@@ -1,0 +1,13 @@
+.welcome {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  justify-content: space-between;
+  align-items: center;
+
+  p {
+    font-size: 34px;
+    line-height: 34px;
+    padding: 0px;
+    margin: 0px;
+  }
+}
