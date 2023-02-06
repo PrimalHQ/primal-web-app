@@ -1,0 +1,66 @@
+import { Component, createEffect } from 'solid-js';
+import { unwrap } from 'solid-js/store';
+import { PrimalPost } from '../../types/primal';
+
+import styles from './Post.module.scss';
+
+const urlify = (text: string) => {
+  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+
+  return text.replace(urlRegex, function(url) {
+    const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
+
+    let link = '';
+
+    if (isImage) {
+      link = '<img src="' + url + '" />'
+    }
+
+    return link + '<a href="' + url + '" target="_blank">' + url + '</a>';
+  })
+}
+
+const Post: Component<{ post: PrimalPost }> = (props) => {
+
+    const date = () => new Date(props.post.post.created_at * 1000);
+
+    return (
+      <div class={styles.post}>
+        <div class={styles.avatar}>
+          <img class={styles.avatarImg} src={props.post.user.picture} />
+          <div class={styles.avatarName}>{props.post.user.name}</div>
+        </div>
+        <div class={styles.content}>
+          <div class={styles.header}>
+            <span class='userName'>
+              {props.post.user.name}
+            </span>
+            <span class={styles.verifiedIcon} />
+            <span class='verifiedBy'>{props.post.user.nip05}</span>
+            <span class={styles.time}>| {date().toLocaleString()}</span>
+          </div>
+
+          <div class={styles.message} innerHTML={urlify(props.post.post.content)}>
+            
+          </div>
+
+          <div class={styles.footer}>
+            <div class={styles.stat}>
+              <div class={styles.replyIcon}></div>
+              <div class={styles.statNumber}>{props.post.post.replies}</div>
+            </div>
+            <div class={styles.stat}>
+              <div class={styles.likeIcon}></div>
+              <div class={styles.statNumber}>{props.post.post.likes}</div>
+            </div>
+            <div class={styles.stat}>
+              <div class={styles.repostIcon}></div>
+              <div class={styles.statNumber}>{props.post.post.mentions}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+}
+
+export default Post;

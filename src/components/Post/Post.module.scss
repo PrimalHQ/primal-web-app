@@ -1,0 +1,103 @@
+.post {
+  display: block;
+  background-color: var(--post-color);
+  margin-top: 4px;
+  padding: 16px 0px;
+}
+
+.avatar {
+  min-width: 80px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.avatarImg {
+  width: 48px;
+  height: 48px;
+  margin-left: 16px;
+  border-radius: 50%;
+}
+
+.avatarName {
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  line-height: 12px;
+  color: var(--active-link);
+  margin-top: 6px;
+}
+
+.content {
+  display: inline-block;
+  width: 80%;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.message {
+  padding-bottom: 40px;
+  color: var(--active-link);
+}
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+}
+
+.header {
+  font-size: small;
+  margin-bottom: 12px;
+}
+
+.verifiedIcon {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 0px 3px;
+  background-color: var(--color);
+  -webkit-mask: url(icons/verified.svg) no-repeat center;
+  mask: url(icons/verified.svg) no-repeat center;
+}
+
+.time {
+  margin-left: 6px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: row;
+  margin-right: 60px;
+  font-size: 14px;
+  line-height: 16px;
+  align-items: center;
+}
+
+
+@mixin iconNav {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+}
+
+.likeIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/like.svg) no-repeat center;
+  mask: url(icons/like.svg) no-repeat center;
+}
+
+.replyIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/reply.svg) no-repeat center;
+  mask: url(icons/reply.svg) no-repeat center;
+}
+
+
+.repostIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/reposts.svg) no-repeat center;
+  mask: url(icons/reposts.svg) no-repeat center;
+}

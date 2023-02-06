@@ -1,26 +1,34 @@
-import type { Component } from 'solid-js';
-
-import logo from './logo.svg';
-import styles from './App.module.css';
+import { Component, onCleanup, onMount } from 'solid-js';
+import { Routes, Route, Navigate } from "@solidjs/router"
+import Home from './pages/Home';
+import Layout from './components/Layout/Layout';
+import Explore from './pages/Explore';
+import { FeedProvider } from './contexts/FeedContext';
+import { connect, disconnect } from './sockets';
 
 const App: Component = () => {
+
+  onMount(() => {
+    connect();
+  });
+
+  onCleanup(() => {
+    disconnect();
+  })
+
   return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
-    </div>
+    <>
+      <FeedProvider>
+        <Routes>
+          <Route path="/" component={Layout} >
+            <Route path="/" element={<Navigate href="/home" />} />
+            <Route path="/home" component={Home} />
+            <Route path="/explore" component={Explore} />
+            <Route path="/rest" component={Explore} />
+          </Route>
+        </Routes>
+      </FeedProvider>
+    </>
   );
 };
 

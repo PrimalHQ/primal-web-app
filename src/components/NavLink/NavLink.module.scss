@@ -1,0 +1,95 @@
+
+.navLink {
+  text-align: right;
+  margin-right: 12px;
+  
+  div {
+    display: inline;
+  }
+  
+  p {
+    display: inline;
+    text-transform: uppercase;
+    font-size: 18px;
+    line-height: 10px;
+    font-weight: 800;
+  }
+}
+
+.active {
+  p {
+    color: var(--active-link);
+  }
+  div {
+    background-color: var(--active-link);  
+  }
+}
+
+.inactive {
+  p {
+    color: var(--inactive-link);
+  }
+  div {
+    background-color: var(--inactive-link);
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .navLink {
+    div {
+      display: inline-block;
+    }
+    
+    p {
+      display: none;
+    }
+  } 
+}
+
+@mixin iconNav { 
+  width: 32px;
+  height: 32px;
+}
+
+.homeIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/home.svg) no-repeat center;
+  mask: url(icons/home.svg) no-repeat center;
+}
+.exploreIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/explore.svg) no-repeat center;
+  mask: url(icons/explore.svg) no-repeat center;
+}
+.messagesIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/messages.svg) no-repeat center;
+  mask: url(icons/messages.svg) no-repeat center;
+}
+.notificationsIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/notifications.svg) no-repeat center;
+  mask: url(icons/notifications.svg) no-repeat center;
+}
+.downloadIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/download.svg) no-repeat center;
+  mask: url(icons/download.svg) no-repeat center;
+}
+.settingsIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/settings.svg) no-repeat center;
+  mask: url(icons/settings.svg) no-repeat center;
+}
+.helpIcon {
+  @include iconNav;
+  background-color: var(--color);
+  -webkit-mask: url(icons/help.svg) no-repeat center;
+  mask: url(icons/help.svg) no-repeat center;
+}

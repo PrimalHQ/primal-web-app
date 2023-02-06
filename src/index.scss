@@ -1,0 +1,54 @@
+@import "@picocss/pico/scss/pico";
+
+/* Purple Light scheme (Default) */
+/* Can be forced with data-theme="light" */
+[data-theme="light"],
+:root:not([data-theme="dark"]) {
+  --primary: #860675;
+  --primary-hover: #a90a93;
+  --primary-focus: var(--background-color);
+  --primary-inverse: #FFF;
+  --background-color: #F5F5F5;
+  --post-color: white;
+  --active-link: #333333;
+  --inactive-link: #888888;
+}
+
+/* Purple Dark scheme (Auto) */
+/* Automatically enabled if user has Dark mode enabled */
+@media only screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --primary: #860675;
+    --primary-hover: #a90a93;
+    --primary-focus: rgba(142, 36, 170, 0.25);
+    --primary-inverse: #FFF;
+  }
+}
+
+/* Purple Dark scheme (Forced) */
+/* Enabled if forced with data-theme="dark" */
+[data-theme="dark"] {
+  --primary: #860675;
+  --primary-hover: #a90a93;
+  --primary-focus: var(--background-color);
+  --primary-inverse: #FFF;
+  --background-color: black;
+  --post-color: #181818;
+  --active-link: white;
+  --inactive-link: #AAAAAA;
+}
+
+/* Purple (Common styles) */
+:root {
+  --form-element-active-border-color: var(--primary);
+  --form-element-focus-color: var(--primary-focus);
+  --switch-color: var(--primary-inverse);
+  --switch-checked-background-color: var(--primary);
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto Flex', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
