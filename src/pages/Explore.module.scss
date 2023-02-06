@@ -1,0 +1,23 @@
+.statsCaption {
+  margin-bottom: 32px;
+}
+.netstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-row-gap: 47px;
+
+  .netstat {
+    .number {
+      font-size: 34px;
+      line-height: 34px;
+      color: var(--color);
+    }
+
+    .label {
+      font-size: 18px;
+      line-height: 21px;
+      color: rgba($color: var(--color), $alpha: 0.1);
+    }
+  }
+}

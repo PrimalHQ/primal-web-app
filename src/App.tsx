@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import { Routes, Route, Navigate } from "@solidjs/router"
 import Home from './pages/Home';
 import Layout from './components/Layout/Layout';
@@ -8,13 +8,17 @@ import { connect, disconnect } from './sockets';
 
 const App: Component = () => {
 
-  onMount(() => {
+  onMount(async () => {
     connect();
   });
 
   onCleanup(() => {
     disconnect();
   })
+
+  createEffect(() => {
+
+  });
 
   return (
     <>

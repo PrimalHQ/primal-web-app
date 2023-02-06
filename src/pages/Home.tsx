@@ -49,7 +49,6 @@ const Home: Component = () => {
       
       <For each={context?.data?.posts} >
         {(post) => {
-          console.log('POST: ', post);
           return <Post 
             post={post}
           />

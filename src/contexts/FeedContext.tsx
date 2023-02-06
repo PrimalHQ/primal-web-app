@@ -7,7 +7,7 @@ import type {
   PrimalFeed, 
   Store, 
 } from '../types/primal';
-import { socket } from "../sockets";
+import { isConnected, socket } from "../sockets";
 
 type PrimalContextStore = {
 
@@ -87,25 +87,15 @@ export const FeedContext = createContext<PrimalContextStore>();
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
   
   const [data, setData] = createStore<Store>(initialStore);
-  
-  const [connected, setConnected] = createSignal(false);
-
-  const isConnected = () => connected() === true;
 
   const onError = (error: Event) => {
     console.log("error: ", error);
   };
 
-  const onOpen = () => {
-    setConnected(true);
-  };
-
-  const onClose = () => {
-    setConnected(false);
-  };
-
   const onMessage = (message: MessageEvent) => {
     const fetchedData: NostrMultiAdd | NostrPost | NostrUser = JSON.parse(message.data);
+
+    console.log('FETCHED: ', fetchedData);
 
     if (fetchedData.op === 'eos') {
       setData('posts', convertDataToPosts(data));
@@ -136,16 +126,11 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   };
 
-  onMount(() => {
-      socket()?.addEventListener('error', onError);
-  
-      socket()?.addEventListener('open', onOpen);
-  
-      socket()?.addEventListener('close', onClose);
-      
-      socket()?.addEventListener('message', onMessage);
+  createEffect(() => {
+    socket()?.addEventListener('error', onError);
+    
+    socket()?.addEventListener('message', onMessage);
   });
-
 
 	createEffect(() => {
     if (isConnected()) {
@@ -163,9 +148,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 	});
 
   onCleanup(() => {
-    socket()?.removeEventListener('open', onOpen);
     socket()?.removeEventListener('error', onError);
-    socket()?.removeEventListener('close', onClose);
     socket()?.removeEventListener('message', onMessage);
   });
 
