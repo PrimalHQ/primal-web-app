@@ -2,7 +2,7 @@ import { Component } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import jack from '/icons/jack.png';
+import jack from '/assets/icons/jack.png';
 import Branding from '../Branding/Branding';
 import Welcome from '../Welcome/Welcome';
 import { Outlet } from '@solidjs/router';
