@@ -142,7 +142,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 			socket()?.send(JSON.stringify([
         "REQ", 
         subid, 
-        {primal: ["user_feed", {"pubkey": pubkey}]},
+        {cache: ["user_feed", {"pubkey": pubkey}]},
       ]));
 		}
 	});

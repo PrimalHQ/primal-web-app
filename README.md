@@ -14,7 +14,7 @@ Application comunicates with the cache server using the following messages.
 
 #User feed
 
-Client request : `["REQ", $subid, { primal: ["user_feed", {"pubkey": $pubkey }]}]`
+Client request : `["REQ", $subid, { cache: ["user_feed", {"pubkey": $pubkey }]}]`
 
 - `$subid` is the id of subscription, currently a random number will do
 - `$pubkey` public key (hex version) of the user whose feed you wish to see.

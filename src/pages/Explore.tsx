@@ -39,7 +39,7 @@ const Explore: Component = () => {
     onMount(() => {
       socket()?.addEventListener('message', onMessage);
       
-      socket()?.send(JSON.stringify(["REQ", "5345734845", {primal: ["net_stats"]}]));
+      socket()?.send(JSON.stringify(["REQ", "5345734845", {cache: ["net_stats"]}]));
     });
 
     onCleanup(() => {
