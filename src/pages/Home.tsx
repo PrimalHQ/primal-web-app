@@ -1,8 +1,8 @@
-import { Component, createSignal, For, Match, onMount, Switch } from 'solid-js';
+import { Component, createEffect, createResource, createSignal, For, Match, on, onMount, Switch } from 'solid-js';
 import Post from '../components/Post/Post';
 import styles from './Home.module.scss';
 import { useFeedContext } from '../contexts/FeedContext';
-import { Portal } from 'solid-js/web';
+import { Portal, untrack } from 'solid-js/web';
 import FeedSelect from '../components/FeedSelect/FeedSelect';
 
 const Home: Component = () => {
@@ -11,7 +11,7 @@ const Home: Component = () => {
 
   const [mounted, setMounted] = createSignal(false);
 
-  onMount(() => {
+  onMount(async () => {
     // Temporary fix for Portal rendering on initial load.
     setMounted(true);
   });
@@ -20,13 +20,13 @@ const Home: Component = () => {
     <div class={styles.homeContent}>
       <Switch>
         <Match when={mounted()}>
-          <Portal 
+          <Portal
             mount={document.getElementById("subheader_center") as Node}
           >
             <FeedSelect />
           </Portal>
 
-          <Portal 
+          <Portal
             mount={document.getElementById("right_sidebar") as Node}
           >
             <h4>Trending</h4>
@@ -46,10 +46,10 @@ const Home: Component = () => {
           </Portal>
         </Match>
       </Switch>
-      
+
       <For each={context?.data?.posts} >
         {(post) => {
-          return <Post 
+          return <Post
             post={post}
           />
         }
