@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 
 import styles from './Branding.module.scss';
-import logo from '/assets/icons/logo.svg';
+import logo from '../../assets/icons/logo.svg';
 
 const Branding: Component = () => {
 

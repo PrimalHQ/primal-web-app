@@ -3,7 +3,7 @@ import Avatar from '../Avatar/Avatar';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 import styles from './Welcome.module.scss';
-import jack from '/assets/icons/jack.png';
+import jack from '../../assets/icons/jack.png';
 
 const Welcome: Component = () => {
   return (

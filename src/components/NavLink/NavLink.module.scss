@@ -54,42 +54,42 @@
 .homeIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/home.svg) no-repeat center;
-  mask: url(assets/icons/home.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
+  mask: url(../../assets/icons/home.svg) no-repeat center;
 }
 .exploreIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/explore.svg) no-repeat center;
-  mask: url(assets/icons/explore.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/explore.svg) no-repeat center;
+  mask: url(../../assets/icons/explore.svg) no-repeat center;
 }
 .messagesIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/messages.svg) no-repeat center;
-  mask: url(assets/icons/messages.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
+  mask: url(../../assets/icons/messages.svg) no-repeat center;
 }
 .notificationsIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/notifications.svg) no-repeat center;
-  mask: url(assets/icons/notifications.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
+  mask: url(../../assets/icons/notifications.svg) no-repeat center;
 }
 .downloadIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/download.svg) no-repeat center;
-  mask: url(assets/icons/download.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
+  mask: url(../../assets/icons/download.svg) no-repeat center;
 }
 .settingsIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/settings.svg) no-repeat center;
-  mask: url(assets/icons/settings.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
+  mask: url(../../assets/icons/settings.svg) no-repeat center;
 }
 .helpIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(assets/icons/help.svg) no-repeat center;
-  mask: url(assets/icons/help.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
+  mask: url(../../assets/icons/help.svg) no-repeat center;
 }
