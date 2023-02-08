@@ -6,6 +6,7 @@
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
+    "build:unminified": "vite build --minify=false",
     "serve": "vite preview"
   },
   "license": "MIT",
