@@ -83,21 +83,21 @@
 .likeIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(icons/like.svg) no-repeat center;
-  mask: url(icons/like.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/like.svg) no-repeat center;
+  mask: url(../../assets/icons/like.svg) no-repeat center;
 }
 
 .replyIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(icons/reply.svg) no-repeat center;
-  mask: url(icons/reply.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/reply.svg) no-repeat center;
+  mask: url(../../assets/icons/reply.svg) no-repeat center;
 }
 
 
 .repostIcon {
   @include iconNav;
   background-color: var(--color);
-  -webkit-mask: url(icons/reposts.svg) no-repeat center;
-  mask: url(icons/reposts.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
+  mask: url(../../assets/icons/reposts.svg) no-repeat center;
 }
