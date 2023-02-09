@@ -56,9 +56,11 @@ const Layout: Component = () => {
     }
 
     onMount(() => {
-      onScroll();
+      setTimeout(() => {
+        onScroll();
+        window.addEventListener('scroll', onScroll);
 
-      window.addEventListener('scroll', onScroll);
+      }, 1000);
     });
 
     onCleanup(() => {

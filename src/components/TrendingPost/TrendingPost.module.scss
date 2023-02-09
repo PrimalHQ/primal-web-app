@@ -1,0 +1,62 @@
+.trendingPost {
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "avatar content";
+  grid-column-gap: 12px;
+
+  .avatar {
+    grid-area: avatar;
+    display: grid;
+    justify-items: center;
+
+
+    .avatarImg {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+  }
+
+
+  .content {
+    grid-area: content;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 16px 1fr;
+    grid-row-gap: 2px;
+    grid-template-areas: "header" "message";
+
+    .header {
+      grid-area: header;
+      font-size: 14px;
+      line-height: 20px;
+      display: flex;
+      align-items: center;
+
+      .name {
+        color: white;
+      }
+
+      .time{
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0px 2px;
+        &::before {
+          content: "|";
+          padding: 0px 2px;
+        }
+      }
+    }
+
+    .message {
+      grid-area: message;
+      color: var(--active-link);
+      word-break: break-word;
+      font-size: 14px;
+      line-height: 20px;
+      color: var(--color);
+    }
+  }
+}

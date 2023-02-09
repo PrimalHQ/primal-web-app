@@ -4,6 +4,7 @@ import styles from './Home.module.scss';
 import { useFeedContext } from '../contexts/FeedContext';
 import { Portal, untrack } from 'solid-js/web';
 import FeedSelect from '../components/FeedSelect/FeedSelect';
+import TrendingPost from '../components/TrendingPost/TrendingPost';
 
 const Home: Component = () => {
 
@@ -31,77 +32,7 @@ const Home: Component = () => {
           >
             <h4>Trending on Nostr</h4>
             <aside>
-              <ul>
-                <li>
-                  <div>
-                    <span class={styles.trendAuthor}>Snowden</span>
-                    <span class={styles.trendTime}>5 hours ago</span>
-                  </div>
-                  <div class={styles.trendContent}>
-                    The problem is that most major states are pressuring corporations to limit speech...
-                  </div>
-                </li>
-
-                <li>
-                  <div>
-                    <span class={styles.trendAuthor}>Snowden</span>
-                    <span class={styles.trendTime}>5 hours ago</span>
-                  </div>
-                  <div class={styles.trendContent}>
-                    The problem is that most major states are pressuring corporations to limit speech...
-                  </div>
-                </li>
-
-<li>
-  <div>
-    <span class={styles.trendAuthor}>Snowden</span>
-    <span class={styles.trendTime}>5 hours ago</span>
-  </div>
-  <div class={styles.trendContent}>
-    The problem is that most major states are pressuring corporations to limit speech...
-  </div>
-</li>
-
-<li>
-  <div>
-    <span class={styles.trendAuthor}>Snowden</span>
-    <span class={styles.trendTime}>5 hours ago</span>
-  </div>
-  <div class={styles.trendContent}>
-    The problem is that most major states are pressuring corporations to limit speech...
-  </div>
-</li>
-
-<li>
-  <div>
-    <span class={styles.trendAuthor}>Snowden</span>
-    <span class={styles.trendTime}>5 hours ago</span>
-  </div>
-  <div class={styles.trendContent}>
-    The problem is that most major states are pressuring corporations to limit speech...
-  </div>
-</li>
-
-<li>
-  <div>
-    <span class={styles.trendAuthor}>Snowden</span>
-    <span class={styles.trendTime}>5 hours ago</span>
-  </div>
-  <div class={styles.trendContent}>
-    The problem is that most major states are pressuring corporations to limit speech...
-  </div>
-</li>
-
-<li>
-  <div>
-    <span class={styles.trendAuthor}>Bojan</span>
-    <span class={styles.trendTime}>5 hours ago</span>
-  </div>
-  <div class={styles.trendContent}>
-    The problem is that most major states are pressuring corporations to limit speech...
-  </div>
-</li>
-              </ul>
+              <TrendingPost />
             </aside>
           </Portal>
         </Match>
