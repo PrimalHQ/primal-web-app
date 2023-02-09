@@ -41,6 +41,16 @@ const Home: Component = () => {
                     The problem is that most major states are pressuring corporations to limit speech...
                   </div>
                 </li>
+
+                <li>
+                  <div>
+                    <span class={styles.trendAuthor}>Snowden</span>
+                    <span class={styles.trendTime}>5 hours ago</span>
+                  </div>
+                  <div class={styles.trendContent}>
+                    The problem is that most major states are pressuring corporations to limit speech...
+                  </div>
+                </li>
               </ul>
             </aside>
           </Portal>

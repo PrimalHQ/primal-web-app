@@ -12,6 +12,9 @@
   --post-color: white;
   --active-link: #333333;
   --inactive-link: #888888;
+  select {
+    background-color: #F5F5F5;
+  }
 }
 
 /* Purple Dark scheme (Auto) */
@@ -36,6 +39,9 @@
   --post-color: #181818;
   --active-link: white;
   --inactive-link: #AAAAAA;
+  select {
+    background-color: black;
+  }
 }
 
 /* Purple (Common styles) */

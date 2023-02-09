@@ -1,7 +1,6 @@
 .welcome {
   display: grid;
-  grid-template-columns: 1fr 48px;
-  justify-content: space-between;
+  grid-template-columns: 48px 1fr 36px;
   align-items: center;
 
   p {
@@ -9,5 +8,14 @@
     line-height: 34px;
     padding: 0px;
     margin: 0px;
+  }
+
+  input {
+    height: 36px;
+    font-size: 18px;
+    line-height: 20px;
+    margin: 0px 0px 0px 10px;
+    border-radius: 6px 0px 0px 6px;
+    border: solid 1px var(--primary)
   }
 }

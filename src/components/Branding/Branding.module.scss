@@ -1,15 +1,26 @@
 .branding {
+  display: flex;
+  align-items: center;
   img {
     margin-right: 12px;
+    width: 48px;
+    height: 48px;
   }
-  
+
   span {
-    margin-right: 12px;
-    font-weight: bold;
-    font-size: xx-large;
+    // margin-right: 12px;
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 40px;
   }
 }
 
+.brandingSmall {
+  img {
+    width: 24px;
+    height: 24px;
+  }
+}
 
 @media only screen and (max-width: 1300px) {
   .branding {

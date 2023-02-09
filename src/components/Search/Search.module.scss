@@ -1,8 +1,24 @@
-input.search {
-  height: 36px;
-  border-radius: 10px;
-  font-weight: bold;
-  padding: 0px 12px;
-  margin-bottom: 0px;
+.search {
+  display: grid;
+  grid-template-columns: 12px 1fr;
 
+  input {
+    height: 36px;
+    border-radius: 10px;
+    font-weight: bold;
+    padding: 0px 12px;
+    margin-bottom: 0px;
+    border: none;
+  }
+
+  // .searchIcon {
+  //   display: inline-block;
+  //   width: 16px;
+  //   height: 16px;
+
+  //   background-color: var(--color);
+  //   -webkit-mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+  //   mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+
+  // }
 }

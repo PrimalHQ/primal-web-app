@@ -6,7 +6,9 @@ export default function ThemeToggle() {
 
     const [theme, setTheme] = createSignal('dark');
 
-    const toggleTheme = () => theme() === 'dark' ? setTheme('light') : setTheme('dark');
+    const alternate = () => theme() === 'dark' ? 'light' : 'dark';
+
+    const toggleTheme = () => setTheme(alternate());
 
     createEffect(() => {
       const html: HTMLElement | null = document.querySelector('html');
@@ -18,7 +20,7 @@ export default function ThemeToggle() {
         class={styles.themeToggle}
         onClick={toggleTheme}
       >
-        T
+        {alternate()}
       </button>
     )
 }

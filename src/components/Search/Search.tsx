@@ -5,7 +5,10 @@ import styles from './Search.module.scss';
 const Search: Component = () => {
 
     return (
-      <input class={styles.search} type='text' placeholder='search'/>
+      <div class={styles.search}>
+        <div class={styles.searchIcon}></div>
+        <input type='text' placeholder='search'/>
+      </div>
     )
 }
 

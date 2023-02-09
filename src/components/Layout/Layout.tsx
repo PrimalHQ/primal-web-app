@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
@@ -8,16 +8,49 @@ import Welcome from '../Welcome/Welcome';
 import { Outlet } from '@solidjs/router';
 import NavLink from '../NavLink/NavLink';
 import Search from '../Search/Search';
+import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 const Layout: Component = () => {
+    let position = document.body.scrollTop || document.documentElement.scrollTop;
+
+    const onScroll = () => {
+      const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+      const container = document.getElementById('container');
+
+      if (scrollTop < 108) {
+        container && container.classList.remove(styles.midscroll);
+        container && container.classList.remove(styles.fullscroll);
+      }
+      else if (position > scrollTop) {
+        container && container.classList.add(styles.midscroll);
+        container && container.classList.remove(styles.fullscroll);
+      }
+      else if (scrollTop >= position) {
+        container && container.classList.remove(styles.midscroll);
+        container && container.classList.add(styles.fullscroll);
+      }
+
+      position = scrollTop;
+    }
+
+    onMount(() => {
+      onScroll();
+
+      window.addEventListener('scroll', onScroll);
+    });
+
+    onCleanup(() => {
+      window.removeEventListener('scroll', onScroll);
+    });
+
 
     return (
 
-      <div class={styles.container}>
+      <div id="container" class={styles.container}>
 
         <header>
           <section class={styles.left}>
-            <Branding />
+            <Branding small={false} />
           </section>
 
           <section>
@@ -30,10 +63,16 @@ const Layout: Component = () => {
         </header>
 
         <div class={styles.subheader}>
-          <div></div>
-          <div id="subheader_center">
+          <div class={styles.shleft}>
+            <Branding small={true} />
           </div>
-          <div></div>
+          <div id="subheader_center" class={styles.shcenter}>
+          </div>
+          <div class={styles.shright}>
+            <div>
+              <Search />
+            </div>
+          </div>
         </div>
 
 
@@ -62,6 +101,7 @@ const Layout: Component = () => {
                 <NavLink to='/rest' label='Help' icon='helpIcon' />
               </li>
             </ul>
+            <ThemeToggle />
           </aside>
         </nav>
 

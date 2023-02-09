@@ -1,15 +1,24 @@
-import type { Component } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
 
 import styles from './Branding.module.scss';
 import logo from '../../assets/icons/logo.svg';
 
-const Branding: Component = () => {
+const Branding: Component<{ small: boolean }> = (props) => {
 
     return (
-      <div class={styles.branding}>
-        <img src={logo} alt="logo" />
-        <span>primal</span>
-      </div>
+      <Show
+        when={!props.small}
+        fallback={
+          <div class={styles.brandingSmall}>
+            <img src={logo} alt="logo" />
+          </div>
+        }
+      >
+        <div class={styles.branding}>
+          <img src={logo} alt="logo" />
+          <span>primal</span>
+        </div>
+      </Show>
     )
 }
 

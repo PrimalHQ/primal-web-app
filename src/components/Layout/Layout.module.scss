@@ -1,18 +1,50 @@
 .container {
   display: grid;
   height: 100vh;
-  width: 100%;
-  max-width: 1240px;
+  // width: 100%;
+  width: 1240px;
   margin: 0px auto;
+  position: relative;
 
   grid-template-columns: 178px 1fr 360px;
-  grid-template-rows: 116px 16px 1fr 77px;
-  grid-template-areas: 
+  grid-template-rows: 100px 40px 1fr 77px;
+  grid-template-areas:
     "header header header"
     "subheader subheader subheader"
     "nav main sidebar"
     "profile main sidebar";
   grid-column-gap: 32px;
+
+  &.midscroll {
+    .subheader {
+      position: fixed;
+      width: 1240px;
+      background-color: var(--background-color);
+      .shcenter {
+        width: 640px;
+      }
+      .shleft, .shright {
+        visibility: visible;
+      }
+    }
+  }
+
+  &.fullscroll {
+    .subheader {
+      position: fixed;
+      width: 1240px;
+      background-color: unset;
+      .shcenter {
+        visibility: hidden;
+        width: 640px;
+      }
+      .shleft, .shright {
+        visibility: visible;
+        background-color: var(--background-color);
+        padding: 2px 0px;
+      }
+    }
+  }
 }
 
 .brand {
@@ -24,21 +56,18 @@
 header {
   grid-area: header;
   padding: 0px;
-  
+
   display: grid;
   grid-template-columns: 178px 1fr 360px;
   grid-template-rows: 1fr;
   grid-column-gap: 32px;
+  z-index: 1;
 
   section {
     display: grid;
     align-self: center;
     align-content: center;
     margin: 0px;
-
-    &.left {
-      // position: fixed;
-    }
 
     &.right {
       height: 48px;
@@ -52,17 +81,26 @@ header {
   grid-area: subheader;
   display: grid;
   grid-template-columns: 178px 1fr 360px;
-  grid-template-rows: 16px;
+  grid-template-rows: 40px;
   grid-column-gap: 32px;
-  
+  align-items: center;
+  z-index: 1;
+
+  .shright {
+    visibility: hidden;
+    justify-content: left;
+  }
+  .shleft {
+    visibility: hidden;
+    justify-content: right;
+  }
+
   div {
     display: grid;
     justify-content: end;
-
   }
-  
-}
 
+}
 
 .sideNav {
   grid-area: nav;
@@ -74,7 +112,7 @@ header {
 
 main {
   grid-area: main;
-  max-width: 640px;
+  width: 640px;
 }
 
 .sidebar {
@@ -85,11 +123,11 @@ main {
     text-transform: uppercase;
     margin-bottom: 12px;
   }
-  
+
   ul {
     padding: 0px;
   }
-  
+
   li {
     padding-left: 0px;
   }
@@ -142,17 +180,28 @@ button {
 @media only screen and (max-width: 1300px) {
   .container {
     grid-template-columns: 48px 1fr 360px;
-    grid-template-areas: 
+    grid-template-areas:
       "header header header"
       "subheader subheader subheader"
       "nav main sidebar"
       "profile main sidebar";
+    width: 1068px;
+
+    &.midscroll, &.fullscroll {
+      .subheader {
+        width: 1112px;
+      }
+    }
   }
 
   header, .subheader {
     grid-template-columns: 48px 1fr 360px;
+
+    .shleft {
+      justify-content: center;
+    }
   }
-  
+
   .sideNav {
     width: 48px;
   }
@@ -164,7 +213,7 @@ button {
   .navItem > div {
     display: inline-block;
   }
-  
+
   .navItem > p {
     display: none;
   }
@@ -173,17 +222,27 @@ button {
 @media only screen and (max-width: 1087px) {
   .container {
     grid-template-columns: 48px 1fr;
-    grid-template-areas: 
+    grid-template-areas:
       "header header"
       "subheader subheader"
       "nav main"
       "profile main";
+    width: 720px;
+    &.midscroll {
+      .subheader {
+        width: 720px;
+      }
+    }
   }
 
   header, .subheader {
     grid-template-columns: 48px 1fr;
 
     section.right {
+      display: none;
+    }
+
+    .shright {
       display: none;
     }
   }
