@@ -1,5 +1,5 @@
-import { Component, createEffect } from 'solid-js';
-import { unwrap } from 'solid-js/store';
+import { Component, createSignal } from 'solid-js';
+import { date } from '../../lib/dates';
 import { PrimalPost } from '../../types/primal';
 
 import styles from './Post.module.scss';
@@ -22,11 +22,11 @@ const urlify = (text: string) => {
 
 const Post: Component<{ post: PrimalPost }> = (props) => {
 
-    const date = () => new Date(props.post.post.created_at * 1000);
+  const [time] = createSignal(date(props.post.post.created_at));
 
     return (
       <div class={styles.post}>
-        <div class={styles.avatar}>
+        <div class={styles.avatar} title={props.post.user.name}>
           <img class={styles.avatarImg} src={props.post.user.picture} />
           <div class={styles.avatarName}>{props.post.user.name}</div>
         </div>
@@ -37,11 +37,11 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
             </span>
             <span class={styles.verifiedIcon} />
             <span class='verifiedBy'>{props.post.user.nip05}</span>
-            <span class={styles.time}>| {date().toLocaleString()}</span>
+            <span class={styles.time} title={time().date.toLocaleString()}>{time().label}</span>
           </div>
 
           <div class={styles.message} innerHTML={urlify(props.post.post.content)}>
-            
+
           </div>
 
           <div class={styles.footer}>

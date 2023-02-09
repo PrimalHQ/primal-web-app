@@ -9,13 +9,26 @@ import { Outlet } from '@solidjs/router';
 import NavLink from '../NavLink/NavLink';
 import Search from '../Search/Search';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import { createStore } from 'solid-js/store';
 
 const Layout: Component = () => {
     let position = document.body.scrollTop || document.documentElement.scrollTop;
+    const sidebar = document.getElementById('right_sidebar');
+    const sidebarRect = sidebar?.getBoundingClientRect();
+
+    const [pos, setPos] = createStore({ sb: sidebar, top: 140});
+
+    createEffect(() => {
+      const { sb, top} = pos;
+      if (sb && sb?.style.position === 'absolute') {
+        sb.style.top = `${top}px`;
+      }
+    });
 
     const onScroll = () => {
       const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
       const container = document.getElementById('container');
+      const sidebar2 = document.getElementById('right_sidebar');
 
       if (scrollTop < 108) {
         container && container.classList.remove(styles.midscroll);
@@ -28,6 +41,15 @@ const Layout: Component = () => {
       else if (scrollTop >= position) {
         container && container.classList.remove(styles.midscroll);
         container && container.classList.add(styles.fullscroll);
+      }
+
+      if (sidebar2 && sidebarRect && scrollTop > document.documentElement.clientHeight - sidebarRect.height + 140) {
+
+        sidebar2.style.position = 'absolute';
+        setPos({sb: sidebar2, top: scrollTop - document.documentElement.clientHeight + sidebarRect.height - 140});
+      }
+      else if (sidebar2) {
+        sidebar2.style.position = '';
       }
 
       position = scrollTop;

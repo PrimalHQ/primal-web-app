@@ -29,7 +29,7 @@ const Home: Component = () => {
           <Portal
             mount={document.getElementById("right_sidebar") as Node}
           >
-            <h4>Trending</h4>
+            <h4>Trending on Nostr</h4>
             <aside>
               <ul>
                 <li>
@@ -51,6 +51,56 @@ const Home: Component = () => {
                     The problem is that most major states are pressuring corporations to limit speech...
                   </div>
                 </li>
+
+<li>
+  <div>
+    <span class={styles.trendAuthor}>Snowden</span>
+    <span class={styles.trendTime}>5 hours ago</span>
+  </div>
+  <div class={styles.trendContent}>
+    The problem is that most major states are pressuring corporations to limit speech...
+  </div>
+</li>
+
+<li>
+  <div>
+    <span class={styles.trendAuthor}>Snowden</span>
+    <span class={styles.trendTime}>5 hours ago</span>
+  </div>
+  <div class={styles.trendContent}>
+    The problem is that most major states are pressuring corporations to limit speech...
+  </div>
+</li>
+
+<li>
+  <div>
+    <span class={styles.trendAuthor}>Snowden</span>
+    <span class={styles.trendTime}>5 hours ago</span>
+  </div>
+  <div class={styles.trendContent}>
+    The problem is that most major states are pressuring corporations to limit speech...
+  </div>
+</li>
+
+<li>
+  <div>
+    <span class={styles.trendAuthor}>Snowden</span>
+    <span class={styles.trendTime}>5 hours ago</span>
+  </div>
+  <div class={styles.trendContent}>
+    The problem is that most major states are pressuring corporations to limit speech...
+  </div>
+</li>
+
+<li>
+  <div>
+    <span class={styles.trendAuthor}>Bojan</span>
+    <span class={styles.trendTime}>5 hours ago</span>
+  </div>
+  <div class={styles.trendContent}>
+    The problem is that most major states are pressuring corporations to limit speech...
+  </div>
+</li>
               </ul>
             </aside>
           </Portal>
