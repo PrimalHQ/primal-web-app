@@ -1,5 +1,5 @@
 .post {
-  background-color: var(--post-color);
+  background-color: var(--background-card);
   margin-top: 4px;
   display: grid;
   grid-template-columns: 92px 1fr;
@@ -28,7 +28,7 @@
       display: inline-block;
       font-size: 12px;
       line-height: 12px;
-      color: var(--active-link);
+      color: var(--text-primary);
       align-self: flex-start;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -49,6 +49,7 @@
       font-size: small;
       display: flex;
       align-items: center;
+      color: var(--text-tertiary-2);
 
       .time{
         margin: 0px 2px;
@@ -61,7 +62,7 @@
 
     .message {
       grid-area: message;
-      color: var(--active-link);
+      color: var(--text-primary);
       word-break: break-word;
       font-size: 16px;
       line-height: 24px;
@@ -81,6 +82,15 @@
         font-size: 14px;
         line-height: 16px;
         align-items: center;
+
+        &:hover {
+          .replyIcon, .likeIcon, .repostIcon {
+            background-color: var(--text-socondary);
+          }
+          .statNumber {
+            color: var(--text-primary);
+          }
+        }
       }
     }
   }
@@ -89,18 +99,17 @@
 @mixin statIcon {
   width: 28px;
   height: 28px;
+  background-color: var(--text-tertiary-2);
 }
 
 .likeIcon {
   @include statIcon;
-  background-color: var(--color);
   -webkit-mask: url(../../assets/icons/like.svg) no-repeat center;
   mask: url(../../assets/icons/like.svg) no-repeat center;
 }
 
 .replyIcon {
   @include statIcon;
-  background-color: var(--color);
   -webkit-mask: url(../../assets/icons/reply.svg) no-repeat center;
   mask: url(../../assets/icons/reply.svg) no-repeat center;
 }
@@ -108,7 +117,6 @@
 
 .repostIcon {
   @include statIcon;
-  background-color: var(--color);
   -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
   mask: url(../../assets/icons/reposts.svg) no-repeat center;
 }
@@ -118,7 +126,7 @@
   height: 12px;
   display: inline-block;
   margin: 0px 2px;
-  background-color: var(--color);
+  background-color: var(--text-tertiary-2);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
   mask: url(../../assets/icons/verified.svg) no-repeat center;
 }

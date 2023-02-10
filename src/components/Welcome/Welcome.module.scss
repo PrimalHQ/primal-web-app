@@ -10,12 +10,20 @@
     margin: 0px;
   }
 
-  input {
+  .border {
     height: 36px;
+    padding: 1px 0px 1px 1px;
+    background: var(--brand-gradient);
+    border-radius: 6px 0px 0px 6px;
+    margin-left: 10px
+  }
+
+  input {
+    height: 34px;
     font-size: 18px;
     line-height: 20px;
-    margin: 0px 0px 0px 10px;
+    margin: 0px 0px 0px 0px;
     border-radius: 6px 0px 0px 6px;
-    border: solid 1px var(--primary)
+    border: none
   }
 }

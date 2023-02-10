@@ -30,10 +30,12 @@ const Home: Component = () => {
           <Portal
             mount={document.getElementById("right_sidebar") as Node}
           >
-            <h4>Trending on Nostr</h4>
-            <aside>
-              <TrendingPost />
-            </aside>
+            <div class={styles.trendingBar}>
+              <h4>Trending on Nostr</h4>
+              <aside>
+                <TrendingPost />
+              </aside>
+            </div>
           </Portal>
         </Match>
       </Switch>

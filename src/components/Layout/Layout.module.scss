@@ -72,6 +72,7 @@ header {
     &.right {
       height: 48px;
       display: grid;
+      bottom: 0;
       align-content: center;
     }
   }
@@ -172,7 +173,6 @@ button {
   font-size: 16px;
   font-weight: bold;
 
-  // background: linear-gradient(152.94deg, #FA4343 0%, #5B12A4 84.53%), linear-gradient(152.94deg, rgba(235, 6, 184, 0.85) 0%, rgba(112, 18, 164, 0.85) 84.53%);
   border-radius: 6px;
   border: none;
 }
@@ -205,10 +205,6 @@ button {
   .sideNav {
     width: 48px;
   }
-
-  // main, header {
-  //   margin-left: 48px;
-  // }
 
   .navItem > div {
     display: inline-block;
@@ -254,4 +250,10 @@ button {
   .search {
     display: none;
   }
+}
+
+.right {
+  display: flex;
+  justify-content: end;
+  margin-right: 12px;
 }

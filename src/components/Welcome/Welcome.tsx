@@ -9,7 +9,7 @@ const Welcome: Component = () => {
   return (
     <div class={styles.welcome}>
       <Avatar src={jack} />
-      <div>
+      <div class={styles.border}>
         <input type="text" placeholder="post something to nostr..." />
       </div>
       <div>

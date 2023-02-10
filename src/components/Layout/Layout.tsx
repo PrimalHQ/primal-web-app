@@ -80,30 +80,23 @@ const Layout: Component = () => {
 
         <nav class={styles.sideNav}>
           <aside>
-            <ul>
-              <li>
-                <NavLink to='/home' label='Home' icon='homeIcon' />
-              </li>
-              <li>
-                <NavLink to='/explore' label='Explore' icon='exploreIcon' />
-              </li>
-              <li>
-                <NavLink to='/rest' label='Messages' icon='messagesIcon' />
-              </li>
-              <li>
-                <NavLink to='/rest' label='Notifications' icon='notificationsIcon' />
-              </li>
-              <li>
-                <NavLink to='/rest' label='Downloads' icon='downloadIcon' />
-              </li>
-              <li>
-                <NavLink to='/rest' label='Settings' icon='settingsIcon' />
-              </li>
-              <li>
-                <NavLink to='/rest' label='Help' icon='helpIcon' />
-              </li>
-            </ul>
-            <ThemeToggle />
+            <NavLink to='/home' label='Home' icon='homeIcon' />
+
+            <NavLink to='/explore' label='Explore' icon='exploreIcon' />
+
+            <NavLink to='/rest' label='Messages' icon='messagesIcon' />
+
+            <NavLink to='/rest' label='Notifications' icon='notificationsIcon' />
+
+            <NavLink to='/rest' label='Downloads' icon='downloadIcon' />
+
+            <NavLink to='/rest' label='Settings' icon='settingsIcon' />
+
+            <NavLink to='/rest' label='Help' icon='helpIcon' />
+
+            <div class={styles.right}>
+              <ThemeToggle />
+            </div>
           </aside>
         </nav>
 

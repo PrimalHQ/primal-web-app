@@ -20,7 +20,7 @@ export default function ThemeToggle() {
         class={styles.themeToggle}
         onClick={toggleTheme}
       >
-        {alternate()}
+        <div class={styles.postIcon}></div>
       </button>
     )
 }

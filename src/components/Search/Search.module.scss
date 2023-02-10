@@ -1,24 +1,54 @@
 .search {
   display: grid;
-  grid-template-columns: 12px 1fr;
+  grid-template-columns: 16px 1fr;
+  grid-column-gap: 15px;
+  border-radius: 22px;
+  background-color: var(--background-input);
+  width: 360px;
+  padding-right: 22px;
+
+  &:hover {
+    input {
+      color: var(--text-primary);
+    }
+
+    .searchIcon {
+      background-color: var(--text-primary);
+    }
+  }
 
   input {
     height: 36px;
-    border-radius: 10px;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 20px;
     padding: 0px 12px;
     margin-bottom: 0px;
     border: none;
+    background-color: var(--background-input);
+    color: var(--text-tertiary);
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
   }
 
-  // .searchIcon {
-  //   display: inline-block;
-  //   width: 16px;
-  //   height: 16px;
+  .searchIcon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 16px;
+    margin-top: 10px;
 
-  //   background-color: var(--color);
-  //   -webkit-mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
-  //   mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+    background-color: var(--text-tertiary);
+    -webkit-mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+    mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
 
-  // }
+  }
 }

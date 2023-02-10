@@ -1,3 +1,18 @@
 .themeToggle {
+  width: 56px;
+  height: 56px;
   padding: 0px;
+  background: var(--brand-gradient);
+  border-radius: 50%;
+}
+
+.postIcon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+
+  background-color: white;
+  -webkit-mask: url(../../assets/icons/post.svg) no-repeat center;
+  mask: url(../../assets/icons/post.svg) no-repeat center;
 }

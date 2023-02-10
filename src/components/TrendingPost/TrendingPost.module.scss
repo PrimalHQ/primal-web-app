@@ -31,18 +31,18 @@
     .header {
       grid-area: header;
       font-size: 14px;
-      line-height: 20px;
+      line-height: 22px;
+      font-weight: 700;
       display: flex;
       align-items: center;
 
       .name {
-        color: white;
+        color: var(--text-secondary-2);
       }
 
       .time{
-        font-size: 14px;
-        line-height: 20px;
         margin: 0px 2px;
+        color: var(--text-tertiary);
         &::before {
           content: "|";
           padding: 0px 2px;
@@ -52,11 +52,10 @@
 
     .message {
       grid-area: message;
-      color: var(--active-link);
       word-break: break-word;
       font-size: 14px;
-      line-height: 20px;
-      color: var(--color);
+      line-height: 22px;
+      color: var(--text-tertiary);
     }
   }
 }

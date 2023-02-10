@@ -4,16 +4,26 @@
 /* Can be forced with data-theme="light" */
 [data-theme="light"],
 :root:not([data-theme="dark"]) {
-  --primary: #860675;
-  --primary-hover: #a90a93;
+  --brand-text: #444444;
+  --background-site: #F5F5F5;
+  --backround-card: #FFFFFF;
+  --background-input: #E5E5E5;
+  --text-primary: #111111;
+  --text-socondary: #444444;
+  --text-secondary-2: #888888;
+  --text-tertiary: #999999;
+  --text-tertiary-2: #999999;
+
+  --primary: var(--accent-1);
+  --primary-hover: var(--accent-2);
   --primary-focus: var(--background-color);
-  --primary-inverse: #FFF;
-  --background-color: #F5F5F5;
-  --post-color: white;
+  --background-color: var(--background-site);
+  // --primary-inverse: #FFF;
   --active-link: #333333;
   --inactive-link: #888888;
+
   select {
-    background-color: #F5F5F5;
+    background-color: var(--background-site);
   }
 }
 
@@ -21,35 +31,89 @@
 /* Automatically enabled if user has Dark mode enabled */
 @media only screen and (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --primary: #860675;
-    --primary-hover: #a90a93;
-    --primary-focus: rgba(142, 36, 170, 0.25);
-    --primary-inverse: #FFF;
+    // --primary: #860675;
+    // --primary-hover: #a90a93;
+    // --primary-focus: rgba(142, 36, 170, 0.25);
+    // --primary-inverse: #FFF;
+
+    // --brand-one: #FA4343;
+    // --brand-two: #5b12A4;
+    // --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
+
+    --brand-text: #D5D5D5;
+    --background-color: #000000;
+    --backround-card: #181818;
+    --background-input: #222222;
+    --text-primary: #FFFFFF;
+    --text-socondary: #AAAAAA;
+    --text-secondary-2: #AAAAAA;
+    --text-tertiary: #757575;
+    --text-tertiary-2: #666666;
+
+    --primary: var(--accent-1);
+    --primary-hover: var(--accent-2);
+    --primary-focus: var(--background-color);
   }
 }
 
 /* Purple Dark scheme (Forced) */
 /* Enabled if forced with data-theme="dark" */
 [data-theme="dark"] {
-  --primary: #860675;
-  --primary-hover: #a90a93;
+  // --primary: #860675;
+  // --primary-hover: #a90a93;
+  // --primary-focus: var(--background-color);
+  // --primary-inverse: #FFF;
+  // --background-color: black;
+  // --post-color: #181818;
+  // --active-link: white;
+  // --inactive-link: #AAAAAA;
+
+  // --brand-one: #FA4343;
+  // --brand-two: #5b12A4;
+  // --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
+
+  --brand-text: #D5D5D5;
+  --background-site: #000000;
+  --backround-card: #181818;
+  --background-input: #222222;
+  --text-primary: #FFFFFF;
+  --text-socondary: #AAAAAA;
+  --text-secondary-2: #AAAAAA;
+  --text-tertiary: #757575;
+  --text-tertiary-2: #666666;
+
+  --primary: var(--accent-1);
+  --primary-hover: var(--accent-2);
   --primary-focus: var(--background-color);
-  --primary-inverse: #FFF;
-  --background-color: black;
-  --post-color: #181818;
-  --active-link: white;
-  --inactive-link: #AAAAAA;
+  --background-color: var(--background-site);
+
+  --active-link: var(--text-primary);
+  --inactive-link: var(--text-socondary);
+
   select {
-    background-color: black;
+    background-color: var(--background-site);
   }
 }
 
 /* Purple (Common styles) */
 :root {
-  --form-element-active-border-color: var(--primary);
-  --form-element-focus-color: var(--primary-focus);
-  --switch-color: var(--primary-inverse);
-  --switch-checked-background-color: var(--primary);
+  --brand-one: #FA4343;
+  --brand-two: #5b12A4;
+  --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
+  --accent-1: #CA079F;
+  --accent-2: #AB268E;
+
+  // --form-element-background-color: var(var(--background-input));
+
+  // --form-element-active-border-color: var(--primary);
+  // --form-element-focus-color: var(--primary-focus);
+  // --switch-color: var(--primary-inverse);
+  // --switch-checked-background-color: var(--primary);
+
+  // --brand-one: #FA4343;
+  // --brand-two: #5b12A4;
+  // --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
+
 }
 
 body {
