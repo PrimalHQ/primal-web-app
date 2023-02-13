@@ -5,6 +5,8 @@ import { useFeedContext } from '../contexts/FeedContext';
 import { Portal, untrack } from 'solid-js/web';
 import FeedSelect from '../components/FeedSelect/FeedSelect';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
+import Welcome from '../components/Welcome/Welcome';
+import HomeHeader from '../components/HomeHeader/HomeHeader';
 
 const Home: Component = () => {
 
@@ -22,20 +24,15 @@ const Home: Component = () => {
       <Switch>
         <Match when={mounted()}>
           <Portal
-            mount={document.getElementById("subheader_center") as Node}
+            mount={document.getElementById("central_header") as Node}
           >
-            <FeedSelect />
+            <HomeHeader />
           </Portal>
-
           <Portal
+            ref={<div id="portal_div"></div> as HTMLDivElement}
             mount={document.getElementById("right_sidebar") as Node}
           >
-            <div class={styles.trendingBar}>
-              <h4>Trending on Nostr</h4>
-              <aside>
-                <TrendingPost />
-              </aside>
-            </div>
+            <TrendingPost />
           </Portal>
         </Match>
       </Switch>

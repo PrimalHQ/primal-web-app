@@ -9,7 +9,7 @@
   --backround-card: #FFFFFF;
   --background-input: #E5E5E5;
   --text-primary: #111111;
-  --text-socondary: #444444;
+  --text-secondary: #444444;
   --text-secondary-2: #888888;
   --text-tertiary: #999999;
   --text-tertiary-2: #999999;
@@ -45,7 +45,7 @@
     --backround-card: #181818;
     --background-input: #222222;
     --text-primary: #FFFFFF;
-    --text-socondary: #AAAAAA;
+    --text-secondary: #AAAAAA;
     --text-secondary-2: #AAAAAA;
     --text-tertiary: #757575;
     --text-tertiary-2: #666666;
@@ -77,7 +77,7 @@
   --backround-card: #181818;
   --background-input: #222222;
   --text-primary: #FFFFFF;
-  --text-socondary: #AAAAAA;
+  --text-secondary: #AAAAAA;
   --text-secondary-2: #AAAAAA;
   --text-tertiary: #757575;
   --text-tertiary-2: #666666;
@@ -88,7 +88,7 @@
   --background-color: var(--background-site);
 
   --active-link: var(--text-primary);
-  --inactive-link: var(--text-socondary);
+  --inactive-link: var(--text-secondary);
 
   select {
     background-color: var(--background-site);
@@ -102,6 +102,8 @@
   --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
   --accent-1: #CA079F;
   --accent-2: #AB268E;
+
+  --z-index-header: 10;
 
   // --form-element-background-color: var(var(--background-input));
 

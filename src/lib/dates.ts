@@ -1,12 +1,11 @@
 
 
-const rtf = new Intl.RelativeTimeFormat('en', { style: 'long' });
+const rtf = new Intl.RelativeTimeFormat('en', { style: 'short' });
 
 export const date = (postTimestamp: number) => {
   const date = new Date(postTimestamp * 1000);
   const currentTimestamp = Math.floor((new Date()).getTime() / 1000);
 
-  const seconds = 1000;
   const minute = 60;
   const hour = minute * 60;
   const day = hour * 24;
@@ -18,33 +17,33 @@ export const date = (postTimestamp: number) => {
 
   if ( diff > year) {
     const years = Math.floor(diff / (12 * 4 * 7 * 24 * 60 * 60));
-    return { date, label: rtf.format(-years, 'year')};
+    return { date, label: `${years}y` };
   }
 
   if (diff > month) {
     const months = Math.floor(diff / (4 * 7 * 24 * 60 * 60));
-    return { date, label: rtf.format(-months, 'month')};
+    return { date, label: `${months}m` };
   }
 
   if (diff > week) {
     const weeks = Math.floor(diff / (7 * 24 * 60 * 60));
-    return { date, label: rtf.format(-weeks, 'week')};
+    return { date, label: `${weeks}w` };
   }
 
   if (diff > day) {
     const days = Math.floor(diff / (24 * 60 * 60));
-    return { date, label: rtf.format(-days, 'hour')};
+    return { date, label: `${days}d` };
   }
 
   if (diff > hour) {
     const hours = Math.floor(diff / (60 * 60));
-    return { date, label: rtf.format(-hours, 'hour')};
+    return { date, label: `${hours}h` };
   }
 
   if (diff > minute) {
     const minutes = Math.floor(diff / (60));
-    return { date, label: rtf.format(-minutes, 'minute') };
+    return { date, label: `${minutes}m` };
   }
 
-  return { date, label: rtf.format(-diff, 'second')};
+  return { date, label: `${diff}s` };
 };

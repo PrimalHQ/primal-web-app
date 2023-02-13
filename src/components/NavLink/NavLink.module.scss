@@ -1,12 +1,11 @@
 @mixin iconNav {
   width: 32px;
   height: 32px;
-  background-color: var(--text-socondary);
+  background-color: var(--text-secondary);
 }
 
 .navLink {
   text-align: right;
-  margin-right: 12px;
   margin-bottom: 28px;
 
   div {

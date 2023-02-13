@@ -1,23 +1,30 @@
-import { Component, createSignal, For } from 'solid-js';
+import { Component, createEffect, For } from 'solid-js';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import Avatar from '../Avatar/Avatar';
-import Post from '../Post/Post';
+import { calculateStickyPosition } from './helpers';
 
 import styles from './TrendingPost.module.scss';
+
 
 const TrendingPost: Component = () => {
   const context = useFeedContext();
 
-  const posts = () => context?.data?.posts.slice(0, 12);
+  const posts = () => context?.data?.posts.slice(0, 26);
+
+  createEffect(() => {
+    // If the content changes, recalculate sticky boundary.
+    if (posts()) {
+      calculateStickyPosition();
+    }
+  });
 
   return (
-    <div>
-      <ul>
-        <For each={posts()}>
-          {
-            (post) =>
-              <li>
+      <div id="trending_wrapper" class={styles.stickyWrapper}>
+        <div class={styles.heading}>Trending on Nostr</div>
+        <div id="trending_section" class={styles.trendingSection}>
+          <For each={posts()}>
+            {
+              (post) =>
                 <div class={styles.trendingPost}>
                   <div class={styles.avatar}>
                     <img class={styles.avatarImg} src={post.user.picture} />
@@ -33,11 +40,10 @@ const TrendingPost: Component = () => {
                     <div class={styles.message}>{post.post.content}</div>
                   </div>
                 </div>
-              </li>
-          }
-        </For>
-      </ul>
-    </div>
+            }
+          </For>
+        </div>
+      </div>
   );
 }
 

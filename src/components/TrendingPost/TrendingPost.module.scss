@@ -1,5 +1,31 @@
+.trendingSection {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  padding-top: 44px;
+}
+
+.stickyWrapper {
+  height: 100%;
+  // width: 360px;
+}
+
+.heading {
+  position: fixed;
+  top: 117px;
+  width: 100%;
+  height: 44px;
+  background-color: var(--background-site);
+  z-index: 5;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 20px;
+  color: var(--text-secondary-2);
+  text-transform: uppercase;
+}
+
 .trendingPost {
-  margin-top: 4px;
+  margin-bottom: 12px;
   display: grid;
   grid-template-columns: 24px 1fr;
   grid-template-rows: 1fr;
@@ -11,14 +37,12 @@
     display: grid;
     justify-items: center;
 
-
     .avatarImg {
       width: 24px;
       height: 24px;
       border-radius: 50%;
     }
   }
-
 
   .content {
     grid-area: content;
@@ -31,18 +55,19 @@
     .header {
       grid-area: header;
       font-size: 14px;
-      line-height: 22px;
-      font-weight: 700;
+      line-height: 18px;
       display: flex;
       align-items: center;
 
       .name {
         color: var(--text-secondary-2);
+        font-weight: 800;
       }
 
       .time{
         margin: 0px 2px;
         color: var(--text-tertiary);
+        font-weight: 400;
         &::before {
           content: "|";
           padding: 0px 2px;
@@ -54,8 +79,27 @@
       grid-area: message;
       word-break: break-word;
       font-size: 14px;
-      line-height: 22px;
+      line-height: 18px;
+      font-weight: 400;
       color: var(--text-tertiary);
+
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      -moz-box-orient: vertical;
+      -ms-box-orient: vertical;
+      text-overflow: ellipsis;
+    }
+
+    &:hover {
+      .message {
+        color: var(--text-primary);
+        text-decoration: underline;
+      }
+
+      cursor: pointer;
     }
   }
 }

@@ -1,5 +1,21 @@
-.avatar {
+@mixin avatar {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.xsAvatar {
+  @include avatar;
+  width: 24px;
+  height: 24px;
+}
+.smallAvatar {
+  @include avatar;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+}
+
+.largeAvatar {
+  @include avatar;
+  width: 72px;
+  height: 72px;
 }

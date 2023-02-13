@@ -1,259 +1,120 @@
 .container {
-  display: grid;
-  height: 100vh;
-  // width: 100%;
   width: 1240px;
+  height: 100vh;
   margin: 0px auto;
-  position: relative;
-
-  grid-template-columns: 178px 1fr 360px;
-  grid-template-rows: 100px 40px 1fr 77px;
-  grid-template-areas:
-    "header header header"
-    "subheader subheader subheader"
-    "nav main sidebar"
-    "profile main sidebar";
-  grid-column-gap: 32px;
-
-  &.midscroll {
-    .subheader {
-      position: fixed;
-      width: 1240px;
-      background-color: var(--background-color);
-      .shcenter {
-        width: 640px;
-      }
-      .shleft, .shright {
-        visibility: visible;
-      }
-    }
-  }
-
-  &.fullscroll {
-    .subheader {
-      position: fixed;
-      width: 1240px;
-      background-color: unset;
-      .shcenter {
-        visibility: hidden;
-        width: 640px;
-      }
-      .shleft, .shright {
-        visibility: visible;
-        background-color: var(--background-color);
-        padding: 2px 0px;
-      }
-    }
-  }
-}
-
-.brand {
-  grid-area: brand;
-  position: fixed;
-  height: 50px;
-}
-
-header {
-  grid-area: header;
-  padding: 0px;
 
   display: grid;
-  grid-template-columns: 178px 1fr 360px;
-  grid-template-rows: 1fr;
+  grid-template-columns: 176px 640px 360px;
   grid-column-gap: 32px;
-  z-index: 1;
+}
 
-  section {
-    display: grid;
-    align-self: center;
-    align-content: center;
-    margin: 0px;
+.leftColumn {
+  display: grid;
+  grid-template-rows: 117px 1fr;
+  grid-row-gap: 28px;
 
-    &.right {
-      height: 48px;
-      display: grid;
-      bottom: 0;
-      align-content: center;
-    }
+  >div {
+    position: fixed;
   }
 }
 
-.subheader {
-  grid-area: subheader;
+.leftHeader {
+  height: 117px;
   display: grid;
-  grid-template-columns: 178px 1fr 360px;
-  grid-template-rows: 40px;
-  grid-column-gap: 32px;
   align-items: center;
-  z-index: 1;
-
-  .shright {
-    visibility: hidden;
-    justify-content: left;
-  }
-  .shleft {
-    visibility: hidden;
-    justify-content: right;
-  }
-
-  div {
-    display: grid;
-    justify-content: end;
-  }
-
+  justify-content: right;
 }
 
-.sideNav {
-  grid-area: nav;
-  justify-content: end;
-  width: 178px;
-  position: fixed;
-  top: 140px;
+.leftContent {
+  display: grid;
+  height: 100%;
+  justify-content: right;
 }
 
-main {
-  grid-area: main;
+.centerColumn {
+  display: grid;
+  grid-template-rows: 117px 1fr;
+}
+
+.centerHeader {
+  width: 640px;
+  height: 117px;
+}
+
+.centerContent {
   width: 640px;
 }
 
-.sidebar {
-  grid-area: sidebar;
-  padding: 12px;
-
-  h4 {
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  ul {
-    padding: 0px;
-  }
-
-  li {
-    padding-left: 0px;
-  }
+.rightColumn {
+  display: grid;
+  width: 360px;
+  grid-template-rows: 117px 1fr;
+  grid-row-gap: 28px;
 }
 
-.trendAuthor {
-  font-weight: bolder;
-}
-
-.trendTime::before {
-  content: "|";
-  padding: 0px 6px;
-}
-
-.currentProfile {
-  grid-area: profile;
+.rightHeader {
+  height: 117px;
+  display: grid;
+  align-items: center;
+  justify-content: left;
   position: fixed;
-  bottom: 0px;
+  background-color: var(--background-site);
+  z-index: var(--z-index-header);
 }
 
-.currentProfile > div {
-  display: inline;
-}
-
-.cuInfo > span{
-  font-size: smaller;
-}
-
-
-.getStarted {
-  margin: 0px;
-  padding: 0px;
-  background-color: none;
-  box-shadow: none;
-  border: none;
-}
-
-button {
-  padding: 8px 16px;
-  margin: 0px;
-
-  font-size: 16px;
-  font-weight: bold;
-
-  border-radius: 6px;
-  border: none;
+.rightContent {
+  margin-top: 117px;
 }
 
 @media only screen and (max-width: 1300px) {
   .container {
-    grid-template-columns: 48px 1fr 360px;
-    grid-template-areas:
-      "header header header"
-      "subheader subheader subheader"
-      "nav main sidebar"
-      "profile main sidebar";
-    width: 1068px;
-
-    &.midscroll, &.fullscroll {
-      .subheader {
-        width: 1112px;
-      }
-    }
+    width: 1032px;
+    grid-template-columns: 48px 640px 280px;
   }
-
-  header, .subheader {
-    grid-template-columns: 48px 1fr 360px;
-
-    .shleft {
-      justify-content: center;
-    }
-  }
-
-  .sideNav {
-    width: 48px;
-  }
-
-  .navItem > div {
-    display: inline-block;
-  }
-
-  .navItem > p {
-    display: none;
+  .rightColumn {
+    width: 280px;
   }
 }
 
 @media only screen and (max-width: 1087px) {
   .container {
-    grid-template-columns: 48px 1fr;
-    grid-template-areas:
-      "header header"
-      "subheader subheader"
-      "nav main"
-      "profile main";
     width: 720px;
-    &.midscroll {
-      .subheader {
-        width: 720px;
-      }
-    }
+    grid-template-columns: 48px 640px;
   }
 
-  header, .subheader {
-    grid-template-columns: 48px 1fr;
-
-    section.right {
-      display: none;
-    }
-
-    .shright {
-      display: none;
-    }
-  }
-
-  .sidebar {
-    display: none;
-  }
-
-  .search {
+  .rightColumn {
     display: none;
   }
 }
 
-.right {
-  display: flex;
-  justify-content: end;
-  margin-right: 12px;
+@media only screen and (max-width: 720px) {
+  .container {
+    max-width: 720px;
+    height: 100vh;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "content" "footer";
+  }
+
+  .centerColumn {
+    grid-area: content;
+    height: 80vh;
+  }
+
+  .leftColumn {
+    position: fixed;
+    bottom: 0px;
+    grid-area: footer;
+    display: flex;
+    flex-direction: row;
+    z-index: 20;
+
+    >div {
+      position: relative;
+    }
+  }
+
+  .rightColumn {
+    display: none;
+  }
 }

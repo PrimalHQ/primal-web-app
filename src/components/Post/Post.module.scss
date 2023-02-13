@@ -24,6 +24,7 @@
 
     .avatarName {
       width: 100%;
+      padding: 0px 6px;
       text-align: center;
       display: inline-block;
       font-size: 12px;
@@ -47,17 +48,41 @@
     .header {
       grid-area: header;
       font-size: small;
-      display: flex;
       align-items: center;
       color: var(--text-tertiary-2);
+      display: flex;
+      justify-content: space-between;
+      width: 532px;
 
-      .time{
-        margin: 0px 2px;
-        &::before {
-          content: "|";
-          padding: 0px 2px;
+      .postInfo {
+        display: flex;
+        width: 492px;
+        justify-content: flex-start;
+
+        .userInfo {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+
+        .time{
+          margin: 0px 2px;
+          min-width: 40px;
+          &::before {
+            content: "|";
+            padding: 0px 2px;
+          }
         }
       }
+
+
+      .contextMenu {
+        min-width: 40px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+      }
+
     }
 
     .message {
@@ -85,7 +110,7 @@
 
         &:hover {
           .replyIcon, .likeIcon, .repostIcon {
-            background-color: var(--text-socondary);
+            background-color: var(--text-secondary);
           }
           .statNumber {
             color: var(--text-primary);
@@ -97,8 +122,8 @@
 }
 
 @mixin statIcon {
-  width: 28px;
-  height: 28px;
+  width: 16px;
+  height: 16px;
   background-color: var(--text-tertiary-2);
 }
 

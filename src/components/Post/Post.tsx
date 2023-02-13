@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
 import { PrimalPost } from '../../types/primal';
 
@@ -20,6 +20,12 @@ const urlify = (text: string) => {
   })
 }
 
+const trimVerification = (address: string) => {
+  const [_, domain] = address.split('@');
+
+  return domain;
+}
+
 const Post: Component<{ post: PrimalPost }> = (props) => {
 
   const [time] = createSignal(date(props.post.post.created_at));
@@ -32,12 +38,26 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
         </div>
         <div class={styles.content}>
           <div class={styles.header}>
-            <span class='userName'>
-              {props.post.user.name}
+            <span class={styles.postInfo}>
+              <span class={styles.userInfo}>
+                <span class={styles.userName}>
+                  {props.post.user.name}
+                </span>
+                <Switch>
+                  <Match when={props.post.user.nip05}>
+                    <span class={styles.verifiedIcon} />
+                    <span
+                      class={styles.verifiedBy}
+                      title={props.post.user.nip05}
+                    >
+                      {trimVerification(props.post.user.nip05)}
+                    </span>
+                  </Match>
+                </Switch>
+              </span>
+              <span class={styles.time} title={time().date.toLocaleString()}>{time().label}</span>
             </span>
-            <span class={styles.verifiedIcon} />
-            <span class='verifiedBy'>{props.post.user.nip05}</span>
-            <span class={styles.time} title={time().date.toLocaleString()}>{time().label}</span>
+            <div class={styles.contextMenu}>...</div>
           </div>
 
           <div class={styles.message} innerHTML={urlify(props.post.post.content)}>

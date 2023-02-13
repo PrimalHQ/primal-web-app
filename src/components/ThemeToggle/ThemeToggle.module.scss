@@ -1,6 +1,6 @@
 .themeToggle {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   padding: 0px;
   background: var(--brand-gradient);
   border-radius: 50%;
@@ -11,8 +11,24 @@
   width: 24px;
   height: 24px;
   vertical-align: middle;
+  margin-top: -3px;
 
   background-color: white;
   -webkit-mask: url(../../assets/icons/post.svg) no-repeat center;
   mask: url(../../assets/icons/post.svg) no-repeat center;
+}
+
+
+@media only screen and (max-width: 1300px) {
+  .themeToggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .postIcon {
+    width: 16px;
+    height: 16px;
+    -webkit-mask: url(../../assets/icons/post.svg) no-repeat 0px / 16px;
+    mask: url(../../assets/icons/post.svg) no-repeat 0px / 16px;
+  }
 }

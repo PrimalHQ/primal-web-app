@@ -1,0 +1,64 @@
+.fullHeader {
+  display: grid;
+  height: 117px;
+  padding-top: 25px;
+}
+
+.feedSelector {
+  display: grid;
+  justify-content: right;
+}
+
+.fixedSelector {
+  position:fixed;
+  top: 0px;
+  width: 640px;
+  height: 48px;
+  align-items: center;
+  background-color: var(--background-site);
+  z-index: var(--z-index-header);
+  transition: all 0.6s;
+  transform: translateY(0px);
+}
+
+.hiddenSelector {
+  transition: all 0.6s;
+  transform: translateY(-48px);
+}
+
+.instaHide {
+  top: -48px;
+}
+
+.callToAction {
+  display: grid;
+  height: 72px;
+  grid-template-columns: 72px 1fr;
+  grid-column-gap: 17px;
+  align-items: center;
+
+  p {
+    font-size: 34px;
+    line-height: 34px;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  .border {
+    height: 36px;
+    padding: 1px;
+    background: var(--brand-gradient);
+    border-radius: 6px;
+    margin-left: 10px
+  }
+
+  input {
+    height: 34px;
+    font-size: 18px;
+    line-height: 20px;
+    margin: 0px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--background-site);
+  }
+}
