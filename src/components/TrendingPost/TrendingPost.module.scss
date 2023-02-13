@@ -25,7 +25,7 @@
 }
 
 .trendingPost {
-  margin-bottom: 12px;
+  margin-bottom: 18px;
   display: grid;
   grid-template-columns: 24px 1fr;
   grid-template-rows: 1fr;
@@ -94,7 +94,7 @@
     }
 
     &:hover {
-      .message {
+      .message, .name, .time {
         color: var(--text-primary);
         text-decoration: underline;
       }

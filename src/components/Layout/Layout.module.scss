@@ -15,6 +15,7 @@
 
   >div {
     position: fixed;
+    width: 176px;
   }
 }
 
@@ -71,6 +72,14 @@
     width: 1032px;
     grid-template-columns: 48px 640px 280px;
   }
+
+  .leftColumn {
+    >div {
+      position: fixed;
+      width: 48px;
+    }
+  }
+
   .rightColumn {
     width: 280px;
   }

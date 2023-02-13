@@ -6,6 +6,7 @@
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content";
   padding: 16px 16px 16px 0px;
+  border-radius: 4px;
 
   .avatar {
     grid-area: avatar;
@@ -42,12 +43,11 @@
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: 16px 1fr 28px;
-    grid-row-gap: 12px;
+    grid-row-gap: 16px;
     grid-template-areas: "header" "message" "footer";
 
     .header {
       grid-area: header;
-      font-size: small;
       align-items: center;
       color: var(--text-tertiary-2);
       display: flex;
@@ -63,11 +63,17 @@
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
+          font-size: 14px;
+          line-height: 16px;
+          font-weight: 400;
         }
 
         .time{
           margin: 0px 2px;
           min-width: 40px;
+          font-size: 14px;
+          line-height: 16px;
+          font-weight: 400;
           &::before {
             content: "|";
             padding: 0px 2px;
