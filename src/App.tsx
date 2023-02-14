@@ -8,7 +8,7 @@ import { connect, disconnect } from './sockets';
 
 const App: Component = () => {
 
-  onMount(async () => {
+  onMount(() => {
     connect();
   });
 

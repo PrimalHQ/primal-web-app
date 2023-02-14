@@ -1,5 +1,5 @@
 import { createContext, createEffect, createResource, createSignal, JSX, onCleanup, onMount, untrack, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import type {
   NostrMultiAdd,
   NostrPost,
@@ -8,6 +8,7 @@ import type {
   Store,
 } from '../types/primal';
 import { isConnected, socket } from "../sockets";
+import { getFeed } from "../lib/feed";
 
 type PrimalContextStore = {
 
@@ -15,20 +16,22 @@ type PrimalContextStore = {
   actions?: {
     selectFeed: (profile: PrimalFeed | undefined) => void,
     clearData: () => void,
+    loadNextPage: () => void,
   },
 };
 
 type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: () => string } };
 
-const convertDataToPosts = (data: Store) => {
-  return  data?.messages.map((msg) => {
-    const user = data?.users[msg.event.pubkey];
+const convertDataToPosts = (page) => {
+  return  page?.messages.map((msg) => {
+    const user = page?.users[msg.pubkey];
+    const stat = page?.postStats[msg.id];
 
-    const userMeta = JSON.parse(user?.meta_data.content || '');
+    const userMeta = JSON.parse(user?.content || '');
 
     return {
       user: {
-        id: user?.meta_data.id || '',
+        id: user?.id || '',
         pubkey: user?.pubkey || '',
         name: userMeta.name,
         about: userMeta.about,
@@ -40,27 +43,34 @@ const convertDataToPosts = (data: Store) => {
         lud06: userMeta.lud06,
         lud16: userMeta.lud16,
         website: userMeta.website,
-        tags: user?.meta_data.tags || [],
+        tags: user?.tags || [],
       },
       post: {
-        id: msg.event.id,
-        pubkey: msg.event.pubkey,
-        created_at: msg.event.created_at,
-        tags: msg.event.tags,
-        content: msg.event.content,
-        sig: msg.event.sig,
-        likes: msg.stats.likes,
-        mentions: msg.stats.mentions,
-        replies: msg.stats.replies,
+        id: msg.id,
+        pubkey: msg.pubkey,
+        created_at: msg.created_at,
+        tags: msg.tags,
+        content: msg.content,
+        sig: msg.sig,
+        likes: stat.likes,
+        mentions: stat.mentions,
+        replies: stat.replies,
       },
     };
-  });
+  }).sort((a, b) => b.post.created_at - a.post.created_at);
+}
+
+const emptyPage = {
+  users: {},
+  messages: [],
+  postStats: {},
 }
 
 const initialStore: Store = {
   posts: [],
   users: {},
   messages: [],
+  postStats: {},
   selectedFeed: {
     name: 'snowden',
     hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
@@ -83,47 +93,74 @@ const initialStore: Store = {
   ],
 };
 
-
 export const FeedContext = createContext<PrimalContextStore>();
 
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
   const [data, setData] = createStore<Store>(initialStore);
 
+  const [page, setPage] = createStore(emptyPage);
+
+  const [oldestPost, setOldestPost] = createSignal();
+
+  const randomNumber = Math.floor(Math.random()*10000000000);
+  const subid = String(randomNumber);
+
+  createEffect(() => {
+    const until = oldestPost()?.post.created_at || 0;
+
+    if (until > 0) {
+      const pubkey = data?.selectedFeed?.hex;
+
+      getFeed(pubkey, subid, until);
+    }
+  });
+
+  const proccessPost = (post) => {
+    if (oldestPost()?.post.id === post.id) {
+      return;
+    }
+
+    setPage('messages', [ ...page.messages, post]);
+  };
+
+  const proccessUser = (user) => {
+    setPage('users', { ...page.users, [user.pubkey]: user})
+  };
+
+  const proccessStat = (stat) => {
+    const content = JSON.parse(stat.content);
+    setPage('postStats', { ...page.postStats, [content.event_id]: content })
+  };
+
+  const process = {
+    0: proccessUser,
+    1: proccessPost,
+    10000100: proccessStat,
+  };
+
   const onError = (error: Event) => {
     console.log("error: ", error);
   };
 
-  const onMessage = (message: MessageEvent) => {
-    const fetchedData: NostrMultiAdd | NostrPost | NostrUser = JSON.parse(message.data);
+  const onMessage = (event: MessageEvent) => {
+    const message = JSON.parse(event.data);
 
-    if (fetchedData.op === 'eos') {
-      setData('posts', convertDataToPosts(data));
+    const [type, subkey, content] = message;
+
+    if (type === 'EOSE') {
+      const newPosts = convertDataToPosts(page);
+
+      setPage({ messages: [], users: {}, postStats: {} });
+
+      setData('posts', [ ...data.posts, ...newPosts ]);
+      return;
     }
 
-    if (fetchedData.op === 'multi_add') {
-      const msg = fetchedData as NostrMultiAdd;
-
-      msg.event.forEach((event) => {
-        setData('messages', (msgs) => [ ...msgs, event ]);
-      });
-
-      msg.meta_data.forEach((user) => {
-        setData('users', (users) => ({ ...users, [user.pubkey]: user }));
-      });
+    if (type === 'EVENT') {
+      process[content.kind](content)
     }
 
-    if (fetchedData.op === 'add') {
-      if ('event' in fetchedData) {
-        const msg = fetchedData as NostrPost;
-        setData('messages', (msgs) => [ ...msgs, msg ]);
-      }
-
-      if ('meta_data' in fetchedData) {
-        const msg = fetchedData as NostrUser;
-        setData('users', (users) => ({ ...users, [msg.pubkey]: msg }));
-      }
-    }
   };
 
   const fetchNostrKey = async () => {
@@ -135,20 +172,23 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       setTimeout(fetchNostrKey, 1000);
     }
 
-    const key = await nostr.getPublicKey();
+    try {
+      const key = await nostr.getPublicKey();
 
-
-    if (key === undefined) {
-      setTimeout(fetchNostrKey, 1000);
-    }
-    else {
-      const feed = { name: 'my feed', hex: key, npub: ''};
-      setData('availableFeeds', feeds => [...feeds, feed]);
+      if (key === undefined) {
+        setTimeout(fetchNostrKey, 1000);
+      }
+      else {
+        const feed = { name: 'my feed', hex: key, npub: ''};
+        setData('availableFeeds', feeds => [...feeds, feed]);
+      }
+    } catch (e) {
+      console.log('ERROR: ', e);
     }
   }
 
   onMount(() => {
-    fetchNostrKey();
+    // fetchNostrKey();
   });
 
   createEffect(() => {
@@ -159,16 +199,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
 	createEffect(() => {
     if (isConnected()) {
-      const randomNumber = Math.floor(Math.random()*10000000000);
-      const subid = String(randomNumber);
+      const pubkey = data?.selectedFeed?.hex || '';
 
-      const pubkey = data?.selectedFeed?.hex;
-
-			socket()?.send(JSON.stringify([
-        "REQ",
-        subid,
-        {cache: ["user_feed", {"pubkey": pubkey}]},
-      ]));
+      getFeed(pubkey, subid);
 		}
 	});
 
@@ -185,9 +218,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
           setData('selectedFeed', profile);
         }
       },
-
       clearData() {
         setData({ posts: [], messages: [], users: {}});
+      },
+      loadNextPage() {
+        const lastPost = data.posts[data.posts.length - 1];
+
+        setOldestPost(lastPost);
       },
     }
   };

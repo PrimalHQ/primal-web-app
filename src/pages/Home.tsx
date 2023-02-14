@@ -1,4 +1,4 @@
-import { Component, createEffect, createResource, createSignal, For, Match, on, onMount, Switch } from 'solid-js';
+import { Component, createEffect, createResource, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Post from '../components/Post/Post';
 import styles from './Home.module.scss';
 import { useFeedContext } from '../contexts/FeedContext';
@@ -14,9 +14,29 @@ const Home: Component = () => {
 
   const [mounted, setMounted] = createSignal(false);
 
+  let observer: IntersectionObserver | undefined;
+
   onMount(async () => {
     // Temporary fix for Portal rendering on initial load.
     setMounted(true);
+
+    observer = new IntersectionObserver(entries => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          context?.actions?.loadNextPage();
+        }
+      });
+    });
+
+    const pag = document.getElementById('pagination_trigger');
+
+    observer && observer.observe(pag);
+  });
+
+  onCleanup(() => {
+    const pag = document.getElementById('pagination_trigger');
+
+    observer.unobserve(pag);
   });
 
   return (
@@ -37,14 +57,20 @@ const Home: Component = () => {
         </Match>
       </Switch>
 
-      <For each={context?.data?.posts} >
-        {(post) => {
-          return <Post
-            post={post}
-          />
-        }
-        }
-      </For>
+      <Show
+        when={context?.data?.posts && context.data.posts.length > 0}
+        fallback={<div>Loading...</div>}
+      >
+        <For each={context?.data?.posts} >
+          {(post) => {
+            return <Post
+              post={post}
+            />
+          }
+          }
+        </For>
+      </Show>
+      <div id="pagination_trigger" class={styles.paginate}>Pagination</div>
     </div>
   )
 }

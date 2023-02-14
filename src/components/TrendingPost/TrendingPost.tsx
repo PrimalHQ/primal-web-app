@@ -27,17 +27,17 @@ const TrendingPost: Component = () => {
               (post) =>
                 <div class={styles.trendingPost}>
                   <div class={styles.avatar}>
-                    <img class={styles.avatarImg} src={post.user.picture} />
+                    <img class={styles.avatarImg} src={post.user?.picture} />
                   </div>
                   <div class={styles.content}>
                     <div class={styles.header}>
                       <div class={styles.name}>
-                        {post.user.name}
+                        {post.user?.name}
                       </div>
                       <div class={styles.time}>
-                        {date(post.post.created_at).label}</div>
+                        {date(post.post?.created_at).label}</div>
                       </div>
-                    <div class={styles.message}>{post.post.content}</div>
+                    <div class={styles.message}>{post.post?.content}</div>
                   </div>
                 </div>
             }

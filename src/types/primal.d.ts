@@ -1,3 +1,10 @@
+export type NostrMessage = [
+  type: "EVENT" | "EOSE",
+  subkey: number,
+
+];
+
+
 export type NostrPost = {
   op: string,
   event: {
@@ -74,11 +81,14 @@ export type PrimalFeed = {
 };
 
 export type Store = {
-  messages: NostrPost[],
+  messages: [],
   users: {
-    [pubkey: string]: NostrUser, 
+    [pubkey: string]: object,
   },
-  posts: PrimalPost[],
+  posts: [],
+  postStats: {
+    [eventId: string]: object,
+  },
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
 };

@@ -8,6 +8,7 @@ type PrimalNetStats = {
   pubkeys: number,
   pubnotes: number,
   reactions: number,
+  reposts: number,
   allevents: number,
 };
 
@@ -20,25 +21,35 @@ const initialStats: PrimalNetStats = {
   pubkeys: 0,
   pubnotes: 0,
   reactions: 0,
+  reposts: 0,
   allevents: 0,
 };
 
 
 const Explore: Component = () => {
 
-    const [stats, setStats] = createStore<PrimalNetStats>(initialStats);
-  
-    const onMessage = (message: MessageEvent) => {
-      const response: PrimalResponse = JSON.parse(message.data);
-    
-      const netstats = response.netstats || initialStats;
-      
-      setStats(netstats);
-    
+    const [stats, setStats] = createStore(initialStats);
+
+    const onMessage = (event: MessageEvent) => {
+
+      const [type, subkey, content] = JSON.parse(event.data);
+
+      console.log('RESP: ', content)
+
+      const stats = JSON.parse(content.netstats.content)
+
+      setStats(stats);
+
+      // const netstats = response.netstats || initialStats;
+
+      // setStats(netstats);
+
     };
     onMount(() => {
       socket()?.addEventListener('message', onMessage);
-      
+
+      console.log('SEND');
+
       socket()?.send(JSON.stringify(["REQ", "5345734845", {cache: ["net_stats"]}]));
     });
 
@@ -61,46 +72,46 @@ const Explore: Component = () => {
                 users
               </div>
             </div>
-            
+
             <div class={styles.netstat}>
               <div class={styles.number}>
-                {stats.pubkeys}
+                {stats.pubkeys.toLocaleString()}
               </div>
               <div class={styles.label}>
                 public keys
               </div>
             </div>
-            
+
             <div class={styles.netstat}>
               <div class={styles.number}>
-                {stats.pubnotes}
+                {stats.pubnotes.toLocaleString()}
               </div>
               <div class={styles.label}>
                 public notes
               </div>
             </div>
-            
+
             <div class={styles.netstat}>
               <div class={styles.number}>
-                {stats.reactions}
+                {stats.reactions.toLocaleString()}
               </div>
               <div class={styles.label}>
                 reactions
               </div>
             </div>
-            
+
             <div class={styles.netstat}>
               <div class={styles.number}>
-                TBD
+                {stats.reposts.toLocaleString()}
               </div>
               <div class={styles.label}>
                 reposts
               </div>
             </div>
-            
+
             <div class={styles.netstat}>
               <div class={styles.number}>
-                {stats.allevents}
+                {stats.allevents.toLocaleString()}
               </div>
               <div class={styles.label}>
                 all events
