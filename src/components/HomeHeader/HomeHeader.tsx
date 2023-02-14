@@ -37,7 +37,6 @@ const HomeHeader: Component = () => {
     }
 
     smallHeader?.classList.add(styles.hiddenSelector);
-    smallHeader?.classList.remove(styles.fixedSelector);
   }
 
   onMount(() => {
