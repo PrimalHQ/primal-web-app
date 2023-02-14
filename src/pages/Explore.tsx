@@ -54,7 +54,8 @@ const Explore: Component = () => {
     });
 
     onCleanup(() => {
-      reset();
+      socket()?.send(JSON.stringify(["CLOSE", "5345734845"]));
+      // reset();
     });
 
     return (
