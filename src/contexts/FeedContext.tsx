@@ -27,13 +27,13 @@ const convertDataToPosts = (page) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
-    const userMeta = JSON.parse(user?.content || '');
+    const userMeta = JSON.parse(user?.content || '{}');
 
     return {
       user: {
         id: user?.id || '',
-        pubkey: user?.pubkey || '',
-        name: userMeta.name,
+        pubkey: user?.pubkey || msg.pubkey,
+        name: userMeta.name || 'N/A',
         about: userMeta.about,
         picture: userMeta.picture,
         nip05: userMeta.nip05,
