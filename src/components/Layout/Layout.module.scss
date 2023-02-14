@@ -4,7 +4,7 @@
   margin: 0px auto;
 
   display: grid;
-  grid-template-columns: 176px 640px 360px;
+  grid-template-columns: 176px 640px 300px;
   grid-column-gap: 32px;
 }
 
@@ -48,7 +48,7 @@
 
 .rightColumn {
   display: grid;
-  width: 360px;
+  width: 300px;
   grid-template-rows: 117px 1fr;
   grid-row-gap: 28px;
 }
@@ -70,7 +70,7 @@
 @media only screen and (max-width: 1300px) {
   .container {
     width: 1032px;
-    grid-template-columns: 48px 640px 280px;
+    grid-template-columns: 48px 640px 300px;
   }
 
   .leftColumn {
@@ -81,7 +81,7 @@
   }
 
   .rightColumn {
-    width: 280px;
+    width: 300px;
   }
 }
 
