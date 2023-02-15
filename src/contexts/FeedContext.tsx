@@ -14,46 +14,7 @@ import type {
   PrimalPost,
 } from '../types/primal';
 import { isConnected, socket } from "../sockets";
-import { getFeed } from "../lib/feed";
-
-
-const convertDataToPosts = (page: FeedPage) => {
-  return  page?.messages.map((msg) => {
-    const user = page?.users[msg.pubkey];
-    const stat = page?.postStats[msg.id];
-
-    const userMeta = JSON.parse(user?.content || '{}');
-
-    return {
-      user: {
-        id: user?.id || '',
-        pubkey: user?.pubkey || msg.pubkey,
-        name: userMeta.name || 'N/A',
-        about: userMeta.about,
-        picture: userMeta.picture,
-        nip05: userMeta.nip05,
-        banner: userMeta.banner,
-        displayName: userMeta.display_name,
-        location: userMeta.location,
-        lud06: userMeta.lud06,
-        lud16: userMeta.lud16,
-        website: userMeta.website,
-        tags: user?.tags || [],
-      },
-      post: {
-        id: msg.id,
-        pubkey: msg.pubkey,
-        created_at: msg.created_at,
-        tags: msg.tags,
-        content: msg.content,
-        sig: msg.sig,
-        likes: stat.likes,
-        mentions: stat.mentions,
-        replies: stat.replies,
-      },
-    };
-  }).sort((a: PrimalPost, b: PrimalPost) => b.post.created_at - a.post.created_at);
-}
+import { convertToPosts, getFeed } from "../lib/feed";
 
 const emptyPage: FeedPage = {
   users: {},
@@ -135,7 +96,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     const [type, subkey, content] = message;
 
     if (type === 'EOSE') {
-      const newPosts = convertDataToPosts(page);
+      const newPosts = convertToPosts(page);
 
       setPage({ messages: [], users: {}, postStats: {} });
 
@@ -182,7 +143,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   }
 
   onMount(() => {
-    // fetchNostrKey();
+    fetchNostrKey();
   });
 
   createEffect(() => {
