@@ -2,10 +2,8 @@ import { Component, createEffect, createResource, createSignal, For, Match, on, 
 import Post from '../components/Post/Post';
 import styles from './Home.module.scss';
 import { useFeedContext } from '../contexts/FeedContext';
-import { Portal, untrack } from 'solid-js/web';
-import FeedSelect from '../components/FeedSelect/FeedSelect';
+import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
-import Welcome from '../components/Welcome/Welcome';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 
 const Home: Component = () => {
@@ -30,13 +28,13 @@ const Home: Component = () => {
 
     const pag = document.getElementById('pagination_trigger');
 
-    observer && observer.observe(pag);
+    pag && observer && observer.observe(pag);
   });
 
   onCleanup(() => {
     const pag = document.getElementById('pagination_trigger');
 
-    observer.unobserve(pag);
+    pag && observer?.unobserve(pag);
   });
 
   return (

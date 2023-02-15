@@ -1,28 +1,23 @@
 import { createContext, createEffect, createResource, createSignal, JSX, onCleanup, onMount, untrack, useContext } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import type {
-  NostrMultiAdd,
-  NostrPost,
-  NostrUser,
+  FeedPage,
+  FeedStore,
+  NostrEOSE,
+  NostrEvent,
+  NostrPostContent,
+  NostrStatsContent,
+  NostrUserContent,
+  NostrWindow,
+  PrimalContextStore,
   PrimalFeed,
-  Store,
+  PrimalPost,
 } from '../types/primal';
 import { isConnected, socket } from "../sockets";
 import { getFeed } from "../lib/feed";
 
-type PrimalContextStore = {
 
-  data?: Store,
-  actions?: {
-    selectFeed: (profile: PrimalFeed | undefined) => void,
-    clearData: () => void,
-    loadNextPage: () => void,
-  },
-};
-
-type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: () => string } };
-
-const convertDataToPosts = (page) => {
+const convertDataToPosts = (page: FeedPage) => {
   return  page?.messages.map((msg) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
@@ -57,20 +52,17 @@ const convertDataToPosts = (page) => {
         replies: stat.replies,
       },
     };
-  }).sort((a, b) => b.post.created_at - a.post.created_at);
+  }).sort((a: PrimalPost, b: PrimalPost) => b.post.created_at - a.post.created_at);
 }
 
-const emptyPage = {
+const emptyPage: FeedPage = {
   users: {},
   messages: [],
   postStats: {},
 }
 
-const initialStore: Store = {
+const initialStore: FeedStore = {
   posts: [],
-  users: {},
-  messages: [],
-  postStats: {},
   selectedFeed: {
     name: 'snowden',
     hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
@@ -97,11 +89,11 @@ export const FeedContext = createContext<PrimalContextStore>();
 
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
-  const [data, setData] = createStore<Store>(initialStore);
+  const [data, setData] = createStore<FeedStore>(initialStore);
 
   const [page, setPage] = createStore(emptyPage);
 
-  const [oldestPost, setOldestPost] = createSignal();
+  const [oldestPost, setOldestPost] = createSignal<PrimalPost | undefined>();
 
   const randomNumber = Math.floor(Math.random()*10000000000);
   const subid = String(randomNumber);
@@ -112,11 +104,11 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     if (until > 0) {
       const pubkey = data?.selectedFeed?.hex;
 
-      getFeed(pubkey, subid, until);
+      pubkey && getFeed(pubkey, subid, until);
     }
   });
 
-  const proccessPost = (post) => {
+  const proccessPost = (post: NostrPostContent) => {
     if (oldestPost()?.post.id === post.id) {
       return;
     }
@@ -124,19 +116,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     setPage('messages', [ ...page.messages, post]);
   };
 
-  const proccessUser = (user) => {
+  const proccessUser = (user: NostrUserContent) => {
     setPage('users', { ...page.users, [user.pubkey]: user})
   };
 
-  const proccessStat = (stat) => {
+  const proccessStat = (stat: NostrStatsContent) => {
     const content = JSON.parse(stat.content);
     setPage('postStats', { ...page.postStats, [content.event_id]: content })
-  };
-
-  const process = {
-    0: proccessUser,
-    1: proccessPost,
-    10000100: proccessStat,
   };
 
   const onError = (error: Event) => {
@@ -144,7 +130,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   };
 
   const onMessage = (event: MessageEvent) => {
-    const message = JSON.parse(event.data);
+    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subkey, content] = message;
 
@@ -158,7 +144,15 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
 
     if (type === 'EVENT') {
-      process[content.kind](content)
+      if (content.kind === 0) {
+        proccessUser(content);
+      }
+      if (content.kind === 1) {
+        proccessPost(content);
+      }
+      if (content.kind === 10000100) {
+        proccessStat(content);
+      }
     }
 
   };
@@ -219,7 +213,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         }
       },
       clearData() {
-        setData({ posts: [], messages: [], users: {}});
+        setData({ posts: []});
       },
       loadNextPage() {
         const lastPost = data.posts[data.posts.length - 1];
