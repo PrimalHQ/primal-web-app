@@ -5,6 +5,7 @@ import Layout from './components/Layout/Layout';
 import Explore from './pages/Explore';
 import { FeedProvider } from './contexts/FeedContext';
 import { connect, disconnect } from './sockets';
+import Thread from './pages/Thread';
 
 const App: Component = () => {
 
@@ -27,6 +28,7 @@ const App: Component = () => {
           <Route path="/" component={Layout} >
             <Route path="/" element={<Navigate href="/home" />} />
             <Route path="/home" component={Home} />
+            <Route path="/thread/:postId" component={Thread} />
             <Route path="/explore" component={Explore} />
             <Route path="/rest" component={Explore} />
           </Route>

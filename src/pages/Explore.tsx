@@ -34,8 +34,6 @@ const Explore: Component = () => {
 
       const [type, subkey, content] = JSON.parse(event.data);
 
-      console.log('RESP: ', content)
-
       const stats = JSON.parse(content.netstats.content)
 
       setStats(stats);

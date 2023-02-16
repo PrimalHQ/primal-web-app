@@ -1,0 +1,27 @@
+.threadList {
+  // margin-top: -117px;
+}
+
+.border {
+  height: 36px;
+  padding: 1px;
+  background: var(--brand-gradient);
+  border-radius: 6px;
+  margin-left: 10px;
+
+  input {
+    height: 34px;
+    font-size: 18px;
+    line-height: 20px;
+    margin: 0px;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--background-site);
+  }
+}
+
+.replyBox {
+  margin-top: 4px;
+  padding: 30px 22px;
+  background-color: var(--backround-card);
+}

@@ -86,37 +86,38 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     setPage('postStats', { ...page.postStats, [content.event_id]: content })
   };
 
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
+  // const onError = (error: Event) => {
+  //   console.log("error: ", error);
+  // };
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  // const onMessage = (event: MessageEvent) => {
+  //   console.log('FEED Message');
+  //   const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
-    const [type, subkey, content] = message;
+  //   const [type, subkey, content] = message;
 
-    if (type === 'EOSE') {
-      const newPosts = convertToPosts(page);
+  //   if (type === 'EOSE') {
+  //     const newPosts = convertToPosts(page);
 
-      setPage({ messages: [], users: {}, postStats: {} });
+  //     setPage({ messages: [], users: {}, postStats: {} });
 
-      setData('posts', [ ...data.posts, ...newPosts ]);
-      return;
-    }
+  //     setData('posts', [ ...data.posts, ...newPosts ]);
+  //     return;
+  //   }
 
-    if (type === 'EVENT') {
-      if (content.kind === 0) {
-        proccessUser(content);
-      }
-      if (content.kind === 1) {
-        proccessPost(content);
-      }
-      if (content.kind === 10000100) {
-        proccessStat(content);
-      }
-    }
+  //   if (type === 'EVENT') {
+  //     if (content.kind === 0) {
+  //       proccessUser(content);
+  //     }
+  //     if (content.kind === 1) {
+  //       proccessPost(content);
+  //     }
+  //     if (content.kind === 10000100) {
+  //       proccessStat(content);
+  //     }
+  //   }
 
-  };
+  // };
 
   const fetchNostrKey = async () => {
     const win = window as NostrWindow;
@@ -146,27 +147,28 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     fetchNostrKey();
   });
 
-  createEffect(() => {
-    socket()?.addEventListener('error', onError);
+  // createEffect(() => {
+  //   socket()?.addEventListener('error', onError);
 
-    socket()?.addEventListener('message', onMessage);
-  });
+  //   socket()?.addEventListener('message', onMessage);
+  // });
 
-	createEffect(() => {
-    if (isConnected()) {
-      const pubkey = data?.selectedFeed?.hex || '';
+	// createEffect(() => {
+  //   if (isConnected()) {
+  //     const pubkey = data?.selectedFeed?.hex || '';
 
-      getFeed(pubkey, subid);
-		}
-	});
+  //     getFeed(pubkey, subid);
+	// 	}
+	// });
 
-  onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
-    socket()?.removeEventListener('message', onMessage);
-  });
+  // onCleanup(() => {
+  //   socket()?.removeEventListener('error', onError);
+  //   socket()?.removeEventListener('message', onMessage);
+  // });
 
   const store = {
     data: data,
+    page: page,
     actions: {
       selectFeed(profile: PrimalFeed | undefined) {
         if (profile as PrimalFeed) {
@@ -180,6 +182,25 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         const lastPost = data.posts[data.posts.length - 1];
 
         setOldestPost(lastPost);
+      },
+      savePosts(posts: PrimalPost[]) {
+        setData('posts', [ ...data.posts, ...posts ]);
+      },
+      clearPage() {
+        setPage({ messages: [], users: {}, postStats: {} });
+      },
+      proccessEventContent(content: NostrUserContent | NostrPostContent | NostrStatsContent, type: string) {
+        if (type === 'EVENT') {
+          if (content.kind === 0) {
+            proccessUser(content);
+          }
+          if (content.kind === 1) {
+            proccessPost(content);
+          }
+          if (content.kind === 10000100) {
+            proccessStat(content);
+          }
+        }
       },
     }
   };

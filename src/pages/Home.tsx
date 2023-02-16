@@ -5,6 +5,9 @@ import { useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
+import { isConnected, socket } from '../sockets';
+import { convertToPosts, getFeed } from '../lib/feed';
+import { NostrEOSE, NostrEvent } from '../types/primal';
 
 const Home: Component = () => {
 
@@ -13,6 +16,9 @@ const Home: Component = () => {
   const [mounted, setMounted] = createSignal(false);
 
   let observer: IntersectionObserver | undefined;
+
+  const randomNumber = Math.floor(Math.random()*10000000000);
+  const subid = String(randomNumber);
 
   onMount(async () => {
     // Temporary fix for Portal rendering on initial load.
@@ -29,23 +35,58 @@ const Home: Component = () => {
     const pag = document.getElementById('pagination_trigger');
 
     pag && observer && observer.observe(pag);
+
+    socket()?.addEventListener('error', onError);
+    socket()?.addEventListener('message', onMessage);
   });
 
   onCleanup(() => {
     const pag = document.getElementById('pagination_trigger');
 
     pag && observer?.unobserve(pag);
+
+
+    socket()?.removeEventListener('error', onError);
+    socket()?.removeEventListener('message', onMessage);
   });
+
+	createEffect(() => {
+    if (isConnected()) {
+      const pubkey = context?.data?.selectedFeed?.hex || '';
+
+      getFeed(pubkey, subid);
+		}
+	});
+
+  const onError = (error: Event) => {
+    console.log("error: ", error);
+  };
+
+  const onMessage = (event: MessageEvent) => {
+    console.log('FEED Message');
+    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+
+    const [type, subkey, content] = message;
+
+    if (type === 'EOSE') {
+      const newPosts = convertToPosts(context?.page);
+
+      context?.actions?.clearPage();
+      context?.actions?.savePosts(newPosts);
+
+      return;
+    }
+
+    context?.actions?.proccessEventContent(content, type);
+  };
 
   return (
     <div class={styles.homeContent}>
       <Switch>
         <Match when={mounted()}>
-          <Portal
-            mount={document.getElementById("central_header") as Node}
-          >
+          <div id="central_header">
             <HomeHeader />
-          </Portal>
+          </div>
           <Portal
             ref={<div id="portal_div"></div> as HTMLDivElement}
             mount={document.getElementById("right_sidebar") as Node}
@@ -68,7 +109,7 @@ const Home: Component = () => {
           }
         </For>
       </Show>
-      <div id="pagination_trigger" class={styles.paginate}>Pagination</div>
+      <div id="pagination_trigger" class={styles.paginate}>Loading...</div>
     </div>
   )
 }

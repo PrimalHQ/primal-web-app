@@ -1,0 +1,117 @@
+.trendingSection {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  padding-top: 44px;
+}
+
+.stickyWrapper {
+  height: 100%;
+}
+
+.heading {
+  position: fixed;
+  top: 117px;
+  width: 100%;
+  height: 44px;
+  background-color: var(--background-site);
+  z-index: 5;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 20px;
+  color: var(--text-secondary-2);
+  text-transform: uppercase;
+}
+
+.peopleList {
+  margin-bottom: 33px;
+  display: grid;
+  grid-template-columns: 52px 1fr 64px;
+  grid-template-rows: 1fr;
+  grid-template-areas: "avatar content follow";
+  grid-column-gap: 14px;
+
+  .avatar {
+    grid-area: avatar;
+    display: grid;
+    justify-items: center;
+    height: 52px;
+
+    .avatarImg {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+    }
+  }
+
+  .content {
+    grid-area: content;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    .name {
+      color: var(--text-primary);
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 12px;
+    }
+
+    .verification {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      color: var(--text-tertiary-2);
+    }
+
+    .verifiedName {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+      color: var(--text-tertiary-2);
+    }
+
+    .npub {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 300;
+      color: var(--text-tertiary-2);
+    }
+
+    &:hover {
+      .message, .name, .time {
+        color: var(--text-primary);
+        text-decoration: underline;
+      }
+
+      cursor: pointer;
+    }
+  }
+
+  .action {
+    grid-area: follow;
+    align-items: center;
+    display: flex;
+    align-items: center;
+    button {
+      width: 64px;
+      height: 40px;
+      background: var(--brand-gradient);
+      border-radius: 6px;
+      padding: 0px;
+      font-size: 12px;
+      line-height: 16px;
+      margin: 0px;
+    }
+  }
+}
+
+.verifiedIcon {
+  width:13px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
+  mask: url(../../assets/icons/verified.svg) no-repeat center;
+}

@@ -1,25 +1,31 @@
+.border {
+  background: var(--brand-gradient-vertical);
+  padding-left: 4px;
+  border-radius: 4px 4px 4px 4px;
+}
+
 .post {
   background-color: var(--backround-card);
-  margin-top: 4px;
+  margin-top: 0px;
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: 122px 1fr;
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content";
   padding: 16px 16px 16px 0px;
-  border-radius: 4px;
+  border-radius: 0px 4px 4px 0px;
 
   .avatar {
     grid-area: avatar;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 52px 1fr;
+    grid-template-rows: 80px 1fr;
     grid-row-gap: 6px;
     justify-items: center;
 
 
     .avatarImg {
-      width: 52px;
-      height: 52px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
     }
 
@@ -28,8 +34,9 @@
       padding: 0px 6px;
       text-align: center;
       display: inline-block;
-      font-size: 12px;
+      font-size: 16px;
       line-height: 12px;
+      font-weight: 400;
       color: var(--text-primary);
       align-self: flex-start;
       text-overflow: ellipsis;
@@ -52,18 +59,18 @@
       color: var(--text-tertiary-2);
       display: flex;
       justify-content: space-between;
-      width: 532px;
+      width: 502px;
 
       .postInfo {
         display: flex;
-        width: 492px;
+        width: 462px;
         justify-content: flex-start;
 
         .userInfo {
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
-          font-size: 14px;
+          font-size: 16px;
           line-height: 16px;
           font-weight: 400;
         }
@@ -71,7 +78,7 @@
         .time{
           margin: 0px 2px;
           min-width: 40px;
-          font-size: 14px;
+          font-size: 16px;
           line-height: 16px;
           font-weight: 400;
           &::before {
@@ -95,8 +102,8 @@
       grid-area: message;
       color: var(--text-primary);
       word-break: break-word;
-      font-size: 16px;
-      line-height: 24px;
+      font-size: 20px;
+      line-height: 28px;
     }
 
     .footer {
@@ -110,7 +117,7 @@
         grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr;
         grid-column-gap: 5px;
-        font-size: 14px;
+        font-size: 18px;
         line-height: 16px;
         align-items: center;
 
@@ -128,28 +135,28 @@
 }
 
 @mixin statIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background-color: var(--text-tertiary-2);
 }
 
 .likeIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/like.svg) no-repeat center;
-  mask: url(../../assets/icons/like.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/like.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/like.svg) no-repeat 0px / 18px;
 }
 
 .replyIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/reply.svg) no-repeat center;
-  mask: url(../../assets/icons/reply.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/reply.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/reply.svg) no-repeat 0px / 18px;
 }
 
 
 .repostIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
-  mask: url(../../assets/icons/reposts.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/reposts.svg) no-repeat 0px / 18px;
 }
 
 .verifiedIcon {
@@ -160,30 +167,4 @@
   background-color: var(--text-tertiary-2);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
   mask: url(../../assets/icons/verified.svg) no-repeat center;
-}
-
-
-.postLink {
-  text-decoration: none;
-  color: unset;
-  margin: 0px;
-  padding: 0px;
-  background: var(--brand-gradient-vertical);
-  border-radius: 6px;
-  display: block;
-  transition: 0.2s padding;
-  >div {
-    border-radius: 4px;
-    transition: 0.2s border-radius ease-out;
-  }
-
-  &:hover {
-    padding-left: 4px;
-    transition: 0.2s padding;
-    border-radius: 4px;
-    >div {
-      border-radius: 0px 4px 4px 0px;
-      transition: 0.2s border-radius ease-out;
-    }
-  }
 }

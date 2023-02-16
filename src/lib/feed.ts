@@ -12,7 +12,18 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
   ]));
 }
 
-export const convertToPosts = (page: FeedPage) => {
+export const getThread = (postId: string, subid: string, until = 0, limit = 20) => {
+
+  // const start = until === 0 ? 'since' : 'until';
+  // ["REQ", "akdsfad", {"cache":["thread_view",{"event_id":"4f7b03bf840b5155741e3d1b694d1b05391e04fb0828d5c6120c3247d9693245"}]}]
+  socket()?.send(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["thread_view", { event_id: postId }]},
+  ]));
+}
+
+export const convertToPosts = (page: FeedPage, reverse = false) => {
   return  page?.messages.map((msg) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
@@ -47,5 +58,9 @@ export const convertToPosts = (page: FeedPage) => {
         replies: stat.replies,
       },
     };
-  }).sort((a: PrimalPost, b: PrimalPost) => b.post.created_at - a.post.created_at);
+  }).sort((a: PrimalPost, b: PrimalPost) => {
+    const order = b.post.created_at - a.post.created_at;
+
+    return reverse ? -1 * order : order;
+  });
 }

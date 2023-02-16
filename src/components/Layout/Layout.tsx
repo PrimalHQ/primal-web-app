@@ -30,8 +30,6 @@ const Layout: Component = () => {
 
 
         <div class={styles.centerColumn}>
-          <div id="central_header" class={styles.centerHeader}>
-          </div>
           <div class={styles.centerContent}>
             <div>
               <Outlet />

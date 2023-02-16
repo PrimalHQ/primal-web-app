@@ -56,11 +56,18 @@ export type FeedPage = {
 
 export type PrimalContextStore = {
 
-  data?: FeedStore,
+  data: FeedStore,
+  page: FeedPage,
   actions?: {
     selectFeed: (profile: PrimalFeed | undefined) => void,
     clearData: () => void,
     loadNextPage: () => void,
+    savePosts: (posts: PrimalPost[]) => void,
+    clearPage: () => void,
+    proccessEventContent: (
+      content: NostrUserContent | NostrPostContent | NostrStatsContent,
+      type: string
+    ) => void,
   },
 };
 

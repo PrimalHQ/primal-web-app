@@ -3,7 +3,7 @@ import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
 import { PrimalPost } from '../../types/primal';
 
-import styles from './Post.module.scss';
+import styles from './PrimaryPost.module.scss';
 
 const urlify = (text: string) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
@@ -27,12 +27,12 @@ const trimVerification = (address: string) => {
   return domain;
 }
 
-const Post: Component<{ post: PrimalPost }> = (props) => {
+const PrimaryPost: Component<{ post: PrimalPost }> = (props) => {
 
   // const [time] = createSignal(date(props.post?.post.created_at));
 
     return (
-      <A class={styles.postLink} href={`/thread/${props.post?.post.id}`}>
+      <div class={styles.border}>
         <div class={styles.post}>
           <div class={styles.avatar} title={props.post?.user?.name}>
             <img class={styles.avatarImg} src={props.post?.user?.picture} />
@@ -87,8 +87,8 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
             </div>
           </div>
         </div>
-      </A>
+      </div>
     )
 }
 
-export default Post;
+export default PrimaryPost;
