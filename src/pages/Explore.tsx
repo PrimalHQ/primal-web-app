@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import { Portal, style } from 'solid-js/web';
 import { useFeedContext } from '../contexts/FeedContext';
 import { getLegendStats, startListeningForNostrStats, stopListeningForNostrStats } from '../lib/stats';
-import { reset, socket } from '../sockets';
+import { isConnected, reset, socket } from '../sockets';
 import styles from './Explore.module.scss';
 
 type PrimalNetStats = {
@@ -67,11 +67,20 @@ const Explore: Component = () => {
       }
     };
 
+    createEffect(() => {
+      if (isConnected()) {
+        getLegendStats(context?.data.publicKey);
+        startListeningForNostrStats();
+      }
+    });
+
     onMount(() => {
       socket()?.addEventListener('message', onMessage);
 
-      getLegendStats(context?.data.publicKey);
-      startListeningForNostrStats();
+      if (isConnected()) {
+        getLegendStats(context?.data.publicKey);
+        startListeningForNostrStats();
+      }
     });
 
     onCleanup(() => {
