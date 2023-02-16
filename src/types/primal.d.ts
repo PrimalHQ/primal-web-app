@@ -50,6 +50,7 @@ export type FeedPage = {
       likes: number,
       mentions: number,
       replies: number,
+      zaps: number,
     },
   },
 }
@@ -110,6 +111,7 @@ export type PrimalPost = {
       likes: number,
       mentions: number,
       replies: number,
+      zaps: number,
   }
 };
 

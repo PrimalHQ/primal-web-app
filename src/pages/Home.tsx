@@ -63,7 +63,6 @@ const Home: Component = () => {
   };
 
   const onMessage = (event: MessageEvent) => {
-    console.log('FEED Message');
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subkey, content] = message;

@@ -159,6 +159,12 @@
   mask: url(../../assets/icons/reposts.svg) no-repeat 0px / 18px;
 }
 
+.zapIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/zaps.svg) no-repeat center;
+  mask: url(../../assets/icons/zaps.svg) no-repeat center;
+}
+
 .verifiedIcon {
   width:13px;
   height: 12px;

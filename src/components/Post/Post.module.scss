@@ -145,11 +145,16 @@
   mask: url(../../assets/icons/reply.svg) no-repeat center;
 }
 
-
 .repostIcon {
   @include statIcon;
   -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
   mask: url(../../assets/icons/reposts.svg) no-repeat center;
+}
+
+.zapIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/zaps.svg) no-repeat center;
+  mask: url(../../assets/icons/zaps.svg) no-repeat center;
 }
 
 .verifiedIcon {

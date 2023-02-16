@@ -2,6 +2,7 @@ import { A } from '@solidjs/router';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
 import { PrimalPost } from '../../types/primal';
+import Avatar from '../Avatar/Avatar';
 
 import styles from './Post.module.scss';
 
@@ -21,6 +22,18 @@ const urlify = (text: string) => {
   })
 }
 
+// const nostrify = (text, post) => {
+//   const regex = /\#\[([0-9]*)\]/g;
+//   let refs = [];
+//   let match;
+
+//   while((match = regex.exec(text)) !== null) {
+//     refs.push(match[1]);
+//   }
+
+
+// }
+
 const trimVerification = (address: string) => {
   const [_, domain] = address.split('@');
 
@@ -35,7 +48,11 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
       <A class={styles.postLink} href={`/thread/${props.post?.post.id}`}>
         <div class={styles.post}>
           <div class={styles.avatar} title={props.post?.user?.name}>
-            <img class={styles.avatarImg} src={props.post?.user?.picture} />
+            <Avatar
+              src={props.post?.user?.picture}
+              size="md"
+              verified={props.post?.user?.nip05}
+            />
             <div class={styles.avatarName}>{props.post?.user?.name}</div>
           </div>
           <div class={styles.content}>
@@ -67,8 +84,7 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
               <div class={styles.contextMenu}>...</div>
             </div>
 
-            <div class={styles.message}>
-              {urlify(`${props.post?.post?.content}`)}
+            <div class={styles.message} innerHTML={urlify(props.post?.post?.content)}>
             </div>
 
             <div class={styles.footer}>
@@ -83,6 +99,10 @@ const Post: Component<{ post: PrimalPost }> = (props) => {
               <div class={styles.stat}>
                 <div class={styles.repostIcon}></div>
                 <div class={styles.statNumber}>{props.post?.post?.mentions}</div>
+              </div>
+              <div class={styles.stat}>
+                <div class={styles.zapIcon}></div>
+                <div class={styles.statNumber}>{props.post?.post?.zaps}</div>
               </div>
             </div>
           </div>

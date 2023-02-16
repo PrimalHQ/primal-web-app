@@ -34,7 +34,7 @@ export const convertToPosts = (page: FeedPage, reverse = false) => {
       user: {
         id: user?.id || '',
         pubkey: user?.pubkey || msg.pubkey,
-        name: userMeta.name || 'N/A',
+        name: userMeta.name || user?.pubkey,
         about: userMeta.about,
         picture: userMeta.picture,
         nip05: userMeta.nip05,
@@ -56,6 +56,7 @@ export const convertToPosts = (page: FeedPage, reverse = false) => {
         likes: stat.likes,
         mentions: stat.mentions,
         replies: stat.replies,
+        zaps: stat.zaps,
       },
     };
   }).sort((a: PrimalPost, b: PrimalPost) => {

@@ -50,7 +50,7 @@ const HomeHeader: Component = () => {
   return (
     <div class={styles.fullHeader}>
       <div class={styles.callToAction}>
-        <Avatar src={miljan} size="lg" />
+        <Avatar src={miljan} size="lg" verified="naravno" />
         <div class={styles.border}>
           <input type="text" placeholder="post something to nostr..." />
         </div>

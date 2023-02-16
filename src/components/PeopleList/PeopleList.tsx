@@ -2,6 +2,7 @@ import { Component, createEffect, For, Match, Switch } from 'solid-js';
 import { style } from 'solid-js/web';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
+import Avatar from '../Avatar/Avatar';
 import { calculateStickyPosition } from '../TrendingPost/helpers';
 
 import styles from './PeopleList.module.scss';
@@ -32,7 +33,11 @@ const PeopleList: Component = (props) => {
               (person) =>
                 <div class={styles.peopleList}>
                   <div class={styles.avatar}>
-                    <img class={styles.avatarImg} src={person.picture} />
+                    <Avatar
+                      src={person.picture}
+                      size="md"
+                      verified={person.nip05}
+                    />
                   </div>
                   <div class={styles.content}>
                     <div class={styles.name}>
