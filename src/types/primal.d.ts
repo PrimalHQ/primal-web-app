@@ -37,6 +37,7 @@ export type NostrEOSE = [
 export type FeedStore = {
   posts: PrimalPost[],
   isFetching: boolean,
+  publicKey: string | undefined,
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
 };
@@ -119,6 +120,6 @@ export type PrimalPost = {
 
 export type PrimalFeed = {
   name: string,
-  npub: string,
-  hex: string,
+  npub: string | undefined,
+  hex: string | undefined,
 };

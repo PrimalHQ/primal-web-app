@@ -80,3 +80,28 @@
     }
   }
 }
+
+.statsLegend {
+  margin-top: 50px;
+
+  .legendCaption {
+    font-size: 18px;
+    line-height: 20px;
+    font-weight: 800;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+  }
+
+  .legendDetails {
+    font-size: 16px;
+    line-height: 34px;
+    font-weight: 700;
+    color: var(--text-secondary);
+
+    .highlight {
+      font-weight: 900;
+      color: var(--text-primary);
+      margin: 0px 3px 0px 6px;
+    }
+  }
+}

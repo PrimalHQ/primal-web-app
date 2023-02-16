@@ -26,6 +26,7 @@ const emptyPage: FeedPage = {
 const initialStore: FeedStore = {
   posts: [],
   isFetching: false,
+  publicKey: '',
   selectedFeed: {
     name: 'snowden',
     hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
@@ -100,6 +101,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
       setData('availableFeeds', feeds => [...feeds, feed]);
       setData('selectedFeed', feed);
+      setData('publicKey', publicKey())
     }
   });
 

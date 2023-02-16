@@ -1,10 +1,13 @@
 import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal, style } from 'solid-js/web';
+import { useFeedContext } from '../contexts/FeedContext';
+import { getLegendStats, startListeningForNostrStats, stopListeningForNostrStats } from '../lib/stats';
 import { reset, socket } from '../sockets';
 import styles from './Explore.module.scss';
 
 type PrimalNetStats = {
+  users: number,
   pubkeys: number,
   pubnotes: number,
   reactions: number,
@@ -15,9 +18,16 @@ type PrimalNetStats = {
 type PrimalResponse = {
   op: string,
   netstats?: PrimalNetStats;
-}
+};
+
+type PrimalLegend = {
+  your_follows: number,
+  your_inner_network: number,
+  your_outer_network: number,
+};
 
 const initialStats: PrimalNetStats = {
+  users: 0,
   pubkeys: 0,
   pubnotes: 0,
   reactions: 0,
@@ -25,35 +35,48 @@ const initialStats: PrimalNetStats = {
   allevents: 0,
 };
 
+const initialLegend = {
+  your_follows: 0,
+  your_inner_network: 0,
+  your_outer_network: 0,
+}
+
 
 const Explore: Component = () => {
 
     const [stats, setStats] = createStore(initialStats);
 
+    const [legend, setLegend] = createStore(initialLegend);
+
+    const context = useFeedContext();
+
     const onMessage = (event: MessageEvent) => {
 
       const [type, subkey, content] = JSON.parse(event.data);
 
-      const stats = JSON.parse(content.netstats.content)
+      if (content?.content) {
+        const stats = JSON.parse(content.content);
 
-      setStats(stats);
+        if (content.kind === 10000101) {
+          setStats(stats);
+        }
 
-      // const netstats = response.netstats || initialStats;
-
-      // setStats(netstats);
-
+        if (content.kind === 10000102) {
+          setLegend(stats);
+        }
+      }
     };
+
     onMount(() => {
       socket()?.addEventListener('message', onMessage);
 
-      console.log('SEND');
-
-      socket()?.send(JSON.stringify(["REQ", "5345734845", {cache: ["net_stats"]}]));
+      getLegendStats(context?.data.publicKey);
+      startListeningForNostrStats();
     });
 
     onCleanup(() => {
-      socket()?.send(JSON.stringify(["CLOSE", "5345734845"]));
-      // reset();
+      socket()?.removeEventListener('message', onMessage);
+      stopListeningForNostrStats();
     });
 
     return (
@@ -70,7 +93,7 @@ const Explore: Component = () => {
           <div class={styles.netstats}>
             <div class={styles.netstat}>
               <div class={styles.number}>
-                TBD
+                {stats.users?.toLocaleString()}
               </div>
               <div class={styles.label}>
                 users
@@ -187,6 +210,35 @@ const Explore: Component = () => {
               <div class={styles.secondLine}>firehose</div>
             </div>
           </div>
+        </div>
+
+        <div class={styles.statsLegend}>
+          <div class={styles.legendCaption}>
+            LEGEND
+          </div>
+          <ul class={styles.legendDetails}>
+            <li>
+              Your Follows:
+              <span class={styles.highlight}>
+                {legend.your_follows}
+              </span>
+              accounts you follow</li>
+            <li>
+              Your Inner Network:
+              <span class={styles.highlight}>
+                {legend.your_inner_network}
+              </span>
+              accounts (your follows + your followers)
+            </li>
+            <li>
+              Your Outer Network:
+              <span class={styles.highlight}>
+                {legend.your_outer_network}
+              </span>
+              accounts (accounts you follow + everyone they follow)
+            </li>
+            <li>Global: all of nostr, minus the spam we try to filter out</li>
+          </ul>
         </div>
       </>
     )
