@@ -182,13 +182,13 @@
     transition: 0.2s border-radius ease-out;
   }
 
-  &:hover {
-    padding-left: 4px;
-    transition: 0.2s padding;
-    border-radius: 4px;
-    >div {
-      border-radius: 0px 4px 4px 0px;
-      transition: 0.2s border-radius ease-out;
-    }
-  }
+  // &:hover {
+  //   padding-left: 4px;
+  //   transition: 0.2s padding;
+  //   border-radius: 4px;
+  //   >div {
+  //     border-radius: 0px 4px 4px 0px;
+  //     transition: 0.2s border-radius ease-out;
+  //   }
+  // }
 }
