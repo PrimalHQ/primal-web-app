@@ -36,6 +36,7 @@ export type NostrEOSE = [
 
 export type FeedStore = {
   posts: PrimalPost[],
+  isFetching: boolean,
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
 };
@@ -103,16 +104,16 @@ export type PrimalUser = {
 export type PrimalPost = {
   user: PrimalUser,
   post: {
-      id: string,
-      pubkey: string,
-      created_at: number,
-      tags: string[][],
-      content: string,
-      sig: string,
-      likes: number,
-      mentions: number,
-      replies: number,
-      zaps: number,
+    id: string,
+    pubkey: string,
+    created_at: number,
+    tags: string[][],
+    content: string,
+    sig: string,
+    likes: number,
+    mentions: number,
+    replies: number,
+    zaps: number,
   }
 };
 

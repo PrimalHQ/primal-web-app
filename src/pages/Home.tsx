@@ -28,7 +28,6 @@ const Home: Component = () => {
     observer = new IntersectionObserver(entries => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setPageLoaded(false);
           context?.actions?.loadNextPage();
         }
       });
@@ -56,13 +55,10 @@ const Home: Component = () => {
     if (isConnected()) {
       const pubkey = context?.data?.selectedFeed?.hex || '';
 
-      setPageLoaded(false);
       context?.actions?.clearData();
       getFeed(pubkey, subid);
 		}
 	});
-
-  const [pageLoaded, setPageLoaded] = createSignal(false);
 
   const onError = (error: Event) => {
     console.log("error: ", error);
@@ -79,13 +75,13 @@ const Home: Component = () => {
       context?.actions?.clearPage();
       context?.actions?.savePosts(newPosts);
 
-      setPageLoaded(true);
-
       return;
     }
 
     context?.actions?.proccessEventContent(content, type);
   };
+
+  const isPageLoading = () => context?.data.isFetching
 
   return (
     <div class={styles.homeContent}>
@@ -103,22 +99,21 @@ const Home: Component = () => {
         </Match>
       </Switch>
 
+      <Show
+        when={context?.data?.posts && context.data.posts.length > 0}
+      >
+        <For each={context?.data?.posts} >
+          {(post) => {
+            return <Post
+              post={post}
+            />
+          }}
+        </For>
+      </Show>
+
       <Switch>
         <Match
-          when={context?.data?.posts && context.data.posts.length > 0}
-        >
-          <For each={context?.data?.posts} >
-            {(post) => {
-              return <Post
-                post={post}
-              />
-            }
-            }
-          </For>
-          <Loader />
-        </Match>
-        <Match
-          when={pageLoaded() && context?.data?.posts && context.data.posts.length === 0}
+          when={!isPageLoading() && context?.data?.posts && context.data.posts.length === 0}
         >
           <div class={styles.noContent}>
             <p>You are new around here?</p>
@@ -126,14 +121,14 @@ const Home: Component = () => {
           </div>
         </Match>
         <Match
-          when={pageLoaded()}
+          when={!isPageLoading()}
         >
           <div class={styles.endOfContent}>
             You reached the end. You are a quick reader.
           </div>
         </Match>
         <Match
-          when={!pageLoaded()}
+          when={isPageLoading()}
         >
           <Loader />
         </Match>

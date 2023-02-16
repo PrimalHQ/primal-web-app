@@ -25,6 +25,7 @@ const emptyPage: FeedPage = {
 
 const initialStore: FeedStore = {
   posts: [],
+  isFetching: false,
   selectedFeed: {
     name: 'snowden',
     hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
@@ -66,7 +67,10 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     if (until > 0) {
       const pubkey = data?.selectedFeed?.hex;
 
-      pubkey && getFeed(pubkey, subid, until);
+      if (pubkey) {
+        setData('isFetching', true);
+        getFeed(pubkey, subid, until);
+      }
     }
   });
 
@@ -86,39 +90,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     const content = JSON.parse(stat.content);
     setPage('postStats', { ...page.postStats, [content.event_id]: content })
   };
-
-  // const onError = (error: Event) => {
-  //   console.log("error: ", error);
-  // };
-
-  // const onMessage = (event: MessageEvent) => {
-  //   console.log('FEED Message');
-  //   const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-  //   const [type, subkey, content] = message;
-
-  //   if (type === 'EOSE') {
-  //     const newPosts = convertToPosts(page);
-
-  //     setPage({ messages: [], users: {}, postStats: {} });
-
-  //     setData('posts', [ ...data.posts, ...newPosts ]);
-  //     return;
-  //   }
-
-  //   if (type === 'EVENT') {
-  //     if (content.kind === 0) {
-  //       proccessUser(content);
-  //     }
-  //     if (content.kind === 1) {
-  //       proccessPost(content);
-  //     }
-  //     if (content.kind === 10000100) {
-  //       proccessStat(content);
-  //     }
-  //   }
-
-  // };
 
   const [publicKey, setPublicKey] = createSignal<string>();
 
@@ -162,26 +133,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }, 1000);
   });
 
-  // createEffect(() => {
-  //   socket()?.addEventListener('error', onError);
-
-  //   socket()?.addEventListener('message', onMessage);
-  // });
-
-	createEffect(() => {
-    // console.log('SF: ', data.selectedFeed);
-    // if (isConnected()) {
-    //   const pubkey = data?.selectedFeed?.hex || '';
-
-    //   getFeed(pubkey, subid);
-		// }
-	});
-
-  // onCleanup(() => {
-  //   socket()?.removeEventListener('error', onError);
-  //   socket()?.removeEventListener('message', onMessage);
-  // });
-
   const store = {
     data: data,
     page: page,
@@ -201,6 +152,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       },
       savePosts(posts: PrimalPost[]) {
         setData('posts', [ ...data.posts, ...posts ]);
+        setData('isFetching', false);
       },
       clearPage() {
         setPage({ messages: [], users: {}, postStats: {} });
