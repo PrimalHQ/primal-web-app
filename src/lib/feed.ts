@@ -1,5 +1,6 @@
 import { socket } from "../sockets";
 import { FeedPage, PrimalPost } from "../types/primal";
+import { hexToNpub } from "./keys";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -34,6 +35,7 @@ export const convertToPosts = (page: FeedPage, reverse = false) => {
       user: {
         id: user?.id || '',
         pubkey: user?.pubkey || msg.pubkey,
+        npub: hexToNpub(user?.pubkey || msg.pubkey),
         name: userMeta.name || user?.pubkey,
         about: userMeta.about,
         picture: userMeta.picture,

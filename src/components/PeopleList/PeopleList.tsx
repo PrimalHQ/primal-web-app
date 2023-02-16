@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Match, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
 import { style } from 'solid-js/web';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
@@ -44,22 +44,22 @@ const PeopleList: Component = (props) => {
                       {person.name}
                     </div>
                     <div class={styles.verification}>
-                      <Switch>
-                        <Match when={person.nip05}>
-                          <span class={styles.verifiedName}>
-                            {trimVerification(person.nip05)[0]}
-                          </span>
-                          <span class={styles.verifiedIcon} />
-                          <span
-                            class={styles.verifiedBy}
-                            title={person.nip05}
-                          >
-                            {trimVerification(person.nip05)[1]}
-                          </span>
-                        </Match>
-                      </Switch>
+                      <Show when={person.nip05}>
+                        <span class={styles.verifiedName}>
+                          {trimVerification(person.nip05)[0]}
+                        </span>
+                        <span class={styles.verifiedIcon} />
+                        <span
+                          class={styles.verifiedBy}
+                          title={person.nip05}
+                        >
+                          {trimVerification(person.nip05)[1]}
+                        </span>
+                      </Show>
                     </div>
-                    <div class={styles.npub}></div>
+                    <div class={styles.npub}>
+                      {person.npub}
+                    </div>
                   </div>
                   <div class={styles.action}>
                     <button>follow</button>

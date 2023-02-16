@@ -26,7 +26,7 @@
 .peopleList {
   margin-bottom: 33px;
   display: grid;
-  grid-template-columns: 52px 1fr 64px;
+  grid-template-columns: 52px 184px 64px;
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content follow";
   grid-column-gap: 14px;
@@ -76,6 +76,9 @@
       line-height: 16px;
       font-weight: 300;
       color: var(--text-tertiary-2);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     &:hover {

@@ -86,6 +86,7 @@ export type NostrMessage = [
 export type PrimalUser = {
   id: string,
   pubkey: string,
+  npub: string,
   name: string,
   about: string,
   picture: string,
