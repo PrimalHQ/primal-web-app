@@ -13,14 +13,19 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
   ]));
 }
 
-export const getThread = (postId: string, subid: string, until = 0, limit = 20) => {
-
-  // const start = until === 0 ? 'since' : 'until';
-  // ["REQ", "akdsfad", {"cache":["thread_view",{"event_id":"4f7b03bf840b5155741e3d1b694d1b05391e04fb0828d5c6120c3247d9693245"}]}]
+export const getTrending = (subid: string) => {
   socket()?.send(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["thread_view", { event_id: postId }]},
+    {"cache":["trending_content", { limit: 25 }]},
+  ]));
+};
+
+export const getThread = (postId: string, subid: string, until = 0, limit = 20) => {
+  socket()?.send(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["thread_view", { event_id: postId, limit: 100 }]},
   ]));
 }
 
@@ -64,6 +69,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         mentions: stat.mentions,
         replies: stat.replies,
         zaps: stat.zaps,
+        score24h: stat.score24h,
       },
     };
   }).sort((a: PrimalPost, b: PrimalPost) => {

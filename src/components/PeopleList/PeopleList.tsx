@@ -43,7 +43,7 @@ const PeopleList: Component = (props) => {
                     <div class={styles.name}>
                       {person.name}
                     </div>
-                    <div class={styles.verification}>
+                    <div class={styles.verification} title={person.nip05}>
                       <Show when={person.nip05}>
                         <span class={styles.verifiedName}>
                           {trimVerification(person.nip05)[0]}
@@ -57,7 +57,7 @@ const PeopleList: Component = (props) => {
                         </span>
                       </Show>
                     </div>
-                    <div class={styles.npub}>
+                    <div class={styles.npub} title={person.npub}>
                       {person.npub}
                     </div>
                   </div>

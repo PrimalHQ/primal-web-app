@@ -26,7 +26,7 @@
 .peopleList {
   margin-bottom: 33px;
   display: grid;
-  grid-template-columns: 52px 184px 64px;
+  grid-template-columns: 52px 156px 64px;
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content follow";
   grid-column-gap: 14px;
@@ -55,6 +55,9 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .verification {
@@ -62,6 +65,9 @@
       line-height: 16px;
       font-weight: 400;
       color: var(--text-tertiary-2);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .verifiedName {
@@ -69,6 +75,9 @@
       line-height: 16px;
       font-weight: 700;
       color: var(--text-tertiary-2);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .npub {
@@ -105,6 +114,13 @@
       font-size: 12px;
       line-height: 16px;
       margin: 0px;
+    }
+  }
+
+  &:hover {
+    .name {
+      text-decoration: underline;
+      color: var(--text-primary);
     }
   }
 }

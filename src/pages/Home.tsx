@@ -6,15 +6,23 @@ import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { isConnected, socket } from '../sockets';
-import { convertToPosts, getFeed } from '../lib/feed';
-import { NostrEOSE, NostrEvent } from '../types/primal';
+import { convertToPosts, getFeed, getTrending } from '../lib/feed';
+import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent } from '../types/primal';
 import Loader from '../components/Loader/Loader';
+import { createStore } from 'solid-js/store';
 
 const Home: Component = () => {
 
   const context = useFeedContext();
 
   const [mounted, setMounted] = createSignal(false);
+
+  const [trendingPosts, setTrendingPosts] = createStore({
+    messages: [],
+    users: {},
+    posts: [],
+    postStats: {},
+  });
 
   let observer: IntersectionObserver | undefined;
 
@@ -57,6 +65,13 @@ const Home: Component = () => {
 
       context?.actions?.clearData();
       getFeed(pubkey, subid);
+
+      setTrendingPosts({
+        messages: [],
+        users: {},
+        postStats: {},
+      });
+      getTrending('trending');
 		}
 	});
 
@@ -67,11 +82,16 @@ const Home: Component = () => {
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
-    const [type, subkey, content] = message;
+    const [type, subId, content] = message;
+
+    if (subId === 'trending') {
+      processTrendingPost(type, content);
+      return;
+    }
+
 
     if (type === 'EOSE') {
       const newPosts = convertToPosts(context?.page);
-
       context?.actions?.clearPage();
       context?.actions?.savePosts(newPosts);
 
@@ -80,6 +100,51 @@ const Home: Component = () => {
 
     context?.actions?.proccessEventContent(content, type);
   };
+
+
+
+
+
+
+  const proccessPost = (post: NostrPostContent) => {
+    setTrendingPosts('messages', (msgs) => [ ...msgs, post]);
+  };
+
+  const proccessUser = (user: NostrUserContent) => {
+    setTrendingPosts('users', (users) => ({ ...users, [user.pubkey]: user}))
+  };
+
+  const proccessStat = (stat: NostrStatsContent) => {
+    const content = JSON.parse(stat.content);
+    setTrendingPosts('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
+  };
+
+  const processTrendingPost = (type, content) => {
+    if (type === 'EOSE') {
+      const newPosts = convertToPosts(trendingPosts);
+
+      setTrendingPosts('posts', () => [...newPosts]);
+
+      return;
+    }
+
+    if (type === 'EVENT') {
+      if (content.kind === 0) {
+        proccessUser(content);
+      }
+      if (content.kind === 1) {
+        proccessPost(content);
+      }
+      if (content.kind === 10000100) {
+        proccessStat(content);
+      }
+    }
+  };
+
+
+
+
+
 
   const isPageLoading = () => context?.data.isFetching
 
@@ -94,7 +159,7 @@ const Home: Component = () => {
             ref={<div id="portal_div"></div> as HTMLDivElement}
             mount={document.getElementById("right_sidebar") as Node}
           >
-            <TrendingPost />
+            <TrendingPost posts={trendingPosts.posts}/>
           </Portal>
         </Match>
       </Switch>

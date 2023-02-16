@@ -25,13 +25,13 @@ export type NostrStatsContent = {
 
 export type NostrEvent = [
   type: "EVENT",
-  subkey: number,
+  subkey: string,
   content: NostrUserContent | NostrPostContent | NostrStatsContent,
 ];
 
 export type NostrEOSE = [
   type: "EOSE",
-  subkey: number,
+  subkey: string,
 ];
 
 export type FeedStore = {
@@ -53,6 +53,7 @@ export type FeedPage = {
       mentions: number,
       replies: number,
       zaps: number,
+      score24h: number,
     },
   },
 }
@@ -78,7 +79,7 @@ export type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: 
 
 export type NostrMessage = [
   type: "EVENT" | "EOSE",
-  subkey: number,
+  subkey: string,
   info: {
     kind: number,
     content: string,
@@ -115,6 +116,7 @@ export type PrimalPost = {
     mentions: number,
     replies: number,
     zaps: number,
+    score24h: number,
   }
 };
 

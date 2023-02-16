@@ -13,6 +13,8 @@ type PrimalNetStats = {
   reactions: number,
   reposts: number,
   allevents: number,
+  zaps: number,
+  satszapped: number,
 };
 
 type PrimalResponse = {
@@ -33,6 +35,8 @@ const initialStats: PrimalNetStats = {
   reactions: 0,
   reposts: 0,
   allevents: 0,
+  zaps: 0,
+  satszapped: 0,
 };
 
 const initialLegend = {
@@ -133,6 +137,24 @@ const Explore: Component = () => {
               </div>
               <div class={styles.label}>
                 reactions
+              </div>
+            </div>
+
+            <div class={styles.netstat}>
+              <div class={styles.number}>
+                {stats.zaps.toLocaleString()}
+              </div>
+              <div class={styles.label}>
+                zaps
+              </div>
+            </div>
+
+            <div class={styles.netstat}>
+              <div class={styles.number}>
+                {(stats.satszapped /100000000).toFixed(8).toLocaleString()}
+              </div>
+              <div class={styles.label}>
+                btc zapped
               </div>
             </div>
 

@@ -38,16 +38,16 @@ const Home: Component = () => {
   };
 
   const proccessPost = (post: NostrPostContent) => {
-    setPage('messages', [ ...page.messages, post]);
+    setPage('messages', (msgs) => [ ...msgs, post]);
   };
 
   const proccessUser = (user: NostrUserContent) => {
-    setPage('users', { ...page.users, [user.pubkey]: user})
+    setPage('users', (users ) => ({ ...users, [user.pubkey]: user}))
   };
 
   const proccessStat = (stat: NostrStatsContent) => {
     const content = JSON.parse(stat.content);
-    setPage('postStats', { ...page.postStats, [content.event_id]: content })
+    setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
   };
 
   const onMessage = (event: MessageEvent) => {
@@ -77,7 +77,18 @@ const Home: Component = () => {
     }
   };
 
-  const people = () => posts.map(p => p.user);
+  const unique = (value, index, self) => {
+    return self.indexOf(value) === index
+  }
+
+  const people = () => posts.reduce((acc, p) => {
+    const user = p.user;
+    if (acc.find(u => user.pubkey === u.pubkey)) {
+      return acc;
+    }
+
+    return [...acc, user];
+  }, []);
 
   onMount(() => {
     // Temporary fix for Portal rendering on initial load.
