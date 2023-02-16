@@ -129,7 +129,7 @@ const Home: Component = () => {
           when={pageLoaded()}
         >
           <div class={styles.endOfContent}>
-            You reached the end. You are a quick reader :)
+            You reached the end. You are a quick reader.
           </div>
         </Match>
         <Match
