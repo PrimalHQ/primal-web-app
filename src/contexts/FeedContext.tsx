@@ -126,6 +126,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     if (nostr === undefined) {
       console.log('No WebLn extension');
       setTimeout(fetchNostrKey, 1000);
+      return;
     }
 
     try {
@@ -144,7 +145,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   }
 
   onMount(() => {
-    fetchNostrKey();
+    setTimeout(() => {
+      fetchNostrKey();
+    }, 1000);
   });
 
   // createEffect(() => {
