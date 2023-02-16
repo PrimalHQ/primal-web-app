@@ -8,6 +8,7 @@ import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { isConnected, socket } from '../sockets';
 import { convertToPosts, getFeed } from '../lib/feed';
 import { NostrEOSE, NostrEvent } from '../types/primal';
+import Loader from '../components/Loader/Loader';
 
 const Home: Component = () => {
 
@@ -27,6 +28,7 @@ const Home: Component = () => {
     observer = new IntersectionObserver(entries => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
+          setPageLoaded(false);
           context?.actions?.loadNextPage();
         }
       });
@@ -54,10 +56,13 @@ const Home: Component = () => {
     if (isConnected()) {
       const pubkey = context?.data?.selectedFeed?.hex || '';
 
+      setPageLoaded(false);
       context?.actions?.clearData();
       getFeed(pubkey, subid);
 		}
 	});
+
+  const [pageLoaded, setPageLoaded] = createSignal(false);
 
   const onError = (error: Event) => {
     console.log("error: ", error);
@@ -73,6 +78,8 @@ const Home: Component = () => {
 
       context?.actions?.clearPage();
       context?.actions?.savePosts(newPosts);
+
+      setPageLoaded(true);
 
       return;
     }
@@ -96,20 +103,43 @@ const Home: Component = () => {
         </Match>
       </Switch>
 
-      <Show
-        when={context?.data?.posts && context.data.posts.length > 0}
-        fallback={<div>Loading...</div>}
-      >
-        <For each={context?.data?.posts} >
-          {(post) => {
-            return <Post
-              post={post}
-            />
-          }
-          }
-        </For>
-      </Show>
-      <div id="pagination_trigger" class={styles.paginate}>Loading...</div>
+      <Switch>
+        <Match
+          when={context?.data?.posts && context.data.posts.length > 0}
+        >
+          <For each={context?.data?.posts} >
+            {(post) => {
+              return <Post
+                post={post}
+              />
+            }
+            }
+          </For>
+          <Loader />
+        </Match>
+        <Match
+          when={pageLoaded() && context?.data?.posts && context.data.posts.length === 0}
+        >
+          <div class={styles.noContent}>
+            <p>You are new around here?</p>
+            <p>Follow someone or post a message.</p>
+          </div>
+        </Match>
+        <Match
+          when={pageLoaded()}
+        >
+          <div class={styles.endOfContent}>
+            You reached the end. You are a quick reader :)
+          </div>
+        </Match>
+        <Match
+          when={!pageLoaded()}
+        >
+          <Loader />
+        </Match>
+      </Switch>
+      <div id="pagination_trigger" class={styles.paginate}>
+      </div>
     </div>
   )
 }

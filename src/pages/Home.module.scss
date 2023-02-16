@@ -7,3 +7,9 @@
   position: absolute;
   bottom: 1280px;
 }
+
+.noContent, .endOfContent {
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 80px;
+}
