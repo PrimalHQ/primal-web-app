@@ -1,3 +1,16 @@
+.fullHeader {
+  display: grid;
+  height: 117px;
+  align-items: center;
+  justify-content: left;
+
+  >div {
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 34px;
+  }
+}
+
 .statsCaption {
   margin-bottom: 32px;
 }
@@ -9,15 +22,61 @@
 
   .netstat {
     .number {
-      font-size: 34px;
+      font-size: 28px;
       line-height: 34px;
-      color: var(--color);
+      color: var(--text-secondary-2);
     }
 
     .label {
+      font-size: 16px;
+      line-height: 19px;
+      color: var(--text-tertiary-2);
+    }
+  }
+}
+
+.exploreMenu {
+  display: grid;
+  grid-template-columns: 160px 160px 160px;
+  grid-template-rows: 132px 132px 132px;
+  grid-column-gap: 79px;
+  grid-row-gap: 64px;
+}
+
+.exploreBox {
+  box-sizing: border-box;
+
+  width: 160px;
+  height: 132px;
+
+  border: 1px solid var(--text-primary);
+  border-radius: 9px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  >div {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    margin-bottom: 10px;
+
+    .firstLine {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 21px;
+      color: var(--text-tertiary);
+    }
+
+    .secondLine {
+      text-align: center;
       font-size: 18px;
       line-height: 21px;
-      color: rgba($color: var(--color), $alpha: 0.1);
+      font-weight: 700;
+      color: var(--text-primary);
     }
   }
 }

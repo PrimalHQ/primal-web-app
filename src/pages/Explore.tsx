@@ -1,6 +1,6 @@
 import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
+import { Portal, style } from 'solid-js/web';
 import { reset, socket } from '../sockets';
 import styles from './Explore.module.scss';
 
@@ -58,6 +58,11 @@ const Explore: Component = () => {
 
     return (
       <>
+        <div id="central_header" class={styles.fullHeader}>
+          <div>
+            explore nostr
+          </div>
+        </div>
         <Portal mount={document.getElementById("right_sidebar") as Node}>
           <div class={styles.statsCaption}>
             NOSTR NETWORK STATS
@@ -118,6 +123,71 @@ const Explore: Component = () => {
             </div>
           </div>
         </Portal>
+
+        <div class={styles.exploreMenu}>
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>trending</div>
+              <div class={styles.secondLine}>global</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>trending</div>
+              <div class={styles.secondLine}>my network</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>trending</div>
+              <div class={styles.secondLine}>my follows</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>popular</div>
+              <div class={styles.secondLine}>global</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>popular</div>
+              <div class={styles.secondLine}>my network</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>popular</div>
+              <div class={styles.secondLine}>my follows</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>trending</div>
+              <div class={styles.secondLine}>people</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>popular</div>
+              <div class={styles.secondLine}>people</div>
+            </div>
+          </div>
+
+          <div class={styles.exploreBox}>
+            <div>
+              <div class={styles.firstLine}>all content</div>
+              <div class={styles.secondLine}>firehose</div>
+            </div>
+          </div>
+        </div>
       </>
     )
 }
