@@ -15,6 +15,7 @@ import type {
 } from '../types/primal';
 import { isConnected, socket } from "../sockets";
 import { convertToPosts, getFeed } from "../lib/feed";
+import { hexToNpub } from "../lib/keys";
 
 const emptyPage: FeedPage = {
   users: {},
@@ -119,6 +120,18 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   // };
 
+  const [publicKey, setPublicKey] = createSignal<string>();
+
+  createEffect(() => {
+    if (publicKey()) {
+      const npub = hexToNpub(publicKey() as string);
+      const feed = { name: 'my feed', hex: publicKey(), npub};
+
+      setData('availableFeeds', feeds => [...feeds, feed]);
+      setData('selectedFeed', feed);
+    }
+  });
+
   const fetchNostrKey = async () => {
     const win = window as NostrWindow;
     const nostr = win.nostr;
@@ -136,8 +149,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         setTimeout(fetchNostrKey, 1000);
       }
       else {
-        const feed = { name: 'my feed', hex: key, npub: ''};
-        setData('availableFeeds', feeds => [...feeds, feed]);
+        setPublicKey(key);
       }
     } catch (e) {
       console.log('ERROR: ', e);
@@ -156,13 +168,14 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   //   socket()?.addEventListener('message', onMessage);
   // });
 
-	// createEffect(() => {
-  //   if (isConnected()) {
-  //     const pubkey = data?.selectedFeed?.hex || '';
+	createEffect(() => {
+    // console.log('SF: ', data.selectedFeed);
+    // if (isConnected()) {
+    //   const pubkey = data?.selectedFeed?.hex || '';
 
-  //     getFeed(pubkey, subid);
-	// 	}
-	// });
+    //   getFeed(pubkey, subid);
+		// }
+	});
 
   // onCleanup(() => {
   //   socket()?.removeEventListener('error', onError);

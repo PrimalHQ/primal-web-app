@@ -72,7 +72,7 @@ export type PrimalContextStore = {
   },
 };
 
-export type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: () => string } };
+export type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: () => Promise<string> } };
 
 export type NostrMessage = [
   type: "EVENT" | "EOSE",

@@ -54,6 +54,7 @@ const Home: Component = () => {
     if (isConnected()) {
       const pubkey = context?.data?.selectedFeed?.hex || '';
 
+      context?.actions?.clearData();
       getFeed(pubkey, subid);
 		}
 	});

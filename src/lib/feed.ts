@@ -24,7 +24,12 @@ export const getThread = (postId: string, subid: string, until = 0, limit = 20) 
   ]));
 }
 
-export const convertToPosts = (page: FeedPage, reverse = false) => {
+export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
+
+  if (page === undefined) {
+    return [];
+  }
+
   return  page?.messages.map((msg) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
