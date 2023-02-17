@@ -38,6 +38,7 @@ export type FeedStore = {
   posts: PrimalPost[],
   isFetching: boolean,
   scrollTop: number,
+  activeUser: PrimalUser | undefined,
   publicKey: string | undefined,
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
@@ -69,6 +70,7 @@ export type PrimalContextStore = {
     loadNextPage: () => void,
     savePosts: (posts: PrimalPost[]) => void,
     clearPage: () => void,
+    setActiveUser: (user: PrimalUser) => void,
     updatedFeedScroll: (scrollTop: number) => void,
     proccessEventContent: (
       content: NostrUserContent | NostrPostContent | NostrStatsContent,

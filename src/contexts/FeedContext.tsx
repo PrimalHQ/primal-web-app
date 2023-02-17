@@ -9,11 +9,13 @@ import type {
   PrimalContextStore,
   PrimalFeed,
   PrimalPost,
+  PrimalUser,
 } from '../types/primal';
 import { getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
 import { isConnected } from "../sockets";
+import { getUserProfile } from "../lib/profile";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -70,6 +72,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       setData('availableFeeds', feeds => [...feeds, feed]);
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => publicKey())
+
+      getUserProfile(publicKey(), 'user_profile');
     }
   });
 
@@ -110,7 +114,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   createEffect(() => {
     if (isConnected()) {
-    const pubkey = data?.selectedFeed?.hex || '';
+    const pubkey = data?.selectedFeed?.hex;
 
     setData('posts', () => []);
     setData('scrollTop', () => 0);
@@ -121,7 +125,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       behavior: 'instant',
     });
 
-    getFeed(pubkey, subid);}
+    pubkey && getFeed(pubkey, subid);}
   });
 
   onMount(() => {
@@ -138,6 +142,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         if (profile as PrimalFeed) {
           setData('selectedFeed', () => ({...profile}));
         }
+      },
+      setActiveUser: (user: PrimalUser) => {
+        setData('activeUser', () => ({...user}));
       },
       updatedFeedScroll: (scrollTop: number) => {
         setData('scrollTop', () => scrollTop);

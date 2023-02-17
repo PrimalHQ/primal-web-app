@@ -6,7 +6,7 @@ import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { useParams } from '@solidjs/router';
-import { convertToPosts, getThread } from '../lib/feed';
+import { convertToPosts, getThread, sortByRecency } from '../lib/feed';
 import { FeedStore, NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalPost } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
@@ -56,7 +56,7 @@ const Home: Component = () => {
     const [type, subkey, content] = message;
 
     if (type === 'EOSE') {
-      const newPosts = convertToPosts(page, true);
+      const newPosts = sortByRecency(convertToPosts(page), true);
 
       setPage({ users: {}, messages: [], postStats: {}});
       setPosts(newPosts);

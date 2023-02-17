@@ -78,3 +78,46 @@
     right: 4px;
   }
 }
+
+@mixin missing {
+  display: grid;
+  place-items: center;
+  color: var(--text-tertiary-2);
+  background-color: var(--text-primary);
+  border-radius: 50%;
+}
+
+.xsMissing {
+  @include missing;
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+
+.smallMissing {
+  @include missing;
+  width: 48px;
+  height: 48px;
+  font-size: 12px;
+}
+
+.midMissing {
+  @include missing;
+  width: 52px;
+  height: 52px;
+  font-size: 16px;
+}
+
+.largeMissing {
+  @include missing;
+  width: 72px;
+  height: 72px;
+  font-size: 18px;
+}
+
+.extraLargeMissing {
+  @include missing;
+  width: 80px;
+  height: 80px;
+  font-size: 20px;
+}

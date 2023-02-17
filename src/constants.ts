@@ -11,6 +11,7 @@ export const initialStore: FeedStore = {
   isFetching: false,
   scrollTop: 0,
   publicKey: '',
+  activeUser: undefined,
   selectedFeed: undefined,
   availableFeeds: [
     {

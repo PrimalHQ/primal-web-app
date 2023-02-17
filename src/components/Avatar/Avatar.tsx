@@ -4,7 +4,8 @@ import logo from '../../assets/icons/logo.svg';
 import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
-  src: string, size?: "xs" | "sm" | "md" | "lg" | "xl",
+  src: string | undefined,
+  size?: "xs" | "sm" | "md" | "lg" | "xl",
   verified?: string
 }> = (props) => {
 
@@ -18,9 +19,22 @@ const Avatar: Component<{
       xl: styles.extraLargeAvatar
     };
 
+    const missingClass = {
+      xs: styles.xsMissing,
+      sm: styles.smallMissing,
+      md: styles.midMissing,
+      lg: styles.largeMissing,
+      xl: styles.extraLargeMissing
+    };
+
     return (
       <div class={avatarClass[selectedSize]}>
-        <Show when={props.src} fallback={<div>MIA</div>}>
+        <Show
+          when={props.src}
+          fallback={
+            <div class={missingClass[selectedSize]}>MIA</div>
+          }
+        >
           <img src={props.src} alt="avatar" />
         </Show>
         <Show when={props.verified}>

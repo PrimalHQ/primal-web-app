@@ -52,6 +52,8 @@ const HomeHeader: Component = () => {
     window.removeEventListener('scroll', onScroll);
   });
 
+  const activeUserPicture = () => context?.data.activeUser?.picture;
+
   return (
     <div class={styles.fullHeader}>
       <Show
@@ -59,12 +61,18 @@ const HomeHeader: Component = () => {
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <div class={styles.callToAction}>
-          <Avatar src={miljan} size="lg" verified="naravno" />
+          <Avatar
+            src={activeUserPicture()}
+            size="lg"
+            verified="naravno"
+          />
+
           <div class={styles.border}>
             <input type="text" placeholder="post something to nostr..." />
           </div>
         </div>
       </Show>
+
       <div id="small_header" class={styles.feedSelector}>
         <FeedSelect />
       </div>

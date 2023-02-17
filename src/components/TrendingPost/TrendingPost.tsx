@@ -2,6 +2,7 @@ import { A } from '@solidjs/router';
 import { Component, createEffect, For } from 'solid-js';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
+import Avatar from '../Avatar/Avatar';
 import { calculateStickyPosition } from './helpers';
 
 import styles from './TrendingPost.module.scss';
@@ -9,7 +10,7 @@ import styles from './TrendingPost.module.scss';
 
 const TrendingPost: Component = (props) => {
 
-  const trendPosts = () => [...props.posts].sort((a, b) => b.post.score24h - a.post.score24h )
+  const trendPosts = () => [...props.posts];
 
   createEffect(() => {
     // If the content changes, recalculate sticky boundary.
@@ -28,7 +29,7 @@ const TrendingPost: Component = (props) => {
                 <A href={`/thread/${post.post.id}`}>
                   <div class={styles.trendingPost}>
                     <div class={styles.avatar}>
-                      <img class={styles.avatarImg} src={post.user?.picture} />
+                      <Avatar src={post.user?.picture} size="xs" />
                     </div>
                     <div class={styles.content}>
                       <div class={styles.header}>

@@ -6,7 +6,7 @@ import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { isConnected, socket } from '../sockets';
-import { convertToPosts, getFeed, getTrending } from '../lib/feed';
+import { convertToPosts, getFeed, getTrending, sortByRecency, sortByScore24h } from '../lib/feed';
 import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent } from '../types/primal';
 import Loader from '../components/Loader/Loader';
 import { createStore } from 'solid-js/store';
@@ -95,22 +95,33 @@ const Home: Component = () => {
 
     const [type, subId, content] = message;
 
+
     if (subId === `trending_${subid}`) {
       processTrendingPost(type, content);
       return;
     }
 
-
     if (type === 'EOSE') {
-      const newPosts = convertToPosts(context?.page);
+      const newPosts = sortByRecency(convertToPosts(context?.page));
       context?.actions?.clearPage();
       context?.actions?.savePosts(newPosts);
 
       return;
     }
 
+    if (subId === 'user_profile') {
+      proccessUserProfile(content);
+      return;
+    }
+
     context?.actions?.proccessEventContent(content, type);
   };
+
+  const proccessUserProfile = (content) => {
+    const user = JSON.parse(content.content);
+
+    context?.actions?.setActiveUser(user);
+  }
 
 
 // PROCESSING TRENDS -------------------------------------
@@ -133,7 +144,7 @@ const Home: Component = () => {
 
   const processTrendingPost = (type, content) => {
     if (type === 'EOSE') {
-      const newPosts = convertToPosts(trendingPosts);
+      const newPosts = sortByScore24h(convertToPosts(trendingPosts));
 
       setTrendingPosts('posts', () => [...newPosts]);
 

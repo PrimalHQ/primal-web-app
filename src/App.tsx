@@ -11,6 +11,7 @@ import Notifications from './pages/Notifications';
 import Downloads from './pages/Downloads';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import Feed from './pages/Feed';
 
 const App: Component = () => {
 
@@ -40,6 +41,7 @@ const App: Component = () => {
             <Route path="/downloads" component={Downloads} />
             <Route path="/settings" component={Settings} />
             <Route path="/help" component={Help} />
+            <Route path="/feed/:scope/:timeframe" component={Feed} />
             <Route path="/rest" component={Explore} />
           </Route>
         </Routes>
