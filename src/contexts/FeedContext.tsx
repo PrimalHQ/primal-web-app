@@ -73,14 +73,22 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   });
 
+  let extensionAttempt = 0;
+
   const fetchNostrKey = async () => {
     const win = window as NostrWindow;
     const nostr = win.nostr;
 
     if (nostr === undefined) {
       console.log('No WebLn extension');
-      setTimeout(fetchNostrKey, 1000);
-      return;
+      // Try again after one second if extensionAttempts are not exceeded
+      if (extensionAttempt < 1) {
+        extensionAttempt += 1;
+        setTimeout(fetchNostrKey, 1000);
+        return;
+      }
+
+      setData('selectedFeed', data.availableFeeds[0]);
     }
 
     try {
