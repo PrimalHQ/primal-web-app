@@ -1,10 +1,7 @@
 import { createContext, createEffect, createResource, createSignal, JSX, onCleanup, onMount, untrack, useContext } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import type {
-  FeedPage,
   FeedStore,
-  NostrEOSE,
-  NostrEvent,
   NostrPostContent,
   NostrStatsContent,
   NostrUserContent,
@@ -13,41 +10,10 @@ import type {
   PrimalFeed,
   PrimalPost,
 } from '../types/primal';
-import { isConnected, socket } from "../sockets";
-import { convertToPosts, getFeed } from "../lib/feed";
+import { getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
+import { initialStore, emptyPage } from "../constants";
 
-const emptyPage: FeedPage = {
-  users: {},
-  messages: [],
-  postStats: {},
-}
-
-const initialStore: FeedStore = {
-  posts: [],
-  isFetching: false,
-  publicKey: '',
-  selectedFeed: {
-    name: 'snowden',
-    hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
-    npub: 'npub1sn0wdenkukak0d9dfczzeacvhkrgz92ak56egt7vdgzn8pv2wfqqhrjdv9',
-  },
-  availableFeeds: [
-    {
-      name: 'snowden' ,
-      hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
-      npub: 'npub1sn0wdenkukak0d9dfczzeacvhkrgz92ak56egt7vdgzn8pv2wfqqhrjdv9',
-    },{
-      name: 'jack',
-      hex: '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2',
-      npub: 'npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m',
-    },{
-      name: 'miljan',
-      hex: 'd61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a',
-      npub: 'npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr',
-    },
-  ],
-};
 
 export const FeedContext = createContext<PrimalContextStore>();
 
@@ -99,9 +65,10 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       const npub = hexToNpub(publicKey() as string);
       const feed = { name: 'my feed', hex: publicKey(), npub};
 
+
       setData('availableFeeds', feeds => [...feeds, feed]);
-      setData('selectedFeed', feed);
-      setData('publicKey', publicKey())
+      setData('selectedFeed', () => ({...feed}));
+      setData('publicKey', () => publicKey())
     }
   });
 
@@ -125,6 +92,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         setPublicKey(key);
       }
     } catch (e) {
+      if (e.message === 'User rejected') {
+        setData('selectedFeed', data.availableFeeds[0]);
+      }
       console.log('ERROR: ', e);
     }
   }
@@ -141,11 +111,11 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     actions: {
       selectFeed(profile: PrimalFeed | undefined) {
         if (profile as PrimalFeed) {
-          setData('selectedFeed', profile);
+          setData('selectedFeed', () => ({...profile}));
         }
       },
       clearData() {
-        setData({ posts: []});
+        setData('posts', () => []);
       },
       loadNextPage() {
         const lastPost = data.posts[data.posts.length - 1];

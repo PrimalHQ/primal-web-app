@@ -23,6 +23,7 @@ const FeedSelect: Component = () => {
         id="profiles"
         onChange={selectFeed}
       >
+        <option value="" disabled selected={context?.data?.selectedFeed === undefined}>Select a feed</option>
         <For each={context?.data?.availableFeeds}>
           {(profile) =>
             <option

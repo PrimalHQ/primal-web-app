@@ -71,7 +71,7 @@ const Home: Component = () => {
         users: {},
         postStats: {},
       });
-      getTrending('trending');
+      getTrending(`trending_${subid}`);
 		}
 	});
 
@@ -84,7 +84,7 @@ const Home: Component = () => {
 
     const [type, subId, content] = message;
 
-    if (subId === 'trending') {
+    if (subId === `trending_${subid}`) {
       processTrendingPost(type, content);
       return;
     }
@@ -102,7 +102,8 @@ const Home: Component = () => {
   };
 
 
-
+// PROCESSING TRENDS -------------------------------------
+// TODO: Cleanup and refactor
 
 
 
@@ -142,7 +143,7 @@ const Home: Component = () => {
   };
 
 
-
+// ----------------------------------------------------------
 
 
 
@@ -181,8 +182,7 @@ const Home: Component = () => {
           when={!isPageLoading() && context?.data?.posts && context.data.posts.length === 0}
         >
           <div class={styles.noContent}>
-            <p>You are new around here?</p>
-            <p>Follow someone or post a message.</p>
+            <Loader />
           </div>
         </Match>
         <Match
