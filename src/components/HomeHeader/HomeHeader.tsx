@@ -64,10 +64,10 @@ const HomeHeader: Component = () => {
             <input type="text" placeholder="post something to nostr..." />
           </div>
         </div>
-        <div id="small_header" class={styles.feedSelector}>
-          <FeedSelect />
-        </div>
       </Show>
+      <div id="small_header" class={styles.feedSelector}>
+        <FeedSelect />
+      </div>
     </div>
   );
 }
