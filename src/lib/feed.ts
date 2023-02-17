@@ -9,7 +9,7 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
   socket()?.send(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_feed", { pubkey, limit, [start]: until }]},
+    {cache: ["feed", { pubkey, limit, [start]: until }]},
   ]));
 }
 
@@ -17,7 +17,7 @@ export const getTrending = (subid: string) => {
   socket()?.send(JSON.stringify([
     "REQ",
     subid,
-    {"cache":["trending_content", { limit: 25 }]},
+    {"cache":["explore", { timeframe: "trending", scope: "global", limit: 25 }]},
   ]));
 };
 
@@ -72,9 +72,42 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         score24h: stat.score24h,
       },
     };
-  }).sort((a: PrimalPost, b: PrimalPost) => {
+  });
+}
+
+export const sortByRecency = (posts: PrimalPost[], reverse = false) => {
+  return posts.sort((a: PrimalPost, b: PrimalPost) => {
     const order = b.post.created_at - a.post.created_at;
 
     return reverse ? -1 * order : order;
   });
-}
+};
+
+export const sortByScore24h = (posts: PrimalPost[], reverse = false) => {
+  return posts.sort((a: PrimalPost, b: PrimalPost) => {
+    const order = b.post.score24h - a.post.score24h;
+
+    return reverse ? -1 * order : order;
+  });
+};
+
+export const getExploreFeed = (
+  pubkey: string,
+  subid: string,
+  scope: string,
+  timeframe: string,
+  until = 0,
+  limit = 20
+) => {
+
+  const start = until === 0 ? 'since' : 'until';
+
+  socket()?.send(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: [
+      "explore",
+      { pubkey, timeframe, scope, limit, [start]: until },
+    ]},
+  ]));
+};

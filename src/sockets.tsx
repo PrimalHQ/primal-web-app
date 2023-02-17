@@ -16,7 +16,7 @@ const onClose = () => {
 
 export const connect = () => {
   if (isNotConnected()) {
-    setSocket(new WebSocket('wss://dev.primal.net/cache4'));
+    setSocket(new WebSocket('wss://dev.primal.net/cache5'));
 
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
