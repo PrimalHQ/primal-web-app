@@ -5,14 +5,19 @@ import styles from './HomeHeader.module.scss';
 import miljan from '../../assets/icons/miljan.jpg';
 import PostButton from '../PostButton/PostButton';
 import FeedSelect from '../FeedSelect/FeedSelect';
+import { useFeedContext } from '../../contexts/FeedContext';
 
 const HomeHeader: Component = () => {
+
+  const context = useFeedContext();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
   const onScroll = () => {
     const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
     const smallHeader = document.getElementById('small_header');
+
+    context?.actions?.updatedFeedScroll(scrollTop);
 
     const isScrollingDown = scrollTop > lastScrollTop;
     lastScrollTop = scrollTop;

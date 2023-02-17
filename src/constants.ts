@@ -9,6 +9,7 @@ export const emptyPage: FeedPage = {
 export const initialStore: FeedStore = {
   posts: [],
   isFetching: false,
+  scrollTop: 0,
   publicKey: '',
   selectedFeed: undefined,
   availableFeeds: [

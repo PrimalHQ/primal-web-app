@@ -30,8 +30,17 @@ const Home: Component = () => {
   const subid = String(randomNumber);
 
   onMount(async () => {
-    // Temporary fix for Portal rendering on initial load.
-    setMounted(true);
+
+    setTimeout(() => {
+      // Temporary fix for Portal rendering on initial load.
+      setMounted(true);
+
+      window.scrollTo({
+        top: context?.data.scrollTop,
+        left: 0,
+        behavior: 'instant',
+      });
+    }, 0);
 
     observer = new IntersectionObserver(entries => {
       entries.forEach((entry) => {
@@ -47,6 +56,8 @@ const Home: Component = () => {
 
     socket()?.addEventListener('error', onError);
     socket()?.addEventListener('message', onMessage);
+
+
   });
 
   onCleanup(() => {
@@ -61,10 +72,10 @@ const Home: Component = () => {
 
 	createEffect(() => {
     if (isConnected()) {
-      const pubkey = context?.data?.selectedFeed?.hex || '';
+      // const pubkey = context?.data?.selectedFeed?.hex || '';
 
-      context?.actions?.clearData();
-      getFeed(pubkey, subid);
+      // context?.actions?.clearData();
+      // getFeed(pubkey, subid);
 
       setTrendingPosts({
         messages: [],
@@ -151,53 +162,51 @@ const Home: Component = () => {
 
   return (
     <div class={styles.homeContent}>
-      <Switch>
-        <Match when={mounted()}>
-          <div id="central_header">
-            <HomeHeader />
-          </div>
-          <Portal
-            ref={<div id="portal_div"></div> as HTMLDivElement}
-            mount={document.getElementById("right_sidebar") as Node}
+      <Show when={mounted()}>
+        <div id="central_header">
+          <HomeHeader />
+        </div>
+        <Portal
+          ref={<div id="portal_div"></div> as HTMLDivElement}
+          mount={document.getElementById("right_sidebar") as Node}
+        >
+          <TrendingPost posts={trendingPosts.posts}/>
+        </Portal>
+
+        <Show
+          when={context?.data?.posts && context.data.posts.length > 0}
+        >
+          <For each={context?.data?.posts} >
+            {(post) => {
+              return <Post
+                post={post}
+              />
+            }}
+          </For>
+        </Show>
+
+        <Switch>
+          <Match
+            when={!isPageLoading() && context?.data?.posts && context.data.posts.length === 0}
           >
-            <TrendingPost posts={trendingPosts.posts}/>
-          </Portal>
-        </Match>
-      </Switch>
-
-      <Show
-        when={context?.data?.posts && context.data.posts.length > 0}
-      >
-        <For each={context?.data?.posts} >
-          {(post) => {
-            return <Post
-              post={post}
-            />
-          }}
-        </For>
-      </Show>
-
-      <Switch>
-        <Match
-          when={!isPageLoading() && context?.data?.posts && context.data.posts.length === 0}
-        >
-          <div class={styles.noContent}>
+            <div class={styles.noContent}>
+              <Loader />
+            </div>
+          </Match>
+          <Match
+            when={!isPageLoading()}
+          >
+            <div class={styles.endOfContent}>
+              You reached the end. You are a quick reader.
+            </div>
+          </Match>
+          <Match
+            when={isPageLoading()}
+          >
             <Loader />
-          </div>
-        </Match>
-        <Match
-          when={!isPageLoading()}
-        >
-          <div class={styles.endOfContent}>
-            You reached the end. You are a quick reader.
-          </div>
-        </Match>
-        <Match
-          when={isPageLoading()}
-        >
-          <Loader />
-        </Match>
-      </Switch>
+          </Match>
+        </Switch>
+      </Show>
       <div id="pagination_trigger" class={styles.paginate}>
       </div>
     </div>

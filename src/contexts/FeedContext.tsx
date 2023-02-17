@@ -13,6 +13,7 @@ import type {
 import { getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
+import { isConnected } from "../sockets";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -99,6 +100,22 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   }
 
+  createEffect(() => {
+    if (isConnected()) {
+    const pubkey = data?.selectedFeed?.hex || '';
+
+    setData('posts', () => []);
+    setData('scrollTop', () => 0);
+
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    });
+
+    getFeed(pubkey, subid);}
+  });
+
   onMount(() => {
     setTimeout(() => {
       fetchNostrKey();
@@ -113,6 +130,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         if (profile as PrimalFeed) {
           setData('selectedFeed', () => ({...profile}));
         }
+      },
+      updatedFeedScroll: (scrollTop: number) => {
+        setData('scrollTop', () => scrollTop);
       },
       clearData() {
         setData('posts', () => []);

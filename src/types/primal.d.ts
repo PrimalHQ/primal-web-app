@@ -37,6 +37,7 @@ export type NostrEOSE = [
 export type FeedStore = {
   posts: PrimalPost[],
   isFetching: boolean,
+  scrollTop: number,
   publicKey: string | undefined,
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
@@ -68,6 +69,7 @@ export type PrimalContextStore = {
     loadNextPage: () => void,
     savePosts: (posts: PrimalPost[]) => void,
     clearPage: () => void,
+    updatedFeedScroll: (scrollTop: number) => void,
     proccessEventContent: (
       content: NostrUserContent | NostrPostContent | NostrStatsContent,
       type: string
