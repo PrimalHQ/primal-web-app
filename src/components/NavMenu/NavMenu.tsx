@@ -9,11 +9,11 @@ const NavMenu: Component = (props) => {
     const links = [
       { to: '/home', label: 'Home', icon: 'homeIcon' },
       { to: '/explore', label: 'Explore', icon: 'exploreIcon' },
-      { to: '/rest', label: 'Messages', icon: 'messagesIcon' },
-      { to: '/rest', label: 'Notifications', icon: 'notificationsIcon' },
-      { to: '/rest', label: 'Downloads', icon: 'downloadIcon' },
-      { to: '/rest', label: 'Settings', icon: 'settingsIcon' },
-      { to: '/rest', label: 'Help', icon: 'helpIcon' },
+      { to: '/messages', label: 'Messages', icon: 'messagesIcon' },
+      { to: '/notifications', label: 'Notifications', icon: 'notificationsIcon' },
+      { to: '/downloads', label: 'Downloads', icon: 'downloadIcon' },
+      { to: '/settings', label: 'Settings', icon: 'settingsIcon' },
+      { to: '/help', label: 'Help', icon: 'helpIcon' },
     ];
 
     return (
