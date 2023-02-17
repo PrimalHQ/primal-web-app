@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
@@ -54,15 +54,20 @@ const HomeHeader: Component = () => {
 
   return (
     <div class={styles.fullHeader}>
-      <div class={styles.callToAction}>
-        <Avatar src={miljan} size="lg" verified="naravno" />
-        <div class={styles.border}>
-          <input type="text" placeholder="post something to nostr..." />
+      <Show
+        when={context?.data.publicKey}
+        fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
+      >
+        <div class={styles.callToAction}>
+          <Avatar src={miljan} size="lg" verified="naravno" />
+          <div class={styles.border}>
+            <input type="text" placeholder="post something to nostr..." />
+          </div>
         </div>
-      </div>
-      <div id="small_header" class={styles.feedSelector}>
-        <FeedSelect />
-      </div>
+        <div id="small_header" class={styles.feedSelector}>
+          <FeedSelect />
+        </div>
+      </Show>
     </div>
   );
 }
