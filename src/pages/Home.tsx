@@ -6,7 +6,7 @@ import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { isConnected, socket } from '../sockets';
-import { convertToPosts, getFeed, getTrending, sortByRecency, sortByScore24h } from '../lib/feed';
+import { convertToPosts, getExploreFeed, getFeed, getTrending, sortByRecency, sortByScore24h } from '../lib/feed';
 import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent } from '../types/primal';
 import Loader from '../components/Loader/Loader';
 import { createStore } from 'solid-js/store';
@@ -82,7 +82,9 @@ const Home: Component = () => {
         users: {},
         postStats: {},
       });
-      getTrending(`trending_${subid}`);
+      // getTrending(`trending_${subid}`);
+      const pk = () => context?.data.publicKey;
+      pk() && getExploreFeed(pk(), `trending_${subid}`, 'mynetwork', 'trending');
 		}
 	});
 

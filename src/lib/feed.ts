@@ -107,7 +107,7 @@ export const getExploreFeed = (
     subid,
     {cache: [
       "explore",
-      { pubkey, timeframe, scope, limit, [start]: until },
+      { pubkey, timeframe, scope, limit: 25 },
     ]},
   ]));
 };
