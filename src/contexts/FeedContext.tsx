@@ -135,6 +135,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     if (subId === `user_profile_${APP_ID}`) {
       content && proccessUserProfile(content);
+
+      // Temporary quick & dirty fix for dissapearing avatar
+      if (content) {
+        const user = JSON.parse(content.content);
+
+        setData('activeUser', () => ({...user}));
+      }
       return;
     }
 
