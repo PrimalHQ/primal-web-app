@@ -23,10 +23,12 @@ export type NostrStatsContent = {
   content: string,
 };
 
+export type NostrEventContent = NostrPostContent | NostrUserContent | NostrStatsContent;
+
 export type NostrEvent = [
   type: "EVENT",
   subkey: string,
-  content: NostrUserContent | NostrPostContent | NostrStatsContent,
+  content: NostrEventContent,
 ];
 
 export type NostrEOSE = [
@@ -35,7 +37,7 @@ export type NostrEOSE = [
 ];
 
 export type FeedStore = {
-  posts: PrimalPost[],
+  posts: PrimalNote[],
   isFetching: boolean,
   scrollTop: number,
   activeUser: PrimalUser | undefined,
@@ -58,7 +60,25 @@ export type FeedPage = {
       score24h: number,
     },
   },
-}
+};
+
+export
+type TrendingNotesStore = {
+  users: {
+    [pubkey: string]: NostrUserContent,
+  },
+  messages: NostrPostContent[],
+  notes: PrimalNote[],
+  postStats: {
+    [eventId: string]: {
+      likes: number,
+      mentions: number,
+      replies: number,
+      zaps: number,
+      score24h: number,
+    },
+  },
+};
 
 export type PrimalContextStore = {
 
@@ -68,7 +88,7 @@ export type PrimalContextStore = {
     selectFeed: (profile: PrimalFeed | undefined) => void,
     clearData: () => void,
     loadNextPage: () => void,
-    savePosts: (posts: PrimalPost[]) => void,
+    savePosts: (posts: PrimalNote[]) => void,
     clearPage: () => void,
     setActiveUser: (user: PrimalUser) => void,
     updatedFeedScroll: (scrollTop: number) => void,
@@ -107,7 +127,7 @@ export type PrimalUser = {
   tags: string[][],
 };
 
-export type PrimalPost = {
+export type PrimalNote = {
   user: PrimalUser,
   post: {
     id: string,

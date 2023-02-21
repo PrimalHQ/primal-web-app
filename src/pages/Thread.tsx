@@ -7,7 +7,7 @@ import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { useParams } from '@solidjs/router';
 import { convertToPosts, getThread, sortByRecency } from '../lib/feed';
-import { FeedStore, NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalPost } from '../types/primal';
+import { FeedStore, NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import PrimaryPost from '../components/PrimaryPost/PrimaryPost';
@@ -19,7 +19,7 @@ const Home: Component = () => {
 
   const context = useFeedContext();
 
-  const [mainPost, setMainPost] = createSignal<PrimalPost>();
+  const [mainPost, setMainPost] = createSignal<PrimalNote>();
 
   const [mounted, setMounted] = createSignal(false);
 

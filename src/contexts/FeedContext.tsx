@@ -8,7 +8,7 @@ import type {
   NostrWindow,
   PrimalContextStore,
   PrimalFeed,
-  PrimalPost,
+  PrimalNote,
   PrimalUser,
 } from '../types/primal';
 import { getFeed } from "../lib/feed";
@@ -26,7 +26,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const [page, setPage] = createStore(emptyPage);
 
-  const [oldestPost, setOldestPost] = createSignal<PrimalPost | undefined>();
+  const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
   const randomNumber = Math.floor(Math.random()*10000000000);
   const subid = String(randomNumber);
@@ -157,7 +157,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
         setOldestPost(lastPost);
       },
-      savePosts(posts: PrimalPost[]) {
+      savePosts(posts: PrimalNote[]) {
         setData('posts', [ ...data.posts, ...posts ]);
         setData('isFetching', false);
       },

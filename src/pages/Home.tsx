@@ -7,9 +7,11 @@ import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { isConnected, socket } from '../sockets';
 import { convertToPosts, getFeed, getTrending, sortByRecency, sortByScore24h } from '../lib/feed';
-import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent } from '../types/primal';
+import { NostrEOSE, NostrEvent, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import Loader from '../components/Loader/Loader';
 import { createStore } from 'solid-js/store';
+import Paginator from '../components/Paginator/Paginator';
+import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
 
 const Home: Component = () => {
 
@@ -17,14 +19,13 @@ const Home: Component = () => {
 
   const [mounted, setMounted] = createSignal(false);
 
-  const [trendingPosts, setTrendingPosts] = createStore({
+
+  const [trendingPosts, setTrendingPosts] = createStore<TrendingNotesStore>({
     messages: [],
     users: {},
-    posts: [],
+    notes: [],
     postStats: {},
   });
-
-  let observer: IntersectionObserver | undefined;
 
   const randomNumber = Math.floor(Math.random()*10000000000);
   const subid = String(randomNumber);
@@ -38,21 +39,10 @@ const Home: Component = () => {
       window.scrollTo({
         top: context?.data.scrollTop,
         left: 0,
+        // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
         behavior: 'instant',
       });
     }, 0);
-
-    observer = new IntersectionObserver(entries => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          context?.actions?.loadNextPage();
-        }
-      });
-    });
-
-    const pag = document.getElementById('pagination_trigger');
-
-    pag && observer && observer.observe(pag);
 
     socket()?.addEventListener('error', onError);
     socket()?.addEventListener('message', onMessage);
@@ -61,9 +51,6 @@ const Home: Component = () => {
   });
 
   onCleanup(() => {
-    const pag = document.getElementById('pagination_trigger');
-
-    pag && observer?.unobserve(pag);
 
 
     socket()?.removeEventListener('error', onError);
@@ -72,11 +59,6 @@ const Home: Component = () => {
 
 	createEffect(() => {
     if (isConnected()) {
-      // const pubkey = context?.data?.selectedFeed?.hex || '';
-
-      // context?.actions?.clearData();
-      // getFeed(pubkey, subid);
-
       setTrendingPosts({
         messages: [],
         users: {},
@@ -95,7 +77,6 @@ const Home: Component = () => {
 
     const [type, subId, content] = message;
 
-
     if (subId === `trending_${subid}`) {
       processTrendingPost(type, content);
       return;
@@ -110,14 +91,14 @@ const Home: Component = () => {
     }
 
     if (subId === 'user_profile') {
-      proccessUserProfile(content);
+      proccessUserProfile(content as NostrUserContent);
       return;
     }
 
     context?.actions?.proccessEventContent(content, type);
   };
 
-  const proccessUserProfile = (content) => {
+  const proccessUserProfile = (content: NostrUserContent) => {
     const user = JSON.parse(content.content);
 
     context?.actions?.setActiveUser(user);
@@ -142,23 +123,24 @@ const Home: Component = () => {
     setTrendingPosts('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
   };
 
-  const processTrendingPost = (type, content) => {
+  const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
+
     if (type === 'EOSE') {
       const newPosts = sortByScore24h(convertToPosts(trendingPosts));
 
-      setTrendingPosts('posts', () => [...newPosts]);
+      setTrendingPosts('notes', () => [...newPosts]);
 
       return;
     }
 
     if (type === 'EVENT') {
-      if (content.kind === 0) {
+      if (content && content.kind === 0) {
         proccessUser(content);
       }
-      if (content.kind === 1) {
+      if (content && content.kind === 1) {
         proccessPost(content);
       }
-      if (content.kind === 10000100) {
+      if (content && content.kind === 10000100) {
         proccessStat(content);
       }
     }
@@ -178,10 +160,9 @@ const Home: Component = () => {
           <HomeHeader />
         </div>
         <Portal
-          ref={<div id="portal_div"></div> as HTMLDivElement}
           mount={document.getElementById("right_sidebar") as Node}
         >
-          <TrendingPost posts={trendingPosts.posts}/>
+          <TrendingNotes notes={trendingPosts.notes}/>
         </Portal>
 
         <Show
@@ -218,8 +199,7 @@ const Home: Component = () => {
           </Match>
         </Switch>
       </Show>
-      <div id="pagination_trigger" class={styles.paginate}>
-      </div>
+      <Paginator loadNextPage={context?.actions?.loadNextPage}/>
     </div>
   )
 }

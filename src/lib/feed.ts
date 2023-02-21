@@ -1,5 +1,5 @@
 import { socket } from "../sockets";
-import { FeedPage, PrimalPost } from "../types/primal";
+import { FeedPage, PrimalNote } from "../types/primal";
 import { hexToNpub } from "./keys";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
@@ -75,16 +75,16 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
   });
 }
 
-export const sortByRecency = (posts: PrimalPost[], reverse = false) => {
-  return posts.sort((a: PrimalPost, b: PrimalPost) => {
+export const sortByRecency = (posts: PrimalNote[], reverse = false) => {
+  return posts.sort((a: PrimalNote, b: PrimalNote) => {
     const order = b.post.created_at - a.post.created_at;
 
     return reverse ? -1 * order : order;
   });
 };
 
-export const sortByScore24h = (posts: PrimalPost[], reverse = false) => {
-  return posts.sort((a: PrimalPost, b: PrimalPost) => {
+export const sortByScore24h = (posts: PrimalNote[], reverse = false) => {
+  return posts.sort((a: PrimalNote, b: PrimalNote) => {
     const order = b.post.score24h - a.post.score24h;
 
     return reverse ? -1 * order : order;

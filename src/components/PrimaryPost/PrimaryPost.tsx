@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
-import { PrimalPost } from '../../types/primal';
+import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './PrimaryPost.module.scss';
@@ -28,7 +28,7 @@ const trimVerification = (address: string) => {
   return domain;
 }
 
-const PrimaryPost: Component<{ post: PrimalPost }> = (props) => {
+const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
 
   // const [time] = createSignal(date(props.post?.post.created_at));
 
