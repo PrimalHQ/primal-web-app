@@ -1,3 +1,5 @@
+import { SetStoreFunction } from "solid-js/store";
+
 export type NostrPostContent = {
   kind: 1,
   content: string,
@@ -62,8 +64,7 @@ export type FeedPage = {
   },
 };
 
-export
-type TrendingNotesStore = {
+export type TrendingNotesStore = {
   users: {
     [pubkey: string]: NostrUserContent,
   },
@@ -85,6 +86,7 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   actions?: {
+    fetchHomeFeed: () => void,
     selectFeed: (profile: PrimalFeed | undefined) => void,
     clearData: () => void,
     loadNextPage: () => void,

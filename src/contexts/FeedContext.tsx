@@ -20,6 +20,8 @@ import { getUserProfile } from "../lib/profile";
 
 export const FeedContext = createContext<PrimalContextStore>();
 
+export const APP_ID = Math.floor(Math.random()*10000000000);
+
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
   const [data, setData] = createStore<FeedStore>(initialStore);
@@ -28,8 +30,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
-  const randomNumber = Math.floor(Math.random()*10000000000);
-  const subid = String(randomNumber);
 
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
@@ -39,7 +39,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
       if (pubkey) {
         setData('isFetching', true);
-        getFeed(pubkey, subid, until);
+        getFeed(pubkey, `user_feed_${APP_ID}`, until);
       }
     }
   });
@@ -73,7 +73,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => publicKey())
 
-      getUserProfile(publicKey(), 'user_profile');
+      getUserProfile(publicKey(), `user_profile_${APP_ID}`);
     }
   });
 
@@ -122,10 +122,11 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     window.scrollTo({
       top: 0,
       left: 0,
+      // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
       behavior: 'instant',
     });
 
-    pubkey && getFeed(pubkey, subid);}
+    pubkey && getFeed(pubkey, `user_feed_${APP_ID}`);}
   });
 
   onMount(() => {
@@ -142,6 +143,15 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         if (profile as PrimalFeed) {
           setData('selectedFeed', () => ({...profile}));
         }
+      },
+      fetchHomeFeed: () => {
+        const pubkey = data?.selectedFeed?.hex;
+
+        if (pubkey) {
+          setData('isFetching', true);
+          getFeed(pubkey, `user_feed_${APP_ID}`);
+        }
+
       },
       setActiveUser: (user: PrimalUser) => {
         setData('activeUser', () => ({...user}));

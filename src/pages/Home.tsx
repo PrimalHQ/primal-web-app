@@ -1,7 +1,7 @@
 import { Component, createEffect, createResource, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Post from '../components/Post/Post';
 import styles from './Home.module.scss';
-import { useFeedContext } from '../contexts/FeedContext';
+import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
@@ -18,17 +18,6 @@ const Home: Component = () => {
   const context = useFeedContext();
 
   const [mounted, setMounted] = createSignal(false);
-
-
-  const [trendingPosts, setTrendingPosts] = createStore<TrendingNotesStore>({
-    messages: [],
-    users: {},
-    notes: [],
-    postStats: {},
-  });
-
-  const randomNumber = Math.floor(Math.random()*10000000000);
-  const subid = String(randomNumber);
 
   onMount(async () => {
 
@@ -47,26 +36,16 @@ const Home: Component = () => {
     socket()?.addEventListener('error', onError);
     socket()?.addEventListener('message', onMessage);
 
+    if (!context?.data.isFetching && context?.data.posts.length === 0) {
+      context.actions?.fetchHomeFeed();
+    }
 
   });
 
   onCleanup(() => {
-
-
     socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
   });
-
-	createEffect(() => {
-    if (isConnected()) {
-      setTrendingPosts({
-        messages: [],
-        users: {},
-        postStats: {},
-      });
-      getTrending(`trending_${subid}`);
-		}
-	});
 
   const onError = (error: Event) => {
     console.log("error: ", error);
@@ -77,25 +56,30 @@ const Home: Component = () => {
 
     const [type, subId, content] = message;
 
-    if (subId === `trending_${subid}`) {
-      processTrendingPost(type, content);
-      return;
-    }
+    // if (subId === `trending_${APP_ID}`) {
+    //   processTrendingPost(type, content);
+    //   return;
+    // }
 
-    if (type === 'EOSE') {
-      const newPosts = sortByRecency(convertToPosts(context?.page));
-      context?.actions?.clearPage();
-      context?.actions?.savePosts(newPosts);
 
-      return;
-    }
-
-    if (subId === 'user_profile') {
+    if (subId === `user_profile_${APP_ID}`) {
       proccessUserProfile(content as NostrUserContent);
       return;
     }
 
-    context?.actions?.proccessEventContent(content, type);
+    if (subId === `user_feed_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const newPosts = sortByRecency(convertToPosts(context?.page));
+        context?.actions?.clearPage();
+        context?.actions?.savePosts(newPosts);
+
+        return;
+      }
+
+      context?.actions?.proccessEventContent(content, type);
+      return;
+    }
+
   };
 
   const proccessUserProfile = (content: NostrUserContent) => {
@@ -103,52 +87,6 @@ const Home: Component = () => {
 
     context?.actions?.setActiveUser(user);
   }
-
-
-// PROCESSING TRENDS -------------------------------------
-// TODO: Cleanup and refactor
-
-
-
-  const proccessPost = (post: NostrPostContent) => {
-    setTrendingPosts('messages', (msgs) => [ ...msgs, post]);
-  };
-
-  const proccessUser = (user: NostrUserContent) => {
-    setTrendingPosts('users', (users) => ({ ...users, [user.pubkey]: user}))
-  };
-
-  const proccessStat = (stat: NostrStatsContent) => {
-    const content = JSON.parse(stat.content);
-    setTrendingPosts('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
-  };
-
-  const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
-
-    if (type === 'EOSE') {
-      const newPosts = sortByScore24h(convertToPosts(trendingPosts));
-
-      setTrendingPosts('notes', () => [...newPosts]);
-
-      return;
-    }
-
-    if (type === 'EVENT') {
-      if (content && content.kind === 0) {
-        proccessUser(content);
-      }
-      if (content && content.kind === 1) {
-        proccessPost(content);
-      }
-      if (content && content.kind === 10000100) {
-        proccessStat(content);
-      }
-    }
-  };
-
-
-// ----------------------------------------------------------
-
 
 
   const isPageLoading = () => context?.data.isFetching
@@ -162,7 +100,7 @@ const Home: Component = () => {
         <Portal
           mount={document.getElementById("right_sidebar") as Node}
         >
-          <TrendingNotes notes={trendingPosts.notes}/>
+          <TrendingNotes />
         </Portal>
 
         <Show

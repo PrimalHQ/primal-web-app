@@ -1,7 +1,7 @@
 import { Component, createEffect, createResource, createSignal, For, Index, Match, on, onCleanup, onMount, Show, Switch, useContext } from 'solid-js';
 import Post from '../components/Post/Post';
 import styles from './Thread.module.scss';
-import { useFeedContext } from '../contexts/FeedContext';
+import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
 import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
@@ -17,14 +17,7 @@ import PeopleList from '../components/PeopleList/PeopleList';
 const Home: Component = () => {
   const params = useParams();
 
-  const context = useFeedContext();
-
-  const [mainPost, setMainPost] = createSignal<PrimalNote>();
-
   const [mounted, setMounted] = createSignal(false);
-
-  const randomNumber = Math.floor(Math.random()*10000000000);
-  const subid = String(randomNumber);
 
   const [posts, setPosts] = createStore([]);
   const [page, setPage] = createStore({
@@ -54,6 +47,10 @@ const Home: Component = () => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subkey, content] = message;
+
+    if (subkey !== `thread_${params.postId}_${APP_ID}`) {
+      return;
+    }
 
     if (type === 'EOSE') {
       const newPosts = sortByRecency(convertToPosts(page), true);
@@ -103,13 +100,9 @@ const Home: Component = () => {
     socket()?.removeEventListener('message', onMessage);
   });
 
-  createEffect(() => {
-    params.postId && getThread(params.postId, subid);
-  });
-
 	createEffect(() => {
     if (isConnected()) {
-      getThread(params.postId, subid);
+      params.postId && getThread(params.postId, `thread_${params.postId}_${APP_ID}`);
 		}
 	});
 
