@@ -70,6 +70,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         replies: stat.replies,
         zaps: stat.zaps,
         score24h: stat.score24h,
+        satszapped: stat.satszapped,
       },
     };
   });

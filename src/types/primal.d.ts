@@ -59,6 +59,7 @@ export type FeedPage = {
       mentions: number,
       replies: number,
       zaps: number,
+      satszapped: number,
       score24h: number,
     },
   },
@@ -143,6 +144,7 @@ export type PrimalNote = {
     replies: number,
     zaps: number,
     score24h: number,
+    satszapped: number,
   }
 };
 

@@ -12,6 +12,7 @@ import Loader from '../components/Loader/Loader';
 import { createStore } from 'solid-js/store';
 import Paginator from '../components/Paginator/Paginator';
 import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
+import { proccessUserProfile } from '../stores/profile';
 
 const Home: Component = () => {
 
@@ -33,8 +34,8 @@ const Home: Component = () => {
       });
     }, 0);
 
-    socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
+    // socket()?.addEventListener('error', onError);
+    // socket()?.addEventListener('message', onMessage);
 
     if (!context?.data.isFetching && context?.data.posts.length === 0) {
       context.actions?.fetchHomeFeed();
@@ -42,51 +43,51 @@ const Home: Component = () => {
 
   });
 
-  onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
-    socket()?.removeEventListener('message', onMessage);
-  });
+  // onCleanup(() => {
+  //   socket()?.removeEventListener('error', onError);
+  //   socket()?.removeEventListener('message', onMessage);
+  // });
 
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
+  // const onError = (error: Event) => {
+  //   console.log("error: ", error);
+  // };
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  // const onMessage = (event: MessageEvent) => {
+  //   const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
-    const [type, subId, content] = message;
+  //   const [type, subId, content] = message;
 
-    // if (subId === `trending_${APP_ID}`) {
-    //   processTrendingPost(type, content);
-    //   return;
-    // }
+  //   // if (subId === `trending_${APP_ID}`) {
+  //   //   processTrendingPost(type, content);
+  //   //   return;
+  //   // }
 
 
-    if (subId === `user_profile_${APP_ID}`) {
-      proccessUserProfile(content as NostrUserContent);
-      return;
-    }
+  //   if (subId === `user_profile_${APP_ID}`) {
+  //     content && proccessUserProfile(content);
+  //     return;
+  //   }
 
-    if (subId === `user_feed_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const newPosts = sortByRecency(convertToPosts(context?.page));
-        context?.actions?.clearPage();
-        context?.actions?.savePosts(newPosts);
+  //   if (subId === `user_feed_${APP_ID}`) {
+  //     if (type === 'EOSE') {
+  //       const newPosts = sortByRecency(convertToPosts(context?.page));
+  //       context?.actions?.clearPage();
+  //       context?.actions?.savePosts(newPosts);
 
-        return;
-      }
+  //       return;
+  //     }
 
-      context?.actions?.proccessEventContent(content, type);
-      return;
-    }
+  //     context?.actions?.proccessEventContent(content, type);
+  //     return;
+  //   }
 
-  };
+  // };
 
-  const proccessUserProfile = (content: NostrUserContent) => {
-    const user = JSON.parse(content.content);
+  // const proccessUserProfile = (content: NostrUserContent) => {
+  //   const user = JSON.parse(content.content);
 
-    context?.actions?.setActiveUser(user);
-  }
+  //   context?.actions?.setActiveUser(user);
+  // }
 
 
   const isPageLoading = () => context?.data.isFetching

@@ -10,5 +10,5 @@ export const stopListeningForNostrStats = () => {
 };
 
 export const getLegendStats = (pubkey: string | undefined) => {
-  pubkey && socket()?.send(JSON.stringify(["REQ", `netstats_${APP_ID}`, {"cache":["explore_legend_counts",{ pubkey }]}]))
+  pubkey && socket()?.send(JSON.stringify(["REQ", `stats_legend_${APP_ID}`, {"cache":["explore_legend_counts",{ pubkey }]}]))
 }

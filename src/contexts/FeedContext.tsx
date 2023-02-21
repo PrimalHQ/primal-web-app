@@ -2,6 +2,8 @@ import { createContext, createEffect, createResource, createSignal, JSX, onClean
 import { createStore, unwrap } from "solid-js/store";
 import type {
   FeedStore,
+  NostrEOSE,
+  NostrEvent,
   NostrPostContent,
   NostrStatsContent,
   NostrUserContent,
@@ -11,11 +13,13 @@ import type {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { getFeed } from "../lib/feed";
+import { convertToPosts, getFeed, sortByRecency } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
-import { isConnected } from "../sockets";
+import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
+import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
+import { proccessEventContent } from "../stores/home";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -61,19 +65,19 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     setPage('postStats', { ...page.postStats, [content.event_id]: content })
   };
 
-  const [publicKey, setPublicKey] = createSignal<string>();
+  // const [publicKey, setPublicKey] = createSignal<string>();
 
   createEffect(() => {
-    if (publicKey()) {
-      const npub = hexToNpub(publicKey() as string);
-      const feed = { name: 'my feed', hex: publicKey(), npub};
+    if (profile.publicKey) {
+      const npub = hexToNpub(profile.publicKey);
+      const feed = { name: 'my feed', hex: profile.publicKey, npub};
 
 
       setData('availableFeeds', feeds => [...feeds, feed]);
       setData('selectedFeed', () => ({...feed}));
-      setData('publicKey', () => publicKey())
+      setData('publicKey', () => profile.publicKey)
 
-      getUserProfile(publicKey(), `user_profile_${APP_ID}`);
+      getUserProfile(profile.publicKey, `user_profile_${APP_ID}`);
     }
   });
 
@@ -112,6 +116,48 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   }
 
+  // MESSAGE LISTENERS ------------------------------------
+
+  const onError = (error: Event) => {
+    console.log("error: ", error);
+  };
+
+  const onMessage = (event: MessageEvent) => {
+    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+
+    const [type, subId, content] = message;
+
+    // if (subId === `trending_${APP_ID}`) {
+    //   processTrendingPost(type, content);
+    //   return;
+    // }
+
+
+    if (subId === `user_profile_${APP_ID}`) {
+      content && proccessUserProfile(content);
+      return;
+    }
+
+    if (subId === `user_feed_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const newPosts = sortByRecency(convertToPosts(page));
+
+        setData('posts', (posts) => [ ...posts, ...newPosts ]);
+        setData('isFetching', false);
+
+        // context?.actions?.clearPage();
+        // context?.actions?.savePosts(newPosts);
+
+        return;
+      }
+
+      proccessEventContent(content, type);
+      return;
+    }
+
+  };
+  // ------------------------------------------------------
+
   createEffect(() => {
     if (isConnected()) {
     const pubkey = data?.selectedFeed?.hex;
@@ -130,9 +176,17 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   });
 
   onMount(() => {
+    socket()?.addEventListener('error', onError);
+    socket()?.addEventListener('message', onMessage);
+
     setTimeout(() => {
       fetchNostrKey();
     }, 1000);
+  });
+
+  onCleanup(() => {
+    socket()?.removeEventListener('error', onError);
+    socket()?.removeEventListener('message', onMessage);
   });
 
   const store = {
