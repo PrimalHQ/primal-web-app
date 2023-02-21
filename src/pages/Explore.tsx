@@ -86,10 +86,12 @@ const Explore: Component = () => {
     };
 
     createEffect(() => {
-      if (isConnected() && !isListening()) {
+      if (isConnected()) {
+        if (!isListening()) {
+          startListeningForNostrStats();
+          setIsListening(true);
+        }
         getLegendStats(context?.data.publicKey);
-        startListeningForNostrStats();
-        setIsListening(true);
       }
     });
 
@@ -97,10 +99,12 @@ const Explore: Component = () => {
       socket()?.addEventListener('error', onError);
       socket()?.addEventListener('message', onMessage);
 
-      if (isConnected() && !isListening()) {
+      if (isConnected()) {
+        if (!isListening()) {
+          startListeningForNostrStats();
+          setIsListening(true);
+        }
         getLegendStats(context?.data.publicKey);
-        startListeningForNostrStats();
-        setIsListening(true);
       }
 
       setTimeout(() => {
