@@ -3,7 +3,7 @@ import styles from './Feed.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { useParams } from '@solidjs/router';
 import { isConnected, socket } from '../sockets';
-import { convertToPosts, getExploreFeed, sortByRecency, sortByScore, sortByScore24h } from '../lib/feed';
+import { convertToPosts, getExploreFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from '../lib/feed';
 import Post from '../components/Post/Post';
 import { NostrEvent, NostrEOSE, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import { createStore } from 'solid-js/store';
@@ -71,6 +71,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
     trending: sortByScore24h,
     popular: sortByScore,
     latest: sortByRecency,
+    mostzapped: sortByZapped,
   }
 
 

@@ -102,6 +102,14 @@ export const sortByScore = (posts: PrimalNote[], reverse = false) => {
   });
 };
 
+export const sortByZapped = (posts: PrimalNote[], reverse = false) => {
+  return posts.sort((a: PrimalNote, b: PrimalNote) => {
+    const order = b.post.satszapped - a.post.satszapped;
+
+    return reverse ? -1 * order : order;
+  });
+};
+
 export const getExploreFeed = (
   pubkey: string,
   subid: string,

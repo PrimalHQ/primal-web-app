@@ -30,7 +30,7 @@ const initialLegend = {
 };
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
-const timeframes = ['latest', 'trending', 'popular'];
+const timeframes = ['latest', 'trending', 'popular', 'mostzapped'];
 
 const Explore: Component = () => {
 
@@ -50,6 +50,7 @@ const Explore: Component = () => {
       latest: 'latest',
       trending: 'trending',
       popular: 'popular',
+      mostzapped: 'mostzapped',
     };
 
     const scopeLabels: Record<string, string> = {
