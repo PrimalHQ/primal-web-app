@@ -35,13 +35,12 @@ const App: Component = () => {
             <Route path="/" element={<Navigate href="/home" />} />
             <Route path="/home" component={Home} />
             <Route path="/thread/:postId" component={Thread} />
-            <Route path="/explore" component={Explore} />
+            <Route path="/explore/:scope?/:timeframe?" component={Explore} />
             <Route path="/messages" component={Messages} />
             <Route path="/notifications" component={Notifications} />
             <Route path="/downloads" component={Downloads} />
             <Route path="/settings" component={Settings} />
             <Route path="/help" component={Help} />
-            <Route path="/feed/:scope/:timeframe" component={Feed} />
             <Route path="/rest" component={Explore} />
           </Route>
         </Routes>

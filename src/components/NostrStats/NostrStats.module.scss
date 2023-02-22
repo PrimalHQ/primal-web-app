@@ -1,0 +1,29 @@
+
+.statsCaption {
+  margin-bottom: 32px;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 20px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.netstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-row-gap: 47px;
+
+  .netstat {
+    .number {
+      font-size: 20px;
+      line-height: 28px;
+      color: var(--text-secondary-2);
+    }
+
+    .label {
+      font-size: 16px;
+      line-height: 20px;
+      color: var(--text-tertiary-2);
+    }
+  }
+}

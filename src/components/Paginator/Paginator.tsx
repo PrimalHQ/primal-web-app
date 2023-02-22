@@ -8,7 +8,6 @@ export default function Paginator(props: { loadNextPage: (() => void) | undefine
     observer = new IntersectionObserver(entries => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          console.log('Intersect')
           props.loadNextPage && props.loadNextPage();
         }
       });

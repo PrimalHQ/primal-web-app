@@ -149,3 +149,25 @@ export type PrimalFeed = {
   npub: string | undefined,
   hex: string | undefined,
 };
+
+export type PrimalNetStats = {
+  users: number,
+  pubkeys: number,
+  pubnotes: number,
+  reactions: number,
+  reposts: number,
+  any: number,
+  zaps: number,
+  satszapped: number,
+};
+
+export type PrimalResponse = {
+  op: string,
+  netstats?: PrimalNetStats;
+};
+
+export type PrimalLegend = {
+  your_follows: number,
+  your_inner_network: number,
+  your_outer_network: number,
+};

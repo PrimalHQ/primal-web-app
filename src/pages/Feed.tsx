@@ -7,8 +7,9 @@ import { convertToPosts, getExploreFeed, sortByRecency, sortByScore, sortByScore
 import Post from '../components/Post/Post';
 import { NostrEvent, NostrEOSE, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import { createStore } from 'solid-js/store';
+import Loader from '../components/Loader/Loader';
 
-const Feed: Component = () => {
+const Feed: Component<{ scope: string, timeframe: string}> = () => {
 
   const context = useFeedContext();
 
@@ -74,7 +75,6 @@ const Feed: Component = () => {
 
 
   const proccessPost = (post: NostrPostContent) => {
-    console.log('PC: ', post);
     setNotes('messages', (msgs) => [ ...msgs, {...post}]);
   };
 
@@ -107,7 +107,6 @@ const Feed: Component = () => {
         proccessUser(content);
       }
       if (content && content.kind === 1) {
-        console.log('POSTS', content);
         proccessPost(content);
       }
       if (content && content.kind === 10000100) {
@@ -122,13 +121,18 @@ const Feed: Component = () => {
 
   return (
     <div class={styles.feedContent}>
-      <For each={notes.notes} >
-        {(post) => {
-          return <Post
-            post={post}
-          />
-        }}
-      </For>
+      <Show
+        when={notes.notes.length > 0}
+        fallback={<Loader />}
+      >
+        <For each={notes.notes} >
+          {(post) => {
+            return <Post
+              post={post}
+            />
+          }}
+        </For>
+      </Show>
     </div>
   )
 }

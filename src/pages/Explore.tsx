@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal, style } from 'solid-js/web';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
@@ -26,29 +26,12 @@ import follows from '../assets/icons/follows.svg';
 import tribe from '../assets/icons/tribe.svg';
 import network from '../assets/icons/network.svg';
 import global from '../assets/icons/global.svg';
-import { A } from '@solidjs/router';
+import { A, useParams } from '@solidjs/router';
+import NostrStats from '../components/NostrStats/NostrStats';
+import { PrimalNetStats } from '../types/primal';
+import ExploreMenu from './ExploreMenu';
+import Feed from './Feed';
 
-type PrimalNetStats = {
-  users: number,
-  pubkeys: number,
-  pubnotes: number,
-  reactions: number,
-  reposts: number,
-  any: number,
-  zaps: number,
-  satszapped: number,
-};
-
-type PrimalResponse = {
-  op: string,
-  netstats?: PrimalNetStats;
-};
-
-type PrimalLegend = {
-  your_follows: number,
-  your_inner_network: number,
-  your_outer_network: number,
-};
 
 const initialStats: PrimalNetStats = {
   users: 0,
@@ -67,6 +50,8 @@ const initialLegend = {
   your_outer_network: 0,
 };
 
+const scopes = ['follows', 'tribe', 'network', 'global'];
+const timeframes = ['latest', 'trending', 'popular'];
 
 const Explore: Component = () => {
 
@@ -80,35 +65,17 @@ const Explore: Component = () => {
 
     const context = useFeedContext();
 
-    const timeframeLabels: Record<string, string> = {
-      latest: 'latest',
-      trending: 'trending',
-      popular: 'popular',
+    const params = useParams();
+
+    const hasParams = () => {
+      if (!params.scope || !params.timeframe) {
+        return false;
+      }
+
+      return scopes.includes(params.scope) &&
+        timeframes.includes(params.timeframe);
+
     };
-
-    const scopeLabels: Record<string, string> = {
-      follows: 'my follows',
-      tribe: 'my tribe',
-      network: 'my network',
-      global: 'global'
-    };
-
-    const boxes = [
-      { scope: 'follows', timeframe: 'latest', icon: followsLatest},
-      { scope: 'tribe', timeframe: 'latest', icon: tribeLatest},
-      { scope: 'network', timeframe: 'latest', icon: networkLatest},
-      { scope: 'global', timeframe: 'latest', icon: globalLatest},
-
-      { scope: 'follows', timeframe: 'trending', icon: followsTrending},
-      { scope: 'tribe', timeframe: 'trending', icon: tribeTrending},
-      { scope: 'network', timeframe: 'trending', icon: networkTrending},
-      { scope: 'global', timeframe: 'trending', icon: globalTrending},
-
-      { scope: 'follows', timeframe: 'popular', icon: followsPopular},
-      { scope: 'tribe', timeframe: 'popular', icon: tribePopular},
-      { scope: 'network', timeframe: 'popular', icon: networkPopular},
-      { scope: 'global', timeframe: 'popular', icon: globalPopular},
-    ];
 
     const onError = (error: Event) => {
       console.log("error: ", error);
@@ -181,141 +148,17 @@ const Explore: Component = () => {
         </div>
         <Show when={mounted()}>
           <Portal mount={document.getElementById("right_sidebar") as Node}>
-            <div class={styles.statsCaption}>
-              NOSTR NETWORK STATS
-            </div>
-            <div class={styles.netstats}>
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.users?.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  users
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.pubkeys.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  public keys
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.pubnotes.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  public notes
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.reactions.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  reactions
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.zaps.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  zaps
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {(stats.satszapped /100000000).toFixed(8).toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  btc zapped
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.reposts.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  reposts
-                </div>
-              </div>
-
-              <div class={styles.netstat}>
-                <div class={styles.number}>
-                  {stats.any.toLocaleString()}
-                </div>
-                <div class={styles.label}>
-                  all events
-                </div>
-              </div>
-            </div>
+            <NostrStats stats={stats}/>
           </Portal>
         </Show>
 
 
-        <div class={styles.exploreMenu}>
-          <For each={boxes}>
-            {(box) =>
-              <A
-                href={`/feed/${box.scope}/${box.timeframe}`}
-                class={styles.exploreBox}
-              >
-                <div>
-                  <img
-                    class={styles.exploreBoxIcon}
-                    src={box.icon}
-                    alt={`${box.scope}_${box.timeframe}`}
-                  />
-                  <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
-                  <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
-                </div>
-              </A>
-            }
-          </For>
-        </div>
-
-        <div class={styles.statsLegend}>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <img src={follows} />
-            </div>
-            <div class={styles.legendName}>Follows</div>
-            <div class={styles.legendNumber}>{legend.your_follows}</div>
-            <div class={styles.legendDescription}>accounts you follow</div>
-          </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <img src={tribe} />
-            </div>
-            <div class={styles.legendName}>Tribe</div>
-            <div class={styles.legendNumber}>{legend.your_inner_network}</div>
-            <div class={styles.legendDescription}>your follows + your followers</div>
-          </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <img src={network} />
-            </div>
-            <div class={styles.legendName}>Network</div>
-            <div class={styles.legendNumber}>{legend.your_outer_network}</div>
-            <div class={styles.legendDescription}>your follows + everyone they follow</div>
-          </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <img src={global} />
-            </div>
-            <div class={styles.legendName}>Global</div>
-            <div class={styles.legendNumber}>{stats.users.toLocaleString()}</div>
-            <div class={styles.legendDescription}>all account on nostr</div>
-          </div>
-        </div>
+        <Show
+          when={hasParams()}
+          fallback={<ExploreMenu legend={legend} stats={stats}/>}
+        >
+          <Feed scope={params.scope} timeframe={params.timeframe} />
+        </Show>
       </>
     )
 }
