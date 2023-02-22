@@ -67,6 +67,19 @@ const Explore: Component = () => {
 
     const params = useParams();
 
+    const timeframeLabels: Record<string, string> = {
+      latest: 'latest',
+      trending: 'trending',
+      popular: 'popular',
+    };
+
+    const scopeLabels: Record<string, string> = {
+      follows: 'my follows',
+      tribe: 'my tribe',
+      network: 'my network',
+      global: 'global'
+    };
+
     const hasParams = () => {
       if (!params.scope || !params.timeframe) {
         return false;
@@ -143,7 +156,12 @@ const Explore: Component = () => {
       <>
         <div id="central_header" class={styles.fullHeader}>
           <div>
-            explore nostr
+            <Show
+              when={hasParams()}
+              fallback="explore nostr"
+            >
+              {timeframeLabels[params.timeframe]}: {scopeLabels[params.scope]}
+            </Show>
           </div>
         </div>
         <Show when={mounted()}>
