@@ -28,14 +28,14 @@
 
   .netstat {
     .number {
-      font-size: 28px;
-      line-height: 34px;
+      font-size: 20px;
+      line-height: 28px;
       color: var(--text-secondary-2);
     }
 
     .label {
       font-size: 16px;
-      line-height: 19px;
+      line-height: 20px;
       color: var(--text-tertiary-2);
     }
   }
@@ -43,19 +43,18 @@
 
 .exploreMenu {
   display: grid;
-  grid-template-columns: 160px 160px 160px;
-  grid-template-rows: 132px 132px 132px;
-  grid-column-gap: 79px;
-  grid-row-gap: 64px;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-column-gap: 26px;
+  grid-row-gap: 26px;
 }
 
 .exploreBox {
   box-sizing: border-box;
 
-  width: 160px;
-  height: 132px;
+  width: 140px;
+  height: 140px;
 
-  border: 1px solid var(--text-primary);
+  border: 1px solid var(--text-tertiary-2);
   border-radius: 9px;
 
   display: flex;
@@ -65,49 +64,85 @@
   >div {
     display: flex;
     width: 100%;
+    height: 100%;
     flex-direction: column;
-    justify-content: center;
-    margin-bottom: 10px;
+    align-items: center;
 
     .firstLine {
       text-align: center;
       font-size: 18px;
       font-weight: 300;
-      line-height: 21px;
+      line-height: 22px;
       color: var(--text-tertiary);
     }
 
     .secondLine {
       text-align: center;
       font-size: 18px;
-      line-height: 21px;
+      line-height: 22px;
       font-weight: 700;
       color: var(--text-primary);
+    }
+
+    .exploreBoxIcon {
+      align-self: center;
+      justify-self: center;
+      margin-top: 12px;
+      margin-bottom: 12px;
     }
   }
 }
 
-.statsLegend {
-  margin-top: 50px;
+@mixin tableCell {
+  display: table-cell;
+  padding: 0px 12px;
+  margin: 12px 0px;
+  border-bottom: solid 1px var(--text-tertiary-2);
+}
 
-  .legendCaption {
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: 800;
-    color: var(--text-secondary);
-    margin-bottom: 15px;
-  }
+.statsLegend {
+  display: table;
+  width: 100%;
+  margin-top: 53px;
+
 
   .legendDetails {
-    font-size: 16px;
-    line-height: 34px;
-    font-weight: 700;
-    color: var(--text-secondary);
+    display: table-row;
 
-    .highlight {
-      font-weight: 900;
+    .legendIcon {
+      @include tableCell;
+      width: 32px;
+      padding: 0px;
+      >img {
+        width: 32px;
+        height: 32px;
+        margin: 12px 0px;
+      }
+    }
+
+    .legendName {
+      @include tableCell;
       color: var(--text-primary);
-      margin: 0px 3px 0px 6px;
+      font-size: 18px;
+      line-height: 22px;
+      font-weight: 700;
+    }
+
+    .legendNumber {
+      @include tableCell;
+      color: var(--text-primary);
+      font-size: 24px;
+      line-height: 36px;
+      font-weight: 300;
+
+    }
+
+    .legendDescription {
+      @include tableCell;
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 300;
     }
   }
 }

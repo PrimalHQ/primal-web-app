@@ -90,7 +90,11 @@ const TrendingNotes: Component = () => {
     const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
 
       if (type === 'EOSE') {
-        const newPosts = sortByScore24h(convertToPosts(trendingNotes));
+        const newPosts = sortByScore24h(convertToPosts({
+          users: trendingNotes.users,
+          messages: trendingNotes.messages,
+          postStats: trendingNotes.postStats,
+        }));
 
         setTrendingPosts('notes', () => [...newPosts]);
 

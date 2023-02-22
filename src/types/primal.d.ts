@@ -48,21 +48,23 @@ export type FeedStore = {
   availableFeeds: PrimalFeed[],
 };
 
+export type NostrPostStats = {
+  [eventId: string]: {
+    likes: number,
+    mentions: number,
+    replies: number,
+    zaps: number,
+    satszapped: number,
+    score24h: number,
+  },
+};
+
 export type FeedPage = {
   users: {
     [pubkey: string]: NostrUserContent,
   },
   messages: NostrPostContent[],
-  postStats: {
-    [eventId: string]: {
-      likes: number,
-      mentions: number,
-      replies: number,
-      zaps: number,
-      satszapped: number,
-      score24h: number,
-    },
-  },
+  postStats: NostrPostStats,
 };
 
 export type TrendingNotesStore = {
@@ -78,6 +80,7 @@ export type TrendingNotesStore = {
       replies: number,
       zaps: number,
       score24h: number,
+      satszapped: number,
     },
   },
 };
