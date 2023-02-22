@@ -1,6 +1,7 @@
 import { socket } from "../sockets";
 import { FeedPage, PrimalNote } from "../types/primal";
 import { hexToNpub } from "./keys";
+import DOMPurify from 'dompurify';
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -63,7 +64,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         pubkey: msg.pubkey,
         created_at: msg.created_at,
         tags: msg.tags,
-        content: msg.content,
+        content: DOMPurify.sanitize(msg.content),
         sig: msg.sig,
         likes: stat.likes,
         mentions: stat.mentions,

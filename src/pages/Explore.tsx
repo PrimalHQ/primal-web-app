@@ -1,32 +1,10 @@
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal, style } from 'solid-js/web';
+import { Portal } from 'solid-js/web';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { getLegendStats, startListeningForNostrStats, stopListeningForNostrStats } from '../lib/stats';
-import { isConnected, reset, socket } from '../sockets';
+import { isConnected, socket } from '../sockets';
 import styles from './Explore.module.scss';
-
-import globalTrending from '../assets/icons/global_trending.svg';
-import globalLatest from '../assets/icons/global_latest.svg';
-import globalPopular from '../assets/icons/global_popular.svg';
-
-import networkTrending from '../assets/icons/network_trending.svg';
-import networkLatest from '../assets/icons/network_latest.svg';
-import networkPopular from '../assets/icons/network_popular.svg';
-
-import tribeTrending from '../assets/icons/tribe_trending.svg';
-import tribeLatest from '../assets/icons/tribe_latest.svg';
-import tribePopular from '../assets/icons/tribe_popular.svg';
-
-import followsTrending from '../assets/icons/follows_trending.svg';
-import followsLatest from '../assets/icons/follows_latest.svg';
-import followsPopular from '../assets/icons/follows_popular.svg';
-
-import follows from '../assets/icons/follows.svg';
-import tribe from '../assets/icons/tribe.svg';
-import network from '../assets/icons/network.svg';
-import global from '../assets/icons/global.svg';
-import { A, useParams } from '@solidjs/router';
 import NostrStats from '../components/NostrStats/NostrStats';
 import { PrimalNetStats } from '../types/primal';
 import ExploreMenu from './ExploreMenu';
