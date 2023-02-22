@@ -108,7 +108,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       else {
         setPublicKey(key);
       }
-    } catch (e) {
+    } catch (e: any) {
       if (e.message === 'User rejected') {
         setData('selectedFeed', data.availableFeeds[0]);
       }
