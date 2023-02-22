@@ -90,11 +90,10 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
                 class={styles.exploreBox}
               >
                 <div>
-                  <img
-                    class={styles.exploreBoxIcon}
-                    src={box.icon}
-                    alt={`${box.scope}_${box.timeframe}`}
-                  />
+                  <div
+                    class={`${styles.exploreBoxIcon} ${styles[`${box.scope}_${box.timeframe}_icon`]}`}
+                  >
+                  </div>
                   <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
                   <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
                 </div>
@@ -106,7 +105,7 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
         <div class={styles.statsLegend}>
           <div class={styles.legendDetails}>
             <div class={styles.legendIcon}>
-              <img src={follows} />
+              <div class={styles.followsIcon}></div>
             </div>
             <div class={styles.legendName}>Follows</div>
             <div class={styles.legendNumber}>{props.legend.your_follows}</div>
@@ -114,7 +113,7 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
           </div>
           <div class={styles.legendDetails}>
             <div class={styles.legendIcon}>
-              <img src={tribe} />
+              <div class={styles.tribeIcon}></div>
             </div>
             <div class={styles.legendName}>Tribe</div>
             <div class={styles.legendNumber}>{props.legend.your_inner_network}</div>
@@ -122,7 +121,7 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
           </div>
           <div class={styles.legendDetails}>
             <div class={styles.legendIcon}>
-              <img src={network} />
+              <div class={styles.networkIcon}></div>
             </div>
             <div class={styles.legendName}>Network</div>
             <div class={styles.legendNumber}>{props.legend.your_outer_network}</div>
@@ -130,7 +129,7 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
           </div>
           <div class={styles.legendDetails}>
             <div class={styles.legendIcon}>
-              <img src={global} />
+              <div class={styles.globalIcon}></div>
             </div>
             <div class={styles.legendName}>Global</div>
             <div class={styles.legendNumber}>{props.stats.users.toLocaleString()}</div>

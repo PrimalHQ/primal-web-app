@@ -69,8 +69,8 @@
 @mixin tableCell {
   display: table-cell;
   padding: 0px 12px;
-  margin: 12px 0px;
   border-bottom: solid 1px var(--text-tertiary-2);
+  vertical-align: middle;
 }
 
 .statsLegend {
@@ -86,7 +86,7 @@
       @include tableCell;
       width: 32px;
       padding: 0px;
-      >img {
+      >div {
         width: 32px;
         height: 32px;
         margin: 12px 0px;
@@ -118,4 +118,126 @@
       font-weight: 300;
     }
   }
+}
+
+@mixin exploreCategoryIcon {
+  width: 56px;
+  height: 56px;
+  background-color: var(--text-primary);
+}
+
+.global_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/global_trending.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.global_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/global_latest.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.global_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/global_popular.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.network_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/network_trending.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.network_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/network_latest.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.network_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/network_popular.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.tribe_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/tribe_trending.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribe_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/tribe_latest.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribe_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/tribe_popular.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.follows_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/follows_trending.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.follows_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/follows_latest.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.follows_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/follows_latest.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.followsIcon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/follows.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribeIcon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/tribe.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.networkIcon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/network.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.globalIcon {
+  @include exploreCategoryIcon;
+  background-image: url('../assets/icons/global.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
