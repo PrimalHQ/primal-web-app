@@ -35,7 +35,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
     return [];
   }
 
-  return  page?.messages.map((msg) => {
+  return  page.messages.map((msg) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
@@ -69,6 +69,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         mentions: stat.mentions,
         replies: stat.replies,
         zaps: stat.zaps,
+        score: stat.score,
         score24h: stat.score24h,
         satszapped: stat.satszapped,
       },
@@ -92,6 +93,14 @@ export const sortByScore24h = (posts: PrimalNote[], reverse = false) => {
   });
 };
 
+export const sortByScore = (posts: PrimalNote[], reverse = false) => {
+  return posts.sort((a: PrimalNote, b: PrimalNote) => {
+    const order = b.post.score - a.post.score;
+
+    return reverse ? -1 * order : order;
+  });
+};
+
 export const getExploreFeed = (
   pubkey: string,
   subid: string,
@@ -108,7 +117,7 @@ export const getExploreFeed = (
     subid,
     {cache: [
       "explore",
-      { pubkey, timeframe, scope, limit, [start]: until },
+      { pubkey, timeframe, scope, limit },
     ]},
   ]));
 };

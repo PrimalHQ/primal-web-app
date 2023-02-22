@@ -55,6 +55,7 @@ export type NostrPostStats = {
     replies: number,
     zaps: number,
     satszapped: number,
+    score: number,
     score24h: number,
   },
 };
@@ -73,16 +74,7 @@ export type TrendingNotesStore = {
   },
   messages: NostrPostContent[],
   notes: PrimalNote[],
-  postStats: {
-    [eventId: string]: {
-      likes: number,
-      mentions: number,
-      replies: number,
-      zaps: number,
-      score24h: number,
-      satszapped: number,
-    },
-  },
+  postStats: NostrPostStats,
 };
 
 export type PrimalContextStore = {
@@ -146,6 +138,7 @@ export type PrimalNote = {
     mentions: number,
     replies: number,
     zaps: number,
+    score: number,
     score24h: number,
     satszapped: number,
   }

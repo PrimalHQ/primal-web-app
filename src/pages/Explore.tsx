@@ -26,6 +26,7 @@ import follows from '../assets/icons/follows.svg';
 import tribe from '../assets/icons/tribe.svg';
 import network from '../assets/icons/network.svg';
 import global from '../assets/icons/global.svg';
+import { A } from '@solidjs/router';
 
 type PrimalNetStats = {
   users: number,
@@ -263,7 +264,10 @@ const Explore: Component = () => {
         <div class={styles.exploreMenu}>
           <For each={boxes}>
             {(box) =>
-              <div class={styles.exploreBox}>
+              <A
+                href={`/feed/${box.scope}/${box.timeframe}`}
+                class={styles.exploreBox}
+              >
                 <div>
                   <img
                     class={styles.exploreBoxIcon}
@@ -273,7 +277,7 @@ const Explore: Component = () => {
                   <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
                   <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
                 </div>
-              </div>
+              </A>
             }
           </For>
         </div>
