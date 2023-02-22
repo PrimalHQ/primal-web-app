@@ -9,6 +9,7 @@ import NostrStats from '../components/NostrStats/NostrStats';
 import { PrimalNetStats } from '../types/primal';
 import ExploreMenu from './ExploreMenu';
 import Feed from './Feed';
+import { useParams } from '@solidjs/router';
 
 
 const initialStats: PrimalNetStats = {
