@@ -22,13 +22,6 @@
     grid-row-gap: 6px;
     justify-items: center;
 
-
-    .avatarImg {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-    }
-
     .avatarName {
       width: 100%;
       padding: 0px 6px;
@@ -90,7 +83,7 @@
 
 
       .contextMenu {
-        min-width: 40px;
+        min-width: 10px;
         display: inline-block;
         text-align: center;
         font-weight: bold;
@@ -173,4 +166,41 @@
   background-color: var(--text-tertiary-2);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
   mask: url(../../assets/icons/verified.svg) no-repeat center;
+}
+
+
+@media only screen and (max-width: 720px) {
+  // .border {
+  //   background: var(--brand-gradient-vertical);
+  //   padding-left: 4px;
+  //   border-radius: 4px 4px 4px 4px;
+  // }
+  .post {
+    width: 100% !important;
+    grid-template-columns: 92px 1fr;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-right: 0px;
+    .content {
+      width: 100%;
+      .header {
+        width: 100% !important;
+        .postInfo {
+          width: 80% !important;
+        }
+      }
+      .message {
+        width: 80% !important;
+      }
+
+      .footer {
+        width: 80% !important;
+        grid-column-gap: 10% !important;
+      }
+    }
+  }
+
+  .postLink {
+    width: 100% !important;
+  }
 }

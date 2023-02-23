@@ -1,5 +1,43 @@
+.sideNav {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    margin-bottom: 28px;
+  }
+}
+
 .callToAction {
   display: grid;
   justify-content: right;
   margin-top: 15px;
+}
+
+@media only screen and (max-width: 720px) {
+  .navMenu {
+    width: 100%;
+  }
+
+  .sideNav {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-end;
+    width: 100%;
+    height: 48px;
+
+    > div {
+      margin-bottom: 0px;
+    }
+
+    div:nth-child(n+5) {
+      display: none;
+    }
+  }
+
+  .callToAction {
+    position: fixed;
+    bottom: 56px;
+    right: 12px;
+  }
 }

@@ -87,7 +87,7 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
             {(box) =>
               <A
                 href={`/explore/${box.scope}/${box.timeframe}`}
-                class={styles.exploreBox}
+                class={`${styles.exploreBox} ${styles[`${box.scope}_${box.timeframe}_box`]}`}
               >
                 <div>
                   <div

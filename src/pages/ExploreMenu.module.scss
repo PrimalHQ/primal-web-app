@@ -241,3 +241,70 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+@media only screen and (max-width: 720px) {
+  .exploreMenu {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    grid-column-gap: 6px;
+    grid-row-gap: 26px;
+    grid-template-areas:
+      "followsLatest followsTrending followsPopular"
+      "tribeLatest tribeTrending tribePopular"
+      "networkLatest networkTrending networkPopular"
+      "globalLatest globalTrending globalPopular";
+  }
+
+  .global_trending_box {
+    grid-area: globalTrending;
+  }
+
+  .global_latest_box {
+    grid-area: globalLatest;
+  }
+
+  .global_popular_box {
+    grid-area: globalPopular;
+  }
+
+
+  .network_trending_box {
+    grid-area: networkTrending;
+  }
+
+  .network_latest_box {
+    grid-area: networkLatest;
+  }
+
+  .network_popular_box {
+    grid-area: networkPopular;
+  }
+
+
+  .tribe_trending_box {
+    grid-area: tribeTrending;
+  }
+
+  .tribe_latest_box {
+    grid-area: tribeLatest;
+  }
+
+  .tribe_popular_box {
+    grid-area: tribePopular;
+  }
+
+
+  .follows_trending_box {
+    grid-area: followsTrending;
+  }
+
+  .follows_latest_box {
+    grid-area: followsLatest;
+  }
+
+  .follows_popular_box {
+    grid-area: followsPopular;
+  }
+}

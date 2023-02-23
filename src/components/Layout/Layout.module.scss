@@ -97,32 +97,59 @@
 
 @media only screen and (max-width: 720px) {
   .container {
-    max-width: 720px;
+    width: 100%;
     height: 100vh;
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    grid-template-rows: 1fr 48px;
     grid-template-areas: "content" "footer";
   }
 
   .centerColumn {
     grid-area: content;
-    height: 80vh;
+    width: 100%;
+  }
+
+  .centerHeader {
+    width: 100%;
+  }
+
+  .centerContent {
+    width: 100%;
   }
 
   .leftColumn {
     position: fixed;
+    left: 0px;
     bottom: 0px;
+    width: 100%;
     grid-area: footer;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
     z-index: 20;
+    background-color: var(--background-site);
+
+    .leftHeader {
+      display: none;
+    }
+
+    .leftContent {
+      display: flex;
+      width: 100%;
+    }
 
     >div {
       position: relative;
+      width: 100%;
     }
   }
 
   .rightColumn {
     display: none;
   }
+
+  // body {
+  //   overflow-x: hidden;
+  // }
 }

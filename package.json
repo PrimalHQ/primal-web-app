@@ -5,9 +5,11 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "vite build",
     "build:unminified": "vite build --minify=false",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "host": "vite preview --host"
   },
   "license": "MIT",
   "devDependencies": {

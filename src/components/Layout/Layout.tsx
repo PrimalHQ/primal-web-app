@@ -2,13 +2,9 @@ import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid
 
 import styles from './Layout.module.scss';
 
-import jack from '../../assets/icons/jack.png';
 import Branding from '../Branding/Branding';
-import Welcome from '../Welcome/Welcome';
 import { Outlet } from '@solidjs/router';
-import NavLink from '../NavLink/NavLink';
 import Search from '../Search/Search';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import NavMenu from '../NavMenu/NavMenu';
 
 const Layout: Component = () => {

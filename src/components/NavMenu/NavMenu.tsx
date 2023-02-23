@@ -19,13 +19,11 @@ const NavMenu: Component = (props) => {
     return (
       <div class={styles.navMenu}>
         <nav class={styles.sideNav}>
-          <aside>
-            <For each={links}>
-              {({ to, label, icon }) =>
-                <NavLink to={to} label={label} icon={icon} />
-              }
-            </For>
-          </aside>
+          <For each={links}>
+            {({ to, label, icon }) =>
+              <NavLink to={to} label={label} icon={icon} />
+            }
+          </For>
         </nav>
         <div class={styles.callToAction}>
           <ThemeToggle />
