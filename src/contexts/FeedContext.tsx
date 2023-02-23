@@ -43,6 +43,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
       if (pubkey) {
         setData('isFetching', true);
+
+        console.log('GET FEED UNTIL');
+        setPage({ messages: [], users: {}, postStats: {} });
         getFeed(pubkey, `user_feed_${APP_ID}`, until);
       }
     }
@@ -53,16 +56,16 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       return;
     }
 
-    setPage('messages', [ ...page.messages, post]);
+    setPage('messages', (msgs) =>[ ...msgs, post]);
   };
 
   const proccessUser = (user: NostrUserContent) => {
-    setPage('users', { ...page.users, [user.pubkey]: user})
+    setPage('users', (users) => ({ ...users, [user.pubkey]: user}));
   };
 
   const proccessStat = (stat: NostrStatsContent) => {
     const content = JSON.parse(stat.content);
-    setPage('postStats', { ...page.postStats, [content.event_id]: content })
+    setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }));
   };
 
   // const [publicKey, setPublicKey] = createSignal<string>();
@@ -96,7 +99,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         return;
       }
 
-      setData('selectedFeed', data.availableFeeds[0]);
+      setData('selectedFeed', () => ({ ...data.availableFeeds[0] }));
     }
 
     try {
@@ -110,7 +113,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       }
     } catch (e: any) {
       if (e.message === 'User rejected') {
-        setData('selectedFeed', data.availableFeeds[0]);
+        setData('selectedFeed', () => ({ ...data.availableFeeds[0] }));
       }
       console.log('ERROR: ', e);
     }
@@ -171,6 +174,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     setData('posts', () => []);
     setData('scrollTop', () => 0);
+    setPage({ messages: [], users: {}, postStats: {} });
 
     window.scrollTo({
       top: 0,
