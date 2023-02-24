@@ -19,7 +19,7 @@ import { initialStore, emptyPage } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
-import { proccessEventContent } from "../stores/home";
+// import { proccessEventContent } from "../stores/home";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -44,7 +44,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       if (pubkey) {
         setData('isFetching', true);
 
-        console.log('GET FEED UNTIL');
         setPage({ messages: [], users: {}, postStats: {} });
         getFeed(pubkey, `user_feed_${APP_ID}`, until);
       }
@@ -66,6 +65,20 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const proccessStat = (stat: NostrStatsContent) => {
     const content = JSON.parse(stat.content);
     setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }));
+  };
+
+  const proccessEventContent = (content: NostrUserContent | NostrPostContent | NostrStatsContent, type: string) => {
+    if (type === 'EVENT') {
+      if (content.kind === 0) {
+        proccessUser(content);
+      }
+      if (content.kind === 1) {
+        proccessPost(content);
+      }
+      if (content.kind === 10000100) {
+        proccessStat(content);
+      }
+    }
   };
 
   // const [publicKey, setPublicKey] = createSignal<string>();
