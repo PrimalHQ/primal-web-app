@@ -13,6 +13,7 @@ import { createStore } from 'solid-js/store';
 import Paginator from '../components/Paginator/Paginator';
 import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
 import { proccessUserProfile } from '../stores/profile';
+import Branding from '../components/Branding/Branding';
 
 const Home: Component = () => {
 
@@ -95,6 +96,12 @@ const Home: Component = () => {
   return (
     <div class={styles.homeContent}>
       <Show when={mounted()}>
+        <Portal
+          mount={document.getElementById("branding_holder") as Node}
+        >
+          <Branding small={false} />
+        </Portal>
+
         <div id="central_header">
           <HomeHeader />
         </div>

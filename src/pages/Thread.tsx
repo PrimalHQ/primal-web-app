@@ -12,9 +12,10 @@ import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import PrimaryPost from '../components/PrimaryPost/PrimaryPost';
 import PeopleList from '../components/PeopleList/PeopleList';
+import PageNav from '../components/PageNav/PageNav';
 
 
-const Home: Component = () => {
+const Thread: Component = () => {
   const params = useParams();
 
   const [mounted, setMounted] = createSignal(false);
@@ -115,7 +116,12 @@ const Home: Component = () => {
         <Switch>
           <Match when={mounted()}>
             <Portal
-              ref={<div id="portal_div"></div> as HTMLDivElement}
+              mount={document.getElementById("branding_holder") as Node}
+            >
+              <PageNav />
+            </Portal>
+
+            <Portal
               mount={document.getElementById("right_sidebar") as Node}
             >
               <PeopleList people={people()} />
@@ -149,4 +155,4 @@ const Home: Component = () => {
   )
 }
 
-export default Home;
+export default Thread;

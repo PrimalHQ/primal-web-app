@@ -15,8 +15,7 @@ const Layout: Component = () => {
 
         <div class={styles.leftColumn}>
           <div>
-            <div class={styles.leftHeader}>
-              <Branding small={false} />
+            <div id="branding_holder" class={styles.leftHeader}>
             </div>
 
             <div class={styles.leftContent}>

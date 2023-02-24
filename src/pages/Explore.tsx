@@ -10,6 +10,8 @@ import { PrimalNetStats } from '../types/primal';
 import ExploreMenu from './ExploreMenu';
 import Feed from './Feed';
 import { useParams } from '@solidjs/router';
+import Branding from '../components/Branding/Branding';
+import PageNav from '../components/PageNav/PageNav';
 
 
 const initialStats: PrimalNetStats = {
@@ -134,6 +136,18 @@ const Explore: Component = () => {
 
     return (
       <>
+        <Portal
+          mount={document.getElementById("branding_holder") as Node}
+        >
+          <Show
+            when={hasParams()}
+            fallback={
+              <Branding small={false} />
+            }
+          >
+            <PageNav />
+          </Show>
+        </Portal>
         <div id="central_header" class={styles.fullHeader}>
           <div>
             <Show
