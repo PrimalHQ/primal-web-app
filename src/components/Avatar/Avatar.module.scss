@@ -41,6 +41,12 @@
   @include avatar;
   width: 48px;
   height: 48px;
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: 0px;
+    right: 0px;
+  }
 }
 
 .midAvatar {
@@ -50,8 +56,8 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: 2px;
-    right: 2px;
+    bottom: 0px;
+    right: 0px;
   }
 }
 

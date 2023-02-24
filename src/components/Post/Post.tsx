@@ -1,6 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
+import { trimVerification } from '../../lib/profile';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
@@ -34,11 +35,11 @@ const urlify = (text: string) => {
 
 // }
 
-const trimVerification = (address: string) => {
-  const [_, domain] = address.split('@');
+// const trimVerification = (address: string) => {
+//   const [_, domain] = address.split('@');
 
-  return domain;
-}
+//   return domain;
+// }
 
 const Post: Component<{ post: PrimalNote }> = (props) => {
 
@@ -81,7 +82,9 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
                 {date(props.post?.post?.created_at).label}
               </span>
             </span>
-            <div class={styles.contextMenu}>...</div>
+            <div class={styles.contextMenu}>
+              <div class={styles.contextIcon}></div>
+            </div>
           </div>
 
           <div class={styles.message} innerHTML={urlify(props.post?.post?.content)}>

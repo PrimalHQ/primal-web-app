@@ -6,6 +6,7 @@ import Branding from '../Branding/Branding';
 import { Outlet } from '@solidjs/router';
 import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
+import ProfileWidget from '../ProfileWidget/ProfileWidget';
 
 const Layout: Component = () => {
 
@@ -20,6 +21,10 @@ const Layout: Component = () => {
 
             <div class={styles.leftContent}>
               <NavMenu />
+            </div>
+
+            <div class={styles.leftFooter}>
+              <ProfileWidget />
             </div>
           </div>
         </div>

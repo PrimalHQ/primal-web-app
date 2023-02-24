@@ -169,6 +169,17 @@
   mask: url(../../assets/icons/verified.svg) no-repeat center;
 }
 
+.contextIcon {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  vertical-align: middle;
+
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}
+
 
 .postLink {
   text-decoration: none;

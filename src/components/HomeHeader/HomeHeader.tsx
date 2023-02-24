@@ -52,7 +52,7 @@ const HomeHeader: Component = () => {
     window.removeEventListener('scroll', onScroll);
   });
 
-  const activeUserPicture = () => context?.data.activeUser?.picture;
+  const activeUser = () => context?.data.activeUser;
 
   return (
     <div class={styles.fullHeader}>
@@ -62,9 +62,9 @@ const HomeHeader: Component = () => {
       >
         <div class={styles.callToAction}>
           <Avatar
-            src={activeUserPicture()}
+            src={activeUser()?.picture}
             size="lg"
-            verified="naravno"
+            verified={activeUser()?.nip05}
           />
 
           <div class={styles.border}>

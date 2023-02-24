@@ -1,0 +1,74 @@
+.userProfile {
+  display: grid;
+  width: 176px;
+  grid-template-columns: 48px 90px 22px;
+  grid-column-gap: 8px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.userName {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  width: 90px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.userVerification {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  width: 90px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.contextMenu {
+  display: flex;
+  align-items: center;
+}
+
+.contextIcon {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  vertical-align: middle;
+
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}
+
+@media only screen and (max-width: 1300px) {
+  .userProfile {
+    display: grid;
+    width: 48px;
+    grid-template-columns: 48px;
+    grid-column-gap: 0px;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .contextMenu {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .userProfile {
+    display: none;
+  }
+}

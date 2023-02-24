@@ -7,3 +7,14 @@ export const getUserProfile = (pubkey: string, subid: string) => {
     {cache: ["user_info", { pubkey }]},
   ]));
 }
+
+
+export const trimVerification = (address: string | undefined) => {
+  if (address === undefined) {
+    return '';
+  }
+
+  const [_, domain] = address.split('@');
+
+  return domain;
+}
