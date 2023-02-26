@@ -166,10 +166,9 @@ export const resetScroll = () => {
 
 export const addMyFeed = (hex: string) => {
   const npub = hexToNpub(hex);
-  const feed = { name: 'my feed', hex, npub};
+  const feed = { name: 'Latest, following', hex, npub};
 
-  setHomeFeed('availableFeeds', () => ([...initialStore.availableFeeds, feed]));
-  console.log('Add MY FEED');
+  setHomeFeed('availableFeeds', () => ([ feed, ...initialStore.availableFeeds]));
   selectFeed(feed);
 };
 

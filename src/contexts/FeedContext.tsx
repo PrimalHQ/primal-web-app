@@ -86,10 +86,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   createEffect(() => {
     if (profile.publicKey) {
       const npub = hexToNpub(profile.publicKey);
-      const feed = { name: 'my feed', hex: profile.publicKey, npub};
+      const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
-
-      setData('availableFeeds', feeds => [...feeds, feed]);
+      setData('availableFeeds', () => [ feed, ...initialStore.availableFeeds]);
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey)
 

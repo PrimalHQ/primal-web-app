@@ -25,3 +25,10 @@
   -webkit-mask: url(../../assets/icons/forward.svg) no-repeat center;
   mask: url(../../assets/icons/forward.svg) no-repeat center;
 }
+
+
+@media only screen and (max-width: 1300px) {
+  .backIcon {
+    margin-right: 8px;
+  }
+}

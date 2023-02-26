@@ -20,6 +20,7 @@
   "dependencies": {
     "@picocss/pico": "^1.5.7",
     "@solidjs/router": "^0.7.0",
+    "@thisbeyond/solid-select": "^0.13.0",
     "@types/dompurify": "^2.4.0",
     "dompurify": "^3.0.0",
     "nostr-tools": "^1.4.1",

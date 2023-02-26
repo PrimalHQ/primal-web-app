@@ -171,3 +171,5 @@ export type PrimalLegend = {
   your_inner_network: number,
   your_outer_network: number,
 };
+
+export type FeedOption = { label: string, value: string | undefined};
