@@ -6,6 +6,7 @@ import miljan from '../../assets/icons/miljan.jpg';
 import PostButton from '../PostButton/PostButton';
 import FeedSelect from '../FeedSelect/FeedSelect';
 import { useFeedContext } from '../../contexts/FeedContext';
+import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 
 const HomeHeader: Component = () => {
 
@@ -64,17 +65,23 @@ const HomeHeader: Component = () => {
           <Avatar
             src={activeUser()?.picture}
             size="lg"
-            verified={activeUser()?.nip05}
           />
 
           <div class={styles.border}>
-            <input type="text" placeholder="post something to nostr..." />
+            <div class={styles.input}>
+              say something on nostr...
+            </div>
           </div>
         </div>
       </Show>
 
-      <div id="small_header" class={styles.feedSelector}>
-        <FeedSelect />
+      <div id="small_header" class={styles.smallHeader}>
+        <div class={styles.smallLeft}>
+          <SmallCallToAction activeUser={activeUser()} />
+        </div>
+        <div class={styles.smallRight}>
+          <FeedSelect />
+        </div>
       </div>
     </div>
   );

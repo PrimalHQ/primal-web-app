@@ -15,7 +15,7 @@ export const initialStore: FeedStore = {
   selectedFeed: undefined,
   availableFeeds: [
     {
-      name: 'Edward Snowden\'s feed' ,
+      name: 'Edward Snowden\'s feed is the best feed ever made, I tell you!' ,
       hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
       npub: 'npub1sn0wdenkukak0d9dfczzeacvhkrgz92ak56egt7vdgzn8pv2wfqqhrjdv9',
     },{

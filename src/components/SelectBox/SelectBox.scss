@@ -15,10 +15,25 @@
   }
 
   .solid-select-control {
-    margin: 0;
+    margin: 0px 0px 0px 8px;
     padding: 0;
     cursor: pointer;
     pointer-events:painted;
+    width: calc(100% - 8px);
+    display: flex;
+    align-items: center;
+
+    &:after {
+      content: '';
+      display: inline-block;
+      margin-left: 8px;
+      width: 10px;
+      height: 10px;
+
+      background-color: var(--text-primary);
+      -webkit-mask: url(../../assets/icons/caret.svg) no-repeat center;
+      mask: url(../../assets/icons/caret.svg) no-repeat center;
+    }
   }
 
   .solid-select-option {
@@ -68,22 +83,14 @@
     margin: 0;
     padding: 0;
     cursor: pointer;
-    caret-color: transparent;
   }
 
   .solid-select-single-value {
-
-    &:after {
-      content: ' ';
-      display: inline-block;
-      margin-left: 8px;
-      width: 10px;
-      height: 10px;
-
-      background-color: var(--text-primary);
-      -webkit-mask: url(../../assets/icons/caret.svg) no-repeat center;
-      mask: url(../../assets/icons/caret.svg) no-repeat center;
-    }
+    caret-color: transparent;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 100%;
   }
 
 }

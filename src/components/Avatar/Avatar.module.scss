@@ -35,6 +35,12 @@
   @include avatar;
   width: 24px;
   height: 24px;
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
 }
 
 .smallAvatar {

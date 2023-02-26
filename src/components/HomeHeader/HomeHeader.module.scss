@@ -4,10 +4,25 @@
   padding-top: 25px;
 }
 
-.feedSelector {
-  display: grid;
-  justify-content: right;
+.smallHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: streach;
   background-color: var(--background-site);
+
+}
+
+.smallLeft {
+ width: 100%;
+ flex-grow: 20;
+ flex-shrink: 1;
+ visibility: hidden;
+}
+
+.smallRight {
+  max-width: 50%;
+  flex-grow: 1;
+  margin: auto;
 }
 
 .fixedSelector {
@@ -20,6 +35,10 @@
   z-index: var(--z-index-header);
   transition: 0.3s;
   transform: translateY(0px);
+
+  .smallLeft {
+    visibility: visible;
+  }
 }
 
 .hiddenSelector {
@@ -53,14 +72,18 @@
     margin-left: 10px
   }
 
-  input {
+  .input {
     height: 34px;
     font-size: 18px;
     line-height: 20px;
     margin: 0px;
     border-radius: 6px;
     border: none;
+    color: var(--text-tertiary);
     background-color: var(--background-site);
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
   }
 }
 
