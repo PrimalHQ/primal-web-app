@@ -13,6 +13,7 @@ export const initialStore: FeedStore = {
   publicKey: '',
   activeUser: undefined,
   selectedFeed: undefined,
+  showNewNoteForm: false,
   availableFeeds: [
     {
       name: 'Edward Snowden\'s feed is the best feed ever made, I tell you!' ,

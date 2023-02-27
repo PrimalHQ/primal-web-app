@@ -7,48 +7,70 @@ import { Outlet } from '@solidjs/router';
 import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
+import NewNote from '../NewNote/NewNote';
+import { useFeedContext } from '../../contexts/FeedContext';
 
 const Layout: Component = () => {
 
-    return (
-      <div id="container" class={styles.container}>
+  const context = useFeedContext();
 
-        <div class={styles.leftColumn}>
-          <div>
-            <div id="branding_holder" class={styles.leftHeader}>
-            </div>
+  createEffect(() => {
+    const newNote = document.getElementById('new_note_input');
+    const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-            <div class={styles.leftContent}>
-              <NavMenu />
-            </div>
+    if (context?.data.showNewNoteForm) {
+      newNote?.classList.add(styles.animatedShow);
+      newNoteTextArea?.focus();
+    }
+    else {
+      newNote?.classList.remove(styles.animatedShow);
+      newNoteTextArea.value = '';
+    }
+  });
 
-            <div class={styles.leftFooter}>
-              <ProfileWidget />
-            </div>
+  return (
+    <div id="container" class={styles.container}>
+
+      <div class={styles.leftColumn}>
+        <div>
+          <div id="branding_holder" class={styles.leftHeader}>
           </div>
-        </div>
 
-
-        <div class={styles.centerColumn}>
-          <div class={styles.centerContent}>
-            <div>
-              <Outlet />
-            </div>
+          <div class={styles.leftContent}>
+            <NavMenu />
           </div>
-        </div>
 
-
-        <div class={styles.rightColumn}>
-          <div class={styles.rightHeader}>
-            <Search />
-          </div>
-          <div class={styles.rightContent}>
-            <div id="right_sidebar">
-            </div>
+          <div class={styles.leftFooter}>
+            <ProfileWidget />
           </div>
         </div>
       </div>
-    )
+
+
+      <div class={styles.centerColumn}>
+        <div class={styles.centerContent}>
+          <div id="new_note_input" class={styles.headerFloater}>
+            <NewNote />
+          </div>
+
+          <div>
+            <Outlet />
+          </div>
+        </div>
+      </div>
+
+
+      <div class={styles.rightColumn}>
+        <div class={styles.rightHeader}>
+          <Search />
+        </div>
+        <div class={styles.rightContent}>
+          <div id="right_sidebar">
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default Layout;

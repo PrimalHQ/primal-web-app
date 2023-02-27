@@ -216,6 +216,12 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     page: page,
     actions: {
+      showNewNoteForm: () => {
+        setData('showNewNoteForm', () => true);
+      },
+      hideNewNoteForm: () => {
+        setData('showNewNoteForm', () => false);
+      },
       selectFeed(profile: PrimalFeed | undefined) {
         if (profile as PrimalFeed) {
           setData('selectedFeed', () => ({...profile}));

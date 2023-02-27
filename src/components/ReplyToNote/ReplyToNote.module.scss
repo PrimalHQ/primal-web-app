@@ -1,0 +1,172 @@
+.newNoteBorder {
+  width: 100%;
+  min-height: 120px;
+  padding: 1px;
+  background: var(--brand-gradient);
+  border-radius: 6px;
+  display: block;
+  position: relative;
+}
+
+.newNote {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  font-size: 18px;
+  line-height: 20px;
+  margin: 0px;
+  border-radius: 6px;
+  border: none;
+  color: var(--text-tertiary);
+  background-color: var(--background-site);
+  padding-bottom: 11px;
+  display: grid;
+  grid-template-columns: 92px 1fr;
+
+  .leftSide {
+    padding: 20px;
+  }
+
+
+  textarea {
+    width: calc(100% - 36px);
+    margin: 18px;
+    padding: 0px;
+    box-sizing: padding-box;
+    border: none;
+    border-radius: 0px;
+    background-color: unset;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+    color: var(--text-primary);
+    resize: none;
+
+    &:focus {
+      border: none;
+      outline: none;
+    }
+  }
+}
+
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  >button {
+    width: 80px;
+    height: 28px;
+  }
+}
+
+.primaryButton {
+  border: none;
+  border-radius: 6px;
+  margin: 0px 8px;
+  padding: 0px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  background: var(--brand-gradient-vertical);
+  color: var(--text-primary);
+  >span {
+    opacity: 0.75;
+  }
+}
+
+
+.secondaryButton {
+  border: none;
+  border-radius: 6px;
+  margin: 0px 15px 0px 0px;
+  padding: 1px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  background: var(--brand-gradient-vertical);
+  color: var(--text-tertiary-2);
+  >div {
+    width: 100%;
+    height: 100%;
+    vertical-align: middle;
+    border-radius: 6px;
+    background-color: var(--backround-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.border {
+  height: 36px;
+  padding: 1px;
+  background: var(--brand-gradient);
+  border-radius: 6px;
+  margin-left: 10px;
+
+  .input {
+    height: 34px;
+    font-size: 18px;
+    line-height: 20px;
+    margin: 0px;
+    border-radius: 6px;
+    border: none;
+    color: var(--text-tertiary);
+    background-color: var(--background-site);
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+  }
+}
+
+.replyBox {
+  margin-top: 4px;
+  // padding: 30px 22px;
+  background-color: var(--backround-card);
+  border: none;
+  outline: none;
+  display: grid;
+  grid-template-columns: 92px 1fr;
+}
+
+.leftSideClosed {
+  // margin-top: -13px;
+  // margin-left: -1px;
+  padding-top: 3px;
+  padding-left: 2px;
+}
+
+.rightSideClosed {
+  padding-top: 10px;
+}
+
+@media only screen and (max-width: 720px) {
+  .border {
+    height: 36px;
+    padding: 1px;
+    background: var(--brand-gradient);
+    border-radius: 6px;
+    margin-left: 10px;
+
+    .input {
+      height: 34px;
+      font-size: 18px;
+      line-height: 20px;
+      margin: 0px;
+      border-radius: 6px;
+      border: none;
+      color: var(--text-tertiary);
+      background-color: var(--background-site);
+      display: flex;
+      align-items: center;
+      padding-left: 12px;
+    }
+  }
+
+  .replyBox {
+    margin-top: 4px;
+    padding: 30px 12px;
+    width: 100%;
+    background-color: var(--backround-card);
+  }
+}

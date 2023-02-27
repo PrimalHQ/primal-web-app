@@ -13,6 +13,7 @@ import { createStore } from 'solid-js/store';
 import PrimaryPost from '../components/PrimaryPost/PrimaryPost';
 import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
+import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 
 const Thread: Component = () => {
@@ -134,14 +135,7 @@ const Thread: Component = () => {
               <Switch>
                 <Match when={post.post.id === params.postId}>
                   <PrimaryPost post={post}/>
-                  <div class={styles.replyBox}>
-                    <div class={styles.border}>
-                      <input
-                        type="text"
-                        placeholder={`reply to ${post.user.name}`}
-                      />
-                    </div>
-                  </div>
+                  <ReplyToNote note={post} />
                 </Match>
                 <Match when={post.post.id !== params.postId}>
                   <Post post={post} />

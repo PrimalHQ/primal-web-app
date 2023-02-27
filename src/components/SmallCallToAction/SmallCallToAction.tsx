@@ -10,8 +10,14 @@ import { PrimalUser } from '../../types/primal';
 
 const SmallCallToAction: Component<{ activeUser: PrimalUser }> = (params) => {
 
+  const context = useFeedContext();
+
+  const showNewNoteForm = () => {
+    context?.actions?.showNewNoteForm();
+  };
+
   return (
-    <div class={styles.callToAction}>
+    <button class={styles.callToAction} onClick={showNewNoteForm}>
       <Avatar
         src={params.activeUser?.picture}
         size="xs"
@@ -22,7 +28,7 @@ const SmallCallToAction: Component<{ activeUser: PrimalUser }> = (params) => {
           say something on nostr...
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 

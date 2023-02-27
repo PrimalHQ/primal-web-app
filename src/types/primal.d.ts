@@ -46,6 +46,7 @@ export type FeedStore = {
   publicKey: string | undefined,
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
+  showNewNoteForm: boolean,
 };
 
 export type NostrPostStats = {
@@ -82,6 +83,8 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   actions?: {
+    showNewNoteForm: () => void,
+    hideNewNoteForm: () => void,
     fetchHomeFeed: () => void,
     selectFeed: (profile: PrimalFeed | undefined) => void,
     clearData: () => void,

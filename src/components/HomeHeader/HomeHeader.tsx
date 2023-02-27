@@ -45,6 +45,10 @@ const HomeHeader: Component = () => {
     smallHeader?.classList.add(styles.hiddenSelector);
   }
 
+  const onShowNewNoteinput = () => {
+    context?.actions.showNewNoteForm();
+  };
+
   onMount(() => {
     window.addEventListener('scroll', onScroll);
   });
@@ -61,7 +65,7 @@ const HomeHeader: Component = () => {
         when={context?.data.publicKey}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
-        <div class={styles.callToAction}>
+        <button class={styles.callToAction} onClick={onShowNewNoteinput}>
           <Avatar
             src={activeUser()?.picture}
             size="lg"
@@ -72,7 +76,7 @@ const HomeHeader: Component = () => {
               say something on nostr...
             </div>
           </div>
-        </div>
+        </button>
       </Show>
 
       <div id="small_header" class={styles.smallHeader}>

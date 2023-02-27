@@ -41,6 +41,7 @@
 .centerColumn {
   display: grid;
   grid-template-rows: 117px 1fr;
+  position: relative;
 }
 
 .centerHeader {
@@ -49,6 +50,19 @@
 
 .centerContent {
   width: 640px;
+  .headerFloater {
+    position: fixed;
+    opacity: 0;
+    pointer-events: none;
+    width: 640px;
+    z-index: var(--z-index-floater);
+
+    &.animatedShow {
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      pointer-events: all;
+    }
+  }
 }
 
 .rightColumn {
@@ -121,6 +135,10 @@
 
   .centerContent {
     width: 100%;
+
+    .headerFloater {
+      width: 100%;
+    }
   }
 
   .leftColumn {

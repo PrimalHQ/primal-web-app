@@ -56,6 +56,11 @@
   grid-template-columns: 72px 1fr;
   grid-column-gap: 17px;
   align-items: center;
+  background-color: unset;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+  outline: none;
 
   p {
     font-size: 34px;
