@@ -53,6 +53,17 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
     document.removeEventListener('input', onExpandableTextareaInput);
   });
 
+  createEffect(() => {
+    if (open()) {
+      const textArea = document.getElementById('reply_to_note_text_area') as HTMLTextAreaElement;
+      textArea?.focus();
+    }
+  });
+
+  const openReplyBox = () => {
+    setOpen(true);
+  };
+
 
   const closeReplyToNote = () => {
     setOpen(false);
@@ -62,7 +73,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
     <Show
       when={open()}
       fallback={
-        <button class={styles.replyBox} onClick={() => setOpen(true)}>
+        <button class={styles.replyBox} onClick={openReplyBox}>
           <div class={styles.leftSideClosed}>
             <Avatar
               src={activeUser()?.picture}
