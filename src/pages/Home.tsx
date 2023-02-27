@@ -99,7 +99,7 @@ const Home: Component = () => {
         <Portal
           mount={document.getElementById("branding_holder") as Node}
         >
-          <Branding small={false} />
+          <Branding small={false} isHome={true} />
         </Portal>
 
         <div id="central_header">
