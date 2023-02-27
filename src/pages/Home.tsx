@@ -91,7 +91,6 @@ const Home: Component = () => {
   //   context?.actions?.setActiveUser(user);
   // }
 
-
   const isPageLoading = () => context?.data.isFetching
 
   return (

@@ -13,8 +13,10 @@ const FeedSelect: Component = () => {
     const hex = option.value;
     const profile = context?.data?.availableFeeds.find(p => p.hex === hex);
 
-    context?.actions?.clearData();
-    context?.actions?.selectFeed(profile);
+    if (hex !== initialValue().value) {
+      context?.actions?.clearData();
+      context?.actions?.selectFeed(profile);
+    }
   };
 
   const isSelected = (option: FeedOption) => {
@@ -27,8 +29,6 @@ const FeedSelect: Component = () => {
     if (context?.data === undefined) {
      return [];
     }
-
-    console.log("AF: ", context.data.availableFeeds)
 
     return context.data.availableFeeds.map(feed => ({
       label: feed.name,

@@ -252,6 +252,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       },
       clearData() {
         setData('posts', () => []);
+        setOldestPost(undefined);
       },
       loadNextPage() {
         const lastPost = data.posts[data.posts.length - 1];
