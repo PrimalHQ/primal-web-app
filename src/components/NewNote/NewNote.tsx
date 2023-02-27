@@ -57,29 +57,37 @@ type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 
   return (
-    <div class={styles.newNoteBorder}>
-      <div class={styles.newNote}>
-        <div class={styles.leftSide}>
-          <Avatar
-            src={activeUser()?.picture}
-            size="md"
-            verified={activeUser()?.nip05}
-          />
-        </div>
-        <div class={styles.rightSide}>
-          <textarea id="new_note_text_area" rows={2} data-min-rows={2} >
-          </textarea>
-          <div class={styles.controls}>
-            <button class={styles.primaryButton}>
-              <span>post</span>
-            </button>
-            <button class={styles.secondaryButton} onClick={closeNewNote}>
-              <div><span>cancel</span></div>
-            </button>
+    <>
+      <div class={styles.newNoteHolder}>
+        <div class={styles.newNoteBorder}>
+          <div class={styles.newNote}>
+            <div class={styles.leftSide}>
+              <Avatar
+                src={activeUser()?.picture}
+                size="md"
+                verified={activeUser()?.nip05}
+              />
+            </div>
+            <div class={styles.rightSide}>
+              <textarea id="new_note_text_area" rows={1} data-min-rows={1} >
+              </textarea>
+              <div class={styles.controls}>
+                <button class={styles.primaryButton}>
+                  <span>post</span>
+                </button>
+                <button class={styles.secondaryButton} onClick={closeNewNote}>
+                  <div><span>cancel</span></div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class={styles.holderBottomBorder}>
+        <div class={styles.leftCorner}></div>
+        <div class={styles.rightCorner}></div>
+      </div>
+    </>
   )
 }
 
