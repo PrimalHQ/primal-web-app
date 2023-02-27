@@ -97,7 +97,11 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         postStats: notes.postStats,
       }));
 
-      setNotes('notes', () => [...newPosts]);
+      // setNotes('notes', () => [...newPosts]);
+
+      console.log('NEW: ', newPosts)
+
+      context?.actions?.setExploredNotes(newPosts);
 
       return;
     }
@@ -123,10 +127,10 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   return (
     <div class={styles.feedContent}>
       <Show
-        when={notes.notes.length > 0}
+        when={context && context.data.exploredNotes.length > 0}
         fallback={<Loader />}
       >
-        <For each={notes.notes} >
+        <For each={context?.data.exploredNotes} >
           {(post) => {
             return <Post
               post={post}

@@ -15,11 +15,21 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
+import Loader from '../components/Loader/Loader';
+
 
 const Thread: Component = () => {
   const params = useParams();
 
+  const context = useFeedContext();
+
   const [mounted, setMounted] = createSignal(false);
+
+  const [parentNotes, setParentNotes] = createStore<PrimalNote[]>([]);
+  const [replies, setReplies] = createStore<PrimalNote[]>([]);
+  const [primaryNote, setPrimaryNote] = createSignal<PrimalNote>();
+
+  const [isFetching, setIsFetching] = createSignal(false);
 
   const [posts, setPosts] = createStore([]);
   const [page, setPage] = createStore({
@@ -58,7 +68,33 @@ const Thread: Component = () => {
       const newPosts = sortByRecency(convertToPosts(page), true);
 
       setPage({ users: {}, messages: [], postStats: {}});
-      setPosts(newPosts);
+      // setPosts(newPosts);
+
+      newPosts.forEach((note) => {
+
+        if (primaryNote() === undefined && note.post.id === params.postId) {
+          setPrimaryNote(() => ({ ...note }));
+          return;
+        }
+
+        if (note.post.id === primaryNote()?.post.id) {
+          return;
+        }
+
+        if (note.post.created_at < (primaryNote()?.post.created_at || 0)) {
+          setParentNotes((parents) => [...parents, {...note}]);
+          return;
+        }
+
+        if (note.post.created_at > (primaryNote()?.post.created_at || 0)) {
+          setReplies((replies) => [...replies, {...note}]);
+          return;
+        }
+      });
+
+      setIsFetching(false);
+
+      // primary?.scrollTo({ top: 0, left: 0, behavior: 'instant'});
 
       return;
     }
@@ -89,6 +125,36 @@ const Thread: Component = () => {
     return [...acc, user];
   }, []);
 
+  createEffect(() => {
+    if (params.postId && params.postId !== primaryNote()?.post.id) {
+      let note = context?.data.posts.find(p => p.post.id === params.postId);
+
+      if (!note) {
+        note = context?.data.trendingNotes.notes.find(p => p.post.id === params.postId);
+      }
+
+      if (!note) {
+        note = context?.data.exploredNotes.find(p => p.post.id === params.postId);
+      }
+
+      if (!note) {
+        note = parentNotes.find(p => p.post.id === params.postId);
+      }
+
+      if (!note) {
+        note = replies.find(p => p.post.id === params.postId);
+      }
+
+      if (note) {
+        setPrimaryNote(note);
+      }
+    }
+    else {
+      setReplies(() => []);
+      setParentNotes(() => []);
+    }
+  });
+
   onMount(() => {
     // Temporary fix for Portal rendering on initial load.
     setMounted(true);
@@ -104,43 +170,55 @@ const Thread: Component = () => {
 
 	createEffect(() => {
     if (isConnected()) {
-      params.postId && getThread(params.postId, `thread_${params.postId}_${APP_ID}`);
+      params.postId && setIsFetching(true) && getThread(params.postId, `thread_${params.postId}_${APP_ID}`);
 		}
 	});
 
   return (
     <div>
-      <Show
-        when={posts && posts.length > 0}
-        fallback={<div>Loading...</div>}
-      >
-        <Switch>
-          <Match when={mounted()}>
-            <Portal
-              mount={document.getElementById("branding_holder") as Node}
-            >
-              <PageNav />
-            </Portal>
+      <Switch>
+        <Match when={mounted()}>
+          <Portal
+            mount={document.getElementById("branding_holder") as Node}
+          >
+            <PageNav />
+          </Portal>
 
-            <Portal
-              mount={document.getElementById("right_sidebar") as Node}
-            >
-              <PeopleList people={people()} />
-            </Portal>
-          </Match>
-        </Switch>
-        <For each={posts}>
-          {post =>
+          <Portal
+            mount={document.getElementById("right_sidebar") as Node}
+          >
+            <PeopleList people={people()} />
+          </Portal>
+        </Match>
+      </Switch>
+
+      <Show
+        when={!isFetching()}
+      >
+        <For each={parentNotes}>
+          {note =>
             <div class={styles.threadList}>
-              <Switch>
-                <Match when={post.post.id === params.postId}>
-                  <PrimaryPost post={post}/>
-                  <ReplyToNote note={post} />
-                </Match>
-                <Match when={post.post.id !== params.postId}>
-                  <Post post={post} />
-                </Match>
-              </Switch>
+              <Post post={note} />
+            </div>
+          }
+        </For>
+      </Show>
+
+      <Show when={primaryNote()}>
+        <div id="primary_note" class={styles.threadList}>
+          <PrimaryPost post={primaryNote()}/>
+          <ReplyToNote note={primaryNote()} />
+        </div>
+      </Show>
+
+      <Show
+        when={!isFetching()}
+        fallback={<Loader />}
+      >
+        <For each={replies}>
+          {note =>
+            <div class={styles.threadList}>
+              <Post post={note} />
             </div>
           }
         </For>

@@ -13,7 +13,7 @@ import type {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { convertToPosts, getFeed, sortByRecency } from "../lib/feed";
+import { convertToPosts, getFeed, sortByRecency, sortByScore24h } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
 import { isConnected, socket } from "../sockets";
@@ -81,6 +81,34 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   };
 
+  const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
+
+    if (type === 'EOSE') {
+      const newPosts = sortByScore24h(convertToPosts({
+        users: data.trendingNotes.users,
+        messages: data.trendingNotes.messages,
+        postStats: data.trendingNotes.postStats,
+      }));
+
+      setData('trendingNotes', 'notes', () => [...newPosts]);
+
+      return;
+    }
+
+    if (type === 'EVENT') {
+      if (content && content.kind === 0) {
+        setData('trendingNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
+      }
+      if (content && content.kind === 1) {
+        setData('trendingNotes', 'messages',  (msgs) => [ ...msgs, content]);
+      }
+      if (content && content.kind === 10000100) {
+        const stat = JSON.parse(content.content);
+        setData('trendingNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+      }
+    }
+  };
+
   // const [publicKey, setPublicKey] = createSignal<string>();
 
   createEffect(() => {
@@ -142,10 +170,10 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     const [type, subId, content] = message;
 
-    // if (subId === `trending_${APP_ID}`) {
-    //   processTrendingPost(type, content);
-    //   return;
-    // }
+    if (subId === `trending_${APP_ID}`) {
+      processTrendingPost(type, content);
+      return;
+    }
 
 
     if (subId === `user_profile_${APP_ID}`) {
@@ -221,6 +249,20 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     page: page,
     actions: {
+      clearExploredNotes: () => {
+        setData('exploredNotes', () => []);
+      },
+      setExploredNotes: (newNotes: PrimalNotes[]) => {
+        setData('exploredNotes', () => newNotes);
+      },
+      clearTrendingNotes: () => {
+        setData('trendingNotes', () => ({
+          messages: [],
+          users: {},
+          notes: [],
+          postStats: {},
+        }));
+      },
       setTheme: (newTheme: string) => {
         setData('theme', newTheme);
       },

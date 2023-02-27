@@ -8,7 +8,7 @@ export type NostrPostContent = {
   pubkey: string,
   sig: string,
   tags: string[][],
-};
+} | {};
 
 export type NostrUserContent = {
   kind: 0,
@@ -18,12 +18,12 @@ export type NostrUserContent = {
   pubkey: string,
   sig: string,
   tags: string[][],
-};
+} | {};
 
 export type NostrStatsContent = {
   kind: 10000100,
   content: string,
-};
+} | {};
 
 export type NostrEventContent = NostrPostContent | NostrUserContent | NostrStatsContent;
 
@@ -48,6 +48,8 @@ export type FeedStore = {
   availableFeeds: PrimalFeed[],
   showNewNoteForm: boolean,
   theme: string,
+  trendingNotes: TrendingNotesStore,
+  exploredNotes: PrimalNotes[] | [],
 };
 
 export type NostrPostStats = {
@@ -84,6 +86,9 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   actions?: {
+    clearExploredNotes: () => void,
+    setExploredNotes: (newNotes: PrimalNotes[]) => void,
+    clearTrendingNotes: () => void,
     setTheme: (newTheme: string) => void,
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,

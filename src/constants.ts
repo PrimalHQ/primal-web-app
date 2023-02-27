@@ -15,6 +15,13 @@ export const initialStore: FeedStore = {
   selectedFeed: undefined,
   showNewNoteForm: false,
   theme: localStorage.getItem('theme') || '',
+  trendingNotes: {
+    messages: [],
+    users: {},
+    notes: [],
+    postStats: {},
+  },
+  exploredNotes: [],
   availableFeeds: [
     {
       name: 'Edward Snowden\'s feed is the best feed ever made, I tell you!' ,
