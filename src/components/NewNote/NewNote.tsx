@@ -67,7 +67,7 @@ type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
           />
         </div>
         <div class={styles.rightSide}>
-          <textarea id="new_note_text_area" rows={3} data-min-rows={3} >
+          <textarea id="new_note_text_area" rows={2} data-min-rows={2} >
           </textarea>
           <div class={styles.controls}>
             <button class={styles.primaryButton}>
