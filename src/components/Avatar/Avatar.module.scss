@@ -94,8 +94,8 @@
 @mixin missing {
   display: grid;
   place-items: center;
-  color: var(--text-tertiary-2);
-  background-color: var(--text-primary);
+  color: var(--missing-avatar-text);
+  background: var(--brand-gradient);
   border-radius: 50%;
 }
 

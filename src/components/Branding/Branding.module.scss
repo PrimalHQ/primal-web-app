@@ -1,7 +1,9 @@
 .branding {
   display: flex;
   align-items: center;
-  img {
+  .logo {
+    background-image: var(--logo);
+    background-size: contain;
     margin-right: 12px;
     width: 40px;
     height: 40px;
@@ -17,7 +19,10 @@
 }
 
 .brandingSmall {
-  img {
+  .logo {
+    background-image: var(--logo);
+    background-size: contain;
+    margin-right: 0px;
     width: 24px;
     height: 24px;
   }
@@ -25,7 +30,7 @@
 
 @media only screen and (max-width: 1300px) {
   .branding {
-    img {
+    .logo {
       margin-right: 0px;
       width: 32px;
       height: 32px;

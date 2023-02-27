@@ -14,6 +14,7 @@ export const initialStore: FeedStore = {
   activeUser: undefined,
   selectedFeed: undefined,
   showNewNoteForm: false,
+  theme: localStorage.getItem('theme') || '',
   availableFeeds: [
     {
       name: 'Edward Snowden\'s feed is the best feed ever made, I tell you!' ,

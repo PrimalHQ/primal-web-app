@@ -167,9 +167,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         setData('posts', (posts) => [ ...posts, ...newPosts ]);
         setData('isFetching', false);
 
-        // context?.actions?.clearPage();
-        // context?.actions?.savePosts(newPosts);
-
         return;
       }
 
@@ -198,9 +195,17 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     pubkey && getFeed(pubkey, `user_feed_${APP_ID}`);}
   });
 
+  createEffect(() => {
+    const html: HTMLElement | null = document.querySelector('html');
+    localStorage.setItem('theme', data.theme);
+    html?.setAttribute('data-theme', data.theme);
+  });
+
   onMount(() => {
     socket()?.addEventListener('error', onError);
     socket()?.addEventListener('message', onMessage);
+
+    setData('theme', localStorage.getItem('theme') || '');
 
     setTimeout(() => {
       fetchNostrKey();
@@ -216,6 +221,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     page: page,
     actions: {
+      setTheme: (newTheme: string) => {
+        setData('theme', newTheme);
+      },
       showNewNoteForm: () => {
         setData('showNewNoteForm', () => true);
       },

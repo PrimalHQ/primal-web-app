@@ -47,6 +47,7 @@ export type FeedStore = {
   selectedFeed: PrimalFeed | undefined,
   availableFeeds: PrimalFeed[],
   showNewNoteForm: boolean,
+  theme: string,
 };
 
 export type NostrPostStats = {
@@ -83,6 +84,7 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   actions?: {
+    setTheme: (newTheme: string) => void,
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
     fetchHomeFeed: () => void,

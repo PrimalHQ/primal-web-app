@@ -38,9 +38,10 @@ const Home: Component = () => {
     // socket()?.addEventListener('error', onError);
     // socket()?.addEventListener('message', onMessage);
 
-    if (!context?.data.isFetching && context?.data.posts.length === 0) {
-      // context.actions?.fetchHomeFeed();
-    }
+    // if (!context?.data.isFetching && context?.data.posts.length === 0) {
+    //   console.log('FETCH HOME')
+    //   context.actions?.fetchHomeFeed();
+    // }
 
   });
 

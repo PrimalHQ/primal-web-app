@@ -12,12 +12,12 @@ const Branding: Component<{ small: boolean }> = (props) => {
           when={!props.small}
           fallback={
             <div class={styles.brandingSmall}>
-              <img src={logo} alt="logo" />
+              <div class={styles.logo} />
             </div>
           }
         >
           <div class={styles.branding}>
-            <img src={logo} alt="logo" />
+            <div class={styles.logo} />
             <span>primal</span>
           </div>
         </Show>

@@ -1,27 +1,61 @@
-import { Component } from 'solid-js';
-import { Portal } from 'solid-js/web';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Portal, style } from 'solid-js/web';
 import Branding from '../components/Branding/Branding';
+import { useFeedContext } from '../contexts/FeedContext';
 import styles from './Settings.module.scss';
+
+import logoFire from '../assets/icons/logo_fire.svg';
+import logoIce from '../assets/icons/logo_ice.svg';
+import check from '../assets/icons/check.svg';
 
 
 const Settings: Component = () => {
-    return (
-      <>
-        <Portal
-          mount={document.getElementById("branding_holder") as Node}
-        >
-          <Branding small={false} />
-        </Portal>
-        <div id="central_header" class={styles.fullHeader}>
-          <div>
-            Settings
-          </div>
+
+  const context = useFeedContext();
+
+  return (
+    <>
+      <Portal
+        mount={document.getElementById("branding_holder") as Node}
+      >
+        <Branding small={false} />
+      </Portal>
+      <div id="central_header" class={styles.fullHeader}>
+        <div>
+          Settings
         </div>
-        <div class={styles.commingSoon}>
-          Comming soon.
-        </div>
-      </>
-    )
+      </div>
+      <div class={styles.themeCaption}>
+        Themes
+      </div>
+      <div class={styles.themeChooser}>
+        <button class={styles.sunset} onClick={() => context?.actions?.setTheme('sunset')}>
+          <img src={logoFire} />
+          <Show when={context?.data.theme === 'sunset'}>
+            <div class={styles.themeChecked}><img src={check} /></div>
+          </Show>
+        </button>
+        <button class={styles.midnight} onClick={() => context?.actions?.setTheme('midnight')}>
+          <img src={logoIce} />
+          <Show when={context?.data.theme === 'midnight'}>
+            <div class={styles.themeChecked}><img src={check} /></div>
+          </Show>
+        </button>
+        <button class={styles.sunrise} onClick={() => context?.actions?.setTheme('sunrise')}>
+          <img src={logoFire} />
+          <Show when={context?.data.theme === 'sunrise'}>
+            <div class={styles.themeChecked}><img src={check} /></div>
+          </Show>
+        </button>
+        <button class={styles.ice} onClick={() => context?.actions?.setTheme('ice')}>
+          <img src={logoIce} />
+          <Show when={context?.data.theme === 'ice'}>
+            <div class={styles.themeChecked}><img src={check} /></div>
+          </Show>
+        </button>
+      </div>
+    </>
+  )
 }
 
 export default Settings;

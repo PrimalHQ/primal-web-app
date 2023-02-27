@@ -19,3 +19,75 @@
   line-height: 34px;
   color: var(--text-secondary);
 }
+
+.themeChooser {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.themeCaption {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 20px;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+}
+
+@mixin themeOption {
+  position: relative;
+  width: 128px;
+  height: 100px;
+  background-color: unset;
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  display: grid;
+  place-content: center;
+  border: solid 1px var(--brand-one);
+  border-radius: 6px;
+
+  >img {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+.sunset {
+  @include themeOption();
+  background-color: #000000;
+}
+
+.midnight {
+  @include themeOption();
+  background-color: #000000;
+}
+
+.sunrise {
+  @include themeOption();
+  background-color: #F5F5F5;
+}
+
+.ice {
+  @include themeOption();
+  background-color: #F5F5F5;
+}
+
+.themeChecked {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  margin: 0px;
+  padding: 0px;
+  align-items: center;
+  justify-content: center;
+  background: var(--brand-gradient);
+  border-radius: 50%;
+  >img {
+    width: 10px;
+    height: 10px;
+  }
+}

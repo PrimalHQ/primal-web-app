@@ -13,7 +13,7 @@
   vertical-align: middle;
   margin-top: -3px;
 
-  background-color: white;
+  background-color: var(--missing-avatar-text);
   -webkit-mask: url(../../assets/icons/post.svg) no-repeat center;
   mask: url(../../assets/icons/post.svg) no-repeat center;
 }
