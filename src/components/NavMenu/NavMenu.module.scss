@@ -26,11 +26,11 @@
     width: 100%;
     height: 48px;
 
-    > div {
+    > button {
       margin-bottom: 0px;
     }
 
-    div:nth-child(n+5) {
+    button:nth-child(n+5) {
       display: none;
     }
   }
