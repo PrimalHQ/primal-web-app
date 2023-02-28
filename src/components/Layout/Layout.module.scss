@@ -14,12 +14,12 @@
     position: fixed;
     width: 176px;
     display: grid;
-    grid-template-rows: 117px 1fr 82px;
+    grid-template-rows: 128px 1fr 82px;
     height: 100vh;
   }
 
   .leftHeader {
-    height: 117px;
+    height: 128px;
     display: grid;
     align-items: center;
     justify-content: right;
@@ -40,7 +40,7 @@
 
 .centerColumn {
   display: grid;
-  grid-template-rows: 117px 1fr;
+  grid-template-rows: 128px 1fr;
   position: relative;
 }
 
@@ -68,12 +68,12 @@
 .rightColumn {
   display: grid;
   width: 300px;
-  grid-template-rows: 117px 1fr;
+  grid-template-rows: 128px 1fr;
   grid-row-gap: 28px;
 }
 
 .rightHeader {
-  height: 117px;
+  height: 128px;
   display: grid;
   align-items: center;
   justify-content: left;
@@ -83,7 +83,7 @@
 }
 
 .rightContent {
-  margin-top: 117px;
+  margin-top: 128px;
 }
 
 @media only screen and (max-width: 1300px) {

@@ -3,6 +3,7 @@
   position: sticky;
   top: 0px;
   padding-top: 44px;
+  width: 300px;
 }
 
 .stickyWrapper {
@@ -11,7 +12,7 @@
 
 .heading {
   position: fixed;
-  top: 117px;
+  top: 128px;
   width: 100%;
   height: 44px;
   background-color: var(--background-site);
@@ -30,6 +31,7 @@
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content";
   grid-column-gap: 12px;
+  width: 300px;
 
   .avatar {
     grid-area: avatar;
@@ -61,6 +63,10 @@
       .name {
         color: var(--text-secondary-2);
         font-weight: 800;
+        max-width: 220px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .time{
@@ -81,6 +87,7 @@
       line-height: 18px;
       font-weight: 400;
       color: var(--text-tertiary);
+      width: 264px;
 
       overflow: hidden;
       display: -webkit-box;

@@ -31,7 +31,6 @@ const Thread: Component = () => {
 
   const [isFetching, setIsFetching] = createSignal(false);
 
-  const [posts, setPosts] = createStore([]);
   const [page, setPage] = createStore({
     users: {},
     messages: [],
@@ -68,7 +67,6 @@ const Thread: Component = () => {
       const newPosts = sortByRecency(convertToPosts(page), true);
 
       setPage({ users: {}, messages: [], postStats: {}});
-      // setPosts(newPosts);
 
       newPosts.forEach((note) => {
 
@@ -94,8 +92,6 @@ const Thread: Component = () => {
 
       setIsFetching(false);
 
-      // primary?.scrollTo({ top: 0, left: 0, behavior: 'instant'});
-
       return;
     }
 
@@ -116,7 +112,9 @@ const Thread: Component = () => {
     return self.indexOf(value) === index
   }
 
-  const people = () => posts.reduce((acc, p) => {
+  const posts = () => [ primaryNote(), ...parentNotes, ...replies];
+
+  const people = () => posts().reduce((acc, p) => {
     const user = p.user;
     if (acc.find(u => user.pubkey === u.pubkey)) {
       return acc;
