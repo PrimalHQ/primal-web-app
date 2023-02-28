@@ -16,7 +16,7 @@
   height: 15px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: #AB268E;
+  background-color: var(--brand-one);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
   mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
 }
