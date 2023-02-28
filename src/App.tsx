@@ -12,6 +12,7 @@ import Downloads from './pages/Downloads';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Feed from './pages/Feed';
+import Profile from './pages/Profile';
 
 const App: Component = () => {
 
@@ -40,6 +41,7 @@ const App: Component = () => {
             <Route path="/notifications" component={Notifications} />
             <Route path="/downloads" component={Downloads} />
             <Route path="/settings" component={Settings} />
+            <Route path="/profile" component={Profile} />
             <Route path="/help" component={Help} />
             <Route path="/rest" component={Explore} />
           </Route>

@@ -3,6 +3,12 @@
   width: 176px;
   grid-template-columns: 48px 90px 22px;
   grid-column-gap: 8px;
+  text-decoration: none;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: var(--backround-card);
+  }
 }
 
 .userInfo {

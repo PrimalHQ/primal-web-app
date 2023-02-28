@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 
 import styles from './ProfileWidget.module.scss';
 
 import Branding from '../Branding/Branding';
-import { Outlet } from '@solidjs/router';
+import { A, Outlet } from '@solidjs/router';
 import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
 import Avatar from '../Avatar/Avatar';
@@ -19,7 +19,7 @@ const ProfileWidget: Component = () => {
   return (
     <div>
       <Show when={activeUser()}>
-        <div class={styles.userProfile}>
+        <A href="/profile" class={styles.userProfile}>
           <Avatar
             size="sm"
             src={activeUser()?.picture}
@@ -34,7 +34,7 @@ const ProfileWidget: Component = () => {
           <div class={styles.contextMenu}>
             <div class={styles.contextIcon}></div>
           </div>
-        </div>
+        </A>
       </Show>
     </div>
   );
