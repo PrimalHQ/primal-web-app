@@ -1,15 +1,11 @@
-import { Component, createEffect, For } from 'solid-js';
-import { useFeedContext } from '../../contexts/FeedContext';
+import { Component } from 'solid-js';
 
 import styles from './Loader.module.scss';
 
 const Loader: Component = () => {
 
   return (
-    <div class={styles.loader}>
-      <div></div>
-      <div></div>
-    </div>
+    <div class={styles.loader}><span></span></div>
   );
 }
 
