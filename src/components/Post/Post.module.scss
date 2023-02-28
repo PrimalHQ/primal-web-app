@@ -215,9 +215,9 @@
     margin-right: 0px;
     padding-right: 0px;
     .content {
-      width: 100%;
       .header {
-        width: 100% !important;
+        width: 280px !important;
+        // margin-inline: 0px !important;
         .postInfo {
           width: 80% !important;
         }
