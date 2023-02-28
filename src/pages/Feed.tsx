@@ -97,10 +97,6 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         postStats: notes.postStats,
       }));
 
-      // setNotes('notes', () => [...newPosts]);
-
-      console.log('NEW: ', newPosts)
-
       context?.actions?.setExploredNotes(newPosts);
 
       return;
