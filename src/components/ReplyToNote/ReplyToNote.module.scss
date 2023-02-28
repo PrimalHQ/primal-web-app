@@ -107,6 +107,7 @@
 
   .input {
     height: 34px;
+    max-width: 498px;
     font-size: 18px;
     line-height: 20px;
     margin: 0px;
@@ -116,7 +117,16 @@
     background-color: var(--background-site);
     display: flex;
     align-items: center;
-    padding-left: 12px;
+    padding-inline: 12px;
+
+    .userName {
+      max-width: 408px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      word-wrap: break-word;
+      overflow: hidden;
+      margin-left: 6px;
+    }
   }
 }
 

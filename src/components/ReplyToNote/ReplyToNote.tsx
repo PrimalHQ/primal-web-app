@@ -86,7 +86,8 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
               <div
                 class={styles.input}
               >
-                reply to {params.note.user.name}
+                <span>reply to</span>
+                <span class={styles.userName}>{params.note.user.name}</span>
               </div>
             </div>
           </div>
