@@ -115,6 +115,9 @@
         font-size: 14px;
         line-height: 16px;
         align-items: center;
+        .statNumber {
+          color: var(--text-secondary);
+        }
 
         &:hover {
           .replyIcon, .likeIcon, .repostIcon {
