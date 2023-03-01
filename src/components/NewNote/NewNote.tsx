@@ -35,11 +35,26 @@ const NewNote: Component = () => {
     elm.rows = minRows + rows
   }
 
-type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
+  type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
   const context = useFeedContext();
 
   const activeUser = () => context?.data.activeUser;
+
+  const onClickOutide = (e: MouseEvent) => {
+    if (!document?.getElementById('new_note_holder')?.contains(e.target as Node)) {
+      context?.actions?.hideNewNoteForm();
+    }
+  }
+
+  createEffect(() => {
+    if (context?.data.showNewNoteForm) {
+      document.addEventListener('click', onClickOutide);
+    }
+    else {
+      document.removeEventListener('click', onClickOutide);
+    }
+  });
 
   onMount(() => {
     // @ts-expect-error TODO: fix types here
@@ -58,7 +73,7 @@ type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
   return (
     <>
-      <div class={styles.newNoteHolder}>
+      <div id="new_note_holder" class={styles.newNoteHolder}>
         <div class={styles.newNoteBorder}>
           <div class={styles.newNote}>
             <div class={styles.leftSide}>
