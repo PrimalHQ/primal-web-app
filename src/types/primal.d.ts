@@ -50,6 +50,7 @@ export type FeedStore = {
   theme: string,
   trendingNotes: TrendingNotesStore,
   exploredNotes: PrimalNotes[] | [],
+  threadedNotes: PrimalNotes[] | [],
 };
 
 export type NostrPostStats = {
@@ -86,6 +87,9 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   actions?: {
+    clearThreadedNotes: () => void,
+    setThreadedNotes: (newNotes: PrimalNote[]) => void,
+    setData: SetStoreFunction<FeedStore>,
     clearExploredNotes: () => void,
     setExploredNotes: (newNotes: PrimalNotes[]) => void,
     clearTrendingNotes: () => void,

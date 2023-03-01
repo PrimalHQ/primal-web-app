@@ -1,26 +1,12 @@
 import { A } from '@solidjs/router';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import { date } from '../../lib/dates';
+import { parseNote } from '../../lib/posts';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './PrimaryPost.module.scss';
 
-const urlify = (text: string) => {
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
-
-  return text.replace(urlRegex, function(url) {
-    const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
-
-    let link = '';
-
-    if (isImage) {
-      link = '<img src="' + url + '" />'
-    }
-
-    return link + '<a href="' + url + '" target="_blank">' + url + '</a>';
-  })
-}
 
 const trimVerification = (address: string) => {
   const [_, domain] = address.split('@');
@@ -72,7 +58,7 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
               <div class={styles.contextMenu}>...</div>
             </div>
 
-            <div class={styles.message} innerHTML={urlify(props.post?.post?.content)}>
+            <div class={styles.message} innerHTML={parseNote(props.post)}>
             </div>
 
             <div class={styles.footer}>

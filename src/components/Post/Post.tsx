@@ -1,38 +1,56 @@
 import { A } from '@solidjs/router';
-import { Component, createSignal, Match, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Match, onCleanup, onError, Switch } from 'solid-js';
+import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import { trimVerification } from '../../lib/profile';
-import { PrimalNote } from '../../types/primal';
+import { parseNote } from '../../lib/posts';
+import { getUserProfile, trimVerification } from '../../lib/profile';
+import { isConnected, socket } from '../../sockets';
+import { NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './Post.module.scss';
 
-const urlify = (text: string) => {
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+// const urlify = (text: string) => {
+//   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
-  return text.replace(urlRegex, function(url) {
-    const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
+//   return text.replace(urlRegex, function(url) {
+//     const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
-    let link = '';
+//     let link = '';
 
-    if (isImage) {
-      link = '<img src="' + url + '" />'
-    }
+//     if (isImage) {
+//       link = '<img src="' + url + '" class="'+ styles.postImage +'"/>'
+//     }
 
-    return link + '<a href="' + url + '" target="_blank">' + url + '</a>';
-  })
-}
+//     return link;
+//   })
+// }
 
-// const nostrify = (text, post) => {
+// const addlineBreaks = (text: string) => {
+//   const regex = /(\r\n|\r|\n)/g;
+
+//   return text.replace(regex, '<br>');
+// };
+
+// const nostrify = (text, post: PrimalNote) => {
 //   const regex = /\#\[([0-9]*)\]/g;
 //   let refs = [];
 //   let match;
+//   let nostrifiedText = `${text}`;
 
 //   while((match = regex.exec(text)) !== null) {
 //     refs.push(match[1]);
 //   }
 
-
+//   if (refs.length > 0) {
+//     refs.forEach(ref => {
+//       const tag = post.post.tags[ref];
+//       if (tag[0] === 'p') {
+//         getUserProfile(tag[1], `mentioned_user_|_${post.post.id}_|_${ref}`)
+//       }
+//     });
+//   }
+//   return text;
 // }
 
 // const trimVerification = (address: string) => {
@@ -87,7 +105,7 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
             </div>
           </div>
 
-          <div class={styles.message} innerHTML={urlify(props.post?.post?.content)}>
+          <div class={styles.message} innerHTML={parseNote(props.post)}>
           </div>
 
           <div class={styles.footer}>

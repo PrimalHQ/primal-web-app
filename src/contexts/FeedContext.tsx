@@ -202,6 +202,18 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       return;
     }
 
+    if (type !== 'EOSE' && subId.startsWith('mentioned_user')) {
+      const [_, postId, ref] = subId.split('_|_');
+      const user = JSON.parse(content?.content || '') as NostrUserContent;
+
+      setData('posts', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
+      setData('threadedNotes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
+      setData('exploredNotes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
+      setData('trendingNotes', 'notes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
+
+      return;
+    }
+
   };
   // ------------------------------------------------------
 
@@ -249,11 +261,18 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     page: page,
     actions: {
+      setData: setData,
       clearExploredNotes: () => {
         setData('exploredNotes', () => []);
       },
-      setExploredNotes: (newNotes: PrimalNotes[]) => {
+      setExploredNotes: (newNotes: PrimalNote[]) => {
         setData('exploredNotes', () => newNotes);
+      },
+      clearThreadedNotes: () => {
+        setData('threadedNotes', () => []);
+      },
+      setThreadedNotes: (newNotes: PrimalNote[]) => {
+        setData('threadedNotes', () => newNotes);
       },
       clearTrendingNotes: () => {
         setData('trendingNotes', () => ({

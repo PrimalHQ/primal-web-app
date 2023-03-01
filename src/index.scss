@@ -183,6 +183,19 @@
   --z-index-header: 10;
   --z-index-floater: 20;
 
+  .mentioned_user {
+    color: var(--accent-1);
+  }
+  .hash_tag {
+    color: var(--accent-1);
+  }
+
+  .postImage {
+    display: block;
+    width: 100%;
+    border-radius: 4px;
+  }
+
 }
 
 body {

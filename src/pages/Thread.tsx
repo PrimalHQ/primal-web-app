@@ -45,7 +45,7 @@ const Thread: Component = () => {
     setPage('messages', (msgs) => [ ...msgs, post]);
   };
 
-  const proccessUser = (user: NostrUserContent) => {
+  const proccessUser = (user: NostrUserCosetParentNotesntent) => {
     setPage('users', (users ) => ({ ...users, [user.pubkey]: user}))
   };
 
@@ -68,27 +68,7 @@ const Thread: Component = () => {
 
       setPage({ users: {}, messages: [], postStats: {}});
 
-      newPosts.forEach((note) => {
-
-        if (primaryNote() === undefined && note.post.id === params.postId) {
-          setPrimaryNote(() => ({ ...note }));
-          return;
-        }
-
-        if (note.post.id === primaryNote()?.post.id) {
-          return;
-        }
-
-        if (note.post.created_at < (primaryNote()?.post.created_at || 0)) {
-          setParentNotes((parents) => [...parents, {...note}]);
-          return;
-        }
-
-        if (note.post.created_at > (primaryNote()?.post.created_at || 0)) {
-          setReplies((replies) => [...replies, {...note}]);
-          return;
-        }
-      });
+      context?.actions?.setThreadedNotes(newPosts);
 
       setIsFetching(false);
 
@@ -107,6 +87,30 @@ const Thread: Component = () => {
       }
     }
   };
+
+  createEffect(() => {
+    context?.data.threadedNotes.forEach((note) => {
+
+      if (primaryNote() === undefined && note.post.id === params.postId) {
+        setPrimaryNote(() => ({ ...note }));
+        return;
+      }
+
+      if (note.post.id === primaryNote()?.post.id) {
+        return;
+      }
+
+      if (note.post.created_at < (primaryNote()?.post.created_at || 0)) {
+        setParentNotes((parents) => [...parents, {...note}]);
+        return;
+      }
+
+      if (note.post.created_at > (primaryNote()?.post.created_at || 0)) {
+        setReplies((replies) => [...replies, {...note}]);
+        return;
+      }
+    });
+  });
 
   const unique = (value, index, self) => {
     return self.indexOf(value) === index

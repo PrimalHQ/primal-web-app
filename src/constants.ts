@@ -22,6 +22,7 @@ export const initialStore: FeedStore = {
     postStats: {},
   },
   exploredNotes: [],
+  threadedNotes: [],
   availableFeeds: [
     {
       name: 'Nostr highlights by Primal' ,
