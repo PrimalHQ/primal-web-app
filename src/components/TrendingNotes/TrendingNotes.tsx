@@ -25,7 +25,7 @@ const TrendingNotes: Component = () => {
 
   createEffect(() => {
     // If the content changes, recalculate sticky boundary.
-    if (context?.data.trendingNotes.notes) {
+    if (context?.data.trendingNotes.notes && context.data.posts) {
       calculateStickyPosition();
     }
   });

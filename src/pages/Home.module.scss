@@ -11,6 +11,7 @@
 }
 
 .noContent, .endOfContent {
+  position: relative;
   color: var(--text-secondary);
   text-align: center;
   margin-top: 80px;

@@ -141,7 +141,9 @@ const Home: Component = () => {
           <Match
             when={isPageLoading()}
           >
-            <Loader />
+            <div class={styles.noContent}>
+              <Loader />
+            </div>
           </Match>
         </Switch>
       </Show>

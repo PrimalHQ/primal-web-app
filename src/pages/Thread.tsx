@@ -209,18 +209,20 @@ const Thread: Component = () => {
         </div>
       </Show>
 
-      <Show
-        when={!isFetching()}
-        fallback={<Loader />}
-      >
-        <For each={replies}>
-          {note =>
-            <div class={styles.threadList}>
-              <Post post={note} />
-            </div>
-          }
-        </For>
-      </Show>
+      <div class={styles.repliesHolder}>
+        <Show
+          when={!isFetching()}
+          fallback={<div class={styles.noContent}><Loader /></div>}
+        >
+          <For each={replies}>
+            {note =>
+              <div class={styles.threadList}>
+                <Post post={note} />
+              </div>
+            }
+          </For>
+        </Show>
+      </div>
     </div>
   )
 }

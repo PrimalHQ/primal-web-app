@@ -1,3 +1,13 @@
+.repliesHolder {
+  position: relative;
+}
+.noContent {
+  position: relative;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 80px;
+}
+
 .border {
   height: 36px;
   padding: 1px;
