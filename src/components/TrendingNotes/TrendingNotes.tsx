@@ -126,7 +126,7 @@ const TrendingNotes: Component = () => {
                 <A href={`/thread/${post.post.id}`}>
                   <div class={styles.trendingPost}>
                     <div class={styles.avatar}>
-                      <Avatar src={post.user?.picture} size="xs" />
+                      <Avatar src={post.user?.picture} size="xxs" />
                     </div>
                     <div class={styles.content}>
                       <div class={styles.header}>

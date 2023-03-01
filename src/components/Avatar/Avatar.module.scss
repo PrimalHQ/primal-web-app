@@ -31,10 +31,22 @@
   border-radius: 50%;
 }
 
-.xsAvatar {
+.xxsAvatar {
   @include avatar;
   width: 24px;
   height: 24px;
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+}
+
+.xsAvatar {
+  @include avatar;
+  width: 32px;
+  height: 32px;
 
   .iconBackground {
     @include iconBackground;
@@ -99,10 +111,17 @@
   border-radius: 50%;
 }
 
-.xsMissing {
+.xxsMissing {
   @include missing;
   width: 24px;
   height: 24px;
+  font-size: 10px;
+}
+
+.xsMissing {
+  @include missing;
+  width: 32px;
+  height: 32px;
   font-size: 10px;
 }
 

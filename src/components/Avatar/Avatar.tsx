@@ -12,6 +12,7 @@ const Avatar: Component<{
     const selectedSize = props.size || 'sm';
 
     const avatarClass = {
+      xxs: styles.xxsAvatar,
       xs: styles.xsAvatar,
       sm: styles.smallAvatar,
       md: styles.midAvatar,
@@ -20,6 +21,7 @@ const Avatar: Component<{
     };
 
     const missingClass = {
+      xxs: styles.xxsMissing,
       xs: styles.xsMissing,
       sm: styles.smallMissing,
       md: styles.midMissing,
