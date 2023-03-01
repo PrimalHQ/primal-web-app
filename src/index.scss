@@ -138,19 +138,20 @@
   }
 }
 
-:root[data-theme="light"],
-:root[data-theme="sunrise"] {
-  @include sunrise_wave();
-}
-
 /* Default theme */
 :root[data-theme="dark"],
 :root[data-theme="sunset"],
 :root:not([data-theme="dark"]),
 :root:not([data-theme="sunset"]),
+:root:not([data-theme="sunrise"]),
 :root:not([data-theme="midinght"]),
 :root:not([data-theme="ice"]) {
   @include sunset_wave();
+}
+
+:root[data-theme="light"],
+:root[data-theme="sunrise"] {
+  @include sunrise_wave();
 }
 
 :root[data-theme="midnight"] {
