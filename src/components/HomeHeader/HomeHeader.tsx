@@ -62,7 +62,7 @@ const HomeHeader: Component = () => {
   return (
     <div class={styles.fullHeader}>
       <Show
-        when={context?.data.publicKey}
+        when={activeUser()}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
