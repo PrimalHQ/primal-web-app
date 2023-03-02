@@ -78,7 +78,7 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
               </div>
               <div class={styles.stat}>
                 <div class={styles.zapIcon}></div>
-                <div class={styles.statNumber}>{props.post?.post?.zaps}</div>
+                <div class={styles.statNumber}>{props.post?.post?.satszapped}</div>
               </div>
             </div>
           </div>
