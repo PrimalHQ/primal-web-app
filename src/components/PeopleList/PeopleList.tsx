@@ -2,6 +2,7 @@ import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
 import { style } from 'solid-js/web';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
+import { truncateNpub } from '../../stores/profile';
 import Avatar from '../Avatar/Avatar';
 import { calculateStickyPosition } from '../TrendingPost/helpers';
 
@@ -58,7 +59,7 @@ const PeopleList: Component = (props) => {
                       </Show>
                     </div>
                     <div class={styles.npub} title={person?.npub}>
-                      {person?.npub}
+                      {truncateNpub(person?.npub)}
                     </div>
                   </div>
                   <div class={styles.action}>
