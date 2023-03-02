@@ -9,13 +9,35 @@ export const urlify = (text: string) => {
   return text.replace(urlRegex, function(url) {
     const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
-    let link = '';
 
     if (isImage) {
-      link = '<img src="' + url + '" class="postImage"/>'
+      return '<img src="' + url + '" class="postImage"/>'
     }
 
-    return link;
+    const isMp4Video = url.includes('.mp4');
+    const isOggVideo = url.includes('.ogg');
+    const isWebmVideo = url.includes('.webm');
+    const isYouTubeVideo = url.includes('https://www.youtube.com');
+
+    if (isMp4Video) {
+      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+    }
+
+    if (isOggVideo) {
+      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+    }
+
+    if (isWebmVideo) {
+      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+    }
+
+    if (isYouTubeVideo) {
+      return `<iframe class="w-max" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
+    }
+
+
+
+    return url;
   })
 }
 
@@ -31,32 +53,10 @@ export const highlightHashtags = (text: string) => {
   return text.replace(regex, "$1<span class='hash_tag'>$2</span>");
 };
 
-export const nostrify = (text, post: PrimalNote, skipNotes = false) => {
-  const regex = /\#\[([0-9]*)\]/g;
-  let refs = [];
-  let match;
-  const context = useFeedContext();
+const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
-  while((match = regex.exec(text)) !== null) {
-    refs.push(match[1]);
-  }
+  console.log('NOSTIFY: ', text);
 
-  if (refs.length > 0) {
-    refs.forEach(ref => {
-      const tag = post.post.tags[ref];
-      if (tag[0] === 'p') {
-        getUserProfile(tag[1], `mentioned_user_|_${post.post.id}_|_${ref}`)
-      }
-
-      if (!skipNotes && tag[0] === 'e') {
-        getThread(tag[1], `mentioned_post_|_${post.post.id}_|_${ref}_|_${tag[1]}`, 0, 1);
-      }
-    });
-  }
-  return text;
-}
-
-const nostrify2 = (text: string, note: PrimalNote, skipNotes: boolean) => {
   const regex = /\#\[([0-9]*)\]/g;
   let refs = [];
   let match;
@@ -85,4 +85,4 @@ const nostrify2 = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
 };
 
-export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify2(note.post.content, note, skipNotes))));
+export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
