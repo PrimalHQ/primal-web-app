@@ -32,7 +32,8 @@ export const urlify = (text: string) => {
     }
 
     if (isYouTubeVideo) {
-      return `<iframe class="w-max" src="${url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
+      const source = url.includes('/watch?v=') ? `https://www.youtube.com/embed/${url.split('/watch?v=')[1]}` : url;
+      return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
 
