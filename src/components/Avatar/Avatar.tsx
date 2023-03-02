@@ -34,7 +34,7 @@ const Avatar: Component<{
         <Show
           when={props.src}
           fallback={
-            <div class={missingClass[selectedSize]}>MIA</div>
+            <div class={missingClass[selectedSize]}></div>
           }
         >
           <img src={props.src} alt="avatar" />
