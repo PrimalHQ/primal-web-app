@@ -15,6 +15,10 @@
   color: unset;
   line-height: 20px;
 
+  &:hover {
+    text-decoration: none !important;
+  }
+
   .mentionedNoteHeader {
     display: flex;
     justify-content: flex-start;
