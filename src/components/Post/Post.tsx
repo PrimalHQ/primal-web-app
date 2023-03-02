@@ -113,19 +113,19 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
           <div class={styles.footer}>
             <div class={styles.stat}>
               <div class={styles.replyIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.replies}</div>
+              <div class={styles.statNumber}>{props.post?.post?.replies || ''}</div>
             </div>
             <div class={styles.stat}>
               <div class={styles.likeIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.likes}</div>
+              <div class={styles.statNumber}>{props.post?.post?.likes || ''}</div>
             </div>
             <div class={styles.stat}>
               <div class={styles.repostIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.mentions}</div>
+              <div class={styles.statNumber}>{props.post?.post?.mentions || ''}</div>
             </div>
             <div class={styles.stat}>
               <div class={styles.zapIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.satszapped}</div>
+              <div class={styles.statNumber}>{props.post?.post?.satszapped || ''}</div>
             </div>
           </div>
         </div>
