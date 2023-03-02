@@ -12,6 +12,10 @@ const onOpen = () => {
 
 const onClose = () => {
   setConnected(false);
+
+  setTimeout(() => {
+    connect();
+  }, 200);
 }
 
 export const connect = () => {
@@ -31,7 +35,3 @@ export const reset = () => {
   disconnect();
   setTimeout(connect, 200);
 };
-
-// export const isConnected = () => {
-//   return socket()?.readyState === 1;
-// };
