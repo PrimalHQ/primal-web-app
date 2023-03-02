@@ -23,43 +23,43 @@
     line-height: 20px;
     font-weight: 800;
   }
+}
 
-  .homeIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
-    mask: url(../../assets/icons/home.svg) no-repeat center;
-  }
+.homeIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
+  mask: url(../../assets/icons/home.svg) no-repeat center;
+}
 
-  .exploreIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/explore.svg) no-repeat center;
-    mask: url(../../assets/icons/explore.svg) no-repeat center;
-  }
-  .messagesIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
-    mask: url(../../assets/icons/messages.svg) no-repeat center;
-  }
-  .notificationsIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
-    mask: url(../../assets/icons/notifications.svg) no-repeat center;
-  }
-  .downloadIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
-    mask: url(../../assets/icons/download.svg) no-repeat center;
-  }
-  .settingsIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
-    mask: url(../../assets/icons/settings.svg) no-repeat center;
-  }
-  .helpIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
-    mask: url(../../assets/icons/help.svg) no-repeat center;
-  }
+.exploreIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/explore.svg) no-repeat center;
+  mask: url(../../assets/icons/explore.svg) no-repeat center;
+}
+.messagesIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
+  mask: url(../../assets/icons/messages.svg) no-repeat center;
+}
+.notificationsIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
+  mask: url(../../assets/icons/notifications.svg) no-repeat center;
+}
+.downloadIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
+  mask: url(../../assets/icons/download.svg) no-repeat center;
+}
+.settingsIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
+  mask: url(../../assets/icons/settings.svg) no-repeat center;
+}
+.helpIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
+  mask: url(../../assets/icons/help.svg) no-repeat center;
 }
 
 .active {
@@ -72,40 +72,25 @@
   }
 
   .homeIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/home_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/home_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
-
   .exploreIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/explore_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/explore_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
   .messagesIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/messages_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/messages_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
   .notificationsIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/notifications_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/notifications_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
   .downloadIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/download_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/download_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
   .settingsIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/settings_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/settings_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
   .helpIcon {
-    @include iconNav;
-    -webkit-mask: url(../../assets/icons/help_filled.svg) no-repeat center;
-    mask: url(../../assets/icons/help_filled.svg) no-repeat center;
+    background-color: var(--text-primary);
   }
 }
 
