@@ -17,7 +17,7 @@ import type {
 import { convertToPosts, getFeed, sortByRecency, sortByScore24h } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
-import { isConnected, socket } from "../sockets";
+import { connect, isConnected, isNotConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
 import { render, renderToString } from "solid-js/web";
@@ -233,9 +233,17 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     html?.setAttribute('data-theme', data.theme);
   });
 
+  const onVisibilityChange = () => {
+    if (document.visibilityState === "visible" && isNotConnected()) {
+      connect();
+    }
+  };
+
   onMount(() => {
     socket()?.addEventListener('error', onError);
     socket()?.addEventListener('message', onMessage);
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     setData('theme', localStorage.getItem('theme') || '');
 
@@ -247,6 +255,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   onCleanup(() => {
     socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+
   });
 
   const store = {
