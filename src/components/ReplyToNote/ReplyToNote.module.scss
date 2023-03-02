@@ -20,7 +20,6 @@
   border: none;
   color: var(--text-tertiary);
   background-color: var(--background-site);
-  padding-bottom: 11px;
   display: grid;
   grid-template-columns: 92px 1fr;
 
@@ -53,9 +52,12 @@
 .controls {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  margin: 0px 12px 12px 0px;
   >button {
     width: 80px;
     height: 28px;
+    margin: 0px 0px 0px 8px;
   }
 }
 
@@ -103,11 +105,10 @@
   padding: 1px;
   background: var(--brand-gradient);
   border-radius: 6px;
-  margin-left: 10px;
 
   .input {
     height: 34px;
-    max-width: 498px;
+    width: 100%;
     font-size: 18px;
     line-height: 20px;
     margin: 0px;
@@ -137,7 +138,7 @@
   border: none;
   outline: none;
   display: grid;
-  grid-template-columns: 92px 1fr;
+  grid-template-columns: 72px 1fr;
 }
 
 .leftSideClosed {

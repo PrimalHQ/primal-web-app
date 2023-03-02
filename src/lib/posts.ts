@@ -9,36 +9,36 @@ export const urlify = (text: string) => {
   return text.replace(urlRegex, function(url) {
     const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
-
     if (isImage) {
       return '<img src="' + url + '" class="postImage"/>'
     }
 
     const isMp4Video = url.includes('.mp4');
-    const isOggVideo = url.includes('.ogg');
-    const isWebmVideo = url.includes('.webm');
-    const isYouTubeVideo = url.includes('https://www.youtube.com');
 
     if (isMp4Video) {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
+    const isOggVideo = url.includes('.ogg');
+
     if (isOggVideo) {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
+    const isWebmVideo = url.includes('.webm');
+
     if (isWebmVideo) {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
+
+    const isYouTubeVideo = url.includes('https://www.youtube.com');
 
     if (isYouTubeVideo) {
       const source = url.includes('/watch?v=') ? `https://www.youtube.com/embed/${url.split('/watch?v=')[1]}` : url;
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
-
-
-    return url;
+    return `<a href="${url}" target="_blank" >${url}</a>`;
   })
 }
 
@@ -55,8 +55,6 @@ export const highlightHashtags = (text: string) => {
 };
 
 const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
-
-  console.log('NOSTIFY: ', text);
 
   const regex = /\#\[([0-9]*)\]/g;
   let refs = [];
