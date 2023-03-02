@@ -56,6 +56,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   });
 
   const proccessPost = (post: NostrPostContent) => {
+
     if (oldestPost()?.post.noteId === noteEncode(post.id)) {
       return;
     }

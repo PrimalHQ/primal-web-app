@@ -1,3 +1,4 @@
+import { noteEncode } from "nostr-tools/nip19";
 import { useFeedContext } from "../contexts/FeedContext";
 import { PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
@@ -71,12 +72,13 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
     refs.forEach(ref => {
       const tag = note.post.tags[ref];
       if (tag[0] === 'p') {
-        getUserProfile(tag[1], `mentioned_user_|_${note.post.id}_|_${ref}`)
+        getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
         // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[UR ${tag[1]}]]`)
       }
 
       if (!skipNotes && tag[0] === 'e') {
-        getThread(tag[1], `mentioned_post_|_${note.post.id}_|_${ref}_|_${tag[1]}`, 0, 1);
+        const mId = noteEncode(tag[1]);
+        getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
         // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[ER ${tag[1]}]]`)
       }
     });
