@@ -4,6 +4,7 @@ import { date } from '../../lib/dates';
 import { parseNote } from '../../lib/posts';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
+import ParsedNote from '../ParsedNote/ParsedNote';
 
 import styles from './PrimaryPost.module.scss';
 
@@ -58,7 +59,8 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
               <div class={styles.contextMenu}>...</div>
             </div>
 
-            <div class={styles.message} innerHTML={parseNote(props.post)}>
+            <div class={styles.message}>
+              <ParsedNote note={props.post} />
             </div>
 
             <div class={styles.footer}>

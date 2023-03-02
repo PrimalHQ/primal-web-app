@@ -5,7 +5,7 @@ import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src: string | undefined,
-  size?: "xs" | "sm" | "md" | "lg" | "xl",
+  size?: "xxs" | "xs" | "sm" | "md" | "lg" | "xl",
   verified?: string
 }> = (props) => {
 

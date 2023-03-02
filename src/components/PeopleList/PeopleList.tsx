@@ -34,31 +34,31 @@ const PeopleList: Component = (props) => {
                 <div class={styles.peopleList}>
                   <div class={styles.avatar}>
                     <Avatar
-                      src={person.picture}
+                      src={person?.picture}
                       size="md"
-                      verified={person.nip05}
+                      verified={person?.nip05}
                     />
                   </div>
                   <div class={styles.content}>
                     <div class={styles.name}>
-                      {person.name}
+                      {person?.name}
                     </div>
-                    <div class={styles.verification} title={person.nip05}>
-                      <Show when={person.nip05}>
+                    <div class={styles.verification} title={person?.nip05}>
+                      <Show when={person?.nip05}>
                         <span class={styles.verifiedName}>
-                          {trimVerification(person.nip05)[0]}
+                          {trimVerification(person?.nip05)[0]}
                         </span>
                         <span class={styles.verifiedIcon} />
                         <span
                           class={styles.verifiedBy}
-                          title={person.nip05}
+                          title={person?.nip05}
                         >
-                          {trimVerification(person.nip05)[1]}
+                          {trimVerification(person?.nip05)[1]}
                         </span>
                       </Show>
                     </div>
-                    <div class={styles.npub} title={person.npub}>
-                      {person.npub}
+                    <div class={styles.npub} title={person?.npub}>
+                      {person?.npub}
                     </div>
                   </div>
                   <div class={styles.action}>

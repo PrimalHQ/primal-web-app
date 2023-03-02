@@ -1,4 +1,6 @@
+import { useFeedContext } from "../contexts/FeedContext";
 import { PrimalNote } from "../types/primal";
+import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
 
 export const urlify = (text: string) => {
@@ -29,10 +31,11 @@ export const highlightHashtags = (text: string) => {
   return text.replace(regex, "$1<span class='hash_tag'>$2</span>");
 };
 
-export const nostrify = (text, post: PrimalNote) => {
+export const nostrify = (text, post: PrimalNote, skipNotes = false) => {
   const regex = /\#\[([0-9]*)\]/g;
   let refs = [];
   let match;
+  const context = useFeedContext();
 
   while((match = regex.exec(text)) !== null) {
     refs.push(match[1]);
@@ -44,9 +47,42 @@ export const nostrify = (text, post: PrimalNote) => {
       if (tag[0] === 'p') {
         getUserProfile(tag[1], `mentioned_user_|_${post.post.id}_|_${ref}`)
       }
+
+      if (!skipNotes && tag[0] === 'e') {
+        getThread(tag[1], `mentioned_post_|_${post.post.id}_|_${ref}_|_${tag[1]}`, 0, 1);
+      }
     });
   }
   return text;
 }
 
-export const parseNote = (note: PrimalNote) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note))));
+const nostrify2 = (text: string, note: PrimalNote, skipNotes: boolean) => {
+  const regex = /\#\[([0-9]*)\]/g;
+  let refs = [];
+  let match;
+  // let nostrifiedText = `${text}`;
+
+  while((match = regex.exec(text)) !== null) {
+    refs.push(match[1]);
+  }
+
+  if (refs.length > 0) {
+    refs.forEach(ref => {
+      const tag = note.post.tags[ref];
+      if (tag[0] === 'p') {
+        getUserProfile(tag[1], `mentioned_user_|_${note.post.id}_|_${ref}`)
+        // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[UR ${tag[1]}]]`)
+      }
+
+      if (!skipNotes && tag[0] === 'e') {
+        getThread(tag[1], `mentioned_post_|_${note.post.id}_|_${ref}_|_${tag[1]}`, 0, 1);
+        // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[ER ${tag[1]}]]`)
+      }
+    });
+  }
+  // return nostrifiedText;
+  return text;
+
+};
+
+export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify2(note.post.content, note, skipNotes))));

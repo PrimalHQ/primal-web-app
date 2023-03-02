@@ -12,6 +12,7 @@ import type {
   PrimalFeed,
   PrimalNote,
   PrimalUser,
+  TrendingNotesStore,
 } from '../types/primal';
 import { convertToPosts, getFeed, sortByRecency, sortByScore24h } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
@@ -19,6 +20,10 @@ import { initialStore, emptyPage } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
+import { render, renderToString } from "solid-js/web";
+import Avatar from "../components/Avatar/Avatar";
+import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
+import { parseNote } from "../lib/posts";
 // import { proccessEventContent } from "../stores/home";
 
 
@@ -33,7 +38,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const [page, setPage] = createStore(emptyPage);
 
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
-
 
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
@@ -199,18 +203,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       }
 
       proccessEventContent(content, type);
-      return;
-    }
-
-    if (type !== 'EOSE' && subId.startsWith('mentioned_user')) {
-      const [_, postId, ref] = subId.split('_|_');
-      const user = JSON.parse(content?.content || '') as NostrUserContent;
-
-      setData('posts', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
-      setData('threadedNotes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
-      setData('exploredNotes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
-      setData('trendingNotes', 'notes', post => post.post.id === postId, 'post', 'content', c => c.replace(`#[${ref}]`, `<span class="mentioned_user">@${user.name}</span>`));
-
       return;
     }
 

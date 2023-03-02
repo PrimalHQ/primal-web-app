@@ -7,6 +7,7 @@ import { getUserProfile, trimVerification } from '../../lib/profile';
 import { isConnected, socket } from '../../sockets';
 import { NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
+import ParsedNote from '../ParsedNote/ParsedNote';
 
 import styles from './Post.module.scss';
 
@@ -105,7 +106,8 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
             </div>
           </div>
 
-          <div class={styles.message} innerHTML={parseNote(props.post)}>
+          <div class={styles.message}>
+            <ParsedNote note={props.post} />
           </div>
 
           <div class={styles.footer}>
