@@ -31,10 +31,12 @@ export const urlify = (text: string) => {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
-    const isYouTubeVideo = url.includes('https://www.youtube.com');
+    const isYouTubeVideo = url.includes('https://www.youtube.com') || url.includes('https://youtu.be');
 
     if (isYouTubeVideo) {
-      const source = url.includes('/watch?v=') ? `https://www.youtube.com/embed/${url.split('/watch?v=')[1]}` : url;
+      const full = new URL(url);
+      const videoId = url.includes('/watch?v=') ? full.searchParams.get('v') : full.pathname.substring(1);
+      const source = `https://www.youtube.com/embed/${videoId}`
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
