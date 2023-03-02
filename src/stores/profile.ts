@@ -2,7 +2,7 @@ import { createStore, SetStoreFunction } from "solid-js/store";
 import { NostrEventContent, PrimalUser } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
-  return `${npub.slice(0, 8)}..${npub.slice(-5)}`;
+  return npub ? `${npub.slice(0, 8)}..${npub.slice(-5)}` : '';
 };
 
 export type ProfileStoreData = {

@@ -68,8 +68,6 @@ const Thread: Component = () => {
 
     const [type, subkey, content] = message;
 
-    console.log('subkey >>>> ', subkey)
-
     if (subkey !== `thread_${postId()}_${APP_ID}`) {
       return;
     }
