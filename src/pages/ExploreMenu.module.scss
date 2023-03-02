@@ -123,26 +123,26 @@
 @mixin exploreCategoryIcon {
   width: 56px;
   height: 56px;
-  background-color: var(--text-primary);
+  background-color: var(--background-site);
 }
 
 .global_trending_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/global_trending.svg');
+  background-image: var(--icon-global_trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .global_latest_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/global_latest.svg');
+  background-image: var(--icon-network_latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .global_popular_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/global_popular.svg');
+  background-image: var(--icon-network_popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -150,21 +150,21 @@
 
 .network_trending_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/network_trending.svg');
+  background-image: var(--icon-network_trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .network_latest_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/network_latest.svg');
+  background-image: var(--icon-network_latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .network_popular_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/network_popular.svg');
+  background-image: var(--icon-network_popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -172,21 +172,21 @@
 
 .tribe_trending_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/tribe_trending.svg');
+  background-image: var(--icon-tribe_trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .tribe_latest_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/tribe_latest.svg');
+  background-image: var(--icon-tribe_latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .tribe_popular_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/tribe_popular.svg');
+  background-image: var(--icon-tribe_popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -194,21 +194,21 @@
 
 .follows_trending_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/follows_trending.svg');
+  background-image: var(--icon-follows_trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .follows_latest_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/follows_latest.svg');
+  background-image: var(--icon-follows_latest);;
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .follows_popular_icon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/follows_latest.svg');
+  background-image: var(--icon-follows_popular);;
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -216,28 +216,28 @@
 
 .followsIcon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/follows.svg');
+  background-image: var(--icon-follows);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .tribeIcon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/tribe.svg');
+  background-image: var(--icon-tribe);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .networkIcon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/network.svg');
+  background-image: var(--icon-network);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .globalIcon {
   @include exploreCategoryIcon;
-  background-image: url('../assets/icons/global.svg');
+  background-image: var(--icon-global);
   background-size: contain;
   background-repeat: no-repeat;
 }
