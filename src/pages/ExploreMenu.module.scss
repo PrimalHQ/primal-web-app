@@ -128,21 +128,21 @@
 
 .global_trending_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-global_trending);
+  background-image: var(--icon-global-trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .global_latest_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-network_latest);
+  background-image: var(--icon-network-latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .global_popular_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-network_popular);
+  background-image: var(--icon-network-popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -150,21 +150,21 @@
 
 .network_trending_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-network_trending);
+  background-image: var(--icon-network-trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .network_latest_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-network_latest);
+  background-image: var(--icon-network-latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .network_popular_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-network_popular);
+  background-image: var(--icon-network-popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -172,21 +172,21 @@
 
 .tribe_trending_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-tribe_trending);
+  background-image: var(--icon-tribe-trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .tribe_latest_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-tribe_latest);
+  background-image: var(--icon-tribe-latest);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .tribe_popular_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-tribe_popular);
+  background-image: var(--icon-tribe-popular);
   background-size: contain;
   background-repeat: no-repeat;
 }
@@ -194,21 +194,21 @@
 
 .follows_trending_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-follows_trending);
+  background-image: var(--icon-follows-trending);
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .follows_latest_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-follows_latest);;
+  background-image: var(--icon-follows-latest);;
   background-size: contain;
   background-repeat: no-repeat;
 }
 
 .follows_popular_icon {
   @include exploreCategoryIcon;
-  background-image: var(--icon-follows_popular);;
+  background-image: var(--icon-follows-popular);;
   background-size: contain;
   background-repeat: no-repeat;
 }
