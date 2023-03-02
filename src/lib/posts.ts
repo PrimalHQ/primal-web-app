@@ -20,15 +20,15 @@ export const urlify = (text: string) => {
     const isYouTubeVideo = url.includes('https://www.youtube.com');
 
     if (isMp4Video) {
-      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
     if (isOggVideo) {
-      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
     if (isWebmVideo) {
-      return `<video width="320" height="240" controls><source src="${url}" type="video/mp4"></video>`;
+      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
     if (isYouTubeVideo) {
