@@ -86,10 +86,11 @@
   bottom: 0px;
   right: 15px;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   >button {
     width: 80px;
     height: 28px;
+    margin: 0px 0px 11px 8px;
   }
 }
 
