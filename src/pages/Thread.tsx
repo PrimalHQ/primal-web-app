@@ -16,10 +16,19 @@ import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
+import { noteEncode } from 'nostr-tools/nip19';
 
 
 const Thread: Component = () => {
   const params = useParams();
+
+  const postId = () => {
+    if (params.postId.startsWith('note')) {
+      return params.postId;
+    }
+
+    return noteEncode(params.postId);
+  };
 
   const context = useFeedContext();
 
@@ -59,7 +68,9 @@ const Thread: Component = () => {
 
     const [type, subkey, content] = message;
 
-    if (subkey !== `thread_${params.postId}_${APP_ID}`) {
+    console.log('subkey >>>> ', subkey)
+
+    if (subkey !== `thread_${postId()}_${APP_ID}`) {
       return;
     }
 
@@ -91,12 +102,12 @@ const Thread: Component = () => {
   createEffect(() => {
     context?.data.threadedNotes.forEach((note) => {
 
-      if (primaryNote() === undefined && note.post.id === params.postId) {
+      if (primaryNote() === undefined && note.post.noteId === postId()) {
         setPrimaryNote(() => ({ ...note }));
         return;
       }
 
-      if (note.post.id === primaryNote()?.post.id) {
+      if (note.post.noteId === primaryNote()?.post.noteId) {
         return;
       }
 
@@ -128,23 +139,23 @@ const Thread: Component = () => {
   }, []);
 
   createEffect(() => {
-    if (params.postId && params.postId !== primaryNote()?.post.id) {
-      let note = context?.data.posts.find(p => p.post.id === params.postId);
+    if (postId() && postId() !== primaryNote()?.post.noteId) {
+      let note = context?.data.posts.find(p => p.post.noteId === postId());
 
       if (!note) {
-        note = context?.data.trendingNotes.notes.find(p => p.post.id === params.postId);
+        note = context?.data.trendingNotes.notes.find(p => p.post.noteId === postId());
       }
 
       if (!note) {
-        note = context?.data.exploredNotes.find(p => p.post.id === params.postId);
+        note = context?.data.exploredNotes.find(p => p.post.noteId === postId());
       }
 
       if (!note) {
-        note = parentNotes.find(p => p.post.id === params.postId);
+        note = parentNotes.find(p => p.post.noteId === postId());
       }
 
       if (!note) {
-        note = replies.find(p => p.post.id === params.postId);
+        note = replies.find(p => p.post.noteId === postId());
       }
 
       if (note) {
@@ -172,7 +183,7 @@ const Thread: Component = () => {
 
 	createEffect(() => {
     if (isConnected()) {
-      params.postId && setIsFetching(true) && getThread(params.postId, `thread_${params.postId}_${APP_ID}`);
+      postId() && setIsFetching(true) && getThread(postId(), `thread_${postId()}_${APP_ID}`);
 		}
 	});
 

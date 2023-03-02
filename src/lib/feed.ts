@@ -2,6 +2,7 @@ import { socket } from "../sockets";
 import { FeedPage, PrimalNote } from "../types/primal";
 import { hexToNpub } from "./keys";
 import DOMPurify from 'dompurify';
+import { noteEncode, decode } from "nostr-tools/nip19";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -26,7 +27,7 @@ export const getThread = (postId: string, subid: string, until = 0, limit = 20) 
   socket()?.send(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["thread_view", { event_id: postId, limit: 100 }]},
+    {cache: ["thread_view", { event_id: decode(postId).data, limit: 100 }]},
   ]));
 }
 
@@ -73,6 +74,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         score: stat.score,
         score24h: stat.score24h,
         satszapped: stat.satszapped,
+        noteId: noteEncode(msg.id),
       },
     };
   });

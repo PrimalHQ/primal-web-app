@@ -123,7 +123,7 @@ const TrendingNotes: Component = () => {
           <For each={context?.data.trendingNotes.notes}>
             {
               (post) =>
-                <A href={`/thread/${post.post.id}`}>
+                <A href={`/thread/${post.post.noteId}`}>
                   <div class={styles.trendingPost}>
                     <div class={styles.avatar}>
                       <Avatar src={post.user?.picture} size="xxs" />

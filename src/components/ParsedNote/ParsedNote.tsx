@@ -45,7 +45,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     if (type !== 'EOSE' && subId.startsWith('mentioned_user')) {
       const [_, postId, ref] = subId.split('_|_');
 
-      if (postId !== props.note.post.id) {
+      if (postId !== props.note.post.noteId) {
         return;
       }
 
@@ -59,7 +59,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     if (!props.ignoreMentionedNotes && subId.startsWith('mentioned_post')) {
       const [_, postId, ref, mentionId] = subId.split('_|_');
 
-      if (postId !== props.note.post.id) {
+      if (postId !== props.note.post.noteId) {
         return;
       }
 
@@ -70,7 +70,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         if (mentions) {
           const newPosts = convertToPosts(mentions);
 
-          const mentionedNote = newPosts.find(note => note.post.id === mentionId);
+          const mentionedNote = newPosts.find(note => note.post.noteId === mentionId);
 
           if (mentionedNote) {
             setReferences(refs => ({...refs, [ref]: mentionedNote}));          }
@@ -137,7 +137,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
           if (reference.post) {
             return (
               <A
-                href={`/thread/${reference.post.id}`}
+                href={`/thread/${reference.post.noteId}`}
                 class={styles.mentionedNote}
               >
                 <div class={styles.mentionedNoteHeader}>

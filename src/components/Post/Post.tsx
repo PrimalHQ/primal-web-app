@@ -47,7 +47,7 @@ import styles from './Post.module.scss';
 //     refs.forEach(ref => {
 //       const tag = post.post.tags[ref];
 //       if (tag[0] === 'p') {
-//         getUserProfile(tag[1], `mentioned_user_|_${post.post.id}_|_${ref}`)
+//         getUserProfile(tag[1], `mentioned_user_|_${post.post.noteId}_|_${ref}`)
 //       }
 //     });
 //   }
@@ -65,7 +65,7 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
   // const [time] = createSignal(date(props.post?.post.created_at));
 
   return (
-    <A class={styles.postLink} href={`/thread/${props.post?.post.id}`}>
+    <A class={styles.postLink} href={`/thread/${props.post?.post.noteId}`}>
       <div class={styles.post}>
         <div class={styles.avatar} title={props.post?.user?.name}>
           <Avatar

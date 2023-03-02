@@ -24,6 +24,7 @@ import { render, renderToString } from "solid-js/web";
 import Avatar from "../components/Avatar/Avatar";
 import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
 import { parseNote } from "../lib/posts";
+import { noteEncode } from "nostr-tools/nip19";
 // import { proccessEventContent } from "../stores/home";
 
 
@@ -55,7 +56,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   });
 
   const proccessPost = (post: NostrPostContent) => {
-    if (oldestPost()?.post.id === post.id) {
+    if (oldestPost()?.post.noteId === noteEncode(post.id)) {
       return;
     }
 
