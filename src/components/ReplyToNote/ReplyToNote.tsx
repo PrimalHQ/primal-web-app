@@ -1,5 +1,6 @@
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { useFeedContext } from "../../contexts/FeedContext";
+import { sendNote } from "../../lib/posts";
 import { PrimalNetStats, PrimalNote } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./ReplyToNote.module.scss";
@@ -35,7 +36,7 @@ const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
   elm.rows = minRows + rows
 }
 
-const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
+const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
   const [open, setOpen] = createSignal(false);
 
@@ -69,6 +70,23 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
     setOpen(false);
   };
 
+  const postNote = () => {
+    const textArea = document.getElementById('reply_to_note_text_area') as HTMLTextAreaElement;
+
+    if (textArea.value.trim() === '') {
+      return;
+    }
+
+    const replyTo = props.note.post.id;
+
+    if (context) {
+      sendNote(textArea.value, context?.relays, replyTo);
+    }
+
+    closeReplyToNote();
+
+  };
+
   return (
     <Show
       when={open()}
@@ -87,7 +105,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
                 class={styles.input}
               >
                 <span>reply to</span>
-                <span class={styles.userName}>{params.note.user.name}</span>
+                <span class={styles.userName}>{props.note.user.name}</span>
               </div>
             </div>
           </div>
@@ -107,7 +125,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (params) => {
             <textarea id="reply_to_note_text_area" rows={3} data-min-rows={3} >
             </textarea>
             <div class={styles.controls}>
-              <button class={styles.primaryButton}>
+              <button class={styles.primaryButton} onClick={postNote}>
                 <span>post</span>
               </button>
               <button class={styles.secondaryButton} onClick={closeReplyToNote}>

@@ -143,7 +143,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
           }
         }
 
-        console.log('Relays: ', relays)
+        console.log('Connected relays: ', unwrap(relays))
       }
     }
   };

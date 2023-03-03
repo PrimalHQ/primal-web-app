@@ -117,10 +117,23 @@ export type NostrRelay = { read: boolean, write: boolean };
 
 export type NostrRelays = Record<string, NostrRelay>;
 
+export type NostrRelayEvent = {
+  kind: number,
+  content: string,
+  created_at: number,
+  tags: string[][],
+};
+export type NostrRelaySignedEvent = NostrRelayEvent & {
+  id: string,
+  pubkey: string,
+  sig: string,
+};
+
 export type NostrWindow = Window & typeof globalThis & {
   nostr: {
     getPublicKey: () => Promise<string>,
     getRelays: () => Promise<NostrRelays>,
+    signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>;
   },
 };
 

@@ -1,6 +1,7 @@
+import { Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
 import { useFeedContext } from "../contexts/FeedContext";
-import { PrimalNote } from "../types/primal";
+import { NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
 
@@ -89,3 +90,40 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 };
 
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
+
+export const sendNote = async (text: string, relays: Relay[], replyTo?: string) => {
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (nostr !== undefined) {
+
+    const tags = replyTo ? [['e', replyTo]] : [[]];
+
+    const event = {
+      content: text,
+      kind: 1,
+      tags,
+      created_at: Math.floor((new Date()).getTime() / 1000),
+    };
+
+    try {
+      const signedNote = await nostr.signEvent(event);
+
+      relays?.forEach(relay => {
+        let pub = relay.publish(signedNote)
+        pub.on('ok', () => {
+          console.log(`${relay.url} has accepted our event`)
+        })
+        pub.on('seen', () => {
+          console.log(`we saw the event on ${relay.url}`)
+        })
+        pub.on('failed', reason => {
+          console.log(`failed to publish to ${relay.url}: ${reason}`)
+        })
+      });
+
+    } catch (e) {
+      console.log('Failed sending note: ', e);
+    }
+  }
+}
