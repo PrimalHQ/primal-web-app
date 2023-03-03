@@ -1,6 +1,6 @@
 import { Component, createEffect, onCleanup, onMount } from "solid-js";
 import { useFeedContext } from "../../contexts/FeedContext";
-import { PrimalNetStats } from "../../types/primal";
+import { NostrWindow, PrimalNetStats } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./NewNote.module.scss";
 
@@ -70,6 +70,53 @@ const NewNote: Component = () => {
     context?.actions?.hideNewNoteForm()
   };
 
+  const sendNote = async (note) => {
+    const win = window as NostrWindow;
+    const nostr = win.nostr;
+
+    if (nostr !== undefined) {
+      const relays = context?.relays;
+
+      try {
+        const signedNote = await nostr.signEvent(note);
+
+        console.log('signedNote: ', signedNote);
+
+        relays?.forEach(relay => {
+          let pub = relay.publish(signedNote)
+          pub.on('ok', () => {
+            console.log(`${relay.url} has accepted our event`)
+          })
+          pub.on('seen', () => {
+            console.log(`we saw the event on ${relay.url}`)
+          })
+          pub.on('failed', reason => {
+            console.log(`failed to publish to ${relay.url}: ${reason}`)
+          })
+        });
+
+      } catch (e) {
+        console.log('Failed sending note: ', e);
+      }
+
+
+    }
+
+  }
+
+  const postNote = () => {
+    const textArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
+
+    const event = {
+      content: textArea.value,
+      kind: 1,
+      tags: [],
+      created_at: Math.floor((new Date()).getTime() / 1000),
+    };
+
+    sendNote(event);
+  };
+
 
   return (
     <>
@@ -87,7 +134,7 @@ const NewNote: Component = () => {
               <textarea id="new_note_text_area" rows={1} data-min-rows={1} >
               </textarea>
               <div class={styles.controls}>
-                <button class={styles.primaryButton}>
+                <button class={styles.primaryButton} onClick={postNote}>
                   <span>post</span>
                 </button>
                 <button class={styles.secondaryButton} onClick={closeNewNote}>

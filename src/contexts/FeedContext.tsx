@@ -5,6 +5,7 @@ import type {
   NostrEOSE,
   NostrEvent,
   NostrPostContent,
+  NostrRelays,
   NostrStatsContent,
   NostrUserContent,
   NostrWindow,
@@ -25,6 +26,7 @@ import Avatar from "../components/Avatar/Avatar";
 import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
 import { parseNote } from "../lib/posts";
 import { noteEncode } from "nostr-tools/nip19";
+import { Relay, relayInit } from "nostr-tools";
 // import { proccessEventContent } from "../stores/home";
 
 
@@ -39,6 +41,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const [page, setPage] = createStore(emptyPage);
 
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
+
+  const [relays, setRelays] = createStore<Relay[]>([]);
 
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
@@ -116,6 +120,34 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   };
 
+  const getRelays = async () => {
+    const win = window as NostrWindow;
+    const nostr = win.nostr;
+
+    if (nostr) {
+      const rels = await nostr.getRelays();
+
+      if (rels) {
+        const addresses = Object.keys(rels);
+
+        const relObjects = addresses.map(address => {
+          return relayInit(address);
+        })
+
+        for (let i=0; i < relObjects.length; i++) {
+          try {
+            await relObjects[i].connect();
+            setRelays(r => [ ...r, {...relObjects[i]}]);
+          } catch (e) {
+            console.log('error connecting to relay: ', e);
+          }
+        }
+
+        console.log('Relays: ', relays)
+      }
+    }
+  };
+
   // const [publicKey, setPublicKey] = createSignal<string>();
 
   createEffect(() => {
@@ -125,7 +157,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
       setData('availableFeeds', () => [ {...feed}, ...initialStore.availableFeeds]);
       setData('selectedFeed', () => ({...feed}));
-      setData('publicKey', () => profile.publicKey)
+      setData('publicKey', () => profile.publicKey);
+
+      getRelays();
 
       getUserProfile(profile.publicKey, `user_profile_${APP_ID}`);
     }
@@ -256,11 +290,15 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   onCleanup(() => {
     socket()?.removeEventListener('message', onMessage);
     // document.removeEventListener('visibilitychange', onVisibilityChange);
-
+    for (let i=0; i < relays.length; i++) {
+      const rel = relays[i];
+      rel.close();
+    }
   });
 
   const store = {
     data: data,
+    relays: relays,
     page: page,
     actions: {
       setData: setData,

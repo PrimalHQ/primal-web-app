@@ -1,3 +1,4 @@
+import { Relay } from "nostr-tools";
 import { SetStoreFunction } from "solid-js/store";
 
 export type NostrPostContent = {
@@ -86,6 +87,7 @@ export type PrimalContextStore = {
 
   data: FeedStore,
   page: FeedPage,
+  relays: Relay[],
   actions?: {
     clearThreadedNotes: () => void,
     setThreadedNotes: (newNotes: PrimalNote[]) => void,
@@ -111,7 +113,16 @@ export type PrimalContextStore = {
   },
 };
 
-export type NostrWindow = Window & typeof globalThis & { nostr: { getPublicKey: () => Promise<string> } };
+export type NostrRelay = { read: boolean, write: boolean };
+
+export type NostrRelays = Record<string, NostrRelay>;
+
+export type NostrWindow = Window & typeof globalThis & {
+  nostr: {
+    getPublicKey: () => Promise<string>,
+    getRelays: () => Promise<NostrRelays>,
+  },
+};
 
 export type NostrMessage = [
   type: "EVENT" | "EOSE",
