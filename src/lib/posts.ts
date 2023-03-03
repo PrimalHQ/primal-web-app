@@ -97,7 +97,7 @@ export const sendNote = async (text: string, relays: Relay[], replyTo?: string) 
 
   if (nostr !== undefined) {
 
-    const tags = replyTo ? [['e', replyTo]] : [[]];
+    const tags = replyTo && replyTo.length > 0 ? [['e', replyTo]] : [];
 
     const event = {
       content: text,
