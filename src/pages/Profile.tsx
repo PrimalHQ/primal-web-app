@@ -17,8 +17,8 @@ const Profile: Component = () => {
             Profile
           </div>
         </div>
-        <div class={styles.commingSoon}>
-          Comming soon.
+        <div class={styles.comingSoon}>
+          Coming soon.
         </div>
       </>
     )
