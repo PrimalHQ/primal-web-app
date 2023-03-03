@@ -77,7 +77,10 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
       return;
     }
 
-    const replyTo = props.note.post.id;
+    const replyTo = {
+      e: props.note.post.id,
+      p: props.note.post.pubkey,
+    };
 
     if (context) {
       sendNote(textArea.value, context?.relays, replyTo);

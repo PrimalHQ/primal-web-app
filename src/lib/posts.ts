@@ -91,13 +91,34 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
 
-export const sendNote = async (text: string, relays: Relay[], replyTo?: string) => {
+type ReplyTo = { e?: string, p?: string };
+
+const parseReplyTo = (replyTo?: ReplyTo) => {
+  let ret: string[][] = [];
+
+  if (!replyTo) {
+    return ret;
+  }
+
+  if (replyTo.e) {
+    ret.push(['e', replyTo.e]);
+  }
+
+  if (replyTo.p) {
+    ret.push(['p', replyTo.p]);
+  }
+
+  return ret;
+
+};
+
+export const sendNote = async (text: string, relays: Relay[], replyTo?: ReplyTo) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
   if (nostr !== undefined) {
 
-    const tags = replyTo && replyTo.length > 0 ? [['e', replyTo]] : [];
+    const tags = parseReplyTo(replyTo);
 
     const event = {
       content: text,
