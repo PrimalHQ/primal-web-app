@@ -36,9 +36,9 @@ const timeframes = ['latest', 'trending', 'popular', 'mostzapped'];
 
 const Explore: Component = () => {
 
-    const [stats, setStats] = createStore(initialStats);
+    const [stats, setStats] = createStore({...initialStats});
 
-    const [legend, setLegend] = createStore(initialLegend);
+    const [legend, setLegend] = createStore({...initialLegend});
 
     const [isListening, setIsListening] = createSignal(false);
 
@@ -72,10 +72,6 @@ const Explore: Component = () => {
 
     };
 
-    const onError = (error: Event) => {
-      console.log("error: ", error);
-    };
-
     const onMessage = (event: MessageEvent) => {
 
       const [type, subkey, content] = JSON.parse(event.data);
@@ -101,6 +97,8 @@ const Explore: Component = () => {
 
     createEffect(() => {
       if (isConnected()) {
+        socket()?.addEventListener('message', onMessage);
+
         if (!isListening()) {
           startListeningForNostrStats();
           setIsListening(true);
@@ -110,9 +108,6 @@ const Explore: Component = () => {
     });
 
     onMount(() => {
-      socket()?.addEventListener('error', onError);
-      socket()?.addEventListener('message', onMessage);
-
       if (isConnected()) {
         if (!isListening()) {
           startListeningForNostrStats();
@@ -129,7 +124,6 @@ const Explore: Component = () => {
     });
 
     onCleanup(() => {
-      socket()?.removeEventListener('error', onError);
       socket()?.removeEventListener('message', onMessage);
       stopListeningForNostrStats();
     });

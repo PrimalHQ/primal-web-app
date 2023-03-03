@@ -31,10 +31,9 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     setPrintableContent(() => newContent.split(/(\#\[[\d]\])/));
   });
 
-
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
+  createEffect(() => {
+    socket()?.addEventListener('message', onMessage);
+  });
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
@@ -102,12 +101,9 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
 
   onMount(() => {
-    socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
   });
 
   onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
   });
 

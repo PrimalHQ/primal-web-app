@@ -18,12 +18,21 @@ const onClose = () => {
   }, 200);
 }
 
+const onError = (error: Event) => {
+  console.log("ws error: ", error);
+
+  setTimeout(() => {
+    connect();
+  }, 200);
+};
+
 export const connect = () => {
   if (isNotConnected()) {
     setSocket(new WebSocket('wss://dev.primal.net/cache8'));
 
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
+    socket()?.addEventListener('error', onError);
   }
 };
 
@@ -35,3 +44,7 @@ export const reset = () => {
   disconnect();
   setTimeout(connect, 200);
 };
+
+export const sendMessage = (message: string) => {
+  isConnected() && socket()?.send(message);
+}

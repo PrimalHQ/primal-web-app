@@ -1,4 +1,4 @@
-import { socket } from "../sockets";
+import { isConnected, sendMessage, socket } from "../sockets";
 import { FeedPage, PrimalNote } from "../types/primal";
 import { hexToNpub } from "./keys";
 import DOMPurify from 'dompurify';
@@ -7,8 +7,7 @@ import { noteEncode, decode } from "nostr-tools/nip19";
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';
-
-  socket()?.send(JSON.stringify([
+  sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: ["feed", { pubkey, limit, [start]: until }]},
@@ -16,7 +15,7 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
 }
 
 export const getTrending = (subid: string) => {
-  socket()?.send(JSON.stringify([
+  sendMessage(JSON.stringify([
     "REQ",
     subid,
     {"cache":["explore", { timeframe: "trending", scope: "global", limit: 25 }]},
@@ -24,7 +23,7 @@ export const getTrending = (subid: string) => {
 };
 
 export const getThread = (postId: string, subid: string, until = 0, limit = 20) => {
-  socket()?.send(JSON.stringify([
+  sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: ["thread_view", { event_id: decode(postId).data, limit: 100 }]},
@@ -123,7 +122,7 @@ export const getExploreFeed = (
 
   const start = until === 0 ? 'since' : 'until';
 
-  socket()?.send(JSON.stringify([
+  sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: [

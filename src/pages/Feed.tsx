@@ -26,6 +26,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
 
   createEffect(() => {
     if (isConnected()) {
+      socket()?.addEventListener('message', onMessage);
       getExploreFeed(
         context?.data.publicKey || '',
         topic,
@@ -38,18 +39,11 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   });
 
   onMount(async () => {
-    socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
   });
 
   onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
   });
-
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);

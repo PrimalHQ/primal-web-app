@@ -46,10 +46,6 @@ const Thread: Component = () => {
     postStats: {},
   });
 
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
-
   const proccessPost = (post: NostrPostContent) => {
     setPage('messages', (msgs) => [ ...msgs, post]);
   };
@@ -169,19 +165,21 @@ const Thread: Component = () => {
   onMount(() => {
     // Temporary fix for Portal rendering on initial load.
     setMounted(true);
-
-    socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
   });
 
   onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
   });
 
 	createEffect(() => {
     if (isConnected()) {
-      postId() && setIsFetching(true) && getThread(postId(), `thread_${postId()}_${APP_ID}`);
+      socket()?.addEventListener('message', onMessage);
+      if (postId()) {
+        context?.actions?.clearThreadedNotes();
+        setIsFetching(true);
+        getThread(postId(), `thread_${postId()}_${APP_ID}`);
+
+      }
 		}
 	});
 

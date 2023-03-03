@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Layout from './components/Layout/Layout';
 import Explore from './pages/Explore';
 import { FeedProvider } from './contexts/FeedContext';
-import { connect, disconnect } from './sockets';
+import { connect, disconnect, isNotConnected } from './sockets';
 import Thread from './pages/Thread';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
@@ -14,14 +14,24 @@ import Help from './pages/Help';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 
+const onVisibilityChange = () => {
+  if (document.visibilityState === "visible") {
+    connect();
+  }
+};
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
   });
 
   onCleanup(() => {
     disconnect();
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+
   })
 
   createEffect(() => {

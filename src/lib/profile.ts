@@ -1,7 +1,7 @@
-import { socket } from "../sockets";
+import { isConnected, sendMessage, socket } from "../sockets";
 
 export const getUserProfile = (pubkey: string, subid: string) => {
-  socket()?.send(JSON.stringify([
+  sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: ["user_info", { pubkey }]},

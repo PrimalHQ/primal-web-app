@@ -34,7 +34,7 @@ export const APP_ID = Math.floor(Math.random()*10000000000);
 
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
-  const [data, setData] = createStore<FeedStore>(initialStore);
+  const [data, setData] = createStore<FeedStore>({...initialStore});
 
   const [page, setPage] = createStore(emptyPage);
 
@@ -50,6 +50,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         setData('isFetching', true);
 
         setPage({ messages: [], users: {}, postStats: {} });
+
         getFeed(pubkey, `user_feed_${APP_ID}`, until);
       }
     }
@@ -122,7 +123,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       const npub = hexToNpub(profile.publicKey);
       const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
-      setData('availableFeeds', () => [ feed, ...initialStore.availableFeeds]);
+      setData('availableFeeds', () => [ {...feed}, ...initialStore.availableFeeds]);
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey)
 
@@ -161,15 +162,12 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       if (e.message === 'User rejected') {
         setData('selectedFeed', () => ({ ...data.availableFeeds[0] }));
       }
-      console.log('ERROR: ', e);
+      console.log('error fetching public key: ', e);
     }
   }
 
   // MESSAGE LISTENERS ------------------------------------
 
-  const onError = (error: Event) => {
-    console.log("error: ", error);
-  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
@@ -215,6 +213,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     if (isConnected()) {
     const pubkey = data?.selectedFeed?.hex;
 
+    socket()?.addEventListener('message', onMessage);
+
     setData('posts', () => []);
     setData('scrollTop', () => 0);
     setPage({ messages: [], users: {}, postStats: {} });
@@ -235,17 +235,16 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     html?.setAttribute('data-theme', data.theme);
   });
 
-  const onVisibilityChange = () => {
-    if (document.visibilityState === "visible" && isNotConnected()) {
-      connect();
-    }
-  };
+  // const onVisibilityChange = () => {
+  //   if (document.visibilityState === "visible" && isNotConnected()) {
+  //     console.log('visible')
+  //     connect();
+  //   }
+  // };
 
   onMount(() => {
-    socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
 
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    // document.addEventListener('visibilitychange', onVisibilityChange);
 
     setData('theme', localStorage.getItem('theme') || '');
 
@@ -255,9 +254,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   });
 
   onCleanup(() => {
-    socket()?.removeEventListener('error', onError);
     socket()?.removeEventListener('message', onMessage);
-    document.removeEventListener('visibilitychange', onVisibilityChange);
+    // document.removeEventListener('visibilitychange', onVisibilityChange);
 
   });
 
