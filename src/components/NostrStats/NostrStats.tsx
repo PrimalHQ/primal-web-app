@@ -6,9 +6,6 @@ const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
 
   return (
     <>
-      <div class={styles.statsCaption}>
-        NOSTR NETWORK STATS
-      </div>
       <div class={styles.netstats}>
         <div class={styles.netstat}>
           <div class={styles.number}>
@@ -25,24 +22,6 @@ const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
           </div>
           <div class={styles.label}>
             public keys
-          </div>
-        </div>
-
-        <div class={styles.netstat}>
-          <div class={styles.number}>
-            {props.stats.pubnotes.toLocaleString()}
-          </div>
-          <div class={styles.label}>
-            public notes
-          </div>
-        </div>
-
-        <div class={styles.netstat}>
-          <div class={styles.number}>
-            {props.stats.reactions.toLocaleString()}
-          </div>
-          <div class={styles.label}>
-            reactions
           </div>
         </div>
 
@@ -66,10 +45,28 @@ const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
 
         <div class={styles.netstat}>
           <div class={styles.number}>
+            {props.stats.pubnotes.toLocaleString()}
+          </div>
+          <div class={styles.label}>
+            public notes
+          </div>
+        </div>
+
+        <div class={styles.netstat}>
+          <div class={styles.number}>
             {props.stats.reposts.toLocaleString()}
           </div>
           <div class={styles.label}>
             reposts
+          </div>
+        </div>
+
+        <div class={styles.netstat}>
+          <div class={styles.number}>
+            {props.stats.reactions.toLocaleString()}
+          </div>
+          <div class={styles.label}>
+            reactions
           </div>
         </div>
 

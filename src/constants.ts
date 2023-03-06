@@ -66,3 +66,17 @@ export const initialStore: FeedStore = {
     // },
   ],
 };
+
+
+export const timeframeLabels: Record<string, string> = {
+  latest: 'latest',
+  trending: 'trending',
+  popular: 'popular',
+};
+
+export const scopeLabels: Record<string, string> = {
+  follows: 'my follows',
+  tribe: 'my tribe',
+  network: 'my network',
+  global: 'global'
+};

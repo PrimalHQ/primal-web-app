@@ -29,6 +29,7 @@ import global from '../assets/icons/global.svg';
 import { A } from '@solidjs/router';
 import NostrStats from '../components/NostrStats/NostrStats';
 import { PrimalLegend, PrimalNetStats } from '../types/primal';
+import { timeframeLabels, scopeLabels } from '../constants';
 
 
 const initialStats: PrimalNetStats = {
@@ -48,20 +49,68 @@ const initialLegend = {
   your_outer_network: 0,
 };
 
-const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (props) => {
+const ExploreMenu: Component = () => {
 
-    const timeframeLabels: Record<string, string> = {
-      latest: 'latest',
-      trending: 'trending',
-      popular: 'popular',
-    };
 
-    const scopeLabels: Record<string, string> = {
-      follows: 'my follows',
-      tribe: 'my tribe',
-      network: 'my network',
-      global: 'global'
-    };
+  const [stats, setStats] = createStore({...initialStats});
+
+  const [legend, setLegend] = createStore({...initialLegend});
+
+  const [isListening, setIsListening] = createSignal(false);
+
+  const context = useFeedContext();
+
+
+
+  const onMessage = (event: MessageEvent) => {
+
+    const [type, subkey, content] = JSON.parse(event.data);
+
+
+    if (subkey !== `netstats_${APP_ID}` && subkey !== `stats_legend_${APP_ID}`) {
+      return;
+    }
+
+    if (content?.content) {
+      const stats = JSON.parse(content.content);
+
+
+      if (content.kind === 10000101) {
+        setStats(() => ({ ...stats }));
+      }
+
+      if (content.kind === 10000102) {
+        setLegend(() => ({ ...stats }));
+      }
+    }
+  };
+
+  createEffect(() => {
+    if (isConnected()) {
+      socket()?.addEventListener('message', onMessage);
+
+      if (!isListening()) {
+        startListeningForNostrStats();
+        setIsListening(true);
+      }
+      getLegendStats(context?.data.publicKey);
+    }
+  });
+
+  onMount(() => {
+    if (isConnected()) {
+      if (!isListening()) {
+        startListeningForNostrStats();
+        setIsListening(true);
+      }
+      getLegendStats(context?.data.publicKey);
+    }
+  });
+
+  onCleanup(() => {
+    socket()?.removeEventListener('message', onMessage);
+    stopListeningForNostrStats();
+  });
 
     const boxes = [
       { scope: 'follows', timeframe: 'latest', icon: followsLatest},
@@ -80,64 +129,67 @@ const ExploreMenu: Component<{ legend: PrimalLegend, stats: PrimalNetStats}> = (
       { scope: 'global', timeframe: 'popular', icon: globalPopular},
     ];
 
-    return (
-      <>
-        <div class={styles.exploreMenu}>
-          <For each={boxes}>
-            {(box) =>
-              <A
-                href={`/explore/${box.scope}/${box.timeframe}`}
-                class={`${styles.exploreBox} ${styles[`${box.scope}_${box.timeframe}_box`]}`}
-              >
-                <div>
-                  <div
-                    class={`${styles.exploreBoxIcon} ${styles[`${box.scope}_${box.timeframe}_icon`]}`}
-                  >
-                  </div>
-                  <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
-                  <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
+  return (
+    <>
+      <div class={styles.statsHolder}>
+        <NostrStats stats={stats}/>
+      </div>
+      <div class={styles.exploreMenu}>
+        <For each={boxes}>
+          {(box) =>
+            <A
+              href={`/explore/${box.scope}/${box.timeframe}`}
+              class={`${styles.exploreBox} ${styles[`${box.scope}_${box.timeframe}_box`]}`}
+            >
+              <div>
+                <div
+                  class={`${styles.exploreBoxIcon} ${styles[`${box.scope}_${box.timeframe}_icon`]}`}
+                >
                 </div>
-              </A>
-            }
-          </For>
-        </div>
+                <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
+                <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
+              </div>
+            </A>
+          }
+        </For>
+      </div>
 
-        <div class={styles.statsLegend}>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <div class={styles.followsIcon}></div>
-            </div>
-            <div class={styles.legendName}>Follows</div>
-            <div class={styles.legendNumber}>{props.legend.your_follows}</div>
-            <div class={styles.legendDescription}>accounts you follow</div>
+      <div class={styles.statsLegend}>
+        <div class={styles.legendDetails}>
+          <div class={styles.legendIcon}>
+            <div class={styles.followsIcon}></div>
           </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <div class={styles.tribeIcon}></div>
-            </div>
-            <div class={styles.legendName}>Tribe</div>
-            <div class={styles.legendNumber}>{props.legend.your_inner_network}</div>
-            <div class={styles.legendDescription}>your follows + your followers</div>
-          </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <div class={styles.networkIcon}></div>
-            </div>
-            <div class={styles.legendName}>Network</div>
-            <div class={styles.legendNumber}>{props.legend.your_outer_network}</div>
-            <div class={styles.legendDescription}>your follows + everyone they follow</div>
-          </div>
-          <div class={styles.legendDetails}>
-            <div class={styles.legendIcon}>
-              <div class={styles.globalIcon}></div>
-            </div>
-            <div class={styles.legendName}>Global</div>
-            <div class={styles.legendNumber}>{props.stats.users.toLocaleString()}</div>
-            <div class={styles.legendDescription}>all account on nostr</div>
-          </div>
+          <div class={styles.legendName}>Follows</div>
+          <div class={styles.legendNumber}>{legend.your_follows}</div>
+          <div class={styles.legendDescription}>accounts you follow</div>
         </div>
-      </>
-    )
+        <div class={styles.legendDetails}>
+          <div class={styles.legendIcon}>
+            <div class={styles.tribeIcon}></div>
+          </div>
+          <div class={styles.legendName}>Tribe</div>
+          <div class={styles.legendNumber}>{legend.your_inner_network}</div>
+          <div class={styles.legendDescription}>your follows + your followers</div>
+        </div>
+        <div class={styles.legendDetails}>
+          <div class={styles.legendIcon}>
+            <div class={styles.networkIcon}></div>
+          </div>
+          <div class={styles.legendName}>Network</div>
+          <div class={styles.legendNumber}>{legend.your_outer_network}</div>
+          <div class={styles.legendDescription}>your follows + everyone they follow</div>
+        </div>
+        <div class={styles.legendDetails}>
+          <div class={styles.legendIcon}>
+            <div class={styles.globalIcon}></div>
+          </div>
+          <div class={styles.legendName}>Global</div>
+          <div class={styles.legendNumber}>{stats.users.toLocaleString()}</div>
+          <div class={styles.legendDescription}>all account on nostr</div>
+        </div>
+      </div>
+    </>
+  )
 }
 
 export default ExploreMenu;
