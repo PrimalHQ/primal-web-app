@@ -1,10 +1,12 @@
 @import "@picocss/pico/scss/pico";
 
 @mixin sunset_wave {
-  --brand-one: #FA3C3C;
-  --brand-two: #5B09AD;
-  --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-one) 0%, var(--brand-two) 100%);
+  --brand-1: #FA3C3C;
+  --brand-2: #5B09AD;
+  --brand-3: #FA9A43;
+  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.3%, var(--brand-2) 100%);
   --accent-1: #CA079F;
   --accent-2: #AB268E;
 
@@ -56,10 +58,12 @@
 }
 
 @mixin sunrise_wave {
-  --brand-one: #FA3C3C;
-  --brand-two: #5B09AD;
-  --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-one) 0%, var(--brand-two) 100%);
+  --brand-1: #FA3C3C;
+  --brand-2: #5B09AD;
+  --brand-3: #5B09AD;
+  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.3%, var(--brand-2) 100%);
   --accent-1: #CA079F;
   --accent-2: #AB268E;
 
@@ -110,10 +114,12 @@
 }
 
 @mixin midnight_wave {
-  --brand-one: #0090F8;
-  --brand-two: #4C00C7;
-  --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-one) 0%, var(--brand-two) 100%);
+  --brand-1: #0090F8;
+  --brand-2: #4C00C7;
+  --brand-3: #00E0FF;
+  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.22%, var(--brand-2) 100%);
   --accent-1: #2394EF;
   --accent-2: #0C7DD8;
 
@@ -166,10 +172,12 @@
 
 
 @mixin ice_wave {
-  --brand-one: #0090F8;
-  --brand-two: #4C00C7;
-  --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-one) 0%, var(--brand-two) 100%);
+  --brand-1: #0090F8;
+  --brand-2: #4C00C7;
+  --brand-3: #00E0FF;
+  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.22%, var(--brand-2) 100%);
   --accent-1: #2394EF;
   --accent-2: #0C7DD8;
 
@@ -249,14 +257,8 @@
   }
 }
 
-/* Purple (Common styles) */
+/* Common styles */
 :root {
-  // --brand-one: #FA4343;
-  // --brand-two: #5b12A4;
-  // --brand-gradient: linear-gradient(135deg, var(--brand-one) 0%, var(--brand-two) 100%);
-  // --brand-gradient-vertical: linear-gradient(180deg, rgba(250,67,67,1) 0%, rgba(91,18,164,1) 100%);
-  // --accent-1: #CA079F;
-  // --accent-2: #AB268E;
 
   --missing-avatar-text: #FFFFFF;
 
