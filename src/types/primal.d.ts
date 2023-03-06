@@ -88,6 +88,7 @@ export type PrimalContextStore = {
   data: FeedStore,
   page: FeedPage,
   relays: Relay[],
+  likes: string[],
   actions?: {
     clearThreadedNotes: () => void,
     setThreadedNotes: (newNotes: PrimalNote[]) => void,

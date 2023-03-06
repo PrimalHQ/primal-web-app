@@ -14,6 +14,7 @@ import Paginator from '../components/Paginator/Paginator';
 import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
 import { proccessUserProfile } from '../stores/profile';
 import Branding from '../components/Branding/Branding';
+import { getLikes } from '../lib/posts';
 
 const Home: Component = () => {
 
@@ -34,64 +35,9 @@ const Home: Component = () => {
         behavior: 'instant',
       });
     }, 0);
-
-    // socket()?.addEventListener('error', onError);
-    // socket()?.addEventListener('message', onMessage);
-
-    // if (!context?.data.isFetching && context?.data.posts.length === 0) {
-    //   console.log('FETCH HOME')
-    //   context.actions?.fetchHomeFeed();
-    // }
-
   });
 
-  // onCleanup(() => {
-  //   socket()?.removeEventListener('error', onError);
-  //   socket()?.removeEventListener('message', onMessage);
-  // });
-
-  // const onError = (error: Event) => {
-  //   console.log("error: ", error);
-  // };
-
-  // const onMessage = (event: MessageEvent) => {
-  //   const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-  //   const [type, subId, content] = message;
-
-  //   // if (subId === `trending_${APP_ID}`) {
-  //   //   processTrendingPost(type, content);
-  //   //   return;
-  //   // }
-
-
-  //   if (subId === `user_profile_${APP_ID}`) {
-  //     content && proccessUserProfile(content);
-  //     return;
-  //   }
-
-  //   if (subId === `user_feed_${APP_ID}`) {
-  //     if (type === 'EOSE') {
-  //       const newPosts = sortByRecency(convertToPosts(context?.page));
-  //       context?.actions?.clearPage();
-  //       context?.actions?.savePosts(newPosts);
-
-  //       return;
-  //     }
-
-  //     context?.actions?.proccessEventContent(content, type);
-  //     return;
-  //   }
-
-  // };
-
-  // const proccessUserProfile = (content: NostrUserContent) => {
-  //   const user = JSON.parse(content.content);
-
-  //   context?.actions?.setActiveUser(user);
-  // }
-
-  const isPageLoading = () => context?.data.isFetching
+  const isPageLoading = () => context?.data.isFetching;
 
   return (
     <div class={styles.homeContent}>
@@ -118,6 +64,7 @@ const Home: Component = () => {
             {(post) => {
               return <Post
                 post={post}
+                liked={context?.likes.includes(post.post.id)}
               />
             }}
           </For>

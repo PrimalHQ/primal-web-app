@@ -24,7 +24,7 @@ import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
 import { render, renderToString } from "solid-js/web";
 import Avatar from "../components/Avatar/Avatar";
 import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
-import { parseNote } from "../lib/posts";
+import { getLikes, parseNote } from "../lib/posts";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
 // import { proccessEventContent } from "../stores/home";
@@ -43,6 +43,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
   const [relays, setRelays] = createStore<Relay[]>([]);
+
+  const [likes, setLikes] = createStore<string[]>([]);
 
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
@@ -162,6 +164,12 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       getRelays();
 
       getUserProfile(profile.publicKey, `user_profile_${APP_ID}`);
+    }
+  });
+
+  createEffect(() => {
+    if (profile.publicKey && relays.length > 0) {
+      getLikes(profile.publicKey, relays, setLikes);
     }
   });
 
@@ -300,6 +308,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     relays: relays,
     page: page,
+    likes: likes,
     actions: {
       setData: setData,
       clearExploredNotes: () => {

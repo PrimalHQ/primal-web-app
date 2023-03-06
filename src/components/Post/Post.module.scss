@@ -7,6 +7,7 @@
   grid-template-areas: "avatar content";
   padding: 16px 16px 16px 0px;
   border-radius: 4px;
+  // pointer-events: none;
 
   .avatar {
     grid-area: avatar;
@@ -120,6 +121,21 @@
         font-size: 14px;
         line-height: 16px;
         align-items: center;
+        margin: 0px;
+        padding: 0px;
+        border: none;
+        background-color: unset;
+        &:disabled, &[disabled] {
+          .replyIcon, .likeIcon, .repostIcon {
+            background-color: var(--accent-1);
+          }
+          .statNumber {
+            color: var(--accent-1);
+          }
+        }
+        &:focus {
+          box-shadow: none;
+        }
         .statNumber {
           color: var(--text-secondary);
         }

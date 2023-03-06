@@ -1,4 +1,4 @@
-import { Relay } from "nostr-tools";
+import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
 import { useFeedContext } from "../contexts/FeedContext";
 import { NostrWindow, PrimalNote } from "../types/primal";
@@ -92,6 +92,7 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
 
 type ReplyTo = { e?: string, p?: string };
+type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
 const parseReplyTo = (replyTo?: ReplyTo) => {
   let ret: string[][] = [];
@@ -112,21 +113,93 @@ const parseReplyTo = (replyTo?: ReplyTo) => {
 
 };
 
-export const sendNote = async (text: string, relays: Relay[], replyTo?: ReplyTo) => {
+export const sendLike = (note: PrimalNote, relays: Relay[]) => {
+  const event = {
+    content: '+',
+    kind: 7,
+    tags: [
+      ['e', note.post.id],
+      ['p', note.post.pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  const likes = localStorage.getItem('likes');
+
+  const likedNotes = likes ? JSON.parse(likes) : [];
+
+  if (likedNotes.includes(note.post.id)) {
+    return;
+  }
+
+  sendEvent(event, relays);
+
+  localStorage.setItem('likes', JSON.stringify([...likedNotes, note.post.id]));
+}
+
+export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
+  const tags = parseReplyTo(replyTo);
+
+  const event = {
+    content: text,
+    kind: 1,
+    tags,
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  sendEvent(event, relays);
+}
+
+
+export const getLikes = (userId: string, relays: Relay[], setLikes) => {
+  console.log('get likes');
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
   if (nostr !== undefined) {
+    try {
+      // const signedNote = await nostr.signEvent(event);
 
-    const tags = parseReplyTo(replyTo);
+      relays?.forEach(relay => {
 
-    const event = {
-      content: text,
-      kind: 1,
-      tags,
-      created_at: Math.floor((new Date()).getTime() / 1000),
-    };
+        const sub = relay.sub([
+          {
+            kinds: [7],
+            authors: [userId],
+          },
+        ]);
 
+        sub.on('event', (event: Event) => {
+          const l = localStorage.getItem('likes');
+          const likes = l ? JSON.parse(l) : [];
+          const e = event.tags.find(t => t[0] === 'e');
+
+          if (!e || likes.includes(e[1])) {
+            return;
+          }
+
+          localStorage.setItem('likes', JSON.stringify([ ...likes, e[1]]));
+
+          console.log('E: ', e[1]);
+
+          setLikes(ls => [...ls, e[1]]);
+        })
+        sub.on('eose', () => {
+          sub.unsub();
+        })
+      });
+
+    } catch (e) {
+      console.log('Failed sending note: ', e);
+    }
+  }
+};
+
+const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (nostr !== undefined) {
     try {
       const signedNote = await nostr.signEvent(event);
 
