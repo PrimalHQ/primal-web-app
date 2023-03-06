@@ -8,6 +8,7 @@ import Post from '../components/Post/Post';
 import { NostrEvent, NostrEOSE, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import Loader from '../components/Loader/Loader';
+import { likedNotes } from '../lib/posts';
 
 const Feed: Component<{ scope: string, timeframe: string}> = () => {
 
@@ -124,6 +125,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
           {(post) => {
             return <Post
               post={post}
+              liked={likedNotes.includes(post.post.id)}
             />
           }}
         </For>

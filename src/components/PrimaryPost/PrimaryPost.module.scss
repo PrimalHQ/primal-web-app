@@ -113,6 +113,18 @@
         font-size: 18px;
         line-height: 16px;
         align-items: center;
+        margin: 0px;
+        padding: 0px;
+        border: none;
+        background-color: unset;
+        &:disabled, &[disabled] {
+          .replyIcon, .likeIcon, .repostIcon {
+            background-color: var(--accent-1);
+          }
+          .statNumber {
+            color: var(--accent-1);
+          }
+        }
         .statNumber {
           color: var(--text-secondary);
         }

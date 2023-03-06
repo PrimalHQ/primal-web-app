@@ -1,9 +1,14 @@
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
+import { createStore } from "solid-js/store";
 import { useFeedContext } from "../contexts/FeedContext";
 import { NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
+
+export const [likedNotes, setLikedNotes] = createStore(
+  JSON.parse(localStorage.getItem('likes') || '[]')
+)
 
 export const urlify = (text: string) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
@@ -135,6 +140,8 @@ export const sendLike = (note: PrimalNote, relays: Relay[]) => {
   sendEvent(event, relays);
 
   localStorage.setItem('likes', JSON.stringify([...likedNotes, note.post.id]));
+
+  setLikedNotes(ls => [...ls, note.post.id]);
 }
 
 export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
@@ -151,8 +158,7 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
 }
 
 
-export const getLikes = (userId: string, relays: Relay[], setLikes) => {
-  console.log('get likes');
+export const getLikes = (userId: string, relays: Relay[]) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
@@ -180,9 +186,7 @@ export const getLikes = (userId: string, relays: Relay[], setLikes) => {
 
           localStorage.setItem('likes', JSON.stringify([ ...likes, e[1]]));
 
-          console.log('E: ', e[1]);
-
-          setLikes(ls => [...ls, e[1]]);
+          setLikedNotes(ls => [...ls, e[1]]);
         })
         sub.on('eose', () => {
           sub.unsub();

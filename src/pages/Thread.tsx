@@ -17,6 +17,7 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
+import { likedNotes } from '../lib/posts';
 
 
 const Thread: Component = () => {
@@ -207,7 +208,10 @@ const Thread: Component = () => {
         <For each={parentNotes}>
           {note =>
             <div class={styles.threadList}>
-              <Post post={note} />
+              <Post
+                post={note}
+                liked={likedNotes.includes(note.post.id)}
+              />
             </div>
           }
         </For>
@@ -215,7 +219,10 @@ const Thread: Component = () => {
 
       <Show when={primaryNote()}>
         <div id="primary_note" class={styles.threadList}>
-          <PrimaryPost post={primaryNote()}/>
+          <PrimaryPost
+            post={primaryNote()}
+            liked={likedNotes.includes(primaryNote()?.post.id)}
+          />
           <ReplyToNote note={primaryNote()} />
         </div>
       </Show>
@@ -228,7 +235,10 @@ const Thread: Component = () => {
           <For each={replies}>
             {note =>
               <div class={styles.threadList}>
-                <Post post={note} />
+                <Post
+                  post={note}
+                  liked={likedNotes.includes(note.post.id)}
+                />
               </div>
             }
           </For>

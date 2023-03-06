@@ -14,7 +14,7 @@ import Paginator from '../components/Paginator/Paginator';
 import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
 import { proccessUserProfile } from '../stores/profile';
 import Branding from '../components/Branding/Branding';
-import { getLikes } from '../lib/posts';
+import { getLikes, likedNotes } from '../lib/posts';
 
 const Home: Component = () => {
 
@@ -64,7 +64,7 @@ const Home: Component = () => {
             {(post) => {
               return <Post
                 post={post}
-                liked={context?.likes.includes(post.post.id)}
+                liked={likedNotes.includes(post.post.id)}
               />
             }}
           </For>

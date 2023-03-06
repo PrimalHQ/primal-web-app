@@ -44,7 +44,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const [relays, setRelays] = createStore<Relay[]>([]);
 
-  const [likes, setLikes] = createStore<string[]>([]);
+  // const [likes, setLikes] = createStore<string[]>(
+  //   JSON.parse(localStorage.getItem('likes') || '[]')
+  // );
 
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
@@ -169,7 +171,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   createEffect(() => {
     if (profile.publicKey && relays.length > 0) {
-      getLikes(profile.publicKey, relays, setLikes);
+      getLikes(profile.publicKey, relays);
     }
   });
 
@@ -308,7 +310,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     data: data,
     relays: relays,
     page: page,
-    likes: likes,
+    // likes: likes,
     actions: {
       setData: setData,
       clearExploredNotes: () => {
