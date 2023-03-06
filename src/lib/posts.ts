@@ -1,8 +1,8 @@
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
-import { createStore } from "solid-js/store";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import { useFeedContext } from "../contexts/FeedContext";
-import { NostrWindow, PrimalNote } from "../types/primal";
+import { FeedStore, NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
 
@@ -118,7 +118,7 @@ const parseReplyTo = (replyTo?: ReplyTo) => {
 
 };
 
-export const sendLike = (note: PrimalNote, relays: Relay[]) => {
+export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
   const event = {
     content: '+',
     kind: 7,
@@ -137,11 +137,16 @@ export const sendLike = (note: PrimalNote, relays: Relay[]) => {
     return;
   }
 
-  sendEvent(event, relays);
+  const success = await sendEvent(event, relays);
 
-  localStorage.setItem('likes', JSON.stringify([...likedNotes, note.post.id]));
+  if (success) {
+    localStorage.setItem('likes', JSON.stringify([...likedNotes, note.post.id]));
 
-  setLikedNotes(ls => [...ls, note.post.id]);
+    setLikedNotes(ls => [...ls, note.post.id]);
+
+    setData('posts', p => p.post.id === note.post.id, 'post', 'likes', (l) => l+1);
+  }
+
 }
 
 export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
@@ -220,8 +225,13 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
         })
       });
 
+      return true;
+
     } catch (e) {
       console.log('Failed sending note: ', e);
+      return false;
     }
   }
+
+  return false;
 }

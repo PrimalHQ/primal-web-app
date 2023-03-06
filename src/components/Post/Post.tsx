@@ -19,7 +19,7 @@ const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
   const doLike = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    sendLike(props.post, context?.relays);
+    sendLike(props.post, context?.relays, context?.actions?.setData);
   };
 
   return (
