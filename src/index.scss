@@ -28,6 +28,7 @@
 
   --active-link: var(--text-primary);
   --inactive-link: var(--text-secondary);
+  --fade-gradient-vertical: linear-gradient(180deg, #000000FF 80%, #00000000 100%);
 
   --logo: url('./assets/icons/logo_fire.svg');
   --icon-follows: url('./assets/icons/follows.svg');
@@ -85,6 +86,7 @@
 
   --active-link: var(--text-primary);
   --inactive-link: var(--text-secondary);
+  --fade-gradient-vertical: linear-gradient(180deg, #F5F5F5FF 80%, #F5F5F500 100%);
 
   --logo: url('./assets/icons/logo_fire.svg');
   --icon-follows: url('./assets/icons/follows_light.svg');
@@ -120,6 +122,7 @@
   --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
   --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
   --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.22%, var(--brand-2) 100%);
+
   --accent-1: #2394EF;
   --accent-2: #0C7DD8;
 
@@ -141,6 +144,7 @@
 
   --active-link: var(--text-primary);
   --inactive-link: var(--text-secondary);
+  --fade-gradient-vertical: linear-gradient(180deg, #000000FF 80%, #00000000 100%);
 
   --logo: url('./assets/icons/logo_ice.svg');
   --icon-follows: url('./assets/icons/follows.svg');
@@ -199,6 +203,7 @@
 
   --active-link: var(--text-primary);
   --inactive-link: var(--text-secondary);
+  --fade-gradient-vertical: linear-gradient(180deg, #F5F5F5FF 80%, #F5F5F500 100%);
 
   --logo: url('./assets/icons/logo_ice.svg');
   --icon-follows: url('./assets/icons/follows_light.svg');
