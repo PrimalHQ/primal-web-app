@@ -1,0 +1,37 @@
+.trendingUsers {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  .user {
+    width: 75px;
+    height: 85px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+
+    .name {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+      margin-top: 10px;
+      width: 80%;
+
+      font-size: 12px;
+      line-height: 12px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.trendingUsersCaption {
+  margin-bottom: 24px;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 20px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
