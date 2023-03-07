@@ -4,14 +4,36 @@ import { Component, createEffect, createSignal, For, onCleanup, onMount, Show, S
 import { createStore } from 'solid-js/store';
 import { date } from '../../lib/dates';
 import { convertToPosts } from '../../lib/feed';
+import { hexToNpub } from '../../lib/keys';
 import { parseNote } from '../../lib/posts';
 import { trimVerification } from '../../lib/profile';
 import { socket } from '../../sockets';
 import { TrendingNotesStore } from '../../stores/trending';
-import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
+import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ParsedNote.module.scss';
+
+type UserRefference = {
+  id: string,
+  pubkey: string,
+  npub: string,
+  name: string,
+  about: string,
+  picture: string,
+  nip05: string,
+  banner: string,
+  display_name: string,
+  location?: string,
+  lud06: string,
+  lud16: string,
+  website: string,
+  tags: string[][],
+  content?: string,
+  created_at?: number,
+  kind?: string,
+  sig?: string,
+};
 
 const tokenRegex = /(\#\[[\d]\])/;
 
@@ -19,7 +41,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
   const [content, setContent] = createSignal<string>('');
 
-  const [references, setReferences] = createStore<Record<string, NostrUserContent | PrimalNote>>({});
+  const [references, setReferences] = createStore<Record<string, UserRefference | PrimalNote>>({});
 
   const [printableContent, setPrintableContent] = createStore<any[]>([]);
 
@@ -48,9 +70,15 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         return;
       }
 
-      const user = JSON.parse(userContent?.content || '') as NostrUserContent;
+      const user = JSON.parse(userContent?.content || '{}') as NostrUserContent;
 
-      setReferences(refs => ({...refs, [ref]: user}));
+      const u: UserRefference = {
+        ...userContent,
+        ...user,
+        npub: hexToNpub(userContent.pubkey),
+       }
+
+      setReferences(refs => ({...refs, [ref]: u}));
 
       return;
     }
@@ -124,9 +152,9 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         if (reference) {
           if (reference.name) {
             return (
-              <span class={styles.mentionedUser}>
+              <A href={`/profile/${reference.npub}`} class={styles.mentionedUser}>
                 @{reference.name}
-              </span>
+              </A>
             );
           }
 

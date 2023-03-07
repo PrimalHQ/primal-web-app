@@ -30,6 +30,7 @@
   grid-template-rows: 1fr;
   grid-template-areas: "avatar content follow";
   grid-column-gap: 14px;
+  text-decoration: none;
 
   .avatar {
     grid-area: avatar;

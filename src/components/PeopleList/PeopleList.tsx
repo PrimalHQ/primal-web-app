@@ -1,3 +1,4 @@
+import { A } from '@solidjs/router';
 import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
 import { style } from 'solid-js/web';
 import { useFeedContext } from '../../contexts/FeedContext';
@@ -32,7 +33,7 @@ const PeopleList: Component = (props) => {
           <For each={people()}>
             {
               (person) =>
-                <div class={styles.peopleList}>
+                <A href={`/profile/${person?.npub}`} class={styles.peopleList}>
                   <div class={styles.avatar}>
                     <Avatar
                       src={person?.picture}
@@ -65,7 +66,7 @@ const PeopleList: Component = (props) => {
                   <div class={styles.action}>
                     <button>follow</button>
                   </div>
-                </div>
+                </A>
             }
           </For>
         </div>

@@ -30,6 +30,7 @@ import { A } from '@solidjs/router';
 import NostrStats from '../components/NostrStats/NostrStats';
 import { PrimalLegend, PrimalNetStats } from '../types/primal';
 import { timeframeLabels, scopeLabels } from '../constants';
+import ExploreMenuItem from '../components/ExploreMenuItem/ExploreMenuItem';
 
 
 const initialStats: PrimalNetStats = {
@@ -134,60 +135,12 @@ const ExploreMenu: Component = () => {
       <div class={styles.statsHolder}>
         <NostrStats stats={stats}/>
       </div>
-      <div class={styles.exploreMenu}>
-        <For each={boxes}>
-          {(box) =>
-            <A
-              href={`/explore/${box.scope}/${box.timeframe}`}
-              class={`${styles.exploreBox} ${styles[`${box.scope}_${box.timeframe}_box`]}`}
-            >
-              <div>
-                <div
-                  class={`${styles.exploreBoxIcon} ${styles[`${box.scope}_${box.timeframe}_icon`]}`}
-                >
-                </div>
-                <div class={styles.firstLine}>{timeframeLabels[box.timeframe]}</div>
-                <div class={styles.secondLine}>{scopeLabels[box.scope]}</div>
-              </div>
-            </A>
-          }
-        </For>
-      </div>
 
-      <div class={styles.statsLegend}>
-        <div class={styles.legendDetails}>
-          <div class={styles.legendIcon}>
-            <div class={styles.followsIcon}></div>
-          </div>
-          <div class={styles.legendName}>Follows</div>
-          <div class={styles.legendNumber}>{legend.your_follows}</div>
-          <div class={styles.legendDescription}>accounts you follow</div>
-        </div>
-        <div class={styles.legendDetails}>
-          <div class={styles.legendIcon}>
-            <div class={styles.tribeIcon}></div>
-          </div>
-          <div class={styles.legendName}>Tribe</div>
-          <div class={styles.legendNumber}>{legend.your_inner_network}</div>
-          <div class={styles.legendDescription}>your follows + your followers</div>
-        </div>
-        <div class={styles.legendDetails}>
-          <div class={styles.legendIcon}>
-            <div class={styles.networkIcon}></div>
-          </div>
-          <div class={styles.legendName}>Network</div>
-          <div class={styles.legendNumber}>{legend.your_outer_network}</div>
-          <div class={styles.legendDescription}>your follows + everyone they follow</div>
-        </div>
-        <div class={styles.legendDetails}>
-          <div class={styles.legendIcon}>
-            <div class={styles.globalIcon}></div>
-          </div>
-          <div class={styles.legendName}>Global</div>
-          <div class={styles.legendNumber}>{stats.users.toLocaleString()}</div>
-          <div class={styles.legendDescription}>all account on nostr</div>
-        </div>
-      </div>
+      <ExploreMenuItem scope='follows' stat={legend.your_follows} />
+      <ExploreMenuItem scope='tribe' stat={legend.your_inner_network} />
+      <ExploreMenuItem scope='network' stat={legend.your_outer_network} />
+      <ExploreMenuItem scope='global' stat={stats.users} />
+
     </>
   )
 }

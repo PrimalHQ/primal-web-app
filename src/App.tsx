@@ -51,7 +51,7 @@ const App: Component = () => {
             <Route path="/notifications" component={Notifications} />
             <Route path="/downloads" component={Downloads} />
             <Route path="/settings" component={Settings} />
-            <Route path="/profile" component={Profile} />
+            <Route path="/profile/:npub?" component={Profile} />
             <Route path="/help" component={Help} />
             <Route path="/rest" component={Explore} />
           </Route>

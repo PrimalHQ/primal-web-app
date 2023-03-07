@@ -72,6 +72,7 @@ export const timeframeLabels: Record<string, string> = {
   latest: 'latest',
   trending: 'trending',
   popular: 'popular',
+  mostzapped: 'most zapped',
 };
 
 export const scopeLabels: Record<string, string> = {

@@ -55,6 +55,18 @@
   }
 }
 
+.vsAvatar {
+  @include avatar;
+  width: 42px;
+  height: 42px;
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+}
+
 .smallAvatar {
   @include avatar;
   width: 48px;
@@ -124,6 +136,15 @@
   @include missing;
   width: 32px;
   height: 32px;
+  font-size: 10px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
+}
+
+.vsMissing {
+  @include missing;
+  width: 42px;
+  height: 42px;
   font-size: 10px;
   -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
   mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;

@@ -13,6 +13,7 @@ import { useParams } from '@solidjs/router';
 import Branding from '../components/Branding/Branding';
 import PageNav from '../components/PageNav/PageNav';
 import { scopeLabels, timeframeLabels } from '../constants';
+import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -69,7 +70,7 @@ const Explore: Component = () => {
         </div>
         <Show when={mounted()}>
           <Portal mount={document.getElementById("right_sidebar") as Node}>
-            Sidebar
+            <ExploreSidebar />
           </Portal>
         </Show>
 
@@ -78,7 +79,7 @@ const Explore: Component = () => {
           when={hasParams()}
           fallback={
             <>
-              <ExploreMenu  />
+              <ExploreMenu />
             </>
           }
         >

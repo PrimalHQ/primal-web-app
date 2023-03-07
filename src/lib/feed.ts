@@ -14,11 +14,11 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
   ]));
 }
 
-export const getTrending = (subid: string) => {
+export const getTrending = (subid: string, limit = 25) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {"cache":["explore", { timeframe: "trending", scope: "global", limit: 25 }]},
+    {"cache":["explore", { timeframe: "trending", scope: "global", limit }]},
   ]));
 };
 
