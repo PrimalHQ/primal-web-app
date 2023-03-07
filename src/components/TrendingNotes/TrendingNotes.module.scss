@@ -1,12 +1,23 @@
 .trendingSection {
-  position: -webkit-sticky;
-  position: sticky;
+  // position: -webkit-sticky;
+  // position: sticky;
   padding-top: 44px;
   width: 300px;
+  margin-bottom: 228px
 }
 
 .stickyWrapper {
-  height: 100%;
+  position: fixed;
+  height: 100vh;
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar{
+    display: none;
+  }
+
+  &::scrollbar{
+    display: none;
+  }
 }
 
 .heading {
