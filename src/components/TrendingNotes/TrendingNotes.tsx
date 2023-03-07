@@ -34,7 +34,7 @@ const TrendingNotes: Component = () => {
     if (isConnected()) {
       context?.actions?.clearTrendingNotes();
 
-      getTrending(`trending_${APP_ID}`);
+      getTrending(`trending_${APP_ID}`, 10);
 		}
 	});
 
@@ -135,8 +135,14 @@ const TrendingNotes: Component = () => {
 
   return (
       <div id="trending_wrapper" class={styles.stickyWrapper}>
-        <div class={styles.heading}>Trending on Nostr</div>
         <div id="trending_section" class={styles.trendingSection}>
+        <div class={styles.headingTrending}>
+          <div>
+            <div class={styles.flameIcon}></div>
+            Trending on Nostr
+            <span>24h</span>
+          </div>
+        </div>
           <For each={context?.data.trendingNotes.notes}>
             {
               (post) =>
@@ -159,7 +165,36 @@ const TrendingNotes: Component = () => {
                 </A>
             }
           </For>
-        </div>
+          <div class={styles.headingZapped}>
+            <div>
+              <div class={styles.zapIcon}></div>
+              Most Zapped
+              <span>4h</span>
+            </div>
+          </div>
+            <For each={context?.data.trendingNotes.notes}>
+              {
+                (post) =>
+                  <A href={`/thread/${post.post.noteId}`}>
+                    <div class={styles.trendingPost}>
+                      <div class={styles.avatar}>
+                        <Avatar src={post.user?.picture} size="xxs" />
+                      </div>
+                      <div class={styles.content}>
+                        <div class={styles.header}>
+                          <div class={styles.name}>
+                            {post.user?.name}
+                          </div>
+                          <div class={styles.time}>
+                            {date(post.post?.created_at).label}</div>
+                          </div>
+                        <div class={styles.message}>{post.post?.content}</div>
+                      </div>
+                    </div>
+                  </A>
+              }
+            </For>
+          </div>
       </div>
   );
 }

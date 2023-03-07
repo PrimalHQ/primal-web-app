@@ -1,7 +1,54 @@
+@mixin heading {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  width: 100%;
+  height: 44px;
+  background-color: var(--background-site);
+  z-index: 5;
+  display:flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 20px;
+  color: var(--text-secondary-2);
+  text-transform: uppercase;
+  >div{
+    height: 22px;
+    >span {
+      color: var(--text-tertiary-2);
+      text-transform: lowercase;
+      margin-left: 6px;
+    }
+  }
+}
+
+.flameIcon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  margin-right: 9px;
+  background: var(--brand-gradient-vertical);
+  -webkit-mask: url(../../assets/icons/explore/flame.svg) no-repeat 0px / 22px;
+  mask: url(../../assets/icons/explore/flame.svg) no-repeat 0px / 22px;
+}
+
+.zapIcon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  margin-right: 9px;
+  background: var(--brand-gradient-vertical);
+  -webkit-mask: url(../../assets/icons/explore/zaps.svg) no-repeat 0px / 22px;
+  mask: url(../../assets/icons/explore/zaps.svg) no-repeat 0px / 22px;
+}
+
 .trendingSection {
   // position: -webkit-sticky;
   // position: sticky;
-  padding-top: 44px;
+  // padding-top: 44px;
   width: 300px;
   margin-bottom: 228px;
 }
@@ -17,19 +64,16 @@
   }
 }
 
-.heading {
-  position: fixed;
-  top: 128px;
-  width: 100%;
-  height: 44px;
-  background-color: var(--background-site);
-  z-index: 5;
-  font-size: 18px;
-  font-weight: 800;
-  line-height: 20px;
-  color: var(--text-secondary-2);
-  text-transform: uppercase;
+.headingTrending {
+  @include heading();
 }
+
+.headingZapped {
+  @include heading();
+  margin-top: 34px;
+  z-index: 10px;
+}
+
 
 .trendingPost {
   margin-bottom: 18px;
