@@ -139,7 +139,7 @@ const TrendingNotes: Component = () => {
         <div class={styles.headingTrending}>
           <div>
             <div class={styles.flameIcon}></div>
-            Trending on Nostr
+            Trending
             <span>24h</span>
           </div>
         </div>
