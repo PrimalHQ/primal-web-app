@@ -38,17 +38,34 @@ const TrendingNotes: Component = () => {
 		}
 	});
 
+  let lastScroll = 0;
+  let lastWrapperScroll = 0;
+
+  const onScroll = () => {
+    const wrapper = document.getElementById('trending_wrapper');
+    const scrollTop = document.documentElement.scrollTop;
+    const diff = lastScroll - scrollTop;
+
+    wrapper?.scrollTo({ top: lastWrapperScroll - diff , behavior: 'instant'});
+
+    lastScroll = scrollTop;
+    lastWrapperScroll = wrapper.scrollTop;
+  };
 
 
-  // onMount(async () => {
-  //   socket()?.addEventListener('error', onError);
-  //   socket()?.addEventListener('message', onMessage);
-  // });
+  onMount(() => {
+    // socket()?.addEventListener('error', onError);
+    // socket()?.addEventListener('message', onMessage);
+    const wrapper = document.getElementById('trending_wrapper');
+    document.addEventListener('scroll', onScroll);
+  });
 
-  // onCleanup(() => {
-  //   socket()?.removeEventListener('error', onError);
-  //   socket()?.removeEventListener('message', onMessage);
-  // });
+  onCleanup(() => {
+    const wrapper = document.getElementById('trending_wrapper');
+    document.removeEventListener('scroll', onScroll);
+    // socket()?.removeEventListener('error', onError);
+    // socket()?.removeEventListener('message', onMessage);
+  });
 
   // const onError = (error: Event) => {
   //   console.log("error: ", error);

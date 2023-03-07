@@ -3,13 +3,14 @@
   // position: sticky;
   padding-top: 44px;
   width: 300px;
-  margin-bottom: 228px
+  margin-bottom: 228px;
 }
 
 .stickyWrapper {
   position: fixed;
   height: 100vh;
-  overflow-y: scroll;
+  overflow: hidden;
+  // overflow-y: scroll;
 
   &::-webkit-scrollbar{
     display: none;
