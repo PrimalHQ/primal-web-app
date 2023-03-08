@@ -1,22 +1,40 @@
 .userProfile {
   display: grid;
   width: 146px;
-  height: 44px;
+  height: 46px;
   grid-template-columns: 42px 1fr;
   grid-column-gap: 5px;
+  position: relative;
+  align-items: center;
   text-decoration: none;
-  background-color: var(--background-input);
-  background: linear-gradient(var(--background-input), var(--background-input)) padding-box,
-              var(--brand-gradient) border-box;
-  border-radius: 21px;
-  border: 1px solid transparent;
-  opacity: 0.5;
-  transition: opacity 0.4s;
+
+  .background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 146px;
+    height: 46px;
+    background-color: var(--background-input);
+    background: linear-gradient(var(--background-input), var(--background-input)) padding-box,
+                var(--brand-gradient) border-box;
+    border-radius: 21px;
+    border: 1px solid transparent;
+    opacity: 0.5;
+    transition: opacity 0.4s;
+
+  }
 
   &:hover {
-    opacity: 1;
-    transition: opacity 0.4s;
+    .background {
+      opacity: 1;
+      transition: opacity 0.4s;
+    }
   }
+
+}
+.avatar {
+  z-index: 1;
+  padding: 2px;
 }
 
 .userInfo {
@@ -24,6 +42,8 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  z-index: 1;
+  padding: 2px;
 }
 
 .userName {
@@ -42,7 +62,7 @@
   line-height: 16px;
   font-weight: 400;
   color: var(--text-tertiary);
-  width: 90px;
+  width: 92px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

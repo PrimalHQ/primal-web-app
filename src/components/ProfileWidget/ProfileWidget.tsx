@@ -20,17 +20,20 @@ const ProfileWidget: Component = () => {
     <div>
       <Show when={activeUser()}>
         <A href="/profile" class={styles.userProfile}>
-          <Avatar
-            size="vs"
-            src={activeUser()?.picture}
-            verified={activeUser()?.nip05}
-          />
+          <div class={styles.avatar}>
+            <Avatar
+              size="vs"
+              src={activeUser()?.picture}
+              verified={activeUser()?.nip05}
+            />
+          </div>
           <div class={styles.userInfo}>
             <div class={styles.userName}>{activeUser()?.name}</div>
             <div class={styles.userVerification}>
-              @{trimVerification(activeUser()?.nip05)}
+              {trimVerification(activeUser()?.nip05)}
             </div>
           </div>
+          <div class={styles.background}></div>
         </A>
       </Show>
     </div>
