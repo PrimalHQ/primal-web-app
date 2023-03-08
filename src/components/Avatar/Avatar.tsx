@@ -9,52 +9,52 @@ const Avatar: Component<{
   verified?: string
 }> = (props) => {
 
-    const selectedSize = props.size || 'sm';
+  const selectedSize = props.size || 'sm';
 
-    const avatarClass = {
-      xxs: styles.xxsAvatar,
-      xs: styles.xsAvatar,
-      vs: styles.vsAvatar,
-      sm: styles.smallAvatar,
-      md: styles.midAvatar,
-      lg: styles.largeAvatar,
-      xl: styles.extraLargeAvatar
-    };
+  const avatarClass = {
+    xxs: styles.xxsAvatar,
+    xs: styles.xsAvatar,
+    vs: styles.vsAvatar,
+    sm: styles.smallAvatar,
+    md: styles.midAvatar,
+    lg: styles.largeAvatar,
+    xl: styles.extraLargeAvatar
+  };
 
-    const missingClass = {
-      xxs: styles.xxsMissing,
-      xs: styles.xsMissing,
-      vs: styles.vsMissing,
-      sm: styles.smallMissing,
-      md: styles.midMissing,
-      lg: styles.largeMissing,
-      xl: styles.extraLargeMissing
-    };
+  const missingClass = {
+    xxs: styles.xxsMissing,
+    xs: styles.xsMissing,
+    vs: styles.vsMissing,
+    sm: styles.smallMissing,
+    md: styles.midMissing,
+    lg: styles.largeMissing,
+    xl: styles.extraLargeMissing
+  };
 
-    const imgError = (event: any) => {
-      const image = event.target;
-      image.onerror = "";
-      image.src = defaultAvatar;
-      return true;
+  const imgError = (event: any) => {
+    const image = event.target;
+    image.onerror = "";
+    image.src = defaultAvatar;
+    return true;
   }
 
-    return (
-      <div class={avatarClass[selectedSize]}>
-        <Show
-          when={props.src}
-          fallback={
-            <div class={missingClass[selectedSize]}></div>
-          }
-        >
-          <img src={props.src} alt="avatar" onerror={imgError}/>
-        </Show>
-        <Show when={props.verified}>
-          <div class={styles.iconBackground}>
-            <div class={styles.verifiedIcon}></div>
-          </div>
-        </Show>
-      </div>
-    )
+  return (
+    <div class={avatarClass[selectedSize]}>
+      <Show
+        when={props.src}
+        fallback={
+          <div class={missingClass[selectedSize]}></div>
+        }
+      >
+        <img src={props.src} alt="avatar" onerror={imgError}/>
+      </Show>
+      <Show when={props.verified}>
+        <div class={styles.iconBackground}>
+          <div class={styles.verifiedIcon}></div>
+        </div>
+      </Show>
+    </div>
+  )
 }
 
 export default Avatar;
