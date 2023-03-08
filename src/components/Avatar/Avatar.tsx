@@ -1,5 +1,5 @@
 import { Component, Show } from 'solid-js';
-import logo from '../../assets/icons/logo.svg';
+import defaultAvatar from '../../assets/icons/default_nostrich.svg';
 
 import styles from './Avatar.module.scss';
 
@@ -31,6 +31,13 @@ const Avatar: Component<{
       xl: styles.extraLargeMissing
     };
 
+    const imgError = (event: any) => {
+      const image = event.target;
+      image.onerror = "";
+      image.src = defaultAvatar;
+      return true;
+  }
+
     return (
       <div class={avatarClass[selectedSize]}>
         <Show
@@ -39,7 +46,7 @@ const Avatar: Component<{
             <div class={missingClass[selectedSize]}></div>
           }
         >
-          <img src={props.src} alt="avatar" />
+          <img src={props.src} alt="avatar" onerror={imgError}/>
         </Show>
         <Show when={props.verified}>
           <div class={styles.iconBackground}>
