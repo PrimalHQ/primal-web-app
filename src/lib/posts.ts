@@ -6,9 +6,20 @@ import { FeedStore, NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
 
-export const [likedNotes, setLikedNotes] = createStore(
-  JSON.parse(localStorage.getItem('likes') || '[]')
-)
+const getLikesStorageKey = () => {
+  const key = localStorage.getItem('pubkey') || 'anon';
+  return `likes_${key}`;
+};
+
+const getStoredLikes = () => {
+  return JSON.parse(localStorage.getItem(getLikesStorageKey()) || '[]');
+};
+
+const setStoredLikes = (likes: string[]) => {
+  return localStorage.setItem(getLikesStorageKey(), JSON.stringify(likes));
+};
+
+export const [likedNotes, setLikedNotes] = createStore(getStoredLikes());
 
 export const urlify = (text: string) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
@@ -129,18 +140,16 @@ export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetSt
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const likes = localStorage.getItem('likes');
+  const likes = getStoredLikes();
 
-  const likedNotes = likes ? JSON.parse(likes) : [];
-
-  if (likedNotes.includes(note.post.id)) {
+  if (likes.includes(note.post.id)) {
     return;
   }
 
   const success = await sendEvent(event, relays);
 
   if (success) {
-    localStorage.setItem('likes', JSON.stringify([...likedNotes, note.post.id]));
+    setStoredLikes([...likes, note.post.id]);
 
     setLikedNotes(ls => [...ls, note.post.id]);
 
@@ -199,16 +208,14 @@ export const getLikes = (userId: string, relays: Relay[]) => {
         ]);
 
         sub.on('event', (event: Event) => {
-          const l = localStorage.getItem('likes');
-          const likes = l ? JSON.parse(l) : [];
+          const likes = getStoredLikes();
           const e = event.tags.find(t => t[0] === 'e');
 
           if (!e || likes.includes(e[1])) {
             return;
           }
 
-          localStorage.setItem('likes', JSON.stringify([ ...likes, e[1]]));
-
+          setStoredLikes([ ...likes, e[1]]);
           setLikedNotes(ls => [...ls, e[1]]);
         })
         sub.on('eose', () => {

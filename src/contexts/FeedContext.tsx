@@ -44,10 +44,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const [relays, setRelays] = createStore<Relay[]>([]);
 
-  // const [likes, setLikes] = createStore<string[]>(
-  //   JSON.parse(localStorage.getItem('likes') || '[]')
-  // );
-
   createEffect(() => {
     const until = oldestPost()?.post.created_at || 0;
 
@@ -201,6 +197,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       }
       else {
         setPublicKey(key);
+        localStorage.setItem('pubkey', key);
       }
     } catch (e: any) {
       if (e.message === 'User rejected') {
