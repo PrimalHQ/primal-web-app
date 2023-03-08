@@ -194,6 +194,10 @@ export const getLikes = (userId: string, relays: Relay[]) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
+  const storedLikes = getStoredLikes();
+
+  setLikedNotes(() => [...storedLikes]);
+
   if (nostr !== undefined) {
     try {
       // const signedNote = await nostr.signEvent(event);
