@@ -14,10 +14,11 @@
   justify-content: flex-start;
   font-size: 18px;
   font-weight: 800;
-  line-height: 20px;
+  line-height: 22px;
   color: var(--text-secondary-2);
   text-transform: uppercase;
   >div{
+    display: flex;
     height: 22px;
     >span {
       color: var(--text-tertiary-2);
@@ -32,9 +33,9 @@
   height: 22px;
   display: inline-block;
   margin-right: 9px;
-  background: var(--brand-gradient-vertical);
-  -webkit-mask: url(../../assets/icons/explore/flame.svg) no-repeat 0px / 22px;
-  mask: url(../../assets/icons/explore/flame.svg) no-repeat 0px / 22px;
+  background: var(--sidebar-section-icon-gradient);
+  -webkit-mask: url(../../assets/icons/explore/flame.svg) no-repeat 1px 0 / 20px 22px;
+  mask: url(../../assets/icons/explore/flame.svg) no-repeat 1px 0 / 20px 22px;
 }
 
 .zapIcon {
@@ -42,9 +43,9 @@
   height: 22px;
   display: inline-block;
   margin-right: 9px;
-  background: var(--brand-gradient-vertical);
-  -webkit-mask: url(../../assets/icons/explore/zaps.svg) no-repeat 0px / 22px;
-  mask: url(../../assets/icons/explore/zaps.svg) no-repeat 0px / 22px;
+  background: var(--sidebar-section-icon-gradient);
+  -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+  mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
 }
 
 .trendingSection {
