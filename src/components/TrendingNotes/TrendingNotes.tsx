@@ -4,6 +4,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID, useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
 import { convertToPosts, getTrending, sortByScore24h } from '../../lib/feed';
+import { humanizeNumber } from '../../lib/stats';
 import { isConnected, socket } from '../../sockets';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote, TrendingNotesStore } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
@@ -157,8 +158,9 @@ const TrendingNotes: Component = () => {
                           {post.user?.name}
                         </div>
                         <div class={styles.time}>
-                          {date(post.post?.created_at).label}</div>
+                          {date(post.post?.created_at).label}
                         </div>
+                      </div>
                       <div class={styles.message}>{post.post?.content}</div>
                     </div>
                   </div>
@@ -186,8 +188,11 @@ const TrendingNotes: Component = () => {
                             {post.user?.name}
                           </div>
                           <div class={styles.time}>
-                            {date(post.post?.created_at).label}</div>
+                            {humanizeNumber(post.post.zaps)} zaps
+                            <span>, </span>
+                            {humanizeNumber(post.post.satszapped)} sats
                           </div>
+                        </div>
                         <div class={styles.message}>{post.post?.content}</div>
                       </div>
                     </div>

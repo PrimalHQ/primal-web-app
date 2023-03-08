@@ -23,3 +23,23 @@ export const getLegendStats = (pubkey: string | undefined) => {
     {"cache":["explore_legend_counts",{ pubkey }]},
   ]));
 }
+
+export const humanizeNumber = (number: number) => {
+  if (number < 10000) {
+    return number.toLocaleString();
+  }
+
+  if (number < 100000) {
+    return `${parseFloat((number/1000).toFixed(1))} k`;
+  }
+
+  if (number < 1000000) {
+    return `${Math.floor(number/1000)} k`;
+  }
+
+  if (number < 100000000) {
+    return `${parseFloat((number/1000000).toFixed(1))} m`;
+  }
+
+  return `${Math.floor(number/1000000)} m`;
+};
