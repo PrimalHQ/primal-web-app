@@ -6,6 +6,7 @@
   justify-content: space-between;
   padding-left: 24px;
   margin-bottom: 16px;
+  border-radius: 4px;
 
   .itemInfo {
     display: flex;
@@ -59,9 +60,9 @@
 
     .option {
       width: 72px;
-      height: 98px;
+      height: 92px;
       border: none;
-      margin: 0px;
+      margin: 4px;
       padding: 0px;
       outline: none;
       text-decoration: none;
@@ -76,6 +77,7 @@
         width: 20px;
         height: 20px;
         background-color: var(--text-secondary-2);
+        margin-bottom: 6px;
       }
       >span {
         font-size: 12px;
