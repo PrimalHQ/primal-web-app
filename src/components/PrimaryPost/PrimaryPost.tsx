@@ -2,7 +2,7 @@ import { A } from '@solidjs/router';
 import { Component, createSignal, Match, Switch } from 'solid-js';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import { parseNote, sendLike } from '../../lib/posts';
+import { parseNote, sendLike, sendRepost } from '../../lib/posts';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
@@ -21,6 +21,12 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
   // const [time] = createSignal(date(props.post?.post.created_at));
 
   const context = useFeedContext();
+
+  const doRepost = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sendRepost(props.post, context?.relays, context?.actions?.setData);
+  };
 
   const doLike = (e: MouseEvent) => {
     e.preventDefault();
@@ -81,10 +87,10 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
               <div class={styles.likeIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.likes || ''}</div>
             </button>
-            <div class={styles.stat}>
+            <button class={styles.stat} onClick={doRepost}>
               <div class={styles.repostIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.mentions || ''}</div>
-            </div>
+            </button>
             <div class={styles.stat}>
               <div class={styles.zapIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.satszapped || ''}</div>

@@ -128,7 +128,9 @@
         .statNumber {
           color: var(--text-secondary);
         }
-
+        &:focus {
+          box-shadow: none;
+        }
         &:hover {
           .replyIcon, .likeIcon, .repostIcon {
             background-color: var(--text-secondary);

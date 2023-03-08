@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, from, Match, on, onCleanup, onEr
 import { createStore } from 'solid-js/store';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import { parseNote, sendLike } from '../../lib/posts';
+import { parseNote, sendLike, sendRepost } from '../../lib/posts';
 import { getUserProfile, trimVerification } from '../../lib/profile';
 import { isConnected, socket } from '../../sockets';
 import { NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
@@ -15,6 +15,12 @@ import styles from './Post.module.scss';
 const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
 
   const context = useFeedContext();
+
+  const doRepost = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    sendRepost(props.post, context?.relays, context?.actions?.setData);
+  };
 
   const doLike = (e: MouseEvent) => {
     e.preventDefault();
@@ -77,10 +83,10 @@ const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
               <div class={styles.likeIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.likes || ''}</div>
             </button>
-            <div class={styles.stat}>
+            <button class={styles.stat} onClick={doRepost}>
               <div class={styles.repostIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.mentions || ''}</div>
-            </div>
+            </button>
             <div class={styles.stat}>
               <div class={styles.zapIcon}></div>
               <div class={styles.statNumber}>{props.post?.post?.satszapped || ''}</div>

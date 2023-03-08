@@ -75,6 +75,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         satszapped: stat.satszapped,
         noteId: noteEncode(msg.id),
       },
+      msg,
     };
   });
 }

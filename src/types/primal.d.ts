@@ -181,7 +181,8 @@ export type PrimalNote = {
     score24h: number,
     satszapped: number,
     noteId: string,
-  }
+  },
+  msg: NostrPostContent[],
 };
 
 export type PrimalFeed = {

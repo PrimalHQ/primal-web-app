@@ -162,6 +162,24 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
   sendEvent(event, relays);
 }
 
+export const sendRepost = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
+  const event = {
+    content: JSON.stringify(note.msg),
+    kind: 6,
+    tags: [
+      ['e', note.post.id],
+      ['p', note.user.pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  const success = await sendEvent(event, relays);
+
+  // if (success) {
+  //   setData('posts', p => p.post.id === note.post.id, 'post', 'mentions', (l) => l+1);
+  // }
+}
+
 
 export const getLikes = (userId: string, relays: Relay[]) => {
   const win = window as NostrWindow;
