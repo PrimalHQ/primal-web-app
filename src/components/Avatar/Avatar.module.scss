@@ -62,8 +62,8 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: -6px;
-    right: -6px;
+    bottom: 0px;
+    right: 0px;
   }
 }
 
@@ -146,8 +146,8 @@
   width: 42px;
   height: 42px;
   font-size: 10px;
-  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
-  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 42px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 42px;
 }
 
 .smallMissing {

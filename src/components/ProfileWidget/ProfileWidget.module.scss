@@ -1,14 +1,21 @@
 .userProfile {
   display: grid;
-  width: 176px;
-  grid-template-columns: 48px 90px 22px;
-  grid-column-gap: 8px;
+  width: 146px;
+  height: 44px;
+  grid-template-columns: 42px 1fr;
+  grid-column-gap: 5px;
   text-decoration: none;
-  border-radius: 24px;
-  padding: 4px;
+  background-color: var(--background-input);
+  background: linear-gradient(var(--background-input), var(--background-input)) padding-box,
+              var(--brand-gradient) border-box;
+  border-radius: 21px;
+  border: 1px solid transparent;
+  opacity: 0.5;
+  transition: opacity 0.4s;
 
   &:hover {
-    background-color: var(--backround-card);
+    opacity: 1;
+    transition: opacity 0.4s;
   }
 }
 

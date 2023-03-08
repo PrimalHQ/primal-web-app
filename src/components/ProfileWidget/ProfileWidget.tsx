@@ -21,7 +21,7 @@ const ProfileWidget: Component = () => {
       <Show when={activeUser()}>
         <A href="/profile" class={styles.userProfile}>
           <Avatar
-            size="sm"
+            size="vs"
             src={activeUser()?.picture}
             verified={activeUser()?.nip05}
           />
@@ -30,9 +30,6 @@ const ProfileWidget: Component = () => {
             <div class={styles.userVerification}>
               @{trimVerification(activeUser()?.nip05)}
             </div>
-          </div>
-          <div class={styles.contextMenu}>
-            <div class={styles.contextIcon}></div>
           </div>
         </A>
       </Show>
