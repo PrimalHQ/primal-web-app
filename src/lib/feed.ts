@@ -120,10 +120,23 @@ export const getExploreFeed = (
   scope: string,
   timeframe: string,
   until = 0,
-  limit = 20
+  limit = 20,
 ) => {
 
-  const start = until === 0 ? 'since' : 'until';
+  if (timeframe === 'trending') {
+    const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: [
+        "explore",
+        { pubkey, timeframe, scope, limit, since: yesterday },
+      ]},
+    ]));
+
+    return;
+  }
 
   sendMessage(JSON.stringify([
     "REQ",
