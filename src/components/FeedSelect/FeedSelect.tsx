@@ -11,18 +11,27 @@ const FeedSelect: Component = () => {
 
   const selectFeed = (option: FeedOption) => {
     const hex = option.value;
-    const profile = context?.data?.availableFeeds.find(p => p.hex === hex);
 
-    if (hex !== initialValue().value) {
-      context?.actions?.clearData();
-      context?.actions?.selectFeed(profile);
+    if (hex) {
+      const profile = context?.data?.availableFeeds.find(p => p.hex === hex);
+
+      if (hex !== initialValue()?.value) {
+        context?.actions?.clearData();
+        context?.actions?.selectFeed(profile);
+      }
+      return;
     }
+
   };
 
   const isSelected = (option: FeedOption) => {
     const selected = context?.data.selectedFeed;
 
-    return selected?.hex === option.value;
+    if (selected?.hex) {
+      return selected.hex === option.value;
+    }
+
+    return false;
   }
 
   const options:() => FeedOption[] = () => {
@@ -30,19 +39,38 @@ const FeedSelect: Component = () => {
      return [];
     }
 
-    return context.data.availableFeeds.map(feed => ({
-      label: feed.name,
-      value: feed.hex,
-    }));
+    return context.data.availableFeeds.map(feed => {
+      return ({
+        label: feed.name,
+        value: feed.hex,
+      });
+    });
   };
 
   const initialValue = () => {
-    const feed = context?.data?.availableFeeds.find(f => f.hex === context?.data?.selectedFeed?.hex);
+    const selected = context?.data?.selectedFeed;
 
-    return {
-      label: feed?.name,
-      value: feed?.hex,
-    };
+    if (!selected) {
+      return {
+        label: '',
+        value: undefined,
+      };
+    }
+
+    const feed = context?.data?.availableFeeds.find(f =>
+      f.hex === selected.hex
+    );
+
+    if (feed) {
+      const [scope, timeframe] = feed.hex?.split(';') || [];
+
+      const value = scope && timeframe ? `${scope};${timeframe}` : feed.hex;
+
+      return {
+        label: feed.name,
+        value,
+      };
+    }
   }
 
   return (

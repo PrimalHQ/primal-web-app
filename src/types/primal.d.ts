@@ -187,9 +187,17 @@ export type PrimalNote = {
 
 export type PrimalFeed = {
   name: string,
-  npub: string | undefined,
-  hex: string | undefined,
+  npub?: string,
+  hex?: string,
 };
+
+export type PrimalScopeFeed = {
+  name: string,
+  scope?: string,
+  timeframe?: string,
+};
+
+// export type PrimalFeed = PrimalUserFeed & PrimalScopeFeed;
 
 export type PrimalNetStats = {
   users: number,
@@ -213,4 +221,7 @@ export type PrimalLegend = {
   your_outer_network: number,
 };
 
-export type FeedOption = { label: string, value: string | undefined};
+export type FeedOption = {
+  label: string,
+  value: string | undefined,
+};

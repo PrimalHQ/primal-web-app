@@ -15,7 +15,7 @@ import type {
   PrimalUser,
   TrendingNotesStore,
 } from '../types/primal';
-import { convertToPosts, getFeed, sortByRecency, sortByScore24h } from "../lib/feed";
+import { convertToPosts, getExploreFeed, getFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
 import { connect, isConnected, isNotConnected, socket } from "../sockets";
@@ -247,27 +247,67 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       return;
     }
 
+    if (subId === `user_feed_explore_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const sortingPlan: Record<string, Function> = {
+          trending: sortByScore24h,
+          popular: sortByScore,
+          latest: sortByRecency,
+          mostzapped: sortByZapped,
+        }
+
+        const [_, timeframe]: string[] = data.selectedFeed?.hex?.split(';') || [];
+
+        const newPosts = sortingPlan[timeframe](convertToPosts(page));
+
+        setData('posts', (posts) => [ ...posts, ...newPosts ]);
+        setData('isFetching', false);
+
+        return;
+      }
+
+      proccessEventContent(content, type);
+      return;
+    }
+
+
   };
   // ------------------------------------------------------
 
   createEffect(() => {
     if (isConnected()) {
-    const pubkey = data?.selectedFeed?.hex;
 
-    socket()?.addEventListener('message', onMessage);
+      socket()?.removeEventListener('message', onMessage);
+      socket()?.addEventListener('message', onMessage);
 
-    setData('posts', () => []);
-    setData('scrollTop', () => 0);
-    setPage({ messages: [], users: {}, postStats: {} });
+      setData('posts', () => []);
+      setData('scrollTop', () => 0);
+      setPage({ messages: [], users: {}, postStats: {} });
 
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
-      behavior: 'instant',
-    });
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
+        behavior: 'instant',
+      });
 
-    pubkey && getFeed(pubkey, `user_feed_${APP_ID}`);}
+      const selected = data?.selectedFeed;
+
+      const pubkey = selected?.hex;
+
+      if (pubkey) {
+        const [scope, timeframe] = pubkey.split(';');
+
+        if (scope && timeframe) {
+          profile?.publicKey && getExploreFeed(profile.publicKey, `user_feed_explore_${APP_ID}`, scope, timeframe, 0, 100);
+          return;
+        }
+
+        getFeed(pubkey, `user_feed_${APP_ID}`);
+        return;
+      }
+
+    }
   });
 
   createEffect(() => {
@@ -339,9 +379,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       hideNewNoteForm: () => {
         setData('showNewNoteForm', () => false);
       },
-      selectFeed(profile: PrimalFeed | undefined) {
-        if (profile as PrimalFeed) {
-          setData('selectedFeed', () => ({...profile}));
+      selectFeed(feed: PrimalFeed | undefined) {
+        if (feed !== undefined) {
+          setData('selectedFeed', () => ({ ...feed }));
         }
       },
       fetchHomeFeed: () => {

@@ -25,6 +25,11 @@ export const initialStore: FeedStore = {
   threadedNotes: [],
   availableFeeds: [
     {
+      name: 'Trending, my network',
+      hex: 'network;trending',
+      npub: 'trending;network',
+    },
+    {
       name: 'Nostr highlights by Primal' ,
       hex: '9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a',
       npub: 'npub1nfgqmnxqsjsnsvc2r5djhcx4ap3egcjryhf9ppxnajskfel2dx9qq6mnsp',
