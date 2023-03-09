@@ -42,7 +42,7 @@ export const disconnect = () => {
 
 export const reset = () => {
   disconnect();
-  setTimeout(connect, 200);
+  setTimeout(connect, 1000);
 };
 
 export const sendMessage = (message: string) => {

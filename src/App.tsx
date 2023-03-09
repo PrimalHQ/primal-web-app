@@ -14,23 +14,23 @@ import Help from './pages/Help';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 
-const onVisibilityChange = () => {
-  if (document.visibilityState === "visible") {
-    connect();
-  }
-};
+// const onVisibilityChange = () => {
+//   if (document.visibilityState === "visible") {
+//     connect();
+//   }
+// };
 
 const App: Component = () => {
 
   onMount(() => {
     connect();
-    document.addEventListener('visibilitychange', onVisibilityChange);
+    // document.addEventListener('visibilitychange', onVisibilityChange);
 
   });
 
   onCleanup(() => {
     disconnect();
-    document.removeEventListener('visibilitychange', onVisibilityChange);
+    // document.removeEventListener('visibilitychange', onVisibilityChange);
 
   })
 

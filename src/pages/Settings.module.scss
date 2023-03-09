@@ -1,3 +1,10 @@
+.settingsContainer {
+  background-color: var(--backround-card);
+  padding-inline: 28px;
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
 .fullHeader {
   display: grid;
   height: 128px;
@@ -24,9 +31,12 @@
   display: grid;
   width: 100%;
   grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+  border-bottom: solid 1px var(--subtile-devider);
 }
 
-.themeCaption {
+.settingsCaption {
   font-size: 18px;
   font-weight: 800;
   line-height: 20px;

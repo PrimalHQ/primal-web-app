@@ -7,6 +7,7 @@ import styles from './Settings.module.scss';
 import logoFire from '../assets/icons/logo_fire.svg';
 import logoIce from '../assets/icons/logo_ice.svg';
 import check from '../assets/icons/check.svg';
+import FeedSorter from '../components/FeedSorter/FeedSorted';
 
 
 const Settings: Component = () => {
@@ -14,7 +15,7 @@ const Settings: Component = () => {
   const context = useFeedContext();
 
   return (
-    <>
+    <div class={styles.settingsContainer}>
       <Portal
         mount={document.getElementById("branding_holder") as Node}
       >
@@ -25,8 +26,8 @@ const Settings: Component = () => {
           Settings
         </div>
       </div>
-      <div class={styles.themeCaption}>
-        Themes
+      <div class={styles.settingsCaption}>
+        Theme
       </div>
       <div class={styles.themeChooser}>
         <button class={styles.sunset} onClick={() => context?.actions?.setTheme('sunset')}>
@@ -54,7 +55,15 @@ const Settings: Component = () => {
           </Show>
         </button>
       </div>
-    </>
+
+      <div class={styles.settingsCaption}>
+        Home page feeds
+      </div>
+
+      <div class={styles.feedSettingsg}>
+        <FeedSorter />
+      </div>
+    </div>
   )
 }
 

@@ -15,6 +15,17 @@ export type FeedStore2 = {
   availableFeeds: PrimalFeed[],
 };
 
+const arrMove = (arr, oldIndex, newIndex) => {
+  if (newIndex >= arr.length) {
+    let i = newIndex - arr.length + 1;
+    while (i--) {
+      arr.push(undefined);
+    }
+  }
+  arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
+  return arr;
+};
+
 // export const initialStore: FeedStore2 = {
 //   notes: [],
 //   isFetching: false,
@@ -83,6 +94,43 @@ export const updateAvailableFeeds = (pubKey: string | undefined, feed, feeds) =>
 
   return newFeeds;
 };
+
+export const removeFromAvailableFeeds = (pubKey: string | undefined, feed, feeds) => {
+  const newFeeds = feeds.filter(f => f.hex !== feed.hex);
+
+  localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+
+  return newFeeds;
+};
+
+export const moveFeedUp = (pubKey: string | undefined, feed, feeds) => {
+
+  const index = feeds.findIndex(f => f.hex === feed.hex);
+
+  if (index > 0) {
+    const newFeeds = arrMove([...feeds], index, index - 1);
+    localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+
+
+    return newFeeds;
+  }
+
+  return [ ...feeds ];
+}
+
+export const moveFeedDown = (pubKey: string | undefined, feed, feeds) => {
+
+  const index = feeds.findIndex(f => f.hex === feed.hex);
+
+  if (index < feeds.length - 1) {
+    const newFeeds = arrMove([...feeds], index, index + 1);
+    localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+
+    return newFeeds;
+  }
+
+  return [ ...feeds ];
+}
 
 // Processing
 // TODO: Move to it's own file
