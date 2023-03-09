@@ -14,12 +14,19 @@ import Branding from '../components/Branding/Branding';
 import PageNav from '../components/PageNav/PageNav';
 import { scopeLabels, timeframeLabels } from '../constants';
 import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
+import { updateAvailableFeeds } from '../stores/home';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
 const timeframes = ['latest', 'trending', 'popular', 'mostzapped'];
 
+const titleCase = (text: string) => {
+  return text[0].toUpperCase() + text.slice(1).toLowerCase();
+}
+
 const Explore: Component = () => {
+
+  const context = useFeedContext();
 
     const [mounted, setMounted] = createSignal(false);
 
@@ -33,6 +40,20 @@ const Explore: Component = () => {
       return scopes.includes(params.scope) &&
         timeframes.includes(params.timeframe);
 
+    };
+
+    const hasFeedAtHome = () => {
+      const hex = `${params.scope};${params.timeframe}`;
+
+      return !!context?.data.availableFeeds.find(f => f.hex === hex);
+    };
+
+    const addToHomeFeed = () => {
+      const hex = `${params.scope};${params.timeframe}`;
+      const name = titleCase(`${timeframeLabels[params.timeframe]}, ${scopeLabels[params.scope]}`);
+      const feed = { name, hex };
+
+      context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
     };
 
     onMount(() => {
@@ -59,14 +80,29 @@ const Explore: Component = () => {
           </Show>
         </Portal>
         <div id="central_header" class={styles.fullHeader}>
-          <div>
-            <Show
-              when={hasParams()}
-              fallback="explore nostr"
-            >
-              {timeframeLabels[params.timeframe]}: {scopeLabels[params.scope]}
-            </Show>
-          </div>
+          <Show
+            when={hasParams()}
+            fallback={<div class={styles.exploreCaption}>explore nostr</div>}
+          >
+              <div class={styles.exploreCaption}>
+                {timeframeLabels[params.timeframe]}: {scopeLabels[params.scope]}
+              </div>
+              <div class={styles.addToFeed}>
+                <Show
+                  when={!hasFeedAtHome()}
+                  fallback={<div class={styles.noAdd}>
+                    Available on your home page
+                  </div>}
+                >
+                  <button
+                    class={styles.addButton}
+                    onClick={addToHomeFeed}
+                  >
+                    <span>+</span> add this feed to my home page
+                  </button>
+                </Show>
+              </div>
+          </Show>
         </div>
         <Show when={mounted()}>
           <Portal mount={document.getElementById("right_sidebar") as Node}>
