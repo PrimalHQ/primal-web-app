@@ -15,10 +15,12 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
 }
 
 export const getTrending = (subid: string, limit = 25) => {
+  const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {"cache":["explore", { timeframe: "trending", scope: "global", limit }]},
+    {"cache":["explore", { timeframe: "trending", scope: "global", limit, since: yesterday }]},
   ]));
 };
 

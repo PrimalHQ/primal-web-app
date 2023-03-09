@@ -18,7 +18,7 @@ import type {
 import { convertToPosts, getExploreFeed, getFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage } from "../constants";
-import { connect, isConnected, isNotConnected, socket } from "../sockets";
+import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
 import { render, renderToString } from "solid-js/web";
