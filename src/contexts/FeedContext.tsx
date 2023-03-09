@@ -27,6 +27,7 @@ import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
 import { getLikes, parseNote } from "../lib/posts";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
+import { initAvailableFeeds, updateAvailableFeeds } from "../stores/home";
 // import { proccessEventContent } from "../stores/home";
 
 
@@ -151,11 +152,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   // const [publicKey, setPublicKey] = createSignal<string>();
 
   createEffect(() => {
+    setData('availableFeeds', initAvailableFeeds(profile.publicKey));
+
     if (profile.publicKey) {
       const npub = hexToNpub(profile.publicKey);
       const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
-      setData('availableFeeds', () => [ {...feed}, ...initialStore.availableFeeds]);
+      setData('availableFeeds', (feeds) => updateAvailableFeeds(profile.publicKey, feed, feeds));
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey);
 
@@ -276,7 +279,6 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   createEffect(() => {
     if (isConnected()) {
-
       socket()?.removeEventListener('message', onMessage);
       socket()?.addEventListener('message', onMessage);
 
@@ -316,17 +318,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     html?.setAttribute('data-theme', data.theme);
   });
 
-  // const onVisibilityChange = () => {
-  //   if (document.visibilityState === "visible" && isNotConnected()) {
-  //     console.log('visible')
-  //     connect();
-  //   }
-  // };
-
   onMount(() => {
-
-    // document.addEventListener('visibilitychange', onVisibilityChange);
-
     setData('theme', localStorage.getItem('theme') || '');
 
     setTimeout(() => {
