@@ -63,3 +63,25 @@
     }
   }
 }
+
+.dragIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/drag_handle.svg) no-repeat center;
+  mask: url(../../assets/icons/drag_handle.svg) no-repeat center;
+}
+
+.draggedBefore {
+  border-top: solid 1px var(--subtile-devider);
+}
+
+.draggedAfter {
+  border-bottom: solid 1px var(--subtile-devider);
+}
+
+.draggedItem {
+  opacity: 0.6;
+}

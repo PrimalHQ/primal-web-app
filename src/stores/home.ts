@@ -103,6 +103,12 @@ export const removeFromAvailableFeeds = (pubKey: string | undefined, feed, feeds
   return newFeeds;
 };
 
+export const replaceAvailableFeeds = (pubKey: string | undefined, feeds) => {
+  localStorage.setItem(storageKey(pubKey), JSON.stringify(feeds));
+
+  return feeds;
+}
+
 export const moveFeedUp = (pubKey: string | undefined, feed, feeds) => {
 
   const index = feeds.findIndex(f => f.hex === feed.hex);

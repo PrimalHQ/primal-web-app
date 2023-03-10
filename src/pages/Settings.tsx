@@ -7,7 +7,7 @@ import styles from './Settings.module.scss';
 import logoFire from '../assets/icons/logo_fire.svg';
 import logoIce from '../assets/icons/logo_ice.svg';
 import check from '../assets/icons/check.svg';
-import FeedSorter from '../components/FeedSorter/FeedSorted';
+import FeedSorter from '../components/FeedSorter/FeedSorter';
 
 
 const Settings: Component = () => {
