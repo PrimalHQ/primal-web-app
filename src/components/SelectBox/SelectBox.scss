@@ -8,7 +8,7 @@
     border: none;
     text-align: right;
     background-position: center right !important;
-    color: var(--text-secondary);
+    color: var(--text-tertiary-2);
 
   .solid-select-container {
     position: relative;
@@ -27,12 +27,12 @@
       content: '';
       display: inline-block;
       margin-left: 8px;
-      width: 10px;
-      height: 10px;
+      width: 16px;
+      height: 16px;
 
-      background-color: var(--text-primary);
-      -webkit-mask: url(../../assets/icons/caret.svg) no-repeat center;
-      mask: url(../../assets/icons/caret.svg) no-repeat center;
+      background-color: var(--text-tertiary-2);
+      -webkit-mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 12px 16px;
+      mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 12px 16px;
     }
   }
 
