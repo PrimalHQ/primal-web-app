@@ -135,6 +135,13 @@ export const getExploreFeed = (
 
     payload.since = yesterday;
   }
+  if (timeframe === 'mostzapped4h') {
+    const fourHAgo = Math.floor((new Date().getTime() - (4 * 60 * 60 * 1000)) / 1000);
+
+    payload.timeframe = 'mostzapped';
+    payload.since = fourHAgo;
+  }
+
 
   sendMessage(JSON.stringify([
     "REQ",

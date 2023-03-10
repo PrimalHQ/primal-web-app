@@ -27,6 +27,12 @@ export const initialStore: FeedStore = {
     notes: [],
     postStats: {},
   },
+  zappedNotes: {
+    messages: [],
+    users: {},
+    notes: [],
+    postStats: {},
+  },
   exploredNotes: [],
   threadedNotes: [],
   availableFeeds: [

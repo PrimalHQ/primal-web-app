@@ -93,6 +93,34 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   };
 
+  const processZappedPost = (type: string, content: NostrEventContent | undefined) => {
+
+    if (type === 'EOSE') {
+      const newPosts = sortByZapped(convertToPosts({
+        users: data.zappedNotes.users,
+        messages: data.zappedNotes.messages,
+        postStats: data.zappedNotes.postStats,
+      }));
+
+      setData('zappedNotes', 'notes', () => [...newPosts]);
+
+      return;
+    }
+
+    if (type === 'EVENT') {
+      if (content && content.kind === 0) {
+        setData('zappedNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
+      }
+      if (content && content.kind === 1) {
+        setData('zappedNotes', 'messages',  (msgs) => [ ...msgs, content]);
+      }
+      if (content && content.kind === 10000100) {
+        const stat = JSON.parse(content.content);
+        setData('zappedNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+      }
+    }
+  };
+
   const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
 
     if (type === 'EOSE') {
@@ -221,6 +249,10 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     if (subId === `trending_${APP_ID}`) {
       processTrendingPost(type, content);
+      return;
+    }
+    if (subId === `zapped_4h_${APP_ID}`) {
+      processZappedPost(type, content);
       return;
     }
 
@@ -357,6 +389,14 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       },
       clearTrendingNotes: () => {
         setData('trendingNotes', () => ({
+          messages: [],
+          users: {},
+          notes: [],
+          postStats: {},
+        }));
+      },
+      clearZappedNotes: () => {
+        setData('zappedNotes', () => ({
           messages: [],
           users: {},
           notes: [],

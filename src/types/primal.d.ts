@@ -50,6 +50,7 @@ export type FeedStore = {
   showNewNoteForm: boolean,
   theme: string,
   trendingNotes: TrendingNotesStore,
+  zappedNotes: TrendingNotesStore,
   exploredNotes: PrimalNote[] | [],
   threadedNotes: PrimalNote[] | [],
 };
@@ -96,6 +97,7 @@ export type PrimalContextStore = {
     clearExploredNotes: () => void,
     setExploredNotes: (newNotes: PrimalNote[]) => void,
     clearTrendingNotes: () => void,
+    clearZappedNotes: () => void,
     setTheme: (newTheme: string) => void,
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,

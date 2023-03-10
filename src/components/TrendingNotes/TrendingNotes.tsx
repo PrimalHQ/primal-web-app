@@ -3,7 +3,7 @@ import { Component, createEffect, For, onCleanup, onError, onMount } from 'solid
 import { createStore } from 'solid-js/store';
 import { APP_ID, useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import { convertToPosts, getTrending, sortByScore24h } from '../../lib/feed';
+import { convertToPosts, getExploreFeed, getTrending, sortByScore24h } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
 import { isConnected, socket } from '../../sockets';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote, TrendingNotesStore } from '../../types/primal';
@@ -34,8 +34,10 @@ const TrendingNotes: Component = () => {
 	createEffect(() => {
     if (isConnected()) {
       context?.actions?.clearTrendingNotes();
+      context?.actions?.clearZappedNotes();
 
-      getTrending(`trending_${APP_ID}`, 10);
+      getTrending(`trending_${APP_ID}`, 12);
+      getExploreFeed('', `zapped_4h_${APP_ID}`, 'global', 'mostzapped4h', 12);
 		}
 	});
 
@@ -174,7 +176,7 @@ const TrendingNotes: Component = () => {
               <span>4h</span>
             </div>
           </div>
-            <For each={context?.data.trendingNotes.notes}>
+            <For each={context?.data.zappedNotes.notes}>
               {
                 (post) =>
                   <A href={`/thread/${post.post.noteId}`}>
