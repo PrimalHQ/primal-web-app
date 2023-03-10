@@ -123,19 +123,17 @@ export const getExploreFeed = (
   limit = 20,
 ) => {
 
+  let payload = { timeframe, scope, limit };
+
+  if (pubkey.length > 0) {
+    payload.pubkey = pubkey;
+  }
+
+
   if (timeframe === 'trending') {
     const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
 
-    sendMessage(JSON.stringify([
-      "REQ",
-      subid,
-      {cache: [
-        "explore",
-        { pubkey, timeframe, scope, limit, since: yesterday },
-      ]},
-    ]));
-
-    return;
+    payload.since = yesterday;
   }
 
   sendMessage(JSON.stringify([
@@ -143,7 +141,7 @@ export const getExploreFeed = (
     subid,
     {cache: [
       "explore",
-      { pubkey, timeframe, scope, limit },
+      payload,
     ]},
   ]));
 };
