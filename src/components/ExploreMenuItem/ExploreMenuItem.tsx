@@ -38,7 +38,7 @@ const itemInfo: Record<string, ItemInfo> = {
   network: {
     caption:'Network',
     icon: styles.networkIcon,
-    description: 'account you follow + everyone you follow',
+    description: 'account you follow + everyone they follow',
   },
   global: {
     caption:'Global',
