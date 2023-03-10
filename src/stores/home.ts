@@ -74,7 +74,7 @@ const storageKey = (pubKey: string | undefined) => {
 export const initAvailableFeeds = (pubKey: string | undefined) => {
   const storedFeeds = JSON.parse(localStorage.getItem(storageKey(pubKey)) || '["empty"]');
 
-  if (storedFeeds[0] === 'empty') {
+  if (storedFeeds[0] === 'empty' || !pubKey) {
     localStorage.setItem(storageKey(pubKey), JSON.stringify(initialStore.availableFeeds));
 
     return initialStore.availableFeeds;

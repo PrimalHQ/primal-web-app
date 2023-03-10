@@ -6,6 +6,12 @@ export const emptyPage: FeedPage = {
   postStats: {},
 }
 
+export const trendingFeed = {
+  name: 'Trending, my network',
+  hex: 'network;trending',
+  npub: 'trending;network',
+};
+
 export const initialStore: FeedStore = {
   posts: [],
   isFetching: false,
@@ -24,11 +30,6 @@ export const initialStore: FeedStore = {
   exploredNotes: [],
   threadedNotes: [],
   availableFeeds: [
-    {
-      name: 'Trending, my network',
-      hex: 'network;trending',
-      npub: 'trending;network',
-    },
     {
       name: 'Nostr highlights by Primal' ,
       hex: '9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a',

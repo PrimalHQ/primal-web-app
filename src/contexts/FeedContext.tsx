@@ -17,7 +17,7 @@ import type {
 } from '../types/primal';
 import { convertToPosts, getExploreFeed, getFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
-import { initialStore, emptyPage } from "../constants";
+import { initialStore, emptyPage, trendingFeed } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
@@ -158,6 +158,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       const npub = hexToNpub(profile.publicKey);
       const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
+      setData('availableFeeds', (feeds) => updateAvailableFeeds(profile.publicKey, trendingFeed, feeds));
       setData('availableFeeds', (feeds) => updateAvailableFeeds(profile.publicKey, feed, feeds));
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey);
