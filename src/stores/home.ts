@@ -88,7 +88,7 @@ export const updateAvailableFeeds = (pubKey: string | undefined, feed, feeds) =>
     return [...feeds];
   }
 
-  const newFeeds = [{ ...feed }, ...feeds];
+  const newFeeds = [ ...feeds, { ...feed }];
 
   localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
 
