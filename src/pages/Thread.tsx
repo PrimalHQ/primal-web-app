@@ -126,7 +126,7 @@ const Thread: Component = () => {
 
   const people = () => posts().reduce((acc, p) => {
     const user = p?.user;
-    if (user && acc.find(u => user.pubkey === u.pubkey)) {
+    if (user && acc.find(u => u && user.pubkey === u.pubkey)) {
       return acc;
     }
 
