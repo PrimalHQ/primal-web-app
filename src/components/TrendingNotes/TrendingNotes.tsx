@@ -23,7 +23,7 @@ const TrendingNotes: Component = () => {
       context?.actions?.clearZappedNotes();
 
       getTrending(`trending_${APP_ID}`, 12);
-      getExploreFeed('', `zapped_4h_${APP_ID}`, 'global', 'mostzapped4h', 0, 12);
+      getExploreFeed('', `zapped_4h_${APP_ID}`, 'global', 'mostzapped4h', 0, 24);
 		}
 	});
 
