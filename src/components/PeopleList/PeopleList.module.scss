@@ -14,10 +14,11 @@
   justify-content: flex-start;
   font-size: 18px;
   font-weight: 800;
-  line-height: 20px;
+  line-height: 22px;
   color: var(--text-secondary-2);
   text-transform: uppercase;
   >div{
+    display: flex;
     height: 22px;
     >span {
       color: var(--text-tertiary-2);
@@ -31,15 +32,15 @@
   // position: -webkit-sticky;
   // position: sticky;
   // top: 0px;
-  padding-top: 44px;
+  width: 300px;
   margin-bottom: 228px
 }
 
 .stickyWrapper {
-  height: 100%;
   position: fixed;
   height: 100vh;
-  overflow-y: scroll;
+  overflow: hidden;
+  // overflow-y: scroll;
 
   &::-webkit-scrollbar{
     display: none;

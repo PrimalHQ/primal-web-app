@@ -60,7 +60,7 @@
   position: fixed;
   height: 100vh;
   overflow: hidden;
-  overflow-y: scroll;
+  // overflow-y: scroll;
 
   &::-webkit-scrollbar{
     display: none;
