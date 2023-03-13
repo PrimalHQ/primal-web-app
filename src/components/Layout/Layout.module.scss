@@ -15,7 +15,7 @@
     width: 176px;
     display: grid;
     grid-template-rows: 128px 1fr 82px;
-    height: 100vh;
+    height: 100%;
   }
 
   .leftHeader {
@@ -119,7 +119,7 @@
 @media only screen and (max-width: 720px) {
   .container {
     width: 100%;
-    height: 100vh;
+    // height: 100vh;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr 48px;
     grid-template-areas: "content" "footer";
