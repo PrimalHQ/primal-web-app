@@ -4,6 +4,7 @@ import type {
   FeedStore,
   NostrEOSE,
   NostrEvent,
+  NostrEventContent,
   NostrPostContent,
   NostrRelays,
   NostrStatsContent,
@@ -27,7 +28,7 @@ import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
 import { getLikes, parseNote } from "../lib/posts";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
-import { initAvailableFeeds, updateAvailableFeeds } from "../stores/home";
+import { initAvailableFeeds, updateAvailableFeeds, updateAvailableFeedsTop } from "../stores/home";
 // import { proccessEventContent } from "../stores/home";
 
 
@@ -186,8 +187,8 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       const npub = hexToNpub(profile.publicKey);
       const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
-      setData('availableFeeds', (feeds) => updateAvailableFeeds(profile.publicKey, trendingFeed, feeds));
-      setData('availableFeeds', (feeds) => updateAvailableFeeds(profile.publicKey, feed, feeds));
+      setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, trendingFeed, feeds));
+      setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, feed, feeds));
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey);
 

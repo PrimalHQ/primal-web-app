@@ -83,6 +83,18 @@ export const initAvailableFeeds = (pubKey: string | undefined) => {
   return storedFeeds;
 }
 
+export const updateAvailableFeedsTop = (pubKey: string | undefined, feed, feeds) => {
+  if (feeds.find(f => feed.name === f.name)) {
+    return [...feeds];
+  }
+
+  const newFeeds = [ { ...feed }, ...feeds];
+
+  localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+
+  return newFeeds;
+};
+
 export const updateAvailableFeeds = (pubKey: string | undefined, feed, feeds) => {
   if (feeds.find(f => feed.name === f.name)) {
     return [...feeds];
