@@ -93,11 +93,12 @@
   }
 
   .solid-select-input {
-    max-height: 20px;
-    height: 20px;
+    max-height: 0px;
+    height: 0px;
     box-shadow: none;
     margin: 0;
     padding: 0;
+    font-size: 16px;
     cursor: pointer;
   }
 
