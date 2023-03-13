@@ -14,6 +14,8 @@ const Layout: Component = () => {
 
   const context = useFeedContext();
 
+  let container;
+
   createEffect(() => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
@@ -28,8 +30,20 @@ const Layout: Component = () => {
     }
   });
 
+  const onResize = () => {
+    container?.style.setProperty('height', `${window.innerHeight}px`);
+  };
+
+  onMount(() => {
+    window.addEventListener('resize', onResize);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('resize', onResize);
+  });
+
   return (
-    <div id="container" class={styles.container}>
+    <div id="container" ref={container} class={styles.container}>
 
       <div class={styles.leftColumn}>
         <div>
