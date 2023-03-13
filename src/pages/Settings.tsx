@@ -14,6 +14,10 @@ const Settings: Component = () => {
 
   const context = useFeedContext();
 
+  const selectedClass = (klass: string) => {
+    return context?.data.theme === klass ? styles.selected : '';
+  };
+
   return (
     <div class={styles.settingsContainer}>
       <Portal
@@ -30,30 +34,69 @@ const Settings: Component = () => {
         Theme
       </div>
       <div class={styles.themeChooser}>
-        <button class={styles.sunset} onClick={() => context?.actions?.setTheme('sunset')}>
-          <img src={logoFire} />
-          <Show when={context?.data.theme === 'sunset'}>
-            <div class={styles.themeChecked}><img src={check} /></div>
-          </Show>
-        </button>
-        <button class={styles.midnight} onClick={() => context?.actions?.setTheme('midnight')}>
-          <img src={logoIce} />
-          <Show when={context?.data.theme === 'midnight'}>
-            <div class={styles.themeChecked}><img src={check} /></div>
-          </Show>
-        </button>
-        <button class={styles.sunrise} onClick={() => context?.actions?.setTheme('sunrise')}>
-          <img src={logoFire} />
-          <Show when={context?.data.theme === 'sunrise'}>
-            <div class={styles.themeChecked}><img src={check} /></div>
-          </Show>
-        </button>
-        <button class={styles.ice} onClick={() => context?.actions?.setTheme('ice')}>
-          <img src={logoIce} />
-          <Show when={context?.data.theme === 'ice'}>
-            <div class={styles.themeChecked}><img src={check} /></div>
-          </Show>
-        </button>
+        <div class={styles.themeOption}>
+          <button
+            class={`${styles.sunset} ${selectedClass('sunset')}`}
+            onClick={() => context?.actions?.setTheme('sunset')}
+          >
+            <img src={logoFire} />
+            <Show
+              when={context?.data.theme === 'sunset'}
+              fallback={<div class={styles.themeUncheckedDark}></div>}
+            >
+              <div class={styles.themeChecked}><img src={check} /></div>
+            </Show>
+          </button>
+          <p>sunset wave</p>
+        </div>
+
+        <div class={styles.themeOption}>
+          <button
+            class={`${styles.sunrise} ${selectedClass('sunrise')}`}
+            onClick={() => context?.actions?.setTheme('sunrise')}
+          >
+            <img src={logoFire} />
+            <Show
+              when={context?.data.theme === 'sunrise'}
+              fallback={<div class={styles.themeUncheckedLight}></div>}
+            >
+              <div class={styles.themeChecked}><img src={check} /></div>
+            </Show>
+          </button>
+          <p>sunrise wave</p>
+        </div>
+
+        <div class={styles.themeOption}>
+          <button
+            class={`${styles.midnight} ${selectedClass('midnight')}`}
+            onClick={() => context?.actions?.setTheme('midnight')}
+          >
+            <img src={logoIce} />
+            <Show
+              when={context?.data.theme === 'midnight'}
+              fallback={<div class={styles.themeUncheckedDark}></div>}
+            >
+              <div class={styles.themeChecked}><img src={check} /></div>
+            </Show>
+          </button>
+          <p>midnight wave</p>
+        </div>
+
+        <div class={styles.themeOption}>
+          <button
+            class={`${styles.ice} ${selectedClass('ice')}`}
+            onClick={() => context?.actions?.setTheme('ice')}
+          >
+            <img src={logoIce} />
+            <Show
+              when={context?.data.theme === 'ice'}
+              fallback={<div class={styles.themeUncheckedLight}></div>}
+            >
+              <div class={styles.themeChecked}><img src={check} /></div>
+            </Show>
+          </button>
+          <p>ice wave</p>
+        </div>
       </div>
 
       <div class={styles.settingsCaption}>

@@ -40,13 +40,25 @@
   font-size: 18px;
   font-weight: 800;
   line-height: 20px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   margin-bottom: 20px;
 }
 
-@mixin themeOption {
-  position: relative;
+.themeOption {
   width: 128px;
+  >p {
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-top: 8px;
+    text-align: center;
+  }
+}
+
+@mixin themeOptionButton {
+  position: relative;
+  width: 100%;
   height: 100px;
   background-color: unset;
   border: none;
@@ -54,7 +66,6 @@
   padding: 0px;
   display: grid;
   place-content: center;
-  border: solid 1px var(--brand-1);
   border-radius: 6px;
 
   >img {
@@ -63,23 +74,27 @@
   }
 }
 
+.selected {
+  border: solid 1px var(--brand-1) !important;
+}
+
 .sunset {
-  @include themeOption();
+  @include themeOptionButton();
   background-color: #000000;
 }
 
 .midnight {
-  @include themeOption();
+  @include themeOptionButton();
   background-color: #000000;
 }
 
 .sunrise {
-  @include themeOption();
+  @include themeOptionButton();
   background-color: #F5F5F5;
 }
 
 .ice {
-  @include themeOption();
+  @include themeOptionButton();
   background-color: #F5F5F5;
 }
 
@@ -100,4 +115,34 @@
     width: 10px;
     height: 10px;
   }
+}
+
+.themeUncheckedDark {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  margin: 0px;
+  padding: 0px;
+  align-items: center;
+  justify-content: center;
+  background: #222222;
+  border-radius: 50%;
+}
+
+.themeUncheckedLight {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: block;
+  margin: 0px;
+  padding: 0px;
+  align-items: center;
+  justify-content: center;
+  background: #E5E5E5;
+  border-radius: 50%;
 }
