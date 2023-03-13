@@ -81,9 +81,19 @@ const HomeHeader: Component = () => {
 
       <div id="small_header" class={styles.smallHeader}>
         <div class={styles.smallHeaderMain}>
-          <div class={styles.smallLeft}>
-            <SmallCallToAction activeUser={activeUser()} />
-          </div>
+          <Show
+            when={activeUser()}
+            fallback={
+              <div class={styles.smallLeft}>
+                <div class={styles.welcomeMessageSmall}>
+                  Welcome to nostr!
+                </div>
+              </div>}
+          >
+            <div class={styles.smallLeft}>
+              <SmallCallToAction activeUser={activeUser()} />
+            </div>
+          </Show>
           <div class={styles.smallRight}>
             <FeedSelect />
           </div>

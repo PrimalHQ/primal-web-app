@@ -47,6 +47,8 @@ const Thread: Component = () => {
     postStats: {},
   });
 
+  const activeUser = () => context?.data.activeUser;
+
   const proccessPost = (post: NostrPostContent) => {
     setPage('messages', (msgs) => [ ...msgs, post]);
   };
@@ -223,7 +225,9 @@ const Thread: Component = () => {
             post={primaryNote()}
             liked={likedNotes.includes(primaryNote()?.post.id)}
           />
-          <ReplyToNote note={primaryNote()} />
+          <Show when={activeUser()}>
+            <ReplyToNote note={primaryNote()} />
+          </Show>
         </div>
       </Show>
 
