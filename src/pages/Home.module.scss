@@ -16,3 +16,23 @@
   text-align: center;
   margin-top: 80px;
 }
+
+.normalCentralHeader {
+  display: block;
+}
+
+.phoneCentralHeader {
+  display: none;
+}
+
+@media only screen and (max-width: 720px) {
+
+  .normalCentralHeader {
+    display: none;
+  }
+
+  .phoneCentralHeader {
+    display: block;
+    width: 100%;
+  }
+}

@@ -5,7 +5,7 @@ import SelectBox from '../SelectBox/SelectBox';
 
 import styles from './FeedSelect.module.scss';
 
-const FeedSelect: Component = () => {
+const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
 
   const context = useFeedContext();
 
@@ -83,6 +83,7 @@ const FeedSelect: Component = () => {
       onChange={selectFeed}
       initialValue={initialValue()}
       isSelected={isSelected}
+      isPhone={props.isPhone}
     />
   );
 }

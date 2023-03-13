@@ -15,6 +15,7 @@ import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
 import { proccessUserProfile } from '../stores/profile';
 import Branding from '../components/Branding/Branding';
 import { getLikes, likedNotes } from '../lib/posts';
+import HomeHeaderPhone from '../components/HomeHeaderPhone/HomeHeaderPhone';
 
 const Home: Component = () => {
 
@@ -48,8 +49,12 @@ const Home: Component = () => {
           <Branding small={false} isHome={true} />
         </Portal>
 
-        <div id="central_header">
+        <div class={styles.normalCentralHeader}>
           <HomeHeader />
+        </div>
+
+        <div class={styles.phoneCentralHeader}>
+          <HomeHeaderPhone />
         </div>
         <Portal
           mount={document.getElementById("right_sidebar") as Node}
