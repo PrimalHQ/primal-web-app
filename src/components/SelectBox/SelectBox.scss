@@ -1,14 +1,14 @@
 .feed_select {
-    height: 20px;
-    font-size: 14px;
-    line-height: 16px;
-    padding: 0px;
-    margin: 0px;
-    width: auto;
-    border: none;
-    text-align: right;
-    background-position: center right !important;
-    color: var(--text-tertiary-2);
+  height: 20px;
+  font-size: 14px;
+  line-height: 16px;
+  padding: 0px;
+  margin: 0px;
+  width: auto;
+  border: none;
+  text-align: right;
+  background-position: center right !important;
+  color: var(--text-tertiary-2);
 
   .solid-select-container {
     position: relative;
@@ -27,12 +27,12 @@
       content: '';
       display: inline-block;
       margin-left: 8px;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
 
       background-color: var(--text-tertiary-2);
-      -webkit-mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 12px 16px;
-      mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 12px 16px;
+      -webkit-mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
+      mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
     }
   }
 

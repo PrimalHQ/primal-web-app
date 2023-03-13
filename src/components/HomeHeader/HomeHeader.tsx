@@ -17,6 +17,7 @@ const HomeHeader: Component = () => {
   const onScroll = () => {
     const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
     const smallHeader = document.getElementById('small_header');
+    const border = document.getElementById('small_bottom_border');
 
     context?.actions?.updatedFeedScroll(scrollTop);
 
@@ -24,6 +25,7 @@ const HomeHeader: Component = () => {
     lastScrollTop = scrollTop;
 
     if (scrollTop < 117) {
+      border.style.display = 'none';
       smallHeader?.classList.remove(styles.hiddenSelector);
       smallHeader?.classList.remove(styles.fixedSelector);
       return;
@@ -34,6 +36,7 @@ const HomeHeader: Component = () => {
       return;
     }
 
+    border.style.display = 'flex';
     smallHeader?.classList.remove(styles.instaHide);
 
     if (!isScrollingDown) {
@@ -98,7 +101,10 @@ const HomeHeader: Component = () => {
             <FeedSelect />
           </div>
         </div>
-        <div class={styles.smallHeaderBottomBorder}>
+        <div
+          id="small_bottom_border"
+          class={styles.smallHeaderBottomBorder}
+        >
           <div class={styles.leftCorner}></div>
           <div class={styles.rightCorner}></div>
         </div>
