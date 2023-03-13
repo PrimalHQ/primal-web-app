@@ -25,7 +25,7 @@ export const getLegendStats = (pubkey: string | undefined) => {
 }
 
 export const humanizeNumber = (number: number) => {
-  if (number < 10000) {
+  if (number < 1000) {
     return number.toLocaleString();
   }
 

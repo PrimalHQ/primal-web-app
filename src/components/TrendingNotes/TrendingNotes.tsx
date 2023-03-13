@@ -102,7 +102,7 @@ const TrendingNotes: Component = () => {
                       </div>
                       <div class={styles.content}>
                         <div class={styles.header}>
-                          <div class={styles.name}>
+                          <div class={styles.name} title={post.user?.name}>
                             {post.user?.name}
                           </div>
                           <div class={styles.time}>
