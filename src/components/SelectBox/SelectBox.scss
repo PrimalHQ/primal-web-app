@@ -9,6 +9,7 @@
   text-align: right;
   background-position: center right !important;
   color: var(--text-tertiary-2);
+  padding-right: 6px;
 
   .solid-select-container {
     position: relative;
@@ -34,6 +35,20 @@
       -webkit-mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
       mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
     }
+
+    &:hover {
+      color: var(--text-primary);
+      &:after {
+        background-color: var(--text-primary);
+      }
+    }
+  }
+
+  .highlighted {
+    color: var(--text-primary);
+    &:after {
+      background-color: var(--text-primary);
+    }
   }
 
   .solid-select-option {
@@ -53,6 +68,7 @@
   }
   .solid-select-option[data-disabled=true] {
     padding-right: 10px;
+    color: var(--text-primary);
 
     &:after {
       content: '';

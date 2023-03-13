@@ -11,6 +11,9 @@ const FeedSelect: Component = () => {
 
   const selectFeed = (option: FeedOption) => {
     const hex = option.value;
+    const selector = document.getElementById('defocus');
+
+    selector?.focus();
 
     if (hex) {
       const profile = context?.data?.availableFeeds.find(p => p.hex === hex);

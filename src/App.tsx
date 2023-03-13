@@ -13,6 +13,7 @@ import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Feed from './pages/Feed';
 import Profile from './pages/Profile';
+import styles from './App.module.scss';
 
 // const onVisibilityChange = () => {
 //   if (document.visibilityState === "visible") {
@@ -41,6 +42,7 @@ const App: Component = () => {
   return (
     <>
       <FeedProvider>
+        <input id="defocus" class={styles.invisible}/>
         <Routes>
           <Route path="/" component={Layout} >
             <Route path="/" element={<Navigate href="/home" />} />

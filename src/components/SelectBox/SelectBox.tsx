@@ -13,6 +13,16 @@ const SelectBox: Component<{ options: () => FeedOption[], onChange: (value: any)
 
   const opts = createOptions(params.options, { key: 'label', disable: params.isSelected })
 
+  const onFocus = () => {
+    const control = document.querySelector('.solid-select-control');
+    control?.classList.add('highlighted');
+  }
+
+  const onBlur = () => {
+    const control = document.querySelector('.solid-select-control');
+    control?.classList.remove('highlighted');
+  }
+
   return (
     <Select
       class="feed_select"
@@ -20,6 +30,8 @@ const SelectBox: Component<{ options: () => FeedOption[], onChange: (value: any)
       onChange={params.onChange}
       placeholder='Select feed'
       readonly={true}
+      onFocus={onFocus}
+      onBlur={onBlur}
       {...opts}
     />
   );
