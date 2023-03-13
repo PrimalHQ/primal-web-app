@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
 import { style } from 'solid-js/web';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
@@ -15,39 +15,21 @@ const PeopleList: Component = (props) => {
 
   const people = () => props.people;
 
+  createEffect(() => {
+    // If the content changes, recalculate sticky boundary.
+    if (people()) {
+      calculateStickyPosition();
+    }
+  });
+
   const trimVerification = (address: string) => {
     return address.split('@');
   }
 
-  let lastScroll = 0;
-  let lastWrapperScroll = 0;
-
-  const onScroll = () => {
-    const wrapper = document.getElementById('trending_wrapper');
-    const scrollTop = document.documentElement.scrollTop;
-    const diff = lastScroll - scrollTop;
-
-    wrapper?.scrollTo({ top: lastWrapperScroll - diff , behavior: 'instant'});
-
-    lastScroll = scrollTop;
-    lastWrapperScroll = wrapper.scrollTop;
-  };
-
-
-  onMount(() => {
-    const wrapper = document.getElementById('trending_wrapper');
-    document.addEventListener('scroll', onScroll);
-  });
-
-  onCleanup(() => {
-    const wrapper = document.getElementById('trending_wrapper');
-    document.removeEventListener('scroll', onScroll);
-  });
-
   return (
       <div id="trending_wrapper" class={styles.stickyWrapper}>
+        <div class={styles.heading}>People in this thread</div>
         <div id="trending_section" class={styles.trendingSection}>
-          <div class={styles.heading}>People in this thread</div>
           <For each={people()}>
             {
               (person) =>
