@@ -67,18 +67,20 @@ const Explore: Component = () => {
 
     return (
       <>
-        <Portal
-          mount={document.getElementById("branding_holder") as Node}
-        >
-          <Show
-            when={hasParams()}
-            fallback={
-              <Branding small={false} />
-            }
+        <Show when={mounted()}>
+          <Portal
+            mount={document.getElementById("branding_holder") as Node}
           >
-            <PageNav />
-          </Show>
-        </Portal>
+            <Show
+              when={hasParams()}
+              fallback={
+                <Branding small={false} />
+              }
+            >
+              <PageNav />
+            </Show>
+          </Portal>
+        </Show>
         <div id="central_header" class={styles.fullHeader}>
           <Show
             when={hasParams()}
