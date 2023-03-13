@@ -97,9 +97,11 @@ const HomeHeader: Component = () => {
               <SmallCallToAction activeUser={activeUser()} />
             </div>
           </Show>
-          <div class={styles.smallRight}>
-            <FeedSelect />
-          </div>
+          <Show when={context?.data.selectedFeed}>
+            <div class={styles.smallRight}>
+              <FeedSelect />
+            </div>
+          </Show>
         </div>
         <div
           id="small_bottom_border"
