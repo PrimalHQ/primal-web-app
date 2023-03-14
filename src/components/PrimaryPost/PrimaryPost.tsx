@@ -93,7 +93,7 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
             </button>
             <button class={styles.stat} onClick={doRepost}>
               <div class={styles.repostIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.mentions || ''}</div>
+              <div class={styles.statNumber}>{props.post?.post?.reposts || ''}</div>
             </button>
             <div class={styles.stat}>
               <div class={styles.zapIcon}></div>

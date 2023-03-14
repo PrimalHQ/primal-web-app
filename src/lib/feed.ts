@@ -70,6 +70,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         sig: msg.sig,
         likes: stat.likes,
         mentions: stat.mentions,
+        reposts: stat.reposts,
         replies: stat.replies,
         zaps: stat.zaps,
         score: stat.score,

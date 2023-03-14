@@ -59,6 +59,7 @@ export type NostrPostStats = {
   [eventId: string]: {
     likes: number,
     mentions: number,
+    reposts: number,
     replies: number,
     zaps: number,
     satszapped: number,
@@ -177,6 +178,7 @@ export type PrimalNote = {
     sig: string,
     likes: number,
     mentions: number,
+    reposts: number,
     replies: number,
     zaps: number,
     score: number,
