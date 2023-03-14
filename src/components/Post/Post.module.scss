@@ -16,7 +16,10 @@
     grid-template-rows: 52px 1fr;
     grid-row-gap: 6px;
     justify-items: center;
-    text-decoration: none;
+
+    >a {
+      text-decoration: none;
+    }
 
 
     .avatarImg {

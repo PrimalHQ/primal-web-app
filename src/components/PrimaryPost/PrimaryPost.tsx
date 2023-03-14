@@ -37,18 +37,21 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
   return (
     <div class={styles.border}>
       <div class={styles.post}>
-        <A
-          href={`/profile/${props.post.user.npub}`}
+        <div
           class={styles.avatar}
           title={props.post?.user?.name}
         >
-          <Avatar
-            src={props.post?.user?.picture}
-            size="xl"
-            verified={props.post?.user?.nip05}
-          />
-          <div class={styles.avatarName}>{props.post?.user?.name}</div>
-        </A>
+          <A
+            href={`/profile/${props.post.user.npub}`}
+          >
+            <Avatar
+              src={props.post?.user?.picture}
+              size="xl"
+              verified={props.post?.user?.nip05}
+            />
+            <div class={styles.avatarName}>{props.post?.user?.name}</div>
+          </A>
+        </div>
         <div class={styles.content}>
           <div class={styles.header}>
             <span class={styles.postInfo}>
