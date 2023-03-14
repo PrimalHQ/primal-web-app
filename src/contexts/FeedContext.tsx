@@ -353,7 +353,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   });
 
   onMount(() => {
-    setData('theme', localStorage.getItem('theme') || '');
+    setData('theme', localStorage.getItem('theme') || 'sunset');
 
     setTimeout(() => {
       fetchNostrKey();
