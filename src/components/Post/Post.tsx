@@ -43,8 +43,8 @@ const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
               size="md"
               verified={props.post?.user?.nip05}
             />
-            <div class={styles.avatarName}>{props.post?.user?.name}</div>
           </A>
+          <div class={styles.avatarName}>{props.post?.user?.name}</div>
         </div>
         <div class={styles.content}>
           <div class={styles.header}>
