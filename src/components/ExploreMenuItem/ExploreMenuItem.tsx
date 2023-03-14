@@ -28,17 +28,17 @@ const itemInfo: Record<string, ItemInfo> = {
   follows: {
     caption:'Follows',
     icon: styles.followsIcon,
-    description: 'account you follow',
+    description: 'accounts you follow',
   },
   tribe: {
     caption:'Tribe',
     icon: styles.tribeIcon,
-    description: 'account you follow + your followers',
+    description: 'accounts you follow + your followers',
   },
   network: {
     caption:'Network',
     icon: styles.networkIcon,
-    description: 'account you follow + everyone they follow',
+    description: 'accounts you follow + everyone they follow',
   },
   global: {
     caption:'Global',
