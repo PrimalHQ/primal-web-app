@@ -1,14 +1,11 @@
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, onCleanup, onError, onMount } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { Component, createEffect, For } from 'solid-js';
 import { APP_ID, useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
-import { convertToPosts, getExploreFeed, getTrending, sortByScore24h } from '../../lib/feed';
+import { getExploreFeed, getTrending } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
-import { isConnected, socket } from '../../sockets';
-import { NostrEOSE, NostrEvent, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote, TrendingNotesStore } from '../../types/primal';
+import { isConnected } from '../../sockets';
 import Avatar from '../Avatar/Avatar';
-import { calculateStickyPosition } from './helpers';
 
 import styles from './TrendingNotes.module.scss';
 
@@ -40,12 +37,12 @@ const TrendingNotes: Component = () => {
           <For each={context?.data.trendingNotes.notes}>
             {
               (post) =>
-                <A href={`/thread/${post.post.noteId}`}>
+                <div>
                   <div class={styles.trendingPost}>
-                    <div class={styles.avatar}>
+                    <A href={`/profile/${post.user.npub}`} class={styles.avatar}>
                       <Avatar src={post.user?.picture} size="xxs" />
-                    </div>
-                    <div class={styles.content}>
+                    </A>
+                    <A href={`/thread/${post.post.noteId}`} class={styles.content}>
                       <div class={styles.header}>
                         <div class={styles.name}>
                           {post.user?.name}
@@ -55,9 +52,9 @@ const TrendingNotes: Component = () => {
                         </div>
                       </div>
                       <div class={styles.message}>{post.post?.content}</div>
-                    </div>
+                    </A>
                   </div>
-                </A>
+                </div>
             }
           </For>
           <div class={styles.headingZapped}>
@@ -70,12 +67,12 @@ const TrendingNotes: Component = () => {
             <For each={context?.data.zappedNotes.notes}>
               {
                 (post) =>
-                  <A href={`/thread/${post.post.noteId}`}>
+                  <div>
                     <div class={styles.trendingPost}>
-                      <div class={styles.avatar}>
+                      <A href={`/profile/${post.user.npub}`} class={styles.avatar}>
                         <Avatar src={post.user?.picture} size="xxs" />
-                      </div>
-                      <div class={styles.content}>
+                      </A>
+                      <A href={`/thread/${post.post.noteId}`} class={styles.content}>
                         <div class={styles.header}>
                           <div class={styles.name} title={post.user?.name}>
                             {post.user?.name}
@@ -87,9 +84,9 @@ const TrendingNotes: Component = () => {
                           </div>
                         </div>
                         <div class={styles.message}>{post.post?.content}</div>
-                      </div>
+                      </A>
                     </div>
-                  </A>
+                  </div>
               }
             </For>
           </div>

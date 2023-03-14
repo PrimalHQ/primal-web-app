@@ -5,7 +5,7 @@ import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
 import { truncateNpub } from '../../stores/profile';
 import Avatar from '../Avatar/Avatar';
-import { calculateStickyPosition } from '../TrendingPost/helpers';
+import { calculateStickyPosition } from '../TrendingNotes/helpers';
 
 import styles from './PeopleList.module.scss';
 

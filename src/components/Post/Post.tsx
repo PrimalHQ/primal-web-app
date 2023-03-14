@@ -31,14 +31,18 @@ const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
   return (
     <A class={styles.postLink} href={`/thread/${props.post?.post.noteId}`}>
       <div class={styles.post}>
-        <div class={styles.avatar} title={props.post?.user?.name}>
+        <A
+          href={`/profile/${props.post.user.npub}`}
+          class={styles.avatar}
+          title={props.post?.user?.name}
+        >
           <Avatar
             src={props.post?.user?.picture}
             size="md"
             verified={props.post?.user?.nip05}
           />
           <div class={styles.avatarName}>{props.post?.user?.name}</div>
-        </div>
+        </A>
         <div class={styles.content}>
           <div class={styles.header}>
             <span class={styles.postInfo}>
