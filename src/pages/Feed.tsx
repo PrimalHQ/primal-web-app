@@ -28,6 +28,9 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   createEffect(() => {
     if (isConnected()) {
       socket()?.addEventListener('message', onMessage);
+
+      context?.actions?.clearExploredNotes();
+
       getExploreFeed(
         context?.data.publicKey || '',
         topic,
@@ -37,9 +40,6 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         100,
       );
     }
-  });
-
-  onMount(async () => {
   });
 
   onCleanup(() => {
