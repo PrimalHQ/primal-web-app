@@ -159,19 +159,30 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
       if (rels) {
         const addresses = Object.keys(rels);
+        if (relays.length > 0) {
+          for (let i=0; i< relays.length; i++) {
+            await relays[i].close();
+          }
+        }
 
         const relObjects = addresses.map(address => {
           return relayInit(address);
         })
 
+        let connectedRelays: Relay[] = [];
+
+
         for (let i=0; i < relObjects.length; i++) {
           try {
-            await relObjects[i].connect();
-            setRelays(r => [ ...r, {...relObjects[i]}]);
+            if (relObjects[i].status === WebSocket.CLOSED) {
+              await relObjects[i].connect();
+              connectedRelays.push(relObjects[i]);
+            }
           } catch (e) {
             console.log('error connecting to relay: ', e);
           }
         }
+        setRelays(() => connectedRelays);
 
         console.log('Connected relays: ', unwrap(relays))
       }
@@ -342,7 +353,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
         getFeed(pubkey, `user_feed_${APP_ID}`);
         return;
       }
-
+    }
+    else {
+      socket()?.removeEventListener('message', onMessage);
     }
   });
 
