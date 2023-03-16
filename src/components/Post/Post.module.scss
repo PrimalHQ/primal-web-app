@@ -213,10 +213,12 @@
   color: unset;
   margin: 0px;
   padding: 0px;
-  background: var(--brand-gradient-vertical);
+  // background: var(--brand-gradient-vertical);
+  background-color: var(--backround-card);
   border-radius: 6px;
   display: block;
   transition: 0.2s padding;
+  margin-top: 6px;
   >div {
     border-radius: 4px;
     transition: 0.2s border-radius ease-out;
@@ -231,6 +233,21 @@
   //     transition: 0.2s border-radius ease-out;
   //   }
   // }
+}
+
+.repostedBy {
+  margin-left: 22px;
+  padding-top: 16px;
+  display: flex;
+  >span {
+    >a {
+      margin-inline: 5px;
+    }
+    color: var(--text-tertiary);
+    font-size: 16px;
+    line-height: 16px;
+    font-weight: 400;
+  }
 }
 
 

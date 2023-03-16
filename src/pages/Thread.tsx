@@ -90,6 +90,9 @@ const Thread: Component = () => {
       if (content.kind === 1) {
         proccessPost(content);
       }
+      if (content.kind === 6) {
+        proccessPost(content);
+      }
       if (content.kind === 10000100) {
         proccessStat(content);
       }

@@ -88,6 +88,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       if (content.kind === 1) {
         proccessPost(content);
       }
+      if (content.kind === 6) {
+        proccessPost(content);
+      }
       if (content.kind === 10000100) {
         proccessStat(content);
       }
@@ -112,7 +115,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       if (content && content.kind === 0) {
         setData('zappedNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
       }
-      if (content && content.kind === 1) {
+      if (content && (content.kind === 1 || content.kind === 6)) {
         setData('zappedNotes', 'messages',  (msgs) => [ ...msgs, content]);
       }
       if (content && content.kind === 10000100) {
@@ -140,7 +143,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       if (content && content.kind === 0) {
         setData('trendingNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
       }
-      if (content && content.kind === 1) {
+      if (content && (content.kind === 1 || content.kind === 6)) {
         setData('trendingNotes', 'messages',  (msgs) => [ ...msgs, content]);
       }
       if (content && content.kind === 10000100) {
@@ -156,6 +159,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     if (nostr) {
       const rels = await nostr.getRelays();
+
 
       if (rels) {
         const addresses = Object.keys(rels);

@@ -43,6 +43,9 @@ export const processTrendingNotes = (type: string, content: NostrEventContent | 
     if (content && content.kind === 1) {
       proccessNote(content);
     }
+    if (content && content.kind === 6) {
+      proccessNote(content);
+    }
     if (content && content.kind === 10000100) {
       proccessStat(content);
     }

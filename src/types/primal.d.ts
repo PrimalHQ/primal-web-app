@@ -186,7 +186,8 @@ export type PrimalNote = {
     satszapped: number,
     noteId: string,
   },
-  msg: NostrPostContent[],
+  repost: NostrPostContent,
+  msg: NostrPostContent,
 };
 
 export type PrimalFeed = {

@@ -1,5 +1,5 @@
 import { isConnected, sendMessage, socket } from "../sockets";
-import { FeedPage, PrimalNote } from "../types/primal";
+import { FeedPage, NostrPostContent, PrimalNote } from "../types/primal";
 import { hexToNpub } from "./keys";
 import DOMPurify from 'dompurify';
 import { noteEncode, decode } from "nostr-tools/nip19";
@@ -32,17 +32,48 @@ export const getThread = (postId: string, subid: string, until = 0, limit = 20) 
   ]));
 }
 
+export const getRepostInfo = (page: FeedPage, message: NostrPostContent) => {
+  const user = page?.users[message.pubkey];
+  const userMeta = JSON.parse(user?.content || '{}');
+
+  return {
+    user: {
+      id: user?.id || '',
+      pubkey: user?.pubkey || msg.pubkey,
+      npub: hexToNpub(user?.pubkey || msg.pubkey),
+      name: userMeta.name || user?.pubkey,
+      about: userMeta.about,
+      picture: userMeta.picture,
+      nip05: userMeta.nip05,
+      banner: userMeta.banner,
+      displayName: userMeta.display_name,
+      location: userMeta.location,
+      lud06: userMeta.lud06,
+      lud16: userMeta.lud16,
+      website: userMeta.website,
+      tags: user?.tags || [],
+    },
+  }
+};
+
 export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
 
   if (page === undefined) {
     return [];
   }
 
-  return  page.messages.map((msg) => {
+  return  page.messages.map((message) => {
+    const msg = message.kind === 6 ? JSON.parse(message.content) : message;
+
     const user = page?.users[msg.pubkey];
-    const stat = page?.postStats[msg.id];
+    const stat = page?.postStats[message.id];
 
     const userMeta = JSON.parse(user?.content || '{}');
+
+    if (message.kind === 6) {
+      console.log('>>>> ', message.id, msg.id)
+    }
+
 
     return {
       user: {
@@ -78,6 +109,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         satszapped: stat.satszapped,
         noteId: noteEncode(msg.id),
       },
+      repost: message.kind === 6 ? getRepostInfo(page, message) : null,
       msg,
     };
   });

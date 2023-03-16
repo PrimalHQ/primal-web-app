@@ -1,8 +1,9 @@
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, from, Match, on, onCleanup, onError, onMount, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, from, Match, on, onCleanup, onError, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { date } from '../../lib/dates';
+import { hexToNpub } from '../../lib/keys';
 import { parseNote, sendLike, sendRepost } from '../../lib/posts';
 import { getUserProfile, trimVerification } from '../../lib/profile';
 import { isConnected, socket } from '../../sockets';
@@ -28,12 +29,25 @@ const Post: Component<{ post: PrimalNote, liked?: boolean }> = (props) => {
     sendLike(props.post, context?.relays, context?.actions?.setData);
   };
 
+  const repost = () => props.post.repost;
+
   return (
     <A class={styles.postLink} href={`/thread/${props.post?.post.noteId}`}>
+      <Show when={repost()}>
+        <div class={styles.repostedBy}>
+          <div class={styles.repostIcon}></div>
+          <span>
+            <A href={`/profile/${repost().user.npub}`} >
+              {repost().user.name}
+            </A>
+            reposted
+          </span>
+        </div>
+      </Show>
       <div class={styles.post}>
         <div
           class={styles.avatar}
-          title={props.post?.user?.name}
+          title={props.post?.user?.npub}
         >
           <A
             href={`/profile/${props.post.user.npub}`}

@@ -105,6 +105,9 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
       if (content && content.kind === 1) {
         proccessPost(content);
       }
+      if (content && content.kind === 6) {
+        proccessPost(content);
+      }
       if (content && content.kind === 10000100) {
         proccessStat(content);
       }
