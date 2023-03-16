@@ -13,6 +13,15 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
     {cache: ["feed", { pubkey, limit, [start]: until }]},
   ]));
 }
+export const getUserFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
+
+  const start = until === 0 ? 'since' : 'until';
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["feed", { pubkey, limit, notes: 'authored', [start]: until }]},
+  ]));
+}
 
 export const getTrending = (subid: string, limit = 25) => {
   const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
@@ -56,6 +65,22 @@ export const getRepostInfo = (page: FeedPage, message: NostrPostContent) => {
   }
 };
 
+const parseKind6 = (message: NostrPostContent) => {
+  try {
+    return JSON.parse(message.content);
+  } catch (e) {
+    return {
+      kind: 1,
+      content: '',
+      id: message.id,
+      created_at: message.created_at,
+      pubkey: message.pubkey,
+      sig: message.sig,
+      tags: message.tags,
+    }
+  }
+};
+
 export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
 
   if (page === undefined) {
@@ -63,17 +88,12 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
   }
 
   return  page.messages.map((message) => {
-    const msg = message.kind === 6 ? JSON.parse(message.content) : message;
+    const msg = message.kind === 6 ? parseKind6(message) : message;
 
     const user = page?.users[msg.pubkey];
-    const stat = page?.postStats[message.id];
+    const stat = page?.postStats[msg.id];
 
     const userMeta = JSON.parse(user?.content || '{}');
-
-    if (message.kind === 6) {
-      console.log('>>>> ', message.id, msg.id)
-    }
-
 
     return {
       user: {

@@ -115,6 +115,18 @@
   }
 }
 
+.xxlAvatar {
+  @include avatar;
+  width: 150px;
+  height: 150px;
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: 4px;
+    right: 4px;
+  }
+}
+
 @mixin missing {
   display: grid;
   place-items: center;
@@ -182,6 +194,15 @@
   width: 80px;
   height: 80px;
   font-size: 20px;
-  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 60px;
-  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 60px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 80px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 80px;
+}
+
+.xxlMissing {
+  @include missing;
+  width: 150px;
+  height: 150px;
+  font-size: 20px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 150px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 150px;
 }

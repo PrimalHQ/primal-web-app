@@ -24,8 +24,11 @@ export const getLegendStats = (pubkey: string | undefined) => {
   ]));
 }
 
-export const humanizeNumber = (number: number) => {
-  if (number < 1000) {
+export const humanizeNumber = (number: number, veryShort = false) => {
+
+  const bottomLimit = veryShort ? 1000 : 10000;
+
+  if (number < bottomLimit) {
     return number.toLocaleString();
   }
 

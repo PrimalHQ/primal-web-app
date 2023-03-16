@@ -5,7 +5,7 @@ import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src: string | undefined,
-  size?: "xxs" | "xs" | "vs" | "sm" | "md" | "lg" | "xl",
+  size?: "xxs" | "xs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
   verified?: string
 }> = (props) => {
 
@@ -18,7 +18,8 @@ const Avatar: Component<{
     sm: styles.smallAvatar,
     md: styles.midAvatar,
     lg: styles.largeAvatar,
-    xl: styles.extraLargeAvatar
+    xl: styles.extraLargeAvatar,
+    xxl: styles.xxlAvatar,
   };
 
   const missingClass = {
@@ -28,7 +29,8 @@ const Avatar: Component<{
     sm: styles.smallMissing,
     md: styles.midMissing,
     lg: styles.largeMissing,
-    xl: styles.extraLargeMissing
+    xl: styles.extraLargeMissing,
+    xxl: styles.xxlMissing,
   };
 
   const imgError = (event: any) => {

@@ -1,24 +1,36 @@
 import { useParams } from '@solidjs/router';
 import { decode } from 'nostr-tools/nip19';
-import { Component, createEffect, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
+import Avatar from '../components/Avatar/Avatar';
 import Branding from '../components/Branding/Branding';
+import Post from '../components/Post/Post';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
+import { date, shortDate } from '../lib/dates';
+import { convertToPosts, getUserFeed, sortByRecency } from '../lib/feed';
 import { hexToNpub } from '../lib/keys';
-import { getUserProfile } from '../lib/profile';
+import { getUserProfile, getUserProfileInfo } from '../lib/profile';
+import { humanizeNumber } from '../lib/stats';
 import { isConnected, socket } from '../sockets';
-import { updateAvailableFeeds } from '../stores/home';
-import { ProfileStoreData } from '../stores/profile';
-import { NostrEvent, NostrEOSE, NostrEventContent } from '../types/primal';
+import { proccessEventContent, removeFromAvailableFeeds, updateAvailableFeeds } from '../stores/home';
+import { ProfileStoreData, truncateNpub } from '../stores/profile';
+import { TrendingNotesData } from '../stores/trending';
+import { NostrEvent, NostrEOSE, NostrEventContent, TrendingNotesStore } from '../types/primal';
 import styles from './Profile.module.scss';
+import defaultAvatar from '../assets/icons/default_nostrich.svg';
 
 const pageId = `user_profile_page_${APP_ID}`;
 
 const initialStore: ProfileStoreData = {
   publicKey: undefined,
   activeUser: undefined,
-}
+  userStats: {
+    follows_count: 0,
+    followers_count: 0,
+    note_count: 0,
+  },
+};
 
 
 const Profile: Component = () => {
@@ -27,30 +39,109 @@ const Profile: Component = () => {
 
   const params = useParams();
 
+  const [mounted, setMounted] = createSignal(false);
+
   const [profile, setProfile] = createStore<ProfileStoreData>({ ...initialStore });
 
-  const proccessUserProfile = (content: NostrEventContent) => {
-    const user = JSON.parse(content.content);
+  const [userNotes, setUserNotes] = createStore<TrendingNotesStore>({
+    users: {},
+    messages: [],
+    notes: [],
+    postStats: {},
+  });
 
-    setProfile('activeUser', () => ({ ...user }));
+  const proccessUserProfile = (content: NostrEventContent) => {
+    if (content.kind === 0) {
+      let user = JSON.parse(content.content);
+
+      user.pubkey = content.pubkey;
+      user.npub =hexToNpub(content.pubkey);
+      user.created_at = content.created_at;
+
+      setProfile('activeUser', () => ({ ...user }));
+      return;
+    }
+
+    if (content.kind === 10000105) {
+      const stats = JSON.parse(content.content);
+
+      setProfile('userStats', () => ({ ...stats }));
+      return;
+    }
+
   }
+
+  const processUserNotes = (type: string, content: NostrEventContent | undefined) => {
+    if (type === 'EOSE') {
+      const newPosts = sortByRecency(convertToPosts({
+        users: userNotes.users,
+        messages: userNotes.messages,
+        postStats: userNotes.postStats,
+      }));
+
+
+      setUserNotes('notes', () => [...newPosts]);
+
+      return;
+    }
+
+    if (type === 'EVENT') {
+      if (content && content.kind === 0) {
+        setUserNotes('users', (users) => ({ ...users, [content.pubkey]: content}))
+      }
+      if (content && (content.kind === 1 || content.kind === 6)) {
+        setUserNotes('messages',  (msgs) => [ ...msgs, content]);
+      }
+      if (content && content.kind === 10000100) {
+        const stat = JSON.parse(content.content);
+        setUserNotes('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+      }
+    }
+  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subId, content] = message;
 
-    if (subId === pageId) {
-      content && proccessUserProfile(content);
+
+    if (subId === `${pageId}_feed`) {
+      processUserNotes(type, content);
+      return;
     }
 
+    if (subId === pageId) {
+      content && proccessUserProfile(content);
+      return;
+    }
+
+
   };
+
+  const getProfileData = (publicKey: string) => {
+    getUserProfileInfo(`${publicKey}`, pageId);
+
+    setUserNotes(() => ({
+      users: {},
+      messages: [],
+      notes: [],
+      postStats: {},
+    }));
+
+    getUserFeed(publicKey, `${pageId}_feed`);
+  }
 
   createEffect(() => {
     if (isConnected()) {
       socket()?.removeEventListener('message', onMessage);
       socket()?.addEventListener('message', onMessage);
       if (!params.npub) {
+        setProfile(() => ({
+          publicKey: context?.data.publicKey,
+          activeUser: {...context?.data.activeUser},
+        }));
+
+        getProfileData(context?.data.publicKey);
         return;
       }
 
@@ -58,8 +149,14 @@ const Profile: Component = () => {
 
       setProfile('publicKey', hex.data);
 
-      getUserProfile(`${hex.data}`, pageId);
+      getProfileData(hex.data);
     }
+  });
+
+  onMount(() => {
+    setTimeout(() => {
+      setMounted(true);
+    }, 0);
   });
 
   onCleanup(() => {
@@ -72,8 +169,18 @@ const Profile: Component = () => {
       hex: profile.publicKey,
       npub: hexToNpub(profile.publicKey),
     };
-    console.log('')
+
     context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds))
+  };
+
+  const removeFromHome = () => {
+    const feed = {
+      name: `${profile.activeUser?.name}'s feed`,
+      hex: profile.publicKey,
+      npub: hexToNpub(profile.publicKey),
+    };
+
+    context?.actions?.setData('availableFeeds', (feeds) => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds))
   };
 
   const hasFeedAtHome = () => {
@@ -81,39 +188,152 @@ const Profile: Component = () => {
     return !!context?.data.availableFeeds.find(f => f.hex === profile.publicKey);
   };
 
-    return (
-      <>
+  const copyNpub = () => {
+    navigator.clipboard.writeText(profile.activeUser?.npub);
+  }
+
+  const imgError = (event: any) => {
+    const image = event.target;
+    image.onerror = "";
+    image.src = defaultAvatar;
+    return true;
+  }
+
+  const rectifyUrl = (url: string) => {
+    if (!url.startsWith('http://') || !url.startsWith('https://')) {
+      return `http://${url}`;
+    }
+
+    return url;
+  }
+
+  return (
+    <>
+      <Show when={mounted()}>
         <Portal
           mount={document.getElementById("branding_holder") as Node}
         >
           <Branding small={false} />
         </Portal>
-        <div id="central_header" class={styles.fullHeader}>
-          <div>
-            Profile of {profile.activeUser?.name}
+      </Show>
+      <div id="central_header" class={styles.fullHeader}>
+        <div class={styles.banner}>
+          <img src={profile.activeUser?.banner || ''} onerror={imgError}/>
+        </div>
+
+        <div class={styles.userImage}>
+          <div class={styles.avatar}>
+            <Avatar src={profile.activeUser?.picture} size="xxl" />
           </div>
         </div>
-        <div class={styles.comingSoon}>
-          Coming soon.
-        </div>
-        <div>
+
+        <div class={styles.profileActions}>
+          <button class={styles.smallSecondaryButton}>
+            <div class={styles.zapIcon}></div>
+          </button>
+          <button class={styles.smallSecondaryButton}>
+            <div class={styles.messageIcon}></div>
+          </button>
           <Show
             when={!hasFeedAtHome()}
-            fallback={<div class={styles.noAdd}>
-              This user's feed is available on your home page
-            </div>}
+            fallback={
+              <button
+                class={styles.smallSecondaryButton}
+                onClick={removeFromHome}
+                title={`remove ${profile.activeUser?.name}'s feed from your home page`}
+              >
+                <div class={styles.removeFeedIcon}></div>
+              </button>
+            }
           >
             <button
-              class={styles.addButton}
+              class={styles.smallPrimaryButton}
               onClick={addToHome}
+              title={`add ${profile.activeUser?.name}'s feed to home page`}
             >
-              <span>+</span>
-              add {profile.activeUser?.name}'s feed to home page
+              <div class={styles.addFeedIcon}></div>
             </button>
           </Show>
+          <button class={styles.primaryButton}>
+            follow
+          </button>
         </div>
-      </>
-    )
+
+        <div class={styles.profileVerification}>
+          <div class={styles.avatarName}>
+            {profile.activeUser?.name}
+            <div class={styles.verifiedIconL}></div>
+          </div>
+          <div class={styles.verificationInfo}>
+            <div class={styles.verifiedIconS}></div>
+            <div>{profile.activeUser?.nip05}</div>
+            <div class={styles.publicKey}>
+              <div class={styles.keyIcon}></div>
+              <button
+                class={styles.npub}
+                title={profile.activeUser?.npub}
+                onClick={copyNpub}
+              >
+                {truncateNpub(profile.activeUser?.npub)}
+                <div class={styles.copyIcon}></div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class={styles.profileAbout}>
+          {profile.activeUser?.about}
+        </div>
+
+        <div class={styles.profileLinks}>
+          <div class={styles.website}>
+            <Show when={profile.activeUser?.website}>
+              <div class={styles.linkIcon}></div>
+              <a href={rectifyUrl(profile.activeUser?.website)} target="_blank">
+                {profile.activeUser?.website}
+              </a>
+            </Show>
+          </div>
+          <div class={styles.joined}>
+            <Show when={profile.activeUser?.created_at}>
+              Joined Nostr on {shortDate(profile.activeUser?.created_at)}
+            </Show>
+          </div>
+        </div>
+
+        <div class={styles.userStats}>
+          <div class={styles.userStat}>
+            <div class={styles.statNumber}>
+              {humanizeNumber(profile.userStats?.follows_count)}
+            </div>
+            <div class={styles.statName}>following</div>
+          </div>
+          <div class={styles.userStat}>
+            <div class={styles.statNumber}>
+              {humanizeNumber(profile.userStats?.followers_count)}
+            </div>
+            <div class={styles.statName}>followers</div>
+          </div>
+          <div class={styles.userStat}>
+            <div class={styles.statNumber}>
+              {humanizeNumber(profile.userStats?.note_count)}
+            </div>
+            <div class={styles.statName}>notes</div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class={styles.userFeed}>
+        <For each={userNotes.notes}>
+          {note => (
+            <Post post={note} />
+          )}
+        </For>
+      </div>
+    </>
+  )
 }
 
 export default Profile;

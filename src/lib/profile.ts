@@ -8,6 +8,14 @@ export const getUserProfile = (pubkey: string, subid: string) => {
   ]));
 }
 
+export const getUserProfileInfo = (pubkey: string, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_profile", { pubkey }]},
+  ]));
+}
+
 
 export const trimVerification = (address: string | undefined) => {
   if (address === undefined) {

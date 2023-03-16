@@ -57,13 +57,13 @@
   }
 
   .solid-select-option:hover {
-    background-color: var(--backround-card);
+    background-color: var(--background-card);
   }
   .solid-select-option[data-focused=true] {
     background-color: unset;
 
     &:hover {
-      background-color: var(--backround-card);
+      background-color: var(--background-card);
     }
   }
   .solid-select-option[data-disabled=true] {
@@ -183,13 +183,13 @@
   }
 
   .solid-select-option:hover {
-    background-color: var(--backround-card);
+    background-color: var(--background-card);
   }
   .solid-select-option[data-focused=true] {
     background-color: unset;
 
     &:hover {
-      background-color: var(--backround-card);
+      background-color: var(--background-card);
     }
   }
   .solid-select-option[data-disabled=true] {

@@ -1,5 +1,5 @@
 .post {
-  background-color: var(--backround-card);
+  background-color: var(--background-card);
   margin-top: 4px;
   display: grid;
   grid-template-columns: 92px 1fr;
@@ -214,7 +214,7 @@
   margin: 0px;
   padding: 0px;
   // background: var(--brand-gradient-vertical);
-  background-color: var(--backround-card);
+  background-color: var(--background-card);
   border-radius: 6px;
   display: block;
   transition: 0.2s padding;

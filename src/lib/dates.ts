@@ -2,6 +2,13 @@
 
 const rtf = new Intl.RelativeTimeFormat('en', { style: 'short' });
 
+export const shortDate = (timestamp: number) => {
+  const date = new Date(timestamp * 1000);
+  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium'});
+
+  return dtf.format(date);
+};
+
 export const date = (postTimestamp: number) => {
   const date = new Date(postTimestamp * 1000);
   const currentTimestamp = Math.floor((new Date()).getTime() / 1000);

@@ -78,9 +78,9 @@ const TrendingNotes: Component = () => {
                             {post.user?.name}
                           </div>
                           <div class={styles.time}>
-                            {humanizeNumber(post.post.zaps)} zaps
+                            {humanizeNumber(post.post.zaps, true)} zaps
                             <span>, </span>
-                            {humanizeNumber(post.post.satszapped)} sats
+                            {humanizeNumber(post.post.satszapped, true)} sats
                           </div>
                         </div>
                         <div class={styles.message}>{post.post?.content}</div>
