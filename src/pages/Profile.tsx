@@ -19,6 +19,7 @@ import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote } from '../types/p
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
+import { useToastContext } from '../components/Toaster/Toaster';
 
 const pageId = `user_profile_page_${APP_ID}`;
 
@@ -41,6 +42,8 @@ const emptyPage: FeedPage = {
 const Profile: Component = () => {
 
   const context = useFeedContext();
+
+  const toaster = useToastContext();
 
   const params = useParams();
 
@@ -195,7 +198,8 @@ const Profile: Component = () => {
       npub: hexToNpub(profile.publicKey),
     };
 
-    context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds))
+    context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
+    toaster?.sendSuccess(`${profile.activeUser?.name}'s feed added to home page`);
   };
 
   const removeFromHome = () => {
@@ -206,6 +210,7 @@ const Profile: Component = () => {
     };
 
     context?.actions?.setData('availableFeeds', (feeds) => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds))
+    toaster?.sendSuccess(`${profile.activeUser?.name}'s feed removed from home page`);
   };
 
   const hasFeedAtHome = () => {
@@ -232,6 +237,10 @@ const Profile: Component = () => {
     return url;
   }
 
+  const onNotImplemented = () => {
+    toaster?.notImplemented();
+  }
+
   return (
     <>
       <Show when={mounted()}>
@@ -253,10 +262,16 @@ const Profile: Component = () => {
         </div>
 
         <div class={styles.profileActions}>
-          <button class={styles.smallSecondaryButton}>
+          <button
+            class={styles.smallSecondaryButton}
+            onClick={onNotImplemented}
+          >
             <div class={styles.zapIcon}></div>
           </button>
-          <button class={styles.smallSecondaryButton}>
+          <button
+            class={styles.smallSecondaryButton}
+            onClick={onNotImplemented}
+          >
             <div class={styles.messageIcon}></div>
           </button>
           <Show
@@ -279,7 +294,10 @@ const Profile: Component = () => {
               <div class={styles.addFeedIcon}></div>
             </button>
           </Show>
-          <button class={styles.primaryButton}>
+          <button
+            class={styles.primaryButton}
+            onClick={onNotImplemented}
+          >
             follow
           </button>
         </div>

@@ -1,17 +1,15 @@
 import { A } from '@solidjs/router';
 import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
-import { style } from 'solid-js/web';
-import { useFeedContext } from '../../contexts/FeedContext';
-import { date } from '../../lib/dates';
 import { truncateNpub } from '../../stores/profile';
 import Avatar from '../Avatar/Avatar';
+import { useToastContext } from '../Toaster/Toaster';
 import { calculateStickyPosition } from '../TrendingNotes/helpers';
 
 import styles from './PeopleList.module.scss';
 
 
 const PeopleList: Component = (props) => {
-  const context = useFeedContext();
+  const toaster = useToastContext();
 
   const people = () => props.people;
 
@@ -24,6 +22,11 @@ const PeopleList: Component = (props) => {
 
   const trimVerification = (address: string) => {
     return address.split('@');
+  }
+
+  const onFollow = (e: MouseEvent) => {
+    e.preventDefault();
+    toaster?.notImplemented();
   }
 
   return (
@@ -64,7 +67,7 @@ const PeopleList: Component = (props) => {
                     </div>
                   </div>
                   <div class={styles.action}>
-                    <button>follow</button>
+                    <button onClick={onFollow} >follow</button>
                   </div>
                 </A>
             }
