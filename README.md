@@ -1,4 +1,4 @@
-### Primal Web Client
+# Primal Web Client
 
 This repo holds the web client of the Primal Nostr.
 
@@ -44,6 +44,8 @@ Followed by the `EOSE` message:
 
 ### FEED (`feed`)
 
+#### Request
+
 Request a feed of notes, whose authors are followed by a user specified by the `pubkey` parameter. Notes in the feed are sorted by creation time.
 
 Available options are:
@@ -69,6 +71,8 @@ Followed by the `EOSE` message:
 
 ### Thread (`thread_vew`)
 
+#### Request
+
 Request a thread of the specific note. It's replies and a note that this note is a reply to (if applicable).
 
 Available options are:
@@ -84,6 +88,8 @@ Example: `["REQ", "some_sub_id", { "cache": ["thread_view", { event_id: "<actual
 Resonse is the similar to the `feed` one.
 
 ### Explore (`explore`)
+
+#### Request
 
 Request notes that adhere to criteria of `scope` and `timeframe`.
 
@@ -116,6 +122,8 @@ Example: `["REQ", "some_sub_id", { "cache": ["feed", { pubkey: "<actual_hex_pubk
 Response is similar to the `feed` one.
 
 ### Stats (`net_stats`)
+
+#### Request
 
 Request a stream of statistics provided by the cache server.
 
