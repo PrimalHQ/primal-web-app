@@ -7,19 +7,17 @@ import Avatar from '../components/Avatar/Avatar';
 import Branding from '../components/Branding/Branding';
 import Post from '../components/Post/Post';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
-import { date, shortDate } from '../lib/dates';
-import { convertToPosts, getFeed, getUserFeed, sortByRecency } from '../lib/feed';
+import { shortDate } from '../lib/dates';
+import { convertToPosts, getUserFeed, sortByRecency } from '../lib/feed';
 import { hexToNpub } from '../lib/keys';
-import { getUserProfile, getUserProfileInfo } from '../lib/profile';
+import { getUserProfileInfo } from '../lib/profile';
 import { humanizeNumber } from '../lib/stats';
 import { isConnected, socket } from '../sockets';
-import { proccessEventContent, removeFromAvailableFeeds, updateAvailableFeeds } from '../stores/home';
+import { removeFromAvailableFeeds, updateAvailableFeeds } from '../stores/home';
 import { ProfileStoreData, truncateNpub } from '../stores/profile';
-import { TrendingNotesData } from '../stores/trending';
-import { NostrEvent, NostrEOSE, NostrEventContent, TrendingNotesStore, PrimalNote } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote } from '../types/primal';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
-// import { emptyPage } from '../constants';
 import Paginator from '../components/Paginator/Paginator';
 
 const pageId = `user_profile_page_${APP_ID}`;
@@ -50,12 +48,7 @@ const Profile: Component = () => {
 
   const [profile, setProfile] = createStore<ProfileStoreData>({ ...initialStore });
 
-  const [userNotes, setUserNotes] = createStore<TrendingNotesStore>({
-    users: {},
-    messages: [],
-    notes: [],
-    postStats: {},
-  });
+  const [userNotes, setUserNotes] = createStore<PrimalNote[]>([]);
 
   const [page, setPage] = createStore({ ...emptyPage });
 
@@ -83,7 +76,7 @@ const Profile: Component = () => {
   }
 
   const loadNextPage = () => {
-    const lastPost = userNotes.notes[userNotes.notes.length - 1];
+    const lastPost = userNotes[userNotes.length - 1];
 
     setOldestPost(() => ({ ...lastPost }));
   };
@@ -107,7 +100,7 @@ const Profile: Component = () => {
     if (type === 'EOSE') {
       const newPosts = sortByRecency(convertToPosts(page));
 
-      setUserNotes('notes', (notes) => [...notes, ...newPosts]);
+      setUserNotes((notes) => [...notes, ...newPosts]);
 
       return;
     }
@@ -115,7 +108,6 @@ const Profile: Component = () => {
     if (type === 'EVENT') {
       if (content && content.kind === 0) {
         setPage('users', (users) => ({ ...users, [content.pubkey]: content}));
-        // setUserNotes('users', (users) => ({ ...users, [content.pubkey]: content}))
       }
       if (content && (content.kind === 1 || content.kind === 6)) {
 
@@ -124,13 +116,10 @@ const Profile: Component = () => {
         }
 
         setPage('messages', (msgs) =>[ ...msgs, content]);
-        // setUserNotes('messages',  (msgs) => [ ...msgs, content]);
       }
       if (content && content.kind === 10000100) {
         const stat = JSON.parse(content.content);
         setPage('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }));
-
-        // setUserNotes('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
       }
     }
   };
@@ -161,12 +150,7 @@ const Profile: Component = () => {
 
     setOldestPost(() => undefined);
 
-    setUserNotes(() => ({
-      users: {},
-      messages: [],
-      notes: [],
-      postStats: {},
-    }));
+    setUserNotes(() => []);
 
     getUserFeed(publicKey, `${pageId}_feed`);
   }
@@ -367,7 +351,7 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
-        <For each={userNotes.notes}>
+        <For each={userNotes}>
           {note => (
             <Post post={note} />
           )}
