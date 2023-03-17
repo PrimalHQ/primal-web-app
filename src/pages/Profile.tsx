@@ -337,11 +337,11 @@ const Profile: Component = () => {
               </a>
             </Show>
           </div>
-          <div class={styles.joined}>
+          {/* <div class={styles.joined}>
             <Show when={profile.activeUser?.created_at}>
               Joined Nostr on {shortDate(profile.activeUser?.created_at)}
             </Show>
-          </div>
+          </div> */}
         </div>
 
         <div class={styles.userStats}>
