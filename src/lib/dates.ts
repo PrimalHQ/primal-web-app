@@ -49,7 +49,7 @@ export const date = (postTimestamp: number) => {
 
   if (diff > minute) {
     const minutes = Math.floor(diff / (60));
-    return { date, label: `${minutes}m` };
+    return { date, label: `${minutes}min` };
   }
 
   return { date, label: `${diff}s` };
