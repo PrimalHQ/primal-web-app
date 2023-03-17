@@ -3,6 +3,7 @@ import { createStore } from 'solid-js/store';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { moveFeedDown, moveFeedUp, removeFromAvailableFeeds, replaceAvailableFeeds } from '../../stores/home';
 import { PrimalFeed } from '../../types/primal';
+import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FeedSorter.module.scss';
 
@@ -13,6 +14,8 @@ const FeedSorter: Component = () => {
 
   const context = useFeedContext();
 
+  const toaster = useToastContext();
+
   const [orderedFeeds, setOrderedFeeds] = createStore<PrimalFeed[]>([]);
 
   const availableFeeds = () => {
@@ -21,6 +24,7 @@ const FeedSorter: Component = () => {
 
   const removeFeed = (feed: PrimalFeed) => {
     context?.actions?.setData('availableFeeds', feeds => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds));
+    toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
   };
 
   const onMoveFeedUp = (feed: PrimalFeed) => {

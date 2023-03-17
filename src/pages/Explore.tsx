@@ -15,6 +15,7 @@ import PageNav from '../components/PageNav/PageNav';
 import { scopeLabels, timeframeLabels } from '../constants';
 import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
 import { updateAvailableFeeds } from '../stores/home';
+import { useToastContext } from '../components/Toaster/Toaster';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -27,6 +28,8 @@ const titleCase = (text: string) => {
 const Explore: Component = () => {
 
   const context = useFeedContext();
+
+  const toaster = useToastContext();
 
     const [mounted, setMounted] = createSignal(false);
 
@@ -54,6 +57,8 @@ const Explore: Component = () => {
       const feed = { name, hex };
 
       context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
+
+      toaster?.sendSuccess(`"${name}" has been added to your home page`);
     };
 
     onMount(() => {
