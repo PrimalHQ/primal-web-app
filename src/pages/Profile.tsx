@@ -1,5 +1,5 @@
 import { useParams } from '@solidjs/router';
-import { decode } from 'nostr-tools/nip19';
+import { decode, noteEncode } from 'nostr-tools/nip19';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
@@ -8,7 +8,7 @@ import Branding from '../components/Branding/Branding';
 import Post from '../components/Post/Post';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { date, shortDate } from '../lib/dates';
-import { convertToPosts, getUserFeed, sortByRecency } from '../lib/feed';
+import { convertToPosts, getFeed, getUserFeed, sortByRecency } from '../lib/feed';
 import { hexToNpub } from '../lib/keys';
 import { getUserProfile, getUserProfileInfo } from '../lib/profile';
 import { humanizeNumber } from '../lib/stats';
@@ -16,9 +16,11 @@ import { isConnected, socket } from '../sockets';
 import { proccessEventContent, removeFromAvailableFeeds, updateAvailableFeeds } from '../stores/home';
 import { ProfileStoreData, truncateNpub } from '../stores/profile';
 import { TrendingNotesData } from '../stores/trending';
-import { NostrEvent, NostrEOSE, NostrEventContent, TrendingNotesStore } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEventContent, TrendingNotesStore, PrimalNote } from '../types/primal';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
+import { emptyPage } from '../constants';
+import Paginator from '../components/Paginator/Paginator';
 
 const pageId = `user_profile_page_${APP_ID}`;
 
@@ -31,6 +33,8 @@ const initialStore: ProfileStoreData = {
     note_count: 0,
   },
 };
+
+
 
 
 const Profile: Component = () => {
@@ -49,6 +53,10 @@ const Profile: Component = () => {
     notes: [],
     postStats: {},
   });
+
+  const [page, setPage] = createStore(emptyPage);
+
+  const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
   const proccessUserProfile = (content: NostrEventContent) => {
     if (content.kind === 0) {
@@ -71,30 +79,55 @@ const Profile: Component = () => {
 
   }
 
+  const loadNextPage = () => {
+    const lastPost = userNotes.notes[userNotes.notes.length - 1];
+
+    setOldestPost(() => ({ ...lastPost }));
+  };
+
+  createEffect(() => {
+    const until = oldestPost()?.post?.created_at || 0;
+
+    if (until > 0) {
+      const pubkey = profile.publicKey;
+
+      if (pubkey) {
+
+        setPage({ messages: [], users: {}, postStats: {} });
+
+        getUserFeed(pubkey, `${pageId}_feed`, until);
+      }
+    }
+  });
+
   const processUserNotes = (type: string, content: NostrEventContent | undefined) => {
     if (type === 'EOSE') {
-      const newPosts = sortByRecency(convertToPosts({
-        users: userNotes.users,
-        messages: userNotes.messages,
-        postStats: userNotes.postStats,
-      }));
+      const newPosts = sortByRecency(convertToPosts(page));
 
-
-      setUserNotes('notes', () => [...newPosts]);
+      setUserNotes('notes', (notes) => [...notes, ...newPosts]);
 
       return;
     }
 
     if (type === 'EVENT') {
       if (content && content.kind === 0) {
-        setUserNotes('users', (users) => ({ ...users, [content.pubkey]: content}))
+        setPage('users', (users) => ({ ...users, [content.pubkey]: content}));
+        // setUserNotes('users', (users) => ({ ...users, [content.pubkey]: content}))
       }
       if (content && (content.kind === 1 || content.kind === 6)) {
-        setUserNotes('messages',  (msgs) => [ ...msgs, content]);
+
+        if (oldestPost()?.post?.noteId === noteEncode(content.id)) {
+          return;
+        }
+
+        setPage('messages', (msgs) =>[ ...msgs, content]);
+        // setUserNotes('messages',  (msgs) => [ ...msgs, content]);
       }
       if (content && content.kind === 10000100) {
         const stat = JSON.parse(content.content);
-        setUserNotes('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+        setPage('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }));
+
+        // setUserNotes('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
       }
     }
   };
@@ -331,6 +364,7 @@ const Profile: Component = () => {
             <Post post={note} />
           )}
         </For>
+        <Paginator loadNextPage={loadNextPage}/>
       </div>
     </>
   )
