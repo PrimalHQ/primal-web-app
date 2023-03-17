@@ -19,7 +19,7 @@ import { TrendingNotesData } from '../stores/trending';
 import { NostrEvent, NostrEOSE, NostrEventContent, TrendingNotesStore, PrimalNote } from '../types/primal';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
-import { emptyPage } from '../constants';
+// import { emptyPage } from '../constants';
 import Paginator from '../components/Paginator/Paginator';
 
 const pageId = `user_profile_page_${APP_ID}`;
@@ -34,8 +34,11 @@ const initialStore: ProfileStoreData = {
   },
 };
 
-
-
+const emptyPage: FeedPage = {
+  users: {},
+  messages: [],
+  postStats: {},
+}
 
 const Profile: Component = () => {
 
@@ -54,7 +57,7 @@ const Profile: Component = () => {
     postStats: {},
   });
 
-  const [page, setPage] = createStore(emptyPage);
+  const [page, setPage] = createStore({ ...emptyPage });
 
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
@@ -154,6 +157,10 @@ const Profile: Component = () => {
   const getProfileData = (publicKey: string) => {
     getUserProfileInfo(`${publicKey}`, pageId);
 
+    setPage(() => ({ ...emptyPage }));
+
+    setOldestPost(() => undefined);
+
     setUserNotes(() => ({
       users: {},
       messages: [],
@@ -168,6 +175,7 @@ const Profile: Component = () => {
     if (isConnected()) {
       socket()?.removeEventListener('message', onMessage);
       socket()?.addEventListener('message', onMessage);
+
       if (!params.npub) {
         setProfile(() => ({
           publicKey: context?.data.publicKey,
