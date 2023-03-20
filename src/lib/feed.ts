@@ -95,6 +95,7 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
 
     const userMeta = JSON.parse(user?.content || '{}');
 
+
     return {
       user: {
         id: user?.id || '',
@@ -119,14 +120,14 @@ export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
         tags: msg.tags,
         content: DOMPurify.sanitize(msg.content),
         sig: msg.sig,
-        likes: stat.likes,
-        mentions: stat.mentions,
-        reposts: stat.reposts,
-        replies: stat.replies,
-        zaps: stat.zaps,
-        score: stat.score,
-        score24h: stat.score24h,
-        satszapped: stat.satszapped,
+        likes: stat?.likes || 0,
+        mentions: stat?.mentions || 0,
+        reposts: stat?.reposts || 0,
+        replies: stat?.replies || 0,
+        zaps: stat?.zaps || 0,
+        score: stat?.score || 0,
+        score24h: stat?.score24h || 0,
+        satszapped: stat?.satszapped || 0,
         noteId: noteEncode(msg.id),
       },
       repost: message.kind === 6 ? getRepostInfo(page, message) : null,
