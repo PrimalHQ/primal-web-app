@@ -3,11 +3,9 @@ import Post from '../components/Post/Post';
 import styles from './Thread.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
-import TrendingPost from '../components/TrendingPost/TrendingPost';
-import HomeHeader from '../components/HomeHeader/HomeHeader';
 import { useParams } from '@solidjs/router';
 import { convertToPosts, getThread, sortByRecency } from '../lib/feed';
-import { FeedStore, NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote } from '../types/primal';
+import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import PrimaryPost from '../components/PrimaryPost/PrimaryPost';
@@ -236,7 +234,7 @@ const Thread: Component = () => {
             post={primaryNote()}
             liked={likedNotes.includes(primaryNote()?.post.id)}
           />
-          <Show when={activeUser()}>
+          <Show when={context?.data.publicKey}>
             <ReplyToNote note={primaryNote()} />
           </Show>
         </div>

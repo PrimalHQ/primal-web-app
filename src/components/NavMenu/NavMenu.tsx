@@ -28,7 +28,7 @@ const NavMenu: Component = (props) => {
           }
         </For>
       </nav>
-      <Show when={context?.data.activeUser}>
+      <Show when={context?.data.publicKey}>
         <div class={styles.callToAction}>
           <ThemeToggle />
         </div>

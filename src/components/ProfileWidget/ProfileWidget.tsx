@@ -9,6 +9,7 @@ import NavMenu from '../NavMenu/NavMenu';
 import Avatar from '../Avatar/Avatar';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { trimVerification } from '../../lib/profile';
+import { hexToNpub } from '../../lib/keys';
 
 const ProfileWidget: Component = () => {
 
@@ -18,7 +19,7 @@ const ProfileWidget: Component = () => {
 
   return (
     <div>
-      <Show when={activeUser()}>
+      <Show when={context?.data.publicKey}>
         <A href="/profile" class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
@@ -28,7 +29,7 @@ const ProfileWidget: Component = () => {
             />
           </div>
           <div class={styles.userInfo}>
-            <div class={styles.userName}>{activeUser()?.name}</div>
+            <div class={styles.userName}>{activeUser()?.name || hexToNpub(context?.data.publicKey)}</div>
             <div class={styles.userVerification}>
               {trimVerification(activeUser()?.nip05)}
             </div>

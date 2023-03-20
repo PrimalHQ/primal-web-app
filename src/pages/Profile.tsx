@@ -323,10 +323,10 @@ const Profile: Component = () => {
               <div class={styles.keyIcon}></div>
               <button
                 class={styles.npub}
-                title={profile.activeUser?.npub}
+                title={profile.activeUser?.npub || hexToNpub(profile.publicKey)}
                 onClick={copyNpub}
               >
-                {truncateNpub(profile.activeUser?.npub)}
+                {truncateNpub(profile.activeUser?.npub || hexToNpub(profile.publicKey))}
                 <div class={styles.copyIcon}></div>
               </button>
             </div>

@@ -65,7 +65,7 @@ const HomeHeader: Component = () => {
   return (
     <div class={styles.fullHeader}>
       <Show
-        when={activeUser()}
+        when={context?.data.publicKey}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
@@ -85,7 +85,7 @@ const HomeHeader: Component = () => {
       <div id="small_header" class={styles.smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
-            when={activeUser()}
+            when={context?.data.publicKey}
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>
