@@ -64,6 +64,8 @@ const ExploreMenu: Component = () => {
   const onSocketClose = (closeEvent: CloseEvent) => {
     const webSocket = closeEvent.target as WebSocket;
 
+    setIsListening(false);
+
     webSocket.removeEventListener('message', onMessage);
     webSocket.removeEventListener('close', onSocketClose);
   };
