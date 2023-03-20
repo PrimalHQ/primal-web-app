@@ -26,6 +26,7 @@ export const connect = () => {
   if (isNotConnected()) {
     // setSocket(new WebSocket('wss://dev.primal.net/cache8'));
     setSocket(new WebSocket(`wss://${window.location.host}/cache8`));
+    console.log('SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);

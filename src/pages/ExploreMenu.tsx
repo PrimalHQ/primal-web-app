@@ -121,23 +121,6 @@ const ExploreMenu: Component = () => {
     stopListeningForNostrStats();
   });
 
-    const boxes = [
-      { scope: 'follows', timeframe: 'latest', icon: followsLatest},
-      { scope: 'tribe', timeframe: 'latest', icon: tribeLatest},
-      { scope: 'network', timeframe: 'latest', icon: networkLatest},
-      { scope: 'global', timeframe: 'latest', icon: globalLatest},
-
-      { scope: 'follows', timeframe: 'trending', icon: followsTrending},
-      { scope: 'tribe', timeframe: 'trending', icon: tribeTrending},
-      { scope: 'network', timeframe: 'trending', icon: networkTrending},
-      { scope: 'global', timeframe: 'trending', icon: globalTrending},
-
-      { scope: 'follows', timeframe: 'popular', icon: followsPopular},
-      { scope: 'tribe', timeframe: 'popular', icon: tribePopular},
-      { scope: 'network', timeframe: 'popular', icon: networkPopular},
-      { scope: 'global', timeframe: 'popular', icon: globalPopular},
-    ];
-
   return (
     <>
       <div class={styles.statsHolder}>
