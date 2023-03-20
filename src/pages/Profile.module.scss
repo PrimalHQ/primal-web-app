@@ -17,10 +17,10 @@
 
 .userImage {
   position: absolute;
-  top: 139px;
+  top: 148px;
   left: 15px;
   .avatar {
-    border: solid 9px var(--background-card);
+    border: solid 4px var(--background-card);
     border-radius: 50%;
     background-color: var(--background-card);
   }
@@ -79,7 +79,8 @@
 .profileActions {
   display: flex;
   justify-content: right;
-  padding-top: 16px;
+  padding-top: 20px;
+  padding-right: 8px;
   padding-bottom: 36px;
 }
 
@@ -91,7 +92,7 @@
   height: 40px;
   border: none;
   border-radius: 6px;
-  margin: 0px 12px;
+  margin: 0px 6px;
   padding: 0px;
 }
 
@@ -189,6 +190,9 @@
     font-size: 12px;
     line-height: 16px;
     margin-top: 10px;
+    .nip05 {
+      margin-right: 36px;
+    }
   }
   .publicKey {
     display: flex;
@@ -198,7 +202,6 @@
     font-weight: 400;
     font-size: 12px;
     line-height: 16px;
-    margin-left: 36px;
 
     .npub {
       color: var(--text-tertiary-2);

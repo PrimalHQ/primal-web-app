@@ -13,6 +13,9 @@ const onOpen = () => {
 const onClose = () => {
   setConnected(false);
 
+  socket()?.removeEventListener('open', onOpen);
+  socket()?.removeEventListener('close', onClose);
+  socket()?.removeEventListener('error', onError);
   setTimeout(() => {
     connect();
   }, 200);

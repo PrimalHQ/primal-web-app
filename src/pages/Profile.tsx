@@ -154,6 +154,9 @@ const Profile: Component = () => {
   };
 
   const getProfileData = (publicKey: string) => {
+
+    setProfile('activeUser', () => undefined);
+
     getUserProfileInfo(`${publicKey}`, pageId);
 
     setPage(() => ({ ...emptyPage }));
@@ -228,7 +231,7 @@ const Profile: Component = () => {
   };
 
   const copyNpub = () => {
-    navigator.clipboard.writeText(profile.activeUser?.npub);
+    navigator.clipboard.writeText(profile.activeUser?.npub || hexToNpub(profile.publicKey));
   }
 
   const imgError = (event: any) => {
@@ -290,6 +293,7 @@ const Profile: Component = () => {
                 class={styles.smallSecondaryButton}
                 onClick={removeFromHome}
                 title={`remove ${profile.activeUser?.name}'s feed from your home page`}
+                disabled={profile.publicKey === context?.data.publicKey}
               >
                 <div class={styles.removeFeedIcon}></div>
               </button>
@@ -313,12 +317,16 @@ const Profile: Component = () => {
 
         <div class={styles.profileVerification}>
           <div class={styles.avatarName}>
-            {profile.activeUser?.name}
-            <div class={styles.verifiedIconL}></div>
+            {profile.activeUser?.name || truncateNpub(hexToNpub(profile.publicKey))}
+            <Show when={profile.activeUser?.nip05}>
+              <div class={styles.verifiedIconL}></div>
+            </Show>
           </div>
           <div class={styles.verificationInfo}>
-            <div class={styles.verifiedIconS}></div>
-            <div>{profile.activeUser?.nip05}</div>
+            <Show when={profile.activeUser?.nip05}>
+              <div class={styles.verifiedIconS}></div>
+              <div class={styles.nip05}>{profile.activeUser?.nip05}</div>
+            </Show>
             <div class={styles.publicKey}>
               <div class={styles.keyIcon}></div>
               <button

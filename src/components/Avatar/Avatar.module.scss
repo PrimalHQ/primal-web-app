@@ -117,8 +117,8 @@
 
 .xxlAvatar {
   @include avatar;
-  width: 150px;
-  height: 150px;
+  width: 142px;
+  height: 142px;
 
   .iconBackground {
     @include iconBackground;
@@ -200,9 +200,9 @@
 
 .xxlMissing {
   @include missing;
-  width: 150px;
-  height: 150px;
+  width: 142px;
+  height: 142px;
   font-size: 20px;
-  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 150px;
-  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 150px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 142px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 142px;
 }

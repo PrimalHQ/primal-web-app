@@ -48,8 +48,8 @@ export const getRepostInfo = (page: FeedPage, message: NostrPostContent) => {
   return {
     user: {
       id: user?.id || '',
-      pubkey: user?.pubkey || msg.pubkey,
-      npub: hexToNpub(user?.pubkey || msg.pubkey),
+      pubkey: user?.pubkey || message.pubkey,
+      npub: hexToNpub(user?.pubkey || message.pubkey),
       name: userMeta.name || user?.pubkey,
       about: userMeta.about,
       picture: userMeta.picture,
