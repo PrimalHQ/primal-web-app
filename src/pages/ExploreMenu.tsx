@@ -61,7 +61,12 @@ const ExploreMenu: Component = () => {
 
   const context = useFeedContext();
 
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
 
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
 
   const onMessage = (event: MessageEvent) => {
 
@@ -89,6 +94,7 @@ const ExploreMenu: Component = () => {
   createEffect(() => {
     if (isConnected()) {
       socket()?.addEventListener('message', onMessage);
+      socket()?.addEventListener('close', onSocketClose);
 
       if (!isListening()) {
         startListeningForNostrStats();

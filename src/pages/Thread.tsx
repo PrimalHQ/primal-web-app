@@ -62,6 +62,13 @@ const Thread: Component = () => {
     setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
   };
 
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
+
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
@@ -180,6 +187,7 @@ const Thread: Component = () => {
 	createEffect(() => {
     if (isConnected()) {
       socket()?.addEventListener('message', onMessage);
+      socket()?.addEventListener('close', onSocketClose);
       if (postId()) {
         context?.actions?.clearThreadedNotes();
         setIsFetching(true);

@@ -28,6 +28,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   createEffect(() => {
     if (isConnected()) {
       socket()?.addEventListener('message', onMessage);
+      socket()?.addEventListener('close', onSocketClose);
 
       context?.actions?.clearExploredNotes();
 
@@ -45,6 +46,13 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   onCleanup(() => {
     socket()?.removeEventListener('message', onMessage);
   });
+
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);

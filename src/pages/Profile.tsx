@@ -127,6 +127,13 @@ const Profile: Component = () => {
     }
   };
 
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
+
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
@@ -161,7 +168,9 @@ const Profile: Component = () => {
   createEffect(() => {
     if (isConnected()) {
       socket()?.removeEventListener('message', onMessage);
+      socket()?.removeEventListener('close', onSocketClose);
       socket()?.addEventListener('message', onMessage);
+      socket()?.addEventListener('close', onSocketClose);
 
       if (!params.npub) {
         setProfile(() => ({

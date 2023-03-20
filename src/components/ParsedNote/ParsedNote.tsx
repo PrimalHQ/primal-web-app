@@ -55,7 +55,15 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
   createEffect(() => {
     socket()?.addEventListener('message', onMessage);
+    socket()?.addEventListener('close', onSocketClose);
   });
+
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);

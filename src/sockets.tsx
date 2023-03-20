@@ -20,10 +20,6 @@ const onClose = () => {
 
 const onError = (error: Event) => {
   console.log("ws error: ", error);
-
-  setTimeout(() => {
-    connect();
-  }, 200);
 };
 
 export const connect = () => {

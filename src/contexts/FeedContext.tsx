@@ -257,6 +257,12 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   // MESSAGE LISTENERS ------------------------------------
 
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    webSocket.removeEventListener('message', onMessage);
+    webSocket.removeEventListener('close', onSocketClose);
+  };
 
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
@@ -329,7 +335,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   createEffect(() => {
     if (isConnected()) {
       socket()?.removeEventListener('message', onMessage);
+      socket()?.removeEventListener('close', onSocketClose);
       socket()?.addEventListener('message', onMessage);
+      socket()?.addEventListener('close', onSocketClose);
 
       setData('posts', () => []);
       setData('scrollTop', () => 0);
@@ -379,6 +387,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   onCleanup(() => {
     socket()?.removeEventListener('message', onMessage);
+    socket()?.removeEventListener('close', onSocketClose);
     // document.removeEventListener('visibilitychange', onVisibilityChange);
     for (let i=0; i < relays.length; i++) {
       const rel = relays[i];
