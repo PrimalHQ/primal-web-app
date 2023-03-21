@@ -5,7 +5,7 @@ import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import Avatar from '../components/Avatar/Avatar';
 import Branding from '../components/Branding/Branding';
-import Post from '../components/Post/Post';
+import Note from '../components/Note/Note';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { shortDate } from '../lib/dates';
 import { convertToPosts, getUserFeed, sortByRecency } from '../lib/feed';
@@ -388,7 +388,7 @@ const Profile: Component = () => {
       <div class={styles.userFeed}>
         <For each={userNotes}>
           {note => (
-            <Post post={note} />
+            <Note note={note} />
           )}
         </For>
         <Paginator loadNextPage={loadNextPage}/>

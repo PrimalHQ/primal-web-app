@@ -42,6 +42,13 @@
   }
 }
 
+@media only screen and (max-width: 720px) {
+  .footer {
+    width: calc(100vw - 92px);
+    grid-column-gap: 30px;
+  }
+}
+
 @mixin statIcon {
   width: 16px;
   height: 16px;
@@ -50,24 +57,24 @@
 
 .likeIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/like.svg) no-repeat center;
-  mask: url(../../assets/icons/like.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/like.svg) no-repeat center;
+  mask: url(../../../assets/icons/like.svg) no-repeat center;
 }
 
 .replyIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/reply.svg) no-repeat center;
-  mask: url(../../assets/icons/reply.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/reply.svg) no-repeat center;
+  mask: url(../../../assets/icons/reply.svg) no-repeat center;
 }
 
 .repostIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
-  mask: url(../../assets/icons/reposts.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/reposts.svg) no-repeat center;
+  mask: url(../../../assets/icons/reposts.svg) no-repeat center;
 }
 
 .zapIcon {
   @include statIcon;
-  -webkit-mask: url(../../assets/icons/zaps.svg) no-repeat center;
-  mask: url(../../assets/icons/zaps.svg) no-repeat center;
+  -webkit-mask: url(../../../assets/icons/zaps.svg) no-repeat center;
+  mask: url(../../../assets/icons/zaps.svg) no-repeat center;
 }

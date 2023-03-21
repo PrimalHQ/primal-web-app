@@ -1,5 +1,5 @@
 import { Component, createEffect, createResource, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
-import Post from '../components/Post/Post';
+import Note from '../components/Note/Note';
 import styles from './Home.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
@@ -66,9 +66,9 @@ const Home: Component = () => {
           when={context?.data?.posts && context.data.posts.length > 0}
         >
           <For each={context?.data?.posts} >
-            {(post) => {
-              return <Post
-                post={post}
+            {(note) => {
+              return <Note
+                note={note}
               />
             }}
           </For>

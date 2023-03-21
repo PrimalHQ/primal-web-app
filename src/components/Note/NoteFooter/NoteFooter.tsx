@@ -1,18 +1,16 @@
 import { A, Navigate } from '@solidjs/router';
 import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
 import type { Component } from 'solid-js';
-import { PrimalNote } from '../../types/primal';
-import Avatar from '../Avatar/Avatar';
-import { sendLike, likedNotes, sendRepost } from '../../lib/posts';
+import { PrimalNote } from '../../../types/primal';
+import Avatar from '../../Avatar/Avatar';
+import { sendLike, likedNotes, sendRepost } from '../../../lib/posts';
 
-import styles from './PostFooter.module.scss';
-import { useFeedContext } from '../../contexts/FeedContext';
+import styles from './NoteFooter.module.scss';
+import { useFeedContext } from '../../../contexts/FeedContext';
 
-const PostFooter: Component<{ note: PrimalNote}> = (props) => {
+const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const context = useFeedContext();
-
-  const user = () => props.note.user;
 
   const liked = () => likedNotes.includes(props.note.post.id);
 
@@ -50,4 +48,4 @@ const PostFooter: Component<{ note: PrimalNote}> = (props) => {
   )
 }
 
-export default PostFooter;
+export default NoteFooter;

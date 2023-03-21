@@ -1,5 +1,5 @@
 import { Component, createEffect, createResource, createSignal, For, Index, Match, on, onCleanup, onMount, Show, Switch, useContext } from 'solid-js';
-import Post from '../components/Post/Post';
+import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
@@ -8,7 +8,7 @@ import { convertToPosts, getThread, sortByRecency } from '../lib/feed';
 import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
-import PrimaryPost from '../components/PrimaryPost/PrimaryPost';
+import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
@@ -219,8 +219,8 @@ const Thread: Component = () => {
         <For each={parentNotes}>
           {note =>
             <div class={styles.threadList}>
-              <Post
-                post={note}
+              <Note
+                note={note}
               />
             </div>
           }
@@ -229,8 +229,8 @@ const Thread: Component = () => {
 
       <Show when={primaryNote()}>
         <div id="primary_note" class={styles.threadList}>
-          <PrimaryPost
-            post={primaryNote()}
+          <NotePrimary
+            note={primaryNote()}
           />
           <Show when={context?.data.publicKey}>
             <ReplyToNote note={primaryNote()} />
@@ -246,9 +246,8 @@ const Thread: Component = () => {
           <For each={replies}>
             {note =>
               <div class={styles.threadList}>
-                <Post
-                  post={note}
-                  liked={likedNotes.includes(note.post.id)}
+                <Note
+                  note={note}
                 />
               </div>
             }

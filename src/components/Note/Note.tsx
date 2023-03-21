@@ -10,19 +10,17 @@ import { isConnected, socket } from '../../sockets';
 import { NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
-import PostFooter from '../PostFooter/PostFooter';
-import PostHeader from '../PostHeader/PostHeader';
+import NoteFooter from './NoteFooter/NoteFooter';
+import NoteHeader from './NoteHeader/NoteHeader';
 
-import styles from './Post.module.scss';
+import styles from './Note.module.scss';
 
-const Post: Component<{ post: PrimalNote }> = (props) => {
+const Note: Component<{ note: PrimalNote }> = (props) => {
 
-  const context = useFeedContext();
-
-  const repost = () => props.post.repost;
+  const repost = () => props.note.repost;
 
   return (
-    <A class={styles.postLink} href={`/thread/${props.post?.post.noteId}`}>
+    <A class={styles.postLink} href={`/thread/${props.note?.post.noteId}`}>
       <Show when={repost()}>
         <div class={styles.repostedBy}>
           <div class={styles.repostIcon}></div>
@@ -37,31 +35,31 @@ const Post: Component<{ post: PrimalNote }> = (props) => {
       <div class={styles.post}>
         <div
           class={styles.avatar}
-          title={props.post?.user?.npub}
+          title={props.note?.user?.npub}
         >
           <A
-            href={`/profile/${props.post.user.npub}`}
+            href={`/profile/${props.note.user.npub}`}
           >
             <Avatar
-              src={props.post?.user?.picture}
+              src={props.note?.user?.picture}
               size="md"
-              verified={props.post?.user?.nip05}
+              verified={props.note?.user?.nip05}
             />
           </A>
-          <div class={styles.avatarName}>{props.post?.user?.name}</div>
+          <div class={styles.avatarName}>{props.note?.user?.name}</div>
         </div>
         <div class={styles.content}>
-          <PostHeader note={props.post} />
+          <NoteHeader note={props.note} />
 
           <div class={styles.message}>
-            <ParsedNote note={props.post} />
+            <ParsedNote note={props.note} />
           </div>
 
-          <PostFooter note={props.post} />
+          <NoteFooter note={props.note} />
         </div>
       </div>
     </A>
   )
 }
 
-export default Post;
+export default Note;

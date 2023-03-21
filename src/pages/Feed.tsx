@@ -4,7 +4,7 @@ import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { useParams } from '@solidjs/router';
 import { isConnected, socket } from '../sockets';
 import { convertToPosts, getExploreFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from '../lib/feed';
-import Post from '../components/Post/Post';
+import Note from '../components/Note/Note';
 import { NostrEvent, NostrEOSE, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import Loader from '../components/Loader/Loader';
@@ -133,9 +133,9 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         fallback={<Loader />}
       >
         <For each={context?.data.exploredNotes} >
-          {(post) => {
-            return <Post
-              post={post}
+          {(note) => {
+            return <Note
+              note={note}
             />
           }}
         </For>
