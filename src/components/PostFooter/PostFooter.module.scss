@@ -1,0 +1,73 @@
+.footer {
+  display: grid;
+  grid-template-columns: 36px 36px 36px 36px;
+  grid-template-rows: 1fr;
+  grid-column-gap: 60px;
+
+  .stat {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 5px;
+    font-size: 14px;
+    line-height: 16px;
+    align-items: center;
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    background-color: unset;
+    &:disabled, &[disabled] {
+      .replyIcon, .likeIcon, .repostIcon {
+        background-color: var(--accent-1);
+      }
+      .statNumber {
+        color: var(--accent-1);
+      }
+    }
+    &:focus {
+      box-shadow: none;
+    }
+    .statNumber {
+      color: var(--text-secondary);
+    }
+
+    &:hover {
+      .replyIcon, .likeIcon, .repostIcon {
+        background-color: var(--text-secondary);
+      }
+      .statNumber {
+        color: var(--text-primary);
+      }
+    }
+  }
+}
+
+@mixin statIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-tertiary-2);
+}
+
+.likeIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/like.svg) no-repeat center;
+  mask: url(../../assets/icons/like.svg) no-repeat center;
+}
+
+.replyIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/reply.svg) no-repeat center;
+  mask: url(../../assets/icons/reply.svg) no-repeat center;
+}
+
+.repostIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/reposts.svg) no-repeat center;
+  mask: url(../../assets/icons/reposts.svg) no-repeat center;
+}
+
+.zapIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/zaps.svg) no-repeat center;
+  mask: url(../../assets/icons/zaps.svg) no-repeat center;
+}

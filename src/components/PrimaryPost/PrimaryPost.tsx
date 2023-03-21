@@ -6,6 +6,8 @@ import { sendLike, sendRepost } from '../../lib/posts';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
+import PostFooter from '../PostFooter/PostFooter';
+import PostHeader from '../PostHeader/PostHeader';
 
 import styles from './PrimaryPost.module.scss';
 
@@ -53,56 +55,13 @@ const PrimaryPost: Component<{ post: PrimalNote }> = (props) => {
           <div class={styles.avatarName}>{props.post?.user?.name}</div>
         </div>
         <div class={styles.content}>
-          <div class={styles.header}>
-            <span class={styles.postInfo}>
-              <span class={styles.userInfo}>
-                <span class={styles.userName}>
-                  {props.post?.user?.name}
-                </span>
-                <Switch>
-                  <Match when={props.post?.user?.nip05}>
-                    <span class={styles.verifiedIcon} />
-                    <span
-                      class={styles.verifiedBy}
-                      title={props.post?.user?.nip05}
-                    >
-                      {trimVerification(props.post?.user?.nip05)}
-                    </span>
-                  </Match>
-                </Switch>
-              </span>
-              <span
-                class={styles.time}
-                title={date(props.post?.post?.created_at).date.toLocaleString()}
-              >
-                {date(props.post?.post?.created_at).label}
-              </span>
-            </span>
-            <div class={styles.contextMenu}>...</div>
-          </div>
+          <PostHeader note={props.post} />
 
           <div class={styles.message}>
             <ParsedNote note={props.post} />
           </div>
 
-          <div class={styles.footer}>
-            <div class={styles.stat}>
-              <div class={styles.replyIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.replies || ''}</div>
-            </div>
-            <button class={styles.stat} onClick={doLike} disabled={props.liked}>
-              <div class={styles.likeIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.likes || ''}</div>
-            </button>
-            <button class={styles.stat} onClick={doRepost}>
-              <div class={styles.repostIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.reposts || ''}</div>
-            </button>
-            <div class={styles.stat}>
-              <div class={styles.zapIcon}></div>
-              <div class={styles.statNumber}>{props.post?.post?.satszapped || ''}</div>
-            </div>
-          </div>
+          <PostFooter note={props.post} />
         </div>
       </div>
     </div>

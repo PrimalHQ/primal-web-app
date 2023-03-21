@@ -1,0 +1,65 @@
+.header {
+  grid-area: header;
+  align-items: center;
+  color: var(--text-tertiary-2);
+  display: flex;
+  justify-content: space-between;
+
+  .postInfo {
+    display: flex;
+    justify-content: flex-start;
+
+    .userInfo {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      font-size: 14px;
+      line-height: 16px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+    }
+
+    .time{
+      margin: 0px 2px;
+      min-width: 40px;
+      font-size: 14px;
+      line-height: 16px;
+      font-weight: 400;
+      &::before {
+        content: "|";
+        padding: 0px 2px;
+      }
+    }
+  }
+
+
+  .contextMenu {
+    min-width: 5px;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+  }
+
+}
+
+.verifiedIcon {
+  width: 13px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
+  mask: url(../../assets/icons/verified.svg) no-repeat center;
+}
+
+.contextIcon {
+  display: inline-block;
+  width: 10px;
+  height: 2px;
+  vertical-align: middle;
+
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}

@@ -221,7 +221,6 @@ const Thread: Component = () => {
             <div class={styles.threadList}>
               <Post
                 post={note}
-                liked={likedNotes.includes(note.post.id)}
               />
             </div>
           }
@@ -232,7 +231,6 @@ const Thread: Component = () => {
         <div id="primary_note" class={styles.threadList}>
           <PrimaryPost
             post={primaryNote()}
-            liked={likedNotes.includes(primaryNote()?.post.id)}
           />
           <Show when={context?.data.publicKey}>
             <ReplyToNote note={primaryNote()} />

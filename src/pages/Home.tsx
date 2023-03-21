@@ -69,7 +69,6 @@ const Home: Component = () => {
             {(post) => {
               return <Post
                 post={post}
-                liked={likedNotes.includes(post.post.id)}
               />
             }}
           </For>

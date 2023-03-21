@@ -136,7 +136,6 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
           {(post) => {
             return <Post
               post={post}
-              liked={likedNotes.includes(post.post.id)}
             />
           }}
         </For>
