@@ -17,7 +17,7 @@ import { truncateNpub } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 
 
-const tokenRegex = /(\#\[[\d]\])/;
+const tokenRegex = /(\#\[[\d]+\])/;
 
 const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
 
@@ -32,7 +32,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
   createEffect(() => {
     const newContent = parseNote(props.note, props.ignoreMentionedNotes);
     setContent(newContent);
-    setPrintableContent(() => newContent.split(/(\#\[[\d]\])/));
+    setPrintableContent(() => newContent.split(tokenRegex));
   });
 
   createEffect(() => {
