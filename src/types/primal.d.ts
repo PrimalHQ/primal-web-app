@@ -1,15 +1,15 @@
 import { Relay } from "nostr-tools";
 import { SetStoreFunction } from "solid-js/store";
 
-export type NostrPostContent = {
-  kind: 1,
+export type NostrNoteContent = {
+  kind: 1 | 6,
   content: string,
   id: string,
   created_at: number,
   pubkey: string,
   sig: string,
   tags: string[][],
-} | {};
+};
 
 export type NostrUserContent = {
   kind: 0,
@@ -19,14 +19,21 @@ export type NostrUserContent = {
   pubkey: string,
   sig: string,
   tags: string[][],
-} | {};
+};
 
 export type NostrStatsContent = {
   kind: 10000100,
   content: string,
-} | {};
+  pubkey?: string,
+};
 
-export type NostrEventContent = NostrPostContent | NostrUserContent | NostrStatsContent;
+export type NostrMentionContent = {
+  kind: 10000107,
+  content: string,
+  pubkey?: string,
+};
+
+export type NostrEventContent = NostrNoteContent | NostrUserContent | NostrStatsContent | NostrMentionContent;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -72,7 +79,7 @@ export type FeedPage = {
   users: {
     [pubkey: string]: NostrUserContent,
   },
-  messages: NostrPostContent[],
+  messages: NostrNoteContent[],
   postStats: NostrPostStats,
 };
 
@@ -80,7 +87,7 @@ export type TrendingNotesStore = {
   users: {
     [pubkey: string]: NostrUserContent,
   },
-  messages: NostrPostContent[],
+  messages: NostrNoteContent[],
   notes: PrimalNote[],
   postStats: NostrPostStats,
 };
@@ -111,7 +118,7 @@ export type PrimalContextStore = {
     setActiveUser: (user: PrimalUser) => void,
     updatedFeedScroll: (scrollTop: number) => void,
     proccessEventContent: (
-      content: NostrUserContent | NostrPostContent | NostrStatsContent,
+      content: NostrUserContent | NostrNoteContent | NostrStatsContent,
       type: string
     ) => void,
   },
@@ -186,8 +193,8 @@ export type PrimalNote = {
     satszapped: number,
     noteId: string,
   },
-  repost: NostrPostContent,
-  msg: NostrPostContent,
+  repost?: PrimalRepost,
+  msg: NostrNoteContent,
 };
 
 export type PrimalFeed = {
@@ -229,4 +236,40 @@ export type PrimalLegend = {
 export type FeedOption = {
   label: string,
   value: string | undefined,
+};
+
+type PrimalRepost = {
+  user: PrimalUser,
+}
+
+type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
+
+type ExploreFeedPayload = {
+  timeframe: string,
+  scope: string,
+  limit: number,
+  pubkey?: string,
+  since? : number,
+  until?: number,
+}
+
+type UserReference = {
+  id: string,
+  pubkey: string,
+  kind: number,
+  tags: string[][],
+  npub?: string,
+  name?: string,
+  about?: string,
+  picture?: string,
+  nip05?: string,
+  banner?: string,
+  display_name?: string,
+  location?: string,
+  lud06?: string,
+  lud16?: string,
+  website?: string,
+  content?: string,
+  created_at?: number,
+  sig?: string,
 };

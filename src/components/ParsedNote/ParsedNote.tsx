@@ -3,37 +3,19 @@ import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show, Switch, Match } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { date } from '../../lib/dates';
-import { convertToPosts } from '../../lib/feed';
+import { convertToPosts } from '../../stores/note';
 import { hexToNpub } from '../../lib/keys';
 import { parseNote } from '../../lib/posts';
 import { trimVerification } from '../../lib/profile';
 import { socket } from '../../sockets';
 import { TrendingNotesStore } from '../../stores/trending';
-import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
+import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser, UserReference } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ParsedNote.module.scss';
+import { truncateNpub } from '../../stores/profile';
+import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 
-type UserRefference = {
-  id: string,
-  pubkey: string,
-  npub: string,
-  name: string,
-  about: string,
-  picture: string,
-  nip05: string,
-  banner: string,
-  display_name: string,
-  location?: string,
-  lud06: string,
-  lud16: string,
-  website: string,
-  tags: string[][],
-  content?: string,
-  created_at?: number,
-  kind?: string,
-  sig?: string,
-};
 
 const tokenRegex = /(\#\[[\d]\])/;
 
@@ -41,7 +23,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
   const [content, setContent] = createSignal<string>('');
 
-  const [references, setReferences] = createStore<Record<string, UserRefference | PrimalNote>>({});
+  const [references, setReferences] = createStore<Record<string, UserReference | PrimalNote>>({});
 
   const [printableContent, setPrintableContent] = createStore<any[]>([]);
 
@@ -80,7 +62,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
       const user = JSON.parse(userContent?.content || '{}') as NostrUserContent;
 
-      const u: UserRefference = {
+      const u: UserReference = {
         ...userContent,
         ...user,
         npub: hexToNpub(userContent.pubkey),
@@ -108,7 +90,8 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
           const mentionedNote = newPosts.find(note => note.post.noteId === mentionId);
 
           if (mentionedNote) {
-            setReferences(refs => ({...refs, [ref]: mentionedNote}));          }
+            setReferences(refs => ({...refs, [ref]: mentionedNote}));
+          }
         }
 
         return;
@@ -143,6 +126,13 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     socket()?.removeEventListener('message', onMessage);
   });
 
+  const isUserReference = (reference: any): reference is UserReference => {
+    return reference.npub !== undefined;
+  }
+  const isNoteReference = (reference: any): reference is PrimalNote => {
+    return reference.post !== undefined;
+  }
+
   const referenceInfo = (token: string) => {
     const regex = /\#\[([0-9]*)\]/g;
 
@@ -157,62 +147,25 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
       for(let i =0; i < refs.length; i++) {
         let r = refs[i];
         const reference = references[r];
-        if (reference) {
-          if (reference.name) {
-            return (
-              <A href={`/profile/${reference.npub}`} class={styles.mentionedUser}>
-                @{reference.name}
-              </A>
-            );
-          }
 
-          if (reference.post) {
-            return (
-              <A
-                href={`/thread/${reference.post.noteId}`}
-                class={styles.mentionedNote}
-              >
-                <div class={styles.mentionedNoteHeader}>
-                  <Avatar
-                    src={reference.user.picture}
-                    size="xxs"
-                  />
-                  <span class={styles.postInfo}>
-                    <span class={styles.userInfo}>
-                      <span class={styles.userName}>
-                        {reference.user.name}
-                      </span>
-                      <Show when={reference.user.nip05} >
-                        <span class={styles.verifiedIcon} />
-                        <span
-                          class={styles.verifiedBy}
-                          title={reference.user.nip05}
-                        >
-                          {trimVerification(reference.user.nip05)}
-                        </span>
-                      </Show>
-                    </span>
+        if (reference ===  undefined) {
+          return <span>{token}</span>
+        }
 
-                    <span
-                      class={styles.time}
-                      title={date(reference.post.created_at).date.toLocaleString()}
-                    >
-                      {date(reference.post.created_at).label}
-                    </span>
-                  </span>
-                </div>
-                <ParsedNote
-                  note={reference}
-                  ignoreMentionedNotes={true}
-                />
-              </A>
-            );
-          }
+        if (isUserReference(reference)) {
+          return (
+            <A href={`/profile/${reference.npub}`} class={styles.mentionedUser}>
+              @{reference.name || truncateNpub(reference.npub || '')}
+            </A>
+          );
+        }
+
+        if (isNoteReference(reference)) {
+          return <EmbeddedNote note={reference} />;
         }
       }
     }
 
-    return <span>{token}</span>
   }
 
   return (

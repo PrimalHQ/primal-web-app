@@ -3,12 +3,20 @@ import styles from './Feed.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { useParams } from '@solidjs/router';
 import { isConnected, socket } from '../sockets';
-import { convertToPosts, getExploreFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from '../lib/feed';
+import {
+  getExploreFeed,
+} from '../lib/feed';
+import {
+  convertToPosts,
+  sortByRecency,
+  sortByScore,
+  sortByScore24h,
+  sortByZapped,
+} from '../stores/note';
 import Note from '../components/Note/Note';
-import { NostrEvent, NostrEOSE, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEventContent, NostrNoteContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import Loader from '../components/Loader/Loader';
-import { likedNotes } from '../lib/posts';
 
 const Feed: Component<{ scope: string, timeframe: string}> = () => {
 
@@ -78,7 +86,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   }
 
 
-  const proccessPost = (post: NostrPostContent) => {
+  const proccessPost = (post: NostrNoteContent) => {
     setNotes('messages', (msgs) => [ ...msgs, {...post}]);
   };
 

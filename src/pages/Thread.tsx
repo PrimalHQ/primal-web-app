@@ -4,8 +4,9 @@ import styles from './Thread.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
 import { useParams } from '@solidjs/router';
-import { convertToPosts, getThread, sortByRecency } from '../lib/feed';
-import { NostrEOSE, NostrEvent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalNote } from '../types/primal';
+import { getThread } from '../lib/feed';
+import { convertToPosts, sortByRecency } from '../stores/note';
+import { FeedPage, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
@@ -39,19 +40,17 @@ const Thread: Component = () => {
 
   const [isFetching, setIsFetching] = createSignal(false);
 
-  const [page, setPage] = createStore({
+  const [page, setPage] = createStore<FeedPage>({
     users: {},
     messages: [],
     postStats: {},
   });
 
-  const activeUser = () => context?.data.activeUser;
-
-  const proccessPost = (post: NostrPostContent) => {
+  const proccessPost = (post: NostrNoteContent) => {
     setPage('messages', (msgs) => [ ...msgs, post]);
   };
 
-  const proccessUser = (user: NostrUserCosetParentNotesntent) => {
+  const proccessUser = (user: NostrUserContent) => {
     setPage('users', (users ) => ({ ...users, [user.pubkey]: user}))
   };
 
@@ -128,14 +127,14 @@ const Thread: Component = () => {
     });
   });
 
-  const unique = (value, index, self) => {
-    return self.indexOf(value) === index
-  }
-
   const posts = () => [ primaryNote(), ...parentNotes, ...replies];
 
-  const people = () => posts().reduce((acc, p) => {
-    const user = p?.user;
+  const people = () => posts().reduce((acc: PrimalUser[], p: PrimalNote | undefined) => {
+    if (!p) {
+      return acc;
+    }
+
+    const user = p.user;
     if (user && acc.find(u => u && user.pubkey === u.pubkey)) {
       return acc;
     }
@@ -230,10 +229,10 @@ const Thread: Component = () => {
       <Show when={primaryNote()}>
         <div id="primary_note" class={styles.threadList}>
           <NotePrimary
-            note={primaryNote()}
+            note={primaryNote() as PrimalNote}
           />
           <Show when={context?.data.publicKey}>
-            <ReplyToNote note={primaryNote()} />
+            <ReplyToNote note={primaryNote() as PrimalNote} />
           </Show>
         </div>
       </Show>

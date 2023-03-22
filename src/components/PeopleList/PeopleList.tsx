@@ -1,6 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
 import { truncateNpub } from '../../stores/profile';
+import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import { useToastContext } from '../Toaster/Toaster';
 import { calculateStickyPosition } from '../TrendingNotes/helpers';
@@ -8,7 +9,7 @@ import { calculateStickyPosition } from '../TrendingNotes/helpers';
 import styles from './PeopleList.module.scss';
 
 
-const PeopleList: Component = (props) => {
+const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
   const toaster = useToastContext();
 
   const people = () => props.people;

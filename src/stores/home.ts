@@ -1,7 +1,7 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
 import { emptyPage } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import {FeedPage, FeedStore, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, PrimalFeed, PrimalNote, PrimalUser } from "../types/primal";
+import {FeedPage, FeedStore, NostrEventContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalFeed, PrimalNote, PrimalUser } from "../types/primal";
 import { initialStore } from "../constants";
 
 export type FeedStore2 = {
@@ -153,7 +153,7 @@ export const moveFeedDown = (pubKey: string | undefined, feed, feeds) => {
 // Processing
 // TODO: Move to it's own file
 
-const proccessPost = (post: NostrPostContent) => {
+const proccessPost = (post: NostrNoteContent) => {
   if (homeFeed.oldestNote?.post?.id === post.id) {
     return;
   }

@@ -1,6 +1,6 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { sortByScore24h, convertToPosts } from "../lib/feed";
-import { NostrPostContent, NostrUserContent, NostrStatsContent, FeedPage, PrimalNote, NostrEventContent } from "../types/primal";
+import { sortByScore24h, convertToPosts } from "../stores/note";
+import { NostrNoteContent, NostrUserContent, NostrStatsContent, FeedPage, PrimalNote, NostrEventContent } from "../types/primal";
 
 export type TrendingNotesData = FeedPage & { notes: PrimalNote[]};
 
@@ -14,7 +14,7 @@ export const emptyNotes: TrendingNotesData = {
 export const [trendingNotes, setTrendingNotes] =
   createStore<TrendingNotesData>(emptyNotes);
 
-const proccessNote = (post: NostrPostContent) => {
+const proccessNote = (post: NostrNoteContent) => {
   setTrendingNotes('messages', (msgs) => [ ...msgs, post]);
 };
 

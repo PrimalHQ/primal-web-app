@@ -5,8 +5,7 @@ import type {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
-  NostrPostContent,
-  NostrRelays,
+  NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
   NostrWindow,
@@ -14,22 +13,24 @@ import type {
   PrimalFeed,
   PrimalNote,
   PrimalUser,
-  TrendingNotesStore,
 } from '../types/primal';
-import { convertToPosts, getExploreFeed, getFeed, sortByRecency, sortByScore, sortByScore24h, sortByZapped } from "../lib/feed";
+import {
+  convertToPosts,
+  sortByRecency,
+  sortByScore,
+  sortByScore24h,
+  sortByZapped,
+} from "../stores/note";
+import { getExploreFeed, getFeed,  } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { initialStore, emptyPage, trendingFeed } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
-import { render, renderToString } from "solid-js/web";
-import Avatar from "../components/Avatar/Avatar";
-import EmbeddedNote from "../components/EmbeddedNote/EmbeddedNote";
-import { getLikes, parseNote } from "../lib/posts";
+import { getLikes } from "../lib/posts";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
-import { initAvailableFeeds, updateAvailableFeeds, updateAvailableFeedsTop } from "../stores/home";
-// import { proccessEventContent } from "../stores/home";
+import { initAvailableFeeds, updateAvailableFeedsTop } from "../stores/home";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -62,7 +63,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   });
 
-  const proccessPost = (post: NostrPostContent) => {
+  const proccessPost = (post: NostrNoteContent) => {
 
     if (oldestPost()?.post.noteId === noteEncode(post.id)) {
       return;
@@ -80,7 +81,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }));
   };
 
-  const proccessEventContent = (content: NostrUserContent | NostrPostContent | NostrStatsContent, type: string) => {
+  const proccessEventContent = (content: NostrEventContent, type: string) => {
     if (type === 'EVENT') {
       if (content.kind === 0) {
         proccessUser(content);
@@ -475,7 +476,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       clearPage() {
         setPage({ messages: [], users: {}, postStats: {} });
       },
-      proccessEventContent(content: NostrUserContent | NostrPostContent | NostrStatsContent, type: string) {
+      proccessEventContent(content: NostrUserContent | NostrNoteContent | NostrStatsContent, type: string) {
         if (type === 'EVENT') {
           if (content.kind === 0) {
             proccessUser(content);

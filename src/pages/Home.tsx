@@ -1,20 +1,13 @@
-import { Component, createEffect, createResource, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Home.module.scss';
-import { APP_ID, useFeedContext } from '../contexts/FeedContext';
+import { useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
-import TrendingPost from '../components/TrendingPost/TrendingPost';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
-import { isConnected, socket } from '../sockets';
-import { convertToPosts, getFeed, getTrending, sortByRecency, sortByScore24h } from '../lib/feed';
-import { NostrEOSE, NostrEvent, NostrEventContent, NostrPostContent, NostrStatsContent, NostrUserContent, TrendingNotesStore } from '../types/primal';
 import Loader from '../components/Loader/Loader';
-import { createStore } from 'solid-js/store';
 import Paginator from '../components/Paginator/Paginator';
 import TrendingNotes from '../components/TrendingNotes/TrendingNotes';
-import { proccessUserProfile } from '../stores/profile';
 import Branding from '../components/Branding/Branding';
-import { getLikes, likedNotes } from '../lib/posts';
 import HomeHeaderPhone from '../components/HomeHeaderPhone/HomeHeaderPhone';
 
 const Home: Component = () => {

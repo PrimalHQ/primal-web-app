@@ -1,5 +1,5 @@
 import { isConnected, sendMessage, socket } from "../sockets";
-import { FeedPage, NostrPostContent, PrimalNote } from "../types/primal";
+import { ExploreFeedPayload, FeedPage, NostrNoteContent, PrimalNote, PrimalUser, RepostInfo } from "../types/primal";
 import { hexToNpub } from "./keys";
 import DOMPurify from 'dompurify';
 import { noteEncode, decode } from "nostr-tools/nip19";
@@ -41,133 +41,6 @@ export const getThread = (postId: string, subid: string, until = 0, limit = 20) 
   ]));
 }
 
-export const getRepostInfo = (page: FeedPage, message: NostrPostContent) => {
-  const user = page?.users[message.pubkey];
-  const userMeta = JSON.parse(user?.content || '{}');
-
-  return {
-    user: {
-      id: user?.id || '',
-      pubkey: user?.pubkey || message.pubkey,
-      npub: hexToNpub(user?.pubkey || message.pubkey),
-      name: userMeta.name || user?.pubkey,
-      about: userMeta.about,
-      picture: userMeta.picture,
-      nip05: userMeta.nip05,
-      banner: userMeta.banner,
-      displayName: userMeta.display_name,
-      location: userMeta.location,
-      lud06: userMeta.lud06,
-      lud16: userMeta.lud16,
-      website: userMeta.website,
-      tags: user?.tags || [],
-    },
-  }
-};
-
-const parseKind6 = (message: NostrPostContent) => {
-  try {
-    return JSON.parse(message.content);
-  } catch (e) {
-    return {
-      kind: 1,
-      content: '',
-      id: message.id,
-      created_at: message.created_at,
-      pubkey: message.pubkey,
-      sig: message.sig,
-      tags: message.tags,
-    }
-  }
-};
-
-export const convertToPosts = (page: FeedPage | undefined, reverse = false) => {
-
-  if (page === undefined) {
-    return [];
-  }
-
-  return  page.messages.map((message) => {
-    const msg = message.kind === 6 ? parseKind6(message) : message;
-
-    const user = page?.users[msg.pubkey];
-    const stat = page?.postStats[msg.id];
-
-    const userMeta = JSON.parse(user?.content || '{}');
-
-
-    return {
-      user: {
-        id: user?.id || '',
-        pubkey: user?.pubkey || msg.pubkey,
-        npub: hexToNpub(user?.pubkey || msg.pubkey),
-        name: userMeta.name || user?.pubkey,
-        about: userMeta.about,
-        picture: userMeta.picture,
-        nip05: userMeta.nip05,
-        banner: userMeta.banner,
-        displayName: userMeta.display_name,
-        location: userMeta.location,
-        lud06: userMeta.lud06,
-        lud16: userMeta.lud16,
-        website: userMeta.website,
-        tags: user?.tags || [],
-      },
-      post: {
-        id: msg.id,
-        pubkey: msg.pubkey,
-        created_at: msg.created_at,
-        tags: msg.tags,
-        content: DOMPurify.sanitize(msg.content),
-        sig: msg.sig,
-        likes: stat?.likes || 0,
-        mentions: stat?.mentions || 0,
-        reposts: stat?.reposts || 0,
-        replies: stat?.replies || 0,
-        zaps: stat?.zaps || 0,
-        score: stat?.score || 0,
-        score24h: stat?.score24h || 0,
-        satszapped: stat?.satszapped || 0,
-        noteId: noteEncode(msg.id),
-      },
-      repost: message.kind === 6 ? getRepostInfo(page, message) : null,
-      msg,
-    };
-  });
-}
-
-export const sortByRecency = (posts: PrimalNote[], reverse = false) => {
-  return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.created_at - a.post.created_at;
-
-    return reverse ? -1 * order : order;
-  });
-};
-
-export const sortByScore24h = (posts: PrimalNote[], reverse = false) => {
-  return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.score24h - a.post.score24h;
-
-    return reverse ? -1 * order : order;
-  });
-};
-
-export const sortByScore = (posts: PrimalNote[], reverse = false) => {
-  return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.score - a.post.score;
-
-    return reverse ? -1 * order : order;
-  });
-};
-
-export const sortByZapped = (posts: PrimalNote[], reverse = false) => {
-  return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.satszapped - a.post.satszapped;
-
-    return reverse ? -1 * order : order;
-  });
-};
-
 export const getExploreFeed = (
   pubkey: string,
   subid: string,
@@ -177,7 +50,7 @@ export const getExploreFeed = (
   limit = 20,
 ) => {
 
-  let payload = { timeframe, scope, limit };
+  let payload: ExploreFeedPayload = { timeframe, scope, limit };
 
   if (pubkey.length > 0) {
     payload.pubkey = pubkey;

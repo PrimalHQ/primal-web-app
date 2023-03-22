@@ -1,13 +1,6 @@
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, from, Match, on, onCleanup, onError, onMount, Show, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { useFeedContext } from '../../contexts/FeedContext';
-import { date } from '../../lib/dates';
-import { hexToNpub } from '../../lib/keys';
-import { parseNote, sendLike, sendRepost } from '../../lib/posts';
-import { getUserProfile, trimVerification } from '../../lib/profile';
-import { isConnected, socket } from '../../sockets';
-import { NostrEOSE, NostrEvent, NostrUserContent, PrimalNote } from '../../types/primal';
+import { Component, Show } from 'solid-js';
+import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
