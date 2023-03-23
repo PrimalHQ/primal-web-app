@@ -8,7 +8,7 @@ import { removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeedsTo
 import { getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { sortingPlan, convertToNotes } from "../stores/note";
-import { profile } from "../stores/profile";
+import { hasPublicKey, profile } from "../stores/profile";
 import {
   ContextChildren,
   FeedPage,
@@ -183,7 +183,7 @@ const toaster = useToastContext();
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (profile.publicKey) {
+    if (hasPublicKey()) {
       const npub = hexToNpub(profile.publicKey);
       const feed = {
         name: 'Latest, following',

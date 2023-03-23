@@ -1,5 +1,6 @@
 import { Component, For, Show } from 'solid-js';
 import { useFeedContext } from '../../contexts/FeedContext';
+import { hasPublicKey } from '../../stores/profile';
 import NavLink from '../NavLink/NavLink';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
@@ -28,7 +29,7 @@ const NavMenu: Component = (props) => {
           }
         </For>
       </nav>
-      <Show when={context?.data.publicKey}>
+      <Show when={hasPublicKey()}>
         <div class={styles.callToAction}>
           <ThemeToggle />
         </div>

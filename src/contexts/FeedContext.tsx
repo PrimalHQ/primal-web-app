@@ -23,7 +23,7 @@ import {
 } from "../stores/note";
 import { getExploreFeed, getFeed,  } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
-import { initialStore, emptyPage, trendingFeed } from "../constants";
+import { initialStore, emptyPage, trendingFeed, noKey } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
@@ -250,7 +250,9 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       }
     } catch (e: any) {
       if (e.message === 'User rejected') {
-        setData('selectedFeed', () => ({ ...data.availableFeeds[0] }));
+        setPublicKey(noKey);
+        localStorage.setItem('pubkey', noKey);
+        // setData('selectedFeed', () => ({ ...data.availableFeeds[0] }));
       }
       console.log('error fetching public key: ', e);
     }

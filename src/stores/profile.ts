@@ -1,4 +1,5 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
+import { noKey } from "../constants";
 import { NostrEventContent, PrimalUser } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
@@ -38,6 +39,10 @@ export type ProfileStore = {
   setPublicKey: (key: string | undefined) => void,
   proccessUserProfile: (content: NostrEventContent) => void,
 };
+
+export const hasPublicKey = () => {
+  return profile.publicKey && profile.publicKey !== noKey;
+}
 
 export default {
   data: profile,

@@ -8,6 +8,7 @@ import FeedSelect from '../FeedSelect/FeedSelect';
 import { useFeedContext } from '../../contexts/FeedContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
+import { hasPublicKey } from '../../stores/profile';
 
 const HomeHeader: Component = () => {
 
@@ -72,7 +73,7 @@ const HomeHeader: Component = () => {
   return (
     <div class={styles.fullHeader}>
       <Show
-        when={feedContext?.data.publicKey}
+        when={hasPublicKey()}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
@@ -92,7 +93,7 @@ const HomeHeader: Component = () => {
       <div id="small_header" class={styles.smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
-            when={feedContext?.data.publicKey}
+            when={hasPublicKey()}
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>

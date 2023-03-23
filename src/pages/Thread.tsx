@@ -17,6 +17,7 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
 import { likedNotes } from '../lib/notes';
+import { hasPublicKey } from '../stores/profile';
 
 
 const Thread: Component = () => {
@@ -231,7 +232,7 @@ const Thread: Component = () => {
           <NotePrimary
             note={primaryNote() as PrimalNote}
           />
-          <Show when={context?.data.publicKey}>
+          <Show when={hasPublicKey()}>
             <ReplyToNote note={primaryNote() as PrimalNote} />
           </Show>
         </div>

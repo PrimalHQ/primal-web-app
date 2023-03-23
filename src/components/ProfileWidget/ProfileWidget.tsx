@@ -10,6 +10,7 @@ import Avatar from '../Avatar/Avatar';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { trimVerification } from '../../lib/profile';
 import { hexToNpub } from '../../lib/keys';
+import { hasPublicKey } from '../../stores/profile';
 
 const ProfileWidget: Component = () => {
 
@@ -19,7 +20,7 @@ const ProfileWidget: Component = () => {
 
   return (
     <div>
-      <Show when={context?.data.publicKey}>
+      <Show when={hasPublicKey()}>
         <A href="/profile" class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar

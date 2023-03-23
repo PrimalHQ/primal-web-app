@@ -32,13 +32,18 @@ const Home: Component = () => {
 
   const isPageLoading = () => context?.isFetching;
 
-  const track = createReaction(() => {
+  const onPubKeyFound = createReaction(() => {
     context?.actions.selectFeed(context.availableFeeds[0]);
   });
 
   onMount(() => {
     scrollWindowTo(context?.scrollTop);
-    track(() => profile.publicKey);
+
+    if (!context?.selectedFeed) {
+      context?.actions.selectFeed(context.availableFeeds[0]);
+    }
+    onPubKeyFound(() => profile.publicKey);
+
   });
 
   onCleanup(() => {

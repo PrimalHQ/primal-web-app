@@ -116,3 +116,5 @@ export const scopeLabels: Record<string, string> = {
   network: 'my network',
   global: 'global'
 };
+
+export const noKey = 'no-key';
