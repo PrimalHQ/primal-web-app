@@ -44,8 +44,9 @@ const parseKind6 = (message: NostrNoteContent) => {
   }
 };
 
-type ConvertToPosts = (page: FeedPage | undefined) => PrimalNote[];
-export const convertToPosts: ConvertToPosts = (page) => {
+type ConvertToNotes = (page: FeedPage | undefined) => PrimalNote[];
+
+export const convertToNotes: ConvertToNotes = (page) => {
 
   if (page === undefined) {
     return [];
@@ -129,4 +130,17 @@ export const sortByZapped = (posts: PrimalNote[], reverse = false) => {
 
     return reverse ? -1 * order : order;
   });
+};
+
+export const sortingPlan = (topic: string = '') => {
+  const sortingFunctions: Record<string, Function> = {
+    trending: sortByScore24h,
+    popular: sortByScore,
+    latest: sortByRecency,
+    mostzapped: sortByZapped,
+  }
+
+  const plan = topic.split(';')[1] || 'latest';
+
+  return sortingFunctions[plan];
 };

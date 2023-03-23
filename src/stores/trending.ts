@@ -1,5 +1,5 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { sortByScore24h, convertToPosts } from "../stores/note";
+import { sortByScore24h, convertToNotes } from "../stores/note";
 import { NostrNoteContent, NostrUserContent, NostrStatsContent, FeedPage, PrimalNote, NostrEventContent } from "../types/primal";
 
 export type TrendingNotesData = FeedPage & { notes: PrimalNote[]};
@@ -29,7 +29,7 @@ const proccessStat = (stat: NostrStatsContent) => {
 
 export const processTrendingNotes = (type: string, content: NostrEventContent | undefined) => {
   if (type === 'EOSE') {
-    const newNotes = sortByScore24h(convertToPosts(trendingNotes));
+    const newNotes = sortByScore24h(convertToNotes(trendingNotes));
 
     setTrendingNotes('notes', () => [...newNotes]);
 

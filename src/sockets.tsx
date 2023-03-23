@@ -16,6 +16,7 @@ const onClose = () => {
   socket()?.removeEventListener('open', onOpen);
   socket()?.removeEventListener('close', onClose);
   socket()?.removeEventListener('error', onError);
+
   setTimeout(() => {
     connect();
   }, 200);
@@ -49,3 +50,32 @@ export const reset = () => {
 export const sendMessage = (message: string) => {
   isConnected() && socket()?.send(message);
 }
+
+export const refreshSocketListeners = (
+  ws: WebSocket | undefined,
+  listeners: Record<string, (event: any) => any>,
+  ) => {
+
+  if (!ws) {
+    return;
+  }
+
+  Object.keys(listeners).forEach((event: string) => {
+    ws.removeEventListener(event, listeners[event]);
+    ws.addEventListener(event, listeners[event]);
+  });
+};
+
+export const removeSocketListeners = (
+  ws: WebSocket | undefined,
+  listeners: Record<string, (event: any) => any>,
+  ) => {
+
+  if (!ws) {
+    return;
+  }
+
+  Object.keys(listeners).forEach((event: string) => {
+    ws.removeEventListener(event, listeners[event]);
+  });
+};

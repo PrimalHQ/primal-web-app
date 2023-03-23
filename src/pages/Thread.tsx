@@ -5,7 +5,7 @@ import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { Portal } from 'solid-js/web';
 import { useParams } from '@solidjs/router';
 import { getThread } from '../lib/feed';
-import { convertToPosts, sortByRecency } from '../stores/note';
+import { convertToNotes, sortByRecency } from '../stores/note';
 import { FeedPage, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
@@ -16,7 +16,7 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
-import { likedNotes } from '../lib/posts';
+import { likedNotes } from '../lib/notes';
 
 
 const Thread: Component = () => {
@@ -76,7 +76,7 @@ const Thread: Component = () => {
     }
 
     if (type === 'EOSE') {
-      const newPosts = sortByRecency(convertToPosts(page), true);
+      const newPosts = sortByRecency(convertToNotes(page), true);
 
       setPage({ users: {}, messages: [], postStats: {}});
 

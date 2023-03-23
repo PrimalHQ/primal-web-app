@@ -14,7 +14,7 @@ import Branding from '../components/Branding/Branding';
 import PageNav from '../components/PageNav/PageNav';
 import { scopeLabels, timeframeLabels } from '../constants';
 import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
-import { updateAvailableFeeds } from '../stores/home';
+import { updateAvailableFeeds } from '../lib/availableFeeds';
 import { useToastContext } from '../components/Toaster/Toaster';
 
 

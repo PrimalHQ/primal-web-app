@@ -1,4 +1,5 @@
 import { Relay } from "nostr-tools";
+import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 
 export type NostrNoteContent = {
@@ -238,13 +239,13 @@ export type FeedOption = {
   value: string | undefined,
 };
 
-type PrimalRepost = {
+export type PrimalRepost = {
   user: PrimalUser,
 }
 
-type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
+export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
 
-type ExploreFeedPayload = {
+export type ExploreFeedPayload = {
   timeframe: string,
   scope: string,
   limit: number,
@@ -253,7 +254,7 @@ type ExploreFeedPayload = {
   until?: number,
 }
 
-type UserReference = {
+export type UserReference = {
   id: string,
   pubkey: string,
   kind: number,
@@ -273,3 +274,36 @@ type UserReference = {
   created_at?: number,
   sig?: string,
 };
+
+export type ContextChildren =
+  number |
+  boolean |
+  Node |
+  JSX.ArrayElement |
+  JSX.FunctionElement |
+  (string & {}) | null | undefined;
+
+  type HomeContextStore = {
+    notes: PrimalNote[],
+    isFetching: boolean,
+    scrollTop: number,
+    selectedFeed: PrimalFeed | undefined,
+    availableFeeds: PrimalFeed[],
+    page: FeedPage,
+    lastNote: PrimalNote | undefined,
+    actions: {
+      saveNotes: (newNotes: PrimalNote[]) => void,
+      clearNotes: () => void,
+      fetchNotes: (topic: string, subId: string, until?: number) => void,
+      fetchNextPage: () => void,
+      selectFeed: (feed: PrimalFeed | undefined) => void,
+      updateScrollTop: (top: number) => void,
+      updatePage: (content: NostrEventContent) => void,
+      savePage: (page: FeedPage) => void,
+      addAvailableFeed: (feed: PrimalFeed) => void,
+      removeAvailableFeed: (feed: PrimalFeed) => void,
+      setAvailableFeeds: (feedList: PrimalFeed[]) => void,
+    }
+  }
+
+export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };

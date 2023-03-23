@@ -3,7 +3,7 @@ import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
 import type { Component } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 import Avatar from '../../Avatar/Avatar';
-import { sendLike, likedNotes, sendRepost } from '../../../lib/posts';
+import { sendLike, likedNotes, sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useFeedContext } from '../../../contexts/FeedContext';

@@ -15,7 +15,7 @@ import type {
   PrimalUser,
 } from '../types/primal';
 import {
-  convertToPosts,
+  convertToNotes,
   sortByRecency,
   sortByScore,
   sortByScore24h,
@@ -27,10 +27,10 @@ import { initialStore, emptyPage, trendingFeed } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
-import { getLikes } from "../lib/posts";
+import { getLikes } from "../lib/notes";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
-import { initAvailableFeeds, updateAvailableFeedsTop } from "../stores/home";
+import { initAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
@@ -101,7 +101,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const processZappedPost = (type: string, content: NostrEventContent | undefined) => {
 
     if (type === 'EOSE') {
-      const newPosts = sortByZapped(convertToPosts({
+      const newPosts = sortByZapped(convertToNotes({
         users: data.zappedNotes.users,
         messages: data.zappedNotes.messages,
         postStats: data.zappedNotes.postStats,
@@ -129,7 +129,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
 
     if (type === 'EOSE') {
-      const newPosts = sortByScore24h(convertToPosts({
+      const newPosts = sortByScore24h(convertToNotes({
         users: data.trendingNotes.users,
         messages: data.trendingNotes.messages,
         postStats: data.trendingNotes.postStats,
@@ -292,42 +292,42 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       return;
     }
 
-    if (subId === `user_feed_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const newPosts = sortByRecency(convertToPosts(page));
+    // if (subId === `user_feed_${APP_ID}`) {
+    //   if (type === 'EOSE') {
+    //     const newPosts = sortByRecency(convertToPosts(page));
 
-        setData('posts', (posts) => [ ...posts, ...newPosts ]);
-        setData('isFetching', false);
+    //     setData('posts', (posts) => [ ...posts, ...newPosts ]);
+    //     setData('isFetching', false);
 
-        return;
-      }
+    //     return;
+    //   }
 
-      proccessEventContent(content, type);
-      return;
-    }
+    //   proccessEventContent(content, type);
+    //   return;
+    // }
 
-    if (subId === `user_feed_explore_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const sortingPlan: Record<string, Function> = {
-          trending: sortByScore24h,
-          popular: sortByScore,
-          latest: sortByRecency,
-          mostzapped: sortByZapped,
-        }
+    // if (subId === `user_feed_explore_${APP_ID}`) {
+    //   if (type === 'EOSE') {
+    //     const sortingPlan: Record<string, Function> = {
+    //       trending: sortByScore24h,
+    //       popular: sortByScore,
+    //       latest: sortByRecency,
+    //       mostzapped: sortByZapped,
+    //     }
 
-        const [_, timeframe]: string[] = data.selectedFeed?.hex?.split(';') || [];
+    //     const [_, timeframe]: string[] = data.selectedFeed?.hex?.split(';') || [];
 
-        const newPosts = sortingPlan[timeframe](convertToPosts(page));
+    //     const newPosts = sortingPlan[timeframe](convertToPosts(page));
 
-        setData('posts', (posts) => [ ...posts, ...newPosts ]);
-        setData('isFetching', false);
+    //     setData('posts', (posts) => [ ...posts, ...newPosts ]);
+    //     setData('isFetching', false);
 
-        return;
-      }
+    //     return;
+    //   }
 
-      proccessEventContent(content, type);
-      return;
-    }
+    //   proccessEventContent(content, type);
+    //   return;
+    // }
 
 
   };

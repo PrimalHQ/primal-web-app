@@ -3,9 +3,9 @@ import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show, Switch, Match } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { date } from '../../lib/dates';
-import { convertToPosts } from '../../stores/note';
+import { convertToNotes } from '../../stores/note';
 import { hexToNpub } from '../../lib/keys';
-import { parseNote } from '../../lib/posts';
+import { parseNote } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
 import { socket } from '../../sockets';
 import { TrendingNotesStore } from '../../stores/trending';
@@ -85,7 +85,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         const mentions = mentionedNotes[ref];
 
         if (mentions) {
-          const newPosts = convertToPosts(mentions);
+          const newPosts = convertToNotes(mentions);
 
           const mentionedNote = newPosts.find(note => note.post.noteId === mentionId);
 

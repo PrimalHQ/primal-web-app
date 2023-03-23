@@ -1,55 +1,42 @@
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { useFeedContext } from '../../contexts/FeedContext';
-import { moveFeedDown, moveFeedUp, removeFromAvailableFeeds, replaceAvailableFeeds } from '../../stores/home';
+import { useHomeContext } from '../../contexts/HomeContext';
 import { PrimalFeed } from '../../types/primal';
-import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FeedSorter.module.scss';
 
 
 const FeedSorter: Component = () => {
 
-  let sorter;
+  let sorter: any;
 
-  const context = useFeedContext();
-
-  const toaster = useToastContext();
+  const home = useHomeContext();
 
   const [orderedFeeds, setOrderedFeeds] = createStore<PrimalFeed[]>([]);
 
   const availableFeeds = () => {
-    return context?.data.availableFeeds || [];
+    return home?.availableFeeds || [];
   };
 
   const removeFeed = (feed: PrimalFeed) => {
-    context?.actions?.setData('availableFeeds', feeds => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds));
-    toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
+    home?.actions.removeAvailableFeed(feed);
   };
 
-  const onMoveFeedUp = (feed: PrimalFeed) => {
-    context?.actions?.setData('availableFeeds', feeds => moveFeedUp(context?.data.publicKey, feed, feeds));
+  const reorderFeeds = (feedList: PrimalFeed[]) => {
+    home?.actions.setAvailableFeeds(feedList);
   };
 
-  const onMoveFeedDown = (feed: PrimalFeed) => {
-    context?.actions?.setData('availableFeeds', feeds => moveFeedDown(context?.data.publicKey, feed, feeds));
-  };
-
-  const reorderFeeds = (list) => {
-    context?.actions?.setData('availableFeeds', () => replaceAvailableFeeds(context.data.publicKey, list));
-  };
-
-  const slist = (target) => {
+  const sortList = (target: any) => {
     // Get all items
     let items = target.getElementsByClassName(styles.feedItem);
     // init current item
-    let current = null;
+    let current: any = null;
 
     // (Make items draggable and sortable
     for (let i of items) {
       i.draggable = true;
 
-      i.ondragstart = (e) => {
+      i.ondragstart = (e: DragEvent) => {
         current = i;
         for (let it of items) {
           if (it === current) {
@@ -58,7 +45,7 @@ const FeedSorter: Component = () => {
         }
       };
 
-      i.ondragenter = (e) => {
+      i.ondragenter = (e: DragEvent) => {
         const oldIndex = current.getAttribute('data-index');
         const newIndex = i.getAttribute('data-index');
 
@@ -84,9 +71,9 @@ const FeedSorter: Component = () => {
       }};
 
       // Prevent default "drop", so we can do our own
-      i.ondragover = e => e.preventDefault();
+      i.ondragover = (e: DragEvent) => e.preventDefault();
 
-      i.ondrop = (e) => {
+      i.ondrop = (e: DragEvent) => {
         e.preventDefault();
         if (i != current) {
           const oldIndex = current.getAttribute('data-index');
@@ -111,7 +98,7 @@ const FeedSorter: Component = () => {
   createEffect(() => {
     if (sorter && availableFeeds().length > 0) {
       setOrderedFeeds(() => availableFeeds());
-      slist(sorter);
+      sortList(sorter);
     }
   });
 

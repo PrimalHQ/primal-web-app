@@ -8,7 +8,7 @@ import FeedSelect from '../FeedSelect/FeedSelect';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { PrimalUser } from '../../types/primal';
 
-const SmallCallToAction: Component<{ activeUser: PrimalUser }> = (params) => {
+const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined }> = (params) => {
 
   const context = useFeedContext();
 

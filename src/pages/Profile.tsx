@@ -8,12 +8,12 @@ import Branding from '../components/Branding/Branding';
 import Note from '../components/Note/Note';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
 import { getUserFeed } from '../lib/feed';
-import { convertToPosts, sortByRecency } from '../stores/note';
+import { convertToNotes, sortByRecency } from '../stores/note';
 import { hexToNpub } from '../lib/keys';
 import { getUserProfileInfo } from '../lib/profile';
 import { humanizeNumber } from '../lib/stats';
 import { isConnected, socket } from '../sockets';
-import { removeFromAvailableFeeds, updateAvailableFeeds } from '../stores/home';
+import { removeFromAvailableFeeds, updateAvailableFeeds } from '../lib/availableFeeds';
 import { ProfileStoreData, truncateNpub } from '../stores/profile';
 import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote, FeedPage } from '../types/primal';
 import styles from './Profile.module.scss';
@@ -101,7 +101,7 @@ const Profile: Component = () => {
 
   const processUserNotes = (type: string, content: NostrEventContent | undefined) => {
     if (type === 'EOSE') {
-      const newPosts = sortByRecency(convertToPosts(page));
+      const newPosts = sortByRecency(convertToNotes(page));
 
       setUserNotes((notes) => [...notes, ...newPosts]);
 

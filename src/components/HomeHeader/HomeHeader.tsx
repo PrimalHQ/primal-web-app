@@ -7,10 +7,12 @@ import PostButton from '../PostButton/PostButton';
 import FeedSelect from '../FeedSelect/FeedSelect';
 import { useFeedContext } from '../../contexts/FeedContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
+import { useHomeContext } from '../../contexts/HomeContext';
 
 const HomeHeader: Component = () => {
 
-  const context = useFeedContext();
+  const feedContext = useFeedContext();
+  const homeContext = useHomeContext();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -19,13 +21,15 @@ const HomeHeader: Component = () => {
     const smallHeader = document.getElementById('small_header');
     const border = document.getElementById('small_bottom_border');
 
-    context?.actions?.updatedFeedScroll(scrollTop);
+    homeContext?.actions.updateScrollTop(scrollTop);
 
     const isScrollingDown = scrollTop > lastScrollTop;
     lastScrollTop = scrollTop;
 
     if (scrollTop < 117) {
-      border.style.display = 'none';
+      if (border) {
+        border.style.display = 'none';
+      }
       smallHeader?.classList.remove(styles.hiddenSelector);
       smallHeader?.classList.remove(styles.fixedSelector);
       return;
@@ -36,7 +40,10 @@ const HomeHeader: Component = () => {
       return;
     }
 
-    border.style.display = 'flex';
+    if (border) {
+      border.style.display = 'flex';
+    }
+
     smallHeader?.classList.remove(styles.instaHide);
 
     if (!isScrollingDown) {
@@ -49,7 +56,7 @@ const HomeHeader: Component = () => {
   }
 
   const onShowNewNoteinput = () => {
-    context?.actions.showNewNoteForm();
+    feedContext?.actions?.showNewNoteForm();
   };
 
   onMount(() => {
@@ -60,12 +67,12 @@ const HomeHeader: Component = () => {
     window.removeEventListener('scroll', onScroll);
   });
 
-  const activeUser = () => context?.data.activeUser;
+  const activeUser = () => feedContext?.data.activeUser;
 
   return (
     <div class={styles.fullHeader}>
       <Show
-        when={context?.data.publicKey}
+        when={feedContext?.data.publicKey}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
@@ -85,7 +92,7 @@ const HomeHeader: Component = () => {
       <div id="small_header" class={styles.smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
-            when={context?.data.publicKey}
+            when={feedContext?.data.publicKey}
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>
@@ -97,7 +104,7 @@ const HomeHeader: Component = () => {
               <SmallCallToAction activeUser={activeUser()} />
             </div>
           </Show>
-          <Show when={context?.data.selectedFeed}>
+          <Show when={homeContext?.selectedFeed}>
             <div class={styles.smallRight}>
               <FeedSelect />
             </div>

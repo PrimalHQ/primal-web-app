@@ -15,12 +15,15 @@ import Feed from './pages/Feed';
 import Profile from './pages/Profile';
 import styles from './App.module.scss';
 import Toaster from './components/Toaster/Toaster';
+import { HomeProvider } from './contexts/HomeContext';
 
 // const onVisibilityChange = () => {
 //   if (document.visibilityState === "visible") {
 //     connect();
 //   }
 // };
+
+export const APP_ID = Math.floor(Math.random()*10000000000);
 
 const App: Component = () => {
 
@@ -42,26 +45,28 @@ const App: Component = () => {
 
   return (
     <>
-      <FeedProvider>
-        <Toaster>
-          <input id="defocus" class={styles.invisible}/>
-          <Routes>
-            <Route path="/" component={Layout} >
-              <Route path="/" element={<Navigate href="/home" />} />
-              <Route path="/home" component={Home} />
-              <Route path="/thread/:postId" component={Thread} />
-              <Route path="/explore/:scope?/:timeframe?" component={Explore} />
-              <Route path="/messages" component={Messages} />
-              <Route path="/notifications" component={Notifications} />
-              <Route path="/downloads" component={Downloads} />
-              <Route path="/settings" component={Settings} />
-              <Route path="/profile/:npub?" component={Profile} />
-              <Route path="/help" component={Help} />
-              <Route path="/rest" component={Explore} />
-            </Route>
-          </Routes>
-        </Toaster>
-      </FeedProvider>
+      <Toaster>
+        <FeedProvider>
+          <HomeProvider>
+              <input id="defocus" class={styles.invisible}/>
+              <Routes>
+                <Route path="/" component={Layout} >
+                  <Route path="/" element={<Navigate href="/home" />} />
+                  <Route path="/home" component={Home} />
+                  <Route path="/thread/:postId" component={Thread} />
+                  <Route path="/explore/:scope?/:timeframe?" component={Explore} />
+                  <Route path="/messages" component={Messages} />
+                  <Route path="/notifications" component={Notifications} />
+                  <Route path="/downloads" component={Downloads} />
+                  <Route path="/settings" component={Settings} />
+                  <Route path="/profile/:npub?" component={Profile} />
+                  <Route path="/help" component={Help} />
+                  <Route path="/rest" component={Explore} />
+                </Route>
+              </Routes>
+          </HomeProvider>
+        </FeedProvider>
+      </Toaster>
     </>
   );
 };

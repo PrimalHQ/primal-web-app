@@ -7,7 +7,7 @@ import {
   getExploreFeed,
 } from '../lib/feed';
 import {
-  convertToPosts,
+  convertToNotes,
   sortByRecency,
   sortByScore,
   sortByScore24h,
@@ -102,7 +102,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
   const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
 
     if (type === 'EOSE') {
-      const newPosts = sortingPlan[params.timeframe](convertToPosts({
+      const newPosts = sortingPlan[params.timeframe](convertToNotes({
         users: notes.users,
         messages: notes.messages,
         postStats: notes.postStats,

@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { useFeedContext } from "../../contexts/FeedContext";
-import { sendNote } from "../../lib/posts";
+import { sendNote } from "../../lib/notes";
 import { PrimalNetStats, PrimalNote } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./ReplyToNote.module.scss";
