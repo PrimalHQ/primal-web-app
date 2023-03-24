@@ -1,4 +1,4 @@
-import { Component, createEffect, createResource, createSignal, For, Index, Match, on, onCleanup, onMount, Show, Switch, useContext } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { APP_ID, useFeedContext } from '../contexts/FeedContext';
@@ -19,6 +19,10 @@ import { noteEncode } from 'nostr-tools/nip19';
 import { likedNotes } from '../lib/notes';
 import { hasPublicKey } from '../stores/profile';
 import { Kind } from '../constants';
+import { useThreadContext } from '../contexts/ThreadContext';
+import { useHomeContext } from '../contexts/HomeContext';
+import { useExploreContext } from '../contexts/ExploreContext';
+import Wormhole from '../components/Wormhole/Wormhole';
 
 
 const Thread: Component = () => {
@@ -32,192 +36,68 @@ const Thread: Component = () => {
     return noteEncode(params.postId);
   };
 
-  const context = useFeedContext();
+  const homeContext = useHomeContext();
+  const exploreContext = useExploreContext();
+  const threadContext = useThreadContext();
 
-  const [mounted, setMounted] = createSignal(false);
-
-  const [parentNotes, setParentNotes] = createStore<PrimalNote[]>([]);
-  const [replies, setReplies] = createStore<PrimalNote[]>([]);
-  const [primaryNote, setPrimaryNote] = createSignal<PrimalNote>();
-
-  const [isFetching, setIsFetching] = createSignal(false);
-
-  const [page, setPage] = createStore<FeedPage>({
-    users: {},
-    messages: [],
-    postStats: {},
-  });
-
-  const proccessPost = (post: NostrNoteContent) => {
-    setPage('messages', (msgs) => [ ...msgs, post]);
+  const threadContexts: Record<string, any> = {
+    home: homeContext,
+    explore: exploreContext,
+    thread: threadContext,
   };
 
-  const proccessUser = (user: NostrUserContent) => {
-    setPage('users', (users ) => ({ ...users, [user.pubkey]: user}))
+  const primaryNote = () => {
+    const context = threadContexts[threadContext?.threadContext || 'thread'];
+
+    return context?.notes.find((n: PrimalNote) => n.post.noteId === postId());
   };
 
-  const proccessStat = (stat: NostrStatsContent) => {
-    const content = JSON.parse(stat.content);
-    setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }))
-  };
+  const parentNotes = () => {
+    const note = primaryNote();
 
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    webSocket.removeEventListener('message', onMessage);
-    webSocket.removeEventListener('close', onSocketClose);
-  };
-
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    const [type, subkey, content] = message;
-
-    if (subkey !== `thread_${postId()}_${APP_ID}`) {
-      return;
+    if (!note) {
+      return [];
     }
 
-    if (type === 'EOSE') {
-      const newPosts = sortByRecency(convertToNotes(page), true);
-
-      setPage({ users: {}, messages: [], postStats: {}});
-
-      context?.actions?.setThreadedNotes(newPosts);
-
-      setIsFetching(false);
-
-      return;
-    }
-
-    if (type === 'EVENT') {
-      if (content.kind === Kind.Metadata) {
-        proccessUser(content);
-      }
-      if (content.kind === Kind.Text) {
-        proccessPost(content);
-      }
-      if (content.kind === Kind.Repost) {
-        proccessPost(content);
-      }
-      if (content.kind === Kind.NoteStats) {
-        proccessStat(content);
-      }
-    }
+    return threadContext?.notes.filter(n =>
+      n.post.id !== note.post.id && n.post.created_at <= note.post.created_at,
+    ) || [];
   };
+
+  const replyNotes = () => {
+    const note = primaryNote();
+
+    if (!note) {
+      return [];
+    }
+
+    return threadContext?.notes.filter(n =>
+      n.post.id !== note.post.id && n.post.created_at >= note.post.created_at,
+    ) || [];
+  };
+
+  const people = () => threadContext?.users || [];
+  const isFetching = () => threadContext?.isFetching;
 
   createEffect(() => {
-    context?.data.threadedNotes.forEach((note) => {
-
-      if (primaryNote() === undefined && note.post.noteId === postId()) {
-        setPrimaryNote(() => ({ ...note }));
-        return;
-      }
-
-      if (note.post.noteId === primaryNote()?.post.noteId) {
-        return;
-      }
-
-      if (note.post.created_at < (primaryNote()?.post.created_at || 0)) {
-        setParentNotes((parents) => [...parents, {...note}]);
-        return;
-      }
-
-      if (note.post.created_at > (primaryNote()?.post.created_at || 0)) {
-        setReplies((replies) => [...replies, {...note}]);
-        return;
-      }
-    });
+    threadContext?.actions.fetchNotes(params.postId);
   });
 
-  const posts = () => [ primaryNote(), ...parentNotes, ...replies];
-
-  const people = () => posts().reduce((acc: PrimalUser[], p: PrimalNote | undefined) => {
-    if (!p) {
-      return acc;
-    }
-
-    const user = p.user;
-    if (user && acc.find(u => u && user.pubkey === u.pubkey)) {
-      return acc;
-    }
-
-    return [...acc, user];
-  }, []);
-
-  createEffect(() => {
-    if (postId() && postId() !== primaryNote()?.post.noteId) {
-      let note = context?.data.posts.find(p => p.post.noteId === postId());
-
-      if (!note) {
-        note = context?.data.trendingNotes.notes.find(p => p.post.noteId === postId());
-      }
-
-      if (!note) {
-        note = context?.data.exploredNotes.find(p => p.post.noteId === postId());
-      }
-
-      if (!note) {
-        note = parentNotes.find(p => p.post.noteId === postId());
-      }
-
-      if (!note) {
-        note = replies.find(p => p.post.noteId === postId());
-      }
-
-      if (note) {
-        setPrimaryNote(note);
-      }
-    }
-    else {
-      setReplies(() => []);
-      setParentNotes(() => []);
-    }
-  });
-
-  onMount(() => {
-    // Temporary fix for Portal rendering on initial load.
-    setMounted(true);
-  });
-
-  onCleanup(() => {
-    socket()?.removeEventListener('message', onMessage);
-  });
-
-	createEffect(() => {
-    if (isConnected()) {
-      socket()?.addEventListener('message', onMessage);
-      socket()?.addEventListener('close', onSocketClose);
-      if (postId()) {
-        context?.actions?.clearThreadedNotes();
-        setIsFetching(true);
-        getThread(postId(), `thread_${postId()}_${APP_ID}`);
-
-      }
-		}
-	});
 
   return (
     <div>
-      <Switch>
-        <Match when={mounted()}>
-          <Portal
-            mount={document.getElementById("branding_holder") as Node}
-          >
-            <PageNav />
-          </Portal>
+      <Wormhole to='branding_holder'>
+        <PageNav />
+      </Wormhole>
 
-          <Portal
-            mount={document.getElementById("right_sidebar") as Node}
-          >
-            <PeopleList people={people()} />
-          </Portal>
-        </Match>
-      </Switch>
+      <Wormhole to='right_sidebar'>
+        <PeopleList people={people()} />
+      </Wormhole>
 
       <Show
         when={!isFetching()}
       >
-        <For each={parentNotes}>
+        <For each={parentNotes()}>
           {note =>
             <div class={styles.threadList}>
               <Note
@@ -244,7 +124,7 @@ const Thread: Component = () => {
           when={!isFetching()}
           fallback={<div class={styles.noContent}><Loader /></div>}
         >
-          <For each={replies}>
+          <For each={replyNotes()}>
             {note =>
               <div class={styles.threadList}>
                 <Note
