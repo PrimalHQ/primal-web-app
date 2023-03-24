@@ -283,27 +283,27 @@ export type ContextChildren =
   JSX.FunctionElement |
   (string & {}) | null | undefined;
 
-  type HomeContextStore = {
-    notes: PrimalNote[],
-    isFetching: boolean,
-    scrollTop: number,
-    selectedFeed: PrimalFeed | undefined,
-    availableFeeds: PrimalFeed[],
-    page: FeedPage,
-    lastNote: PrimalNote | undefined,
-    actions: {
-      saveNotes: (newNotes: PrimalNote[]) => void,
-      clearNotes: () => void,
-      fetchNotes: (topic: string, subId: string, until?: number) => void,
-      fetchNextPage: () => void,
-      selectFeed: (feed: PrimalFeed | undefined) => void,
-      updateScrollTop: (top: number) => void,
-      updatePage: (content: NostrEventContent) => void,
-      savePage: (page: FeedPage) => void,
-      addAvailableFeed: (feed: PrimalFeed) => void,
-      removeAvailableFeed: (feed: PrimalFeed) => void,
-      setAvailableFeeds: (feedList: PrimalFeed[]) => void,
-    }
+export type HomeContextStore = {
+  notes: PrimalNote[],
+  isFetching: boolean,
+  scrollTop: number,
+  selectedFeed: PrimalFeed | undefined,
+  availableFeeds: PrimalFeed[],
+  page: FeedPage,
+  lastNote: PrimalNote | undefined,
+  actions: {
+    saveNotes: (newNotes: PrimalNote[]) => void,
+    clearNotes: () => void,
+    fetchNotes: (topic: string, subId: string, until?: number) => void,
+    fetchNextPage: () => void,
+    selectFeed: (feed: PrimalFeed | undefined) => void,
+    updateScrollTop: (top: number) => void,
+    updatePage: (content: NostrEventContent) => void,
+    savePage: (page: FeedPage) => void,
+    addAvailableFeed: (feed: PrimalFeed) => void,
+    removeAvailableFeed: (feed: PrimalFeed) => void,
+    setAvailableFeeds: (feedList: PrimalFeed[]) => void,
   }
+}
 
 export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };

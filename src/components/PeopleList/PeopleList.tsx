@@ -4,7 +4,6 @@ import { truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import { useToastContext } from '../Toaster/Toaster';
-import { calculateStickyPosition } from '../TrendingNotes/helpers';
 
 import styles from './PeopleList.module.scss';
 
@@ -13,13 +12,6 @@ const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
   const toaster = useToastContext();
 
   const people = () => props.people;
-
-  createEffect(() => {
-    // If the content changes, recalculate sticky boundary.
-    if (people()) {
-      calculateStickyPosition();
-    }
-  });
 
   const trimVerification = (address: string) => {
     return address.split('@');

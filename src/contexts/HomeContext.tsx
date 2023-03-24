@@ -1,5 +1,5 @@
 import { noteEncode } from "nostr-tools/nip19";
-import { createContext, createEffect, useContext } from "solid-js";
+import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { useToastContext } from "../components/Toaster/Toaster";
@@ -7,12 +7,15 @@ import { defaultFeeds, trendingFeed } from "../constants";
 import { removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
 import { getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes } from "../stores/note";
 import { hasPublicKey, profile } from "../stores/profile";
 import {
   ContextChildren,
   FeedPage,
   HomeContextStore,
+  NostrEOSE,
+  NostrEvent,
   NostrEventContent,
   NostrNoteContent,
   NostrStatsContent,
@@ -31,14 +34,13 @@ const initialHomeData = {
   lastNote: undefined,
 };
 
-
 export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
-const toaster = useToastContext();
+  const toaster = useToastContext();
 
-// ACTIONS ------------------------------------
+// ACTIONS --------------------------------------
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
@@ -180,6 +182,37 @@ const toaster = useToastContext();
     }
   };
 
+// SOCKET HANDLERS ------------------------------
+
+  const onMessage = (event: MessageEvent) => {
+    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+
+    const [type, subId, content] = message;
+
+    if (subId !== `home_feed_${APP_ID}`) {
+      return;
+    }
+
+    if (type === 'EOSE') {
+      savePage(homeStore.page);
+      return;
+    }
+
+    if (type === 'EVENT') {
+      updatePage(content);
+      return;
+    }
+  };
+
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    removeSocketListeners(
+      webSocket,
+      { message: onMessage, close: onSocketClose },
+    );
+  };
+
 // EFFECTS --------------------------------------
 
   createEffect(() => {
@@ -196,8 +229,24 @@ const toaster = useToastContext();
     }
   });
 
+  createEffect(() => {
+    if (isConnected()) {
+      refreshSocketListeners(
+        socket(),
+        { message: onMessage, close: onSocketClose },
+      );
+    }
+  });
 
-// STORES -------------------------------------
+  onCleanup(() => {
+    removeSocketListeners(
+      socket(),
+      { message: onMessage, close: onSocketClose },
+    );
+  });
+
+
+// STORES ---------------------------------------
 
   const [homeStore, updateHomeStore] = createStore<HomeContextStore>({
     ...initialHomeData,

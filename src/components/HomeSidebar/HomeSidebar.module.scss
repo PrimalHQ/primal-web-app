@@ -48,25 +48,6 @@
   mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
 }
 
-.trendingSection {
-  // position: -webkit-sticky;
-  // position: sticky;
-  // padding-top: 44px;
-  width: 300px;
-  margin-bottom: 228px;
-}
-
-.stickyWrapper {
-  position: fixed;
-  height: 100%;
-  overflow: hidden;
-  overflow-y: scroll;
-
-  &::-webkit-scrollbar{
-    display: none;
-  }
-}
-
 .headingTrending {
   @include heading();
 }
@@ -76,7 +57,6 @@
   margin-top: 34px;
   z-index: 10px;
 }
-
 
 .trendingPost {
   margin-bottom: 18px;
