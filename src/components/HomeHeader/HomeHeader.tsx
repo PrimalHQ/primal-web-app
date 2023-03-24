@@ -2,8 +2,6 @@ import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
-import miljan from '../../assets/icons/miljan.jpg';
-import PostButton from '../PostButton/PostButton';
 import FeedSelect from '../FeedSelect/FeedSelect';
 import { useFeedContext } from '../../contexts/FeedContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';

@@ -1,25 +1,35 @@
-import { APP_ID } from '../contexts/FeedContext';
-import { sendMessage, socket } from '../sockets';
+import { sendMessage } from '../sockets';
 
-export const startListeningForNostrStats = () => {
+let isListening = false;
+
+export const startListeningForNostrStats = (subId: string) => {
+  if (isListening) {
+    return;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
-    `netstats_${APP_ID}`,
+    `netstats_${subId}`,
     {cache: ["net_stats"]},
   ]));
+  isListening = true;
 };
 
-export const stopListeningForNostrStats = () => {
+export const stopListeningForNostrStats = (subId: string) => {
+  if (!isListening) {
+    return;
+  }
   sendMessage(JSON.stringify([
     "CLOSE",
-    `netstats_${APP_ID}`,
+    `netstats_${subId}`,
   ]));
+  isListening = false;
 };
 
-export const getLegendStats = (pubkey: string | undefined) => {
+export const getLegendStats = (pubkey: string | undefined, subId: string) => {
   pubkey && sendMessage(JSON.stringify([
     "REQ",
-    `stats_legend_${APP_ID}`,
+    `netstats_${subId}`,
     {"cache":["explore_legend_counts",{ pubkey }]},
   ]));
 }

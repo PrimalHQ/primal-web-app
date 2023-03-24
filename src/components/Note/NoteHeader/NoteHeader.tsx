@@ -12,7 +12,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
       <span class={styles.postInfo}>
         <span class={styles.userInfo}>
           <span class={styles.userName}>
-            {props.note.user?.name}
+            {props.note.user?.name || props.note.user.npub}
           </span>
           <Show when={props.note.user?.nip05}>
             <span class={styles.verifiedIcon} />

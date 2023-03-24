@@ -51,6 +51,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const fetchNotes = (topic: string, subId: string, until = 0) => {
     const [scope, timeframe] = topic.split(';');
 
+    updateHomeStore('isFetching', true);
+    updateHomeStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+
     if (scope && timeframe && until === 0) {
       const limit = 100;
 
@@ -65,8 +68,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    updateHomeStore('isFetching', true);
-    updateHomeStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     getFeed(topic, `home_feed_${subId}`, until);
   };
 

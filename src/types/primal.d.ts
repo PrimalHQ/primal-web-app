@@ -28,13 +28,33 @@ export type NostrStatsContent = {
   pubkey?: string,
 };
 
+export type NostrNetStatsContent = {
+  kind: 10000101,
+  content: string,
+  pubkey?: string,
+};
+
+
+export type NostrLegendStatsContent = {
+  kind: 10000102,
+  content: string,
+  pubkey?: string,
+};
+
+
 export type NostrMentionContent = {
   kind: 10000107,
   content: string,
   pubkey?: string,
 };
 
-export type NostrEventContent = NostrNoteContent | NostrUserContent | NostrStatsContent | NostrMentionContent;
+export type NostrEventContent =
+  NostrNoteContent |
+  NostrUserContent |
+  NostrStatsContent |
+  NostrNetStatsContent |
+  NostrLegendStatsContent |
+  NostrMentionContent;
 
 export type NostrEvent = [
   type: "EVENT",

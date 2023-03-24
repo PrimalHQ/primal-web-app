@@ -16,6 +16,7 @@ import Profile from './pages/Profile';
 import styles from './App.module.scss';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
+import { ExploreProvider } from './contexts/ExploreContext';
 
 // const onVisibilityChange = () => {
 //   if (document.visibilityState === "visible") {
@@ -48,6 +49,7 @@ const App: Component = () => {
       <Toaster>
         <FeedProvider>
           <HomeProvider>
+            <ExploreProvider>
               <input id="defocus" class={styles.invisible}/>
               <Routes>
                 <Route path="/" component={Layout} >
@@ -64,6 +66,7 @@ const App: Component = () => {
                   <Route path="/rest" component={Explore} />
                 </Route>
               </Routes>
+            </ExploreProvider>
           </HomeProvider>
         </FeedProvider>
       </Toaster>
