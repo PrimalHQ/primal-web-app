@@ -9,7 +9,7 @@ import { parseNote } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
 import { socket } from '../../sockets';
 import { TrendingNotesStore } from '../../stores/trending';
-import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser, UserReference } from '../../types/primal';
+import { FeedPage, Kind, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser, UserReference } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ParsedNote.module.scss';
@@ -102,13 +102,13 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
           setMentionedNotes((notes) => ({ ...notes, [ref]: { messages: [], users: {}, postStats: {}}}));
         }
 
-        if (userContent.kind === 0) {
+        if (userContent.kind === Kind.Metadata) {
           setMentionedNotes(`${ref}`, 'users', users => ({ ... users, [userContent.pubkey]: userContent}));
         }
-        if (userContent.kind === 1) {
+        if (userContent.kind === Kind.Text) {
           setMentionedNotes(`${ref}`, 'messages',  (msgs) => [ ...msgs, userContent]);
         }
-        if (userContent.kind === 10000100) {
+        if (userContent.kind === Kind.NoteStats) {
           const stat = JSON.parse(userContent.content);
           setMentionedNotes(`${ref}`, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }));
         }

@@ -1,6 +1,6 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
 import { sortByScore24h, convertToNotes } from "../stores/note";
-import { NostrNoteContent, NostrUserContent, NostrStatsContent, FeedPage, PrimalNote, NostrEventContent } from "../types/primal";
+import { NostrNoteContent, NostrUserContent, NostrStatsContent, FeedPage, PrimalNote, NostrEventContent, Kind } from "../types/primal";
 
 export type TrendingNotesData = FeedPage & { notes: PrimalNote[]};
 
@@ -37,16 +37,16 @@ export const processTrendingNotes = (type: string, content: NostrEventContent | 
   }
 
   if (type === 'EVENT') {
-    if (content && content.kind === 0) {
+    if (content && content.kind === Kind.Metadata) {
       proccessUser(content);
     }
-    if (content && content.kind === 1) {
+    if (content && content.kind === Kind.Text) {
       proccessNote(content);
     }
-    if (content && content.kind === 6) {
+    if (content && content.kind === Kind.Repost) {
       proccessNote(content);
     }
-    if (content && content.kind === 10000100) {
+    if (content && content.kind === Kind.NoteStats) {
       proccessStat(content);
     }
   }

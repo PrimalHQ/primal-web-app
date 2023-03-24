@@ -15,7 +15,7 @@ import { humanizeNumber } from '../lib/stats';
 import { isConnected, socket } from '../sockets';
 import { removeFromAvailableFeeds, updateAvailableFeeds } from '../lib/availableFeeds';
 import { ProfileStoreData, truncateNpub } from '../stores/profile';
-import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote, FeedPage } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote, FeedPage, Kind } from '../types/primal';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
@@ -58,7 +58,7 @@ const Profile: Component = () => {
   const [oldestPost, setOldestPost] = createSignal<PrimalNote | undefined>();
 
   const proccessUserProfile = (content: NostrEventContent) => {
-    if (content.kind === 0) {
+    if (content.kind === Kind.Metadata) {
       let user = JSON.parse(content.content);
 
       user.pubkey = content.pubkey;
@@ -69,7 +69,7 @@ const Profile: Component = () => {
       return;
     }
 
-    if (content.kind === 10000105) {
+    if (content.kind === Kind.UserStats) {
       const stats = JSON.parse(content.content);
 
       setProfile('userStats', () => ({ ...stats }));
@@ -109,10 +109,10 @@ const Profile: Component = () => {
     }
 
     if (type === 'EVENT') {
-      if (content && content.kind === 0) {
+      if (content && content.kind === Kind.Metadata) {
         setPage('users', (users) => ({ ...users, [content.pubkey]: content}));
       }
-      if (content && (content.kind === 1 || content.kind === 6)) {
+      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
 
         if (oldestPost()?.post?.noteId === noteEncode(content.id)) {
           return;
@@ -120,7 +120,7 @@ const Profile: Component = () => {
 
         setPage('messages', (msgs) =>[ ...msgs, content]);
       }
-      if (content && content.kind === 10000100) {
+      if (content && content.kind === Kind.NoteStats) {
         const stat = JSON.parse(content.content);
         setPage('postStats', (stats) => ({ ...stats, [stat.event_id]: stat }));
       }

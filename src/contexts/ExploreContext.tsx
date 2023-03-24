@@ -1,26 +1,36 @@
 import { noteEncode } from "nostr-tools/nip19";
-import { createContext, createEffect, createMemo, createSelector, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
-import { APP_ID } from "../App";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, trendingFeed } from "../constants";
-import { removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
-import { getExploreFeed, getFeed } from "../lib/feed";
-import { hexToNpub } from "../lib/keys";
-import { getLegendStats, startListeningForNostrStats, stopListeningForNostrStats } from "../lib/stats";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
+import { getExploreFeed } from "../lib/feed";
 import { sortingPlan, convertToNotes } from "../stores/note";
-import { hasPublicKey, profile } from "../stores/profile";
+import { profile } from "../stores/profile";
+import {
+  createContext,
+  createEffect,
+  onCleanup,
+  useContext
+} from "solid-js";
+import {
+  getLegendStats,
+  startListeningForNostrStats,
+  stopListeningForNostrStats
+} from "../lib/stats";
+import {
+  isConnected,
+  refreshSocketListeners,
+  removeSocketListeners,
+  socket
+} from "../sockets";
 import {
   ContextChildren,
   FeedPage,
+  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
-  PrimalFeed,
   PrimalNote,
 } from "../types/primal";
 
@@ -152,7 +162,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   };
 
   const updatePage = (content: NostrEventContent) => {
-    if (content.kind === 0) {
+    if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
       updateExploreStore('page', 'users',
@@ -161,7 +171,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if ([1, 6].includes(content.kind)) {
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       if (exploreStore.lastNote?.post?.noteId !== noteEncode(message.id)) {
@@ -173,7 +183,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (content.kind === 10000100) {
+    if (content.kind === Kind.NoteStats) {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
@@ -230,11 +240,11 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if (subId === `netstats_${exploreStore.subId}` && content?.content) {
       const stats = JSON.parse(content.content);
 
-      if (content.kind === 10000101) {
+      if (content.kind === Kind.NetStats) {
         updateExploreStore('stats', () => ({ ...stats }));
       }
 
-      if (content.kind === 10000102) {
+      if (content.kind === Kind.LegendStats) {
         updateExploreStore('legend', () => ({ ...stats }));
       }
 

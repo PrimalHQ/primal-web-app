@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import { noteEncode } from "nostr-tools/nip19";
 import { hexToNpub } from "../lib/keys";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalUser } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalUser, Kind } from "../types/primal";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {
@@ -53,7 +53,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
   }
 
   return  page.messages.map((message) => {
-    const msg = message.kind === 6 ? parseKind6(message) : message;
+    const msg = message.kind === Kind.Repost ? parseKind6(message) : message;
 
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
@@ -94,7 +94,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         satszapped: stat?.satszapped || 0,
         noteId: noteEncode(msg.id),
       },
-      repost: message.kind === 6 ? getRepostInfo(page, message) : undefined,
+      repost: message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined,
       msg,
     };
   });

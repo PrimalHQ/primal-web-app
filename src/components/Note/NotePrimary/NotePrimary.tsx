@@ -1,8 +1,5 @@
 import { A } from '@solidjs/router';
-import { Component, Match, Switch } from 'solid-js';
-import { useFeedContext } from '../../../contexts/FeedContext';
-import { date } from '../../../lib/dates';
-import { sendLike, sendRepost } from '../../../lib/notes';
+import { Component } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 import Avatar from '../../Avatar/Avatar';
 import ParsedNote from '../../ParsedNote/ParsedNote';

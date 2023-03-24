@@ -14,6 +14,7 @@ import {
   ContextChildren,
   FeedPage,
   HomeContextStore,
+  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
@@ -111,7 +112,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const updatePage = (content: NostrEventContent) => {
-    if (content.kind === 0) {
+    if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
       updateHomeStore('page', 'users',
@@ -120,7 +121,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if ([1, 6].includes(content.kind)) {
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       if (homeStore.lastNote?.post?.noteId !== noteEncode(message.id)) {
@@ -132,7 +133,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (content.kind === 10000100) {
+    if (content.kind === Kind.NoteStats) {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 

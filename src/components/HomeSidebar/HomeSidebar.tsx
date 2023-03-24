@@ -14,6 +14,7 @@ import {
 } from '../../sockets';
 import {
   FeedPage,
+  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
@@ -93,13 +94,13 @@ const HomeSidebar: Component = () => {
     }
 
     if (type === 'EVENT') {
-      if (content && content.kind === 0) {
+      if (content && content.kind === Kind.Metadata) {
         setData(key, 'users', (users) => ({ ...users, [content.pubkey]: content}))
       }
-      if (content && (content.kind === 1 || content.kind === 6)) {
+      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
         setData(key, 'messages',  (msgs) => [ ...msgs, content]);
       }
-      if (content && content.kind === 10000100) {
+      if (content && content.kind === Kind.NoteStats) {
         const stat = JSON.parse(content.content);
         setData(key, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
       }

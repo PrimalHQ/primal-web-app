@@ -1,7 +1,7 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
 import { emptyPage } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import {FeedPage, FeedStore, NostrEventContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalFeed, PrimalNote, PrimalUser } from "../types/primal";
+import {FeedPage, FeedStore, Kind, NostrEventContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalFeed, PrimalNote, PrimalUser } from "../types/primal";
 import { initialStore } from "../constants";
 
 export type HomeStore = {
@@ -95,13 +95,13 @@ export const proccessEventContent = (
   type: string
 ) => {
   if (type === 'EVENT') {
-    if (content.kind === 0) {
+    if (content.kind === Kind.Metadata) {
       proccessUser(content);
     }
-    if (content.kind === 1) {
+    if (content.kind === Kind.Text) {
       proccessPost(content);
     }
-    if (content.kind === 10000100) {
+    if (content.kind === Kind.NoteStats) {
       proccessStat(content);
     }
   }

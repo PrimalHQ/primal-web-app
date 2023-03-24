@@ -1,7 +1,8 @@
 import { createContext, createEffect, createResource, createSignal, JSX, onCleanup, onMount, untrack, useContext } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import type {
+import {
   FeedStore,
+  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
@@ -83,16 +84,16 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const proccessEventContent = (content: NostrEventContent, type: string) => {
     if (type === 'EVENT') {
-      if (content.kind === 0) {
+      if (content.kind === Kind.Metadata) {
         proccessUser(content);
       }
-      if (content.kind === 1) {
+      if (content.kind === Kind.Text) {
         proccessPost(content);
       }
-      if (content.kind === 6) {
+      if (content.kind === Kind.Repost) {
         proccessPost(content);
       }
-      if (content.kind === 10000100) {
+      if (content.kind === Kind.NoteStats) {
         proccessStat(content);
       }
     }
@@ -113,13 +114,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
 
     if (type === 'EVENT') {
-      if (content && content.kind === 0) {
+      if (content && content.kind === Kind.Metadata) {
         setData('zappedNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
       }
-      if (content && (content.kind === 1 || content.kind === 6)) {
+      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
         setData('zappedNotes', 'messages',  (msgs) => [ ...msgs, content]);
       }
-      if (content && content.kind === 10000100) {
+      if (content && content.kind === Kind.NoteStats) {
         const stat = JSON.parse(content.content);
         setData('zappedNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
       }
@@ -141,13 +142,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
 
     if (type === 'EVENT') {
-      if (content && content.kind === 0) {
+      if (content && content.kind === Kind.Metadata) {
         setData('trendingNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
       }
-      if (content && (content.kind === 1 || content.kind === 6)) {
+      if (content && (content.kind === Kind.Metadata || content.kind === Kind.Repost) {
         setData('trendingNotes', 'messages',  (msgs) => [ ...msgs, content]);
       }
-      if (content && content.kind === 10000100) {
+      if (content && content.kind === Kind.NoteStats) {
         const stat = JSON.parse(content.content);
         setData('trendingNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
       }
@@ -480,13 +481,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
       },
       proccessEventContent(content: NostrUserContent | NostrNoteContent | NostrStatsContent, type: string) {
         if (type === 'EVENT') {
-          if (content.kind === 0) {
+          if (content.kind === Kind.Metadata) {
             proccessUser(content);
           }
-          if (content.kind === 1) {
+          if (content.kind === Kind.Text) {
             proccessPost(content);
           }
-          if (content.kind === 10000100) {
+          if (content.kind === Kind.NoteStats) {
             proccessStat(content);
           }
         }

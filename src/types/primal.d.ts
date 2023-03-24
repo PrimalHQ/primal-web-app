@@ -2,8 +2,30 @@ import { Relay } from "nostr-tools";
 import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 
+export enum Kind  {
+  Metadata = 0,
+  Text = 1,
+  RecommendRelay = 2,
+  Contacts = 3,
+  EncryptedDirectMessage = 4,
+  EventDeletion = 5,
+  Repost = 6,
+  Reaction = 7,
+  ChannelCreation = 40,
+  ChannelMetadata = 41,
+  ChannelMessage = 42,
+  ChannelHideMessage = 43,
+  ChannelMuteUser = 44,
+
+  NoteStats = 10000100,
+  NetStats = 10000101,
+  LegendStats = 10000102,
+  UserStats = 10000105,
+  Mentions = 10000107,
+}
+
 export type NostrNoteContent = {
-  kind: 1 | 6,
+  kind: Kind.Text | Kind.Repost,
   content: string,
   id: string,
   created_at: number,
@@ -13,7 +35,7 @@ export type NostrNoteContent = {
 };
 
 export type NostrUserContent = {
-  kind: 0,
+  kind: Kind.Metadata,
   content: string,
   id: string,
   created_at: number,
@@ -23,27 +45,31 @@ export type NostrUserContent = {
 };
 
 export type NostrStatsContent = {
-  kind: 10000100,
+  kind: Kind.NoteStats,
   content: string,
   pubkey?: string,
 };
 
 export type NostrNetStatsContent = {
-  kind: 10000101,
+  kind: Kind.NetStats,
   content: string,
   pubkey?: string,
 };
-
 
 export type NostrLegendStatsContent = {
-  kind: 10000102,
+  kind: Kind.LegendStats,
   content: string,
   pubkey?: string,
 };
 
+export type NostrUserStatsContent = {
+  kind: Kind.UserStats,
+  content: string,
+  pubkey?: string,
+};
 
 export type NostrMentionContent = {
-  kind: 10000107,
+  kind: Kind.Mentions,
   content: string,
   pubkey?: string,
 };
@@ -54,6 +80,7 @@ export type NostrEventContent =
   NostrStatsContent |
   NostrNetStatsContent |
   NostrLegendStatsContent |
+  NostrUserStatsContent |
   NostrMentionContent;
 
 export type NostrEvent = [

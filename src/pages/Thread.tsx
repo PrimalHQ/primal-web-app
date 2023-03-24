@@ -6,7 +6,7 @@ import { Portal } from 'solid-js/web';
 import { useParams } from '@solidjs/router';
 import { getThread } from '../lib/feed';
 import { convertToNotes, sortByRecency } from '../stores/note';
-import { FeedPage, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
+import { FeedPage, Kind, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
@@ -89,16 +89,16 @@ const Thread: Component = () => {
     }
 
     if (type === 'EVENT') {
-      if (content.kind === 0) {
+      if (content.kind === Kind.Metadata) {
         proccessUser(content);
       }
-      if (content.kind === 1) {
+      if (content.kind === Kind.Text) {
         proccessPost(content);
       }
-      if (content.kind === 6) {
+      if (content.kind === Kind.Repost) {
         proccessPost(content);
       }
-      if (content.kind === 10000100) {
+      if (content.kind === Kind.NoteStats) {
         proccessStat(content);
       }
     }
