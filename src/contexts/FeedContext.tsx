@@ -1,11 +1,9 @@
-import { createContext, createEffect, createResource, createSignal, JSX, onCleanup, onMount, untrack, useContext } from "solid-js";
+import { createContext, createEffect, createSignal, JSX, onCleanup, onMount, useContext } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import {
   FeedStore,
-  Kind,
   NostrEOSE,
   NostrEvent,
-  NostrEventContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
@@ -15,16 +13,9 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import {
-  convertToNotes,
-  sortByRecency,
-  sortByScore,
-  sortByScore24h,
-  sortByZapped,
-} from "../stores/note";
 import { getExploreFeed, getFeed,  } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
-import { initialStore, emptyPage, trendingFeed, noKey } from "../constants";
+import { initialStore, emptyPage, trendingFeed, noKey, Kind } from "../constants";
 import { isConnected, socket } from "../sockets";
 import { getUserProfile } from "../lib/profile";
 import { proccessUserProfile, profile, setPublicKey } from "../stores/profile";
@@ -82,78 +73,78 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     setPage('postStats', (stats) => ({ ...stats, [content.event_id]: content }));
   };
 
-  const proccessEventContent = (content: NostrEventContent, type: string) => {
-    if (type === 'EVENT') {
-      if (content.kind === Kind.Metadata) {
-        proccessUser(content);
-      }
-      if (content.kind === Kind.Text) {
-        proccessPost(content);
-      }
-      if (content.kind === Kind.Repost) {
-        proccessPost(content);
-      }
-      if (content.kind === Kind.NoteStats) {
-        proccessStat(content);
-      }
-    }
-  };
+  // const proccessEventContent = (content: NostrEventContent, type: string) => {
+  //   if (type === 'EVENT') {
+  //     if (content.kind === Kind.Metadata) {
+  //       proccessUser(content);
+  //     }
+  //     if (content.kind === Kind.Text) {
+  //       proccessPost(content);
+  //     }
+  //     if (content.kind === Kind.Repost) {
+  //       proccessPost(content);
+  //     }
+  //     if (content.kind === Kind.NoteStats) {
+  //       proccessStat(content);
+  //     }
+  //   }
+  // };
 
-  const processZappedPost = (type: string, content: NostrEventContent | undefined) => {
+  // const processZappedPost = (type: string, content: NostrEventContent | undefined) => {
 
-    if (type === 'EOSE') {
-      const newPosts = sortByZapped(convertToNotes({
-        users: data.zappedNotes.users,
-        messages: data.zappedNotes.messages,
-        postStats: data.zappedNotes.postStats,
-      }));
+  //   if (type === 'EOSE') {
+  //     const newPosts = sortByZapped(convertToNotes({
+  //       users: data.zappedNotes.users,
+  //       messages: data.zappedNotes.messages,
+  //       postStats: data.zappedNotes.postStats,
+  //     }));
 
-      setData('zappedNotes', 'notes', () => [...newPosts]);
+  //     setData('zappedNotes', 'notes', () => [...newPosts]);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    if (type === 'EVENT') {
-      if (content && content.kind === Kind.Metadata) {
-        setData('zappedNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
-      }
-      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
-        setData('zappedNotes', 'messages',  (msgs) => [ ...msgs, content]);
-      }
-      if (content && content.kind === Kind.NoteStats) {
-        const stat = JSON.parse(content.content);
-        setData('zappedNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
-      }
-    }
-  };
+  //   if (type === 'EVENT') {
+  //     if (content && content.kind === Kind.Metadata) {
+  //       setData('zappedNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
+  //     }
+  //     if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
+  //       setData('zappedNotes', 'messages',  (msgs) => [ ...msgs, content]);
+  //     }
+  //     if (content && content.kind === Kind.NoteStats) {
+  //       const stat = JSON.parse(content.content);
+  //       setData('zappedNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+  //     }
+  //   }
+  // };
 
-  const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
+  // const processTrendingPost = (type: string, content: NostrEventContent | undefined) => {
 
-    if (type === 'EOSE') {
-      const newPosts = sortByScore24h(convertToNotes({
-        users: data.trendingNotes.users,
-        messages: data.trendingNotes.messages,
-        postStats: data.trendingNotes.postStats,
-      }));
+  //   if (type === 'EOSE') {
+  //     const newPosts = sortByScore24h(convertToNotes({
+  //       users: data.trendingNotes.users,
+  //       messages: data.trendingNotes.messages,
+  //       postStats: data.trendingNotes.postStats,
+  //     }));
 
-      setData('trendingNotes', 'notes', () => [...newPosts]);
+  //     setData('trendingNotes', 'notes', () => [...newPosts]);
 
-      return;
-    }
+  //     return;
+  //   }
 
-    if (type === 'EVENT') {
-      if (content && content.kind === Kind.Metadata) {
-        setData('trendingNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
-      }
-      if (content && (content.kind === Kind.Metadata || content.kind === Kind.Repost) {
-        setData('trendingNotes', 'messages',  (msgs) => [ ...msgs, content]);
-      }
-      if (content && content.kind === Kind.NoteStats) {
-        const stat = JSON.parse(content.content);
-        setData('trendingNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
-      }
-    }
-  };
+  //   if (type === 'EVENT') {
+  //     if (content && content.kind === Kind.Metadata) {
+  //       setData('trendingNotes', 'users', (users) => ({ ...users, [content.pubkey]: content}))
+  //     }
+  //     if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
+  //       setData('trendingNotes', 'messages',  (msgs) => [ ...msgs, content]);
+  //     }
+  //     if (content && content.kind === Kind.NoteStats) {
+  //       const stat = JSON.parse(content.content);
+  //       setData('trendingNotes', 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+  //     }
+  //   }
+  // };
 
   const getRelays = async () => {
     const win = window as NostrWindow;
@@ -273,14 +264,14 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
     const [type, subId, content] = message;
 
-    if (subId === `trending_${APP_ID}`) {
-      processTrendingPost(type, content);
-      return;
-    }
-    if (subId === `zapped_4h_${APP_ID}`) {
-      processZappedPost(type, content);
-      return;
-    }
+    // if (subId === `trending_${APP_ID}`) {
+    //   processTrendingPost(type, content);
+    //   return;
+    // }
+    // if (subId === `zapped_4h_${APP_ID}`) {
+    //   processZappedPost(type, content);
+    //   return;
+    // }
 
 
     if (subId === `user_profile_${APP_ID}`) {

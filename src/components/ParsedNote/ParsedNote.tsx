@@ -1,20 +1,31 @@
-import { A, Navigate } from '@solidjs/router';
-import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show, Switch, Match } from 'solid-js';
+import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
-import { date } from '../../lib/dates';
 import { convertToNotes } from '../../stores/note';
 import { hexToNpub } from '../../lib/keys';
 import { parseNote } from '../../lib/notes';
-import { trimVerification } from '../../lib/profile';
 import { socket } from '../../sockets';
-import { TrendingNotesStore } from '../../stores/trending';
-import { FeedPage, Kind, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser, UserReference } from '../../types/primal';
-import Avatar from '../Avatar/Avatar';
-
-import styles from './ParsedNote.module.scss';
 import { truncateNpub } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
+import { Kind } from '../../constants';
+import {
+  Component,
+  createEffect,
+  createSignal,
+  For,
+  onCleanup,
+  onMount,
+  Show,
+} from 'solid-js';
+import {
+  FeedPage,
+  NostrEOSE,
+  NostrEvent,
+  NostrUserContent,
+  PrimalNote,
+  UserReference,
+} from '../../types/primal';
+
+import styles from './ParsedNote.module.scss';
 
 
 const tokenRegex = /(\#\[[\d]+\])/;

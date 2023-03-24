@@ -4,6 +4,7 @@ import { useToastContext } from "../components/Toaster/Toaster";
 import { getExploreFeed } from "../lib/feed";
 import { sortingPlan, convertToNotes } from "../stores/note";
 import { profile } from "../stores/profile";
+import { Kind } from "../constants";
 import {
   createContext,
   createEffect,
@@ -24,7 +25,6 @@ import {
 import {
   ContextChildren,
   FeedPage,
-  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,

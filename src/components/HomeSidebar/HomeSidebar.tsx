@@ -6,6 +6,8 @@ import { date } from '../../lib/dates';
 import { getExploreFeed } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
 import { convertToNotes, sortingPlan } from '../../stores/note';
+import Avatar from '../Avatar/Avatar';
+import { Kind } from '../../constants';
 import {
   isConnected,
   refreshSocketListeners,
@@ -14,13 +16,11 @@ import {
 } from '../../sockets';
 import {
   FeedPage,
-  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
   PrimalNote
 } from '../../types/primal';
-import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeSidebar.module.scss';
 

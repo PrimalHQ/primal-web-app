@@ -1,8 +1,16 @@
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { emptyPage } from "../constants";
+import { emptyPage, Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import {FeedPage, FeedStore, Kind, NostrEventContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalFeed, PrimalNote, PrimalUser } from "../types/primal";
 import { initialStore } from "../constants";
+import {
+  FeedPage,
+  NostrEventContent,
+  NostrNoteContent,
+  NostrStatsContent,
+  NostrUserContent,
+  PrimalFeed,
+  PrimalNote
+} from "../types/primal";
 
 export type HomeStore = {
   notes: PrimalNote[],

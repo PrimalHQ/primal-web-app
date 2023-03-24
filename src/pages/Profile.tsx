@@ -15,11 +15,12 @@ import { humanizeNumber } from '../lib/stats';
 import { isConnected, socket } from '../sockets';
 import { removeFromAvailableFeeds, updateAvailableFeeds } from '../lib/availableFeeds';
 import { ProfileStoreData, truncateNpub } from '../stores/profile';
-import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote, FeedPage, Kind } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEventContent, PrimalNote, FeedPage } from '../types/primal';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
+import { Kind } from '../constants';
 
 const pageId = `user_profile_page_${APP_ID}`;
 

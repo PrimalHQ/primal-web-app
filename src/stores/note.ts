@@ -1,7 +1,8 @@
 import DOMPurify from "dompurify";
 import { noteEncode } from "nostr-tools/nip19";
+import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalUser, Kind } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote } from "../types/primal";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {

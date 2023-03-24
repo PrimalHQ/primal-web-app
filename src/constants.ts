@@ -118,3 +118,25 @@ export const scopeLabels: Record<string, string> = {
 };
 
 export const noKey = 'no-key';
+
+export enum Kind  {
+  Metadata = 0,
+  Text = 1,
+  RecommendRelay = 2,
+  Contacts = 3,
+  EncryptedDirectMessage = 4,
+  EventDeletion = 5,
+  Repost = 6,
+  Reaction = 7,
+  ChannelCreation = 40,
+  ChannelMetadata = 41,
+  ChannelMessage = 42,
+  ChannelHideMessage = 43,
+  ChannelMuteUser = 44,
+
+  NoteStats = 10000100,
+  NetStats = 10000101,
+  LegendStats = 10000102,
+  UserStats = 10000105,
+  Mentions = 10000107,
+}

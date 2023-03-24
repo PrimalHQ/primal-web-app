@@ -6,7 +6,7 @@ import { Portal } from 'solid-js/web';
 import { useParams } from '@solidjs/router';
 import { getThread } from '../lib/feed';
 import { convertToNotes, sortByRecency } from '../stores/note';
-import { FeedPage, Kind, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
+import { FeedPage, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
 import { isConnected, socket } from '../sockets';
 import { createStore } from 'solid-js/store';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
@@ -18,6 +18,7 @@ import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
 import { likedNotes } from '../lib/notes';
 import { hasPublicKey } from '../stores/profile';
+import { Kind } from '../constants';
 
 
 const Thread: Component = () => {

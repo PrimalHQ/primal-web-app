@@ -3,7 +3,7 @@ import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, trendingFeed } from "../constants";
+import { defaultFeeds, Kind, trendingFeed } from "../constants";
 import { removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
 import { getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
@@ -14,7 +14,6 @@ import {
   ContextChildren,
   FeedPage,
   HomeContextStore,
-  Kind,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,

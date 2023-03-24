@@ -1,7 +1,7 @@
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore, SetStoreFunction } from "solid-js/store";
-import { useFeedContext } from "../contexts/FeedContext";
+import { Kind } from "../constants";
 import { FeedStore, NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
@@ -86,7 +86,7 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
   }
 
   if (refs.length > 0) {
-    refs.forEach(ref => {
+    refs.forEach((ref: any) => {
       const tag = note.post.tags[ref];
       if (tag[0] === 'p') {
         getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
@@ -132,7 +132,7 @@ const parseReplyTo = (replyTo?: ReplyTo) => {
 export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
   const event = {
     content: '+',
-    kind: 7,
+    kind: Kind.Reaction,
     tags: [
       ['e', note.post.id],
       ['p', note.post.pubkey],
@@ -151,7 +151,7 @@ export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetSt
   if (success) {
     setStoredLikes([...likes, note.post.id]);
 
-    setLikedNotes(ls => [...ls, note.post.id]);
+    setLikedNotes((ls: string[]) => [...ls, note.post.id]);
 
     setData('posts', p => p.post.id === note.post.id, 'post', 'likes', (l) => l+1);
   }
@@ -163,7 +163,7 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
 
   const event = {
     content: text,
-    kind: 1,
+    kind: Kind.Text,
     tags,
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
@@ -174,7 +174,7 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
 export const sendRepost = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
   const event = {
     content: JSON.stringify(note.msg),
-    kind: 6,
+    kind: Kind.Repost,
     tags: [
       ['e', note.post.id],
       ['p', note.user.pubkey],
@@ -206,7 +206,7 @@ export const getLikes = (userId: string, relays: Relay[]) => {
 
         const sub = relay.sub([
           {
-            kinds: [7],
+            kinds: [Kind.Reaction],
             authors: [userId],
           },
         ]);
@@ -220,7 +220,7 @@ export const getLikes = (userId: string, relays: Relay[]) => {
           }
 
           setStoredLikes([ ...likes, e[1]]);
-          setLikedNotes(ls => [...ls, e[1]]);
+          setLikedNotes((ls: string[]) => [...ls, e[1]]);
         })
         sub.on('eose', () => {
           sub.unsub();
@@ -249,7 +249,7 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
         pub.on('seen', () => {
           console.log(`we saw the event on ${relay.url}`)
         })
-        pub.on('failed', reason => {
+        pub.on('failed', (reason: any) => {
           console.log(`failed to publish to ${relay.url}: ${reason}`)
         })
       });
