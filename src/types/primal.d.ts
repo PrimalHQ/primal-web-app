@@ -176,6 +176,11 @@ export type NostrWindow = Window & typeof globalThis & {
   },
 };
 
+export type PrimalWindow = Window & typeof globalThis & {
+  loadPrimalStores: () => void,
+  primal?: any,
+};
+
 export type NostrMessage = [
   type: "EVENT" | "EOSE",
   subkey: string,

@@ -10,9 +10,28 @@ import Downloads from './pages/Downloads';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Profile from './pages/Profile';
+import { useHomeContext } from './contexts/HomeContext';
+import { useExploreContext } from './contexts/ExploreContext';
+import { useThreadContext } from './contexts/ThreadContext';
+import { PrimalWindow } from './types/primal';
 
+const primalWindow = window as PrimalWindow;
 
 const Router: Component = () => {
+
+  const home = useHomeContext();
+  const explore = useExploreContext();
+  const thread = useThreadContext();
+
+  const loadPrimalStores = () => {
+    primalWindow.primal = {
+      home,
+      explore,
+      thread,
+    };
+  };
+
+  primalWindow.loadPrimalStores = loadPrimalStores;
 
   return (
     <>
