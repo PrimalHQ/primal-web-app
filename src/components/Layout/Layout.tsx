@@ -1,8 +1,7 @@
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import Branding from '../Branding/Branding';
 import { Outlet } from '@solidjs/router';
 import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
@@ -14,7 +13,7 @@ const Layout: Component = () => {
 
   const context = useFeedContext();
 
-  let container;
+  let container: HTMLDivElement | undefined;
 
   createEffect(() => {
     const newNote = document.getElementById('new_note_input');

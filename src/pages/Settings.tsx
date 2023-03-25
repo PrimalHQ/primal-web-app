@@ -8,6 +8,7 @@ import logoFire from '../assets/icons/logo_fire.svg';
 import logoIce from '../assets/icons/logo_ice.svg';
 import check from '../assets/icons/check.svg';
 import FeedSorter from '../components/FeedSorter/FeedSorter';
+import ThemeChooser from '../components/ThemeChooser/ThemeChooser';
 
 
 const Settings: Component = () => {
@@ -45,71 +46,7 @@ const Settings: Component = () => {
       <div class={styles.settingsCaption}>
         Theme
       </div>
-      <div class={styles.themeChooser}>
-        <div class={styles.themeOption}>
-          <button
-            class={`${styles.sunset} ${selectedClass('sunset')}`}
-            onClick={() => context?.actions?.setTheme('sunset')}
-          >
-            <img src={logoFire} />
-            <Show
-              when={context?.data.theme === 'sunset'}
-              fallback={<div class={styles.themeUncheckedDark}></div>}
-            >
-              <div class={styles.themeChecked}><img src={check} /></div>
-            </Show>
-          </button>
-          <p>sunset wave</p>
-        </div>
-
-        <div class={styles.themeOption}>
-          <button
-            class={`${styles.sunrise} ${selectedClass('sunrise')}`}
-            onClick={() => context?.actions?.setTheme('sunrise')}
-          >
-            <img src={logoFire} />
-            <Show
-              when={context?.data.theme === 'sunrise'}
-              fallback={<div class={styles.themeUncheckedLight}></div>}
-            >
-              <div class={styles.themeChecked}><img src={check} /></div>
-            </Show>
-          </button>
-          <p>sunrise wave</p>
-        </div>
-
-        <div class={styles.themeOption}>
-          <button
-            class={`${styles.midnight} ${selectedClass('midnight')}`}
-            onClick={() => context?.actions?.setTheme('midnight')}
-          >
-            <img src={logoIce} />
-            <Show
-              when={context?.data.theme === 'midnight'}
-              fallback={<div class={styles.themeUncheckedDark}></div>}
-            >
-              <div class={styles.themeChecked}><img src={check} /></div>
-            </Show>
-          </button>
-          <p>midnight wave</p>
-        </div>
-
-        <div class={styles.themeOption}>
-          <button
-            class={`${styles.ice} ${selectedClass('ice')}`}
-            onClick={() => context?.actions?.setTheme('ice')}
-          >
-            <img src={logoIce} />
-            <Show
-              when={context?.data.theme === 'ice'}
-              fallback={<div class={styles.themeUncheckedLight}></div>}
-            >
-              <div class={styles.themeChecked}><img src={check} /></div>
-            </Show>
-          </button>
-          <p>ice wave</p>
-        </div>
-      </div>
+      <ThemeChooser />
 
       <div class={styles.settingsCaption}>
         Home page feeds

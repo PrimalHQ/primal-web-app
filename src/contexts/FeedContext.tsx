@@ -189,14 +189,14 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   // const [publicKey, setPublicKey] = createSignal<string>();
 
   createEffect(() => {
-    setData('availableFeeds', initAvailableFeeds(profile.publicKey));
+    // setData('availableFeeds', initAvailableFeeds(profile.publicKey));
 
     if (profile.publicKey) {
       const npub = hexToNpub(profile.publicKey);
       const feed = { name: 'Latest, following', hex: profile.publicKey, npub};
 
-      setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, trendingFeed, feeds));
-      setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, feed, feeds));
+      // setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, trendingFeed, feeds));
+      // setData('availableFeeds', (feeds) => updateAvailableFeedsTop(profile.publicKey, feed, feeds));
       setData('selectedFeed', () => ({...feed}));
       setData('publicKey', () => profile.publicKey);
 
@@ -366,11 +366,11 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
     }
   });
 
-  createEffect(() => {
-    const html: HTMLElement | null = document.querySelector('html');
-    localStorage.setItem('theme', data.theme);
-    html?.setAttribute('data-theme', data.theme);
-  });
+  // createEffect(() => {
+  //   const html: HTMLElement | null = document.querySelector('html');
+  //   localStorage.setItem('theme', data.theme);
+  //   html?.setAttribute('data-theme', data.theme);
+  // });
 
   onMount(() => {
     setData('theme', localStorage.getItem('theme') || 'sunset');

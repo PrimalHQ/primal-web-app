@@ -264,13 +264,17 @@
 
 /* Common styles */
 :root {
-
   --missing-avatar-text: #FFFFFF;
 
   --z-index-header: 10;
   --z-index-floater: 20;
 
   --sidebar-section-icon-gradient: linear-gradient(175.11deg, #FA9A43 6.94%, #FA4343 29.79%, #5B12A4 97.76%), linear-gradient(170.29deg, #CCCCCC 12.73%, #808080 94.98%), #D9D9D9;
+
+  --light-input: #E5E5E5;
+  --light-back: #F5F5F5;
+  --dark-input: #222222;
+  --dark-back: #000000;
 
   .mentioned_user {
     color: var(--accent-1);

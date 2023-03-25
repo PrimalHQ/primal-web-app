@@ -18,6 +18,8 @@ import { HomeProvider } from './contexts/HomeContext';
 import { ExploreProvider } from './contexts/ExploreContext';
 import { ThreadProvider } from './contexts/ThreadContext';
 import Router from './Router';
+import { ProfileProvider } from './contexts/ProfileContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 
 export const APP_ID = Math.floor(Math.random()*10000000000);
@@ -38,14 +40,16 @@ const App: Component = () => {
     <>
       <Toaster>
         <FeedProvider>
-          <HomeProvider>
-            <ExploreProvider>
-              <ThreadProvider>
-                <input id="defocus" class={styles.invisible}/>
-                <Router />
-              </ThreadProvider>
-            </ExploreProvider>
-          </HomeProvider>
+          <SettingsProvider>
+            <HomeProvider>
+              <ExploreProvider>
+                <ThreadProvider>
+                  <input id="defocus" class={styles.invisible}/>
+                  <Router />
+                </ThreadProvider>
+              </ExploreProvider>
+            </HomeProvider>
+          </SettingsProvider>
         </FeedProvider>
       </Toaster>
     </>

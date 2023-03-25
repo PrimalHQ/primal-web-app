@@ -1,9 +1,9 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { getExploreFeed, getThread } from "../lib/feed";
-import { sortingPlan, convertToNotes, sortByRecency } from "../stores/note";
-import { convertToUser, profile } from "../stores/profile";
+import { getThread } from "../lib/feed";
+import { convertToNotes, sortByRecency } from "../stores/note";
+import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -11,11 +11,6 @@ import {
   onCleanup,
   useContext
 } from "solid-js";
-import {
-  getLegendStats,
-  startListeningForNostrStats,
-  stopListeningForNostrStats
-} from "../lib/stats";
 import {
   isConnected,
   refreshSocketListeners,

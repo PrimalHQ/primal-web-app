@@ -320,7 +320,6 @@ export type HomeContextStore = {
   isFetching: boolean,
   scrollTop: number,
   selectedFeed: PrimalFeed | undefined,
-  availableFeeds: PrimalFeed[],
   page: FeedPage,
   lastNote: PrimalNote | undefined,
   actions: {
@@ -332,9 +331,6 @@ export type HomeContextStore = {
     updateScrollTop: (top: number) => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
-    addAvailableFeed: (feed: PrimalFeed) => void,
-    removeAvailableFeed: (feed: PrimalFeed) => void,
-    setAvailableFeeds: (feedList: PrimalFeed[]) => void,
   }
 }
 

@@ -23,13 +23,13 @@ import {
   PrimalFeed,
   PrimalNote,
 } from "../types/primal";
+import { useSettingsContext } from "./SettingsContext";
 
 const initialHomeData = {
   notes: [],
   isFetching: false,
   scrollTop: 0,
   selectedFeed: undefined,
-  availableFeeds: [ ...defaultFeeds ],
   page: { messages: [], users: {}, postStats: {} },
   lastNote: undefined,
 };
@@ -38,21 +38,22 @@ export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
+  const settings = useSettingsContext();
   const toaster = useToastContext();
 
 // ACTIONS --------------------------------------
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
-    updateHomeStore('notes', (notes) => [ ...notes, ...newNotes ]);
-    updateHomeStore('isFetching', () => false);
+    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
+    updateStore('isFetching', () => false);
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0) => {
     const [scope, timeframe] = topic.split(';');
 
-    updateHomeStore('isFetching', true);
-    updateHomeStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('isFetching', true);
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
     if (scope && timeframe && until === 0) {
       const limit = 100;
@@ -72,25 +73,25 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const clearNotes = () => {
-    updateHomeStore('scrollTop', () => 0);
-    updateHomeStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    updateHomeStore('notes', () => []);
-    updateHomeStore('lastNote', () => undefined);
+    updateStore('scrollTop', () => 0);
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('notes', () => []);
+    updateStore('lastNote', () => undefined);
   };
 
   const fetchNextPage = () => {
-    const lastNote = homeStore.notes[homeStore.notes.length - 1];
+    const lastNote = store.notes[store.notes.length - 1];
 
     if (!lastNote) {
       return;
     }
 
-    updateHomeStore('lastNote', () => ({ ...lastNote }));
+    updateStore('lastNote', () => ({ ...lastNote }));
 
     const until = lastNote.post?.created_at || 0;
 
     if (until > 0) {
-      const topic = homeStore.selectedFeed?.hex;
+      const topic = store.selectedFeed?.hex;
 
       if (topic) {
         fetchNotes(topic, `${APP_ID}`, until);
@@ -99,12 +100,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const updateScrollTop = (top: number) => {
-    updateHomeStore('scrollTop', () => top);
+    updateStore('scrollTop', () => top);
   };
 
   const selectFeed = (feed: PrimalFeed | undefined) => {
     if (feed !== undefined && feed.hex !== undefined) {
-      updateHomeStore('selectedFeed', () => ({ ...feed }));
+      updateStore('selectedFeed', () => ({ ...feed }));
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`);
     }
@@ -114,7 +115,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateHomeStore('page', 'users',
+      updateStore('page', 'users',
         (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
       );
       return;
@@ -123,8 +124,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (homeStore.lastNote?.post?.noteId !== noteEncode(message.id)) {
-        updateHomeStore('page', 'messages',
+      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+        updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );
       }
@@ -136,7 +137,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateHomeStore('page', 'postStats',
+      updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
       );
       return;
@@ -144,43 +145,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage) => {
-    const sortingFunction = sortingPlan(homeStore.selectedFeed?.hex);
+    const sortingFunction = sortingPlan(store.selectedFeed?.hex);
 
     const newPosts = sortingFunction(convertToNotes(page));
 
     saveNotes(newPosts);
-  };
-
-  const addAvailableFeed = (feed: PrimalFeed) => {
-    if (!feed) {
-      return;
-    }
-    if (profile.publicKey) {
-      updateHomeStore('availableFeeds',
-        (feeds) => updateAvailableFeedsTop(profile.publicKey, feed, feeds),
-      );
-    }
-  };
-
-  const removeAvailableFeed = (feed: PrimalFeed) => {
-    if (!feed) {
-      return;
-    }
-
-    if (profile.publicKey) {
-      updateHomeStore('availableFeeds',
-        (feeds) => removeFromAvailableFeeds(profile.publicKey, feed, feeds),
-      );
-      toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
-    }
-  };
-
-  const setAvailableFeeds = (feedList: PrimalFeed[]) => {
-    if (profile.publicKey) {
-      updateHomeStore('availableFeeds',
-        () => replaceAvailableFeeds(profile.publicKey, feedList),
-      );
-    }
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -195,7 +164,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
 
     if (type === 'EOSE') {
-      savePage(homeStore.page);
+      savePage(store.page);
       return;
     }
 
@@ -225,8 +194,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         npub,
       };
 
-      addAvailableFeed(trendingFeed);
-      addAvailableFeed(feed);
+      settings?.actions.addAvailableFeed(trendingFeed, true);
+      settings?.actions.addAvailableFeed(feed, true);
     }
   });
 
@@ -249,7 +218,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
 // STORES ---------------------------------------
 
-  const [homeStore, updateHomeStore] = createStore<HomeContextStore>({
+  const [store, updateStore] = createStore<HomeContextStore>({
     ...initialHomeData,
     actions: {
       saveNotes,
@@ -260,16 +229,13 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       updateScrollTop,
       updatePage,
       savePage,
-      addAvailableFeed,
-      removeAvailableFeed,
-      setAvailableFeeds,
     },
   });
 
 // RENDER -------------------------------------
 
   return (
-    <HomeContext.Provider value={homeStore}>
+    <HomeContext.Provider value={store}>
       {props.children}
     </HomeContext.Provider>
   );

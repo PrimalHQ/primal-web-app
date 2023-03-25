@@ -1,0 +1,9 @@
+
+.themeChooser {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+  border-bottom: solid 1px var(--subtile-devider);
+}

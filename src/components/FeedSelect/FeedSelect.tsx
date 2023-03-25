@@ -1,6 +1,7 @@
 import { Component, createEffect, For } from 'solid-js';
 import { useFeedContext } from '../../contexts/FeedContext';
 import { useHomeContext } from '../../contexts/HomeContext';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 import { FeedOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 
@@ -8,7 +9,8 @@ import styles from './FeedSelect.module.scss';
 
 const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
 
-  const context = useHomeContext();
+  const home = useHomeContext();
+  const settings = useSettingsContext();
 
   const selectFeed = (option: FeedOption) => {
     const hex = option.value;
@@ -18,11 +20,11 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
     selector?.blur();
 
     if (hex) {
-      const profile = context?.availableFeeds.find(p => p.hex === hex);
+      const feed = settings?.availableFeeds.find(p => p.hex === hex);
 
       if (hex !== initialValue()?.value) {
-        context?.actions.clearNotes();
-        context?.actions.selectFeed(profile);
+        home?.actions.clearNotes();
+        home?.actions.selectFeed(feed);
       }
       return;
     }
@@ -30,7 +32,7 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
   };
 
   const isSelected = (option: FeedOption) => {
-    const selected = context?.selectedFeed;
+    const selected = home?.selectedFeed;
 
     if (selected?.hex) {
       return selected.hex === option.value;
@@ -40,11 +42,11 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
   }
 
   const options:() => FeedOption[] = () => {
-    if (context?.availableFeeds === undefined) {
+    if (settings?.availableFeeds === undefined) {
      return [];
     }
 
-    return context.availableFeeds.map(feed => {
+    return settings.availableFeeds.map(feed => {
       return ({
         label: feed.name,
         value: feed.hex,
@@ -53,7 +55,7 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
   };
 
   const initialValue = () => {
-    const selected = context?.selectedFeed;
+    const selected = home?.selectedFeed;
 
     if (!selected) {
       return {
@@ -62,7 +64,7 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
       };
     }
 
-    const feed = context?.availableFeeds.find(f =>
+    const feed = settings?.availableFeeds.find(f =>
       f.hex === selected.hex
     );
 

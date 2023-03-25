@@ -108,8 +108,8 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
-    updateExploreStore('notes', (notes) => [ ...notes, ...newNotes ]);
-    updateExploreStore('isFetching', () => false);
+    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
+    updateStore('isFetching', () => false);
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0, limit = 100) => {
@@ -117,9 +117,9 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     if (scope && timeframe) {
 
-      updateExploreStore('scope', () => scope);
-      updateExploreStore('timeframe', () => timeframe);
-      updateExploreStore('subId', () => subId);
+      updateStore('scope', () => scope);
+      updateStore('timeframe', () => timeframe);
+      updateStore('subId', () => subId);
 
       getExploreFeed(
         profile.publicKey || '',
@@ -134,27 +134,27 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateExploreStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    updateExploreStore('notes', () => []);
-    updateExploreStore('lastNote', () => undefined);
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('notes', () => []);
+    updateStore('lastNote', () => undefined);
   };
 
   const fetchNextPage = () => {
-    const lastNote = exploreStore.notes[exploreStore.notes.length - 1];
+    const lastNote = store.notes[store.notes.length - 1];
 
     if (!lastNote) {
       return;
     }
 
-    updateExploreStore('lastNote', () => ({ ...lastNote }));
+    updateStore('lastNote', () => ({ ...lastNote }));
 
     // Disable pagination for explore feeds
     const until = 0; //lastNote.post?.created_at || 0;
 
     if (until > 0) {
       fetchNotes(
-        `${exploreStore.scope};${exploreStore.timeframe}`,
-        `${exploreStore.subId}`,
+        `${store.scope};${store.timeframe}`,
+        `${store.subId}`,
         until,
         20,
       );
@@ -165,7 +165,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateExploreStore('page', 'users',
+      updateStore('page', 'users',
         (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
       );
       return;
@@ -174,8 +174,8 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (exploreStore.lastNote?.post?.noteId !== noteEncode(message.id)) {
-        updateExploreStore('page', 'messages',
+      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+        updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );
       }
@@ -187,7 +187,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateExploreStore('page', 'postStats',
+      updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
       );
       return;
@@ -195,7 +195,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage) => {
-    const sort = sortingPlan(exploreStore.timeframe);
+    const sort = sortingPlan(store.timeframe);
 
     const newPosts = sort(convertToNotes(page));
 
@@ -203,11 +203,11 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   };
 
   const openNetStatsStream = () => {
-    startListeningForNostrStats(exploreStore.subId);
+    startListeningForNostrStats(store.subId);
   };
 
   const closeNetStatsStream = () => {
-    stopListeningForNostrStats(exploreStore.subId);
+    stopListeningForNostrStats(store.subId);
   };
 
   const fetchLegendStats = (pubkey?: string) => {
@@ -215,7 +215,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    getLegendStats(pubkey, exploreStore.subId);
+    getLegendStats(pubkey, store.subId);
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -225,9 +225,9 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === `explore_${exploreStore.subId}`) {
+    if (subId === `explore_${store.subId}`) {
       if (type === 'EOSE') {
-        savePage(exploreStore.page);
+        savePage(store.page);
         return;
       }
 
@@ -237,15 +237,15 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       }
     }
 
-    if (subId === `netstats_${exploreStore.subId}` && content?.content) {
+    if (subId === `netstats_${store.subId}` && content?.content) {
       const stats = JSON.parse(content.content);
 
       if (content.kind === Kind.NetStats) {
-        updateExploreStore('stats', () => ({ ...stats }));
+        updateStore('stats', () => ({ ...stats }));
       }
 
       if (content.kind === Kind.LegendStats) {
-        updateExploreStore('legend', () => ({ ...stats }));
+        updateStore('legend', () => ({ ...stats }));
       }
 
     }
@@ -280,7 +280,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 // STORES ---------------------------------------
 
-  const [exploreStore, updateExploreStore] = createStore<ExploreContextStore>({
+  const [store, updateStore] = createStore<ExploreContextStore>({
     ...initialExploreData,
     actions: {
       saveNotes,
@@ -298,7 +298,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 // RENDER ---------------------------------------
 
   return (
-    <ExploreContext.Provider value={exploreStore}>
+    <ExploreContext.Provider value={store}>
       {props.children}
     </ExploreContext.Provider>
   );

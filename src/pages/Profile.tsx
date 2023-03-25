@@ -21,6 +21,7 @@ import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { Kind } from '../constants';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 const pageId = `user_profile_page_${APP_ID}`;
 
@@ -43,6 +44,8 @@ const emptyPage: FeedPage = {
 const Profile: Component = () => {
 
   const context = useFeedContext();
+
+  const settings = useSettingsContext();
 
   const toaster = useToastContext();
 
@@ -211,7 +214,8 @@ const Profile: Component = () => {
       npub: hexToNpub(profile.publicKey),
     };
 
-    context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
+    settings?.actions.addAvailableFeed(feed);
+    // context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
     toaster?.sendSuccess(`${profile.activeUser?.name}'s feed added to home page`);
   };
 
@@ -222,13 +226,14 @@ const Profile: Component = () => {
       npub: hexToNpub(profile.publicKey),
     };
 
-    context?.actions?.setData('availableFeeds', (feeds) => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds))
+    settings?.actions.removeAvailableFeed(feed);
+    // context?.actions?.setData('availableFeeds', (feeds) => removeFromAvailableFeeds(context?.data.publicKey, feed, feeds))
     toaster?.sendSuccess(`${profile.activeUser?.name}'s feed removed from home page`);
   };
 
   const hasFeedAtHome = () => {
 
-    return !!context?.data.availableFeeds.find(f => f.hex === profile.publicKey);
+    return !!settings?.availableFeeds.find(f => f.hex === profile.publicKey);
   };
 
   const copyNpub = () => {

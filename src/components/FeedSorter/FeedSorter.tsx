@@ -1,6 +1,7 @@
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useHomeContext } from '../../contexts/HomeContext';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 import { PrimalFeed } from '../../types/primal';
 
 import styles from './FeedSorter.module.scss';
@@ -10,20 +11,20 @@ const FeedSorter: Component = () => {
 
   let sorter: any;
 
-  const home = useHomeContext();
+  const settings = useSettingsContext();
 
   const [orderedFeeds, setOrderedFeeds] = createStore<PrimalFeed[]>([]);
 
   const availableFeeds = () => {
-    return home?.availableFeeds || [];
+    return settings?.availableFeeds || [];
   };
 
   const removeFeed = (feed: PrimalFeed) => {
-    home?.actions.removeAvailableFeed(feed);
+    settings?.actions.removeAvailableFeed(feed);
   };
 
   const reorderFeeds = (feedList: PrimalFeed[]) => {
-    home?.actions.setAvailableFeeds(feedList);
+    settings?.actions.setAvailableFeeds(feedList);
   };
 
   const sortList = (target: any) => {

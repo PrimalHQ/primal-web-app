@@ -20,23 +20,25 @@ import { profile } from '../stores/profile';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { scrollWindowTo } from '../lib/scroll';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 
 const Home: Component = () => {
 
   const context = useHomeContext();
+  const settings = useSettingsContext();
 
   const isPageLoading = () => context?.isFetching;
 
   const onPubKeyFound = createReaction(() => {
-    context?.actions.selectFeed(context.availableFeeds[0]);
+    context?.actions.selectFeed(settings?.availableFeeds[0]);
   });
 
   onMount(() => {
     scrollWindowTo(context?.scrollTop);
 
     if (!context?.selectedFeed) {
-      context?.actions.selectFeed(context.availableFeeds[0]);
+      context?.actions.selectFeed(settings?.availableFeeds[0]);
     }
     onPubKeyFound(() => profile.publicKey);
   });

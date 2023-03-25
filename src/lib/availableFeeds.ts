@@ -1,17 +1,17 @@
-import { initialStore } from "../constants";
+import { defaultFeeds, initialStore, noKey } from "../constants";
 import { PrimalFeed } from "../types/primal";
 
 const storageKey = (pubKey: string | undefined) => {
-  return pubKey ? `saved_feeds_${pubKey}` : 'saved_feeds_anon';
+  return pubKey && pubKey !== noKey ? `saved_feeds_${pubKey}` : 'saved_feeds_anon';
 };
 
 export const initAvailableFeeds = (pubKey: string | undefined) => {
   const storedFeeds = JSON.parse(localStorage.getItem(storageKey(pubKey)) || '["empty"]');
 
   if (storedFeeds[0] === 'empty' || !pubKey) {
-    localStorage.setItem(storageKey(pubKey), JSON.stringify(initialStore.availableFeeds));
+    localStorage.setItem(storageKey(pubKey), JSON.stringify(defaultFeeds));
 
-    return initialStore.availableFeeds;
+    return defaultFeeds;
   }
 
   return storedFeeds;

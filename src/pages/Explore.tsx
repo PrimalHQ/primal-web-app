@@ -16,6 +16,7 @@ import { scopeLabels, timeframeLabels } from '../constants';
 import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
 import { updateAvailableFeeds } from '../lib/availableFeeds';
 import { useToastContext } from '../components/Toaster/Toaster';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -28,6 +29,8 @@ const titleCase = (text: string) => {
 const Explore: Component = () => {
 
   const context = useFeedContext();
+
+  const settings = useSettingsContext();
 
   const toaster = useToastContext();
 
@@ -48,7 +51,7 @@ const Explore: Component = () => {
     const hasFeedAtHome = () => {
       const hex = `${params.scope};${params.timeframe}`;
 
-      return !!context?.data.availableFeeds.find(f => f.hex === hex);
+      return !!settings?.availableFeeds.find(f => f.hex === hex);
     };
 
     const addToHomeFeed = () => {
@@ -56,7 +59,8 @@ const Explore: Component = () => {
       const name = titleCase(`${timeframeLabels[params.timeframe]}, ${scopeLabels[params.scope]}`);
       const feed = { name, hex };
 
-      context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
+      settings?.actions.addAvailableFeed(feed);
+      // context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
 
       toaster?.sendSuccess(`"${name}" has been added to your home page`);
     };
