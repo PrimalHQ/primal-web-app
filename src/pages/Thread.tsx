@@ -1,14 +1,8 @@
-import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
-import { APP_ID, useFeedContext } from '../contexts/FeedContext';
-import { Portal } from 'solid-js/web';
 import { useParams } from '@solidjs/router';
-import { getThread } from '../lib/feed';
-import { convertToNotes, sortByRecency } from '../stores/note';
-import { FeedPage, NostrEOSE, NostrEvent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from '../types/primal';
-import { isConnected, socket } from '../sockets';
-import { createStore } from 'solid-js/store';
+import { PrimalNote } from '../types/primal';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
@@ -16,12 +10,8 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
-import { likedNotes } from '../lib/notes';
 import { hasPublicKey } from '../stores/profile';
-import { Kind } from '../constants';
 import { useThreadContext } from '../contexts/ThreadContext';
-import { useHomeContext } from '../contexts/HomeContext';
-import { useExploreContext } from '../contexts/ExploreContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 
 
@@ -36,20 +26,16 @@ const Thread: Component = () => {
     return noteEncode(params.postId);
   };
 
-  const homeContext = useHomeContext();
-  const exploreContext = useExploreContext();
   const threadContext = useThreadContext();
 
-  const threadContexts: Record<string, any> = {
-    home: homeContext,
-    explore: exploreContext,
-    thread: threadContext,
-  };
-
   const primaryNote = () => {
-    const context = threadContexts[threadContext?.threadContext || 'thread'];
+    const savedNote = threadContext?.primaryNote;
 
-    return context?.notes.find((n: PrimalNote) => n.post.noteId === postId());
+    if (savedNote?.post.noteId === postId()) {
+      return savedNote;
+    }
+
+    return threadContext?.notes.find(n => n.post.noteId === postId());
   };
 
   const parentNotes = () => {

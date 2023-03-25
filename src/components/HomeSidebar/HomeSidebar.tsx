@@ -23,6 +23,7 @@ import {
 } from '../../types/primal';
 
 import styles from './HomeSidebar.module.scss';
+import SmallNote from '../SmallNote/SmallNote';
 
 
 const HomeSidebar: Component = () => {
@@ -140,29 +141,11 @@ const HomeSidebar: Component = () => {
           <span>24h</span>
         </div>
       </div>
+
       <For each={data.trending.notes}>
-        {
-          (post) =>
-            <div>
-              <div class={styles.trendingPost}>
-                <A href={`/profile/${post.user.npub}`} class={styles.avatar}>
-                  <Avatar src={post.user?.picture} size="xxs" />
-                </A>
-                <A href={`/thread/${post.post.noteId}`} class={styles.content}>
-                  <div class={styles.header}>
-                    <div class={styles.name}>
-                      {post.user?.name}
-                    </div>
-                    <div class={styles.time}>
-                      {date(post.post?.created_at).label}
-                    </div>
-                  </div>
-                  <div class={styles.message}>{post.post?.content}</div>
-                </A>
-              </div>
-            </div>
-        }
+        {(note) => <SmallNote note={note} />}
       </For>
+
       <div class={styles.headingZapped}>
         <div>
           <div class={styles.zapIcon}></div>
@@ -172,27 +155,14 @@ const HomeSidebar: Component = () => {
       </div>
       <For each={data.mostzapped.notes}>
         {
-          (post) =>
-            <div>
-              <div class={styles.trendingPost}>
-                <A href={`/profile/${post.user.npub}`} class={styles.avatar}>
-                  <Avatar src={post.user?.picture} size="xxs" />
-                </A>
-                <A href={`/thread/${post.post.noteId}`} class={styles.content}>
-                  <div class={styles.header}>
-                    <div class={styles.name} title={post.user?.name}>
-                      {post.user?.name}
-                    </div>
-                    <div class={styles.time}>
-                      {humanizeNumber(post.post.zaps, true)} zaps
-                      <span>, </span>
-                      {humanizeNumber(post.post.satszapped, true)} sats
-                    </div>
-                  </div>
-                  <div class={styles.message}>{post.post?.content}</div>
-                </A>
-              </div>
-            </div>
+          (note) =>
+            <SmallNote
+              note={note}
+            >
+              {humanizeNumber(note.post.zaps, true)} zaps
+              <span>, </span>
+              {humanizeNumber(note.post.satszapped, true)} sats
+            </SmallNote>
         }
       </For>
     </div>

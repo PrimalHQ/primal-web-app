@@ -1,6 +1,6 @@
-import { A, Navigate } from '@solidjs/router';
-import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
+import { A } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
+import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { trimVerification } from '../../lib/profile';
 import { PrimalNote } from '../../types/primal';
@@ -11,12 +11,17 @@ import styles from './EmbeddedNote.module.scss';
 
 const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
 
-  const user = () => props.note.user;
+  const threadContext = useThreadContext();
+
+  const navToThread = (note: PrimalNote) => {
+    threadContext?.actions.setPrimaryNote(note);
+  };
 
   return (
     <A
     href={`/thread/${props.note.post.noteId}`}
     class={styles.mentionedNote}
+    onClick={() => navToThread(props.note)}
   >
     <div class={styles.mentionedNoteHeader}>
       <Avatar

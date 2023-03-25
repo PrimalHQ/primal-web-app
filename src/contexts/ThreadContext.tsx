@@ -37,7 +37,7 @@ import {
 import { APP_ID } from "../App";
 
 export type ThreadContextStore = {
-  threadContext: string | undefined,
+  primaryNote: PrimalNote | undefined,
   noteId: string;
   notes: PrimalNote[],
   users: PrimalUser[],
@@ -51,12 +51,12 @@ export type ThreadContextStore = {
     fetchNextPage: () => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
-    setThreadContext: (context: string | undefined) => void,
+    setPrimaryNote: (context: PrimalNote | undefined) => void,
   }
 }
 
 export const initialData = {
-  threadContext: undefined,
+  primaryNote: undefined,
   noteId: '',
   parentNotes: [],
   notes: [],
@@ -152,8 +152,8 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     saveNotes(newPosts);
   };
 
-  const setThreadContext = (context: string | undefined) => {
-    updateStore('threadContext', () => context);
+  const setPrimaryNote = (context: PrimalNote | undefined) => {
+    updateStore('primaryNote', () => ({ ...context }));
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -240,7 +240,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       fetchNextPage,
       updatePage,
       savePage,
-      setThreadContext,
+      setPrimaryNote,
     },
   });
 

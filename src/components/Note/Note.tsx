@@ -7,19 +7,30 @@ import NoteFooter from './NoteFooter/NoteFooter';
 import NoteHeader from './NoteHeader/NoteHeader';
 
 import styles from './Note.module.scss';
+import { useThreadContext } from '../../contexts/ThreadContext';
 
 const Note: Component<{ note: PrimalNote }> = (props) => {
 
+  const threadContext = useThreadContext();
+
   const repost = () => props.note.repost;
 
+  const navToThread = (note: PrimalNote) => {
+    threadContext?.actions.setPrimaryNote(note);
+  };
+
   return (
-    <A class={styles.postLink} href={`/thread/${props.note?.post.noteId}`}>
+    <A
+      class={styles.postLink}
+      href={`/thread/${props.note?.post.noteId}`}
+      onClick={() => navToThread(props.note)}
+    >
       <Show when={repost()}>
         <div class={styles.repostedBy}>
           <div class={styles.repostIcon}></div>
           <span>
-            <A href={`/profile/${repost().user.npub}`} >
-              {repost().user.name}
+            <A href={`/profile/${repost()?.user.npub}`} >
+              {repost()?.user.name}
             </A>
             reposted
           </span>
