@@ -1,12 +1,5 @@
-import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
-import { APP_ID, useFeedContext } from '../contexts/FeedContext';
-import { getLegendStats, startListeningForNostrStats, stopListeningForNostrStats } from '../lib/stats';
-import { isConnected, socket } from '../sockets';
+import { Component, Show } from 'solid-js';
 import styles from './Explore.module.scss';
-import NostrStats from '../components/NostrStats/NostrStats';
-import { PrimalNetStats } from '../types/primal';
 import ExploreMenu from './ExploreMenu';
 import Feed from './Feed';
 import { useParams } from '@solidjs/router';
@@ -14,9 +7,10 @@ import Branding from '../components/Branding/Branding';
 import PageNav from '../components/PageNav/PageNav';
 import { scopeLabels, timeframeLabels } from '../constants';
 import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
-import { updateAvailableFeeds } from '../lib/availableFeeds';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
+import StickySidebar from '../components/StickySidebar/StickySidebar';
+import Wormhole from '../components/Wormhole/Wormhole';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -28,13 +22,9 @@ const titleCase = (text: string) => {
 
 const Explore: Component = () => {
 
-  const context = useFeedContext();
-
   const settings = useSettingsContext();
 
   const toaster = useToastContext();
-
-    const [mounted, setMounted] = createSignal(false);
 
     const params = useParams();
 
@@ -60,36 +50,21 @@ const Explore: Component = () => {
       const feed = { name, hex };
 
       settings?.actions.addAvailableFeed(feed);
-      // context?.actions?.setData('availableFeeds', (feeds) => updateAvailableFeeds(context?.data.publicKey, feed, feeds));
 
       toaster?.sendSuccess(`"${name}" has been added to your home page`);
     };
 
-    onMount(() => {
-
-      setTimeout(() => {
-        // Temporary fix for Portal rendering on initial load.
-        setMounted(true);
-      }, 0);
-
-    });
-
     return (
       <>
-        <Show when={mounted()}>
-          <Portal
-            mount={document.getElementById("branding_holder") as Node}
+        <Wormhole to="branding_holder">
+          <Show
+            when={hasParams()}
+            fallback={<Branding small={false} />}
           >
-            <Show
-              when={hasParams()}
-              fallback={
-                <Branding small={false} />
-              }
-            >
-              <PageNav />
-            </Show>
-          </Portal>
-        </Show>
+            <PageNav />
+          </Show>
+        </Wormhole>
+
         <div id="central_header" class={styles.fullHeader}>
           <Show
             when={hasParams()}
@@ -115,20 +90,14 @@ const Explore: Component = () => {
               </div>
           </Show>
         </div>
-        <Show when={mounted()}>
-          <Portal mount={document.getElementById("right_sidebar") as Node}>
-            <ExploreSidebar />
-          </Portal>
-        </Show>
 
+        <StickySidebar>
+          <ExploreSidebar />
+        </StickySidebar>
 
         <Show
           when={hasParams()}
-          fallback={
-            <>
-              <ExploreMenu />
-            </>
-          }
+          fallback={<ExploreMenu />}
         >
           <Feed scope={params.scope} timeframe={params.timeframe} />
         </Show>
