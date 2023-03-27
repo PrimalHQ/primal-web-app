@@ -10,11 +10,6 @@ export const truncateNpub = (npub: string) => {
 export type ProfileStoreData = {
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
-  userStats?: {
-    follows_count: number,
-    followers_count: number,
-    note_count: number,
-  },
 }
 
 const initialStore: ProfileStoreData = {

@@ -23,11 +23,12 @@ import { getLikes } from "../lib/notes";
 import { noteEncode } from "nostr-tools/nip19";
 import { Relay, relayInit } from "nostr-tools";
 import { initAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
+import { APP_ID } from "../App";
 
 
 export const FeedContext = createContext<PrimalContextStore>();
 
-export const APP_ID = Math.floor(Math.random()*10000000000);
+// export const APP_ID = Math.floor(Math.random()*10000000000);
 
 export function FeedProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
@@ -39,21 +40,21 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
   const [relays, setRelays] = createStore<Relay[]>([]);
 
-  createEffect(() => {
-    const until = oldestPost()?.post.created_at || 0;
+  // createEffect(() => {
+  //   const until = oldestPost()?.post.created_at || 0;
 
-    if (until > 0) {
-      const pubkey = data?.selectedFeed?.hex;
+  //   if (until > 0) {
+  //     const pubkey = data?.selectedFeed?.hex;
 
-      if (pubkey) {
-        setData('isFetching', true);
+  //     if (pubkey) {
+  //       setData('isFetching', true);
 
-        setPage({ messages: [], users: {}, postStats: {} });
+  //       setPage({ messages: [], users: {}, postStats: {} });
 
-        getFeed(pubkey, `user_feed_${APP_ID}`, until);
-      }
-    }
-  });
+  //       getFeed(pubkey, `user_feed_${APP_ID}`, until);
+  //     }
+  //   }
+  // });
 
   const proccessPost = (post: NostrNoteContent) => {
 
@@ -275,6 +276,7 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
 
 
     if (subId === `user_profile_${APP_ID}`) {
+      console.log('processing')
       content && proccessUserProfile(content);
 
       // Temporary quick & dirty fix for dissapearing avatar
@@ -327,44 +329,44 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   };
   // ------------------------------------------------------
 
-  createEffect(() => {
-    if (isConnected()) {
-      socket()?.removeEventListener('message', onMessage);
-      socket()?.removeEventListener('close', onSocketClose);
-      socket()?.addEventListener('message', onMessage);
-      socket()?.addEventListener('close', onSocketClose);
+  // createEffect(() => {
+  //   if (isConnected()) {
+  //     socket()?.removeEventListener('message', onMessage);
+  //     socket()?.removeEventListener('close', onSocketClose);
+  //     socket()?.addEventListener('message', onMessage);
+  //     socket()?.addEventListener('close', onSocketClose);
 
-      setData('posts', () => []);
-      setData('scrollTop', () => 0);
-      setPage({ messages: [], users: {}, postStats: {} });
+  //     setData('posts', () => []);
+  //     setData('scrollTop', () => 0);
+  //     setPage({ messages: [], users: {}, postStats: {} });
 
-      window.scrollTo({
-        top: 0,
-        left: 0,
-        // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
-        behavior: 'instant',
-      });
+  //     window.scrollTo({
+  //       top: 0,
+  //       left: 0,
+  //       // @ts-expect-error https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/5
+  //       behavior: 'instant',
+  //     });
 
-      const selected = data?.selectedFeed;
+  //     const selected = data?.selectedFeed;
 
-      const pubkey = selected?.hex;
+  //     const pubkey = selected?.hex;
 
-      if (pubkey) {
-        const [scope, timeframe] = pubkey.split(';');
+  //     if (pubkey) {
+  //       const [scope, timeframe] = pubkey.split(';');
 
-        if (scope && timeframe) {
-          profile?.publicKey && getExploreFeed(profile.publicKey, `user_feed_explore_${APP_ID}`, scope, timeframe, 0, 100);
-          return;
-        }
+  //       if (scope && timeframe) {
+  //         profile?.publicKey && getExploreFeed(profile.publicKey, `user_feed_explore_${APP_ID}`, scope, timeframe, 0, 100);
+  //         return;
+  //       }
 
-        getFeed(pubkey, `user_feed_${APP_ID}`);
-        return;
-      }
-    }
-    else {
-      socket()?.removeEventListener('message', onMessage);
-    }
-  });
+  //       getFeed(pubkey, `user_feed_${APP_ID}`);
+  //       return;
+  //     }
+  //   }
+  //   else {
+  //     socket()?.removeEventListener('message', onMessage);
+  //   }
+  // });
 
   // createEffect(() => {
   //   const html: HTMLElement | null = document.querySelector('html');
@@ -372,13 +374,13 @@ export function FeedProvider(props: { children: number | boolean | Node | JSX.Ar
   //   html?.setAttribute('data-theme', data.theme);
   // });
 
-  onMount(() => {
-    setData('theme', localStorage.getItem('theme') || 'sunset');
+  // onMount(() => {
+  //   setData('theme', localStorage.getItem('theme') || 'sunset');
 
-    setTimeout(() => {
-      fetchNostrKey();
-    }, 1000);
-  });
+  //   setTimeout(() => {
+  //     fetchNostrKey();
+  //   }, 1000);
+  // });
 
   onCleanup(() => {
     socket()?.removeEventListener('message', onMessage);

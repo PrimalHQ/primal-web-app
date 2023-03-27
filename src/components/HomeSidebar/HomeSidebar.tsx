@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, createEffect, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { APP_ID } from '../../contexts/FeedContext';
+import { APP_ID } from '../../App';
 import { date } from '../../lib/dates';
 import { getExploreFeed } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';

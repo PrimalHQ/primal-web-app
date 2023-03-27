@@ -1,10 +1,7 @@
-import { noteEncode } from "nostr-tools/nip19";
 import { createStore, unwrap } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { getThread, getUserFeed } from "../lib/feed";
-import { convertToNotes, sortByRecency } from "../stores/note";
 import { profile, setPublicKey } from "../stores/profile";
-import { defaultFeeds, Kind, noKey, trendingFeed } from "../constants";
+import { defaultFeeds, noKey } from "../constants";
 import {
   createContext,
   createEffect,
@@ -20,23 +17,20 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
-  FeedPage,
   NostrEOSE,
   NostrEvent,
-  NostrEventContent,
-  NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
   NostrWindow,
   PrimalFeed,
-  PrimalNote,
   PrimalUser,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { initAvailableFeeds, removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
-import { hexToNpub } from "../lib/keys";
-import { getLikes } from "../lib/notes";
-import { fetchLikes, getUserProfile } from "../lib/profile";
+import {
+  initAvailableFeeds,
+  removeFromAvailableFeeds,
+  replaceAvailableFeeds,
+  updateAvailableFeeds,
+  updateAvailableFeedsTop
+} from "../lib/availableFeeds";
 import { Relay, relayInit } from "nostr-tools";
 
 export type SettingsContextStore = {

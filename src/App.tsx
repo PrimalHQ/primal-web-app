@@ -41,14 +41,16 @@ const App: Component = () => {
       <Toaster>
         <FeedProvider>
           <SettingsProvider>
-            <HomeProvider>
-              <ExploreProvider>
-                <ThreadProvider>
-                  <input id="defocus" class={styles.invisible}/>
-                  <Router />
-                </ThreadProvider>
-              </ExploreProvider>
-            </HomeProvider>
+            <ProfileProvider>
+              <HomeProvider>
+                <ExploreProvider>
+                  <ThreadProvider>
+                    <input id="defocus" class={styles.invisible}/>
+                    <Router />
+                  </ThreadProvider>
+                </ExploreProvider>
+              </HomeProvider>
+            </ProfileProvider>
           </SettingsProvider>
         </FeedProvider>
       </Toaster>

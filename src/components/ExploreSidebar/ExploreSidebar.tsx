@@ -2,7 +2,7 @@ import { A } from '@solidjs/router';
 import { Component, createEffect, createMemo, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
-import { APP_ID } from '../../contexts/FeedContext';
+import { APP_ID } from '../../App';
 import { getExploreFeed } from '../../lib/feed';
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
 import { sortingPlan, convertToNotes } from '../../stores/note';
