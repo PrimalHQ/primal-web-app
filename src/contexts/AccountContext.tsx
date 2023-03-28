@@ -122,10 +122,10 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         localStorage.setItem('pubkey', key);
       }
     } catch (e: any) {
-      if (e.message === 'User rejected') {
+      // if (e.message === 'User rejected') {
         setPublicKey(noKey);
         localStorage.setItem('pubkey', noKey);
-      }
+      // }
       console.log('error fetching public key: ', e);
     }
   }
@@ -214,7 +214,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     const [type, subId, content] = message;
 
     if (subId === `user_profile_${APP_ID}`) {
-      if (content) {
+      if (content?.content) {
         const user = JSON.parse(content.content);
 
         updateStore('activeUser', () => ({...user}));
