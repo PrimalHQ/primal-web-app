@@ -4,10 +4,12 @@ import { sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
+import { useToastContext } from '../../Toaster/Toaster';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const account = useAccountContext();
+  const toast = useToastContext();
 
   const liked = () => account?.likes.includes(props.note.post.id);
 
@@ -43,6 +45,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     }
   };
 
+  const doZap = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    toast?.notImplemented();
+  }
+
   return (
     <div class={styles.footer}>
       <div class={styles.stat}>
@@ -57,10 +66,10 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         <div class={styles.repostIcon}></div>
         <div class={styles.statNumber}>{reposts() || ''}</div>
       </button>
-      <div class={styles.stat}>
+      <button class={styles.stat} onClick={doZap}>
         <div class={styles.zapIcon}></div>
         <div class={styles.statNumber}>{props.note.post?.satszapped || ''}</div>
-      </div>
+      </button>
     </div>
   )
 }
