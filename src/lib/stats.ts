@@ -29,7 +29,7 @@ export const stopListeningForNostrStats = (subId: string) => {
 export const getLegendStats = (pubkey: string | undefined, subId: string) => {
   pubkey && sendMessage(JSON.stringify([
     "REQ",
-    `netstats_${subId}`,
+    `legendstats_${subId}`,
     {"cache":["explore_legend_counts",{ pubkey }]},
   ]));
 }

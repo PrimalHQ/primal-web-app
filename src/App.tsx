@@ -11,7 +11,7 @@ import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 
 
-export const APP_ID = Math.floor(Math.random()*10000000000);
+export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
 
 const App: Component = () => {
 

@@ -32,12 +32,12 @@ import {
   NostrUserContent,
   PrimalNote,
 } from "../types/primal";
+import { APP_ID } from "../App";
 
 export type ExploreContextStore = {
   notes: PrimalNote[],
   scope: string,
   timeframe: string,
-  subId: string,
   isFetching: boolean,
   page: FeedPage,
   lastNote: PrimalNote | undefined,
@@ -60,7 +60,7 @@ export type ExploreContextStore = {
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
-    fetchNotes: (topic: string, subId: string, until?: number) => void,
+    fetchNotes: (topic: string, until?: number, limit?: number) => void,
     fetchNextPage: () => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
@@ -75,7 +75,6 @@ export const initialExploreData = {
   isFetching: false,
   scope: 'global',
   timeframe: 'latest',
-  subId: '',
   page: { messages: [], users: {}, postStats: {} },
   lastNote: undefined,
   isNetStatsStreamOpen: false,
@@ -111,18 +110,17 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
-  const fetchNotes = (topic: string, subId: string, until = 0, limit = 100) => {
+  const fetchNotes = (topic: string, until = 0, limit = 100) => {
     const [scope, timeframe] = topic.split(';');
 
     if (scope && timeframe) {
 
       updateStore('scope', () => scope);
       updateStore('timeframe', () => timeframe);
-      updateStore('subId', () => subId);
 
       getExploreFeed(
         account?.publicKey || '',
-        `explore_${subId}`,
+        `explore_${APP_ID}`,
         scope,
         timeframe,
         until,
@@ -153,7 +151,6 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if (until > 0) {
       fetchNotes(
         `${store.scope};${store.timeframe}`,
-        `${store.subId}`,
         until,
         20,
       );
@@ -202,11 +199,11 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   };
 
   const openNetStatsStream = () => {
-    startListeningForNostrStats(store.subId);
+    startListeningForNostrStats(APP_ID);
   };
 
   const closeNetStatsStream = () => {
-    stopListeningForNostrStats(store.subId);
+    stopListeningForNostrStats(APP_ID);
   };
 
   const fetchLegendStats = (pubkey?: string) => {
@@ -214,7 +211,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    getLegendStats(pubkey, store.subId);
+    getLegendStats(pubkey, APP_ID);
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -224,7 +221,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === `explore_${store.subId}`) {
+    if (subId === `explore_${APP_ID}`) {
       if (type === 'EOSE') {
         savePage(store.page);
         return;
@@ -236,7 +233,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       }
     }
 
-    if (subId === `netstats_${store.subId}` && content?.content) {
+    if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId) && content?.content) {
       const stats = JSON.parse(content.content);
 
       if (content.kind === Kind.NetStats) {
