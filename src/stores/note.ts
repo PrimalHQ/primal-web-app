@@ -29,6 +29,21 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   }
 };
 
+export const parseEmptyReposts = (page: FeedPage) => {
+  let reposts: Record<string, string> = {};
+
+  page.messages.forEach(message => {
+    if (message.kind === 6 && message.content.length === 0) {
+      const tag = message.tags.find(t => t[0] === 'e');
+      if (tag) {
+        reposts[tag[1]] = message.id;
+      }
+    }
+  });
+
+  return reposts;
+};
+
 const parseKind6 = (message: NostrNoteContent) => {
   try {
     return JSON.parse(message.content);

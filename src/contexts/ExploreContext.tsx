@@ -1,8 +1,8 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
-import { getExploreFeed } from "../lib/feed";
+import { getEvents, getExploreFeed } from "../lib/feed";
 import { useAccountContext } from "./AccountContext";
-import { sortingPlan, convertToNotes } from "../stores/note";
+import { sortingPlan, convertToNotes, parseEmptyReposts } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -41,6 +41,7 @@ export type ExploreContextStore = {
   isFetching: boolean,
   page: FeedPage,
   lastNote: PrimalNote | undefined,
+  reposts: Record<string, string> | undefined,
   isNetStatsStreamOpen: boolean,
   stats: {
     users: number,
@@ -76,6 +77,7 @@ export const initialExploreData = {
   scope: 'global',
   timeframe: 'latest',
   page: { messages: [], users: {}, postStats: {} },
+  reposts: {},
   lastNote: undefined,
   isNetStatsStreamOpen: false,
   stats: {
@@ -133,6 +135,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   const clearNotes = () => {
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     updateStore('notes', () => []);
+    updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
   };
 
@@ -223,7 +226,18 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     if (subId === `explore_${APP_ID}`) {
       if (type === 'EOSE') {
-        savePage(store.page);
+        const reposts = parseEmptyReposts(store.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          savePage(store.page);
+          return;
+        }
+
+        updateStore('reposts', () => reposts);
+
+        getEvents(ids, `explore_reposts_${APP_ID}`);
+
         return;
       }
 
@@ -243,7 +257,25 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       if (content.kind === Kind.LegendStats) {
         updateStore('legend', () => ({ ...stats }));
       }
+    }
 
+    if (subId === `explore_reposts_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        const repostId = (content as NostrNoteContent).id;
+        const reposts = store.reposts || {};
+        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+        if (parent) {
+          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+        }
+
+        return;
+      }
     }
   };
 

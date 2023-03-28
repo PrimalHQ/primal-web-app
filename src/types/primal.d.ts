@@ -322,6 +322,7 @@ export type HomeContextStore = {
   selectedFeed: PrimalFeed | undefined,
   page: FeedPage,
   lastNote: PrimalNote | undefined,
+  reposts: Record<string, string> | undefined,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,

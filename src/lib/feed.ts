@@ -1,8 +1,6 @@
-import { isConnected, sendMessage, socket } from "../sockets";
-import { ExploreFeedPayload, FeedPage, NostrNoteContent, PrimalNote, PrimalUser, RepostInfo } from "../types/primal";
-import { hexToNpub } from "./keys";
-import DOMPurify from 'dompurify';
-import { noteEncode, decode } from "nostr-tools/nip19";
+import { sendMessage } from "../sockets";
+import { ExploreFeedPayload } from "../types/primal";
+import { decode } from "nostr-tools/nip19";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -13,6 +11,16 @@ export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) =>
     {cache: ["feed", { pubkey, limit, [start]: until }]},
   ]));
 }
+
+export const getEvents = (eventIds: string[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["events", { event_ids: eventIds }]},
+  ]));
+
+};
+
 export const getUserFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';

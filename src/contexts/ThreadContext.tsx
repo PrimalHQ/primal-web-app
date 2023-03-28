@@ -1,8 +1,7 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
-import { useToastContext } from "../components/Toaster/Toaster";
-import { getThread } from "../lib/feed";
-import { convertToNotes, sortByRecency } from "../stores/note";
+import { getEvents, getThread } from "../lib/feed";
+import { convertToNotes, parseEmptyReposts, sortByRecency } from "../stores/note";
 import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {
@@ -38,6 +37,7 @@ export type ThreadContextStore = {
   users: PrimalUser[],
   isFetching: boolean,
   page: FeedPage,
+  reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
@@ -59,6 +59,7 @@ export const initialData = {
   replyNotes: [],
   isFetching: false,
   page: { messages: [], users: {}, postStats: {} },
+  reposts: {},
   lastNote: undefined,
 };
 
@@ -66,8 +67,6 @@ export const initialData = {
 export const ThreadContext = createContext<ThreadContextStore>();
 
 export const ThreadProvider = (props: { children: ContextChildren }) => {
-
-  const toaster = useToastContext();
 
 // ACTIONS --------------------------------------
 
@@ -86,6 +85,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const clearNotes = () => {
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     updateStore('notes', () => []);
+    updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
   };
 
@@ -160,12 +160,42 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     if (subId === `thread_${APP_ID}`) {
       if (type === 'EOSE') {
-        savePage(store.page);
+        const reposts = parseEmptyReposts(store.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          savePage(store.page);
+          return;
+        }
+
+        updateStore('reposts', () => reposts);
+
+        getEvents(ids, `thread_reposts_${APP_ID}`);
+
         return;
       }
 
       if (type === 'EVENT') {
         updatePage(content);
+        return;
+      }
+    }
+
+    if (subId === `thread_reposts_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        const repostId = (content as NostrNoteContent).id;
+        const reposts = store.reposts || {};
+        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+        if (parent) {
+          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+        }
+
         return;
       }
     }

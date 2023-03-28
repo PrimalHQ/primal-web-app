@@ -5,10 +5,10 @@ import { APP_ID } from "../App";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { defaultFeeds, Kind, trendingFeed } from "../constants";
 import { removeFromAvailableFeeds, replaceAvailableFeeds, updateAvailableFeedsTop } from "../lib/availableFeeds";
-import { getExploreFeed, getFeed } from "../lib/feed";
+import { getEvents, getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { sortingPlan, convertToNotes } from "../stores/note";
+import { sortingPlan, convertToNotes, parseEmptyReposts } from "../stores/note";
 import {
   ContextChildren,
   FeedPage,
@@ -31,6 +31,7 @@ const initialHomeData = {
   scrollTop: 0,
   selectedFeed: undefined,
   page: { messages: [], users: {}, postStats: {} },
+  reposts: {},
   lastNote: undefined,
 };
 
@@ -76,6 +77,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => 0);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     updateStore('notes', () => []);
+    updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
   };
 
@@ -159,19 +161,48 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId !== `home_feed_${APP_ID}`) {
-      return;
+    if (subId === `home_feed_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const reposts = parseEmptyReposts(store.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          savePage(store.page);
+          return;
+        }
+
+        updateStore('reposts', () => reposts);
+
+        getEvents(ids, `home_reposts_${APP_ID}`);
+
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
     }
 
-    if (type === 'EOSE') {
-      savePage(store.page);
-      return;
+    if (subId === `home_reposts_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        const repostId = (content as NostrNoteContent).id;
+        const reposts = store.reposts || {};
+        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+        if (parent) {
+          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+        }
+
+        return;
+      }
     }
 
-    if (type === 'EVENT') {
-      updatePage(content);
-      return;
-    }
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {

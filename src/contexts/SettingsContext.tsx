@@ -29,6 +29,7 @@ import {
 import { useAccountContext } from "./AccountContext";
 
 export type SettingsContextStore = {
+  locale: string,
   theme: string,
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
@@ -42,6 +43,7 @@ export type SettingsContextStore = {
 }
 
 export const initialData = {
+  locale: 'en-us',
   theme: 'sunset',
   themes,
   availableFeeds: [ ...defaultFeeds ],
