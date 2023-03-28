@@ -156,7 +156,7 @@ export const sortingPlan = (topic: string = '') => {
     mostzapped: sortByZapped,
   }
 
-  const plan = topic.split(';')[1] || 'latest';
+  const plan = topic || 'latest';
 
-  return sortingFunctions[plan];
+  return sortingFunctions[plan] || sortingFunctions['latest'];
 };
