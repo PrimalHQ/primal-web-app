@@ -1,10 +1,11 @@
-import { Component, JSXElement, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import styles from './ThemeOption.module.scss';
 
 import check from '../../../assets/icons/check.svg';
+import { PrimalTheme } from '../../../types/primal';
 
 const ThemeOption: Component<{
-  theme: { name: string, label: string, logo: string, dark?: boolean },
+  theme: PrimalTheme,
   isSelected: boolean,
   onSelect: (value: string) => void,
 }> = (props) => {

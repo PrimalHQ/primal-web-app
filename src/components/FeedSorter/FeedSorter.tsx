@@ -13,18 +13,12 @@ const FeedSorter: Component = () => {
 
   const settings = useSettingsContext();
 
-  const [orderedFeeds, setOrderedFeeds] = createStore<PrimalFeed[]>([]);
-
   const availableFeeds = () => {
     return settings?.availableFeeds || [];
   };
 
   const removeFeed = (feed: PrimalFeed) => {
     settings?.actions.removeAvailableFeed(feed);
-  };
-
-  const reorderFeeds = (feedList: PrimalFeed[]) => {
-    settings?.actions.setAvailableFeeds(feedList);
   };
 
   const sortList = (target: any) => {
@@ -80,17 +74,13 @@ const FeedSorter: Component = () => {
           const oldIndex = current.getAttribute('data-index');
           const newIndex = i.getAttribute('data-index');
 
-          let list = [...orderedFeeds];
-
-          list.splice(newIndex, 0, list.splice(oldIndex, 1)[0]);
+          settings?.actions.moveAvailableFeed(oldIndex, newIndex);
 
           for (let it of items) {
             it.classList.remove(styles.draggedBefore);
             it.classList.remove(styles.draggedBefore);
             it.classList.remove(styles.draggeditem);
           }
-
-          reorderFeeds(list);
         }
       };
     }
@@ -98,7 +88,6 @@ const FeedSorter: Component = () => {
 
   createEffect(() => {
     if (sorter && availableFeeds().length > 0) {
-      setOrderedFeeds(() => availableFeeds());
       sortList(sorter);
     }
   });

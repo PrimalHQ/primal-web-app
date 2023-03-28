@@ -1,4 +1,4 @@
-import { defaultFeeds, initialStore, noKey } from "../constants";
+import { defaultFeeds, noKey } from "../constants";
 import { PrimalFeed } from "../types/primal";
 
 const storageKey = (pubKey: string | undefined) => {

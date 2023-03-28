@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds } from "../constants";
+import { defaultFeeds, themes } from "../constants";
 import {
   createContext,
   createEffect,
@@ -17,6 +17,7 @@ import {
 import {
   ContextChildren,
   PrimalFeed,
+  PrimalTheme,
 } from "../types/primal";
 import {
   initAvailableFeeds,
@@ -29,17 +30,20 @@ import { useAccountContext } from "./AccountContext";
 
 export type SettingsContextStore = {
   theme: string,
+  themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
   actions: {
     setTheme: (theme: string | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
+    moveAvailableFeed: (fromIndex: number, toIndex: number) => void,
   }
 }
 
 export const initialData = {
   theme: 'sunset',
+  themes,
   availableFeeds: [ ...defaultFeeds ],
 };
 
@@ -91,6 +95,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         () => replaceAvailableFeeds(account?.publicKey, feedList),
       );
     }
+  };
+
+  const moveAvailableFeed = (fromIndex: number, toIndex: number) => {
+
+    let list = [...store.availableFeeds];
+
+    list.splice(toIndex, 0, list.splice(fromIndex, 1)[0]);
+
+    store.actions.setAvailableFeeds(list);
+
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -154,6 +168,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       addAvailableFeed,
       removeAvailableFeed,
       setAvailableFeeds,
+      moveAvailableFeed,
     },
   });
 

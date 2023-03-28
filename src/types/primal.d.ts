@@ -334,4 +334,6 @@ export type HomeContextStore = {
   }
 }
 
+export type PrimalTheme = { name: string, label: string, logo: string, dark?: boolean};
+
 export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };
