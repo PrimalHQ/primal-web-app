@@ -27,6 +27,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     if (success) {
       setReposts(reposts() + 1);
+      toast?.sendSuccess('Reposted successfully');
     }
   };
 
