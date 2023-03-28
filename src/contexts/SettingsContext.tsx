@@ -33,7 +33,7 @@ export type SettingsContextStore = {
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
   actions: {
-    setTheme: (theme: string | null) => void,
+    setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
@@ -57,12 +57,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const setTheme = (theme: string | null) => {
+  const setTheme = (theme: PrimalTheme | null) => {
     if (!theme) {
       return;
     }
 
-    updateStore('theme', () => theme);
+    updateStore('theme', () => theme.name);
   }
 
   const addAvailableFeed = (feed: PrimalFeed, addToTop = false) => {
@@ -127,7 +127,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   onMount(() => {
-    setTheme(localStorage.getItem('theme'));
+    const storedTheme = localStorage.getItem('theme');
+    const availableTheme = store.themes.find(t => t.name === storedTheme);
+    availableTheme && setTheme(availableTheme);
   });
 
   createEffect(() => {

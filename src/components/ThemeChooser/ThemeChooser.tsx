@@ -15,7 +15,7 @@ const ThemeChooser: Component = () => {
           <ThemeOption
             theme={theme}
             isSelected={settings?.theme === theme.name}
-            onSelect={() => settings?.actions?.setTheme(theme.name)}
+            onSelect={() => settings?.actions?.setTheme(theme)}
           />
         )}
       </For>

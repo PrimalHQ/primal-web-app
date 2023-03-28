@@ -7,7 +7,7 @@ import { PrimalTheme } from '../../../types/primal';
 const ThemeOption: Component<{
   theme: PrimalTheme,
   isSelected: boolean,
-  onSelect: (value: string) => void,
+  onSelect: (value: PrimalTheme) => void,
 }> = (props) => {
 
   const selectedClass = () => {
@@ -22,7 +22,7 @@ const ThemeOption: Component<{
       <div class={styles.themeOption}>
         <button
           class={`${styles[props.theme.name]} ${selectedClass()}`}
-          onClick={() => props.onSelect(props.theme.name)}
+          onClick={() => props.onSelect(props.theme)}
         >
           <img src={props.theme.logo} />
           <Show
