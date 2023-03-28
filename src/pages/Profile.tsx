@@ -30,7 +30,7 @@ const Profile: Component = () => {
 
   const settings = useSettingsContext();
   const toaster = useToastContext();
-  const profileContext = useProfileContext();
+  const profile = useProfileContext();
   const account = useAccountContext();
 
   const params = useParams();
@@ -46,10 +46,14 @@ const Profile: Component = () => {
   }
 
   const setProfile = (hex: string | undefined) => {
-    profileContext?.actions.setProfileKey(hex);
+    if (hex === profile?.profileKey) {
+      return;
+    }
 
-    profileContext?.actions.clearNotes();
-    profileContext?.actions.fetchNotes(hex);
+    profile?.actions.setProfileKey(hex);
+
+    profile?.actions.clearNotes();
+    profile?.actions.fetchNotes(hex);
   }
 
   const react = createReaction(() => {
@@ -76,17 +80,17 @@ const Profile: Component = () => {
   });
 
   const profileNpub = createMemo(() => {
-    return hexToNpub(profileContext?.profileKey);
+    return hexToNpub(profile?.profileKey);
   });
 
   const profileName = () => {
-    return profileContext?.userProfile?.name || truncateNpub(profileNpub());
+    return profile?.userProfile?.name || truncateNpub(profileNpub());
   }
 
   const addToHome = () => {
     const feed = {
       name: `${profileName()}'s feed`,
-      hex: profileContext?.profileKey,
+      hex: profile?.profileKey,
       npub: profileNpub(),
     };
 
@@ -97,7 +101,7 @@ const Profile: Component = () => {
   const removeFromHome = () => {
     const feed = {
       name: `${profileName()}'s feed`,
-      hex: profileContext?.profileKey,
+      hex: profile?.profileKey,
       npub: profileNpub(),
     };
 
@@ -106,11 +110,11 @@ const Profile: Component = () => {
   };
 
   const hasFeedAtHome = () => {
-    return !!settings?.availableFeeds.find(f => f.hex === profileContext?.profileKey);
+    return !!settings?.availableFeeds.find(f => f.hex === profile?.profileKey);
   };
 
   const copyNpub = () => {
-    navigator.clipboard.writeText(profileContext?.userProfile?.npub || profileNpub());
+    navigator.clipboard.writeText(profile?.userProfile?.npub || profileNpub());
   }
 
   const imgError = (event: any) => {
@@ -140,12 +144,12 @@ const Profile: Component = () => {
 
       <div id="central_header" class={styles.fullHeader}>
         <div class={styles.banner}>
-          <img src={profileContext?.userProfile?.banner || ''} onerror={imgError}/>
+          <img src={profile?.userProfile?.banner || ''} onerror={imgError}/>
         </div>
 
         <div class={styles.userImage}>
           <div class={styles.avatar}>
-            <Avatar src={profileContext?.userProfile?.picture} size="xxl" />
+            <Avatar src={profile?.userProfile?.picture} size="xxl" />
           </div>
         </div>
 
@@ -169,7 +173,7 @@ const Profile: Component = () => {
                 class={styles.smallSecondaryButton}
                 onClick={removeFromHome}
                 title={`remove ${profileName()}'s feed from your home page`}
-                disabled={profileContext?.profileKey === account?.publicKey}
+                disabled={profile?.profileKey === account?.publicKey}
               >
                 <div class={styles.removeFeedIcon}></div>
               </button>
@@ -194,23 +198,23 @@ const Profile: Component = () => {
         <div class={styles.profileVerification}>
           <div class={styles.avatarName}>
             {profileName()}
-            <Show when={profileContext?.userProfile?.nip05}>
+            <Show when={profile?.userProfile?.nip05}>
               <div class={styles.verifiedIconL}></div>
             </Show>
           </div>
           <div class={styles.verificationInfo}>
-            <Show when={profileContext?.userProfile?.nip05}>
+            <Show when={profile?.userProfile?.nip05}>
               <div class={styles.verifiedIconS}></div>
-              <div class={styles.nip05}>{profileContext?.userProfile?.nip05}</div>
+              <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
             </Show>
             <div class={styles.publicKey}>
               <div class={styles.keyIcon}></div>
               <button
                 class={styles.npub}
-                title={profileContext?.userProfile?.npub || profileNpub()}
+                title={profile?.userProfile?.npub || profileNpub()}
                 onClick={copyNpub}
               >
-                {truncateNpub(profileContext?.userProfile?.npub || profileNpub())}
+                {truncateNpub(profile?.userProfile?.npub || profileNpub())}
                 <div class={styles.copyIcon}></div>
               </button>
             </div>
@@ -218,21 +222,21 @@ const Profile: Component = () => {
         </div>
 
         <div class={styles.profileAbout}>
-          {profileContext?.userProfile?.about}
+          {profile?.userProfile?.about}
         </div>
 
         <div class={styles.profileLinks}>
           <div class={styles.website}>
-            <Show when={profileContext?.userProfile?.website}>
+            <Show when={profile?.userProfile?.website}>
               <div class={styles.linkIcon}></div>
-              <a href={rectifyUrl(profileContext?.userProfile?.website || '')} target="_blank">
-                {profileContext?.userProfile?.website}
+              <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                {profile?.userProfile?.website}
               </a>
             </Show>
           </div>
           {/* <div class={styles.joined}>
-            <Show when={profileContext?.userProfile?.created_at}>
-              Joined Nostr on {shortDate(profileContext?.userProfile?.created_at)}
+            <Show when={profile?.userProfile?.created_at}>
+              Joined Nostr on {shortDate(profile?.userProfile?.created_at)}
             </Show>
           </div> */}
         </div>
@@ -240,19 +244,19 @@ const Profile: Component = () => {
         <div class={styles.userStats}>
           <div class={styles.userStat}>
             <div class={styles.statNumber}>
-              {humanizeNumber(profileContext?.userStats?.follows_count || 0)}
+              {humanizeNumber(profile?.userStats?.follows_count || 0)}
             </div>
             <div class={styles.statName}>following</div>
           </div>
           <div class={styles.userStat}>
             <div class={styles.statNumber}>
-              {humanizeNumber(profileContext?.userStats?.followers_count || 0)}
+              {humanizeNumber(profile?.userStats?.followers_count || 0)}
             </div>
             <div class={styles.statName}>followers</div>
           </div>
           <div class={styles.userStat}>
             <div class={styles.statNumber}>
-              {humanizeNumber(profileContext?.userStats?.note_count || 0)}
+              {humanizeNumber(profile?.userStats?.note_count || 0)}
             </div>
             <div class={styles.statName}>notes</div>
           </div>
@@ -262,12 +266,12 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
-        <For each={profileContext?.notes}>
+        <For each={profile?.notes}>
           {note => (
             <Note note={note} />
           )}
         </For>
-        <Paginator loadNextPage={profileContext?.actions.fetchNextPage}/>
+        <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
       </div>
     </>
   )
