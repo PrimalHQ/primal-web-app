@@ -29,6 +29,11 @@ export const defaultFeeds = [
     npub: 'npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m',
   },
   {
+    name: 'Rockstar\'s feed',
+    hex: '91c9a5e1a9744114c6fe2d61ae4de82629eaaa0fb52f48288093c7e7e036f832',
+    npub: 'npub1j8y6tcdfw3q3f3h794s6un0gyc5742s0k5h5s2yqj0r70cpklqeqjavrvg',
+  },
+  {
     name: 'Der Gigi\'s feed',
     hex: '6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93',
     npub: 'npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc',
