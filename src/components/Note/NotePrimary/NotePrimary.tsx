@@ -18,7 +18,11 @@ const trimVerification = (address: string) => {
 const NotePrimary: Component<{ note: PrimalNote }> = (props) => {
 
   return (
-      <div class={styles.post}>
+      <div
+        class={styles.post}
+        data-event={props.note.post.id}
+        data-event-bech32={props.note.post.noteId}
+      >
         <div class={styles.border}></div>
         <div
           class={styles.avatar}

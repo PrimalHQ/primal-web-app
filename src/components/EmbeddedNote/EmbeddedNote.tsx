@@ -22,6 +22,8 @@ const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
     href={`/thread/${props.note.post.noteId}`}
     class={styles.mentionedNote}
     onClick={() => navToThread(props.note)}
+    data-event={props.note.post.id}
+    data-event-bech32={props.note.post.noteId}
   >
     <div class={styles.mentionedNoteHeader}>
       <Avatar

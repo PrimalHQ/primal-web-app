@@ -24,6 +24,8 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
       class={styles.postLink}
       href={`/thread/${props.note?.post.noteId}`}
       onClick={() => navToThread(props.note)}
+      data-event={props.note.post.id}
+      data-event-bech32={props.note.post.noteId}
     >
       <Show when={repost()}>
         <div class={styles.repostedBy}>
