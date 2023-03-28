@@ -1,17 +1,13 @@
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import Avatar from '../Avatar/Avatar';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './HomeHeaderPhone.module.scss';
-import miljan from '../../assets/icons/miljan.jpg';
-import PostButton from '../PostButton/PostButton';
 import FeedSelect from '../FeedSelect/FeedSelect';
-import { useFeedContext } from '../../contexts/FeedContext';
-import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import Branding from '../Branding/Branding';
+import { useHomeContext } from '../../contexts/HomeContext';
 
 const HomeHeaderPhone: Component = () => {
 
-  const context = useFeedContext();
+  const home = useHomeContext();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -20,13 +16,15 @@ const HomeHeaderPhone: Component = () => {
     const smallHeader = document.getElementById('phone_header');
     const border = document.getElementById('small_bottom_border');
 
-    context?.actions?.updatedFeedScroll(scrollTop);
+    home?.actions?.updateScrollTop(scrollTop);
 
     const isScrollingDown = scrollTop > lastScrollTop;
     lastScrollTop = scrollTop;
 
     if (scrollTop < 117) {
-      border.style.display = 'none';
+      if (border) {
+        border.style.display = 'none';
+      }
       smallHeader?.classList.remove(styles.hiddenSelector);
       smallHeader?.classList.remove(styles.fixedSelector);
       return;
@@ -37,7 +35,9 @@ const HomeHeaderPhone: Component = () => {
       return;
     }
 
-    border.style.display = 'flex';
+    if (border) {
+      border.style.display = 'flex';
+    }
     smallHeader?.classList.remove(styles.instaHide);
 
     if (!isScrollingDown) {
@@ -63,7 +63,7 @@ const HomeHeaderPhone: Component = () => {
         <div class={styles.logo}>
           <Branding small={true} />
         </div>
-        <Show when={context?.data.selectedFeed}>
+        <Show when={home?.selectedFeed}>
           <FeedSelect isPhone={true} />
         </Show>
       </div>

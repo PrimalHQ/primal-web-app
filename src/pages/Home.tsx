@@ -15,18 +15,19 @@ import Paginator from '../components/Paginator/Paginator';
 import HomeSidebar from '../components/HomeSidebar/HomeSidebar';
 import Branding from '../components/Branding/Branding';
 import HomeHeaderPhone from '../components/HomeHeaderPhone/HomeHeaderPhone';
-import { useHomeContext } from '../contexts/HomeContext';
-import { profile } from '../stores/profile';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { scrollWindowTo } from '../lib/scroll';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
+import { useHomeContext } from '../contexts/HomeContext';
 import { useSettingsContext } from '../contexts/SettingsContext';
+import { useAccountContext } from '../contexts/AccountContext';
 
 
 const Home: Component = () => {
 
   const context = useHomeContext();
   const settings = useSettingsContext();
+  const account = useAccountContext();
 
   const isPageLoading = () => context?.isFetching;
 
@@ -40,7 +41,7 @@ const Home: Component = () => {
     if (!context?.selectedFeed) {
       context?.actions.selectFeed(settings?.availableFeeds[0]);
     }
-    onPubKeyFound(() => profile.publicKey);
+    onPubKeyFound(() => account?.publicKey);
   });
 
   return (

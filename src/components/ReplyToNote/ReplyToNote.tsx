@@ -1,7 +1,7 @@
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
-import { useFeedContext } from "../../contexts/FeedContext";
+import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
-import { PrimalNetStats, PrimalNote } from "../../types/primal";
+import { PrimalNote } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./ReplyToNote.module.scss";
 
@@ -40,9 +40,9 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
   const [open, setOpen] = createSignal(false);
 
-  const context = useFeedContext();
+  const account = useAccountContext();
 
-  const activeUser = () => context?.data.activeUser;
+  const activeUser = () => account?.activeUser;
 
   onMount(() => {
     // @ts-expect-error TODO: fix types here
@@ -82,8 +82,8 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
       p: props.note.post.pubkey,
     };
 
-    if (context) {
-      sendNote(textArea.value, context?.relays, replyTo);
+    if (account) {
+      sendNote(textArea.value, account.relays, replyTo);
     }
 
     closeReplyToNote();

@@ -1,9 +1,8 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
-import { useToastContext } from "../components/Toaster/Toaster";
 import { getExploreFeed } from "../lib/feed";
+import { useAccountContext } from "./AccountContext";
 import { sortingPlan, convertToNotes } from "../stores/note";
-import { profile } from "../stores/profile";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -102,7 +101,7 @@ export const ExploreContext = createContext<ExploreContextStore>();
 
 export const ExploreProvider = (props: { children: ContextChildren }) => {
 
-  const toaster = useToastContext();
+  const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
@@ -122,7 +121,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       updateStore('subId', () => subId);
 
       getExploreFeed(
-        profile.publicKey || '',
+        account?.publicKey || '',
         `explore_${subId}`,
         scope,
         timeframe,

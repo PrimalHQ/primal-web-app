@@ -9,7 +9,6 @@ import { getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes } from "../stores/note";
-import { hasPublicKey, profile } from "../stores/profile";
 import {
   ContextChildren,
   FeedPage,
@@ -23,6 +22,7 @@ import {
   PrimalFeed,
   PrimalNote,
 } from "../types/primal";
+import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
 
 const initialHomeData = {
@@ -39,7 +39,7 @@ export const HomeContext = createContext<HomeContextStore>();
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const settings = useSettingsContext();
-  const toaster = useToastContext();
+  const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
@@ -58,8 +58,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (scope && timeframe && until === 0) {
       const limit = 100;
 
-      profile?.publicKey && getExploreFeed(
-        profile.publicKey,
+      account?.publicKey && getExploreFeed(
+        account.publicKey,
         `home_feed_${subId}`,
         scope,
         timeframe,
@@ -186,11 +186,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (hasPublicKey()) {
-      const npub = hexToNpub(profile.publicKey);
+    if (account?.hasPublicKey()) {
+      const npub = hexToNpub(account?.publicKey);
       const feed = {
         name: 'Latest, following',
-        hex: profile.publicKey,
+        hex: account?.publicKey,
         npub,
       };
 

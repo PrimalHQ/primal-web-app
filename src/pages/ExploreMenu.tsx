@@ -5,25 +5,26 @@ import styles from './ExploreMenu.module.scss';
 import NostrStats from '../components/NostrStats/NostrStats';
 import ExploreMenuItem from '../components/ExploreMenuItem/ExploreMenuItem';
 import { initialExploreData, useExploreContext } from '../contexts/ExploreContext';
-import { profile } from '../stores/profile';
+import { useAccountContext } from '../contexts/AccountContext';
 
 
 const ExploreMenu: Component = () => {
 
-  const context = useExploreContext();
+  const explore = useExploreContext();
+  const account = useAccountContext();
 
-  const legend = () => context?.legend || { ...initialExploreData.legend };
-  const stats = () => context?.stats || { ...initialExploreData.stats };
+  const legend = () => explore?.legend || { ...initialExploreData.legend };
+  const stats = () => explore?.stats || { ...initialExploreData.stats };
 
   createEffect(() => {
     if (isConnected()) {
-      context?.actions.fetchLegendStats(profile.publicKey);
-      context?.actions.openNetStatsStream();
+      explore?.actions.fetchLegendStats(account?.publicKey);
+      explore?.actions.openNetStatsStream();
     }
   });
 
   onCleanup(() => {
-    context?.actions.closeNetStatsStream();
+    explore?.actions.closeNetStatsStream();
   });
 
   return (

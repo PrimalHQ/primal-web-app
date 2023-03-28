@@ -1,4 +1,4 @@
-import { Component, createResource } from 'solid-js';
+import { Component } from 'solid-js';
 import { Routes, Route, Navigate } from "@solidjs/router"
 import Home from './pages/Home';
 import Layout from './components/Layout/Layout';
@@ -10,23 +10,32 @@ import Downloads from './pages/Downloads';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 import Profile from './pages/Profile';
+import { PrimalWindow } from './types/primal';
 import { useHomeContext } from './contexts/HomeContext';
 import { useExploreContext } from './contexts/ExploreContext';
 import { useThreadContext } from './contexts/ThreadContext';
-import { PrimalWindow } from './types/primal';
+import { useAccountContext } from './contexts/AccountContext';
+import { useProfileContext } from './contexts/ProfileContext';
+import { useSettingsContext } from './contexts/SettingsContext';
 
 const primalWindow = window as PrimalWindow;
 
 const Router: Component = () => {
 
+  const account = useAccountContext();
+  const profile = useProfileContext();
+  const settings = useSettingsContext();
   const home = useHomeContext();
   const explore = useExploreContext();
   const thread = useThreadContext();
 
   const loadPrimalStores = () => {
     primalWindow.primal = {
-      home,
+      account,
       explore,
+      home,
+      profile,
+      settings,
       thread,
     };
   };

@@ -1,26 +1,21 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
+import { A } from '@solidjs/router';
+import Avatar from '../Avatar/Avatar';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { trimVerification } from '../../lib/profile';
+import { hexToNpub } from '../../lib/keys';
 
 import styles from './ProfileWidget.module.scss';
 
-import Branding from '../Branding/Branding';
-import { A, Outlet } from '@solidjs/router';
-import Search from '../Search/Search';
-import NavMenu from '../NavMenu/NavMenu';
-import Avatar from '../Avatar/Avatar';
-import { useFeedContext } from '../../contexts/FeedContext';
-import { trimVerification } from '../../lib/profile';
-import { hexToNpub } from '../../lib/keys';
-import { hasPublicKey } from '../../stores/profile';
-
 const ProfileWidget: Component = () => {
 
-  const context = useFeedContext()
+  const account = useAccountContext()
 
-  const activeUser = () => context?.data.activeUser;
+  const activeUser = () => account?.activeUser;
 
   return (
     <div>
-      <Show when={hasPublicKey()}>
+      <Show when={account?.hasPublicKey()}>
         <A href="/profile" class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
@@ -30,7 +25,7 @@ const ProfileWidget: Component = () => {
             />
           </div>
           <div class={styles.userInfo}>
-            <div class={styles.userName}>{activeUser()?.name || hexToNpub(context?.data.publicKey)}</div>
+            <div class={styles.userName}>{activeUser()?.name || hexToNpub(account?.publicKey)}</div>
             <div class={styles.userVerification}>
               {trimVerification(activeUser()?.nip05)}
             </div>

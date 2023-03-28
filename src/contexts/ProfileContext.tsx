@@ -55,14 +55,16 @@ export type ProfileContextStore = {
   }
 }
 
+export const emptyStats = {
+  follows_count: 0,
+  followers_count: 0,
+  note_count: 0,
+};
+
 export const initialData = {
   profileKey: undefined,
   userProfile: undefined,
-  userStats: {
-    follows_count: 0,
-    followers_count: 0,
-    note_count: 0,
-  },
+  userStats: { ...emptyStats },
   notes: [],
   isFetching: false,
   page: { messages: [], users: {}, postStats: {} },
@@ -155,10 +157,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const setProfileKey = (profileKey?: string) => {
     updateStore('profileKey', () => profileKey);
 
-    console.log('pk: ', profileKey)
-
     if (profileKey) {
-      console.log('get profile info');
+      updateStore('userProfile', () => undefined);
+      updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
     }
   }
@@ -191,7 +192,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         user.npub = hexToNpub(content.pubkey);
         user.created_at = content.created_at;
 
-        updateStore('userProfile', () => ({ ...user }));
+        updateStore('userProfile', () => user);
         return;
       }
 

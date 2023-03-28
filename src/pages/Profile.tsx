@@ -2,6 +2,7 @@ import { useParams } from '@solidjs/router';
 import { decode } from 'nostr-tools/nip19';
 import {
   Component,
+  createEffect,
   createMemo,
   createReaction,
   For,
@@ -13,13 +14,14 @@ import Branding from '../components/Branding/Branding';
 import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
-import { profile, truncateNpub } from '../stores/profile';
+import { truncateNpub } from '../stores/profile';
 import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useProfileContext } from '../contexts/ProfileContext';
+import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { isConnected } from '../sockets';
 
@@ -27,15 +29,14 @@ import { isConnected } from '../sockets';
 const Profile: Component = () => {
 
   const settings = useSettingsContext();
-
   const toaster = useToastContext();
-
   const profileContext = useProfileContext();
+  const account = useAccountContext();
 
   const params = useParams();
 
   const getHex = () => {
-    let hex = params.npub || profile.publicKey;
+    let hex = params.npub || account?.publicKey;
 
     if (params.npub?.startsWith('npub')) {
       hex = decode(params.npub).data as string;
@@ -68,12 +69,18 @@ const Profile: Component = () => {
     setProfile(getHex());
   });
 
+  createEffect(() => {
+    if (account?.publicKey) {
+      setProfile(getHex());
+    }
+  });
+
   const profileNpub = createMemo(() => {
     return hexToNpub(profileContext?.profileKey);
   });
 
   const profileName = () => {
-    return profileContext?.userProfile?.name || profileNpub();
+    return profileContext?.userProfile?.name || truncateNpub(profileNpub());
   }
 
   const addToHome = () => {
@@ -99,7 +106,6 @@ const Profile: Component = () => {
   };
 
   const hasFeedAtHome = () => {
-
     return !!settings?.availableFeeds.find(f => f.hex === profileContext?.profileKey);
   };
 
@@ -163,7 +169,7 @@ const Profile: Component = () => {
                 class={styles.smallSecondaryButton}
                 onClick={removeFromHome}
                 title={`remove ${profileName()}'s feed from your home page`}
-                disabled={profileContext?.profileKey === profile.publicKey}
+                disabled={profileContext?.profileKey === account?.publicKey}
               >
                 <div class={styles.removeFeedIcon}></div>
               </button>
@@ -187,7 +193,7 @@ const Profile: Component = () => {
 
         <div class={styles.profileVerification}>
           <div class={styles.avatarName}>
-            {profileName() || truncateNpub(profileNpub())}
+            {profileName()}
             <Show when={profileContext?.userProfile?.nip05}>
               <div class={styles.verifiedIconL}></div>
             </Show>

@@ -10,12 +10,13 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
 import { noteEncode } from 'nostr-tools/nip19';
-import { hasPublicKey } from '../stores/profile';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
+import { useAccountContext } from '../contexts/AccountContext';
 
 
 const Thread: Component = () => {
+  const account = useAccountContext();
   const params = useParams();
 
   const postId = () => {
@@ -99,7 +100,7 @@ const Thread: Component = () => {
           <NotePrimary
             note={primaryNote() as PrimalNote}
           />
-          <Show when={hasPublicKey()}>
+          <Show when={account?.hasPublicKey()}>
             <ReplyToNote note={primaryNote() as PrimalNote} />
           </Show>
         </div>

@@ -1,7 +1,6 @@
-import { createStore, unwrap } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { profile, setPublicKey } from "../stores/profile";
-import { defaultFeeds, noKey } from "../constants";
+import { defaultFeeds } from "../constants";
 import {
   createContext,
   createEffect,
@@ -17,13 +16,8 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
-  NostrEOSE,
-  NostrEvent,
-  NostrWindow,
   PrimalFeed,
-  PrimalUser,
 } from "../types/primal";
-import { APP_ID } from "../App";
 import {
   initAvailableFeeds,
   removeFromAvailableFeeds,
@@ -31,14 +25,10 @@ import {
   updateAvailableFeeds,
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
-import { Relay, relayInit } from "nostr-tools";
+import { useAccountContext } from "./AccountContext";
 
 export type SettingsContextStore = {
   theme: string,
-  likes: string[],
-  relays: Relay[],
-  publicKey: string | undefined,
-  activeUser: PrimalUser | undefined,
   availableFeeds: PrimalFeed[],
   actions: {
     setTheme: (theme: string | null) => void,
@@ -50,10 +40,6 @@ export type SettingsContextStore = {
 
 export const initialData = {
   theme: 'sunset',
-  likes: [],
-  relays: [],
-  publicKey: undefined,
-  activeUser: undefined,
   availableFeeds: [ ...defaultFeeds ],
 };
 
@@ -63,6 +49,7 @@ export const SettingsContext = createContext<SettingsContextStore>();
 export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const toaster = useToastContext();
+  const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
@@ -78,10 +65,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!feed) {
       return;
     }
-    if (profile.publicKey) {
+    if (account?.publicKey) {
       const add = addToTop ? updateAvailableFeedsTop : updateAvailableFeeds;
 
-      updateStore('availableFeeds', (feeds) => add(profile.publicKey, feed, feeds));
+      updateStore('availableFeeds', (feeds) => add(account?.publicKey, feed, feeds));
     }
   };
 
@@ -90,117 +77,28 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (profile.publicKey) {
+    if (account?.publicKey) {
       updateStore('availableFeeds',
-        (feeds) => removeFromAvailableFeeds(profile.publicKey, feed, feeds),
+        (feeds) => removeFromAvailableFeeds(account?.publicKey, feed, feeds),
       );
       toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
     }
   };
 
   const setAvailableFeeds = (feedList: PrimalFeed[]) => {
-    if (profile.publicKey) {
+    if (account?.publicKey) {
       updateStore('availableFeeds',
-        () => replaceAvailableFeeds(profile.publicKey, feedList),
+        () => replaceAvailableFeeds(account?.publicKey, feedList),
       );
     }
-  };
-
-  let extensionAttempt = 0;
-
-  const fetchNostrKey = async () => {
-    const win = window as NostrWindow;
-    const nostr = win.nostr;
-
-    if (nostr === undefined) {
-      console.log('No WebLn extension');
-      // Try again after one second if extensionAttempts are not exceeded
-      if (extensionAttempt < 1) {
-        extensionAttempt += 1;
-        setTimeout(fetchNostrKey, 1000);
-        return;
-      }
-    }
-
-    try {
-      const key = await nostr.getPublicKey();
-
-      if (key === undefined) {
-        setTimeout(fetchNostrKey, 1000);
-      }
-      else {
-        setPublicKey(key);
-        localStorage.setItem('pubkey', key);
-      }
-    } catch (e: any) {
-      if (e.message === 'User rejected') {
-        setPublicKey(noKey);
-        localStorage.setItem('pubkey', noKey);
-      }
-      console.log('error fetching public key: ', e);
-    }
-  }
-
-  const getRelays = async () => {
-    const win = window as NostrWindow;
-    const nostr = win.nostr;
-
-    if (nostr) {
-      const rels = await nostr.getRelays();
-
-
-      if (rels) {
-        const addresses = Object.keys(rels);
-        if (store.relays.length > 0) {
-          for (let i=0; i< store.relays.length; i++) {
-            await store.relays[i].close();
-          }
-        }
-
-        const relObjects = addresses.map(address => {
-          return relayInit(address);
-        })
-
-        let connectedRelays: Relay[] = [];
-
-        for (let i=0; i < relObjects.length; i++) {
-          try {
-            if (relObjects[i].status === WebSocket.CLOSED) {
-              await relObjects[i].connect();
-              connectedRelays.push(relObjects[i]);
-            }
-          } catch (e) {
-            console.log('error connecting to relay: ', e);
-          }
-        }
-
-        updateStore('relays', () => connectedRelays);
-
-        console.log('Connected relays: ', unwrap(connectedRelays))
-      }
-    }
-  };
-
-  const saveLikes = (likes: Set<string>) => {
-    updateStore('likes', () => Array.from(likes));
   };
 
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+    // const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
-    const [type, subId, content] = message;
-
-    if (subId === `user_profile_${APP_ID}`) {
-      if (!content) {
-        return;
-      }
-
-      const user = JSON.parse(content.content);
-
-      updateStore('activeUser', () => user);
-    }
+    // const [type, subId, content] = message;
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {
@@ -216,15 +114,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   onMount(() => {
     setTheme(localStorage.getItem('theme'));
-
-    setTimeout(() => {
-      fetchNostrKey();
-    }, 1000);
   });
 
   createEffect(() => {
-    if (profile.publicKey) {
-      updateStore('availableFeeds', () => initAvailableFeeds(profile.publicKey));
+    if (account?.publicKey) {
+      updateStore('availableFeeds', () => initAvailableFeeds(account?.publicKey));
     }
   });
 

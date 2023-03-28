@@ -7,11 +7,11 @@ import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
-import { useFeedContext } from '../../contexts/FeedContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const Layout: Component = () => {
 
-  const context = useFeedContext();
+  const account = useAccountContext();
 
   let container: HTMLDivElement | undefined;
 
@@ -19,7 +19,7 @@ const Layout: Component = () => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-    if (context?.data.showNewNoteForm) {
+    if (account?.showNewNoteForm) {
       newNote?.classList.add(styles.animatedShow);
       newNoteTextArea?.focus();
     }

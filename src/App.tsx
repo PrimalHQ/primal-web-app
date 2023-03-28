@@ -1,17 +1,6 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { Routes, Route, Navigate } from "@solidjs/router"
-import Home from './pages/Home';
-import Layout from './components/Layout/Layout';
-import Explore from './pages/Explore';
-import { FeedProvider } from './contexts/FeedContext';
+import { AccountProvider } from './contexts/AccountContext';
 import { connect, disconnect } from './sockets';
-import Thread from './pages/Thread';
-import Messages from './pages/Messages';
-import Notifications from './pages/Notifications';
-import Downloads from './pages/Downloads';
-import Settings from './pages/Settings';
-import Help from './pages/Help';
-import Profile from './pages/Profile';
 import styles from './App.module.scss';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
@@ -39,7 +28,7 @@ const App: Component = () => {
   return (
     <>
       <Toaster>
-        <FeedProvider>
+        <AccountProvider>
           <SettingsProvider>
             <ProfileProvider>
               <HomeProvider>
@@ -52,7 +41,7 @@ const App: Component = () => {
               </HomeProvider>
             </ProfileProvider>
           </SettingsProvider>
-        </FeedProvider>
+        </AccountProvider>
       </Toaster>
     </>
   );

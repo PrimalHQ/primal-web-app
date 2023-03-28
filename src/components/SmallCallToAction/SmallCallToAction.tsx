@@ -1,19 +1,16 @@
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './SmallCallToAction.module.scss';
-import miljan from '../../assets/icons/miljan.jpg';
-import PostButton from '../PostButton/PostButton';
-import FeedSelect from '../FeedSelect/FeedSelect';
-import { useFeedContext } from '../../contexts/FeedContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { PrimalUser } from '../../types/primal';
 
 const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined }> = (params) => {
 
-  const context = useFeedContext();
+  const account = useAccountContext();
 
   const showNewNoteForm = () => {
-    context?.actions?.showNewNoteForm();
+    account?.actions?.showNewNoteForm();
   };
 
   return (

@@ -3,15 +3,14 @@ import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
 import FeedSelect from '../FeedSelect/FeedSelect';
-import { useFeedContext } from '../../contexts/FeedContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
-import { hasPublicKey } from '../../stores/profile';
 
 const HomeHeader: Component = () => {
 
-  const feedContext = useFeedContext();
-  const homeContext = useHomeContext();
+  const account = useAccountContext();
+  const home = useHomeContext();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -20,7 +19,7 @@ const HomeHeader: Component = () => {
     const smallHeader = document.getElementById('small_header');
     const border = document.getElementById('small_bottom_border');
 
-    homeContext?.actions.updateScrollTop(scrollTop);
+    home?.actions.updateScrollTop(scrollTop);
 
     const isScrollingDown = scrollTop > lastScrollTop;
     lastScrollTop = scrollTop;
@@ -55,7 +54,7 @@ const HomeHeader: Component = () => {
   }
 
   const onShowNewNoteinput = () => {
-    feedContext?.actions?.showNewNoteForm();
+    account?.actions?.showNewNoteForm();
   };
 
   onMount(() => {
@@ -66,12 +65,12 @@ const HomeHeader: Component = () => {
     window.removeEventListener('scroll', onScroll);
   });
 
-  const activeUser = () => feedContext?.data.activeUser;
+  const activeUser = () => account?.activeUser;
 
   return (
     <div class={styles.fullHeader}>
       <Show
-        when={hasPublicKey()}
+        when={account?.hasPublicKey()}
         fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
@@ -91,7 +90,7 @@ const HomeHeader: Component = () => {
       <div id="small_header" class={styles.smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
-            when={hasPublicKey()}
+            when={account?.hasPublicKey()}
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>
@@ -103,7 +102,7 @@ const HomeHeader: Component = () => {
               <SmallCallToAction activeUser={activeUser()} />
             </div>
           </Show>
-          <Show when={homeContext?.selectedFeed}>
+          <Show when={home?.selectedFeed}>
             <div class={styles.smallRight}>
               <FeedSelect />
             </div>

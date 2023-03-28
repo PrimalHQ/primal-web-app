@@ -1,7 +1,6 @@
 import { Component, createEffect, onCleanup, onMount } from "solid-js";
-import { useFeedContext } from "../../contexts/FeedContext";
+import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
-import { NostrWindow, PrimalNetStats } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./NewNote.module.scss";
 
@@ -38,18 +37,18 @@ const NewNote: Component = () => {
 
   type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
-  const context = useFeedContext();
+  const account = useAccountContext();
 
-  const activeUser = () => context?.data.activeUser;
+  const activeUser = () => account?.activeUser;
 
   const onClickOutide = (e: MouseEvent) => {
     if (!document?.getElementById('new_note_holder')?.contains(e.target as Node)) {
-      context?.actions?.hideNewNoteForm();
+      account?.actions?.hideNewNoteForm();
     }
   }
 
   createEffect(() => {
-    if (context?.data.showNewNoteForm) {
+    if (account?.showNewNoteForm) {
       document.addEventListener('click', onClickOutide);
     }
     else {
@@ -68,7 +67,7 @@ const NewNote: Component = () => {
   });
 
   const closeNewNote = () => {
-    context?.actions?.hideNewNoteForm()
+    account?.actions?.hideNewNoteForm()
   };
 
   const postNote = () => {
@@ -78,7 +77,9 @@ const NewNote: Component = () => {
       return;
     }
 
-    sendNote(textArea.value, context?.relays);
+    if (account) {
+      sendNote(textArea.value, account.relays);
+    }
 
     closeNewNote();
   };

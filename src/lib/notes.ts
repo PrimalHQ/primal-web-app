@@ -1,8 +1,7 @@
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
-import { createStore, SetStoreFunction } from "solid-js/store";
 import { Kind } from "../constants";
-import { FeedStore, NostrWindow, PrimalNote } from "../types/primal";
+import { NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
 import { getUserProfile } from "./profile";
 
@@ -11,15 +10,13 @@ const getLikesStorageKey = () => {
   return `likes_${key}`;
 };
 
-const getStoredLikes = () => {
+export const getStoredLikes = () => {
   return JSON.parse(localStorage.getItem(getLikesStorageKey()) || '[]');
 };
 
-const setStoredLikes = (likes: string[]) => {
+export const setStoredLikes = (likes: string[]) => {
   return localStorage.setItem(getLikesStorageKey(), JSON.stringify(likes));
 };
-
-export const [likedNotes, setLikedNotes] = createStore(getStoredLikes());
 
 export const urlify = (text: string) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
@@ -79,7 +76,6 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
   const regex = /\#\[([0-9]*)\]/g;
   let refs = [];
   let match;
-  // let nostrifiedText = `${text}`;
 
   while((match = regex.exec(text)) !== null) {
     refs.push(match[1]);
@@ -90,17 +86,15 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
       const tag = note.post.tags[ref];
       if (tag[0] === 'p') {
         getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
-        // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[UR ${tag[1]}]]`)
       }
 
       if (!skipNotes && tag[0] === 'e') {
         const mId = noteEncode(tag[1]);
         getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
-        // nostrifiedText = nostrifiedText.replaceAll(`#[${ref}]`, `[[ER ${tag[1]}]]`)
       }
     });
   }
-  // return nostrifiedText;
+
   return text;
 
 };
@@ -129,7 +123,7 @@ const parseReplyTo = (replyTo?: ReplyTo) => {
 
 };
 
-export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
+export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
@@ -140,22 +134,22 @@ export const sendLike = async (note: PrimalNote, relays: Relay[], setData: SetSt
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const likes = getStoredLikes();
+  return await sendEvent(event, relays);
 
-  if (likes.includes(note.post.id)) {
-    return;
-  }
+}
 
-  const success = await sendEvent(event, relays);
+export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
+  const event = {
+    content: JSON.stringify(note.msg),
+    kind: Kind.Repost,
+    tags: [
+      ['e', note.post.id],
+      ['p', note.user.pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
 
-  if (success) {
-    setStoredLikes([...likes, note.post.id]);
-
-    setLikedNotes((ls: string[]) => [...ls, note.post.id]);
-
-    setData('posts', p => p.post.id === note.post.id, 'post', 'likes', (l) => l+1);
-  }
-
+  return await sendEvent(event, relays);
 }
 
 export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
@@ -171,38 +165,18 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
   sendEvent(event, relays);
 }
 
-export const sendRepost = async (note: PrimalNote, relays: Relay[], setData: SetStoreFunction<FeedStore>) => {
-  const event = {
-    content: JSON.stringify(note.msg),
-    kind: Kind.Repost,
-    tags: [
-      ['e', note.post.id],
-      ['p', note.user.pubkey],
-    ],
-    created_at: Math.floor((new Date()).getTime() / 1000),
-  };
 
-  const success = await sendEvent(event, relays);
-
-  // if (success) {
-  //   setData('posts', p => p.post.id === note.post.id, 'post', 'mentions', (l) => l+1);
-  // }
-}
-
-
-export const getLikes = (userId: string, relays: Relay[]) => {
+export const getLikes = (userId: string, relays: Relay[], callback: (likes: string[]) => void) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
-  const storedLikes = getStoredLikes();
-
-  setLikedNotes(() => [...storedLikes]);
+  let likes = new Set<string>(getStoredLikes());
 
   if (nostr !== undefined) {
     try {
       // const signedNote = await nostr.signEvent(event);
 
-      relays?.forEach(relay => {
+      relays.forEach(relay => {
 
         const sub = relay.sub([
           {
@@ -212,17 +186,17 @@ export const getLikes = (userId: string, relays: Relay[]) => {
         ]);
 
         sub.on('event', (event: Event) => {
-          const likes = getStoredLikes();
           const e = event.tags.find(t => t[0] === 'e');
 
-          if (!e || likes.includes(e[1])) {
-            return;
-          }
-
-          setStoredLikes([ ...likes, e[1]]);
-          setLikedNotes((ls: string[]) => [...ls, e[1]]);
+          e && e[1] && likes.add(e[1]);
         })
+
         sub.on('eose', () => {
+          const likeArray = Array.from(likes);
+
+          setStoredLikes(likeArray);
+          callback(likeArray);
+
           sub.unsub();
         })
       });
@@ -237,30 +211,43 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
-  if (nostr !== undefined) {
-    try {
-      const signedNote = await nostr.signEvent(event);
-
-      relays?.forEach(relay => {
-        let pub = relay.publish(signedNote)
-        pub.on('ok', () => {
-          console.log(`${relay.url} has accepted our event`)
-        })
-        pub.on('seen', () => {
-          console.log(`we saw the event on ${relay.url}`)
-        })
-        pub.on('failed', (reason: any) => {
-          console.log(`failed to publish to ${relay.url}: ${reason}`)
-        })
-      });
-
-      return true;
-
-    } catch (e) {
-      console.log('Failed sending note: ', e);
-      return false;
-    }
+  if (nostr === undefined) {
+    return false;
   }
 
-  return false;
+  const signedNote = await nostr.signEvent(event);
+
+  return new Promise<boolean>((resolve) => {
+    const numberOfRelays = relays.length;
+    let failed = 0;
+
+    relays.forEach(relay => {
+      try {
+        let pub = relay.publish(signedNote);
+
+        pub.on('ok', () => {
+          console.log(`${relay.url} has accepted our event`);
+        })
+
+        pub.on('seen', () => {
+          console.log(`we saw the event on ${relay.url}`);
+          resolve(true);
+        })
+
+        pub.on('failed', (reason: any) => {
+          console.log(`failed to publish to ${relay.url}: ${reason}`)
+          failed += 1;
+          if (failed >= numberOfRelays) {
+            resolve(false);
+          }
+        })
+      } catch (e) {
+        console.log('Failed sending note: ', e);failed += 1;
+        if (failed >= numberOfRelays) {
+          resolve(false);
+        }
+      }
+    });
+
+  });
 }

@@ -1,5 +1,4 @@
-import { Component, createEffect, For } from 'solid-js';
-import { useFeedContext } from '../../contexts/FeedContext';
+import { Component } from 'solid-js';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { FeedOption } from '../../types/primal';

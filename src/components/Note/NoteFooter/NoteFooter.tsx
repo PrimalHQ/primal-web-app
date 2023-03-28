@@ -1,29 +1,46 @@
-import { A, Navigate } from '@solidjs/router';
-import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
-import type { Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
-import Avatar from '../../Avatar/Avatar';
-import { sendLike, likedNotes, sendRepost } from '../../../lib/notes';
+import { sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
-import { useFeedContext } from '../../../contexts/FeedContext';
+import { useAccountContext } from '../../../contexts/AccountContext';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
-  const context = useFeedContext();
+  const account = useAccountContext();
 
-  const liked = () => likedNotes.includes(props.note.post.id);
+  const liked = () => account?.likes.includes(props.note.post.id);
 
-  const doRepost = (e: MouseEvent) => {
+  const [likes, setLikes] = createSignal(props.note.post.likes);
+  const [reposts, setReposts] = createSignal(props.note.post.reposts);
+
+  const doRepost = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    sendRepost(props.note, context?.relays, context?.actions?.setData);
+    if (!account) {
+      return;
+    }
+
+    const success = await sendRepost(props.note, account.relays);
+
+    if (success) {
+      setReposts(reposts() + 1);
+    }
   };
 
-  const doLike = (e: MouseEvent) => {
+  const doLike = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    sendLike(props.note, context?.relays, context?.actions?.setData);
+
+    if (!account) {
+      return;
+    }
+
+    const success = await account.actions.addLike(props.note);
+
+    if (success) {
+      setLikes(likes() + 1);
+    }
   };
 
   return (
@@ -34,11 +51,11 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       </div>
       <button class={styles.stat} onClick={doLike} disabled={liked()}>
         <div class={styles.likeIcon}></div>
-        <div class={styles.statNumber}>{props.note.post?.likes || ''}</div>
+        <div class={styles.statNumber}>{likes() || ''}</div>
       </button>
       <button class={styles.stat} onClick={doRepost}>
         <div class={styles.repostIcon}></div>
-        <div class={styles.statNumber}>{props.note.post?.reposts || ''}</div>
+        <div class={styles.statNumber}>{reposts() || ''}</div>
       </button>
       <div class={styles.stat}>
         <div class={styles.zapIcon}></div>

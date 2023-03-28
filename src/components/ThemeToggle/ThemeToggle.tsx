@@ -1,12 +1,12 @@
-import { useFeedContext } from "../../contexts/FeedContext";
+import { useAccountContext } from "../../contexts/AccountContext";
 
 import styles from  "./ThemeToggle.module.scss";
 
 export default function ThemeToggle() {
-    const context = useFeedContext();
+    const account = useAccountContext();
 
     const showNewNoteForm = () => {
-      context?.actions?.showNewNoteForm();
+      account?.actions?.showNewNoteForm();
     };
 
 

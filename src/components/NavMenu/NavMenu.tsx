@@ -1,14 +1,12 @@
 import { Component, For, Show } from 'solid-js';
-import { useFeedContext } from '../../contexts/FeedContext';
-import { hasPublicKey } from '../../stores/profile';
+import { useAccountContext } from '../../contexts/AccountContext';
 import NavLink from '../NavLink/NavLink';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 import styles from './NavMenu.module.scss';
 
 const NavMenu: Component = (props) => {
-
-  const context = useFeedContext();
+  const account = useAccountContext();
 
   const links = [
     { to: '/home', label: 'Home', icon: 'homeIcon' },
@@ -29,7 +27,7 @@ const NavMenu: Component = (props) => {
           }
         </For>
       </nav>
-      <Show when={hasPublicKey()}>
+      <Show when={account?.hasPublicKey()}>
         <div class={styles.callToAction}>
           <ThemeToggle />
         </div>
