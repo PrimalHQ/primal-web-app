@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useParams } from '@solidjs/router';
@@ -13,6 +13,8 @@ import { noteEncode } from 'nostr-tools/nip19';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
+import { sortByRecency } from '../stores/note';
+import { scrollWindowTo } from '../lib/scroll';
 
 
 const Thread: Component = () => {
@@ -46,9 +48,12 @@ const Thread: Component = () => {
       return [];
     }
 
-    return threadContext?.notes.filter(n =>
-      n.post.id !== note.post.id && n.post.created_at <= note.post.created_at,
-    ) || [];
+    return sortByRecency(
+      threadContext?.notes.filter(n =>
+        n.post.id !== note.post.id && n.post.created_at <= note.post.created_at,
+      ) || [],
+      true,
+    );
   };
 
   const replyNotes = () => {
@@ -68,6 +73,37 @@ const Thread: Component = () => {
 
   createEffect(() => {
     threadContext?.actions.fetchNotes(params.postId);
+  });
+
+  let observer: IntersectionObserver | undefined;
+
+  createEffect(() => {
+    if (primaryNote()) {
+      const pn = document.getElementById('primary_note');
+
+      if (!pn) {
+        return;
+      }
+
+      observer = new IntersectionObserver(entries => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) {
+            const rect = pn.getBoundingClientRect();
+
+            scrollWindowTo(rect.top);
+          }
+          observer?.unobserve(pn);
+        });
+      });
+
+      observer?.observe(pn);
+    }
+  });
+
+  onCleanup(() => {
+    const pn = document.getElementById('primary_note');
+
+    pn && observer?.unobserve(pn);
   });
 
 
