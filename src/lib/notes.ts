@@ -152,7 +152,7 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
   return await sendEvent(event, relays);
 }
 
-export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
+export const sendNote = async (text: string, relays: Relay[], replyTo?: ReplyTo) => {
   const tags = parseReplyTo(replyTo);
 
   const event = {
@@ -162,7 +162,7 @@ export const sendNote = (text: string, relays: Relay[], replyTo?: ReplyTo) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  sendEvent(event, relays);
+  return await sendEvent(event, relays);
 }
 
 

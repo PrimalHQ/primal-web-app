@@ -29,6 +29,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       setReposts(reposts() + 1);
       toast?.sendSuccess('Reposted successfully');
     }
+    else {
+      toast?.sendWarning('Failed to repost');
+    }
   };
 
   const doLike = async (e: MouseEvent) => {

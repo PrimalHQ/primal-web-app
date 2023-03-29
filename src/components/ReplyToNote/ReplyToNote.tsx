@@ -3,6 +3,7 @@ import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
 import { PrimalNote } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
+import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./ReplyToNote.module.scss";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
@@ -41,6 +42,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
   const [open, setOpen] = createSignal(false);
 
   const account = useAccountContext();
+  const toast = useToastContext();
 
   const activeUser = () => account?.activeUser;
 
@@ -70,7 +72,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     setOpen(false);
   };
 
-  const postNote = () => {
+  const postNote = async () => {
     const textArea = document.getElementById('reply_to_note_text_area') as HTMLTextAreaElement;
 
     if (textArea.value.trim() === '') {
@@ -83,7 +85,14 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     };
 
     if (account) {
-      sendNote(textArea.value, account.relays, replyTo);
+      const success = await sendNote(textArea.value, account.relays, replyTo);
+
+      if (success) {
+        toast?.sendSuccess('Message posted successfully');
+      }
+      else {
+        toast?.sendWarning('Failed to send message');
+      }
     }
 
     closeReplyToNote();

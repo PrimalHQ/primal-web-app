@@ -2,6 +2,7 @@ import { Component, createEffect, onCleanup, onMount } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
 import Avatar from "../Avatar/Avatar";
+import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./NewNote.module.scss";
 
 const NewNote: Component = () => {
@@ -38,6 +39,7 @@ const NewNote: Component = () => {
   type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
   const account = useAccountContext();
+  const toast = useToastContext();
 
   const activeUser = () => account?.activeUser;
 
@@ -70,7 +72,7 @@ const NewNote: Component = () => {
     account?.actions?.hideNewNoteForm()
   };
 
-  const postNote = () => {
+  const postNote = async () => {
     const textArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
     if (textArea.value.trim() === '') {
@@ -78,7 +80,14 @@ const NewNote: Component = () => {
     }
 
     if (account) {
-      sendNote(textArea.value, account.relays);
+      const success = await sendNote(textArea.value, account.relays);
+
+      if (success) {
+        toast?.sendSuccess('Message posted successfully');
+      }
+      else {
+        toast?.sendWarning('Failed to send message');
+      }
     }
 
     closeNewNote();
