@@ -1,3 +1,4 @@
+import { useIntl } from "@cookbook/solid-intl";
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
@@ -16,6 +17,7 @@ const getScrollHeight = (elm: AutoSizedTextArea) => {
 }
 
 const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
+
   const maxHeight = document.documentElement.clientHeight || window.innerHeight || 0;
 
   const elm = event.target as AutoSizedTextArea ;
@@ -38,6 +40,8 @@ const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
 }
 
 const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
+
+  const intl = useIntl();
 
   const [open, setOpen] = createSignal(false);
 
@@ -116,7 +120,15 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
               <div
                 class={styles.input}
               >
-                <span>reply to</span>
+                <span>
+                  {intl.formatMessage(
+                    {
+                      id: 'actions.replyToNote',
+                      defaultMessage: 'reply to',
+                      description: 'Reply to button label',
+                    }
+                  )}
+                </span>
                 <span class={styles.userName}>{props.note.user.name}</span>
               </div>
             </div>
@@ -138,10 +150,28 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
             </textarea>
             <div class={styles.controls}>
               <button class={styles.primaryButton} onClick={postNote}>
-                <span>post</span>
+                <span>
+                  {intl.formatMessage(
+                    {
+                      id: 'actions.postNewNote',
+                      defaultMessage: 'post',
+                      description: 'Send new note, button label',
+                    }
+                  )}
+                </span>
               </button>
               <button class={styles.secondaryButton} onClick={closeReplyToNote}>
-                <div><span>cancel</span></div>
+                <div>
+                  <span>
+                    {intl.formatMessage(
+                      {
+                        id: 'actions.cancel',
+                        defaultMessage: 'cancel',
+                        description: 'Cancel action, button label',
+                      }
+                    )}
+                  </span>
+                </div>
               </button>
             </div>
           </div>

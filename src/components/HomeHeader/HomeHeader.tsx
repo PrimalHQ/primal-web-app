@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
@@ -6,11 +6,13 @@ import FeedSelect from '../FeedSelect/FeedSelect';
 import { useAccountContext } from '../../contexts/AccountContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
+import { useIntl } from '@cookbook/solid-intl';
 
 const HomeHeader: Component = () => {
 
   const account = useAccountContext();
   const home = useHomeContext();
+  const intl = useIntl();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -81,7 +83,11 @@ const HomeHeader: Component = () => {
 
           <div class={styles.border}>
             <div class={styles.input}>
-              say something on nostr...
+              {intl.formatMessage({
+                id: 'placeholders.callToAction.note',
+                defaultMessage: 'say something on nostr...',
+                description: 'Placeholder for new note call-to-action',
+              })}
             </div>
           </div>
         </button>
@@ -94,7 +100,11 @@ const HomeHeader: Component = () => {
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>
-                  Welcome to nostr!
+                  {intl.formatMessage({
+                    id: 'placeholders.welcomeMessage',
+                    defaultMessage: 'Welcome to nostr!',
+                    description: 'Default welcome message',
+                  })}
                 </div>
               </div>}
           >

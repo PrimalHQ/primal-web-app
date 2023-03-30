@@ -9,12 +9,6 @@ import NoteHeader from '../NoteHeader/NoteHeader';
 import styles from './NotePrimary.module.scss';
 
 
-const trimVerification = (address: string) => {
-  const [_, domain] = address.split('@');
-
-  return domain;
-}
-
 const NotePrimary: Component<{ note: PrimalNote }> = (props) => {
 
   return (

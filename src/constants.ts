@@ -1,6 +1,7 @@
 import { FeedPage, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
+import { MessageDescriptor } from "@cookbook/solid-intl";
 
 export const emptyPage: FeedPage = {
   users: {},
@@ -67,7 +68,6 @@ export const defaultFeeds = [
   },
 ];
 
-
 export const timeframeLabels: Record<string, string> = {
   latest: 'latest',
   trending: 'trending',
@@ -80,6 +80,107 @@ export const scopeLabels: Record<string, string> = {
   tribe: 'my tribe',
   network: 'my network',
   global: 'global'
+};
+
+
+export const timeframeDescriptors: Record<string, MessageDescriptor> = {
+  latest: {
+    id: 'explore.timeframes.latest.caption',
+    defaultMessage: 'latest',
+    description: 'Caption for the latest timeframe',
+  },
+  trending: {
+    id: 'explore.timeframes.trending.caption',
+    defaultMessage: 'trending',
+    description: 'Caption for the trending timeframe',
+  },
+  popular: {
+    id: 'explore.timeframes.popular.caption',
+    defaultMessage: 'popular',
+    description: 'Caption for the popular timeframe',
+  },
+  mostzapped: {
+    id: 'explore.timeframes.mostzapped.caption',
+    defaultMessage: 'zapped',
+    description: 'Caption for the mostzapped timeframe',
+  },
+};
+
+export type ScopeDescriptor = {
+  caption: MessageDescriptor,
+  label: MessageDescriptor,
+  description: MessageDescriptor,
+}
+
+export const scopeDescriptors: Record<string, ScopeDescriptor> = {
+  follows: {
+    caption: {
+      id: 'explore.scopes.follows.caption',
+      defaultMessage: 'Follows',
+      description: 'Caption for the follows scope',
+    },
+    label: {
+      id: 'explore.scopes.follows.label',
+      defaultMessage: 'my follows',
+      description: 'Label for the follows scope',
+    },
+    description: {
+      id: 'explore.scopes.follows.description',
+      defaultMessage: 'accounts you follow',
+      description: 'Description of the follows scope description',
+    },
+  },
+  tribe: {
+    caption: {
+      id: 'explore.scopes.tribe.caption',
+      defaultMessage: 'Tribe',
+      description: 'Caption for the tribe scope',
+    },
+    label: {
+      id: 'explore.scopes.tribe.label',
+      defaultMessage: 'my tribe',
+      description: 'Label for the tribe scope',
+    },
+    description: {
+      id: 'explore.scopes.tribe.description',
+      defaultMessage: 'accounts you follow + your followers',
+      description: 'Description of the tribe scope description',
+    },
+  },
+  network: {
+    caption: {
+      id: 'explore.scopes.network.caption',
+      defaultMessage: 'Network',
+      description: 'Caption for the network scope',
+    },
+    label: {
+      id: 'explore.scopes.network.label',
+      defaultMessage: 'my network',
+      description: 'Label for the network scope',
+    },
+    description: {
+      id: 'explore.scopes.network.description',
+      defaultMessage: 'accounts you follow + everyone they follow',
+      description: 'Description of the network scope description',
+    },
+  },
+  global: {
+    caption: {
+      id: 'explore.scopes.global.caption',
+      defaultMessage: 'Global',
+      description: 'Caption for the global scope',
+    },
+    label: {
+      id: 'explore.scopes.global.label',
+      defaultMessage: 'global',
+      description: 'Label for the global scope',
+    },
+    description: {
+      id: 'explore.scopes.global.description',
+      defaultMessage: 'all accounts on nostr',
+      description: 'Description of the global scope description',
+    },
+  },
 };
 
 export const noKey = 'no-key';

@@ -1,6 +1,4 @@
 import { Component, createEffect, For, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { PrimalFeed } from '../../types/primal';
 

@@ -11,8 +11,11 @@ import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, PrimalNote, PrimalU
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ExploreSidebar.module.scss';
+import { useIntl } from '@cookbook/solid-intl';
 
 const ExploreSidebar: Component = () => {
+
+  const intl = useIntl();
 
   const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
     trending: {
@@ -126,7 +129,11 @@ const ExploreSidebar: Component = () => {
   return (
     <>
       <div class={styles.trendingUsersCaption}>
-        TRENDING USERS
+        {intl.formatMessage({
+          id: 'explore.sidebar.caption',
+          defaultMessage: 'trending users',
+          description: 'Caption for the explore page sidebar showing a list of trending users',
+        })}
       </div>
       <div class={styles.trendingUsers}>
         <For each={trendingUsers()}>

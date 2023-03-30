@@ -32,8 +32,6 @@ const tokenRegex = /(\#\[[\d]+\])/;
 
 const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
 
-  const [content, setContent] = createSignal<string>('');
-
   const [references, setReferences] = createStore<Record<string, UserReference | PrimalNote>>({});
 
   const [printableContent, setPrintableContent] = createStore<any[]>([]);
@@ -42,7 +40,6 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
   createEffect(() => {
     const newContent = parseNote(props.note, props.ignoreMentionedNotes);
-    setContent(newContent);
     setPrintableContent(() => newContent.split(tokenRegex));
   });
 
@@ -128,7 +125,6 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     }
 
   };
-
 
   onMount(() => {
   });

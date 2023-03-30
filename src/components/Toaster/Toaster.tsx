@@ -14,18 +14,18 @@ type ToastContextStore = {
 const ToastContext = createContext<ToastContextStore>();
 
 const Toaster: Component<ContextProps> = (props) => {
-  let toastHolder: HTMLDivElement;
+  let toastHolder: HTMLDivElement | undefined = undefined;
 
   const toastMesage = (message: string, klass: string, duration = 4000) => {
     const toaster = document.createElement('div');
     toaster.innerHTML = message;
     toaster.classList.add(klass);
     setTimeout(() => {
-      toastHolder.append(toaster)
+      toastHolder?.append(toaster)
     }, 0);
 
     setTimeout(() => {
-      toastHolder.removeChild(toaster);
+      toastHolder?.removeChild(toaster);
     }, duration);
 
   };

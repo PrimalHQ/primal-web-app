@@ -1,12 +1,9 @@
-import { A } from '@solidjs/router';
 import { Component, createEffect, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
-import { date } from '../../lib/dates';
 import { getExploreFeed } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
 import { convertToNotes, sortingPlan } from '../../stores/note';
-import Avatar from '../Avatar/Avatar';
 import { Kind } from '../../constants';
 import {
   isConnected,
@@ -24,9 +21,13 @@ import {
 
 import styles from './HomeSidebar.module.scss';
 import SmallNote from '../SmallNote/SmallNote';
+import { useIntl } from '@cookbook/solid-intl';
+import { hourNarrow } from '../../formats';
 
 
 const HomeSidebar: Component = () => {
+
+  const intl = useIntl();
 
   const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
     trending: {
@@ -137,8 +138,14 @@ const HomeSidebar: Component = () => {
       <div class={styles.headingTrending}>
         <div>
           <div class={styles.flameIcon}></div>
-          Trending
-          <span>24h</span>
+          {intl.formatMessage({
+            id: 'home.sidebar.caption.trending',
+            defaultMessage: 'Trending',
+            description: 'Caption for the home page sidebar showing a list of trending notes',
+          })}
+          <span>
+            {intl.formatNumber(24, hourNarrow)}
+          </span>
         </div>
       </div>
 
@@ -149,8 +156,14 @@ const HomeSidebar: Component = () => {
       <div class={styles.headingZapped}>
         <div>
           <div class={styles.zapIcon}></div>
-          Most Zapped
-          <span>4h</span>
+          {intl.formatMessage({
+            id: 'home.sidebar.caption.mostzapped',
+            defaultMessage: 'Most Zapped',
+            description: 'Caption for the home page sidebar showing a list of most zapped notes',
+          })}
+          <span>
+            {intl.formatNumber(4, hourNarrow)}
+          </span>
         </div>
       </div>
       <For each={data.mostzapped.notes}>
@@ -159,9 +172,15 @@ const HomeSidebar: Component = () => {
             <SmallNote
               note={note}
             >
-              {humanizeNumber(note.post.zaps, true)} zaps
-              <span>, </span>
-              {humanizeNumber(note.post.satszapped, true)} sats
+            {intl.formatMessage({
+              id: 'home.sidebar.note.zaps',
+              defaultMessage: '{zaps} zaps, {sats} sats',
+              description: 'Zaps data for a small note on home sidebar',
+            },
+            {
+              zaps: humanizeNumber(note.post.zaps, true),
+              sats: humanizeNumber(note.post.satszapped, true),
+            })}
             </SmallNote>
         }
       </For>

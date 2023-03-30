@@ -8,10 +8,12 @@ import NoteHeader from './NoteHeader/NoteHeader';
 
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
+import { useIntl } from '@cookbook/solid-intl';
 
 const Note: Component<{ note: PrimalNote }> = (props) => {
 
   const threadContext = useThreadContext();
+  const intl = useIntl();
 
   const repost = () => props.note.repost;
 
@@ -34,7 +36,11 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
             <A href={`/profile/${repost()?.user.npub}`} >
               {repost()?.user.name}
             </A>
-            reposted
+            {intl.formatMessage({
+              id: 'note.reposted',
+              defaultMessage: 'Reposted',
+              description: 'Label indicating that the note is a repost',
+            })}
           </span>
         </div>
       </Show>

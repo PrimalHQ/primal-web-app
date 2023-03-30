@@ -1,11 +1,12 @@
-import { Component, Match, Show, Switch } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
 import styles from './Branding.module.scss';
-import logo from '../../assets/icons/logo.svg';
 import { useNavigate } from '@solidjs/router';
+import { useIntl } from '@cookbook/solid-intl';
 
 const Branding: Component<{ small: boolean, isHome?: boolean }> = (props) => {
   const navigate = useNavigate();
+  const intl = useIntl();
 
   const onClick = () => {
     if (props.isHome) {
@@ -31,7 +32,15 @@ const Branding: Component<{ small: boolean, isHome?: boolean }> = (props) => {
       >
         <div class={styles.branding}>
           <div class={styles.logo} />
-          <span>primal</span>
+          <span>
+            {intl.formatMessage(
+              {
+                id: 'branding',
+                defaultMessage: 'Primal',
+                description: 'Brand name',
+              }
+            )}
+          </span>
         </div>
       </Show>
     </button>

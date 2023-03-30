@@ -1,3 +1,4 @@
+import { useIntl } from "@cookbook/solid-intl";
 import { Component, createEffect, onCleanup, onMount } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
@@ -6,6 +7,8 @@ import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./NewNote.module.scss";
 
 const NewNote: Component = () => {
+
+  const intl = useIntl();
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -113,10 +116,28 @@ const NewNote: Component = () => {
                   class={styles.primaryButton}
                   onClick={postNote}
                 >
-                  <span>post</span>
+                  <span>
+                    {intl.formatMessage(
+                      {
+                        id: 'actions.postNewNote',
+                        defaultMessage: 'post',
+                        description: 'Send new note, button label',
+                      }
+                    )}
+                  </span>
                 </button>
                 <button class={styles.secondaryButton} onClick={closeNewNote}>
-                  <div><span>cancel</span></div>
+                  <div>
+                    <span>
+                      {intl.formatMessage(
+                        {
+                          id: 'actions.cancel',
+                          defaultMessage: 'cancel',
+                          description: 'Cancel action, button label',
+                        }
+                      )}
+                    </span>
+                  </div>
                 </button>
               </div>
             </div>

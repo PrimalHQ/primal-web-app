@@ -5,7 +5,7 @@ import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
 import styles from './NavMenu.module.scss';
 
-const NavMenu: Component = (props) => {
+const NavMenu: Component = () => {
   const account = useAccountContext();
 
   const links = [
