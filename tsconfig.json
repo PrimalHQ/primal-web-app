@@ -8,9 +8,9 @@
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client", "@modyfi/vite-plugin-yaml/modules"],
+    "types": ["vite/client"],
     "noEmit": true,
     "isolatedModules": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   }
 }
