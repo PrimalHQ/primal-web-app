@@ -145,7 +145,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage) => {
-    const sortingFunction = sortingPlan(store.selectedFeed?.hex);
+    const topic = (store.selectedFeed?.hex || '').split(';');
+    const sortingFunction = sortingPlan(topic[1]);
 
     const newPosts = sortingFunction(convertToNotes(page));
 
