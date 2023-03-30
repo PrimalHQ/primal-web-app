@@ -9,15 +9,19 @@
     "build": "vite build",
     "build:unminified": "vite build --minify=false",
     "serve": "vite preview",
-    "host": "vite preview --host"
+    "host": "vite preview --host",
+    "extract": "formatjs extract",
+    "compile": "formatjs compile"
   },
   "license": "MIT",
   "devDependencies": {
+    "@formatjs/cli": "^6.0.4",
     "typescript": "^4.9.4",
     "vite": "^4.0.3",
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@cookbook/solid-intl": "^0.1.2",
     "@picocss/pico": "^1.5.7",
     "@solidjs/router": "^0.7.0",
     "@thisbeyond/solid-select": "^0.13.0",

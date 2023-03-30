@@ -9,6 +9,7 @@ import { ThreadProvider } from './contexts/ThreadContext';
 import Router from './Router';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { TranslatorProvider } from './contexts/TranslatorContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -26,7 +27,7 @@ const App: Component = () => {
   })
 
   return (
-    <>
+    <TranslatorProvider>
       <Toaster>
         <AccountProvider>
           <SettingsProvider>
@@ -43,7 +44,7 @@ const App: Component = () => {
           </SettingsProvider>
         </AccountProvider>
       </Toaster>
-    </>
+    </TranslatorProvider>
   );
 };
 
