@@ -1,4 +1,4 @@
-import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, For, onCleanup, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useParams } from '@solidjs/router';
@@ -123,9 +123,7 @@ const Thread: Component = () => {
         <For each={parentNotes()}>
           {note =>
             <div class={styles.threadList}>
-              <Note
-                note={note}
-              />
+              <Note note={note} />
             </div>
           }
         </For>
@@ -150,9 +148,7 @@ const Thread: Component = () => {
           <For each={replyNotes()}>
             {note =>
               <div class={styles.threadList}>
-                <Note
-                  note={note}
-                />
+                <Note note={note} />
               </div>
             }
           </For>

@@ -11,6 +11,7 @@ import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
+import { useIntl } from '@cookbook/solid-intl';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -23,8 +24,8 @@ const titleCase = (text: string) => {
 const Explore: Component = () => {
 
   const settings = useSettingsContext();
-
   const toaster = useToastContext();
+  const intl = useIntl();
 
     const params = useParams();
 
@@ -51,7 +52,14 @@ const Explore: Component = () => {
 
       settings?.actions.addAvailableFeed(feed);
 
-      toaster?.sendSuccess(`"${name}" has been added to your home page`);
+      toaster?.sendSuccess(intl.formatMessage(
+        {
+          id: 'toasts.addFeedToHome.success',
+          defaultMessage: '"{name}" has been added to your home page',
+          description: 'Toast message confirming successfull adding of the feed to home to the list of available feeds',
+        },
+        { name },
+      ));
     };
 
     return (
@@ -71,20 +79,45 @@ const Explore: Component = () => {
             fallback={<div class={styles.exploreCaption}>explore nostr</div>}
           >
               <div class={styles.exploreCaption}>
-                {timeframeLabels[params.timeframe]}: {scopeLabels[params.scope]}
+                {intl.formatMessage(
+                  {
+                    id: 'pages.explore.title',
+                    defaultMessage: '{timeframe}: {scope}',
+                    description: 'Title of the explore page',
+                  },
+                  {
+                    timeframe: timeframeLabels[params.timeframe],
+                    scope: scopeLabels[params.scope],
+                  },
+                )}
               </div>
               <div class={styles.addToFeed}>
                 <Show
                   when={!hasFeedAtHome()}
-                  fallback={<div class={styles.noAdd}>
-                    Available on your home page
-                  </div>}
+                  fallback={
+                    <div class={styles.noAdd}>
+                      {intl.formatMessage(
+                        {
+                          id: 'actions.homeFeedAdd.disabled',
+                          defaultMessage: 'Available on your home page',
+                          description: 'Add feed to home label, when feed is already added',
+                        }
+                      )}
+                    </div>
+                  }
                 >
                   <button
                     class={styles.addButton}
                     onClick={addToHomeFeed}
                   >
-                    <span>+</span> add this feed to my home page
+                    <span>+</span>
+                    {intl.formatMessage(
+                      {
+                        id: 'actions.homeFeedAdd.generic',
+                        defaultMessage: 'add this feed to my home page',
+                        description: 'Add feed to home, button label',
+                      }
+                    )}
                   </button>
                 </Show>
               </div>

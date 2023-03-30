@@ -21,6 +21,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useHomeContext } from '../contexts/HomeContext';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useAccountContext } from '../contexts/AccountContext';
+import { useIntl } from '@cookbook/solid-intl';
 
 
 const Home: Component = () => {
@@ -28,6 +29,7 @@ const Home: Component = () => {
   const context = useHomeContext();
   const settings = useSettingsContext();
   const account = useAccountContext();
+  const intl = useIntl();
 
   const isPageLoading = () => context?.isFetching;
 
@@ -84,7 +86,11 @@ const Home: Component = () => {
           when={!isPageLoading()}
         >
           <div class={styles.endOfContent}>
-            You reached the end. You are a quick reader.
+            {intl.formatMessage({
+              id: 'placeholders.endOfFeed',
+              defaultMessage: 'Your reached the end. You are a quick reader',
+              description: 'Message displayed when user reaches the end of the feed',
+            })}
           </div>
         </Match>
         <Match

@@ -24,6 +24,7 @@ import { useProfileContext } from '../contexts/ProfileContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { isConnected } from '../sockets';
+import { useIntl } from '@cookbook/solid-intl';
 
 
 const Profile: Component = () => {
@@ -32,6 +33,7 @@ const Profile: Component = () => {
   const toaster = useToastContext();
   const profile = useProfileContext();
   const account = useAccountContext();
+  const intl = useIntl();
 
   const params = useParams();
 
@@ -166,13 +168,21 @@ const Profile: Component = () => {
           >
             <div class={styles.messageIcon}></div>
           </button>
+
           <Show
             when={!hasFeedAtHome()}
             fallback={
               <button
                 class={styles.smallSecondaryButton}
                 onClick={removeFromHome}
-                title={`remove ${profileName()}'s feed from your home page`}
+                title={intl.formatMessage(
+                  {
+                    id: 'actions.homeFeedRemove.named',
+                    defaultMessage: 'remove {name} feed from your home page',
+                    description: 'Remove named feed from home, button label',
+                  },
+                  { name: profileName() },
+                )}
                 disabled={profile?.profileKey === account?.publicKey}
               >
                 <div class={styles.removeFeedIcon}></div>
@@ -182,16 +192,30 @@ const Profile: Component = () => {
             <button
               class={styles.smallPrimaryButton}
               onClick={addToHome}
-              title={`add ${profileName()}'s feed to home page`}
+              title={intl.formatMessage(
+                {
+                  id: 'actions.homeFeedAdd.named',
+                  defaultMessage: 'add {name} feed to home page',
+                  description: 'Add named feed to home, button label',
+                },
+                { name: profileName() },
+              )}
             >
               <div class={styles.addFeedIcon}></div>
             </button>
           </Show>
+
           <button
             class={styles.primaryButton}
             onClick={onNotImplemented}
           >
-            follow
+            {intl.formatMessage(
+              {
+                id: 'actions.follow',
+                defaultMessage: 'follow',
+                description: 'Follow button label',
+              }
+            )}
           </button>
         </div>
 
