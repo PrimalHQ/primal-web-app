@@ -17,6 +17,7 @@ import { useThreadContext } from './contexts/ThreadContext';
 import { useAccountContext } from './contexts/AccountContext';
 import { useProfileContext } from './contexts/ProfileContext';
 import { useSettingsContext } from './contexts/SettingsContext';
+import NotFound from './pages/NotFound';
 
 const primalWindow = window as PrimalWindow;
 
@@ -42,6 +43,7 @@ const Router: Component = () => {
 
   primalWindow.loadPrimalStores = loadPrimalStores;
 
+
   return (
     <>
       <Routes>
@@ -57,6 +59,8 @@ const Router: Component = () => {
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
           <Route path="/rest" component={Explore} />
+          <Route path="/404" component={NotFound} />
+          <Route path="/:vanityName" component={Profile} />
         </Route>
       </Routes>
     </>

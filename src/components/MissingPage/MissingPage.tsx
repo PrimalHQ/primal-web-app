@@ -1,11 +1,11 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 import Branding from '../Branding/Branding';
 import Wormhole from '../Wormhole/Wormhole';
 import styles from './MissingPage.module.scss';
 
 
-const MissingPage: Component<{ title: string }> = (props) => {
+const MissingPage: Component<{ title: string, children?: JSXElement }> = (props) => {
 
   const intl = useIntl();
 
@@ -28,13 +28,22 @@ const MissingPage: Component<{ title: string }> = (props) => {
         </div>
       </div>
 
-      <div class={styles.comingSoon}>
-        {intl.formatMessage({
-          id: 'placeholders.comingSoon',
-          defaultMessage: 'Coming soon',
-          description: 'Placholder text for missing content',
-        })}
-      </div>
+      <Show
+        when={props.children}
+        fallback={
+          <div class={styles.comingSoon}>
+            {intl.formatMessage({
+              id: 'placeholders.comingSoon',
+              defaultMessage: 'Coming soon',
+              description: 'Placholder text for missing content',
+            })}
+          </div>
+        }
+      >
+        <div class={styles.comingSoon}>
+          {props.children}
+        </div>
+      </Show>
     </>
   )
 }

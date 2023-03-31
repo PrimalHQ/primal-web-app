@@ -7,6 +7,7 @@ import {
   createContext,
   createEffect,
   onCleanup,
+  onMount,
   useContext
 } from "solid-js";
 import {
@@ -26,10 +27,11 @@ import {
   NostrUserContent,
   PrimalNote,
   PrimalUser,
+  VanityProfiles,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
-import { getUserProfileInfo } from "../lib/profile";
+import { fetchKnownProfiles, getOldestProfileEvent, getUserProfileInfo } from "../lib/profile";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -39,6 +41,8 @@ export type ProfileContextStore = {
     followers_count: number,
     note_count: number,
   },
+  knownProfiles: VanityProfiles,
+  oldestNoteDate: number | undefined,
   notes: PrimalNote[],
   isFetching: boolean,
   page: FeedPage,
@@ -65,6 +69,8 @@ export const initialData = {
   profileKey: undefined,
   userProfile: undefined,
   userStats: { ...emptyStats },
+  knownProfiles: { names: {} },
+  oldestNoteDate: undefined,
   notes: [],
   isFetching: false,
   page: { messages: [], users: {}, postStats: {} },
@@ -163,6 +169,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
+      getOldestProfileEvent(profileKey, `profile_oldest_${APP_ID}`);
     }
   }
 
@@ -234,6 +241,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         return;
       }
     }
+
+    if (subId === `profile_oldest_${APP_ID}`) {
+      if (content?.kind === Kind.OldestEvent) {
+        const timestamp = Number.parseInt(content.content);
+        if (isNaN(timestamp)) {
+          updateStore('oldestNoteDate', () => undefined);
+          return;
+        }
+        updateStore('oldestNoteDate', () => timestamp);
+      }
+    }
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {
@@ -246,6 +264,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
 // EFFECTS --------------------------------------
+
+  onMount(async () => {
+    const known = await fetchKnownProfiles();
+
+    updateStore('knownProfiles', () => known || {})
+  });
 
   createEffect(() => {
     if (isConnected()) {

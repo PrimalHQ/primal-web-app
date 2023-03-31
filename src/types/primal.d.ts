@@ -54,6 +54,12 @@ export type NostrMentionContent = {
   pubkey?: string,
 };
 
+export type NostrOldestEventContent = {
+  kind: Kind.OldestEvent,
+  content: string,
+  pubkey?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -61,7 +67,8 @@ export type NostrEventContent =
   NostrNetStatsContent |
   NostrLegendStatsContent |
   NostrUserStatsContent |
-  NostrMentionContent;
+  NostrMentionContent |
+  NostrOldestEventContent;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -338,3 +345,5 @@ export type HomeContextStore = {
 export type PrimalTheme = { name: string, label: string, logo: string, dark?: boolean};
 
 export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };
+
+export type VanityProfiles = { names: Record<string, string> };

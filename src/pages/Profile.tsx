@@ -1,4 +1,4 @@
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import { decode } from 'nostr-tools/nip19';
 import {
   Component,
@@ -15,7 +15,6 @@ import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
 import { truncateNpub } from '../stores/profile';
-import styles from './Profile.module.scss';
 import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
@@ -26,6 +25,9 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { isConnected } from '../sockets';
 import { useIntl } from '@cookbook/solid-intl';
 import { urlify, sanitize } from '../lib/notes';
+import { shortDate } from '../lib/dates';
+
+import styles from './Profile.module.scss';
 
 
 const Profile: Component = () => {
@@ -35,10 +37,22 @@ const Profile: Component = () => {
   const profile = useProfileContext();
   const account = useAccountContext();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const params = useParams();
 
+
   const getHex = () => {
+    if (params.vanityName) {
+      const hex = profile?.knownProfiles.names[params.vanityName];
+
+      if (hex) {
+        return hex;
+      }
+
+      navigate('/404');
+    }
+
     let hex = params.npub || account?.publicKey;
 
     if (params.npub?.startsWith('npub')) {
@@ -258,11 +272,11 @@ const Profile: Component = () => {
               </a>
             </Show>
           </div>
-          {/* <div class={styles.joined}>
-            <Show when={profile?.userProfile?.created_at}>
-              Joined Nostr on {shortDate(profile?.userProfile?.created_at)}
+          <div class={styles.joined}>
+            <Show when={profile?.oldestNoteDate}>
+              Joined Nostr on {shortDate(profile?.oldestNoteDate)}
             </Show>
-          </div> */}
+          </div>
         </div>
 
         <div class={styles.userStats}>

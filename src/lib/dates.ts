@@ -2,7 +2,10 @@
 
 const rtf = new Intl.RelativeTimeFormat('en', { style: 'short' });
 
-export const shortDate = (timestamp: number) => {
+export const shortDate = (timestamp: number | undefined) => {
+  if (!timestamp || timestamp < 0) {
+    return '';
+  }
   const date = new Date(timestamp * 1000);
   const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium'});
 

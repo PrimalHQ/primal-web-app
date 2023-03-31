@@ -204,5 +204,6 @@ export enum Kind  {
   NetStats = 10000101,
   LegendStats = 10000102,
   UserStats = 10000105,
+  OldestEvent = 10000106,
   Mentions = 10000107,
 }
