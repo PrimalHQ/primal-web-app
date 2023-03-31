@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
 import { Kind } from "../constants";
@@ -17,6 +18,8 @@ export const getStoredLikes = () => {
 export const setStoredLikes = (likes: string[]) => {
   return localStorage.setItem(getLikesStorageKey(), JSON.stringify(likes));
 };
+
+export const sanitize = DOMPurify.sanitize;
 
 export const urlify = (text: string) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;

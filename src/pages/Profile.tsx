@@ -25,6 +25,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { isConnected } from '../sockets';
 import { useIntl } from '@cookbook/solid-intl';
+import { urlify, sanitize } from '../lib/notes';
 
 
 const Profile: Component = () => {
@@ -245,8 +246,7 @@ const Profile: Component = () => {
           </div>
         </div>
 
-        <div class={styles.profileAbout}>
-          {profile?.userProfile?.about}
+        <div class={styles.profileAbout} innerHTML={sanitize(urlify(profile?.userProfile?.about || ''))}>
         </div>
 
         <div class={styles.profileLinks}>
