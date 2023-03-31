@@ -27,13 +27,13 @@
 }
 
 .verifiedIconL {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   display: inline-block;
   margin: 0px 6px;
   background-color: var(--accent-2);
-  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 26px;
-  mask: url(../assets/icons/verified.svg) no-repeat 0px / 26px;
+  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
+  mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
 }
 
 .verifiedIconS {
@@ -297,4 +297,10 @@
 
 .userFeed {
   position: relative;
+}
+
+.bannerPlaceholder {
+  width: 100%;
+  height: 214px;
+  background-color: var(--background-card);
 }

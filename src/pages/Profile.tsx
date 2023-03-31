@@ -135,9 +135,19 @@ const Profile: Component = () => {
   }
 
   const imgError = (event: any) => {
-    const image = event.target;
-    image.onerror = "";
-    image.src = defaultAvatar;
+    // Temprary solution until we decide what to to when banner is missing.
+
+    // const image = event.target;
+    // image.onerror = "";
+    // image.src = defaultAvatar;
+    console.log('ERROR')
+
+    const banner = document.getElementById('profile_banner');
+
+    if (banner) {
+      banner.innerHTML = `<div class="${styles.bannerPlaceholder}"></div>`;
+    }
+
     return true;
   }
 
@@ -160,8 +170,13 @@ const Profile: Component = () => {
       </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>
-        <div class={styles.banner}>
-          <img src={profile?.userProfile?.banner || ''} onerror={imgError}/>
+        <div id="profile_banner" class={styles.banner}>
+          <Show
+            when={profile?.userProfile?.banner}
+            fallback={<div class={styles.bannerPlaceholder}></div>}
+          >
+            <img src={profile?.userProfile?.banner} onerror={imgError}/>
+          </Show>
         </div>
 
         <div class={styles.userImage}>
