@@ -47,33 +47,33 @@
 }
 
 .keyIcon {
-  width: 12px;
-  height: 12px;
+  min-width: 16px;
+  height: 16px;
   display: inline-block;
-  margin: 0px 2px;
+  margin: 0px;
   background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../assets/icons/key.svg) no-repeat 0 0 / 12px 12px;
-  mask: url(../assets/icons/key.svg) no-repeat 0 0 / 12px 12px;
+  -webkit-mask: url(../assets/icons/key.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/key.svg) no-repeat 0 0 / 16px 16px;
 }
 
 .copyIcon {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   display: inline-block;
   margin: 0px 2px;
   background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 12px 12px;
-  mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 12px 12px;
+  -webkit-mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 16px 16px;
 }
 
 .linkIcon {
-  width: 8px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   display: inline-block;
   margin: 0px 6px 0px 0px;
   background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../assets/icons/link.svg) no-repeat 0 0 / 8px 12px;
-  mask: url(../assets/icons/link.svg) no-repeat 0 0 / 8px 12px;
+  -webkit-mask: url(../assets/icons/link.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/link.svg) no-repeat 0 0 / 16px 16px;
 }
 
 .profileActions {
@@ -216,6 +216,7 @@
       font-weight: 400;
       font-size: 12px;
       line-height: 16px;
+      display: flex;
 
       .copyIcon {
         background-color: var(--accent-2);
@@ -242,6 +243,8 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
+    display: flex;
+    align-items: center;
   }
 
   .joined {
