@@ -163,6 +163,10 @@ const Profile: Component = () => {
     toaster?.notImplemented();
   }
 
+  const isFollowingYou = () => {
+    return account?.publicKey && profile?.following.includes(account.publicKey);
+  }
+
   return (
     <>
       <Wormhole to='branding_holder'>
@@ -254,6 +258,15 @@ const Profile: Component = () => {
             {profileName()}
             <Show when={profile?.userProfile?.nip05}>
               <div class={styles.verifiedIconL}></div>
+            </Show>
+            <Show when={isFollowingYou()}>
+              <div class={styles.followsBadge}>
+                {intl.formatMessage({
+                  id: 'profile.followsYou',
+                  defaultMessage: 'Follows you',
+                  description: 'Label indicating that a profile is following your profile',
+                })}
+              </div>
             </Show>
           </div>
           <div class={styles.verificationInfo}>

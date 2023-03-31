@@ -30,7 +30,7 @@
   width: 22px;
   height: 22px;
   display: inline-block;
-  margin: 0px 6px;
+  margin: 0px 12px 0px 6px;
   background-color: var(--accent-2);
   -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
   mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
@@ -303,4 +303,19 @@
   width: 100%;
   height: 214px;
   background-color: var(--background-card);
+}
+
+.followsBadge {
+  background-color: var(--background-input);
+  width: 80px;
+  height: 16px;
+  border-radius: 4px;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-tertiary-2);
+  text-transform: lowercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -27,6 +27,14 @@ export const getOldestProfileEvent = (pubkey: string, subid: string) => {
   ]));
 }
 
+export const getProfileContactList = (pubkey: string, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["contact_list", { pubkey }]},
+  ]));
+}
+
 
 export const trimVerification = (address: string | undefined) => {
   if (address === undefined) {

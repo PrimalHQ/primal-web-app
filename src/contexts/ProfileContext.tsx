@@ -31,7 +31,12 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
-import { fetchKnownProfiles, getOldestProfileEvent, getUserProfileInfo } from "../lib/profile";
+import {
+  fetchKnownProfiles,
+  getOldestProfileEvent,
+  getProfileContactList,
+  getUserProfileInfo,
+} from "../lib/profile";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -48,6 +53,8 @@ export type ProfileContextStore = {
   page: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
+  following: string[],
+  sidebar: FeedPage & { notes: PrimalNote[] },
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -76,6 +83,13 @@ export const initialData = {
   page: { messages: [], users: {}, postStats: {} },
   reposts: {},
   lastNote: undefined,
+  following: [],
+  sidebar: {
+    messages: [],
+    users: {},
+    postStats: {},
+    notes: [],
+  },
 };
 
 
@@ -105,6 +119,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
+    updateStore('sidebar', () => ({
+      messages: [],
+      users: {},
+      postStats: {},
+      notes: [],
+    }));
   };
 
   const fetchNextPage = () => {
@@ -170,6 +190,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
       getOldestProfileEvent(profileKey, `profile_oldest_${APP_ID}`);
+      getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
     }
   }
 
@@ -251,6 +272,20 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         }
         updateStore('oldestNoteDate', () => timestamp);
       }
+      return;
+    }
+
+    if (subId === `profile_contacts_${APP_ID}`) {
+      if (content && content.kind === Kind.Contacts) {
+        const tags = content.tags;
+
+        const contacts = tags.reduce((acc, t) => {
+          return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
+        }, []);
+
+        updateStore('following', () => contacts);
+      }
+      return;
     }
   };
 

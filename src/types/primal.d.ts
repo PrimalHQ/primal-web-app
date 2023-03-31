@@ -60,6 +60,13 @@ export type NostrOldestEventContent = {
   pubkey?: string,
 };
 
+export type NostrContactsContent = {
+  kind: Kind.Contacts,
+  content: string,
+  pubkey?: string,
+  tags: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -68,7 +75,8 @@ export type NostrEventContent =
   NostrLegendStatsContent |
   NostrUserStatsContent |
   NostrMentionContent |
-  NostrOldestEventContent;
+  NostrOldestEventContent |
+  NostrContactsContent;
 
 export type NostrEvent = [
   type: "EVENT",

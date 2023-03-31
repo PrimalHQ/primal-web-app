@@ -14,12 +14,12 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { noKey } from "../constants";
+import { Kind, noKey } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { getLikes, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getUserProfile } from "../lib/profile";
+import { getProfileContactList, getUserProfile } from "../lib/profile";
 
 export type AccountContextStore = {
   likes: string[],
@@ -27,6 +27,7 @@ export type AccountContextStore = {
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
   showNewNoteForm: boolean,
+  following: string[],
   hasPublicKey: () => boolean,
   actions: {
     showNewNoteForm: () => void,
@@ -42,6 +43,7 @@ const initialData = {
   publicKey: undefined,
   activeUser: undefined,
   showNewNoteForm: false,
+  following: [],
 };
 export const AccountContext = createContext<AccountContextStore>();
 
@@ -171,6 +173,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
       getRelays();
       getUserProfile(store.publicKey, `user_profile_${APP_ID}`);
+      getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
     }
   });
 
@@ -218,6 +221,19 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         const user = JSON.parse(content.content);
 
         updateStore('activeUser', () => ({...user}));
+      }
+      return;
+    }
+
+    if (subId === `user_contacts_${APP_ID}`) {
+      if (content && content.kind === Kind.Contacts) {
+        const tags = content.tags;
+
+        const contacts = tags.reduce((acc, t) => {
+          return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
+        }, []);
+
+        updateStore('following', () => contacts);
       }
       return;
     }
