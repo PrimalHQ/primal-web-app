@@ -338,19 +338,37 @@ const Profile: Component = () => {
             <div class={styles.statNumber}>
               {humanizeNumber(profile?.userStats?.follows_count || 0)}
             </div>
-            <div class={styles.statName}>following</div>
+            <div class={styles.statName}>
+              {intl.formatMessage({
+                id: 'profile.stats.following',
+                defaultMessage: 'Following',
+                description: 'Label for following profile stat',
+              })}
+            </div>
           </div>
           <div class={styles.userStat}>
             <div class={styles.statNumber}>
               {humanizeNumber(profile?.userStats?.followers_count || 0)}
             </div>
-            <div class={styles.statName}>followers</div>
+            <div class={styles.statName}>
+              {intl.formatMessage({
+                id: 'profile.stats.followers',
+                defaultMessage: 'Followers',
+                description: 'Label for followers profile stat',
+              })}
+            </div>
           </div>
           <div class={styles.userStat}>
             <div class={styles.statNumber}>
               {humanizeNumber(profile?.userStats?.note_count || 0)}
             </div>
-            <div class={styles.statName}>notes</div>
+            <div class={styles.statName}>
+              {intl.formatMessage({
+                id: 'profile.stats.notes',
+                defaultMessage: 'Posts',
+                description: 'Label for notes profile stat',
+              })}
+            </div>
           </div>
 
         </div>
