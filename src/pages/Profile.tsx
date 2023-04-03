@@ -6,6 +6,7 @@ import {
   createMemo,
   createReaction,
   For,
+  onCleanup,
   onMount,
   Resource,
   Show
@@ -100,6 +101,33 @@ const Profile: Component = () => {
     }
   });
 
+  let origTitle = document.querySelector('title')?.innerText;
+
+  createEffect(() => {
+    const titleTag = document.querySelector('title');
+
+    if (titleTag) {
+      titleTag.innerText = intl.formatMessage({
+        id: 'page.profile.title',
+        defaultMessage: '{name} - Nostr Profile',
+        description: 'Page title for Profile page'
+      }, {
+        name: profile?.userProfile?.displayName ||
+          profile?.userProfile?.name ||
+          truncateNpub(profileNpub()),
+      });
+    }
+  });
+
+  onCleanup(() => {
+    const titleTag = document.querySelector('title');
+
+    if (titleTag) {
+      titleTag.innerText = origTitle || '';
+    }
+
+  });
+
   const profileNpub = createMemo(() => {
     return hexToNpub(profile?.profileKey);
   });
@@ -192,7 +220,7 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={profile?.userProfile}>
+        <Show when={profile?.userProfile || !profile?.isFetching}>
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <Avatar src={profile?.userProfile?.picture} size="xxl" />
@@ -264,7 +292,7 @@ const Profile: Component = () => {
           </button>
         </div>
 
-        <Show when={profile?.userProfile}>
+        <Show when={profile?.userProfile || !profile?.isFetching}>
           <div class={styles.profileVerification}>
             <div class={styles.avatarName}>
               {profileName()}
