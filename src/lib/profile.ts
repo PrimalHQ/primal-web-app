@@ -35,11 +35,11 @@ export const getProfileContactList = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const getProfileScoredNotes = (pubkey: string, subid: string) => {
+export const getProfileScoredNotes = (pubkey: string, subid: string, limit = 5) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_profile_scored_content", { pubkey }]},
+    {cache: ["user_profile_scored_content", { pubkey, limit }]},
   ]));
 }
 

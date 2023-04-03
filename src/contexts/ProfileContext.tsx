@@ -232,7 +232,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
       getOldestProfileEvent(profileKey, `profile_oldest_${APP_ID}`);
       getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
-      getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`);
+      getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
     }
   }
 
