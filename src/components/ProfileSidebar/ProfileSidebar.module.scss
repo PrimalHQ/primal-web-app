@@ -28,34 +28,8 @@
   }
 }
 
-.flameIcon {
-  width: 22px;
-  height: 22px;
-  display: inline-block;
-  margin-right: 9px;
-  background: var(--sidebar-section-icon-gradient);
-  -webkit-mask: url(../../assets/icons/explore/flame.svg) no-repeat 1px 0 / 20px 22px;
-  mask: url(../../assets/icons/explore/flame.svg) no-repeat 1px 0 / 20px 22px;
-}
-
-.zapIcon {
-  width: 22px;
-  height: 22px;
-  display: inline-block;
-  margin-right: 9px;
-  background: var(--sidebar-section-icon-gradient);
-  -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
-  mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
-}
-
 .headingTrending {
   @include heading();
-}
-
-.headingZapped {
-  @include heading();
-  margin-top: 34px;
-  z-index: 10px;
 }
 
 .noNotes {

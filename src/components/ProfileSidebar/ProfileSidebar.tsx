@@ -18,7 +18,6 @@ const ProfileSidebar: Component<{ notes: PrimalNote[] | undefined, profile: Prim
     <Show when={props.profile}>
       <div class={styles.headingTrending}>
         <div>
-          <div class={styles.flameIcon}></div>
           {intl.formatMessage({
             id: 'profile.sidebar.caption',
             defaultMessage: 'Top 10 notes',
