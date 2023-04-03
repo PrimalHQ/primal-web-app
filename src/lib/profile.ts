@@ -113,7 +113,7 @@ export const fetchKnownProfiles: () => Promise<VanityProfiles> = async () => {
     const json = await fetch(`${window.location.host}/.well-known/nostr.json`);
     return JSON.parse(await json.json());
   } catch (e) {
-    console.log('Failed to fetch known users');
+    console.log('Failed to fetch known users: ', e);
 
     return {
       "names": {
