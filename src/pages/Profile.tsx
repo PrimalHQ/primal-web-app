@@ -6,6 +6,7 @@ import {
   createMemo,
   createReaction,
   For,
+  onCleanup,
   onMount,
   Show
 } from 'solid-js';
@@ -97,6 +98,35 @@ const Profile: Component = () => {
     }
   });
 
+  const metaTag = (property: string) => {
+    return document.querySelector(`meta[property="og:${property}"]`)
+  }
+
+  const metaData = {
+    title: metaTag('title')?.getAttribute('content') || '',
+    description: metaTag('description')?.getAttribute('content') || '',
+    image: metaTag('image')?.getAttribute('content') || '',
+    url: metaTag('url')?.getAttribute('content') || '',
+  };
+
+  onCleanup(() => {
+    metaTag('title')?.setAttribute("content", metaData.title);
+    metaTag('description')?.setAttribute("content", metaData.description);
+    metaTag('image')?.setAttribute("content", metaData.image);
+    metaTag('url')?.setAttribute("content", metaData.url);
+  })
+
+  createEffect(() => {
+    if (params.vanityName && profile?.userProfile) {
+      const  name = profile.userProfile.displayName || profile.userProfile.name || truncateNpub(profile.userProfile.npub);
+
+      metaTag('title')?.setAttribute("content", `${name} - Nostr Profile`);
+      metaTag('description')?.setAttribute("content", `${profile.userProfile.about}`);
+      metaTag('image')?.setAttribute("content", `${profile.userProfile.picture}`);
+      metaTag('url')?.setAttribute("content", `https://primal.net/${profile.userProfile.name}`);
+    }
+  });
+
   const profileNpub = createMemo(() => {
     return hexToNpub(profile?.profileKey);
   });
@@ -143,7 +173,6 @@ const Profile: Component = () => {
     // const image = event.target;
     // image.onerror = "";
     // image.src = defaultAvatar;
-    console.log('ERROR')
 
     const banner = document.getElementById('profile_banner');
 
