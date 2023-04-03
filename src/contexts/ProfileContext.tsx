@@ -1,7 +1,7 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
 import { getEvents, getUserFeed } from "../lib/feed";
-import { convertToNotes, parseEmptyReposts, sortByRecency } from "../stores/note";
+import { convertToNotes, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -35,6 +35,7 @@ import {
   fetchKnownProfiles,
   getOldestProfileEvent,
   getProfileContactList,
+  getProfileScoredNotes,
   getUserProfileInfo,
 } from "../lib/profile";
 
@@ -182,6 +183,46 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     saveNotes(newPosts);
   };
 
+
+  const updateSidebar = (content: NostrEventContent) => {
+    if (content.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      updateStore('sidebar', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      );
+      return;
+    }
+
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+        updateStore('sidebar', 'messages',
+          (msgs) => [ ...msgs, { ...message }]
+        );
+      }
+
+      return;
+    }
+
+    if (content.kind === Kind.NoteStats) {
+      const statistic = content as NostrStatsContent;
+      const stat = JSON.parse(statistic.content);
+
+      updateStore('sidebar', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+  };
+
+  const saveSidebar = (page: FeedPage) => {
+    const newPosts = sortByScore(convertToNotes(page));
+
+    updateStore('sidebar', 'notes', () => [...newPosts]);
+  };
+
   const setProfileKey = (profileKey?: string) => {
     updateStore('profileKey', () => profileKey);
 
@@ -191,6 +232,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
       getOldestProfileEvent(profileKey, `profile_oldest_${APP_ID}`);
       getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
+      getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`);
     }
   }
 
@@ -286,6 +328,18 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         updateStore('following', () => contacts);
       }
       return;
+    }
+
+    if (subId === `profile_scored_${APP_ID}`) {
+      if (type === 'EOSE') {
+        saveSidebar(store.sidebar);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updateSidebar(content);
+        return;
+      }
     }
   };
 

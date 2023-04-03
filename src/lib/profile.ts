@@ -35,6 +35,14 @@ export const getProfileContactList = (pubkey: string, subid: string) => {
   ]));
 }
 
+export const getProfileScoredNotes = (pubkey: string, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_profile_scored_content", { pubkey }]},
+  ]));
+}
+
 
 export const trimVerification = (address: string | undefined) => {
   if (address === undefined) {

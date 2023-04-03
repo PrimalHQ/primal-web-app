@@ -15,7 +15,6 @@ import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
 import { truncateNpub } from '../stores/profile';
-import defaultAvatar from '../assets/icons/default_nostrich.svg';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
@@ -28,6 +27,8 @@ import { urlify, sanitize } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
+import StickySidebar from '../components/StickySidebar/StickySidebar';
+import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
 
 
 const Profile: Component = () => {
@@ -101,7 +102,9 @@ const Profile: Component = () => {
   });
 
   const profileName = () => {
-    return profile?.userProfile?.name || truncateNpub(profileNpub());
+    return profile?.userProfile?.displayName ||
+      profile?.userProfile?.name ||
+      truncateNpub(profileNpub());
   }
 
   const addToHome = () => {
@@ -172,6 +175,10 @@ const Profile: Component = () => {
       <Wormhole to='branding_holder'>
         <Branding small={false} />
       </Wormhole>
+
+      <StickySidebar>
+        <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
+      </StickySidebar>
 
       <div id="central_header" class={styles.fullHeader}>
         <div id="profile_banner" class={styles.banner}>
