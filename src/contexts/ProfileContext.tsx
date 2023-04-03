@@ -354,12 +354,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // EFFECTS --------------------------------------
 
-  onMount(async () => {
-    const known = await fetchKnownProfiles();
-
-    updateStore('knownProfiles', () => known || {})
-  });
-
   createEffect(() => {
     if (isConnected()) {
       refreshSocketListeners(

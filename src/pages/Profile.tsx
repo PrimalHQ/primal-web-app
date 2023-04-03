@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from '@solidjs/router';
+import { RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
 import { decode } from 'nostr-tools/nip19';
 import {
   Component,
@@ -7,6 +7,7 @@ import {
   createReaction,
   For,
   onMount,
+  Resource,
   Show
 } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
@@ -29,6 +30,7 @@ import { shortDate } from '../lib/dates';
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
+import { VanityProfiles } from '../types/primal';
 
 
 const Profile: Component = () => {
@@ -42,10 +44,11 @@ const Profile: Component = () => {
 
   const params = useParams();
 
+  const routeData = useRouteData<(opts: RouteDataFuncArgs) => Resource<VanityProfiles>>();
 
   const getHex = () => {
-    if (params.vanityName) {
-      const hex = profile?.knownProfiles.names[params.vanityName];
+    if (params.vanityName && routeData()) {
+      const hex = routeData()?.names[params.vanityName];
 
       if (hex) {
         return hex;
