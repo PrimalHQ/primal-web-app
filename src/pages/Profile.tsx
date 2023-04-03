@@ -6,7 +6,6 @@ import {
   createMemo,
   createReaction,
   For,
-  onCleanup,
   onMount,
   Resource,
   Show
@@ -32,6 +31,7 @@ import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
 import { VanityProfiles } from '../types/primal';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 
 const Profile: Component = () => {
@@ -99,33 +99,6 @@ const Profile: Component = () => {
     if (account?.publicKey) {
       setProfile(getHex());
     }
-  });
-
-  let origTitle = document.querySelector('title')?.innerText;
-
-  createEffect(() => {
-    const titleTag = document.querySelector('title');
-
-    if (titleTag) {
-      titleTag.innerText = intl.formatMessage({
-        id: 'page.profile.title',
-        defaultMessage: '{name} - Nostr Profile',
-        description: 'Page title for Profile page'
-      }, {
-        name: profile?.userProfile?.displayName ||
-          profile?.userProfile?.name ||
-          truncateNpub(profileNpub()),
-      });
-    }
-  });
-
-  onCleanup(() => {
-    const titleTag = document.querySelector('title');
-
-    if (titleTag) {
-      titleTag.innerText = origTitle || '';
-    }
-
   });
 
   const profileNpub = createMemo(() => {
@@ -202,6 +175,18 @@ const Profile: Component = () => {
 
   return (
     <>
+      <PageTitle title={
+        intl.formatMessage({
+          id: 'page.profile.title',
+          defaultMessage: '{name} - Nostr Profile',
+          description: 'Page title for Profile page'
+        }, {
+          name: profile?.userProfile?.displayName ||
+            profile?.userProfile?.name ||
+            truncateNpub(profileNpub()),
+        })}
+      />
+
       <Wormhole to='branding_holder'>
         <Branding small={false} />
       </Wormhole>

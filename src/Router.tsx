@@ -10,7 +10,7 @@ import Downloads from './pages/Downloads';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
 // import Profile from './pages/Profile';
-import { PrimalWindow, VanityProfiles } from './types/primal';
+import { PrimalWindow } from './types/primal';
 import { useHomeContext } from './contexts/HomeContext';
 import { useExploreContext } from './contexts/ExploreContext';
 import { useThreadContext } from './contexts/ThreadContext';

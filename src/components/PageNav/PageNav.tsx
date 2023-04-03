@@ -1,5 +1,3 @@
-import { A, Navigate } from '@solidjs/router';
-import { useNavigate, useRouter } from '@solidjs/router/dist/routing';
 import type { Component } from 'solid-js';
 
 import styles from './PageNav.module.scss';
