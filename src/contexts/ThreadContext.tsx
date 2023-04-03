@@ -1,7 +1,11 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
 import { getEvents, getThread } from "../lib/feed";
-import { convertToNotes, parseEmptyReposts, sortByRecency } from "../stores/note";
+import {
+  convertToNotes,
+  parseEmptyReposts,
+  sortByRecency,
+} from "../stores/note";
 import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {

@@ -20,7 +20,7 @@ const ProfileSidebar: Component<{ notes: PrimalNote[] | undefined, profile: Prim
         <div>
           {intl.formatMessage({
             id: 'profile.sidebar.caption',
-            defaultMessage: 'Top 10 notes',
+            defaultMessage: 'Top 10 posts',
             description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
           })}
         </div>
@@ -32,7 +32,7 @@ const ProfileSidebar: Component<{ notes: PrimalNote[] | undefined, profile: Prim
           <div class={styles.noNotes}>
             {intl.formatMessage({
               id: 'profile.sidebar.noNotes',
-              defaultMessage: 'No trending notes',
+              defaultMessage: 'No trending posts',
               description: 'Placeholde for profile sidebar when the profile is missing trending notes',
             },
             {
