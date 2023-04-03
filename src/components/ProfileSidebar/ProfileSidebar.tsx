@@ -21,13 +21,9 @@ const ProfileSidebar: Component<{ notes: PrimalNote[] | undefined, profile: Prim
           <div class={styles.flameIcon}></div>
           {intl.formatMessage({
             id: 'profile.sidebar.caption',
-            defaultMessage: 'By {name}',
+            defaultMessage: 'Top 10 notes',
             description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
-          },
-          {
-            name: props.profile?.name || truncateNpub(props.profile?.npub || ''),
-          },
-          )}
+          })}
         </div>
       </div>
 
