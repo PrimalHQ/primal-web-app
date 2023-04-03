@@ -1,29 +1,18 @@
 import { sendMessage } from '../sockets';
 
-let isListening = false;
-
 export const startListeningForNostrStats = (subId: string) => {
-  if (isListening) {
-    return;
-  }
-
   sendMessage(JSON.stringify([
     "REQ",
     `netstats_${subId}`,
     {cache: ["net_stats"]},
   ]));
-  isListening = true;
 };
 
 export const stopListeningForNostrStats = (subId: string) => {
-  if (!isListening) {
-    return;
-  }
   sendMessage(JSON.stringify([
     "CLOSE",
     `netstats_${subId}`,
   ]));
-  isListening = false;
 };
 
 export const getLegendStats = (pubkey: string | undefined, subId: string) => {
