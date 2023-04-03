@@ -189,11 +189,13 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <div class={styles.userImage}>
-          <div class={styles.avatar}>
-            <Avatar src={profile?.userProfile?.picture} size="xxl" />
+        <Show when={profile?.userProfile}>
+          <div class={styles.userImage}>
+            <div class={styles.avatar}>
+              <Avatar src={profile?.userProfile?.picture} size="xxl" />
+            </div>
           </div>
-        </div>
+        </Show>
 
         <div class={styles.profileActions}>
           <button
@@ -259,40 +261,42 @@ const Profile: Component = () => {
           </button>
         </div>
 
-        <div class={styles.profileVerification}>
-          <div class={styles.avatarName}>
-            {profileName()}
-            <Show when={profile?.userProfile?.nip05}>
-              <div class={styles.verifiedIconL}></div>
-            </Show>
-            <Show when={isFollowingYou()}>
-              <div class={styles.followsBadge}>
-                {intl.formatMessage({
-                  id: 'profile.followsYou',
-                  defaultMessage: 'Follows you',
-                  description: 'Label indicating that a profile is following your profile',
-                })}
+        <Show when={profile?.userProfile}>
+          <div class={styles.profileVerification}>
+            <div class={styles.avatarName}>
+              {profileName()}
+              <Show when={profile?.userProfile?.nip05}>
+                <div class={styles.verifiedIconL}></div>
+              </Show>
+              <Show when={isFollowingYou()}>
+                <div class={styles.followsBadge}>
+                  {intl.formatMessage({
+                    id: 'profile.followsYou',
+                    defaultMessage: 'Follows you',
+                    description: 'Label indicating that a profile is following your profile',
+                  })}
+                </div>
+              </Show>
+            </div>
+            <div class={styles.verificationInfo}>
+              <Show when={profile?.userProfile?.nip05}>
+                <div class={styles.verifiedIconS}></div>
+                <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
+              </Show>
+              <div class={styles.publicKey}>
+                <div class={styles.keyIcon}></div>
+                <button
+                  class={styles.npub}
+                  title={profile?.userProfile?.npub || profileNpub()}
+                  onClick={copyNpub}
+                  >
+                  {truncateNpub(profile?.userProfile?.npub || profileNpub())}
+                  <div class={styles.copyIcon}></div>
+                </button>
               </div>
-            </Show>
-          </div>
-          <div class={styles.verificationInfo}>
-            <Show when={profile?.userProfile?.nip05}>
-              <div class={styles.verifiedIconS}></div>
-              <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
-            </Show>
-            <div class={styles.publicKey}>
-              <div class={styles.keyIcon}></div>
-              <button
-                class={styles.npub}
-                title={profile?.userProfile?.npub || profileNpub()}
-                onClick={copyNpub}
-              >
-                {truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                <div class={styles.copyIcon}></div>
-              </button>
             </div>
           </div>
-        </div>
+        </Show>
 
         <div class={styles.profileAbout} innerHTML={sanitize(urlify(profile?.userProfile?.about || ''))}>
         </div>
