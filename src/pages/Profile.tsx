@@ -208,7 +208,13 @@ const Profile: Component = () => {
         <Show when={profile?.userProfile && !profile?.isFetching}>
           <div class={styles.userImage}>
             <div class={styles.avatar}>
-              <Avatar src={profile?.userProfile?.picture} size="xxl" />
+              <div class={styles.desktopAvatar}>
+                <Avatar src={profile?.userProfile?.picture} size="xxl" />
+              </div>
+
+              <div class={styles.phoneAvatar}>
+                <Avatar src={profile?.userProfile?.picture} size="lg" />
+              </div>
             </div>
           </div>
         </Show>
@@ -227,41 +233,43 @@ const Profile: Component = () => {
             <div class={styles.messageIcon}></div>
           </button>
 
-          <Show
-            when={!hasFeedAtHome()}
-            fallback={
+          <div class={styles.addToFeedButton}>
+            <Show
+              when={!hasFeedAtHome()}
+              fallback={
+                <button
+                  class={styles.smallSecondaryButton}
+                  onClick={removeFromHome}
+                  title={intl.formatMessage(
+                    {
+                      id: 'actions.homeFeedRemove.named',
+                      defaultMessage: 'remove {name} feed from your home page',
+                      description: 'Remove named feed from home, button label',
+                    },
+                    { name: profileName() },
+                  )}
+                  disabled={profile?.profileKey === account?.publicKey}
+                >
+                  <div class={styles.removeFeedIcon}></div>
+                </button>
+              }
+            >
               <button
-                class={styles.smallSecondaryButton}
-                onClick={removeFromHome}
+                class={styles.smallPrimaryButton}
+                onClick={addToHome}
                 title={intl.formatMessage(
                   {
-                    id: 'actions.homeFeedRemove.named',
-                    defaultMessage: 'remove {name} feed from your home page',
-                    description: 'Remove named feed from home, button label',
+                    id: 'actions.homeFeedAdd.named',
+                    defaultMessage: 'add {name} feed to home page',
+                    description: 'Add named feed to home, button label',
                   },
                   { name: profileName() },
                 )}
-                disabled={profile?.profileKey === account?.publicKey}
               >
-                <div class={styles.removeFeedIcon}></div>
+                <div class={styles.addFeedIcon}></div>
               </button>
-            }
-          >
-            <button
-              class={styles.smallPrimaryButton}
-              onClick={addToHome}
-              title={intl.formatMessage(
-                {
-                  id: 'actions.homeFeedAdd.named',
-                  defaultMessage: 'add {name} feed to home page',
-                  description: 'Add named feed to home, button label',
-                },
-                { name: profileName() },
-              )}
-            >
-              <div class={styles.addFeedIcon}></div>
-            </button>
-          </Show>
+            </Show>
+          </div>
 
           <button
             class={styles.primaryButton}
@@ -296,8 +304,10 @@ const Profile: Component = () => {
             </div>
             <div class={styles.verificationInfo}>
               <Show when={profile?.userProfile?.nip05}>
-                <div class={styles.verifiedIconS}></div>
-                <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
+                <div class={styles.verified}>
+                  <div class={styles.verifiedIconS}></div>
+                  <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
+                </div>
               </Show>
               <div class={styles.publicKey}>
                 <div class={styles.keyIcon}></div>
@@ -328,7 +338,13 @@ const Profile: Component = () => {
           </div>
           <div class={styles.joined}>
             <Show when={profile?.oldestNoteDate}>
-              Joined Nostr on {shortDate(profile?.oldestNoteDate)}
+              {intl.formatMessage({
+                id: 'profile.joinDate',
+                defaultMessage: 'Joined Nostr on {date}',
+                description: 'Label indicating when the profile joined Nostr (oldest event)',
+              }, {
+                date: shortDate(profile?.oldestNoteDate),
+              })}
             </Show>
           </div>
         </div>
