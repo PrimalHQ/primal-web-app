@@ -22,6 +22,7 @@ import { useHomeContext } from '../contexts/HomeContext';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useIntl } from '@cookbook/solid-intl';
+import { isConnected } from '../sockets';
 
 
 const Home: Component = () => {
@@ -43,7 +44,7 @@ const Home: Component = () => {
     if (!context?.selectedFeed) {
       context?.actions.selectFeed(settings?.availableFeeds[0]);
     }
-    onPubKeyFound(() => account?.publicKey);
+    onPubKeyFound(() => account?.publicKey && isConnected());
   });
 
   return (
