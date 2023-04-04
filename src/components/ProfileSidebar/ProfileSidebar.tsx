@@ -20,7 +20,7 @@ const ProfileSidebar: Component<{ notes: PrimalNote[] | undefined, profile: Prim
         <div>
           {intl.formatMessage({
             id: 'profile.sidebar.caption',
-            defaultMessage: 'Top 10 posts',
+            defaultMessage: 'Popular posts',
             description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
           })}
         </div>
