@@ -34,7 +34,18 @@ const Home: Component = () => {
 
   const isPageLoading = () => context?.isFetching;
 
+  const onConnectionEstablished = createReaction(() => {
+    console.log('onConnectionEstablished', isConnected());
+    context?.actions.selectFeed(settings?.availableFeeds[0]);
+  });
+
+
   const onPubKeyFound = createReaction(() => {
+    console.log('onPubKeyFound', isConnected());
+    if (!isConnected()) {
+      onConnectionEstablished(() => isConnected());
+      return;
+    }
     context?.actions.selectFeed(settings?.availableFeeds[0]);
   });
 
@@ -44,7 +55,7 @@ const Home: Component = () => {
     if (!context?.selectedFeed) {
       context?.actions.selectFeed(settings?.availableFeeds[0]);
     }
-    onPubKeyFound(() => account?.publicKey && isConnected());
+    onPubKeyFound(() => account?.publicKey);
   });
 
   return (
