@@ -25,7 +25,7 @@ const ExploreSidebar: Component = () => {
 
   const trendingUsers = createMemo(() => {
     const sortedKeys = Object.keys(store.scores).sort(
-      (a, b) => store.scores[a] - store.scores[b]);
+      (a, b) => store.scores[b] - store.scores[a]);
 
     return sortedKeys.map(key => convertToUser(store.users[key]));
   });
