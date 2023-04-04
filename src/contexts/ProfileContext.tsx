@@ -7,7 +7,6 @@ import {
   createContext,
   createEffect,
   onCleanup,
-  onMount,
   useContext
 } from "solid-js";
 import {
@@ -32,7 +31,6 @@ import {
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
-  fetchKnownProfiles,
   getOldestProfileEvent,
   getProfileContactList,
   getProfileScoredNotes,

@@ -205,7 +205,7 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={profile?.userProfile || !profile?.isFetching}>
+        <Show when={profile?.userProfile && !profile?.isFetching}>
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <Avatar src={profile?.userProfile?.picture} size="xxl" />
@@ -277,7 +277,7 @@ const Profile: Component = () => {
           </button>
         </div>
 
-        <Show when={profile?.userProfile || !profile?.isFetching}>
+        <Show when={profile?.userProfile && !profile?.isFetching}>
           <div class={styles.profileVerification}>
             <div class={styles.avatarName}>
               {profileName()}
