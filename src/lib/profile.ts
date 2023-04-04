@@ -43,6 +43,16 @@ export const getProfileScoredNotes = (pubkey: string, subid: string, limit = 5) 
   ]));
 }
 
+export const getTrendingUsers = (subid: string, limit = 24) => {
+  const fourHAgo = Math.floor((new Date().getTime() - (4 * 60 * 60 * 1000)) / 1000);
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["scored_users", { limit, since: fourHAgo }]},
+  ]));
+}
+
 
 export const trimVerification = (address: string | undefined) => {
   if (address === undefined) {

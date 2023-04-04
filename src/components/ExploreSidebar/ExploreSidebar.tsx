@@ -6,69 +6,50 @@ import { APP_ID } from '../../App';
 import { getExploreFeed } from '../../lib/feed';
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
 import { sortingPlan, convertToNotes } from '../../stores/note';
-import { truncateNpub } from '../../stores/profile';
-import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, PrimalNote, PrimalUser } from '../../types/primal';
+import { convertToUser, truncateNpub } from '../../stores/profile';
+import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ExploreSidebar.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
+import { getTrendingUsers } from '../../lib/profile';
 
 const ExploreSidebar: Component = () => {
 
   const intl = useIntl();
 
-  const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
-    trending: {
-      messages: [],
-      users: {},
-      postStats: {},
-      notes: [],
-    }
+  const [store, setStore] = createStore<{ users: Record<string, NostrUserContent>, scores: Record<string, number> }>({
+    users: {},
+    scores: {},
   });
 
   const trendingUsers = createMemo(() => {
-    const notes: PrimalNote[] = data.trending.notes;
-    const users = notes.map(n => n.user) || [];
+    const sortedKeys = Object.keys(store.scores).sort(
+      (a, b) => store.scores[a] - store.scores[b]);
 
-    const unique = users.reduce((acc: PrimalUser[], u) => {
-      if (acc.find(e => e.pubkey === u.pubkey)) {
-        return acc;
-      }
-
-      return [ ...acc, u];
-    }, []);
-
-    return unique.slice(0, 24);
+    return sortedKeys.map(key => convertToUser(store.users[key]));
   });
 
 //  ACTIONS -------------------------------------
 
-  const processNotes = (type: string, key: string, content: NostrEventContent | undefined) => {
+  const processUsers = (type: string, content: NostrEventContent | undefined) => {
 
-    const sort = sortingPlan(key);
+    // const sort = sortingPlan(key);
 
     if (type === 'EOSE') {
-      const newPosts = sort(convertToNotes({
-        users: data[key].users,
-        messages: data[key].messages,
-        postStats: data[key].postStats,
-      }));
-
-      setData(key, 'notes', () => [ ...newPosts ]);
-
       return;
     }
 
     if (type === 'EVENT') {
       if (content && content.kind === Kind.Metadata) {
-        setData(key, 'users', (users) => ({ ...users, [content.pubkey]: content}))
+        setStore('users', (users) => ({ ...users, [content.pubkey]: content}));
+        return;
       }
-      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
-        setData(key, 'messages',  (msgs) => [ ...msgs, content]);
-      }
-      if (content && content.kind === Kind.NoteStats) {
-        const stat = JSON.parse(content.content);
-        setData(key, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+      if (content && content.kind === Kind.UserScore) {
+        const scores = JSON.parse(content.content);
+
+        setStore('scores', () => ({ ...scores }));
+        return;
       }
     }
   };
@@ -89,7 +70,7 @@ const ExploreSidebar: Component = () => {
     const [type, subId, content] = message;
 
     if (subId === `explore_sidebar_${APP_ID}`) {
-      processNotes(type, 'trending', content);
+      processUsers(type, content);
       return;
     }
   };
@@ -111,16 +92,12 @@ const ExploreSidebar: Component = () => {
         { message: onMessage, close: onSocketClose },
       );
 
-      setData(() => ({
-        trending: {
-          messages: [],
-          users: {},
-          postStats: {},
-          notes: [],
-        },
+      setStore(() => ({
+        users: {},
+        scores: {},
       }));
 
-      getExploreFeed('', `explore_sidebar_${APP_ID}`, 'global', 'trending', 0, 100);
+      getTrendingUsers(`explore_sidebar_${APP_ID}`, 24);
 		}
 	});
 

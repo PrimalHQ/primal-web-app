@@ -67,6 +67,11 @@ export type NostrContactsContent = {
   tags: string[][],
 };
 
+export type NostrScoredUsersContent = {
+  kind: Kind.UserScore,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -76,7 +81,8 @@ export type NostrEventContent =
   NostrUserStatsContent |
   NostrMentionContent |
   NostrOldestEventContent |
-  NostrContactsContent;
+  NostrContactsContent |
+  NostrScoredUsersContent;
 
 export type NostrEvent = [
   type: "EVENT",

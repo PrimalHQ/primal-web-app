@@ -206,4 +206,5 @@ export enum Kind  {
   UserStats = 10000105,
   OldestEvent = 10000106,
   Mentions = 10000107,
+  UserScore = 10000108,
 }
