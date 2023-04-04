@@ -108,9 +108,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (feed !== undefined && feed.hex !== undefined) {
       updateStore('selectedFeed', () => ({ ...feed }));
       clearNotes();
-      const id = feed.hex.slice(0, 6);
-      console.log('Selected: ', id);
-      fetchNotes(feed.hex , `${id}_${APP_ID}`);
+      fetchNotes(feed.hex , `${APP_ID}`);
     }
   };
 
@@ -162,9 +160,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subId, content] = message;
-    const id = store.selectedFeed?.hex?.slice(0, 6);
 
-    if (subId === `home_feed_${id}_${APP_ID}`) {
+    if (subId === `home_feed_${APP_ID}`) {
       if (type === 'EOSE') {
         const reposts = parseEmptyReposts(store.page);
         const ids = Object.keys(reposts);

@@ -35,13 +35,11 @@ const Home: Component = () => {
   const isPageLoading = () => context?.isFetching;
 
   const onConnectionEstablished = createReaction(() => {
-    console.log('onConnectionEstablished', isConnected());
     context?.actions.selectFeed(settings?.availableFeeds[0]);
   });
 
 
   const onPubKeyFound = createReaction(() => {
-    console.log('onPubKeyFound', isConnected());
     if (!isConnected()) {
       onConnectionEstablished(() => isConnected());
       return;
