@@ -48,6 +48,7 @@ export const reset = () => {
 };
 
 export const sendMessage = (message: string) => {
+  console.log('Is Connected: ', isConnected());
   isConnected() && socket()?.send(message);
 }
 

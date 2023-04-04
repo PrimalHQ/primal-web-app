@@ -34,7 +34,6 @@ const Home: Component = () => {
   const isPageLoading = () => context?.isFetching;
 
   const onPubKeyFound = createReaction(() => {
-    console.log('reaction select')
     context?.actions.selectFeed(settings?.availableFeeds[0]);
   });
 
@@ -42,7 +41,6 @@ const Home: Component = () => {
     scrollWindowTo(context?.scrollTop);
 
     if (!context?.selectedFeed) {
-      console.log('init select')
       context?.actions.selectFeed(settings?.availableFeeds[0]);
     }
     onPubKeyFound(() => account?.publicKey);
