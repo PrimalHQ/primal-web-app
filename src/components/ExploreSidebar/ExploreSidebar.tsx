@@ -23,20 +23,19 @@ const ExploreSidebar: Component = () => {
     scores: {},
   });
 
-  const trendingUsers = createMemo(() => {
-    const sortedKeys = Object.keys(store.scores).sort(
-      (a, b) => store.scores[b] - store.scores[a]);
-
-    return sortedKeys.map(key => convertToUser(store.users[key]));
-  });
+  const [trendingUsers, setTrendingUsers] = createStore<PrimalUser[]>([]);
 
 //  ACTIONS -------------------------------------
 
   const processUsers = (type: string, content: NostrEventContent | undefined) => {
 
-    // const sort = sortingPlan(key);
-
     if (type === 'EOSE') {
+      const sortedKeys = Object.keys(store.scores).sort(
+        (a, b) => store.scores[b] - store.scores[a]);
+
+      const users = sortedKeys.map(key => convertToUser(store.users[key]));
+
+      setTrendingUsers(() => [...users]);
       return;
     }
 
@@ -113,7 +112,7 @@ const ExploreSidebar: Component = () => {
         })}
       </div>
       <div class={styles.trendingUsers}>
-        <For each={trendingUsers()}>
+        <For each={trendingUsers}>
           {
             user => (
               <A
