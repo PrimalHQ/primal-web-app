@@ -44,7 +44,7 @@ const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean 
   return (
     <Show when={props.person}>
       <div class={klass()}>
-        <button onClick={onFollow} disabled={account?.processingFollow}>
+        <button onClick={onFollow} >
           <Show
             when={isFollowed()}
             fallback={intl.formatMessage(
