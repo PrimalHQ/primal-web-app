@@ -4,15 +4,22 @@ import { PrimalNote } from '../../../types/primal';
 import styles from './NoteHeader.module.scss';
 import { date } from '../../../lib/dates';
 import { trimVerification } from '../../../lib/profile';
+import { truncateNpub } from '../../../stores/profile';
 
 const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
+
+  const authorName = () => {
+    return props.note.user?.displayName ||
+      props.note.user?.name ||
+      truncateNpub(props.note.user.npub);
+  }
 
   return (
     <div class={styles.header}>
       <span class={styles.postInfo}>
         <span class={styles.userInfo}>
           <span class={styles.userName}>
-            {props.note.user?.name || props.note.user.npub}
+            {authorName()}
           </span>
           <Show when={props.note.user?.nip05}>
             <span class={styles.verifiedIcon} />

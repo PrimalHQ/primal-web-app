@@ -268,6 +268,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       if (content?.kind === Kind.Metadata) {
         let user = JSON.parse(content.content);
 
+        if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+          user.displayName = user.display_name;
+        }
         user.pubkey = content.pubkey;
         user.npub = hexToNpub(content.pubkey);
         user.created_at = content.created_at;

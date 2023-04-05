@@ -9,6 +9,7 @@ import NoteHeader from './NoteHeader/NoteHeader';
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
+import { truncateNpub } from '../../stores/profile';
 
 const Note: Component<{ note: PrimalNote }> = (props) => {
 
@@ -20,6 +21,25 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
   const navToThread = (note: PrimalNote) => {
     threadContext?.actions.setPrimaryNote(note);
   };
+
+  const authorName = () => {
+    return props.note.user?.displayName ||
+      props.note.user?.name ||
+      truncateNpub(props.note.user.npub);
+  }
+
+  const reposterName = () => {
+    const r = repost();
+
+    if (!r) {
+      return '';
+    }
+
+    return r.user?.displayName ||
+      r.user?.name ||
+      truncateNpub(r.user.npub);
+  }
+
 
   return (
     <A
@@ -34,7 +54,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
           <div class={styles.repostIcon}></div>
           <span>
             <A href={`/profile/${repost()?.user.npub}`} >
-              {repost()?.user.name}
+              {reposterName()}
             </A>
             {intl.formatMessage({
               id: 'note.reposted',
@@ -58,7 +78,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
               verified={props.note?.user?.nip05}
             />
           </A>
-          <div class={styles.avatarName}>{props.note?.user?.name}</div>
+          <div class={styles.avatarName}>{authorName()}</div>
         </div>
         <div class={styles.content}>
           <NoteHeader note={props.note} />

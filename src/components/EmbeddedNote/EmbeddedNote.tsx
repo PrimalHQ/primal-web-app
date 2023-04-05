@@ -3,6 +3,7 @@ import { Component, Show } from 'solid-js';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { trimVerification } from '../../lib/profile';
+import { truncateNpub } from '../../stores/profile';
 import { PrimalNote } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
@@ -16,6 +17,11 @@ const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
   const navToThread = (note: PrimalNote) => {
     threadContext?.actions.setPrimaryNote(note);
   };
+  const authorName = () => {
+    return props.note.user?.displayName ||
+      props.note.user?.name ||
+      truncateNpub(props.note.user.npub);
+  }
 
   return (
     <A
@@ -33,7 +39,7 @@ const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
       <span class={styles.postInfo}>
         <span class={styles.userInfo}>
           <span class={styles.userName}>
-            {props.note.user.name}
+            {authorName()}
           </span>
           <Show when={props.note.user.nip05} >
             <span class={styles.verifiedIcon} />
