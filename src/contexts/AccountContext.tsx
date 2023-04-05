@@ -31,6 +31,7 @@ export type AccountContextStore = {
   showNewNoteForm: boolean,
   following: string[],
   followingSince: number,
+  processingFollow: boolean,
   hasPublicKey: () => boolean,
   actions: {
     showNewNoteForm: () => void,
@@ -51,6 +52,7 @@ const initialData = {
   showNewNoteForm: false,
   following: [],
   followingSince: 0,
+  processingFollow: false,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -184,6 +186,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
+    updateStore('processingFollow', () => true);
+
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
         return;
@@ -207,6 +211,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         }
       }
 
+      updateStore('processingFollow', () => false);
       unsub();
     });
 
@@ -218,6 +223,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (!store.publicKey || !store.following.includes(pubkey)) {
       return;
     }
+    updateStore('processingFollow', () => true);
 
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -242,6 +248,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           }
         }
 
+        updateStore('processingFollow', () => false);
         unsub();
     });
 
