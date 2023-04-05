@@ -79,3 +79,22 @@ export const removeSocketListeners = (
     ws.removeEventListener(event, listeners[event]);
   });
 };
+
+export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
+  const listener = (event: MessageEvent) => {
+    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+    const [type, subscriptionId, content] = message;
+
+    if (subId === subscriptionId) {
+      cb(type, subscriptionId, content);
+    }
+
+  };
+
+  socket()?.addEventListener('message', listener);
+
+  return () => {
+    console.log('unsubbed ', subId);
+    socket()?.removeEventListener('message', listener);
+  };
+};
