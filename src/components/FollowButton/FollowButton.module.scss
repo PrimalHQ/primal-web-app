@@ -1,0 +1,57 @@
+
+  @mixin followButton {
+    grid-area: follow;
+    align-items: center;
+    display: flex;
+    align-items: center;
+    button {
+      background: var(--brand-gradient-vertical);
+      border-radius: 6px;
+      padding: 0px;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 700;
+      margin: 0px;
+    }
+  }
+
+  .primaryButton {
+    width: 90px;
+    height: 40px;
+  }
+
+  .follow {
+    @include followButton;
+    button {
+      border: none;
+    }
+  }
+
+  .unfollow {
+    @include followButton;
+    button {
+      color: var(--text-secondary);
+      background-color: var(--background-card);
+      background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                    var(--brand-gradient) border-box;
+      border: 1px solid transparent;
+    }
+  }
+
+  .large {
+    button {
+      width: 90px;
+      height: 40px;
+      margin: 0px 8px;
+      font-size: 16px;
+      line-height: 20px;
+    }
+
+  }
+
+  .small {
+    button {
+      width: 64px;
+      height: 40px;
+    }
+  }

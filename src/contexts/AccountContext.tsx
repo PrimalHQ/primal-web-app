@@ -8,6 +8,7 @@ import {
   useContext
 } from "solid-js";
 import {
+  NostrContactsContent,
   NostrEOSE,
   NostrEvent,
   NostrWindow,
@@ -15,8 +16,8 @@ import {
   PrimalUser,
 } from '../types/primal';
 import { Kind, noKey } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { getLikes, sendLike, setStoredLikes } from "../lib/notes";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
+import { getLikes, sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getProfileContactList, getUserProfile } from "../lib/profile";
@@ -28,6 +29,7 @@ export type AccountContextStore = {
   activeUser: PrimalUser | undefined,
   showNewNoteForm: boolean,
   following: string[],
+  followingSince: number,
   hasPublicKey: () => boolean,
   actions: {
     showNewNoteForm: () => void,
@@ -35,6 +37,8 @@ export type AccountContextStore = {
     setActiveUser: (user: PrimalUser) => void,
     addLike: (note: PrimalNote) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
+    addFollow: (pubkey: string) => void,
+    removeFollow: (pubkey: string) => void,
   },
 }
 const initialData = {
@@ -44,6 +48,7 @@ const initialData = {
   activeUser: undefined,
   showNewNoteForm: false,
   following: [],
+  followingSince: 0,
 };
 export const AccountContext = createContext<AccountContextStore>();
 
@@ -78,7 +83,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         })
 
         let connectedRelays: Relay[] = [];
-
 
         for (let i=0; i < relObjects.length; i++) {
           try {
@@ -159,6 +163,87 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     return success;
   };
 
+  const updateContacts = (content: NostrContactsContent) => {
+    const followingSince = content.created_at;
+    const tags = content.tags;
+
+    const contacts = tags.reduce((acc, t) => {
+      return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
+    }, []);
+
+    updateStore('following', () => contacts);
+    updateStore('followingSince', () => followingSince || 0);
+  };
+
+  const addFollow = (pubkey: string) => {
+    if (!store.publicKey || store.following.includes(pubkey)) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+        return;
+      }
+
+      if (content && content.kind === Kind.Contacts && content.created_at && content.created_at > store.followingSince) {
+        updateContacts(content);
+      }
+
+      if (!store.following.includes(pubkey)) {
+        const relayInfo = content?.content || '';
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const following = [...store.following, pubkey];
+
+        const success = await sendContacts(following, date, relayInfo, store.relays);
+
+        if (success) {
+          updateStore('following', () => following);
+          updateStore('followingSince', () => date);
+        }
+      }
+
+      unsub();
+    });
+
+    getProfileContactList(store.publicKey, `before_follow_${APP_ID}`);
+
+  }
+
+  const removeFollow = (pubkey: string) => {
+    if (!store.publicKey || !store.following.includes(pubkey)) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+        return;
+      }
+
+      if (content && content.kind === Kind.Contacts && content.created_at && content.created_at > store.followingSince) {
+          updateContacts(content);
+        }
+
+        if (store.following.includes(pubkey)) {
+          const relayInfo = content?.content || '';
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const following = store.following.filter(f => f !== pubkey);
+
+          const success = await sendContacts(following, date, relayInfo, store.relays);
+
+          if (success) {
+            updateStore('following', () => following);
+            updateStore('followingSince', () => date);
+          }
+        }
+
+        unsub();
+    });
+
+    getProfileContactList(store.publicKey, `before_unfollow_${APP_ID}`);
+
+  }
+
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
@@ -227,13 +312,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     if (subId === `user_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
-        const tags = content.tags;
 
-        const contacts = tags.reduce((acc, t) => {
-          return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
-        }, []);
+        if (!content.created_at || content.created_at <= store.followingSince) {
+          return;
+        }
 
-        updateStore('following', () => contacts);
+        updateContacts(content);
       }
       return;
     }
@@ -251,6 +335,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setActiveUser,
     addLike,
     setPublicKey,
+    addFollow,
+    removeFollow,
   },
 });
 

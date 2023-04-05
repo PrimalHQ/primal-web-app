@@ -210,6 +210,17 @@ export const getLikes = (userId: string, relays: Relay[], callback: (likes: stri
   }
 };
 
+export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[]) => {
+  const event = {
+    content,
+    kind: Kind.Contacts,
+    tags: contacts.map(c => ['p', c]),
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays);
+};
+
 const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;

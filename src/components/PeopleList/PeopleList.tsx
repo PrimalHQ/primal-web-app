@@ -1,16 +1,17 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
+import { Component, For, Show } from 'solid-js';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
-import { useToastContext } from '../Toaster/Toaster';
+import FollowButton from '../FollowButton/FollowButton';
 
 import styles from './PeopleList.module.scss';
 
 
 const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
-  const toaster = useToastContext();
+  const account = useAccountContext();
   const intl = useIntl();
 
   const people = () => props.people;
@@ -19,9 +20,27 @@ const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
     return address.split('@');
   }
 
-  const onFollow = (e: MouseEvent) => {
+  const isFollowed = (pubkey: string) => {
+    return account?.publicKey && account?.following.includes(pubkey);
+  }
+
+  const onFollow = (e: MouseEvent, pubkey: string) => {
     e.preventDefault();
-    toaster?.notImplemented();
+    if (!account) {
+      return;
+    }
+
+    const action = isFollowed(pubkey) ?
+      account.actions.removeFollow :
+      account.actions.addFollow;
+
+    action(pubkey);
+  }
+
+  const authorName = (person: PrimalUser) => {
+    return person.displayName ||
+      person.name ||
+      truncateNpub(person.npub);
   }
 
   return (
@@ -41,7 +60,7 @@ const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
                 </div>
                 <div class={styles.content}>
                   <div class={styles.name}>
-                    {person?.name}
+                    {authorName(person)}
                   </div>
                   <div class={styles.verification} title={person?.nip05}>
                     <Show when={person?.nip05}>
@@ -61,17 +80,7 @@ const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
                     {truncateNpub(person?.npub)}
                   </div>
                 </div>
-                <div class={styles.action}>
-                  <button onClick={onFollow} >
-                    {intl.formatMessage(
-                      {
-                        id: 'actions.follow',
-                        defaultMessage: 'follow',
-                        description: 'Follow button label',
-                      }
-                    )}
-                  </button>
-                </div>
+                <FollowButton person={person} />
               </A>
           }
         </For>

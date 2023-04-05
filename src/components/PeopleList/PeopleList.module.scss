@@ -128,7 +128,7 @@
     }
   }
 
-  .action {
+  @mixin followButton {
     grid-area: follow;
     align-items: center;
     display: flex;
@@ -142,6 +142,21 @@
       font-size: 12px;
       line-height: 16px;
       margin: 0px;
+    }
+
+  }
+
+  .follow {
+    @include followButton;
+  }
+
+  .unfollow {
+    @include followButton;
+    button {
+      background-color: var(--background-card);
+      background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                    var(--brand-gradient) border-box;
+      border: 1px solid transparent;
     }
   }
 

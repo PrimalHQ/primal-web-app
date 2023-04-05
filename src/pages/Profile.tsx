@@ -32,6 +32,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
 import { VanityProfiles } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
+import FollowButton from '../components/FollowButton/FollowButton';
 
 
 const Profile: Component = () => {
@@ -271,18 +272,8 @@ const Profile: Component = () => {
             </Show>
           </div>
 
-          <button
-            class={styles.primaryButton}
-            onClick={onNotImplemented}
-          >
-            {intl.formatMessage(
-              {
-                id: 'actions.follow',
-                defaultMessage: 'follow',
-                description: 'Follow button label',
-              }
-            )}
-          </button>
+          <FollowButton person={profile?.userProfile} large={true} />
+
         </div>
 
         <Show when={profile?.userProfile && !profile?.isFetching}>

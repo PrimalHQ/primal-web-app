@@ -8,7 +8,7 @@ export type NostrNoteContent = {
   kind: Kind.Text | Kind.Repost,
   content: string,
   id: string,
-  created_at: number,
+  created_at?: number,
   pubkey: string,
   sig: string,
   tags: string[][],
@@ -18,7 +18,7 @@ export type NostrUserContent = {
   kind: Kind.Metadata,
   content: string,
   id: string,
-  created_at: number,
+  created_at?: number,
   pubkey: string,
   sig: string,
   tags: string[][],
@@ -28,48 +28,56 @@ export type NostrStatsContent = {
   kind: Kind.NoteStats,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrNetStatsContent = {
   kind: Kind.NetStats,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrLegendStatsContent = {
   kind: Kind.LegendStats,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrUserStatsContent = {
   kind: Kind.UserStats,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrMentionContent = {
   kind: Kind.Mentions,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrOldestEventContent = {
   kind: Kind.OldestEvent,
   content: string,
   pubkey?: string,
+  created_at?: number,
 };
 
 export type NostrContactsContent = {
   kind: Kind.Contacts,
   content: string,
   pubkey?: string,
+  created_at?: number,
   tags: string[][],
 };
 
 export type NostrScoredUsersContent = {
   kind: Kind.UserScore,
   content: string,
+  created_at?: number,
 };
 
 export type NostrEventContent =
@@ -202,8 +210,10 @@ export type PrimalWindow = Window & typeof globalThis & {
   primal?: any,
 };
 
+export type NostrEventType = "EVENT" | "EOSE";
+
 export type NostrMessage = [
-  type: "EVENT" | "EOSE",
+  type: NostrEventType,
   subkey: string,
   info: {
     kind: number,
