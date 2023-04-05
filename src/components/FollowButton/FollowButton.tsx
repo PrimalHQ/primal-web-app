@@ -2,12 +2,14 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { PrimalUser } from '../../types/primal';
+import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FollowButton.module.scss';
 
 
 const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean }> = (props) => {
 
+  const toast = useToastContext()
   const account = useAccountContext();
   const intl = useIntl();
 
@@ -19,7 +21,12 @@ const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean 
 
   const onFollow = (e: MouseEvent) => {
     e.preventDefault();
-    if (!account || !props.person) {
+    if (!account || !account.hasPublicKey() || !props.person) {
+      toast?.sendWarning(intl.formatMessage({
+        id: 'account.needToLogin',
+        defaultMessage: 'You cannot perform this action anonimously',
+        description: 'Message to user that an action cannot be preformed without a public key',
+      }))
       return;
     }
 
