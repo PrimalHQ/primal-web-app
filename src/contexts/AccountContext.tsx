@@ -21,6 +21,7 @@ import { getLikes, sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getProfileContactList, getUserProfile } from "../lib/profile";
+import { getStorage, saveFollowing } from "../lib/localStore";
 
 export type AccountContextStore = {
   likes: string[],
@@ -41,6 +42,7 @@ export type AccountContextStore = {
     removeFollow: (pubkey: string) => void,
   },
 }
+
 const initialData = {
   likes: [],
   relays: [],
@@ -50,6 +52,7 @@ const initialData = {
   following: [],
   followingSince: 0,
 };
+
 export const AccountContext = createContext<AccountContextStore>();
 
 export function AccountProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
@@ -173,6 +176,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
+    saveFollowing(store.publicKey, contacts, followingSince || 0);
   };
 
   const addFollow = (pubkey: string) => {
@@ -199,6 +203,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         if (success) {
           updateStore('following', () => following);
           updateStore('followingSince', () => date);
+          saveFollowing(store.publicKey, following, date);
         }
       }
 
@@ -233,6 +238,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           if (success) {
             updateStore('following', () => following);
             updateStore('followingSince', () => date);
+            saveFollowing(store.publicKey, following, date);
           }
         }
 
@@ -255,6 +261,13 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   createEffect(() => {
     if (store.publicKey) {
       updateStore('publicKey', () => store.publicKey);
+
+      const storage = getStorage(store.publicKey);
+
+      if (store.followingSince < storage.followingSince) {
+        updateStore('following', () => ({ ...storage.following }));
+        updateStore('followingSince', () => storage.followingSince);
+      }
 
       getRelays();
       getUserProfile(store.publicKey, `user_profile_${APP_ID}`);

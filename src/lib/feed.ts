@@ -1,6 +1,7 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { decode } from "nostr-tools/nip19";
+import { noKey } from "../constants";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -60,7 +61,7 @@ export const getExploreFeed = (
 
   let payload: ExploreFeedPayload = { timeframe, scope, limit };
 
-  if (pubkey.length > 0) {
+  if (pubkey.length > 0 && pubkey !== noKey) {
     payload.pubkey = pubkey;
   }
 
