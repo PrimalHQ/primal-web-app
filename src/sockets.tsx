@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
 
@@ -94,7 +95,6 @@ export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: str
   socket()?.addEventListener('message', listener);
 
   return () => {
-    console.log('unsubbed ', subId);
     socket()?.removeEventListener('message', listener);
   };
 };

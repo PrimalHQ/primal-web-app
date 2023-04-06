@@ -11,6 +11,7 @@ import {
   NostrContactsContent,
   NostrEOSE,
   NostrEvent,
+  NostrRelays,
   NostrWindow,
   PrimalNote,
   PrimalUser,
@@ -21,11 +22,13 @@ import { getLikes, sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getProfileContactList, getUserProfile } from "../lib/profile";
-import { getStorage, saveFollowing } from "../lib/localStore";
+import { getStorage, saveFollowing, saveRelaySettings } from "../lib/localStore";
+import { closeRelays, connectRelays } from "../lib/relays";
 
 export type AccountContextStore = {
   likes: string[],
   relays: Relay[],
+  relaySettings: NostrRelays,
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
   showNewNoteForm: boolean,
@@ -46,6 +49,7 @@ export type AccountContextStore = {
 const initialData = {
   likes: [],
   relays: [],
+  relaySettings: {},
   publicKey: undefined,
   activeUser: undefined,
   showNewNoteForm: false,
@@ -65,51 +69,40 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     return !!store.publicKey && store.publicKey !== noKey;
   };
 
+  const setRelaySettings = (settings: NostrRelays) => {
+    updateStore('relaySettings', () => ({ ...settings }));
+    saveRelaySettings(store.publicKey, settings)
+  }
+
   const getRelays = async () => {
     const win = window as NostrWindow;
     const nostr = win.nostr;
+    const storage = getStorage(store.publicKey);
 
     if (nostr) {
-      const rels = await nostr.getRelays();
+      let relaySettings = await nostr.getRelays();
 
-
-      if (rels) {
-        const addresses = Object.keys(rels);
-        if (store.relays.length > 0) {
-          for (let i=0; i< store.relays.length; i++) {
-            await store.relays[i].close();
-          }
-        }
-
-        const relObjects = addresses.map(address => {
-          return relayInit(address);
-        })
-
-        for (let i=0; i < relObjects.length; i++) {
-          try {
-            if (relObjects[i].status === WebSocket.CLOSED) {
-              const connectToRelay = (relay: Relay) => new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                  relay.close();
-                  console.log('timed out connecting to relay: ', relay.url);
-                  reject();
-                }, relayConnectingTimeout);
-
-                relay.connect()
-                .then((x) => {resolve(x); clearTimeout(timeout);})
-                .catch(() => {reject()});
-              });
-
-              await connectToRelay(relObjects[i]);
-              updateStore('relays', (relays) => [ ...relays, { ...relObjects[i] }]);
-            }
-          } catch (e) {
-            console.log('error connecting to relay: ', relObjects[i].url, e);
-          }
-        }
-        console.log('Connected relays: ', unwrap(store.relays))
+      if (!relaySettings) {
+        relaySettings = storage.relaySettings;
       }
+
+      setRelaySettings(relaySettings);
+
+      let allClosed = true;
+
+      allClosed = await closeRelays(store.relays);
+
+      if (!allClosed) {
+        console.log('Failed to close all relays')
+      }
+
+      await connectRelays(relaySettings, (relay) => {
+        updateStore('relays', (relays) => [ ...relays, { ...relay }]);
+      });
+
+      console.log('Connected relays: ', unwrap(store.relays))
     }
+
   };
 
   let extensionAttempt = 0;
@@ -196,7 +189,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       if (type === 'EOSE') {
 
         if (!store.following.includes(pubkey)) {
-          const relayInfo = content?.content || '';
+          const relayInfo = JSON.stringify(store.relaySettings);
           const date = Math.floor((new Date()).getTime() / 1000);
           const following = [...store.following, pubkey];
 
@@ -234,7 +227,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
         if (store.following.includes(pubkey)) {
-          const relayInfo = content?.content || '';
+          const relayInfo = JSON.stringify(store.relaySettings);
           const date = Math.floor((new Date()).getTime() / 1000);
           const following = store.following.filter(f => f !== pubkey);
 
