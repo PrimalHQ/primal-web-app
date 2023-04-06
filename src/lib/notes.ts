@@ -256,7 +256,8 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
           }
         })
       } catch (e) {
-        console.log('Failed sending note: ', e);failed += 1;
+        console.log('Failed sending note: ', e);
+        failed += 1;
         if (failed >= numberOfRelays) {
           resolve(false);
         }

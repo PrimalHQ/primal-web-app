@@ -186,28 +186,32 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
+
+        if (!store.following.includes(pubkey)) {
+          const relayInfo = content?.content || '';
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const following = [...store.following, pubkey];
+
+          const success = await sendContacts(following, date, relayInfo, store.relays);
+
+          if (success) {
+            updateStore('following', () => following);
+            updateStore('followingSince', () => date);
+            saveFollowing(store.publicKey, following, date);
+          }
+        }
+
+        unsub();
         return;
       }
 
-      if (content && content.kind === Kind.Contacts && content.created_at && content.created_at > store.followingSince) {
+      if (content &&
+        content.kind === Kind.Contacts &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
         updateContacts(content);
       }
-
-      if (!store.following.includes(pubkey)) {
-        const relayInfo = content?.content || '';
-        const date = Math.floor((new Date()).getTime() / 1000);
-        const following = [...store.following, pubkey];
-
-        const success = await sendContacts(following, date, relayInfo, store.relays);
-
-        if (success) {
-          updateStore('following', () => following);
-          updateStore('followingSince', () => date);
-          saveFollowing(store.publicKey, following, date);
-        }
-      }
-
-      unsub();
     });
 
     getProfileContactList(store.publicKey, `before_follow_${APP_ID}`);
@@ -221,13 +225,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
-        return;
-      }
-
-      if (content && content.kind === Kind.Contacts && content.created_at && content.created_at > store.followingSince) {
-          updateContacts(content);
-        }
-
         if (store.following.includes(pubkey)) {
           const relayInfo = content?.content || '';
           const date = Math.floor((new Date()).getTime() / 1000);
@@ -243,6 +240,16 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         }
 
         unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.Contacts &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateContacts(content);
+      }
     });
 
     getProfileContactList(store.publicKey, `before_unfollow_${APP_ID}`);
@@ -259,8 +266,14 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
-    if (store.publicKey) {
-      updateStore('publicKey', () => store.publicKey);
+    if (store.publicKey && store.publicKey !== noKey) {
+      getRelays();
+      getUserProfile(store.publicKey, `user_profile_${APP_ID}`);
+    }
+  });
+
+  createEffect(() => {
+    if (store.publicKey && store.publicKey !== noKey) {
 
       const storage = getStorage(store.publicKey);
 
@@ -269,8 +282,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         updateStore('followingSince', () => storage.followingSince);
       }
 
-      getRelays();
-      getUserProfile(store.publicKey, `user_profile_${APP_ID}`);
       getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
     }
   });
