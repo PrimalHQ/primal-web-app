@@ -2,7 +2,8 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { sendNote } from "../../lib/notes";
-import { PrimalNote } from "../../types/primal";
+import { truncateNpub } from "../../stores/profile";
+import { PrimalNote, PrimalUser } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./ReplyToNote.module.scss";
@@ -102,6 +103,11 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     closeReplyToNote();
 
   };
+  const recipientName = (user: PrimalUser) => {
+    return user.displayName ||
+      user.name ||
+      truncateNpub(user.npub);
+  }
 
   return (
     <Show
@@ -124,12 +130,14 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
                   {intl.formatMessage(
                     {
                       id: 'actions.replyToNote',
-                      defaultMessage: 'reply to',
+                      defaultMessage: 'reply to {name}',
                       description: 'Reply to button label',
-                    }
+                    },
+                    {
+                      name: recipientName(props.note.user),
+                    },
                   )}
                 </span>
-                <span class={styles.userName}>{props.note.user.name}</span>
               </div>
             </div>
           </div>

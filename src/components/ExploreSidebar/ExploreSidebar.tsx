@@ -1,4 +1,4 @@
-import { A } from '@solidjs/router';
+import { A, useResolvedPath } from '@solidjs/router';
 import { Component, createEffect, createMemo, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
@@ -24,6 +24,12 @@ const ExploreSidebar: Component = () => {
   });
 
   const [trendingUsers, setTrendingUsers] = createStore<PrimalUser[]>([]);
+
+  const authorName = (user: PrimalUser) => {
+    return user.displayName ||
+      user.name ||
+      truncateNpub(user.npub);
+  }
 
 //  ACTIONS -------------------------------------
 
@@ -118,10 +124,10 @@ const ExploreSidebar: Component = () => {
               <A
                 href={`/profile/${user.npub}`}
                 class={styles.user}
-                title={user.name || user.npub}
+                title={authorName(user)}
               >
                 <Avatar src={user.picture} size="vs" />
-                <div class={styles.name}>{user.name || truncateNpub(user.npub)}</div>
+                <div class={styles.name}>{authorName(user)}</div>
               </A>
             )
           }
