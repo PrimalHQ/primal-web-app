@@ -15,7 +15,7 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { Kind, noKey } from "../constants";
+import { Kind, noKey, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
 import { getLikes, sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
@@ -85,20 +85,28 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           return relayInit(address);
         })
 
-        let connectedRelays: Relay[] = [];
-
         for (let i=0; i < relObjects.length; i++) {
           try {
             if (relObjects[i].status === WebSocket.CLOSED) {
-              await relObjects[i].connect();
-              connectedRelays.push(relObjects[i]);
+              const connectToRelay = (relay: Relay) => new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                  relay.close();
+                  console.log('timed out connecting to relay: ', relay.url);
+                  reject();
+                }, relayConnectingTimeout);
+
+                relay.connect()
+                .then((x) => {resolve(x); clearTimeout(timeout);})
+                .catch(() => {reject()});
+              });
+
+              await connectToRelay(relObjects[i]);
+              updateStore('relays', (relays) => [ ...relays, { ...relObjects[i] }]);
             }
           } catch (e) {
-            console.log('error connecting to relay: ', e);
+            console.log('error connecting to relay: ', relObjects[i].url, e);
           }
         }
-        updateStore('relays', () => connectedRelays);
-
         console.log('Connected relays: ', unwrap(store.relays))
       }
     }
