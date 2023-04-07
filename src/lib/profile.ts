@@ -59,9 +59,7 @@ export const trimVerification = (address: string | undefined) => {
     return '';
   }
 
-  const [_, domain] = address.split('@');
-
-  return domain;
+  return address.split('@');
 }
 
 const getLikesStorageKey = () => {

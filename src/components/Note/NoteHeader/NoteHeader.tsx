@@ -1,4 +1,4 @@
-import { Component, Match, Show, Switch } from 'solid-js';
+import { Component, createMemo, Match, Show, Switch } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
@@ -9,25 +9,37 @@ import { truncateNpub } from '../../../stores/profile';
 const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
   const authorName = () => {
+    console.log('NIP: ', props.note.user.nip05)
     return props.note.user?.displayName ||
       props.note.user?.name ||
       truncateNpub(props.note.user.npub);
-  }
+  };
+
+  const verification = createMemo(() => {
+    return trimVerification(props.note.user?.nip05);
+  });
 
   return (
     <div class={styles.header}>
       <span class={styles.postInfo}>
         <span class={styles.userInfo}>
-          <span class={styles.userName}>
-            {authorName()}
-          </span>
-          <Show when={props.note.user?.nip05}>
+          <Show
+            when={props.note.user?.nip05}
+            fallback={
+              <span class={styles.userName}>
+                {authorName()}
+              </span>
+            }
+          >
+            <span class={styles.userName}>
+              {verification()[0]}
+            </span>
             <span class={styles.verifiedIcon} />
             <span
               class={styles.verifiedBy}
               title={props.note.user?.nip05}
             >
-              {trimVerification(props.note.user?.nip05)}
+              {verification()[1]}
             </span>
           </Show>
         </span>

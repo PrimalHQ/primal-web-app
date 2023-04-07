@@ -56,11 +56,13 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
             <A href={`/profile/${repost()?.user.npub}`} >
               {reposterName()}
             </A>
-            {intl.formatMessage({
-              id: 'note.reposted',
-              defaultMessage: 'Reposted',
-              description: 'Label indicating that the note is a repost',
-            })}
+            <span>
+              {intl.formatMessage({
+                id: 'note.reposted',
+                defaultMessage: 'Reposted',
+                description: 'Label indicating that the note is a repost',
+              })}
+            </span>
           </span>
         </div>
       </Show>

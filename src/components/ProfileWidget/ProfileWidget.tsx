@@ -27,7 +27,7 @@ const ProfileWidget: Component = () => {
           <div class={styles.userInfo}>
             <div class={styles.userName}>{activeUser()?.name || hexToNpub(account?.publicKey)}</div>
             <div class={styles.userVerification}>
-              {trimVerification(activeUser()?.nip05)}
+              {trimVerification(activeUser()?.nip05)[1]}
             </div>
           </div>
           <div class={styles.background}></div>
