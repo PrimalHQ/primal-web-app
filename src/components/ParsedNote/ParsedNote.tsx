@@ -140,6 +140,14 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     return reference.post !== undefined;
   }
 
+  const referenceName = (reference: UserReference) => {
+    return truncateNpub(
+      reference.name ||
+      reference.display_name ||
+      reference.displayName ||
+      reference.npub || '');
+  };
+
   const referenceInfo = (token: string) => {
     const regex = /\#\[([0-9]*)\]/g;
 
@@ -162,7 +170,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         if (isUserReference(reference)) {
           return (
             <A href={`/profile/${reference.npub}`} class={styles.mentionedUser}>
-              @{reference.name || truncateNpub(reference.npub || '')}
+              @{referenceName(reference)}
             </A>
           );
         }

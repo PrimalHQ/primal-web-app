@@ -2,7 +2,10 @@ import { hexToNpub } from "../lib/keys";
 import { NostrUserContent, PrimalUser } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
-  return npub ? `${npub.slice(0, 8)}..${npub.slice(-5)}` : '';
+  if (npub.length < 24) {
+    return npub;
+  }
+  return `${npub.slice(0, 8)}..${npub.slice(-5)}`;
 };
 
 export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {

@@ -78,6 +78,7 @@ export type NostrScoredUsersContent = {
   kind: Kind.UserScore,
   content: string,
   created_at?: number,
+  pubkey?: string,
 };
 
 export type NostrEventContent =
@@ -346,6 +347,7 @@ export type UserReference = {
   nip05?: string,
   banner?: string,
   display_name?: string,
+  displayName?: string,
   location?: string,
   lud06?: string,
   lud16?: string,
