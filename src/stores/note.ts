@@ -2,12 +2,13 @@ import DOMPurify from "dompurify";
 import { noteEncode } from "nostr-tools/nip19";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost } from "../types/primal";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
   const userMeta = JSON.parse(user?.content || '{}');
+  const stat = page?.postStats[message.id];
 
   return {
     user: {
@@ -25,6 +26,23 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       lud16: (userMeta.lud16 || '') as string,
       website: (userMeta.website || '') as string,
       tags: user?.tags || [],
+    },
+    note: {
+      id: message.id,
+      pubkey: message.pubkey,
+      created_at: message.created_at || 0,
+      tags: message.tags,
+      content: DOMPurify.sanitize(message.content),
+      sig: message.sig,
+      likes: stat?.likes || 0,
+      mentions: stat?.mentions || 0,
+      reposts: stat?.reposts || 0,
+      replies: stat?.replies || 0,
+      zaps: stat?.zaps || 0,
+      score: stat?.score || 0,
+      score24h: stat?.score24h || 0,
+      satszapped: stat?.satszapped || 0,
+      noteId: noteEncode(message.id),
     },
   }
 };
@@ -69,7 +87,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
   }
 
   return  page.messages.map((message) => {
-    const msg = message.kind === Kind.Repost ? parseKind6(message) : message;
+    const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
 
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
@@ -96,7 +114,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
       post: {
         id: msg.id,
         pubkey: msg.pubkey,
-        created_at: msg.created_at,
+        created_at: msg.created_at || 0,
         tags: msg.tags,
         content: DOMPurify.sanitize(msg.content),
         sig: msg.sig,
@@ -116,9 +134,17 @@ export const convertToNotes: ConvertToNotes = (page) => {
   });
 }
 
+const sortBy = (a: PrimalNote, b: PrimalNote, property: string) => {
+
+  const aData: Record<string, any> = a.repost ? a.repost.note : a.post;
+  const bData: Record<string, any> = b.repost ? b.repost.note : b.post;
+
+  return bData[property] - aData[property];
+};
+
 export const sortByRecency = (posts: PrimalNote[], reverse = false) => {
   return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.created_at - a.post.created_at;
+    const order = sortBy(a, b, 'created_at');
 
     return reverse ? -1 * order : order;
   });
@@ -126,7 +152,7 @@ export const sortByRecency = (posts: PrimalNote[], reverse = false) => {
 
 export const sortByScore24h = (posts: PrimalNote[], reverse = false) => {
   return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.score24h - a.post.score24h;
+    const order = sortBy(a, b, 'score24h');
 
     return reverse ? -1 * order : order;
   });
@@ -134,7 +160,7 @@ export const sortByScore24h = (posts: PrimalNote[], reverse = false) => {
 
 export const sortByScore = (posts: PrimalNote[], reverse = false) => {
   return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.score - a.post.score;
+    const order = sortBy(a, b, 'score');
 
     return reverse ? -1 * order : order;
   });
@@ -142,7 +168,7 @@ export const sortByScore = (posts: PrimalNote[], reverse = false) => {
 
 export const sortByZapped = (posts: PrimalNote[], reverse = false) => {
   return posts.sort((a: PrimalNote, b: PrimalNote) => {
-    const order = b.post.satszapped - a.post.satszapped;
+    const order = sortBy(a, b, 'satszapped');
 
     return reverse ? -1 * order : order;
   });

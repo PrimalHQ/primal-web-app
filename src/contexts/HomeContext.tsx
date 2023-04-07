@@ -89,7 +89,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const until = lastNote.post?.created_at || 0;
+    const until = lastNote.repost ?
+      lastNote.repost.note.created_at :
+      lastNote.post.created_at;
 
     if (until > 0) {
       const topic = store.selectedFeed?.hex;
