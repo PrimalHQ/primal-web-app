@@ -135,7 +135,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const until = lastNote.post?.created_at || 0;
+    const until = lastNote.repost ?
+      lastNote.repost.note.created_at :
+      lastNote.post.created_at;
 
     if (until > 0 && store.profileKey) {
       fetchNotes(store.profileKey, until);
