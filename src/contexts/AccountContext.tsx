@@ -18,11 +18,11 @@ import {
 } from '../types/primal';
 import { Kind, noKey, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
-import { getLikes, sendContacts, sendLike, setStoredLikes } from "../lib/notes";
+import { sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getProfileContactList, getUserProfile } from "../lib/profile";
-import { getStorage, saveFollowing, saveRelaySettings } from "../lib/localStore";
+import { getLikes, getProfileContactList, getUserProfile } from "../lib/profile";
+import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
 import { closeRelays, connectRelays } from "../lib/relays";
 
 export type AccountContextStore = {
@@ -132,10 +132,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         localStorage.setItem('pubkey', key);
       }
     } catch (e: any) {
-      // if (e.message === 'User rejected') {
-        setPublicKey(noKey);
-        localStorage.setItem('pubkey', noKey);
-      // }
+      setPublicKey(noKey);
+      localStorage.setItem('pubkey', noKey);
       console.log('error fetching public key: ', e);
     }
   }
@@ -161,7 +159,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     if (success) {
       updateStore('likes', (likes) => [ ...likes, note.post.id]);
-      setStoredLikes(store.likes);
+      saveLikes(store.publicKey, store.likes);
     }
 
     return success;
@@ -291,6 +289,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (store.publicKey && store.relays.length > 0) {
       getLikes(store.publicKey, store.relays, (likes: string[]) => {
         updateStore('likes', () => [...likes]);
+        saveLikes(store.publicKey, likes);
       });
     }
   });

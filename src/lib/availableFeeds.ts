@@ -1,24 +1,43 @@
 import { defaultFeeds, noKey } from "../constants";
 import { PrimalFeed } from "../types/primal";
+import { getStorage, saveFeeds } from "./localStore";
 
-const storageKey = (pubKey: string | undefined) => {
-  return pubKey && pubKey !== noKey ? `saved_feeds_${pubKey}` : 'saved_feeds_anon';
+const storageKey = (pubkey: string | undefined) => {
+  return pubkey && pubkey !== noKey ? `saved_feeds_${pubkey}` : 'saved_feeds_anon';
 };
 
-export const initAvailableFeeds = (pubKey: string | undefined) => {
-  const storedFeeds = JSON.parse(localStorage.getItem(storageKey(pubKey)) || '["empty"]');
+const copyOldFeedData = (pubkey: string | undefined) => {
+  const key = storageKey(pubkey);
 
-  if (storedFeeds[0] === 'empty' || !pubKey) {
-    localStorage.setItem(storageKey(pubKey), JSON.stringify(defaultFeeds));
+  try {
+    const feedsString = localStorage.getItem(key);
 
+    if (feedsString) {
+      const feeds = JSON.parse(feedsString) as PrimalFeed[];
+      saveFeeds(pubkey, feeds);
+      localStorage.removeItem(key);
+    }
+  } catch (e) {
+    console.log('Error parsing saved feeds: ', e);
+  }
+
+}
+
+export const initAvailableFeeds = (pubkey: string | undefined) => {
+  const storage = getStorage(pubkey);
+
+  copyOldFeedData(pubkey);
+
+  if (storage.feeds.length === 0) {
+    saveFeeds(pubkey, defaultFeeds);
     return defaultFeeds;
   }
 
-  return storedFeeds;
+  return storage.feeds;
 }
 
 export const updateAvailableFeedsTop = (
-  pubKey: string | undefined,
+  pubkey: string | undefined,
   feed: PrimalFeed,
   feeds: PrimalFeed[],
 ) => {
@@ -28,13 +47,13 @@ export const updateAvailableFeedsTop = (
 
   const newFeeds = [ { ...feed }, ...feeds];
 
-  localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+  saveFeeds(pubkey, newFeeds);
 
   return newFeeds;
 };
 
 export const updateAvailableFeeds = (
-  pubKey: string | undefined,
+  pubkey: string | undefined,
   feed: PrimalFeed,
   feeds: PrimalFeed[],
 ) => {
@@ -44,28 +63,29 @@ export const updateAvailableFeeds = (
 
   const newFeeds = [ ...feeds, { ...feed }];
 
-  localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+  saveFeeds(pubkey, newFeeds);
 
   return newFeeds;
 };
 
 export const removeFromAvailableFeeds = (
-  pubKey: string | undefined,
+  pubkey: string | undefined,
   feed: PrimalFeed,
   feeds: PrimalFeed[],
 ) => {
   const newFeeds = feeds.filter(f => f.hex !== feed.hex);
 
-  localStorage.setItem(storageKey(pubKey), JSON.stringify(newFeeds));
+  saveFeeds(pubkey, newFeeds);
 
   return newFeeds;
 };
 
 export const replaceAvailableFeeds = (
-  pubKey: string | undefined,
+  pubkey: string | undefined,
   feeds: PrimalFeed[],
 ) => {
-  localStorage.setItem(storageKey(pubKey), JSON.stringify(feeds));
+  const newFeeds = [...feeds];
+  saveFeeds(pubkey, newFeeds);
 
-  return [...feeds];
+  return newFeeds;
 }

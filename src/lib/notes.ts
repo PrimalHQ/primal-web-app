@@ -168,48 +168,6 @@ export const sendNote = async (text: string, relays: Relay[], replyTo?: ReplyTo)
   return await sendEvent(event, relays);
 }
 
-
-export const getLikes = (userId: string, relays: Relay[], callback: (likes: string[]) => void) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  let likes = new Set<string>(getStoredLikes());
-
-  if (nostr !== undefined) {
-    try {
-      // const signedNote = await nostr.signEvent(event);
-
-      relays.forEach(relay => {
-
-        const sub = relay.sub([
-          {
-            kinds: [Kind.Reaction],
-            authors: [userId],
-          },
-        ]);
-
-        sub.on('event', (event: Event) => {
-          const e = event.tags.find(t => t[0] === 'e');
-
-          e && e[1] && likes.add(e[1]);
-        })
-
-        sub.on('eose', () => {
-          const likeArray = Array.from(likes);
-
-          setStoredLikes(likeArray);
-          callback(likeArray);
-
-          sub.unsub();
-        })
-      });
-
-    } catch (e) {
-      console.log('Failed sending note: ', e);
-    }
-  }
-};
-
 export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[]) => {
   const event = {
     content,

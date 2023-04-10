@@ -9,7 +9,6 @@ import { truncateNpub } from '../../../stores/profile';
 const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
   const authorName = () => {
-    console.log('NIP: ', props.note.user.nip05)
     return props.note.user?.displayName ||
       props.note.user?.name ||
       truncateNpub(props.note.user.npub);

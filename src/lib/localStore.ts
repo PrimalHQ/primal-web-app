@@ -1,16 +1,20 @@
 import { noKey } from "../constants"
-import { NostrRelays } from "../types/primal";
+import { NostrRelays, PrimalFeed } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
   followingSince: number,
   relaySettings: NostrRelays,
+  likes: string[],
+  feeds: PrimalFeed[];
 };
 
 export const emptyStorage = {
   following: [],
   followingSince: 0,
   relaySettings: {},
+  likes: [],
+  feeds: [],
 }
 
 export const storageName = (pubkey?: string) => {
@@ -53,3 +57,19 @@ export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRel
 
   setStorage(pubkey, store);
 }
+
+export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
+  const store = getStorage(pubkey);
+
+  store.likes = [ ...likes ];
+
+  setStorage(pubkey, store);
+};
+
+export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
+  const store = getStorage(pubkey);
+
+  store.feeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
