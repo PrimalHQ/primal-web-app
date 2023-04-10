@@ -7,6 +7,7 @@ export type LocalStore = {
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
+  theme: string,
 };
 
 export const emptyStorage = {
@@ -15,6 +16,7 @@ export const emptyStorage = {
   relaySettings: {},
   likes: [],
   feeds: [],
+  theme: 'sunset',
 }
 
 export const storageName = (pubkey?: string) => {
@@ -70,6 +72,14 @@ export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
   const store = getStorage(pubkey);
 
   store.feeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
+
+export const saveTheme = (pubkey: string | undefined, theme: string) => {
+  const store = getStorage(pubkey);
+
+  store.theme = theme;
 
   setStorage(pubkey, store);
 };

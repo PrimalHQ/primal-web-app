@@ -27,6 +27,7 @@ import {
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
+import { getStorage, saveTheme } from "../lib/localStore";
 
 export type SettingsContextStore = {
   locale: string,
@@ -64,7 +65,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    saveTheme(account?.publicKey, theme.name);
     updateStore('theme', () => theme.name);
+  }
+
+  const setThemeByName = (name: string | null) => {
+    if (!name) {
+      return;
+    }
+
+    const availableTheme = store.themes.find(t => t.name === name);
+    availableTheme && setTheme(availableTheme);
   }
 
   const addAvailableFeed = (feed: PrimalFeed, addToTop = false) => {
@@ -129,13 +140,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   onMount(() => {
+    // Set global theme, this is done to avoid changing the theme
+    // when waiting for pubkey (like when reloading a page).
     const storedTheme = localStorage.getItem('theme');
-    const availableTheme = store.themes.find(t => t.name === storedTheme);
-    availableTheme && setTheme(availableTheme);
+    setThemeByName(storedTheme);
   });
 
   createEffect(() => {
     if (account?.publicKey) {
+      const storage = getStorage(account.publicKey);
+      setThemeByName(storage.theme);
+
       updateStore('availableFeeds', () => initAvailableFeeds(account?.publicKey));
     }
   });
