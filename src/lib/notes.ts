@@ -31,7 +31,7 @@ export const urlify = (text: string) => {
       return '<img src="' + url + '" class="postImage"/>'
     }
 
-    const isMp4Video = url.includes('.mp4');
+    const isMp4Video = url.includes('.mp4') || url.includes('.mov');
 
     if (isMp4Video) {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
