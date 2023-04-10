@@ -78,7 +78,7 @@ const Thread: Component = () => {
   let observer: IntersectionObserver | undefined;
 
   createEffect(() => {
-    if (primaryNote()) {
+    if (primaryNote() && !threadContext?.isFetching) {
       const pn = document.getElementById('primary_note');
 
       if (!pn) {
@@ -86,10 +86,9 @@ const Thread: Component = () => {
       }
 
       observer = new IntersectionObserver(entries => {
+        const rect = pn.getBoundingClientRect();
         entries.forEach((entry) => {
           if (!entry.isIntersecting) {
-            const rect = pn.getBoundingClientRect();
-
             scrollWindowTo(rect.top);
           }
           observer?.unobserve(pn);
