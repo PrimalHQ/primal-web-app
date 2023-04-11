@@ -2,11 +2,14 @@ import { defaultFeeds, noKey } from "../constants";
 import { PrimalFeed } from "../types/primal";
 import { getStorage, saveFeeds } from "./localStore";
 
-const storageKey = (pubkey: string | undefined) => {
-  return pubkey && pubkey !== noKey ? `saved_feeds_${pubkey}` : 'saved_feeds_anon';
-};
 
+// Copies data from the old storage key
 const copyOldFeedData = (pubkey: string | undefined) => {
+
+  const storageKey = (pubkey: string | undefined) => {
+    return pubkey && pubkey !== noKey ? `saved_feeds_${pubkey}` : 'saved_feeds_anon';
+  };
+
   const key = storageKey(pubkey);
 
   try {

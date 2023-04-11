@@ -142,15 +142,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const subid = `save_settings_${APP_ID}`;
 
     const unsub = subscribeTo(subid, async (type, subId, content) => {
-
-      if (type === 'EOSE') {
-        toaster?.sendSuccess(intl.formatMessage({
-          id: 'settings.saveSuccess',
-          defaultMessage: 'Settings saved successfully',
-          description: 'Toast message after settings have been sucessfully saved on the server',
-        }));
-      }
-
       if (type === 'NOTICE') {
         toaster?.sendWarning(intl.formatMessage({
           id: 'settings.saveFail',
@@ -237,6 +228,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     }
 
     const initFeeds = initAvailableFeeds(account.publicKey);
+
+    updateStore('availableFeeds', () => replaceAvailableFeeds(account.publicKey, initFeeds));
 
     const npub = hexToNpub(account?.publicKey);
     const feed = {
