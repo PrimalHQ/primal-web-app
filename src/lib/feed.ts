@@ -65,6 +65,9 @@ export const getExploreFeed = (
     payload.pubkey = pubkey;
   }
 
+  if (until > 0) {
+    payload.until = until;
+  }
 
   if (timeframe === 'trending') {
     const yesterday = Math.floor((new Date().getTime() - day) / 1000);

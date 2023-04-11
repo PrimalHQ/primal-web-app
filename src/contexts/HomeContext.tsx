@@ -6,7 +6,7 @@ import { Kind, trendingFeed } from "../constants";
 import { getEvents, getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { sortingPlan, convertToNotes, parseEmptyReposts } from "../stores/note";
+import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import {
   ContextChildren,
   FeedPage,
@@ -54,8 +54,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
-    if (scope && timeframe && until === 0) {
-      const limit = 100;
+    if (scope && timeframe) {
 
       account?.publicKey && getExploreFeed(
         account.publicKey,
@@ -63,7 +62,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         scope,
         timeframe,
         until,
-        limit,
       );
       return;
     }
@@ -88,16 +86,25 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const until = lastNote.repost ?
-      lastNote.repost.note.created_at :
-      lastNote.post.created_at;
+    const topic = store.selectedFeed?.hex;
+
+    if (!topic) {
+      return;
+    }
+
+    const [scope, timeframe] = topic.split(';');
+    const pagCriteria = timeframe || 'latest';
+
+    const criteria = paginationPlan(pagCriteria);
+
+    const noteData: Record<string, any> =  lastNote.repost ?
+      lastNote.repost.note :
+      lastNote.post;
+
+    const until = noteData[criteria];
 
     if (until > 0) {
-      const topic = store.selectedFeed?.hex;
-
-      if (topic) {
-        fetchNotes(topic, `${APP_ID}`, until);
-      }
+      fetchNotes(topic, `${APP_ID}`, until);
     }
   };
 

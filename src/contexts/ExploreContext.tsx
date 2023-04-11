@@ -2,7 +2,7 @@ import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
 import { getEvents, getExploreFeed } from "../lib/feed";
 import { useAccountContext } from "./AccountContext";
-import { sortingPlan, convertToNotes, parseEmptyReposts } from "../stores/note";
+import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -31,6 +31,7 @@ import {
   NostrStatsContent,
   NostrUserContent,
   PrimalNote,
+  PrimalNoteData,
 } from "../types/primal";
 import { APP_ID } from "../App";
 
@@ -112,10 +113,13 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
-  const fetchNotes = (topic: string, until = 0, limit = 100) => {
+  const fetchNotes = (topic: string, until = 0, limit = 20) => {
     const [scope, timeframe] = topic.split(';');
 
+
     if (scope && timeframe) {
+      updateStore('isFetching', true);
+      updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
       updateStore('scope', () => scope);
       updateStore('timeframe', () => timeframe);
@@ -148,14 +152,18 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    // Disable pagination for explore feeds
-    const until = 0; //lastNote.post?.created_at || 0;
+    const criteria = paginationPlan(store.timeframe);
+
+    const noteData: Record<string, any> =  lastNote.repost ?
+      lastNote.repost.note :
+      lastNote.post;
+
+    const until = noteData[criteria];
 
     if (until > 0) {
       fetchNotes(
         `${store.scope};${store.timeframe}`,
         until,
-        20,
       );
     }
   };

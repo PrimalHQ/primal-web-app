@@ -239,25 +239,27 @@ export type PrimalUser = {
   tags: string[][],
 };
 
+export type PrimalNoteData = {
+  id: string,
+  pubkey: string,
+  created_at: number,
+  tags: string[][],
+  content: string,
+  sig: string,
+  likes: number,
+  mentions: number,
+  reposts: number,
+  replies: number,
+  zaps: number,
+  score: number,
+  score24h: number,
+  satszapped: number,
+  noteId: string,
+}
+
 export type PrimalNote = {
   user: PrimalUser,
-  post: {
-    id: string,
-    pubkey: string,
-    created_at: number,
-    tags: string[][],
-    content: string,
-    sig: string,
-    likes: number,
-    mentions: number,
-    reposts: number,
-    replies: number,
-    zaps: number,
-    score: number,
-    score24h: number,
-    satszapped: number,
-    noteId: string,
-  },
+  post: PrimalNoteData,
   repost?: PrimalRepost,
   msg: NostrNoteContent,
 };
@@ -305,23 +307,7 @@ export type FeedOption = {
 
 export type PrimalRepost = {
   user: PrimalUser,
-  note: {
-    id: string,
-    pubkey: string,
-    created_at: number,
-    tags: string[][],
-    content: string,
-    sig: string,
-    likes: number,
-    mentions: number,
-    reposts: number,
-    replies: number,
-    zaps: number,
-    score: number,
-    score24h: number,
-    satszapped: number,
-    noteId: string,
-  },
+  note: PrimalNoteData,
 }
 
 export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;

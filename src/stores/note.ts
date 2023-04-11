@@ -186,3 +186,17 @@ export const sortingPlan = (topic: string = '') => {
 
   return sortingFunctions[plan] || sortingFunctions['latest'];
 };
+
+
+export const paginationPlan = (criteria: string) => {
+  const pagCriteria: Record<string, string> = {
+    trending: 'score24h',
+    popular: 'score',
+    latest: 'created_at',
+    mostzapped: 'satszapped',
+  }
+
+  const plan = criteria || 'latest';
+
+  return pagCriteria[plan] || pagCriteria['latest'];
+}

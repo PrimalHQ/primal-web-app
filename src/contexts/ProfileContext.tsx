@@ -1,7 +1,7 @@
 import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
 import { getEvents, getUserFeed } from "../lib/feed";
-import { convertToNotes, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
+import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -135,9 +135,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const until = lastNote.repost ?
-      lastNote.repost.note.created_at :
-      lastNote.post.created_at;
+    const criteria = paginationPlan('latest');
+
+    const noteData: Record<string, any> =  lastNote.repost ?
+      lastNote.repost.note :
+      lastNote.post;
+
+    const until = noteData[criteria];
 
     if (until > 0 && store.profileKey) {
       fetchNotes(store.profileKey, until);
@@ -156,8 +160,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
+      const messageId = noteEncode(message.id);
 
-      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+      const isLastNote = message.kind === Kind.Text ?
+        store.lastNote?.post?.noteId === messageId :
+        store.lastNote?.repost?.note.noteId === messageId;
+
+      if (!isLastNote) {
         updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );
