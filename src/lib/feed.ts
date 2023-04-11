@@ -69,13 +69,13 @@ export const getExploreFeed = (
   if (timeframe === 'trending') {
     const yesterday = Math.floor((new Date().getTime() - day) / 1000);
 
-    payload.since = yesterday;
+    payload.created_after = yesterday;
   }
   if (timeframe === 'mostzapped4h') {
     const fourHAgo = Math.floor((new Date().getTime() - (4 * hour)) / 1000);
 
     payload.timeframe = 'mostzapped';
-    payload.since = fourHAgo;
+    payload.created_after = fourHAgo;
   }
 
 

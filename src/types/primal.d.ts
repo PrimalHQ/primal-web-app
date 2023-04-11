@@ -333,6 +333,7 @@ export type ExploreFeedPayload = {
   pubkey?: string,
   since? : number,
   until?: number,
+  created_after?: number,
 }
 
 export type UserReference = {
