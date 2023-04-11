@@ -68,7 +68,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    console.log('get home feed', subId);
     getFeed(topic, `home_feed_${subId}`, until);
   };
 
@@ -222,20 +221,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
 // EFFECTS --------------------------------------
-
-  createEffect(() => {
-    if (account?.hasPublicKey()) {
-      const npub = hexToNpub(account?.publicKey);
-      const feed = {
-        name: 'Latest, following',
-        hex: account?.publicKey,
-        npub,
-      };
-
-      settings?.actions.addAvailableFeed(trendingFeed, true);
-      settings?.actions.addAvailableFeed(feed, true);
-    }
-  });
 
   createEffect(() => {
     if (isConnected()) {

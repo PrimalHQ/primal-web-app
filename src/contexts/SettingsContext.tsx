@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, themes } from "../constants";
+import { defaultFeeds, themes, trendingFeed } from "../constants";
 import {
   createContext,
   createEffect,
@@ -12,7 +12,8 @@ import {
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
-  socket
+  socket,
+  subscribeTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -28,6 +29,10 @@ import {
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
 import { getStorage, saveTheme } from "../lib/localStore";
+import { getSettings, sendSettings } from "../lib/settings";
+import { APP_ID } from "../App";
+import { useIntl } from "@cookbook/solid-intl";
+import { hexToNpub } from "../lib/keys";
 
 export type SettingsContextStore = {
   locale: string,
@@ -40,6 +45,8 @@ export type SettingsContextStore = {
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
     moveAvailableFeed: (fromIndex: number, toIndex: number) => void,
+    saveSettings: () => void,
+    loadSettings: (pubkey: string) => void,
   }
 }
 
@@ -57,56 +64,62 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const toaster = useToastContext();
   const account = useAccountContext();
+  const intl = useIntl();
 
 // ACTIONS --------------------------------------
 
-  const setTheme = (theme: PrimalTheme | null) => {
+  const setTheme = (theme: PrimalTheme | null, temp?: boolean) => {
     if (!theme) {
       return;
     }
 
     saveTheme(account?.publicKey, theme.name);
     updateStore('theme', () => theme.name);
+    !temp && saveSettings();
   }
 
-  const setThemeByName = (name: string | null) => {
+  const setThemeByName = (name: string | null, temp?: boolean) => {
     if (!name) {
       return;
     }
 
     const availableTheme = store.themes.find(t => t.name === name);
-    availableTheme && setTheme(availableTheme);
+    availableTheme && setTheme(availableTheme, temp);
   }
 
-  const addAvailableFeed = (feed: PrimalFeed, addToTop = false) => {
+  const addAvailableFeed = (feed: PrimalFeed, addToTop = false, temp?: boolean) => {
     if (!feed) {
       return;
     }
-    if (account?.publicKey) {
+    if (account?.hasPublicKey()) {
       const add = addToTop ? updateAvailableFeedsTop : updateAvailableFeeds;
 
       updateStore('availableFeeds', (feeds) => add(account?.publicKey, feed, feeds));
+      !temp && saveSettings();
     }
   };
 
-  const removeAvailableFeed = (feed: PrimalFeed) => {
+  const removeAvailableFeed = (feed: PrimalFeed, temp?: boolean) => {
     if (!feed) {
       return;
     }
 
-    if (account?.publicKey) {
+    if (account?.hasPublicKey()) {
       updateStore('availableFeeds',
         (feeds) => removeFromAvailableFeeds(account?.publicKey, feed, feeds),
       );
+
+      !temp && saveSettings();
       toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
     }
   };
 
-  const setAvailableFeeds = (feedList: PrimalFeed[]) => {
-    if (account?.publicKey) {
+  const setAvailableFeeds = (feedList: PrimalFeed[], temp?: boolean) => {
+    if (account?.hasPublicKey()) {
       updateStore('availableFeeds',
         () => replaceAvailableFeeds(account?.publicKey, feedList),
       );
+      !temp && saveSettings();
     }
   };
 
@@ -116,9 +129,79 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     list.splice(toIndex, 0, list.splice(fromIndex, 1)[0]);
 
-    store.actions.setAvailableFeeds(list);
+    setAvailableFeeds(list);
 
   };
+
+  const saveSettings = () => {
+    const settings = {
+      theme: store.theme,
+      feeds: store.availableFeeds,
+    };
+
+    const subid = `save_settings_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EOSE') {
+        toaster?.sendSuccess(intl.formatMessage({
+          id: 'settings.saveSuccess',
+          defaultMessage: 'Settings saved successfully',
+          description: 'Toast message after settings have been sucessfully saved on the server',
+        }));
+      }
+
+      if (type === 'NOTICE') {
+        toaster?.sendWarning(intl.formatMessage({
+          id: 'settings.saveFail',
+          defaultMessage: 'Failed to save settings',
+          description: 'Toast message after settings have failed to be saved on the server',
+        }));
+      }
+
+      unsub();
+      return;
+    });
+
+    sendSettings(settings, subid);
+  }
+
+  const loadSettings = (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const subid = `load_settings_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EVENT' && content?.content) {
+        try {
+          const { theme, feeds } = JSON.parse(content?.content);
+
+          theme && setThemeByName(theme, true);
+          feeds && setAvailableFeeds(feeds, true);
+
+        }
+        catch (e) {
+          console.log('Error parsing settings response: ', e);
+        }
+      }
+
+      if (type === 'NOTICE') {
+        toaster?.sendWarning(intl.formatMessage({
+          id: 'settings.loadFail',
+          defaultMessage: 'Failed to load settings. Will be using local settings.',
+          description: 'Toast message after settings have failed to be loaded from the server',
+        }));
+      }
+
+      unsub();
+      return;
+    });
+
+    pubkey && getSettings(pubkey, subid);
+  }
 
 // SOCKET HANDLERS ------------------------------
 
@@ -137,22 +220,49 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     );
   };
 
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
     // Set global theme, this is done to avoid changing the theme
     // when waiting for pubkey (like when reloading a page).
     const storedTheme = localStorage.getItem('theme');
-    setThemeByName(storedTheme);
+    setThemeByName(storedTheme, true);
   });
 
+  // Initial setup for a user with a public key
   createEffect(() => {
-    if (account?.publicKey) {
-      const storage = getStorage(account.publicKey);
-      setThemeByName(storage.theme);
-
-      updateStore('availableFeeds', () => initAvailableFeeds(account?.publicKey));
+    if (!account?.hasPublicKey()) {
+      return;
     }
+
+    const initFeeds = initAvailableFeeds(account.publicKey);
+
+    const npub = hexToNpub(account?.publicKey);
+    const feed = {
+      name: intl.formatMessage({
+        id: 'feeds.latestFollowing',
+        defaultMessage: 'Latest, following',
+        description: 'Label for the `latest;following` (active user\'s) feed',
+      }),
+      hex: account?.publicKey,
+      npub,
+    };
+
+    // Add trendingFeed if it's missing
+    if (!initFeeds.find(f => f.hex === trendingFeed.hex)) {
+      addAvailableFeed(trendingFeed, true, true);
+    }
+
+    // Add active user's feed if it's missing
+    if (!initFeeds.find(f => f.hex === feed.hex)) {
+      addAvailableFeed(feed, true, true);
+    }
+
+
+    setTimeout(() => {
+      loadSettings(account?.publicKey);
+    }, 100);
   });
 
   createEffect(() => {
@@ -188,6 +298,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       removeAvailableFeed,
       setAvailableFeeds,
       moveAvailableFeed,
+      saveSettings,
+      loadSettings,
     },
   });
 

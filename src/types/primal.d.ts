@@ -211,7 +211,7 @@ export type PrimalWindow = Window & typeof globalThis & {
   primal?: any,
 };
 
-export type NostrEventType = "EVENT" | "EOSE";
+export type NostrEventType = "EVENT" | "EOSE" | "NOTICE";
 
 export type NostrMessage = [
   type: NostrEventType,
