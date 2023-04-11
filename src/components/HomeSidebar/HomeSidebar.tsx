@@ -1,7 +1,7 @@
 import { Component, createEffect, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
-import { getExploreFeed } from '../../lib/feed';
+import { getExploreFeed, getMostZapped4h, getTrending24h } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
 import { convertToNotes, sortingPlan } from '../../stores/note';
 import { Kind } from '../../constants';
@@ -74,8 +74,8 @@ const HomeSidebar: Component = () => {
         },
       }));
 
-      getExploreFeed('', `sidebar_trending_${APP_ID}`, 'global', 'trending', 0, 12);
-      getExploreFeed('', `sidebar_zapped_${APP_ID}`, 'global', 'mostzapped4h', 0, 12);
+      getTrending24h(`sidebar_trending_${APP_ID}`);
+      getMostZapped4h(`sidebar_zapped_${APP_ID}`);
 		}
 	});
 

@@ -1,7 +1,7 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { decode } from "nostr-tools/nip19";
-import { noKey } from "../constants";
+import { day, hour, noKey } from "../constants";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
 
@@ -33,7 +33,7 @@ export const getUserFeed = (pubkey: string, subid: string, until = 0, limit = 20
 }
 
 export const getTrending = (subid: string, limit = 25) => {
-  const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
+  const yesterday = Math.floor((new Date().getTime() - day) / 1000);
 
   sendMessage(JSON.stringify([
     "REQ",
@@ -67,12 +67,12 @@ export const getExploreFeed = (
 
 
   if (timeframe === 'trending') {
-    const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
+    const yesterday = Math.floor((new Date().getTime() - day) / 1000);
 
     payload.since = yesterday;
   }
   if (timeframe === 'mostzapped4h') {
-    const fourHAgo = Math.floor((new Date().getTime() - (4 * 60 * 60 * 1000)) / 1000);
+    const fourHAgo = Math.floor((new Date().getTime() - (4 * hour)) / 1000);
 
     payload.timeframe = 'mostzapped';
     payload.since = fourHAgo;
@@ -85,6 +85,30 @@ export const getExploreFeed = (
     {cache: [
       "explore",
       payload,
+    ]},
+  ]));
+};
+
+export const getTrending24h = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: [
+      "explore_global_trending_24h",
+    ]},
+  ]));
+};
+
+export const getMostZapped4h = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: [
+      "explore_global_mostzapped_4h",
     ]},
   ]));
 };

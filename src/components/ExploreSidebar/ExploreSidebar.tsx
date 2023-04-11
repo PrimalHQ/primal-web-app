@@ -102,7 +102,7 @@ const ExploreSidebar: Component = () => {
         scores: {},
       }));
 
-      getTrendingUsers(`explore_sidebar_${APP_ID}`, 24);
+      getTrendingUsers(`explore_sidebar_${APP_ID}`);
 		}
 	});
 

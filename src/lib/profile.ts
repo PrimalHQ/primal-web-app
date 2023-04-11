@@ -44,13 +44,11 @@ export const getProfileScoredNotes = (pubkey: string, subid: string, limit = 5) 
   ]));
 }
 
-export const getTrendingUsers = (subid: string, limit = 24) => {
-  const yesterday = Math.floor((new Date().getTime() - (24 * 60 * 60 * 1000)) / 1000);
-
+export const getTrendingUsers = (subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["scored_users", { limit, since: yesterday }]},
+    {cache: ["scored_users_24h"]},
   ]));
 }
 
