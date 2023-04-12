@@ -221,25 +221,32 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     setThemeByName(storedTheme, true);
   });
 
+
+  // This is here as to not trigger the effect
+  // TODO Solve this.
+  const feedLabel = intl.formatMessage({
+    id: 'feeds.latestFollowing',
+    defaultMessage: 'Latest, following',
+    description: 'Label for the `latest;following` (active user\'s) feed',
+  });
+
+
   // Initial setup for a user with a public key
   createEffect(() => {
     if (!account?.hasPublicKey()) {
       return;
     }
 
-    const initFeeds = initAvailableFeeds(account.publicKey);
+    const pubkey = account.publicKey;
 
-    updateStore('availableFeeds', () => replaceAvailableFeeds(account.publicKey, initFeeds));
+    const initFeeds = initAvailableFeeds(pubkey);
 
-    const npub = hexToNpub(account?.publicKey);
+    updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
+
     const feed = {
-      name: intl.formatMessage({
-        id: 'feeds.latestFollowing',
-        defaultMessage: 'Latest, following',
-        description: 'Label for the `latest;following` (active user\'s) feed',
-      }),
-      hex: account?.publicKey,
-      npub,
+      name: feedLabel,
+      hex: pubkey,
+      npub: hexToNpub(pubkey),
     };
 
     // Add trendingFeed if it's missing
@@ -254,7 +261,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
 
     setTimeout(() => {
-      loadSettings(account?.publicKey);
+      loadSettings(pubkey);
     }, 100);
   });
 
