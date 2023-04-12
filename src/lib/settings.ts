@@ -5,6 +5,7 @@ import { NostrWindow, PrimalFeed } from "../types/primal";
 type PrimalSettings = {
   theme: string,
   feeds: PrimalFeed[],
+  description?: string,
 };
 
 export const sendSettings = async (settings: PrimalSettings, subid: string) => {
@@ -15,8 +16,10 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
     return false;
   }
 
+  const content = { description: 'Sync app settings', ...settings };
+
   const event = {
-    content: JSON.stringify(settings),
+    content: JSON.stringify(content),
     kind: Kind.Settings,
     tags: [],
     created_at: Math.floor((new Date()).getTime() / 1000),
@@ -40,7 +43,7 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
   }
 
   const event = {
-    content: '',
+    content: '{ "description": "Sync app settings" }',
     kind: Kind.Settings,
     tags: [],
     created_at: Math.floor((new Date()).getTime() / 1000),

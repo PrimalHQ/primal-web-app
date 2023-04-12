@@ -224,10 +224,11 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  Settings = 30078,
+
   NoteStats = 10000100,
   NetStats = 10000101,
   LegendStats = 10000102,
-  Settings = 10000104,
   UserStats = 10000105,
   OldestEvent = 10000106,
   Mentions = 10000107,
