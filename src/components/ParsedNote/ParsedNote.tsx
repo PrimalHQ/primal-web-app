@@ -10,8 +10,8 @@ import { Kind } from '../../constants';
 import {
   Component,
   createEffect,
-  createSignal,
   For,
+  JSXElement,
   onCleanup,
   onMount,
   Show,
@@ -27,6 +27,44 @@ import {
 
 import styles from './ParsedNote.module.scss';
 
+export const parseNoteLinks = (text: string) => {
+  const regex = /nostr:note[^\s]+/;
+
+  return text.replace(regex, (url) => {
+    const [_, id] = url.split(':');
+
+    if (!id) {
+      return url;
+    }
+
+    const path = `/thread/${id}`;
+
+    const link = <A href={path}>{url}</A>;
+
+    // @ts-ignore
+    return link.outerHTML || url;
+  });
+
+};
+export const parseNpubLinks = (text: string) => {
+  const regex = /nostr:npub[^\s]+/;
+
+  return text.replace(regex, (url) => {
+    const [_, id] = url.split(':');
+
+    if (!id) {
+      return url;
+    }
+
+    const path = `/profile/${id}`;
+
+    const link = <A href={path}>{url}</A>;
+
+    // @ts-ignore
+    return link.outerHTML || url;
+  });
+
+};
 
 const tokenRegex = /(\#\[[\d]+\])/;
 
@@ -39,7 +77,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
   const [mentionedNotes, setMentionedNotes] = createStore<Record<string, FeedPage>>({});
 
   createEffect(() => {
-    const newContent = parseNote(props.note, props.ignoreMentionedNotes);
+    const newContent = parseNpubLinks(parseNoteLinks(parseNote(props.note, props.ignoreMentionedNotes)));
     setPrintableContent(() => newContent.split(tokenRegex));
   });
 

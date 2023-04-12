@@ -1,6 +1,8 @@
 import DOMPurify from "dompurify";
 import { Event, Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
+import { Component } from "solid-js";
+import { renderToString } from "solid-js/web";
 import { Kind } from "../constants";
 import { NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";
@@ -58,7 +60,7 @@ export const urlify = (text: string) => {
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
-    return `<a href="${url}" target="_blank" >${url}</a>`;
+    return `<a link href="${url}" target="_blank" >${url}</a>`;
   })
 }
 
