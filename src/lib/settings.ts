@@ -21,7 +21,7 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
   const event = {
     content: JSON.stringify(content),
     kind: Kind.Settings,
-    tags: [],
+    tags: [["d", "Primal-Web App"]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -45,7 +45,7 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
   const event = {
     content: '{ "description": "Sync app settings" }',
     kind: Kind.Settings,
-    tags: [],
+    tags: [["d", "Primal-Web App"]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
