@@ -1,4 +1,4 @@
-import { Component, createEffect, For, onCleanup } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { getExploreFeed, getMostZapped4h, getTrending24h } from '../../lib/feed';
@@ -24,25 +24,26 @@ import SmallNote from '../SmallNote/SmallNote';
 import { useIntl } from '@cookbook/solid-intl';
 import { hourNarrow } from '../../formats';
 
+const [init, setInit] = createSignal(false);
+
+const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
+  trending: {
+    messages: [],
+    users: {},
+    postStats: {},
+    notes: [],
+  },
+  mostzapped: {
+    messages: [],
+    users: {},
+    postStats: {},
+    notes: [],
+  },
+});
 
 const HomeSidebar: Component = () => {
 
   const intl = useIntl();
-
-  const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
-    trending: {
-      messages: [],
-      users: {},
-      postStats: {},
-      notes: [],
-    },
-    mostzapped: {
-      messages: [],
-      users: {},
-      postStats: {},
-      notes: [],
-    },
-  });
 
   onCleanup(() => {
     removeSocketListeners(
@@ -53,7 +54,7 @@ const HomeSidebar: Component = () => {
 
 
 	createEffect(() => {
-    if (isConnected()) {
+    if (isConnected() && !init()) {
       refreshSocketListeners(
         socket(),
         { message: onMessage, close: onSocketClose },
@@ -92,6 +93,7 @@ const HomeSidebar: Component = () => {
 
       setData(key, 'notes', () => [ ...newPosts ]);
 
+      setInit(true);
       return;
     }
 
