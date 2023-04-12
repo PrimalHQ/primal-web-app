@@ -7,6 +7,7 @@ import { PrimalNote } from '../../types/primal';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { truncateNpub } from '../../stores/profile';
+import ParsedNote from '../ParsedNote/ParsedNote';
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props) => {
 
@@ -46,7 +47,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
               </Show>
             </div>
           </div>
-          <div class={styles.message}>{props.note.post?.content}</div>
+          <div class={styles.message}>{<ParsedNote note={props.note} />}</div>
         </A>
       </div>
     </div>
