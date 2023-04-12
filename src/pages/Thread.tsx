@@ -72,7 +72,7 @@ const Thread: Component = () => {
   const isFetching = () => threadContext?.isFetching;
 
   createEffect(() => {
-    threadContext?.actions.fetchNotes(params.postId);
+    threadContext?.actions.fetchNotes(postId());
   });
 
   let observer: IntersectionObserver | undefined;
