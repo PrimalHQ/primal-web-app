@@ -104,6 +104,8 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
 
+export const parseSmallNote = (note: PrimalNote) => nostrify(note.post.content, note, true);
+
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
