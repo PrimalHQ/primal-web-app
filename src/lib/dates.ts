@@ -20,39 +20,41 @@ export const date = (postTimestamp: number) => {
   const hour = minute * 60;
   const day = hour * 24;
   const week = day * 7;
-  const month = week * 4;
+  const month = day * 30;
   const year = month * 12;
+
+
 
   const diff = currentTimestamp - postTimestamp;
 
   if ( diff > year) {
-    const years = Math.floor(diff / (12 * 4 * 7 * 24 * 60 * 60));
-    return { date, label: `${years}y` };
+    const years = Math.floor(diff / year);
+    return { date, label: rtf.format(years, 'years') };
   }
 
   if (diff > month) {
-    const months = Math.floor(diff / (4 * 7 * 24 * 60 * 60));
-    return { date, label: `${months}m` };
+    const months = Math.floor(diff / month);
+    return { date, label: rtf.format(months, 'months') };
   }
 
   if (diff > week) {
-    const weeks = Math.floor(diff / (7 * 24 * 60 * 60));
-    return { date, label: `${weeks}w` };
+    const weeks = Math.floor(diff / week);
+    return { date, label: rtf.format(weeks, 'weeks') };
   }
 
   if (diff > day) {
-    const days = Math.floor(diff / (24 * 60 * 60));
-    return { date, label: `${days}d` };
+    const days = Math.floor(diff / day);
+    return { date, label: rtf.format(days, 'days') };
   }
 
   if (diff > hour) {
-    const hours = Math.floor(diff / (60 * 60));
-    return { date, label: `${hours}h` };
+    const hours = Math.floor(diff / hour);
+    return { date, label: rtf.format(hours, 'hours') };
   }
 
   if (diff > minute) {
-    const minutes = Math.floor(diff / (60));
-    return { date, label: `${minutes}min` };
+    const minutes = Math.floor(diff / minute);
+    return { date, label: rtf.format(minutes, 'minutes') };
   }
 
   return { date, label: `${diff}s` };
