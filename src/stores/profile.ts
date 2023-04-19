@@ -28,3 +28,22 @@ export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: Nost
     website: (userMeta.website || '') as string,
   };
 }
+
+export const emptyUser = (pubkey: string) => {
+  return {
+    id: '',
+    pubkey,
+    tags: '',
+    npub: hexToNpub(pubkey),
+    name: '',
+    about: '',
+    picture: '',
+    nip05: '',
+    banner: '',
+    displayName: '',
+    location: '',
+    lud06: '',
+    lud16: '',
+    website: '',
+  };
+};

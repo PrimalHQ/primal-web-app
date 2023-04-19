@@ -1,8 +1,6 @@
 import DOMPurify from "dompurify";
-import { Event, Relay } from "nostr-tools";
+import { Relay } from "nostr-tools";
 import { noteEncode } from "nostr-tools/nip19";
-import { Component } from "solid-js";
-import { renderToString } from "solid-js/web";
 import { Kind } from "../constants";
 import { NostrWindow, PrimalNote } from "../types/primal";
 import { getThread } from "./feed";

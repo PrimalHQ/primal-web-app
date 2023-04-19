@@ -1,0 +1,89 @@
+.notifItem {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+
+  padding-top: 12px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--subtile-devider);
+
+  .notifType {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-block: 6px;
+  }
+
+  .iconInfo {
+    color: #FFA02F;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+
+  .notifContent {
+    display: flex;
+    flex-direction: column;
+
+    .avatars {
+      display: flex;
+      padding-bottom: 8px;
+      .avatar {
+        >div {
+          border: solid 1px var(--text-primary);
+          border-radius: 50%;
+          transition: margin-right 0.2s;
+          margin-right: -8px;
+        }
+
+        &:hover {
+          >div {
+            transition: margin-right 0.2s;
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+
+    .description {
+      display: flex;
+      align-items: baseline;
+      padding-bottom: 8px;
+      .firstUser {
+        display: flex;
+        align-items: center;
+        font-weight: 800;
+        font-size: 16px;
+        line-height: 18px;
+        color: var(--text-secondary);
+      }
+
+      .restUsers {
+        margin-left: 4px;
+        font-weight: 400;
+        font-size: 16px;
+        line-height: 18px;
+        color: var(--text-secondary);
+      }
+    }
+
+    .reference {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 22px;
+      color: var(--text-tertiary);
+    }
+  }
+}
+
+.verifiedIcon {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  display: inline-block;
+  margin-left: 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 14px;
+  mask: url(../../../assets/icons/verified.svg) no-repeat 0 / 14px;
+}

@@ -73,7 +73,13 @@ const HomeHeader: Component = () => {
     <div class={styles.fullHeader}>
       <Show
         when={account?.hasPublicKey()}
-        fallback={<div class={styles.welcomeMessage}>Welcome to nostr!</div>}
+        fallback={<div class={styles.welcomeMessage}>
+          {intl.formatMessage({
+            id: 'placeholders.gguestUserGreeting',
+            defaultMessage: 'Welcome to nostr!',
+            description: 'Header placeholder for guest user',
+          })}
+        </div>}
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
           <Avatar

@@ -48,8 +48,8 @@ export type NostrLegendStatsContent = {
 export type NostrUserStatsContent = {
   kind: Kind.UserStats,
   content: string,
-  pubkey?: string,
-  created_at?: number,
+  pubkey: string,
+  created_at: number,
 };
 
 export type NostrMentionContent = {
@@ -81,6 +81,13 @@ export type NostrScoredUsersContent = {
   pubkey?: string,
 };
 
+export type NostrNotificationContent = {
+  kind: Kind.Notification,
+  content: string,
+  created_at?: number,
+  pubkey?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -91,7 +98,8 @@ export type NostrEventContent =
   NostrMentionContent |
   NostrOldestEventContent |
   NostrContactsContent |
-  NostrScoredUsersContent;
+  NostrScoredUsersContent |
+  NostrNotificationContent;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -377,3 +385,22 @@ export type PrimalTheme = { name: string, label: string, logo: string, dark?: bo
 export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };
 
 export type VanityProfiles = { names: Record<string, string> };
+
+export type PrimalNotifUser = PrimalUser & { followers_count: number };
+
+export type PrimalNotification  = {
+  pubkey: string,
+  created_at: number,
+  type: number,
+  your_post?: string,
+  follower?: string,
+  you_were_mentioned_in?: string,
+  your_post_were_mentioned_in?: string,
+  post_you_were_mentioned_in?: string,
+  post_your_post_was_mentioned_in?: string,
+  who_liked_it?: string,
+  who_zapped_it?: string,
+  who_reposted_it?: string,
+  who_replied_to_it?: string,
+  satszapped?: number,
+};

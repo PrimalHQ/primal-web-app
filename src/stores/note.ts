@@ -1,8 +1,11 @@
 import DOMPurify from "dompurify";
 import { noteEncode } from "nostr-tools/nip19";
+import { SetStoreFunction } from "solid-js/store";
+import { APP_ID } from "../App";
 import { Kind } from "../constants";
+import { getEvents } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent } from "../types/primal";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {
@@ -199,4 +202,11 @@ export const paginationPlan = (criteria: string) => {
   const plan = criteria || 'latest';
 
   return pagCriteria[plan] || pagCriteria['latest'];
+}
+
+type NoteStore = {
+  notes: PrimalNote[],
+  page: FeedPage,
+  lastNote: PrimalNote | undefined,
+  reposts: Record<string, string> | undefined,
 }

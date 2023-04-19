@@ -233,6 +233,127 @@ export enum Kind  {
   OldestEvent = 10000106,
   Mentions = 10000107,
   UserScore = 10000108,
+  Notification = 10000110,
 }
 
 export const relayConnectingTimeout = 5000;
+
+export enum NotificationType {
+  NEW_USER_FOLLOWED_YOU = 1,//
+  USER_UNFOLLOWED_YOU = 2,//
+
+  YOUR_POST_WAS_ZAPPED = 3,//
+  YOUR_POST_WAS_LIKED = 4,//
+  YOUR_POST_WAS_REPOSTED = 5,//
+  YOUR_POST_WAS_REPLIED_TO = 6,//
+  YOU_WERE_MENTIONED_IN_POST = 7,//
+  YOUR_POST_WAS_MENTIONED_IN_POST = 8,//
+
+  POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED = 101,//
+  POST_YOU_WERE_MENTIONED_IN_WAS_LIKED = 102,//
+  POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED = 103,
+  POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO = 104,
+
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED = 201,
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED = 202,//
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED = 203,
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO = 204,
+};
+
+export const typeIcons: Record<string, string> = {
+  [NotificationType.NEW_USER_FOLLOWED_YOU]: 'user_followed.svg',
+  [NotificationType.USER_UNFOLLOWED_YOU]: 'user_unfollowed.svg',
+
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'post_zapped.svg',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'post_liked.svg',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'post_reposted.svg',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'post_replied.svg',
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mention.svg',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned_post.svg',
+
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'mention_zapped.svg',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'mention_liked.svg',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'mention_reposted.svg',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'mention_replied.svg',
+
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'mentioned_post_zapped.svg',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'mentioned_post_liked.svg',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'mentioned_post_reposted.svg',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'mentioned_post_replied.svg',
+
+}
+
+export const notificationTypeUserProps: Record<string, string> = {
+  [NotificationType.NEW_USER_FOLLOWED_YOU]: 'follower',
+  [NotificationType.USER_UNFOLLOWED_YOU]: 'follower',
+
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'who_zapped_it',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'who_liked_it',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'who_reposted_it',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'who_replied_to_it',
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'post_you_were_mentioned_in',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_in',
+
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'who_zapped_it',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'who_liked_it',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'who_reposted_it',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'who_replied_to_it',
+
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'who_zapped_it',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'who_liked_it',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'who_reposted_it',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'who_replied_to_it',
+
+}
+
+export const notificationTypeProps: Record<string, string[]> = {
+  [NotificationType.NEW_USER_FOLLOWED_YOU]: ['follower'],
+  [NotificationType.USER_UNFOLLOWED_YOU]: ['follower'],
+
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: ['who_zapped_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.YOUR_POST_WAS_LIKED]: ['who_liked_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: ['who_reposted_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: ['who_replied_to_it', 'your_post', 'your_post_were_mentioned_in'],
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: ['post_you_were_mentioned_in'],
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: ['your_post_were_mentioned_in', 'your_post', 'your_post_were_mentioned_in'],
+
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: ['who_zapped_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: ['who_liked_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: ['who_reposted_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: ['who_replied_to_it', 'your_post', 'your_post_were_mentioned_in'],
+
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: ['who_zapped_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: ['who_liked_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: ['who_reposted_it', 'your_post', 'your_post_were_mentioned_in'],
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: ['who_replied_to_it', 'your_post', 'your_post_were_mentioned_in'],
+
+}
+
+
+
+export const notificationTypeTranslations: Record<string, string> = {
+  [NotificationType.NEW_USER_FOLLOWED_YOU]: 'followed you',
+  [NotificationType.USER_UNFOLLOWED_YOU]: 'unfollowed you',
+
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your post',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your post',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your post',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your post',
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a post',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your post',
+
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'zapped a post you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'liked a post you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'reposted a post you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a post you were mentioned in',
+
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'zapped a post your post was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'liked a post your post was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a post your post was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a post your post was mentioned in',
+
+}
