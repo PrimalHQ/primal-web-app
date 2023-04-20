@@ -169,9 +169,12 @@ const Notifications: Component = () => {
 
       });
 
-      const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+      setTimeout(() => {
 
-      getNotifications(account?.publicKey, subid, since);
+        const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+
+        getNotifications(account?.publicKey, subid, since);
+      }, 2000);
     }
   });
 
