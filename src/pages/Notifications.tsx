@@ -4,6 +4,8 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
 import MissingPage from '../components/MissingPage/MissingPage';
 import NotificationItem from '../components/Notifications/NotificationItem';
+import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
+import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { Kind, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents } from '../lib/feed';
@@ -13,10 +15,9 @@ import { getLastSeen, getNotifications } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser, truncateNpub } from '../stores/profile';
-import { FeedPage, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser } from '../types/primal';
+import { FeedPage, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 
 
-type SortedNotifications = Record<number, PrimalNotification[]>;
 
 const Notifications: Component = () => {
 
@@ -71,8 +72,9 @@ const Notifications: Component = () => {
   });
 
   createEffect(() => {
-    if (notifSince() >= 0) {
+    if (notifSince() >= 0 && account?.hasPublicKey()) {
       const subid = `notif_${APP_ID}`
+
       const unsub = subscribeTo(subid, async (type, _, content) => {
         if (type === 'EVENT') {
           if (!content?.content) {
@@ -82,7 +84,10 @@ const Notifications: Component = () => {
           if (content.kind === Kind.Notification) {
             const notif = JSON.parse(content.content) as PrimalNotification;
 
-            console.log('GOT TYPE: ', notif.type);
+            if (notif.type === NotificationType.YOUR_POST_WAS_ZAPPED) {
+              console.log('+1', notif)
+            }
+
 
             setSortedNotifications(notif.type, (notifs) => {
               return notifs ? [ ...notifs, notif] : [notif];
@@ -295,6 +300,8 @@ const Notifications: Component = () => {
 
     const grouped = groupBy(notifs, 'your_post');
 
+    console.log('ZAP: ', grouped);
+
     const keys = Object.keys(grouped);
 
     return <For each={keys}>
@@ -319,8 +326,6 @@ const Notifications: Component = () => {
   const youWereMentioned = () => {
     const type = NotificationType.YOU_WERE_MENTIONED_IN_POST;
     const notifs = sortedNotifications[type] || [];
-
-    console.log('MENT: ', notifs);
 
     const grouped = groupBy(notifs, 'you_were_mentioned_in');
 
@@ -764,6 +769,10 @@ const Notifications: Component = () => {
 
   return (
     <div>
+      <StickySidebar>
+        <NotificationsSidebar notifications={sortedNotifications} />
+      </StickySidebar>
+
       <Show when={account?.activeUser}>
         <Show when={allSet()}>
           {newUserFollowedYou()}

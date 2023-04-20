@@ -404,3 +404,5 @@ export type PrimalNotification  = {
   who_replied_to_it?: string,
   satszapped?: number,
 };
+
+type SortedNotifications = Record<number, PrimalNotification[]>;
