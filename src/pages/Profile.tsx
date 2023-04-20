@@ -159,7 +159,7 @@ const Profile: Component = () => {
   }
 
   const rectifyUrl = (url: string) => {
-    if (!url.startsWith('http://') || !url.startsWith('https://')) {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
       return `http://${url}`;
     }
 
