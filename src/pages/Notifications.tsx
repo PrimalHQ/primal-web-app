@@ -161,36 +161,6 @@ const Notifications: Component = () => {
     return `1T+`;
   };
 
-  const getRelevantUsers = (type: number) => {
-    const notifs = sortedNotifications[type];
-
-    if (!notifs) {
-      return;
-    }
-
-    const userProp = notificationTypeUserProps[type];
-    const pubkeys = notifs.map(n => n[userProp]);
-
-    return pubkeys.reduce<PrimalNotifUser[]>((acc, pk) => {
-      if (!pk) {
-        return acc;
-      }
-
-      const user = users[pk];
-      const stat = userStats[pk];
-
-      if (!user || !stat) {
-        return acc;
-      }
-
-      const ret = { ...convertToUser(user), ...stat};
-
-      return [...acc, ret]
-
-    }, []);
-  }
-
-
   const getUsers = (
     notifs: PrimalNotification[],
     type: NotificationType,
@@ -226,6 +196,34 @@ const Notifications: Component = () => {
       },
       {},
     );
+  };
+
+  const newUserFollowedYou = () => {
+    const type = NotificationType.NEW_USER_FOLLOWED_YOU;
+    const notifs = sortedNotifications[type];
+
+    if (!notifs) {
+      return;
+    }
+
+    return <NotificationItem
+      type={type}
+      users={getUsers(notifs, type)}
+    />
+  };
+
+  const userUnfollowedYou = () => {
+    const type = NotificationType.USER_UNFOLLOWED_YOU;
+    const notifs = sortedNotifications[type];
+
+    if (!notifs) {
+      return;
+    }
+
+    return <NotificationItem
+      type={type}
+      users={getUsers(notifs, type)}
+    />
   };
 
   const yourPostWasLiked = () => {
@@ -322,32 +320,41 @@ const Notifications: Component = () => {
     const type = NotificationType.YOU_WERE_MENTIONED_IN_POST;
     const notifs = sortedNotifications[type] || [];
 
+    console.log('MENT: ', notifs);
+
     const grouped = groupBy(notifs, 'you_were_mentioned_in');
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -362,28 +369,36 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
 
-    if (!note) {
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -398,28 +413,36 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
 
-    if (!note) {
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -434,20 +457,28 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
 
-    if (!note) {
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
@@ -457,8 +488,8 @@ const Notifications: Component = () => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
             iconInfo={`${displaySats(sats)}`}
             iconTooltip={`${sats} sats`}
           />
@@ -475,28 +506,35 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -511,28 +549,35 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -548,28 +593,35 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -584,28 +636,40 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
+        const sats = grouped[key].reduce((acc, n) => {
+          return n.satszapped ? acc + n.satszapped : acc;
+        },0);
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
+            iconInfo={`${displaySats(sats)}`}
+            iconTooltip={`${sats} sats`}
           />
         )}
       }
@@ -620,28 +684,35 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -656,28 +727,35 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    const note = relatedNotes.notes.find(n => n.post.id === keys[0]);
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
 
-    if (!note) {
+    if (notes.length === 0) {
       return;
     }
 
     const knownUsers = Object.keys(users);
-    const pk = note.user.pubkey;
 
-    const rUser = knownUsers.includes(pk) ?
-      convertToUser(users[pk]) :
-      emptyUser(pk);
+    const rUsers = notes.reduce((acc, note) => {
+      const pk = note.user.pubkey;
 
-    const usrs = [{...rUser, ...userStats[pk]}];
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk]) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
 
     return <For each={keys}>
       {key => {
         return (
           <NotificationItem
             type={type}
-            users={usrs}
-            note={note}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
           />
         )}
       }
@@ -687,18 +765,14 @@ const Notifications: Component = () => {
   return (
     <div>
       <Show when={account?.activeUser}>
-        <NotificationItem
-          type={NotificationType.NEW_USER_FOLLOWED_YOU}
-          users={getRelevantUsers(NotificationType.NEW_USER_FOLLOWED_YOU)}
-        />
-        <NotificationItem
-          type={NotificationType.USER_UNFOLLOWED_YOU}
-          users={getRelevantUsers(NotificationType.USER_UNFOLLOWED_YOU)}
-        />
         <Show when={allSet()}>
-          {youWereMentioned()}
+          {newUserFollowedYou()}
+          {userUnfollowedYou()}
 
           {yourPostWasLiked()}
+
+          {youWereMentioned()}
+
           {yourPostWasReposted()}
           {yourPostWasRepliedTo()}
           {yourPostWasZapped()}

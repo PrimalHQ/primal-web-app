@@ -29,6 +29,8 @@ import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post
 import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
+import Note from '../Note/Note';
+import NotificationNote from '../Note/NotificationNote/NotificationNote';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -136,6 +138,15 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
     setTypeIcon(typeIcons[props.type])
   });
 
+
+  const isReply = () => {
+    return [
+      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO,
+      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
+      NotificationType.YOUR_POST_WAS_REPLIED_TO,
+    ].includes(props.type)
+  }
+
   return (
     <div class={styles.notifItem}>
       <div class={styles.notifType}>
@@ -172,7 +183,12 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           when={![NotificationType.NEW_USER_FOLLOWED_YOU, NotificationType.USER_UNFOLLOWED_YOU].includes(props.type)}
         >
           <div class={styles.reference}>
-            {props.note && props.note.post.content}
+            <Show when={props.note}>
+              <NotificationNote
+                note={props.note}
+                showFooter={isReply()}
+              />
+            </Show>
           </div>
         </Show>
       </div>
