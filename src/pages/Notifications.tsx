@@ -84,11 +84,6 @@ const Notifications: Component = () => {
           if (content.kind === Kind.Notification) {
             const notif = JSON.parse(content.content) as PrimalNotification;
 
-            if (notif.type === NotificationType.YOUR_POST_WAS_ZAPPED) {
-              console.log('+1', notif)
-            }
-
-
             setSortedNotifications(notif.type, (notifs) => {
               return notifs ? [ ...notifs, notif] : [notif];
             });
@@ -299,8 +294,6 @@ const Notifications: Component = () => {
     const notifs = sortedNotifications[type] || [];
 
     const grouped = groupBy(notifs, 'your_post');
-
-    console.log('ZAP: ', grouped);
 
     const keys = Object.keys(grouped);
 
