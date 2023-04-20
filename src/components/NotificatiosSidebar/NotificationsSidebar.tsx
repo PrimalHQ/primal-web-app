@@ -239,7 +239,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 </Show>
               </div>
               <div class={styles.sidebarItem}>
-                <Show when={activity()[1] > 0}>
+                <Show when={activity()[2] > 0}>
                 <div class={styles.itemAmount}>{activity()[2]}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.likes',
