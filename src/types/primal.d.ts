@@ -88,6 +88,13 @@ export type NostrNotificationContent = {
   pubkey?: string,
 };
 
+export type NostrNotificationLastSeenContent = {
+  kind: Kind.Timestamp,
+  content: string,
+  created_at?: number,
+  pubkey?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -99,7 +106,8 @@ export type NostrEventContent =
   NostrOldestEventContent |
   NostrContactsContent |
   NostrScoredUsersContent |
-  NostrNotificationContent;
+  NostrNotificationContent |
+  NostrNotificationLastSeenContent;
 
 export type NostrEvent = [
   type: "EVENT",

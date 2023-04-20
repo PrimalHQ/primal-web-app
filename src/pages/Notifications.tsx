@@ -1,27 +1,31 @@
+import { useIntl } from '@cookbook/solid-intl';
 import { noteEncode } from 'nostr-tools/nip19';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
+import Branding from '../components/Branding/Branding';
 import MissingPage from '../components/MissingPage/MissingPage';
 import NotificationItem from '../components/Notifications/NotificationItem';
 import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
+import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents } from '../lib/feed';
 import { saveFollowing } from '../lib/localStore';
 import { sendContacts } from '../lib/notes';
-import { getLastSeen, getNotifications } from '../lib/notifications';
+import { getLastSeen, getNotifications, setLastSeen } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser, truncateNpub } from '../stores/profile';
 import { FeedPage, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 
-
+import styles from './Notifications.module.scss';
 
 const Notifications: Component = () => {
 
   const account = useAccountContext();
+  const intl = useIntl();
 
   const [notifSince, setNotifSince] = createSignal<number>(0);
 
@@ -49,17 +53,18 @@ const Notifications: Component = () => {
     reposts: {},
   })
 
-
-
   createEffect(() => {
     if (account?.hasPublicKey()) {
       const subid = `notif_ls_${APP_ID}`
 
       const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EVENT') {
+        if (type === 'EVENT' && content?.kind === Kind.Timestamp) {
 
-          console.log('SEEN: ', content);
+          const timestamp = parseInt(content.content);
 
+          if (!isNaN(timestamp)) {
+            setNotifSince(timestamp);
+          }
 
           unsub();
           return;
@@ -68,6 +73,30 @@ const Notifications: Component = () => {
       });
 
       getLastSeen(account.publicKey, subid);
+    }
+  });
+  createEffect(() => {
+    if (account?.hasPublicKey()) {
+      const subid = `notif_sls_${APP_ID}`
+
+      const unsub = subscribeTo(subid, async (type, _, content) => {
+        if (type === 'EOSE') {
+          unsub();
+          return;
+        }
+
+        if (type === 'NOTICE') {
+          console.log('Error setting notifications lats seen');
+          unsub();
+          return;
+        }
+
+      });
+
+      setTimeout(() => {
+        setLastSeen(subid, Math.floor((new Date()).getTime() / 1000));
+      }, 1000);
+
     }
   });
 
@@ -762,6 +791,23 @@ const Notifications: Component = () => {
 
   return (
     <div>
+      <Wormhole to="branding_holder">
+        <Branding small={false} />
+      </Wormhole>
+
+      <div id="central_header" class={styles.fullHeader}>
+        <div>
+          {intl.formatMessage(
+            {
+              id: 'pages.notifications.title',
+              defaultMessage: 'Notifications',
+              description: 'Title of the notifications page',
+            }
+          )}
+        </div>
+      </div>
+
+
       <StickySidebar>
         <NotificationsSidebar notifications={sortedNotifications} />
       </StickySidebar>

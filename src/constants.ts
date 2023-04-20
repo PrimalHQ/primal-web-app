@@ -226,6 +226,7 @@ export enum Kind  {
 
   Settings = 30078,
 
+  ACK = 10000098,
   NoteStats = 10000100,
   NetStats = 10000101,
   LegendStats = 10000102,
@@ -234,6 +235,7 @@ export enum Kind  {
   Mentions = 10000107,
   UserScore = 10000108,
   Notification = 10000110,
+  Timestamp = 10000111,
 }
 
 export const relayConnectingTimeout = 5000;

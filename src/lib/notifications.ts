@@ -1,14 +1,17 @@
+import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
+import { NostrWindow } from "../types/primal";
 
 export const getNotifications = (
   pubkey: string | undefined,
   subid: string,
   since = 0,
-  limit = 20,
+  limit = 1000,
 ) => {
   if (!pubkey) {
     return;
   }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -29,19 +32,32 @@ export const getLastSeen = (pubkey: string | undefined, subid: string) => {
 
 };
 
-export const setLastSeen = (
-  pubkey: string | undefined,
+export const setLastSeen = async (
   subid: string,
   timestamp: number,
 ) => {
-  if (!pubkey) {
-    return;
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (nostr === undefined) {
+    return false;
   }
+
+  const event = {
+    content: '{ "description": "update notifications last seen timestamp"}',
+    kind: Kind.Settings,
+    tags: [],
+    created_at: timestamp,
+  };
+
+  const signedNote = await nostr.signEvent(event);
 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_notifications_seen", { pubkey, seen_until: timestamp }]},
+    {cache: ["set_notifications_seen", {
+      event_from_user: signedNote,
+    }]},
   ]));
 
 };
