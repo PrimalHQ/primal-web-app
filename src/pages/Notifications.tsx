@@ -1,4 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
+import { useSearchParams } from '@solidjs/router';
 import { noteEncode } from 'nostr-tools/nip19';
 import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -26,6 +27,8 @@ const Notifications: Component = () => {
 
   const account = useAccountContext();
   const intl = useIntl();
+
+  const [queryParams, setQueryParams] = useSearchParams();
 
   const [notifSince, setNotifSince] = createSignal<number>(0);
 
@@ -165,7 +168,10 @@ const Notifications: Component = () => {
         }
 
       });
-      getNotifications(account?.publicKey, subid, notifSince());
+
+      const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+
+      getNotifications(account?.publicKey, subid, since);
     }
   });
 
