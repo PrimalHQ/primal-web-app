@@ -130,12 +130,47 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
       NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
       NotificationType.YOUR_POST_WAS_REPLIED_TO,
     ].includes(type())
-  }
+  };
+
+  const isZapType = () => {
+    return [
+      NotificationType.YOUR_POST_WAS_ZAPPED,
+      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED,
+      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
+    ].includes(type())
+  };
+
+  const displaySats = (amount: number) => {
+    const t = 1000;
+    if (amount < t) {
+      return `${amount}`;
+    }
+
+    if (amount < (t^2)) {
+      return `${Math.floor(amount / t)}K`;
+    }
+
+    if (amount < (t^3)) {
+      return `${Math.floor(amount / (t^2))}M`
+    }
+
+    if (amount < (t^4)) {
+      return `${Math.floor(amount / (t^4))}B`
+    }
+
+    return `1T+`;
+  };
+
 
   return (
     <div class={styles.notifItem}>
       <div class={styles.notifType}>
         <img src={typeIcon()} alt="notification icon" />
+        <Show when={isZapType()}>
+          <div class={styles.iconInfo} title={`${props.notification.satszapped} sats`}>
+            {displaySats(props.notification.satszapped || 0)}
+          </div>
+        </Show>
       </div>
       <div class={styles.notifContent}>
         <div class={styles.avatars}>
