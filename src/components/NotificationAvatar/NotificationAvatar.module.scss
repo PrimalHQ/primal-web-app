@@ -1,0 +1,165 @@
+@mixin avatar {
+  position: relative;
+
+  background-color: var(--subtile-devider);
+  border-radius: 50%;
+  border: 1px solid var(--text-primary);
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.verifiedIcon {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--accent-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
+  mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
+}
+
+@mixin iconBackground {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 15px;
+  height: 15px;
+  background-color: var(--background-site);
+  border-radius: 50%;
+}
+
+.xxsAvatar {
+  @include avatar;
+  width: 24px;
+  height: 24px;
+}
+
+.xsAvatar {
+  @include avatar;
+  width: 32px;
+  height: 32px;
+}
+
+.vsAvatar {
+  @include avatar;
+  width: 42px;
+  height: 42px;
+}
+
+.smallAvatar {
+  @include avatar;
+  width: 48px;
+  height: 48px;
+}
+
+.midAvatar {
+  @include avatar;
+  width: 52px;
+  height: 52px;
+}
+
+.largeAvatar {
+  @include avatar;
+  width: 72px;
+  height: 72px;
+}
+
+.extraLargeAvatar {
+  @include avatar;
+  width: 80px;
+  height: 80px;
+}
+
+.xxlAvatar {
+  @include avatar;
+  width: 142px;
+  height: 142px;
+}
+
+@mixin missing {
+  display: grid;
+  place-items: center;
+  color: var(--missing-avatar-text);
+  background-color: var(--subtile-devider);
+  border-radius: 50%;
+}
+
+.xxsMissing {
+  @include missing;
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 24px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 24px;
+}
+
+.xsMissing {
+  @include missing;
+  width: 32px;
+  height: 32px;
+  font-size: 10px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 32px;
+}
+
+.vsMissing {
+  @include missing;
+  width: 42px;
+  height: 42px;
+  font-size: 10px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 42px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 42px;
+}
+
+.smallMissing {
+  @include missing;
+  width: 48px;
+  height: 48px;
+  font-size: 12px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 48px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 48px;
+}
+
+.midMissing {
+  @include missing;
+  width: 52px;
+  height: 52px;
+  font-size: 16px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 52px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 52px;
+}
+
+.largeMissing {
+  @include missing;
+  width: 72px;
+  height: 72px;
+  font-size: 18px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 72px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 72px;
+}
+
+.extraLargeMissing {
+  @include missing;
+  width: 80px;
+  height: 80px;
+  font-size: 20px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 80px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 80px;
+}
+
+.xxlMissing {
+  @include missing;
+  width: 142px;
+  height: 142px;
+  font-size: 20px;
+  -webkit-mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 142px;
+  mask: url(../../assets/icons/default_nostrich.svg) no-repeat 0px / 142px;
+}

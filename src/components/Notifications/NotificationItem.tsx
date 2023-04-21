@@ -31,6 +31,7 @@ import mentionedPostReposted from '../../assets/icons/notifications/mentioned_po
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
 import Note from '../Note/Note';
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
+import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -71,6 +72,8 @@ const uniqueifyUsers = (users: PrimalNotifUser[]) => {
   }, []);
 }
 
+const avatarDisplayLimit = 12;
+
 const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
@@ -84,13 +87,25 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     const users = uniqueifyUsers(props.users);
 
-
     return users.sort((a, b) => b.followers_count - a.followers_count);
   });
 
-  const numberOfUsers = () => sortedUsers().length;
+  const displayedUsers = createMemo(() => {
+    const limited = sortedUsers().slice(0, avatarDisplayLimit);
 
-  const firstUserName = () => {
+    return limited;
+  });
+
+  const numberOfUsers = createMemo(() => sortedUsers().length);
+
+  const remainingUsers = createMemo(() => {
+    const remainder = numberOfUsers() - displayedUsers().length;
+
+    return remainder > 99 ? 99 : remainder;
+  });
+
+
+  const firstUserName = createMemo(() => {
     const firstUser = sortedUsers()[0];
 
     if (!firstUser) {
@@ -100,9 +115,9 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
     return firstUser.displayName ||
       firstUser.name ||
       truncateNpub(firstUser.npub);
-  };
+  });
 
-  const firstUserVerification = () => {
+  const firstUserVerification = createMemo(() => {
     const firstUser = sortedUsers()[0];
 
     if (!firstUser || !firstUser.nip05) {
@@ -111,7 +126,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     return trimVerification(firstUser.nip05);
 
-  }
+  });
 
   const userName = (user: PrimalUser) => {
     return user.displayName ||
@@ -158,7 +173,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
       <div class={styles.notifContent}>
         <div class={styles.avatars}>
           <Show when={numberOfUsers() > 0}>
-            <For each={sortedUsers()}>
+            <For each={displayedUsers()}>
               {(user) => (
                 <A
                   href={`/profile/${user.npub}`} class={styles.avatar}
@@ -168,6 +183,9 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
                 </A>
               )}
             </For>
+          </Show>
+          <Show when={numberOfUsers() > avatarDisplayLimit - 1}>
+            <NotificationAvatar number={remainingUsers()} size="xs" />
           </Show>
         </div>
         <div class={styles.description}>
