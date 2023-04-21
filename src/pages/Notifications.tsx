@@ -301,11 +301,6 @@ const Notifications: Component = () => {
 
         setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
 
-        console.log('UNTIL: ', until);
-        console.log('NOTIF: ', oldNotifications.notifications.map(n => `${n.type} - ${n.created_at}`));
-        console.log('-----------------------');
-
-
         unsub();
         return;
       }

@@ -84,7 +84,6 @@ const NavMenu: Component = () => {
       <nav class={styles.sideNav}>
         <For each={links}>
           {({ to, label, icon, bubble }) => {
-            console.log('BUBBLE: ', bubble && bubble())
             return <NavLink to={to} label={label} icon={icon} bubble={bubble}/>
           }
           }
