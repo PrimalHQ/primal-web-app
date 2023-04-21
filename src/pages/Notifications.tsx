@@ -1,13 +1,16 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { noteEncode } from 'nostr-tools/nip19';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import { style } from 'solid-js/web';
 import { APP_ID } from '../App';
 import Branding from '../components/Branding/Branding';
 import MissingPage from '../components/MissingPage/MissingPage';
 import NotificationItem from '../components/Notifications/NotificationItem';
+import NotificationItem2 from '../components/Notifications/NotificationItem2';
 import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
+import Paginator from '../components/Paginator/Paginator';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, NotificationType, notificationTypeUserProps } from '../constants';
@@ -15,7 +18,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents } from '../lib/feed';
 import { saveFollowing } from '../lib/localStore';
 import { sendContacts } from '../lib/notes';
-import { getLastSeen, getNotifications, setLastSeen } from '../lib/notifications';
+import { getLastSeen, getNotifications, getOldNotifications, setLastSeen } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser, truncateNpub } from '../stores/profile';
@@ -49,11 +52,29 @@ const Notifications: Component = () => {
     reposts: Record<string, string> | undefined,
   }
 
+  type OldNotificationStore = {
+    notes: PrimalNote[],
+    users: Record<string, PrimalUser>,
+    userStats: Record<string, { followers_count: number }>,
+    page: FeedPage & { notifications: PrimalNotification[]},
+    reposts: Record<string, string> | undefined,
+    notifications: PrimalNotification[],
+  }
+
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
     users: [],
     page: { messages: [], users: {}, postStats: {} },
     reposts: {},
+  })
+
+  const [oldNotifications, setOldNotifications] = createStore<OldNotificationStore>({
+    notes: [],
+    users: {},
+    userStats: {},
+    page: { messages: [], users: {}, postStats: {}, notifications: [] },
+    reposts: {},
+    notifications: [],
   })
 
   createEffect(() => {
@@ -78,6 +99,7 @@ const Notifications: Component = () => {
       getLastSeen(account.publicKey, subid);
     }
   });
+
   createEffect(() => {
     if (account?.hasPublicKey()) {
       const subid = `notif_sls_${APP_ID}`
@@ -103,8 +125,9 @@ const Notifications: Component = () => {
     }
   });
 
+  // Fetch new notifications
   createEffect(() => {
-    if (notifSince() >= 0 && account?.hasPublicKey()) {
+    if (account?.hasPublicKey()) {
       const subid = `notif_${APP_ID}`
 
       const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -116,6 +139,9 @@ const Notifications: Component = () => {
           if (content.kind === Kind.Notification) {
             const notif = JSON.parse(content.content) as PrimalNotification;
 
+            if (notif.type === NotificationType.NEW_USER_FOLLOWED_YOU) {
+              console.log('REPLY: ', notif);
+            }
             setSortedNotifications(notif.type, (notifs) => {
               return notifs ? [ ...notifs, notif] : [notif];
             });
@@ -174,6 +200,129 @@ const Notifications: Component = () => {
         const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
         getNotifications(account?.publicKey, subid, since);
+      }, 2000);
+    }
+  });
+
+  onCleanup(() => {
+    setLastNotification(undefined);
+    setOldNotifications('notifications', []);
+    setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
+    setNotifSince(0);
+    setNotifications([]);
+  });
+
+  const sortNotifByRecency = (notifs: PrimalNotification[]) => {
+    return notifs.sort((a: PrimalNotification, b: PrimalNotification) => {
+      return b.created_at - a.created_at;
+    });
+  }
+
+  const fetchOldNotifications = (until: number) => {
+    const subid = `notif_old_${APP_ID}`
+
+    const unsub = subscribeTo(subid, async (type, _, content) => {
+      if (type === 'EVENT') {
+        if (!content?.content) {
+          return;
+        }
+
+        if (content.kind === Kind.Notification) {
+          const notif = JSON.parse(content.content) as PrimalNotification;
+
+
+          const isLastNotif =
+            lastNotification()?.created_at === notif.created_at &&
+            lastNotification()?.type === notif.type;
+
+          if (!isLastNotif) {
+            setOldNotifications('page', 'notifications',
+              (notifs) => notifs ? [ ...notifs, notif] : [notif],
+            );
+          }
+
+          return;
+        }
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          setOldNotifications('page', 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+          return;
+        }
+
+        if (content.kind === Kind.UserStats) {
+          const stat = content as NostrUserStatsContent;
+          const statContent = JSON.parse(content.content);
+
+          setOldNotifications('userStats', (stats) => ({ ...stats, [stat.pubkey]: { ...statContent } }));
+          return;
+        }
+
+        if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if (content.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          setOldNotifications('page', 'postStats',
+            (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+          );
+          return;
+        }
+
+      }
+
+      if (type === 'EOSE') {
+
+        // Sort notifications
+        const notifs = [...oldNotifications.page.notifications];
+
+        const sorted = sortNotifByRecency(notifs);
+
+        setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted])
+
+        // Convert related notes
+        setOldNotifications('notes', () => [...convertToNotes(oldNotifications.page)])
+
+        const pageUsers = oldNotifications.page.users;
+
+        const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
+          return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key])}};
+        },  {});
+
+        setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
+
+        console.log('UNTIL: ', until);
+        console.log('NOTIF: ', oldNotifications.notifications.map(n => `${n.type} - ${n.created_at}`));
+        console.log('-----------------------');
+
+
+        unsub();
+        return;
+      }
+
+    });
+
+    setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
+
+
+    getOldNotifications(account?.publicKey, subid, until);
+  }
+
+  // Fetch old notifications
+  createEffect(() => {
+    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen) {
+      setTimeout(() => {
+        fetchOldNotifications(notifSince());
       }, 2000);
     }
   });
@@ -310,7 +459,7 @@ const Notifications: Component = () => {
     const type = NotificationType.YOUR_POST_WAS_REPLIED_TO;
     const notifs = sortedNotifications[type] || [];
 
-    const grouped = groupBy(notifs, 'your_post');
+    const grouped = groupBy(notifs, 'reply');
 
     const keys = Object.keys(grouped);
 
@@ -798,6 +947,24 @@ const Notifications: Component = () => {
     </For>
   };
 
+  const [lastNotification, setLastNotification] = createSignal<PrimalNotification>();
+
+  const fetchMoreNotifications = () => {
+    const lastNotif = oldNotifications.notifications[oldNotifications.notifications.length - 1];
+
+    if (!lastNotif || lastNotif.created_at === lastNotification()?.created_at) {
+      return;
+    }
+
+    setLastNotification(lastNotif);
+
+    const until = lastNotif.created_at;
+
+    if (until > 0) {
+      fetchOldNotifications(until);
+    }
+  }
+
   return (
     <div>
       <Wormhole to="branding_holder">
@@ -845,6 +1012,25 @@ const Notifications: Component = () => {
           {postYourPostWasMentionedInWasReposted()}
           {postYourPostWasMentionedInWasRepliedTo()}
         </Show>
+
+        <Show when={oldNotifications.notifications.length > 0}>
+          <div class={styles.separator}></div>
+
+          <div class={styles.oldNotifications}>
+            <For each={oldNotifications.notifications}>
+              {notif => (
+                <NotificationItem2
+                  notification={notif}
+                  users={oldNotifications.users}
+                  userStats={oldNotifications.userStats}
+                  notes={oldNotifications.notes}
+                />
+              )}
+            </For>
+            <Paginator loadNextPage={fetchMoreNotifications} />
+          </div>
+        </Show>
+
       </Show>
     </div>
   );

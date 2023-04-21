@@ -12,3 +12,13 @@
     text-transform: lowercase;
   }
 }
+
+.separator {
+  width: 100%;
+  height: 1px;
+  background-color: var(--text-primary);
+}
+
+.oldNotifications {
+  position: relative;
+}

@@ -19,6 +19,23 @@ export const getNotifications = (
   ]));
 };
 
+export const getOldNotifications = (
+  pubkey: string | undefined,
+  subid: string,
+  until = 0,
+  limit = 20,
+) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_notifications", { pubkey, limit, until }]},
+  ]));
+};
+
 export const getLastSeen = (pubkey: string | undefined, subid: string) => {
   if (!pubkey) {
     return;
