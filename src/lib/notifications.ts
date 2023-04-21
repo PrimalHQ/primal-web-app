@@ -78,3 +78,11 @@ export const setLastSeen = async (
   ]));
 
 };
+
+export const subscribeToNotificationStats = (pubkey: string, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["notification_counts", { pubkey, subid, }]},
+  ]));
+}

@@ -1,6 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import NavLink from '../NavLink/NavLink';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 
@@ -8,6 +9,7 @@ import styles from './NavMenu.module.scss';
 
 const NavMenu: Component = () => {
   const account = useAccountContext();
+  const notifications = useNotificationsContext();
   const intl = useIntl();
 
   const links = [
@@ -46,6 +48,7 @@ const NavMenu: Component = () => {
         description: 'Label for the nav bar item link to Notifications page',
       }),
       icon: 'notificationsIcon',
+      bubble: () => notifications?.notificationCount || 0,
     },
     {
       to: '/downloads',
@@ -80,8 +83,10 @@ const NavMenu: Component = () => {
     <div class={styles.navMenu}>
       <nav class={styles.sideNav}>
         <For each={links}>
-          {({ to, label, icon }) =>
-            <NavLink to={to} label={label} icon={icon} />
+          {({ to, label, icon, bubble }) => {
+            console.log('BUBBLE: ', bubble && bubble())
+            return <NavLink to={to} label={label} icon={icon} bubble={bubble}/>
+          }
           }
         </For>
       </nav>

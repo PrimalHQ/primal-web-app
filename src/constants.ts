@@ -236,6 +236,7 @@ export enum Kind  {
   UserScore = 10000108,
   Notification = 10000110,
   Timestamp = 10000111,
+  NotificationStats = 10000112,
 }
 
 export const relayConnectingTimeout = 5000;

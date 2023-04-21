@@ -1,9 +1,9 @@
 import { A, useLocation, useNavigate } from '@solidjs/router';
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
 import styles from './NavLink.module.scss';
 
-const NavLink: Component<{ to: string, label: string, icon: string}> = (props) => {
+const NavLink: Component<{ to: string, label: string, icon: string, bubble?: () => number}> = (props) => {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -23,6 +23,11 @@ const NavLink: Component<{ to: string, label: string, icon: string}> = (props) =
 
     return (
       <button class={styles.navLink} onClick={onClick}>
+        <Show when={props.bubble && props.bubble() > 0}>
+          <div class={styles.bubble}>
+            <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
+          </div>
+        </Show>
         <A href={props.to} activeClass={styles.active} inactiveClass={styles.inactive}>
           <div class={styles[props.icon]}></div>
           <p>{props.label}</p>

@@ -5,6 +5,7 @@
 }
 
 .navLink {
+  position: relative;
   text-align: right;
   margin: 0px 0px 28px 0px;
   padding: 0px;
@@ -116,4 +117,25 @@
       display: none;
     }
   }
+}
+
+.bubble {
+  position: absolute;
+  text-align: center;
+  padding-top: 2px;
+  padding-inline: 4px;
+  top: 0;
+  right: -16px;
+  min-width: 16px;
+  min-height: 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 11px;
+
+  background: linear-gradient(141.22deg, #EF404A 6.36%, #5B12A4 97.61%);
+  border: 1px solid #000000;
+
+  color: #FFFFFF;
+  text-shadow: 0.5px 0.5px 0px #000000;
 }

@@ -10,6 +10,7 @@ import Router from './Router';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { TranslatorProvider } from './contexts/TranslatorContext';
+import { NotificationsProvider } from './contexts/NotificationsContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -32,14 +33,16 @@ const App: Component = () => {
         <AccountProvider>
           <SettingsProvider>
             <ProfileProvider>
-              <HomeProvider>
-                <ExploreProvider>
-                  <ThreadProvider>
-                    <input id="defocus" class={styles.invisible}/>
-                    <Router />
-                  </ThreadProvider>
-                </ExploreProvider>
-              </HomeProvider>
+              <NotificationsProvider>
+                <HomeProvider>
+                  <ExploreProvider>
+                    <ThreadProvider>
+                      <input id="defocus" class={styles.invisible}/>
+                      <Router />
+                    </ThreadProvider>
+                  </ExploreProvider>
+                </HomeProvider>
+              </NotificationsProvider>
             </ProfileProvider>
           </SettingsProvider>
         </AccountProvider>
