@@ -130,6 +130,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       else {
         setPublicKey(key);
         localStorage.setItem('pubkey', key);
+        getRelays();
+        getUserProfile(key, `user_profile_${APP_ID}`);
       }
     } catch (e: any) {
       setPublicKey(noKey);
@@ -262,13 +264,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     setTimeout(() => {
       fetchNostrKey();
     }, 1000);
-  });
-
-  createEffect(() => {
-    if (store.publicKey && store.publicKey !== noKey) {
-      getRelays();
-      getUserProfile(store.publicKey, `user_profile_${APP_ID}`);
-    }
   });
 
   createEffect(() => {
