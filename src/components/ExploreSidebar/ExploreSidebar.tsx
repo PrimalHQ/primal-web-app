@@ -13,6 +13,7 @@ import Avatar from '../Avatar/Avatar';
 import styles from './ExploreSidebar.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { getTrendingUsers } from '../../lib/profile';
+import { hexToNpub } from '../../lib/keys';
 
 const ExploreSidebar: Component = () => {
 
@@ -39,7 +40,13 @@ const ExploreSidebar: Component = () => {
       const sortedKeys = Object.keys(store.scores).sort(
         (a, b) => store.scores[b] - store.scores[a]);
 
-      const users = sortedKeys.map(key => convertToUser(store.users[key]));
+      const users = sortedKeys.map(key => {
+        if (!store.users[key]) {
+          return { pubkey: key, npub: hexToNpub(key) };
+        }
+
+        return convertToUser(store.users[key]);
+      });
 
       setTrendingUsers(() => [...users]);
       return;
