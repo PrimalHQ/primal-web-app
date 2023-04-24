@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
-import { noteEncode } from 'nostr-tools/nip19';
+import { decode, noteEncode } from 'nostr-tools/nip19';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
@@ -13,7 +13,7 @@ import NotificationsSidebar from '../components/NotificatiosSidebar/Notification
 import Paginator from '../components/Paginator/Paginator';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
-import { Kind, NotificationType, notificationTypeUserProps } from '../constants';
+import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents } from '../lib/feed';
 import { saveFollowing } from '../lib/localStore';
@@ -33,7 +33,7 @@ const Notifications: Component = () => {
 
   const [queryParams, setQueryParams] = useSearchParams();
 
-  const [notifSince, setNotifSince] = createSignal<number>(0);
+  const [notifSince, setNotifSince] = createSignal<number>();
 
   const [notifications, setNotifications] = createStore<PrimalNotification[]>([]);
 
@@ -77,8 +77,26 @@ const Notifications: Component = () => {
     notifications: [],
   })
 
+  const publicKey = () => {
+    const user = queryParams.user;
+    if (user) {
+      if (minKnownProfiles.names[user]) {
+        return minKnownProfiles.names[user];
+      }
+
+      if (user.startsWith('npub')) {
+        return decode(user).data;
+      }
+
+      return user;
+    }
+
+    return account?.publicKey;
+  }
+
   createEffect(() => {
-    if (account?.hasPublicKey()) {
+    const pk = publicKey();
+    if (pk) {
       const subid = `notif_ls_${APP_ID}`
 
       const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -94,14 +112,20 @@ const Notifications: Component = () => {
           return;
         }
 
+        if (type === 'EOSE') {
+          if (!notifSince()) {
+            setNotifSince(0);
+          }
+        }
+
       });
 
-      getLastSeen(account.publicKey, subid);
+      getLastSeen(pk as string, subid);
     }
   });
 
   createEffect(() => {
-    if (account?.hasPublicKey()) {
+    if (account?.hasPublicKey() && publicKey() === account.publicKey) {
       const subid = `notif_sls_${APP_ID}`
 
       const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -120,88 +144,86 @@ const Notifications: Component = () => {
 
       setTimeout(() => {
         setLastSeen(subid, Math.floor((new Date()).getTime() / 1000));
-      }, 1000);
+      }, 10);
 
     }
   });
 
   // Fetch new notifications
   createEffect(() => {
-    if (account?.hasPublicKey()) {
-      const subid = `notif_${APP_ID}`
+    const pk = publicKey();
 
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EVENT') {
-          if (!content?.content) {
-            return;
-          }
+    if (!pk || notifSince() === undefined) {
+      return;
+    }
 
-          if (content.kind === Kind.Notification) {
-            const notif = JSON.parse(content.content) as PrimalNotification;
+    const subid = `notif_${APP_ID}`
 
-            if (notif.type === NotificationType.NEW_USER_FOLLOWED_YOU) {
-              console.log('REPLY: ', notif);
-            }
-            setSortedNotifications(notif.type, (notifs) => {
-              return notifs ? [ ...notifs, notif] : [notif];
-            });
-
-            return;
-          }
-
-          if (content.kind === Kind.Metadata) {
-            const user = content as NostrUserContent;
-
-            setUsers((usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
-            return;
-          }
-
-          if (content.kind === Kind.UserStats) {
-            const stat = content as NostrUserStatsContent;
-            const statContent = JSON.parse(content.content);
-
-            setUserStats((stats) => ({ ...stats, [stat.pubkey]: { ...statContent } }));
-            return;
-          }
-
-          if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-            const message = content as NostrNoteContent;
-
-            setRelatedNotes('page', 'messages',
-              (msgs) => [ ...msgs, { ...message }]
-            );
-
-            return;
-          }
-
-          if (content.kind === Kind.NoteStats) {
-            const statistic = content as NostrStatsContent;
-            const stat = JSON.parse(statistic.content);
-
-            setRelatedNotes('page', 'postStats',
-              (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-            );
-            return;
-          }
-
-        }
-
-        if (type === 'EOSE') {
-          setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
-          setAllSet(true)
-          unsub();
+    const unsub = subscribeTo(subid, async (type, _, content) => {
+      if (type === 'EVENT') {
+        if (!content?.content) {
           return;
         }
 
-      });
+        if (content.kind === Kind.Notification) {
+          const notif = JSON.parse(content.content) as PrimalNotification;
 
-      setTimeout(() => {
+          setSortedNotifications(notif.type, (notifs) => {
+            return notifs ? [ ...notifs, notif] : [notif];
+          });
 
-        const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+          return;
+        }
 
-        getNotifications(account?.publicKey, subid, since);
-      }, 2000);
-    }
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          setUsers((usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+          return;
+        }
+
+        if (content.kind === Kind.UserStats) {
+          const stat = content as NostrUserStatsContent;
+          const statContent = JSON.parse(content.content);
+
+          setUserStats((stats) => ({ ...stats, [stat.pubkey]: { ...statContent } }));
+          return;
+        }
+
+        if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setRelatedNotes('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if (content.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          setRelatedNotes('page', 'postStats',
+            (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+          );
+          return;
+        }
+
+      }
+
+      if (type === 'EOSE') {
+        setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
+        setAllSet(true)
+        unsub();
+        return;
+      }
+
+    });
+
+    const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+
+    getNotifications(pk as string, subid, since);
   });
 
   onCleanup(() => {
@@ -309,8 +331,12 @@ const Notifications: Component = () => {
 
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
 
+    const pk = publicKey();
 
-    getOldNotifications(account?.publicKey, subid, until);
+    if (pk) {
+      getOldNotifications(pk as string, subid, until);
+    }
+
   }
 
   // Fetch old notifications

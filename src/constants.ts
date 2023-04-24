@@ -46,7 +46,7 @@ export const themes = [
   },
 ];
 
-export const minKnownProfiles = {
+export const minKnownProfiles: {"names": Record<string,string>} = {
   "names": {
     "miljan": "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a",
     "marko": "123afae7d187ba36d6ddcd97dbf4acc59aeffe243f782592ff8f25ed579df306",

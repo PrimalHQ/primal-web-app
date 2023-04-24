@@ -15,7 +15,7 @@ export const getNotifications = (
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_notifications", { pubkey, /*limit,*/ since }]},
+    {cache: ["get_notifications", { pubkey, limit, since }]},
   ]));
 };
 
