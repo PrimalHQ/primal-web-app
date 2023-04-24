@@ -346,10 +346,8 @@ const Notifications: Component = () => {
 
   // Fetch old notifications
   createEffect(() => {
-    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen) {
-      setTimeout(() => {
-        fetchOldNotifications(notifSince());
-      }, 2000);
+    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince() !== undefined) {
+      fetchOldNotifications(notifSince() || 0);
     }
   });
 
