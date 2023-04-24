@@ -29,32 +29,32 @@ export const date = (postTimestamp: number) => {
 
   if ( diff > year) {
     const years = Math.floor(diff / year);
-    return { date, label: rtf.format(years, 'years') };
+    return { date, label: rtf.format(-years, 'years') };
   }
 
   if (diff > month) {
     const months = Math.floor(diff / month);
-    return { date, label: rtf.format(months, 'months') };
+    return { date, label: rtf.format(-months, 'months') };
   }
 
   if (diff > week) {
     const weeks = Math.floor(diff / week);
-    return { date, label: rtf.format(weeks, 'weeks') };
+    return { date, label: rtf.format(-weeks, 'weeks') };
   }
 
   if (diff > day) {
     const days = Math.floor(diff / day);
-    return { date, label: rtf.format(days, 'days') };
+    return { date, label: rtf.format(-days, 'days') };
   }
 
   if (diff > hour) {
     const hours = Math.floor(diff / hour);
-    return { date, label: rtf.format(hours, 'hours') };
+    return { date, label: rtf.format(-hours, 'hours') };
   }
 
   if (diff > minute) {
     const minutes = Math.floor(diff / minute);
-    return { date, label: rtf.format(minutes, 'minutes') };
+    return { date, label: rtf.format(-minutes, 'minutes') };
   }
 
   return { date, label: `${diff}s` };
