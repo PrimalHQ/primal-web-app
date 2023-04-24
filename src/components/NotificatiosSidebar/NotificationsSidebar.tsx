@@ -124,8 +124,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${follows()[0]}`}>{truncateNumber(follows()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.gainedFollowers',
-                  defaultMessage: 'new followers',
+                  defaultMessage: `new {number, plural,
+                    =0 {}
+                    one {follower}
+                    other {followers}}`,
                   description: 'Sidebar new follower stats description on the notification page',
+                }, {
+                  number: follows()[0],
                 })}
                 </Show>
               </div>
@@ -134,8 +139,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${follows()[1]}`}>{truncateNumber(follows()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.lostFollowers',
-                  defaultMessage: 'lost follwers',
+                  defaultMessage: `lost {number, plural,
+                    =0 {}
+                    one {follower}
+                    other {followers}}`,
                   description: 'Sidebar lost follwers stats description on the notification page',
+                }, {
+                  number: follows()[1],
                 })}
                 </Show>
               </div>
@@ -163,8 +173,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${mentions()[0]}`}>{truncateNumber(mentions()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.mentionsYou',
-                  defaultMessage: 'mentions of you',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {mention}
+                    other {mentions}} of you`,
                   description: 'Sidebar mentions you stats description on the notification page',
+                }, {
+                  number: mentions()[0],
                 })}
                 </Show>
               </div>
@@ -173,8 +188,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${mentions()[1]}`}>{truncateNumber(mentions()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.mentionsYourPost',
-                  defaultMessage: 'mentions of your posts',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {mention of your post}
+                    other {mentions of your posts}}`,
                   description: 'Sidebar mentions your post stats description on the notification page',
+                }, {
+                  number: mentions()[1],
                 })}
                 </Show>
               </div>
@@ -202,8 +222,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${zaps()[0]}`}>{truncateNumber(zaps()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.zapNumber',
-                  defaultMessage: 'zaps',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {zap}
+                    other {zaps}}`,
                   description: 'Sidebar zaps stats description on the notification page',
+                }, {
+                  number: zaps()[0],
                 })}
                 </Show>
               </div>
@@ -212,8 +237,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${zaps()[1]}`}>{truncateNumber(zaps()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.stasNumber',
-                  defaultMessage: 'sats',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {sat}
+                    other {sats}}`,
                   description: 'Sidebar sats stats description on the notification page',
+                }, {
+                  number: zaps()[1],
                 })}
                 </Show>
               </div>
@@ -241,8 +271,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                   <div class={styles.itemAmount} title={`${activity()[0]}`}>{truncateNumber(activity()[0])}</div>
                   {intl.formatMessage({
                     id: 'notifications.sidebar.replies',
-                    defaultMessage: 'replies',
+                    defaultMessage: `{number, plural,
+                      =0 {}
+                      one {reply}
+                      other {replies}}`,
                     description: 'Sidebar replies stats caption on the notification page',
+                  }, {
+                    number: activity()[0],
                   })}
                 </Show>
               </div>
@@ -251,8 +286,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${activity()[1]}`}>{truncateNumber(activity()[1])}</div>
                   {intl.formatMessage({
                     id: 'notifications.sidebar.reposts',
-                    defaultMessage: 'reposts',
+                    defaultMessage: `{number, plural,
+                      =0 {}
+                      one {repost}
+                      other {reposts}}`,
                     description: 'Sidebar reposts stats caption on the notification page',
+                  }, {
+                    number: activity()[1],
                   })}
                 </Show>
               </div>
@@ -261,8 +301,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 <div class={styles.itemAmount} title={`${activity()[2]}`}>{truncateNumber(activity()[2])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.likes',
-                  defaultMessage: 'likes',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {like}
+                    other {likes}}`,
                   description: 'Sidebar likes stats caption on the notification page',
+                }, {
+                  number: activity()[2],
                 })}
                 </Show>
               </div>
