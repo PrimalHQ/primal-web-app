@@ -154,55 +154,6 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
         </div>
       </Show>
 
-      <Show when={mentions()[0] + mentions()[1] > 0}>
-        <div class={styles.category}>
-          <div class={styles.categoryIcon}>
-            <div class={styles.mentionIcon}></div>
-          </div>
-          <div class={styles.content}>
-            <div class={styles.sidebarTitle}>
-              {intl.formatMessage({
-                id: 'notifications.sidebar.mentions',
-                defaultMessage: 'Mentions',
-                description: 'Sidebar mentions stats caption on the notification page',
-              })}
-            </div>
-            <div class={styles.sidebarItems}>
-              <div class={styles.sidebarItem}>
-                <Show when={mentions()[0]> 0}>
-                <div class={styles.itemAmount} title={`${mentions()[0]}`}>{truncateNumber(mentions()[0])}</div>
-                {intl.formatMessage({
-                  id: 'notifications.sidebar.mentionsYou',
-                  defaultMessage: `{number, plural,
-                    =0 {}
-                    one {mention}
-                    other {mentions}} of you`,
-                  description: 'Sidebar mentions you stats description on the notification page',
-                }, {
-                  number: mentions()[0],
-                })}
-                </Show>
-              </div>
-              <div class={styles.sidebarItem}>
-                <Show when={mentions()[1] > 0}>
-                <div class={styles.itemAmount} title={`${mentions()[1]}`}>{truncateNumber(mentions()[1])}</div>
-                {intl.formatMessage({
-                  id: 'notifications.sidebar.mentionsYourPost',
-                  defaultMessage: `{number, plural,
-                    =0 {}
-                    one {mention of your post}
-                    other {mentions of your posts}}`,
-                  description: 'Sidebar mentions your post stats description on the notification page',
-                }, {
-                  number: mentions()[1],
-                })}
-                </Show>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Show>
-
       <Show when={zaps()[0] > 0}>
         <div class={styles.category}>
           <div class={styles.categoryIcon}>
@@ -308,6 +259,55 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                   description: 'Sidebar likes stats caption on the notification page',
                 }, {
                   number: activity()[2],
+                })}
+                </Show>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Show>
+
+      <Show when={mentions()[0] + mentions()[1] > 0}>
+        <div class={styles.category}>
+          <div class={styles.categoryIcon}>
+            <div class={styles.mentionIcon}></div>
+          </div>
+          <div class={styles.content}>
+            <div class={styles.sidebarTitle}>
+              {intl.formatMessage({
+                id: 'notifications.sidebar.mentions',
+                defaultMessage: 'Mentions',
+                description: 'Sidebar mentions stats caption on the notification page',
+              })}
+            </div>
+            <div class={styles.sidebarItems}>
+              <div class={styles.sidebarItem}>
+                <Show when={mentions()[0]> 0}>
+                <div class={styles.itemAmount} title={`${mentions()[0]}`}>{truncateNumber(mentions()[0])}</div>
+                {intl.formatMessage({
+                  id: 'notifications.sidebar.mentionsYou',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {mention}
+                    other {mentions}} of you`,
+                  description: 'Sidebar mentions you stats description on the notification page',
+                }, {
+                  number: mentions()[0],
+                })}
+                </Show>
+              </div>
+              <div class={styles.sidebarItem}>
+                <Show when={mentions()[1] > 0}>
+                <div class={styles.itemAmount} title={`${mentions()[1]}`}>{truncateNumber(mentions()[1])}</div>
+                {intl.formatMessage({
+                  id: 'notifications.sidebar.mentionsYourPost',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {mention of your post}
+                    other {mentions of your posts}}`,
+                  description: 'Sidebar mentions your post stats description on the notification page',
+                }, {
+                  number: mentions()[1],
                 })}
                 </Show>
               </div>
