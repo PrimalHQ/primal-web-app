@@ -32,6 +32,7 @@ import mentionedPostReplied from '../../assets/icons/notifications/mentioned_pos
 import Note from '../Note/Note';
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import { hexToNpub } from '../../lib/keys';
+import { truncateNumber } from '../../lib/notifications';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -140,27 +141,6 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
     ].includes(type())
   };
 
-  const displaySats = (amount: number) => {
-    const t = 1000;
-    if (amount < t) {
-      return `${amount}`;
-    }
-
-    if (amount < (t^2)) {
-      return `${Math.floor(amount / t)}K`;
-    }
-
-    if (amount < (t^3)) {
-      return `${Math.floor(amount / (t^2))}M`
-    }
-
-    if (amount < (t^4)) {
-      return `${Math.floor(amount / (t^4))}B`
-    }
-
-    return `1T+`;
-  };
-
 
   return (
     <div class={styles.notifItem}>
@@ -168,7 +148,7 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
         <img src={typeIcon()} alt="notification icon" />
         <Show when={isZapType()}>
           <div class={styles.iconInfo} title={`${props.notification.satszapped} sats`}>
-            {displaySats(props.notification.satszapped || 0)}
+            {truncateNumber(props.notification.satszapped || 0)}
           </div>
         </Show>
       </div>

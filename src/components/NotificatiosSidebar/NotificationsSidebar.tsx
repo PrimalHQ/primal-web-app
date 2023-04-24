@@ -1,6 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, Show } from 'solid-js';
 import { NotificationType } from '../../constants';
+import { truncateNumber } from '../../lib/notifications';
 import { SortedNotifications } from '../../types/primal';
 
 import styles from './NotificationsSidebar.module.scss';
@@ -120,7 +121,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
             <div class={styles.sidebarItems}>
               <div class={styles.sidebarItem}>
                 <Show when={follows()[0]> 0}>
-                <div class={styles.itemAmount}>{follows()[0]}</div>
+                <div class={styles.itemAmount} title={`${follows()[0]}`}>{truncateNumber(follows()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.gainedFollowers',
                   defaultMessage: 'new followers',
@@ -130,7 +131,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
               </div>
               <div class={styles.sidebarItem}>
                 <Show when={follows()[1] > 0}>
-                <div class={styles.itemAmount}>{follows()[1]}</div>
+                <div class={styles.itemAmount} title={`${follows()[1]}`}>{truncateNumber(follows()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.lostFollowers',
                   defaultMessage: 'lost follwers',
@@ -159,7 +160,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
             <div class={styles.sidebarItems}>
               <div class={styles.sidebarItem}>
                 <Show when={mentions()[0]> 0}>
-                <div class={styles.itemAmount}>{mentions()[0]}</div>
+                <div class={styles.itemAmount} title={`${mentions()[0]}`}>{truncateNumber(mentions()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.mentionsYou',
                   defaultMessage: 'mentions of you',
@@ -169,7 +170,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
               </div>
               <div class={styles.sidebarItem}>
                 <Show when={mentions()[1] > 0}>
-                <div class={styles.itemAmount}>{mentions()[1]}</div>
+                <div class={styles.itemAmount} title={`${mentions()[1]}`}>{truncateNumber(mentions()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.mentionsYourPost',
                   defaultMessage: 'mentions of your posts',
@@ -198,7 +199,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
             <div class={styles.sidebarItems}>
               <div class={styles.sidebarItem}>
                 <Show when={zaps()[0] > 0}>
-                <div class={styles.itemAmount}>{zaps()[0]}</div>
+                <div class={styles.itemAmount} title={`${zaps()[0]}`}>{truncateNumber(zaps()[0])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.zapNumber',
                   defaultMessage: 'zaps',
@@ -208,10 +209,10 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
               </div>
               <div class={styles.sidebarItem}>
                 <Show when={zaps()[1] > 0}>
-                <div class={styles.itemAmount}>{zaps()[1]}</div>
+                <div class={styles.itemAmount} title={`${zaps()[1]}`}>{truncateNumber(zaps()[1])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.stasNumber',
-                  defaultMessage: 'stas',
+                  defaultMessage: 'sats',
                   description: 'Sidebar sats stats description on the notification page',
                 })}
                 </Show>
@@ -237,7 +238,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
             <div class={styles.sidebarItems}>
               <div class={styles.sidebarItem}>
                 <Show when={activity()[0] > 0}>
-                  <div class={styles.itemAmount}>{activity()[0]}</div>
+                  <div class={styles.itemAmount} title={`${activity()[0]}`}>{truncateNumber(activity()[0])}</div>
                   {intl.formatMessage({
                     id: 'notifications.sidebar.replies',
                     defaultMessage: 'replies',
@@ -247,7 +248,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
               </div>
               <div class={styles.sidebarItem}>
                 <Show when={activity()[1] > 0}>
-                <div class={styles.itemAmount}>{activity()[1]}</div>
+                <div class={styles.itemAmount} title={`${activity()[1]}`}>{truncateNumber(activity()[1])}</div>
                   {intl.formatMessage({
                     id: 'notifications.sidebar.reposts',
                     defaultMessage: 'reposts',
@@ -257,7 +258,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
               </div>
               <div class={styles.sidebarItem}>
                 <Show when={activity()[2] > 0}>
-                <div class={styles.itemAmount}>{activity()[2]}</div>
+                <div class={styles.itemAmount} title={`${activity()[2]}`}>{truncateNumber(activity()[2])}</div>
                 {intl.formatMessage({
                   id: 'notifications.sidebar.likes',
                   defaultMessage: 'likes',

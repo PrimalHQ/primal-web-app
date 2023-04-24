@@ -86,3 +86,26 @@ export const subscribeToNotificationStats = (pubkey: string, subid: string) => {
     {cache: ["notification_counts", { pubkey, subid, }]},
   ]));
 }
+
+export const truncateNumber = (amount: number) => {
+  const t = 1000;
+
+
+  if (amount < t) {
+    return `${amount}`;
+  }
+
+  if (amount < Math.pow(t, 2)) {
+    return `${Math.floor(amount / t)}K`;
+  }
+
+  if (amount < Math.pow(t, 3)) {
+    return `${Math.floor(amount / (t^2))}M`
+  }
+
+  if (amount < Math.pow(t, 4)) {
+    return `${Math.floor(amount / (t^4))}B`
+  }
+
+  return `1T+`;
+};
