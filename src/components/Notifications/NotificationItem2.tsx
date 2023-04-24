@@ -163,7 +163,7 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
         </div>
         <div class={styles.description}>
           <div class={styles.firstUser}>
-            {userName(user())}
+          <span class={styles.firstUserName}>{userName(user())}</span>
             <Show when={trimVerification(user()?.nip05)}>
               <span class={styles.verifiedIcon} />
             </Show>

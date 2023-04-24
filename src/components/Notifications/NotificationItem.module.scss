@@ -74,6 +74,13 @@
   }
 }
 
+.firstUserName {
+  max-width: 200px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .verifiedIcon {
   width: 14px;
   height: 14px;
