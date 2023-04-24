@@ -1,13 +1,11 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
-import { decode, noteEncode } from 'nostr-tools/nip19';
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { decode } from 'nostr-tools/nip19';
+import { Component, createEffect, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { style } from 'solid-js/web';
 import { APP_ID } from '../App';
 import Branding from '../components/Branding/Branding';
 import Loader from '../components/Loader/Loader';
-import MissingPage from '../components/MissingPage/MissingPage';
 import NotificationItem from '../components/Notifications/NotificationItem';
 import NotificationItem2 from '../components/Notifications/NotificationItem2';
 import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
@@ -16,13 +14,10 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
-import { getEvents } from '../lib/feed';
-import { saveFollowing } from '../lib/localStore';
-import { sendContacts } from '../lib/notes';
-import { getLastSeen, getNotifications, getOldNotifications, setLastSeen } from '../lib/notifications';
+import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
-import { convertToUser, emptyUser, truncateNpub } from '../stores/profile';
+import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 
 import styles from './Notifications.module.scss';
@@ -35,8 +30,6 @@ const Notifications: Component = () => {
   const [queryParams, setQueryParams] = useSearchParams();
 
   const [notifSince, setNotifSince] = createSignal<number>();
-
-  const [notifications, setNotifications] = createStore<PrimalNotification[]>([]);
 
   const [sortedNotifications, setSortedNotifications] = createStore<SortedNotifications>({});
 
@@ -147,10 +140,17 @@ const Notifications: Component = () => {
 
       setTimeout(() => {
         setLastSeen(subid, Math.floor((new Date()).getTime() / 1000));
-      }, 10);
+      }, 1000);
 
     }
   });
+
+  let start = 0;
+  let first = false;
+  let end = 0;
+
+
+  let newNotifs: PrimalNotification[] = [];
 
   // Fetch new notifications
   createEffect(() => {
@@ -169,11 +169,19 @@ const Notifications: Component = () => {
         }
 
         if (content.kind === Kind.Notification) {
+          if (!first) {
+            let f = (new Date()).getTime();
+            console.log('FIRST: ', f - start);
+            first = true;
+          }
+
           const notif = JSON.parse(content.content) as PrimalNotification;
 
-          setSortedNotifications(notif.type, (notifs) => {
-            return notifs ? [ ...notifs, notif] : [notif];
-          });
+          newNotifs.push(notif);
+
+          // setSortedNotifications(notif.type, (notifs) => {
+          //   return notifs ? [ ...notifs, notif] : [notif];
+          // });
 
           return;
         }
@@ -216,8 +224,22 @@ const Notifications: Component = () => {
       }
 
       if (type === 'EOSE') {
+        let sorted: SortedNotifications = {};
+        newNotifs.forEach((n) => {
+          if (sorted[n.type]) {
+            sorted[n.type].push(n);
+          }
+          else {
+            sorted[n.type] = [n];
+          }
+        });
+
+        setSortedNotifications(() => sorted);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
-        setAllSet(true)
+        setAllSet(true);
+        end = (new Date()).getTime();
+
+        console.log(`DUR: ${end - start} ms`);
         unsub();
         return;
       }
@@ -226,6 +248,7 @@ const Notifications: Component = () => {
 
     const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
+    start = (new Date()).getTime();
     getNotifications(pk as string, subid, since);
   });
 
@@ -234,7 +257,7 @@ const Notifications: Component = () => {
     setOldNotifications('notifications', []);
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
     setNotifSince(0);
-    setNotifications([]);
+    setSortedNotifications({})
   });
 
   const sortNotifByRecency = (notifs: PrimalNotification[]) => {
@@ -350,27 +373,6 @@ const Notifications: Component = () => {
       fetchOldNotifications(notifSince() || 0);
     }
   });
-
-  const displaySats = (amount: number) => {
-    const t = 1000;
-    if (amount < t) {
-      return `${amount}`;
-    }
-
-    if (amount < (t^2)) {
-      return `${Math.floor(amount / t)}K`;
-    }
-
-    if (amount < (t^3)) {
-      return `${Math.floor(amount / (t^2))}M`
-    }
-
-    if (amount < (t^4)) {
-      return `${Math.floor(amount / (t^4))}B`
-    }
-
-    return `1T+`;
-  };
 
   const getUsers = (
     notifs: PrimalNotification[],
@@ -519,7 +521,7 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
-            iconInfo={`${displaySats(sats)}`}
+            iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
           />
         )}
@@ -699,7 +701,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
-            iconInfo={`${displaySats(sats)}`}
+            iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
           />
         )}
@@ -877,7 +879,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
-            iconInfo={`${displaySats(sats)}`}
+            iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
           />
         )}
@@ -1008,34 +1010,39 @@ const Notifications: Component = () => {
       </div>
 
 
-      <StickySidebar>
-        <NotificationsSidebar notifications={sortedNotifications} />
-      </StickySidebar>
+      <Show
+        when={publicKey() && allSet()}
+        fallback={
+          <div class={styles.loader}>
+            <Loader />
+          </div>
+        }
+      >
+        <StickySidebar>
+          <NotificationsSidebar notifications={sortedNotifications} />
+        </StickySidebar>
 
-      <Show when={account?.activeUser}>
-        <Show when={allSet()}>
-          {newUserFollowedYou()}
-          {userUnfollowedYou()}
+        {newUserFollowedYou()}
+        {userUnfollowedYou()}
 
-          {yourPostWasLiked()}
+        {yourPostWasLiked()}
 
-          {youWereMentioned()}
+        {youWereMentioned()}
 
-          {yourPostWasReposted()}
-          {yourPostWasRepliedTo()}
-          {yourPostWasZapped()}
-          {yourPostWasMentioned()}
+        {yourPostWasReposted()}
+        {yourPostWasRepliedTo()}
+        {yourPostWasZapped()}
+        {yourPostWasMentioned()}
 
-          {postYouWereMentionedInWasLiked()}
-          {postYouWereMentionedInWasZapped()}
-          {postYouWereMentionedInWasReposted()}
-          {postYouWereMentionedInWasRepliedTo()}
+        {postYouWereMentionedInWasLiked()}
+        {postYouWereMentionedInWasZapped()}
+        {postYouWereMentionedInWasReposted()}
+        {postYouWereMentionedInWasRepliedTo()}
 
-          {postYourPostWasMentionedInWasLiked()}
-          {postYourPostWasMentionedInWasZapped()}
-          {postYourPostWasMentionedInWasReposted()}
-          {postYourPostWasMentionedInWasRepliedTo()}
-        </Show>
+        {postYourPostWasMentionedInWasLiked()}
+        {postYourPostWasMentionedInWasZapped()}
+        {postYourPostWasMentionedInWasReposted()}
+        {postYourPostWasMentionedInWasRepliedTo()}
 
         <Show when={fetchingOldNotifs()}>
           <div class={styles.loader}>
