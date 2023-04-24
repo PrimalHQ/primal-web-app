@@ -316,7 +316,7 @@ const Notifications: Component = () => {
         setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted])
 
         // Convert related notes
-        setOldNotifications('notes', () => [...convertToNotes(oldNotifications.page)])
+        setOldNotifications('notes', (notes) => [...notes, ...convertToNotes(oldNotifications.page)])
 
         const pageUsers = oldNotifications.page.users;
 
