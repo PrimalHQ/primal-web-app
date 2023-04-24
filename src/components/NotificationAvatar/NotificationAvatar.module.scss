@@ -3,7 +3,7 @@
 
   background-color: var(--subtile-devider);
   border-radius: 50%;
-  border: 1px solid var(--text-primary);
+  border: 2px solid var(--text-primary);
   color: var(--text-primary);
   font-weight: 500;
   font-size: 12px;
@@ -44,8 +44,8 @@
 
 .xsAvatar {
   @include avatar;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
 .vsAvatar {
