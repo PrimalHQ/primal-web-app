@@ -30,18 +30,15 @@
       display: flex;
       padding-bottom: 8px;
       .avatar {
-        >div {
-          border: solid 1px var(--text-primary);
-          border-radius: 50%;
-          transition: margin-right 0.2s;
-          margin-right: -8px;
-        }
+        border: solid 2px var(--text-primary);
+        border-radius: 50%;
+        width: 36px;
+        transition: margin-right 0.2s;
+        margin-right: -16px;
 
         &:hover {
-          >div {
-            transition: margin-right 0.2s;
-            margin-right: 5px;
-          }
+          transition: margin-right 0.2s;
+          margin-right: 5px;
         }
       }
     }

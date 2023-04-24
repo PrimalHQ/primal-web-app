@@ -1,11 +1,14 @@
 @mixin avatar {
   position: relative;
+  background-color: var(--background-site);
+  border-radius: 50%;
 
   img {
     border-radius: 50%;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    vertical-align: top;
   }
 }
 

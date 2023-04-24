@@ -77,6 +77,13 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
     return [replyNotifs.length, repostNotifs.length, likeNotifs.length];
   };
 
+  const nothingNew = () => {
+    return mentions()[0] + mentions()[1] +
+      follows()[0] + follows()[1] +
+      zaps()[0] +
+      activity()[0] + activity()[1] + activity()[2] === 0;
+  }
+
   return (
     <>
       <div class={styles.sidebarHeading}>
@@ -86,6 +93,16 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
           description: 'Sidebar caption on the notification page',
         })}
       </div>
+
+      <Show when={nothingNew()}>
+        <div class={styles.sidebarTitle}>
+          {intl.formatMessage({
+            id: 'notifications.sidebar.nothing',
+            defaultMessage: 'No new notifications',
+            description: 'Sidebar caption indicating no new notifications',
+          })}
+        </div>
+      </Show>
 
       <Show when={follows()[0] + follows()[1] > 0}>
         <div class={styles.category}>
@@ -213,7 +230,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
             <div class={styles.sidebarTitle}>
               {intl.formatMessage({
                 id: 'notifications.sidebar.activities',
-                defaultMessage: 'Activities',
+                defaultMessage: 'Reactions',
                 description: 'Sidebar activities stats caption on the notification page',
               })}
             </div>
