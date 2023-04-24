@@ -6,6 +6,7 @@ import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
 import { APP_ID } from '../App';
 import Branding from '../components/Branding/Branding';
+import Loader from '../components/Loader/Loader';
 import MissingPage from '../components/MissingPage/MissingPage';
 import NotificationItem from '../components/Notifications/NotificationItem';
 import NotificationItem2 from '../components/Notifications/NotificationItem2';
@@ -44,6 +45,8 @@ const Notifications: Component = () => {
   const [userStats, setUserStats] = createStore<Record<string, { followers_count: number }>>({});
 
   const [allSet, setAllSet] = createSignal(false);
+  const [fetchingOldNotifs, setfetchingOldNotifs] = createSignal(false);
+
 
   type NotificationStore = {
     notes: PrimalNote[],
@@ -323,6 +326,7 @@ const Notifications: Component = () => {
 
         setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
 
+        setfetchingOldNotifs(false);
         unsub();
         return;
       }
@@ -334,6 +338,7 @@ const Notifications: Component = () => {
     const pk = publicKey();
 
     if (pk) {
+      setfetchingOldNotifs(true);
       getOldNotifications(pk as string, subid, until);
     }
 
@@ -1032,6 +1037,12 @@ const Notifications: Component = () => {
           {postYourPostWasMentionedInWasZapped()}
           {postYourPostWasMentionedInWasReposted()}
           {postYourPostWasMentionedInWasRepliedTo()}
+        </Show>
+
+        <Show when={fetchingOldNotifs()}>
+          <div class={styles.loader}>
+            <Loader />
+          </div>
         </Show>
 
         <Show when={oldNotifications.notifications.length > 0}>
