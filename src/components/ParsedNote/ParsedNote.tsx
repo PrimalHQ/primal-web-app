@@ -28,7 +28,7 @@ import {
 import styles from './ParsedNote.module.scss';
 
 export const parseNoteLinks = (text: string) => {
-  const regex = /\bnostr:((note)1\w+)\b|#\[(\d+)\]/;
+  const regex = /\bnostr:((note)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
     const [_, id] = url.split(':');
@@ -47,7 +47,7 @@ export const parseNoteLinks = (text: string) => {
 
 };
 export const parseNpubLinks = (text: string) => {
-  const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/;
+  const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
     const [_, id] = url.split(':');
