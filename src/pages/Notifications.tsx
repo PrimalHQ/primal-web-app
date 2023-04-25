@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { decode } from 'nostr-tools/nip19';
-import { Component, createEffect, createSignal, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Branding from '../components/Branding/Branding';
@@ -72,6 +72,10 @@ const Notifications: Component = () => {
     reposts: {},
     notifications: [],
   })
+
+  const hasNewNotifications = createMemo(() => {
+    return Object.keys(sortedNotifications).length > 0;
+  });
 
   const publicKey = () => {
     const user = queryParams.user;
@@ -1036,6 +1040,10 @@ const Notifications: Component = () => {
         {postYourPostWasMentionedInWasReposted()}
         {postYourPostWasMentionedInWasRepliedTo()}
 
+        <Show when={hasNewNotifications()}>
+          <div class={styles.separator}></div>
+        </Show>
+
         <Show when={fetchingOldNotifs()}>
           <div class={styles.loader}>
             <Loader />
@@ -1043,8 +1051,6 @@ const Notifications: Component = () => {
         </Show>
 
         <Show when={oldNotifications.notifications.length > 0}>
-          <div class={styles.separator}></div>
-
           <div class={styles.oldNotifications}>
             <For each={oldNotifications.notifications}>
               {notif => (
