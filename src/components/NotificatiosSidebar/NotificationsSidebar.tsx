@@ -96,7 +96,7 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
       </div>
 
       <Show when={nothingNew()}>
-        <div class={styles.sidebarTitle}>
+        <div class={styles.sidebarEmpty}>
           {intl.formatMessage({
             id: 'notifications.sidebar.nothing',
             defaultMessage: 'No new notifications',
