@@ -150,7 +150,7 @@ const Notifications: Component = () => {
   let end = 0;
 
 
-  let newNotifs: PrimalNotification[] = [];
+  let newNotifs: Record<string, PrimalNotification[]> = {};
 
   // Fetch new notifications
   createEffect(() => {
@@ -177,11 +177,12 @@ const Notifications: Component = () => {
 
           const notif = JSON.parse(content.content) as PrimalNotification;
 
-          newNotifs.push(notif);
-
-          // setSortedNotifications(notif.type, (notifs) => {
-          //   return notifs ? [ ...notifs, notif] : [notif];
-          // });
+          if (newNotifs[notif.type]) {
+            newNotifs[notif.type].push(notif);
+          }
+          else {
+            newNotifs[notif.type] = [notif];
+          }
 
           return;
         }
@@ -224,17 +225,7 @@ const Notifications: Component = () => {
       }
 
       if (type === 'EOSE') {
-        let sorted: SortedNotifications = {};
-        newNotifs.forEach((n) => {
-          if (sorted[n.type]) {
-            sorted[n.type].push(n);
-          }
-          else {
-            sorted[n.type] = [n];
-          }
-        });
-
-        setSortedNotifications(() => sorted);
+        setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
         end = (new Date()).getTime();
@@ -249,6 +240,7 @@ const Notifications: Component = () => {
     const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
     start = (new Date()).getTime();
+    newNotifs = {};
     getNotifications(pk as string, subid, since);
   });
 
