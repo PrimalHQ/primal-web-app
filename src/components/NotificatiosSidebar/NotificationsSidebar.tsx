@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, Show } from 'solid-js';
+import { Component, For, Show } from 'solid-js';
 import { NotificationType } from '../../constants';
 import { truncateNumber } from '../../lib/notifications';
 import { SortedNotifications } from '../../types/primal';
@@ -74,9 +74,100 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
     const repostNotifs = props.notifications[NotificationType.YOUR_POST_WAS_REPOSTED] || [];
     const likeNotifs = props.notifications[NotificationType.YOUR_POST_WAS_LIKED] || [];
 
-
     return [replyNotifs.length, repostNotifs.length, likeNotifs.length];
   };
+
+  const otherNotifications = () => {
+    const zapedMentionPostNotifs = props.notifications[NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED] || [];
+    const replyMentionPostNotifs = props.notifications[NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED] || [];
+    const repostMentionPostNotifs = props.notifications[NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED] || [];
+    const likeMentionPostNotifs = props.notifications[NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO] || [];
+
+    const zapedPostMentionPostNotifs = props.notifications[NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED] || [];
+    const replyPostMentionPostNotifs = props.notifications[NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED] || [];
+    const repostPostMentionPostNotifs = props.notifications[NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED] || [];
+    const likePostMentionPostNotifs = props.notifications[NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO] || [];
+
+    return [
+      zapedMentionPostNotifs.length,
+      replyMentionPostNotifs.length,
+      repostMentionPostNotifs.length,
+      likeMentionPostNotifs.length,
+
+      zapedPostMentionPostNotifs.length,
+      replyPostMentionPostNotifs.length,
+      repostPostMentionPostNotifs.length,
+      likePostMentionPostNotifs.length,
+    ];
+  };
+
+  const otherNotifLabels = [
+    {
+      id: 'notifications.sidebar.mentionsPostZap',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {mention was zaped}
+        other {mentions were zaped}}`,
+      description: 'Sidebar "posts you were mentioned in were zaped" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.mentionsPostLike',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {mention was liked}
+        other {mentions were liked}}`,
+      description: 'Sidebar "posts you were mentioned in were liked" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.mentionsPostReposted',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {mention was reposted}
+        other {mentions were reposted}}`,
+      description: 'Sidebar "posts you were mentioned in were reposted" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.mentionsPostReplied',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {mention was replied to}
+        other {mentions were replied to}}`,
+      description: 'Sidebar "posts you were mentioned in were replied to" stats description on the notification page',
+    },
+
+    {
+      id: 'notifications.sidebar.postMentionsPostZaped',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {post mention was zaped}
+        other {post mentions were zaped}}`,
+      description: 'Sidebar "posts your posts were mentioned in were zaped" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.postMentionsPostLike',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {post mention was liked}
+        other {post mentions were liked}}`,
+      description: 'Sidebar "posts your posts were mentioned in were liked" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.postMentionsPostReposted',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {post mention was reposted}
+        other {post mentions were reposted}}`,
+      description: 'Sidebar "posts your posts were mentioned in were reposted" stats description on the notification page',
+    },
+    {
+      id: 'notifications.sidebar.postMentionsPostReposted',
+      defaultMessage: `{number, plural,
+        =0 {}
+        one {post mention was replied to}
+        other {post mentions were replied to}}`,
+      description: 'Sidebar "posts your posts were mentioned in were replied to" stats description on the notification page',
+    },
+  ];
 
   const nothingNew = () => {
     return mentions()[0] + mentions()[1] +
@@ -311,6 +402,51 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
                 })}
                 </Show>
               </div>
+            </div>
+          </div>
+        </div>
+      </Show>
+
+      <Show when={
+        otherNotifications()[0] +
+        otherNotifications()[1] +
+        otherNotifications()[2] +
+        otherNotifications()[3] +
+        otherNotifications()[4] +
+        otherNotifications()[5] +
+        otherNotifications()[6] +
+        otherNotifications()[7] > 0}
+      >
+        <div class={styles.category}>
+          <div class={styles.categoryIcon}>
+            <div class={styles.contextIcon}></div>
+          </div>
+          <div class={styles.content}>
+            <div class={styles.sidebarTitle}>
+              {intl.formatMessage({
+                id: 'notifications.sidebar.other',
+                defaultMessage: 'Other',
+                description: 'Sidebar other stats caption on the notification page',
+              })}
+            </div>
+            <div class={styles.sidebarItems}>
+              <For each={otherNotifications()}>
+                {(stat, index) => (
+                  <Show when={stat > 0}>
+                    <div class={styles.sidebarItem}>
+                      <div class={styles.itemAmount} title={`${stat}`}>
+                        {truncateNumber(stat)}
+                      </div>
+                      {intl.formatMessage(
+                        otherNotifLabels[index()],
+                        {
+                        number: stat,
+                        }
+                      )}
+                    </div>
+                  </Show>
+                )}
+              </For>
             </div>
           </div>
         </div>

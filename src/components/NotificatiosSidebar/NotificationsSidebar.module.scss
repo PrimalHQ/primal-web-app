@@ -82,3 +82,9 @@
   -webkit-mask: url(../../assets/icons/notifications/post_replied.svg) no-repeat 0px / 16px;
   mask: url(../../assets/icons/notifications/post_replied.svg) no-repeat 0px / 16px;
 }
+
+.contextIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}
