@@ -88,12 +88,12 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
     refs.forEach((ref: any) => {
       const tag = note.post.tags[ref];
       if (tag[0] === 'p') {
-        // getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
+        getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
       }
 
       if (!skipNotes && tag[0] === 'e') {
         const mId = noteEncode(tag[1]);
-        // getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
+        getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
       }
     });
   }
