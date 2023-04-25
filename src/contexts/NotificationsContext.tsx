@@ -75,7 +75,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === subId) {
+    if (subId === subid) {
       if (content?.kind === Kind.NotificationStats) {
         const sum = Object.keys(content).reduce((acc, key) => {
           if (key === 'pubkey' || key == 'kind') {
