@@ -138,4 +138,11 @@
 
   color: white;
   text-shadow: 0.5px 0.5px 0px black;
+
+  &.doubleSize {
+    right: -24px;
+  }
+  &.tripleSize {
+    right: -30px;
+  }
 }

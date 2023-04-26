@@ -21,10 +21,22 @@ const NavLink: Component<{ to: string, label: string, icon: string, bubble?: () 
     navigate('/home');
   }
 
+  const bubbleClass = () => {
+    if (!props.bubble || props.bubble() < 10) {
+      return '';
+    }
+
+    if (props.bubble() < 100) {
+      return styles.doubleSize;
+    }
+
+    return styles.tripleSize;
+  }
+
     return (
       <button class={styles.navLink} onClick={onClick}>
         <Show when={props.bubble && props.bubble() > 0}>
-          <div class={styles.bubble}>
+          <div class={`${styles.bubble} ${bubbleClass()}`}>
             <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
           </div>
         </Show>
