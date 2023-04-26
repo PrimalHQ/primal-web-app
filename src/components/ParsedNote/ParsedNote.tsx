@@ -28,7 +28,7 @@ import {
 
 import styles from './ParsedNote.module.scss';
 
-export const parseNoteLinks = (text: string) => {
+export const parseNoteLinks = (text: string, highlightOnly = false) => {
   const regex = /\bnostr:((note)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -40,14 +40,16 @@ export const parseNoteLinks = (text: string) => {
 
     const path = `/thread/${id}`;
 
-    const link = <A href={path}>{url}</A>;
+    const link = highlightOnly ?
+      <span class='linkish' >{url}</span> :
+      <A href={path}>{url}</A>;
 
     // @ts-ignore
     return link.outerHTML || url;
   });
 
 };
-export const parseNpubLinks = (text: string) => {
+export const parseNpubLinks = (text: string, highlightOnly = false) => {
   const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -59,7 +61,9 @@ export const parseNpubLinks = (text: string) => {
 
     const path = `/profile/${id}`;
 
-    const link = <A href={path}>{url}</A>;
+    const link = highlightOnly ?
+      <span class='linkish'>{url}</span> :
+      <A href={path}>{url}</A>;
 
     // @ts-ignore
     return link.outerHTML || url;
@@ -88,6 +92,10 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     let refs = [];
     let match;
 
+    if(props.ignoreMentionedNotes) {
+      console.log('Mentions: ', props.note)
+    }
+
     while((match = regex.exec(text)) !== null) {
       refs.push(match[1]);
     }
@@ -98,8 +106,19 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
         const tag = props.note.post.tags[r];
 
-        if (tag[0] === 'e' && props.note.mentionedNotes && props.note.mentionedNotes[tag[1]]) {
-          const embeded = <div><EmbeddedNote note={props.note.mentionedNotes[tag[1]]} /></div>;
+        if (
+          tag[0] === 'e' &&
+          props.note.mentionedNotes &&
+          props.note.mentionedNotes[tag[1]]
+        ) {
+          const embeded = (
+            <div>
+              <EmbeddedNote
+                note={props.note.mentionedNotes[tag[1]]}
+                mentionedUsers={props.note.mentionedUsers}
+              />
+            </div>
+          );
 
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }

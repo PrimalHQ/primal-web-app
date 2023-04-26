@@ -114,8 +114,6 @@ const getUserReferences = (message: NostrNoteContent) => {
   }, []);
 };
 
-const toNote = () => {};
-
 type ConvertToNotes = (page: FeedPage | undefined) => PrimalNote[];
 
 export const convertToNotes: ConvertToNotes = (page) => {
@@ -142,7 +140,20 @@ export const convertToNotes: ConvertToNotes = (page) => {
     if (mentionIds.length > 0) {
       mentionedNotes = mentionIds.reduce((acc, id) => {
         const m = page.mentions && page.mentions[id];
-        return !m ? acc : {
+
+        if (!m) {
+          return acc;
+        }
+
+        m.tags.forEach(t => {
+          if (t[0] === 'p') {
+            mentionedUsers = {
+              ...mentionedUsers,
+              [t[1]]: convertToUser(page.users[t[1]] || emptyUser(t[1]))};
+          }
+        })
+
+        return {
           ...acc,
           [id]: {
             post: { ...m },

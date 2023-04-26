@@ -287,6 +287,8 @@ export type PrimalNote = {
   post: PrimalNoteData,
   repost?: PrimalRepost,
   msg: NostrNoteContent,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedUsers?: Record<string, PrimalUser>,
 };
 
 export type PrimalFeed = {

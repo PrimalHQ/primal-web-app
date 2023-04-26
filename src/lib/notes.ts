@@ -21,7 +21,7 @@ export const setStoredLikes = (likes: string[]) => {
 
 export const sanitize = DOMPurify.sanitize;
 
-export const urlify = (text: string) => {
+export const urlify = (text: string, highlightOnly = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
   return text.replace(urlRegex, function(url) {
@@ -58,7 +58,9 @@ export const urlify = (text: string) => {
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
-    return `<a link href="${url}" target="_blank" >${url}</a>`;
+    return highlightOnly ?
+      `<span class="linkish">${url}</span>` :
+      `<a link href="${url}" target="_blank" >${url}</a>`;
   })
 }
 
@@ -105,6 +107,8 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
 
 export const parseNote1 = (content: string, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(content)));
+
+export const parseNote2 = (content: string, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(content), true));
 
 export const parseSmallNote = (note: PrimalNote) => nostrify(note.post.content, note, true);
 
