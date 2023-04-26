@@ -86,9 +86,9 @@ const NotificationsSidebar: Component<{
       id: 'notifications.sidebar.mentionsPostZap',
       defaultMessage: `{number, plural,
         =0 {}
-        one {mention was zaped}
-        other {mentions were zaped}}`,
-      description: 'Sidebar "posts you were mentioned in were zaped" stats description on the notification page',
+        one {mention was zapped}
+        other {mentions were zapped}}`,
+      description: 'Sidebar "posts you were mentioned in were zapped" stats description on the notification page',
     },
     {
       id: 'notifications.sidebar.mentionsPostLike',
@@ -119,9 +119,9 @@ const NotificationsSidebar: Component<{
       id: 'notifications.sidebar.postMentionsPostZaped',
       defaultMessage: `{number, plural,
         =0 {}
-        one {post mention was zaped}
-        other {post mentions were zaped}}`,
-      description: 'Sidebar "posts your posts were mentioned in were zaped" stats description on the notification page',
+        one {post mention was zapped}
+        other {post mentions were zapped}}`,
+      description: 'Sidebar "posts your posts were mentioned in were zapped" stats description on the notification page',
     },
     {
       id: 'notifications.sidebar.postMentionsPostLike',
