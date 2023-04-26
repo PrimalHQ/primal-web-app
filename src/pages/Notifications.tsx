@@ -1035,7 +1035,10 @@ const Notifications: Component = () => {
         }
       >
         <StickySidebar>
-          <NotificationsSidebar notifications={sortedNotifications} />
+          <NotificationsSidebar
+            notifications={sortedNotifications}
+            getUsers={getUsers}
+          />
         </StickySidebar>
 
         {newUserFollowedYou()}

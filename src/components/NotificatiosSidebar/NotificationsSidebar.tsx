@@ -2,11 +2,21 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, For, Show } from 'solid-js';
 import { NotificationType } from '../../constants';
 import { truncateNumber } from '../../lib/notifications';
-import { SortedNotifications } from '../../types/primal';
+import { PrimalNotification, PrimalNotifUser, SortedNotifications } from '../../types/primal';
 
 import styles from './NotificationsSidebar.module.scss';
 
-const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (props) => {
+const uniqueifyUsers = (users: PrimalNotifUser[]) => {
+  return users.reduce<PrimalNotifUser[]>((acc, u) => {
+    const found = acc.find(a => a.id === u.id);
+    return found ? acc : [...acc, u];
+  }, []);
+}
+
+const NotificationsSidebar: Component<{
+  notifications: SortedNotifications,
+  getUsers: (notifs: PrimalNotification[], type: NotificationType) => PrimalNotifUser[],
+}> = (props) => {
 
   const intl = useIntl();
 
@@ -14,41 +24,11 @@ const NotificationsSidebar: Component<{ notifications: SortedNotifications}> = (
     const followNotifs = props.notifications[NotificationType.NEW_USER_FOLLOWED_YOU] || [];
     const unffolowNotifs = props.notifications[NotificationType.USER_UNFOLLOWED_YOU] || [];
 
-    const newFollowers = followNotifs.map(n => n.follower || 'NA');
-    const lostFolloowers = unffolowNotifs.map(n => n.follower || 'NA');
+    const followers = props.getUsers(followNotifs, NotificationType.USER_UNFOLLOWED_YOU);
+    const lost = props.getUsers(unffolowNotifs, NotificationType.USER_UNFOLLOWED_YOU);
 
-    const followCounts: Record<string, number> = {};
-    const unfollowCounts: Record<string, number> = {};
+    return [uniqueifyUsers(followers).length, uniqueifyUsers(lost).length];
 
-    newFollowers.forEach(f => {
-      followCounts[f] = followCounts[f] ? followCounts[f] + 1 : 1;
-    })
-
-    lostFolloowers.forEach(f => {
-      unfollowCounts[f] = unfollowCounts[f] ? unfollowCounts[f] + 1 : 1;
-    })
-
-    const followTotal = Object.keys(followCounts).reduce((acc, key) => {
-      if (!unfollowCounts[key]) {
-        return acc + 1;
-      }
-
-      const diff = followCounts[key] - unfollowCounts[key];
-
-      return diff > 0 ? acc + 1 : acc;
-    }, 0);
-
-    const unfollowTotal = Object.keys(unfollowCounts).reduce((acc, key) => {
-      if (!followCounts[key]) {
-        return acc + 1;
-      }
-
-      const diff = unfollowCounts[key] - followCounts[key];
-
-      return diff > 0 ? acc + 1 : acc;
-    }, 0);
-
-    return [followTotal, unfollowTotal];
 
   };
 
