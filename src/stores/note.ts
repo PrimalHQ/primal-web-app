@@ -6,6 +6,7 @@ import { Kind } from "../constants";
 import { getEvents } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent } from "../types/primal";
+import { convertToUser, emptyUser } from "./profile";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {
@@ -81,6 +82,40 @@ const parseKind6 = (message: NostrNoteContent) => {
   }
 };
 
+const getNoteReferences = (message: NostrNoteContent) => {
+  const regex = /\#\[([0-9]*)\]/g;
+  let refs = [];
+  let match;
+
+  while((match = regex.exec(message.content)) !== null) {
+    refs.push(match[1]);
+  }
+
+  return refs.reduce((acc, ref) => {
+    const tag = message.tags[ref] || [];
+
+    return tag[0] === 'e' ? [...acc, tag[1]] : acc;
+  }, []);
+};
+
+const getUserReferences = (message: NostrNoteContent) => {
+  const regex = /\#\[([0-9]*)\]/g;
+  let refs = [];
+  let match;
+
+  while((match = regex.exec(message.content)) !== null) {
+    refs.push(match[1]);
+  }
+
+  return refs.reduce((acc, ref) => {
+    const tag = message.tags[ref] || [];
+
+    return tag[0] === 'p' ? [...acc, tag[1]] : acc;
+  }, []);
+};
+
+const toNote = () => {};
+
 type ConvertToNotes = (page: FeedPage | undefined) => PrimalNote[];
 
 export const convertToNotes: ConvertToNotes = (page) => {
@@ -96,6 +131,36 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const stat = page?.postStats[msg.id];
 
     const userMeta = JSON.parse(user?.content || '{}');
+
+    const mentionIds = getNoteReferences(message);
+    const userMentionIds = getUserReferences(message);
+
+    let mentionedNotes = {};
+    let mentionedUsers = {};
+
+
+    if (mentionIds.length > 0) {
+      mentionedNotes = mentionIds.reduce((acc, id) => {
+        const m = page.mentions && page.mentions[id];
+        return !m ? acc : {
+          ...acc,
+          [id]: {
+            post: { ...m },
+            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+          },
+        };
+      }, {});
+    }
+
+    if (userMentionIds.length > 0) {
+      mentionedUsers = userMentionIds.reduce((acc, id) => {
+        const m = page.users && page.users[id];
+        return {
+          ...acc,
+          [id]: { ...convertToUser(m || emptyUser(id)) },
+        };
+      }, {});
+    }
 
     return {
       user: {
@@ -133,6 +198,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
       },
       repost: message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined,
       msg,
+      mentionedNotes,
+      mentionedUsers,
     };
   });
 }

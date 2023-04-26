@@ -77,7 +77,7 @@ export const initialExploreData = {
   isFetching: false,
   scope: 'global',
   timeframe: 'latest',
-  page: { messages: [], users: {}, postStats: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {} },
   reposts: {},
   lastNote: undefined,
   isNetStatsStreamOpen: false,
@@ -196,6 +196,16 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
       );
       return;
     }

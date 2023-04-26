@@ -163,6 +163,7 @@ export type FeedPage = {
   },
   messages: NostrNoteContent[],
   postStats: NostrPostStats,
+  mentions?: Record<string, NostrNoteContent>,
 };
 
 export type TrendingNotesStore = {
@@ -384,6 +385,7 @@ export type HomeContextStore = {
   page: FeedPage,
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
+  mentionedNotes: Record<string, NostrNoteContent>,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,

@@ -62,7 +62,7 @@ export const initialData = {
   users: [],
   replyNotes: [],
   isFetching: false,
-  page: { messages: [], users: {}, postStats: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {} },
   reposts: {},
   lastNote: undefined,
 };
@@ -138,6 +138,16 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
       );
       return;
     }

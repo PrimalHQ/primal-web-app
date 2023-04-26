@@ -15,7 +15,6 @@ import { convertToNotes } from '../../stores/note';
 import { Kind } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 
-const tokenRegex = /(\#\[[\d]+\])/;
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props) => {
 
@@ -26,170 +25,64 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const authorName = () => {
-    return props.note.user?.displayName ||
-      props.note.user?.name ||
-      truncateNpub(props.note.user.npub);
-  }
+
   const userName = (user: PrimalUser) => {
-    return user.displayName ||
-      user.name ||
-      truncateNpub(user.npub);
-  }
-
-  const [references, setReferences] = createStore<Record<string, UserReference | PrimalNote>>({});
-  const [printableContent, setPrintableContent] = createStore<any[]>([]);
-  const [mentionedNotes, setMentionedNotes] = createStore<Record<string, FeedPage>>({});
-
-  createEffect(() => {
-    const newContent = parseSmallNote(props.note);
-    setPrintableContent(() => newContent.split(tokenRegex));
-  });
-
-  createEffect(() => {
-    socket()?.addEventListener('message', onMessage);
-    socket()?.addEventListener('close', onSocketClose);
-  });
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    webSocket.removeEventListener('message', onMessage);
-    webSocket.removeEventListener('close', onSocketClose);
-  };
-
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    const [type, subId, userContent] = message;
-
-
-    if (type !== 'EOSE' && subId.startsWith('mentioned_user')) {
-      const [_, postId, ref] = subId.split('_|_');
-
-      if (postId !== props.note.post.noteId) {
-        return;
-      }
-
-      const user = JSON.parse(userContent?.content || '{}') as NostrUserContent;
-
-      const u: UserReference = {
-        ...userContent,
-        ...user,
-        npub: hexToNpub(userContent.pubkey),
-       }
-
-      setReferences(refs => ({...refs, [ref]: u}));
-
-      return;
-    }
-
-    if (subId.startsWith('mentioned_post')) {
-      const [_, postId, ref, mentionId] = subId.split('_|_');
-
-      if (postId !== props.note.post.noteId) {
-        return;
-      }
-
-      if (type === 'EOSE') {
-
-        const mentions = mentionedNotes[ref];
-
-        if (mentions) {
-          const newPosts = convertToNotes(mentions);
-
-          const mentionedNote = newPosts.find(note => note.post.noteId === mentionId);
-
-          if (mentionedNote) {
-            setReferences(refs => ({...refs, [ref]: mentionedNote}));
-          }
-        }
-
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (mentionedNotes[ref] === undefined) {
-          setMentionedNotes((notes) => ({ ...notes, [ref]: { messages: [], users: {}, postStats: {}}}));
-        }
-
-        if (userContent.kind === Kind.Metadata) {
-          setMentionedNotes(`${ref}`, 'users', users => ({ ... users, [userContent.pubkey]: userContent}));
-        }
-        if (userContent.kind === Kind.Text) {
-          setMentionedNotes(`${ref}`, 'messages',  (msgs) => [ ...msgs, userContent]);
-        }
-        if (userContent.kind === Kind.NoteStats) {
-          const stat = JSON.parse(userContent.content);
-          setMentionedNotes(`${ref}`, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }));
-        }
-      }
-      return;
-    }
-
-  };
-
-  onCleanup(() => {
-    socket()?.removeEventListener('message', onMessage);
-  });
-
-  const isUserReference = (reference: any): reference is UserReference => {
-    return reference.npub !== undefined;
-  }
-  const isNoteReference = (reference: any): reference is PrimalNote => {
-    return reference.post !== undefined;
-  }
-
-  const referenceName = (reference: UserReference) => {
     return truncateNpub(
-      reference.name ||
-      reference.display_name ||
-      reference.displayName ||
-      reference.npub || '');
-  };
+      user.display_name ||
+      user.displayName ||
+      user.name ||
+      user.npub ||
+      hexToNpub(user.pubkey) || '');
+    };
 
-  const referenceInfo = (token: string) => {
+    const authorName = () => {
+      return userName(props.note.user || { pubkey: props.note.post.pubkey });
+    };
+
+  const parsedContent = (text: string) => {
     const regex = /\#\[([0-9]*)\]/g;
+    let parsed = text;
 
     let refs = [];
     let match;
 
-    while((match = regex.exec(token)) !== null) {
+    while((match = regex.exec(text)) !== null) {
       refs.push(match[1]);
     }
 
     if (refs.length > 0) {
       for(let i =0; i < refs.length; i++) {
-        let r = refs[i];
-        const reference = references[r];
+        let r = parseInt(refs[i]);
 
-        if (reference ===  undefined) {
-          return <span>{token}</span>
+        const tag = props.note.post.tags[r];
+
+        if (tag[0] === 'e' && props.note.mentionedNotes && props.note.mentionedNotes[tag[1]]) {
+          const embeded = (<span>
+          {intl.formatMessage({
+            id: 'mentionedSmallNote',
+            defaultMessage: '\[post by {name}\]',
+            description: 'Label indicating that a note has been metioned in the small note display'
+          }, {
+            name: userName(props.note.user),
+          })}
+        </span>);
+
+          parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
 
-        if (isUserReference(reference)) {
-          return (
-            <span>
-              @{referenceName(reference)}
-            </span>
-          );
-        }
+        if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
+          const user = props.note.mentionedUsers[tag[1]];
 
-        if (isNoteReference(reference)) {
-          return <span>
-            {intl.formatMessage({
-              id: 'mentionedSmallNote',
-              defaultMessage: '\[post by {name}\]',
-              description: 'Label indicating that a note has been metioned in the small note display'
-            }, {
-              name: userName(reference.user),
-            })}
-          </span>;
+          const link =  (<span>@{userName(user)}</span>);
+
+          parsed = parsed.replace(`#[${r}]`, link.outerHTML);
         }
       }
     }
 
-  }
+    return parsed;
+
+  };
 
   return (
     <div>
@@ -216,16 +109,8 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
             </div>
           </div>
           <div class={styles.message}>
-            <For each={printableContent}>
-              {c =>
-                <Show
-                  when={tokenRegex.test(c)}
-                  fallback={<span innerHTML={c}></span>}
-                >
-                  {referenceInfo(c)}
-                </Show>
-              }
-            </For>
+            <div innerHTML={parsedContent(props.note.post.content)}>
+            </div>
           </div>
         </A>
       </div>

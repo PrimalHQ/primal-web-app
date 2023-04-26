@@ -79,7 +79,7 @@ export const initialData = {
   oldestNoteDate: undefined,
   notes: [],
   isFetching: false,
-  page: { messages: [], users: {}, postStats: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {} },
   reposts: {},
   lastNote: undefined,
   following: [],
@@ -221,6 +221,16 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       updateStore('sidebar', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
       );
       return;
     }

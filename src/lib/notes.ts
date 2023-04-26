@@ -76,33 +76,35 @@ export const highlightHashtags = (text: string) => {
 
 const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
-  const regex = /\#\[([0-9]*)\]/g;
-  let refs = [];
-  let match;
+  // const regex = /\#\[([0-9]*)\]/g;
+  // let refs = [];
+  // let match;
 
-  while((match = regex.exec(text)) !== null) {
-    refs.push(match[1]);
-  }
+  // while((match = regex.exec(text)) !== null) {
+  //   refs.push(match[1]);
+  // }
 
-  if (refs.length > 0) {
-    refs.forEach((ref: any) => {
-      const tag = note.post.tags[ref];
-      if (tag[0] === 'p') {
-        getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
-      }
+  // if (refs.length > 0) {
+  //   refs.forEach((ref: any) => {
+  //     const tag = note.post.tags[ref];
+  //     if (tag[0] === 'p') {
+  //       getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
+  //     }
 
-      if (!skipNotes && tag[0] === 'e') {
-        const mId = noteEncode(tag[1]);
-        getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
-      }
-    });
-  }
+  //     if (!skipNotes && tag[0] === 'e') {
+  //       const mId = noteEncode(tag[1]);
+  //       getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
+  //     }
+  //   });
+  // }
 
   return text;
 
 };
 
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
+
+export const parseNote1 = (content: string, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(content)));
 
 export const parseSmallNote = (note: PrimalNote) => nostrify(note.post.content, note, true);
 

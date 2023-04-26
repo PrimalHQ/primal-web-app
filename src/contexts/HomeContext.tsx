@@ -14,6 +14,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrMentionContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
@@ -28,9 +29,10 @@ const initialHomeData = {
   isFetching: false,
   scrollTop: 0,
   selectedFeed: undefined,
-  page: { messages: [], users: {}, postStats: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {} },
   reposts: {},
   lastNote: undefined,
+  mentionedNotes: {},
 };
 
 export const HomeContext = createContext<HomeContextStore>();
@@ -153,6 +155,16 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
       );
       return;
     }

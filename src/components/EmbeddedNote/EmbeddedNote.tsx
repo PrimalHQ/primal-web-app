@@ -2,20 +2,23 @@ import { A } from '@solidjs/router';
 import { Component, createMemo, Show } from 'solid-js';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
+import { hexToNpub } from '../../lib/keys';
 import { trimVerification } from '../../lib/profile';
 import { truncateNpub } from '../../stores/profile';
-import { PrimalNote } from '../../types/primal';
+import { NostrNoteContent, NostrPostStats, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote from '../ParsedNote/ParsedNote';
 
 import styles from './EmbeddedNote.module.scss';
 
-const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
+const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser }}> = (props) => {
 
   const threadContext = useThreadContext();
 
-  const navToThread = (note: PrimalNote) => {
-    threadContext?.actions.setPrimaryNote(note);
+  const noteId = () => hexToNpub(props.note.post.id);
+
+  const navToThread = () => {
+    threadContext?.actions.setPrimaryNote(props.note);
   };
 
   const authorName = () => {
@@ -30,11 +33,11 @@ const EmbeddedNote: Component<{ note: PrimalNote}> = (props) => {
 
   return (
     <A
-    href={`/thread/${props.note.post.noteId}`}
+    href={`/thread/${noteId()}`}
     class={styles.mentionedNote}
-    onClick={() => navToThread(props.note)}
+    onClick={() => navToThread()}
     data-event={props.note.post.id}
-    data-event-bech32={props.note.post.noteId}
+    data-event-bech32={noteId()}
   >
     <div class={styles.mentionedNoteHeader}>
       <Avatar

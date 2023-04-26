@@ -60,7 +60,7 @@ const Notifications: Component = () => {
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
     users: [],
-    page: { messages: [], users: {}, postStats: {} },
+    page: { messages: [], users: {}, postStats: {}, mentions: {} },
     reposts: {},
   })
 
@@ -68,7 +68,7 @@ const Notifications: Component = () => {
     notes: [],
     users: {},
     userStats: {},
-    page: { messages: [], users: {}, postStats: {}, notifications: [] },
+    page: { messages: [], users: {}, postStats: {}, notifications: [], mentions: {} },
     reposts: {},
     notifications: [],
   })
@@ -226,6 +226,16 @@ const Notifications: Component = () => {
           return;
         }
 
+        if (content.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          setRelatedNotes('page', 'mentions',
+            (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+          );
+          return;
+        }
+
       }
 
       if (type === 'EOSE') {
@@ -319,6 +329,16 @@ const Notifications: Component = () => {
 
           setOldNotifications('page', 'postStats',
             (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+          );
+          return;
+        }
+
+        if (content.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          setOldNotifications('page', 'mentions',
+            (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
           );
           return;
         }

@@ -16,6 +16,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrMentionContent,
   PrimalNote
 } from '../../types/primal';
 
@@ -32,12 +33,14 @@ const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNot
     users: {},
     postStats: {},
     notes: [],
+    mentions: {},
   },
   mostzapped: {
     messages: [],
     users: {},
     postStats: {},
     notes: [],
+    mentions: {},
   },
 });
 
@@ -66,12 +69,14 @@ const HomeSidebar: Component = () => {
           users: {},
           postStats: {},
           notes: [],
+          mentions: {},
         },
         mostzapped: {
           messages: [],
           users: {},
           postStats: {},
           notes: [],
+          mentions: {},
         },
       }));
 
@@ -89,6 +94,7 @@ const HomeSidebar: Component = () => {
         users: data[key].users,
         messages: data[key].messages,
         postStats: data[key].postStats,
+        mentions: data[key].mentions,
       }));
 
       setData(key, 'notes', () => [ ...newPosts ]);
@@ -107,6 +113,15 @@ const HomeSidebar: Component = () => {
       if (content && content.kind === Kind.NoteStats) {
         const stat = JSON.parse(content.content);
         setData(key, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
+      }
+      if (content && content.kind === Kind.Mentions) {
+        const mentionContent = content as NostrMentionContent;
+        const mention = JSON.parse(mentionContent.content);
+
+        setData(key, 'mentions',
+          (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+        );
+        return;
       }
     }
   };
