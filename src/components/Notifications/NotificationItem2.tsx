@@ -177,7 +177,7 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
             <Show when={note()}>
               <NotificationNote
                 note={note()}
-                showFooter={isReply()}
+                showFooter={true}
               />
             </Show>
           </div>

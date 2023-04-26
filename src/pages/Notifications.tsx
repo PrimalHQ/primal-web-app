@@ -1044,24 +1044,24 @@ const Notifications: Component = () => {
         {newUserFollowedYou()}
         {userUnfollowedYou()}
 
+        {yourPostWasZapped()}
+
+        {yourPostWasRepliedTo()}
+        {yourPostWasReposted()}
         {yourPostWasLiked()}
 
         {youWereMentioned()}
-
-        {yourPostWasReposted()}
-        {yourPostWasRepliedTo()}
-        {yourPostWasZapped()}
         {yourPostWasMentioned()}
 
-        {postYouWereMentionedInWasLiked()}
         {postYouWereMentionedInWasZapped()}
-        {postYouWereMentionedInWasReposted()}
         {postYouWereMentionedInWasRepliedTo()}
+        {postYouWereMentionedInWasReposted()}
+        {postYouWereMentionedInWasLiked()}
 
-        {postYourPostWasMentionedInWasLiked()}
         {postYourPostWasMentionedInWasZapped()}
-        {postYourPostWasMentionedInWasReposted()}
         {postYourPostWasMentionedInWasRepliedTo()}
+        {postYourPostWasMentionedInWasReposted()}
+        {postYourPostWasMentionedInWasLiked()}
 
         <Show when={hasNewNotifications()}>
           <div class={styles.separator}></div>
