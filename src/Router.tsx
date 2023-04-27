@@ -19,6 +19,7 @@ import { useProfileContext } from './contexts/ProfileContext';
 import { useSettingsContext } from './contexts/SettingsContext';
 import NotFound from './pages/NotFound';
 import { fetchKnownProfiles } from './lib/profile';
+import Search from './pages/Search';
 
 const primalWindow = window as PrimalWindow;
 
@@ -65,6 +66,7 @@ const Router: Component = () => {
           <Route path="/settings" component={Settings} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
+          <Route path="/search/:query" component={Search} />
           <Route path="/rest" component={Explore} />
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName" component={Profile} data={getKnownProfiles} />

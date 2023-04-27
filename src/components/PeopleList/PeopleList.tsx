@@ -10,9 +10,8 @@ import FollowButton from '../FollowButton/FollowButton';
 import styles from './PeopleList.module.scss';
 
 
-const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
+const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) => {
   const account = useAccountContext();
-  const intl = useIntl();
 
   const people = () => props.people;
 
@@ -45,7 +44,7 @@ const PeopleList: Component<{ people: PrimalUser[]}> = (props) => {
 
   return (
     <div id="trending_wrapper" class={styles.stickyWrapper}>
-      <div class={styles.heading}>People in this thread</div>
+      <div class={styles.heading}>{props.label}</div>
       <div id="trending_section" class={styles.trendingSection}>
         <For each={people()}>
           {

@@ -15,11 +15,13 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
 import { sortByRecency } from '../stores/note';
 import { scrollWindowTo } from '../lib/scroll';
+import { useIntl } from '@cookbook/solid-intl';
 
 
 const Thread: Component = () => {
   const account = useAccountContext();
   const params = useParams();
+  const intl = useIntl();
 
   const postId = () => {
     if (params.postId.startsWith('note')) {
@@ -113,7 +115,16 @@ const Thread: Component = () => {
       </Wormhole>
 
       <Wormhole to='right_sidebar'>
-        <PeopleList people={people()} />
+        <PeopleList
+          people={people()}
+          label={intl.formatMessage(
+            {
+              id: 'thread.sidebar.title',
+              defaultMessage: 'People in this thread',
+              description: 'Title of the Thread page sidebar',
+            }
+          )}
+        />
       </Wormhole>
 
       <Show

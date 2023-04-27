@@ -149,11 +149,6 @@ const Notifications: Component = () => {
     }
   });
 
-  let start = 0;
-  let first = false;
-  let end = 0;
-
-
   let newNotifs: Record<string, PrimalNotification[]> = {};
 
   // Fetch new notifications
@@ -173,11 +168,6 @@ const Notifications: Component = () => {
         }
 
         if (content.kind === Kind.Notification) {
-          if (!first) {
-            let f = (new Date()).getTime();
-            console.log('FIRST: ', f - start);
-            first = true;
-          }
 
           const notif = JSON.parse(content.content) as PrimalNotification;
 
@@ -242,9 +232,6 @@ const Notifications: Component = () => {
         setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
-        end = (new Date()).getTime();
-
-        console.log(`DUR: ${end - start} ms`);
         unsub();
         return;
       }
@@ -253,7 +240,6 @@ const Notifications: Component = () => {
 
     const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
-    start = (new Date()).getTime();
     newNotifs = {};
     getNotifications(pk as string, subid, since);
   });

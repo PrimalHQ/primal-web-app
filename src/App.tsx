@@ -11,6 +11,7 @@ import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { TranslatorProvider } from './contexts/TranslatorContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
+import { SearchProvider } from './contexts/SearchContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -30,22 +31,24 @@ const App: Component = () => {
   return (
     <TranslatorProvider>
       <Toaster>
-        <AccountProvider>
-          <SettingsProvider>
-            <ProfileProvider>
-              <NotificationsProvider>
-                <HomeProvider>
-                  <ExploreProvider>
-                    <ThreadProvider>
-                      <input id="defocus" class={styles.invisible}/>
-                      <Router />
-                    </ThreadProvider>
-                  </ExploreProvider>
-                </HomeProvider>
-              </NotificationsProvider>
-            </ProfileProvider>
-          </SettingsProvider>
-        </AccountProvider>
+        <SearchProvider>
+          <AccountProvider>
+            <SettingsProvider>
+              <ProfileProvider>
+                <NotificationsProvider>
+                  <HomeProvider>
+                    <ExploreProvider>
+                      <ThreadProvider>
+                        <input id="defocus" class={styles.invisible}/>
+                        <Router />
+                      </ThreadProvider>
+                    </ExploreProvider>
+                  </HomeProvider>
+                </NotificationsProvider>
+              </ProfileProvider>
+            </SettingsProvider>
+          </AccountProvider>
+        </SearchProvider>
       </Toaster>
     </TranslatorProvider>
   );

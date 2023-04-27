@@ -30,6 +30,7 @@ const onError = (error: Event) => {
 export const connect = () => {
   if (isNotConnected()) {
     setSocket(new WebSocket('wss://cache2.primal.net/cache12'));
+    // setSocket(new WebSocket('wss://cache3.primal.net/cache14'));
     console.log('SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
