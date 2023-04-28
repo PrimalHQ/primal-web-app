@@ -133,12 +133,12 @@ const Search: Component = () => {
               <SearchOption
                 title={intl.formatMessage({
                   id: 'search.emptyQueryResult',
-                  defaultMessage: 'Type to',
+                  defaultMessage: 'type to',
                   description: 'Label shown is search resuls when no term is provided',
                 })}
                 description={intl.formatMessage({
                   id: 'search.description',
-                  defaultMessage: 'Search Nostr',
+                  defaultMessage: 'search nostr',
                   description: 'Label explaining full search action',
                 })}
                 icon={<div class={styles.searchIcon}></div>}
@@ -151,7 +151,7 @@ const Search: Component = () => {
               title={query()}
               description={intl.formatMessage({
                 id: 'search.description',
-                defaultMessage: 'Search Nostr',
+                defaultMessage: 'search nostr',
                 description: 'Label explaining full search action',
               })}
               icon={<div class={styles.searchIcon}></div>}
