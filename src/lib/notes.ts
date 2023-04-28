@@ -106,9 +106,9 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
 export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
 
-export const parseNote1 = (content: string, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(content)));
+export const parseNote1 = (content: string, skipNotes = false) => urlify(addlineBreaks(content));
 
-export const parseNote2 = (content: string, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(content), true));
+export const parseNote2 = (content: string, skipNotes = false) => urlify(addlineBreaks(content), true);
 
 export const parseSmallNote = (note: PrimalNote) => nostrify(note.post.content, note, true);
 

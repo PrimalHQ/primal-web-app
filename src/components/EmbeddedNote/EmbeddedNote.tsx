@@ -99,6 +99,37 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
 
   };
 
+  const highlightHashtags = (text: string) => {
+    const regex = /(#[a-züöäßÄÖÜ0\d-]+)/ig;
+
+    let parsed = text;
+
+    let refs = [];
+    let match;
+
+    while((match = regex.exec(text)) !== null) {
+      refs.push(match[1]);
+    }
+
+    if (refs.length > 0) {
+      for(let i =0; i < refs.length; i++) {
+        let r = refs[i];
+
+        const embeded = (
+          <span>
+            <A
+              href={`/search/${r.replaceAll('#', '%23')}`}
+            >{r}</A>
+          </span>
+        );
+
+        parsed = parsed.replaceAll(`${r}`, embeded.outerHTML);
+      }
+    }
+
+    return parsed;
+  }
+
   return (
     <A
     href={`/thread/${noteId()}`}
@@ -143,7 +174,7 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
           </span>
         </span>
       </div>
-      <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(parseNote2(props.note.post.content), true), true))}>
+      <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote2(props.note.post.content), true)), true))}>
       </div>
     </A>
   )
