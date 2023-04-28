@@ -4,6 +4,14 @@ import { sendMessage } from "../sockets";
 import { NostrWindow, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
 
+export const getUserProfiles = (pubkeys: string[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_infos", { pubkeys }]},
+  ]));
+}
+
 export const getUserProfile = (pubkey: string, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",

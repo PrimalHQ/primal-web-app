@@ -1,38 +1,26 @@
-import { createStore, unwrap } from "solid-js/store";
+import { createStore } from "solid-js/store";
 import {
   createContext,
-  createEffect,
   JSX,
-  onCleanup,
-  onMount,
   useContext
 } from "solid-js";
 import {
   FeedPage,
-  NostrContactsContent,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
   NostrMentionContent,
   NostrNoteContent,
-  NostrRelays,
   NostrStatsContent,
   NostrUserContent,
-  NostrWindow,
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { Kind, noKey, relayConnectingTimeout } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
-import { sendContacts, sendLike, setStoredLikes } from "../lib/notes";
-import { Relay, relayInit } from "nostr-tools";
+import { Kind } from "../constants";
 import { APP_ID } from "../App";
-import { getLikes, getProfileContactList, getUserProfile } from "../lib/profile";
-import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
-import { closeRelays, connectRelays } from "../lib/relays";
+import { getUserProfiles } from "../lib/profile";
 import { searchContent, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes } from "../stores/note";
+import { subscribeTo } from "../sockets";
 
 export type SearchContextStore = {
   contentQuery: string,
@@ -51,6 +39,7 @@ export type SearchContextStore = {
     findContentUsers: (query: string, pubkey?: string) => void,
     findContent: (query: string) => void,
     setContentQuery: (query: string) => void,
+    getRecomendedUsers: () => void,
   },
 }
 
@@ -73,6 +62,53 @@ export const SearchContext = createContext<SearchContextStore>();
 export function SearchProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
 // ACTIONS --------------------------------------
+
+  const getRecomendedUsers = () => {
+    const subid = `recomended_users_${APP_ID}`;
+
+    let users: PrimalUser[] = [];
+
+    const unsub = subscribeTo(subid, (type, _, content) => {
+      if (type === 'EVENT') {
+        if (!content) {
+          return;
+        }
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          users.push(convertToUser(user));
+          return;
+        }
+      }
+
+      if (type === 'EOSE') {
+
+        updateStore('users', () => users);
+        updateStore('isFetchingUsers', () => false);
+
+        unsub();
+        return;
+      }
+    });
+
+    const pubkeys = [
+      '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
+      'bf2376e17ba4ec269d10fcc996a4746b451152be9031fa48e74553dde5526bce', // carla
+      'c48e29f04b482cc01ca1f9ef8c86ef8318c059e0e9353235162f080f26e14c11', // walker
+      '85080d3bad70ccdcd7f74c29a44f55bb85cbcd3dd0cbb957da1d215bdb931204', // preston
+      'eab0e756d32b80bcd464f3d844b8040303075a13eabc3599a762c9ac7ab91f4f', // lyn
+      '04c915daefee38317fa734444acee390a8269fe5810b2241e5e6dd343dfbecc9', // odell
+      '472f440f29ef996e92a186b8d320ff180c855903882e59d50de1b8bd5669301e', // marty
+      'e88a691e98d9987c964521dff60025f60700378a4879180dcbbb4a5027850411', // nvk
+      '91c9a5e1a9744114c6fe2d61ae4de82629eaaa0fb52f48288093c7e7e036f832', // rockstar
+      'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52', // pablo
+    ];
+
+    updateStore('isFetchingUsers', () => true);
+    getUserProfiles(pubkeys, subid);
+
+  };
 
   const findUsers = (query: string, publicKey?: string) => {
     const subid = `search_users_${APP_ID}`;
@@ -273,6 +309,7 @@ const [store, updateStore] = createStore<SearchContextStore>({
     findContent,
     findContentUsers,
     setContentQuery,
+    getRecomendedUsers,
   },
 });
 

@@ -85,9 +85,16 @@ const Search: Component = () => {
   };
 
   createEffect(() => {
-    if (isFocused()) {
-      search?.actions.findUsers(query(), account?.publicKey);
+    if (!isFocused()) {
+      return;
     }
+
+    if (query().length === 0) {
+      search?.actions.getRecomendedUsers();
+      return;
+    }
+
+    search?.actions.findUsers(query());
   });
 
   return (
