@@ -37,7 +37,7 @@ const Search: Component = () => {
 
 
     if (q.length > 0) {
-      navigate(`/search/${q}`);
+      navigate(`/search/${q.replaceAll('#', '%23')}`);
       onBlur();
       resetQuery();
     }
