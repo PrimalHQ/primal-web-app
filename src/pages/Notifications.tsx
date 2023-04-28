@@ -18,7 +18,7 @@ import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, trunca
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
-import { FeedPage, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 
 import styles from './Notifications.module.scss';
 
@@ -185,6 +185,10 @@ const Notifications: Component = () => {
           const user = content as NostrUserContent;
 
           setUsers((usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+
+          setRelatedNotes('page', 'users',
+            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+          );
           return;
         }
 
@@ -490,6 +494,7 @@ const Notifications: Component = () => {
     const grouped = groupBy(notifs, 'reply');
 
     const keys = Object.keys(grouped);
+
 
     return <For each={keys}>
       {key => {

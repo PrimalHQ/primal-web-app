@@ -166,6 +166,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
     if (userMentionIds.length > 0) {
       mentionedUsers = userMentionIds.reduce((acc, id) => {
         const m = page.users && page.users[id];
+
         return {
           ...acc,
           [id]: { ...convertToUser(m || emptyUser(id)) },
