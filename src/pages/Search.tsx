@@ -22,7 +22,7 @@ const Search: Component = () => {
   const account = useAccountContext();
   const intl = useIntl();
 
-  const query = () => decodeURI(params.query);
+  const query = () => decodeURI(params.query).replaceAll('%23', '#');
 
   createEffect(() => {
     if (isConnected() && query().length > 0 && search?.contentQuery !== query()) {

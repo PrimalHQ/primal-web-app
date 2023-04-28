@@ -1,8 +1,11 @@
+import DOMPurify from "dompurify";
 import { sendMessage } from "../sockets";
+
+type SearchPayload = { query: string, limit: number, pubkey?: string };
 
 export const searchUsers = (pubkey: string | undefined, subid: string, query: string, limit = 1000) => {
 
-  let payload = { query, limit };
+  let payload: SearchPayload = { query: DOMPurify.sanitize(query), limit };
 
   if (pubkey) {
     payload.pubkey = pubkey;
@@ -18,7 +21,7 @@ export const searchUsers = (pubkey: string | undefined, subid: string, query: st
 
 export const searchContent = (subid: string, query: string, limit = 100) => {
 
-  let payload = { query, limit };
+  let payload: SearchPayload = { query: DOMPurify.sanitize(query), limit };
 
   sendMessage(JSON.stringify([
     "REQ",

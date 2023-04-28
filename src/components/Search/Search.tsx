@@ -13,6 +13,7 @@ import Loader from '../Loader/Loader';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './Search.module.scss';
+import SearchOption from './SearchOption';
 
 
 const Search: Component = () => {
@@ -27,6 +28,8 @@ const Search: Component = () => {
   const [isFocused, setIsFocused] = createSignal(false);
   const [isDebouncing, setIsDebouncing] = createSignal(false);
 
+  const queryUrl = () => query().replaceAll('#', '%23');
+
   const onSearch = (e: Event) => {
     e.preventDefault();
     if (isDebouncing()) {
@@ -34,8 +37,9 @@ const Search: Component = () => {
     }
 
     if (query().length >0) {
-      navigate(`/search/${query()}`);
+      navigate(`/search/${queryUrl()}`);
       onBlur();
+      resetQuery();
     }
     else {
       toaster?.sendInfo(intl.formatMessage({
@@ -65,6 +69,10 @@ const Search: Component = () => {
       setIsFocused(false);
     }, 200);
   }
+
+  const resetQuery = () => {
+    setQuery('');
+  };
 
   const userName = (user: PrimalUser) => {
     return truncateNpub(
@@ -115,75 +123,51 @@ const Search: Component = () => {
           <Show
             when={query().length > 0}
             fallback={
-              <div class={styles.userResult}>
-                <div class={styles.userAvatar}>
-                  <div class={styles.searchIcon}></div>
-                </div>
-                <div class={styles.userInfo}>
-                  <div class={styles.userName}>
-                    type in a term to
-                  </div>
-                  <div class={styles.verification}>
-                    search nostr
-                  </div>
-                </div>
-              </div>
+              <SearchOption
+                title={intl.formatMessage({
+                  id: 'search.emptyQueryResult',
+                  defaultMessage: 'Type to',
+                  description: 'Label shown is search resuls when no term is provided',
+                })}
+                description={intl.formatMessage({
+                  id: 'search.description',
+                  defaultMessage: 'Search Nostr',
+                  description: 'Label explaining full search action',
+                })}
+                icon={<div class={styles.searchIcon}></div>}
+                underline={true}
+              />
             }
           >
-            <A
-              href={`/search/${query()}`}
-              class={styles.userResult}
-              tabIndex={0}
-              onFocus={onFocus}
-            >
-              <div class={styles.userAvatar}>
-                <div class={styles.searchIcon}></div>
-              </div>
-              <div class={styles.userInfo}>
-                <div class={styles.userName}>
-                  {query()}
-                </div>
-                <div class={styles.verification}>
-                  search nostr
-                </div>
-              </div>
-            </A>
+            <SearchOption
+              href={`/search/${queryUrl()}`}
+              title={query()}
+              description={intl.formatMessage({
+                id: 'search.description',
+                defaultMessage: 'Search Nostr',
+                description: 'Label explaining full search action',
+              })}
+              icon={<div class={styles.searchIcon}></div>}
+              underline={true}
+              onClick={resetQuery}
+            />
           </Show>
 
           <For each={search?.users}>
             {(user) => (
-              <A
+              <SearchOption
                 href={`/profile/${user.npub}`}
-                class={styles.userResult}
-                tabIndex={0}
-                onFocus={onFocus}
-              >
-                <div class={styles.userAvatar}>
-                  <Avatar src={user.picture} size="xs" />
-                </div>
-                <div class={styles.userInfo}>
-                  <div class={styles.userName}>
-                    {userName(user)}
-                  </div>
-                  <Show when={user.nip05.length > 0}>
-                    <div class={styles.verification} title={user.nip05}>
-                      {truncateNpub(user.nip05)}
-                    </div>
-                  </Show>
-                </div>
-                <div class={styles.userStats}>
-                  <div class={styles.followerNumber}>
-                    {truncateNumber(search?.scores[user.pubkey] || 0)}
-                  </div>
-                  <div class={styles.followerLabel}>
-                    {intl.formatMessage({
-                      id: 'search.users.followers',
-                      defaultMessage: 'followers',
-                      description: 'Followers label for user search results',
-                    })}
-                  </div>
-                </div>
-              </A>
+                title={userName(user)}
+                description={user.nip05}
+                icon={<Avatar src={user.picture} size="xs" />}
+                statNumber={search?.scores[user.pubkey]}
+                statLabel={intl.formatMessage({
+                  id: 'search.users.followers',
+                  defaultMessage: 'followers',
+                  description: 'Followers label for user search results',
+                })}
+                onClick={resetQuery}
+              />
             )}
           </For>
         </div>
