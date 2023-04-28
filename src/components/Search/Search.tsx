@@ -1,10 +1,8 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A, useNavigate } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { hexToNpub } from '../../lib/keys';
-import { truncateNumber } from '../../lib/notifications';
 import { truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { debounce } from '../../utils';
@@ -20,24 +18,26 @@ const Search: Component = () => {
 
   const toaster = useToastContext();
   const search = useSearchContext();
-  const account = useAccountContext();
   const navigate = useNavigate();
   const intl = useIntl();
 
   const [query, setQuery] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
-  const [isDebouncing, setIsDebouncing] = createSignal(false);
 
   const queryUrl = () => query().replaceAll('#', '%23');
 
-  const onSearch = (e: Event) => {
+  const onSearch = (e: SubmitEvent) => {
     e.preventDefault();
-    if (isDebouncing()) {
-      return;
-    }
 
-    if (query().length >0) {
-      navigate(`/search/${queryUrl()}`);
+    const form = e.target as HTMLFormElement;
+
+    const data = new FormData(form);
+
+    const q = data.get('searchQuery') as string || '';
+
+
+    if (q.length > 0) {
+      navigate(`/search/${q}`);
       onBlur();
       resetQuery();
     }
@@ -48,15 +48,14 @@ const Search: Component = () => {
         description: 'Alert letting the user know that the search term is empty',
       }))
     }
+    return false;
   }
 
   const onInput = (e: InputEvent) => {
-    setIsDebouncing(true);
     setIsFocused(true);
     debounce(() => {
       // @ts-ignore
       setQuery(e.target?.value || '');
-      setIsDebouncing(false);
     }, 500);
   };
 
@@ -99,10 +98,15 @@ const Search: Component = () => {
 
   return (
     <div class={styles.searchHolder}>
-      <form class={styles.search} onsubmit={onSearch}>
+      <form
+        class={styles.search}
+        onsubmit={onSearch}
+        autocomplete="off"
+      >
         <div class={styles.searchIcon}></div>
         <input
           type='text'
+          name='searchQuery'
           placeholder={
             intl.formatMessage(
               {
