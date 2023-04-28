@@ -4,7 +4,7 @@ import { sendMessage } from "../sockets";
 type SearchPayload = { query: string, limit: number, pubkey?: string };
 
 export const cleanQuery = (query: string) => {
-  return `"${DOMPurify.sanitize(query)}"`;
+  return DOMPurify.sanitize(query);
 }
 
 
