@@ -37,7 +37,7 @@ const Search: Component = () => {
       <Wormhole
         to="branding_holder"
       >
-        <Branding small={false} isHome={true} />
+        <Branding small={false} />
       </Wormhole>
 
       <StickySidebar>
