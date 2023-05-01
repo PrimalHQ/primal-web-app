@@ -104,13 +104,8 @@ const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
 
 };
 
-export const parseNote = (note: PrimalNote, skipNotes = false) => highlightHashtags(urlify(addlineBreaks(nostrify(note.post.content, note, skipNotes))));
-
-export const parseNote1 = (content: string, skipNotes = false) => urlify(addlineBreaks(content));
-
-export const parseNote2 = (content: string, skipNotes = false) => urlify(addlineBreaks(content), true);
-
-export const parseSmallNote = (note: PrimalNote) => nostrify(note.post.content, note, true);
+export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
+export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
 
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };

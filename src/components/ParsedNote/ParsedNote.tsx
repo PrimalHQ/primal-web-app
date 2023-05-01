@@ -2,7 +2,7 @@ import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
 import { convertToNotes } from '../../stores/note';
 import { hexToNpub } from '../../lib/keys';
-import { parseNote, parseNote1 } from '../../lib/notes';
+import { parseNote1 } from '../../lib/notes';
 import { socket } from '../../sockets';
 import { truncateNpub } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
@@ -142,35 +142,21 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
   };
 
   const highlightHashtags = (text: string) => {
-    const regex = /(#[a-züöäßÄÖÜ0\d-]+)/ig;
+    const regex = /#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
-    let parsed = text;
+    return text.replace(regex, (token) => {
+      const embeded = (
+        <span>
+          <A
+            href={`/search/${token.replaceAll('#', '%23')}`}
+          >{token}</A>
+        </span>
+      );
 
-    let refs = [];
-    let match;
-
-    while((match = regex.exec(text)) !== null) {
-      refs.push(match[1]);
-    }
-
-    if (refs.length > 0) {
-      for(let i =0; i < refs.length; i++) {
-        let r = refs[i];
-
-        const embeded = (
-          <span>
-            <A
-              href={`/search/${r.replaceAll('#', '%23')}`}
-            >{r}</A>
-          </span>
-        );
-
-        parsed = parsed.replaceAll(`${r}`, embeded.outerHTML);
-      }
-    }
-
-    return parsed;
+      return embeded.outerHTML;
+    });
   }
+
 
   return (
     <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote1(props.note.post.content)))))}>

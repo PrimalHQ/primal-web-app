@@ -1,18 +1,13 @@
-import { Component, createEffect, For, JSXElement, onCleanup, Show } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './SmallNote.module.scss';
 import { A } from '@solidjs/router';
-import { FeedPage, NostrEOSE, NostrEvent, NostrUserContent, PrimalNote, PrimalUser, UserReference } from '../../types/primal';
+import { PrimalNote, PrimalUser } from '../../types/primal';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { truncateNpub } from '../../stores/profile';
-import { createStore } from 'solid-js/store';
 import { hexToNpub } from '../../lib/keys';
-import { parseSmallNote } from '../../lib/notes';
-import { socket } from '../../sockets';
-import { convertToNotes } from '../../stores/note';
-import { Kind } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 
 

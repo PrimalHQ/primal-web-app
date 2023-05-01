@@ -5,7 +5,7 @@ import { Component, createMemo, Show } from 'solid-js';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
-import { parseNote1, parseNote2 } from '../../lib/notes';
+import { parseNote2 } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
 import { truncateNpub } from '../../stores/profile';
 import { NostrNoteContent, NostrPostStats, PrimalNote, PrimalUser } from '../../types/primal';
@@ -100,34 +100,19 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
   };
 
   const highlightHashtags = (text: string) => {
-    const regex = /(#[a-züöäßÄÖÜ0\d-]+)/ig;
+    const regex = /#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
-    let parsed = text;
+    return text.replace(regex, (token) => {
+      const embeded = (
+        <span>
+          <A
+            href={`/search/${token.replaceAll('#', '%23')}`}
+          >{token}</A>
+        </span>
+      );
 
-    let refs = [];
-    let match;
-
-    while((match = regex.exec(text)) !== null) {
-      refs.push(match[1]);
-    }
-
-    if (refs.length > 0) {
-      for(let i =0; i < refs.length; i++) {
-        let r = refs[i];
-
-        const embeded = (
-          <span>
-            <A
-              href={`/search/${r.replaceAll('#', '%23')}`}
-            >{r}</A>
-          </span>
-        );
-
-        parsed = parsed.replaceAll(`${r}`, embeded.outerHTML);
-      }
-    }
-
-    return parsed;
+      return embeded.outerHTML;
+    });
   }
 
   return (
@@ -174,7 +159,7 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
           </span>
         </span>
       </div>
-      <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote2(props.note.post.content), true)), true))}>
+      <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote2(props.note.post.content))), true))}>
       </div>
     </A>
   )
