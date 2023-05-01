@@ -388,6 +388,7 @@ const Notifications: Component = () => {
     const userProp = notificationTypeUserProps[type];
 
     const pks = notifs.reduce<string[]>((acc, n) => {
+      // @ts-ignore
       const pubkey = n[userProp];
 
       if (!pubkey) {
@@ -408,9 +409,12 @@ const Notifications: Component = () => {
   const groupBy = (notifs: PrimalNotification[], keyName: string) => {
     return notifs.reduce<Record<string, PrimalNotification[]>>(
       (group: Record<string, PrimalNotification[]>, notif) => {
+        // @ts-ignore
         const key: string = notif[keyName] || 'none';
+
         group[key] = group[key] ?? [];
         group[key].push(notif);
+
         return group;
       },
       {},
@@ -552,7 +556,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -596,7 +600,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -640,7 +644,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -684,7 +688,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -732,7 +736,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -775,7 +779,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -819,7 +823,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -862,7 +866,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -910,7 +914,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
@@ -953,7 +957,7 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers = notes.reduce((acc, note) => {
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?

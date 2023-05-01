@@ -1,29 +1,14 @@
 import { A } from '@solidjs/router';
-import { createStore } from 'solid-js/store';
-import { convertToNotes } from '../../stores/note';
 import { hexToNpub } from '../../lib/keys';
 import { parseNote1 } from '../../lib/notes';
-import { socket } from '../../sockets';
 import { truncateNpub } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
-import { Kind } from '../../constants';
 import {
   Component,
-  createEffect,
-  For,
-  JSXElement,
-  onCleanup,
-  onMount,
-  Show,
 } from 'solid-js';
 import {
-  FeedPage,
-  NostrEOSE,
-  NostrEvent,
-  NostrUserContent,
   PrimalNote,
   PrimalUser,
-  UserReference,
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
@@ -49,6 +34,7 @@ export const parseNoteLinks = (text: string, highlightOnly = false) => {
   });
 
 };
+
 export const parseNpubLinks = (text: string, highlightOnly = false) => {
   const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/g;
 
@@ -70,9 +56,6 @@ export const parseNpubLinks = (text: string, highlightOnly = false) => {
   });
 
 };
-
-const tokenRegex = /(\#\[[\d]+\])/;
-
 
 const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
 
@@ -118,6 +101,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
             </div>
           );
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
 
@@ -132,6 +116,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
             </A>
           );
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
         }
       }
@@ -153,6 +138,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         </span>
       );
 
+      // @ts-ignore
       return embeded.outerHTML;
     });
   }

@@ -14,7 +14,7 @@ import ParsedNote, { parseNoteLinks, parseNpubLinks } from '../ParsedNote/Parsed
 
 import styles from './EmbeddedNote.module.scss';
 
-const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser }}> = (props) => {
+const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>}> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -77,6 +77,7 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
             </span>
           );
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
 
@@ -90,6 +91,7 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
             </span>
           );
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
         }
       }
@@ -111,6 +113,7 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
         </span>
       );
 
+      // @ts-ignore
       return embeded.outerHTML;
     });
   }
@@ -153,13 +156,24 @@ const EmbeddedNote: Component<{ note: { post: NostrNoteContent, user: PrimalUser
 
           <span
             class={styles.time}
-            title={date(props.note.post.created_at).date.toLocaleString()}
+            title={date(props.note.post.created_at || 0).date.toLocaleString()}
           >
-            {date(props.note.post.created_at).label}
+            {date(props.note.post.created_at || 0).label}
           </span>
         </span>
       </div>
-      <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote2(props.note.post.content))), true))}>
+      <div innerHTML={
+        parsedContent(
+          parseNpubLinks(
+            parseNoteLinks(
+              highlightHashtags(
+                parseNote2(props.note.post.content)
+              )
+            ),
+            true,
+          )
+        )
+      }>
       </div>
     </A>
   )

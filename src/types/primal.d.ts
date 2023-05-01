@@ -256,6 +256,7 @@ export type PrimalUser = {
   picture: string,
   nip05: string,
   banner: string,
+  display_name?: string,
   displayName: string,
   location: string,
   lud06: string,

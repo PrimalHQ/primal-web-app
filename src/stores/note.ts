@@ -91,8 +91,8 @@ const getNoteReferences = (message: NostrNoteContent) => {
     refs.push(match[1]);
   }
 
-  return refs.reduce((acc, ref) => {
-    const tag = message.tags[ref] || [];
+  return refs.reduce<string[]>((acc, ref) => {
+    const tag = message.tags[parseInt(ref)] || [];
 
     return tag[0] === 'e' ? [...acc, tag[1]] : acc;
   }, []);
@@ -107,8 +107,8 @@ const getUserReferences = (message: NostrNoteContent) => {
     refs.push(match[1]);
   }
 
-  return refs.reduce((acc, ref) => {
-    const tag = message.tags[ref] || [];
+  return refs.reduce<string[]>((acc, ref) => {
+    const tag = message.tags[parseInt(ref)] || [];
 
     return tag[0] === 'p' ? [...acc, tag[1]] : acc;
   }, []);

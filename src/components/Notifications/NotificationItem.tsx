@@ -203,6 +203,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           <div class={styles.reference}>
             <Show when={props.note}>
               <NotificationNote
+                // @ts-ignore
                 note={props.note}
                 showFooter={true}
               />

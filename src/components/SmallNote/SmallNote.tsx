@@ -20,7 +20,6 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
     threadContext?.actions.setPrimaryNote(note);
   };
 
-
   const userName = (user: PrimalUser) => {
     return truncateNpub(
       user.display_name ||
@@ -62,6 +61,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
           })}
         </span>);
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
 
@@ -70,6 +70,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
 
           const link =  (<span>@{userName(user)}</span>);
 
+          // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
         }
       }
