@@ -12,8 +12,18 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
+import { decode } from 'nostr-tools/nip19';
 
-export const parseNoteLinks = (text: string, highlightOnly = false) => {
+const userName = (user: PrimalUser) => {
+  return truncateNpub(
+    user.display_name ||
+    user.displayName ||
+    user.name ||
+    user.npub ||
+    hexToNpub(user.pubkey) || '');
+};
+
+export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
   const regex = /\bnostr:((note)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -25,9 +35,18 @@ export const parseNoteLinks = (text: string, highlightOnly = false) => {
 
     const path = `/thread/${id}`;
 
+    const hex = decode(id).data as string;
+
+    const ment = note.mentionedNotes && note.mentionedNotes[hex];
+
     const link = highlightOnly ?
       <span class='linkish' >{url}</span> :
-      <A href={path}>{url}</A>;
+      ment ?
+        <EmbeddedNote
+          note={ment}
+          mentionedUsers={note.mentionedUsers || {}}
+        /> :
+        <A href={path}>{url}</A>;
 
     // @ts-ignore
     return link.outerHTML || url;
@@ -35,7 +54,7 @@ export const parseNoteLinks = (text: string, highlightOnly = false) => {
 
 };
 
-export const parseNpubLinks = (text: string, highlightOnly = false) => {
+export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
   const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -47,9 +66,15 @@ export const parseNpubLinks = (text: string, highlightOnly = false) => {
 
     const path = `/profile/${id}`;
 
+    const pubkey = decode(id);
+
+    const user = note.mentionedUsers && note.mentionedUsers[pubkey.data as string];
+
     const link = highlightOnly ?
       <span class='linkish'>{url}</span> :
-      <A href={path}>{url}</A>;
+      user ?
+        <A href={path}>@{userName(user)}</A> :
+        <A href={path}>{url}</A>;
 
     // @ts-ignore
     return link.outerHTML || url;
@@ -59,14 +84,6 @@ export const parseNpubLinks = (text: string, highlightOnly = false) => {
 
 const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
 
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
-  };
 
   const parsedContent = (text: string) => {
     const regex = /\#\[([0-9]*)\]/g;
@@ -145,7 +162,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
 
   return (
-    <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote1(props.note.post.content)))))}>
+    <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote1(props.note.post.content)), props.note), props.note))}>
     </div>
   );
 };

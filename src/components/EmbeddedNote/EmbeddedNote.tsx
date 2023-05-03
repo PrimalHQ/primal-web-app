@@ -168,8 +168,10 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
             parseNoteLinks(
               highlightHashtags(
                 parseNote2(props.note.post.content)
-              )
+              ),
+              props.note,
             ),
+            props.note,
             true,
           )
         )

@@ -130,8 +130,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
     const userMeta = JSON.parse(user?.content || '{}');
 
-    const mentionIds = getNoteReferences(message);
-    const userMentionIds = getUserReferences(message);
+    const mentionIds = message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
+    const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
     let mentionedNotes = {};
     let mentionedUsers = {};
