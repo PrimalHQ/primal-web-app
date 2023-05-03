@@ -81,22 +81,6 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
   };
 
   const user = () => {
-    if ([
-      NotificationType.YOU_WERE_MENTIONED_IN_POST,
-      NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST,
-      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED,
-      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED,
-      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED,
-      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
-      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
-      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
-      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED,
-      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO,
-    ].includes(type())) {
-      return note()?.user;
-    }
-
-
     const prop = notificationTypeUserProps[type()];
     const id = props.notification[prop];
     return props.users[`${id}`];
@@ -177,7 +161,6 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
             <Show when={note()}>
               <NotificationNote
                 note={note()}
-                showFooter={true}
               />
             </Show>
           </div>

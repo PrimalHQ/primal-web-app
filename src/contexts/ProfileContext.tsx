@@ -21,6 +21,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrMentionContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,

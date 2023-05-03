@@ -274,7 +274,6 @@ const Notifications: Component = () => {
         if (content.kind === Kind.Notification) {
           const notif = JSON.parse(content.content) as PrimalNotification;
 
-
           const isLastNotif =
             lastNotification()?.created_at === notif.created_at &&
             lastNotification()?.type === notif.type;
@@ -767,7 +766,7 @@ const Notifications: Component = () => {
     const type = NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO;
     const notifs = sortedNotifications[type] || [];
 
-    const grouped = groupBy(notifs, 'post_you_were_mentioned_in');
+    const grouped = groupBy(notifs, 'reply');
 
     const keys = Object.keys(grouped);
 
@@ -945,7 +944,7 @@ const Notifications: Component = () => {
     const type = NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO;
     const notifs = sortedNotifications[type] || [];
 
-    const grouped = groupBy(notifs, 'post_your_post_was_mentioned_in');
+    const grouped = groupBy(notifs, 'reply');
 
     const keys = Object.keys(grouped);
 

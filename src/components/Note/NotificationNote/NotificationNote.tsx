@@ -7,7 +7,7 @@ import NoteFooter from '../NoteFooter/NoteFooter';
 import styles from './NotificationNote.module.scss';
 import { useThreadContext } from '../../../contexts/ThreadContext';
 
-const Note: Component<{ note: PrimalNote, showFooter?: boolean }> = (props) => {
+const Note: Component<{ note: PrimalNote }> = (props) => {
 
   const threadContext = useThreadContext();
 
@@ -29,11 +29,9 @@ const Note: Component<{ note: PrimalNote, showFooter?: boolean }> = (props) => {
             <ParsedNote note={props.note} />
           </div>
 
-          <Show when={props.showFooter}>
-            <div class={styles.footer}>
-              <NoteFooter note={props.note} />
-            </div>
-          </Show>
+          <div class={styles.footer}>
+            <NoteFooter note={props.note} />
+          </div>
         </div>
       </div>
     </A>

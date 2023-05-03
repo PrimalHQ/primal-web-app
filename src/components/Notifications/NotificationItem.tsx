@@ -129,7 +129,8 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   });
 
   const userName = (user: PrimalUser) => {
-    return user.displayName ||
+    return user.display_name ||
+      user.displayName ||
       user.name ||
       truncateNpub(user.npub);
   };
@@ -152,15 +153,6 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   createEffect(() => {
     setTypeIcon(typeIcons[props.type])
   });
-
-
-  const isReply = () => {
-    return [
-      NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO,
-      NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
-      NotificationType.YOUR_POST_WAS_REPLIED_TO,
-    ].includes(props.type)
-  }
 
   return (
     <div class={styles.notifItem}>
@@ -205,7 +197,6 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
               <NotificationNote
                 // @ts-ignore
                 note={props.note}
-                showFooter={true}
               />
             </Show>
           </div>

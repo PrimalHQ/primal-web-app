@@ -327,12 +327,12 @@ export const notificationTypeNoteProps: Record<string, string> = {
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'your_post_were_mentioned_in',
-  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'post_you_were_mentioned_in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'reply',
 
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'your_post_were_mentioned_in',
-  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'post_your_post_was_mentioned_in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'reply',
 
 }
 
