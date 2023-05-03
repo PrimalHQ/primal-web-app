@@ -14,6 +14,7 @@ import {
 import styles from './ParsedNote.module.scss';
 import { decode, EventPointer, ProfilePointer } from 'nostr-tools/nip19';
 
+
 const userName = (user: PrimalUser) => {
   return truncateNpub(
     user.display_name ||
@@ -33,27 +34,32 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const eventId = decode(id).data as string | EventPointer;
-    const hex = typeof eventId === 'string' ? eventId : eventId.id;
-    const npub = hexToNpub(hex);
+    try {
+      const eventId = decode(id).data as string | EventPointer;
+      const hex = typeof eventId === 'string' ? eventId : eventId.id;
+      const npub = hexToNpub(hex);
 
-    const path = `/thread/${npub}`;
+      const path = `/thread/${npub}`;
 
-    const ment = note.mentionedNotes && note.mentionedNotes[hex];
+      const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
-    const link = highlightOnly ?
-      <span class='linkish' >{url}</span> :
-      ment ?
-        <div>
-          <EmbeddedNote
-            note={ment}
-            mentionedUsers={note.mentionedUsers || {}}
-          />
-        </div> :
-        <A href={path}>{url}</A>;
+      const link = highlightOnly ?
+        <span class='linkish' >{url}</span> :
+        ment ?
+          <div>
+            <EmbeddedNote
+              note={ment}
+              mentionedUsers={note.mentionedUsers || {}}
+            />
+          </div> :
+          <A href={path}>{url}</A>;
 
-    // @ts-ignore
-    return link.outerHTML || url;
+      // @ts-ignore
+      return link.outerHTML || url;
+    }
+    catch (e) {
+      return (<span class='linkish' >{url}</span>).outerHTML;
+    }
   });
 
 };
