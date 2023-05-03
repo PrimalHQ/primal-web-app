@@ -1,7 +1,4 @@
-import { noteEncode } from "nostr-tools/nip19";
 import { createStore } from "solid-js/store";
-import { getEvents, getUserFeed } from "../lib/feed";
-import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -17,25 +14,10 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
-  FeedPage,
   NostrEOSE,
   NostrEvent,
-  NostrEventContent,
-  NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
-  PrimalNote,
-  PrimalUser,
-  VanityProfiles,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { hexToNpub } from "../lib/keys";
-import {
-  getOldestProfileEvent,
-  getProfileContactList,
-  getProfileScoredNotes,
-  getUserProfileInfo,
-} from "../lib/profile";
 import { subscribeToNotificationStats } from "../lib/notifications";
 import { useAccountContext } from "./AccountContext";
 
@@ -65,6 +47,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    // @ts-ignore
     subscribeToNotificationStats(account?.publicKey, subid);
   }
 
@@ -82,6 +65,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
             return acc;
           }
 
+          // @ts-ignore
           return acc + content[key];
         }, 0);
 

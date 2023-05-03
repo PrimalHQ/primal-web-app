@@ -1,9 +1,6 @@
 import DOMPurify from "dompurify";
-import { noteEncode } from "nostr-tools/nip19";
-import { SetStoreFunction } from "solid-js/store";
-import { APP_ID } from "../App";
+import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
-import { getEvents } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
@@ -46,7 +43,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       score: stat?.score || 0,
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
-      noteId: noteEncode(message.id),
+      noteId: nip19.noteEncode(message.id),
     },
   }
 };
@@ -206,7 +203,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         score: stat?.score || 0,
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
-        noteId: noteEncode(msg.id),
+        noteId: nip19.noteEncode(msg.id),
       },
       repost: message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined,
       msg,

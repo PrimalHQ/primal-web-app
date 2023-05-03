@@ -1,10 +1,7 @@
 import DOMPurify from "dompurify";
 import { Relay } from "nostr-tools";
-import { noteEncode } from "nostr-tools/nip19";
 import { Kind } from "../constants";
 import { NostrWindow, PrimalNote } from "../types/primal";
-import { getThread } from "./feed";
-import { getUserProfile } from "./profile";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';

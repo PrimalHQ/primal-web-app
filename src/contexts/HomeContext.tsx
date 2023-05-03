@@ -1,4 +1,4 @@
-import { noteEncode } from "nostr-tools/nip19";
+import { nip19 } from "nostr-tools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
@@ -134,7 +134,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
-      const messageId = noteEncode(message.id);
+      const messageId = nip19.noteEncode(message.id);
 
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :

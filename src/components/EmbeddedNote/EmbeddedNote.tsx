@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { noteEncode } from 'nostr-tools/nip19';
+import { nip19 } from 'nostr-tools';
 import { Component, createMemo, Show } from 'solid-js';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
@@ -19,7 +19,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
   const threadContext = useThreadContext();
   const intl = useIntl();
 
-  const noteId = () => noteEncode(props.note.post.id);
+  const noteId = () => nip19.noteEncode(props.note.post.id);
 
   const navToThread = () => {
     threadContext?.actions.setPrimaryNote(props.note);

@@ -9,7 +9,7 @@ import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import Loader from '../components/Loader/Loader';
-import { noteEncode } from 'nostr-tools/nip19';
+import { nip19 } from 'nostr-tools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -28,7 +28,7 @@ const Thread: Component = () => {
       return params.postId;
     }
 
-    return noteEncode(params.postId);
+    return nip19.noteEncode(params.postId);
   };
 
   const threadContext = useThreadContext();

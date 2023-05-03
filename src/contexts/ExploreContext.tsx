@@ -1,4 +1,4 @@
-import { noteEncode } from "nostr-tools/nip19";
+import { nip19 } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { getEvents, getExploreFeed } from "../lib/feed";
 import { useAccountContext } from "./AccountContext";
@@ -27,6 +27,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrMentionContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
@@ -181,7 +182,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+      if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
         updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );

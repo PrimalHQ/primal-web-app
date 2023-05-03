@@ -1,4 +1,4 @@
-import { noteEncode } from "nostr-tools/nip19";
+import { nip19 } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { getEvents, getUserFeed } from "../lib/feed";
 import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
@@ -161,7 +161,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
-      const messageId = noteEncode(message.id);
+      const messageId = nip19.noteEncode(message.id);
 
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :
@@ -207,7 +207,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (store.lastNote?.post?.noteId !== noteEncode(message.id)) {
+      if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
         updateStore('sidebar', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );

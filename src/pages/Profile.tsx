@@ -1,5 +1,5 @@
 import { RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
-import { decode } from 'nostr-tools/nip19';
+import { nip19 } from 'nostr-tools';
 import {
   Component,
   createEffect,
@@ -62,7 +62,7 @@ const Profile: Component = () => {
     let hex = params.npub || account?.publicKey;
 
     if (params.npub?.startsWith('npub')) {
-      hex = decode(params.npub).data as string;
+      hex = nip19.decode(params.npub).data as string;
     }
 
     return hex;

@@ -1,6 +1,6 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
-import { decode } from "nostr-tools/nip19";
+import { nip19 } from "nostr-tools";
 import { day, hour, noKey } from "../constants";
 
 export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
@@ -46,7 +46,10 @@ export const getThread = (postId: string, subid: string, until = 0, limit = 20) 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["thread_view", { event_id: decode(postId).data, limit: 100 }]},
+    {cache: ["thread_view", {
+      event_id: nip19.decode(postId).data,
+      limit: 100
+    }]},
   ]));
 }
 

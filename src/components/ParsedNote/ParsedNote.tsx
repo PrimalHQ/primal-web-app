@@ -12,7 +12,7 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-import { decode, EventPointer, ProfilePointer } from 'nostr-tools/nip19';
+import { nip19 } from 'nostr-tools';
 
 
 const userName = (user: PrimalUser) => {
@@ -34,32 +34,27 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    try {
-      const eventId = decode(id).data as string | EventPointer;
-      const hex = typeof eventId === 'string' ? eventId : eventId.id;
-      const npub = hexToNpub(hex);
+    const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+    const hex = typeof eventId === 'string' ? eventId : eventId.id;
+    const noteId = nip19.noteEncode(hex);
 
-      const path = `/thread/${npub}`;
+    const path = `/thread/${noteId}`;
 
-      const ment = note.mentionedNotes && note.mentionedNotes[hex];
+    const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
-      const link = highlightOnly ?
-        <span class='linkish' >{url}</span> :
-        ment ?
-          <div>
-            <EmbeddedNote
-              note={ment}
-              mentionedUsers={note.mentionedUsers || {}}
-            />
-          </div> :
-          <A href={path}>{url}</A>;
+    const link = highlightOnly ?
+      <span class='linkish' >{url}</span> :
+      ment ?
+        <div>
+          <EmbeddedNote
+            note={ment}
+            mentionedUsers={note.mentionedUsers || {}}
+          />
+        </div> :
+        <A href={path}>{url}</A>;
 
-      // @ts-ignore
-      return link.outerHTML || url;
-    }
-    catch (e) {
-      return (<span class='linkish' >{url}</span>).outerHTML;
-    }
+    // @ts-ignore
+    return link.outerHTML || url;
   });
 
 };
@@ -74,7 +69,7 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const profileId = decode(id).data as string | ProfilePointer;
+    const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
     const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
    const npub = hexToNpub(hex);

@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
-import { decode } from 'nostr-tools/nip19';
+import { nip19 } from 'nostr-tools';
 import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
@@ -85,7 +85,7 @@ const Notifications: Component = () => {
       }
 
       if (user.startsWith('npub')) {
-        return decode(user).data;
+        return nip19.decode(user).data;
       }
 
       return user;

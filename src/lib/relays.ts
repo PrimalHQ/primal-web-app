@@ -47,7 +47,7 @@ export const connectRelays = async (
 ) => {
 
   const urls = Object.keys(relaySettings);
-  const relays = urls.map(relayInit);
+  const relays = urls.map(u => relayInit(u));
 
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
