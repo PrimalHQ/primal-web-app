@@ -24,7 +24,7 @@ const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean 
     if (!account || !account.hasPublicKey() || !props.person) {
       toast?.sendWarning(intl.formatMessage({
         id: 'account.needToLogin',
-        defaultMessage: 'You cannot perform this action anonimously',
+        defaultMessage: 'You need to be signed in to perform this action',
         description: 'Message to user that an action cannot be preformed without a public key',
       }))
       return;
