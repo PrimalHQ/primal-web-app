@@ -102,7 +102,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
         const tag = props.note.post.tags[r];
 
-        if (tag == undefined || tag.length == 0) continue;
+        if (tag === undefined || tag.length === 0) continue;
 
         if (
           tag[0] === 'e' &&
