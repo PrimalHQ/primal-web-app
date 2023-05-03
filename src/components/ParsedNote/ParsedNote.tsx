@@ -12,7 +12,7 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-import { decode } from 'nostr-tools/nip19';
+import { decode, EventPointer, ProfilePointer } from 'nostr-tools/nip19';
 
 const userName = (user: PrimalUser) => {
   return truncateNpub(
@@ -24,7 +24,7 @@ const userName = (user: PrimalUser) => {
 };
 
 export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
-  const regex = /\bnostr:((note)1\w+)\b|#\[(\d+)\]/g;
+  const regex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
     const [_, id] = url.split(':');
@@ -33,19 +33,23 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const path = `/thread/${id}`;
+    const eventId = decode(id).data as string | EventPointer;
+    const hex = typeof eventId === 'string' ? eventId : eventId.id;
+    const npub = hexToNpub(hex);
 
-    const hex = decode(id).data as string;
+    const path = `/thread/${npub}`;
 
     const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
     const link = highlightOnly ?
       <span class='linkish' >{url}</span> :
       ment ?
-        <EmbeddedNote
-          note={ment}
-          mentionedUsers={note.mentionedUsers || {}}
-        /> :
+        <div>
+          <EmbeddedNote
+            note={ment}
+            mentionedUsers={note.mentionedUsers || {}}
+          />
+        </div> :
         <A href={path}>{url}</A>;
 
     // @ts-ignore
@@ -55,7 +59,7 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
 };
 
 export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
-  const regex = /\bnostr:((npub)1\w+)\b|#\[(\d+)\]/g;
+  const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
     const [_, id] = url.split(':');
@@ -64,11 +68,14 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const path = `/profile/${id}`;
+    const profileId = decode(id).data as string | ProfilePointer;
 
-    const pubkey = decode(id);
+    const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+   const npub = hexToNpub(hex);
 
-    const user = note.mentionedUsers && note.mentionedUsers[pubkey.data as string];
+    const path = `/profile/${npub}`;
+
+    const user = note.mentionedUsers && note.mentionedUsers[hex];
 
     const link = highlightOnly ?
       <span class='linkish'>{url}</span> :

@@ -106,11 +106,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
     return text.replace(regex, (token) => {
       const embeded = (
-        <span>
-          <A
-            href={`/search/${token.replaceAll('#', '%23')}`}
-          >{token}</A>
-        </span>
+        <span class="linkish">{token}</span>
       );
 
       // @ts-ignore
