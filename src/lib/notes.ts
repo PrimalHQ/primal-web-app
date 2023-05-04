@@ -199,12 +199,8 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
 
         pub.on('ok', () => {
           console.log(`${relay.url} has accepted our event`);
-        })
-
-        pub.on('seen', () => {
-          console.log(`we saw the event on ${relay.url}`);
           resolve(true);
-        })
+        });
 
         pub.on('failed', (reason: any) => {
           console.log(`failed to publish to ${relay.url}: ${reason}`)
@@ -212,7 +208,7 @@ const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
           if (failed >= numberOfRelays) {
             resolve(false);
           }
-        })
+        });
       } catch (e) {
         console.log('Failed sending note: ', e);
         failed += 1;

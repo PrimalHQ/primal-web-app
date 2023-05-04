@@ -70,40 +70,65 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   };
 
   const setRelaySettings = (settings: NostrRelays) => {
+    console.log('setRelaySettings', settings);
     updateStore('relaySettings', () => ({ ...settings }));
     saveRelaySettings(store.publicKey, settings)
   }
 
-  const getRelays = async () => {
-    const win = window as NostrWindow;
-    const nostr = win.nostr;
-    const storage = getStorage(store.publicKey);
+  let connecting = false;
 
-    if (nostr) {
-      let relaySettings = await nostr.getRelays();
+  const connectToRelays = (relaySettings: NostrRelays) => {
 
-      if (!relaySettings) {
-        relaySettings = storage.relaySettings;
-      }
-
-      setRelaySettings(relaySettings);
-
-      let allClosed = true;
-
-      allClosed = await closeRelays(store.relays);
-
-      if (!allClosed) {
-        console.log('Failed to close all relays')
-      }
-
-      await connectRelays(relaySettings, (relay) => {
-        updateStore('relays', (relays) => [ ...relays, { ...relay }]);
-      });
-
-      console.log('Connected relays: ', unwrap(store.relays))
+    if (connecting) {
+      return;
     }
 
+    connecting = true;
+
+    closeRelays(store.relays,
+      () => {
+        connectRelays(relaySettings, (connected) => {
+          updateStore('relays', () => [ ...connected ]);
+          console.log('Connected relays: ', connected);
+          connecting = false;
+        });
+
+      },
+      () => console.log('Failed to close all relays'),
+    );
+
   };
+
+  // const getRelays = async () => {
+  //   const win = window as NostrWindow;
+  //   const nostr = win.nostr;
+  //   const storage = getStorage(store.publicKey);
+
+  //   if (nostr) {
+  //     let relaySettings = await nostr.getRelays();
+
+  //     if (!relaySettings) {
+  //       relaySettings = storage.relaySettings;
+  //     }
+
+  //     setRelaySettings(relaySettings);
+
+  //     let allClosed = true;
+
+  //     allClosed = await closeRelays(store.relays);
+
+  //     if (!allClosed) {
+  //       console.log('Failed to close all relays')
+  //     }
+
+  //     await connectRelays(relaySettings, (relay) => {
+  //       updateStore('relays', (relays) => [ ...relays, { ...relay }]);
+  //     });
+
+  //     console.log('Connected relays: ', unwrap(store.relays))
+  //   }
+
+  // };
 
   let extensionAttempt = 0;
 
@@ -130,7 +155,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       else {
         setPublicKey(key);
         localStorage.setItem('pubkey', key);
-        getRelays();
+        // getRelays();
         getUserProfile(key, `user_profile_${APP_ID}`);
       }
     } catch (e: any) {
@@ -168,6 +193,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   };
 
   const updateContacts = (content: NostrContactsContent) => {
+
     const followingSince = content.created_at;
     const tags = content.tags;
 
@@ -175,6 +201,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
     }, []);
 
+    setRelaySettings(JSON.parse(content.content || '{}'));
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
     saveFollowing(store.publicKey, contacts, followingSince || 0);
@@ -298,6 +325,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
   });
 
+  createEffect(() => {
+    if (Object.keys(store.relaySettings).length > 0) {
+      connectToRelays(store.relaySettings);
+    }
+  });
+
   onCleanup(() => {
     removeSocketListeners(
       socket(),
@@ -331,6 +364,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     if (subId === `user_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
+        if (Object.keys(store.relaySettings).length === 0) {
+          setRelaySettings(JSON.parse(content.content || '{}'));
+        }
 
         if (!content.created_at || content.created_at <= store.followingSince) {
           return;
