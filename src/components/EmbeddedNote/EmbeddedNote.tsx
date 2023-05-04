@@ -166,6 +166,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
                 parseNote2(props.note.post.content)
               ),
               props.note,
+              true,
             ),
             props.note,
             true,
