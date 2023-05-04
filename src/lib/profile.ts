@@ -114,9 +114,9 @@ export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: stri
   }
 };
 
-export const fetchKnownProfiles: () => Promise<VanityProfiles> = async () => {
+export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
-    const content = await fetch(`${window.location.origin}/.well-known/nostr.json`);
+    const content = await fetch(`${window.location.origin}/.well-known/nostr.json?name=${vanityName}`);
 
     return await content.json();
   } catch (e) {
