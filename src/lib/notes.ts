@@ -50,7 +50,7 @@ export const urlify = (text: string, highlightOnly = false) => {
 
     if (isYouTubeVideo) {
       const full = new URL(url);
-      const videoId = url.includes('/watch?v=') ? full.searchParams.get('v') : full.pathname.substring(1);
+      const videoId = url.includes('/watch?v=') ? full.searchParams.get('v') : full.pathname.split('/')[full.pathname.split('/').length - 1];
       const source = `https://www.youtube.com/embed/${videoId}`
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
