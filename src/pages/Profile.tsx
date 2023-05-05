@@ -50,7 +50,8 @@ const Profile: Component = () => {
 
   const getHex = () => {
     if (params.vanityName && routeData()) {
-      const hex = routeData()?.names[params.vanityName];
+      const name = params.vanityName.toLowerCase();
+      const hex = routeData()?.names[name];
 
       if (hex) {
         return hex;
