@@ -15,6 +15,7 @@ import { useParams } from '@solidjs/router';
 import styles from './Search.module.scss';
 import { useSearchContext } from '../contexts/SearchContext';
 import SearchSidebar from '../components/SearchSidebar/SearchSidebar';
+import Loader from '../components/Loader/Loader';
 
 const Search: Component = () => {
   const params = useParams();
@@ -59,22 +60,27 @@ const Search: Component = () => {
 
       <div class={styles.searchContent}>
         <Show
-          when={search?.notes && search.notes.length > 0}
-          fallback={
-            <div class={styles.noResults}>
-              {
-                intl.formatMessage({
-                id: 'search.noResults',
-                defaultMessage: 'No results found',
-                description: 'Message shown when no search results were found'
-              })
-              }
-            </div>
-          }
+          when={!search?.isFetchingContent}
+          fallback={<Loader />}
         >
-          <For each={search?.notes} >
-            {note => <Note note={note} />}
-          </For>
+          <Show
+            when={search?.notes && search.notes.length > 0}
+            fallback={
+              <div class={styles.noResults}>
+                {
+                  intl.formatMessage({
+                  id: 'search.noResults',
+                  defaultMessage: 'No results found',
+                  description: 'Message shown when no search results were found'
+                })
+                }
+              </div>
+            }
+          >
+            <For each={search?.notes} >
+              {note => <Note note={note} />}
+            </For>
+          </Show>
         </Show>
       </div>
     </>
