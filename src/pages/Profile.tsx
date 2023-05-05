@@ -60,6 +60,10 @@ const Profile: Component = () => {
       navigate('/404');
     }
 
+    if (params.vanityName) {
+      return '';
+    }
+
     let hex = params.npub || account?.publicKey;
 
     if (params.npub?.startsWith('npub')) {
@@ -76,6 +80,7 @@ const Profile: Component = () => {
 
     profile?.actions.setProfileKey(hex);
 
+    console.log('CALL: ', hex)
     profile?.actions.clearNotes();
     profile?.actions.fetchNotes(hex);
   }
