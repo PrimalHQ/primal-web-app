@@ -60,6 +60,8 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
 };
 
 export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
+
+
   const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -72,7 +74,7 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
     const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
     const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-   const npub = hexToNpub(hex);
+    const npub = hexToNpub(hex);
 
     const path = `/profile/${npub}`;
 
@@ -126,6 +128,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
             </div>
           );
 
+
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
@@ -170,7 +173,19 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
 
   return (
-    <div innerHTML={parsedContent(parseNpubLinks(parseNoteLinks(highlightHashtags(parseNote1(props.note.post.content)), props.note), props.note))}>
+    <div innerHTML={
+      parseNpubLinks(
+        parseNoteLinks(
+          parsedContent(
+            highlightHashtags(
+              parseNote1(props.note.post.content)
+            ),
+          ),
+          props.note,
+        ),
+        props.note,
+      )}
+    >
     </div>
   );
 };

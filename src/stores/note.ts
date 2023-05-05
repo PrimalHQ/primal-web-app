@@ -119,6 +119,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
     return [];
   }
 
+  const mentions = page.mentions || {};
+
   return  page.messages.map((message) => {
     const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
 
@@ -127,16 +129,15 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
     const userMeta = JSON.parse(user?.content || '{}');
 
-    const mentionIds = message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
+    const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
     let mentionedNotes = {};
     let mentionedUsers = {};
 
-
     if (mentionIds.length > 0) {
       mentionedNotes = mentionIds.reduce((acc, id) => {
-        const m = page.mentions && page.mentions[id];
+        const m = mentions && mentions[id];
 
         if (!m) {
           return acc;
@@ -168,7 +169,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
           ...acc,
           [id]: { ...convertToUser(m || emptyUser(id)) },
         };
-      }, {});
+      }, mentionedUsers);
     }
 
     return {

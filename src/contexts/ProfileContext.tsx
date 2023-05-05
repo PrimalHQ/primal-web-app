@@ -185,6 +185,16 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       );
       return;
     }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
   };
 
   const savePage = (page: FeedPage) => {

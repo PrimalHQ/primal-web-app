@@ -81,7 +81,6 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
         }
 
-
         if (tag[0] === 'p' && props.mentionedUsers && props.mentionedUsers[tag[1]]) {
           const user = props.mentionedUsers[tag[1]];
 
@@ -90,6 +89,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
               @{userName(user)}
             </span>
           );
+
 
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
@@ -116,11 +116,11 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
   return (
     <A
-    href={`/thread/${noteId()}`}
-    class={styles.mentionedNote}
-    onClick={() => navToThread()}
-    data-event={props.note.post.id}
-    data-event-bech32={noteId()}
+      href={`/thread/${noteId()}`}
+      class={styles.mentionedNote}
+      onClick={() => navToThread()}
+      data-event={props.note.post.id}
+      data-event-bech32={noteId()}
     >
       <div class={styles.mentionedNoteHeader}>
         <Avatar
@@ -159,18 +159,18 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
         </span>
       </div>
       <div innerHTML={
-        parsedContent(
-          parseNpubLinks(
-            parseNoteLinks(
+        parseNpubLinks(
+          parseNoteLinks(
+            parsedContent(
               highlightHashtags(
                 parseNote2(props.note.post.content)
               ),
-              props.note,
-              true,
             ),
             props.note,
             true,
-          )
+          ),
+          props.note,
+          true,
         )
       }>
       </div>
