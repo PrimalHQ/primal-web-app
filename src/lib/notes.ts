@@ -64,7 +64,7 @@ export const urlify = (text: string, highlightOnly = false) => {
 export const addlineBreaks = (text: string) => {
   const regex = /(\r\n|\r|\n)/g;
 
-  return text.replace(regex, '<br>');
+  return text.replaceAll(regex, '<br> ');
 };
 
 export const highlightHashtags = (text: string) => {

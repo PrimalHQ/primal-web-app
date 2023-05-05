@@ -102,7 +102,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
   };
 
   const highlightHashtags = (text: string) => {
-    const regex = /#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+    const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
     return text.replace(regex, (token) => {
       const embeded = (
