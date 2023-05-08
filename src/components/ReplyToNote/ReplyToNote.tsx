@@ -209,9 +209,12 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
   };
 
   createEffect(() => {
-    if (query().length > 0) {
-      search?.actions.findUsers(query());
+    if (query().length === 0) {
+      search?.actions.getRecomendedUsers();
+      return;
     }
+
+    search?.actions.findUsers(query());
   });
 
   createEffect(() => {
