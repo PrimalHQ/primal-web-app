@@ -57,8 +57,6 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
   const [isMentioning, setMentioning] = createSignal(false);
   const [query, setQuery] = createSignal('');
 
-  let mentions = new Set<string>();
-
   const [open, setOpen] = createSignal(false);
 
   const account = useAccountContext();
@@ -121,22 +119,22 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     closeReplyToNote();
   };
 
-  const positionOptions = (value: string) => {
-    const lineHight = 20;
-    const charWidth = 6;
-
-    const lineNum = (value.match(/(\r\n|\n|\r)/g) || []).length + 1;
-
-    const lastLineBreakIndex = value.lastIndexOf('\n') + 1;
-
-    const charNum = value.length - lastLineBreakIndex
-
-    if (!mentionOptions) {
+  const positionOptions = () => {
+    if (!textArea || !mentionOptions) {
       return;
     }
 
-    mentionOptions.style.top = `${(lineNum * lineHight) + 20}px`;
-    mentionOptions.style.left = `${(charWidth * charNum) + 110}px`;
+    const taRect = textArea.getBoundingClientRect();
+
+    mentionOptions.style.left = '110px';
+
+    if (30 + taRect.height > document.documentElement.clientHeight - taRect.top -200) {
+      mentionOptions.style.removeProperty('top');
+      mentionOptions.style.bottom = `${130}px`;
+      return;
+    }
+    mentionOptions.style.removeProperty('bottom');
+    mentionOptions.style.top = `${30 + taRect.height}px`;
   };
 
   const updateText = (value: string) => {
@@ -205,7 +203,9 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     setQuery('');
     updateText(textArea.value);
 
-    mentions.add(user.pubkey);
+    // Dispatch input event to recalculate UI position
+    const e = new Event('input', { bubbles: true, cancelable: true});
+    textArea.dispatchEvent(e);
   };
 
   createEffect(() => {
@@ -215,8 +215,8 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
   });
 
   createEffect(() => {
-    if (isMentioning() && textArea) {
-      positionOptions(textArea?.value);
+    if (isMentioning()) {
+      positionOptions();
     }
   });
 

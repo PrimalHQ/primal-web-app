@@ -27,8 +27,6 @@ const NewNote: Component = () => {
   const [isMentioning, setMentioning] = createSignal(false);
   const [query, setQuery] = createSignal('');
 
-  let mentions = new Set<string>();
-
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
     elm.value = ''
@@ -65,24 +63,6 @@ const NewNote: Component = () => {
 
   const activeUser = () => account?.activeUser;
 
-  // const onClickOutside = (e: MouseEvent) => {
-  //   if (
-  //     !document?.getElementById('new_note_holder')?.contains(e.target as Node) &&
-  //     !document?.getElementById('mention-auto')?.contains(e.target as Node)
-  //   ) {
-  //     account?.actions?.hideNewNoteForm();
-  //   }
-  // }
-
-  // createEffect(() => {
-  //   if (account?.showNewNoteForm) {
-  //     document.addEventListener('click', onClickOutside);
-  //   }
-  //   else {
-  //     document.removeEventListener('click', onClickOutside);
-  //   }
-  // });
-
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     document.addEventListener('input', onExpandableTextareaInput);
@@ -91,12 +71,9 @@ const NewNote: Component = () => {
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     document.removeEventListener('input', onExpandableTextareaInput);
-
-    mentions = new Set<string>();
   });
 
   const closeNewNote = () => {
-    mentions = new Set<string>();
     account?.actions?.hideNewNoteForm()
   };
 
@@ -126,22 +103,21 @@ const NewNote: Component = () => {
     closeNewNote();
   };
 
-  const positionOptions = (value: string) => {
-    const lineHight = 20;
-    const charWidth = 6;
-
-    const lineNum = (value.match(/(\r\n|\n|\r)/g) || []).length + 1;
-
-    const lastLineBreakIndex = value.lastIndexOf('\n') + 1;
-
-    const charNum = value.length - lastLineBreakIndex
-
-    if (!mentionOptions) {
+  const positionOptions = () => {
+    if (!textArea || !mentionOptions) {
       return;
     }
 
-    mentionOptions.style.top = `${(lineNum * lineHight) + 20}px`;
-    mentionOptions.style.left = `${(charWidth * charNum) + 110}px`;
+    const taRect = textArea.getBoundingClientRect();
+
+    let newTop = taRect.top + taRect.height;
+
+    if (newTop > document.documentElement.clientHeight - 200) {
+      newTop = taRect.top - 400;
+    }
+
+    mentionOptions.style.top = `${newTop}px`;
+    mentionOptions.style.left = '110px';
   };
 
   const updateText = (value: string) => {
@@ -192,8 +168,8 @@ const NewNote: Component = () => {
   });
 
   createEffect(() => {
-    if (isMentioning() && textArea) {
-      positionOptions(textArea?.value);
+    if (isMentioning()) {
+      positionOptions();
     }
   });
 
@@ -222,7 +198,9 @@ const NewNote: Component = () => {
     setQuery('');
     updateText(textArea.value);
 
-    mentions.add(user.pubkey);
+    // Dispatch input event to recalculate UI position
+    const e = new Event('input', { bubbles: true, cancelable: true});
+    textArea.dispatchEvent(e);
   };
 
   return (
