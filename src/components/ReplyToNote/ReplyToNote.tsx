@@ -1,10 +1,14 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
+import { useSearchContext } from "../../contexts/SearchContext";
+import { hexToNpub } from "../../lib/keys";
 import { sendNote } from "../../lib/notes";
 import { truncateNpub } from "../../stores/profile";
 import { PrimalNote, PrimalUser } from "../../types/primal";
+import { debounce } from "../../utils";
 import Avatar from "../Avatar/Avatar";
+import SearchOption from "../Search/SearchOption";
 import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./ReplyToNote.module.scss";
 
@@ -44,6 +48,16 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
   const intl = useIntl();
 
+  const search = useSearchContext();
+
+  let textArea: HTMLTextAreaElement | undefined;
+  let mentionOptions: HTMLDivElement | undefined;
+
+  const [isMentioning, setMentioning] = createSignal(false);
+  const [query, setQuery] = createSignal('');
+
+  let mentions = new Set<string>();
+
   const [open, setOpen] = createSignal(false);
 
   const account = useAccountContext();
@@ -77,37 +91,157 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     setOpen(false);
   };
 
-  const postNote = async () => {
-    const textArea = document.getElementById('reply_to_note_text_area') as HTMLTextAreaElement;
+  const encodeMentions = (value: string) => {
+    const regex = /@\[[^\s!@#$%^&*(),.?":{}|<>]+\]/ig;
 
-    if (textArea.value.trim() === '') {
+    let parsed = value;
+    let refs = [];
+    let match;
+
+    while((match = regex.exec(parsed)) !== null) {
+      refs.push(match[0]);
+    }
+
+    refs.forEach((ref, i) => {
+      parsed = parsed.replaceAll(ref, `#[${i}]`);
+    });
+
+    return parsed;
+
+  };
+
+  const postNote = async () => {
+    if (!textArea) {
       return;
     }
 
-    const replyTo = {
-      e: props.note.post.id,
-      p: props.note.post.pubkey,
-    };
+    const value = textArea.value;
 
-    if (account) {
-      const success = await sendNote(textArea.value, account.relays, replyTo);
+    const encoded = encodeMentions(value);
 
-      if (success) {
-        toast?.sendSuccess('Message posted successfully');
-      }
-      else {
-        toast?.sendWarning('Failed to send message');
-      }
+    if (encoded.trim() === '') {
+      return;
     }
 
-    closeReplyToNote();
+    console.log('ENC: ', encoded)
+
+    // if (account) {
+    //   let tags = Array.from(mentions).map(pk => ['p', pk]);
+    //   tags.push(['e', props.note.post.id]);
+    //   tags.push(['p', props.note.post.pubkey]);
+
+    //   const success = await sendNote(encoded, account.relays, tags);
+
+    //   if (success) {
+    //     toast?.sendSuccess('Message posted successfully');
+    //   }
+    //   else {
+    //     toast?.sendWarning('Failed to send message');
+    //   }
+    // }
+
+    // closeReplyToNote();
 
   };
-  const recipientName = (user: PrimalUser) => {
-    return user.displayName ||
+
+  const positionOptions = (value: string) => {
+    const lineHight = 20;
+    const charWidth = 6;
+
+    const lineNum = (value.match(/(\r\n|\n|\r)/g) || []).length + 1;
+
+    const lastLineBreakIndex = value.lastIndexOf('\n') + 1;
+
+    const charNum = value.length - lastLineBreakIndex
+
+    if (!mentionOptions) {
+      return;
+    }
+
+    mentionOptions.style.top = `${(lineNum * lineHight) + 20}px`;
+    mentionOptions.style.left = `${(charWidth * charNum) + 110}px`;
+  };
+
+  const updateText = (value: string) => {
+    const lastChar = value.charAt(value.length - 1);
+
+    if (lastChar === '@') {
+      setMentioning(true);
+      setQuery('');
+      return;
+    }
+
+    if (lastChar === ' ') {
+      setMentioning(false);
+      setQuery('');
+      return;
+    }
+
+    const words = value.split(' ');
+    const lastWord = words[words.length -1];
+
+    if (isMentioning()) {
+      const newQuery = lastWord.slice(lastWord.lastIndexOf('@')+1);
+
+      debounce(() => {
+        // @ts-ignore
+        setQuery(newQuery);
+      }, 500);
+    }
+
+    setMentioning(lastWord.includes('@'));
+  };
+
+  const onInput = () => {
+    if (!textArea) {
+      return;
+    }
+
+    const value = textArea.value;
+
+    updateText(value);
+
+  };
+
+  const userName = (user: PrimalUser) => {
+    return truncateNpub(
+      // @ts-ignore
+      user.display_name ||
+      user.displayName ||
       user.name ||
-      truncateNpub(user.npub);
-  }
+      user.npub ||
+      hexToNpub(user.pubkey) || '');
+  };
+
+  const selectUser = (user: PrimalUser) => {
+    if (!textArea) {
+      return;
+    }
+
+    let value = textArea.value;
+
+    value = value.slice(0, value.lastIndexOf('@'));
+
+    textArea.value = `${value}@[${userName(user)}] `;
+    textArea.focus();
+
+    setQuery('');
+    updateText(textArea.value);
+
+    mentions.add(user.pubkey);
+  };
+
+  createEffect(() => {
+    if (query().length > 0) {
+      search?.actions.findUsers(query());
+    }
+  });
+
+  createEffect(() => {
+    if (isMentioning() && textArea) {
+      positionOptions(textArea?.value);
+    }
+  });
 
   return (
     <Show
@@ -134,7 +268,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
                       description: 'Reply to button label',
                     },
                     {
-                      name: recipientName(props.note.user),
+                      name: userName(props.note.user),
                     },
                   )}
                 </span>
@@ -154,8 +288,40 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
             />
           </div>
           <div class={styles.rightSide}>
-            <textarea id="reply_to_note_text_area" rows={3} data-min-rows={3} >
+            <textarea
+              id="reply_to_note_text_area"
+              rows={3}
+              data-min-rows={3}
+              onInput={onInput}
+              ref={textArea}
+            >
             </textarea>
+
+            <Show when={isMentioning()}>
+                <div
+                  id="mention-auto"
+                  class={styles.searchSuggestions}
+                  ref={mentionOptions}
+                >
+                  <For each={search?.users}>
+                    {(user) => (
+                      <SearchOption
+                        title={userName(user)}
+                        description={user.nip05}
+                        icon={<Avatar src={user.picture} size="xs" />}
+                        statNumber={search?.scores[user.pubkey]}
+                        statLabel={intl.formatMessage({
+                          id: 'search.users.followers',
+                          defaultMessage: 'followers',
+                          description: 'Followers label for user search results',
+                        })}
+                        onClick={() => selectUser(user)}
+                      />
+                    )}
+                  </For>
+                </div>
+              </Show>
+
             <div class={styles.controls}>
               <button class={styles.primaryButton} onClick={postNote}>
                 <span>

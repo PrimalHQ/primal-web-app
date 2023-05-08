@@ -155,9 +155,8 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
   return await sendEvent(event, relays);
 }
 
-export const sendNote = async (text: string, relays: Relay[], replyTo?: ReplyTo) => {
-  const tags = parseReplyTo(replyTo);
 
+export const sendNote = async (text: string, relays: Relay[], tags: string[][]) => {
   const event = {
     content: text,
     kind: Kind.Text,

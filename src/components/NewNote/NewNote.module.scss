@@ -131,3 +131,16 @@
     justify-content: center;
   }
 }
+
+.searchSuggestions {
+  width: 300px;
+  background-color: var(--background-site);
+  border: 1px solid var(--text-tertiary-2);
+  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 50;
+}

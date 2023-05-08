@@ -24,7 +24,14 @@ const SearchOption: Component<{
     return (
       <Show
         when={props.href}
-        fallback={<div class={klass()}>{prp.children}</div>}
+        fallback={
+          <div
+            class={klass()}
+            onClick={props.onClick}
+          >
+            {prp.children}
+          </div>
+        }
       >
         <A
           href={props.href || ''}

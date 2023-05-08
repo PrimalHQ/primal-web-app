@@ -1,14 +1,31 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Component, createEffect, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { createStore } from "solid-js/store";
 import { useAccountContext } from "../../contexts/AccountContext";
+import { useSearchContext } from "../../contexts/SearchContext";
+import { hexToNpub } from "../../lib/keys";
 import { sendNote } from "../../lib/notes";
+import { truncateNpub } from "../../stores/profile";
+import { PrimalUser } from "../../types/primal";
+import { debounce } from "../../utils";
 import Avatar from "../Avatar/Avatar";
+import SearchOption from "../Search/SearchOption";
 import { useToastContext } from "../Toaster/Toaster";
 import styles from  "./NewNote.module.scss";
 
 const NewNote: Component = () => {
 
   const intl = useIntl();
+
+  const search = useSearchContext();
+
+  let textArea: HTMLTextAreaElement | undefined;
+  let mentionOptions: HTMLDivElement | undefined;
+
+  const [isMentioning, setMentioning] = createSignal(false);
+  const [query, setQuery] = createSignal('');
+
+  let mentions = new Set<string>();
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -46,20 +63,23 @@ const NewNote: Component = () => {
 
   const activeUser = () => account?.activeUser;
 
-  const onClickOutide = (e: MouseEvent) => {
-    if (!document?.getElementById('new_note_holder')?.contains(e.target as Node)) {
-      account?.actions?.hideNewNoteForm();
-    }
-  }
+  // const onClickOutside = (e: MouseEvent) => {
+  //   if (
+  //     !document?.getElementById('new_note_holder')?.contains(e.target as Node) &&
+  //     !document?.getElementById('mention-auto')?.contains(e.target as Node)
+  //   ) {
+  //     account?.actions?.hideNewNoteForm();
+  //   }
+  // }
 
-  createEffect(() => {
-    if (account?.showNewNoteForm) {
-      document.addEventListener('click', onClickOutide);
-    }
-    else {
-      document.removeEventListener('click', onClickOutide);
-    }
-  });
+  // createEffect(() => {
+  //   if (account?.showNewNoteForm) {
+  //     document.addEventListener('click', onClickOutside);
+  //   }
+  //   else {
+  //     document.removeEventListener('click', onClickOutside);
+  //   }
+  // });
 
   onMount(() => {
     // @ts-expect-error TODO: fix types here
@@ -69,21 +89,50 @@ const NewNote: Component = () => {
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     document.removeEventListener('input', onExpandableTextareaInput);
+
+    mentions = new Set<string>();
   });
 
   const closeNewNote = () => {
+    mentions = new Set<string>();
     account?.actions?.hideNewNoteForm()
   };
 
-  const postNote = async () => {
-    const textArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
+  const encodeMentions = (value: string) => {
+    const regex = /@[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
-    if (textArea.value.trim() === '') {
+    let parsed = value;
+    let refs = [];
+    let match;
+
+    while((match = regex.exec(parsed)) !== null) {
+      refs.push(match[0]);
+    }
+
+    refs.forEach((ref, i) => {
+      parsed = parsed.replaceAll(ref, `#[${i}]`);
+    });
+
+    return parsed;
+
+  };
+
+  const postNote = async () => {
+    if (!textArea) {
+      return;
+    }
+
+    const value = textArea.value;
+
+    const encoded = encodeMentions(value);
+
+    if (encoded.trim() === '') {
       return;
     }
 
     if (account) {
-      const success = await sendNote(textArea.value, account.relays);
+      const tags = Array.from(mentions).map(pk => ['p', pk]);
+      const success = await sendNote(encoded, account.relays, tags);
 
       if (success) {
         toast?.sendSuccess('Message posted successfully');
@@ -94,6 +143,105 @@ const NewNote: Component = () => {
     }
 
     closeNewNote();
+  };
+
+  const positionOptions = (value: string) => {
+    const lineHight = 20;
+    const charWidth = 6;
+
+    const lineNum = (value.match(/(\r\n|\n|\r)/g) || []).length + 1;
+
+    const lastLineBreakIndex = value.lastIndexOf('\n') + 1;
+
+    const charNum = value.length - lastLineBreakIndex
+
+    if (!mentionOptions) {
+      return;
+    }
+
+    mentionOptions.style.top = `${(lineNum * lineHight) + 20}px`;
+    mentionOptions.style.left = `${(charWidth * charNum) + 110}px`;
+  };
+
+  const updateText = (value: string) => {
+    const lastChar = value.charAt(value.length - 1);
+
+    if (lastChar === '@') {
+      setMentioning(true);
+      setQuery('');
+      return;
+    }
+
+    if (lastChar === ' ') {
+      setMentioning(false);
+      setQuery('');
+      return;
+    }
+
+    const words = value.split(' ');
+    const lastWord = words[words.length -1];
+
+    if (isMentioning()) {
+      const newQuery = lastWord.slice(lastWord.lastIndexOf('@')+1);
+
+      debounce(() => {
+        // @ts-ignore
+        setQuery(newQuery);
+      }, 500);
+    }
+
+    setMentioning(lastWord.includes('@'));
+  };
+
+  const onInput = () => {
+    if (!textArea) {
+      return;
+    }
+
+    const value = textArea.value;
+
+    updateText(value);
+
+  };
+
+  createEffect(() => {
+    if (query().length > 0) {
+      search?.actions.findUsers(query());
+    }
+  });
+
+  createEffect(() => {
+    if (isMentioning() && textArea) {
+      positionOptions(textArea?.value);
+    }
+  });
+
+  const userName = (user: PrimalUser) => {
+    return truncateNpub(
+      // @ts-ignore
+      user.display_name ||
+      user.displayName ||
+      user.name ||
+      user.npub ||
+      hexToNpub(user.pubkey) || '');
+  };
+
+  const selectUser = (user: PrimalUser) => {
+    if (!textArea) {
+      return;
+    }
+
+    let value = textArea.value;
+
+    value = value.slice(0, value.lastIndexOf('@'));
+
+    textArea.value = `${value}@${user.npub} `;
+    textArea.focus();
+
+    setQuery('');
+    updateText(textArea.value);
+
+    mentions.add(user.pubkey);
   };
 
   return (
@@ -109,8 +257,40 @@ const NewNote: Component = () => {
               />
             </div>
             <div class={styles.rightSide}>
-              <textarea id="new_note_text_area" rows={1} data-min-rows={1} >
+              <textarea
+                id="new_note_text_area"
+                rows={1}
+                data-min-rows={1}
+                onInput={onInput}
+                ref={textArea}
+              >
               </textarea>
+
+              <Show when={isMentioning()}>
+                <div
+                  id="mention-auto"
+                  class={styles.searchSuggestions}
+                  ref={mentionOptions}
+                >
+                  <For each={search?.users}>
+                    {(user) => (
+                      <SearchOption
+                        title={userName(user)}
+                        description={user.nip05}
+                        icon={<Avatar src={user.picture} size="xs" />}
+                        statNumber={search?.scores[user.pubkey]}
+                        statLabel={intl.formatMessage({
+                          id: 'search.users.followers',
+                          defaultMessage: 'followers',
+                          description: 'Followers label for user search results',
+                        })}
+                        onClick={() => selectUser(user)}
+                      />
+                    )}
+                  </For>
+                </div>
+              </Show>
+
               <div class={styles.controls}>
                 <button
                   class={styles.primaryButton}
