@@ -4,6 +4,7 @@ import { useAccountContext } from "../../contexts/AccountContext";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { hexToNpub } from "../../lib/keys";
 import { sendNote } from "../../lib/notes";
+import { referencesToTags } from "../../stores/note";
 import { truncateNpub } from "../../stores/profile";
 import { PrimalNote, PrimalUser } from "../../types/primal";
 import { debounce } from "../../utils";
@@ -91,25 +92,6 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     setOpen(false);
   };
 
-  const encodeMentions = (value: string) => {
-    const regex = /@\[[^\s!@#$%^&*(),.?":{}|<>]+\]/ig;
-
-    let parsed = value;
-    let refs = [];
-    let match;
-
-    while((match = regex.exec(parsed)) !== null) {
-      refs.push(match[0]);
-    }
-
-    refs.forEach((ref, i) => {
-      parsed = parsed.replaceAll(ref, `#[${i}]`);
-    });
-
-    return parsed;
-
-  };
-
   const postNote = async () => {
     if (!textArea) {
       return;
@@ -117,31 +99,26 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
     const value = textArea.value;
 
-    const encoded = encodeMentions(value);
-
-    if (encoded.trim() === '') {
+    if (value.trim() === '') {
       return;
     }
 
-    console.log('ENC: ', encoded)
+    if (account) {
+      let tags = referencesToTags(value);
+      tags.push(['e', props.note.post.id, '', 'reply']);
+      tags.push(['p', props.note.post.pubkey]);
 
-    // if (account) {
-    //   let tags = Array.from(mentions).map(pk => ['p', pk]);
-    //   tags.push(['e', props.note.post.id]);
-    //   tags.push(['p', props.note.post.pubkey]);
+      const success = await sendNote(value, account.relays, tags);
 
-    //   const success = await sendNote(encoded, account.relays, tags);
+      if (success) {
+        toast?.sendSuccess('Message posted successfully');
+      }
+      else {
+        toast?.sendWarning('Failed to send message');
+      }
+    }
 
-    //   if (success) {
-    //     toast?.sendSuccess('Message posted successfully');
-    //   }
-    //   else {
-    //     toast?.sendWarning('Failed to send message');
-    //   }
-    // }
-
-    // closeReplyToNote();
-
+    closeReplyToNote();
   };
 
   const positionOptions = (value: string) => {
@@ -222,7 +199,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
     value = value.slice(0, value.lastIndexOf('@'));
 
-    textArea.value = `${value}@[${userName(user)}] `;
+    textArea.value = `${value}nostr:${user.npub} `;
     textArea.focus();
 
     setQuery('');

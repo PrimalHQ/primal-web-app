@@ -1,10 +1,12 @@
 import { useIntl } from "@cookbook/solid-intl";
+import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { hexToNpub } from "../../lib/keys";
 import { sendNote } from "../../lib/notes";
+import { referencesToTags } from "../../stores/note";
 import { truncateNpub } from "../../stores/profile";
 import { PrimalUser } from "../../types/primal";
 import { debounce } from "../../utils";
@@ -98,25 +100,6 @@ const NewNote: Component = () => {
     account?.actions?.hideNewNoteForm()
   };
 
-  const encodeMentions = (value: string) => {
-    const regex = /@[^\s!@#$%^&*(),.?":{}|<>]+/ig;
-
-    let parsed = value;
-    let refs = [];
-    let match;
-
-    while((match = regex.exec(parsed)) !== null) {
-      refs.push(match[0]);
-    }
-
-    refs.forEach((ref, i) => {
-      parsed = parsed.replaceAll(ref, `#[${i}]`);
-    });
-
-    return parsed;
-
-  };
-
   const postNote = async () => {
     if (!textArea) {
       return;
@@ -124,15 +107,13 @@ const NewNote: Component = () => {
 
     const value = textArea.value;
 
-    const encoded = encodeMentions(value);
-
-    if (encoded.trim() === '') {
+    if (value.trim() === '') {
       return;
     }
 
     if (account) {
-      const tags = Array.from(mentions).map(pk => ['p', pk]);
-      const success = await sendNote(encoded, account.relays, tags);
+      const tags = referencesToTags(value);
+      const success = await sendNote(value, account.relays, tags);
 
       if (success) {
         toast?.sendSuccess('Message posted successfully');
@@ -235,7 +216,7 @@ const NewNote: Component = () => {
 
     value = value.slice(0, value.lastIndexOf('@'));
 
-    textArea.value = `${value}@${user.npub} `;
+    textArea.value = `${value}nostr:${user.npub} `;
     textArea.focus();
 
     setQuery('');

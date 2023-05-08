@@ -287,3 +287,45 @@ type NoteStore = {
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
 }
+
+export const referencesToTags = (value: string) => {
+  const regex =
+    /\bnostr:((note|npub|nevent|nprofile)1\w+)\b|#\[(\d+)\]/g;
+
+  let refs: string[] = [];
+  let tags: string[][] = [];
+  let match;
+
+  while((match = regex.exec(value)) !== null) {
+    refs.push(match[0]);
+  }
+
+  refs.forEach((ref) => {
+    const decoded = nip19.decode(ref.split('nostr:')[1]);
+
+    if (decoded.type === 'npub') {
+      tags.push(['p', decoded.data])
+      return;
+    }
+
+    if (decoded.type === 'nprofile') {
+      const relay = decoded.data.relays ? decoded.data.relays[0] : '';
+      tags.push(['p', decoded.data.pubkey, relay]);
+      return;
+    }
+
+    if (decoded.type === 'note') {
+      tags.push(['e', decoded.data]);
+      return;
+    }
+
+    if (decoded.type === 'nevent') {
+      const relay = decoded.data.relays ? decoded.data.relays[0] : '';
+      tags.push(['e', decoded.data.id, relay, 'mention']);
+      return;
+    }
+  });
+
+  return tags;
+
+};
