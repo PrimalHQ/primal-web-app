@@ -79,8 +79,6 @@ const Profile: Component = () => {
     }
 
     profile?.actions.setProfileKey(hex);
-
-    console.log('CALL: ', hex)
     profile?.actions.clearNotes();
     profile?.actions.fetchNotes(hex);
   }
