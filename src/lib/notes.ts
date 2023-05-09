@@ -1,5 +1,7 @@
 import DOMPurify from "dompurify";
+import { getLinkPreview } from "link-preview-js";
 import { Relay } from "nostr-tools";
+import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
 import { NostrWindow, PrimalNote } from "../types/primal";
 
@@ -18,10 +20,24 @@ export const setStoredLikes = (likes: string[]) => {
 
 export const sanitize = DOMPurify.sanitize;
 
+export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
+
+export const addLinkPreviews = async (url: string) => {
+  try {
+    const preview = await getLinkPreview(url);
+
+    setLinkPreviews((p) => ({ ...p, [url]: { ...preview }}));
+
+  } catch (e) {
+    console.log('Failed to get preview for: ', url);
+    setLinkPreviews((p) => ({ ...p, [url]: { noPreview: url }}));
+  }
+};
+
 export const urlify = (text: string, highlightOnly = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
-  return text.replace(urlRegex, function(url) {
+  return text.replace(urlRegex, (url) => {
     const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
     if (isImage) {
@@ -55,9 +71,13 @@ export const urlify = (text: string, highlightOnly = false) => {
       return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
     }
 
-    return highlightOnly ?
-      `<span class="linkish">${url}</span>` :
-      `<a link href="${url}" target="_blank" >${url}</a>`;
+    if (highlightOnly) {
+      return `<span class="linkish">${url}</span>`;
+    }
+
+    addLinkPreviews(url);
+
+    return `__LINK__${url}__LINK__`;
   })
 }
 
@@ -73,58 +93,11 @@ export const highlightHashtags = (text: string) => {
   return text.replace(regex, "$1<span class='hash_tag'>$2</span>");
 };
 
-const nostrify = (text: string, note: PrimalNote, skipNotes: boolean) => {
-
-  // const regex = /\#\[([0-9]*)\]/g;
-  // let refs = [];
-  // let match;
-
-  // while((match = regex.exec(text)) !== null) {
-  //   refs.push(match[1]);
-  // }
-
-  // if (refs.length > 0) {
-  //   refs.forEach((ref: any) => {
-  //     const tag = note.post.tags[ref];
-  //     if (tag[0] === 'p') {
-  //       getUserProfile(tag[1], `mentioned_user_|_${note.post.noteId}_|_${ref}`)
-  //     }
-
-  //     if (!skipNotes && tag[0] === 'e') {
-  //       const mId = noteEncode(tag[1]);
-  //       getThread(mId, `mentioned_post_|_${note.post.noteId}_|_${ref}_|_${mId}`, 0, 1);
-  //     }
-  //   });
-  // }
-
-  return text;
-
-};
-
 export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
 export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
 
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
-
-const parseReplyTo = (replyTo?: ReplyTo) => {
-  let ret: string[][] = [];
-
-  if (!replyTo) {
-    return ret;
-  }
-
-  if (replyTo.e) {
-    ret.push(['e', replyTo.e]);
-  }
-
-  if (replyTo.p) {
-    ret.push(['p', replyTo.p]);
-  }
-
-  return ret;
-
-};
 
 export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
   const event = {

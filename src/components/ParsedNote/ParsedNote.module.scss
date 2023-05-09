@@ -77,3 +77,9 @@
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
   mask: url(../../assets/icons/verified.svg) no-repeat center;
 }
+
+.bordered {
+  border:solid 1px var(--subtile-devider);
+  border-radius: 4px;
+  margin-block: 8px;
+}

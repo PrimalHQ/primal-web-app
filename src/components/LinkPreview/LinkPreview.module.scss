@@ -1,0 +1,23 @@
+.linkPreview {
+  width: 100%;
+  text-decoration: none;
+  color: var(--text-tertiary-2);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 22px;
+  text-align: left;
+}
+
+.previewInfo {
+  padding-inline: 14px;
+  padding-block: 9px;
+}
+
+.previewImage {
+  overflow: hidden;
+  max-height: 250px;
+}
+
+.previewTitle {
+  color: var(--text-primary);
+}

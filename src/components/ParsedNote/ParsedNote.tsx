@@ -1,10 +1,10 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
-import { parseNote1 } from '../../lib/notes';
+import { linkPreviews, parseNote1 } from '../../lib/notes';
 import { truncateNpub } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component,
+  Component, createEffect, createMemo, createSignal,
 } from 'solid-js';
 import {
   PrimalNote,
@@ -13,6 +13,7 @@ import {
 
 import styles from './ParsedNote.module.scss';
 import { nip19 } from 'nostr-tools';
+import LinkPreview from '../LinkPreview/LinkPreview';
 
 
 const userName = (user: PrimalUser) => {
@@ -175,21 +176,59 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
     });
   }
 
+  const replaceLinkPreviews = (text: string, previews: Record<string, any>) => {
+    let parsed = text;
 
-  return (
-    <div innerHTML={
-      parseNoteLinks(
-        parseNpubLinks(
-          parsedContent(
-            highlightHashtags(
-              parseNote1(props.note.post.content)
-            ),
+    const regex = /__LINK__(.)*__LINK__/ig;
+
+    parsed = parsed.replace(regex, (link) => {
+      const url = link.split('__LINK__')[1];
+
+      const preview = previews[url];
+
+      // No preview? That can only mean that we are still waiting.
+      if (!preview) {
+        return link;
+      }
+
+      if (preview.noPreview) {
+        return `<a link href="${url}" target="_blank" >${url}</a>`;
+      }
+
+      const linkElement = (<div class={styles.bordered}><LinkPreview preview={preview} /></div>);
+
+      // @ts-ignore
+      return linkElement.outerHTML;
+    });
+
+    return parsed;
+  }
+
+  const content = () => {
+    return parseNoteLinks(
+      parseNpubLinks(
+        parsedContent(
+          highlightHashtags(
+            parseNote1(props.note.post.content)
           ),
-          props.note,
         ),
         props.note,
-      )}
-    >
+      ),
+      props.note,
+    );
+  };
+
+  const [displayedContent, setDisplayedContent] = createSignal<string>(content());
+
+  createEffect(() => {
+    const newContent = replaceLinkPreviews(displayedContent(), { ...linkPreviews });
+
+    setDisplayedContent(() => newContent);
+  });
+
+
+  return (
+    <div innerHTML={displayedContent()}>
     </div>
   );
 };
