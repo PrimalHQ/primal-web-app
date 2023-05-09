@@ -10,6 +10,7 @@ import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { truncateNpub } from '../../stores/profile';
+import { style } from 'solid-js/web';
 
 const Note: Component<{ note: PrimalNote }> = (props) => {
 
@@ -87,6 +88,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
 
           <div class={styles.message}>
             <ParsedNote note={props.note} />
+            <div class={styles.messageFade}></div>
           </div>
 
           <NoteFooter note={props.note} />
