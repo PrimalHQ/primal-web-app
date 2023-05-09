@@ -41,6 +41,7 @@
 
 
   .contextMenu {
+    position: relative;
     min-width: 5px;
     height: 16px;
     display: flex;
@@ -84,4 +85,30 @@
   background-color: var(--text-tertiary-2);
   -webkit-mask: url(../../../assets/icons/context.svg) no-repeat center;
   mask: url(../../../assets/icons/context.svg) no-repeat center;
+}
+
+.contextMenuOptions {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  min-width: 120px;
+  background-color: var(--background-site);
+  border: solid 1px var(--text-tertiary-2);
+  border-radius: 4px;
+  z-index: 20;
+}
+
+.contextOption {
+  background-color: var(--background-site);
+  border: none;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+  color: var(--text-secondary-2);
+  padding: 10px;
+  margin: 0px;
+
+  &:hover, &:focus {
+    background-color: var(--background-input);
+  }
 }
