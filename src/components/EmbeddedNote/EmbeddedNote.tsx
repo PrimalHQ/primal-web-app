@@ -159,8 +159,8 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
         </span>
       </div>
       <div innerHTML={
-        parseNpubLinks(
-          parseNoteLinks(
+        parseNoteLinks(
+          parseNpubLinks(
             parsedContent(
               highlightHashtags(
                 parseNote2(props.note.post.content)

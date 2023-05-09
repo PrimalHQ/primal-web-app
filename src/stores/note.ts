@@ -304,18 +304,18 @@ export const referencesToTags = (value: string) => {
     const decoded = nip19.decode(ref.split('nostr:')[1]);
 
     if (decoded.type === 'npub') {
-      tags.push(['p', decoded.data])
+      tags.push(['p', decoded.data, '', 'mention'])
       return;
     }
 
     if (decoded.type === 'nprofile') {
       const relay = decoded.data.relays ? decoded.data.relays[0] : '';
-      tags.push(['p', decoded.data.pubkey, relay]);
+      tags.push(['p', decoded.data.pubkey, relay, 'mention']);
       return;
     }
 
     if (decoded.type === 'note') {
-      tags.push(['e', decoded.data]);
+      tags.push(['e', decoded.data, '', 'mention']);
       return;
     }
 

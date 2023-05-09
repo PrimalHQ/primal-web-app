@@ -16,7 +16,7 @@ export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: Nost
     pubkey: user.pubkey,
     tags: user.tags,
     npub: hexToNpub(user.pubkey),
-    name: (userMeta.name || user.pubkey || '') as string,
+    name: (userMeta.name || '') as string,
     about: (userMeta.about || '') as string,
     picture: (userMeta.picture || '') as string,
     nip05: (userMeta.nip05 || '') as string,
