@@ -34,6 +34,19 @@ export const addLinkPreviews = async (url: string) => {
   }
 };
 
+export const spotifyRegex = /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
+export const twitchRegex = /twitch.tv\/([a-z0-9_]+$)/i;
+export const mixCloudRegex = /mixcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+// export const tidalRegex = /tidal\.com\/(?:browse\/)?(\w+)\/([a-z0-9-]+)/i;
+export const soundCloudRegex = /soundcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+// export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
+export const appleMusicRegex = /music\.apple\.com\/([a-z]{2}\/)?(?:album|playlist)\/[\w\d-]+\/([.a-zA-Z0-9-]+)(?:\?i=\d+)?/i;
+export const nostrNestsRegex = /nostrnests\.com\/[a-zA-Z0-9]+/i;
+// export const magnetRegex = /(magnet:[\S]+)/i;
+export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|album\/[.a-zA-Z0-9-]+|[.a-zA-Z0-9-]+)/i;
+// export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
+export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
+
 export const urlify = (text: string, highlightOnly = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
@@ -62,13 +75,88 @@ export const urlify = (text: string, highlightOnly = false) => {
       return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
     }
 
-    const isYouTubeVideo = url.includes('https://www.youtube.com') || url.includes('https://youtu.be');
+    if (youtubeRegex.test(url)) {
+      const youtubeId = youtubeRegex.test(url) && RegExp.$1;
 
-    if (isYouTubeVideo) {
-      const full = new URL(url);
-      const videoId = url.includes('/watch?v=') ? full.searchParams.get('v') : full.pathname.split('/')[full.pathname.split('/').length - 1];
-      const source = `https://www.youtube.com/embed/${videoId}`
-      return `<iframe class="w-max" src="${source}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen=""></iframe>`;
+      return `<iframe
+        class="w-max"
+        src="https://www.youtube.com/embed/${youtubeId}"
+        title="YouTube video player"
+        key="${youtubeId}"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />`;
+    }
+
+    if (spotifyRegex.test(url)) {
+      const convertedUrl = url.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
+
+      return `<iframe style="borderRadius: 12" src="${convertedUrl}" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+    }
+
+    if (twitchRegex.test(url)) {
+      const channel = url.split("/").slice(-1);
+
+      const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
+      return `<iframe src="https://player.twitch.tv/${args}" className="w-max" allowFullScreen></iframe>`;
+    }
+
+    if (mixCloudRegex.test(url)) {
+      const feedPath = (mixCloudRegex.test(url) && RegExp.$1) + "%2F" + (mixCloudRegex.test(url) && RegExp.$2);
+
+      // const lightTheme = useLogin().preferences.theme === "light";
+      // const lightParams = lightTheme ? "light=1" : "light=0";
+      return `
+          <br />
+          <iframe
+            title="SoundCloud player"
+            width="100%"
+            height="120"
+            frameBorder="0"
+            src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F"
+          />`;
+    }
+
+    if (soundCloudRegex.test(url)) {
+      return `<iframe
+          width="100%"
+          height="166"
+          scrolling="no"
+          allow="autoplay"
+          src="https://w.soundcloud.com/player/?url=${url}"></iframe>`;
+    }
+
+    if (appleMusicRegex.test(url)) {
+      const convertedUrl = url.replace("music.apple.com", "embed.music.apple.com");
+      const isSongLink = /\?i=\d+$/.test(convertedUrl);
+
+      return `
+        <iframe
+          allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+          frameBorder="0"
+          height="${isSongLink ? 175 : 450}"
+          style="width: 100%, maxWidth: 660, overflow: hidden, background: transparent"
+          sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+          src="${convertedUrl}"></iframe>
+      `;
+    }
+
+    if (nostrNestsRegex.test(url)) {
+      return `<iframe src="${url}" allow="microphone" width="480" height="680" style="maxHeight: 680"></iframe>`;
+    }
+
+    if (wavlakeRegex.test(url)) {
+      const convertedUrl = url.replace(/(?:player\.)?wavlake\.com/, "embed.wavlake.com");
+
+      return `
+        <iframe
+          style="borderRadius: 12"
+          src="${convertedUrl}"
+          width="100%"
+          height="380"
+          frameBorder="0"
+          loading="lazy"></iframe>`;
     }
 
     if (highlightOnly) {
