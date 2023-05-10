@@ -36,27 +36,32 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const eventId = nip19.decode(id).data as string | nip19.EventPointer;
-    const hex = typeof eventId === 'string' ? eventId : eventId.id;
-    const noteId = nip19.noteEncode(hex);
+    try {
+      const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+      const hex = typeof eventId === 'string' ? eventId : eventId.id;
+      const noteId = nip19.noteEncode(hex);
 
-    const path = `/thread/${noteId}`;
+      const path = `/thread/${noteId}`;
 
-    const ment = note.mentionedNotes && note.mentionedNotes[hex];
+      const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
-    const link = highlightOnly ?
-      <span class='linkish' >{url}</span> :
-      ment ?
-        <div>
-          <EmbeddedNote
-            note={ment}
-            mentionedUsers={note.mentionedUsers || {}}
-          />
-        </div> :
-        <A href={path}>{url}</A>;
+      const link = highlightOnly ?
+        <span class='linkish' >{url}</span> :
+        ment ?
+          <div>
+            <EmbeddedNote
+              note={ment}
+              mentionedUsers={note.mentionedUsers || {}}
+            />
+          </div> :
+          <A href={path}>{url}</A>;
 
-    // @ts-ignore
-    return link.outerHTML || url;
+      // @ts-ignore
+      return link.outerHTML || url;
+    } catch (e) {
+      return `<span class="${styles.error}">${url}</span>`;
+    }
+
   });
 
 };
@@ -72,28 +77,32 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       return url;
     }
 
-    const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
+    try {
+      const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
-    const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-    const npub = hexToNpub(hex);
+      const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+      const npub = hexToNpub(hex);
 
-    const path = `/profile/${npub}`;
+      const path = `/profile/${npub}`;
 
-    const user = note.mentionedUsers && note.mentionedUsers[hex];
+      const user = note.mentionedUsers && note.mentionedUsers[hex];
 
-    let link = highlightOnly ?
-      <span class='linkish'>@{truncateNpub(npub)}</span> :
-      <A href={path}>@{truncateNpub(npub)}</A>;
+      let link = highlightOnly ?
+        <span class='linkish'>@{truncateNpub(npub)}</span> :
+        <A href={path}>@{truncateNpub(npub)}</A>;
 
-    if (user) {
-      link = highlightOnly ?
-        <span class='linkish'>@{userName(user)}</span> :
-        <A href={path}>@{userName(user)}</A>;
+      if (user) {
+        link = highlightOnly ?
+          <span class='linkish'>@{userName(user)}</span> :
+          <A href={path}>@{userName(user)}</A>;
+      }
+
+
+      // @ts-ignore
+      return link.outerHTML || url;
+    } catch (e) {
+      return `<span class="${styles.error}">${url}</span>`;
     }
-
-
-    // @ts-ignore
-    return link.outerHTML || url;
   });
 
 };
