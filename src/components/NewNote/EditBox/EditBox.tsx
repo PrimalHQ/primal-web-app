@@ -453,6 +453,13 @@ const EditBox: Component = () => {
           ref={textArea}
         >
         </textarea>
+        <div class={styles.previewCaption}>
+          {intl.formatMessage({
+            id: 'note.new.preview',
+            defaultMessage: 'Note preview',
+            description: 'Caption for preview when creating a new note'
+          })}
+        </div>
         <div
           id="new_note_text_preview"
           class={styles.editor}
