@@ -13,6 +13,7 @@ import { debounce } from "../../utils";
 import Avatar from "../Avatar/Avatar";
 import SearchOption from "../Search/SearchOption";
 import { useToastContext } from "../Toaster/Toaster";
+import EditBox from "./EditBox/EditBox";
 import styles from  "./NewNote.module.scss";
 
 const NewNote: Component = () => {
@@ -219,69 +220,7 @@ const NewNote: Component = () => {
               />
             </div>
             <div class={styles.rightSide}>
-              <textarea
-                id="new_note_text_area"
-                rows={1}
-                data-min-rows={1}
-                onInput={onInput}
-                ref={textArea}
-              >
-              </textarea>
-
-              <Show when={isMentioning()}>
-                <div
-                  id="mention-auto"
-                  class={styles.searchSuggestions}
-                  ref={mentionOptions}
-                >
-                  <For each={search?.users}>
-                    {(user) => (
-                      <SearchOption
-                        title={userName(user)}
-                        description={user.nip05}
-                        icon={<Avatar src={user.picture} size="xs" />}
-                        statNumber={search?.scores[user.pubkey]}
-                        statLabel={intl.formatMessage({
-                          id: 'search.users.followers',
-                          defaultMessage: 'followers',
-                          description: 'Followers label for user search results',
-                        })}
-                        onClick={() => selectUser(user)}
-                      />
-                    )}
-                  </For>
-                </div>
-              </Show>
-
-              <div class={styles.controls}>
-                <button
-                  class={styles.primaryButton}
-                  onClick={postNote}
-                >
-                  <span>
-                    {intl.formatMessage(
-                      {
-                        id: 'actions.postNewNote',
-                        defaultMessage: 'post',
-                        description: 'Send new note, button label',
-                      }
-                    )}
-                  </span>
-                </button>
-                <button class={styles.secondaryButton} onClick={closeNewNote}>
-                  <div>
-                    <span>
-                      {intl.formatMessage(
-                        {
-                          id: 'actions.cancel',
-                          defaultMessage: 'cancel',
-                          description: 'Cancel action, button label',
-                        }
-                      )}
-                    </span>
-                  </div>
-                </button>
-              </div>
+              <EditBox />
             </div>
           </div>
         </div>

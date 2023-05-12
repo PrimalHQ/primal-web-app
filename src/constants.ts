@@ -361,3 +361,8 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a post your post was mentioned in',
 
 }
+
+
+export const noteRegex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
+
+export const profileRegex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
