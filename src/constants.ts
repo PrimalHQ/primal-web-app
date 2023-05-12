@@ -363,6 +363,6 @@ export const notificationTypeTranslations: Record<string, string> = {
 }
 
 
-export const noteRegex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
+export const noteRegex = /nostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
 
-export const profileRegex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
+export const profileRegex = /nostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
