@@ -427,9 +427,24 @@ const EditBox: Component = () => {
 
   };
 
+  const replaceLinkPreviews = (text: string) => {
+    let parsed = text;
+
+    const regex = /__LINK__(.)*__LINK__/ig;
+
+    parsed = parsed.replace(regex, (link) => {
+      const url = link.split('__LINK__')[1];
+
+      return `<a link href="${url}" target="_blank" >${url}</a>`;
+
+    });
+
+    return parsed;
+  }
+
 
   const parseForReferece = (value: string) => {
-    const content = parseUserMentions(highlightHashtags(parseNote1(value)));
+    const content = replaceLinkPreviews(parseUserMentions(highlightHashtags(parseNote1(value))));
 
     parseNpubLinks(content);
     parseNoteLinks(content);
