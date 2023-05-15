@@ -1,5 +1,6 @@
 .newNoteHolder {
   min-height: 100px;
+  max-height: 100vh;
   background-color: var(--background-site);
   padding-top: 10px;
 }
@@ -63,10 +64,15 @@
 
 .controls {
   position: absolute;
-  bottom: 0px;
+  bottom: 4px;
   right: 15px;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  width: calc(100% - 30px);
+  // border: solid 1px red;
+  padding-top: 8px;
+  background-color: var(--background-site);
   >button {
     width: 80px;
     height: 28px;
@@ -138,6 +144,7 @@
 
 textarea {
   width: calc(100% - 18px);
+  max-height: calc(100vh / 3);
   margin: 18px 18px 36px 0px;
   padding: 0px;
   box-sizing: padding-box;
@@ -165,6 +172,7 @@ textarea {
   flex-direction: column;
   flex: 1;
   cursor: text;
+  // max-height: calc(100vh - 7px);
 }
 
 .previewCaption {
@@ -175,8 +183,22 @@ textarea {
   text-transform: uppercase;
 }
 
+.editorScroll {
+  min-height: 60px;
+  max-height: calc(60vh - 70px);
+  overflow-y: scroll;
+  margin-bottom: 16px;
+
+  scrollbar-width: none;  /* Firefox */
+
+}
+
+.editorScroll::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
 .editor {
-  max-width: calc(100% - 18px);
+  max-width: calc(100% - 14px);
   min-height: 60px;
   outline: 0px solid transparent;
   word-wrap: break-word;
@@ -185,7 +207,7 @@ textarea {
   line-height: 20px;
   font-weight: 400;
   color: var(--text-primary);
-  margin: 0px 18px 36px 0px;
+  margin: 0px 14px 32px 0px;
   padding: 0px;
   background-color: var(--background-card);
   border-radius: 4px;

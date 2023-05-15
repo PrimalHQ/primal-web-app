@@ -30,8 +30,6 @@ type Reference = {
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
-
-
 const EditBox: Component = () => {
 
   const intl = useIntl();
@@ -66,8 +64,9 @@ const EditBox: Component = () => {
     const maxHeight = document.documentElement.clientHeight || window.innerHeight || 0;
 
     const elm = event.target as AutoSizedTextArea;
+    const preview = document.getElementById('new_note_text_preview');
 
-    if(elm.nodeName !== 'TEXTAREA' || elm.id !== 'new_note_text_area') {
+    if(elm.nodeName !== 'TEXTAREA' || elm.id !== 'new_note_text_area' || !preview) {
       return;
     }
 
@@ -75,13 +74,18 @@ const EditBox: Component = () => {
 
     !elm._baseScrollHeight && getScrollHeight(elm);
 
-    if (elm.scrollHeight >= (maxHeight - 70)) {
+
+    if (elm.scrollHeight >= (maxHeight / 3)) {
       return;
     }
 
-    elm.rows = minRows
-    const rows = Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20)
-    elm.rows = minRows + rows
+    elm.rows = minRows;
+    const rows = Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
+    elm.rows = minRows + rows;
+
+    const rect = elm.getBoundingClientRect();
+
+    preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
 
   onMount(() => {
@@ -530,27 +534,34 @@ const EditBox: Component = () => {
   return (
     <div class={styles.noteEditBox}>
       <div class={styles.editorWrap} onClick={focusInput}>
-        <textarea
-          id="new_note_text_area"
-          rows={1}
-          data-min-rows={1}
-          onInput={onInput}
-          ref={textArea}
-        >
-        </textarea>
-        <div class={styles.previewCaption}>
-          {intl.formatMessage({
-            id: 'note.new.preview',
-            defaultMessage: 'Note preview',
-            description: 'Caption for preview when creating a new note'
-          })}
+        <div>
+          <textarea
+            id="new_note_text_area"
+            rows={1}
+            data-min-rows={1}
+            onInput={onInput}
+            ref={textArea}
+          >
+          </textarea>
+          <div
+            class={styles.previewCaption}>
+            {intl.formatMessage({
+              id: 'note.new.preview',
+              defaultMessage: 'Note preview',
+              description: 'Caption for preview when creating a new note'
+            })}
+          </div>
         </div>
         <div
+          class={styles.editorScroll}
           id="new_note_text_preview"
-          class={styles.editor}
-          ref={textPreview}
-          innerHTML={parsedMessage()}
-        ></div>
+        >
+          <div
+            class={styles.editor}
+            ref={textPreview}
+            innerHTML={parsedMessage()}
+          ></div>
+        </div>
       </div>
 
       <Show when={isMentioning()}>
