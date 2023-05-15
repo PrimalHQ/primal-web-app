@@ -198,7 +198,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
         updateStore('reposts', () => reposts);
 
-        getEvents(ids, `home_reposts_${APP_ID}`);
+        getEvents(account?.publicKey, ids, `home_reposts_${APP_ID}`);
 
         return;
       }

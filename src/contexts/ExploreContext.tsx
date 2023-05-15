@@ -255,7 +255,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
         updateStore('reposts', () => reposts);
 
-        getEvents(ids, `explore_reposts_${APP_ID}`);
+        getEvents(account?.publicKey, ids, `explore_reposts_${APP_ID}`);
 
         return;
       }

@@ -21,7 +21,7 @@ import { isConnected, refreshSocketListeners, removeSocketListeners, socket, sub
 import { sendContacts, sendLike, setStoredLikes } from "../lib/notes";
 import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getLikes, getProfileContactList, getUserProfile } from "../lib/profile";
+import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
 import { closeRelays, connectRelays } from "../lib/relays";
 
@@ -156,7 +156,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         setPublicKey(key);
         localStorage.setItem('pubkey', key);
         // getRelays();
-        getUserProfile(key, `user_profile_${APP_ID}`);
+        getUserProfiles([key], `user_profile_${APP_ID}`);
       }
     } catch (e: any) {
       setPublicKey(noKey);

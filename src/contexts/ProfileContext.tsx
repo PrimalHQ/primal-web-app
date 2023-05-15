@@ -32,11 +32,11 @@ import {
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
-  getOldestProfileEvent,
   getProfileContactList,
   getProfileScoredNotes,
   getUserProfileInfo,
 } from "../lib/profile";
+import { useAccountContext } from "./AccountContext";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -45,9 +45,9 @@ export type ProfileContextStore = {
     follows_count: number,
     followers_count: number,
     note_count: number,
+    time_joined: number,
   },
   knownProfiles: VanityProfiles,
-  oldestNoteDate: number | undefined,
   notes: PrimalNote[],
   isFetching: boolean,
   page: FeedPage,
@@ -70,6 +70,7 @@ export const emptyStats = {
   follows_count: 0,
   followers_count: 0,
   note_count: 0,
+  time_joined: 0,
 };
 
 export const initialData = {
@@ -77,7 +78,6 @@ export const initialData = {
   userProfile: undefined,
   userStats: { ...emptyStats },
   knownProfiles: { names: {} },
-  oldestNoteDate: undefined,
   notes: [],
   isFetching: false,
   page: { messages: [], users: {}, postStats: {}, mentions: {} },
@@ -96,6 +96,8 @@ export const initialData = {
 export const ProfileContext = createContext<ProfileContextStore>();
 
 export const ProfileProvider = (props: { children: ContextChildren }) => {
+
+  const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
@@ -260,7 +262,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
-      getOldestProfileEvent(profileKey, `profile_oldest_${APP_ID}`);
       getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
       getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
     }
@@ -285,7 +286,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
         updateStore('reposts', () => reposts);
 
-        getEvents(ids, `profile_reposts_${APP_ID}`);
+        getEvents(account?.publicKey, ids, `profile_reposts_${APP_ID}`);
         return;
       }
 
@@ -338,17 +339,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       }
     }
 
-    if (subId === `profile_oldest_${APP_ID}`) {
-      if (content?.kind === Kind.OldestEvent) {
-        const timestamp = Number.parseInt(content.content);
-        if (isNaN(timestamp)) {
-          updateStore('oldestNoteDate', () => undefined);
-          return;
-        }
-        updateStore('oldestNoteDate', () => timestamp);
-      }
-      return;
-    }
+    // if (subId === `profile_oldest_${APP_ID}`) {
+    //   if (content?.kind === Kind.OldestEvent) {
+    //     const timestamp = Number.parseInt(content.content);
+    //     if (isNaN(timestamp)) {
+    //       updateStore('oldestNoteDate', () => undefined);
+    //       return;
+    //     }
+    //     updateStore('oldestNoteDate', () => timestamp);
+    //   }
+    //   return;
+    // }
 
     if (subId === `profile_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {

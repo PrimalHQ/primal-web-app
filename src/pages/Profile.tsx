@@ -332,13 +332,13 @@ const Profile: Component = () => {
             </Show>
           </div>
           <div class={styles.joined}>
-            <Show when={profile?.oldestNoteDate}>
+            <Show when={profile?.userStats.time_joined}>
               {intl.formatMessage({
                 id: 'profile.joinDate',
                 defaultMessage: 'Joined Nostr on {date}',
                 description: 'Label indicating when the profile joined Nostr (oldest event)',
               }, {
-                date: shortDate(profile?.oldestNoteDate),
+                date: shortDate(profile?.userStats.time_joined),
               })}
             </Show>
           </div>

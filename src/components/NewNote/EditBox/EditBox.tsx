@@ -298,7 +298,7 @@ const EditBox: Component = () => {
       });
 
 
-      getEvents([hex], `nn_${id}`);
+      getEvents(account?.publicKey, [hex], `nn_${id}`);
 
     });
 

@@ -344,7 +344,7 @@ export type ExploreFeedPayload = {
   timeframe: string,
   scope: string,
   limit: number,
-  pubkey?: string,
+  user_pubkey?: string,
   since? : number,
   until?: number,
   created_after?: number,

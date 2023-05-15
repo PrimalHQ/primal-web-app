@@ -34,6 +34,7 @@ import {
   PrimalUser,
 } from "../types/primal";
 import { APP_ID } from "../App";
+import { useAccountContext } from "./AccountContext";
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
@@ -73,6 +74,8 @@ export const ThreadContext = createContext<ThreadContextStore>();
 
 export const ThreadProvider = (props: { children: ContextChildren }) => {
 
+  const account = useAccountContext();
+
 // ACTIONS --------------------------------------
 
   const saveNotes = (newNotes: PrimalNote[]) => {
@@ -83,7 +86,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const fetchNotes = (noteId: string, until = 0, limit = 100) => {
     clearNotes();
     updateStore('noteId', noteId)
-    getThread(noteId, `thread_${APP_ID}`);
+    getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
     updateStore('isFetching', () => true);
   }
 
@@ -185,7 +188,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
         updateStore('reposts', () => reposts);
 
-        getEvents(ids, `thread_reposts_${APP_ID}`);
+        getEvents(account?.publicKey, ids, `thread_reposts_${APP_ID}`);
 
         return;
       }
