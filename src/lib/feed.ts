@@ -3,13 +3,13 @@ import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "nostr-tools";
 import { day, hour, noKey } from "../constants";
 
-export const getFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
+export const getFeed = (user_pubkey: string, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["feed", { pubkey, limit, [start]: until }]},
+    {cache: ["feed", { limit, [start]: until, user_pubkey }]},
   ]));
 }
 
@@ -22,13 +22,13 @@ export const getEvents = (eventIds: string[], subid: string) => {
 
 };
 
-export const getUserFeed = (pubkey: string, subid: string, until = 0, limit = 20) => {
+export const getUserFeed = (user_pubkey: string, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["feed", { pubkey, limit, notes: 'authored', [start]: until }]},
+    {cache: ["feed", { user_pubkey, limit, notes: 'authored', [start]: until }]},
   ]));
 }
 
