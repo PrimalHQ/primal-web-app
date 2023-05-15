@@ -4,16 +4,17 @@ import { nip19, parseReferences } from "nostr-tools";
 import { Component, createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { style } from "solid-js/web";
-import { noteRegex, profileRegex, Kind } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents, getThread } from "../../../lib/feed";
 import { hexToNpub } from "../../../lib/keys";
 import { parseNote1, sendNote } from "../../../lib/notes";
+import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
-import { truncateNpub } from "../../../stores/profile";
+import { convertToUser, truncateNpub } from "../../../stores/profile";
 import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
 import { debounce } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
@@ -108,9 +109,18 @@ const EditBox: Component = () => {
       return;
     }
 
+    const messageToSend = value.replace(editMentionRegex, (url) => {
+
+      const [_, name] = url.split('\`');
+      const user = userRefs[name];
+
+      // @ts-ignore
+      return ` nostr:${user.npub}`;
+    })
+
     if (account) {
-      const tags = referencesToTags(value);
-      const success = await sendNote(value, account.relays, tags);
+      const tags = referencesToTags(messageToSend);
+      const success = await sendNote(messageToSend, account.relays, tags);
 
       if (success) {
         toast?.sendSuccess('Message posted successfully');
@@ -185,10 +195,19 @@ const EditBox: Component = () => {
     });
   }
 
+  const parseUserMentions = (text: string) => {
+    return text.replace(editMentionRegex, (url) => {
+      const [_, name] = url.split('\`');
+      const link = <span class='linkish'> @{name}</span>;
+      // @ts-ignore
+      return link.outerHTML || ` @${name}`;
+    });
+  };
 
-  const parseNpubLinks = (text: string) => {
 
-    return text.replace(profileRegex, (url) => {
+  const subUserRef = (userId: string) => {
+
+    const parsed = parsedMessage().replace(profileRegex, (url) => {
       const [_, id] = url.split(':');
 
       if (!id) {
@@ -196,16 +215,16 @@ const EditBox: Component = () => {
       }
 
       try {
-        const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
+        // const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
-        const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-        const npub = hexToNpub(hex);
+        // const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+        // const npub = hexToNpub(hex);
 
-        const user = userRefs[npub];
+        const user = userRefs[userId];
 
         const link = user ?
           <span class='linkish'>@{userName(user)}</span> :
-          <span class='linkish'>@{truncateNpub(npub)}</span>;
+          <span class='linkish'>@{truncateNpub(id)}</span>;
 
         // @ts-ignore
         return link.outerHTML || url;
@@ -214,7 +233,70 @@ const EditBox: Component = () => {
       }
     });
 
+    setParsedMessage(parsed);
+
   };
+
+  const parseNpubLinks = (text: string) => {
+    let refs = [];
+    let match;
+
+    while((match = profileRegex.exec(text)) !== null) {
+      refs.push(match[1]);
+    }
+
+    refs.forEach(id => {
+      if (userRefs[id]) {
+        setTimeout(() => {
+          subUserRef(id);
+        }, 0);
+        return;
+      }
+
+      const eventId = nip19.decode(id).data as string | nip19.ProfilePointer;
+      const hex = typeof eventId === 'string' ? eventId : eventId.pubkey;
+
+      // setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
+
+      const unsub = subscribeTo(`nu_${id}`, (type, subId, content) =>{
+        if (type === 'EOSE') {
+        //   // const newNote = convertToNotes(referencedNotes[subId])[0];
+
+        //   // setNoteRefs((refs) => ({
+        //   //   ...refs,
+        //   //   [newNote.post.noteId]: newNote
+        //   // }));
+
+          subUserRef(hex);
+
+          unsub();
+          return;
+        }
+
+        if (type === 'EVENT') {
+          if (!content) {
+            return;
+          }
+
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
+
+            const u = convertToUser(user)
+
+            setUserRefs(() => ({ [u.pubkey]: u }));
+
+            // setReferencedNotes(subId, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+            return;
+          }
+        }
+      });
+
+
+      getUserProfiles([hex], `nu_${id}`);
+
+    });
+
+  }
 
   const parseNoteLinks = (text: string) => {
     let refs = [];
@@ -343,8 +425,9 @@ const EditBox: Component = () => {
 
 
   const parseForReferece = (value: string) => {
-    const content = parseNpubLinks(highlightHashtags(parseNote1(value)));
+    const content = parseUserMentions(highlightHashtags(parseNote1(value)));
 
+    parseNpubLinks(content);
     parseNoteLinks(content);
 
     return content;
@@ -417,9 +500,11 @@ const EditBox: Component = () => {
       return;
     }
 
+    const name = userName(user);
+
     setUserRefs((refs) => ({
       ...refs,
-      [user.npub]: user,
+      [name]: user,
     }));
 
     let value = message();
@@ -428,7 +513,7 @@ const EditBox: Component = () => {
 
     setQuery('');
 
-    setMessage(`${value}nostr:${user.npub} `);
+    setMessage(`${value}@\`${name}\` `);
     textArea.value = message();
     textArea.focus();
 

@@ -45,8 +45,6 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
 
       const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
-      console.log('WRAP: ', highlightOnly, note);
-
       const link = highlightOnly ?
         <span class='linkish' >{url}</span> :
         ment ?
