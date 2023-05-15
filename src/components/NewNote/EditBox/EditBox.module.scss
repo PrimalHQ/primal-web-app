@@ -156,12 +156,17 @@ textarea {
   font-weight: 400;
   color: var(--text-primary);
   resize: none;
+  scrollbar-width: none;  /* Firefox */
 
   &:focus {
     border: none;
     outline: none;
   }
 }
+
+textarea::-webkit-scrollbar{
+  display: none;  /* Safari and Chrome */
+ }
 
 .error {
   color: var(--brand-1);
