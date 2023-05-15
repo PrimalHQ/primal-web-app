@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { Component, createMemo, Show } from 'solid-js';
+import { Component, createMemo, JSXElement, Show } from 'solid-js';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
@@ -14,7 +14,7 @@ import ParsedNote, { parseNoteLinks, parseNpubLinks } from '../ParsedNote/Parsed
 
 import styles from './EmbeddedNote.module.scss';
 
-const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>}> = (props) => {
+const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>, includeEmbeds?: boolean}> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -114,14 +114,34 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     });
   }
 
-  return (
-    <A
-      href={`/thread/${noteId()}`}
-      class={styles.mentionedNote}
-      onClick={() => navToThread()}
-      data-event={props.note.post.id}
-      data-event-bech32={noteId()}
-    >
+  const wrapper = (children: JSXElement) => {
+    if (props.includeEmbeds) {
+      return (
+        <div
+          class={styles.mentionedNote}
+          data-event={props.note.post.id}
+          data-event-bech32={noteId()}
+        >
+          {children}
+        </div>
+      );
+    }
+
+    return (
+      <A
+        href={`/thread/${noteId()}`}
+        class={styles.mentionedNote}
+        onClick={() => navToThread()}
+        data-event={props.note.post.id}
+        data-event-bech32={noteId()}
+      >
+        {children}
+      </A>
+    );
+  };
+
+  return wrapper(
+    <>
       <div class={styles.mentionedNoteHeader}>
         <Avatar
           src={props.note.user.picture}
@@ -170,12 +190,12 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
             true,
           ),
           props.note,
-          true,
+          !props.includeEmbeds,
         )
       }>
       </div>
-    </A>
-  )
+    </>
+  );
 }
 
 export default EmbeddedNote;

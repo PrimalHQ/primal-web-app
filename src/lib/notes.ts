@@ -26,6 +26,8 @@ export const addLinkPreviews = async (url: string) => {
   try {
     const preview = await getLinkPreview(url);
 
+    // const preview = await fetch(`link-preview?u=https://yahoo.com`);
+    // console.log('PREV: ', preview);
     setLinkPreviews((p) => ({ ...p, [url]: { ...preview }}));
 
   } catch (e) {

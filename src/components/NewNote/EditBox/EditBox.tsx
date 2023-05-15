@@ -8,7 +8,7 @@ import { noteRegex, profileRegex, Kind } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
-import { getEvents } from "../../../lib/feed";
+import { getEvents, getThread } from "../../../lib/feed";
 import { hexToNpub } from "../../../lib/keys";
 import { parseNote1, sendNote } from "../../../lib/notes";
 import { subscribeTo } from "../../../sockets";
@@ -64,7 +64,7 @@ const EditBox: Component = () => {
   const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
     const maxHeight = document.documentElement.clientHeight || window.innerHeight || 0;
 
-    const elm = event.target as AutoSizedTextArea ;
+    const elm = event.target as AutoSizedTextArea;
 
     if(elm.nodeName !== 'TEXTAREA' || elm.id !== 'new_note_text_area') {
       return;
@@ -266,7 +266,6 @@ const EditBox: Component = () => {
 
           if ([Kind.Text, Kind.Repost].includes(content.kind)) {
             const message = content as NostrNoteContent;
-            const messageId = nip19.noteEncode(message.id);
 
             setReferencedNotes(subId, 'messages',
               (msgs) => [ ...msgs, { ...message }]
@@ -298,7 +297,7 @@ const EditBox: Component = () => {
       });
 
 
-      getEvents(account?.publicKey, [hex], `nn_${id}`);
+      getEvents(account?.publicKey, [hex], `nn_${id}`, true);
 
     });
 
@@ -318,12 +317,13 @@ const EditBox: Component = () => {
         const link = note ?
           <div>
             <TranslatorProvider>
-            <Router>
-              <EmbeddedNote
-                note={note}
-                mentionedUsers={note.mentionedUsers || {}}
+              <Router>
+                <EmbeddedNote
+                  note={note}
+                  mentionedUsers={note.mentionedUsers || {}}
+                  includeEmbeds={true}
                 />
-            </Router>
+              </Router>
             </TranslatorProvider>
           </div> :
           <span class="linkish">{url}</span>;

@@ -16,12 +16,17 @@ export const getFeed = (user_pubkey: string | undefined, subid: string, until = 
   ]));
 }
 
-export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string) => {
+export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string, extendResponse?: boolean) => {
 
-  let payload:  {event_ids: string[], user_pubkey?: string } = { event_ids: eventIds } ;
+  let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =
+    { event_ids: eventIds } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
+  }
+
+  if (extendResponse) {
+    payload.extended_response = extendResponse;
   }
 
   sendMessage(JSON.stringify([
