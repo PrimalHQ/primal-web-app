@@ -5,7 +5,7 @@ import { useSearchContext } from "../../contexts/SearchContext";
 import { hexToNpub } from "../../lib/keys";
 import { sendNote } from "../../lib/notes";
 import { referencesToTags } from "../../stores/note";
-import { truncateNpub } from "../../stores/profile";
+import { truncateNpub, userName } from "../../stores/profile";
 import { PrimalNote, PrimalUser } from "../../types/primal";
 import { debounce } from "../../utils";
 import Avatar from "../Avatar/Avatar";
@@ -62,16 +62,6 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
 
   const closeReplyToNote = () => {
     setOpen(false);
-  };
-
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      // @ts-ignore
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
   };
 
   return (

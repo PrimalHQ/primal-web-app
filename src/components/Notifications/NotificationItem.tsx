@@ -1,10 +1,10 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createMemo, createSignal, For, lazy, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js';
 import { NotificationType, notificationTypeTranslations } from '../../constants';
 import { trimVerification } from '../../lib/profile';
-import { truncateNpub } from '../../stores/profile';
-import { PrimalNote, PrimalNotifUser, PrimalUser } from '../../types/primal';
+import { truncateNpub, userName } from '../../stores/profile';
+import { PrimalNote, PrimalNotifUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './NotificationItem.module.scss';
@@ -29,7 +29,6 @@ import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post
 import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
-import Note from '../Note/Note';
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 
@@ -127,13 +126,6 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
     return trimVerification(firstUser.nip05);
 
   });
-
-  const userName = (user: PrimalUser) => {
-    return user.display_name ||
-      user.displayName ||
-      user.name ||
-      truncateNpub(user.npub);
-  };
 
   const typeDescription = () => {
 

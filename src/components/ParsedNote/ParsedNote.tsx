@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
 import { linkPreviews, parseNote1 } from '../../lib/notes';
-import { truncateNpub } from '../../stores/profile';
+import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
   Component, createEffect, createMemo, createSignal,
@@ -15,15 +15,6 @@ import styles from './ParsedNote.module.scss';
 import { nip19 } from 'nostr-tools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 
-
-const userName = (user: PrimalUser) => {
-  return truncateNpub(
-    user.display_name ||
-    user.displayName ||
-    user.name ||
-    user.npub ||
-    hexToNpub(user.pubkey) || '');
-};
 
 export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
 

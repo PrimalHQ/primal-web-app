@@ -1,20 +1,18 @@
-import { IntlProvider, useIntl } from "@cookbook/solid-intl";
-import { A, Router, useLocation } from "@solidjs/router";
-import { nip19, parseReferences } from "nostr-tools";
-import { Component, createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js";
+import { useIntl } from "@cookbook/solid-intl";
+import { Router, useLocation } from "@solidjs/router";
+import { nip19 } from "nostr-tools";
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { style } from "solid-js/web";
 import { noteRegex, profileRegex, Kind, editMentionRegex } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
-import { getEvents, getThread } from "../../../lib/feed";
-import { hexToNpub } from "../../../lib/keys";
+import { getEvents } from "../../../lib/feed";
 import { parseNote1, sendNote } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
-import { convertToUser, truncateNpub } from "../../../stores/profile";
+import { convertToUser, truncateNpub, userName } from "../../../stores/profile";
 import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
 import { debounce } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
@@ -508,32 +506,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
       positionOptions();
     }
   });
-
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      // @ts-ignore
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
-  };
-
-  const setCursor = () => {
-    const el = document.getElementById('new_note_text_area');
-    const selection = window.getSelection();
-    const range = document.createRange();
-
-    if (!selection || !el) {
-      return;
-    }
-
-    selection.removeAllRanges();
-    range.selectNodeContents(el);
-    range.collapse(false);
-    selection.addRange(range);
-    el.focus();
-  };
 
   const selectUser = (user: PrimalUser) => {
     if (!textArea) {

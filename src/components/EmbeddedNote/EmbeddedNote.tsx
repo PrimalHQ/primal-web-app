@@ -7,7 +7,7 @@ import { date } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
 import { parseNote2 } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
-import { truncateNpub } from '../../stores/profile';
+import { truncateNpub, userName } from '../../stores/profile';
 import { NostrNoteContent, NostrPostStats, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote, { parseNoteLinks, parseNpubLinks } from '../ParsedNote/ParsedNote';
@@ -23,21 +23,6 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
   const navToThread = () => {
     threadContext?.actions.setPrimaryNote(props.note);
-  };
-
-  const authorName = () => {
-    return props.note.user?.displayName ||
-      props.note.user?.name ||
-      truncateNpub(props.note.user.npub);
-  };
-
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
   };
 
   const verification = createMemo(() => {
@@ -153,7 +138,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
               when={props.note.user.nip05}
               fallback={
                 <span class={styles.userName}>
-                  {authorName()}
+                  {userName(props.note.user)}
                 </span>
               }
             >

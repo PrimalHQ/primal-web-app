@@ -47,3 +47,27 @@ export const emptyUser = (pubkey: string) => {
     website: '',
   };
 };
+
+export const userName = (user: PrimalUser | undefined) => {
+  if (!user) {
+    return '';
+  }
+  return truncateNpub(
+    user.name ||
+    user.display_name ||
+    user.displayName ||
+    user.npub ||
+    hexToNpub(user.pubkey) || '');
+};
+
+export const authorName = (user: PrimalUser | undefined) => {
+  if (!user) {
+    return '';
+  }
+  return truncateNpub(
+    user.display_name ||
+    user.displayName ||
+    user.name ||
+    user.npub ||
+    hexToNpub(user.pubkey) || '');
+};

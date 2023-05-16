@@ -3,7 +3,7 @@ import { A } from '@solidjs/router';
 import { Component, createEffect, createMemo, createSignal, For, lazy, Show } from 'solid-js';
 import { NotificationType, notificationTypeNoteProps, notificationTypeTranslations, notificationTypeUserProps } from '../../constants';
 import { trimVerification } from '../../lib/profile';
-import { truncateNpub } from '../../stores/profile';
+import { truncateNpub, userName } from '../../stores/profile';
 import { PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
@@ -84,16 +84,6 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
     const prop = notificationTypeUserProps[type()];
     const id = props.notification[prop];
     return props.users[`${id}`];
-  };
-
-  const userName = (user: PrimalUser | undefined) => {
-    if (!user) {
-      return truncateNpub(hexToNpub(props.notification[notificationTypeUserProps[type()]]));
-    }
-
-    return user.displayName ||
-      user.name ||
-      truncateNpub(user.npub);
   };
 
   const typeDescription = () => {

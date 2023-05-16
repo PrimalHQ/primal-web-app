@@ -3,7 +3,7 @@ import { useNavigate } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { hexToNpub } from '../../lib/keys';
-import { truncateNpub } from '../../stores/profile';
+import { truncateNpub, userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { debounce } from '../../utils';
 import Avatar from '../Avatar/Avatar';
@@ -71,16 +71,6 @@ const Search: Component = () => {
 
   const resetQuery = () => {
     setQuery('');
-  };
-
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      // @ts-ignore
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
   };
 
   createEffect(() => {

@@ -3,11 +3,10 @@ import Avatar from '../Avatar/Avatar';
 
 import styles from './SmallNote.module.scss';
 import { A } from '@solidjs/router';
-import { PrimalNote, PrimalUser } from '../../types/primal';
+import { PrimalNote } from '../../types/primal';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
-import { truncateNpub } from '../../stores/profile';
-import { hexToNpub } from '../../lib/keys';
+import { authorName } from '../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 
 
@@ -20,18 +19,9 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const userName = (user: PrimalUser) => {
-    return truncateNpub(
-      user.display_name ||
-      user.displayName ||
-      user.name ||
-      user.npub ||
-      hexToNpub(user.pubkey) || '');
-    };
-
-    const authorName = () => {
-      return userName(props.note.user || { pubkey: props.note.post.pubkey });
-    };
+  const nameOfAuthor = () => {
+    return authorName(props.note.user || { pubkey: props.note.post.pubkey });
+  };
 
   const parsedContent = (text: string) => {
     const regex = /\#\[([0-9]*)\]/g;
@@ -57,7 +47,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
             defaultMessage: '\[post by {name}\]',
             description: 'Label indicating that a note has been metioned in the small note display'
           }, {
-            name: userName(props.note.user),
+            name: authorName(props.note.user),
           })}
         </span>);
 
@@ -68,7 +58,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
         if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
           const user = props.note.mentionedUsers[tag[1]];
 
-          const link =  (<span>@{userName(user)}</span>);
+          const link =  (<span>@{authorName(user)}</span>);
 
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
@@ -92,8 +82,8 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
           onClick={() => navToThread(props.note)}
         >
           <div class={styles.header}>
-            <div class={styles.name} title={authorName()}>
-              {authorName()}
+            <div class={styles.name} title={nameOfAuthor()}>
+              {nameOfAuthor()}
             </div>
             <div class={styles.time}>
               <Show
