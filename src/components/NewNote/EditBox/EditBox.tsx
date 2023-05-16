@@ -23,14 +23,9 @@ import SearchOption from "../../Search/SearchOption";
 import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
 
-type Reference = {
-  type: 'user',
-  content: PrimalUser,
-} | { type: 'note', content: PrimalNote };
-
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
-const EditBox: Component = () => {
+const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (props) => {
 
   const intl = useIntl();
 
@@ -98,12 +93,23 @@ const EditBox: Component = () => {
     document.removeEventListener('input', onExpandableTextareaInput);
   });
 
+  createEffect(() => {
+    document.removeEventListener('keyup', onEscape);
+    document.addEventListener('keyup', onEscape);
+  });
+
+  const onEscape = (e: KeyboardEvent) => {
+    if (e.code === 'Escape') {
+      closeNewNote();
+    }
+  };
+
   const closeNewNote = () => {
-    account?.actions?.hideNewNoteForm();
     setUserRefs({});
     setMessage('');
     setParsedMessage('');
     setQuery('');
+    props.onClose && props.onClose();
   };
 
   const postNote = async () => {
@@ -124,6 +130,12 @@ const EditBox: Component = () => {
 
     if (account) {
       const tags = referencesToTags(messageToSend);
+
+      if (props.replyToNote) {
+        tags.push(['e', props.replyToNote.post.id, '', 'reply']);
+        tags.push(['p', props.replyToNote.post.pubkey]);
+      }
+
       const success = await sendNote(messageToSend, account.relays, tags);
 
       if (success) {

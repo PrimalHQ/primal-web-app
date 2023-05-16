@@ -169,20 +169,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     updateStore('activeUser', () => ({...user}));
   };
 
-  const onEscape = (e: KeyboardEvent) => {
-    if (e.code === 'Escape') {
-      hideNewNoteForm();
-    }
-  };
-
   const showNewNoteForm = () => {
     updateStore('showNewNoteForm', () => true);
-    document.addEventListener('keyup', onEscape);
   };
 
   const hideNewNoteForm = () => {
     updateStore('showNewNoteForm', () => false);
-    document.removeEventListener('keyup', onEscape);
   };
 
   const addLike = async (note: PrimalNote) => {

@@ -35,7 +35,9 @@ const NewNote: Component = () => {
               />
             </div>
             <div class={styles.rightSide}>
-              <EditBox />
+              <EditBox
+                onClose={account?.actions?.hideNewNoteForm}
+              />
             </div>
           </div>
         </div>
