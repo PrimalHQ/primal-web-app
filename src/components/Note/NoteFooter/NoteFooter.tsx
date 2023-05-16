@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, createSignal, onMount, Show } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 import { sendRepost } from '../../../lib/notes';
 
@@ -6,6 +6,17 @@ import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
+
+import likeFilled from '../../../assets/icons/feed_like_fill.svg';
+import likeEmpty from '../../../assets/icons/feed_like.svg';
+import replyFilled from '../../../assets/icons/feed_reply_fill.svg';
+import replyEmpty from '../../../assets/icons/feed_reply.svg';
+import zapFilled from '../../../assets/icons/feed_zap_fill.svg';
+import zapEmpty from '../../../assets/icons/feed_zap.svg';
+import repostFilled from '../../../assets/icons/feed_repost_fill.svg';
+import repostEmpty from '../../../assets/icons/feed_repost.svg';
+import { truncateNumber } from '../../../lib/notifications';
+import { createStore } from 'solid-js/store';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
@@ -17,6 +28,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const [likes, setLikes] = createSignal(props.note.post.likes);
   const [reposts, setReposts] = createSignal(props.note.post.reposts);
+  const [replies, setReplies] = createSignal(props.note.post.replies);
+  const [zaps, setZaps] = createSignal(props.note.post.satszapped);
 
   const doRepost = async (e: MouseEvent) => {
     e.preventDefault();
@@ -48,6 +61,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     }
   };
 
+  const doReply = () => {};
+
   const doLike = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -70,55 +85,88 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     toast?.notImplemented();
   }
 
+  const buttonTypeClasses: Record<string, string> = {
+    zap: styles.zapType,
+    like: styles.likeType,
+    reply: styles.replyType,
+    repost: styles.repostType,
+  };
+
   const actionButton = (opts: {
+    type: 'zap' | 'like' | 'reply' | 'repost',
     disabled?: boolean,
     onClick: (e: MouseEvent) => void,
     icon: string,
+    iconDisabled: string,
     label: string | number,
   }) => {
+
+    const [activeIcon, setActiveIcon] = createSignal<string>(opts.icon);
+
     return (
-      <button
-        class={styles.stat}
-        onClick={opts.onClick}
-        disabled={opts.disabled}
+      <Show
+        when={opts.disabled}
+        fallback={
+          <button
+            class={`${styles.stat} ${buttonTypeClasses[opts.type]}`}
+            onClick={opts.onClick}
+            onMouseOver={() => setActiveIcon(opts.iconDisabled)}
+            onMouseOut={() => setActiveIcon(opts.icon)}
+          >
+            <img src={activeIcon()} />
+            <div class={styles.statNumber}>{opts.label || ''}</div>
+          </button>
+        }
       >
-        <div class={opts.icon}></div>
-        <div class={styles.statNumber}>{opts.label || ''}</div>
-      </button>
+        <button
+          class={`${styles.stat} ${buttonTypeClasses[opts.type]}`}
+          onClick={opts.onClick}
+          disabled={opts.disabled}
+        >
+          <img src={opts.iconDisabled} />
+          <span class={styles.statNumber}>{opts.label || ''}</span>
+        </button>
+      </Show>
     );
   };
 
   return (
     <div class={styles.footer}>
-      <div
-        class={styles.stat}
-        title={intl.formatMessage({
-          id: 'tooltips.replyNumber',
-          defaultMessage: 'Number of replies',
-          description: 'Tooltip message for number of replies',
-        })}
-      >
-        <div class={styles.replyIcon}></div>
-        <div class={styles.statNumber}>{props.note.post?.replies || ''}</div>
-      </div>
+
+      {actionButton({
+        onClick: doReply,
+        type: 'reply',
+        disabled: false,
+        icon: replyEmpty,
+        iconDisabled: replyFilled,
+        label: likes(),
+      })}
+
+      {actionButton({
+        onClick: doZap,
+        type: 'zap',
+        disabled: false,
+        icon: zapEmpty,
+        iconDisabled: zapFilled,
+        label: truncateNumber(props.note.post?.satszapped),
+      })}
 
       {actionButton({
         onClick: doLike,
+        type: 'like',
         disabled: liked(),
-        icon: styles.likeIcon,
+        icon: likeEmpty,
+        iconDisabled: likeFilled,
         label: likes(),
       })}
 
       {actionButton({
         onClick: doRepost,
-        icon: styles.repostIcon,
+        type: 'repost',
+        disabled: false,
+        icon: repostEmpty,
+        iconDisabled: repostFilled,
         label: reposts(),
-      })}
-
-      {actionButton({
-        onClick: doZap,
-        icon: styles.zapIcon,
-        label: props.note.post?.satszapped,
       })}
     </div>
   )

@@ -1,43 +1,84 @@
 .footer {
-  display: grid;
-  grid-template-columns: 36px 36px 36px 36px;
-  grid-template-rows: 1fr;
-  grid-column-gap: 60px;
+  display: flex;
 
   .stat {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 18px 1fr;
     grid-template-rows: 1fr;
     grid-column-gap: 5px;
-    font-size: 14px;
+    font-weight: 400;
+    font-size: 18px;
     line-height: 16px;
     align-items: center;
     margin: 0px;
     padding: 0px;
+    margin-right: 60px;
     border: none;
     background-color: unset;
     &:disabled, &[disabled] {
-      .replyIcon, .likeIcon, .repostIcon {
-        background-color: var(--accent-1);
+      &.zapType {
+        .statNumber {
+          color: #FF9F2F;
+        }
       }
-      .statNumber {
-        color: var(--accent-1);
+      &.likeType {
+        .statNumber {
+          color: #CA079F;
+        }
       }
+      &.replyType {
+        .statNumber {
+          color: #CCCCCC;
+        }
+      }
+      &.repostType {
+        .statNumber {
+          color: #66E205;
+        }
+      }
+      // .replyIcon, .likeIcon, .repostIcon {
+      //   background-color: var(--accent-1);
+      // }
+      // .statNumber {
+      //   color: var(--accent-1);
+      // }
     }
     &:focus {
       box-shadow: none;
     }
+
     .statNumber {
+      text-align: left;
       color: var(--text-secondary);
     }
 
     &:hover {
-      .replyIcon, .likeIcon, .repostIcon, .zapIcon {
-        background-color: var(--text-secondary);
+      &.zapType {
+        .statNumber {
+          color: #FF9F2F;
+        }
       }
-      .statNumber {
-        color: var(--text-primary);
+      &.likeType {
+        .statNumber {
+          color: #BC1870;
+        }
       }
+      &.replyType {
+        .statNumber {
+          color: #CCCCCC;
+        }
+      }
+      &.repostType {
+        .statNumber {
+          color: #66E205;
+        }
+      }
+      // .replyIcon, .likeIcon, .repostIcon, .zapIcon {
+      //   background-color: var(--text-secondary);
+      // }
+      // .statNumber {
+      //   color: var(--text-primary);
+      // }
     }
   }
 }
