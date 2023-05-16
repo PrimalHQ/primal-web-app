@@ -148,7 +148,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         disabled: false,
         icon: zapEmpty,
         iconDisabled: zapFilled,
-        label: truncateNumber(props.note.post?.satszapped),
+        label: zaps() === 0 ? '' : truncateNumber(zaps()),
       })}
 
       {actionButton({
