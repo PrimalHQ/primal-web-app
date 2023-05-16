@@ -112,7 +112,7 @@
 
 @media only screen and (max-width: 720px) {
   .post {
-    width: calc(100vw - (100vw - 100%));
+    width: calc(100vw - (100vw - 100%) - 30px);
     grid-template-columns: 92px 1fr;
     margin-left: 0px;
     margin-right: 0px;

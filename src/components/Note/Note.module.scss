@@ -127,20 +127,21 @@
 
 
 @media only screen and (max-width: 720px) {
-  .post {
-    width: calc(100vw - (100vw - 100%));
-    grid-template-columns: 62px 1fr;
-    margin-left: 0px;
-    margin-right: 0px;
-    padding-right: 0px;
-    .content {
-      .message {
-        width: 80% !important;
+  .postLink {
+    width: calc(100vw - (100vw - 100%) - 30px);
+    .post {
+      width: 100%;
+      grid-template-columns: 62px 1fr;
+      margin-left: 0px;
+      margin-right: 0px;
+      padding-right: 0px;
+      .content {
+        .message {
+          width: 80% !important;
+        }
       }
     }
+
   }
 
-  .postLink {
-    width: 100% !important;
-  }
 }

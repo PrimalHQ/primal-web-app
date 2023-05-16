@@ -69,19 +69,6 @@
 
 }
 
-@media only screen and (max-width: 720px) {
-  .header {
-    width: calc(100vw - 92px);
-    .postInfo {
-      width: calc(100vw - 92px);
-      .userInfo {
-        max-width: calc(100vw - 92px);
-        overflow: hidden;
-      }
-    }
-  }
-}
-
 .contextIcon {
   width: 16px;
   height: 16px;
@@ -117,5 +104,18 @@
 
   &:hover, &:focus {
     background-color: var(--background-input);
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .header {
+    width: calc(100vw - 140px);
+    .postInfo {
+      width: calc(100vw - 92px);
+      .userInfo {
+        max-width: calc(100vw - 92px);
+        overflow: hidden;
+      }
+    }
   }
 }
