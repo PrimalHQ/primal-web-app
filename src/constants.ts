@@ -365,4 +365,4 @@ export const notificationTypeTranslations: Record<string, string> = {
 
 export const noteRegex = /nostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
 export const profileRegex = /nostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
-export const editMentionRegex = /(?:\s|^)@\`[^\s!@#$%^&*(),.?":{}|<>]+\`/ig;
+export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
