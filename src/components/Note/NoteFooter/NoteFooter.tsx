@@ -138,7 +138,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         disabled: false,
         icon: replyEmpty,
         iconDisabled: replyFilled,
-        label: likes(),
+        label: replies(),
       })}
 
       {actionButton({
