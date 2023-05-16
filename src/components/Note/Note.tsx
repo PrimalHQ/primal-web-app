@@ -10,7 +10,6 @@ import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { truncateNpub } from '../../stores/profile';
-import { style } from 'solid-js/web';
 
 const Note: Component<{ note: PrimalNote }> = (props) => {
 
@@ -23,12 +22,6 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const authorName = () => {
-    return props.note.user?.displayName ||
-      props.note.user?.name ||
-      truncateNpub(props.note.user.npub);
-  }
-
   const reposterName = () => {
     const r = repost();
 
@@ -39,6 +32,11 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
     return r.user?.displayName ||
       r.user?.name ||
       truncateNpub(r.user.npub);
+  }
+
+  const isVerifiedByPrimal = () => {
+    return !!props.note.user.nip05 &&
+      props.note.user.nip05.endsWith('primal.net');
   }
 
 
@@ -77,11 +75,10 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
           >
             <Avatar
               src={props.note?.user?.picture}
-              size="md"
-              verified={props.note?.user?.nip05}
+              size="sm"
+              highlightBorder={isVerifiedByPrimal()}
             />
           </A>
-          <div class={styles.avatarName}>{authorName()}</div>
         </div>
         <div class={styles.content}>
           <NoteHeader note={props.note} />

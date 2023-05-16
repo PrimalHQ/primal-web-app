@@ -6,7 +6,8 @@ import styles from './Avatar.module.scss';
 const Avatar: Component<{
   src: string | undefined,
   size?: "xxs" | "xs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
-  verified?: string
+  verified?: string,
+  highlightBorder?: boolean,
 }> = (props) => {
 
   const selectedSize = props.size || 'sm';
@@ -40,12 +41,22 @@ const Avatar: Component<{
     return true;
   }
 
+  const highlightClass = () => {
+    if (props.highlightBorder) {
+      return styles.highlightBorder;
+    }
+
+    return '';
+  };
+
   return (
-    <div class={avatarClass[selectedSize]}>
+    <div class={`${avatarClass[selectedSize]} ${highlightClass()}`}>
       <Show
         when={props.src}
         fallback={
-          <div class={missingClass[selectedSize]}></div>
+          <div class={styles.missingBack}>
+            <div class={missingClass[selectedSize]}></div>
+          </div>
         }
       >
         <img src={props.src} alt="avatar" onerror={imgError}/>

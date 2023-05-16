@@ -36,10 +36,8 @@ const NotePrimary: Component<{ note: PrimalNote }> = (props) => {
             <Avatar
               src={props.note?.user?.picture}
               size="xl"
-              verified={props.note?.user?.nip05}
             />
           </A>
-          <div class={styles.avatarName}>{authorName()}</div>
         </div>
         <div class={styles.content}>
           <NoteHeader note={props.note} />

@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, Match, Show, Switch } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
@@ -7,6 +7,7 @@ import { trimVerification } from '../../../lib/profile';
 import { truncateNpub } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
+import VerificationCheck from '../../VerificationCheck/VerificationCheck';
 
 const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
@@ -20,10 +21,6 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
       props.note.user?.name ||
       truncateNpub(props.note.user.npub);
   };
-
-  const verification = createMemo(() => {
-    return trimVerification(props.note.user?.nip05);
-  });
 
   const openContextMenu = (e: MouseEvent) => {
     e.preventDefault();
@@ -60,37 +57,41 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
   return (
     <div class={styles.header}>
-      <span class={styles.postInfo}>
-        <span class={styles.userInfo}>
-          <Show
-            when={props.note.user?.nip05}
-            fallback={
-              <span class={styles.userName}>
-                {authorName()}
-              </span>
-            }
+      <div class={styles.postInfo}>
+        <div class={styles.userInfo}>
+
+          <span class={styles.userName}>
+            {authorName()}
+          </span>
+
+          <VerificationCheck user={props.note.user} />
+
+          <span
+            class={styles.time}
+            title={date(props.note.post?.created_at).date.toLocaleString()}
           >
-            <span class={styles.userName}>
-              {verification()[0]}
-            </span>
-            <span class={styles.verifiedIcon} />
-            <span
-              class={styles.verifiedBy}
-              title={props.note.user?.nip05}
-            >
-              {verification()[1]}
-            </span>
-          </Show>
-        </span>
-        <span
-          class={styles.time}
-          title={date(props.note.post?.created_at).date.toLocaleString()}
+            {date(props.note.post?.created_at).label}
+          </span>
+        </div>
+
+        <Show
+          when={props.note.user?.nip05}
         >
-          {date(props.note.post?.created_at).label}
-        </span>
-      </span>
+          <span
+            class={styles.verification}
+            title={props.note.user?.nip05}
+          >
+            {props.note.user?.nip05}
+          </span>
+        </Show>
+      </div>
       <div class={styles.contextMenu}>
-        <button onClick={openContextMenu} class={styles.contextIcon}></button>
+        <button
+          class={styles.contextButton}
+          onClick={openContextMenu}
+        >
+          <div class={styles.contextIcon} ></div>
+        </button>
         <Show when={showContext()}>
           <div
             id={`note_context_${props.note.post.id}`}

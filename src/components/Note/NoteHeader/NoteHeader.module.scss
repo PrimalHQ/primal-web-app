@@ -5,16 +5,21 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+  height: 48px;
 
   .postInfo {
     display: flex;
-    justify-content: flex-start;
+    flex-direction: column;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 400;
+    height: 48px;
+    justify-content: space-around;
 
     .userInfo {
+      display: flex;
+      justify-content: flex-start;
       overflow: hidden;
-      font-size: 14px;
-      line-height: 16px;
-      font-weight: 400;
       display: flex;
       align-items: center;
       justify-content: flex-start;
@@ -23,31 +28,43 @@
         white-space: nowrap;
         overflow: hidden;
         max-width: 260px;
+        color: var(--text-primary);
+      }
+      .time{
+        margin: 0px 2px;
+        min-width: 40px;
+        &::before {
+          content: "|";
+          padding: 0px 2px;
+        }
       }
     }
 
-    .time{
-      margin: 0px 2px;
-      min-width: 40px;
-      font-size: 14px;
-      line-height: 16px;
-      font-weight: 400;
-      &::before {
-        content: "|";
-        padding: 0px 2px;
-      }
-    }
   }
 
 
   .contextMenu {
     position: relative;
-    min-width: 5px;
+    width: 16px;
     height: 16px;
     display: flex;
     align-items: center;
     text-align: center;
     font-weight: bold;
+
+    .contextButton {
+      height: 16px;
+      padding: 0;
+      margin: 0;
+      background: none;
+      border: none;
+      outline: none;
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
+      }
+    }
   }
 
 }
@@ -65,31 +82,21 @@
   }
 }
 
-.verifiedIcon {
-  width: 13px;
-  height: 12px;
-  min-width: 13px;
-  display: inline-block;
-  margin: 0px 2px;
-  background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../../../assets/icons/verified.svg) no-repeat center;
-  mask: url(../../../assets/icons/verified.svg) no-repeat center;
-}
-
 .contextIcon {
-  display: inline-block;
-  width: 10px;
-  height: 2px;
-  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary-2);
+  -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+  mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
 
-  background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../../../assets/icons/context.svg) no-repeat center;
-  mask: url(../../../assets/icons/context.svg) no-repeat center;
+  &:hover {
+    background-color: var(--text-primary);
+  }
 }
 
 .contextMenuOptions {
   position: absolute;
-  top: 2px;
+  top: 16px;
   right: 0px;
   min-width: 120px;
   background-color: var(--background-site);

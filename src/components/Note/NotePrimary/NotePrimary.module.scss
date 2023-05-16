@@ -51,7 +51,7 @@
     grid-area: content;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 16px 1fr 28px;
+    grid-template-rows: 48px 1fr 28px;
     grid-row-gap: 16px;
     grid-template-areas: "header" "message" "footer";
 
