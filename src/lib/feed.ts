@@ -4,7 +4,7 @@ import { nip19 } from "nostr-tools";
 import { day, hour, noKey } from "../constants";
 
 export const getFeed = (user_pubkey: string | undefined, subid: string, until = 0, limit = 20) => {
-  if (!user_pubkey) {
+  if (!user_pubkey || user_pubkey === noKey) {
     return;
   }
 
@@ -21,7 +21,7 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
   let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =
     { event_ids: eventIds } ;
 
-  if (user_pubkey) {
+  if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -44,7 +44,7 @@ export const getUserFeed = (user_pubkey: string, subid: string, until = 0, limit
   let payload:  { user_pubkey?: string, limit: number, notes: string, since?: number, until?: number } =
     { user_pubkey, limit, notes: 'authored', [start]: until } ;
 
-  if (user_pubkey) {
+  if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -92,7 +92,7 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   let payload:  { user_pubkey?: string, limit: number, event_id: string, until?: number } =
     { event_id, limit: 100 } ;
 
-  if (user_pubkey) {
+  if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -127,6 +127,7 @@ export const getExploreFeed = (
 
     payload.created_after = yesterday;
   }
+
   if (timeframe === 'mostzapped4h') {
     const fourHAgo = Math.floor((new Date().getTime() - (4 * hour)) / 1000);
 

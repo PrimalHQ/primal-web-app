@@ -34,11 +34,13 @@ const Thread: Component = () => {
   const threadContext = useThreadContext();
 
   const primaryNote = () => {
-    const savedNote = threadContext?.primaryNote;
+    // const id = postId();
+    // const savedNote = threadContext?.primaryNote;
 
-    if (savedNote?.post.noteId === postId()) {
-      return savedNote;
-    }
+
+    // if (savedNote?.post.noteId === postId()) {
+    //   return savedNote;
+    // }
 
     return threadContext?.notes.find(n => n.post.noteId === postId());
   };
@@ -106,7 +108,6 @@ const Thread: Component = () => {
 
     pn && observer?.unobserve(pn);
   });
-
 
   return (
     <div>

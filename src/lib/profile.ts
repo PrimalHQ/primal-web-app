@@ -1,5 +1,5 @@
 import { Event, Relay } from "nostr-tools";
-import { Kind, minKnownProfiles } from "../constants";
+import { Kind, minKnownProfiles, noKey } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrWindow, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
@@ -21,6 +21,9 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
 // }
 
 export const getUserProfileInfo = (pubkey: string, subid: string) => {
+  if (pubkey === noKey) {
+    return
+  }
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -28,15 +31,11 @@ export const getUserProfileInfo = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const getOldestProfileEvent = (pubkey: string, subid: string) => {
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["oldest_event_by_user", { pubkey }]},
-  ]));
-}
-
 export const getProfileContactList = (pubkey: string, subid: string) => {
+  if (pubkey === noKey) {
+    return
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -70,6 +69,10 @@ export const trimVerification = (address: string | undefined) => {
 }
 
 export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: string[]) => void) => {
+  if (pubkey === noKey) {
+    return;
+  }
+
   const win = window as NostrWindow;
   const nostr = win.nostr;
   const storage = getStorage(pubkey);
