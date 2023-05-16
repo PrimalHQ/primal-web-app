@@ -15,7 +15,7 @@
     margin-right: 60px;
     border: none;
     background-color: unset;
-    &:disabled, &[disabled] {
+    &.disabled {
       &.zapType {
         .statNumber {
           color: #FF9F2F;
