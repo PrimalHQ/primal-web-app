@@ -310,6 +310,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   createEffect(() => {
     if (store.publicKey && store.relays.length > 0) {
       getLikes(store.publicKey, store.relays, (likes: string[]) => {
+
         updateStore('likes', () => [...likes]);
         saveLikes(store.publicKey, likes);
       });

@@ -85,7 +85,6 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
 
           <div class={styles.message}>
             <ParsedNote note={props.note} />
-            <div class={styles.messageFade}></div>
           </div>
 
           <NoteFooter note={props.note} />
