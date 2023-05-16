@@ -1,5 +1,5 @@
 import { IntlProvider, useIntl } from "@cookbook/solid-intl";
-import { A, Router } from "@solidjs/router";
+import { A, Router, useLocation } from "@solidjs/router";
 import { nip19, parseReferences } from "nostr-tools";
 import { Component, createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -47,6 +47,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
 
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
 
+  const location = useLocation();
+
+  let currentPath = location.pathname;
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -98,13 +101,19 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
     document.addEventListener('keyup', onEscape);
   });
 
+  createEffect(() => {
+    if (location.pathname !== currentPath) {
+      closeEditor();
+    }
+  })
+
   const onEscape = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
-      closeNewNote();
+      closeEditor();
     }
   };
 
-  const closeNewNote = () => {
+  const closeEditor = () => {
     setUserRefs({});
     setMessage('');
     setParsedMessage('');
@@ -146,7 +155,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
       }
     }
 
-    closeNewNote();
+    closeEditor();
   };
 
   const positionOptions = () => {
@@ -631,7 +640,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
             )}
           </span>
         </button>
-        <button class={styles.secondaryButton} onClick={closeNewNote}>
+        <button class={styles.secondaryButton} onClick={closeEditor}>
           <div>
             <span>
               {intl.formatMessage(
