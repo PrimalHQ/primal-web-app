@@ -11,7 +11,7 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
 
   let payload = { limit, [start]: until, pubkey };
 
-  if (user_pubkey) {
+  if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
   }
 
