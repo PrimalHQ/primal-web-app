@@ -16,6 +16,13 @@
     height: 48px;
     justify-content: space-around;
 
+    .verification {
+      max-width: 470px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
+    }
     .userInfo {
       display: flex;
       justify-content: flex-start;
@@ -27,7 +34,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
-        max-width: 260px;
+        max-width: 360px;
         color: var(--text-primary);
       }
       .time{
@@ -115,6 +122,13 @@
       .userInfo {
         max-width: calc(100vw - 92px);
         overflow: hidden;
+      }
+      .verification {
+        max-width: 220px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+
       }
     }
   }

@@ -55,6 +55,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
     }
   });
 
+
   return (
     <div class={styles.header}>
       <div class={styles.postInfo}>
