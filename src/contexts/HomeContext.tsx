@@ -68,7 +68,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    getFeed(topic, `home_feed_${subId}`, until);
+    getFeed(account?.publicKey, topic, `home_feed_${subId}`, until);
   };
 
   const clearNotes = () => {

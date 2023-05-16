@@ -3,16 +3,22 @@ import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "nostr-tools";
 import { day, hour, noKey } from "../constants";
 
-export const getFeed = (user_pubkey: string | undefined, subid: string, until = 0, limit = 20) => {
-  if (!user_pubkey || user_pubkey === noKey) {
+export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
+  if (!pubkey || pubkey === noKey) {
     return;
   }
-
   const start = until === 0 ? 'since' : 'until';
+
+  let payload = { limit, [start]: until, pubkey };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["feed", { limit, [start]: until, user_pubkey }]},
+    {cache: ["feed", payload]},
   ]));
 }
 
@@ -37,12 +43,14 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
 
 };
 
-export const getUserFeed = (user_pubkey: string, subid: string, until = 0, limit = 20) => {
+export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, until = 0, limit = 20) => {
+  if (!pubkey || pubkey === noKey) {
+    return;
+  }
 
   const start = until === 0 ? 'since' : 'until';
 
-  let payload:  { user_pubkey?: string, limit: number, notes: string, since?: number, until?: number } =
-    { user_pubkey, limit, notes: 'authored', [start]: until } ;
+  let payload = { pubkey, limit, notes: 'authored', [start]: until } ;
 
   if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;

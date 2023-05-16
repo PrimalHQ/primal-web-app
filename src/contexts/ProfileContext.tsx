@@ -113,7 +113,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetching', () => true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    getUserFeed(pubkey, `profile_feed_${APP_ID}`, until, limit);
+    getUserFeed(account?.publicKey, pubkey, `profile_feed_${APP_ID}`, until, limit);
   }
 
   const clearNotes = () => {
