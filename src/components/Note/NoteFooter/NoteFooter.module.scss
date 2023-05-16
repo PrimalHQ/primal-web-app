@@ -12,6 +12,7 @@
     align-items: center;
     margin: 0px;
     padding: 0px;
+    margin-right: 60px;
     border: none;
     background-color: unset;
     &.disabled {
@@ -86,6 +87,10 @@
   .footer {
     width: calc(100vw - 92px);
     grid-column-gap: 30px;
+
+    .stat{
+      margin-right: 6px;
+    }
   }
 }
 
