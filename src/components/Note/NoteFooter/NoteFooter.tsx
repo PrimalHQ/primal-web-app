@@ -119,7 +119,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         }
       >
         <button
-          class={`${styles.stat} ${styles.disabled} ${buttonTypeClasses[opts.type]}`}
+          class={`${styles.stat} ${styles.highlighted} ${buttonTypeClasses[opts.type]}`}
           onClick={() => {}}
         >
           <img src={opts.iconDisabled} />
