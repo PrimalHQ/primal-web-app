@@ -59,7 +59,9 @@ const Avatar: Component<{
           </div>
         }
       >
-        <img src={props.src} alt="avatar" onerror={imgError}/>
+        <div class={styles.missingBack}>
+          <img src={props.src} alt="avatar" onerror={imgError}/>
+        </div>
       </Show>
       <Show when={props.verified}>
         <div class={styles.iconBackground}>
