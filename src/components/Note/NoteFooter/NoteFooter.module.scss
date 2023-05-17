@@ -15,7 +15,7 @@
     margin-right: 60px;
     border: none;
     background-color: unset;
-    &.disabled {
+    &.highlighted {
       &.zapType {
         .statNumber {
           color: #FF9F2F;
@@ -85,12 +85,11 @@
 
 @media only screen and (max-width: 720px) {
   .footer {
-    width: calc(100vw - 92px);
-    grid-column-gap: 30px;
+    width: auto;
+    grid-column-gap: 0px;
 
     .stat{
-      margin-right: 2px;
-      grid-column-gap: 2px;
+      margin-right: 0px;
     }
   }
 }
