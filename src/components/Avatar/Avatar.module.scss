@@ -40,6 +40,11 @@
   width: 24px;
   height: 24px;
 
+  .missingBack {
+    width: 24px;
+    height: 24px;
+  }
+
   .iconBackground {
     @include iconBackground;
     bottom: -6px;
@@ -51,6 +56,11 @@
   @include avatar;
   width: 32px;
   height: 32px;
+
+  .missingBack {
+    width: 32px;
+    height: 32px;
+  }
 
   .iconBackground {
     @include iconBackground;
@@ -64,6 +74,11 @@
   width: 42px;
   height: 42px;
 
+  .missingBack {
+    width: 42px;
+    height: 42px;
+  }
+
   .iconBackground {
     @include iconBackground;
     bottom: 0px;
@@ -75,6 +90,11 @@
   @include avatar;
   width: 48px;
   height: 48px;
+
+  .missingBack {
+    width: 48px;
+    height: 48px;
+  }
 
   .iconBackground {
     @include iconBackground;
@@ -88,6 +108,11 @@
   width: 52px;
   height: 52px;
 
+  .missingBack {
+    width: 52px;
+    height: 52px;
+  }
+
   .iconBackground {
     @include iconBackground;
     bottom: 0px;
@@ -99,6 +124,11 @@
   @include avatar;
   width: 72px;
   height: 72px;
+
+  .missingBack {
+    width: 72px;
+    height: 72px;
+  }
 
   .iconBackground {
     @include iconBackground;
@@ -112,6 +142,11 @@
   width: 80px;
   height: 80px;
 
+  .missingBack {
+    width: 80px;
+    height: 80px;
+  }
+
   .iconBackground {
     @include iconBackground;
     bottom: 4px;
@@ -123,6 +158,11 @@
   @include avatar;
   width: 142px;
   height: 142px;
+
+  .missingBack {
+    width: 142px;
+    height: 142px;
+  }
 
   .iconBackground {
     @include iconBackground;
