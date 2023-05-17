@@ -28,14 +28,24 @@
       margin-left: 11px;
 
       .userInfo {
-        font-size: 14px;
+        font-size: 16px;
         line-height: 16px;
         font-weight: 400;
         display: flex;
         align-items: center;
         width: auto;
         .userName {
+          font-size: 16px;
+          line-height: 16px;
+          font-weight: 700;
+          color: var(--text-primary);
           max-width: 150px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+        .verifiedBy {
+          max-width: 220px;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
@@ -65,11 +75,11 @@
 }
 
 .verifiedIcon {
-  width: 13px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   display: inline-block;
   margin: 0px 2px;
   background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
-  mask: url(../../assets/icons/verified.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
 }

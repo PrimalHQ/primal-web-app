@@ -150,7 +150,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
                 class={styles.verifiedBy}
                 title={props.note.user.nip05}
               >
-                {verification()[1]}
+                {props.note.user.nip05}
               </span>
             </Show>
           </span>
