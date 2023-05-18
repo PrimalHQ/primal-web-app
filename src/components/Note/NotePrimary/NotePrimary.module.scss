@@ -12,115 +12,99 @@
   position: relative;
   background-color: var(--background-card);
   margin-top: 0px;
-  display: grid;
-  grid-template-columns: 122px 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: "avatar content";
-  padding: 16px 16px 16px 0px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+  // grid-template-columns: 122px 1fr;
+  // grid-template-rows: 1fr;
+  // grid-template-areas: "avatar content";
+  // padding: 16px 16px 16px 20px;
   border-radius: 0px 4px 4px 0px;
 
-  .avatar {
-    grid-area: avatar;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 80px 1fr;
-    grid-row-gap: 6px;
-    justify-items: center;
+  // .avatar {
+  //   grid-area: avatar;
+  //   display: grid;
+  //   grid-template-columns: 1fr;
+  //   grid-template-rows: 80px 1fr;
+  //   grid-row-gap: 6px;
+  //   justify-items: center;
 
-    >a {
-      text-decoration: none;
-    }
+  //   >a {
+  //     text-decoration: none;
+  //   }
 
-    .avatarName {
-      width: 100%;
-      padding: 0px 6px;
-      text-align: center;
-      display: inline-block;
-      font-size: 16px;
-      line-height: 12px;
-      font-weight: 400;
-      color: var(--text-primary);
-      align-self: flex-start;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-  }
+  //   .avatarName {
+  //     width: 100%;
+  //     padding: 0px 6px;
+  //     text-align: center;
+  //     display: inline-block;
+  //     font-size: 16px;
+  //     line-height: 12px;
+  //     font-weight: 400;
+  //     color: var(--text-primary);
+  //     align-self: flex-start;
+  //     text-overflow: ellipsis;
+  //     white-space: nowrap;
+  //     overflow: hidden;
+  //   }
+  // }
 
   .content {
+    // grid-area: content;
+    // display: grid;
+    // grid-template-columns: 1fr;
+    // grid-template-rows: 48px 1fr 28px;
+    // grid-row-gap: 16px;
+    // grid-template-areas: "header" "message" "footer";
     grid-area: content;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 48px 1fr 28px;
-    grid-row-gap: 16px;
-    grid-template-areas: "header" "message" "footer";
+    display: flex;
+    flex-direction: column;
+    margin-top: 21px;
+    margin-left: 60px;
 
-    .header {
-      grid-area: header;
-      align-items: center;
-      color: var(--text-tertiary-2);
-      display: flex;
-      justify-content: space-between;
-      width: 502px;
-
-      .postInfo {
-        display: flex;
-        width: 462px;
-        justify-content: flex-start;
-
-        .userInfo {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
-          font-size: 16px;
-          line-height: 16px;
-          font-weight: 400;
-        }
-
-        .time{
-          margin: 0px 2px;
-          min-width: 40px;
-          font-size: 16px;
-          line-height: 16px;
-          font-weight: 400;
-          &::before {
-            content: "|";
-            padding: 0px 2px;
-          }
-        }
-      }
-
-
-      .contextMenu {
-        min-width: 10px;
-        display: inline-block;
-        text-align: center;
-        font-weight: bold;
-      }
-
-    }
 
     .message {
+      position: relative;
       grid-area: message;
       color: var(--text-primary);
       word-break: break-word;
-      font-size: 20px;
-      line-height: 28px;
+      font-size: 16px;
+      line-height: 24px;
+      width: 100%;
+      // max-height: 650px;
+      overflow: hidden;
+      margin-bottom: 17px;
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .messageFade {
+        position: absolute;
+        z-index: 1;
+        top: 610px;
+        left: 0;
+        pointer-events: none;
+        background-image: var(--fade-note-vertical);
+        width: 100%;
+        height: 40px;
+      }
+
     }
   }
 }
 
+
 @media only screen and (max-width: 720px) {
   .post {
-    width: calc(100vw - (100vw - 100%) - 30px);
-    grid-template-columns: 92px 1fr;
+    width: calc(100vw - (100vw - 100%));
+    // grid-template-columns: 62px 1fr;
     margin-left: 0px;
     margin-right: 0px;
     padding-right: 0px;
     .content {
-      .message {
-        width: 80% !important;
-      }
+      margin-left: 0px;
     }
   }
+
 }

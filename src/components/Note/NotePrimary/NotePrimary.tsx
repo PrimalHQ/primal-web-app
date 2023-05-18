@@ -26,21 +26,8 @@ const NotePrimary: Component<{ note: PrimalNote }> = (props) => {
         data-event-bech32={props.note.post.noteId}
       >
         <div class={styles.border}></div>
-        <div
-          class={styles.avatar}
-          title={authorName()}
-        >
-          <A
-            href={`/profile/${props.note.user.npub}`}
-          >
-            <Avatar
-              src={props.note?.user?.picture}
-              size="xl"
-            />
-          </A>
-        </div>
+        <NoteHeader note={props.note} />
         <div class={styles.content}>
-          <NoteHeader note={props.note} />
 
           <div class={styles.message}>
             <ParsedNote note={props.note} />

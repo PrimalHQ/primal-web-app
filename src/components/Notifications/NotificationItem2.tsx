@@ -76,12 +76,14 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
 
   const note = () => {
     const prop = notificationTypeNoteProps[type()];
+    // @ts-ignore
     const id = props.notification[prop];
     return props.notes.find(n => n.post.id === id)
   };
 
   const user = () => {
     const prop = notificationTypeUserProps[type()];
+    // @ts-ignore
     const id = props.notification[prop];
     return props.users[`${id}`];
   };
@@ -150,6 +152,7 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
           <div class={styles.reference}>
             <Show when={note()}>
               <NotificationNote
+                // @ts-ignore
                 note={note()}
               />
             </Show>

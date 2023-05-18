@@ -7,6 +7,25 @@
   width: 100%;
   height: 48px;
 
+  .headerInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .avatar {
+    margin-right: 12px;
+
+    >a {
+      text-decoration: none;
+    }
+
+    .avatarImg {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+    }
+  }
   .postInfo {
     display: flex;
     flex-direction: column;
@@ -39,7 +58,7 @@
       }
       .time{
         margin: 0px 2px;
-        min-width: 40px;
+        min-width: 80px;
         &::before {
           content: "|";
           padding: 0px 2px;
@@ -116,12 +135,15 @@
 
 @media only screen and (max-width: 720px) {
   .header {
-    width: calc(100vw - 140px);
+    width: calc(100vw - 160px);
     .postInfo {
-      width: calc(100vw - 92px);
+      width: calc(100vw - 110px);
       .userInfo {
-        max-width: calc(100vw - 92px);
+        max-width: calc(100vw - 100px);
         overflow: hidden;
+        .userName {
+          max-width: calc(100vw - 180px);
+        }
       }
       .verification {
         max-width: 220px;

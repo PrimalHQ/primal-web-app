@@ -66,27 +66,11 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
         </div>
       </Show>
       <div class={styles.post}>
-        <div
-          class={styles.avatar}
-          title={props.note?.user?.npub}
-        >
-          <A
-            href={`/profile/${props.note.user.npub}`}
-          >
-            <Avatar
-              src={props.note?.user?.picture}
-              size="sm"
-              highlightBorder={isVerifiedByPrimal()}
-            />
-          </A>
-        </div>
+        <NoteHeader note={props.note} />
         <div class={styles.content}>
-          <NoteHeader note={props.note} />
-
           <div class={styles.message}>
             <ParsedNote note={props.note} />
           </div>
-
           <NoteFooter note={props.note} />
         </div>
       </div>

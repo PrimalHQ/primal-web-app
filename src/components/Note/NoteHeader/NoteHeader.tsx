@@ -8,6 +8,8 @@ import { truncateNpub } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
 import VerificationCheck from '../../VerificationCheck/VerificationCheck';
+import Avatar from '../../Avatar/Avatar';
+import { A } from '@solidjs/router';
 
 const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
@@ -55,36 +57,56 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
     }
   });
 
+  const isVerifiedByPrimal = () => {
+    return !!props.note.user.nip05 &&
+      props.note.user.nip05.endsWith('primal.net');
+  }
 
   return (
     <div class={styles.header}>
-      <div class={styles.postInfo}>
-        <div class={styles.userInfo}>
-
-          <span class={styles.userName}>
-            {authorName()}
-          </span>
-
-          <VerificationCheck user={props.note.user} />
-
-          <span
-            class={styles.time}
-            title={date(props.note.post?.created_at).date.toLocaleString()}
+      <div class={styles.headerInfo}>
+        <div
+            class={styles.avatar}
+            title={props.note?.user?.npub}
           >
-            {date(props.note.post?.created_at).label}
-          </span>
+            <A
+              href={`/profile/${props.note.user.npub}`}
+            >
+              <Avatar
+                src={props.note?.user?.picture}
+                size="sm"
+                highlightBorder={isVerifiedByPrimal()}
+              />
+            </A>
+          </div>
+        <div class={styles.postInfo}>
+          <div class={styles.userInfo}>
+
+            <span class={styles.userName}>
+              {authorName()}
+            </span>
+
+            <VerificationCheck user={props.note.user} />
+
+            <span
+              class={styles.time}
+              title={date(props.note.post?.created_at).date.toLocaleString()}
+            >
+              {date(props.note.post?.created_at).label}
+            </span>
+          </div>
+
+          <Show
+            when={props.note.user?.nip05}
+          >
+            <span
+              class={styles.verification}
+              title={props.note.user?.nip05}
+            >
+              {props.note.user?.nip05}
+            </span>
+          </Show>
         </div>
-
-        <Show
-          when={props.note.user?.nip05}
-        >
-          <span
-            class={styles.verification}
-            title={props.note.user?.nip05}
-          >
-            {props.note.user?.nip05}
-          </span>
-        </Show>
       </div>
       <div class={styles.contextMenu}>
         <button

@@ -178,7 +178,7 @@
   .replyBox {
     margin-top: 4px;
     padding: 30px 12px;
-    width: calc(100vw - (100vw - 100%) - 30px);
+    width: calc(100vw - (100vw - 100%));
     background-color: var(--background-card);
   }
 }
