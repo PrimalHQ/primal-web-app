@@ -144,7 +144,6 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
     let mentionedNotes = {};
     let mentionedUsers = {};
-    let noteActions = {};
 
     if (mentionIds.length > 0) {
       mentionedNotes = mentionIds.reduce((acc, id) => {
@@ -167,6 +166,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
           [id]: {
             post: { ...m },
             user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            mentionedUsers,
           },
         };
       }, {});
