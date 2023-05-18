@@ -53,7 +53,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
       noteId: nip19.noteEncode(message.id),
-      noteActions: page.noteActions[message.id] ?? noActions,
+      noteActions: (page.noteActions && page.noteActions[message.id]) || noActions,
     },
   }
 };
@@ -224,7 +224,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
         noteId: nip19.noteEncode(msg.id),
-        noteActions: page.noteActions[msg.id] ?? noActions,
+        noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions,
       },
       repost: message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined,
       msg,
