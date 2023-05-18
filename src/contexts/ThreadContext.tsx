@@ -27,9 +27,11 @@ import {
   NostrEvent,
   NostrEventContent,
   NostrMentionContent,
+  NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NoteActions,
   PrimalNote,
   PrimalUser,
 } from "../types/primal";
@@ -64,7 +66,13 @@ export const initialData = {
   users: [],
   replyNotes: [],
   isFetching: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {} },
+  page: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+  },
   reposts: {},
   lastNote: undefined,
 };
@@ -91,7 +99,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
@@ -152,6 +160,16 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
       return;
     }

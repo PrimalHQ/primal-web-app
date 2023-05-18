@@ -22,9 +22,11 @@ import {
   NostrEvent,
   NostrEventContent,
   NostrMentionContent,
+  NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NoteActions,
   PrimalNote,
   PrimalUser,
   VanityProfiles,
@@ -80,7 +82,7 @@ export const initialData = {
   knownProfiles: { names: {} },
   notes: [],
   isFetching: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
   lastNote: undefined,
   following: [],
@@ -89,6 +91,7 @@ export const initialData = {
     users: {},
     postStats: {},
     notes: [],
+    noteActions: {},
   },
 };
 
@@ -117,7 +120,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
@@ -126,6 +129,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       users: {},
       postStats: {},
       notes: [],
+      noteActions: {},
     }));
   };
 
@@ -194,6 +198,16 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
       return;
     }

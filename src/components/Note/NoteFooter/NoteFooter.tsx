@@ -24,7 +24,10 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const toast = useToastContext();
   const intl = useIntl();
 
-  const liked = () => account?.likes.includes(props.note.post.id);
+  const [liked, setLiked] = createSignal(props.note.post.noteActions.liked);
+  const [zapped, setZapped] = createSignal(props.note.post.noteActions.zapped);
+  const [replied, setReplied] = createSignal(props.note.post.noteActions.replied);
+  const [reposted, setReposted] = createSignal(props.note.post.noteActions.reposted);
 
   const [likes, setLikes] = createSignal(props.note.post.likes);
   const [reposts, setReposts] = createSignal(props.note.post.reposts);
@@ -42,6 +45,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     if (success) {
       setReposts(reposts() + 1);
+      setReposted(true);
       toast?.sendSuccess(
         intl.formatMessage({
           id: 'toast.repostSuccess',
@@ -75,6 +79,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     if (success) {
       setLikes(likes() + 1);
+      setLiked(true);
     }
   };
 
@@ -95,6 +100,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const actionButton = (opts: {
     type: 'zap' | 'like' | 'reply' | 'repost',
     disabled?: boolean,
+    highlighted?: boolean,
     onClick: (e: MouseEvent) => void,
     icon: string,
     iconDisabled: string,
@@ -108,18 +114,18 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         when={opts.disabled}
         fallback={
           <button
-            class={`${styles.stat} ${buttonTypeClasses[opts.type]}`}
+            class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''} ${buttonTypeClasses[opts.type]}`}
             onClick={opts.onClick}
             onMouseOver={() => setActiveIcon(opts.iconDisabled)}
             onMouseOut={() => setActiveIcon(opts.icon)}
           >
-            <img src={activeIcon()} />
+            <img src={opts.highlighted ? opts.iconDisabled : activeIcon()} />
             <div class={styles.statNumber}>{opts.label || ''}</div>
           </button>
         }
       >
         <button
-          class={`${styles.stat} ${styles.highlighted} ${buttonTypeClasses[opts.type]}`}
+          class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''} ${buttonTypeClasses[opts.type]}`}
           onClick={() => {}}
         >
           <img src={opts.iconDisabled} />
@@ -136,6 +142,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doReply,
         type: 'reply',
         disabled: false,
+        highlighted: replied(),
         icon: replyEmpty,
         iconDisabled: replyFilled,
         label: replies(),
@@ -145,6 +152,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doZap,
         type: 'zap',
         disabled: false,
+        highlighted: zapped(),
         icon: zapEmpty,
         iconDisabled: zapFilled,
         label: zaps() === 0 ? '' : truncateNumber(zaps()),
@@ -154,6 +162,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doLike,
         type: 'like',
         disabled: liked(),
+        highlighted: liked(),
         icon: likeEmpty,
         iconDisabled: likeFilled,
         label: likes(),
@@ -163,6 +172,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doRepost,
         type: 'repost',
         disabled: false,
+        highlighted: reposted(),
         icon: repostEmpty,
         iconDisabled: repostFilled,
         label: reposts(),

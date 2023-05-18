@@ -8,9 +8,11 @@ import {
   FeedPage,
   NostrEventContent,
   NostrMentionContent,
+  NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NoteActions,
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
@@ -65,7 +67,7 @@ const initialData = {
   notes: [],
   isFetchingUsers: false,
   isFetchingContent: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
   mentionedNotes: {},
 };
@@ -267,6 +269,16 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
       );
       return;
     }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
+      return;
+    }
   };
 
   const savePage = (page: FeedPage) => {
@@ -300,7 +312,7 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
 
     updateStore('isFetchingContent', () => true);
     updateStore('notes', () => []);
-    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {} })
+    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} })
     searchContent(subid, query);
   }
 

@@ -15,9 +15,11 @@ import {
   NostrEvent,
   NostrEventContent,
   NostrMentionContent,
+  NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NoteActions,
   PrimalFeed,
   PrimalNote,
 } from "../types/primal";
@@ -29,7 +31,13 @@ const initialHomeData = {
   isFetching: false,
   scrollTop: 0,
   selectedFeed: undefined,
-  page: { messages: [], users: {}, postStats: {}, mentions: {} },
+  page: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+  },
   reposts: {},
   lastNote: undefined,
   mentionedNotes: {},
@@ -73,7 +81,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const clearNotes = () => {
     updateStore('scrollTop', () => 0);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
@@ -165,6 +173,16 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
       return;
     }

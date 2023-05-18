@@ -28,9 +28,11 @@ import {
   NostrEvent,
   NostrEventContent,
   NostrMentionContent,
+  NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NoteActions,
   PrimalNote,
   PrimalNoteData,
 } from "../types/primal";
@@ -78,7 +80,13 @@ export const initialExploreData = {
   isFetching: false,
   scope: 'global',
   timeframe: 'latest',
-  page: { messages: [], users: {}, postStats: {}, mentions: {} },
+  page: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+  },
   reposts: {},
   lastNote: undefined,
   isNetStatsStreamOpen: false,
@@ -138,7 +146,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
@@ -207,6 +215,16 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
       return;
     }

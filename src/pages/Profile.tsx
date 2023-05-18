@@ -74,9 +74,9 @@ const Profile: Component = () => {
   }
 
   const setProfile = (hex: string | undefined) => {
-    if (hex === profile?.profileKey) {
-      return;
-    }
+    // if (hex === profile?.profileKey) {
+    //   return;
+    // }
 
     profile?.actions.setProfileKey(hex);
     profile?.actions.clearNotes();
@@ -101,7 +101,7 @@ const Profile: Component = () => {
   });
 
   createEffect(() => {
-    if (account?.publicKey) {
+    if (account?.hasPublicKey()) {
       setProfile(getHex());
     }
   });

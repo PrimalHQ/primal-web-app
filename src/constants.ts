@@ -13,6 +13,7 @@ export const emptyPage: FeedPage = {
   users: {},
   messages: [],
   postStats: {},
+  noteActions: {},
 }
 
 export const trendingFeed = {
@@ -238,6 +239,7 @@ export enum Kind  {
   Notification = 10000110,
   Timestamp = 10000111,
   NotificationStats = 10000112,
+  NoteActions = 10000115,
 }
 
 export const relayConnectingTimeout = 5000;

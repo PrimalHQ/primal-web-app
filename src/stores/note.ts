@@ -11,6 +11,15 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   const userMeta = JSON.parse(user?.content || '{}');
   const stat = page?.postStats[message.id];
 
+
+  const noActions = {
+    event_id: message.id,
+    liked: false,
+    replied: false,
+    reposted: false,
+    zapped: false,
+  };
+
   return {
     user: {
       id: user?.id || '',
@@ -44,6 +53,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
       noteId: nip19.noteEncode(message.id),
+      noteActions: page.noteActions[message.id] ?? noActions,
     },
   }
 };
@@ -79,37 +89,37 @@ const parseKind6 = (message: NostrNoteContent) => {
   }
 };
 
-const getNoteReferences = (message: NostrNoteContent) => {
-  const regex = /\#\[([0-9]*)\]/g;
-  let refs = [];
-  let match;
+// const getNoteReferences = (message: NostrNoteContent) => {
+//   const regex = /\#\[([0-9]*)\]/g;
+//   let refs = [];
+//   let match;
 
-  while((match = regex.exec(message.content)) !== null) {
-    refs.push(match[1]);
-  }
+//   while((match = regex.exec(message.content)) !== null) {
+//     refs.push(match[1]);
+//   }
 
-  return refs.reduce<string[]>((acc, ref) => {
-    const tag = message.tags[parseInt(ref)] || [];
+//   return refs.reduce<string[]>((acc, ref) => {
+//     const tag = message.tags[parseInt(ref)] || [];
 
-    return tag[0] === 'e' ? [...acc, tag[1]] : acc;
-  }, []);
-};
+//     return tag[0] === 'e' ? [...acc, tag[1]] : acc;
+//   }, []);
+// };
 
-const getUserReferences = (message: NostrNoteContent) => {
-  const regex = /\#\[([0-9]*)\]/g;
-  let refs = [];
-  let match;
+// const getUserReferences = (message: NostrNoteContent) => {
+//   const regex = /\#\[([0-9]*)\]/g;
+//   let refs = [];
+//   let match;
 
-  while((match = regex.exec(message.content)) !== null) {
-    refs.push(match[1]);
-  }
+//   while((match = regex.exec(message.content)) !== null) {
+//     refs.push(match[1]);
+//   }
 
-  return refs.reduce<string[]>((acc, ref) => {
-    const tag = message.tags[parseInt(ref)] || [];
+//   return refs.reduce<string[]>((acc, ref) => {
+//     const tag: string[] = message.tags[parseInt(ref)] || [];
 
-    return tag[0] === 'p' ? [...acc, tag[1]] : acc;
-  }, []);
-};
+//     return tag[0] === 'p' ? [...acc, tag[1]] : acc;
+//   }, []);
+// };
 
 type ConvertToNotes = (page: FeedPage | undefined) => PrimalNote[];
 
@@ -134,6 +144,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
     let mentionedNotes = {};
     let mentionedUsers = {};
+    let noteActions = {};
 
     if (mentionIds.length > 0) {
       mentionedNotes = mentionIds.reduce((acc, id) => {
@@ -172,6 +183,14 @@ export const convertToNotes: ConvertToNotes = (page) => {
       }, mentionedUsers);
     }
 
+    const noActions = {
+      event_id: msg.id,
+      liked: false,
+      replied: false,
+      reposted: false,
+      zapped: false,
+    };
+
     return {
       user: {
         id: user?.id || '',
@@ -205,6 +224,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
         noteId: nip19.noteEncode(msg.id),
+        noteActions: page.noteActions[msg.id] ?? noActions,
       },
       repost: message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined,
       msg,

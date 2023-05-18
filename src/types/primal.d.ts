@@ -102,6 +102,13 @@ export type NostrNotificationStatsContent = {
   pubkey?: string,
 };
 
+export type NostrNoteActionsContent = {
+  kind: Kind.NoteActions,
+  content: string,
+  created_at?: number,
+  pubkey?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -115,7 +122,8 @@ export type NostrEventContent =
   NostrScoredUsersContent |
   NostrNotificationContent |
   NostrNotificationLastSeenContent |
-  NostrNotificationStatsContent;
+  NostrNotificationStatsContent |
+  NostrNoteActionsContent;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -127,6 +135,14 @@ export type NostrEOSE = [
   type: "EOSE",
   subkey: string,
 ];
+
+export type NoteActions = {
+  event_id: string,
+  liked: boolean,
+  replied: boolean,
+  reposted: boolean,
+  zapped: boolean,
+};
 
 export type FeedStore = {
   posts: PrimalNote[],
@@ -164,6 +180,7 @@ export type FeedPage = {
   messages: NostrNoteContent[],
   postStats: NostrPostStats,
   mentions?: Record<string, NostrNoteContent>,
+  noteActions: Record<string, NoteActions>,
 };
 
 export type TrendingNotesStore = {
@@ -281,6 +298,7 @@ export type PrimalNoteData = {
   score24h: number,
   satszapped: number,
   noteId: string,
+  noteActions: NoteActions,
 }
 
 export type PrimalNote = {
