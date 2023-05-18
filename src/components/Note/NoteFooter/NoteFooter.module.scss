@@ -88,9 +88,13 @@
 @media only screen and (max-width: 720px) {
   .footer {
     width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
     .stat{
-      margin-right: 2px;
+      min-width: 0px;
+      margin-right: 0;
     }
   }
 }
