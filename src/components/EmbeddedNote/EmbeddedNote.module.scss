@@ -1,7 +1,8 @@
 
 .mentionedNote {
-  border: solid 1px var(--subtile-devider);
-  border-radius: 4px;
+  border: solid 1px var(--border-embedded-card);
+  border-radius: 8px;
+  background-color: var(--background-embedded_card);
   margin-block: 6px;
   padding: 18px;
   display: grid;

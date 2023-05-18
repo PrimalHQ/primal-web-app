@@ -14,6 +14,8 @@
   --background-site: #000000;
   --background-card: #121212;
   --background-input: #222222;
+  --background-embedded_card: #1A1A1A;
+  --border-embedded-card: #282828;
   --text-primary: #FFFFFF;
   --text-secondary: #AAAAAA;
   --text-secondary-2: #AAAAAA;
@@ -74,6 +76,8 @@
   --background-site: #F5F5F5;
   --background-card: #FFFFFF;
   --background-input: #E5E5E5;
+  --background-embedded_card: #F5F5F5;
+  --border-embedded-card: #E5E5E5;
   --text-primary: #111111;
   --text-secondary: #444444;
   --text-secondary-2: #666666;
@@ -133,12 +137,15 @@
   --background-site: #000000;
   --background-card: #121212;
   --background-input: #222222;
+  --background-embedded_card: #1A1A1A;
+  --border-embedded-card: #282828;
   --text-primary: #FFFFFF;
   --text-secondary: #AAAAAA;
   --text-secondary-2: #AAAAAA;
   --text-tertiary: #757575;
   --text-tertiary-2: #666666;
   --subtile-devider: #444444;
+  --card-border: #282828;
 
   --primary: var(--accent-1);
   --primary-hover: var(--accent-2);
@@ -193,6 +200,8 @@
   --background-site: #F5F5F5;
   --background-card: #FFFFFF;
   --background-input: #E5E5E5;
+  --background-embedded_card: #F5F5F5;
+  --border-embedded-card: #E5E5E5;
   --text-primary: #111111;
   --text-secondary: #444444;
   --text-secondary-2: #666666;
