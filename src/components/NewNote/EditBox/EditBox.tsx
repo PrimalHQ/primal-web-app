@@ -449,7 +449,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
   const replaceLinkPreviews = (text: string) => {
     let parsed = text;
 
-    const regex = /__LINK__(.)*__LINK__/ig;
+    const regex = /__LINK__.*?__LINK__/ig;
 
     parsed = parsed.replace(regex, (link) => {
       const url = link.split('__LINK__')[1];
