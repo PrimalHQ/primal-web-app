@@ -179,7 +179,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
   const replaceLinkPreviews = (text: string, previews: Record<string, any>) => {
     let parsed = text;
 
-    const regex = /__LINK__(.)*__LINK__/ig;
+    const regex = /__LINK__.*?__LINK__/ig;
 
     parsed = parsed.replace(regex, (link) => {
       const url = link.split('__LINK__')[1];
