@@ -1,5 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
+import { Value } from 'sass';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { hexToNpub } from '../../lib/keys';
@@ -26,6 +27,8 @@ const Search: Component = () => {
 
   const queryUrl = () => query().replaceAll('#', '%23');
 
+  let input: HTMLInputElement | undefined;
+
   const onSearch = (e: SubmitEvent) => {
     e.preventDefault();
 
@@ -34,7 +37,6 @@ const Search: Component = () => {
     const data = new FormData(form);
 
     const q = data.get('searchQuery') as string || '';
-
 
     if (q.length > 0) {
       navigate(`/search/${q.replaceAll('#', '%23')}`);
@@ -55,7 +57,14 @@ const Search: Component = () => {
     setIsFocused(true);
     debounce(() => {
       // @ts-ignore
-      setQuery(e.target?.value || '');
+      const value = e.target?.value;
+
+      if (value.startsWith('npub1')) {
+        search?.actions.findUserByNupub(value);
+        return;
+      }
+
+      setQuery(value || '');
     }, 500);
   };
 
@@ -71,6 +80,10 @@ const Search: Component = () => {
 
   const resetQuery = () => {
     setQuery('');
+
+    if (input) {
+      input.value = '';
+    }
   };
 
   createEffect(() => {
@@ -97,6 +110,7 @@ const Search: Component = () => {
         <input
           type='text'
           name='searchQuery'
+          ref={input}
           placeholder={
             intl.formatMessage(
               {

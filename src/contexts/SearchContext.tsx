@@ -23,6 +23,7 @@ import { searchContent, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes } from "../stores/note";
 import { subscribeTo } from "../sockets";
+import { nip19 } from "nostr-tools";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -51,6 +52,7 @@ export type SearchContextStore = {
   mentionedNotes: Record<string, NostrNoteContent>,
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
+    findUserByNupub: (npub: string) => void,
     findContentUsers: (query: string, pubkey?: string) => void,
     findContent: (query: string) => void,
     setContentQuery: (query: string) => void,
@@ -77,6 +79,50 @@ export const SearchContext = createContext<SearchContextStore>();
 export function SearchProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
 // ACTIONS --------------------------------------
+
+  const findUserByNupub = (npub: string) => {
+    const subId = `find_npub_${APP_ID}`;
+    const decoded = nip19.decode(npub);
+
+
+    const hex = typeof decoded.data === 'string' ?
+    decoded.data :
+    (decoded.data as nip19.ProfilePointer).pubkey;
+
+    let users: PrimalUser[] = [];
+
+    const unsub = subscribeTo(subId, (type, _, content) => {
+      if (type === 'EVENT') {
+        if (!content) {
+          return;
+        }
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          users.push(convertToUser(user));
+          return;
+        }
+
+        if (content.kind === Kind.UserScore) {
+          const scores = JSON.parse(content.content);
+
+          updateStore('scores', () => ({ ...scores }));
+          return;
+        }
+      }
+
+      if (type === 'EOSE') {
+        updateStore('users', () => [users[0]]);
+        updateStore('isFetchingUsers', () => false);
+
+        unsub();
+        return;
+      }
+    });
+
+    getUserProfiles([hex], subId);
+  };
 
   const getRecomendedUsers = () => {
     const subid = `recomended_users_${APP_ID}`;
@@ -333,6 +379,7 @@ const [store, updateStore] = createStore<SearchContextStore>({
   ...initialData,
   actions: {
     findUsers,
+    findUserByNupub,
     findContent,
     findContentUsers,
     setContentQuery,
