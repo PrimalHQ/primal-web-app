@@ -45,7 +45,7 @@ const Search: Component = () => {
   };
 
   const addToHomeFeed = () => {
-    const q = decodeURI(params.query)
+    const q = decodeURI(params.query).replaceAll('%23', '#')
     const hex = `search;${q}`;
     const name = intl.formatMessage(
       {
