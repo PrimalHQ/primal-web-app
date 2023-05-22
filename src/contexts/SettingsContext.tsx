@@ -55,7 +55,7 @@ export const initialData = {
   locale: 'en-us',
   theme: 'sunset',
   themes,
-  availableFeeds: [ ...defaultFeeds ],
+  availableFeeds: [],
 };
 
 
@@ -185,8 +185,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
               [ ...acc, feed ];
           }, store.availableFeeds)
 
-
-          setAvailableFeeds(updatedFeeds);
+          updateStore('availableFeeds',
+            () => replaceAvailableFeeds(account?.publicKey, updatedFeeds),
+          );
 
         }
         catch (e) {
@@ -303,11 +304,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     };
 
     // Add trendingFeed if it's missing
-    if (!initFeeds.find(f => f.hex === trendingFeed.hex)) {
+    // @ts-ignore
+    if (!initFeeds.find((f) => f.hex === trendingFeed.hex)) {
       addAvailableFeed(trendingFeed, true, true);
     }
 
     // Add active user's feed if it's missing
+    // @ts-ignore
     if (!initFeeds.find(f => f.hex === feed.hex)) {
       addAvailableFeed(feed, true, true);
     }
