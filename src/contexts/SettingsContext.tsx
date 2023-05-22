@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, themes, trendingFeed } from "../constants";
+import { defaultFeeds, noKey, themes, trendingFeed } from "../constants";
 import {
   createContext,
   createEffect,
@@ -29,7 +29,7 @@ import {
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
 import { getStorage, saveTheme } from "../lib/localStore";
-import { getSettings, sendSettings } from "../lib/settings";
+import { getDefaultSettings, getSettings, sendSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
@@ -165,8 +165,52 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     sendSettings(settings, subid);
   }
 
+  const loadDefaults = () => {
+
+    const subid = `load_defaults_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EVENT' && content?.content) {
+        try {
+          const settings = JSON.parse(content?.content);
+
+          const feeds = settings.feeds as PrimalFeed[];
+
+          const availableTopics = store.availableFeeds.map(f => f.hex);
+
+          const updatedFeeds = feeds.reduce((acc, feed) => {
+            return availableTopics.includes(feed.hex) ?
+              acc :
+              [ ...acc, feed ];
+          }, store.availableFeeds)
+
+
+          setAvailableFeeds(updatedFeeds);
+
+        }
+        catch (e) {
+          console.log('Error parsing settings response: ', e);
+        }
+      }
+
+      if (type === 'NOTICE') {
+        toaster?.sendWarning(intl.formatMessage({
+          id: 'settings.loadFail',
+          defaultMessage: 'Failed to load settings. Will be using local settings.',
+          description: 'Toast message after settings have failed to be loaded from the server',
+        }));
+      }
+
+      unsub();
+      return;
+    });
+
+    getDefaultSettings(subid)
+  };
+
   const loadSettings = (pubkey: string | undefined) => {
-    if (!pubkey) {
+    if (!pubkey || pubkey === noKey) {
       return;
     }
 
@@ -242,6 +286,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   // Initial setup for a user with a public key
   createEffect(() => {
     if (!account?.hasPublicKey()) {
+      loadDefaults();
       return;
     }
 

@@ -57,3 +57,19 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
     {cache: ["get_app_settings", { event_from_user: signedNote }]},
   ]))
 };
+
+export const getDefaultSettings = async (subid: string) => {
+
+  // const event = {
+  //   content: '{ "description": "Get default app settings" }',
+  //   kind: Kind.Settings,
+  //   tags: [["d", "Primal-Web App"]],
+  //   created_at: Math.floor((new Date()).getTime() / 1000),
+  // };
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_default_app_settings"]},
+  ]))
+};
