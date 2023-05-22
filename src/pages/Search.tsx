@@ -16,11 +16,16 @@ import styles from './Search.module.scss';
 import { useSearchContext } from '../contexts/SearchContext';
 import SearchSidebar from '../components/SearchSidebar/SearchSidebar';
 import Loader from '../components/Loader/Loader';
+import { useToastContext } from '../components/Toaster/Toaster';
+import { useSettingsContext } from '../contexts/SettingsContext';
+import { scopeLabels, timeframeLabels } from '../constants';
 
 const Search: Component = () => {
   const params = useParams();
   const search = useSearchContext();
   const account = useAccountContext();
+  const toaster = useToastContext();
+  const settings = useSettingsContext();
   const intl = useIntl();
 
   const query = () => decodeURI(params.query).replaceAll('%23', '#');
@@ -32,6 +37,38 @@ const Search: Component = () => {
       search?.actions.findContentUsers(query(), account?.publicKey);
     }
   });
+
+  const hasFeedAtHome = () => {
+    const hex = `search;${decodeURI(params.query)}`;
+
+    return !!settings?.availableFeeds.find(f => f.hex === hex);
+  };
+
+  const addToHomeFeed = () => {
+    const q = decodeURI(params.query)
+    const hex = `search;${q}`;
+    const name = intl.formatMessage(
+      {
+        id: 'feed.search.label',
+        defaultMessage: 'Search: {query}',
+        description: 'Label for a search results feed',
+      },
+      { query: q || '' },
+    );
+
+    const feed = { name, hex };
+
+    settings?.actions.addAvailableFeed(feed);
+
+    toaster?.sendSuccess(intl.formatMessage(
+      {
+        id: 'toasts.addFeedToHome.success',
+        defaultMessage: '"{name}" has been added to your home page',
+        description: 'Toast message confirming successfull adding of the feed to home to the list of available feeds',
+      },
+      { name },
+    ));
+  };
 
   return (
     <>
@@ -46,7 +83,7 @@ const Search: Component = () => {
       </StickySidebar>
 
       <div id="central_header" class={styles.fullHeader}>
-        <div>
+        <div class={styles.caption}>
           {intl.formatMessage(
             {
               id: 'pages.search.title',
@@ -55,6 +92,36 @@ const Search: Component = () => {
             },
             { query: query() || '' },
           )}
+        </div>
+        <div class={styles.addToFeed}>
+          <Show
+            when={!hasFeedAtHome()}
+            fallback={
+              <div class={styles.noAdd}>
+                {intl.formatMessage(
+                  {
+                    id: 'actions.homeFeedAdd.disabled',
+                    defaultMessage: 'Available on your home page',
+                    description: 'Add feed to home label, when feed is already added',
+                  }
+                )}
+              </div>
+            }
+          >
+            <button
+              class={styles.addButton}
+              onClick={addToHomeFeed}
+            >
+              <span>+</span>
+              {intl.formatMessage(
+                {
+                  id: 'actions.homeFeedAdd.generic',
+                  defaultMessage: 'add this feed to my home page',
+                  description: 'Add feed to home, button label',
+                }
+              )}
+            </button>
+          </Show>
         </div>
       </div>
 

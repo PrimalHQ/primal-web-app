@@ -5,6 +5,7 @@ import { APP_ID } from "../App";
 import { Kind, trendingFeed } from "../constants";
 import { getEvents, getExploreFeed, getFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
+import { searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import {
@@ -66,6 +67,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     if (scope && timeframe) {
 
+      if (scope === 'search') {
+        searchContent(`home_feed_${subId}`, decodeURI(timeframe));
+        return;
+      }
+
       account?.publicKey && getExploreFeed(
         account.publicKey,
         `home_feed_${subId}`,
@@ -103,6 +109,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
 
     const [scope, timeframe] = topic.split(';');
+
+    if (scope === 'search') {
+      return;
+    }
+
     const pagCriteria = timeframe || 'latest';
 
     const criteria = paginationPlan(pagCriteria);
