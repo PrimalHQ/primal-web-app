@@ -39,6 +39,7 @@ export type SettingsContextStore = {
   theme: string,
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
+  defaultFeed: PrimalFeed,
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -56,6 +57,7 @@ export const initialData = {
   theme: 'sunset',
   themes,
   availableFeeds: [],
+  defaultFeed: defaultFeeds[0],
 };
 
 
@@ -239,6 +241,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           description: 'Toast message after settings have failed to be loaded from the server',
         }));
       }
+
+      updateStore('defaultFeed', () => store.availableFeeds[0]);
 
       unsub();
       return;

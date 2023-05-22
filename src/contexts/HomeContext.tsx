@@ -279,6 +279,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   });
 
+  createEffect(() => {
+    selectFeed(settings?.defaultFeed);
+  });
+
   onCleanup(() => {
     removeSocketListeners(
       socket(),
