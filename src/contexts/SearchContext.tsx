@@ -82,12 +82,24 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
 
   const findUserByNupub = (npub: string) => {
     const subId = `find_npub_${APP_ID}`;
-    const decoded = nip19.decode(npub);
 
+    let decoded: nip19.DecodeResult | undefined;
+
+    try {
+      decoded = nip19.decode(npub);
+    } catch (e) {
+      findUsers(npub);
+      return;
+    }
+
+    if (!decoded) {
+      findUsers(npub);
+      return;
+    }
 
     const hex = typeof decoded.data === 'string' ?
-    decoded.data :
-    (decoded.data as nip19.ProfilePointer).pubkey;
+      decoded.data :
+      (decoded.data as nip19.ProfilePointer).pubkey;
 
     let users: PrimalUser[] = [];
 
@@ -113,7 +125,11 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
       }
 
       if (type === 'EOSE') {
-        updateStore('users', () => [users[0]]);
+
+        if (users.length > 0) {
+          updateStore('users', () => [users[0]]);
+        }
+
         updateStore('isFetchingUsers', () => false);
 
         unsub();

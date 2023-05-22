@@ -59,7 +59,7 @@ const Search: Component = () => {
       // @ts-ignore
       const value = e.target?.value;
 
-      if (value.startsWith('npub1')) {
+      if (value.startsWith('npub') || value.startsWith('nprofile')) {
         search?.actions.findUserByNupub(value);
         return;
       }
