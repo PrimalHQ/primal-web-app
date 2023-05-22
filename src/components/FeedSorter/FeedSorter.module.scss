@@ -46,6 +46,7 @@
   }
 
   .manageControls {
+    display: flex;
     .mngButton {
       @include controlButton();
       width: 32px;
@@ -60,8 +61,47 @@
       background-color: var(--text-secondary);
       -webkit-mask: url(../../assets/icons/delete.svg) no-repeat 0px / 16px;
       mask: url(../../assets/icons/delete.svg) no-repeat 0px / 16px;
-
     }
+
+    .editButton {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/edit.svg) no-repeat 0px / 16px;
+      mask: url(../../assets/icons/edit.svg) no-repeat 0px / 16px;
+    }
+  }
+
+  .feedEdit {
+    position: relative;
+    width: 100%;
+    .feedNameInput {
+      height: 32px;
+      background-color: var(--background-site);
+      color: var(--text-tertiary);
+      font-size: 16px;
+      line-height: 14px;
+      font-weight: 400;
+      margin: 0;
+    }
+    .feedEditControl {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      height: 32px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      >button {
+        @include controlButton();
+        width: 32px;
+        height: 32px;
+      }
+    }
+
   }
 }
 
@@ -73,6 +113,26 @@
   background-color: var(--text-secondary);
   -webkit-mask: url(../../assets/icons/drag_handle.svg) no-repeat center;
   mask: url(../../assets/icons/drag_handle.svg) no-repeat center;
+}
+
+.closeIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+  mask: url(../../assets/icons/close.svg) no-repeat center;
+}
+
+.checkIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/check.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/check.svg) no-repeat 0 / 100%;
 }
 
 .draggedBefore {

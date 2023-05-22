@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { PrimalFeed } from '../../types/primal';
 
@@ -11,6 +11,10 @@ const FeedSorter: Component = () => {
 
   const settings = useSettingsContext();
 
+  const [editMode, setEditMode] = createSignal('');
+
+  const [newName, setNewName] = createSignal('');
+
   const availableFeeds = () => {
     return settings?.availableFeeds || [];
   };
@@ -18,6 +22,18 @@ const FeedSorter: Component = () => {
   const removeFeed = (feed: PrimalFeed) => {
     settings?.actions.removeAvailableFeed(feed);
   };
+
+  const editFeed = (feed: PrimalFeed) => {
+    setEditMode(() => feed.hex || '');
+    setNewName(() => feed.name);
+    const input = document.getElementById(`input_${feed.hex}`);
+    input && input.focus();
+  };
+
+  const updateFeedName = (feed: PrimalFeed) => {
+    settings?.actions.renameAvailableFeed(feed, newName());
+    setEditMode('');
+  }
 
   const sortList = (target: any) => {
     // Get all items
@@ -96,15 +112,58 @@ const FeedSorter: Component = () => {
         <For each={availableFeeds()}>
           {(feed, index) => (
             <div class={styles.feedItem} data-value={feed.hex} data-index={index()}>
-              <div class={styles.sortControls}>
-                <div class={styles.dragIcon}></div>
-              </div>
-              <div class={styles.manageControls}>
-                <button class={styles.mngButton} onClick={() => removeFeed(feed)}>
-                  <div class={styles.deleteButton}></div>
-                </button>
-              </div>
-              <div class={styles.feedName}>{feed.name}</div>
+              <Show
+                when={editMode() === feed.hex}
+                fallback={
+                  <>
+                    <div class={styles.sortControls}>
+                      <div class={styles.dragIcon}></div>
+                    </div>
+                    <div class={styles.manageControls}>
+                      <button class={styles.mngButton} onClick={() => editFeed(feed)}>
+                        <div class={styles.editButton}></div>
+                      </button>
+                      <button class={styles.mngButton} onClick={() => removeFeed(feed)}>
+                        <div class={styles.deleteButton}></div>
+                      </button>
+                    </div>
+                    <div class={styles.feedName}>{feed.name}</div>
+                  </>
+                }
+              >
+                <div class={styles.feedEdit}>
+                  <input
+                    id={`input_${feed.hex}`}
+                    class={styles.feedNameInput}
+                    value={newName()}
+                    // @ts-ignore
+                    onInput={(e: InputEvent) => setNewName(() => e.target?.value)}
+                    onKeyUp={(e: KeyboardEvent) => {
+                      if (e.code === 'Enter') {
+                        updateFeedName(feed);
+                      }
+
+                      if (e.code === 'Escape') {
+                        setEditMode('');
+                      }
+                    }}
+                  />
+                  <div class={styles.feedEditControl}>
+                    <button
+                      onClick={() => updateFeedName(feed)}
+                      title="Update"
+                    >
+                      <div class={styles.checkIcon}></div>
+                    </button>
+                    <button
+                      onClick={() => {setEditMode('')}}
+                      title="Cancel"
+                    >
+                      <div class={styles.closeIcon}></div>
+                    </button>
+                  </div>
+                </div>
+              </Show>
             </div>
           )}
         </For>

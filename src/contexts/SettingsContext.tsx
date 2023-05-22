@@ -45,6 +45,7 @@ export type SettingsContextStore = {
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
     moveAvailableFeed: (fromIndex: number, toIndex: number) => void,
+    renameAvailableFeed: (feed: PrimalFeed, newName: string) => void,
     saveSettings: () => void,
     loadSettings: (pubkey: string) => void,
   }
@@ -131,6 +132,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     setAvailableFeeds(list);
 
+  };
+
+  const renameAvailableFeed = (feed: PrimalFeed, newName: string) => {
+    const list = store.availableFeeds.map(af => {
+      return af.hex === feed.hex ? { ...af, name: newName } : { ...af };
+    });
+    setAvailableFeeds(list);
   };
 
   const saveSettings = () => {
@@ -298,6 +306,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       removeAvailableFeed,
       setAvailableFeeds,
       moveAvailableFeed,
+      renameAvailableFeed,
       saveSettings,
       loadSettings,
     },
