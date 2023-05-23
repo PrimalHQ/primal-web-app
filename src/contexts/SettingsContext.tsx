@@ -179,16 +179,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
           const feeds = settings.feeds as PrimalFeed[];
 
-          const availableTopics = store.availableFeeds.map(f => f.hex);
+          // const availableTopics = store.availableFeeds.map(f => f.hex);
 
-          const updatedFeeds = feeds.reduce((acc, feed) => {
-            return availableTopics.includes(feed.hex) ?
-              acc :
-              [ ...acc, feed ];
-          }, store.availableFeeds)
+          // const updatedFeeds = feeds.reduce((acc, feed) => {
+          //   return availableTopics.includes(feed.hex) ?
+          //     acc :
+          //     [ ...acc, feed ];
+          // }, store.availableFeeds)
 
           updateStore('availableFeeds',
-            () => replaceAvailableFeeds(account?.publicKey, updatedFeeds),
+            () => replaceAvailableFeeds(account?.publicKey, feeds),
           );
 
           updateStore('defaultFeed', () => store.availableFeeds[0]);
