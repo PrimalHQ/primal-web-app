@@ -1,4 +1,5 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { PrimalFeed } from '../../types/primal';
 
@@ -10,6 +11,7 @@ const FeedSorter: Component = () => {
   let sorter: any;
 
   const settings = useSettingsContext();
+  const account = useAccountContext();
 
   const [editMode, setEditMode] = createSignal('');
 
@@ -116,17 +118,19 @@ const FeedSorter: Component = () => {
                 when={editMode() === feed.hex}
                 fallback={
                   <>
-                    <div class={styles.sortControls}>
-                      <div class={styles.dragIcon}></div>
-                    </div>
-                    <div class={styles.manageControls}>
-                      <button class={styles.mngButton} onClick={() => editFeed(feed)}>
-                        <div class={styles.editButton}></div>
-                      </button>
-                      <button class={styles.mngButton} onClick={() => removeFeed(feed)}>
-                        <div class={styles.deleteButton}></div>
-                      </button>
-                    </div>
+                    <Show when={account?.hasPublicKey()}>
+                      <div class={styles.sortControls}>
+                        <div class={styles.dragIcon}></div>
+                      </div>
+                      <div class={styles.manageControls}>
+                        <button class={styles.mngButton} onClick={() => editFeed(feed)}>
+                          <div class={styles.editButton}></div>
+                        </button>
+                        <button class={styles.mngButton} onClick={() => removeFeed(feed)}>
+                          <div class={styles.deleteButton}></div>
+                        </button>
+                      </div>
+                    </Show>
                     <div class={styles.feedName}>{feed.name}</div>
                   </>
                 }

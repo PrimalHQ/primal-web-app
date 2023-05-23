@@ -68,24 +68,8 @@ export const minKnownProfiles: {"names": Record<string,string>} = {
 
 export const defaultFeeds = [
   {
-    name: 'Nostr highlights by Primal' ,
+    name: 'Nostr highlights' ,
     hex: '9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a',
-  },
-  {
-    name: 'Edward Snowden\'s feed' ,
-    hex: '84dee6e676e5bb67b4ad4e042cf70cbd8681155db535942fcc6a0533858a7240',
-  },
-  {
-    name: 'Jack Dorsey\'s feed',
-    hex: '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2',
-  },
-  {
-    name: 'Rockstar\'s feed',
-    hex: '91c9a5e1a9744114c6fe2d61ae4de82629eaaa0fb52f48288093c7e7e036f832',
-  },
-  {
-    name: 'Der Gigi\'s feed',
-    hex: '6e468422dfb74a5738702a8823b9b28168abab8655faacb6853cd0ee15deee93',
   },
 ];
 
