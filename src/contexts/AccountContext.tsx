@@ -35,6 +35,7 @@ export type AccountContextStore = {
   following: string[],
   followingSince: number,
   hasPublicKey: () => boolean,
+  isKeyLookupDone: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -55,6 +56,7 @@ const initialData = {
   showNewNoteForm: false,
   following: [],
   followingSince: 0,
+  isKeyLookupDone: false,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -63,6 +65,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   const setPublicKey = (pubkey: string | undefined) => {
     updateStore('publicKey', () => pubkey);
+    updateStore('isKeyLookupDone', true);
   };
 
   const hasPublicKey: () => boolean = () => {
@@ -144,6 +147,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         setTimeout(fetchNostrKey, 1000);
         return;
       }
+
+      updateStore('isKeyLookupDone', true);
     }
 
     try {
@@ -289,6 +294,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   onMount(() => {
     setTimeout(() => {
+      updateStore('isKeyLookupDone', false);
       fetchNostrKey();
     }, 1000);
   });

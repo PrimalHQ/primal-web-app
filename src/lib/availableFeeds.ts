@@ -29,7 +29,7 @@ const copyOldFeedData = (pubkey: string | undefined) => {
 export const initAvailableFeeds = (pubkey: string | undefined) => {
   const storage = getStorage(pubkey);
 
-  copyOldFeedData(pubkey);
+  // copyOldFeedData(pubkey);
 
   if (storage.feeds.length === 0) {
     saveFeeds(pubkey, defaultFeeds);

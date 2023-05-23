@@ -34,27 +34,27 @@ const Home: Component = () => {
 
   const isPageLoading = () => context?.isFetching;
 
-  const onConnectionEstablished = createReaction(() => {
-    context?.actions.selectFeed(settings?.availableFeeds[0]);
-  });
+  // const onConnectionEstablished = createReaction(() => {
+  //   context?.actions.selectFeed(settings?.availableFeeds[0]);
+  // });
 
 
-  const onPubKeyFound = createReaction(() => {
-    if (!isConnected()) {
-      onConnectionEstablished(() => isConnected());
-      return;
-    }
-    context?.actions.selectFeed(settings?.availableFeeds[0]);
-  });
+  // const onPubKeyFound = createReaction(() => {
+  //   if (!isConnected()) {
+  //     onConnectionEstablished(() => isConnected());
+  //     return;
+  //   }
+  //   context?.actions.selectFeed(settings?.availableFeeds[0]);
+  // });
 
-  onMount(() => {
-    scrollWindowTo(context?.scrollTop);
+  // onMount(() => {
+  //   scrollWindowTo(context?.scrollTop);
 
-    if (!context?.selectedFeed) {
-      context?.actions.selectFeed(settings?.availableFeeds[0]);
-    }
-    onPubKeyFound(() => account?.publicKey);
-  });
+  //   if (!context?.selectedFeed) {
+  //     context?.actions.selectFeed(settings?.availableFeeds[0]);
+  //   }
+  //   onPubKeyFound(() => account?.publicKey);
+  // });
 
   return (
     <div class={styles.homeContent}>

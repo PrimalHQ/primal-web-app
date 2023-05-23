@@ -191,6 +191,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             () => replaceAvailableFeeds(account?.publicKey, updatedFeeds),
           );
 
+          updateStore('defaultFeed', () => store.availableFeeds[0]);
+
         }
         catch (e) {
           console.log('Error parsing settings response: ', e);
@@ -290,14 +292,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   // Initial setup for a user with a public key
   createEffect(() => {
-    if (!account?.hasPublicKey()) {
+    if (!account?.hasPublicKey() && account?.isKeyLookupDone) {
       loadDefaults();
       return;
     }
 
-    const pubkey = account.publicKey;
+    const pubkey = account?.publicKey;
 
     const initFeeds = initAvailableFeeds(pubkey);
+
+    updateStore('defaultFeed', () => initFeeds[0]);
 
     updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
 

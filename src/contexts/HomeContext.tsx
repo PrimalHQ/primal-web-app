@@ -280,7 +280,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   });
 
   createEffect(() => {
-    selectFeed(settings?.defaultFeed);
+    if (account?.isKeyLookupDone) {
+      selectFeed(settings?.defaultFeed);
+    }
   });
 
   onCleanup(() => {
