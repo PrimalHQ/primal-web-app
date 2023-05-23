@@ -7,11 +7,13 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const HomeHeader: Component = () => {
 
   const account = useAccountContext();
   const home = useHomeContext();
+  const settings = useSettingsContext();
   const intl = useIntl();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
@@ -118,7 +120,7 @@ const HomeHeader: Component = () => {
               <SmallCallToAction activeUser={activeUser()} />
             </div>
           </Show>
-          <Show when={home?.selectedFeed}>
+          <Show when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}>
             <div class={styles.smallRight}>
               <FeedSelect />
             </div>
