@@ -1,6 +1,5 @@
 import {
   Component,
-  createReaction,
   For,
   Match,
   onMount,
@@ -19,17 +18,12 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { scrollWindowTo } from '../lib/scroll';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useHomeContext } from '../contexts/HomeContext';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import { useAccountContext } from '../contexts/AccountContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { isConnected } from '../sockets';
 
 
 const Home: Component = () => {
 
   const context = useHomeContext();
-  const settings = useSettingsContext();
-  const account = useAccountContext();
   const intl = useIntl();
 
   const isPageLoading = () => context?.isFetching;
@@ -47,14 +41,14 @@ const Home: Component = () => {
   //   context?.actions.selectFeed(settings?.availableFeeds[0]);
   // });
 
-  // onMount(() => {
-  //   scrollWindowTo(context?.scrollTop);
+  onMount(() => {
+    scrollWindowTo(context?.scrollTop);
 
-  //   if (!context?.selectedFeed) {
-  //     context?.actions.selectFeed(settings?.availableFeeds[0]);
-  //   }
-  //   onPubKeyFound(() => account?.publicKey);
-  // });
+    // if (!context?.selectedFeed) {
+    //   context?.actions.selectFeed(settings?.availableFeeds[0]);
+    // }
+    // onPubKeyFound(() => account?.publicKey);
+  });
 
   return (
     <div class={styles.homeContent}>
