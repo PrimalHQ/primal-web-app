@@ -1,8 +1,10 @@
 .fullHeader {
   display: grid;
-  height: 128px;
+  height: 120px;
   align-items: center;
   justify-content: left;
+  position: relative;
+  margin-bottom: -3px;
   position: relative;
 
   .exploreCaption {
@@ -15,10 +17,11 @@
   .addToFeed {
     display: flex;
     position: absolute;
-    bottom: 5px;
+    bottom: 0px;
     width: 100%;
     height: 35px;
     justify-content: flex-end;
+    align-items: flex-end;
 
     .noAdd {
       display: flex;

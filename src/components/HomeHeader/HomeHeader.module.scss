@@ -1,6 +1,6 @@
 .fullHeader {
   display: grid;
-  height: 136px;
+  height: 120px;
   padding-top: 30px;
 }
 
@@ -55,6 +55,7 @@
 .smallRight {
   max-width: 50%;
   flex-grow: 1;
+  margin-bottom: 4px;
   // margin: auto;
 }
 
@@ -75,6 +76,10 @@
 
   .smallLeft {
     visibility: visible;
+  }
+
+  .smallRight {
+    margin-bottom: 0;
   }
 }
 
