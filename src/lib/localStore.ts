@@ -28,6 +28,10 @@ export const storageName = (pubkey?: string) => {
 };
 
 export const getStorage = (pubkey?: string) => {
+  if (!pubkey) {
+    return {} as LocalStore;
+  }
+
   const name = storageName(pubkey);
   const storage = localStorage.getItem(name);
 
@@ -37,6 +41,10 @@ export const getStorage = (pubkey?: string) => {
 };
 
 export const setStorage = (pubkey: string | undefined, data: LocalStore) => {
+  if (!pubkey) {
+    return;
+  }
+
   const name = storageName(pubkey);
   const value = JSON.stringify(data);
 
@@ -44,6 +52,10 @@ export const setStorage = (pubkey: string | undefined, data: LocalStore) => {
 }
 
 export const saveFollowing = (pubkey: string | undefined, following: string[], since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
   const store = getStorage(pubkey);
 
   store.following = [...following];
@@ -53,6 +65,10 @@ export const saveFollowing = (pubkey: string | undefined, following: string[], s
 }
 
 export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRelays) => {
+  if (!pubkey) {
+    return;
+  }
+
   const store = getStorage(pubkey);
 
   store.relaySettings = { ...settings };
@@ -61,6 +77,10 @@ export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRel
 }
 
 export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
+  if (!pubkey) {
+    return;
+  }
+
   const store = getStorage(pubkey);
 
   store.likes = [ ...likes ];
@@ -69,6 +89,9 @@ export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
 };
 
 export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
+  if (!pubkey) {
+    return;
+  }
   const store = getStorage(pubkey);
 
   store.feeds = [ ...feeds ];
@@ -77,6 +100,9 @@ export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
 };
 
 export const saveTheme = (pubkey: string | undefined, theme: string) => {
+  if (!pubkey) {
+    return;
+  }
   const store = getStorage(pubkey);
 
   store.theme = theme;

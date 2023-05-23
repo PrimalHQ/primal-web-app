@@ -301,8 +301,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const initFeeds = initAvailableFeeds(pubkey);
 
-    updateStore('defaultFeed', () => initFeeds[0]);
+    if (!initFeeds || initFeeds.length === 0) {
+      return;
+    }
 
+    updateStore('defaultFeed', () => initFeeds[0]);
     updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
 
     const feed = {
