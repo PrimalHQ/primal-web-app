@@ -75,7 +75,7 @@ const HomeHeader: Component = () => {
         when={account?.hasPublicKey()}
         fallback={<div class={styles.welcomeMessage}>
           {intl.formatMessage({
-            id: 'placeholders.gguestUserGreeting',
+            id: 'placeholders.guestUserGreeting',
             defaultMessage: 'Welcome to nostr!',
             description: 'Header placeholder for guest user',
           })}
