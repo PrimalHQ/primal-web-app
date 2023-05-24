@@ -261,6 +261,16 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       );
       return;
     }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
+      return;
+    }
   };
 
   const saveSidebar = (page: FeedPage) => {

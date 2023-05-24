@@ -1,3 +1,14 @@
+@mixin statIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-tertiary-2);
+}
+
+@mixin typeDiv {
+  display: flex;
+  min-width: 64px;
+}
+
 .footer {
   display: flex;
 
@@ -17,33 +28,87 @@
     background-color: unset;
     width: auto;
     min-width: 64px;
-    &.highlighted {
-      &.zapType {
+
+    .likeType {
+      @include typeDiv;
+      .icon {
+        @include statIcon;
+        -webkit-mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+      }
+    }
+
+    .replyType {
+      @include typeDiv;
+      .icon {
+        @include statIcon;
+        -webkit-mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+      }
+    }
+
+    .repostType {
+      @include typeDiv;
+      .icon {
+        @include statIcon;
+        -webkit-mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+      }
+    }
+
+    .zapType {
+      @include typeDiv;
+      .icon {
+        @include statIcon;
+        -webkit-mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+      }
+    }
+
+    &:hover, &.highlighted {
+      .zapType {
         .statNumber {
           color: #FF9F2F;
         }
-      }
-      &.likeType {
-        .statNumber {
-          color: #CA079F;
+        .icon {
+          background-color: #FF9F2F;
+          -webkit-mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
+          mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
         }
       }
-      &.replyType {
+
+      .likeType {
+        .statNumber {
+          color: #BC1870;
+        }
+        .icon {
+          background-color: #BC1870;
+          -webkit-mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+          mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+        }
+      }
+
+      .replyType {
         .statNumber {
           color: #CCCCCC;
         }
+        .icon {
+          background-color: #CCCCCC;
+          -webkit-mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+          mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+        }
       }
-      &.repostType {
+
+      .repostType {
         .statNumber {
           color: #66E205;
         }
+        .icon {
+          background-color: #66E205;
+          -webkit-mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+          mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+        }
       }
-      // .replyIcon, .likeIcon, .repostIcon {
-      //   background-color: var(--accent-1);
-      // }
-      // .statNumber {
-      //   color: var(--accent-1);
-      // }
     }
     &:focus {
       box-shadow: none;
@@ -52,38 +117,11 @@
     .statNumber {
       text-align: left;
       color: var(--text-secondary);
-    }
-
-    &:hover {
-      &.zapType {
-        .statNumber {
-          color: #FF9F2F;
-        }
-      }
-      &.likeType {
-        .statNumber {
-          color: #BC1870;
-        }
-      }
-      &.replyType {
-        .statNumber {
-          color: #CCCCCC;
-        }
-      }
-      &.repostType {
-        .statNumber {
-          color: #66E205;
-        }
-      }
-      // .replyIcon, .likeIcon, .repostIcon, .zapIcon {
-      //   background-color: var(--text-secondary);
-      // }
-      // .statNumber {
-      //   color: var(--text-primary);
-      // }
+      margin-left: 4px;
     }
   }
 }
+
 
 @media only screen and (max-width: 720px) {
   .footer {
@@ -97,34 +135,4 @@
       margin-right: 0;
     }
   }
-}
-
-@mixin statIcon {
-  width: 16px;
-  height: 16px;
-  background-color: var(--text-tertiary-2);
-}
-
-.likeIcon {
-  @include statIcon;
-  -webkit-mask: url(../../../assets/icons/like.svg) no-repeat center;
-  mask: url(../../../assets/icons/like.svg) no-repeat center;
-}
-
-.replyIcon {
-  @include statIcon;
-  -webkit-mask: url(../../../assets/icons/reply.svg) no-repeat center;
-  mask: url(../../../assets/icons/reply.svg) no-repeat center;
-}
-
-.repostIcon {
-  @include statIcon;
-  -webkit-mask: url(../../../assets/icons/reposts.svg) no-repeat center;
-  mask: url(../../../assets/icons/reposts.svg) no-repeat center;
-}
-
-.zapIcon {
-  @include statIcon;
-  -webkit-mask: url(../../../assets/icons/zaps.svg) no-repeat center;
-  mask: url(../../../assets/icons/zaps.svg) no-repeat center;
 }

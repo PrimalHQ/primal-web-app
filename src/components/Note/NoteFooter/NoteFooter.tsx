@@ -110,28 +110,15 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     const [activeIcon, setActiveIcon] = createSignal<string>(opts.icon);
 
     return (
-      <Show
-        when={opts.disabled}
-        fallback={
-          <button
-            class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''} ${buttonTypeClasses[opts.type]}`}
-            onClick={opts.onClick}
-            onMouseOver={() => setActiveIcon(opts.iconDisabled)}
-            onMouseOut={() => setActiveIcon(opts.icon)}
-          >
-            <img src={opts.highlighted ? opts.iconDisabled : activeIcon()} />
-            <div class={styles.statNumber}>{opts.label || ''}</div>
-          </button>
-        }
+      <button
+        class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''}`}
+        onClick={opts.onClick}
       >
-        <button
-          class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''} ${buttonTypeClasses[opts.type]}`}
-          onClick={() => {}}
-        >
-          <img src={opts.iconDisabled} />
-          <span class={styles.statNumber}>{opts.label || ''}</span>
-        </button>
-      </Show>
+        <div class={`${buttonTypeClasses[opts.type]}`}>
+          <div class={styles.icon}></div>
+          <div class={styles.statNumber}>{opts.label || ''}</div>
+        </div>
+      </button>
     );
   };
 
