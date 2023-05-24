@@ -1,5 +1,7 @@
 import {
   Component,
+  createEffect,
+  createSignal,
   For,
   Match,
   onMount,
@@ -19,6 +21,10 @@ import { scrollWindowTo } from '../lib/scroll';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useHomeContext } from '../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
+import { createStore } from 'solid-js/store';
+import { PrimalUser } from '../types/primal';
+import Avatar from '../components/Avatar/Avatar';
+import { userName } from '../stores/profile';
 
 
 const Home: Component = () => {
@@ -27,6 +33,12 @@ const Home: Component = () => {
   const intl = useIntl();
 
   const isPageLoading = () => context?.isFetching;
+
+  let checkNewNotesTimer: number = 0;
+
+  const [hasNewPosts, setHasNewPosts] = createSignal(false);
+  const [newNotesCount, setNewNotesCount] = createSignal(0);
+  const [newPostAuthors, setNewPostAuthors] = createStore<PrimalUser[]>([]);
 
   // const onConnectionEstablished = createReaction(() => {
   //   context?.actions.selectFeed(settings?.availableFeeds[0]);
@@ -50,6 +62,55 @@ const Home: Component = () => {
     // onPubKeyFound(() => account?.publicKey);
   });
 
+  createEffect(() => {
+    const hex = context?.selectedFeed?.hex;
+
+    if (checkNewNotesTimer) {
+      clearInterval(checkNewNotesTimer);
+      setHasNewPosts(false);
+      setNewNotesCount(0);
+      setNewPostAuthors(() => []);
+    }
+
+    checkNewNotesTimer = setInterval(() => {
+      context?.actions.checkForNewNotes(hex);
+    }, 30_000);
+  });
+
+  createEffect(() => {
+    const count = context?.future.notes.length || 0;
+    if (count === 0) {
+      return
+    }
+
+    if (!hasNewPosts()) {
+      setHasNewPosts(true);
+    }
+
+    if (newPostAuthors.length < 3) {
+      const users = context?.future.notes.map(note => note.user) || [];
+
+      const uniqueUsers = users.reduce<PrimalUser[]>((acc, user) => {
+        const isDuplicate = acc.find(u => u.pubkey === user.pubkey);
+        return isDuplicate ?  acc : [ ...acc, user ];
+      }, []).slice(0, 3);
+
+      setNewPostAuthors(() => [...uniqueUsers]);
+    }
+
+    setNewNotesCount(count);
+
+
+  });
+
+  const loadNewContent = () => {
+    context?.actions.loadFutureContent();
+    scrollWindowTo(0);
+    setHasNewPosts(false);
+    setNewNotesCount(0);
+    setNewPostAuthors(() => []);
+  }
+
   return (
     <div class={styles.homeContent}>
       <Wormhole
@@ -66,9 +127,48 @@ const Home: Component = () => {
         <HomeHeaderPhone />
       </div>
 
+      <Show when={hasNewPosts() && (context?.scrollTop && context.scrollTop > 40)}>
+        <div class={styles.newContentNotification}>
+          <button
+            onClick={loadNewContent}
+          >
+            <div class={styles.avatars}>
+              <For each={newPostAuthors}>
+                {(user) => (
+                  <div
+                    class={styles.avatar}
+                    title={userName(user)}
+                  >
+                    <Avatar src={user.picture} size="xs" />
+                  </div>
+                )}
+              </For>
+            </div>
+            <div class={styles.counter}>
+              {newNotesCount()} new posts
+            </div>
+          </button>
+        </div>
+      </Show>
+
       <StickySidebar>
         <HomeSidebar />
       </StickySidebar>
+
+      <Show
+        when={hasNewPosts() && (context?.scrollTop !== undefined && context.scrollTop <= 40)}
+        fallback={<div class={styles.newContentItem}></div>}
+      >
+        <div class={styles.newContentItem}>
+          <button
+            onClick={loadNewContent}
+          >
+            <div class={styles.counter}>
+              {newNotesCount()} new posts
+            </div>
+          </button>
+        </div>
+      </Show>
 
       <Show
         when={context?.notes && context.notes.length > 0}

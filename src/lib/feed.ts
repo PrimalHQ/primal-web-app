@@ -3,6 +3,25 @@ import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "nostr-tools";
 import { day, hour, noKey } from "../constants";
 
+export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
+  if (!pubkey || pubkey === noKey) {
+    return;
+  }
+
+  let payload: { since: number, pubkey: string, user_pubkey?: string } =
+    { since, pubkey };
+
+  if (user_pubkey && user_pubkey !== noKey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["feed", payload]},
+  ]));
+};
+
 export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
   if (!pubkey || pubkey === noKey) {
     return;

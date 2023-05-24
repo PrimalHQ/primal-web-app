@@ -398,26 +398,6 @@ export type ContextChildren =
   JSX.FunctionElement |
   (string & {}) | null | undefined;
 
-export type HomeContextStore = {
-  notes: PrimalNote[],
-  isFetching: boolean,
-  scrollTop: number,
-  selectedFeed: PrimalFeed | undefined,
-  page: FeedPage,
-  lastNote: PrimalNote | undefined,
-  reposts: Record<string, string> | undefined,
-  mentionedNotes: Record<string, NostrNoteContent>,
-  actions: {
-    saveNotes: (newNotes: PrimalNote[]) => void,
-    clearNotes: () => void,
-    fetchNotes: (topic: string, subId: string, until?: number) => void,
-    fetchNextPage: () => void,
-    selectFeed: (feed: PrimalFeed | undefined) => void,
-    updateScrollTop: (top: number) => void,
-    updatePage: (content: NostrEventContent) => void,
-    savePage: (page: FeedPage) => void,
-  }
-}
 
 export type PrimalTheme = { name: string, label: string, logo: string, dark?: boolean};
 

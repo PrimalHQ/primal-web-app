@@ -2,8 +2,8 @@ import { nip19 } from "nostr-tools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind, trendingFeed } from "../constants";
-import { getEvents, getExploreFeed, getFeed } from "../lib/feed";
+import { emptyPage, Kind, trendingFeed } from "../constants";
+import { getEvents, getExploreFeed, getFeed, getFutureFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
 import { searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
@@ -11,7 +11,6 @@ import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "
 import {
   ContextChildren,
   FeedPage,
-  HomeContextStore,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
@@ -26,6 +25,34 @@ import {
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
+
+type HomeContextStore = {
+  notes: PrimalNote[],
+  isFetching: boolean,
+  scrollTop: number,
+  selectedFeed: PrimalFeed | undefined,
+  page: FeedPage,
+  lastNote: PrimalNote | undefined,
+  reposts: Record<string, string> | undefined,
+  mentionedNotes: Record<string, NostrNoteContent>,
+  future: {
+    notes: PrimalNote[],
+    page: FeedPage,
+    reposts: Record<string, string> | undefined,
+  },
+  actions: {
+    saveNotes: (newNotes: PrimalNote[]) => void,
+    clearNotes: () => void,
+    fetchNotes: (topic: string, subId: string, until?: number) => void,
+    fetchNextPage: () => void,
+    selectFeed: (feed: PrimalFeed | undefined) => void,
+    updateScrollTop: (top: number) => void,
+    updatePage: (content: NostrEventContent) => void,
+    savePage: (page: FeedPage) => void,
+    checkForNewNotes: (topic: string | undefined) => void,
+    loadFutureContent: () => void,
+  }
+}
 
 const initialHomeData = {
   notes: [],
@@ -42,6 +69,17 @@ const initialHomeData = {
   reposts: {},
   lastNote: undefined,
   mentionedNotes: {},
+  future: {
+    notes: [],
+    reposts: {},
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    },
+  },
 };
 
 export const HomeContext = createContext<HomeContextStore>();
@@ -53,10 +91,78 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const saveNotes = (newNotes: PrimalNote[]) => {
+const clearFuture = () => {
+  updateStore('future', () => ({
+    notes: [],
+    reposts: {},
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    },
+  }))
+}
 
+  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
+    if (scope) {
+      updateStore(scope, 'notes', (notes) => [ ...notes, ...newNotes ]);
+      return;
+    }
     updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
     updateStore('isFetching', () => false);
+  };
+
+  const checkForNewNotes = (topic: string | undefined) => {
+
+    if (!topic) {
+      return;
+    }
+
+    const [scope, timeframe] = topic.split(';');
+
+    let since = 0;
+
+    if (store.notes[0]) {
+      since = store.notes[0].post.created_at;
+    }
+
+    // if (store.future.notes[0]) {
+    //   since = store.future.notes[0].post.created_at;
+    // }
+    clearFuture();
+
+    if (scope && timeframe) {
+
+      // if (scope === 'search') {
+      //   searchContent(`home_feed_${subId}`, decodeURI(timeframe));
+      //   return;
+      // }
+
+      // account?.publicKey && getExploreFeed(
+      //   account.publicKey,
+      //   `home_feed_${subId}`,
+      //   scope,
+      //   timeframe,
+      //   until,
+      // );
+      return;
+    }
+
+    setTimeout(() => {
+      getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
+    }, 10);
+
+  }
+
+  const loadFutureContent = () => {
+    if (store.future.notes.length === 0) {
+      return;
+    }
+
+    updateStore('notes', (notes) => [...store.future.notes, ...notes]);
+    clearFuture();
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0) => {
@@ -91,6 +197,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
+
+    clearFuture();
   };
 
   const fetchNextPage = () => {
@@ -141,9 +249,16 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const updatePage = (content: NostrEventContent) => {
+  const updatePage = (content: NostrEventContent, scope?: 'future') => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
+
+      if (scope) {
+        updateStore(scope, 'page', 'users',
+          (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+        );
+        return;
+      }
 
       updateStore('page', 'users',
         (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
@@ -154,6 +269,23 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
       const messageId = nip19.noteEncode(message.id);
+
+      if (scope) {
+        const isFirstNote = message.kind === Kind.Text ?
+          store.notes[0]?.post?.noteId === messageId :
+          store.notes[0]?.repost?.note.noteId === messageId;
+
+        // const isAlreadyFetched = message.kind === Kind.Text ?
+        //   store.future.notes[0]?.post?.noteId === messageId :
+        //   store.future.notes[0]?.repost?.note.noteId === messageId;
+
+          if (!isFirstNote) {
+            updateStore(scope, 'page', 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+          }
+        return;
+      }
 
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :
@@ -172,6 +304,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
+      if (scope) {
+        updateStore(scope, 'page', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+        );
+        return;
+      }
       updateStore('page', 'postStats',
         (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
       );
@@ -181,6 +319,13 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Mentions) {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
+
+      if (scope) {
+        updateStore(scope, 'page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+        );
+        return;
+      }
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
@@ -192,6 +337,13 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
+      if (scope) {
+        updateStore(scope, 'page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+        );
+        return;
+      }
+
       updateStore('page', 'noteActions',
         (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
@@ -199,13 +351,13 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const savePage = (page: FeedPage) => {
+  const savePage = (page: FeedPage, scope?: 'future') => {
     const topic = (store.selectedFeed?.hex || '').split(';');
     const sortingFunction = sortingPlan(topic[1]);
 
     const newPosts = sortingFunction(convertToNotes(page));
 
-    saveNotes(newPosts);
+    saveNotes(newPosts, scope);
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -257,6 +409,49 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       }
     }
 
+    if (subId === `home_future_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const reposts = parseEmptyReposts(store.future.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          savePage(store.future.page, 'future');
+          return;
+        }
+
+        updateStore('future', 'reposts', () => reposts);
+
+        getEvents(account?.publicKey, ids, `home_future_reposts_${APP_ID}`);
+
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content, 'future');
+        return;
+      }
+    }
+
+    if (subId === `home_future_reposts_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.future.page, 'future');
+        return;
+      }
+
+      if (type === 'EVENT') {
+        const repostId = (content as NostrNoteContent).id;
+        const reposts = store.future.reposts || {};
+        const parent = store.future.page.messages.find(m => m.id === reposts[repostId]);
+
+        if (parent) {
+          updateStore('future', 'page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+        }
+
+        return;
+      }
+    }
+
+
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {
@@ -306,6 +501,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       updateScrollTop,
       updatePage,
       savePage,
+      checkForNewNotes,
+      loadFutureContent,
     },
   });
 
