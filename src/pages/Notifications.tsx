@@ -18,7 +18,7 @@ import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, trunca
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
-import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 
 import styles from './Notifications.module.scss';
 
@@ -60,7 +60,7 @@ const Notifications: Component = () => {
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
     users: [],
-    page: { messages: [], users: {}, postStats: {}, mentions: {} },
+    page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
     reposts: {},
   })
 
@@ -68,7 +68,7 @@ const Notifications: Component = () => {
     notes: [],
     users: {},
     userStats: {},
-    page: { messages: [], users: {}, postStats: {}, notifications: [], mentions: {} },
+    page: { messages: [], users: {}, postStats: {}, notifications: [], mentions: {}, noteActions: {} },
     reposts: {},
     notifications: [],
   })
@@ -230,6 +230,16 @@ const Notifications: Component = () => {
           return;
         }
 
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          setRelatedNotes('page', 'noteActions',
+            (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+          );
+          return;
+        }
+
       }
 
       if (type === 'EOSE') {
@@ -245,7 +255,7 @@ const Notifications: Component = () => {
     const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
     newNotifs = {};
-    getNotifications(pk as string, subid, since);
+    getNotifications(account?.publicKey, pk as string, subid, since);
   });
 
   onCleanup(() => {
@@ -332,6 +342,16 @@ const Notifications: Component = () => {
           return;
         }
 
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          setOldNotifications('page', 'noteActions',
+            (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+          );
+          return;
+        }
+
       }
 
       if (type === 'EOSE') {
@@ -367,7 +387,7 @@ const Notifications: Component = () => {
 
     if (pk) {
       setfetchingOldNotifs(true);
-      getOldNotifications(pk as string, subid, until);
+      getOldNotifications(account?.publicKey, pk as string, subid, until);
     }
 
   }

@@ -3,6 +3,7 @@ import { sendMessage } from "../sockets";
 import { NostrWindow } from "../types/primal";
 
 export const getNotifications = (
+  user_pubkey: string | undefined,
   pubkey: string | undefined,
   subid: string,
   since = 0,
@@ -12,14 +13,21 @@ export const getNotifications = (
     return;
   }
 
+  let payload: { pubkey: string, limit: number, since: number, user_pubkey?: string } = { pubkey, limit, since };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_notifications", { pubkey, limit, since }]},
+    {cache: ["get_notifications", payload]},
   ]));
 };
 
 export const getOldNotifications = (
+  user_pubkey: string | undefined,
   pubkey: string | undefined,
   subid: string,
   until = 0,
@@ -29,10 +37,16 @@ export const getOldNotifications = (
     return;
   }
 
+  let payload: { pubkey: string, limit: number, until: number, user_pubkey?: string } = { pubkey, limit, until };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_notifications", { pubkey, limit, until }]},
+    {cache: ["get_notifications", payload]},
   ]));
 };
 
