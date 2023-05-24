@@ -105,7 +105,7 @@ const Home: Component = () => {
 
   const loadNewContent = () => {
     context?.actions.loadFutureContent();
-    scrollWindowTo(0);
+    scrollWindowTo(0, true);
     setHasNewPosts(false);
     setNewNotesCount(0);
     setNewPostAuthors(() => []);
