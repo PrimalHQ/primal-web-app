@@ -149,7 +149,7 @@ export const urlify = (text: string, highlightOnly = false) => {
     }
 
     if (wavlakeRegex.test(url)) {
-      const convertedUrl = url.replace(/(?:player\.)?wavlake\.com/, "embed.wavlake.com");
+      const convertedUrl = url.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
       return `
         <iframe
