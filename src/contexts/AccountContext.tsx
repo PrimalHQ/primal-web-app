@@ -149,6 +149,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
 
       updateStore('isKeyLookupDone', true);
+      return;
     }
 
     try {
