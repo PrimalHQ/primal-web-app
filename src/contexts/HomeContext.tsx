@@ -3,9 +3,9 @@ import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { emptyPage, Kind, trendingFeed } from "../constants";
-import { getEvents, getExploreFeed, getFeed, getFutureFeed } from "../lib/feed";
+import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { hexToNpub } from "../lib/keys";
-import { searchContent } from "../lib/search";
+import { searchContent, searchFutureContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import {
@@ -136,17 +136,17 @@ const clearFuture = () => {
     if (scope && timeframe) {
 
       // if (scope === 'search') {
-      //   searchContent(`home_feed_${subId}`, decodeURI(timeframe));
+      //   searchFutureContent(`home_future_${APP_ID}`, decodeURI(timeframe), since);
       //   return;
       // }
 
-      // account?.publicKey && getExploreFeed(
-      //   account.publicKey,
-      //   `home_feed_${subId}`,
-      //   scope,
-      //   timeframe,
-      //   until,
-      // );
+      account?.publicKey && getFutureExploreFeed(
+        account.publicKey,
+        `home_future_${APP_ID}`,
+        scope,
+        timeframe,
+        since,
+      );
       return;
     }
 

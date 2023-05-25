@@ -130,6 +130,51 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   ]));
 }
 
+export const getFutureExploreFeed = (
+  user_pubkey: string,
+  subid: string,
+  scope: string,
+  timeframe: string,
+  since: number,
+  ) => {
+  if (!user_pubkey || user_pubkey === noKey) {
+    return;
+  }
+  let payload: { timeframe: string, scope: string, since: number, user_pubkey?: string, created_after?: number } =
+    { timeframe, scope, since };
+
+  if (user_pubkey.length > 0 && user_pubkey !== noKey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (since > 0) {
+    payload.since = since;
+  }
+
+  if (timeframe === 'trending') {
+    const yesterday = Math.floor((new Date().getTime() - day) / 1000);
+
+    payload.created_after = yesterday;
+  }
+
+  if (timeframe === 'mostzapped4h') {
+    const fourHAgo = Math.floor((new Date().getTime() - (4 * hour)) / 1000);
+
+    payload.timeframe = 'mostzapped';
+    payload.created_after = fourHAgo;
+  }
+
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: [
+      "explore",
+      payload,
+    ]},
+  ]));
+};
+
 export const getExploreFeed = (
   pubkey: string,
   subid: string,
@@ -161,7 +206,6 @@ export const getExploreFeed = (
     payload.timeframe = 'mostzapped';
     payload.created_after = fourHAgo;
   }
-
 
   sendMessage(JSON.stringify([
     "REQ",

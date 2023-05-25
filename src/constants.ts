@@ -218,6 +218,7 @@ export enum Kind  {
   Notification = 10000110,
   Timestamp = 10000111,
   NotificationStats = 10000112,
+  PAGING = 10000113,
   NoteActions = 10000115,
 }
 
