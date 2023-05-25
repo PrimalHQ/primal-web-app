@@ -14,6 +14,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
+import { useNotificationsContext } from '../contexts/NotificationsContext';
 import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
@@ -25,6 +26,7 @@ import styles from './Notifications.module.scss';
 const Notifications: Component = () => {
 
   const account = useAccountContext();
+  const notifications = useNotificationsContext();
   const intl = useIntl();
 
   const [queryParams, setQueryParams] = useSearchParams();
@@ -40,6 +42,8 @@ const Notifications: Component = () => {
   const [allSet, setAllSet] = createSignal(false);
   const [fetchingOldNotifs, setfetchingOldNotifs] = createSignal(false);
 
+
+  const newNotifCount = () => notifications?.notificationCount || 0;
 
   type NotificationStore = {
     notes: PrimalNote[],
@@ -126,7 +130,7 @@ const Notifications: Component = () => {
 
   createEffect(() => {
     if (account?.hasPublicKey() && publicKey() === account.publicKey) {
-      const subid = `notif_sls_${APP_ID}`
+      const subid = `notif_sls_${APP_ID}`;
 
       const unsub = subscribeTo(subid, async (type, _, content) => {
         if (type === 'EOSE') {
@@ -152,13 +156,7 @@ const Notifications: Component = () => {
   let newNotifs: Record<string, PrimalNotification[]> = {};
 
   // Fetch new notifications
-  createEffect(() => {
-    const pk = publicKey();
-
-    if (!pk || notifSince() === undefined) {
-      return;
-    }
-
+  const fetchNewNotifications = (pk: string) => {
     const subid = `notif_${APP_ID}`
 
     const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -256,6 +254,17 @@ const Notifications: Component = () => {
 
     newNotifs = {};
     getNotifications(account?.publicKey, pk as string, subid, since);
+
+  };
+
+  createEffect(() => {
+    const pk = publicKey();
+
+    if (!pk || notifSince() === undefined) {
+      return;
+    }
+
+    fetchNewNotifications(pk as string);
   });
 
   onCleanup(() => {
@@ -1021,6 +1030,11 @@ const Notifications: Component = () => {
     }
   }
 
+  const loadNewContent = () => {
+    fetchNewNotifications(publicKey() as string);
+    setLastSeen(`notif_sls_${APP_ID}`, Math.floor((new Date()).getTime() / 1000));
+  }
+
   return (
     <div>
       <Wormhole to="branding_holder">
@@ -1038,6 +1052,19 @@ const Notifications: Component = () => {
           )}
         </div>
       </div>
+
+
+      <Show when={newNotifCount() > 0}>
+        <div class={styles.newContentNotification}>
+          <button
+            onClick={loadNewContent}
+          >
+            <div class={styles.counter}>
+              {newNotifCount()} new notifications
+            </div>
+          </button>
+        </div>
+      </Show>
 
 
       <Show
