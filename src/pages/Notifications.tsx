@@ -43,7 +43,17 @@ const Notifications: Component = () => {
   const [fetchingOldNotifs, setfetchingOldNotifs] = createSignal(false);
 
 
-  const newNotifCount = () => notifications?.notificationCount || 0;
+  const newNotifCount = () => {
+    if (!notifications?.notificationCount) {
+      return 0;
+    }
+
+    if (notifications.notificationCount > 100) {
+      return 100;
+    }
+
+    return notifications.notificationCount;
+  };
 
   type NotificationStore = {
     notes: PrimalNote[],
@@ -1065,6 +1075,7 @@ const Notifications: Component = () => {
                   defaultMessage: `{number, plural,
                     =0 {}
                     one {# new notification}
+                    =100 {99+ new notifications}
                     other {# new notifications}}`,
                   description: 'Label for a button to load new notifications',
                 }, {

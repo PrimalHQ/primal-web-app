@@ -40,6 +40,9 @@ const Home: Component = () => {
   const [newNotesCount, setNewNotesCount] = createSignal(0);
   const [newPostAuthors, setNewPostAuthors] = createStore<PrimalUser[]>([]);
 
+
+  const newPostCount = () => newNotesCount() < 100 ? newNotesCount() : 100;
+
   // const onConnectionEstablished = createReaction(() => {
   //   context?.actions.selectFeed(settings?.availableFeeds[0]);
   // });
@@ -75,6 +78,7 @@ const Home: Component = () => {
     checkNewNotesTimer = setInterval(() => {
       context?.actions.checkForNewNotes(hex);
     }, 30_000);
+
   });
 
   createEffect(() => {
@@ -104,6 +108,9 @@ const Home: Component = () => {
   });
 
   const loadNewContent = () => {
+    if (newNotesCount() > 100) {
+      location.reload();
+    }
     context?.actions.loadFutureContent();
     scrollWindowTo(0, true);
     setHasNewPosts(false);
@@ -150,10 +157,11 @@ const Home: Component = () => {
                 defaultMessage: `{number, plural,
                   =0 {}
                   one {# new post}
+                  =100 {99+ new posts}
                   other {# new posts}}`,
                 description: 'Label for a button to load new posts',
               }, {
-                number: newNotesCount(),
+                number: newPostCount(),
               })}
             </div>
           </button>
@@ -178,10 +186,11 @@ const Home: Component = () => {
                   defaultMessage: `{number, plural,
                     =0 {}
                     one {# new post}
+                    =100 {99+ new posts}
                     other {# new posts}}`,
                   description: 'Label for a button to load new posts',
                 }, {
-                  number: newNotesCount(),
+                  number: newPostCount(),
                 })}
             </div>
           </button>

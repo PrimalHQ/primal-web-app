@@ -120,6 +120,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    if (store.future.notes.length > 100) {
+      return;
+    }
+
     const [scope, timeframe] = topic.split(';');
 
     let since = 0;
