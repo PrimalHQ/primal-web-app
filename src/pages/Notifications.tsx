@@ -1064,7 +1064,7 @@ const Notifications: Component = () => {
       </div>
 
 
-      <Show when={newNotifCount() > 0}>
+      <Show when={newNotifCount() > 0 && !account?.showNewNoteForm}>
         <div class={styles.newContentNotification}>
           <button
             onClick={loadNewContent}

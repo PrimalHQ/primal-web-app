@@ -25,11 +25,13 @@ import { createStore } from 'solid-js/store';
 import { PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
+import { useAccountContext } from '../contexts/AccountContext';
 
 
 const Home: Component = () => {
 
   const context = useHomeContext();
+  const account = useAccountContext();
   const intl = useIntl();
 
   const isPageLoading = () => context?.isFetching;
@@ -134,7 +136,11 @@ const Home: Component = () => {
         <HomeHeaderPhone />
       </div>
 
-      <Show when={hasNewPosts() && (context?.scrollTop && context.scrollTop > 40)}>
+      <Show when={
+        hasNewPosts() &&
+        (context?.scrollTop && context.scrollTop > 40) &&
+        !account?.showNewNoteForm
+      }>
         <div class={styles.newContentNotification}>
           <button
             onClick={loadNewContent}
