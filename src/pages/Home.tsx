@@ -78,6 +78,7 @@ const Home: Component = () => {
     }
 
     const timeout = 25_000 + Math.random() * 10_000;
+
     checkNewNotesTimer = setInterval(() => {
       context?.actions.checkForNewNotes(hex);
     }, timeout);
