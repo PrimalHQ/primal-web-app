@@ -145,7 +145,16 @@ const Home: Component = () => {
               </For>
             </div>
             <div class={styles.counter}>
-              {newNotesCount()} new posts
+              {intl.formatMessage({
+                id: 'feed.newPosts',
+                defaultMessage: `{number, plural,
+                  =0 {}
+                  one {# new post}
+                  other {# new posts}}`,
+                description: 'Label for a button to load new posts',
+              }, {
+                number: newNotesCount(),
+              })}
             </div>
           </button>
         </div>
@@ -164,7 +173,16 @@ const Home: Component = () => {
             onClick={loadNewContent}
           >
             <div class={styles.counter}>
-              {newNotesCount()} new posts
+              {intl.formatMessage({
+                  id: 'feed.newPosts',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {# new post}
+                    other {# new posts}}`,
+                  description: 'Label for a button to load new posts',
+                }, {
+                  number: newNotesCount(),
+                })}
             </div>
           </button>
         </div>

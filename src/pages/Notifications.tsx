@@ -1060,7 +1060,16 @@ const Notifications: Component = () => {
             onClick={loadNewContent}
           >
             <div class={styles.counter}>
-              {newNotifCount()} new notifications
+              {intl.formatMessage({
+                  id: 'notification.newNotifs',
+                  defaultMessage: `{number, plural,
+                    =0 {}
+                    one {# new notification}
+                    other {# new notifications}}`,
+                  description: 'Label for a button to load new notifications',
+                }, {
+                  number: newNotifCount(),
+                })}
             </div>
           </button>
         </div>
