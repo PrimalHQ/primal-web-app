@@ -137,7 +137,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     // if (store.future.notes[0]) {
     //   since = store.future.notes[0].post.created_at;
     // }
+
     clearFuture();
+
 
     if (scope && timeframe) {
 
@@ -156,10 +158,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    setTimeout(() => {
-      getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
-    }, 10);
-
+    getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
   }
 
   const loadFutureContent = () => {
