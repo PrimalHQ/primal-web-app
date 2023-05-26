@@ -77,9 +77,10 @@ const Home: Component = () => {
       setNewPostAuthors(() => []);
     }
 
+    const timeout = 25_000 + Math.random() * 10_000;
     checkNewNotesTimer = setInterval(() => {
       context?.actions.checkForNewNotes(hex);
-    }, 30_000);
+    }, timeout);
 
   });
 
