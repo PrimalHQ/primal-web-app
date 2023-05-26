@@ -142,8 +142,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       //   return;
       // }
 
-      account?.publicKey && getFutureExploreFeed(
-        account.publicKey,
+      getFutureExploreFeed(
+        account?.publicKey,
         `home_future_${APP_ID}`,
         scope,
         timeframe,
@@ -180,8 +180,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         return;
       }
 
-      account?.publicKey && getExploreFeed(
-        account.publicKey,
+      getExploreFeed(
+        account?.publicKey,
         `home_feed_${subId}`,
         scope,
         timeframe,

@@ -131,19 +131,17 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
 }
 
 export const getFutureExploreFeed = (
-  user_pubkey: string,
+  user_pubkey: string | undefined,
   subid: string,
   scope: string,
   timeframe: string,
   since: number,
   ) => {
-  if (!user_pubkey || user_pubkey === noKey) {
-    return;
-  }
-  let payload: { timeframe: string, scope: string, since: number, user_pubkey?: string, created_after?: number } =
-    { timeframe, scope, since };
 
-  if (user_pubkey.length > 0 && user_pubkey !== noKey) {
+  let payload: { timeframe: string, scope: string, since: number, user_pubkey?: string, created_after?: number, limit: number } =
+    { timeframe, scope, since, limit: 1000, };
+
+  if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -176,7 +174,7 @@ export const getFutureExploreFeed = (
 };
 
 export const getExploreFeed = (
-  pubkey: string,
+  pubkey: string | undefined,
   subid: string,
   scope: string,
   timeframe: string,
@@ -186,7 +184,7 @@ export const getExploreFeed = (
 
   let payload: ExploreFeedPayload = { timeframe, scope, limit };
 
-  if (pubkey.length > 0 && pubkey !== noKey) {
+  if (pubkey && pubkey !== noKey) {
     payload.user_pubkey = pubkey;
   }
 
