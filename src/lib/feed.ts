@@ -8,8 +8,8 @@ export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string | 
     return;
   }
 
-  let payload: { since: number, pubkey: string, user_pubkey?: string } =
-    { since, pubkey };
+  let payload: { since: number, pubkey: string, user_pubkey?: string, limit: number } =
+    { since, pubkey, limit: 1000 };
 
   if (user_pubkey && user_pubkey !== noKey) {
     payload.user_pubkey = user_pubkey;
