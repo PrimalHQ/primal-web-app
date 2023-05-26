@@ -49,116 +49,119 @@ export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|a
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
 
-export const urlify = (text: string, highlightOnly = false) => {
+export const urlify = (text: string, highlightOnly = false, skipEmbed = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
   return text.replace(urlRegex, (url) => {
-    const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
+    if (!skipEmbed) {
 
-    if (isImage) {
-      return '<img src="' + url + '" class="postImage"/>'
-    }
+      const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
-    const isMp4Video = url.includes('.mp4') || url.includes('.mov');
+      if (isImage) {
+        return '<img src="' + url + '" class="postImage"/>'
+      }
 
-    if (isMp4Video) {
-      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
-    }
+      const isMp4Video = url.includes('.mp4') || url.includes('.mov');
 
-    const isOggVideo = url.includes('.ogg');
+      if (isMp4Video) {
+        return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
+      }
 
-    if (isOggVideo) {
-      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
-    }
+      const isOggVideo = url.includes('.ogg');
 
-    const isWebmVideo = url.includes('.webm');
+      if (isOggVideo) {
+        return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
+      }
 
-    if (isWebmVideo) {
-      return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
-    }
+      const isWebmVideo = url.includes('.webm');
 
-    if (youtubeRegex.test(url)) {
-      const youtubeId = youtubeRegex.test(url) && RegExp.$1;
+      if (isWebmVideo) {
+        return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
+      }
 
-      return `<iframe
-        class="w-max"
-        src="https://www.youtube.com/embed/${youtubeId}"
-        title="YouTube video player"
-        key="${youtubeId}"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-      />`;
-    }
+      if (youtubeRegex.test(url)) {
+        const youtubeId = youtubeRegex.test(url) && RegExp.$1;
 
-    if (spotifyRegex.test(url)) {
-      const convertedUrl = url.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
+        return `<iframe
+          class="w-max"
+          src="https://www.youtube.com/embed/${youtubeId}"
+          title="YouTube video player"
+          key="${youtubeId}"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />`;
+      }
 
-      return `<iframe style="borderRadius: 12" src="${convertedUrl}" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
-    }
+      if (spotifyRegex.test(url)) {
+        const convertedUrl = url.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
-    if (twitchRegex.test(url)) {
-      const channel = url.split("/").slice(-1);
+        return `<iframe style="borderRadius: 12" src="${convertedUrl}" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+      }
 
-      const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
-      return `<iframe src="https://player.twitch.tv/${args}" className="w-max" allowFullScreen></iframe>`;
-    }
+      if (twitchRegex.test(url)) {
+        const channel = url.split("/").slice(-1);
 
-    if (mixCloudRegex.test(url)) {
-      const feedPath = (mixCloudRegex.test(url) && RegExp.$1) + "%2F" + (mixCloudRegex.test(url) && RegExp.$2);
+        const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
+        return `<iframe src="https://player.twitch.tv/${args}" className="w-max" allowFullScreen></iframe>`;
+      }
 
-      // const lightTheme = useLogin().preferences.theme === "light";
-      // const lightParams = lightTheme ? "light=1" : "light=0";
-      return `
-          <br />
-          <iframe
-            title="SoundCloud player"
+      if (mixCloudRegex.test(url)) {
+        const feedPath = (mixCloudRegex.test(url) && RegExp.$1) + "%2F" + (mixCloudRegex.test(url) && RegExp.$2);
+
+        // const lightTheme = useLogin().preferences.theme === "light";
+        // const lightParams = lightTheme ? "light=1" : "light=0";
+        return `
+            <br />
+            <iframe
+              title="SoundCloud player"
+              width="100%"
+              height="120"
+              frameBorder="0"
+              src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F"
+            />`;
+      }
+
+      if (soundCloudRegex.test(url)) {
+        return `<iframe
             width="100%"
-            height="120"
+            height="166"
+            scrolling="no"
+            allow="autoplay"
+            src="https://w.soundcloud.com/player/?url=${url}"></iframe>`;
+      }
+
+      if (appleMusicRegex.test(url)) {
+        const convertedUrl = url.replace("music.apple.com", "embed.music.apple.com");
+        const isSongLink = /\?i=\d+$/.test(convertedUrl);
+
+        return `
+          <iframe
+            allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
             frameBorder="0"
-            src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F"
-          />`;
-    }
+            height="${isSongLink ? 175 : 450}"
+            style="width: 100%, maxWidth: 660, overflow: hidden, background: transparent"
+            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+            src="${convertedUrl}"></iframe>
+        `;
+      }
 
-    if (soundCloudRegex.test(url)) {
-      return `<iframe
-          width="100%"
-          height="166"
-          scrolling="no"
-          allow="autoplay"
-          src="https://w.soundcloud.com/player/?url=${url}"></iframe>`;
-    }
+      if (nostrNestsRegex.test(url)) {
+        return `<iframe src="${url}" allow="microphone" width="480" height="680" style="maxHeight: 680"></iframe>`;
+      }
 
-    if (appleMusicRegex.test(url)) {
-      const convertedUrl = url.replace("music.apple.com", "embed.music.apple.com");
-      const isSongLink = /\?i=\d+$/.test(convertedUrl);
+      if (wavlakeRegex.test(url)) {
+        const convertedUrl = url.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
-      return `
-        <iframe
-          allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-          frameBorder="0"
-          height="${isSongLink ? 175 : 450}"
-          style="width: 100%, maxWidth: 660, overflow: hidden, background: transparent"
-          sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-          src="${convertedUrl}"></iframe>
-      `;
-    }
-
-    if (nostrNestsRegex.test(url)) {
-      return `<iframe src="${url}" allow="microphone" width="480" height="680" style="maxHeight: 680"></iframe>`;
-    }
-
-    if (wavlakeRegex.test(url)) {
-      const convertedUrl = url.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
-
-      return `
-        <iframe
-          style="borderRadius: 12"
-          src="${convertedUrl}"
-          width="100%"
-          height="380"
-          frameBorder="0"
-          loading="lazy"></iframe>`;
+        return `
+          <iframe
+            style="borderRadius: 12"
+            src="${convertedUrl}"
+            width="100%"
+            height="380"
+            frameBorder="0"
+            loading="lazy"></iframe>`;
+      }
     }
 
     if (highlightOnly) {
