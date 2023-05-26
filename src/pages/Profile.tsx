@@ -319,7 +319,7 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout} innerHTML={sanitize(urlify(profile?.userProfile?.about || ''))}>
+        <div class={styles.profileAbout} innerHTML={sanitize(urlify(profile?.userProfile?.about || '', true))}>
         </div>
 
         <div class={styles.profileLinks}>
