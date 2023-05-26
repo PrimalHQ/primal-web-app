@@ -139,7 +139,7 @@ const Home: Component = () => {
                     class={styles.avatar}
                     title={userName(user)}
                   >
-                    <Avatar src={user.picture} size="xxs" />
+                    <Avatar src={user.picture} size="xss" />
                   </div>
                 )}
               </For>

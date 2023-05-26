@@ -52,6 +52,23 @@
   }
 }
 
+.xssAvatar {
+  @include avatar;
+  width: 26px;
+  height: 26px;
+
+  .missingBack {
+    width: 26px;
+    height: 26px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+}
+
 .xsAvatar {
   @include avatar;
   width: 32px;
@@ -192,8 +209,15 @@
 
 .xxsMissing {
   @include missing;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+}
+
+.xssMissing {
+  @include missing;
+  width: 26px;
+  height: 26px;
   font-size: 10px;
 }
 

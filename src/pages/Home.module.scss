@@ -83,7 +83,7 @@
     border: none;
     border-radius: 20px;
     padding-block: 0;
-    padding-left: 2px;
+    padding-left: 4px;
     margin: 0;
 
     .avatars {
@@ -93,10 +93,10 @@
       .avatar {
         border: solid 2px var(--text-primary);
         border-radius: 50%;
-        width: 32px;
-        height: 32px;
+        width: 30px;
+        height: 30px;
         transition: margin-right 0.2s;
-        margin-right: -16px;
+        margin-right: -9px;
       }
     }
 
