@@ -91,19 +91,19 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-const clearFuture = () => {
-  updateStore('future', () => ({
-    notes: [],
-    reposts: {},
-    page: {
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-    },
-  }))
-}
+  const clearFuture = () => {
+    updateStore('future', () => ({
+      notes: [],
+      reposts: {},
+      page: {
+        messages: [],
+        users: {},
+        postStats: {},
+        mentions: {},
+        noteActions: {},
+      },
+    }))
+  }
 
   const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
     if (scope) {
@@ -125,7 +125,9 @@ const clearFuture = () => {
     let since = 0;
 
     if (store.notes[0]) {
-      since = store.notes[0].post.created_at;
+      since = store.notes[0].repost ?
+        store.notes[0].repost.note.created_at :
+        store.notes[0].post.created_at;
     }
 
     // if (store.future.notes[0]) {
