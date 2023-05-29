@@ -26,27 +26,6 @@
   .leftSide {
     padding: 16px 21px;
   }
-
-
-  textarea {
-    width: calc(100% - 36px);
-    margin: 18px;
-    padding: 0px;
-    box-sizing: padding-box;
-    border: none;
-    border-radius: 0px;
-    background-color: unset;
-    font-size: 16px;
-    line-height: 20px;
-    font-weight: 400;
-    color: var(--text-primary);
-    resize: none;
-
-    &:focus {
-      border: none;
-      outline: none;
-    }
-  }
 }
 
 .controls {

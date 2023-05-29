@@ -64,6 +64,28 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
     setOpen(false);
   };
 
+  createEffect(() => {
+    if (open()) {
+      setTimeout(() => {
+        const newNoteTextArea = document.getElementById('reply_new_note_text_area') as HTMLTextAreaElement | undefined;
+
+        if (!newNoteTextArea) {
+          return;
+        }
+        newNoteTextArea?.focus();
+      }, 100);
+    }
+    else {
+      const newNoteTextArea = document.getElementById('reply_new_note_text_area') as HTMLTextAreaElement | undefined;
+
+      if (!newNoteTextArea) {
+        return;
+      }
+
+      newNoteTextArea.value = '';
+    }
+  });
+
   return (
     <Show
       when={open()}
@@ -110,6 +132,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
           </div>
           <div class={styles.rightSide}>
             <EditBox
+              idPrefix="reply_"
               replyToNote={props.note}
               onClose={closeReplyToNote}
             />

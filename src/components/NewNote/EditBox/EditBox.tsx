@@ -23,7 +23,7 @@ import styles from './EditBox.module.scss';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
-const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (props) => {
+const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPrefix?: string } > = (props) => {
 
   const intl = useIntl();
 
@@ -34,6 +34,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
   let mentionOptions: HTMLDivElement | undefined;
+  let editWrap: HTMLDivElement | undefined;
 
   const [isMentioning, setMentioning] = createSignal(false);
   const [query, setQuery] = createSignal('');
@@ -60,9 +61,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
     const maxHeight = document.documentElement.clientHeight || window.innerHeight || 0;
 
     const elm = event.target as AutoSizedTextArea;
-    const preview = document.getElementById('new_note_text_preview');
+    const preview = document.getElementById(`${prefix()}new_note_text_preview`);
 
-    if(elm.nodeName !== 'TEXTAREA' || elm.id !== 'new_note_text_area' || !preview) {
+    if(elm.nodeName !== 'TEXTAREA' || elm.id !== `${prefix()}new_note_text_area` || !preview) {
       return;
     }
 
@@ -157,13 +158,16 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
   };
 
   const positionOptions = () => {
-    if (!textArea || !mentionOptions) {
+    if (!textArea || !mentionOptions || !editWrap) {
       return;
     }
 
     const taRect = textArea.getBoundingClientRect();
+    const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top + taRect.height;
+    let newTop = taRect.top + taRect.height - wRect.top + 8;
+
+    console.log('NP: ', taRect, newTop)
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
@@ -539,12 +543,14 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
     textArea && textArea.focus();
   };
 
+  const prefix = () => props.idPrefix ?? '';
+
   return (
-    <div class={styles.noteEditBox}>
+    <div class={styles.noteEditBox} ref={editWrap}>
       <div class={styles.editorWrap} onClick={focusInput}>
         <div>
           <textarea
-            id="new_note_text_area"
+            id={`${prefix()}new_note_text_area`}
             rows={1}
             data-min-rows={1}
             onInput={onInput}
@@ -562,7 +568,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void }> = (
         </div>
         <div
           class={styles.editorScroll}
-          id="new_note_text_preview"
+          id={`${prefix()}new_note_text_preview`}
         >
           <div
             class={styles.editor}
