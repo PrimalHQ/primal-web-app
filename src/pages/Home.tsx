@@ -114,6 +114,7 @@ const Home: Component = () => {
   const loadNewContent = () => {
     if (newNotesCount() > 100) {
       location.reload();
+      return;
     }
     context?.actions.loadFutureContent();
     scrollWindowTo(0, true);
