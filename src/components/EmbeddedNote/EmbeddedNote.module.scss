@@ -84,3 +84,26 @@
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
 }
+
+@media only screen and (max-width: 720px) {
+  .mentionedNoteHeader {
+    width: calc(100vw - 160px);
+    .postInfo {
+      width: calc(100vw - 110px);
+      .userInfo {
+        max-width: calc(100vw - 100px);
+        overflow: hidden;
+        .userName {
+          max-width: calc(100vw - 180px);
+        }
+      }
+      .verification {
+        max-width: 220px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+
+      }
+    }
+  }
+}
