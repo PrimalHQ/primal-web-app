@@ -90,7 +90,7 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-        />`;
+        ></iframe>`;
       }
 
       if (spotifyRegex.test(url)) {
@@ -119,7 +119,7 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
               height="120"
               frameBorder="0"
               src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F"
-            />`;
+            ></iframe>`;
       }
 
       if (soundCloudRegex.test(url)) {
@@ -163,6 +163,7 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
             loading="lazy"></iframe>`;
       }
     }
+
 
     if (highlightOnly) {
       return `<span class="linkish">${url}</span>`;
