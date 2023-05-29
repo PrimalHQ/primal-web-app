@@ -301,12 +301,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const initFeeds = initAvailableFeeds(pubkey);
 
-    if (!initFeeds || initFeeds.length === 0) {
-      return;
+    if (initFeeds && initFeeds.length > 0) {
+      updateStore('defaultFeed', () => initFeeds[0]);
+      updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
     }
 
-    updateStore('defaultFeed', () => initFeeds[0]);
-    updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
 
     const feed = {
       name: feedLabel,
@@ -316,13 +315,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Add trendingFeed if it's missing
     // @ts-ignore
-    if (!initFeeds.find((f) => f.hex === trendingFeed.hex)) {
+    if (initFeeds && !initFeeds.find((f) => f.hex === trendingFeed.hex)) {
       addAvailableFeed(trendingFeed, true, true);
     }
 
     // Add active user's feed if it's missing
     // @ts-ignore
-    if (!initFeeds.find(f => f.hex === feed.hex)) {
+    if (initFeeds && !initFeeds.find(f => f.hex === feed.hex)) {
       addAvailableFeed(feed, true, true);
     }
 
