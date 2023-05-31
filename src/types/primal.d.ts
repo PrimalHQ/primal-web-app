@@ -240,11 +240,19 @@ export type NostrRelaySignedEvent = NostrRelayEvent & {
   sig: string,
 };
 
+interface SendPaymentResponse {
+  preimage: string;
+}
+
 export type NostrWindow = Window & typeof globalThis & {
-  nostr: {
+  nostr?: {
     getPublicKey: () => Promise<string>,
     getRelays: () => Promise<NostrRelays>,
     signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>;
+  },
+  webln?: {
+    enable: () => Promise<void>,
+    sendPayment: (req: string) => Promise<SendPaymentResponse>;
   },
 };
 

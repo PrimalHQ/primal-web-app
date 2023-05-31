@@ -17,6 +17,7 @@ import repostFilled from '../../../assets/icons/feed_repost_fill.svg';
 import repostEmpty from '../../../assets/icons/feed_repost.svg';
 import { truncateNumber } from '../../../lib/notifications';
 import { createStore } from 'solid-js/store';
+import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
@@ -83,11 +84,55 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     }
   };
 
-  const doZap = (e: MouseEvent) => {
+  const doZap = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    toast?.notImplemented();
+    if (!canUserReceiveZaps(props.note.user)) {
+      toast?.sendWarning(
+        intl.formatMessage({
+          id: 'toast.zapUnavailable',
+          defaultMessage: 'Author of this post cannot be zapped',
+          description: 'Toast message indicating user cannot receieve a zap',
+        }),
+      );
+    }
+
+    if (!account?.hasPublicKey()) {
+      toast?.sendWarning(
+        intl.formatMessage({
+          id: 'toast.zapAsGuest',
+          defaultMessage: 'You must be logged-in to perform a zap',
+          description: 'Toast message indicating user must be logged-in to perform a zap',
+        }),
+      );
+    }
+
+
+    if (account?.hasPublicKey()) {
+      const success = await zapNote(props.note, account.publicKey, 1, '', account.relays);
+      setZapped(success);
+
+      if (success) {
+        toast?.sendSuccess(
+          intl.formatMessage({
+            id: 'toast.zapSuccess',
+            defaultMessage: 'Zapped successfully',
+            description: 'Toast message indicating successfull zap',
+          }),
+        );
+        return;
+      }
+
+      toast?.sendWarning(
+        intl.formatMessage({
+          id: 'toast.zapFail',
+          defaultMessage: 'We were unable to send this Zap',
+          description: 'Toast message indicating failed zap',
+        }),
+      );
+
+    }
   }
 
   const buttonTypeClasses: Record<string, string> = {

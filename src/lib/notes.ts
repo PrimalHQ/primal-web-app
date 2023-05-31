@@ -245,7 +245,7 @@ export const sendContacts = async (contacts: string[], date: number, content: st
   return await sendEvent(event, relays);
 };
 
-const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
+export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
