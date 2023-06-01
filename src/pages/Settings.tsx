@@ -6,6 +6,7 @@ import FeedSorter from '../components/FeedSorter/FeedSorter';
 import ThemeChooser from '../components/ThemeChooser/ThemeChooser';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
+import SettingsZap from '../components/SettingsZap/SettingsZap';
 
 
 const Settings: Component = () => {
@@ -41,6 +42,8 @@ const Settings: Component = () => {
 
       <ThemeChooser />
 
+      <div class={styles.devider}></div>
+
       <div class={styles.settingsCaption}>
         {intl.formatMessage(
           {
@@ -51,8 +54,24 @@ const Settings: Component = () => {
         )}
       </div>
 
-      <div class={styles.feedSettingsg}>
+      <div class={styles.feedSettings}>
         <FeedSorter />
+      </div>
+
+      <div class={styles.devider}></div>
+
+      <div class={styles.settingsCaption}>
+        {intl.formatMessage(
+          {
+            id: 'pages.settings.sections.zaps',
+            defaultMessage: 'Zaps',
+            description: 'Title of the zaps section on the settings page',
+          }
+        )}
+      </div>
+
+      <div class={styles.zapSettings}>
+        <SettingsZap />
       </div>
     </div>
   )

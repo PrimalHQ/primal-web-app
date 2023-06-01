@@ -40,6 +40,8 @@ export type SettingsContextStore = {
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
   defaultFeed: PrimalFeed,
+  defaultZapAmount: number,
+  availableZapOptions: number[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -49,6 +51,8 @@ export type SettingsContextStore = {
     renameAvailableFeed: (feed: PrimalFeed, newName: string) => void,
     saveSettings: () => void,
     loadSettings: (pubkey: string) => void,
+    setDefaultZapAmount: (amount: number) => void,
+    setZapOptions: (amount:number, index: number) => void,
   }
 }
 
@@ -58,6 +62,15 @@ export const initialData = {
   themes,
   availableFeeds: [],
   defaultFeed: defaultFeeds[0],
+  defaultZapAmount: 10,
+  availableZapOptions: [
+    21,
+    420,
+    10_000,
+    69_420,
+    100_000,
+    1_000_000,
+  ],
 };
 
 
@@ -70,6 +83,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
+
+  const setDefaultZapAmount = (amount: number, temp?: boolean) => {
+    updateStore('defaultZapAmount', () => amount);
+    !temp && saveSettings();
+  };
+
+  const setZapOptions = (amount: number, index: number, temp?: boolean) => {
+    updateStore('availableZapOptions', index, () => amount);
+    !temp && saveSettings();
+  };
 
   const setTheme = (theme: PrimalTheme | null, temp?: boolean) => {
     if (!theme) {
@@ -147,6 +170,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
+      defaultZapAmount: store.defaultZapAmount,
+      zapOptions: store.availableZapOptions,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -193,6 +218,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
           updateStore('defaultFeed', () => store.availableFeeds[0]);
 
+          const defaultZaps = settings.defaultZapAmount || 10;
+
+          const zapOptions = settings.zapOptions || [
+            21,
+            420,
+            10_000,
+            69_420,
+            100_000,
+            1_000_000,
+          ];
+
+          updateStore('defaultZapAmount', () => defaultZaps);
+          updateStore('availableZapOptions', () => zapOptions);
         }
         catch (e) {
           console.log('Error parsing settings response: ', e);
@@ -225,10 +263,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT' && content?.content) {
         try {
-          const { theme, feeds } = JSON.parse(content?.content);
+          const { theme, feeds, defaultZaps, zapOptions } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
           feeds && setAvailableFeeds(feeds, true);
+          defaultZaps && setDefaultZapAmount(defaultZaps, true);
+          zapOptions && updateStore('availableZapOptions', () => zapOptions);
 
         }
         catch (e) {
@@ -367,6 +407,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       renameAvailableFeed,
       saveSettings,
       loadSettings,
+      setDefaultZapAmount,
+      setZapOptions,
     },
   });
 

@@ -34,3 +34,9 @@
   color: var(--text-secondary);
   margin-bottom: 20px;
 }
+
+.devider {
+  width: 100%;
+  border-bottom: solid 1px var(--subtile-devider);
+  margin-block: 32px;
+}

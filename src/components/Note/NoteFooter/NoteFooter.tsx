@@ -18,12 +18,14 @@ import repostEmpty from '../../../assets/icons/feed_repost.svg';
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 import CustomZap from '../../CustomZap/CustomZap';
+import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
+  const settings = useSettingsContext();
 
   const [liked, setLiked] = createSignal(props.note.post.noteActions.liked);
   const [zapped, setZapped] = createSignal(props.note.post.noteActions.zapped);
@@ -138,7 +140,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
-      const success = await zapNote(props.note, account.publicKey, 1, '', account.relays);
+      const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
       setIsZapping(false);
 
       if (success) {
