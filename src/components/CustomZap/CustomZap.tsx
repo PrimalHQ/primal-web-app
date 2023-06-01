@@ -11,7 +11,7 @@ import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './CustomZap.module.scss';
 
-const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: () => void, onFail: () => void }> = (props) => {
+const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amount?: number) => void, onFail: () => void }> = (props) => {
 
   const toast = useToastContext();
   const account = useAccountContext();
@@ -78,7 +78,7 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: () => 
             }),
           );
 
-          props.onSuccess();
+          props.onSuccess(selectedValue());
           return;
         }
 

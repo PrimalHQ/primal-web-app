@@ -7,6 +7,7 @@
 @mixin typeDiv {
   display: flex;
   min-width: 64px;
+  align-items: center;
 }
 
 .footer {
@@ -59,10 +60,8 @@
 
     .zapType {
       @include typeDiv;
-      .icon {
-        @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
-        mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+      >div {
+        margin-left: -4px;
       }
     }
 

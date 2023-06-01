@@ -263,11 +263,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT' && content?.content) {
         try {
-          const { theme, feeds, defaultZaps, zapOptions } = JSON.parse(content?.content);
+          const { theme, feeds, defaultZapAmount, zapOptions } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
           feeds && setAvailableFeeds(feeds, true);
-          defaultZaps && setDefaultZapAmount(defaultZaps, true);
+          defaultZapAmount && setDefaultZapAmount(defaultZapAmount, true);
           zapOptions && updateStore('availableZapOptions', () => zapOptions);
 
         }

@@ -20,6 +20,8 @@ import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 import CustomZap from '../../CustomZap/CustomZap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
+import zapSM from '../../../assets/lottie/zap_sm.json';
+
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const account = useAccountContext();
@@ -137,6 +139,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     }
   };
 
+  const [zappedNow, setZappedNow] = createSignal(false);
+  const [zappedAmount, setZappedAmount] = createSignal(0);
+
   const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
@@ -151,7 +156,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
             description: 'Toast message indicating successfull zap',
           }),
         );
-        setZapped(true);
+        setZappedAmount(() => settings?.defaultZapAmount || 0);
+        setZappedNow(true);
         return;
       }
 
@@ -204,6 +210,69 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     );
   };
 
+  createEffect(() => {
+    const player = document.getElementById(`note-zap-${props.note.post.id}`);
+
+    if (!player) {
+      return;
+    }
+
+    if (zappedNow()) {
+      setZaps((z) => z + zappedAmount());
+      player.seek(0);
+      player.play();
+      player.addEventListener('complete', () => {
+        setZapped(true);
+        setZappedNow(false);
+      })
+    }
+
+  })
+
+  createEffect(() => {
+    const player = document.getElementById(`note-zap-${props.note.post.id}`);
+
+    if (!player) {
+      return;
+    }
+
+    if (zapped()) {
+      setTimeout(() => {
+        player.seek('99%');
+      }, 10)
+    } else {
+      setTimeout(() => {
+        player.seek(0);
+      }, 10)
+
+    }
+
+  })
+
+  const zapButton = () => {
+    return (
+      <button
+        class={`${styles.stat} ${zapped() ? styles.highlighted : ''}`}
+        onMouseDown={startZap}
+        onMouseUp={commitZap}
+        onTouchStart={startZap}
+        onTouchEnd={commitZap}
+      >
+        <div class={`${buttonTypeClasses.zap}`}>
+          <lottie-player
+            id={`note-zap-${props.note.post.id}`}
+            src={zapSM}
+            background="transparent"
+            speed="1"
+            style="width: 32px; height: 32px;"
+          ></lottie-player>
+
+          <div class={styles.statNumber}>{zaps() === 0 ? '' : truncateNumber(zaps())}</div>
+        </div>
+      </button>
+    );
+  };
+
   return (
     <div class={styles.footer}>
 
@@ -216,31 +285,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         label: replies(),
       })}
 
-      <Show
-        when={!isZapping()}
-        fallback={
-          actionButton({
-            type: 'zap',
-            highlighted: zapped(),
-            disabled: true,
-            icon: zapEmpty,
-            iconDisabled: zapFilled,
-            label: zaps() === 0 ? '' : truncateNumber(zaps()),
-          })
-        }
-      >
-        {actionButton({
-          onMouseDown: startZap,
-          onMouseUp: commitZap,
-          onTouchStart: startZap,
-          onTouchEnd: commitZap,
-          type: 'zap',
-          highlighted: zapped(),
-          icon: zapEmpty,
-          iconDisabled: zapFilled,
-          label: zaps() === 0 ? '' : truncateNumber(zaps()),
-        })}
-      </Show>
+      {zapButton()}
 
       {actionButton({
         onClick: doLike,
@@ -263,8 +308,17 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       <CustomZap
         open={isCustomZap()}
         note={props.note}
-        onSuccess={() => { setIsCustomZap(false); setIsZapping(false)}}
-        onFail={() => { setIsCustomZap(false); setIsZapping(false)}}
+        onSuccess={(amount) => {
+          setIsCustomZap(false);
+          setIsZapping(false);
+          setZappedAmount(() => amount || 0);
+          setZappedNow(true);
+        }}
+        onFail={() => {
+          setIsCustomZap(false);
+          setIsZapping(false);
+          setZappedNow(false);
+        }}
       />
 
     </div>
