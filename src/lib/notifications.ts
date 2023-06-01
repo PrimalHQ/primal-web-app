@@ -114,11 +114,11 @@ export const truncateNumber = (amount: number) => {
   }
 
   if (amount < Math.pow(t, 3)) {
-    return `${Math.floor(amount / (t^2))}M`
+    return `${Math.floor(amount / Math.pow(t, 2))}M`
   }
 
   if (amount < Math.pow(t, 4)) {
-    return `${Math.floor(amount / (t^4))}B`
+    return `${Math.floor(amount / Math.pow(t, 3))}B`
   }
 
   return `1T+`;

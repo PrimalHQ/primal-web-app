@@ -42,47 +42,49 @@ const Layout: Component = () => {
   });
 
   return (
-    <div id="container" ref={container} class={styles.container}>
-
-      <div class={styles.leftColumn}>
-        <div>
-          <div id="branding_holder" class={styles.leftHeader}>
-          </div>
-
-          <div class={styles.leftContent}>
-            <NavMenu />
-          </div>
-
-          <div class={styles.leftFooter}>
-            <ProfileWidget />
-          </div>
-        </div>
-      </div>
-
-
-      <div class={styles.centerColumn}>
-        <div class={styles.centerContent}>
-          <div id="new_note_input" class={styles.headerFloater}>
-            <NewNote />
-          </div>
-
+    <>
+      <div id="modal" class={styles.modal}></div>
+      <div id="container" ref={container} class={styles.container}>
+        <div class={styles.leftColumn}>
           <div>
-            <Outlet />
+            <div id="branding_holder" class={styles.leftHeader}>
+            </div>
+
+            <div class={styles.leftContent}>
+              <NavMenu />
+            </div>
+
+            <div class={styles.leftFooter}>
+              <ProfileWidget />
+            </div>
+          </div>
+        </div>
+
+
+        <div class={styles.centerColumn}>
+          <div class={styles.centerContent}>
+            <div id="new_note_input" class={styles.headerFloater}>
+              <NewNote />
+            </div>
+
+            <div>
+              <Outlet />
+            </div>
+          </div>
+        </div>
+
+
+        <div class={styles.rightColumn}>
+          <div class={styles.rightHeader}>
+            <Search />
+          </div>
+          <div class={styles.rightContent}>
+            <div id="right_sidebar">
+            </div>
           </div>
         </div>
       </div>
-
-
-      <div class={styles.rightColumn}>
-        <div class={styles.rightHeader}>
-          <Search />
-        </div>
-        <div class={styles.rightContent}>
-          <div id="right_sidebar">
-          </div>
-        </div>
-      </div>
-    </div>
+    </>
   )
 }
 

@@ -31,11 +31,11 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
     return false;
   }
 
-  const signeEvent = await nostr.signEvent(zapReq);
-
-  const event = encodeURI(JSON.stringify(signeEvent));
-
   try {
+    const signedEvent = await nostr.signEvent(zapReq);
+
+    const event = encodeURI(JSON.stringify(signedEvent));
+
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 

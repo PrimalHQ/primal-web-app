@@ -87,6 +87,11 @@
   margin-top: 128px;
 }
 
+.modal {
+  position: fixed;
+  z-index: 1200;
+}
+
 @media only screen and (max-width: 1300px) {
   .container {
     width: 1032px;

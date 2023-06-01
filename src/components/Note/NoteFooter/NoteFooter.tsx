@@ -1,4 +1,4 @@
-import { Component, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 import { sendRepost } from '../../../lib/notes';
 
@@ -16,8 +16,8 @@ import zapEmpty from '../../../assets/icons/feed_zap.svg';
 import repostFilled from '../../../assets/icons/feed_repost_fill.svg';
 import repostEmpty from '../../../assets/icons/feed_repost.svg';
 import { truncateNumber } from '../../../lib/notifications';
-import { createStore } from 'solid-js/store';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
+import CustomZap from '../../CustomZap/CustomZap';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
@@ -84,19 +84,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     }
   };
 
-  const doZap = async (e: MouseEvent) => {
+  let quickZapDelay = 0;
+  const [isCustomZap, setIsCustomZap] = createSignal(false);
+  const [isZapping, setIsZapping] = createSignal(false);
+
+  const startZap = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (!canUserReceiveZaps(props.note.user)) {
-      toast?.sendWarning(
-        intl.formatMessage({
-          id: 'toast.zapUnavailable',
-          defaultMessage: 'Author of this post cannot be zapped',
-          description: 'Toast message indicating user cannot receieve a zap',
-        }),
-      );
-    }
 
     if (!account?.hasPublicKey()) {
       toast?.sendWarning(
@@ -106,12 +100,46 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
           description: 'Toast message indicating user must be logged-in to perform a zap',
         }),
       );
+      setIsZapping(false);
+      return;
     }
 
+    if (!canUserReceiveZaps(props.note.user)) {
+      toast?.sendWarning(
+        intl.formatMessage({
+          id: 'toast.zapUnavailable',
+          defaultMessage: 'Author of this post cannot be zapped',
+          description: 'Toast message indicating user cannot receieve a zap',
+        }),
+      );
+      setIsZapping(false);
+      return;
+    }
+
+    quickZapDelay = setTimeout(() => {
+      setIsCustomZap(true);
+      setIsZapping(true);
+    }, 500);
+  };
+
+  const commitZap = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    clearTimeout(quickZapDelay);
+
+    setIsZapping(true);
+
+    if (!isCustomZap()) {
+      doQuickZap();
+    }
+  };
+
+  const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
       const success = await zapNote(props.note, account.publicKey, 1, '', account.relays);
-      setZapped(success);
+      setIsZapping(false);
 
       if (success) {
         toast?.sendSuccess(
@@ -121,6 +149,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
             description: 'Toast message indicating successfull zap',
           }),
         );
+        setZapped(true);
         return;
       }
 
@@ -131,7 +160,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
           description: 'Toast message indicating failed zap',
         }),
       );
-
     }
   }
 
@@ -146,18 +174,25 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     type: 'zap' | 'like' | 'reply' | 'repost',
     disabled?: boolean,
     highlighted?: boolean,
-    onClick: (e: MouseEvent) => void,
+    onClick?: (e: MouseEvent) => void,
+    onMouseDown?: (e: MouseEvent) => void,
+    onMouseUp?: (e: MouseEvent) => void,
+    onTouchStart?: (e: TouchEvent) => void,
+    onTouchEnd?: (e: TouchEvent) => void,
     icon: string,
     iconDisabled: string,
     label: string | number,
   }) => {
 
-    const [activeIcon, setActiveIcon] = createSignal<string>(opts.icon);
-
     return (
       <button
         class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''}`}
-        onClick={opts.onClick}
+        onClick={opts.onClick ?? (() => {})}
+        onMouseDown={opts.onMouseDown ?? (() => {})}
+        onMouseUp={opts.onMouseUp ?? (() => {})}
+        onTouchStart={opts.onTouchStart ?? (() => {})}
+        onTouchEnd={opts.onTouchEnd ?? (() => {})}
+        disabled={opts.disabled}
       >
         <div class={`${buttonTypeClasses[opts.type]}`}>
           <div class={styles.icon}></div>
@@ -173,27 +208,41 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       {actionButton({
         onClick: doReply,
         type: 'reply',
-        disabled: false,
         highlighted: replied(),
         icon: replyEmpty,
         iconDisabled: replyFilled,
         label: replies(),
       })}
 
-      {actionButton({
-        onClick: doZap,
-        type: 'zap',
-        disabled: false,
-        highlighted: zapped(),
-        icon: zapEmpty,
-        iconDisabled: zapFilled,
-        label: zaps() === 0 ? '' : truncateNumber(zaps()),
-      })}
+      <Show
+        when={!isZapping()}
+        fallback={
+          actionButton({
+            type: 'zap',
+            highlighted: zapped(),
+            disabled: true,
+            icon: zapEmpty,
+            iconDisabled: zapFilled,
+            label: zaps() === 0 ? '' : truncateNumber(zaps()),
+          })
+        }
+      >
+        {actionButton({
+          onMouseDown: startZap,
+          onMouseUp: commitZap,
+          onTouchStart: startZap,
+          onTouchEnd: commitZap,
+          type: 'zap',
+          highlighted: zapped(),
+          icon: zapEmpty,
+          iconDisabled: zapFilled,
+          label: zaps() === 0 ? '' : truncateNumber(zaps()),
+        })}
+      </Show>
 
       {actionButton({
         onClick: doLike,
         type: 'like',
-        disabled: liked(),
         highlighted: liked(),
         icon: likeEmpty,
         iconDisabled: likeFilled,
@@ -203,12 +252,19 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       {actionButton({
         onClick: doRepost,
         type: 'repost',
-        disabled: false,
         highlighted: reposted(),
         icon: repostEmpty,
         iconDisabled: repostFilled,
         label: reposts(),
       })}
+
+      <CustomZap
+        open={isCustomZap()}
+        note={props.note}
+        onSuccess={() => { setIsCustomZap(false); setIsZapping(false)}}
+        onFail={() => { setIsCustomZap(false); setIsZapping(false)}}
+      />
+
     </div>
   )
 }

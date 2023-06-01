@@ -28,6 +28,7 @@
     background-color: unset;
     width: auto;
     min-width: 64px;
+    position: relative;
 
     .likeType {
       @include typeDiv;
