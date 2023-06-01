@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { zapNote } from '../../lib/zap';
@@ -19,6 +19,10 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amoun
   const settings = useSettingsContext();
 
   const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || 10);
+
+  createEffect(() => {
+    setSelectedValue(settings?.availableZapOptions[0])
+  });
 
   const isSelected = (value: number) => value === selectedValue();
 
