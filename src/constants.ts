@@ -345,4 +345,4 @@ export const noteRegex = /nostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
 export const profileRegex = /nostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 
-export const medZapLimit = 10;
+export const medZapLimit = 1000;

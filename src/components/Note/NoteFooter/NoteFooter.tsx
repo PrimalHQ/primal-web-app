@@ -218,7 +218,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
 
   const animateZap = () => {
-
     if (zappedAmount() > medZapLimit) {
       setShowMedZapAnim(true);
       animateMedZap();
@@ -233,9 +232,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
-      animateZap();
       setZappedAmount(() => settings?.defaultZapAmount || 0);
       setZappedNow(true);
+      animateZap();
       const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
       setIsZapping(false);
 
@@ -386,6 +385,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         open={isCustomZap()}
         note={props.note}
         onConfirm={(amount) => {
+          setIsCustomZap(false);
           setZappedAmount(() => amount || 0);
           setZappedNow(true);
           setZapped(true);

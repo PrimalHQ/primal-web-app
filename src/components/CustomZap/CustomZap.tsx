@@ -78,31 +78,31 @@ const CustomZap: Component<{
   const submit = async () => {
     if (account?.hasPublicKey()) {
       props.onConfirm(selectedValue());
-        const success = await zapNote(props.note, account.publicKey, selectedValue(), comment, account.relays);
+      const success = await zapNote(props.note, account.publicKey, selectedValue(), comment, account.relays);
 
-        if (success) {
-          toast?.sendSuccess(
-            intl.formatMessage({
-              id: 'toast.zapSuccess',
-              defaultMessage: 'Zapped successfully',
-              description: 'Toast message indicating successfull zap',
-            }),
-          );
-
-          props.onSuccess(selectedValue());
-          return;
-        }
-
-        toast?.sendWarning(
+      if (success) {
+        toast?.sendSuccess(
           intl.formatMessage({
-            id: 'toast.zapFail',
-            defaultMessage: 'We were unable to send this Zap',
-            description: 'Toast message indicating failed zap',
+            id: 'toast.zapSuccess',
+            defaultMessage: 'Zapped successfully',
+            description: 'Toast message indicating successfull zap',
           }),
         );
 
-        props.onFail(selectedValue())
+        props.onSuccess(selectedValue());
+        return;
       }
+
+      toast?.sendWarning(
+        intl.formatMessage({
+          id: 'toast.zapFail',
+          defaultMessage: 'We were unable to send this Zap',
+          description: 'Toast message indicating failed zap',
+        }),
+      );
+
+      props.onFail(selectedValue())
+    }
   };
 
   return (
@@ -123,7 +123,7 @@ const CustomZap: Component<{
               </span> <span class={styles.units}>sats</span>
             </div>
           </div>
-          <button class={styles.close} onClick={() => props.onFail(selectedValue())}>
+          <button class={styles.close} onClick={() => props.onFail(0)}>
           </button>
         </div>
 
