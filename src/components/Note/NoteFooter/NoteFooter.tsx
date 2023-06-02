@@ -21,6 +21,7 @@ import CustomZap from '../../CustomZap/CustomZap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapSM from '../../../assets/lottie/zap_sm.json';
+import zapMD from '../../../assets/lottie/zap_md.json';
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
@@ -38,6 +39,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const [reposts, setReposts] = createSignal(props.note.post.reposts);
   const [replies, setReplies] = createSignal(props.note.post.replies);
   const [zaps, setZaps] = createSignal(props.note.post.satszapped);
+
+  let footerDiv: HTMLDivElement | undefined;
 
   const doRepost = async (e: MouseEvent) => {
     e.preventDefault();
@@ -132,8 +135,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     clearTimeout(quickZapDelay);
 
-    setIsZapping(true);
-
     if (!isCustomZap()) {
       doQuickZap();
     }
@@ -142,13 +143,54 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const [zappedNow, setZappedNow] = createSignal(false);
   const [zappedAmount, setZappedAmount] = createSignal(0);
 
+  const animateZap = () => {
+    setShowSmallZapAnim(true);
+    setTimeout(() => {
+      const zapBtn = document.getElementById(`btn_zap_${props.note.post.id}`);
+
+      const smallZap = document.getElementById(`note-small-zap-${props.note.post.id}`);
+
+      const btnRect = zapBtn?.getBoundingClientRect();
+      const zapRect = smallZap?.getBoundingClientRect();
+      const footerRect = footerDiv?.getBoundingClientRect();
+
+      const newLeft = (btnRect.left - footerRect.left) - zapRect.width/4;
+      const newTop =  (btnRect.height - zapRect.height)/2
+
+
+      smallZap.style.left = `${newLeft}px`;
+      smallZap.style.top = `${newTop}px`;
+
+      const player = document.getElementById(`note-small-zap-${props.note.post.id}`);
+
+      const onAnimDone = () => {
+        setIsZapping(true);
+        setShowSmallZapAnim(false);
+        player?.removeEventListener('complete', onAnimDone);
+      }
+
+      player?.addEventListener('complete', onAnimDone);
+
+      player?.seek(0);
+      player?.play();
+    }, 10);
+
+
+
+  }
+
   const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
       const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
       setIsZapping(false);
+      animateZap();
 
       if (success) {
+        setZappedAmount(() => settings?.defaultZapAmount || 0);
+        setZappedNow(true);
+
+
         toast?.sendSuccess(
           intl.formatMessage({
             id: 'toast.zapSuccess',
@@ -156,10 +198,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
             description: 'Toast message indicating successfull zap',
           }),
         );
-        setZappedAmount(() => settings?.defaultZapAmount || 0);
-        setZappedNow(true);
         return;
       }
+      setZappedNow(false);
 
       toast?.sendWarning(
         intl.formatMessage({
@@ -194,6 +235,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     return (
       <button
+        id={`btn_${opts.type}_${props.note.post.id}`}
         class={`${styles.stat} ${opts.highlighted ? styles.highlighted : ''}`}
         onClick={opts.onClick ?? (() => {})}
         onMouseDown={opts.onMouseDown ?? (() => {})}
@@ -211,70 +253,37 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   };
 
   createEffect(() => {
-    const player = document.getElementById(`note-zap-${props.note.post.id}`);
-
-    if (!player) {
-      return;
-    }
 
     if (zappedNow()) {
       setZaps((z) => z + zappedAmount());
-      player.seek(0);
-      player.play();
-      player.addEventListener('complete', () => {
-        setZapped(true);
-        setZappedNow(false);
-      })
-    }
-
-  })
-
-  createEffect(() => {
-    const player = document.getElementById(`note-zap-${props.note.post.id}`);
-
-    if (!player) {
-      return;
-    }
-
-    if (zapped()) {
-      setTimeout(() => {
-        player.seek('99%');
-      }, 10)
-    } else {
-      setTimeout(() => {
-        player.seek(0);
-      }, 10)
+      setZapped(true);
 
     }
 
   })
 
-  const zapButton = () => {
-    return (
-      <button
-        class={`${styles.stat} ${zapped() ? styles.highlighted : ''}`}
-        onMouseDown={startZap}
-        onMouseUp={commitZap}
-        onTouchStart={startZap}
-        onTouchEnd={commitZap}
-      >
-        <div class={`${buttonTypeClasses.zap}`}>
-          <lottie-player
-            id={`note-zap-${props.note.post.id}`}
-            src={zapSM}
-            background="transparent"
-            speed="1"
-            style="width: 32px; height: 32px;"
-          ></lottie-player>
-
-          <div class={styles.statNumber}>{zaps() === 0 ? '' : truncateNumber(zaps())}</div>
-        </div>
-      </button>
-    );
-  };
+  const [showSmallZapAnim, setShowSmallZapAnim] = createSignal(false);
+  const [showMedZapAnim, setShowMedZapAnim] = createSignal(false);
 
   return (
-    <div class={styles.footer}>
+    <div class={styles.footer} ref={footerDiv}>
+      <Show when={showSmallZapAnim()}>
+        <lottie-player
+          id={`note-small-zap-${props.note.post.id}`}
+          src={zapSM}
+          speed="1"
+          class={styles.smallZapLottie}
+        ></lottie-player>
+      </Show>
+
+      <Show when={showMedZapAnim()}>
+        <lottie-player
+          id={`note-med-zap-${props.note.post.id}`}
+          src={zapMD}
+          speed="1"
+          class={styles.mediumZapLottie}
+        ></lottie-player>
+      </Show>
 
       {actionButton({
         onClick: doReply,
@@ -285,7 +294,17 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         label: replies(),
       })}
 
-      {zapButton()}
+      {actionButton({
+        onMouseDown: startZap,
+        onMouseUp: commitZap,
+        onTouchStart: startZap,
+        onTouchEnd: commitZap,
+        type: 'zap',
+        highlighted: zapped() || isZapping(),
+        icon: zapEmpty,
+        iconDisabled: zapFilled,
+        label: zaps() === 0 ? '' : truncateNumber(zaps()),
+      })}
 
       {actionButton({
         onClick: doLike,
@@ -313,6 +332,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
           setIsZapping(false);
           setZappedAmount(() => amount || 0);
           setZappedNow(true);
+          animateZap();
         }}
         onFail={() => {
           setIsCustomZap(false);

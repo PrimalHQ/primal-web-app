@@ -12,6 +12,7 @@
 
 .footer {
   display: flex;
+  position: relative;
 
   .stat {
     display: grid;
@@ -60,8 +61,10 @@
 
     .zapType {
       @include typeDiv;
-      >div {
-        margin-left: -4px;
+      .icon {
+        @include statIcon;
+        -webkit-mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
       }
     }
 
@@ -117,9 +120,17 @@
     .statNumber {
       text-align: left;
       color: var(--text-secondary);
-      margin-left: 4px;
+      margin-left: 7px;
     }
   }
+}
+
+.smallZapLottie {
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  z-index: 20;
+  background: var(--background-card);
 }
 
 
