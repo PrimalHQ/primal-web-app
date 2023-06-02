@@ -11,16 +11,27 @@ const SettingsZap: Component = () => {
   const changeDefaultZap = (e: InputEvent) => {
     debounce(() => {
       const target = e.target as HTMLInputElement;
+      const val = parseInt(target.value);
 
-      settings?.actions.setDefaultZapAmount(parseInt(target.value));
+      if (isNaN(val)) {
+        return;
+      }
+
+
+      settings?.actions.setDefaultZapAmount(val);
     }, 500)
   };
 
   const changeZapOptions = (e: InputEvent, index: number) => {
     debounce(() => {
       const target = e.target as HTMLInputElement;
+      const val = parseInt(target.value);
 
-      settings?.actions.setZapOptions(parseInt(target.value), index);
+      if (isNaN(val)) {
+        return;
+      }
+
+      settings?.actions.setZapOptions(val, index);
     }, 500);
   };
 
@@ -31,7 +42,7 @@ const SettingsZap: Component = () => {
           Set default zap amount:
         </div>
         <input
-          type='number'
+          type='text'
           class={styles.zapInput}
           value={settings?.defaultZapAmount}
           onInput={changeDefaultZap}
@@ -45,7 +56,7 @@ const SettingsZap: Component = () => {
           <For each={settings?.availableZapOptions}>
             {(value, index) =>
               <input
-                type='number'
+                type='text'
                 class={styles.zapInput}
                 value={value}
                 onInput={(e: InputEvent) => changeZapOptions(e, index())}
