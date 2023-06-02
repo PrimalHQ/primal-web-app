@@ -138,6 +138,10 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     clearTimeout(quickZapDelay);
 
+    if (!account?.hasPublicKey() || !canUserReceiveZaps(props.note.user)) {
+      return;
+    }
+
     if (!isCustomZap()) {
       doQuickZap();
     }
@@ -229,15 +233,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const doQuickZap = async () => {
 
     if (account?.hasPublicKey()) {
+      animateZap();
+      setZappedAmount(() => settings?.defaultZapAmount || 0);
+      setZappedNow(true);
       const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
       setIsZapping(false);
 
       if (success) {
-        setZappedAmount(() => settings?.defaultZapAmount || 0);
-        setZappedNow(true);
-        animateZap();
-
-
         toast?.sendSuccess(
           intl.formatMessage({
             id: 'toast.zapSuccess',
@@ -247,7 +249,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         );
         return;
       }
-      setZappedNow(false);
+      setZappedAmount(() => -(settings?.defaultZapAmount || 0));
+      setZappedNow(true);
+      setZapped(props.note.post.noteActions.zapped);
 
       // toast?.sendWarning(
       //   intl.formatMessage({
@@ -308,7 +312,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     if (zappedNow()) {
       setZaps((z) => z + zappedAmount());
       setZapped(true);
-
+      setZappedNow(false);
     }
 
   })
@@ -381,17 +385,32 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       <CustomZap
         open={isCustomZap()}
         note={props.note}
+        onConfirm={(amount) => {
+          setZappedAmount(() => amount || 0);
+          setZappedNow(true);
+          setZapped(true);
+          animateZap();
+        }}
         onSuccess={(amount) => {
           setIsCustomZap(false);
           setIsZapping(false);
-          setZappedAmount(() => amount || 0);
-          setZappedNow(true);
-          animateZap();
+          // setZappedAmount(() => amount || 0);
+          setZappedNow(false);
+          // animateZap();
+          setShowMedZapAnim(false);
+          setShowSmallZapAnim(false);
+          setHideZapIcon(false);
+          setZapped(true);
         }}
-        onFail={() => {
+        onFail={(amount) => {
+          setZappedAmount(() => -(amount || 0));
+          setZappedNow(true);
           setIsCustomZap(false);
           setIsZapping(false);
-          setZappedNow(false);
+          setShowMedZapAnim(false);
+          setShowSmallZapAnim(false);
+          setHideZapIcon(false);
+          setZapped(props.note.post.noteActions.zapped);
         }}
       />
 

@@ -11,7 +11,13 @@ import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './CustomZap.module.scss';
 
-const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amount?: number) => void, onFail: () => void }> = (props) => {
+const CustomZap: Component<{
+  open?: boolean,
+  note: PrimalNote,
+  onConfirm: (amount?: number) => void,
+  onSuccess: (amount?: number) => void,
+  onFail: (amount?: number) => void
+}> = (props) => {
 
   const toast = useToastContext();
   const account = useAccountContext();
@@ -71,6 +77,7 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amoun
 
   const submit = async () => {
     if (account?.hasPublicKey()) {
+      props.onConfirm(selectedValue());
         const success = await zapNote(props.note, account.publicKey, selectedValue(), comment, account.relays);
 
         if (success) {
@@ -94,7 +101,7 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amoun
           }),
         );
 
-        props.onFail()
+        props.onFail(selectedValue())
       }
   };
 
@@ -116,7 +123,7 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amoun
               </span> <span class={styles.units}>sats</span>
             </div>
           </div>
-          <button class={styles.close} onClick={props.onFail}>
+          <button class={styles.close} onClick={() => props.onFail(selectedValue())}>
           </button>
         </div>
 
