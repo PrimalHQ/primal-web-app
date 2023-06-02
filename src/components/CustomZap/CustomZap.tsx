@@ -81,13 +81,13 @@ const CustomZap: Component<{
       const success = await zapNote(props.note, account.publicKey, selectedValue(), comment, account.relays);
 
       if (success) {
-        toast?.sendSuccess(
-          intl.formatMessage({
-            id: 'toast.zapSuccess',
-            defaultMessage: 'Zapped successfully',
-            description: 'Toast message indicating successfull zap',
-          }),
-        );
+        // toast?.sendSuccess(
+        //   intl.formatMessage({
+        //     id: 'toast.zapSuccess',
+        //     defaultMessage: 'Zapped successfully',
+        //     description: 'Toast message indicating successfull zap',
+        //   }),
+        // );
 
         props.onSuccess(selectedValue());
         return;

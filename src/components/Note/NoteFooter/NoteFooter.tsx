@@ -239,13 +239,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       setIsZapping(false);
 
       if (success) {
-        toast?.sendSuccess(
-          intl.formatMessage({
-            id: 'toast.zapSuccess',
-            defaultMessage: 'Zapped successfully',
-            description: 'Toast message indicating successfull zap',
-          }),
-        );
+        // toast?.sendSuccess(
+        //   intl.formatMessage({
+        //     id: 'toast.zapSuccess',
+        //     defaultMessage: 'Zapped successfully',
+        //     description: 'Toast message indicating successfull zap',
+        //   }),
+        // );
         return;
       }
       setZappedAmount(() => -(settings?.defaultZapAmount || 0));
