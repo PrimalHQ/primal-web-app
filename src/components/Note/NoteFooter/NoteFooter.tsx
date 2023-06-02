@@ -22,6 +22,9 @@ import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapSM from '../../../assets/lottie/zap_sm.json';
 import zapMD from '../../../assets/lottie/zap_md.json';
+import { medZapLimit } from '../../../constants';
+
+
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
@@ -143,39 +146,83 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const [zappedNow, setZappedNow] = createSignal(false);
   const [zappedAmount, setZappedAmount] = createSignal(0);
 
-  const animateZap = () => {
-    setShowSmallZapAnim(true);
+  const animateSmallZap = () => {
     setTimeout(() => {
-      const zapBtn = document.getElementById(`btn_zap_${props.note.post.id}`);
+      setHideZapIcon(true);
 
-      const smallZap = document.getElementById(`note-small-zap-${props.note.post.id}`);
-
-      const btnRect = zapBtn?.getBoundingClientRect();
-      const zapRect = smallZap?.getBoundingClientRect();
-      const footerRect = footerDiv?.getBoundingClientRect();
-
-      const newLeft = (btnRect.left - footerRect.left) - zapRect.width/4;
-      const newTop =  (btnRect.height - zapRect.height)/2
-
-
-      smallZap.style.left = `${newLeft}px`;
-      smallZap.style.top = `${newTop}px`;
-
+      const zapper = document.getElementById(`note-small-zap-${props.note.post.id}`);
       const player = document.getElementById(`note-small-zap-${props.note.post.id}`);
+
+      if (!zapper || !player) {
+        return;
+      }
+
+      const newLeft = 116;
+      const newTop =  -8;
+
+      zapper.style.left = `${newLeft}px`;
+      zapper.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
         setIsZapping(true);
         setShowSmallZapAnim(false);
+        setHideZapIcon(false);
         player?.removeEventListener('complete', onAnimDone);
       }
 
       player?.addEventListener('complete', onAnimDone);
 
+      // @ts-ignore
       player?.seek(0);
+      // @ts-ignore
       player?.play();
     }, 10);
+  };
+
+  const animateMedZap = () => {
+    setTimeout(() => {
+      setHideZapIcon(true);
+
+      const zapper = document.getElementById(`note-med-zap-${props.note.post.id}`);
+      const player = document.getElementById(`note-med-zap-${props.note.post.id}`);
+
+      if (!zapper || !player) {
+        return;
+      }
+
+      const newLeft = 20;
+      const newTop = -35;
+
+      zapper.style.left = `${newLeft}px`;
+      zapper.style.top = `${newTop}px`;
+
+      const onAnimDone = () => {
+        setIsZapping(true);
+        setShowMedZapAnim(false);
+        setHideZapIcon(false);
+        player?.removeEventListener('complete', onAnimDone);
+      }
+
+      player?.addEventListener('complete', onAnimDone);
+
+      // @ts-ignore
+      player?.seek(0);
+      // @ts-ignore
+      player?.play();
+    }, 10);
+  };
 
 
+  const animateZap = () => {
+
+    if (zappedAmount() > medZapLimit) {
+      setShowMedZapAnim(true);
+      animateMedZap();
+    }
+    else {
+      setShowSmallZapAnim(true);
+      animateSmallZap();
+    }
 
   }
 
@@ -184,11 +231,11 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     if (account?.hasPublicKey()) {
       const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
       setIsZapping(false);
-      animateZap();
 
       if (success) {
         setZappedAmount(() => settings?.defaultZapAmount || 0);
         setZappedNow(true);
+        animateZap();
 
 
         toast?.sendSuccess(
@@ -202,13 +249,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       }
       setZappedNow(false);
 
-      toast?.sendWarning(
-        intl.formatMessage({
-          id: 'toast.zapFail',
-          defaultMessage: 'We were unable to send this Zap',
-          description: 'Toast message indicating failed zap',
-        }),
-      );
+      // toast?.sendWarning(
+      //   intl.formatMessage({
+      //     id: 'toast.zapFail',
+      //     defaultMessage: 'We were unable to send this Zap',
+      //     description: 'Toast message indicating failed zap',
+      //   }),
+      // );
     }
   }
 
@@ -231,6 +278,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     icon: string,
     iconDisabled: string,
     label: string | number,
+    hidden?: boolean,
   }) => {
 
     return (
@@ -245,7 +293,10 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         disabled={opts.disabled}
       >
         <div class={`${buttonTypeClasses[opts.type]}`}>
-          <div class={styles.icon}></div>
+          <div
+            class={styles.icon}
+            style={opts.hidden ? 'visibility: hidden': 'visibility: visible'}
+          ></div>
           <div class={styles.statNumber}>{opts.label || ''}</div>
         </div>
       </button>
@@ -264,6 +315,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
   const [showSmallZapAnim, setShowSmallZapAnim] = createSignal(false);
   const [showMedZapAnim, setShowMedZapAnim] = createSignal(false);
+  const [hideZapIcon, setHideZapIcon] = createSignal(false);
 
   return (
     <div class={styles.footer} ref={footerDiv}>
@@ -295,6 +347,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       })}
 
       {actionButton({
+        onClick: (e: MouseEvent) => e.preventDefault(),
         onMouseDown: startZap,
         onMouseUp: commitZap,
         onTouchStart: startZap,
@@ -304,6 +357,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         icon: zapEmpty,
         iconDisabled: zapFilled,
         label: zaps() === 0 ? '' : truncateNumber(zaps()),
+        hidden: hideZapIcon(),
       })}
 
       {actionButton({

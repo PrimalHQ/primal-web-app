@@ -21,7 +21,7 @@ const CustomZap: Component<{ open?: boolean, note: PrimalNote, onSuccess: (amoun
   const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || 10);
 
   createEffect(() => {
-    setSelectedValue(settings?.availableZapOptions[0])
+    setSelectedValue(settings?.availableZapOptions[0] || 10)
   });
 
   const isSelected = (value: number) => value === selectedValue();
