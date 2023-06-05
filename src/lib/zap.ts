@@ -8,10 +8,11 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
     return false;
   }
 
-  // Ignoring typecheck because we only need lud06 and lud16 in content.
-  // We don't need the whole Event.
-  // @ts-ignore
-  const { callback } = await getZapEndpoint(note.user);
+  const callback = await getZapEndpoint(note.user);
+
+  if (!callback) {
+    return false;
+  }
 
   const sats = Math.round(amount * 1000);
 
@@ -48,32 +49,37 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
   }
 }
 
-export const getZapEndpoint = async (user: PrimalUser): Promise<null | { callback: string, lnurl: string}>  => {
+export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  => {
   try {
     let lnurl: string = ''
     let {lud06, lud16} = user;
-    if (lud06) {
-      let {words} = bech32.decode(lud06, 1000)
-      let data = bech32.fromWords(words)
-      lnurl = utils.utf8Decoder.decode(data)
-    } else if (lud16) {
+
+    if (lud16) {
       let [name, domain] = lud16.split('@')
       lnurl = `https://${domain}/.well-known/lnurlp/${name}`
-    } else {
-      return null
+    }
+    else if (lud06) {
+      let {words} = bech32.decode(lud06, 1023)
+      let data = bech32.fromWords(words)
+      lnurl = utils.utf8Decoder.decode(data)
+    }
+    else {
+      return null;
     }
 
     let res = await fetch(lnurl)
     let body = await res.json()
 
     if (body.allowsNostr && body.nostrPubkey) {
-      return {callback: body.callback, lnurl };
+      return body.callback;
     }
   } catch (err) {
+    console.log('E: ', err);
+    return null;
     /*-*/
   }
 
-  return null
+  return null;
 }
 
 export const canUserReceiveZaps = (user: PrimalUser | undefined) => {

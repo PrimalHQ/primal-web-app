@@ -160,7 +160,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       zapper.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
-        setIsZapping(true);
+        // setIsZapping(true);
         setShowSmallZapAnim(false);
         setHideZapIcon(false);
         player?.removeEventListener('complete', onAnimDone);
@@ -193,7 +193,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       zapper.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
-        setIsZapping(true);
+        // setIsZapping(true);
         setShowMedZapAnim(false);
         setHideZapIcon(false);
         player?.removeEventListener('complete', onAnimDone);
@@ -240,9 +240,14 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         // );
         return;
       }
-      setZappedAmount(() => -(settings?.defaultZapAmount || 0));
-      setZappedNow(true);
-      setZapped(props.note.post.noteActions.zapped);
+
+        setZappedAmount(() => -(settings?.defaultZapAmount || 0));
+        setZappedNow(true);
+        setZapped(props.note.post.noteActions.zapped);
+
+      //   setShowSmallZapAnim(false);
+      //   setShowMedZapAnim(false);
+      //   setHideZapIcon(false);
 
       // toast?.sendWarning(
       //   intl.formatMessage({
