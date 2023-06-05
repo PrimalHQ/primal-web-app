@@ -84,25 +84,26 @@ const Profile: Component = () => {
     profile?.actions.fetchNotes(hex);
   }
 
-  const react = createReaction(() => {
-    setProfile(getHex());
-  });
+  // const react = createReaction(() => {
+  //   setProfile(getHex());
+  // });
 
-  onMount(() => {
-    // If connection doesn't exist at mount time,
-    // create a one-time reaction, when connection is established
-    // to fetch profile data.
-    if (!isConnected()) {
-      react(() => isConnected());
-      return;
-    }
+  // onMount(() => {
+  //   // If connection doesn't exist at mount time,
+  //   // create a one-time reaction, when connection is established
+  //   // to fetch profile data.
+  //   if (!isConnected()) {
+  //     react(() => isConnected());
+  //     return;
+  //   }
 
-    // Otherwise, fetch profile data.
-    setProfile(getHex());
-  });
+  //   // Otherwise, fetch profile data.
+  //   setProfile(getHex());
+  // });
 
   createEffect(() => {
-    if (account?.hasPublicKey()) {
+    if (account?.isKeyLookupDone) {
+      console.log('Lookup done')
       setProfile(getHex());
     }
   });
