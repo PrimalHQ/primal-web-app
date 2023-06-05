@@ -70,13 +70,13 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
       const isOggVideo = url.includes('.ogg');
 
       if (isOggVideo) {
-        return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
+        return `<video class="w-max" controls><source src="${url}" type="video/ogg"></video>`;
       }
 
       const isWebmVideo = url.includes('.webm');
 
       if (isWebmVideo) {
-        return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
+        return `<video class="w-max" controls><source src="${url}" type="video/webm"></video>`;
       }
 
       if (youtubeRegex.test(url)) {
