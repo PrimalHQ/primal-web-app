@@ -29,8 +29,10 @@ const onError = (error: Event) => {
 
 export const connect = () => {
   if (isNotConnected()) {
-    // setSocket(new WebSocket('wss://cache2.primal.net/cache12'));
-    setSocket(new WebSocket('wss://cache3.primal.net/cache17'));
+    const cacheServer = localStorage.getItem('cacheServer') ??
+      'wss://cache3.primal.net/cache17';
+
+    setSocket(new WebSocket(cacheServer));
     console.log('SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);

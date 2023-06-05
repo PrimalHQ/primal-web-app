@@ -33,6 +33,7 @@ import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
 import { VanityProfiles } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
+import { getMediaUrl } from '../lib/media';
 
 
 const Profile: Component = () => {
@@ -206,7 +207,7 @@ const Profile: Component = () => {
             when={profile?.userProfile?.banner}
             fallback={<div class={styles.bannerPlaceholder}></div>}
           >
-            <img src={profile?.userProfile?.banner} onerror={imgError}/>
+            <img src={getMediaUrl(profile?.userProfile?.banner, 'm', 1)} onerror={imgError}/>
           </Show>
         </div>
 

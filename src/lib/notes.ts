@@ -4,6 +4,7 @@ import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
 import { NostrWindow, PrimalNote } from "../types/primal";
+import { getMediaUrl } from "./media";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -58,7 +59,7 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
       const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
       if (isImage) {
-        return '<img src="' + url + '" class="postImage"/>'
+        return '<img src="' + getMediaUrl(url) + '" class="postImage"/>'
       }
 
       const isMp4Video = url.includes('.mp4') || url.includes('.mov');

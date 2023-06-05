@@ -1,5 +1,6 @@
 import { Component, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_nostrich.svg';
+import { getMediaUrl } from '../../lib/media';
 
 import styles from './Avatar.module.scss';
 
@@ -51,10 +52,33 @@ const Avatar: Component<{
     return '';
   };
 
+
+  const imageSrc = () => {
+    let size = 'm';
+
+    switch (selectedSize) {
+      case 'xxs':
+      case 'xss':
+      case 'xs':
+      case 'vs':
+      case 'sm':
+      case 'md':
+      case 'lg':
+        size = 's';
+        break;
+      default:
+        size = 'm';
+        break;
+    };
+
+
+    return props.src && getMediaUrl(props.src, size);
+  };
+
   return (
     <div class={`${avatarClass[selectedSize]} ${highlightClass()}`}>
       <Show
-        when={props.src}
+        when={imageSrc()}
         fallback={
           <div class={styles.missingBack}>
             <div class={missingClass[selectedSize]}></div>
@@ -62,7 +86,7 @@ const Avatar: Component<{
         }
       >
         <div class={styles.missingBack}>
-          <img src={props.src} alt="avatar" onerror={imgError}/>
+          <img src={imageSrc()} alt="avatar" onerror={imgError}/>
         </div>
       </Show>
       <Show when={props.verified}>
