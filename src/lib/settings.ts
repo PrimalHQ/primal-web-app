@@ -70,6 +70,6 @@ export const getDefaultSettings = async (subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_default_app_settings"]},
+    {cache: ["get_default_app_settings", { client: "Primal-Web App" }]},
   ]))
 };

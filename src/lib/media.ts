@@ -9,7 +9,6 @@ export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) =
   }
 
   const encodedUrl = encodeURIComponent(url);
-  console.log('URL-ing: ', encodedUrl)
 
   return  `${mediaServer}/media-cache?s=${size}&a=${animated}&u=${encodedUrl}`;
 }
