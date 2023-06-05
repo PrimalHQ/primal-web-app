@@ -7,14 +7,6 @@ import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
-import likeFilled from '../../../assets/icons/feed_like_fill.svg';
-import likeEmpty from '../../../assets/icons/feed_like.svg';
-import replyFilled from '../../../assets/icons/feed_reply_fill.svg';
-import replyEmpty from '../../../assets/icons/feed_reply.svg';
-import zapFilled from '../../../assets/icons/feed_zap_fill.svg';
-import zapEmpty from '../../../assets/icons/feed_zap.svg';
-import repostFilled from '../../../assets/icons/feed_repost_fill.svg';
-import repostEmpty from '../../../assets/icons/feed_repost.svg';
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 import CustomZap from '../../CustomZap/CustomZap';
@@ -278,8 +270,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     onMouseUp?: (e: MouseEvent) => void,
     onTouchStart?: (e: TouchEvent) => void,
     onTouchEnd?: (e: TouchEvent) => void,
-    icon: string,
-    iconDisabled: string,
     label: string | number,
     hidden?: boolean,
   }) => {
@@ -344,8 +334,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doReply,
         type: 'reply',
         highlighted: replied(),
-        icon: replyEmpty,
-        iconDisabled: replyFilled,
         label: replies(),
       })}
 
@@ -357,8 +345,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onTouchEnd: commitZap,
         type: 'zap',
         highlighted: zapped() || isZapping(),
-        icon: zapEmpty,
-        iconDisabled: zapFilled,
         label: zaps() === 0 ? '' : truncateNumber(zaps()),
         hidden: hideZapIcon(),
       })}
@@ -367,8 +353,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doLike,
         type: 'like',
         highlighted: liked(),
-        icon: likeEmpty,
-        iconDisabled: likeFilled,
         label: likes(),
       })}
 
@@ -376,8 +360,6 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doRepost,
         type: 'repost',
         highlighted: reposted(),
-        icon: repostEmpty,
-        iconDisabled: repostFilled,
         label: reposts(),
       })}
 

@@ -8,6 +8,9 @@ import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
+import zapSM from '../../assets/lottie/zap_sm.json';
+import zapMD from '../../assets/lottie/zap_md.json';
+
 
 const Layout: Component = () => {
 
@@ -43,6 +46,24 @@ const Layout: Component = () => {
 
   return (
     <>
+      <div class={styles.preload}>
+        <div class="reply_icon"></div>
+        <div class="reply_icon_fill"></div>
+        <div class="repost_icon"></div>
+        <div class="repost_icon_fill"></div>
+        <div class="zap_icon"></div>
+        <div class="zap_icon_fill"></div>
+        <div class="like_icon"></div>
+        <div class="like_icon_fill"></div>
+        <lottie-player
+          src={zapSM}
+          speed="1"
+        ></lottie-player>
+        <lottie-player
+          src={zapMD}
+          speed="1"
+        ></lottie-player>
+      </div>
       <div id="modal" class={styles.modal}></div>
       <div id="container" ref={container} class={styles.container}>
         <div class={styles.leftColumn}>

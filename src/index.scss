@@ -338,3 +338,36 @@ body {
 .linkish {
   color: var(--accent-1);
 }
+
+.reply_icon {
+  -webkit-mask: url(./assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+}
+.reply_icon {
+  -webkit-mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+}
+.repost_icon {
+  -webkit-mask: url(./assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+}
+.repost_icon {
+  -webkit-mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+}
+.zap_icon {
+  -webkit-mask: url(./assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
+}
+.zap_icon {
+  -webkit-mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
+}
+.like_icon {
+  -webkit-mask: url(./assets/icons/feed_like.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+}
+.like_icon {
+  -webkit-mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+}
