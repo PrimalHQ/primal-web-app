@@ -109,6 +109,13 @@ export type NostrNoteActionsContent = {
   pubkey?: string,
 };
 
+export type NostrMessageStatsContent = {
+  kind: Kind.MessageStats,
+  cnt: string,
+  created_at?: number,
+  pubkey?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -123,7 +130,8 @@ export type NostrEventContent =
   NostrNotificationContent |
   NostrNotificationLastSeenContent |
   NostrNotificationStatsContent |
-  NostrNoteActionsContent;
+  NostrNoteActionsContent |
+  NostrMessageStatsContent;
 
 export type NostrEvent = [
   type: "EVENT",

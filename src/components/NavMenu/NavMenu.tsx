@@ -1,6 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useMessagesContext } from '../../contexts/MessagesContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import NavLink from '../NavLink/NavLink';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
@@ -10,6 +11,7 @@ import styles from './NavMenu.module.scss';
 const NavMenu: Component = () => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
+  const messages = useMessagesContext();
   const intl = useIntl();
 
   const links = [
@@ -39,6 +41,7 @@ const NavMenu: Component = () => {
         description: 'Label for the nav bar item link to Messages page',
       }),
       icon: 'messagesIcon',
+      bubble: () => messages?.messageCount || 0,
     },
     {
       to: '/notifications',
