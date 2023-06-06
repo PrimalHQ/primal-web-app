@@ -280,6 +280,7 @@ export const sortingPlan = (topic: string = '') => {
     popular: sortByScore,
     latest: sortByRecency,
     mostzapped: sortByZapped,
+    mostzapped4h: sortByZapped,
   }
 
   const plan = topic || 'latest';
@@ -294,6 +295,7 @@ export const paginationPlan = (criteria: string) => {
     popular: 'score',
     latest: 'created_at',
     mostzapped: 'satszapped',
+    mostzapped4h: 'satszapped',
   }
 
   const plan = criteria || 'latest';
