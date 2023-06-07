@@ -4,6 +4,7 @@ import {
   createSignal,
   For,
   Match,
+  onCleanup,
   onMount,
   Show,
   Switch
@@ -109,6 +110,10 @@ const Home: Component = () => {
     setNewNotesCount(count);
 
 
+  });
+
+  onCleanup(()=> {
+    clearInterval(checkNewNotesTimer);
   });
 
   const loadNewContent = () => {
