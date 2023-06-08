@@ -116,6 +116,21 @@ export type NostrMessageStatsContent = {
   pubkey?: string,
 };
 
+export type NostrMessagePerSenderStatsContent = {
+  kind: Kind.MesagePerSenderStats,
+  content: string,
+  created_at?: number,
+  pubkey?: string,
+};
+
+export type NostrMessageEncryptedContent = {
+  kind: Kind.EncryptedDirectMessage,
+  content: string,
+  created_at: number,
+  pubkey: string,
+  id: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -131,7 +146,9 @@ export type NostrEventContent =
   NostrNotificationLastSeenContent |
   NostrNotificationStatsContent |
   NostrNoteActionsContent |
-  NostrMessageStatsContent;
+  NostrMessageStatsContent |
+  NostrMessagePerSenderStatsContent |
+  NostrMessageEncryptedContent;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -256,7 +273,11 @@ export type NostrWindow = Window & typeof globalThis & {
   nostr?: {
     getPublicKey: () => Promise<string>,
     getRelays: () => Promise<NostrRelays>,
-    signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>;
+    signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
+    nip04: {
+      encypt: (pubkey: string, message: string) => Promise<string>,
+      decrypt: (pubkey: string, message: string) => Promise<string>,
+    },
   },
   webln?: {
     enable: () => Promise<void>,

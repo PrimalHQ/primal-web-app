@@ -1,7 +1,3 @@
-
-
-const rtf = new Intl.RelativeTimeFormat('en', { style: 'short' });
-
 export const shortDate = (timestamp: number | undefined) => {
   if (!timestamp || timestamp < 0) {
     return '';
@@ -12,7 +8,7 @@ export const shortDate = (timestamp: number | undefined) => {
   return dtf.format(date);
 };
 
-export const date = (postTimestamp: number) => {
+export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short') => {
   const date = new Date(postTimestamp * 1000);
   const currentTimestamp = Math.floor((new Date()).getTime() / 1000);
 
@@ -23,7 +19,7 @@ export const date = (postTimestamp: number) => {
   const month = day * 30;
   const year = month * 12;
 
-
+  const rtf = new Intl.RelativeTimeFormat('en', { style });
 
   const diff = currentTimestamp - postTimestamp;
 

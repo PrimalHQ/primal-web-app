@@ -371,3 +371,24 @@ body {
   -webkit-mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
   mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
 }
+
+/* width */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--subtile-devider);
+  border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary-2);
+}

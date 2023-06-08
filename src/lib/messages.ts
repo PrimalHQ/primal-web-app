@@ -23,8 +23,8 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   const event = {
     content: `{ "description": "reset messages from '${sender}'"}`,
     kind: Kind.Settings,
-    tags: [],
-    created_at: (new Date()).getTime() / 1000,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
   const signedEvent = await nostr.signEvent(event);
@@ -43,15 +43,20 @@ export const getMessageCounts = (receiver: string, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["directmsg_count", { receiver }]},
+    {cache: ["get_directmsg_contacts", { receiver }]},
   ]));
 }
 
-export const getOldMessages = (receiver: string, sender: string, subid: string, until = 0, limit = 20) => {
+export const getOldMessages = (receiver: string, sender: string, subid: string, until = 0, limit = 200) => {
+
+  const start = until === 0 ? 'since' : 'until';
+
+  const payload = { limit, [start]: until, receiver, sender };
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsgs", { receiver, sender, until, limit }]},
+    {cache: ["get_directmsgs", payload]},
   ]));
 }
 
