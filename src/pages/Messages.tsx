@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Relay } from 'nostr-tools';
+import { nip19, Relay } from 'nostr-tools';
 import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
@@ -7,12 +7,94 @@ import EditBox from '../components/NewNote/EditBox/EditBox';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMessagesContext } from '../contexts/MessagesContext';
 import { getMessageCounts } from '../lib/messages';
-import { userName } from '../stores/profile';
-import { PrimalUser } from '../types/primal';
+import { truncateNpub, userName } from '../stores/profile';
+import { PrimalNote, PrimalUser } from '../types/primal';
 import { date } from '../lib/dates';
 
 import styles from './Messages.module.scss';
+import EmbeddedNote from '../components/EmbeddedNote/EmbeddedNote';
+import { A } from '@solidjs/router';
+import { linkPreviews, parseNote1 } from '../lib/notes';
+import LinkPreview from '../components/LinkPreview/LinkPreview';
+import { hexToNpub } from '../lib/keys';
 
+export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
+
+  const regex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
+
+  return text.replace(regex, (url) => {
+    const [_, id] = url.split(':');
+
+    if (!id) {
+      return url;
+    }
+
+    try {
+      const note = mentionedNotes[id];
+
+      const path = `/thread/${id}`;
+
+      const link = highlightOnly ?
+        <span class='linkish' >{url}</span> :
+        note ?
+          <A href={path} class={styles.postLink}>
+            <EmbeddedNote
+              note={note}
+              mentionedUsers={mentionedUsers || {}}
+              includeEmbeds={true}
+            />
+          </A> :
+          <A href={path}>{url}</A>;
+
+      // @ts-ignore
+      return link.outerHTML || url;
+    } catch (e) {
+      return `<span class="${styles.error}">${url}</span>`;
+    }
+
+  });
+
+};
+
+export const parseNpubLinks = (text: string, mentionedUsers: Record<string, PrimalUser>, highlightOnly = false) => {
+
+  const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
+
+  return text.replace(regex, (url) => {
+    const [_, id] = url.split(':');
+
+    if (!id) {
+      return url;
+    }
+
+    try {
+      const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
+
+      const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+      const npub = hexToNpub(hex);
+      const path = `/profile/${npub}`;
+
+      const user = mentionedUsers[hex];
+
+      let link = highlightOnly ?
+        <span class='linkish'>@{truncateNpub(npub)}</span> :
+        <A href={path}>@{truncateNpub(npub)}</A>;
+
+      if (user) {
+        link = highlightOnly ?
+          <span class='linkish'>@{userName(user)}</span> :
+          <A href={path}>@{userName(user)}</A>;
+      }
+
+
+      // @ts-ignore
+      return link.outerHTML || url;
+    } catch (e) {
+      return `<span class="${styles.error}">${url}</span>`;
+    }
+  });
+
+};
 
 const Messages: Component = () => {
 
@@ -21,11 +103,14 @@ const Messages: Component = () => {
   const account = useAccountContext();
 
   let conversationHolder: HTMLDivElement | undefined;
+  let newMessageInput: HTMLTextAreaElement | undefined;
 
-  onMount(() => {
+  createEffect(() => {
     const count = messages?.messageCount || 0;
 
-    if (count === 0) {
+    console.log('COUNT: ', count)
+
+    if (account?.isKeyLookupDone && account.hasPublicKey() && count === 0) {
       messages?.actions.getMessagesPerSender();
     }
   });
@@ -62,15 +147,95 @@ const Messages: Component = () => {
   }
 
   const mgsFromSender = (sender: PrimalUser) => {
-    return messages?.messageCountPerSender[sender.pubkey] || 0;
+    return messages?.messageCountPerSender[sender.pubkey]?.cnt || 0;
   }
 
   const isSelectedSender = (senderId: string) => {
     return messages?.selectedSender?.pubkey === senderId;
   };
 
-  const sendMessage = (text: string, relays: Relay[], tags: string[][]) => {
-    console.log('SEND: ', text, relays, tags);
+  const highlightHashtags = (text: string) => {
+    const regex = /(?:\s|^)?#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+
+    return text.replace(regex, (token) => {
+      const [space, term] = token.split('#');
+      const embeded = (
+        <span>
+          {space}
+          <A
+            href={`/search/%23${term}`}
+          >#{term}</A>
+        </span>
+      );
+
+      // @ts-ignore
+      return embeded.outerHTML;
+    });
+  }
+
+  const parseMessage = (message: string) => {
+    if (!messages) {
+      return message;
+    }
+    return parseNoteLinks(
+      parseNpubLinks(
+        highlightHashtags(
+          parseNote1(message)
+        ),
+        messages?.referecedUsers,
+      ),
+      messages?.referecedNotes,
+      messages?.referecedUsers
+    );
+  };
+  const replaceLinkPreviews = (text: string) => {
+    let parsed = text;
+
+    const regex = /__LINK__.*?__LINK__/ig;
+
+    parsed = parsed.replace(regex, (link) => {
+      const url = link.split('__LINK__')[1];
+
+      const preview = linkPreviews[url];
+
+      // No preview? That can only mean that we are still waiting.
+      if (!preview) {
+        return link;
+      }
+
+      if (preview.noPreview) {
+        return `<a link href="${url}" target="_blank" >${url}</a>`;
+      }
+
+      const linkElement = (<div class={styles.bordered}><LinkPreview preview={preview} /></div>);
+
+      // @ts-ignore
+      return linkElement.outerHTML;
+    });
+
+    return parsed;
+  }
+
+  const sendMessage = async () => {
+    if (!messages?.selectedSender || !newMessageInput) {
+      return;
+    }
+    const text = newMessageInput.value;
+
+    const msg = {
+      id: 'NEW_MESSAGE',
+      sender: account?.publicKey || '',
+      content: text,
+      created_at: Math.floor((new Date()).getTime() / 1000),
+    };
+
+
+    const success = await messages?.actions.sendMessage(messages.selectedSender.pubkey, msg.content)
+
+    if (success) {
+      messages?.actions.addToConversation([msg])
+      newMessageInput.value = '';
+    }
   };
 
   return (
@@ -128,7 +293,10 @@ const Messages: Component = () => {
                         <div class={styles.threadMessages}>
                           <For each={thread.messages}>
                             {(msg) => (
-                              <div class={styles.message}>{msg.content}</div>
+                              <div
+                                class={styles.message}
+                                innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
+                              ></div>
                             )}
                           </For>
                         </div>
@@ -147,7 +315,10 @@ const Messages: Component = () => {
                       <div class={styles.threadMessages}>
                         <For each={thread.messages}>
                           {(msg) => (
-                            <div class={styles.message}>{msg.content}</div>
+                            <div
+                              class={styles.message}
+                              innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
+                            ></div>
                           )}
                         </For>
                       </div>
@@ -164,6 +335,8 @@ const Messages: Component = () => {
           </div>
 
           <div class={styles.newMessage}>
+            <textarea ref={newMessageInput}></textarea>
+            <button onClick={sendMessage}>send</button>
           </div>
         </div>
       </div>

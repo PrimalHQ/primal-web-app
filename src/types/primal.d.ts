@@ -275,7 +275,7 @@ export type NostrWindow = Window & typeof globalThis & {
     getRelays: () => Promise<NostrRelays>,
     signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
     nip04: {
-      encypt: (pubkey: string, message: string) => Promise<string>,
+      encrypt: (pubkey: string, message: string) => Promise<string>,
       decrypt: (pubkey: string, message: string) => Promise<string>,
     },
   },

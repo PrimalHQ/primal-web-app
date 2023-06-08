@@ -167,7 +167,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           </span>
         </span>
       </div>
-      <div innerHTML={
+      <div class={styles.noteContent} innerHTML={
         parseNoteLinks(
           parseNpubLinks(
             parsedContent(

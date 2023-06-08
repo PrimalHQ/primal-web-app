@@ -14,16 +14,29 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
+  FeedPage,
   NostrEOSE,
   NostrEvent,
+  NostrMentionContent,
   NostrMessageEncryptedContent,
+  NostrNoteActionsContent,
+  NostrNoteContent,
+  NostrStatsContent,
+  NostrUserContent,
   NostrWindow,
+  NoteActions,
+  PrimalNote,
   PrimalUser,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { getMessageCounts, getNewMessages, getOldMessages, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
 import { convertToUser } from "../stores/profile";
+import { getUserProfiles } from "../lib/profile";
+import { getEvents } from "../lib/feed";
+import { nip19 } from "nostr-tools";
+import { convertToNotes } from "../stores/note";
+import { sendEvent } from "../lib/notes";
 
 type DirectMessage = {
   id: string,
@@ -37,19 +50,30 @@ type DirectMessageThread = {
   messages: DirectMessage[],
 };
 
+type SenderMessageCount = {
+  cnt: number,
+  latest_at: number,
+  latest_event_id: string,
+}
+
 export type MessagesContextStore = {
   messageCount: number,
-  messageCountPerSender: Record<string, number>,
+  messageCountPerSender: Record<string, SenderMessageCount>,
   senders: Record<string, PrimalUser>;
   selectedSender: PrimalUser | null,
   encryptedMessages: NostrMessageEncryptedContent[],
   messages: DirectMessage[],
   conversation: DirectMessageThread[],
   isConversationLoaded: boolean,
+  referecedUsers: Record<string, PrimalUser>,
+  referecedNotes: Record<string, PrimalNote>,
+  referencePage: FeedPage,
   actions: {
     getMessagesPerSender: () => void,
     selectSender: (sender: PrimalUser) => void,
     resetConversationLoaded: () => void,
+    addToConversation: (messages: DirectMessage[]) => void,
+    sendMessage: (receiver: string, message: string) => Promise<boolean>,
   }
 }
 
@@ -62,6 +86,15 @@ export const initialData = {
   messages: [],
   conversation: [],
   isConversationLoaded: false,
+  referecedUsers: {},
+  referecedNotes: {},
+  referencePage: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+  },
 };
 
 const win = window as NostrWindow;
@@ -79,6 +112,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const subidResetMsgCount = `msg_reset_ ${APP_ID}`;
   const subidCoversation = `msg_conv_ ${APP_ID}`;
   const subidNewMsg = `msg_new_ ${APP_ID}`;
+  const subidNoteRef = `msg_note_ ${APP_ID}`;
+  const subidUserRef = `msg_user_ ${APP_ID}`;
 
 // ACTIONS --------------------------------------
 
@@ -102,7 +137,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
     updateStore('selectedSender', () => ({ ...sender }));
-
   };
 
   const getConversationWithSender = (sender: PrimalUser) => {
@@ -137,20 +171,88 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
 
     updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
+    resetMessageCount(store.selectedSender.pubkey, subidResetMsgCount);
+    updateStore('messageCountPerSender', store.selectedSender.pubkey, 'cnt', 0)
+
+    parseForMentions(newMessages);
     areNewMessages ? addToConversation(newMessages) : generateConversation(newMessages);
   };
 
-  const addToConversation = (messages: any[]) => {
-    let lastThread = store.conversation[store.conversation.length - 1];
+  const parseForMentions = (messages: DirectMessage[]) => {
+    const noteRegex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
+    const userRegex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
+
+    let noteRefs = [];
+    let userRefs = [];
+    let match;
+
+    for (let i=0; i<messages.length; i++) {
+      const message = messages[i];
+
+      while((match = noteRegex.exec(message.content)) !== null) {
+        noteRefs.push(match[1]);
+      }
+
+      while((match = userRegex.exec(message.content)) !== null) {
+        userRefs.push(match[1]);
+      }
+    }
+
+    const pubkeys = userRefs.map(x => {
+      const decoded = nip19.decode(x);
+
+      if (decoded.type === 'npub') {
+        return decoded.data;
+      }
+
+      if (decoded.type === 'nprofile') {
+        return decoded.data.pubkey;
+      }
+
+      return '';
+
+    });
+    const noteIds = noteRefs.map(x => {
+      const decoded = nip19.decode(x);
+
+      if (decoded.type === 'note') {
+        return decoded.data;
+      }
+
+      if (decoded.type === 'nevent') {
+        return decoded.data.id;
+      }
+
+      return '';
+
+    });
+
+    updateStore('referencePage', () => ({
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    }));
+
+    getUserProfiles(pubkeys, subidUserRef);
+    getEvents(account?.publicKey, noteIds, subidNoteRef, true);
+
+
+  };
+
+  const addToConversation = (messages: DirectMessage[]) => {
+    let lastThread = store.conversation[0];
 
     for (let i=0;i<messages.length;i++) {
       const message = messages[i];
 
       if (lastThread && message.sender === lastThread.author) {
+
         updateStore('conversation',
-          store.conversation.length - 1,
+          0,
           'messages',
-          (msgs) => [...msgs, message]
+          (msgs) => [message, ...msgs]
         );
       }
       else {
@@ -159,7 +261,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           messages: [message],
         }
 
-        updateStore('conversation', (conv) => [...conv, { ...lastThread }]);
+        updateStore('conversation', (conv) => [{ ...lastThread }, ...conv]);
       }
 
       updateStore('isConversationLoaded', () => true);
@@ -196,6 +298,45 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const resetConversationLoaded = () => {
     updateStore('isConversationLoaded', () =>  false);
   }
+
+  const updateRefUsers = () => {
+    const refs = store.referencePage.users;
+
+    const users = Object.keys(refs).reduce((acc, id) => {
+      const user = convertToUser(refs[id]);
+      return {...acc, [user.pubkey]: { ...user }};
+    }, {});
+
+    updateStore('referecedUsers', (usrs) => ({ ...usrs, ...users }));
+  };
+
+  const updateRefNotes = () => {
+    const refs = convertToNotes(store.referencePage) || [];
+
+    const notes = refs.reduce((acc, note) => {
+      return { ...acc, [note.post.noteId]: note };
+    }, {});
+
+    updateStore('referecedNotes', (nts) => ({ ...nts, ...notes }));
+  };
+
+  const sendMessage = async (receiver: string, message: string) => {
+    if (!account || !nostr) {
+      return false;
+    }
+
+    const content = await nostr.nip04.encrypt(receiver, message);
+
+    const event = {
+      content,
+      kind: Kind.EncryptedDirectMessage,
+      tags: [],
+      created_at: Math.floor((new Date).getTime() / 1000),
+    };
+
+    return await sendEvent(event, account?.relays);
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -252,6 +393,79 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         decryptMessages(true);
       }
     }
+
+    if (subId === subidUserRef) {
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          updateStore('referencePage', 'users',
+            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+          );
+        }
+      }
+
+      if (type === 'EOSE') {
+        updateRefUsers();
+      }
+    }
+
+    if (subId === subidNoteRef) {
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          updateStore('referencePage', 'users',
+            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+          );
+        }
+
+        if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          updateStore('referencePage', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if (content.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          updateStore('referencePage', 'postStats',
+            (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+          );
+          return;
+        }
+
+        if (content.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          updateStore('referencePage', 'mentions',
+            (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+          );
+          return;
+        }
+
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          updateStore('referencePage', 'noteActions',
+            (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+          );
+          return;
+        }
+      }
+
+      if (type === 'EOSE') {
+        updateRefNotes();
+        updateRefUsers();
+      }
+    }
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {
@@ -297,26 +511,34 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  let oldNum = 0;
-
   // when the total number of messages increases, check for new messages
   createEffect(() => {
-    if (account?.hasPublicKey() && store.selectedSender && store.messageCountPerSender[store.selectedSender.pubkey] > oldNum) {
-
-      if (store.messages.length === 0) {
-        return;
-      }
+    if (
+      account?.hasPublicKey() &&
+      store.selectedSender &&
+      store.messageCountPerSender[store.selectedSender?.pubkey] &&
+      store.messageCountPerSender[store.selectedSender.pubkey].cnt > 0) {
 
       updateStore('encryptedMessages', () => []);
 
-      oldNum = store.messageCountPerSender[store.selectedSender.pubkey];
+      let time = Math.floor((new Date()).getTime() / 1000);
+
+      const lastThread = store.conversation[store.conversation.length - 1];
+
+      if (lastThread) {
+        const lastMessage = lastThread.messages[lastThread.messages.length - 1];
+
+        if (lastMessage) {
+          time = lastMessage.created_at
+        }
+      }
 
       getNewMessages(
         // @ts-ignore
         account?.publicKey,
         store.selectedSender.pubkey,
         subidNewMsg,
-        store.messages[store.messages.length - 1].created_at,
+        time,
       );
     }
   });
@@ -330,7 +552,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     actions: {
       getMessagesPerSender,
       selectSender,
+      addToConversation,
       resetConversationLoaded,
+      sendMessage,
     },
   });
 
