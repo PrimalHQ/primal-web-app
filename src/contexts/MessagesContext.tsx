@@ -330,7 +330,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     const event = {
       content,
       kind: Kind.EncryptedDirectMessage,
-      tags: [],
+      tags: [['p', receiver]],
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
