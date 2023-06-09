@@ -13,10 +13,12 @@ import { date } from '../lib/dates';
 
 import styles from './Messages.module.scss';
 import EmbeddedNote from '../components/EmbeddedNote/EmbeddedNote';
-import { A } from '@solidjs/router';
+import { A, useNavigate, useParams } from '@solidjs/router';
 import { linkPreviews, parseNote1 } from '../lib/notes';
 import LinkPreview from '../components/LinkPreview/LinkPreview';
 import { hexToNpub } from '../lib/keys';
+import Branding from '../components/Branding/Branding';
+import Wormhole from '../components/Wormhole/Wormhole';
 
 export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
 
@@ -102,13 +104,82 @@ const Messages: Component = () => {
   const messages = useMessagesContext();
   const account = useAccountContext();
 
+  const navigate = useNavigate();
+
+  const params = useParams();
+
   let conversationHolder: HTMLDivElement | undefined;
   let newMessageInput: HTMLTextAreaElement | undefined;
 
+  const senderNpub = () => {
+    if (!params.sender) {
+      return '';
+    }
+
+    if (params.sender.startsWith('npub')) {
+      return params.sender;
+    }
+
+    return nip19.noteEncode(params.sender);
+  };
+
+  const orderedSenders = () => {
+    if (!messages) {
+      return;
+    }
+    const senders = messages.senders;
+    const counts = messages.messageCountPerSender;
+
+    const ids = Object.keys(senders);
+    const latests = ids.map(id => ({ latest_at: counts[id].latest_at, id }));
+
+    const ordered = latests.sort((a, b) => b.latest_at - a.latest_at);
+
+    return ordered.map(o => senders[o.id]);
+  };
+
+  const senderPubkey = () => {
+    if (!params.sender) {
+      return '';
+    }
+
+    let pubkey = params.sender;
+
+    if (pubkey.startsWith('npub') || pubkey.startsWith('nevent')) {
+      const decoded = nip19.decode(pubkey);
+
+      if (decoded.type === 'npub') {
+        pubkey = decoded.data;
+      }
+
+      if (decoded.type === 'nevent') {
+        pubkey = decoded.data.id;
+      }
+    }
+
+    return pubkey;
+
+  }
+
+  createEffect(() => {
+    if (!messages || Object.keys(messages.senders).length === 0) {
+      return;
+    }
+
+
+    if (params.sender && messages?.senders[senderPubkey()]) {
+      messages?.actions.selectSender(params.sender);
+      return;
+    }
+
+    const first = Object.keys(messages.senders)[0];
+
+    selectSender(messages.senders[first].npub);
+
+  });
+
   createEffect(() => {
     const count = messages?.messageCount || 0;
-
-    console.log('COUNT: ', count)
 
     if (account?.isKeyLookupDone && account.hasPublicKey() && count === 0) {
       messages?.actions.getMessagesPerSender();
@@ -151,8 +222,12 @@ const Messages: Component = () => {
   }
 
   const isSelectedSender = (senderId: string) => {
-    return messages?.selectedSender?.pubkey === senderId;
+    return senderNpub() === senderId || senderPubkey() === senderId;
   };
+
+  const selectSender = (senderNpub: string) => {
+    navigate(`/messages/${senderNpub}`)
+  }
 
   const highlightHashtags = (text: string) => {
     const regex = /(?:\s|^)?#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
@@ -240,6 +315,9 @@ const Messages: Component = () => {
 
   return (
     <div>
+      <Wormhole to="branding_holder">
+        <Branding small={false} />
+      </Wormhole>
       <div id="central_header" class={styles.fullHeader}>
         <div>
           {intl.formatMessage(
@@ -254,12 +332,12 @@ const Messages: Component = () => {
 
       <div class={styles.messagesContent}>
         <div class={styles.sendersList}>
-          <For each={senders()}>
+          <For each={orderedSenders()}>
             {
               (sender) => (
                 <button
-                  class={`${styles.senderItem} ${isSelectedSender(sender.pubkey) ? styles.selected : ''}`}
-                  onClick={() => messages?.actions.selectSender(sender)}
+                  class={`${styles.senderItem} ${isSelectedSender(sender.npub) ? styles.selected : ''}`}
+                  onClick={() => selectSender(sender.npub)}
                 >
                   <Avatar src={sender.picture} size="vs" />
                   <div class={styles.senderInfo}>

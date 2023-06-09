@@ -20,6 +20,7 @@ import { useSettingsContext } from './contexts/SettingsContext';
 import NotFound from './pages/NotFound';
 import { fetchKnownProfiles } from './lib/profile';
 import Search from './pages/Search';
+import { useMessagesContext } from './contexts/MessagesContext';
 
 const primalWindow = window as PrimalWindow;
 
@@ -31,6 +32,7 @@ const Router: Component = () => {
   const home = useHomeContext();
   const explore = useExploreContext();
   const thread = useThreadContext();
+  const messages = useMessagesContext();
 
   const loadPrimalStores = () => {
     primalWindow.primal = {
@@ -60,7 +62,7 @@ const Router: Component = () => {
           <Route path="/home" component={Home} />
           <Route path="/thread/:postId" component={Thread} />
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />
-          <Route path="/messages" component={Messages} />
+          <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />
           <Route path="/settings" component={Settings} />

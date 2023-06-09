@@ -70,7 +70,7 @@ export type MessagesContextStore = {
   referencePage: FeedPage,
   actions: {
     getMessagesPerSender: () => void,
-    selectSender: (sender: PrimalUser) => void,
+    selectSender: (senderId: string) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
     sendMessage: (receiver: string, message: string) => Promise<boolean>,
@@ -133,7 +133,24 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const selectSender = async (sender: PrimalUser) => {
+  const selectSender = async (senderId: string) => {
+
+    let pubkey = senderId;
+
+    if (senderId.startsWith('npub') || senderId.startsWith('nevent')) {
+      const decoded = nip19.decode(senderId);
+
+      if (decoded.type === 'npub') {
+        pubkey = decoded.data;
+      }
+
+      if (decoded.type === 'nevent') {
+        pubkey = decoded.data.id;
+      }
+    }
+
+    const sender = store.senders[pubkey];
+
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
     updateStore('selectedSender', () => ({ ...sender }));
@@ -366,7 +383,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       if (content?.kind === Kind.Metadata) {
         const user = convertToUser(content);
 
-        updateStore('senders', () => ({ [user.pubkey]: user }));
+        updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
       }
     }
 

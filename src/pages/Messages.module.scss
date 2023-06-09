@@ -36,6 +36,9 @@
         border-radius: 0px 8px 8px 8px;
       }
 
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 24px;
       color: var(--text-primary);
       background-color: var(--subtile-devider);
     }
@@ -69,11 +72,13 @@
   .sendersList {
     display: flex;
     flex-direction: column;
+    overflow-y: scroll;
+    width: 300px;
+    height: calc(100vh - 128px);
 
     .senderItem {
       position: relative;
       display: flex;
-      width: 298px;
       height: 65px;
       background-color: var(--background-card);
       padding-inline: 15px;
