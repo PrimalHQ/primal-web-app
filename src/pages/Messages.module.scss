@@ -9,6 +9,7 @@
 @mixin thread($align-end) {
   display: flex;
   flex-direction: column;
+  margin-top: -16px;
 
   @if $align-end {
     align-items: flex-end;
@@ -23,6 +24,8 @@
     display: flex;
     flex-direction: column-reverse;
     align-items: flex-start;
+    width: calc(100% - 48px);
+
     .message {
       @include messageContent();
 
@@ -85,6 +88,7 @@
       padding-block: 12px;
       border-radius: 8px;
       border: none;
+      margin-bottom: 8px;
 
       &:hover, &.selected {
         background-color: var(--background-input);
