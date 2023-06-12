@@ -1,4 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
+import { useLocation } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useMessagesContext } from '../../contexts/MessagesContext';
@@ -13,6 +14,7 @@ const NavMenu: Component = () => {
   const notifications = useNotificationsContext();
   const messages = useMessagesContext();
   const intl = useIntl();
+  const loc = useLocation();
 
   const links = [
     {
@@ -92,7 +94,7 @@ const NavMenu: Component = () => {
           }
         </For>
       </nav>
-      <Show when={account?.hasPublicKey()}>
+      <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
         <div class={styles.callToAction}>
           <ThemeToggle />
         </div>
