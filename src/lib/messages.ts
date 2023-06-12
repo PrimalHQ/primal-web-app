@@ -43,7 +43,7 @@ export const getMessageCounts = (receiver: string, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsg_contacts", { receiver }]},
+    {cache: ["get_directmsg_contacts", { receiver, relation: 'any' }]},
   ]));
 }
 

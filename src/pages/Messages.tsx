@@ -342,11 +342,16 @@ const Messages: Component = () => {
                 >
                   <Avatar src={sender.picture} size="vs" />
                   <div class={styles.senderInfo}>
-                    <div class={styles.senderName}>
-                      {userName(sender)}
+                    <div class={styles.firstLine}>
+                      <div class={styles.senderName}>
+                        {userName(sender)}
+                      </div>
+                      <div class={styles.lastMessageTime}>
+                        {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
+                      </div>
                     </div>
-                    <div class={styles.lastMessageTime}>
-                      {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
+                    <div class={styles.secondLine}>
+                      {sender.nip05}
                     </div>
                   </div>
                   <Show when={mgsFromSender(sender) > 0}>
