@@ -365,7 +365,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    return await sendEvent(event, account?.relays);
+    const signed = await nostr.signEvent(event);
+
+    return await sendEvent(signed, account?.relays);
   }
 
 
