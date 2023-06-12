@@ -72,65 +72,67 @@
 .messagesContent {
   position: relative;
 
-  .sendersList {
+  .sendersHeader {
+    height: 40px;
+    width: 294px;
+    background-color: var(--background-input);
+    border-radius: 8px;
     display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-    width: 300px;
-    height: calc(100vh - 128px);
-
-    .sendersHeader {
-      height: 40px;
-      width: 100%;
-      background-color: var(--background-input);
-      border-radius: 8px;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: 12px;
+    margin-bottom: 8px;
+    .senderCategorySelector {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-inline: 12px;
-      margin-bottom: 8px;
-      .senderCategorySelector {
-        display: flex;
-        .categorySelector {
-          border: none;
-          outline: none;
-          padding: 0;
-          margin: 0;
-          background: none;
-          color: var(--text-tertiary);
-          font-weight: 400;
-          font-size: 14px;
-          line-height: 16px;
-          &:focus {
-            background: none;
-            box-shadow: none;
-            outline: none;
-          }
-
-          &.highlight {
-            color: var(--text-primary);
-          }
-
-        }
-        .separator {
-          border-left: 1px solid var(--subtile-devider);
-          margin-inline: 8px;
-        }
-      }
-
-      .markAsRead {
+      .categorySelector {
         border: none;
         outline: none;
         padding: 0;
         margin: 0;
         background: none;
-        color: var(--accent-1);
+        color: var(--text-tertiary);
         font-weight: 400;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 16px;
-        width: auto;
+        &:focus {
+          background: none;
+          box-shadow: none;
+          outline: none;
+        }
+
+        &.highlight {
+          color: var(--text-primary);
+        }
+
+      }
+      .separator {
+        border-left: 1px solid var(--subtile-devider);
+        margin-inline: 8px;
       }
     }
+
+    .markAsRead {
+      border: none;
+      outline: none;
+      padding: 0;
+      margin: 0;
+      background: none;
+      color: var(--accent-1);
+      font-weight: 400;
+      font-size: 13px;
+      line-height: 16px;
+      width: auto;
+    }
+  }
+
+  .sendersList {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    width: 308px;
+    height: calc(100vh - 128px);
+    padding-right: 8px;
+
 
     .senderItem {
       position: relative;

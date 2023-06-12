@@ -422,27 +422,27 @@ const Messages: Component = () => {
       </div>
 
       <div class={styles.messagesContent}>
-        <div class={styles.sendersList}>
-          <div class={styles.sendersHeader}>
-            <div class={styles.senderCategorySelector}>
-              <button
-                class={`${styles.categorySelector} ${senderCategory() === 'follows' ? styles.highlight : ''}`}
-                onClick={() => changeSenderCategory('follows')}
-              >
-                FOLLOWS
-              </button>
-              <div class={styles.separator}></div>
-              <button
-                class={`${styles.categorySelector} ${senderCategory() === 'other' ? styles.highlight : ''}`}
-                onClick={() => changeSenderCategory('other')}
-              >
-                OTHER
-              </button>
-            </div>
-            <button class={styles.markAsRead} disabled={areAllRead()}>
-              Mark All Read
+        <div class={styles.sendersHeader}>
+          <div class={styles.senderCategorySelector}>
+            <button
+              class={`${styles.categorySelector} ${senderCategory() === 'follows' ? styles.highlight : ''}`}
+              onClick={() => changeSenderCategory('follows')}
+            >
+              FOLLOWS
+            </button>
+            <div class={styles.separator}></div>
+            <button
+              class={`${styles.categorySelector} ${senderCategory() === 'other' ? styles.highlight : ''}`}
+              onClick={() => changeSenderCategory('other')}
+            >
+              OTHER
             </button>
           </div>
+          <button class={styles.markAsRead} disabled={areAllRead()}>
+            Mark All Read
+          </button>
+        </div>
+        <div class={styles.sendersList}>
           <For each={orderedSenders()}>
             {
               (sender) => (
