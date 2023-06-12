@@ -68,6 +68,7 @@ export type MessagesContextStore = {
   referecedUsers: Record<string, PrimalUser>,
   referecedNotes: Record<string, PrimalNote>,
   referencePage: FeedPage,
+  isFetchingConversation: boolean,
   actions: {
     getMessagesPerSender: () => void,
     selectSender: (senderId: string) => void,
@@ -88,6 +89,7 @@ export const initialData = {
   isConversationLoaded: false,
   referecedUsers: {},
   referecedNotes: {},
+  isFetchingConversation: false,
   referencePage: {
     messages: [],
     users: {},
@@ -128,6 +130,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const getMessagesPerSender = () => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
+      updateStore('isFetchingConversation', true);
       // @ts-ignore
       getMessageCounts(account.publicKey, subidMsgCountPerSender);
     }
@@ -391,6 +394,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       if (type === 'EVENT') {
         if (content?.kind === Kind.EncryptedDirectMessage) {
           updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
+          updateStore('isFetchingConversation', false);
         }
       }
 

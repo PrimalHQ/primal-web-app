@@ -19,6 +19,7 @@ import LinkPreview from '../components/LinkPreview/LinkPreview';
 import { hexToNpub } from '../lib/keys';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
+import Loader from '../components/Loader/Loader';
 
 export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
 
@@ -359,7 +360,10 @@ const Messages: Component = () => {
         <div class={styles.conversation}>
           <div class={styles.messages} ref={conversationHolder}>
             <Show when={messages?.selectedSender}>
-              <For each={messages?.conversation}>
+              <For
+                each={messages?.conversation}
+                fallback={<Loader />}
+              >
                 {(thread) => (
                   <Show
                     when={isSelectedSender(thread.author)}
