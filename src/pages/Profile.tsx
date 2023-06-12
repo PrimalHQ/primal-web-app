@@ -235,7 +235,7 @@ const Profile: Component = () => {
           </button>
           <button
             class={styles.smallSecondaryButton}
-            onClick={onNotImplemented}
+            onClick={() => navigate('/messages')}
           >
             <div class={styles.messageIcon}></div>
           </button>
