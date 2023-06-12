@@ -68,7 +68,7 @@ export type MessagesContextStore = {
   referecedUsers: Record<string, PrimalUser>,
   referecedNotes: Record<string, PrimalNote>,
   referencePage: FeedPage,
-  isFetchingConversation: boolean,
+  now: number,
   actions: {
     getMessagesPerSender: () => void,
     selectSender: (senderId: string) => void,
@@ -89,7 +89,7 @@ export const initialData = {
   isConversationLoaded: false,
   referecedUsers: {},
   referecedNotes: {},
-  isFetchingConversation: false,
+  now: Math.floor(new Date().getTime() / 1000),
   referencePage: {
     messages: [],
     users: {},
@@ -98,9 +98,6 @@ export const initialData = {
     noteActions: {},
   },
 };
-
-const win = window as NostrWindow;
-const nostr = win.nostr;
 
 
 export const MessagesContext = createContext<MessagesContextStore>();
@@ -117,6 +114,13 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const subidNoteRef = `msg_note_ ${APP_ID}`;
   const subidUserRef = `msg_user_ ${APP_ID}`;
 
+
+
+  const getNostr = () => {
+    const win = window as NostrWindow;
+    return win.nostr;
+  }
+
 // ACTIONS --------------------------------------
 
   const subToMessagesStats = () => {
@@ -130,7 +134,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const getMessagesPerSender = () => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
-      updateStore('isFetchingConversation', true);
       // @ts-ignore
       getMessageCounts(account.publicKey, subidMsgCountPerSender);
     }
@@ -167,7 +170,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const decryptMessages = async (areNewMessages?: boolean) => {
-    if (nostr === undefined || !store.selectedSender) {
+    const nostr = getNostr();
+
+    if (nostr === undefined || store.selectedSender === null) {
       return;
     }
 
@@ -195,7 +200,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('messageCountPerSender', store.selectedSender.pubkey, 'cnt', 0)
 
     parseForMentions(newMessages);
-    areNewMessages ? addToConversation(newMessages) : generateConversation(newMessages);
+    areNewMessages ? addToConversation(newMessages, true) : generateConversation(newMessages);
   };
 
   const parseForMentions = (messages: DirectMessage[]) => {
@@ -261,11 +266,15 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   };
 
-  const addToConversation = (messages: DirectMessage[]) => {
+  const addToConversation = (messages: DirectMessage[], ignoreMy?: boolean) => {
     let lastThread = store.conversation[0];
 
     for (let i=0;i<messages.length;i++) {
       const message = messages[i];
+
+      if (ignoreMy && message.sender === account?.publicKey) {
+        return;
+      }
 
       if (lastThread && message.sender === lastThread.author) {
 
@@ -285,6 +294,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       updateStore('isConversationLoaded', () => true);
+      updateMessageTimings();
 
     };
 
@@ -341,6 +351,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const sendMessage = async (receiver: string, message: string) => {
+    const nostr = getNostr();
     if (!account || !nostr) {
       return false;
     }
@@ -380,6 +391,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       if (content?.kind === Kind.MesagePerSenderStats) {
         const senderCount = JSON.parse(content.content);
 
+        console.log('SENDER COUNT: ', senderCount);
+
         updateStore('messageCountPerSender', () => ({ ...senderCount }));
       }
 
@@ -394,7 +407,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       if (type === 'EVENT') {
         if (content?.kind === Kind.EncryptedDirectMessage) {
           updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
-          updateStore('isFetchingConversation', false);
         }
       }
 
@@ -522,13 +534,25 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     );
   });
 
+  let conversationRefreshInterval = 0;
+
+  const updateMessageTimings = () => {
+    updateStore('now', () => Math.floor((new Date()).getTime() / 1000));
+  };
+
   // When a sender is selected, get the first page of the conversation
   createEffect(() => {
     if (store.selectedSender) {
+      clearInterval(conversationRefreshInterval);
+
       updateStore('encryptedMessages', () => []);
       updateStore('conversation', () => []);
       updateStore('messages', () => []);
       getConversationWithSender(store.selectedSender);
+
+      conversationRefreshInterval = setInterval(() => {
+        updateMessageTimings();
+      }, 60_000);
     }
   });
 

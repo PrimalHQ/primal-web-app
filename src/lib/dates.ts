@@ -8,9 +8,9 @@ export const shortDate = (timestamp: number | undefined) => {
   return dtf.format(date);
 };
 
-export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short') => {
+export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short', since?: number) => {
+  const today = since ?? Math.floor((new Date()).getTime() / 1000);
   const date = new Date(postTimestamp * 1000);
-  const currentTimestamp = Math.floor((new Date()).getTime() / 1000);
 
   const minute = 60;
   const hour = minute * 60;
@@ -21,7 +21,7 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
 
   const rtf = new Intl.RelativeTimeFormat('en', { style });
 
-  const diff = currentTimestamp - postTimestamp;
+  const diff = today - postTimestamp;
 
   if ( diff > year) {
     const years = Math.floor(diff / year);

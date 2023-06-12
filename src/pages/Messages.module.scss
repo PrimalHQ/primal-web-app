@@ -92,11 +92,25 @@
 
       .senderInfo {
         margin-left: 12px;
+        display: flex;
+        justify-content: flex-start;
         .senderName {
           color: var(--text-primary);
           font-weight: 700;
           font-size: 16px;
           line-height: 16px;
+        }
+        .lastMessageTime {
+          color: var(--text-tertiary-2);
+          font-weight: 400;
+          font-size: 16px;
+          line-height: 16px;
+          margin-left: 2px;
+
+          &::before {
+            content: "|";
+            padding: 0px 2px;
+          }
         }
       }
     }

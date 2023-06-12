@@ -345,6 +345,9 @@ const Messages: Component = () => {
                     <div class={styles.senderName}>
                       {userName(sender)}
                     </div>
+                    <div class={styles.lastMessageTime}>
+                      {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
+                    </div>
                   </div>
                   <Show when={mgsFromSender(sender) > 0}>
                     <div class={styles.senderBubble}>
@@ -382,9 +385,9 @@ const Messages: Component = () => {
                             )}
                           </For>
                         </div>
-                        <Show when={thread.messages[thread.messages.length - 1]}>
+                        <Show when={thread.messages[0]}>
                           <div class={styles.threadTime}>
-                            {date(thread.messages[thread.messages.length - 1].created_at, 'long').label}
+                            {date(thread.messages[0].created_at, 'long', messages?.now).label}
                           </div>
                         </Show>
                       </div>
@@ -404,9 +407,9 @@ const Messages: Component = () => {
                           )}
                         </For>
                       </div>
-                      <Show when={thread.messages[thread.messages.length - 1]}>
+                      <Show when={thread.messages[0]}>
                         <div class={styles.threadTime}>
-                          {date(thread.messages[thread.messages.length - 1].created_at, 'long').label}
+                          {date(thread.messages[0].created_at, 'long', messages?.now).label}
                         </div>
                       </Show>
                     </div>
