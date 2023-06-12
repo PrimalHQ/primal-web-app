@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { nip19, Relay } from 'nostr-tools';
-import { Component, createEffect, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import EditBox from '../components/NewNote/EditBox/EditBox';
@@ -20,6 +20,9 @@ import { hexToNpub } from '../lib/keys';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
+import { style } from 'solid-js/web';
+
+type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
 
@@ -111,6 +114,8 @@ const Messages: Component = () => {
 
   let conversationHolder: HTMLDivElement | undefined;
   let newMessageInput: HTMLTextAreaElement | undefined;
+  let newMessageInputBorder: HTMLDivElement | undefined;
+  let newMessageWrapper: HTMLDivElement | undefined;
 
   const senderNpub = () => {
     if (!params.sender) {
@@ -292,11 +297,65 @@ const Messages: Component = () => {
     return parsed;
   }
 
-  const sendMessage = async () => {
-    if (!messages?.selectedSender || !newMessageInput) {
+  const getScrollHeight = (elm: AutoSizedTextArea) => {
+    var savedValue = elm.value
+    elm.value = ''
+    elm._baseScrollHeight = elm.scrollHeight
+    elm.value = savedValue
+  }
+
+  const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
+    const maxHeight = 800;
+
+    const elm = event.target as AutoSizedTextArea;
+
+    if(elm.nodeName !== 'TEXTAREA') {
       return;
     }
+
+    const minRows = parseInt(elm.getAttribute('data-min-rows') || '0');
+
+    !elm._baseScrollHeight && getScrollHeight(elm);
+
+
+    if (elm.scrollHeight >= (maxHeight / 3)) {
+      return;
+    }
+
+    elm.rows = minRows;
+    const rows = elm.value === '' ? 0 : Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 14);
+
+    elm.rows = minRows + rows;
+    elm.style.height = `${32 + (14 * rows)}px`;
+
+    if (newMessageWrapper) {
+      newMessageWrapper.style.height = `${32 + (14 * rows)}px`;
+    }
+
+    if (newMessageInputBorder) {
+      newMessageInputBorder.style.height = `${34 + (14 * rows)}px`;
+    }
+
+  }
+
+  onMount(() => {
+    // @ts-expect-error TODO: fix types here
+    document.addEventListener('input', onExpandableTextareaInput);
+  });
+
+  const sendMessage = async () => {
+    if (!messages?.selectedSender ||
+      !newMessageInput ||
+      !newMessageInputBorder ||
+      !newMessageWrapper) {
+      return;
+    }
+
     const text = newMessageInput.value;
+
+    if (text.length === 0) {
+      return;
+    }
 
     const msg = {
       id: 'NEW_MESSAGE',
@@ -305,13 +364,21 @@ const Messages: Component = () => {
       created_at: Math.floor((new Date()).getTime() / 1000),
     };
 
-
     const success = await messages?.actions.sendMessage(messages.selectedSender.pubkey, msg.content)
 
     if (success) {
       messages?.actions.addToConversation([msg])
       newMessageInput.value = '';
+      newMessageInput.style.height = '32px';
+      newMessageInputBorder.style.height = '34px';
+      newMessageWrapper.style.height = '32px';
     }
+  };
+
+  let [inputFocused, setInputFocused] = createSignal(false);
+
+  const sendButtonClass = () => {
+    return inputFocused() ? styles.primaryButton : styles.secondaryButton;
   };
 
   return (
@@ -366,6 +433,32 @@ const Messages: Component = () => {
         </div>
 
         <div class={styles.conversation}>
+          <div class={styles.newMessage} ref={newMessageWrapper} >
+            <div class={styles.textAreaBorder} ref={newMessageInputBorder}>
+              <textarea
+                ref={newMessageInput}
+                data-min-rows={2}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+              ></textarea>
+            </div>
+            <button
+              class={sendButtonClass()}
+              onClick={sendMessage}
+            >
+              <div>
+                <span>
+                  {intl.formatMessage(
+                    {
+                      id: 'actions.directMessages.send',
+                      defaultMessage: 'send',
+                      description: 'Send direct message action, button label',
+                    }
+                  )}
+                </span>
+              </div>
+            </button>
+          </div>
           <div class={styles.messages} ref={conversationHolder}>
             <Show when={messages?.selectedSender}>
               <For
@@ -422,11 +515,6 @@ const Messages: Component = () => {
                 )}
               </For>
             </Show>
-          </div>
-
-          <div class={styles.newMessage}>
-            <textarea ref={newMessageInput}></textarea>
-            <button onClick={sendMessage}>send</button>
           </div>
         </div>
       </div>
