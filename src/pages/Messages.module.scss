@@ -79,6 +79,59 @@
     width: 300px;
     height: calc(100vh - 128px);
 
+    .sendersHeader {
+      height: 40px;
+      width: 100%;
+      background-color: var(--background-input);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-inline: 12px;
+      margin-bottom: 8px;
+      .senderCategorySelector {
+        display: flex;
+        .categorySelector {
+          border: none;
+          outline: none;
+          padding: 0;
+          margin: 0;
+          background: none;
+          color: var(--text-tertiary);
+          font-weight: 400;
+          font-size: 14px;
+          line-height: 16px;
+          &:focus {
+            background: none;
+            box-shadow: none;
+            outline: none;
+          }
+
+          &.highlight {
+            color: var(--text-primary);
+          }
+
+        }
+        .separator {
+          border-left: 1px solid var(--subtile-devider);
+          margin-inline: 8px;
+        }
+      }
+
+      .markAsRead {
+        border: none;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        background: none;
+        color: var(--accent-1);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 16px;
+        width: auto;
+      }
+    }
+
     .senderItem {
       position: relative;
       display: flex;

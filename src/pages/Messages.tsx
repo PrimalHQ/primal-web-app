@@ -382,10 +382,26 @@ const Messages: Component = () => {
     }
   };
 
-  let [inputFocused, setInputFocused] = createSignal(false);
+  const [inputFocused, setInputFocused] = createSignal(false);
+
+  const [senderCategory, setSenderCategory] = createSignal<'follows' | 'other'>('follows');
+
+  const areAllRead = () => {
+    return messages ?
+      Object.keys(messages.messageCountPerSender).reduce(
+        (acc, id) => acc &&
+          !(messages.messageCountPerSender[id] && messages.messageCountPerSender[id].cnt > 0), true) :
+      true;
+  };
 
   const sendButtonClass = () => {
     return inputFocused() ? styles.primaryButton : styles.secondaryButton;
+  };
+
+  const changeSenderCategory = (category: 'follows' | 'other') => {
+    if (senderCategory() !== category) {
+      setSenderCategory(category);
+    }
   };
 
   return (
@@ -407,6 +423,26 @@ const Messages: Component = () => {
 
       <div class={styles.messagesContent}>
         <div class={styles.sendersList}>
+          <div class={styles.sendersHeader}>
+            <div class={styles.senderCategorySelector}>
+              <button
+                class={`${styles.categorySelector} ${senderCategory() === 'follows' ? styles.highlight : ''}`}
+                onClick={() => changeSenderCategory('follows')}
+              >
+                FOLLOWS
+              </button>
+              <div class={styles.separator}></div>
+              <button
+                class={`${styles.categorySelector} ${senderCategory() === 'other' ? styles.highlight : ''}`}
+                onClick={() => changeSenderCategory('other')}
+              >
+                OTHER
+              </button>
+            </div>
+            <button class={styles.markAsRead} disabled={areAllRead()}>
+              Mark All Read
+            </button>
+          </div>
           <For each={orderedSenders()}>
             {
               (sender) => (
