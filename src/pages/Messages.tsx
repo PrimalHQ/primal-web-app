@@ -338,9 +338,16 @@ const Messages: Component = () => {
 
   }
 
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === 'Enter') {
+      !e.shiftKey && sendMessage();
+    }
+  };
+
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     document.addEventListener('input', onExpandableTextareaInput);
+    newMessageInput && newMessageInput.addEventListener('keyup', onKeyUp);
   });
 
   const sendMessage = async () => {
@@ -351,7 +358,7 @@ const Messages: Component = () => {
       return;
     }
 
-    const text = newMessageInput.value;
+    const text = newMessageInput.value.trim();
 
     if (text.length === 0) {
       return;
