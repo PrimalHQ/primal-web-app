@@ -414,6 +414,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         }
 
         if (content?.kind === Kind.Metadata) {
+          if (store.senders[content.pubkey]) {
+            return;
+          }
           const user = convertToUser(content);
 
           updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
