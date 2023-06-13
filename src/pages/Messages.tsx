@@ -21,6 +21,11 @@ import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
 import { style } from 'solid-js/web';
+import SearchOption from '../components/Search/SearchOption';
+import { debounce } from '../utils';
+import { useSearchContext } from '../contexts/SearchContext';
+import { createStore } from 'solid-js/store';
+import { editMentionRegex } from '../constants';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -313,6 +318,8 @@ const Messages: Component = () => {
     elm.value = savedValue
   }
 
+  const [message, setMessage] = createSignal('');
+
   const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
     const maxHeight = 800;
 
@@ -345,6 +352,10 @@ const Messages: Component = () => {
       newMessageInputBorder.style.height = `${34 + (14 * rows)}px`;
     }
 
+    debounce(() => {
+      setMessage(elm.value)
+    }, 300);
+
   }
 
   const onKeyUp = (e: KeyboardEvent) => {
@@ -373,16 +384,20 @@ const Messages: Component = () => {
       return;
     }
 
-    const text = newMessageInput.value.trim();
+    console.log('TEXT: ', message());
+
+    const text = message().trim();
 
     if (text.length === 0) {
       return;
     }
 
+    const content = prepareMessageForSending(text);
+
     const msg = {
       id: 'NEW_MESSAGE',
       sender: account?.publicKey || '',
-      content: text,
+      content,
       created_at: Math.floor((new Date()).getTime() / 1000),
     };
 
@@ -413,6 +428,120 @@ const Messages: Component = () => {
 
   const sendButtonClass = () => {
     return inputFocused() ? styles.primaryButton : styles.secondaryButton;
+  };
+
+// MENTIONING
+
+  const search = useSearchContext();
+
+  const [isMentioning, setMentioning] = createSignal(false);
+  const [query, setQuery] = createSignal('');
+
+  let mentionOptions: HTMLDivElement | undefined;
+
+  const prepareMessageForSending = (text: string) => {
+
+    return text.replace(editMentionRegex, (url) => {
+
+      const [_, name] = url.split('\`');
+      const user = userRefs[name];
+
+      // @ts-ignore
+      return ` nostr:${user.npub}`;
+    })
+  }
+
+  const checkForMentioning = (value: string) => {
+    const lastChar = value.charAt(value.length - 1);
+
+    if (lastChar === '@') {
+      setMentioning(true);
+      setQuery('');
+      return;
+    }
+
+    if (lastChar === ' ') {
+      setMentioning(false);
+      setQuery('');
+      return;
+    }
+
+    const words = value.split(' ');
+    const lastWord = words[words.length -1];
+
+    if (isMentioning()) {
+      const newQuery = lastWord.slice(lastWord.lastIndexOf('@')+1);
+
+      debounce(() => {
+        // @ts-ignore
+        setQuery(newQuery);
+      }, 500);
+    }
+
+    setMentioning(lastWord.includes('@'));
+  };
+
+  createEffect(() => {
+    const msg = message();
+
+    checkForMentioning(msg);
+  })
+
+  createEffect(() => {
+    if (query().length === 0) {
+      search?.actions.getRecomendedUsers();
+      return;
+    }
+
+    search?.actions.findUsers(query());
+  });
+
+  createEffect(() => {
+    if (isMentioning()) {
+      positionOptions();
+    }
+  });
+
+  const positionOptions = () => {
+    if (!newMessageInput || !mentionOptions || !newMessageWrapper) {
+      return;
+    }
+
+    let newBottom = 32;
+
+    mentionOptions.style.removeProperty('top');
+    mentionOptions.style.bottom = `${newBottom}px`;
+    mentionOptions.style.left = '0px';
+  };
+
+  const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
+
+  const selectUser = (user: PrimalUser) => {
+    if (!newMessageInput) {
+      return;
+    }
+
+    const name = userName(user);
+
+    setUserRefs((refs) => ({
+      ...refs,
+      [name]: user,
+    }));
+
+    let value = message();
+
+    value = value.slice(0, value.lastIndexOf('@'));
+
+    setQuery('');
+
+    setMessage(`${value}@\`${name}\` `);
+    newMessageInput.value = message();
+    newMessageInput.focus();
+
+
+    // Dispatch input event to recalculate UI position
+    const e = new Event('input', { bubbles: true, cancelable: true});
+    newMessageInput.dispatchEvent(e);
   };
 
   return (
@@ -534,6 +663,31 @@ const Messages: Component = () => {
                 </span>
               </div>
             </button>
+
+            <Show when={isMentioning()}>
+              <div
+                id="mention-auto"
+                class={styles.searchSuggestions}
+                ref={mentionOptions}
+              >
+                <For each={search?.users}>
+                  {(user) => (
+                    <SearchOption
+                      title={userName(user)}
+                      description={user.nip05}
+                      icon={<Avatar src={user.picture} size="xs" />}
+                      statNumber={search?.scores[user.pubkey]}
+                      statLabel={intl.formatMessage({
+                        id: 'search.users.followers',
+                        defaultMessage: 'followers',
+                        description: 'Followers label for user search results',
+                      })}
+                      onClick={() => selectUser(user)}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
           </div>
           <div class={styles.messages} ref={conversationHolder}>
             <Show when={messages?.selectedSender}>
@@ -554,6 +708,8 @@ const Messages: Component = () => {
                             {(msg) => (
                               <div
                                 class={styles.message}
+                                data-event-id={msg.id}
+                                title={date(msg.created_at || 0).date.toLocaleString()}
                                 innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
                               ></div>
                             )}
@@ -576,6 +732,8 @@ const Messages: Component = () => {
                           {(msg) => (
                             <div
                               class={styles.message}
+                              data-event-id={msg.id}
+                              title={date(msg.created_at || 0).date.toLocaleString()}
                               innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
                             ></div>
                           )}
