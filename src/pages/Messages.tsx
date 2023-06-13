@@ -439,14 +439,26 @@ const Messages: Component = () => {
               class={`${styles.categorySelector} ${messages?.senderRelation === 'follows' ? styles.highlight : ''}`}
               onClick={() => messages?.actions.changeSenderRelation('follows')}
             >
-              FOLLOWS
+              {intl.formatMessage(
+                {
+                  id: 'directMessages.relations.follows',
+                  defaultMessage: 'follows',
+                  description: 'DM relation selection label for follows',
+                }
+              )}
             </button>
             <div class={styles.separator}></div>
             <button
               class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
               onClick={() => messages?.actions.changeSenderRelation('other')}
             >
-              OTHER
+              {intl.formatMessage(
+                {
+                  id: 'directMessages.relations.other',
+                  defaultMessage: 'other',
+                  description: 'DM relation selection label for other',
+                }
+              )}
             </button>
           </div>
           <button
@@ -454,7 +466,13 @@ const Messages: Component = () => {
             disabled={areAllRead()}
             onClick={markAllAsRead}
           >
-            Mark All Read
+            {intl.formatMessage(
+              {
+                id: 'directMessages.markAsRead',
+                defaultMessage: 'Mark All Read',
+                description: 'DM mark as read label',
+              }
+            )}
           </button>
         </div>
         <div class={styles.sendersList}>
