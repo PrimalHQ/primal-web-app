@@ -130,6 +130,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const changeSenderRelation = (relation: UserRelation) => {
     updateStore('senderRelation', () => relation);
+    // @ts-ignore
+    updateStore('senders', () => undefined );
+    updateStore('senders', () => ({}));
     getMessagesPerSender(true);
   };
 
@@ -145,9 +148,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const getMessagesPerSender = (changeSender?: boolean) => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
       changeSender && updateStore('selectedSender', () => null);
-      // @ts-ignore
-      updateStore('senders', () => undefined );
-      updateStore('senders', () => ({}));
       // @ts-ignore
       getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
     }
