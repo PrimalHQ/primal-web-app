@@ -10,6 +10,7 @@ import NotificationItem from '../components/Notifications/NotificationItem';
 import NotificationItem2 from '../components/Notifications/NotificationItem2';
 import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
 import Paginator from '../components/Paginator/Paginator';
+import Search from '../components/Search/Search';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
@@ -1049,6 +1050,12 @@ const Notifications: Component = () => {
     <div>
       <Wormhole to="branding_holder">
         <Branding small={false} />
+      </Wormhole>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
       </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>

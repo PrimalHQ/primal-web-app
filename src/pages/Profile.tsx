@@ -34,6 +34,7 @@ import { VanityProfiles } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import { getMediaUrl } from '../lib/media';
+import Search from '../components/Search/Search';
 
 
 const Profile: Component = () => {
@@ -201,6 +202,12 @@ const Profile: Component = () => {
       <StickySidebar>
         <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
       </StickySidebar>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
+      </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>
         <div id="profile_banner" class={styles.banner}>

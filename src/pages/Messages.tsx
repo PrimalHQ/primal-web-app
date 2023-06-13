@@ -26,6 +26,9 @@ import { debounce } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
 import { editMentionRegex } from '../constants';
+import FindUsers from '../components/Search/FindUsers';
+import Search from '../components/Search/Search';
+import { useProfileContext } from '../contexts/ProfileContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -112,6 +115,7 @@ const Messages: Component = () => {
   const intl = useIntl();
   const messages = useMessagesContext();
   const account = useAccountContext();
+  const profile = useProfileContext();
 
   const navigate = useNavigate();
 
@@ -142,9 +146,19 @@ const Messages: Component = () => {
     const counts = messages.messageCountPerSender;
 
     const ids = Object.keys(senders);
-    const latests = ids.map(id => ({ latest_at: counts[id].latest_at, id }));
+    const latests = ids.map(id => ({ latest_at: counts[id]?.latest_at || null, id }));
 
-    const ordered = latests.sort((a, b) => b.latest_at - a.latest_at);
+    const ordered = latests.sort((a, b) => {
+      if (!a.latest_at) {
+        return -1;
+      }
+
+      if (!b.latest_at) {
+        return 1;
+      }
+
+      return b.latest_at - a.latest_at
+    });
 
     return ordered.map(o => senders[o.id]);
   };
@@ -384,8 +398,6 @@ const Messages: Component = () => {
       return;
     }
 
-    console.log('TEXT: ', message());
-
     const text = message().trim();
 
     if (text.length === 0) {
@@ -429,6 +441,14 @@ const Messages: Component = () => {
   const sendButtonClass = () => {
     return inputFocused() ? styles.primaryButton : styles.secondaryButton;
   };
+
+  const addUserToSenders = (user: PrimalUser | string) => {
+    if (typeof user === 'string') {
+      return;
+    }
+
+    messages?.actions.addSender(user);
+  }
 
 // MENTIONING
 
@@ -544,11 +564,39 @@ const Messages: Component = () => {
     newMessageInput.dispatchEvent(e);
   };
 
+  createEffect(() => {
+    if (account?.hasPublicKey()) {
+      profile?.actions.setProfileKey(account.publicKey)
+    }
+  });
+
   return (
     <div>
       <Wormhole to="branding_holder">
         <Branding small={false} />
       </Wormhole>
+
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search
+          placeholder={
+            intl.formatMessage(
+              {
+                id: 'placeholders.findUsers',
+                defaultMessage: 'find users',
+                description: 'Find users input placeholder',
+              }
+            )
+          }
+          onInputConfirm={() => {}}
+          noLinks={true}
+          hideDefault={true}
+          onUserSelect={addUserToSenders}
+        />
+      </Wormhole>
+
       <div id="central_header" class={styles.fullHeader}>
         <div>
           {intl.formatMessage(
@@ -562,6 +610,7 @@ const Messages: Component = () => {
       </div>
 
       <div class={styles.messagesContent}>
+
         <div class={styles.sendersHeader}>
           <div class={styles.senderCategorySelector}>
             <button
@@ -604,6 +653,7 @@ const Messages: Component = () => {
             )}
           </button>
         </div>
+
         <div class={styles.sendersList}>
           <For each={orderedSenders()}>
             {
@@ -618,9 +668,11 @@ const Messages: Component = () => {
                       <div class={styles.senderName}>
                         {userName(sender)}
                       </div>
-                      <div class={styles.lastMessageTime}>
-                        {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
-                      </div>
+                      <Show when={messages?.messageCountPerSender[sender.pubkey]}>
+                        <div class={styles.lastMessageTime}>
+                          {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
+                        </div>
+                      </Show>
                     </div>
                     <div class={styles.secondLine}>
                       {sender.nip05}
@@ -664,7 +716,7 @@ const Messages: Component = () => {
               </div>
             </button>
 
-            <Show when={isMentioning()}>
+            <Show when={isMentioning() && inputFocused()}>
               <div
                 id="mention-auto"
                 class={styles.searchSuggestions}

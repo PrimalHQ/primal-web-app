@@ -38,6 +38,8 @@ import { getEvents } from "../lib/feed";
 import { nip19 } from "nostr-tools";
 import { convertToNotes } from "../stores/note";
 import { sendEvent } from "../lib/notes";
+import { useResolvedPath } from "@solidjs/router";
+import { useProfileContext } from "./ProfileContext";
 
 type DirectMessage = {
   id: string,
@@ -71,6 +73,7 @@ export type MessagesContextStore = {
   referencePage: FeedPage,
   now: number,
   senderRelation: UserRelation,
+  addSender: PrimalUser | undefined,
   actions: {
     getMessagesPerSender: () => void,
     changeSenderRelation: (relation: UserRelation) => void,
@@ -79,6 +82,7 @@ export type MessagesContextStore = {
     addToConversation: (messages: DirectMessage[]) => void,
     sendMessage: (receiver: string, message: string) => Promise<boolean>,
     resetAllMessages: () => Promise<void>,
+    addSender: (user: PrimalUser) => void,
   }
 }
 
@@ -95,6 +99,7 @@ export const initialData = {
   referecedNotes: {},
   now: Math.floor(new Date().getTime() / 1000),
   senderRelation: 'follows' as UserRelation,
+  addSender: undefined,
   referencePage: {
     messages: [],
     users: {},
@@ -110,6 +115,7 @@ export const MessagesContext = createContext<MessagesContextStore>();
 export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
+  const profile = useProfileContext();
 
   const subidMsgCount = `msg_stats_${APP_ID}`;
   const subidMsgCountPerSender = `msg_count_p_s_ ${APP_ID}`;
@@ -399,6 +405,33 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     return await sendEvent(event, account?.relays);
   }
 
+  const addNewSender = (user: PrimalUser) => {
+    if (!store.senders[user.pubkey]) {
+      updateStore('senders', () => ({ [user.pubkey]: {...user }}));
+      updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
+    }
+
+    selectSender(user.npub);
+  };
+
+  const addSender = (user: PrimalUser) => {
+    const isFollowing = profile?.following.includes(user.pubkey);
+
+    console.log('FOLLOWS: ', profile?.following)
+
+    if (isFollowing && store.senderRelation === 'follows' ||
+      !isFollowing && store.senderRelation === 'other'
+    ) {
+      addNewSender(user);
+      return;
+    }
+
+    updateStore('addSender', () => ({ ...user }));
+
+    changeSenderRelation(isFollowing ? 'follows' : 'other');
+
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -438,6 +471,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EOSE') {
+        if (store.addSender !== undefined) {
+          const key = store.addSender.pubkey;
+          const user = { ...store.addSender }
+
+          updateStore('senders', () => ({ [key]: user }));
+          updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
+          updateStore('addSender', () => undefined);
+        }
         const senderIds = Object.keys(store.senders);
         if (!store.selectedSender) {
           selectSender(senderIds[0]);
@@ -646,6 +687,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       sendMessage,
       changeSenderRelation,
       resetAllMessages,
+      addSender,
     },
   });
 

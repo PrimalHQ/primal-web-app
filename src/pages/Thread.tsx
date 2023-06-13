@@ -16,6 +16,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { sortByRecency } from '../stores/note';
 import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
+import Search from '../components/Search/Search';
 
 
 const Thread: Component = () => {
@@ -113,6 +114,12 @@ const Thread: Component = () => {
     <div>
       <Wormhole to='branding_holder'>
         <PageNav />
+      </Wormhole>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
       </Wormhole>
 
       <Wormhole to='right_sidebar'>

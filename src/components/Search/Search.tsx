@@ -15,7 +15,13 @@ import styles from './Search.module.scss';
 import SearchOption from './SearchOption';
 
 
-const Search: Component = () => {
+const Search: Component<{
+  onInputConfirm?: (query: string) => void,
+  onUserSelect?: (selected: PrimalUser | string) => void,
+  noLinks?: boolean,
+  hideDefault?: boolean,
+  placeholder?: string,
+}> = (props) => {
 
   const toaster = useToastContext();
   const search = useSearchContext();
@@ -39,7 +45,12 @@ const Search: Component = () => {
     const q = data.get('searchQuery') as string || '';
 
     if (q.length > 0) {
-      navigate(`/search/${q.replaceAll('#', '%23')}`);
+      if (props.onInputConfirm) {
+        props.onInputConfirm(q);
+      }
+      else {
+        navigate(`/search/${q.replaceAll('#', '%23')}`);
+      }
       onBlur();
       resetQuery();
     }
@@ -86,6 +97,12 @@ const Search: Component = () => {
     }
   };
 
+  const selectUser = (user: PrimalUser) => {
+    if (props.onUserSelect) {
+      props.onUserSelect(user);
+    }
+  }
+
   createEffect(() => {
     if (!isFocused()) {
       return;
@@ -112,6 +129,7 @@ const Search: Component = () => {
           name='searchQuery'
           ref={input}
           placeholder={
+            props.placeholder ??
             intl.formatMessage(
               {
                 id: 'placeholders.search',
@@ -136,14 +154,30 @@ const Search: Component = () => {
             </div>
           </Show>
           <Show
-            when={query().length > 0}
-            fallback={
+              when={!props.hideDefault}
+            >
+            <Show
+              when={query().length > 0}
+              fallback={
+                <SearchOption
+                  title={intl.formatMessage({
+                    id: 'search.emptyQueryResult',
+                    defaultMessage: 'type to',
+                    description: 'Label shown is search resuls when no term is provided',
+                  })}
+                  description={intl.formatMessage({
+                    id: 'search.description',
+                    defaultMessage: 'search nostr',
+                    description: 'Label explaining full search action',
+                  })}
+                  icon={<div class={styles.searchIcon}></div>}
+                  underline={true}
+                />
+              }
+            >
               <SearchOption
-                title={intl.formatMessage({
-                  id: 'search.emptyQueryResult',
-                  defaultMessage: 'type to',
-                  description: 'Label shown is search resuls when no term is provided',
-                })}
+                href={props.noLinks ? undefined : `/search/${queryUrl()}`}
+                title={query()}
                 description={intl.formatMessage({
                   id: 'search.description',
                   defaultMessage: 'search nostr',
@@ -151,27 +185,15 @@ const Search: Component = () => {
                 })}
                 icon={<div class={styles.searchIcon}></div>}
                 underline={true}
+                onClick={resetQuery}
               />
-            }
-          >
-            <SearchOption
-              href={`/search/${queryUrl()}`}
-              title={query()}
-              description={intl.formatMessage({
-                id: 'search.description',
-                defaultMessage: 'search nostr',
-                description: 'Label explaining full search action',
-              })}
-              icon={<div class={styles.searchIcon}></div>}
-              underline={true}
-              onClick={resetQuery}
-            />
+            </Show>
           </Show>
 
           <For each={search?.users}>
             {(user) => (
               <SearchOption
-                href={`/profile/${user.npub}`}
+                href={props.noLinks ? undefined : `/profile/${user.npub}`}
                 title={userName(user)}
                 description={user.nip05}
                 icon={<Avatar src={user.picture} size="xs" />}
@@ -181,7 +203,7 @@ const Search: Component = () => {
                   defaultMessage: 'followers',
                   description: 'Followers label for user search results',
                 })}
-                onClick={resetQuery}
+                onClick={() => selectUser(user)}
               />
             )}
           </For>

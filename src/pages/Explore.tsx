@@ -12,6 +12,7 @@ import { useSettingsContext } from '../contexts/SettingsContext';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
+import Search from '../components/Search/Search';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -71,6 +72,12 @@ const Explore: Component = () => {
           >
             <PageNav />
           </Show>
+        </Wormhole>
+
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
         </Wormhole>
 
         <div id="central_header" class={styles.fullHeader}>

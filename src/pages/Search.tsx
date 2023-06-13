@@ -19,6 +19,7 @@ import Loader from '../components/Loader/Loader';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { scopeLabels, timeframeLabels } from '../constants';
+import SearchComponent from '../components/Search/Search';
 
 const Search: Component = () => {
   const params = useParams();
@@ -81,6 +82,12 @@ const Search: Component = () => {
       <StickySidebar>
         <SearchSidebar users={search?.contentUsers || []} />
       </StickySidebar>
+
+      <Wormhole
+        to="search_section"
+      >
+        <SearchComponent />
+      </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>
         <div class={styles.caption}>

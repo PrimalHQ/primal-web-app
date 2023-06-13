@@ -7,6 +7,7 @@ import ThemeChooser from '../components/ThemeChooser/ThemeChooser';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
 import SettingsZap from '../components/SettingsZap/SettingsZap';
+import Search from '../components/Search/Search';
 
 
 const Settings: Component = () => {
@@ -17,6 +18,12 @@ const Settings: Component = () => {
     <div class={styles.settingsContainer}>
       <Wormhole to="branding_holder">
         <Branding small={false} />
+      </Wormhole>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
       </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>

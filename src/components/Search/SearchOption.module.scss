@@ -6,6 +6,7 @@
   margin: 4px;
   text-decoration: none;
   border-radius: 4px;
+  cursor: pointer;
 
   &:hover, &:focus {
     background-color: var(--background-input);

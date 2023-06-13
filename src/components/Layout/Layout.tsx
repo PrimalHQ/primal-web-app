@@ -3,7 +3,6 @@ import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import styles from './Layout.module.scss';
 
 import { Outlet } from '@solidjs/router';
-import Search from '../Search/Search';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
@@ -97,7 +96,8 @@ const Layout: Component = () => {
 
         <div class={styles.rightColumn}>
           <div class={styles.rightHeader}>
-            <Search />
+            <div id="search_section">
+            </div>
           </div>
           <div class={styles.rightContent}>
             <div id="right_sidebar">

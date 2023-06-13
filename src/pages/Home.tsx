@@ -27,6 +27,7 @@ import { PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
+import Search from '../components/Search/Search';
 
 
 const Home: Component = () => {
@@ -134,6 +135,12 @@ const Home: Component = () => {
         to="branding_holder"
       >
         <Branding small={false} isHome={true} />
+      </Wormhole>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
       </Wormhole>
 
       <div class={styles.normalCentralHeader}>
