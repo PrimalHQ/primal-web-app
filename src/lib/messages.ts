@@ -39,11 +39,11 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   ]));
 }
 
-export const getMessageCounts = (receiver: string, relation: UserRelation, subid: string) => {
+export const getMessageCounts = (user_pubkey: string, relation: UserRelation, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsg_contacts", { receiver, relation }]},
+    {cache: ["get_directmsg_contacts", { user_pubkey, relation }]},
   ]));
 }
 
