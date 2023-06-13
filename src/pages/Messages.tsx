@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { nip19, Relay } from 'nostr-tools';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import EditBox from '../components/NewNote/EditBox/EditBox';
@@ -8,7 +8,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { useMessagesContext } from '../contexts/MessagesContext';
 import { getMessageCounts } from '../lib/messages';
 import { truncateNpub, userName } from '../stores/profile';
-import { PrimalNote, PrimalUser } from '../types/primal';
+import { PrimalNote, PrimalUser, UserRelation } from '../types/primal';
 import { date } from '../lib/dates';
 
 import styles from './Messages.module.scss';
@@ -130,8 +130,8 @@ const Messages: Component = () => {
   };
 
   const orderedSenders = () => {
-    if (!messages) {
-      return;
+    if (!messages || !messages.senders) {
+      return [];
     }
     const senders = messages.senders;
     const counts = messages.messageCountPerSender;
@@ -168,21 +168,39 @@ const Messages: Component = () => {
   }
 
   createEffect(() => {
-    if (!messages || Object.keys(messages.senders).length === 0) {
+    if (!params.sender && messages?.senders) {
+      const senderIds = Object.keys(messages.senders);
+      senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]]}`);
       return;
     }
 
-
-    if (params.sender && messages?.senders[senderPubkey()]) {
-      messages?.actions.selectSender(params.sender);
+    if (messages?.selectedSender &&
+      params.sender !== messages?.selectedSender?.npub &&
+      params.sender !== messages?.selectedSender?.pubkey
+    ) {
+      navigate(`/messages/${messages?.selectedSender.npub}`);
       return;
     }
-
-    const first = Object.keys(messages.senders)[0];
-
-    selectSender(messages.senders[first].npub);
-
   });
+
+  // createEffect(() => {
+  //   if (!messages || Object.keys(messages.senders).length === 0) {
+  //     return;
+  //   }
+
+
+  //   if (params.sender && messages?.senders[senderPubkey()]) {
+  //     console.log('select sender 1')
+  //     messages.actions.selectSender(params.sender);
+  //     return;
+  //   }
+
+  //   const first = Object.keys(messages.senders)[0];
+
+  //   console.log('select sender 2')
+  //   selectSender(messages.senders[first].npub);
+
+  // });
 
   createEffect(() => {
     const count = messages?.messageCount || 0;
@@ -210,17 +228,8 @@ const Messages: Component = () => {
     }
   });
 
-  const senders = () => {
-    if (!messages?.senders) {
-      return [];
-    }
-
-
-    return Object.keys(messages?.senders).map(id => messages?.senders[id]);
-  };
-
   const user = (pubkey: string) => {
-    return messages?.senders[pubkey];
+    return messages?.senders && messages.senders[pubkey];
   }
 
   const mgsFromSender = (sender: PrimalUser) => {
@@ -232,7 +241,7 @@ const Messages: Component = () => {
   };
 
   const selectSender = (senderNpub: string) => {
-    navigate(`/messages/${senderNpub}`)
+    messages?.actions.selectSender(senderNpub);
   }
 
   const highlightHashtags = (text: string) => {
@@ -350,6 +359,12 @@ const Messages: Component = () => {
     newMessageInput && newMessageInput.addEventListener('keyup', onKeyUp);
   });
 
+  onCleanup(() => {
+    // @ts-expect-error TODO: fix types here
+    document.removeEventListener('input', onExpandableTextareaInput);
+    newMessageInput && newMessageInput.removeEventListener('keyup', onKeyUp);
+  });
+
   const sendMessage = async () => {
     if (!messages?.selectedSender ||
       !newMessageInput ||
@@ -384,8 +399,6 @@ const Messages: Component = () => {
 
   const [inputFocused, setInputFocused] = createSignal(false);
 
-  const [senderCategory, setSenderCategory] = createSignal<'follows' | 'other'>('follows');
-
   const areAllRead = () => {
     return messages ?
       Object.keys(messages.messageCountPerSender).reduce(
@@ -396,12 +409,6 @@ const Messages: Component = () => {
 
   const sendButtonClass = () => {
     return inputFocused() ? styles.primaryButton : styles.secondaryButton;
-  };
-
-  const changeSenderCategory = (category: 'follows' | 'other') => {
-    if (senderCategory() !== category) {
-      setSenderCategory(category);
-    }
   };
 
   return (
@@ -425,15 +432,15 @@ const Messages: Component = () => {
         <div class={styles.sendersHeader}>
           <div class={styles.senderCategorySelector}>
             <button
-              class={`${styles.categorySelector} ${senderCategory() === 'follows' ? styles.highlight : ''}`}
-              onClick={() => changeSenderCategory('follows')}
+              class={`${styles.categorySelector} ${messages?.senderRelation === 'follows' ? styles.highlight : ''}`}
+              onClick={() => messages?.actions.changeSenderRelation('follows')}
             >
               FOLLOWS
             </button>
             <div class={styles.separator}></div>
             <button
-              class={`${styles.categorySelector} ${senderCategory() === 'other' ? styles.highlight : ''}`}
-              onClick={() => changeSenderCategory('other')}
+              class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
+              onClick={() => messages?.actions.changeSenderRelation('other')}
             >
               OTHER
             </button>

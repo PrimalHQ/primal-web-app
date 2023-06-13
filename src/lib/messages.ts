@@ -1,6 +1,6 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow } from "../types/primal";
+import { NostrWindow, UserRelation } from "../types/primal";
 
 
 export const subscribeToMessagesStats = (pubkey: string, subid: string) => {
@@ -39,11 +39,11 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   ]));
 }
 
-export const getMessageCounts = (receiver: string, subid: string) => {
+export const getMessageCounts = (receiver: string, relation: UserRelation, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsg_contacts", { receiver, relation: 'any' }]},
+    {cache: ["get_directmsg_contacts", { receiver, relation }]},
   ]));
 }
 

@@ -461,4 +461,6 @@ export type PrimalNotification  = {
   satszapped?: number,
 };
 
-type SortedNotifications = Record<number, PrimalNotification[]>;
+export type SortedNotifications = Record<number, PrimalNotification[]>;
+
+export type UserRelation = 'follows' | 'other' | 'any';

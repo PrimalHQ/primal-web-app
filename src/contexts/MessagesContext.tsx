@@ -27,6 +27,7 @@ import {
   NoteActions,
   PrimalNote,
   PrimalUser,
+  UserRelation,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { getMessageCounts, getNewMessages, getOldMessages, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
@@ -69,8 +70,10 @@ export type MessagesContextStore = {
   referecedNotes: Record<string, PrimalNote>,
   referencePage: FeedPage,
   now: number,
+  senderRelation: UserRelation,
   actions: {
     getMessagesPerSender: () => void,
+    changeSenderRelation: (relation: UserRelation) => void,
     selectSender: (senderId: string) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
@@ -90,6 +93,7 @@ export const initialData = {
   referecedUsers: {},
   referecedNotes: {},
   now: Math.floor(new Date().getTime() / 1000),
+  senderRelation: 'follows' as UserRelation,
   referencePage: {
     messages: [],
     users: {},
@@ -123,6 +127,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
+  const changeSenderRelation = (relation: UserRelation) => {
+    updateStore('senderRelation', () => relation);
+    getMessagesPerSender(true);
+  };
+
   const subToMessagesStats = () => {
     if (!account?.hasPublicKey()) {
       return;
@@ -132,10 +141,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     subscribeToMessagesStats(account?.publicKey, subidMsgCount);
   }
 
-  const getMessagesPerSender = () => {
+  const getMessagesPerSender = (changeSender?: boolean) => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
+      changeSender && updateStore('selectedSender', () => null);
       // @ts-ignore
-      getMessageCounts(account.publicKey, subidMsgCountPerSender);
+      updateStore('senders', () => undefined );
+      updateStore('senders', () => ({}));
+      // @ts-ignore
+      getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
     }
   };
 
@@ -159,6 +172,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
+    updateStore('selectedSender', () => null);
     updateStore('selectedSender', () => ({ ...sender }));
   };
 
@@ -390,16 +404,26 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
 
     if (subId === subidMsgCountPerSender) {
-      if (content?.kind === Kind.MesagePerSenderStats) {
-        const senderCount = JSON.parse(content.content);
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.MesagePerSenderStats) {
+          const senderCount = JSON.parse(content.content);
 
-        updateStore('messageCountPerSender', () => ({ ...senderCount }));
+          updateStore('messageCountPerSender', () => ({ ...senderCount }));
+        }
+
+        if (content?.kind === Kind.Metadata) {
+          const user = convertToUser(content);
+
+          updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
+        }
       }
 
-      if (content?.kind === Kind.Metadata) {
-        const user = convertToUser(content);
-
-        updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
+      if (type === 'EOSE') {
+        const senderIds = Object.keys(store.senders);
+        if (!store.selectedSender) {
+          selectSender(senderIds[0]);
+        }
+        // !store.selectedSender && updateStore('selectedSender', () => ({ ...store.senders[senderIds[0]] }));
       }
     }
 
@@ -562,7 +586,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       account?.hasPublicKey() &&
       store.selectedSender &&
       store.messageCountPerSender[store.selectedSender?.pubkey] &&
-      store.messageCountPerSender[store.selectedSender.pubkey].cnt > 0) {
+      store.messageCountPerSender[store.selectedSender.pubkey].cnt > 0
+    ) {
 
       updateStore('encryptedMessages', () => []);
 
@@ -600,6 +625,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       addToConversation,
       resetConversationLoaded,
       sendMessage,
+      changeSenderRelation,
     },
   });
 
