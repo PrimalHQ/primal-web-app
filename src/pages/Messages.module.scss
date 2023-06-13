@@ -95,13 +95,14 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 16px;
+
         &:focus {
           background: none;
           box-shadow: none;
           outline: none;
         }
 
-        &.highlight {
+        &.highlight, &:hover {
           color: var(--text-primary);
         }
 
@@ -123,6 +124,12 @@
       font-size: 13px;
       line-height: 16px;
       width: auto;
+
+      &:focus {
+        background: none;
+        box-shadow: none;
+        outline: none;
+      }
     }
   }
 
@@ -131,7 +138,7 @@
     flex-direction: column;
     overflow-y: scroll;
     width: 308px;
-    height: calc(100vh - 128px);
+    height: calc(100vh - 176px);
     padding-right: 8px;
 
 
@@ -202,7 +209,7 @@
     height: calc(100vh - 128px);
     z-index: 13;
     overflow: hidden;
-    padding: 20px;
+    padding: 12px;
     display: flex;
     flex-direction: column-reverse;
 
@@ -213,6 +220,7 @@
       overflow-y: scroll;
       display: flex;
       flex-direction: column-reverse;
+      padding-right: 8px;
 
       .myThread {
         @include thread(true);
@@ -273,7 +281,7 @@
       .secondaryButton {
         position: absolute;
         top: 0;
-        right: 0;
+        right: 14px;
         width: 80px;
         height: 32px;
         border: none;
@@ -300,7 +308,7 @@
       .primaryButton {
         position: absolute;
         top: 0;
-        right: 0;
+        right: 14px;
         width: 80px;
         height: 32px;
         border: none;

@@ -78,6 +78,7 @@ export type MessagesContextStore = {
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
     sendMessage: (receiver: string, message: string) => Promise<boolean>,
+    resetAllMessages: () => Promise<void>,
   }
 }
 
@@ -179,6 +180,19 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('selectedSender', () => ({ ...sender }));
   };
 
+  const resetAllMessages = async () => {
+    const senderIds = Object.keys(store.senders);
+
+    for (let i=0;i<senderIds.length;i++) {
+      const pubkey = senderIds[i];
+      const count = store.messageCountPerSender[pubkey]?.cnt || 0;
+
+      if (count > 0) {
+        await resetMessageCount(pubkey, subidResetMsgCount);
+      }
+    }
+  };
+
   const getConversationWithSender = (sender: PrimalUser) => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
       // @ts-ignore
@@ -198,7 +212,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     for (let i = 0; i < store.encryptedMessages.length; i++) {
       const eMsg = store.encryptedMessages[i];
 
-      if (!store.messages.find(m => eMsg.id === m.id)) {
+      if (!store.messages.find(m => eMsg.id === m.id) && store.selectedSender) {
         const content = await nostr.nip04.decrypt(store.selectedSender.pubkey, eMsg.content);
 
         const msg: DirectMessage = {
@@ -631,6 +645,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       resetConversationLoaded,
       sendMessage,
       changeSenderRelation,
+      resetAllMessages,
     },
   });
 

@@ -170,7 +170,7 @@ const Messages: Component = () => {
   createEffect(() => {
     if (!params.sender && messages?.senders) {
       const senderIds = Object.keys(messages.senders);
-      senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]]}`);
+      senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]].npub}`);
       return;
     }
 
@@ -407,6 +407,10 @@ const Messages: Component = () => {
       true;
   };
 
+  const markAllAsRead = () => {
+    messages?.actions.resetAllMessages();
+  };
+
   const sendButtonClass = () => {
     return inputFocused() ? styles.primaryButton : styles.secondaryButton;
   };
@@ -445,7 +449,11 @@ const Messages: Component = () => {
               OTHER
             </button>
           </div>
-          <button class={styles.markAsRead} disabled={areAllRead()}>
+          <button
+            class={styles.markAsRead}
+            disabled={areAllRead()}
+            onClick={markAllAsRead}
+          >
             Mark All Read
           </button>
         </div>
