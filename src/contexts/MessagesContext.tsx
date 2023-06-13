@@ -74,7 +74,7 @@ export type MessagesContextStore = {
   actions: {
     getMessagesPerSender: () => void,
     changeSenderRelation: (relation: UserRelation) => void,
-    selectSender: (senderId: string) => void,
+    selectSender: (senderId: string | undefined) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
     sendMessage: (receiver: string, message: string) => Promise<boolean>,
@@ -152,7 +152,10 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const selectSender = async (senderId: string) => {
+  const selectSender = async (senderId: string | undefined) => {
+    if (!senderId) {
+      return;
+    }
 
     let pubkey = senderId;
 
@@ -379,9 +382,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    const signed = await nostr.signEvent(event);
-
-    return await sendEvent(signed, account?.relays);
+    return await sendEvent(event, account?.relays);
   }
 
 
@@ -409,6 +410,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           const senderCount = JSON.parse(content.content);
 
           updateStore('messageCountPerSender', () => ({ ...senderCount }));
+          updateMessageTimings();
         }
 
         if (content?.kind === Kind.Metadata) {
