@@ -24,7 +24,7 @@
     display: flex;
     flex-direction: column-reverse;
     align-items: flex-start;
-    width: calc(100% - 48px);
+    max-width: calc(100% - 48px);
 
     .message {
       @include messageContent();
@@ -59,6 +59,7 @@
   height: 120px;
   align-items: center;
   justify-content: left;
+  padding-top: 6px;
 
   >div {
     font-weight: 300;
@@ -215,10 +216,20 @@
 
       .myThread {
         @include thread(true);
+        .threadMessages {
+          .message {
+            background-color: var(--subtile-devider);
+          }
+        }
       }
 
       .theirThread {
         @include thread(false);
+        .threadMessages {
+          .message {
+            background-color: var(--background-input);
+          }
+        }
       }
     }
 
