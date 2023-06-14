@@ -29,6 +29,8 @@ import { editMentionRegex } from '../constants';
 import FindUsers from '../components/Search/FindUsers';
 import Search from '../components/Search/Search';
 import { useProfileContext } from '../contexts/ProfileContext';
+import Paginator from '../components/Paginator/Paginator';
+import { store } from '../services/StoreService';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -201,25 +203,6 @@ const Messages: Component = () => {
       return;
     }
   });
-
-  // createEffect(() => {
-  //   if (!messages || Object.keys(messages.senders).length === 0) {
-  //     return;
-  //   }
-
-
-  //   if (params.sender && messages?.senders[senderPubkey()]) {
-  //     console.log('select sender 1')
-  //     messages.actions.selectSender(params.sender);
-  //     return;
-  //   }
-
-  //   const first = Object.keys(messages.senders)[0];
-
-  //   console.log('select sender 2')
-  //   selectSender(messages.senders[first].npub);
-
-  // });
 
   createEffect(() => {
     const count = messages?.messageCount || 0;
@@ -801,6 +784,11 @@ const Messages: Component = () => {
                 )}
               </For>
             </Show>
+
+            <Paginator
+              loadNextPage={messages?.actions.getNextConversationPage}
+              isSmall={true}
+            />
           </div>
         </div>
       </div>

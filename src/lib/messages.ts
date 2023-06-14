@@ -47,7 +47,7 @@ export const getMessageCounts = (user_pubkey: string, relation: UserRelation, su
   ]));
 }
 
-export const getOldMessages = (receiver: string, sender: string, subid: string, until = 0, limit = 200) => {
+export const getOldMessages = (receiver: string, sender: string, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';
 

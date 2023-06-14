@@ -83,6 +83,7 @@ export type MessagesContextStore = {
     sendMessage: (receiver: string, message: string) => Promise<boolean>,
     resetAllMessages: () => Promise<void>,
     addSender: (user: PrimalUser) => void,
+    getNextConversationPage: () => void,
   }
 }
 
@@ -121,6 +122,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const subidMsgCountPerSender = `msg_count_p_s_ ${APP_ID}`;
   const subidResetMsgCount = `msg_reset_ ${APP_ID}`;
   const subidCoversation = `msg_conv_ ${APP_ID}`;
+  const subidCoversationNextPage = `msg_conv_np_ ${APP_ID}`;
   const subidNewMsg = `msg_new_ ${APP_ID}`;
   const subidNoteRef = `msg_note_ ${APP_ID}`;
   const subidUserRef = `msg_user_ ${APP_ID}`;
@@ -199,14 +201,28 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const getConversationWithSender = (sender: PrimalUser) => {
-    if (account?.isKeyLookupDone && account.hasPublicKey()) {
-      // @ts-ignore
-      getOldMessages(account.publicKey, sender.pubkey, subidCoversation);
+  const getConversationWithSender = (sender: PrimalUser | null, until = 0) => {
+    if (!account?.isKeyLookupDone || !account.hasPublicKey() || !sender) {
+      return;
     }
+    // @ts-ignore
+    getOldMessages(account.publicKey, sender.pubkey, subidCoversation, until);
   };
 
-  const decryptMessages = async (areNewMessages?: boolean) => {
+  const getNextConversationPage = () => {
+    if (!account?.isKeyLookupDone || !account.hasPublicKey() || !store.selectedSender) {
+      return;
+
+    }
+    const lastMessage = store.messages[store.messages.length - 1] || { created_at: 0};
+
+    updateStore('encryptedMessages', () => []);
+
+    // @ts-ignore
+    getOldMessages(account.publicKey, store.selectedSender.pubkey, subidCoversationNextPage, lastMessage.created_at);
+  };
+
+  const decryptMessages = async (then: (messages: DirectMessage[]) => void) => {
     const nostr = getNostr();
 
     if (nostr === undefined || store.selectedSender === null) {
@@ -237,7 +253,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('messageCountPerSender', store.selectedSender.pubkey, 'cnt', 0)
 
     parseForMentions(newMessages);
-    areNewMessages ? addToConversation(newMessages, true) : generateConversation(newMessages);
+    then(newMessages);
+    // areNewMessages ? addToConversation(newMessages, true) : generateConversation(newMessages);
   };
 
   const parseForMentions = (messages: DirectMessage[]) => {
@@ -303,6 +320,36 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   };
 
+  const prependToConversation = (messages: DirectMessage[]) => {
+    let firstThread = store.conversation[store.conversation.length - 1];
+
+    for (let i=0;i<messages.length;i++) {
+      const message = messages[i];
+
+      if (firstThread && message.sender === firstThread.author) {
+
+        updateStore('conversation',
+          store.conversation.length - 1,
+          'messages',
+          (msgs) => [...msgs, message]
+        );
+      }
+      else {
+        firstThread = {
+          author: message.sender,
+          messages: [message],
+        }
+
+        updateStore('conversation', (conv) => [...conv, { ...firstThread }]);
+      }
+
+      // updateStore('isConversationLoaded', () => true);
+      updateMessageTimings();
+
+    };
+
+  };
+
   const addToConversation = (messages: DirectMessage[], ignoreMy?: boolean) => {
     let lastThread = store.conversation[0];
 
@@ -334,7 +381,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       updateMessageTimings();
 
     };
-
   };
 
   const generateConversation = (messages: DirectMessage[]) => {
@@ -417,8 +463,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const addSender = (user: PrimalUser) => {
     const isFollowing = profile?.following.includes(user.pubkey);
 
-    console.log('FOLLOWS: ', profile?.following)
-
     if (isFollowing && store.senderRelation === 'follows' ||
       !isFollowing && store.senderRelation === 'other'
     ) {
@@ -487,7 +531,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
     }
 
-    if (subId === subidCoversation) {
+    if (subId === subidCoversation || subId === subidCoversationNextPage) {
       if (type === 'EVENT') {
         if (content?.kind === Kind.EncryptedDirectMessage) {
           updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
@@ -495,7 +539,15 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EOSE') {
-        decryptMessages();
+        if (subId === subidCoversation) {
+          decryptMessages(generateConversation);
+          return;
+        }
+
+        if (subId === subidCoversationNextPage) {
+          decryptMessages(prependToConversation);
+          return;
+        }
       }
     }
 
@@ -507,7 +559,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EOSE') {
-        decryptMessages(true);
+        decryptMessages((msgs) => addToConversation(msgs, true));
       }
     }
 
@@ -688,6 +740,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       changeSenderRelation,
       resetAllMessages,
       addSender,
+      getNextConversationPage,
     },
   });
 

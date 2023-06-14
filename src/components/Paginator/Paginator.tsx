@@ -1,7 +1,10 @@
 import { onCleanup, onMount } from "solid-js";
 import styles from  "./Paginator.module.scss";
 
-export default function Paginator(props: { loadNextPage: (() => void) | undefined }) {
+export default function Paginator(props: {
+  loadNextPage: (() => void) | undefined,
+  isSmall?: boolean,
+}) {
   let observer: IntersectionObserver | undefined;
 
   onMount(() => {
@@ -25,7 +28,7 @@ export default function Paginator(props: { loadNextPage: (() => void) | undefine
   });
 
   return (
-    <div id="pagination_trigger" class={styles.paginator}>
+    <div id="pagination_trigger" class={props.isSmall ? styles.smallPaginator : styles.paginator}>
     </div>
   )
 }
