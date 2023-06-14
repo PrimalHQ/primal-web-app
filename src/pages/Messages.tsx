@@ -357,6 +357,7 @@ const Messages: Component = () => {
 
   const onKeyUp = (e: KeyboardEvent) => {
     if (e.code === 'Enter') {
+      setMessage(message().trim());
       !e.shiftKey && sendMessage();
     }
   };
@@ -386,6 +387,7 @@ const Messages: Component = () => {
     if (text.length === 0) {
       return;
     }
+    setMessage('');
 
     const content = prepareMessageForSending(text);
 
@@ -395,6 +397,7 @@ const Messages: Component = () => {
       content,
       created_at: Math.floor((new Date()).getTime() / 1000),
     };
+
 
     const success = await messages?.actions.sendMessage(messages.selectedSender.pubkey, msg.content)
 
@@ -422,7 +425,7 @@ const Messages: Component = () => {
   };
 
   const sendButtonClass = () => {
-    return inputFocused() ? styles.primaryButton : styles.secondaryButton;
+    return inputFocused() && message().trim().length > 0 ? styles.primaryButton : styles.secondaryButton;
   };
 
   const addUserToSenders = (user: PrimalUser | string) => {
@@ -689,6 +692,7 @@ const Messages: Component = () => {
                 data-min-rows={2}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
+                value={message()}
               ></textarea>
             </div>
             <button
