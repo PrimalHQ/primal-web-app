@@ -148,7 +148,15 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
       }
 
       if (nostrNestsRegex.test(url)) {
-        return `<iframe src="${url}" allow="microphone" width="480" height="680" style="maxHeight: 680"></iframe>`;
+        return `
+          <iframe
+            src="${url}"
+            allow="microphone"
+            width="480"
+            height="680"
+            style="maxHeight: 680"
+            sandbox="allow-same-origin allow-scripts"
+          ></iframe>`;
       }
 
       if (wavlakeRegex.test(url)) {
