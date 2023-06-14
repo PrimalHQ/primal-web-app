@@ -356,13 +356,14 @@ const Messages: Component = () => {
   }
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.code === 'Enter' && !e.shiftKey)
+    if (e.code === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       debounce(() => {
         sendMessage();
       }, 300);
 
       return false;
+    }
   };
 
   onMount(() => {
@@ -526,6 +527,7 @@ const Messages: Component = () => {
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
 
   const selectUser = (user: PrimalUser) => {
+
     if (!newMessageInput) {
       return;
     }
@@ -545,6 +547,7 @@ const Messages: Component = () => {
 
     setMessage(`${value}@\`${name}\` `);
     newMessageInput.value = message();
+
     newMessageInput.focus();
 
 
@@ -715,7 +718,7 @@ const Messages: Component = () => {
               </div>
             </button>
 
-            <Show when={isMentioning() && inputFocused()}>
+            <Show when={isMentioning()}>
               <div
                 id="mention-auto"
                 class={styles.searchSuggestions}
