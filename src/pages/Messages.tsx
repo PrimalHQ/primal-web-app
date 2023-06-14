@@ -575,9 +575,9 @@ const Messages: Component = () => {
           placeholder={
             intl.formatMessage(
               {
-                id: 'placeholders.findUsers',
-                defaultMessage: 'find users',
-                description: 'Find users input placeholder',
+                id: 'placeholders.findUser',
+                defaultMessage: 'find user',
+                description: 'Find user input placeholder',
               }
             )
           }
