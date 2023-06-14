@@ -67,3 +67,30 @@ export const getNewMessages = (receiver: string, sender: string, subid: string, 
     {cache: ["get_directmsgs", { receiver, sender, since, limit }]},
   ]));
 }
+
+export const markAllAsRead = async (subid: string) => {
+
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (nostr === undefined) {
+    return false;
+  }
+
+  const event = {
+    content: `{ "description": "mark all messages as read"}`,
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.ceil((new Date()).getTime() / 1000),
+  };
+
+  const signedEvent = await nostr.signEvent(event);
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["reset_directmsg_counts", {
+      event_from_user: signedEvent,
+    }]},
+  ]));
+}

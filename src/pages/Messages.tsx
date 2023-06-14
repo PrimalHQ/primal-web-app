@@ -417,14 +417,6 @@ const Messages: Component = () => {
 
   const [inputFocused, setInputFocused] = createSignal(false);
 
-  const areAllRead = () => {
-    return messages ?
-      Object.keys(messages.messageCountPerSender).reduce(
-        (acc, id) => acc &&
-          !(messages.messageCountPerSender[id] && messages.messageCountPerSender[id].cnt > 0), true) :
-      true;
-  };
-
   const markAllAsRead = () => {
     messages?.actions.resetAllMessages();
   };
@@ -647,7 +639,7 @@ const Messages: Component = () => {
           </div>
           <button
             class={styles.markAsRead}
-            disabled={areAllRead()}
+            disabled={!messages?.messageCount}
             onClick={markAllAsRead}
           >
             {intl.formatMessage(

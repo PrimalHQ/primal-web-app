@@ -30,7 +30,7 @@ import {
   UserRelation,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { getMessageCounts, getNewMessages, getOldMessages, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
+import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
 import { convertToUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
@@ -122,12 +122,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const subidMsgCount = `msg_stats_${APP_ID}`;
   const subidMsgCountPerSender = `msg_count_p_s_ ${APP_ID}`;
   const subidResetMsgCount = `msg_reset_ ${APP_ID}`;
+  const subidResetMsgCounts = `msg_mark_as_read_${APP_ID}`;
   const subidCoversation = `msg_conv_ ${APP_ID}`;
   const subidCoversationNextPage = `msg_conv_np_ ${APP_ID}`;
   const subidNewMsg = `msg_new_ ${APP_ID}`;
   const subidNoteRef = `msg_note_ ${APP_ID}`;
   const subidUserRef = `msg_user_ ${APP_ID}`;
-
 
 
   const getNostr = () => {
@@ -190,16 +190,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const resetAllMessages = async () => {
-    const senderIds = Object.keys(store.senders);
-
-    for (let i=0;i<senderIds.length;i++) {
-      const pubkey = senderIds[i];
-      const count = store.messageCountPerSender[pubkey]?.cnt || 0;
-
-      if (count > 0) {
-        await resetMessageCount(pubkey, subidResetMsgCount);
-      }
-    }
+    markAllAsRead(subidResetMsgCounts);
   };
 
   const getConversationWithSender = (sender: PrimalUser | null, until = 0) => {
