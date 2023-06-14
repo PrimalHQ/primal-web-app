@@ -22,7 +22,7 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
 import { style } from 'solid-js/web';
 import SearchOption from '../components/Search/SearchOption';
-import { debounce } from '../utils';
+import { debounce, isVisibleInContainer } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
 import { editMentionRegex } from '../constants';
@@ -127,6 +127,7 @@ const Messages: Component = () => {
   let newMessageInput: HTMLTextAreaElement | undefined;
   let newMessageInputBorder: HTMLDivElement | undefined;
   let newMessageWrapper: HTMLDivElement | undefined;
+  let sendersListElement: HTMLDivElement | undefined;
 
   const senderNpub = () => {
     if (!params.sender) {
@@ -567,7 +568,11 @@ const Messages: Component = () => {
     if (messages?.selectedSender) {
 
       const element = document.querySelector(`[data-user="${messages.selectedSender.pubkey}"]`);
-      element && element.scrollIntoView();
+
+      if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
+        element.scrollIntoView();
+      }
+
     }
   });
 
@@ -655,7 +660,7 @@ const Messages: Component = () => {
           </button>
         </div>
 
-        <div class={styles.sendersList}>
+        <div class={styles.sendersList} ref={sendersListElement}>
           <For each={orderedSenders()}>
             {
               (sender) => (
