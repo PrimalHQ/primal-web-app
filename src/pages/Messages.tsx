@@ -670,7 +670,7 @@ const Messages: Component = () => {
                       <div class={styles.senderName}>
                         {userName(sender)}
                       </div>
-                      <Show when={messages?.messageCountPerSender[sender.pubkey]}>
+                      <Show when={messages?.messageCountPerSender[sender.pubkey] && messages?.messageCountPerSender[sender.pubkey].latest_at > 0}>
                         <div class={styles.lastMessageTime}>
                           {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
                         </div>

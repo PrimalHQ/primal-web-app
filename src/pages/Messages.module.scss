@@ -153,6 +153,7 @@
       border-radius: 8px;
       border: none;
       margin-bottom: 8px;
+      align-items: center;
 
       &:hover, &.selected {
         background-color: var(--background-input);
