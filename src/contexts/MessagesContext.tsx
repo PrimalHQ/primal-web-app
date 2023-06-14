@@ -84,6 +84,7 @@ export type MessagesContextStore = {
     resetAllMessages: () => Promise<void>,
     addSender: (user: PrimalUser) => void,
     getNextConversationPage: () => void,
+    addUserReference: (user: PrimalUser) => void,
   }
 }
 
@@ -481,6 +482,10 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   }
 
+  const addUserReference = (user: PrimalUser) => {
+    updateStore('referecedUsers', () => ({ [user.pubkey]: {...user} }));
+  };
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -749,6 +754,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       resetAllMessages,
       addSender,
       getNextConversationPage,
+      addUserReference,
     },
   });
 

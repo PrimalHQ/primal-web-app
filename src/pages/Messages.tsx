@@ -396,7 +396,7 @@ const Messages: Component = () => {
     const content = prepareMessageForSending(text);
 
     const msg = {
-      id: 'NEW_MESSAGE',
+      id: `N_M_${messages.messages.length}`,
       sender: account?.publicKey || '',
       content,
       created_at: Math.floor((new Date()).getTime() / 1000),
@@ -531,13 +531,14 @@ const Messages: Component = () => {
     if (!newMessageInput) {
       return;
     }
-
     const name = userName(user);
 
     setUserRefs((refs) => ({
       ...refs,
       [name]: user,
     }));
+
+    messages?.actions.addUserReference(user);
 
     let value = message();
 
