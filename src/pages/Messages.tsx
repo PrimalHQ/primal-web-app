@@ -355,23 +355,26 @@ const Messages: Component = () => {
 
   }
 
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === 'Enter') {
-      setMessage(message().trim());
-      !e.shiftKey && sendMessage();
-    }
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.code === 'Enter' && !e.shiftKey)
+      e.preventDefault();
+      debounce(() => {
+        sendMessage();
+      }, 300);
+
+      return false;
   };
 
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     document.addEventListener('input', onExpandableTextareaInput);
-    newMessageInput && newMessageInput.addEventListener('keyup', onKeyUp);
+    newMessageInput && newMessageInput.addEventListener('keydown', onKeyDown);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     document.removeEventListener('input', onExpandableTextareaInput);
-    newMessageInput && newMessageInput.removeEventListener('keyup', onKeyUp);
+    newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
   });
 
   const sendMessage = async () => {
