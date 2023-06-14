@@ -226,7 +226,7 @@ const Messages: Component = () => {
         conversationHolder.scrollTop = conversationHolder.scrollHeight;
       }
 
-      messages.actions.resetConversationLoaded();
+      // messages.actions.resetConversationLoaded();
     }
   });
 
@@ -728,7 +728,12 @@ const Messages: Component = () => {
             <Show when={messages?.selectedSender}>
               <For
                 each={messages?.conversation}
-                fallback={<Loader />}
+                fallback={<>
+                  {messages?.isConversationLoaded ?
+                    <></> :
+                    <Loader />
+                  }
+                </>}
               >
                 {(thread) => (
                   <Show

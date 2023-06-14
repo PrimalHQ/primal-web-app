@@ -205,12 +205,17 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     if (!account?.isKeyLookupDone || !account.hasPublicKey() || !sender) {
       return;
     }
+    resetConversationLoaded();
     // @ts-ignore
     getOldMessages(account.publicKey, sender.pubkey, subidCoversation, until);
   };
 
   const getNextConversationPage = () => {
-    if (!account?.isKeyLookupDone || !account.hasPublicKey() || !store.selectedSender) {
+    if (
+      !account?.isKeyLookupDone ||
+      !account.hasPublicKey() ||
+      !store.selectedSender
+    ) {
       return;
 
     }
