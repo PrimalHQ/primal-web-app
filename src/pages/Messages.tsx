@@ -553,6 +553,14 @@ const Messages: Component = () => {
     }
   });
 
+  createEffect(() => {
+    if (messages?.selectedSender) {
+
+      const element = document.querySelector(`[data-user="${messages.selectedSender.pubkey}"]`);
+      element && element.scrollIntoView();
+    }
+  });
+
   return (
     <div>
       <Wormhole to="branding_holder">
@@ -644,6 +652,7 @@ const Messages: Component = () => {
                 <button
                   class={`${styles.senderItem} ${isSelectedSender(sender.npub) ? styles.selected : ''}`}
                   onClick={() => selectSender(sender.npub)}
+                  data-user={sender.pubkey}
                 >
                   <Avatar src={sender.picture} size="vs" />
                   <div class={styles.senderInfo}>

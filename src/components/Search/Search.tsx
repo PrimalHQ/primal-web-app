@@ -101,6 +101,7 @@ const Search: Component<{
     if (props.onUserSelect) {
       props.onUserSelect(user);
     }
+    resetQuery();
   }
 
   createEffect(() => {

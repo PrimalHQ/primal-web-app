@@ -526,8 +526,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
           updateStore('senders', () => ({ [key]: user }));
           updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
+          selectSender(store.addSender.pubkey);
           updateStore('addSender', () => undefined);
+          return;
         }
+
         const senderIds = Object.keys(store.senders);
         if (!store.selectedSender) {
           selectSender(senderIds[0]);
