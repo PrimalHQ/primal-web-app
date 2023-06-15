@@ -404,10 +404,9 @@ const Messages: Component = () => {
     };
 
 
-    const success = await messages?.actions.sendMessage(messages.selectedSender.pubkey, msg.content)
+    const success = await messages?.actions.sendMessage(messages.selectedSender, msg);
 
     if (success) {
-      messages?.actions.addToConversation([msg])
       newMessageInput.value = '';
       newMessageInput.style.height = '32px';
       newMessageInputBorder.style.height = '34px';

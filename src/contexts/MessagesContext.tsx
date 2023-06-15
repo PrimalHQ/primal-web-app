@@ -80,7 +80,7 @@ export type MessagesContextStore = {
     selectSender: (senderId: string | undefined) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
-    sendMessage: (receiver: string, message: string) => Promise<boolean>,
+    sendMessage: (receiver: PrimalUser, message: DirectMessage) => Promise<boolean>,
     resetAllMessages: () => Promise<void>,
     addSender: (user: PrimalUser) => void,
     getNextConversationPage: () => void,
@@ -430,22 +430,29 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('referecedNotes', (nts) => ({ ...nts, ...notes }));
   };
 
-  const sendMessage = async (receiver: string, message: string) => {
+  const sendMessage = async (receiver: PrimalUser, message: DirectMessage) => {
     const nostr = getNostr();
     if (!account || !nostr) {
       return false;
     }
 
-    const content = await nostr.nip04.encrypt(receiver, message);
+    const content = await nostr.nip04.encrypt(receiver.pubkey, message.content);
 
     const event = {
       content,
       kind: Kind.EncryptedDirectMessage,
-      tags: [['p', receiver]],
+      tags: [['p', receiver.pubkey]],
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    return await sendEvent(event, account?.relays);
+    const success = await sendEvent(event, account?.relays);
+
+    if (success) {
+      addToConversation([message]);
+      updateStore('messageCountPerSender', receiver.pubkey, 'latest_at', message.created_at);
+    }
+
+    return success;
   }
 
   const addNewSender = (user: PrimalUser) => {
