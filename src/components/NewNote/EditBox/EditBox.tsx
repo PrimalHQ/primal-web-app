@@ -498,12 +498,12 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     debounce(() => {
-      textArea && setMessage(sanitize(textArea.value))
+      textArea && setMessage(textArea.value)
     }, 300);
   };
 
   createEffect(() => {
-    const msg = message();
+    const msg = sanitize(message());
 
     checkForMentioning(msg);
 
@@ -546,7 +546,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     setQuery('');
 
-    setMessage(sanitize(`${value}@\`${name}\` `));
+    setMessage(`${value}@\`${name}\` `);
     textArea.value = message();
     textArea.focus();
 

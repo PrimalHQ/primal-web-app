@@ -327,7 +327,7 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout} innerHTML={sanitize(urlify(profile?.userProfile?.about || '', true, true))}>
+        <div class={styles.profileAbout} innerHTML={urlify(sanitize(profile?.userProfile?.about || ''), true, true)}>
         </div>
 
         <div class={styles.profileLinks}>
@@ -335,7 +335,7 @@ const Profile: Component = () => {
             <Show when={profile?.userProfile?.website}>
               <div class={styles.linkIcon}></div>
               <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                {profile?.userProfile?.website}
+                {sanitize(profile?.userProfile?.website || '')}
               </a>
             </Show>
           </div>

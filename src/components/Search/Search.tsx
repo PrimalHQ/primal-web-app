@@ -43,7 +43,7 @@ const Search: Component<{
 
     const data = new FormData(form);
 
-    const q = sanitize(data.get('searchQuery') as string || '');
+    const q = data.get('searchQuery') as string || '';
 
     if (q.length > 0) {
       if (props.onInputConfirm) {
