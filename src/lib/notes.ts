@@ -50,7 +50,7 @@ export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|a
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
 
-export const urlify = (text: string, highlightOnly = false, skipEmbed = false) => {
+export const urlify = (text: string, highlightOnly = false, skipEmbed = false, skipLinkPreview = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
   return text.replace(urlRegex, (url) => {
@@ -173,9 +173,12 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false) =
       }
     }
 
-
     if (highlightOnly) {
       return `<span class="linkish">${url}</span>`;
+    }
+
+    if (skipLinkPreview) {
+      return `<a link href="${url}" target="_blank" >${url}</a>`;
     }
 
     addLinkPreviews(url);
@@ -198,6 +201,7 @@ export const highlightHashtags = (text: string) => {
 
 export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
 export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
+export const parseNote3 = (content: string) => urlify(addlineBreaks(content), false, false, true);
 
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };

@@ -1,36 +1,29 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { nip19, Relay } from 'nostr-tools';
+import { nip19 } from 'nostr-tools';
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
-import EditBox from '../components/NewNote/EditBox/EditBox';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMessagesContext } from '../contexts/MessagesContext';
-import { getMessageCounts } from '../lib/messages';
 import { truncateNpub, userName } from '../stores/profile';
-import { PrimalNote, PrimalUser, UserRelation } from '../types/primal';
+import { PrimalNote, PrimalUser } from '../types/primal';
 import { date } from '../lib/dates';
 
 import styles from './Messages.module.scss';
 import EmbeddedNote from '../components/EmbeddedNote/EmbeddedNote';
 import { A, useNavigate, useParams } from '@solidjs/router';
-import { linkPreviews, parseNote1 } from '../lib/notes';
-import LinkPreview from '../components/LinkPreview/LinkPreview';
+import { parseNote3 } from '../lib/notes';
 import { hexToNpub } from '../lib/keys';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
-import { style } from 'solid-js/web';
 import SearchOption from '../components/Search/SearchOption';
 import { debounce, isVisibleInContainer } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
 import { editMentionRegex } from '../constants';
-import FindUsers from '../components/Search/FindUsers';
 import Search from '../components/Search/Search';
 import { useProfileContext } from '../contexts/ProfileContext';
 import Paginator from '../components/Paginator/Paginator';
-import { store } from '../services/StoreService';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -273,7 +266,7 @@ const Messages: Component = () => {
     return parseNoteLinks(
       parseNpubLinks(
         highlightHashtags(
-          parseNote1(message)
+          parseNote3(message)
         ),
         messages?.referecedUsers,
       ),
@@ -281,33 +274,7 @@ const Messages: Component = () => {
       messages?.referecedUsers
     );
   };
-  const replaceLinkPreviews = (text: string) => {
-    let parsed = text;
 
-    const regex = /__LINK__.*?__LINK__/ig;
-
-    parsed = parsed.replace(regex, (link) => {
-      const url = link.split('__LINK__')[1];
-
-      const preview = linkPreviews[url];
-
-      // No preview? That can only mean that we are still waiting.
-      if (!preview) {
-        return link;
-      }
-
-      if (preview.noPreview) {
-        return `<a link href="${url}" target="_blank" >${url}</a>`;
-      }
-
-      const linkElement = (<div class={styles.bordered}><LinkPreview preview={preview} /></div>);
-
-      // @ts-ignore
-      return linkElement.outerHTML;
-    });
-
-    return parsed;
-  }
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
