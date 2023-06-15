@@ -411,6 +411,14 @@ const Messages: Component = () => {
       newMessageInput.style.height = '32px';
       newMessageInputBorder.style.height = '34px';
       newMessageWrapper.style.height = '32px';
+
+      setTimeout(() => {
+        const element = document.querySelector(`[data-user="${messages?.selectedSender?.pubkey}"]`);
+
+        if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
+          element.scrollIntoView();
+        }
+      }, 100);
     }
   };
 
