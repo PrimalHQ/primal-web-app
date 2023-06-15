@@ -221,7 +221,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   };
 
   const highlightHashtags = (text: string) => {
-    const regex = /(?:\s|^)?#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+    const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
     return text.replace(regex, (token) => {
       const [space, term] = token.split('#');

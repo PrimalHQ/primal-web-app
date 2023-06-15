@@ -160,7 +160,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
   };
 
   const highlightHashtags = (text: string) => {
-    const regex = /(?:\s|^)?#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+    const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
     return text.replace(regex, (token) => {
       const [space, term] = token.split('#');
