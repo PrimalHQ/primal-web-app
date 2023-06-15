@@ -85,14 +85,27 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
 
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.code === 'Enter' && e.metaKey) {
+      e.preventDefault();
+      // console.log('POST');
+      postNote();
+      return false;
+    }
+
+    return true;
+  };
+
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     document.addEventListener('input', onExpandableTextareaInput);
+    document.addEventListener('keydown', onKeyDown);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     document.removeEventListener('input', onExpandableTextareaInput);
+    document.removeEventListener('keydown', onKeyDown);
   });
 
   createEffect(() => {
