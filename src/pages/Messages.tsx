@@ -317,9 +317,9 @@ const Messages: Component = () => {
       newMessageInputBorder.style.height = `${34 + (20 * rows)}px`;
     }
 
-    debounce(() => {
+    // debounce(() => {
       setMessage(elm.value)
-    }, 300);
+    // }, 300);
 
   }
 
