@@ -774,7 +774,7 @@ const Messages: Component = () => {
                                 class={styles.message}
                                 data-event-id={msg.id}
                                 title={date(msg.created_at || 0).date.toLocaleString()}
-                                innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
+                                innerHTML={parseMessage(msg.content)}
                               ></div>
                             )}
                           </For>
@@ -798,7 +798,7 @@ const Messages: Component = () => {
                               class={styles.message}
                               data-event-id={msg.id}
                               title={date(msg.created_at || 0).date.toLocaleString()}
-                              innerHTML={replaceLinkPreviews(parseMessage(msg.content))}
+                              innerHTML={parseMessage(msg.content)}
                             ></div>
                           )}
                         </For>
