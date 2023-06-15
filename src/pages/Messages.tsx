@@ -337,17 +337,17 @@ const Messages: Component = () => {
     }
 
     elm.rows = minRows;
-    const rows = elm.value === '' ? 0 : Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 14);
+    const rows = elm.value === '' ? 0 : Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
 
     elm.rows = minRows + rows;
-    elm.style.height = `${32 + (14 * rows)}px`;
+    elm.style.height = `${32 + (20 * rows)}px`;
 
     if (newMessageWrapper) {
-      newMessageWrapper.style.height = `${32 + (14 * rows)}px`;
+      newMessageWrapper.style.height = `${32 + (20 * rows)}px`;
     }
 
     if (newMessageInputBorder) {
-      newMessageInputBorder.style.height = `${34 + (14 * rows)}px`;
+      newMessageInputBorder.style.height = `${34 + (20 * rows)}px`;
     }
 
     debounce(() => {
