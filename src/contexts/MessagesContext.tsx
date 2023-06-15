@@ -37,7 +37,7 @@ import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "nostr-tools";
 import { convertToNotes } from "../stores/note";
-import { sendEvent } from "../lib/notes";
+import { sanitize, sendEvent } from "../lib/notes";
 import { useResolvedPath } from "@solidjs/router";
 import { useProfileContext } from "./ProfileContext";
 
@@ -236,7 +236,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
         const msg: DirectMessage = {
           sender: eMsg.pubkey,
-          content,
+          content: sanitize(content),
           created_at: eMsg.created_at,
           id: eMsg.id,
         };
@@ -448,7 +448,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     const success = await sendEvent(event, account?.relays);
 
     if (success) {
-      addToConversation([message]);
+      const msg = { ...message, content: sanitize(message.content) };
+      addToConversation([msg]);
       updateStore('messageCountPerSender', receiver.pubkey, 'latest_at', message.created_at);
     }
 

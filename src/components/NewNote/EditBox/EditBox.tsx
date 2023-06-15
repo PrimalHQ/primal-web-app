@@ -8,7 +8,7 @@ import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sendNote } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
@@ -498,7 +498,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     debounce(() => {
-      textArea && setMessage(textArea.value)
+      textArea && setMessage(sanitize(textArea.value))
     }, 300);
   };
 
@@ -546,7 +546,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     setQuery('');
 
-    setMessage(`${value}@\`${name}\` `);
+    setMessage(sanitize(`${value}@\`${name}\` `));
     textArea.value = message();
     textArea.focus();
 

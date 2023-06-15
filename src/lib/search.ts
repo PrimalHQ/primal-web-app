@@ -1,10 +1,10 @@
-import DOMPurify from "dompurify";
 import { sendMessage } from "../sockets";
+import { sanitize } from "./notes";
 
 type SearchPayload = { query: string, limit: number, pubkey?: string, since?: number, until?: number };
 
 export const cleanQuery = (query: string) => {
-  return DOMPurify.sanitize(query);
+  return sanitize(query);
 }
 
 

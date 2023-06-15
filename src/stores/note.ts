@@ -1,7 +1,7 @@
-import DOMPurify from "dompurify";
 import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
+import { sanitize } from "../lib/notes";
 import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
@@ -42,7 +42,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       pubkey: message.pubkey,
       created_at: message.created_at || 0,
       tags: message.tags,
-      content: DOMPurify.sanitize(message.content),
+      content: sanitize(message.content),
       sig: message.sig,
       likes: stat?.likes || 0,
       mentions: stat?.mentions || 0,
@@ -213,7 +213,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         pubkey: msg.pubkey,
         created_at: msg.created_at || 0,
         tags: msg.tags,
-        content: DOMPurify.sanitize(msg.content),
+        content: sanitize(msg.content),
         sig: msg.sig,
         likes: stat?.likes || 0,
         mentions: stat?.mentions || 0,

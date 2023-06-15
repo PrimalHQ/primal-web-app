@@ -4,6 +4,7 @@ import { Value } from 'sass';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { hexToNpub } from '../../lib/keys';
+import { sanitize } from '../../lib/notes';
 import { truncateNpub, userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { debounce } from '../../utils';
@@ -42,7 +43,7 @@ const Search: Component<{
 
     const data = new FormData(form);
 
-    const q = data.get('searchQuery') as string || '';
+    const q = sanitize(data.get('searchQuery') as string || '');
 
     if (q.length > 0) {
       if (props.onInputConfirm) {

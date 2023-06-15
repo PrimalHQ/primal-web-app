@@ -19,7 +19,7 @@ export const setStoredLikes = (likes: string[]) => {
   return localStorage.setItem(getLikesStorageKey(), JSON.stringify(likes));
 };
 
-export const sanitize = DOMPurify.sanitize;
+export const sanitize = (html: string) => DOMPurify.sanitize(html, {ALLOWED_TAGS: []});
 
 export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
 
