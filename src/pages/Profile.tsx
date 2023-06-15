@@ -15,7 +15,7 @@ import Branding from '../components/Branding/Branding';
 import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
-import { truncateNpub } from '../stores/profile';
+import { nip05Verification, truncateNpub } from '../stores/profile';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
@@ -309,7 +309,7 @@ const Profile: Component = () => {
               <Show when={profile?.userProfile?.nip05}>
                 <div class={styles.verified}>
                   <div class={styles.verifiedIconS}></div>
-                  <div class={styles.nip05}>{profile?.userProfile?.nip05}</div>
+                  <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
                 </div>
               </Show>
               <div class={styles.publicKey}>

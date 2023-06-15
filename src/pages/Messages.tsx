@@ -4,7 +4,7 @@ import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } 
 import Avatar from '../components/Avatar/Avatar';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMessagesContext } from '../contexts/MessagesContext';
-import { truncateNpub, userName } from '../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../stores/profile';
 import { PrimalNote, PrimalUser } from '../types/primal';
 import { date } from '../lib/dates';
 
@@ -648,7 +648,7 @@ const Messages: Component = () => {
                       </Show>
                     </div>
                     <div class={styles.secondLine}>
-                      {sender.nip05}
+                      {nip05Verification(sender)}
                     </div>
                   </div>
                   <Show when={mgsFromSender(sender) > 0}>

@@ -12,7 +12,7 @@ import { parseNote1, sendNote } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
-import { convertToUser, truncateNpub, userName } from "../../../stores/profile";
+import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
 import { debounce } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
@@ -605,7 +605,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             {(user) => (
               <SearchOption
                 title={userName(user)}
-                description={user.nip05}
+                description={nip05Verification(user)}
                 icon={<Avatar src={user.picture} size="xs" />}
                 statNumber={search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage({

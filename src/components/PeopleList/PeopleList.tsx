@@ -2,7 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { truncateNpub } from '../../stores/profile';
+import { nip05Verification, truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
@@ -63,15 +63,11 @@ const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) =>
                   </div>
                   <div class={styles.verification} title={person?.nip05}>
                     <Show when={person?.nip05}>
-                      <span class={styles.verifiedName}>
-                        {trimVerification(person?.nip05)[0]}
-                      </span>
-                      <span class={styles.verifiedIcon} />
                       <span
                         class={styles.verifiedBy}
                         title={person?.nip05}
                       >
-                        {trimVerification(person?.nip05)[1]}
+                        {nip05Verification(person)}
                       </span>
                     </Show>
                   </div>

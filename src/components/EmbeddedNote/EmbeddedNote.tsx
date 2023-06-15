@@ -7,7 +7,7 @@ import { date } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
 import { parseNote2 } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
-import { truncateNpub, userName } from '../../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import { NostrNoteContent, NostrPostStats, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ParsedNote, { parseNoteLinks, parseNpubLinks } from '../ParsedNote/ParsedNote';
@@ -154,7 +154,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
                 class={styles.verifiedBy}
                 title={props.note.user.nip05}
               >
-                {props.note.user.nip05}
+                {nip05Verification(props.note.user)}
               </span>
             </Show>
           </span>

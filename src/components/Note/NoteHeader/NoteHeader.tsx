@@ -4,7 +4,7 @@ import { PrimalNote } from '../../../types/primal';
 import styles from './NoteHeader.module.scss';
 import { date } from '../../../lib/dates';
 import { trimVerification } from '../../../lib/profile';
-import { truncateNpub } from '../../../stores/profile';
+import { nip05Verification, truncateNpub } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
 import VerificationCheck from '../../VerificationCheck/VerificationCheck';
@@ -103,7 +103,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
               class={styles.verification}
               title={props.note.user?.nip05}
             >
-              {props.note.user?.nip05}
+              {nip05Verification(props.note.user)}
             </span>
           </Show>
         </div>

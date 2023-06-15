@@ -5,7 +5,7 @@ export const truncateNpub = (npub: string) => {
   if (npub.length < 24) {
     return npub;
   }
-  return `${npub.slice(0, 8)}..${npub.slice(-5)}`;
+  return `${npub.slice(0, 10)}..${npub.slice(-10)}`;
 };
 
 export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
@@ -70,4 +70,16 @@ export const authorName = (user: PrimalUser | undefined) => {
     user.name ||
     user.npub ||
     hexToNpub(user.pubkey) || '');
+};
+
+export const nip05Verification = (user: PrimalUser | undefined) => {
+  if (!user) {
+    return '';
+  }
+
+  if (user.nip05.startsWith('_@')) {
+    return user.nip05.slice(2);
+  }
+
+  return user.nip05;
 };
