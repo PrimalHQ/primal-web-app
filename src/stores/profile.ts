@@ -8,6 +8,13 @@ export const truncateNpub = (npub: string) => {
   return `${npub.slice(0, 15)}..${npub.slice(-10)}`;
 };
 
+export const truncateName = (name: string, limit = 24) => {
+  if (name.length < limit) {
+    return name;
+  }
+  return `${name.slice(0, limit)}...`;
+};
+
 export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
   const userMeta = JSON.parse(user.content || '{}');
 
@@ -52,24 +59,28 @@ export const userName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
-  return truncateNpub(
-    user.name ||
+  const name = user.name ||
     user.display_name ||
     user.displayName ||
-    user.npub ||
-    hexToNpub(user.pubkey) || '');
+    user.npub;
+
+  return name ?
+    truncateName(name) :
+    truncateNpub(hexToNpub(user.pubkey) || '');
 };
 
 export const authorName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
-  return truncateNpub(
-    user.display_name ||
+  const name = user.display_name ||
     user.displayName ||
     user.name ||
-    user.npub ||
-    hexToNpub(user.pubkey) || '');
+    user.npub;
+
+  return name ?
+    truncateName(name) :
+    truncateNpub(hexToNpub(user.pubkey) || '');
 };
 
 export const nip05Verification = (user: PrimalUser | undefined) => {

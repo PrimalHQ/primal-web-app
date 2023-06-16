@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, JSXElement, Show } from 'solid-js';
 import { truncateNumber } from '../../lib/notifications';
-import { truncateNpub } from '../../stores/profile';
+import { truncateName, truncateNpub } from '../../stores/profile';
 
 
 import styles from './SearchOption.module.scss';
@@ -56,7 +56,7 @@ const SearchOption: Component<{
         </div>
         <Show when={props.description && props.description.length > 0}>
           <div class={styles.verification} title={props.description}>
-            {truncateNpub(props.description || '')}
+            {truncateName(props.description || '')}
           </div>
         </Show>
       </div>
