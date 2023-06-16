@@ -348,3 +348,27 @@ export const profileRegex = /nostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 
 export const medZapLimit = 1000;
+
+
+export const defaultNotificationSettings: Record<string, boolean> = {
+  NEW_USER_FOLLOWED_YOU: true,
+  USER_UNFOLLOWED_YOU: true,
+
+  YOUR_POST_WAS_ZAPPED: true,
+  YOUR_POST_WAS_LIKED: true,
+  YOUR_POST_WAS_REPOSTED: true,
+  YOUR_POST_WAS_REPLIED_TO: true,
+
+  YOU_WERE_MENTIONED_IN_POST: true,
+  YOUR_POST_WAS_MENTIONED_IN_POST: true,
+
+  POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: true,
+  POST_YOU_WERE_MENTIONED_IN_WAS_LIKED: true,
+  POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED: true,
+  POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO: true,
+
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED: true,
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: true,
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: true,
+  POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
+};

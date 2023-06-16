@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, noKey, themes, trendingFeed } from "../constants";
+import { defaultFeeds, noKey, defaultNotificationSettings, themes, trendingFeed } from "../constants";
 import {
   createContext,
   createEffect,
@@ -42,6 +42,7 @@ export type SettingsContextStore = {
   defaultFeed: PrimalFeed,
   defaultZapAmount: number,
   availableZapOptions: number[],
+  notificationSettings: Record<string, boolean>,
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -53,6 +54,7 @@ export type SettingsContextStore = {
     loadSettings: (pubkey: string) => void,
     setDefaultZapAmount: (amount: number) => void,
     setZapOptions: (amount:number, index: number) => void,
+    updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
   }
 }
 
@@ -71,6 +73,7 @@ export const initialData = {
     100_000,
     1_000_000,
   ],
+  notificationSettings: { ...defaultNotificationSettings },
 };
 
 
@@ -166,12 +169,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     setAvailableFeeds(list);
   };
 
+  const updateNotificationSettings = (key: string, value: boolean, temp?: boolean) => {
+    updateStore('notificationSettings', () => ({ [key]: value }));
+
+    !temp && saveSettings();
+  };
+
   const saveSettings = () => {
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
       defaultZapAmount: store.defaultZapAmount,
       zapOptions: store.availableZapOptions,
+      notifications: store.notificationSettings,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -203,6 +213,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           const settings = JSON.parse(content?.content);
 
           const feeds = settings.feeds as PrimalFeed[];
+          const notificationSettings = settings.notifications as Record<string, boolean>;
 
           // const availableTopics = store.availableFeeds.map(f => f.hex);
 
@@ -217,6 +228,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           );
 
           updateStore('defaultFeed', () => store.availableFeeds[0]);
+
+          updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
 
           const defaultZaps = settings.defaultZapAmount || 10;
 
@@ -263,13 +276,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT' && content?.content) {
         try {
-          const { theme, feeds, defaultZapAmount, zapOptions } = JSON.parse(content?.content);
+          const { theme, feeds, defaultZapAmount, zapOptions, notifications } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
           feeds && setAvailableFeeds(feeds, true);
           defaultZapAmount && setDefaultZapAmount(defaultZapAmount, true);
           zapOptions && updateStore('availableZapOptions', () => zapOptions);
 
+          if (notifications) {
+            updateStore('notificationSettings', () => ({ ...notifications }));
+          }
+          else {
+            updateStore('notificationSettings', () => ({ ...defaultNotificationSettings}));
+          }
         }
         catch (e) {
           console.log('Error parsing settings response: ', e);
@@ -409,6 +428,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       loadSettings,
       setDefaultZapAmount,
       setZapOptions,
+      updateNotificationSettings,
     },
   });
 

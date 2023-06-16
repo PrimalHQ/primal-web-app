@@ -8,6 +8,7 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
 import SettingsZap from '../components/SettingsZap/SettingsZap';
 import Search from '../components/Search/Search';
+import SettingsNotifications from '../components/SettingsNotifications/SettingsNotifications';
 
 
 const Settings: Component = () => {
@@ -79,6 +80,22 @@ const Settings: Component = () => {
 
       <div class={styles.zapSettings}>
         <SettingsZap />
+      </div>
+
+      <div class={styles.devider}></div>
+
+      <div class={styles.settingsCaption}>
+        {intl.formatMessage(
+          {
+            id: 'pages.settings.sections.notifications',
+            defaultMessage: 'Notification types',
+            description: 'Title of the notifications section on the settings page',
+          }
+        )}
+      </div>
+
+      <div class={styles.notificationSettings}>
+        <SettingsNotifications />
       </div>
     </div>
   )

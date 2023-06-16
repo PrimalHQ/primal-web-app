@@ -1,0 +1,28 @@
+.notificationSettings {
+  display: flex;
+  flex-direction: column;
+
+  li {
+    list-style-type: none;
+  }
+
+  input {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  label {
+    display: inline-block;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 32px;
+    color: var(--text-secondary);
+  }
+}
+
+.caption {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 32px;
+  color: var(--text-secondary);
+}

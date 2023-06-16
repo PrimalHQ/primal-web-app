@@ -112,6 +112,7 @@ export type NostrNoteActionsContent = {
 export type NostrMessageStatsContent = {
   kind: Kind.MessageStats,
   cnt: string,
+  content?: string,
   created_at?: number,
   pubkey?: string,
 };
