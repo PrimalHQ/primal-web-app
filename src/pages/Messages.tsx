@@ -370,7 +370,6 @@ const Messages: Component = () => {
       created_at: Math.floor((new Date()).getTime() / 1000),
     };
 
-
     const success = await messages?.actions.sendMessage(messages.selectedSender, msg);
 
     if (success) {
@@ -542,6 +541,10 @@ const Messages: Component = () => {
     }
   });
 
+  const onInput = () => {
+    setMessage(newMessageInput?.value || '')
+  }
+
   return (
     <div>
       <Wormhole to="branding_holder">
@@ -671,6 +674,7 @@ const Messages: Component = () => {
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 value={message()}
+                onInput={onInput}
               ></textarea>
             </div>
             <button
