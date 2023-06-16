@@ -168,10 +168,15 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
       player?.addEventListener('complete', onAnimDone);
 
-      // @ts-ignore
-      player?.seek(0);
-      // @ts-ignore
-      player?.play();
+      try {
+        // @ts-ignore
+        player?.seek(0);
+        // @ts-ignore
+        player?.play();
+      } catch (e) {
+        console.warn('Failed to animte zap:', e);
+        onAnimDone();
+      }
     }, 10);
   };
 
@@ -201,10 +206,15 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
       player?.addEventListener('complete', onAnimDone);
 
-      // @ts-ignore
-      player?.seek(0);
-      // @ts-ignore
-      player?.play();
+      try {
+        // @ts-ignore
+        player?.seek(0);
+        // @ts-ignore
+        player?.play();
+      } catch (e) {
+        console.warn('Failed to animte zap:', e);
+        onAnimDone();
+      }
     }, 10);
   };
 
