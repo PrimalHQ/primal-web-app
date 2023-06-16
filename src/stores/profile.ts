@@ -5,7 +5,7 @@ export const truncateNpub = (npub: string) => {
   if (npub.length < 24) {
     return npub;
   }
-  return `${npub.slice(0, 10)}..${npub.slice(-10)}`;
+  return `${npub.slice(0, 15)}..${npub.slice(-10)}`;
 };
 
 export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
