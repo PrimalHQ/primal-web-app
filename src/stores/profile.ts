@@ -8,7 +8,7 @@ export const truncateNpub = (npub: string) => {
   return `${npub.slice(0, 15)}..${npub.slice(-10)}`;
 };
 
-export const truncateName = (name: string, limit = 24) => {
+export const truncateName = (name: string, limit = 20) => {
   if (name.length < limit) {
     return name;
   }
