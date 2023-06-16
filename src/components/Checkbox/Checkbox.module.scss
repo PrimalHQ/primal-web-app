@@ -1,0 +1,19 @@
+.checkbox {
+  input {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  img {
+    height: 20px;
+    margin-right: 12px;
+  }
+
+  label {
+    display: inline-block;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 32px;
+    color: var(--text-secondary);
+  }
+}

@@ -373,6 +373,8 @@ body {
   mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
 }
 
+// Scrollbars
+
 /* width */
 ::-webkit-scrollbar {
   width: 6px;
@@ -393,4 +395,92 @@ body {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-tertiary-2);
+}
+
+// Checkboxes
+
+// input[type="checkbox"] {
+//   /* Add if not using autoprefixer */
+//   -webkit-appearance: none;
+//   -moz-appearance: none;
+//   appearance: none;
+//   /* For iOS < 15 to remove gradient background */
+//   background-color: var(--background-card);
+//   /* Not removed via appearance */
+//   margin: 0;
+//   margin-right: 16px;
+
+//   font: inherit;
+//   color: currentColor;
+//   width: 20px;
+//   height: 20px;
+//   border: 1px solid var(--text-tertiary-2);
+//   border-radius: 4px;
+
+//   display: grid;
+//   place-content: center;
+
+//   &::before {
+//     content: "";
+//     width: 10px;
+//     height: 10px;
+//   }
+
+//   &:checked {
+//     background-color: var(--text-tertiary-2);
+//   }
+// }
+[type="checkbox"]  {
+  background-color: var(--background-card);
+  border-color: var(--text-tertiary-2);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  margin-inline-end: 16px;
+  border-width: 1px;
+  font-size: inherit;
+  vertical-align: middle;
+  cursor: pointer;
+
+  &::-ms-check {
+    display: none; // unstyle IE checkboxes
+  }
+
+  &:checked,
+  &:checked:active,
+  &:checked:focus {
+    background-color: var(--text-tertiary-2);
+    border-color: var(--text-tertiary-2);
+    background-image: var(--icon-checkbox);
+    background-position: center;
+    background-size: 12px auto;
+    background-repeat: no-repeat;
+  }
+
+  &:focus {
+    background-color: var(--background-card);
+    border-color: var(--text-tertiary-2);
+  }
+
+  & ~ label {
+    display: inline-block;
+    margin-right: 0;
+    margin-bottom: 0;
+    cursor: pointer;
+  }
+}
+
+// Checkboxes
+[type="checkbox"] {
+  &:indeterminate {
+    background-color: var(--background-card);
+    border-color: var(--text-tertiary-2);
+    background-image: var(--icon-minus);
+    background-position: center;
+    background-size: 12px auto;
+    background-repeat: no-repeat;
+  }
 }

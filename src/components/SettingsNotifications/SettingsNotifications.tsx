@@ -1,9 +1,30 @@
 import { Component, For } from 'solid-js';
 
+import userFollow from '../../assets/icons/notifications/user_followed.svg';
+import userUnFollow from '../../assets/icons/notifications/user_unfollowed.svg';
+
+import postZapped from '../../assets/icons/notifications/post_zapped.svg';
+import postLiked from '../../assets/icons/notifications/post_liked.svg';
+import postReposted from '../../assets/icons/notifications/post_reposted.svg';
+import postReplied from '../../assets/icons/notifications/post_replied.svg';
+
+import mention from '../../assets/icons/notifications/mention.svg';
+import mentionedPost from '../../assets/icons/notifications/mentioned_post.svg';
+
+import mentionZapped from '../../assets/icons/notifications/mention_zapped.svg';
+import mentionLiked from '../../assets/icons/notifications/mention_liked.svg';
+import mentionReposted from '../../assets/icons/notifications/mention_reposted.svg';
+import mentionReplied from '../../assets/icons/notifications/mention_replied.svg';
+
+import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post_zapped.svg';
+import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
+import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
+import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
+
 import styles from './SettingsNotifications.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { debounce } from '../../utils';
 import { useIntl } from '@cookbook/solid-intl';
+import Checkbox from '../Checkbox/Checkbox';
 
 const SettingsZap: Component = () => {
 
@@ -63,19 +84,42 @@ const SettingsZap: Component = () => {
     POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: 'replied to',
   }
 
+  const icons: Record<string, string> = {
+    NEW_USER_FOLLOWED_YOU: userFollow,
+    USER_UNFOLLOWED_YOU: userUnFollow,
+
+    YOUR_POST_WAS_ZAPPED: postZapped,
+    YOUR_POST_WAS_LIKED: postLiked,
+    YOUR_POST_WAS_REPOSTED: postReposted,
+    YOUR_POST_WAS_REPLIED_TO: postReplied,
+
+    YOU_WERE_MENTIONED_IN_POST: mention,
+    YOUR_POST_WAS_MENTIONED_IN_POST: mentionedPost,
+
+    POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: mentionZapped,
+    POST_YOU_WERE_MENTIONED_IN_WAS_LIKED: mentionLiked,
+    POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED: mentionReposted,
+    POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO: mentionReplied,
+
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED: mentionedPostZapped,
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: mentionedPostLiked,
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: mentionReposted,
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: mentionedPostReplied,
+  }
+
   return (
     <div class={styles.notificationSettings}>
       <ul>
         <For each={basicNotifications}>
           {(notif) => (
             <li>
-              <input
+              <Checkbox
                 id={notif}
-                type='checkbox'
                 checked={settings?.notificationSettings[notif]}
                 onChange={() => onChange(notif)}
+                label={notificationLabels[notif]}
+                icon={icons[notif]}
               />
-              <label for={notif}>{notificationLabels[notif]}</label>
             </li>
           )}
         </For>
@@ -95,13 +139,13 @@ const SettingsZap: Component = () => {
         <For each={yourMentionNotifications}>
           {(notif) => (
             <li>
-              <input
+              <Checkbox
                 id={notif}
-                type='checkbox'
                 checked={settings?.notificationSettings[notif]}
                 onChange={() => onChange(notif)}
+                label={notificationLabels[notif]}
+                icon={icons[notif]}
               />
-              <label for={notif}>{notificationLabels[notif]}</label>
             </li>
           )}
         </For>
@@ -120,13 +164,13 @@ const SettingsZap: Component = () => {
         <For each={yourPostMentionNotifications}>
           {(notif) => (
             <li>
-              <input
+              <Checkbox
                 id={notif}
-                type='checkbox'
                 checked={settings?.notificationSettings[notif]}
                 onChange={() => onChange(notif)}
+                label={notificationLabels[notif]}
+                icon={icons[notif]}
               />
-              <label for={notif}>{notificationLabels[notif]}</label>
             </li>
           )}
         </For>
