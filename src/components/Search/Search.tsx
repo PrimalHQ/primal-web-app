@@ -5,7 +5,7 @@ import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { hexToNpub } from '../../lib/keys';
 import { sanitize } from '../../lib/notes';
-import { truncateNpub, userName } from '../../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { debounce } from '../../utils';
 import Avatar from '../Avatar/Avatar';
@@ -197,7 +197,7 @@ const Search: Component<{
               <SearchOption
                 href={props.noLinks ? undefined : `/profile/${user.npub}`}
                 title={userName(user)}
-                description={user.nip05}
+                description={nip05Verification(user)}
                 icon={<Avatar src={user.picture} size="xs" />}
                 statNumber={search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage({

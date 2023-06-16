@@ -8,7 +8,7 @@ export const cleanQuery = (query: string) => {
 }
 
 
-export const searchUsers = (pubkey: string | undefined, subid: string, query: string, limit = 1000) => {
+export const searchUsers = (pubkey: string | undefined, subid: string, query: string, limit = 10) => {
 
   let payload: SearchPayload = { query: cleanQuery(query), limit };
 
