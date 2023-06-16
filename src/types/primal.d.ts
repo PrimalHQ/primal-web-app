@@ -131,6 +131,11 @@ export type NostrMessageEncryptedContent = {
   id: string,
 };
 
+export type NostrFeedRange = {
+  kind: Kind.FeedRange,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -148,7 +153,8 @@ export type NostrEventContent =
   NostrNoteActionsContent |
   NostrMessageStatsContent |
   NostrMessagePerSenderStatsContent |
-  NostrMessageEncryptedContent;
+  NostrMessageEncryptedContent |
+  NostrFeedRange;
 
 export type NostrEvent = [
   type: "EVENT",

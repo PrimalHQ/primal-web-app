@@ -216,7 +216,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('encryptedMessages', () => []);
 
     // @ts-ignore
-    getOldMessages(account.publicKey, store.selectedSender.pubkey, subidCoversationNextPage, lastMessage.created_at);
+    lastMessage.created_at > 0 && getOldMessages(account.publicKey, store.selectedSender.pubkey, subidCoversationNextPage, lastMessage.created_at);
   };
 
   const decryptMessages = async (then: (messages: DirectMessage[]) => void) => {
