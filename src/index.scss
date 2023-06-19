@@ -404,7 +404,7 @@ body {
 // Checkboxes
 
 [type="checkbox"]  {
-  background-color: var(--background-site);
+  background-color: var(--background-card);
   border-color: var(--text-tertiary-2);
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -425,7 +425,7 @@ body {
   &:checked,
   &:checked:active,
   &:checked:focus {
-    background-color: var(--background-site);
+    background-color: var(--background-card);
     border-color: var(--text-tertiary-2);
     background-position: center;
     background-size: 12px auto;
@@ -434,7 +434,7 @@ body {
   }
 
   &:focus {
-    background-color: var(--background-site);
+    background-color: var(--background-card);
     border-color: var(--text-tertiary-2);
   }
 
