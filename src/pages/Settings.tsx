@@ -88,7 +88,7 @@ const Settings: Component = () => {
         {intl.formatMessage(
           {
             id: 'pages.settings.sections.notifications',
-            defaultMessage: 'Notification types',
+            defaultMessage: 'Notifications',
             description: 'Title of the notifications section on the settings page',
           }
         )}

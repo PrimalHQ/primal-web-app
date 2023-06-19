@@ -109,6 +109,17 @@ const SettingsZap: Component = () => {
 
   return (
     <div class={styles.notificationSettings}>
+
+      <div class={styles.caption}>
+        {intl.formatMessage(
+          {
+            id: 'pages.settings.sections.notifications.core',
+            defaultMessage: 'Core notifications:',
+            description: 'Title of the notification settings sub-section for core notifications',
+          }
+        )}
+      </div>
+
       <ul>
         <For each={basicNotifications}>
           {(notif) => (
