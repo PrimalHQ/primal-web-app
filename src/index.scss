@@ -23,6 +23,7 @@
   --text-tertiary: #757575;
   --text-tertiary-2: #666666;
   --subtile-devider: #444444;
+  --check-image: url('./assets/icons/check.svg');
 
   --primary: var(--accent-1);
   --primary-hover: var(--accent-2);
@@ -86,6 +87,7 @@
   --text-tertiary: #808080;
   --text-tertiary-2: #808080;
   --subtile-devider: #C8C8C8;
+  --check-image: url('./assets/icons/check-black.svg');
 
   --primary: var(--accent-1);
   --primary-hover: var(--accent-2);
@@ -149,6 +151,7 @@
   --text-tertiary-2: #666666;
   --subtile-devider: #444444;
   --card-border: #282828;
+  --check-image: url('./assets/icons/check.svg');
 
   --primary: var(--accent-1);
   --primary-hover: var(--accent-2);
@@ -212,6 +215,7 @@
   --text-tertiary: #808080;
   --text-tertiary-2: #808080;
   --subtile-devider: #C8C8C8;
+  --check-image: url('./assets/icons/check-black.svg');
 
   --primary: var(--accent-1);
   --primary-hover: var(--accent-2);
@@ -399,39 +403,8 @@ body {
 
 // Checkboxes
 
-// input[type="checkbox"] {
-//   /* Add if not using autoprefixer */
-//   -webkit-appearance: none;
-//   -moz-appearance: none;
-//   appearance: none;
-//   /* For iOS < 15 to remove gradient background */
-//   background-color: var(--background-card);
-//   /* Not removed via appearance */
-//   margin: 0;
-//   margin-right: 16px;
-
-//   font: inherit;
-//   color: currentColor;
-//   width: 20px;
-//   height: 20px;
-//   border: 1px solid var(--text-tertiary-2);
-//   border-radius: 4px;
-
-//   display: grid;
-//   place-content: center;
-
-//   &::before {
-//     content: "";
-//     width: 10px;
-//     height: 10px;
-//   }
-
-//   &:checked {
-//     background-color: var(--text-tertiary-2);
-//   }
-// }
 [type="checkbox"]  {
-  background-color: var(--background-card);
+  background-color: var(--background-site);
   border-color: var(--text-tertiary-2);
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -452,16 +425,16 @@ body {
   &:checked,
   &:checked:active,
   &:checked:focus {
-    background-color: var(--text-tertiary-2);
+    background-color: var(--background-site);
     border-color: var(--text-tertiary-2);
-    background-image: var(--icon-checkbox);
     background-position: center;
     background-size: 12px auto;
     background-repeat: no-repeat;
+    background-image: var(--check-image);
   }
 
   &:focus {
-    background-color: var(--background-card);
+    background-color: var(--background-site);
     border-color: var(--text-tertiary-2);
   }
 
@@ -471,16 +444,14 @@ body {
     margin-bottom: 0;
     cursor: pointer;
   }
-}
 
-// Checkboxes
-[type="checkbox"] {
   &:indeterminate {
-    background-color: var(--background-card);
+    background-color: var(--background-site);
     border-color: var(--text-tertiary-2);
     background-image: var(--icon-minus);
     background-position: center;
     background-size: 12px auto;
     background-repeat: no-repeat;
   }
+
 }
