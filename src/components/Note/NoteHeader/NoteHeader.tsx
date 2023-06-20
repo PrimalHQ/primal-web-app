@@ -29,13 +29,24 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
     setContext(true);
   };
 
-  const copyNoteLink = (e: MouseEvent) => {
+  const copyNostrLink = (e: MouseEvent) => {
     e.preventDefault();
     navigator.clipboard.writeText(`nostr:${props.note.post.noteId}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage({
       id: 'note.contextMenu.copyFeedback',
       defaultMessage: 'Note\'s nostr link copied',
+      description: 'Confirmation message that the note\'s link has been copied',
+    }));
+  };
+
+  const copyPrimalLink = (e: MouseEvent) => {
+    e.preventDefault();
+    navigator.clipboard.writeText(`${window.location.origin}/thread/${props.note.post.noteId}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage({
+      id: 'note.contextMenu.copyFeedback',
+      defaultMessage: 'Note\'s Primal link copied',
       description: 'Confirmation message that the note\'s link has been copied',
     }));
   };
@@ -121,13 +132,23 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
             class={styles.contextMenuOptions}
           >
             <button
-              onClick={copyNoteLink}
+              onClick={copyNostrLink}
               class={styles.contextOption}
             >
               {intl.formatMessage({
                 id: 'note.contextMenu.copyLink',
-                defaultMessage: 'Copy note link',
-                description: 'Label for the copy note link context menu item',
+                defaultMessage: 'Copy Nostr link',
+                description: 'Label for the copy Nostr note link context menu item',
+              })}
+            </button>
+            <button
+              onClick={copyPrimalLink}
+              class={styles.contextOption}
+            >
+              {intl.formatMessage({
+                id: 'note.contextMenu.copyLink',
+                defaultMessage: 'Copy Primal link',
+                description: 'Label for the copy Primal note link context menu item',
               })}
             </button>
           </div>
