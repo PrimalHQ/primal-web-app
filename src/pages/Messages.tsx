@@ -735,9 +735,12 @@ const Messages: Component = () => {
                     when={isSelectedSender(thread.author)}
                     fallback={
                       <div class={styles.myThread}>
-                        <div class={styles.avatar}>
+                        <A
+                          href={`/profile/${hexToNpub(thread.author)}`}
+                          class={styles.avatar}
+                        >
                           <Avatar src={account?.activeUser?.picture} size="xxs" />
-                        </div>
+                        </A>
                         <div class={styles.threadMessages}>
                           <For each={thread.messages}>
                             {(msg) => (
@@ -759,9 +762,12 @@ const Messages: Component = () => {
                     }
                   >
                     <div class={styles.theirThread}>
-                      <div class={styles.avatar}>
+                      <A
+                        href={`/profile/${hexToNpub(thread.author)}`}
+                        class={styles.avatar}
+                      >
                         <Avatar src={user(thread.author)?.picture} size="xxs" />
-                      </div>
+                      </A>
                       <div class={styles.threadMessages}>
                         <For each={thread.messages}>
                           {(msg) => (
