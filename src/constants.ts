@@ -372,3 +372,9 @@ export const defaultNotificationSettings: Record<string, boolean> = {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: true,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
 };
+
+export const noRelayMessage = {
+  id: 'toast.noRelays',
+  defaultMessage: 'You are not connected to any relay',
+  description: 'Toast message indicating user is not connected to a relay',
+};

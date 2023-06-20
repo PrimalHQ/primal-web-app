@@ -14,8 +14,7 @@ import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapSM from '../../../assets/lottie/zap_sm.json';
 import zapMD from '../../../assets/lottie/zap_md.json';
-import { medZapLimit } from '../../../constants';
-
+import { medZapLimit, noRelayMessage } from '../../../constants';
 
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
@@ -40,7 +39,15 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const doRepost = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
     if (!account) {
+      return;
+    }
+
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelayMessage),
+      );
       return;
     }
 
@@ -78,6 +85,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelayMessage),
+      );
+      return;
+    }
+
     const success = await account.actions.addLike(props.note);
 
     if (success) {
@@ -106,6 +120,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelayMessage),
+      );
+      return;
+    }
+
     if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
         intl.formatMessage({
@@ -130,7 +151,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey() || !canUserReceiveZaps(props.note.user)) {
+    if (!account?.hasPublicKey() || account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
       return;
     }
 

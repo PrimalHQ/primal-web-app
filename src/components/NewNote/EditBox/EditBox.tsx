@@ -3,7 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, noRelayMessage } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -134,6 +134,17 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   };
 
   const postNote = async () => {
+    if (!account || !account.hasPublicKey()) {
+      return;
+    }
+
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelayMessage),
+      );
+      return;
+    }
+
     const value = message();
 
     if (value.trim() === '') {
