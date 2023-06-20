@@ -232,6 +232,9 @@
             background-color: var(--subtile-devider);
           }
         }
+        + .myThread {
+          margin-bottom: 20px;
+        }
       }
 
       .theirThread {
@@ -240,6 +243,9 @@
           .message {
             background-color: var(--background-input);
           }
+        }
+        + .theirThread {
+          margin-bottom: 20px;
         }
       }
     }

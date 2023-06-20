@@ -357,7 +357,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         return;
       }
 
-      if (lastThread && message.sender === lastThread.author) {
+      if (
+        lastThread &&
+        message.sender === lastThread.author &&
+        Math.abs(lastThread.messages[lastThread.messages.length - 1].created_at - message.created_at) < 900
+      ) {
 
         updateStore('conversation',
           0,
@@ -389,7 +393,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     for (let i=0;i<messages.length;i++) {
       const message = messages[i];
 
-      if (message.sender !== author) {
+      if (message.sender !== author || (
+        thread.messages.length > 0 && Math.abs(thread.messages[thread.messages.length - 1].created_at - message.created_at) > 900
+      )) {
         author = message.sender;
         thread.messages.length > 0 && conversation.push(thread);
         thread = { author, messages: []};
