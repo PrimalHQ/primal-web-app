@@ -195,7 +195,6 @@ const Home: Component = () => {
 
       <Show
         when={hasNewPosts() && (context?.scrollTop !== undefined && context.scrollTop <= 40)}
-        fallback={<div class={styles.newContentItem}></div>}
       >
         <div class={styles.newContentItem}>
           <button
