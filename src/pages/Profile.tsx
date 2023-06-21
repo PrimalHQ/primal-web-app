@@ -241,7 +241,7 @@ const Profile: Component = () => {
           </button>
           <button
             class={styles.smallSecondaryButton}
-            onClick={() => navigate('/messages')}
+            onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
           >
             <div class={styles.messageIcon}></div>
           </button>

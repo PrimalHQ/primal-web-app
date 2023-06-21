@@ -10,7 +10,8 @@ import {
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
-  socket
+  socket,
+  subscribeTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -32,7 +33,7 @@ import {
 import { APP_ID } from "../App";
 import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
-import { convertToUser } from "../stores/profile";
+import { convertToUser, userName } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "nostr-tools";
@@ -117,7 +118,6 @@ export const MessagesContext = createContext<MessagesContextStore>();
 export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
-  const profile = useProfileContext();
 
   const subidMsgCount = `msg_stats_${APP_ID}`;
   const subidMsgCountPerSender = `msg_count_p_s_ ${APP_ID}`;
@@ -181,12 +181,42 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
     }
 
+    if (!store.senders) {
+      return;
+    }
+
     const sender = store.senders[pubkey];
+
+    if (!sender) {
+      findMissingUser(pubkey);
+      return;
+    }
 
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
     updateStore('selectedSender', () => null);
     updateStore('selectedSender', () => ({ ...sender }));
+  };
+
+  const findMissingUser = (pubkey: string) => {
+    const subid = `msg_unk_${APP_ID}`;
+    let user: PrimalUser | undefined;
+
+    const unsub = subscribeTo(subid, (type, subId, content) => {
+
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.Metadata) {
+          user = convertToUser(content);
+        }
+      }
+
+      if (type === 'EOSE') {
+        user && addSender(user);
+        unsub();
+      }
+    });
+
+    getUserProfiles([pubkey], subid);
   };
 
   const resetAllMessages = async () => {
@@ -232,16 +262,20 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       const eMsg = store.encryptedMessages[i];
 
       if (!store.messages.find(m => eMsg.id === m.id) && store.selectedSender) {
-        const content = await nostr.nip04.decrypt(store.selectedSender.pubkey, eMsg.content);
+        try {
+          const content = await nostr.nip04.decrypt(store.selectedSender.pubkey, eMsg.content);
 
-        const msg: DirectMessage = {
-          sender: eMsg.pubkey,
-          content: sanitize(content),
-          created_at: eMsg.created_at,
-          id: eMsg.id,
-        };
+          const msg: DirectMessage = {
+            sender: eMsg.pubkey,
+            content: sanitize(content),
+            created_at: eMsg.created_at,
+            id: eMsg.id,
+          };
 
-        newMessages.push(msg);
+          newMessages.push(msg);
+        } catch (e) {
+          console.warn('Falied to decrypt message: ', e);
+        }
       }
     }
 
@@ -472,7 +506,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const addSender = (user: PrimalUser) => {
-    const isFollowing = profile?.following.includes(user.pubkey);
+    const isFollowing = account?.following.includes(user.pubkey);
 
     if (isFollowing && store.senderRelation === 'follows' ||
       !isFollowing && store.senderRelation === 'other'
@@ -484,7 +518,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('addSender', () => ({ ...user }));
 
     changeSenderRelation(isFollowing ? 'follows' : 'other');
-
   }
 
   const addUserReference = (user: PrimalUser) => {
@@ -523,6 +556,15 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           if (store.senders[content.pubkey]) {
             return;
           }
+
+          const isFollowing = account?.following.includes(content.pubkey);
+
+          if (isFollowing && store.senderRelation !== 'follows' ||
+            !isFollowing && store.senderRelation !== 'other'
+          ) {
+            return;
+          }
+
           const user = convertToUser(content);
 
           updateStore('senders', () => ({ [user.pubkey]: { ...user } }));

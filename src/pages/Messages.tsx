@@ -27,6 +27,8 @@ import Paginator from '../components/Paginator/Paginator';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
+let currentUrl = '';
+
 export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
 
   const regex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
@@ -183,19 +185,30 @@ const Messages: Component = () => {
   }
 
   createEffect(() => {
-    if (!params.sender && messages?.senders) {
-      const senderIds = Object.keys(messages.senders);
-      senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]].npub}`);
-      return;
+    if(params.sender && currentUrl !== params.sender) {
+      currentUrl = params.sender;
+      messages?.actions.selectSender(params.sender);
     }
+  });
 
+  createEffect(() => {
     if (messages?.selectedSender &&
-      params.sender !== messages?.selectedSender?.npub &&
-      params.sender !== messages?.selectedSender?.pubkey
+      currentUrl !== messages?.selectedSender?.npub
     ) {
       navigate(`/messages/${messages?.selectedSender.npub}`);
       return;
     }
+  });
+
+  createEffect(() => {
+    if (params.sender || !messages?.senders) {
+      return;
+    }
+
+    const senderIds = Object.keys(messages.senders);
+    senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]].npub}`);
+    return;
+
   });
 
   createEffect(() => {
