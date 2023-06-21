@@ -101,24 +101,26 @@ export const subscribeToNotificationStats = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const truncateNumber = (amount: number) => {
-  const t = 1000;
+export const truncateNumber = (amount: number, from?: 1 | 2 | 3 | 4) => {
+  const t = 1_000;
+  const s = from || 1;
 
+  const l = Math.pow(t, s);
 
-  if (amount < t) {
-    return `${amount}`;
+  if (amount < l) {
+    return amount.toLocaleString();
   }
 
   if (amount < Math.pow(t, 2)) {
-    return `${Math.floor(amount / t)}K`;
+    return `${Math.floor(amount / t).toLocaleString()}K`;
   }
 
   if (amount < Math.pow(t, 3)) {
-    return `${Math.floor(amount / Math.pow(t, 2))}M`
+    return `${Math.floor(amount / Math.pow(t, 2)).toLocaleString()}M`
   }
 
   if (amount < Math.pow(t, 4)) {
-    return `${Math.floor(amount / Math.pow(t, 3))}B`
+    return `${Math.floor(amount / Math.pow(t, 3)).toLocaleString()}B`
   }
 
   return `1T+`;

@@ -308,6 +308,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     onTouchEnd?: (e: TouchEvent) => void,
     label: string | number,
     hidden?: boolean,
+    title?: string,
   }) => {
 
     return (
@@ -320,6 +321,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onTouchStart={opts.onTouchStart ?? (() => {})}
         onTouchEnd={opts.onTouchEnd ?? (() => {})}
         disabled={opts.disabled}
+        title={opts.title || ''}
       >
         <div class={`${buttonTypeClasses[opts.type]}`}>
           <div
@@ -370,7 +372,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onClick: doReply,
         type: 'reply',
         highlighted: replied(),
-        label: replies(),
+        label: replies() === 0 ? '' : truncateNumber(replies(), 2),
+        title: replies().toLocaleString(),
       })}
 
       {actionButton({
@@ -381,22 +384,25 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         onTouchEnd: commitZap,
         type: 'zap',
         highlighted: zapped() || isZapping(),
-        label: zaps() === 0 ? '' : truncateNumber(zaps()),
+        label: zaps() === 0 ? '' : truncateNumber(zaps(), 2),
         hidden: hideZapIcon(),
+        title: zaps().toLocaleString(),
       })}
 
       {actionButton({
         onClick: doLike,
         type: 'like',
         highlighted: liked(),
-        label: likes(),
+        label: likes() === 0 ? '' : truncateNumber(likes(), 2),
+        title: likes().toLocaleString(),
       })}
 
       {actionButton({
         onClick: doRepost,
         type: 'repost',
         highlighted: reposted(),
-        label: reposts(),
+        label: reposts() === 0 ? '' : truncateNumber(reposts(), 2),
+        title: reposts(),
       })}
 
       <CustomZap
