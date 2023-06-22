@@ -1,5 +1,5 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Router, useLocation } from "@solidjs/router";
+import { A, Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -260,8 +260,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const parseUserMentions = (text: string) => {
     return text.replace(editMentionRegex, (url) => {
       const [_, name] = url.split('\`');
-      const link = <span class='linkish'> @{name}</span>;
-      // @ts-ignore
+      const user = Object.values(userRefs).find(ref => userName(ref) === name);
+
+      const link = user ?
+        <a href={`${window.location.origin}/profile/${user.npub}`} target="_blank" class='linkish'> @{name}</a> :
+        <span class='linkish'> @{name}</span>;
+
+        // @ts-ignore
       return link.outerHTML || ` @${name}`;
     });
   };
@@ -285,8 +290,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         const user = userRefs[userId];
 
         const link = user ?
-          <span class='linkish'>@{userName(user)}</span> :
-          <span class='linkish'>@{truncateNpub(id)}</span>;
+          <a href={`${window.location.origin}/profile/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
+          <a href={`${window.location.origin}/profile/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
 
         // @ts-ignore
         return link.outerHTML || url;
