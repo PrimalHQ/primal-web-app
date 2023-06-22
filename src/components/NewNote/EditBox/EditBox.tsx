@@ -198,8 +198,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     let newTop = taRect.top + taRect.height - wRect.top + 8;
 
-    console.log('NP: ', taRect, newTop)
-
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
     }
