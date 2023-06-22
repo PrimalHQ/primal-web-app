@@ -3,7 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, noRelayMessage } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, noRelayConnectedMessage, noRelaysMessage } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -138,9 +138,16 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
+    if (Object.keys(account.relaySettings).length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelaysMessage),
+      );
+      return;
+    }
+
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayMessage),
+        intl.formatMessage(noRelayConnectedMessage),
       );
       return;
     }

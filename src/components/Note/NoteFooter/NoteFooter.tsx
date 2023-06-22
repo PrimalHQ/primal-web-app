@@ -14,7 +14,7 @@ import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapSM from '../../../assets/lottie/zap_sm.json';
 import zapMD from '../../../assets/lottie/zap_md.json';
-import { medZapLimit, noRelayMessage } from '../../../constants';
+import { medZapLimit, noRelayConnectedMessage, noRelaysMessage } from '../../../constants';
 
 
 const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
@@ -44,9 +44,16 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
+    if (Object.keys(account.relaySettings).length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelaysMessage),
+      );
+      return;
+    }
+
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayMessage),
+        intl.formatMessage(noRelayConnectedMessage),
       );
       return;
     }
@@ -85,9 +92,16 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
+    if (Object.keys(account.relaySettings).length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelaysMessage),
+      );
+      return;
+    }
+
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayMessage),
+        intl.formatMessage(noRelayConnectedMessage),
       );
       return;
     }
@@ -120,9 +134,16 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
+    if (Object.keys(account.relaySettings).length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(noRelaysMessage),
+      );
+      return;
+    }
+
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayMessage),
+        intl.formatMessage(noRelayConnectedMessage),
       );
       return;
     }
@@ -402,7 +423,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         type: 'repost',
         highlighted: reposted(),
         label: reposts() === 0 ? '' : truncateNumber(reposts(), 2),
-        title: reposts(),
+        title: reposts().toLocaleString(),
       })}
 
       <CustomZap
