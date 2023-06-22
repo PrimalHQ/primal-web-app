@@ -8,7 +8,7 @@ import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
@@ -477,21 +477,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     setParsedMessage(parsed);
 
   };
-
-  const replaceLinkPreviews = (text: string) => {
-    let parsed = text;
-
-    const regex = /__LINK__.*?__LINK__/ig;
-
-    parsed = parsed.replace(regex, (link) => {
-      const url = link.split('__LINK__')[1];
-
-      return `<a link href="${url}" target="_blank" >${url}</a>`;
-
-    });
-
-    return parsed;
-  }
 
 
   const parseForReferece = (value: string) => {

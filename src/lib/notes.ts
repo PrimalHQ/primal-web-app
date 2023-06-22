@@ -189,6 +189,21 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false, s
   })
 }
 
+export const replaceLinkPreviews = (text: string) => {
+  let parsed = text;
+
+  const regex = /__LINK__.*?__LINK__/ig;
+
+  parsed = parsed.replace(regex, (link) => {
+    const url = link.split('__LINK__')[1];
+
+    return `<a link href="${url}" target="_blank" >${url}</a>`;
+
+  });
+
+  return parsed;
+}
+
 export const addlineBreaks = (text: string) => {
   const regex = /(\r\n|\r|\n)/g;
 

@@ -24,7 +24,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { isConnected } from '../sockets';
 import { useIntl } from '@cookbook/solid-intl';
-import { urlify, sanitize } from '../lib/notes';
+import { urlify, sanitize, replaceLinkPreviews } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
@@ -35,7 +35,6 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import { getMediaUrl } from '../lib/media';
 import Search from '../components/Search/Search';
-
 
 const Profile: Component = () => {
 
@@ -327,7 +326,7 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout} innerHTML={urlify(sanitize(profile?.userProfile?.about || ''), true, true)}>
+        <div class={styles.profileAbout} innerHTML={replaceLinkPreviews(urlify(sanitize(profile?.userProfile?.about || ''), false, false))}>
         </div>
 
         <div class={styles.profileLinks}>
