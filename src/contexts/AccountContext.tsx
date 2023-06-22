@@ -73,7 +73,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   };
 
   const setRelaySettings = (settings: NostrRelays) => {
-    console.log('setRelaySettings', settings);
     updateStore('relaySettings', () => ({ ...settings }));
     saveRelaySettings(store.publicKey, settings)
   }
@@ -97,7 +96,10 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         });
 
       },
-      () => console.log('Failed to close all relays'),
+      () => {
+        console.log('Failed to close all relays');
+        connecting = false;
+      },
     );
 
   };
@@ -323,6 +325,18 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       });
     }
   });
+
+  // If user has relays but none is connected, retry connecting after a delay
+  createEffect(() => {
+    if (
+      Object.keys(store.relaySettings).length > 0 &&
+      store.relays.length === 0
+    ) {
+      setTimeout(() => {
+        connectToRelays(store.relaySettings);
+      }, 2000);
+    }
+  })
 
   createEffect(() => {
     if (isConnected()) {
