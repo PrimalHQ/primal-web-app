@@ -16,10 +16,13 @@ const SearchOption: Component<{
   statLabel?: string,
   underline?: boolean,
   onClick?: (e?: MouseEvent) => void,
+  highlighted?: boolean,
 }> = (props) => {
 
   const Content: Component<{ children: JSXElement }> = (prp) => {
-    const klass = () => `${styles.userResult} ${props.underline ? styles.underline : ''}`;
+    const klass = () => `${styles.userResult}
+      ${props.underline ? styles.underline : ''}
+      ${props.highlighted ? styles.highlight : ''}`;
 
     return (
       <Show

@@ -8,7 +8,7 @@
   border-radius: 4px;
   cursor: pointer;
 
-  &:hover, &:focus {
+  &:hover, &:focus, &.highlight {
     background-color: var(--background-input);
   }
 

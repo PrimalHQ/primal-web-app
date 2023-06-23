@@ -44,6 +44,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
 
+  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
 
   const location = useLocation();
@@ -121,8 +122,32 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     if (isMentioning()) {
+      if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedUser(i => {
+          if (!search?.users || search.users.length === 0) {
+            return 0;
+          }
+
+          return i < search.users.length - 1 ? i + 1 : 0;
+        });
+        return false;
+      }
+
+      if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedUser(i => {
+          if (!search?.users || search.users.length === 0) {
+            return 0;
+          }
+
+          return i > 0 ? i - 1 : search.users.length - 1;
+        });
+        return false;
+      }
+
       if (mentionSeparators.includes(e.code)) {
-        search?.users && selectUser(search.users[0])
+        search?.users && selectUser(search.users[highlightedUser()])
         setMentioning(false);
         return false;
       }
@@ -553,6 +578,10 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   createEffect(() => {
     if (isMentioning()) {
       positionOptions();
+
+      if (search?.users && search.users.length > 0) {
+        setHighlightedUser(0);
+      }
     }
   });
 
@@ -577,7 +606,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     // Get index of the token and inster user's handle
     const index = msg.slice(0, cursor).lastIndexOf('@');
-    const value = msg.slice(0, index) + `@\`${name}\` ` + msg.slice(cursor);
+    const value = msg.slice(0, index) + `@\`${name}\`` + msg.slice(cursor);
 
     // Reset query, update message and text area value
     setQuery('');
@@ -642,7 +671,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
           ref={mentionOptions}
         >
           <For each={search?.users}>
-            {(user) => (
+            {(user, index) => (
               <SearchOption
                 title={userName(user)}
                 description={nip05Verification(user)}
@@ -654,6 +683,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
                   description: 'Followers label for user search results',
                 })}
                 onClick={() => selectUser(user)}
+                highlighted={highlightedUser() === index()}
               />
             )}
           </For>
