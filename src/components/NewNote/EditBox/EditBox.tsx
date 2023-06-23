@@ -85,11 +85,58 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
 
+  const [preQuery, setPreQuery] = createSignal('');
+
   const onKeyDown = (e: KeyboardEvent) => {
+    const mentionSeparators = ['Enter', 'Space', 'Comma'];
+
     if (e.code === 'Enter' && e.metaKey) {
       e.preventDefault();
-      // console.log('POST');
       postNote();
+      return false;
+    }
+
+    if (!isMentioning() && e.key === '@') {
+      setPreQuery('');
+      setQuery('');
+      setMentioning(true);
+      return false;
+    }
+
+    if (!isMentioning() && e.code === 'Backspace' && textArea) {
+      let cursor = textArea.selectionStart;
+      const textSoFar = textArea.value.slice(0, cursor);
+      const lastWord = textSoFar.split(' ').pop();
+
+      if (lastWord?.startsWith('@')) {
+        const index = textSoFar.lastIndexOf(lastWord);
+
+        const newText = textSoFar.slice(0, index) + textArea.value.slice(cursor);
+
+        setMessage(newText);
+        textArea.value = newText;
+
+        textArea.selectionEnd = textSoFar.length - 1;
+      }
+    }
+
+    if (isMentioning()) {
+      if (mentionSeparators.includes(e.code)) {
+        search?.users && selectUser(search.users[0])
+        setMentioning(false);
+        return false;
+      }
+
+      if (e.code === 'Backspace') {
+        setPreQuery(preQuery().slice(0, -1));
+      } else {
+        setPreQuery(q => q + e.key);
+      }
+
+      if (preQuery().length === 0) {
+        setMentioning(false);
+      }
+
       return false;
     }
 
@@ -117,6 +164,14 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     if (location.pathname !== currentPath) {
       closeEditor();
     }
+  })
+
+  createEffect(() => {
+    const preQ = preQuery();
+
+    debounce(() => {
+      setQuery(() => preQ)
+    }, 500);
   })
 
   const onEscape = (e: KeyboardEvent) => {
@@ -204,36 +259,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     mentionOptions.style.top = `${newTop}px`;
     mentionOptions.style.left = '110px';
-  };
-
-  const checkForMentioning = (value: string) => {
-    const lastChar = value.charAt(value.length - 1);
-
-    if (lastChar === '@') {
-      setMentioning(true);
-      setQuery('');
-      return;
-    }
-
-    if (lastChar === ' ') {
-      setMentioning(false);
-      setQuery('');
-      return;
-    }
-
-    const words = value.split(' ');
-    const lastWord = words[words.length -1];
-
-    if (isMentioning()) {
-      const newQuery = lastWord.slice(lastWord.lastIndexOf('@')+1);
-
-      debounce(() => {
-        // @ts-ignore
-        setQuery(newQuery);
-      }, 500);
-    }
-
-    setMentioning(lastWord.includes('@'));
   };
 
   const highlightHashtags = (text: string) => {
@@ -503,15 +528,11 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
-    debounce(() => {
-      textArea && setMessage(textArea.value)
-    }, 300);
+    textArea && setMessage(textArea.value)
   };
 
   createEffect(() => {
     const msg = sanitize(message());
-
-    checkForMentioning(msg);
 
     const p = parseForReferece(msg);
 
@@ -525,6 +546,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
+
     search?.actions.findUsers(query());
   });
 
@@ -534,10 +556,12 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
   });
 
-  const selectUser = (user: PrimalUser) => {
-    if (!textArea) {
+  const selectUser = (user: PrimalUser | undefined) => {
+    if (!textArea || !user) {
       return;
     }
+
+    setMentioning(false);
 
     const name = userName(user);
 
@@ -546,15 +570,25 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       [name]: user,
     }));
 
-    let value = message();
+    const msg = message();
 
-    value = value.slice(0, value.lastIndexOf('@'));
+    // Get cursor position to determine insertion point
+    let cursor = textArea.selectionStart;
 
+    // Get index of the token and inster user's handle
+    const index = msg.slice(0, cursor).lastIndexOf('@');
+    const value = msg.slice(0, index) + `@\`${name}\` ` + msg.slice(cursor);
+
+    // Reset query, update message and text area value
     setQuery('');
-
-    setMessage(`${value}@\`${name}\` `);
+    setMessage(value);
     textArea.value = message();
+
     textArea.focus();
+
+    // Calculate new cursor position
+    cursor = value.slice(0, cursor).lastIndexOf('@') + name.length + 3;
+    textArea.selectionEnd = cursor;
 
 
     // Dispatch input event to recalculate UI position
