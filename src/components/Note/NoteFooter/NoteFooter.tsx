@@ -24,6 +24,9 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const intl = useIntl();
   const settings = useSettingsContext();
 
+  let smallZapAnimation: HTMLElement | undefined;
+  let medZapAnimation: HTMLElement | undefined;
+
   const [liked, setLiked] = createSignal(props.note.post.noteActions.liked);
   const [zapped, setZapped] = createSignal(props.note.post.noteActions.zapped);
   const [replied, setReplied] = createSignal(props.note.post.noteActions.replied);
@@ -188,33 +191,30 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     setTimeout(() => {
       setHideZapIcon(true);
 
-      const zapper = document.getElementById(`note-small-zap-${props.note.post.id}`);
-      const player = document.getElementById(`note-small-zap-${props.note.post.id}`);
-
-      if (!zapper || !player) {
+      if (!smallZapAnimation) {
         return;
       }
 
       const newLeft = 116;
       const newTop =  -8;
 
-      zapper.style.left = `${newLeft}px`;
-      zapper.style.top = `${newTop}px`;
+      smallZapAnimation.style.left = `${newLeft}px`;
+      smallZapAnimation.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
         // setIsZapping(true);
         setShowSmallZapAnim(false);
         setHideZapIcon(false);
-        player?.removeEventListener('complete', onAnimDone);
+        smallZapAnimation?.removeEventListener('complete', onAnimDone);
       }
 
-      player?.addEventListener('complete', onAnimDone);
+      smallZapAnimation.addEventListener('complete', onAnimDone);
 
       try {
         // @ts-ignore
-        player?.seek(0);
+        smallZapAnimation.seek(0);
         // @ts-ignore
-        player?.play();
+        smallZapAnimation.play();
       } catch (e) {
         console.warn('Failed to animte zap:', e);
         onAnimDone();
@@ -226,33 +226,30 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
     setTimeout(() => {
       setHideZapIcon(true);
 
-      const zapper = document.getElementById(`note-med-zap-${props.note.post.id}`);
-      const player = document.getElementById(`note-med-zap-${props.note.post.id}`);
-
-      if (!zapper || !player) {
+      if (!medZapAnimation) {
         return;
       }
 
       const newLeft = 20;
       const newTop = -35;
 
-      zapper.style.left = `${newLeft}px`;
-      zapper.style.top = `${newTop}px`;
+      medZapAnimation.style.left = `${newLeft}px`;
+      medZapAnimation.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
         // setIsZapping(true);
         setShowMedZapAnim(false);
         setHideZapIcon(false);
-        player?.removeEventListener('complete', onAnimDone);
+        medZapAnimation?.removeEventListener('complete', onAnimDone);
       }
 
-      player?.addEventListener('complete', onAnimDone);
+      medZapAnimation.addEventListener('complete', onAnimDone);
 
       try {
         // @ts-ignore
-        player?.seek(0);
+        medZapAnimation.seek(0);
         // @ts-ignore
-        player?.play();
+        medZapAnimation.play();
       } catch (e) {
         console.warn('Failed to animte zap:', e);
         onAnimDone();
@@ -377,6 +374,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
           src={zapSM}
           speed="1"
           class={styles.smallZapLottie}
+          ref={smallZapAnimation}
         ></lottie-player>
       </Show>
 
@@ -386,6 +384,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
           src={zapMD}
           speed="1"
           class={styles.mediumZapLottie}
+          ref={medZapAnimation}
         ></lottie-player>
       </Show>
 
