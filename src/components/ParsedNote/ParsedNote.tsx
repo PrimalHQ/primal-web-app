@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
 import { linkPreviews, parseNote1 } from '../../lib/notes';
-import { truncateNpub, userName } from '../../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
   Component, createEffect, createMemo, createSignal,
@@ -14,6 +14,8 @@ import {
 import styles from './ParsedNote.module.scss';
 import { nip19 } from 'nostr-tools';
 import LinkPreview from '../LinkPreview/LinkPreview';
+import Avatar from '../Avatar/Avatar';
+import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 
 
 export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
@@ -85,9 +87,8 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       if (user) {
         link = highlightOnly ?
           <span class='linkish'>@{userName(user)}</span> :
-          <A href={path}>@{userName(user)}</A>;
+          MentionedUserLink({ user });
       }
-
 
       // @ts-ignore
       return link.outerHTML || url;
@@ -141,13 +142,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
         if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
           const user = props.note.mentionedUsers[tag[1]];
 
-          const npub = user.npub || hexToNpub(user.pubkey);
-
-          const link =  (
-            <A href={`/profile/${npub}`} class={styles.mentionedUser}>
-              @{userName(user)}
-            </A>
-          );
+          const link = MentionedUserLink({ user });
 
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);

@@ -17,6 +17,7 @@ import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, Nos
 import { debounce } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
+import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
 import SearchOption from "../../Search/SearchOption";
 import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
@@ -311,7 +312,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       const user = Object.values(userRefs).find(ref => userName(ref) === name);
 
       const link = user ?
-        <a href={`${window.location.origin}/profile/${user.npub}`} target="_blank" class='linkish'> @{name}</a> :
+        MentionedUserLink({ user, openInNewTab: true}) :
         <span class='linkish'> @{name}</span>;
 
         // @ts-ignore
