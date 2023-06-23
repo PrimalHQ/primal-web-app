@@ -108,7 +108,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     if (!isMentioning() && e.code === 'Backspace' && textArea) {
       let cursor = textArea.selectionStart;
       const textSoFar = textArea.value.slice(0, cursor);
-      const lastWord = textSoFar.split(' ').pop();
+      const lastWord = textSoFar.split(/[\s,;\n\r]/).pop();
 
       if (lastWord?.startsWith('@')) {
         const index = textSoFar.lastIndexOf(lastWord);
