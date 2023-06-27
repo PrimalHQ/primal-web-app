@@ -424,11 +424,10 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     const taRect = textArea.getBoundingClientRect();
+    const wRect = editWrap.getBoundingClientRect();
 
-
-    // let newTop = taRect.top + taRect.height - wRect.top + 8;
-    let newTop = taRect.top + mentionCursorPosition.top + 16;
-    let newLeft = 90 + mentionCursorPosition.left + 16
+    let newTop = taRect.top - wRect.top + mentionCursorPosition.top + 22;
+    let newLeft = 90 + mentionCursorPosition.left + 16;
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
@@ -444,9 +443,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     const taRect = textArea.getBoundingClientRect();
+    const wRect = editWrap.getBoundingClientRect();
 
-    // let newTop = taRect.top + taRect.height - wRect.top + 8;
-    let newTop = taRect.top + emojiCursorPosition.top + 16;
+    let newTop = taRect.top - wRect.top + mentionCursorPosition.top + 22;
     let newLeft = 90 + emojiCursorPosition.left + 16
 
     if (newTop > document.documentElement.clientHeight - 200) {
