@@ -471,3 +471,11 @@ export type PrimalNotification  = {
 export type SortedNotifications = Record<number, PrimalNotification[]>;
 
 export type UserRelation = 'follows' | 'other' | 'any';
+
+export type EmojiOption = {
+  keywords: string[],
+  char: string,
+  fitzpatrick_scale: boolean,
+  category: string,
+  name: string,
+};

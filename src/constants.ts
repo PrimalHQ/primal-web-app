@@ -384,3 +384,5 @@ export const noRelaysMessage = {
   defaultMessage: 'You need to declare at least one relay to perform this action',
   description: 'Toast message indicating user has no relays configured',
 };
+
+export const emojiSearchLimit = 2;
