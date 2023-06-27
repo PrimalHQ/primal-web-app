@@ -22,6 +22,7 @@ import SearchOption from "../../Search/SearchOption";
 import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
 import emojiSearch from '@jukben/emoji-search';
+import { getCaretCoordinates } from "../../../lib/textArea";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -52,12 +53,15 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const [isMentioning, setMentioning] = createSignal(false);
   const [preQuery, setPreQuery] = createSignal('');
   const [query, setQuery] = createSignal('');
+  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
+
   const [message, setMessage] = createSignal('');
   const [parsedMessage, setParsedMessage] = createSignal('');
 
   const [isEmojiInput, setEmojiInput] = createSignal(false);
   const [emojiQuery, setEmojiQuery] = createSignal('');
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
+  let emojiCursorPosition = { top: 0, left: 0, height: 0 };
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
@@ -132,14 +136,15 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+      emojiCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
       setEmojiInput(true);
       return false;
     }
 
     if (isEmojiInput()) {
-      e.preventDefault();
 
       if (e.code === 'ArrowDown') {
+        e.preventDefault();
         setHighlightedEmoji(i => {
           if (emojiResults.length === 0) {
             return 0;
@@ -151,6 +156,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (e.code === 'ArrowUp') {
+        e.preventDefault();
         setHighlightedEmoji(i => {
           if (emojiResults.length === 0) {
             return 0;
@@ -162,6 +168,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (e.code === 'ArrowRight') {
+        e.preventDefault();
         setHighlightedEmoji(i => {
           if (emojiResults.length === 0) {
             return 0;
@@ -173,6 +180,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (e.code === 'ArrowLeft') {
+        e.preventDefault();
         setHighlightedEmoji(i => {
           if (emojiResults.length === 0) {
             return 0;
@@ -184,6 +192,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (mentionSeparators.includes(e.code)) {
+        e.preventDefault();
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
@@ -213,6 +222,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     if (!isMentioning() && e.key === '@') {
+      mentionCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
       setPreQuery('');
       setQuery('');
       setMentioning(true);
@@ -237,9 +247,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     if (isMentioning()) {
-      e.preventDefault();
 
       if (e.code === 'ArrowDown') {
+        e.preventDefault();
         setHighlightedUser(i => {
           if (!search?.users || search.users.length === 0) {
             return 0;
@@ -251,6 +261,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (e.code === 'ArrowUp') {
+        e.preventDefault();
         setHighlightedUser(i => {
           if (!search?.users || search.users.length === 0) {
             return 0;
@@ -262,6 +273,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (mentionSeparators.includes(e.code)) {
+        e.preventDefault();
         search?.users && selectUser(search.users[highlightedUser()])
         setMentioning(false);
         return false;
@@ -412,16 +424,18 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     const taRect = textArea.getBoundingClientRect();
-    const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top + taRect.height - wRect.top + 8;
+
+    // let newTop = taRect.top + taRect.height - wRect.top + 8;
+    let newTop = taRect.top + mentionCursorPosition.top + 16;
+    let newLeft = 90 + mentionCursorPosition.left + 16
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
     }
 
     mentionOptions.style.top = `${newTop}px`;
-    mentionOptions.style.left = '110px';
+    mentionOptions.style.left = `${newLeft}px`;
   };
 
   const emojiPositionOptions = () => {
@@ -430,16 +444,17 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     const taRect = textArea.getBoundingClientRect();
-    const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top + taRect.height - wRect.top + 8;
+    // let newTop = taRect.top + taRect.height - wRect.top + 8;
+    let newTop = taRect.top + emojiCursorPosition.top + 16;
+    let newLeft = 90 + emojiCursorPosition.left + 16
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
     }
 
     emojiOptions.style.top = `${newTop}px`;
-    emojiOptions.style.left = '110px';
+    emojiOptions.style.left = `${newLeft}px`;
   };
 
   const highlightHashtags = (text: string) => {
@@ -732,6 +747,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   createEffect(() => {
     if (isMentioning()) {
+
       mentionPositionOptions();
 
       if (search?.users && search.users.length > 0) {
@@ -741,8 +757,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   });
 
   createEffect(() => {
-    if (isMentioning()) {
-      mentionPositionOptions();
+    if (isEmojiInput()) {
+      emojiPositionOptions();
 
       if (emojiResults.length > 0) {
         setHighlightedEmoji(0);
