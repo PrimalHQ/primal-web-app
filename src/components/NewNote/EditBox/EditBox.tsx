@@ -21,8 +21,19 @@ import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
 import SearchOption from "../../Search/SearchOption";
 import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
+import emojiSearch from '@jukben/emoji-search';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
+
+type EmojiOption = {
+  keywords: string[],
+  char: string,
+  fitzpatrick_scale: boolean,
+  category: string,
+  name: string,
+};
+
+const emojiSearchLimit = 2;
 
 const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPrefix?: string } > = (props) => {
 
@@ -35,17 +46,24 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
   let mentionOptions: HTMLDivElement | undefined;
+  let emojiOptions: HTMLDivElement | undefined;
   let editWrap: HTMLDivElement | undefined;
 
   const [isMentioning, setMentioning] = createSignal(false);
+  const [preQuery, setPreQuery] = createSignal('');
   const [query, setQuery] = createSignal('');
   const [message, setMessage] = createSignal('');
   const [parsedMessage, setParsedMessage] = createSignal('');
+
+  const [isEmojiInput, setEmojiInput] = createSignal(false);
+  const [emojiQuery, setEmojiQuery] = createSignal('');
+  const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
 
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+  const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
 
   const location = useLocation();
@@ -87,14 +105,110 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
 
-  const [preQuery, setPreQuery] = createSignal('');
+  createEffect(() => {
+    if (emojiQuery().length > emojiSearchLimit) {
+      setEmojiResults(() => emojiSearch(emojiQuery()));
+    }
+  });
+
+
+  createEffect(() => {
+    if (isEmojiInput() && emojiQuery().length > emojiSearchLimit) {
+      emojiPositionOptions();
+    }
+  });
 
   const onKeyDown = (e: KeyboardEvent) => {
+    if (!textArea) {
+      return false;
+    }
+
     const mentionSeparators = ['Enter', 'Space', 'Comma'];
 
     if (e.code === 'Enter' && e.metaKey) {
       e.preventDefault();
       postNote();
+      return false;
+    }
+
+    if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+      setEmojiInput(true);
+      return false;
+    }
+
+    if (isEmojiInput()) {
+      e.preventDefault();
+
+      if (e.code === 'ArrowDown') {
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i < emojiResults.length - 7 ? i + 6 : 0;
+        });
+        return false;
+      }
+
+      if (e.code === 'ArrowUp') {
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i > 6 ? i - 6 : emojiResults.length - 1;
+        });
+        return false;
+      }
+
+      if (e.code === 'ArrowRight') {
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i < emojiResults.length - 1 ? i + 1 : 0;
+        });
+        return false;
+      }
+
+      if (e.code === 'ArrowLeft') {
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i > 0 ? i - 1 : emojiResults.length - 1;
+        });
+        return false;
+      }
+
+      if (mentionSeparators.includes(e.code)) {
+        selectEmoji(emojiResults[highlightedEmoji()]);
+        setHighlightedEmoji(0);
+        return false;
+      }
+
+      const cursor = textArea.selectionStart;
+      const lastEmojiTrigger = textArea.value.slice(0, cursor).lastIndexOf(':');
+
+      if (e.code === 'Backspace') {
+        setEmojiQuery(emojiQuery().slice(0, -1));
+
+        if (lastEmojiTrigger < 0 || cursor - lastEmojiTrigger <= 1) {
+          setEmojiInput(false);
+          return false;
+        }
+      } else {
+        setEmojiQuery(q => q + e.key);
+        return false;
+      }
+
+      // if (emojiQuery().length === 0) {
+      //   setEmojiInput(false);
+      //   return false;
+      // }
+
       return false;
     }
 
@@ -110,7 +224,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       const textSoFar = textArea.value.slice(0, cursor);
       const lastWord = textSoFar.split(/[\s,;\n\r]/).pop();
 
-      if (lastWord?.startsWith('@')) {
+      if (lastWord?.startsWith('@`')) {
         const index = textSoFar.lastIndexOf(lastWord);
 
         const newText = textSoFar.slice(0, index) + textArea.value.slice(cursor);
@@ -123,8 +237,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
 
     if (isMentioning()) {
+      e.preventDefault();
+
       if (e.code === 'ArrowDown') {
-        e.preventDefault();
         setHighlightedUser(i => {
           if (!search?.users || search.users.length === 0) {
             return 0;
@@ -136,7 +251,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (e.code === 'ArrowUp') {
-        e.preventDefault();
         setHighlightedUser(i => {
           if (!search?.users || search.users.length === 0) {
             return 0;
@@ -153,15 +267,25 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         return false;
       }
 
+      const cursor = textArea.selectionStart;
+      const lastMentionTrigger = textArea.value.slice(0, cursor).lastIndexOf('@');
+
       if (e.code === 'Backspace') {
         setPreQuery(preQuery().slice(0, -1));
+
+        if (lastMentionTrigger < 0 || cursor - lastMentionTrigger <= 1) {
+          setMentioning(false);
+          return false;
+        }
       } else {
         setPreQuery(q => q + e.key);
+        return false
       }
 
-      if (preQuery().length === 0) {
-        setMentioning(false);
-      }
+      // if (preQuery().length === 0) {
+      //   setMentioning(false);
+      //   return false;
+      // }
 
       return false;
     }
@@ -202,7 +326,9 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   const onEscape = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
-      closeEditor();
+      !isMentioning() && !isEmojiInput() ?
+        closeEditor() :
+        closeEmojiAndMentions();
     }
   };
 
@@ -211,7 +337,18 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     setMessage('');
     setParsedMessage('');
     setQuery('');
+    setMentioning(false);
+    setEmojiInput(false);
+    setEmojiQuery('')
+    setEmojiResults(() => []);
     props.onClose && props.onClose();
+  };
+
+  const closeEmojiAndMentions = () => {
+    setMentioning(false);
+    setEmojiInput(false);
+    setEmojiQuery('')
+    setEmojiResults(() => []);
   };
 
   const postNote = async () => {
@@ -269,7 +406,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     closeEditor();
   };
 
-  const positionOptions = () => {
+  const mentionPositionOptions = () => {
     if (!textArea || !mentionOptions || !editWrap) {
       return;
     }
@@ -285,6 +422,24 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     mentionOptions.style.top = `${newTop}px`;
     mentionOptions.style.left = '110px';
+  };
+
+  const emojiPositionOptions = () => {
+    if (!textArea || !emojiOptions || !editWrap) {
+      return;
+    }
+
+    const taRect = textArea.getBoundingClientRect();
+    const wRect = editWrap.getBoundingClientRect();
+
+    let newTop = taRect.top + taRect.height - wRect.top + 8;
+
+    if (newTop > document.documentElement.clientHeight - 200) {
+      newTop = taRect.top - 400;
+    }
+
+    emojiOptions.style.top = `${newTop}px`;
+    emojiOptions.style.left = '110px';
   };
 
   const highlightHashtags = (text: string) => {
@@ -572,19 +727,59 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
-
     search?.actions.findUsers(query());
   });
 
   createEffect(() => {
     if (isMentioning()) {
-      positionOptions();
+      mentionPositionOptions();
 
       if (search?.users && search.users.length > 0) {
         setHighlightedUser(0);
       }
     }
   });
+
+  createEffect(() => {
+    if (isMentioning()) {
+      mentionPositionOptions();
+
+      if (emojiResults.length > 0) {
+        setHighlightedEmoji(0);
+      }
+    }
+  });
+
+  const selectEmoji = (emoji: EmojiOption) => {
+    if (!textArea) {
+      return;
+    }
+
+    const msg = message();
+
+    // Get cursor position to determine insertion point
+    let cursor = textArea.selectionStart;
+
+    // Get index of the token and inster user's handle
+    const index = msg.slice(0, cursor).lastIndexOf(':');
+    const value = msg.slice(0, index) + emoji.char + msg.slice(cursor);
+
+    // Reset query, update message and text area value
+    setMessage(value);
+    textArea.value = message();
+
+    // Calculate new cursor position
+    textArea.selectionEnd = cursor + 1;
+    textArea.focus();
+
+    setEmojiInput(false);
+    setEmojiQuery('');
+    setEmojiResults(() => []);
+
+    // Dispatch input event to recalculate UI position
+    const e = new Event('input', { bubbles: true, cancelable: true});
+    textArea.dispatchEvent(e);
+  };
 
   const selectUser = (user: PrimalUser | undefined) => {
     if (!textArea || !user) {
@@ -686,6 +881,25 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
                 onClick={() => selectUser(user)}
                 highlighted={highlightedUser() === index()}
               />
+            )}
+          </For>
+        </div>
+      </Show>
+
+      <Show when={isEmojiInput() && emojiQuery().length > emojiSearchLimit}>
+        <div
+          id="emoji-auto"
+          class={styles.emojiSuggestions}
+          ref={emojiOptions}
+        >
+          <For each={emojiResults}>
+            {(emoji, index) => (
+              <button
+              class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
+              onClick={() => selectEmoji(emoji)}
+              >
+                {emoji.char}
+              </button>
             )}
           </For>
         </div>

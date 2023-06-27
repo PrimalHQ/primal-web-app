@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@cookbook/solid-intl": "^0.1.2",
+    "@jukben/emoji-search": "^2.0.1",
     "@picocss/pico": "^1.5.7",
     "@scure/base": "^1.1.1",
     "@solidjs/router": "^0.7.0",
