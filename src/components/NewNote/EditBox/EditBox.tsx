@@ -14,7 +14,7 @@ import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
-import { debounce } from "../../../utils";
+import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
 import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
@@ -39,6 +39,8 @@ const emojiSearchLimit = 2;
 const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPrefix?: string } > = (props) => {
 
   const intl = useIntl();
+
+  const instanceId = uuidv4();
 
   const search = useSearchContext();
   const account = useAccountContext();
@@ -152,6 +154,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
           return i < emojiResults.length - 7 ? i + 6 : 0;
         });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+
         return false;
       }
 
@@ -162,8 +171,15 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             return 0;
           }
 
-          return i > 6 ? i - 6 : emojiResults.length - 1;
+          return i >= 6 ? i - 6 : emojiResults.length - 1;
         });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+
         return false;
       }
 
@@ -176,6 +192,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
           return i < emojiResults.length - 1 ? i + 1 : 0;
         });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+
         return false;
       }
 
@@ -188,6 +211,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
           return i > 0 ? i - 1 : emojiResults.length - 1;
         });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+
         return false;
       }
 
@@ -877,7 +907,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
       <Show when={isMentioning()}>
         <div
-          id="mention-auto"
           class={styles.searchSuggestions}
           ref={mentionOptions}
         >
@@ -903,13 +932,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
       <Show when={isEmojiInput() && emojiQuery().length > emojiSearchLimit}>
         <div
-          id="emoji-auto"
           class={styles.emojiSuggestions}
           ref={emojiOptions}
         >
           <For each={emojiResults}>
             {(emoji, index) => (
               <button
+              id={`${instanceId}-${index()}`}
               class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
               onClick={() => selectEmoji(emoji)}
               >
