@@ -43,10 +43,12 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   let emojiOptions: HTMLDivElement | undefined;
   let editWrap: HTMLDivElement | undefined;
 
+  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
+  let emojiCursorPosition = { top: 0, left: 0, height: 0 };
+
   const [isMentioning, setMentioning] = createSignal(false);
   const [preQuery, setPreQuery] = createSignal('');
   const [query, setQuery] = createSignal('');
-  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
 
   const [message, setMessage] = createSignal('');
   const [parsedMessage, setParsedMessage] = createSignal('');
@@ -54,7 +56,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const [isEmojiInput, setEmojiInput] = createSignal(false);
   const [emojiQuery, setEmojiQuery] = createSignal('');
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
-  let emojiCursorPosition = { top: 0, left: 0, height: 0 };
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
@@ -77,8 +78,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
     const maxHeight = document.documentElement.clientHeight || window.innerHeight || 0;
 
-    const elm = event.target as AutoSizedTextArea;
-    const preview = document.getElementById(`${prefix()}new_note_text_preview`);
+    const elm = textArea as AutoSizedTextArea;
+    const preview = textPreview;
 
     if(elm.nodeName !== 'TEXTAREA' || elm.id !== `${prefix()}new_note_text_area` || !preview) {
       return;
@@ -328,19 +329,19 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   onMount(() => {
     // @ts-expect-error TODO: fix types here
-    document.addEventListener('input', onExpandableTextareaInput);
-    document.addEventListener('keydown', onKeyDown);
+    editWrap?.addEventListener('input', onExpandableTextareaInput);
+    editWrap?.addEventListener('keydown', onKeyDown);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
-    document.removeEventListener('input', onExpandableTextareaInput);
-    document.removeEventListener('keydown', onKeyDown);
+    editWrap?.removeEventListener('input', onExpandableTextareaInput);
+    editWrap?.removeEventListener('keydown', onKeyDown);
   });
 
   createEffect(() => {
-    document.removeEventListener('keyup', onEscape);
-    document.addEventListener('keyup', onEscape);
+    editWrap?.removeEventListener('keyup', onEscape);
+    editWrap?.addEventListener('keyup', onEscape);
   });
 
   createEffect(() => {
@@ -740,10 +741,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   }
 
   const onInput = (e: InputEvent) => {
-    if (!textArea) {
-      return;
-    }
-
     textArea && setMessage(textArea.value)
   };
 
@@ -796,7 +793,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     // Get cursor position to determine insertion point
     let cursor = textArea.selectionStart;
 
-    // Get index of the token and inster user's handle
+    // Get index of the token and insert emoji character
     const index = msg.slice(0, cursor).lastIndexOf(':');
     const value = msg.slice(0, index) + emoji.char + msg.slice(cursor);
 
@@ -805,7 +802,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     textArea.value = message();
 
     // Calculate new cursor position
-    textArea.selectionEnd = cursor + 1;
+    textArea.selectionEnd = index + 1;
     textArea.focus();
 
     setEmojiInput(false);
@@ -813,8 +810,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     setEmojiResults(() => []);
 
     // Dispatch input event to recalculate UI position
-    const e = new Event('input', { bubbles: true, cancelable: true});
-    textArea.dispatchEvent(e);
+    // const e = new Event('input', { bubbles: true, cancelable: true});
+    // textArea.dispatchEvent(e);
   };
 
   const selectUser = (user: PrimalUser | undefined) => {

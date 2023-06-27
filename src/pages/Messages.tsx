@@ -17,17 +17,27 @@ import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
 import SearchOption from '../components/Search/SearchOption';
-import { debounce, isVisibleInContainer } from '../utils';
+import { debounce, isVisibleInContainer, uuidv4 } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
 import { editMentionRegex } from '../constants';
 import Search from '../components/Search/Search';
 import { useProfileContext } from '../contexts/ProfileContext';
 import Paginator from '../components/Paginator/Paginator';
+import { getCaretCoordinates } from '../lib/textArea';
+import emojiSearch from '@jukben/emoji-search';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 let currentUrl = '';
+
+type EmojiOption = {
+  keywords: string[],
+  char: string,
+  fitzpatrick_scale: boolean,
+  category: string,
+  name: string,
+};
 
 export const parseNoteLinks = (text: string, mentionedNotes: Record<string, PrimalNote>, mentionedUsers: Record<string, PrimalUser>, highlightOnly?: boolean) => {
 
@@ -107,7 +117,10 @@ export const parseNpubLinks = (text: string, mentionedUsers: Record<string, Prim
 
 };
 
+const emojiSearchLimit = 2;
+
 const Messages: Component = () => {
+  const instanceId = uuidv4();
 
   const intl = useIntl();
   const messages = useMessagesContext();
@@ -123,6 +136,14 @@ const Messages: Component = () => {
   let newMessageInputBorder: HTMLDivElement | undefined;
   let newMessageWrapper: HTMLDivElement | undefined;
   let sendersListElement: HTMLDivElement | undefined;
+
+  let emojiOptions: HTMLDivElement | undefined;
+
+  const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
+  const [isEmojiInput, setEmojiInput] = createSignal(false);
+  const [emojiQuery, setEmojiQuery] = createSignal('');
+  const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
+  let emojiCursorPosition = { top: 0, left: 0, height: 0 };
 
   const senderNpub = () => {
     if (!params.sender) {
@@ -298,12 +319,12 @@ const Messages: Component = () => {
 
   const [message, setMessage] = createSignal('');
 
-  const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
+  const onExpandableTextareaInput = () => {
     const maxHeight = 800;
 
-    const elm = event.target as AutoSizedTextArea;
+    const elm = newMessageInput as AutoSizedTextArea;
 
-    if(elm.nodeName !== 'TEXTAREA') {
+    if(!elm || elm.nodeName !== 'TEXTAREA') {
       return;
     }
 
@@ -336,8 +357,15 @@ const Messages: Component = () => {
 
   }
 
+
   const onKeyDown = (e: KeyboardEvent) => {
-    if (e.code === 'Enter' && !e.shiftKey) {
+    if (!newMessageInput || !newMessageWrapper) {
+      return false;
+    }
+
+    const mentionSeparators = ['Enter', 'Space', 'Comma'];
+
+    if (!isMentioning() && !isEmojiInput() && e.code === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       debounce(() => {
         sendMessage();
@@ -345,17 +373,233 @@ const Messages: Component = () => {
 
       return false;
     }
+
+    if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+      emojiCursorPosition = getCaretCoordinates(newMessageInput, newMessageInput.selectionStart);
+      setEmojiInput(true);
+      return false;
+    }
+
+    if (isEmojiInput()) {
+
+      if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i < emojiResults.length - 7 ? i + 6 : 0;
+        });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+
+        return false;
+      }
+
+      if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i >= 6 ? i - 6 : emojiResults.length - 1;
+        });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+
+        return false;
+      }
+
+      if (e.code === 'ArrowRight') {
+        e.preventDefault();
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i < emojiResults.length - 1 ? i + 1 : 0;
+        });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'end', behavior: 'smooth' });
+        }
+
+        return false;
+      }
+
+      if (e.code === 'ArrowLeft') {
+        e.preventDefault();
+        setHighlightedEmoji(i => {
+          if (emojiResults.length === 0) {
+            return 0;
+          }
+
+          return i > 0 ? i - 1 : emojiResults.length - 1;
+        });
+
+        const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
+
+        if (emojiHolder && emojiOptions && !isVisibleInContainer(emojiHolder, emojiOptions)) {
+          emojiHolder.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        }
+
+        return false;
+      }
+
+      if (mentionSeparators.includes(e.code)) {
+        e.preventDefault();
+        selectEmoji(emojiResults[highlightedEmoji()]);
+        setHighlightedEmoji(0);
+        return false;
+      }
+
+      const cursor = newMessageInput.selectionStart;
+      const lastEmojiTrigger = newMessageInput.value.slice(0, cursor).lastIndexOf(':');
+
+      if (e.code === 'Backspace') {
+        setEmojiQuery(emojiQuery().slice(0, -1));
+
+        if (lastEmojiTrigger < 0 || cursor - lastEmojiTrigger <= 1) {
+          setEmojiInput(false);
+          return false;
+        }
+      } else {
+        setEmojiQuery(q => q + e.key);
+        return false;
+      }
+
+      // if (emojiQuery().length === 0) {
+      //   setEmojiInput(false);
+      //   return false;
+      // }
+
+      return false;
+    }
+
+    if (!isMentioning() && e.key === '@') {
+      mentionCursorPosition = getCaretCoordinates(newMessageInput, newMessageInput.selectionStart);
+      setPreQuery('');
+      setQuery('');
+      setMentioning(true);
+      return false;
+    }
+
+    if (!isMentioning() && e.code === 'Backspace' && newMessageInput) {
+      let cursor = newMessageInput.selectionStart;
+      const textSoFar = newMessageInput.value.slice(0, cursor);
+      const lastWord = textSoFar.split(/[\s,;\n\r]/).pop();
+
+      if (lastWord?.startsWith('@`')) {
+        const index = textSoFar.lastIndexOf(lastWord);
+
+        const newText = textSoFar.slice(0, index) + newMessageInput.value.slice(cursor);
+
+        setMessage(newText);
+        newMessageInput.value = newText;
+
+        newMessageInput.selectionEnd = index;
+      }
+    }
+
+    if (isMentioning()) {
+
+      if (e.code === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedUser(i => {
+          if (!search?.users || search.users.length === 0) {
+            return 0;
+          }
+
+          return i < search.users.length - 1 ? i + 1 : 0;
+        });
+        return false;
+      }
+
+      if (e.code === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedUser(i => {
+          if (!search?.users || search.users.length === 0) {
+            return 0;
+          }
+
+          return i > 0 ? i - 1 : search.users.length - 1;
+        });
+        return false;
+      }
+
+      if (mentionSeparators.includes(e.code)) {
+        e.preventDefault();
+        search?.users && selectUser(search.users[highlightedUser()])
+        setMentioning(false);
+        return false;
+      }
+
+      const cursor = newMessageInput.selectionStart;
+      const lastMentionTrigger = newMessageInput.value.slice(0, cursor).lastIndexOf('@');
+
+      if (e.code === 'Backspace') {
+        setPreQuery(preQuery().slice(0, -1));
+
+        if (lastMentionTrigger < 0 || cursor - lastMentionTrigger <= 1) {
+          setMentioning(false);
+          return false;
+        }
+      } else {
+        setPreQuery(q => q + e.key);
+        return false
+      }
+
+      // if (preQuery().length === 0) {
+      //   setMentioning(false);
+      //   return false;
+      // }
+
+      return false;
+    }
+
+    return true;
   };
 
+  // const onKeyDown = (e: KeyboardEvent) => {
+  //   if (!newMessageInput) {
+  //     return false;
+  //   }
+
+  //   if (e.code === 'Enter' && !e.shiftKey) {
+  //     e.preventDefault();
+  //     debounce(() => {
+  //       sendMessage();
+  //     }, 300);
+
+  //     return false;
+  //   }
+
+  //   if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+  //     emojiCursorPosition = getCaretCoordinates(newMessageInput, newMessageInput.selectionStart);
+  //     setEmojiInput(true);
+  //     return false;
+  //   }
+  // };
+
   onMount(() => {
-    // @ts-expect-error TODO: fix types here
-    document.addEventListener('input', onExpandableTextareaInput);
+    newMessageWrapper?.addEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.addEventListener('keydown', onKeyDown);
   });
 
   onCleanup(() => {
-    // @ts-expect-error TODO: fix types here
-    document.removeEventListener('input', onExpandableTextareaInput);
+    newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
   });
 
@@ -424,7 +668,11 @@ const Messages: Component = () => {
   const search = useSearchContext();
 
   const [isMentioning, setMentioning] = createSignal(false);
+  const [preQuery, setPreQuery] = createSignal('');
   const [query, setQuery] = createSignal('');
+
+  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
 
   let mentionOptions: HTMLDivElement | undefined;
 
@@ -440,40 +688,12 @@ const Messages: Component = () => {
     })
   }
 
-  const checkForMentioning = (value: string) => {
-    const lastChar = value.charAt(value.length - 1);
-
-    if (lastChar === '@') {
-      setMentioning(true);
-      setQuery('');
-      return;
-    }
-
-    if (lastChar === ' ') {
-      setMentioning(false);
-      setQuery('');
-      return;
-    }
-
-    const words = value.split(' ');
-    const lastWord = words[words.length -1];
-
-    if (isMentioning()) {
-      const newQuery = lastWord.slice(lastWord.lastIndexOf('@')+1);
-
-      debounce(() => {
-        // @ts-ignore
-        setQuery(newQuery);
-      }, 500);
-    }
-
-    setMentioning(lastWord.includes('@'));
-  };
-
   createEffect(() => {
-    const msg = message();
+    const preQ = preQuery();
 
-    checkForMentioning(msg);
+    debounce(() => {
+      setQuery(() => preQ)
+    }, 500);
   })
 
   createEffect(() => {
@@ -487,29 +707,72 @@ const Messages: Component = () => {
 
   createEffect(() => {
     if (isMentioning()) {
-      positionOptions();
+
+      mentionPositionOptions();
+
+      if (search?.users && search.users.length > 0) {
+        setHighlightedUser(0);
+      }
     }
   });
 
-  const positionOptions = () => {
+
+  const mentionPositionOptions = () => {
     if (!newMessageInput || !mentionOptions || !newMessageWrapper) {
       return;
     }
 
-    let newBottom = 32;
+    const taRect = newMessageInput.getBoundingClientRect();
 
-    mentionOptions.style.removeProperty('top');
+    let newBottom = taRect.height - mentionCursorPosition.top;
+    let newLeft = mentionCursorPosition.left;
+
     mentionOptions.style.bottom = `${newBottom}px`;
-    mentionOptions.style.left = '0px';
+    mentionOptions.style.left = `${newLeft}px`;
   };
 
-  const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
-
-  const selectUser = (user: PrimalUser) => {
-
+  const selectEmoji = (emoji: EmojiOption) => {
     if (!newMessageInput) {
       return;
     }
+
+    const msg = message();
+
+    // Get cursor position to determine insertion point
+    let cursor = newMessageInput.selectionStart;
+
+    // Get index of the token and insert emoji character
+    const index = msg.slice(0, cursor).lastIndexOf(':');
+    const value = msg.slice(0, index) + emoji.char + msg.slice(cursor);
+
+    // Reset query, update message and text area value
+    setMessage(value);
+    newMessageInput.value = message();
+
+    // Calculate new cursor position
+    newMessageInput.selectionEnd = index + 1;
+    newMessageInput.focus();
+
+    setEmojiInput(false);
+    setEmojiQuery('');
+    setEmojiResults(() => []);
+
+    // Dispatch input event to recalculate UI position
+    // const e = new Event('input', { bubbles: true, cancelable: true});
+    // newMessageInput.dispatchEvent(e);
+  };
+
+
+  const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
+
+
+  const selectUser = (user: PrimalUser | undefined) => {
+    if (!newMessageInput || !user) {
+      return;
+    }
+
+    setMentioning(false);
+
     const name = userName(user);
 
     setUserRefs((refs) => ({
@@ -517,24 +780,61 @@ const Messages: Component = () => {
       [name]: user,
     }));
 
-    messages?.actions.addUserReference(user);
+    const msg = message();
 
-    let value = message();
+    // Get cursor position to determine insertion point
+    let cursor = newMessageInput.selectionStart;
 
-    value = value.slice(0, value.lastIndexOf('@'));
+    // Get index of the token and inster user's handle
+    const index = msg.slice(0, cursor).lastIndexOf('@');
+    const value = msg.slice(0, index) + `@\`${name}\`` + msg.slice(cursor);
 
+    // Reset query, update message and text area value
     setQuery('');
-
-    setMessage(`${value}@\`${name}\` `);
+    setMessage(value);
     newMessageInput.value = message();
 
     newMessageInput.focus();
+
+    // Calculate new cursor position
+    cursor = value.slice(0, cursor).lastIndexOf('@') + name.length + 3;
+    newMessageInput.selectionEnd = cursor;
 
 
     // Dispatch input event to recalculate UI position
     const e = new Event('input', { bubbles: true, cancelable: true});
     newMessageInput.dispatchEvent(e);
   };
+  // const selectUser = (user: PrimalUser) => {
+
+  //   if (!newMessageInput) {
+  //     return;
+  //   }
+  //   const name = userName(user);
+
+  //   setUserRefs((refs) => ({
+  //     ...refs,
+  //     [name]: user,
+  //   }));
+
+  //   messages?.actions.addUserReference(user);
+
+  //   let value = message();
+
+  //   value = value.slice(0, value.lastIndexOf('@'));
+
+  //   setQuery('');
+
+  //   setMessage(`${value}@\`${name}\` `);
+  //   newMessageInput.value = message();
+
+  //   newMessageInput.focus();
+
+
+  //   // Dispatch input event to recalculate UI position
+  //   const e = new Event('input', { bubbles: true, cancelable: true});
+  //   newMessageInput.dispatchEvent(e);
+  // };
 
   createEffect(() => {
     if (account?.hasPublicKey()) {
@@ -554,8 +854,39 @@ const Messages: Component = () => {
     }
   });
 
+  createEffect(() => {
+    if (emojiQuery().length > emojiSearchLimit) {
+      setEmojiResults(() => emojiSearch(emojiQuery()));
+    }
+  });
+
+  createEffect(() => {
+    if (isEmojiInput()) {
+      emojiPositionOptions();
+
+      if (emojiResults.length > 0) {
+        setHighlightedEmoji(0);
+      }
+    }
+  });
+
+  const emojiPositionOptions = () => {
+    if (!newMessageInput || !emojiOptions || !newMessageWrapper) {
+      return;
+    }
+
+    const taRect = newMessageInput.getBoundingClientRect();
+
+    let newBottom = taRect.height - emojiCursorPosition.top;
+    let newLeft = emojiCursorPosition.left;
+
+    emojiOptions.style.bottom = `${newBottom}px`;
+    emojiOptions.style.left = `${newLeft}px`;
+  };
+
+
   const onInput = () => {
-    setMessage(newMessageInput?.value || '')
+    newMessageInput && setMessage(newMessageInput.value)
   }
 
   return (
@@ -563,7 +894,6 @@ const Messages: Component = () => {
       <Wormhole to="branding_holder">
         <Branding small={false} />
       </Wormhole>
-
 
       <Wormhole
         to="search_section"
@@ -686,7 +1016,6 @@ const Messages: Component = () => {
                 data-min-rows={2}
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
-                value={message()}
                 onInput={onInput}
               ></textarea>
             </div>
@@ -714,7 +1043,7 @@ const Messages: Component = () => {
                 ref={mentionOptions}
               >
                 <For each={search?.users}>
-                  {(user) => (
+                  {(user, index) => (
                     <SearchOption
                       title={userName(user)}
                       description={user.nip05}
@@ -726,7 +1055,27 @@ const Messages: Component = () => {
                         description: 'Followers label for user search results',
                       })}
                       onClick={() => selectUser(user)}
+                      highlighted={highlightedUser() === index()}
                     />
+                  )}
+                </For>
+              </div>
+            </Show>
+
+            <Show when={isEmojiInput() && emojiQuery().length > emojiSearchLimit}>
+              <div
+                class={styles.emojiSuggestions}
+                ref={emojiOptions}
+              >
+                <For each={emojiResults}>
+                  {(emoji, index) => (
+                    <button
+                    id={`${instanceId}-${index()}`}
+                    class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
+                    onClick={() => selectEmoji(emoji)}
+                    >
+                      {emoji.char}
+                    </button>
                   )}
                 </For>
               </div>

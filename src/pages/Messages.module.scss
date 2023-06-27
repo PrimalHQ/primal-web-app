@@ -384,3 +384,44 @@
   left: 0px;
   z-index: var(--z-index-header);
 }
+
+
+.emojiSuggestions {
+  position: absolute;
+  display: grid;
+  grid-template-columns: 50px 50px 50px 50px 50px 50px;
+  width: 322px;
+  max-height: 200px;
+  overflow-y: scroll;
+  padding: 4px;
+  background-color: var(--background-site);
+  border: 1px solid var(--text-tertiary-2);
+  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+
+  bottom: 32px;
+  left: 0px;
+  z-index: var(--z-index-floater);
+
+  .emojiOption {
+    margin-bottom: 5px;
+    padding: 2px;
+    background: none;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover, &.highlight {
+      background-color: var(--text-tertiary-2);
+    }
+
+    &:focus {
+      outline: none;
+      border: none;
+    }
+  }
+}
