@@ -242,7 +242,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         setMessage(newText);
         textArea.value = newText;
 
-        textArea.selectionEnd = textSoFar.length - 1;
+        textArea.selectionEnd = index;
       }
     }
 
