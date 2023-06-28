@@ -459,6 +459,10 @@ const Messages: Component = () => {
       }
 
       if (mentionSeparators.includes(e.code)) {
+        if (emojiQuery().trim().length === 0) {
+          setEmojiInput(false);
+          return false;
+        }
         e.preventDefault();
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
@@ -540,6 +544,10 @@ const Messages: Component = () => {
       }
 
       if (mentionSeparators.includes(e.code)) {
+        if (preQuery().trim().length === 0) {
+          setMentioning(false);
+          return false;
+        }
         e.preventDefault();
         search?.users && selectUser(search.users[highlightedUser()])
         setMentioning(false);
