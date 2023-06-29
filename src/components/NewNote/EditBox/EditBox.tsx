@@ -901,7 +901,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
       const subid = `upload_${APP_ID}`;
 
-      const data = e.target?.result as ArrayBuffer;
+      const data = e.target?.result as string;
 
       const unsub = subscribeTo(subid, (type, subId, content) =>{
 
@@ -924,7 +924,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       uploadMedia(account?.publicKey, subid, data);
     }
 
-    file && reader.readAsArrayBuffer(file);
+    file && reader.readAsDataURL(file);
   }
 
   return (
