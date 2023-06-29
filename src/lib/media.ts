@@ -27,7 +27,7 @@ export const uploadMedia = async (
   }
 
   const event = {
-    content: content,
+    content,
     kind: Kind.Upload,
     tags: [['p', uploader]],
     created_at: Math.floor((new Date()).getTime() / 1000),
@@ -45,6 +45,6 @@ export const uploadMedia = async (
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["upload", subid, { event_from_user: signedNote }]},
+    {cache: ["upload", { event_from_user: signedNote }]},
   ]));
 };
