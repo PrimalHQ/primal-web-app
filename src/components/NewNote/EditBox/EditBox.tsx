@@ -13,7 +13,7 @@ import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
 import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -23,6 +23,8 @@ import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
 import emojiSearch from '@jukben/emoji-search';
 import { getCaretCoordinates } from "../../../lib/textArea";
+import { uploadMedia } from "../../../lib/media";
+import { APP_ID } from "../../../App";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -42,6 +44,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   let mentionOptions: HTMLDivElement | undefined;
   let emojiOptions: HTMLDivElement | undefined;
   let editWrap: HTMLDivElement | undefined;
+  let fileUpload: HTMLInputElement | undefined;
 
   let mentionCursorPosition = { top: 0, left: 0, height: 0 };
   let emojiCursorPosition = { top: 0, left: 0, height: 0 };
@@ -868,6 +871,62 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   const prefix = () => props.idPrefix ?? '';
 
+  const insertAtCursor = (text: string) => {
+    if (!textArea) {
+      return;
+    }
+
+    const msg = message();
+
+    const cursor = textArea.selectionStart;
+
+    const value = msg.slice(0, cursor) + `${text}` + msg.slice(cursor + text.length);
+
+    setMessage(() => value);
+  };
+
+  const uploadFile = () => {
+    if (!fileUpload) {
+      return;
+    }
+
+    const file = fileUpload.files ? fileUpload.files[0] : null;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      if (!e.target?.result) {
+        return;
+      }
+
+      const subid = `upload_${APP_ID}`;
+
+      const content = e.target?.result as ArrayBuffer;
+
+      const unsub = subscribeTo(subid, (type, subId, content) =>{
+
+        if (type === 'EVENT') {
+          if (!content) {
+            return;
+          }
+
+          if (content.kind === Kind.Uploaded) {
+            const uploaded = content as NostrMediaUploaded;
+
+            insertAtCursor(uploaded.content);
+
+            unsub();
+            return;
+          }
+        }
+      });
+
+      uploadMedia(account?.publicKey, subid, content);
+    }
+
+    file && reader.readAsArrayBuffer(file);
+  }
+
   return (
     <div class={styles.noteEditBox} ref={editWrap}>
       <div class={styles.editorWrap} onClick={focusInput}>
@@ -946,6 +1005,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       </Show>
 
       <div class={styles.controls}>
+        <input type="file" onChange={uploadFile} ref={fileUpload} />
         <button
           class={styles.primaryButton}
           onClick={postNote}

@@ -219,6 +219,8 @@ export enum Kind  {
   MessageStats = 10_000_117,
   MesagePerSenderStats = 10_000_118,
   MediaInfo = 10_000_119,
+  Upload = 10_000_120,
+  Uploaded = 10_000_121,
 }
 
 export const relayConnectingTimeout = 5000;

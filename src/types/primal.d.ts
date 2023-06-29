@@ -142,6 +142,11 @@ export type NostrMediaInfo = {
   content: string,
 };
 
+export type NostrMediaUploaded = {
+  kind: Kind.Uploaded,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -161,7 +166,8 @@ export type NostrEventContent =
   NostrMessagePerSenderStatsContent |
   NostrMessageEncryptedContent |
   NostrFeedRange |
-  NostrMediaInfo;
+  NostrMediaInfo |
+  NostrMediaUploaded;
 
 export type NostrEvent = [
   type: "EVENT",
