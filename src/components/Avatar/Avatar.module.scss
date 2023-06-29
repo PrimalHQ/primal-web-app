@@ -274,3 +274,9 @@
   background: var(--brand-gradient);
   padding: 2px;
 }
+
+.cacheFlag {
+  img {
+    filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(300deg) blur(0.1rem);
+  }
+}

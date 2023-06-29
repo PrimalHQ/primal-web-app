@@ -21,6 +21,9 @@ import NotFound from './pages/NotFound';
 import { fetchKnownProfiles } from './lib/profile';
 import Search from './pages/Search';
 import { useMessagesContext } from './contexts/MessagesContext';
+import { useMediaContext } from './contexts/MediaContext';
+import { useNotificationsContext } from './contexts/NotificationsContext';
+import { useSearchContext } from './contexts/SearchContext';
 
 const primalWindow = window as PrimalWindow;
 
@@ -33,13 +36,20 @@ const Router: Component = () => {
   const explore = useExploreContext();
   const thread = useThreadContext();
   const messages = useMessagesContext();
+  const media = useMediaContext();
+  const notifications = useNotificationsContext();
+  const search = useSearchContext();
 
   const loadPrimalStores = () => {
     primalWindow.primal = {
       account,
       explore,
       home,
+      media,
+      messages,
+      notifications,
       profile,
+      search,
       settings,
       thread,
     };

@@ -218,6 +218,7 @@ export enum Kind  {
   NoteActions = 10_000_115,
   MessageStats = 10_000_117,
   MesagePerSenderStats = 10_000_118,
+  MediaInfo = 10_000_119,
 }
 
 export const relayConnectingTimeout = 5000;

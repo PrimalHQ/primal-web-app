@@ -13,6 +13,7 @@ import { TranslatorProvider } from './contexts/TranslatorContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { MessagesProvider } from './contexts/MessagesContext';
+import { MediaProvider } from './contexts/MediaContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -32,26 +33,28 @@ const App: Component = () => {
   return (
     <TranslatorProvider>
       <Toaster>
-        <SearchProvider>
-          <AccountProvider>
-            <SettingsProvider>
-              <ProfileProvider>
-                <MessagesProvider>
-                  <NotificationsProvider>
-                    <HomeProvider>
-                      <ExploreProvider>
-                        <ThreadProvider>
-                          <input id="defocus" class={styles.invisible}/>
-                          <Router />
-                        </ThreadProvider>
-                      </ExploreProvider>
-                    </HomeProvider>
-                  </NotificationsProvider>
-                </MessagesProvider>
-              </ProfileProvider>
-            </SettingsProvider>
-          </AccountProvider>
-        </SearchProvider>
+        <MediaProvider>
+          <SearchProvider>
+            <AccountProvider>
+              <SettingsProvider>
+                <ProfileProvider>
+                  <MessagesProvider>
+                    <NotificationsProvider>
+                      <HomeProvider>
+                        <ExploreProvider>
+                          <ThreadProvider>
+                            <input id="defocus" class={styles.invisible}/>
+                            <Router />
+                          </ThreadProvider>
+                        </ExploreProvider>
+                      </HomeProvider>
+                    </NotificationsProvider>
+                  </MessagesProvider>
+                </ProfileProvider>
+              </SettingsProvider>
+            </AccountProvider>
+          </SearchProvider>
+        </MediaProvider>
       </Toaster>
     </TranslatorProvider>
   );

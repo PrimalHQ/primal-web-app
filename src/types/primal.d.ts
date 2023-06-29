@@ -137,6 +137,11 @@ export type NostrFeedRange = {
   content: string,
 };
 
+export type NostrMediaInfo = {
+  kind: Kind.MediaInfo,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -155,7 +160,8 @@ export type NostrEventContent =
   NostrMessageStatsContent |
   NostrMessagePerSenderStatsContent |
   NostrMessageEncryptedContent |
-  NostrFeedRange;
+  NostrFeedRange |
+  NostrMediaInfo;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -479,3 +485,19 @@ export type EmojiOption = {
   category: string,
   name: string,
 };
+
+export type MediaSize = 'o' | 's' | 'm' | 'l';
+
+export type MediaVariant = {
+  s: MediaSize,
+  a: 0 | 1,
+  w: number,
+  h: number,
+  mt: string,
+  media_url: string,
+}
+
+export type MediaEvent = {
+  event_id: string,
+  resources: { url: string, variants: MediaVariant[] }[],
+}
