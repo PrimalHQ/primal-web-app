@@ -125,6 +125,10 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return false;
     }
 
+    if (isUploading()) {
+      return;
+    }
+
     const mentionSeparators = ['Enter', 'Space', 'Comma'];
 
     if (e.code === 'Enter' && e.metaKey) {
@@ -447,7 +451,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   };
 
   const postNote = async () => {
-    if (!account || !account.hasPublicKey()) {
+    if (!account || !account.hasPublicKey() || isUploading() || isInputting()) {
       return;
     }
 
@@ -799,10 +803,21 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     parseNoteLinks(content);
 
     return content;
-  }
+  };
+
+  const [isInputting, setIsInputting] = createSignal(false);
 
   const onInput = (e: InputEvent) => {
-    debounce(() => textArea && setMessage(textArea.value), 500)
+    if (isUploading()) {
+      e.preventDefault();
+      return false;
+    }
+    setIsInputting(true);
+
+    debounce(() => {
+      setIsInputting(false);
+      textArea && setMessage(textArea.value)
+    }, 500)
   };
 
   createEffect(() => {
@@ -1044,6 +1059,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             onInput={onInput}
             ref={textArea}
             onPaste={onPaste}
+            readOnly={isUploading()}
           >
           </textarea>
           <div
