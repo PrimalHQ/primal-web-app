@@ -378,6 +378,14 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     (isWider || isTaller) && setIsDroppable(false);
   }
 
+  const onPaste = (e:ClipboardEvent) => {
+    if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
+      e.preventDefault();
+      uploadFile(e.clipboardData.files[0]);
+      return false;
+    }
+  }
+
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.addEventListener('input', onExpandableTextareaInput);
@@ -1035,6 +1043,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             data-min-rows={1}
             onInput={onInput}
             ref={textArea}
+            onPaste={onPaste}
           >
           </textarea>
           <div
