@@ -1008,7 +1008,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         >
           {intl.formatMessage({
             id: 'feedback.dropzone',
-            defaultMessage: 'Drop File to upload',
+            defaultMessage: 'drop file to upload',
             description: 'Label accompanying the draging file'
           })}
         </div>
@@ -1021,7 +1021,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
           </div>
           <div>{intl.formatMessage({
             id: 'feedback.uploading',
-            defaultMessage: 'Uploading...',
+            defaultMessage: 'uploading...',
             description: 'Label accompanying the uploading spinner'
           })}</div>
         </div>
