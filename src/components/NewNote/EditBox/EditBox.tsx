@@ -13,7 +13,7 @@ import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
+import { EmojiOption, FeedPage, MediaVariant, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
 import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -25,6 +25,7 @@ import emojiSearch from '@jukben/emoji-search';
 import { getCaretCoordinates } from "../../../lib/textArea";
 import { uploadMedia } from "../../../lib/media";
 import { APP_ID } from "../../../App";
+import Loader from "../../Loader/Loader";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -752,7 +753,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   }
 
   const onInput = (e: InputEvent) => {
-    textArea && setMessage(textArea.value)
+    debounce(() => textArea && setMessage(textArea.value), 500)
   };
 
   createEffect(() => {
@@ -880,10 +881,15 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
     const cursor = textArea.selectionStart;
 
-    const value = msg.slice(0, cursor) + `${text}` + msg.slice(cursor + text.length);
+    const value = msg.slice(0, cursor) + `${text}` + msg.slice(cursor);
 
     setMessage(() => value);
+    textArea.value = value;
+
+    textArea.focus();
   };
+
+  const [isUploading, setIsUploading] = createSignal(false);
 
   const uploadFile = () => {
     if (!fileUpload) {
@@ -893,6 +899,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
     const reader = new FileReader();
+
+    setIsUploading(true);
 
     reader.onload = (e) => {
       if (!e.target?.result) {
@@ -914,22 +922,45 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             const uploaded = content as NostrMediaUploaded;
 
             insertAtCursor(uploaded.content);
-
-            unsub();
             return;
           }
         }
+
+        if (type === 'NOTICE') {
+          setIsUploading(false);
+          unsub();
+          return;
+        }
+
+        if (type === 'EOSE') {
+          setIsUploading(false);
+          unsub();
+          return;
+        }
       });
+
+
 
       uploadMedia(account?.publicKey, subid, data);
     }
 
     file && reader.readAsDataURL(file);
+
+    // @ts-ignore
+    fileUpload.value = null;
   }
 
   return (
     <div class={styles.noteEditBox} ref={editWrap}>
-      <div class={styles.editorWrap} onClick={focusInput}>
+      <div class={`${styles.uploadLoader} ${isUploading() ? '' : styles.hidden}`}>
+        <Loader />
+        <div>{intl.formatMessage({
+          id: 'feedback.uploading',
+          defaultMessage: 'Uploading...',
+          description: 'Label accompanying the uploading spinner'
+        })}</div>
+      </div>
+      <div id={`ew-${instanceId}`} class={styles.editorWrap} onClick={focusInput}>
         <div>
           <textarea
             id={`${prefix()}new_note_text_area`}
@@ -1005,7 +1036,17 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       </Show>
 
       <div class={styles.controls}>
-        <input type="file" onChange={uploadFile} ref={fileUpload} />
+        <div class={styles.editorOptions}>
+          <input
+            id={`upload-${instanceId}`}
+            type="file"
+            onChange={uploadFile}
+            ref={fileUpload}
+            hidden={true}
+          />
+          <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
+          </label>
+        </div>
         <button
           class={styles.primaryButton}
           onClick={postNote}
