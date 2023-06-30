@@ -339,16 +339,57 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     return true;
   };
 
+  const [isDroppable, setIsDroppable] = createSignal(false);
+
+  const onDrop  = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDroppable(false);
+
+    let draggedData = e.dataTransfer;
+    let file = draggedData?.files[0];
+
+
+    file && uploadFile(file);
+
+  };
+
+  const onDragOver = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDroppable(true);
+  }
+
+  const onDragLeave = (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!editWrap) {
+      return;
+    }
+
+    const rect = editWrap.getBoundingClientRect();
+
+    const isWider = e.clientX < rect.x || e.clientX > rect.x + rect.width;
+    const isTaller = e.clientY < rect.y || e.clientY > rect.y + rect.height;
+
+    (isWider || isTaller) && setIsDroppable(false);
+  }
+
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.addEventListener('input', onExpandableTextareaInput);
     editWrap?.addEventListener('keydown', onKeyDown);
+    // editWrap?.addEventListener('drop', onDrop, false);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.removeEventListener('input', onExpandableTextareaInput);
     editWrap?.removeEventListener('keydown', onKeyDown);
+    // editWrap?.removeEventListener('drop', onDrop, false);
   });
 
   createEffect(() => {
@@ -891,16 +932,22 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   const [isUploading, setIsUploading] = createSignal(false);
 
-  const uploadFile = () => {
+  const onUpload = () => {
     if (!fileUpload) {
       return;
     }
 
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
-    const reader = new FileReader();
+    // @ts-ignore fileUpload.value assignment
+    file && uploadFile(file, () => fileUpload.value = null);
 
+  }
+
+  const uploadFile = (file: File, callback?: () => void) => {
     setIsUploading(true);
+
+    const reader = new FileReader();
 
     reader.onload = (e) => {
       if (!e.target?.result) {
@@ -911,7 +958,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
       const data = e.target?.result as string;
 
-      const unsub = subscribeTo(subid, (type, subId, content) =>{
+      const unsub = subscribeTo(subid, (type, subId, content) => {
 
         if (type === 'EVENT') {
           if (!content) {
@@ -939,28 +986,48 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         }
       });
 
-
-
       uploadMedia(account?.publicKey, subid, data);
     }
 
-    file && reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
 
-    // @ts-ignore
-    fileUpload.value = null;
+    callback && callback();
   }
 
   return (
-    <div class={styles.noteEditBox} ref={editWrap}>
-      <div class={`${styles.uploadLoader} ${isUploading() ? '' : styles.hidden}`}>
-        <Loader />
-        <div>{intl.formatMessage({
-          id: 'feedback.uploading',
-          defaultMessage: 'Uploading...',
-          description: 'Label accompanying the uploading spinner'
-        })}</div>
-      </div>
-      <div id={`ew-${instanceId}`} class={styles.editorWrap} onClick={focusInput}>
+    <div
+      class={styles.noteEditBox}
+      ref={editWrap}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+    >
+      <Show when={isDroppable()}>
+        <div
+          class={styles.dropOverlay}
+        >
+          {intl.formatMessage({
+            id: 'feedback.dropzone',
+            defaultMessage: 'Drop File to upload',
+            description: 'Label accompanying the draging file'
+          })}
+        </div>
+      </Show>
+
+      <Show when={isUploading()}>
+        <div class={styles.uploadLoader}>
+          <div>
+            <Loader />
+          </div>
+          <div>{intl.formatMessage({
+            id: 'feedback.uploading',
+            defaultMessage: 'Uploading...',
+            description: 'Label accompanying the uploading spinner'
+          })}</div>
+        </div>
+      </Show>
+
+      <div class={styles.editorWrap} onClick={focusInput}>
         <div>
           <textarea
             id={`${prefix()}new_note_text_area`}
@@ -1040,7 +1107,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
           <input
             id={`upload-${instanceId}`}
             type="file"
-            onChange={uploadFile}
+            onChange={onUpload}
             ref={fileUpload}
             hidden={true}
           />
