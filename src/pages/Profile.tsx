@@ -5,6 +5,7 @@ import {
   createEffect,
   createMemo,
   createReaction,
+  createSignal,
   For,
   onMount,
   Resource,
@@ -35,6 +36,7 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import { getMediaUrl } from '../lib/media';
 import Search from '../components/Search/Search';
+import { useMediaContext } from '../contexts/MediaContext';
 
 const Profile: Component = () => {
 
@@ -42,6 +44,7 @@ const Profile: Component = () => {
   const toaster = useToastContext();
   const profile = useProfileContext();
   const account = useAccountContext();
+  const media = useMediaContext();
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -179,6 +182,28 @@ const Profile: Component = () => {
     return account?.publicKey && profile?.following.includes(account.publicKey);
   }
 
+  const [isBannerCached, setisBannerCached] = createSignal(false);
+
+  const banner = () => {
+    const src= profile?.userProfile?.banner;
+    const url = media?.actions.getMediaUrl(src, 'm', true);
+
+    setisBannerCached(!!url);
+
+    return url ?? src;
+  }
+
+  const flagBannerForWarning = () => {
+    const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+
+    // @ts-ignore
+    if (isBannerCached() || !dev) {
+      return '';
+    }
+
+    return styles.cacheFlag;
+  }
+
   return (
     <>
       <PageTitle title={
@@ -208,12 +233,12 @@ const Profile: Component = () => {
       </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>
-        <div id="profile_banner" class={styles.banner}>
+        <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
           <Show
             when={profile?.userProfile?.banner}
             fallback={<div class={styles.bannerPlaceholder}></div>}
           >
-            <img src={getMediaUrl(profile?.userProfile?.banner, 'm', 1)} onerror={imgError}/>
+            <img src={banner()} onerror={imgError}/>
           </Show>
         </div>
 
