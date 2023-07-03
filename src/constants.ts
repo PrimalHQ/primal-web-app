@@ -388,4 +388,4 @@ export const noRelaysMessage = {
   description: 'Toast message indicating user has no relays configured',
 };
 
-export const emojiSearchLimit = 2;
+export const emojiSearchLimit = 1;
