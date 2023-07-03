@@ -247,11 +247,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         return false;
       }
 
-      // if (emojiQuery().length === 0) {
-      //   setEmojiInput(false);
-      //   return false;
-      // }
-
       return false;
     }
 
@@ -307,7 +302,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       }
 
       if (mentionSeparators.includes(e.code)) {
-        if (preQuery().trim().length === 0) {
+        if (preQuery() === ' ') {
           setMentioning(false);
           return false;
         }
@@ -331,11 +326,6 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         setPreQuery(q => q + e.key);
         return false
       }
-
-      // if (preQuery().length === 0) {
-      //   setMentioning(false);
-      //   return false;
-      // }
 
       return false;
     }
@@ -515,7 +505,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     const wRect = editWrap.getBoundingClientRect();
 
     let newTop = taRect.top - wRect.top + mentionCursorPosition.top + 22;
-    let newLeft = 90 + mentionCursorPosition.left + 16;
+    let newLeft = mentionCursorPosition.left + 16;
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
@@ -533,8 +523,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     const taRect = textArea.getBoundingClientRect();
     const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top - wRect.top + mentionCursorPosition.top + 22;
-    let newLeft = 90 + emojiCursorPosition.left + 16
+    let newTop = taRect.top - wRect.top + emojiCursorPosition.top + 22;
+    let newLeft = emojiCursorPosition.left;
 
     if (newTop > document.documentElement.clientHeight - 200) {
       newTop = taRect.top - 400;
@@ -815,18 +805,25 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }
     setIsInputting(true);
 
-    debounce(() => {
+    // debounce(() => {
       setIsInputting(false);
       textArea && setMessage(textArea.value)
-    }, 500)
+    // }, 500)
   };
 
+  let delayForMedia = 0;
+
   createEffect(() => {
+    if (delayForMedia) {
+      window.clearTimeout(delayForMedia);
+    }
     const msg = sanitize(message());
 
-    const p = parseForReferece(msg);
+    delayForMedia = setTimeout(() => {
+      const p = parseForReferece(msg);
+      setParsedMessage(p);
+    }, 500);
 
-    setParsedMessage(p);
 
   })
 
