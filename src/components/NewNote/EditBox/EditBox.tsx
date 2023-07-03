@@ -355,7 +355,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     let file = draggedData?.files[0];
 
 
-    file && uploadFile(file);
+    file && isSupportedFileType(file) && uploadFile(file);
 
   };
 
@@ -385,7 +385,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
   const onPaste = (e:ClipboardEvent) => {
     if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
       e.preventDefault();
-      uploadFile(e.clipboardData.files[0]);
+      const file = e.clipboardData.files[0];
+      file && isSupportedFileType(file) && uploadFile(file);
       return false;
     }
   }
@@ -955,6 +956,20 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
   const [isUploading, setIsUploading] = createSignal(false);
 
+  const isSupportedFileType = (file: File) => {
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      toast?.sendWarning(intl.formatMessage({
+        id: 'file.unsupportedType',
+        defaultMessage: 'You can only upload images and videos. This file type is not supported.',
+        description: 'Feedback when user tries to upload an unsupported file type',
+      }));
+      return false;
+    }
+
+    return true;
+
+  }
+
   const onUpload = () => {
     if (!fileUpload) {
       return;
@@ -963,7 +978,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
     // @ts-ignore fileUpload.value assignment
-    file && uploadFile(file, () => fileUpload.value = null);
+    file && isSupportedFileType(file) && uploadFile(file, () => fileUpload.value = null);
 
   }
 
@@ -1135,6 +1150,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
             onChange={onUpload}
             ref={fileUpload}
             hidden={true}
+            accept="image/*,video/*,audio/*"
           />
           <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
           </label>
