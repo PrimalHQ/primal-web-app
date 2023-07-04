@@ -19,20 +19,6 @@ const MentionedUserLink: Component<{
   return (
     <LinkComponent>
       @{userName(props.user)}
-      <div class={styles.userPreview}>
-        <Avatar
-          src={props.user.picture}
-          size="sm"
-        />
-        <div>
-          <div class={styles.userName}>
-            {userName(props.user)}
-          </div>
-          <div>
-            {nip05Verification(props.user)}
-          </div>
-        </div>
-      </div>
     </LinkComponent>
   );
 }
