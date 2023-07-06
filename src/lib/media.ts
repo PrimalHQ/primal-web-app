@@ -1,5 +1,5 @@
 import { Kind } from "../constants";
-import { sendMessage } from "../sockets";
+import { sendMessage } from "../uploadSocket";
 import { NostrWindow } from "../types/primal";
 
 export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) => {
@@ -14,7 +14,7 @@ export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) =
 
   const encodedUrl = encodeURIComponent(url);
 
-  return  `${mediaServer}/media-cache?s=${size}&a=${animated}&u=${encodedUrl}`;
+  return `${mediaServer}/media-cache?s=${size}&a=${animated}&u=${encodedUrl}`;
 }
 
 export const uploadMedia = async (

@@ -11,6 +11,7 @@ import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
+import { subscribeTo as uploadSub } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { EmojiOption, FeedPage, MediaVariant, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
@@ -993,7 +994,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
       const data = e.target?.result as string;
 
-      const unsub = subscribeTo(subid, (type, subId, content) => {
+      const unsub = uploadSub(subid, (type, subId, content) => {
 
         if (type === 'EVENT') {
           if (!content) {

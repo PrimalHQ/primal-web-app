@@ -33,7 +33,7 @@ export const connect = () => {
       'wss://cache3.primal.net/cache17';
 
     setSocket(new WebSocket(cacheServer));
-    console.log('SOCKET: ', socket());
+    console.log('CACHE SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
