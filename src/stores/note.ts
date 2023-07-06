@@ -146,41 +146,36 @@ export const convertToNotes: ConvertToNotes = (page) => {
     let mentionedUsers = {};
 
     if (mentionIds.length > 0) {
-      mentionedNotes = mentionIds.reduce((acc, id) => {
+      for (let i = 0;i<mentionIds.length;i++) {
+        const id = mentionIds[i];
         const m = mentions && mentions[id];
 
         if (!m) {
-          return acc;
+          continue;
         }
 
-        m.tags.forEach(t => {
+        for (let i = 0;i<m.tags.length;i++) {
+          const t = m.tags[i];
           if (t[0] === 'p') {
-            mentionedUsers = {
-              ...mentionedUsers,
-              [t[1]]: convertToUser(page.users[t[1]] || emptyUser(t[1]))};
+            mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
           }
-        })
+        }
 
-        return {
-          ...acc,
-          [id]: {
-            post: { ...m },
-            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
-            mentionedUsers,
-          },
+        mentionedNotes[id] = {
+          post: { ...m },
+          user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+          mentionedUsers,
         };
-      }, {});
+      }
     }
 
     if (userMentionIds.length > 0) {
-      mentionedUsers = userMentionIds.reduce((acc, id) => {
+      for (let i = 0;i<userMentionIds.length;i++) {
+        const id = userMentionIds[i];
         const m = page.users && page.users[id];
 
-        return {
-          ...acc,
-          [id]: { ...convertToUser(m || emptyUser(id)) },
-        };
-      }, mentionedUsers);
+        mentionedUsers[id] = convertToUser(m || emptyUser(id));
+      }
     }
 
     const noActions = {

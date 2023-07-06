@@ -56,14 +56,15 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       if (content.kind === Kind.MediaInfo) {
         const mediaInfo: MediaEvent = JSON.parse(content.content);
 
-        let media = mediaInfo.resources.reduce((acc, r) => {
-          return { ...acc, [r.url]: r.variants };
-        }, {});
-
-        updateStore('media', m => ({ ...m, ...media }));
+        updateStore('media', m => {
+          for (let i = 0;i<mediaInfo.resources.length;i++) {
+            const resource = mediaInfo.resources[i];
+            m[resource.url] = resource.variants;
+          }
+          return m;
+        });
       }
     }
-
   };
 
   const onSocketClose = (closeEvent: CloseEvent) => {

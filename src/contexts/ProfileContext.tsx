@@ -159,9 +159,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateStore('page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
+      updateStore('page', 'users', users => {
+        users[user.pubkey] = user;
+        return users;
+      });
       return;
     }
 
@@ -174,9 +175,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         store.lastNote?.repost?.note.noteId === messageId;
 
       if (!isLastNote) {
-        updateStore('page', 'messages',
-          (msgs) => [ ...msgs, { ...message }]
-        );
+        updateStore('page', 'messages', messages => {
+          messages.push(message);
+          return messages;
+        });
       }
 
       return;
@@ -186,9 +188,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateStore('page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
+      updateStore('page', 'postStats', stats => {
+        stats[stat.event_id] = stat;
+        return stats;
+      });
       return;
     }
 
@@ -196,9 +199,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
 
-      updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
+      updateStore('page', 'mentions', mentions => {
+        mentions[mention.id] = mention;
+        return mentions;
+      });
       return;
     }
 
@@ -206,9 +210,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
-      updateStore('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
+      updateStore('page', 'noteActions', actions => {
+        actions[noteActions.event_id] = noteActions;
+        return actions;
+      });
       return;
     }
   };
@@ -378,10 +383,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (subId === `profile_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
         const tags = content.tags;
+        let contacts = [];
 
-        const contacts = tags.reduce((acc, t) => {
-          return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
-        }, []);
+        for (let i = 0;i<tags.length;i++) {
+          const tag = tags[i];
+          if (tag[0] === 'p') {
+            contacts.push(tag[1]);
+          }
+        }
 
         updateStore('following', () => contacts);
       }
