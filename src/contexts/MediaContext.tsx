@@ -56,13 +56,14 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       if (content.kind === Kind.MediaInfo) {
         const mediaInfo: MediaEvent = JSON.parse(content.content);
 
-        updateStore('media', m => {
-          for (let i = 0;i<mediaInfo.resources.length;i++) {
-            const resource = mediaInfo.resources[i];
-            m[resource.url] = resource.variants;
-          }
-          return m;
-        });
+        let media: Record<string, MediaVariant[]> = {};
+
+        for (let i = 0;i<mediaInfo.resources.length;i++) {
+          const resource = mediaInfo.resources[i];
+          media[resource.url] = resource.variants;
+        }
+
+        updateStore('media', () => ({ ...media }));
       }
     }
   };

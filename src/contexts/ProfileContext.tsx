@@ -159,10 +159,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateStore('page', 'users', users => {
-        users[user.pubkey] = user;
-        return users;
-      });
+      updateStore('page', 'users', () => ({ [user.pubkey]: user}));
       return;
     }
 
@@ -175,10 +172,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         store.lastNote?.repost?.note.noteId === messageId;
 
       if (!isLastNote) {
-        updateStore('page', 'messages', messages => {
-          messages.push(message);
-          return messages;
-        });
+        updateStore('page', 'messages', messages => [ ...messages, message]);
       }
 
       return;
@@ -188,10 +182,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateStore('page', 'postStats', stats => {
-        stats[stat.event_id] = stat;
-        return stats;
-      });
+      updateStore('page', 'postStats', () => ({ [stat.event_id]: stat }));
       return;
     }
 
@@ -199,10 +190,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
 
-      updateStore('page', 'mentions', mentions => {
-        mentions[mention.id] = mention;
-        return mentions;
-      });
+      updateStore('page', 'mentions', () => ({ [mention.id]: mention }));
       return;
     }
 
@@ -210,10 +198,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
-      updateStore('page', 'noteActions', actions => {
-        actions[noteActions.event_id] = noteActions;
-        return actions;
-      });
+      updateStore('page', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
       return;
     }
   };
@@ -229,8 +214,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateStore('sidebar', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      updateStore('sidebar', 'users', () => ({ [user.pubkey]: user })
       );
       return;
     }
@@ -239,9 +223,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const message = content as NostrNoteContent;
 
       if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
-        updateStore('sidebar', 'messages',
-          (msgs) => [ ...msgs, { ...message }]
-        );
+        updateStore('sidebar', 'messages', (msgs) => [ ...msgs, message ]);
       }
 
       return;
@@ -251,9 +233,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateStore('sidebar', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
+      updateStore('sidebar', 'postStats', () => ({ [stat.event_id]: stat }));
       return;
     }
 
@@ -261,9 +241,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
 
-      updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
+      updateStore('page', 'mentions', () => ({ [mention.id]: mention }));
       return;
     }
 
@@ -271,9 +249,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
-      updateStore('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
+      updateStore('page', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
       return;
     }
   };
@@ -281,7 +257,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const saveSidebar = (page: FeedPage) => {
     const newPosts = sortByScore(convertToNotes(page));
 
-    updateStore('sidebar', 'notes', () => [...newPosts]);
+    updateStore('sidebar', 'notes', () => [ ...newPosts ]);
   };
 
   const setProfileKey = (profileKey?: string) => {
@@ -383,7 +359,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (subId === `profile_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
         const tags = content.tags;
-        let contacts = [];
+        let contacts: string[] = [];
 
         for (let i = 0;i<tags.length;i++) {
           const tag = tags[i];

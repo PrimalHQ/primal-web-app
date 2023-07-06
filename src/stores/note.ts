@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -142,8 +142,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
-    let mentionedNotes = {};
-    let mentionedUsers = {};
+    let mentionedNotes: Record<string, PrimalNote> = {};
+    let mentionedUsers: Record<string, PrimalUser> = {};
 
     if (mentionIds.length > 0) {
       for (let i = 0;i<mentionIds.length;i++) {
@@ -162,6 +162,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         }
 
         mentionedNotes[id] = {
+          // @ts-ignore TODO: Investigate this typing
           post: { ...m },
           user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
           mentionedUsers,
