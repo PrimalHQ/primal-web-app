@@ -1,0 +1,148 @@
+@mixin iconNav {
+  width: 32px;
+  height: 32px;
+  background-color: var(--text-secondary);
+}
+
+.navLink {
+  position: relative;
+  text-align: right;
+  margin: 0px 0px 28px 0px;
+  padding: 0px;
+  background: none;
+  border: none;
+  border-radius: 0px;
+
+  div {
+    display: inline;
+  }
+
+  p {
+    display: inline;
+    text-transform: uppercase;
+    font-size: 18px;
+    line-height: 20px;
+    font-weight: 800;
+  }
+}
+
+.homeIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
+  mask: url(../../assets/icons/home.svg) no-repeat center;
+}
+
+.exploreIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/explore.svg) no-repeat center;
+  mask: url(../../assets/icons/explore.svg) no-repeat center;
+}
+.messagesIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
+  mask: url(../../assets/icons/messages.svg) no-repeat center;
+}
+.notificationsIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
+  mask: url(../../assets/icons/notifications.svg) no-repeat center;
+}
+.downloadIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
+  mask: url(../../assets/icons/download.svg) no-repeat center;
+}
+.settingsIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
+  mask: url(../../assets/icons/settings.svg) no-repeat center;
+}
+.helpIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
+  mask: url(../../assets/icons/help.svg) no-repeat center;
+}
+
+.active {
+  p {
+    color: var(--active-link);
+    text-decoration: underline;
+  }
+  div {
+    background-color: var(--active-link);
+  }
+
+  .homeIcon {
+    background-color: var(--text-primary);
+  }
+  .exploreIcon {
+    background-color: var(--text-primary);
+  }
+  .messagesIcon {
+    background-color: var(--text-primary);
+  }
+  .notificationsIcon {
+    background-color: var(--text-primary);
+  }
+  .downloadIcon {
+    background-color: var(--text-primary);
+  }
+  .settingsIcon {
+    background-color: var(--text-primary);
+  }
+  .helpIcon {
+    background-color: var(--text-primary);
+  }
+}
+
+.inactive {
+  p {
+    color: var(--inactive-link);
+  }
+  div {
+    background-color: var(--inactive-link);
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .navLink {
+    margin-bottom: 22px;
+
+    width: fit-content;
+    div {
+      display: inline-block;
+    }
+
+    p {
+      display: none;
+    }
+  }
+}
+
+.bubble {
+  position: absolute;
+  text-align: center;
+  padding-top: 2px;
+  padding-inline: 4px;
+  top: 0;
+  right: -18px;
+  min-width: 18px;
+  min-height: 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 12px;
+
+  background: var(--brand-gradient);
+  border: 1px solid var(--background-site);
+
+  color: white;
+  text-shadow: 0.5px 0.5px 0px black;
+
+  &.doubleSize {
+    right: -24px;
+  }
+  &.tripleSize {
+    right: -30px;
+  }
+}

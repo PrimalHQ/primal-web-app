@@ -1,0 +1,42 @@
+.callToAction {
+  display: grid;
+  // height: 32px;
+  min-width: 50%;
+  grid-template-columns: 32px 1fr;
+  grid-column-gap: 10px;
+  align-items: center;
+  background-color: unset;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+  outline: none;
+
+  p {
+    font-size: 34px;
+    line-height: 34px;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  .border {
+    height: 28px;
+    padding: 1px;
+    background: var(--brand-gradient);
+    border-radius: 6px;
+  }
+
+  .input {
+    height: 26px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 400;
+    margin: 0px;
+    border-radius: 6px;
+    border: none;
+    color: var(--text-tertiary);
+    background-color: var(--background-site);
+    display: flex;
+    align-items: center;
+    padding-left: 12px;
+  }
+}

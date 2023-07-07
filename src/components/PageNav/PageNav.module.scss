@@ -1,0 +1,34 @@
+@mixin navButton {
+  display: inline-block;
+  border: none;
+  box-shadow: none;
+  background-color: unset;
+  margin: 0px;
+  padding: 0px;
+  width: 12px;
+  height: 20px;
+}
+
+.backIcon {
+  @include navButton;
+  margin-right: 28px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/back.svg) no-repeat center;
+  mask: url(../../assets/icons/back.svg) no-repeat center;
+}
+
+.forwardIcon {
+  @include navButton;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/forward.svg) no-repeat center;
+  mask: url(../../assets/icons/forward.svg) no-repeat center;
+}
+
+
+@media only screen and (max-width: 1300px) {
+  .backIcon {
+    margin-right: 8px;
+  }
+}

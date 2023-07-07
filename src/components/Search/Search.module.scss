@@ -1,0 +1,89 @@
+.search {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  grid-column-gap: 15px;
+  border-radius: 22px;
+  background-color: var(--background-input);
+  width: 300px;
+  padding-right: 22px;
+
+  &:hover {
+    input {
+      color: var(--text-primary);
+    }
+
+    .searchIcon {
+      background-color: var(--text-primary);
+    }
+  }
+
+  input {
+    height: 36px;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 20px;
+    padding: 0px 12px;
+    margin-bottom: 0px;
+    border: none;
+    background-color: var(--background-input);
+    color: var(--text-tertiary);
+
+    &:focus {
+      border: none;
+      box-shadow: none;
+    }
+
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+
+  .searchIcon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 16px;
+    margin-top: 10px;
+
+    background-color: var(--text-tertiary);
+    -webkit-mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+    mask: url(../../assets/icons/search.svg) 0 0/16px 16px;
+  }
+}
+
+.searchHolder {
+  position: relative;
+  width: 300px;
+  padding-top: 26px;
+}
+
+.searchSuggestions {
+  width: 300px;
+  background-color: var(--background-site);
+  border: 1px solid var(--text-tertiary-2);
+  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+
+  position: absolute;
+  top: 76px;
+}
+
+.loadingOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: var(--background-site);
+  opacity: 0.8;
+}
+
+.searchIcon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
+  mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
+}

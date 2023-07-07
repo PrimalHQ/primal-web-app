@@ -1,0 +1,117 @@
+.post {
+  background-color: var(--background-card);
+  display: flex;
+  flex-direction: column;
+  // grid-template-columns: 60px 1fr;
+  // grid-template-rows: 1fr;
+  // grid-template-areas: "avatar content";
+  padding: 0px;
+  border-radius: 8px;
+  // pointer-events: none;
+
+  .content {
+    grid-area: content;
+    display: flex;
+    flex-direction: column;
+    margin-top: 21px;
+    margin-left: 60px;
+    // grid-template-columns: 1fr;
+    // grid-template-rows: 48px 1fr 28px;
+    // grid-row-gap: 16px;
+    // grid-template-areas: "header" "message" "footer";
+
+
+    .message {
+      position: relative;
+      grid-area: message;
+      color: var(--text-primary);
+      word-break: break-word;
+      font-size: 16px;
+      line-height: 24px;
+      width: 100%;
+      // max-height: 650px;
+      // overflow: hidden;
+      margin-bottom: 17px;
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .messageFade {
+        position: absolute;
+        z-index: 1;
+        top: 610px;
+        left: 0;
+        pointer-events: none;
+        background-image: var(--fade-note-vertical);
+        width: 100%;
+        height: 40px;
+      }
+
+    }
+  }
+}
+
+
+.postLink {
+  text-decoration: none;
+  color: unset;
+  margin: 0px;
+  padding: 16px 20px;
+  // background: var(--brand-gradient-vertical);
+  background-color: var(--background-card);
+  border-radius: 8px;
+  display: block;
+  transition: 0.2s padding;
+  margin-top: 8px;
+  >div {
+    border-radius: 4px;
+    transition: 0.2s border-radius ease-out;
+  }
+
+  // &:hover {
+  //   padding-left: 4px;
+  //   transition: 0.2s padding;
+  //   border-radius: 4px;
+  //   >div {
+  //     border-radius: 0px 4px 4px 0px;
+  //     transition: 0.2s border-radius ease-out;
+  //   }
+  // }
+}
+
+.repostedBy {
+  padding-bottom: 16px;
+  display: flex;
+  >span {
+    >a {
+      margin-inline: 5px;
+    }
+    color: var(--text-tertiary);
+    font-size: 16px;
+    line-height: 16px;
+    font-weight: 400;
+    >span {
+      text-transform: lowercase;
+    }
+  }
+}
+
+
+@media only screen and (max-width: 720px) {
+  .postLink {
+    width: 100vw;
+    .post {
+      width: 100%;
+      // grid-template-columns: 62px 1fr;
+      margin-left: 0px;
+      margin-right: 0px;
+      padding-right: 0px;
+      .content {
+        margin-left: 0;
+      }
+    }
+
+  }
+
+}

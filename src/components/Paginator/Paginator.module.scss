@@ -1,0 +1,17 @@
+.paginator {
+  color: var(--text-tertiary-2);
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  height: 1280px;
+  pointer-events: none;
+}
+
+.smallPaginator {
+  color: var(--text-tertiary-2);
+  position: relative;
+  top: 0px;
+  width: 100%;
+  height: 280px;
+  pointer-events: none;
+}

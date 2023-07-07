@@ -1,0 +1,33 @@
+
+.statsCaption {
+  margin-bottom: 32px;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 20px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.netstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-column-gap: 24px;
+  grid-row-gap: 24px;
+
+  .netstat {
+    .number {
+      font-size: 24px;
+      line-height: 28px;
+      font-weight: 300;
+      color: var(--text-primary);
+    }
+
+    .label {
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 300;
+      color: var(--text-tertiary);
+      text-transform: lowercase;
+    }
+  }
+}

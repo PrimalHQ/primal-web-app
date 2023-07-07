@@ -1,0 +1,314 @@
+.fullHeader {
+  display: grid;
+  height: 120px;
+  align-items: center;
+  justify-content: left;
+
+  >div {
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 34px;
+    color: var(--brand-text);
+  }
+}
+
+.statsHolder {
+  margin-bottom: 36px;
+}
+
+.exploreMenu {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-column-gap: 26px;
+  grid-row-gap: 26px;
+}
+
+.exploreBox {
+  box-sizing: border-box;
+
+  width: 140px;
+  height: 140px;
+
+  border: 1px solid var(--text-tertiary-2);
+  border-radius: 9px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  text-decoration: none;
+
+  >div {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+
+    .firstLine {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 22px;
+      color: var(--text-tertiary);
+    }
+
+    .secondLine {
+      text-align: center;
+      font-size: 18px;
+      line-height: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .exploreBoxIcon {
+      align-self: center;
+      justify-self: center;
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+  }
+}
+
+@mixin tableCell {
+  display: table-cell;
+  padding: 0px 12px;
+  border-bottom: solid 1px var(--text-tertiary-2);
+  vertical-align: middle;
+}
+
+.statsLegend {
+  display: table;
+  width: 100%;
+  margin-top: 53px;
+
+
+  .legendDetails {
+    display: table-row;
+
+    .legendIcon {
+      @include tableCell;
+      width: 32px;
+      padding: 0px;
+      >div {
+        width: 32px;
+        height: 32px;
+        margin: 12px 0px;
+      }
+    }
+
+    .legendName {
+      @include tableCell;
+      color: var(--text-primary);
+      font-size: 18px;
+      line-height: 22px;
+      font-weight: 700;
+    }
+
+    .legendNumber {
+      @include tableCell;
+      color: var(--text-primary);
+      font-size: 24px;
+      line-height: 36px;
+      font-weight: 300;
+
+    }
+
+    .legendDescription {
+      @include tableCell;
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 22px;
+      font-weight: 300;
+    }
+  }
+}
+
+@mixin exploreCategoryIcon {
+  width: 56px;
+  height: 56px;
+  background-color: var(--background-site);
+}
+
+.global_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-global-trending);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.global_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network-latest);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.global_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network-popular);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.network_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network-trending);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.network_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network-latest);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.network_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network-popular);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.tribe_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-tribe-trending);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribe_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-tribe-latest);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribe_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-tribe-popular);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.follows_trending_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-follows-trending);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.follows_latest_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-follows-latest);;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.follows_popular_icon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-follows-popular);;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+
+.followsIcon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-follows);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.tribeIcon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-tribe);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.networkIcon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-network);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.globalIcon {
+  @include exploreCategoryIcon;
+  background-image: var(--icon-global);
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+@media only screen and (max-width: 720px) {
+  .exploreMenu {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    grid-column-gap: 6px;
+    grid-row-gap: 26px;
+    grid-template-areas:
+      "followsLatest followsTrending followsPopular"
+      "tribeLatest tribeTrending tribePopular"
+      "networkLatest networkTrending networkPopular"
+      "globalLatest globalTrending globalPopular";
+  }
+
+  .global_trending_box {
+    grid-area: globalTrending;
+  }
+
+  .global_latest_box {
+    grid-area: globalLatest;
+  }
+
+  .global_popular_box {
+    grid-area: globalPopular;
+  }
+
+
+  .network_trending_box {
+    grid-area: networkTrending;
+  }
+
+  .network_latest_box {
+    grid-area: networkLatest;
+  }
+
+  .network_popular_box {
+    grid-area: networkPopular;
+  }
+
+
+  .tribe_trending_box {
+    grid-area: tribeTrending;
+  }
+
+  .tribe_latest_box {
+    grid-area: tribeLatest;
+  }
+
+  .tribe_popular_box {
+    grid-area: tribePopular;
+  }
+
+
+  .follows_trending_box {
+    grid-area: followsTrending;
+  }
+
+  .follows_latest_box {
+    grid-area: followsLatest;
+  }
+
+  .follows_popular_box {
+    grid-area: followsPopular;
+  }
+}

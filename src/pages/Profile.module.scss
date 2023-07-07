@@ -1,0 +1,418 @@
+.fullHeader {
+  position: relative;
+  background-color: var(--background-card);
+  padding-bottom: 20px;
+  border-radius: 0 0 8px 8px;
+}
+
+.banner {
+  width: 100%;
+  height: 214px;
+
+  >img {
+    width: 100%;
+    height: 214px;
+    object-fit: cover;
+  }
+}
+
+.userImage {
+  position: absolute;
+  top: 148px;
+  left: 15px;
+  .avatar {
+    border: solid 4px var(--background-card);
+    border-radius: 50%;
+    background-color: var(--background-card);
+  }
+}
+
+.verifiedIconL {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  margin: 0px 12px 0px 6px;
+  background-color: var(--accent-2);
+  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
+  mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
+}
+
+.verifiedIconS {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 12px;
+  mask: url(../assets/icons/verified.svg) no-repeat 0px / 12px;
+}
+
+.keyIcon {
+  min-width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../assets/icons/key.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/key.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.copyIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/copy.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.linkIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 6px 0px 0px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../assets/icons/link.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/link.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.profileActions {
+  display: flex;
+  justify-content: right;
+  padding-top: 20px;
+  padding-right: 8px;
+  padding-bottom: 36px;
+}
+
+@mixin smallButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  margin: 0px 6px;
+  padding: 0px;
+}
+
+.smallSecondaryButton {
+  @include smallButton();
+
+  background-color: var(--background-card);
+  background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                var(--brand-gradient-vertical) border-box;
+  border: 1px solid transparent;
+}
+
+.smallPrimaryButton {
+  @include smallButton();
+  background: var(--brand-gradient-vertical);
+
+  .addFeedIcon {
+    background-color: white;
+  }
+}
+
+.zapIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/zaps.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/zaps.svg) no-repeat 0px / 18px;
+}
+
+.messageIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/messages.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/messages.svg) no-repeat 0px / 18px;
+}
+
+.addFeedIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/feed_add.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/feed_add.svg) no-repeat 0px / 18px;
+}
+
+.removeFeedIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/feed_remove.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/feed_remove.svg) no-repeat 0px / 18px;
+}
+
+.primaryButton {
+  width: 90px;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  margin: 0px 8px;
+  padding: 0px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
+  background: var(--brand-gradient-vertical);
+  color: white;
+}
+
+
+.profileVerification {
+  margin-top: 12px;
+  margin-inline: 20px;
+  .avatarName {
+    display: flex;
+    align-items: center;
+    color: var(--text-primary);
+    font-size: 20px;
+    line-height: 20px;
+    font-weight: 700;
+    height: 26px;
+  }
+  .verificationInfo {
+    display: flex;
+    align-items: center;
+    color: var(--text-tertiary-2);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+    margin-top: 10px;
+    .verified {
+      display: flex;
+      align-items: center;
+      .nip05 {
+        margin-right: 36px;
+      }
+    }
+  }
+  .publicKey {
+    display: flex;
+    height: 16px;
+    align-items: center;
+    color: var(--text-tertiary-2);
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 16px;
+
+    .npub {
+      color: var(--text-tertiary-2);
+      text-align: left;
+      border: none;
+      margin: 0;
+      padding: 0;
+      background-color: unset;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      font-weight: 400;
+      font-size: 12px;
+      line-height: 16px;
+      display: flex;
+
+      .copyIcon {
+        background-color: var(--accent-2);
+      }
+
+      &:hover {
+        .copyIcon {
+          background-color: var(--text-primary);
+        }
+      }
+    }
+  }
+
+}
+
+.profileLinks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-inline: 20px;
+  margin-block: 12px;
+
+  .website {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  .joined {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: right;
+    color: var(--text-tertiary-2);
+  }
+}
+
+.profileAbout {
+  margin-top: 12px;
+  margin-inline: 20px;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-primary);
+}
+
+.userStats {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  margin-inline: 20px;
+
+  .userStat {
+    display: flex;
+    justify-content: left;
+    align-items: baseline;
+    margin-right: 28px;
+
+    .statNumber {
+      font-weight: 400;
+      font-size: 34px;
+      line-height: 34px;
+      color: var(--text-primary);
+    }
+
+    .statName {
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 19px;
+      color: var(--text-tertiary-2);
+      margin-left: 8px;
+      text-transform: lowercase;
+    }
+
+  }
+}
+
+.userFeed {
+  position: relative;
+}
+
+.bannerPlaceholder {
+  width: 100%;
+  height: 214px;
+  background-color: var(--background-input);
+}
+
+.followsBadge {
+  background-color: var(--background-input);
+  width: 80px;
+  height: 16px;
+  border-radius: 4px;
+  font-weight: 300;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--text-tertiary-2);
+  text-transform: lowercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phoneAvatar {
+  display: none;
+}
+.desktopAvatar {
+  display: block;
+}
+.addToFeedButton {
+  display: block;
+}
+
+@media only screen and (max-width: 720px) {
+
+  .banner {
+    width: 100%;
+    height: 125px;
+
+    >img {
+      width: 100%;
+      height: 125px;
+      object-fit: cover;
+    }
+  }
+
+  .userImage {
+    position: absolute;
+    top: 96px;
+    left: 15px;
+  }
+
+  .phoneAvatar {
+    display: block;
+  }
+  .desktopAvatar {
+    display: none;
+  }
+  .addToFeedButton {
+    display: none;
+  }
+  .joined {
+    display: none;
+  }
+
+  .profileActions {
+    padding-top: 12px;
+    padding-bottom: 0px;
+  }
+
+  .userStats {
+    justify-content: space-between;
+    .userStat {
+      margin-right: 15px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      .statNumber {
+        font-size: 28px;
+        line-height: 34px;
+      }
+
+      .statName {
+        font-size: 14px;
+        line-height: 16px;
+      }
+
+    }
+  }
+
+  .profileVerification {
+    .verificationInfo {
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: start;
+      >div {
+        margin-bottom: 12px;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 16px;
+      }
+    }
+  }
+  .profileAbout {
+    margin-top: 0px;
+  }
+}
+
+.cacheFlag {
+  img {
+    border: 1px solid red;
+  }
+}

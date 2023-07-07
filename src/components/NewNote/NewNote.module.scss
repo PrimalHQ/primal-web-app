@@ -1,0 +1,146 @@
+.newNoteHolder {
+  min-height: 100px;
+  background-color: var(--background-site);
+  padding-top: 10px;
+}
+
+.holderBottomBorder {
+  width: 100%;
+  height: 4px;
+  display: flex;
+  justify-content: space-between;
+
+  .rightCorner {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+
+    background-color: var(--background-site);
+    -webkit-mask: url(../../assets/icons/corner_right.svg) no-repeat center;
+    mask: url(../../assets/icons/corner_right.svg) no-repeat center;
+  }
+  .leftCorner {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+
+    background-color: var(--background-site);
+    -webkit-mask: url(../../assets/icons/corner_left.svg) no-repeat center;
+    mask: url(../../assets/icons/corner_left.svg) no-repeat center;
+  }
+}
+
+.newNoteBorder {
+  width: 100%;
+  height: 100%;
+  padding: 1px;
+  background: var(--brand-gradient);
+  border-radius: 6px;
+  display: block;
+  position: relative;
+}
+
+.newNote {
+  width: 100%;
+  height: 100%;
+  min-height: 122px;
+  font-size: 18px;
+  line-height: 20px;
+  margin: 0px;
+  border-radius: 6px;
+  border: none;
+  color: var(--text-tertiary);
+  background-color: var(--background-site);
+  padding-bottom: 11px;
+  display: grid;
+  grid-template-columns: 92px 1fr;
+
+  .leftSide {
+    padding: 20px;
+  }
+
+
+  // textarea {
+  //   width: calc(100% - 36px);
+  //   margin: 18px 18px 36px 18px;
+  //   padding: 0px;
+  //   box-sizing: padding-box;
+  //   border: none;
+  //   border-radius: 0px;
+  //   background-color: unset;
+  //   font-size: 16px;
+  //   line-height: 20px;
+  //   font-weight: 400;
+  //   color: var(--text-primary);
+  //   resize: none;
+
+  //   &:focus {
+  //     border: none;
+  //     outline: none;
+  //   }
+  // }
+}
+
+.controls {
+  position: absolute;
+  bottom: 0px;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  >button {
+    width: 80px;
+    height: 28px;
+    margin: 0px 0px 11px 8px;
+  }
+}
+
+.primaryButton {
+  border: none;
+  border-radius: 6px;
+  margin: 0px 8px;
+  padding: 0px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  background: var(--brand-gradient-vertical);
+  color: var(--text-primary);
+  >span {
+    opacity: 0.75;
+  }
+}
+
+
+.secondaryButton {
+  border: none;
+  border-radius: 6px;
+  padding: 1px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 700;
+  background: var(--brand-gradient-vertical);
+  color: var(--text-tertiary-2);
+  >div {
+    width: 100%;
+    height: 100%;
+    vertical-align: middle;
+    border-radius: 6px;
+    background-color: var(--background-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.searchSuggestions {
+  width: 300px;
+  background-color: var(--background-site);
+  border: 1px solid var(--text-tertiary-2);
+  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 50;
+}

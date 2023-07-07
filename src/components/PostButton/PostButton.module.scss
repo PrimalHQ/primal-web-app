@@ -1,0 +1,19 @@
+.postButton {
+  width: 36px;
+  height: 36px;
+  padding: 0px;
+  border-radius: 0px 6px 6px 0px;
+  margin: 0px;
+  background: var(--brand-gradient);
+}
+
+.postIcon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+
+  background-color: white;
+  -webkit-mask: url(../../assets/icons/post.svg) no-repeat center;
+  mask: url(../../assets/icons/post.svg) no-repeat center;
+}

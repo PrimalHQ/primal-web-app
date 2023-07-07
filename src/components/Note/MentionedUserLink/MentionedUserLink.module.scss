@@ -1,0 +1,39 @@
+.userMention {
+  position: relative;
+  .userPreview {
+    display: none;
+  }
+
+  &:hover {
+    .userPreview {
+      position: absolute;
+      left: 0;
+      width: 220px;
+      z-index: var(--z-index-floater);
+      background-color: var(--background-input);
+      display: flex;
+      padding: 4px;
+      border: 1px solid var(--text-tertiary-2);
+      border-radius: 8px;
+      color: var(--text-secondary-2);
+      font-size: 14px;
+      line-height: 16px;
+      font-weight: 400;
+      margin-top: 1px;
+      > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-left: 4px;
+
+        > div {
+          &.userName {
+            font-weight: 800;
+            color: var(--text-primary);
+          }
+          padding-block: 2px;
+        }
+      }
+    }
+  }
+}

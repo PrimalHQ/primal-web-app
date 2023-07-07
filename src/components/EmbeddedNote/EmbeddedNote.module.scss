@@ -1,0 +1,113 @@
+
+.mentionedNote {
+  border: solid 1px var(--border-embedded-card);
+  border-radius: 8px;
+  background-color: var(--background-embedded_card);
+  margin-block: 6px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 32px 1fr;
+  grid-row-gap: 8px;
+  text-decoration: none;
+  color: unset;
+  line-height: 20px;
+
+  &:hover {
+    text-decoration: none !important;
+  }
+
+  .mentionedNoteHeader {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    color: var(--text-tertiary-2);
+
+    .postInfo {
+      display: flex;
+      justify-content: flex-start;
+      margin-left: 11px;
+
+      .userInfo {
+        font-size: 16px;
+        line-height: 16px;
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        width: auto;
+        .userName {
+          font-size: 16px;
+          line-height: 16px;
+          font-weight: 700;
+          color: var(--text-primary);
+          max-width: 150px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+        .verifiedBy {
+          max-width: 220px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+        }
+      }
+
+      .time{
+        margin: 0px 2px;
+        min-width: 40px;
+        font-size: 14px;
+        line-height: 16px;
+        font-weight: 400;
+        &::before {
+          content: "|";
+          padding: 0px 2px;
+        }
+      }
+
+      .contextMenu {
+        min-width: 5px;
+        display: inline-block;
+        text-align: center;
+        font-weight: bold;
+      }
+    }
+  }
+}
+
+.verifiedIcon {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  margin: 0px 2px;
+  background-color: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
+}
+
+@media only screen and (max-width: 720px) {
+  .mentionedNoteHeader {
+    width: calc(100vw - 160px);
+    .postInfo {
+      width: calc(100vw - 110px);
+      .userInfo {
+        max-width: calc(100vw - 100px);
+        overflow: hidden;
+        .userName {
+          max-width: calc(100vw - 180px);
+        }
+      }
+      .verification {
+        max-width: 220px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+
+      }
+    }
+  }
+}
+
+.noteContent {
+  overflow: hidden;
+}

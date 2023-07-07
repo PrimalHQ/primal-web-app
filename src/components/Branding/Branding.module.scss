@@ -1,0 +1,53 @@
+.branding {
+  display: flex;
+  align-items: center;
+  .logo {
+    background-image: var(--logo);
+    background-size: contain;
+    margin-right: 12px;
+    width: 40px;
+    height: 40px;
+  }
+
+  span {
+    // margin-right: 12px;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 30px;
+    color: var(--brand-text);
+    text-transform: lowercase;
+  }
+}
+
+.brandingSmall {
+  .logo {
+    background-image: var(--logo);
+    background-size: contain;
+    margin-right: 0px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .branding {
+    .logo {
+      margin-right: 0px;
+      width: 32px;
+      height: 32px;
+    }
+
+    span {
+      display: none;
+    }
+  }
+}
+
+.logoLink {
+  text-decoration: none;
+  border: none;
+  border-radius: 0px;
+  margin: 0px;
+  padding: 0px;
+  background: unset;
+}

@@ -1,0 +1,90 @@
+.sidebarHeading {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 22px;
+  color: var(--text-secondary-2);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.sidebarTitle {
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 22px;
+  color: var(--text-secondary);
+}
+
+.sidebarEmpty {
+  color: var(--text-secondary);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 20px;
+  text-transform: lowercase;
+}
+
+.sidebarItems {
+  margin-bottom: 20px;
+
+  .sidebarItem {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    color: var(--text-secondary);
+
+    .itemAmount {
+      display: inline-block;
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 22px;
+      color: var(--text-primary);
+      margin-right: 4px;
+    }
+  }
+}
+
+.category {
+  display: flex;
+}
+
+.categoryIcon {
+  display: flex;
+  padding-top: 3px;
+  width: 26px;
+  justify-content: center;
+}
+
+@mixin statIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary);
+}
+
+.followIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/notifications/follows.svg) no-repeat 0px / 16px;
+  mask: url(../../assets/icons/notifications/follows.svg) no-repeat 0px / 16px;
+}
+
+.mentionIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/notifications/at.svg) no-repeat 0px / 16px;
+  mask: url(../../assets/icons/notifications/at.svg) no-repeat 0px / 16px;
+}
+
+.zapIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0px / 16px;
+  mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0px / 16px;
+}
+
+.activityIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/notifications/post_replied.svg) no-repeat 0px / 18px;
+  mask: url(../../assets/icons/notifications/post_replied.svg) no-repeat 0px / 18px;
+}
+
+.contextIcon {
+  @include statIcon;
+  -webkit-mask: url(../../assets/icons/context.svg) no-repeat center;
+  mask: url(../../assets/icons/context.svg) no-repeat center;
+}
