@@ -1,6 +1,6 @@
 # Primal Web Client
 
-This repo holds the web client of the Primal Nostr.
+This repo holds the Primal web client for Nostr.
 
 ## Setup
 
@@ -10,7 +10,7 @@ This repo holds the web client of the Primal Nostr.
 
 ## Development
 
-This code is still very much a work-in-progress. Expect major changes of structure and logic to be happening somewhat frequently.
+This code is still very much a work-in-progress. Expect major changes of the structure and logic to be happening somewhat frequently.
 Major features are still missing.
 
 This code is provided as-is.
