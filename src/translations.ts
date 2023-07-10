@@ -119,6 +119,24 @@ export const downloads = {
   },
 };
 
+export const confirmDefaults = {
+  title: {
+    id: 'confirm.title',
+    defaultMessage: 'Are you sure?',
+    description: 'Default title of the confirmation dialog',
+  },
+  confirm: {
+    id: 'confirm.yes',
+    defaultMessage: 'Yes',
+    description: 'Default label form positive response to the confirmation dialog',
+  },
+  abort: {
+    id: 'confirm.no',
+    defaultMessage: 'No',
+    description: 'Default label form negative response to the confirmation dialog',
+  },
+};
+
 export const exploreSidebarCaption = {
   id: 'explore.sidebar.caption',
   defaultMessage: 'trending users',
@@ -615,6 +633,21 @@ export const settings = {
     id: 'settings.sections.feeds',
     defaultMessage: 'Home page feeds',
     description: 'Title of the feeds section on the settings page',
+  },
+  feedsRestore: {
+    id: 'settings.feedsRestore',
+    defaultMessage: 'Reset to default feeds',
+    description: 'Label for the button for restoring default feeds to the feeds list',
+  },
+  feedsRestoreConfirm: {
+    id: 'settings.feedsRestoreConfirm',
+    defaultMessage: 'Restoring default feeds will erase all your custom feed settings',
+    description: 'Label explaining the impact of restoring default feeds',
+  },
+  feedLatest: {
+    id: 'feeds.latestFollowing',
+    defaultMessage: 'Latest',
+    description: 'Label for the `latest;following` (active user\'s) feed',
   },
   zaps: {
     id: 'settings.sections.zaps',

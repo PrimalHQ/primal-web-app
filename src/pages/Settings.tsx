@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import styles from './Settings.module.scss';
 
@@ -10,10 +10,21 @@ import SettingsZap from '../components/SettingsZap/SettingsZap';
 import Search from '../components/Search/Search';
 import SettingsNotifications from '../components/SettingsNotifications/SettingsNotifications';
 import { settings as t } from '../translations';
+import { useSettingsContext } from '../contexts/SettingsContext';
+import Modal from '../components/Modal/Modal';
+import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 
 const Settings: Component = () => {
 
   const intl = useIntl();
+  const settings = useSettingsContext();
+
+  const [isRestoringFeeds, setIsRestoringFeeds] = createSignal(false);
+
+  const onRestoreFeeds = () => {
+    settings?.actions.restoreDefaultFeeds();
+    setIsRestoringFeeds(false);
+  };
 
   return (
     <div class={styles.settingsContainer}>
@@ -40,9 +51,26 @@ const Settings: Component = () => {
 
       <div class={styles.devider}></div>
 
-      <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.feeds)}
+      <div class={styles.feedCaption}>
+        <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.feeds)}
+        </div>
+
+        <button
+          class={styles.restoreFeedsButton}
+          onClick={() => setIsRestoringFeeds(true)}
+        >
+          {intl.formatMessage(t.feedsRestore)}
+        </button>
+
+        <ConfirmModal
+          open={isRestoringFeeds()}
+          description={intl.formatMessage(t.feedsRestoreConfirm)}
+          onConfirm={onRestoreFeeds}
+          onAbort={() => setIsRestoringFeeds(false)}
+        ></ConfirmModal>
       </div>
+
 
       <div class={styles.feedSettings}>
         <FeedSorter />

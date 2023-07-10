@@ -33,6 +33,7 @@ import { getDefaultSettings, getSettings, sendSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
+import { settings as t } from "../translations";
 
 export type SettingsContextStore = {
   locale: string,
@@ -55,6 +56,7 @@ export type SettingsContextStore = {
     setDefaultZapAmount: (amount: number) => void,
     setZapOptions: (amount:number, index: number) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
+    restoreDefaultFeeds: () => void,
   }
 }
 
@@ -175,6 +177,54 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     !temp && saveSettings();
   };
 
+  const restoreDefaultFeeds = () => {
+
+    const subid = `restore_default_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EVENT' && content?.content) {
+        try {
+          const settings = JSON.parse(content?.content);
+
+          let feeds = settings.feeds as PrimalFeed[];
+
+          if (account?.hasPublicKey()) {
+            feeds.unshift({
+              name: feedLabel,
+              hex: account?.publicKey,
+              npub: hexToNpub(account?.publicKey),
+            });
+          }
+
+          updateStore('availableFeeds',
+            () => replaceAvailableFeeds(account?.publicKey, feeds),
+          );
+
+          updateStore('defaultFeed', () => store.availableFeeds[0]);
+
+          saveSettings();
+        }
+        catch (e) {
+          console.log('Error parsing settings response: ', e);
+        }
+      }
+
+      if (type === 'NOTICE') {
+        toaster?.sendWarning(intl.formatMessage({
+          id: 'settings.loadFail',
+          defaultMessage: 'Failed to load settings. Will be using local settings.',
+          description: 'Toast message after settings have failed to be loaded from the server',
+        }));
+      }
+
+      unsub();
+      return;
+    });
+
+    getDefaultSettings(subid)
+  };
+
   const saveSettings = () => {
     const settings = {
       theme: store.theme,
@@ -214,14 +264,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
           const feeds = settings.feeds as PrimalFeed[];
           const notificationSettings = settings.notifications as Record<string, boolean>;
-
-          // const availableTopics = store.availableFeeds.map(f => f.hex);
-
-          // const updatedFeeds = feeds.reduce((acc, feed) => {
-          //   return availableTopics.includes(feed.hex) ?
-          //     acc :
-          //     [ ...acc, feed ];
-          // }, store.availableFeeds)
 
           updateStore('availableFeeds',
             () => replaceAvailableFeeds(account?.publicKey, feeds),
@@ -342,11 +384,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   // This is here as to not trigger the effect
   // TODO Solve this.
-  const feedLabel = intl.formatMessage({
-    id: 'feeds.latestFollowing',
-    defaultMessage: 'Latest, following',
-    description: 'Label for the `latest;following` (active user\'s) feed',
-  });
+  const feedLabel = intl.formatMessage(t.feedLatest);
 
 
   // Initial setup for a user with a public key
@@ -426,6 +464,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       renameAvailableFeed,
       saveSettings,
       loadSettings,
+      restoreDefaultFeeds,
       setDefaultZapAmount,
       setZapOptions,
       updateNotificationSettings,
