@@ -44,6 +44,7 @@ const NavMenu: Component = () => {
       to: '/downloads',
       label: intl.formatMessage(t.downloads),
       icon: 'downloadIcon',
+      bubble: () => notifications?.downloadsCount || 0,
     },
     {
       to: '/settings',

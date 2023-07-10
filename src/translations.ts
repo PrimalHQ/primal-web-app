@@ -79,6 +79,46 @@ export const branding = {
   description: 'Brand name',
 };
 
+export const downloads = {
+  title: {
+    id: 'downloads.title',
+    defaultMessage: 'Downloads',
+    description: 'Title of the downloads page',
+  },
+  callToActionTitle: {
+    id: 'downloads.ctaTitle',
+    defaultMessage: 'Primal iOS TestFlight is Here!',
+    description: 'Title for the downloads\' page call-to-action',
+  },
+  callToActionDescription: {
+    id: 'downloads.ctaDescription',
+    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    description: 'Description for the downloads\' page call-to-action',
+  },
+  appStoreCaption: {
+    id: 'downloads.appStoreCaption',
+    defaultMessage: 'TestFlight Available Now',
+    description: 'AppStore promo caption',
+  },
+  playStoreCaption: {
+    id: 'downloads.playStoreCaption',
+    defaultMessage: 'Coming soon to Android',
+    description: 'PlayStore promo caption',
+  },
+  links: {
+    webApp: {
+      id: 'downloads.webAppLink',
+      defaultMessage: 'Primal Web App',
+      description: 'Label for the link to the web app',
+    },
+    cachingService: {
+      id: 'downloads.cachingService',
+      defaultMessage: 'Primal Caching Service',
+      description: 'Label for the link to the caching service',
+    },
+  },
+};
+
 export const exploreSidebarCaption = {
   id: 'explore.sidebar.caption',
   defaultMessage: 'trending users',

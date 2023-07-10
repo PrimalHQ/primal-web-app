@@ -249,3 +249,6 @@ export const defaultNotificationSettings: Record<string, boolean> = {
 };
 
 export const emojiSearchLimit = 1;
+
+export const today = (new Date()).getTime();
+export const iosRD = (new Date('07/11/2023')).getTime();

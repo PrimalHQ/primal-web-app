@@ -1,8 +1,9 @@
 import { createStore } from "solid-js/store";
-import { Kind } from "../constants";
+import { andRD, iosRD, Kind, today } from "../constants";
 import {
   createContext,
   createEffect,
+  createSignal,
   onCleanup,
   useContext
 } from "solid-js";
@@ -23,14 +24,15 @@ import { useAccountContext } from "./AccountContext";
 
 export type NotificationsContextStore = {
   notificationCount: number,
+  downloadsCount: number,
   actions: {
   }
 }
 
 export const initialData = {
   notificationCount: 0,
+  downloadsCount: 0,
 };
-
 
 export const NotificationsContext = createContext<NotificationsContextStore>();
 
@@ -50,6 +52,20 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     // @ts-ignore
     subscribeToNotificationStats(account?.publicKey, subid);
   }
+
+  const calculateDownloadCount = () => {
+    const iosDownload = localStorage.getItem('iosDownload');
+    const andDownload = localStorage.getItem('andDownload');
+
+    let count = 0;
+
+    if (!iosDownload && today > iosRD) {
+      count++;
+    }
+
+    updateStore('downloadsCount', () => count);
+
+  };
 
 // SOCKET HANDLERS ------------------------------
 
@@ -72,6 +88,8 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
         if (sum !== store.notificationCount) {
           updateStore('notificationCount', () => sum)
         }
+
+        calculateDownloadCount();
 
       }
     }
@@ -102,6 +120,8 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
       );
     }
   });
+
+  createEffect(() => {});
 
   onCleanup(() => {
     removeSocketListeners(
