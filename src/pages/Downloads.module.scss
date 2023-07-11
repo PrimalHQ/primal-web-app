@@ -49,6 +49,9 @@
 
   .phones {
     z-index: 10;
+    >img {
+      height: 536px;
+    }
   }
 
   .phoneReflections {

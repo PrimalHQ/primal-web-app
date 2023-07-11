@@ -48,7 +48,7 @@ const Downloads: Component = () => {
 
       <StickySidebar>
         <div class={styles.downloadsSidebar}>
-          <div class={styles.title}>Source codes</div>
+          <div class={styles.title}>Source code</div>
           <div class={styles.list}>
             <div>
               <Show
