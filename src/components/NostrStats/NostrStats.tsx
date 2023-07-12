@@ -32,7 +32,7 @@ const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
     <div class={styles.netstats}>
       {statDisplay(props.stats.users, 'users')}
       {statDisplay(props.stats.pubkeys, 'pubkeys')}
-      {statDisplay(props.stats.zaps, 'users')}
+      {statDisplay(props.stats.zaps, 'zaps')}
       {statDisplay((props.stats.satszapped /100000000).toFixed(8), 'btcZapped')}
       {statDisplay(props.stats.pubnotes, 'pubnotes')}
       {statDisplay(props.stats.reposts, 'reposts')}
