@@ -1,3 +1,4 @@
+// @ts-ignore Bad types in nostr-tools
 import { relayInit, Relay } from "nostr-tools";
 import { relayConnectingTimeout } from "../constants";
 import { NostrRelays } from "../types/primal";
@@ -34,7 +35,7 @@ const connectToRelay = (relay: Relay) => new Promise(
         clearTimeout(timeout);
         resolve(true);
       })
-      .catch((e) => {
+      .catch((e: any) => {
         logError(relay, e);
         reject();
       });

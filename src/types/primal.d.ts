@@ -1,4 +1,5 @@
 import { MessageDescriptor } from "@cookbook/solid-intl";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";

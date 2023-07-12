@@ -19,6 +19,7 @@ import {
 import { Kind, noKey } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
 import { sendContacts, sendLike } from "../lib/notes";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";

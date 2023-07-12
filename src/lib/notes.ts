@@ -1,4 +1,5 @@
 import { getLinkPreview } from "link-preview-js";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";

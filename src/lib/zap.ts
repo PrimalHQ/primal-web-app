@@ -1,4 +1,5 @@
 import { bech32 } from "@scure/base";
+// @ts-ignore Bad types in nostr-tools
 import { nip57, Relay, utils } from "nostr-tools";
 import { NostrWindow, PrimalNote, PrimalUser } from "../types/primal";
 

@@ -1,4 +1,5 @@
-import { Event, Relay } from "nostr-tools";
+// @ts-ignore Bad types in nostr-tools
+import { Relay, Event } from "nostr-tools";
 import { Kind, minKnownProfiles, noKey } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrWindow, VanityProfiles } from "../types/primal";
