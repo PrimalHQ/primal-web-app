@@ -29,7 +29,9 @@ const onError = (error: Event) => {
 
 export const connect = () => {
   if (isNotConnected()) {
-    const cacheServer = localStorage.getItem('cacheServer') ??
+    const cacheServer =
+      localStorage.getItem('cacheServer') ||
+      import.meta.env.PRIMAL_CACHE_URL ||
       'wss://cache3.primal.net/cache17';
 
     setSocket(new WebSocket(cacheServer));
