@@ -1,0 +1,15 @@
+.externalLink {
+  >img {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    margin-right: 9px;
+  }
+
+  >a {
+    color: var(--text-secondary-2);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 40px;
+  }
+}

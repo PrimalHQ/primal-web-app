@@ -3,7 +3,6 @@ import { andRD, iosRD, Kind, today } from "../constants";
 import {
   createContext,
   createEffect,
-  createSignal,
   onCleanup,
   useContext
 } from "solid-js";
@@ -60,6 +59,10 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     let count = 0;
 
     if (!iosDownload && today > iosRD) {
+      count++;
+    }
+
+    if (!andDownload && today > andRD) {
       count++;
     }
 

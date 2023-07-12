@@ -14,14 +14,18 @@ import iphoneReflectionLight from '../assets/images/primal_iphone_reflection_lig
 import androidReflectionLight from '../assets/images/primal_android_reflection_light.png';
 
 import appStore from '../assets/images/appstore_download.svg';
-import playStore from '../assets/images/playstore_download.svg';
+import apkDownload from '../assets/images/primal_apk_download.svg';
+
+import gitHubLight from '../assets/icons/github_light.svg';
+import gitHubDark from '../assets/icons/github.svg';
 
 import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { iosRD, today } from '../constants';
+import { andRD, iosRD, today } from '../constants';
+import ExternalLink from '../components/ExternalLink/ExternalLink';
 
 const Downloads: Component = () => {
 
@@ -31,6 +35,10 @@ const Downloads: Component = () => {
   onMount(() => {
     if (today > iosRD) {
       localStorage.setItem('iosDownload', 'seen');
+    }
+
+    if (today > andRD) {
+      localStorage.setItem('andDownload', 'seen');
     }
   });
 
@@ -48,41 +56,38 @@ const Downloads: Component = () => {
 
       <StickySidebar>
         <div class={styles.downloadsSidebar}>
-          <div class={styles.title}>Source code</div>
-          <div class={styles.list}>
-            <div>
-              <Show
-                when={['sunset', 'midnight'].includes(settings?.theme || 'sunset')}
-                fallback={
-                  <div class={styles.githubIconLight}></div>
-                }
-              >
-                <div class={styles.githubIcon}></div>
-              </Show>
-              <a
-                href='https://github.com/PrimalHQ/primal-web-app'
-                target='_blank'
-              >
-                {intl.formatMessage(t.links.webApp)}
-              </a>
-            </div>
-            <div>
-              <Show
-                when={['sunset', 'midnight'].includes(settings?.theme || 'sunset')}
-                fallback={
-                  <div class={styles.githubIconLight}></div>
-                }
-              >
-                <div class={styles.githubIcon}></div>
-              </Show>
-              <a
-                href='https://github.com/PrimalHQ/primal-caching-service'
-                target='_blank'
-              >
-              {intl.formatMessage(t.links.cachingService)}
-              </a>
-            </div>
 
+          <div class={styles.title}>
+            {intl.formatMessage(t.links.title)}
+          </div>
+          <div class={styles.list}>
+            <ExternalLink
+              darkIcon={gitHubLight}
+              lightIcon={gitHubDark}
+              label={intl.formatMessage(t.links.webApp)}
+              href='https://github.com/PrimalHQ/primal-web-app'
+            />
+
+            <ExternalLink
+              darkIcon={gitHubLight}
+              lightIcon={gitHubDark}
+              label={intl.formatMessage(t.links.iosApp)}
+              href='https://github.com/PrimalHQ/primal-ios-app'
+            />
+
+            <ExternalLink
+              darkIcon={gitHubLight}
+              lightIcon={gitHubDark}
+              label={intl.formatMessage(t.links.andApp)}
+              href='https://github.com/PrimalHQ/primal-android-app'
+            />
+
+            <ExternalLink
+              darkIcon={gitHubLight}
+              lightIcon={gitHubDark}
+              label={intl.formatMessage(t.links.cachingService)}
+              href='https://github.com/PrimalHQ/primal-caching-service'
+            />
           </div>
         </div>
       </StickySidebar>
@@ -131,7 +136,6 @@ const Downloads: Component = () => {
         </div>
       </Show>
 
-
       <div class={styles.linkHolder}>
         <div class={styles.appStore}>
           <div>{intl.formatMessage(t.appStoreCaption)}</div>
@@ -143,9 +147,22 @@ const Downloads: Component = () => {
           </a>
         </div>
         <div class={styles.playStore}>
-          <div>{intl.formatMessage(t.playStoreCaption)}</div>
-          <a>
-            <img src={playStore} />
+          <div>{intl.formatMessage(t.apkDownload)}</div>
+
+          <div class={styles.callToActionAndroid}>
+            <div class={styles.ctaTitle}>
+              {intl.formatMessage(t.callToActionAndroidTitle)}
+            </div>
+            <div class={styles.ctaDescription}>
+              {intl.formatMessage(t.callToActionAndroidDescription)}
+            </div>
+          </div>
+
+          <a
+            href='https://downloads.primal.net/android/primal-0.11.2.apk'
+            target='_blank'
+          >
+            <img src={apkDownload} />
           </a>
         </div>
       </div>

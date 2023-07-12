@@ -95,6 +95,16 @@ export const downloads = {
     defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
     description: 'Description for the downloads\' page call-to-action',
   },
+  callToActionAndroidTitle: {
+    id: 'downloads.ctaAndroidTitle',
+    defaultMessage: 'Primal Android Alpha',
+    description: 'Title for the Android downloads\' page call-to-action',
+  },
+  callToActionAndroidDescription: {
+    id: 'downloads.ctaAndroidDescription',
+    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    description: 'Description for the Android downloads\' page call-to-action',
+  },
   appStoreCaption: {
     id: 'downloads.appStoreCaption',
     defaultMessage: 'TestFlight Available Now',
@@ -105,11 +115,31 @@ export const downloads = {
     defaultMessage: 'Coming soon to Android',
     description: 'PlayStore promo caption',
   },
+  apkDownload: {
+    id: 'downloads.apkDownload',
+    defaultMessage: 'Alpha Build Available Now',
+    description: 'APK download caption',
+  },
   links: {
+    title: {
+      id: 'downloads.sidebarTitle',
+      defaultMessage: 'Source code',
+      description: 'Daownload sidebar links title',
+    },
     webApp: {
       id: 'downloads.webAppLink',
       defaultMessage: 'Primal Web App',
       description: 'Label for the link to the web app',
+    },
+    iosApp: {
+      id: 'downloads.iosAppLink',
+      defaultMessage: 'Primal iOS App',
+      description: 'Label for the link to the iOS app',
+    },
+    andApp: {
+      id: 'downloads.andAppLink',
+      defaultMessage: 'Primal Android App',
+      description: 'Label for the link to the Android app',
     },
     cachingService: {
       id: 'downloads.cachingService',
