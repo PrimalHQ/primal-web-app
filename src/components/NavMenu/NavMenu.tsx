@@ -39,6 +39,7 @@ const NavMenu: Component = () => {
       label: intl.formatMessage(t.notifications),
       icon: 'notificationsIcon',
       bubble: () => notifications?.notificationCount || 0,
+      hiddenOnSmallScreens: true,
     },
     {
       to: '/downloads',
@@ -50,11 +51,13 @@ const NavMenu: Component = () => {
       to: '/settings',
       label: intl.formatMessage(t.settings),
       icon: 'settingsIcon',
+      hiddenOnSmallScreens: true,
     },
     {
       to: '/help',
       label: intl.formatMessage(t.help),
       icon: 'helpIcon',
+      hiddenOnSmallScreens: true,
     },
   ];
 
@@ -62,8 +65,14 @@ const NavMenu: Component = () => {
     <div class={styles.navMenu}>
       <nav class={styles.sideNav}>
         <For each={links}>
-          {({ to, label, icon, bubble }) => {
-            return <NavLink to={to} label={label} icon={icon} bubble={bubble}/>
+          {({ to, label, icon, bubble, hiddenOnSmallScreens }) => {
+            return <NavLink
+              to={to}
+              label={label}
+              icon={icon}
+              bubble={bubble}
+              hiddenOnSmallScreens={hiddenOnSmallScreens}
+            />
           }
           }
         </For>

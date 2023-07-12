@@ -13,7 +13,7 @@
   }
 }
 
-.callToAction, .callToActionAndroid {
+.callToAction, .callToActionAndroid, .callToActionIOS {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -38,7 +38,7 @@
   }
 }
 
-.callToActionAndroid {
+.callToActionAndroid, .callToActionIOS {
   display: none;
 }
 
@@ -180,6 +180,10 @@
     display: none;
   }
 
+  .callToAction {
+    display: none;
+  }
+
   .linkHolder {
     margin-top: 20px;
     flex-direction: column;
@@ -202,6 +206,9 @@
     }
 
     .appStore {
+      .callToActionIOS {
+        display: flex;
+      }
       >a {
         width: 188px;
         height: 63px;
@@ -210,6 +217,7 @@
 
     .playStore {
       margin-top: 77px;
+      margin-bottom: 250px;
       width: 100% !important;
       .callToActionAndroid {
         display: flex;

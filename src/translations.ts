@@ -87,13 +87,23 @@ export const downloads = {
   },
   callToActionTitle: {
     id: 'downloads.ctaTitle',
-    defaultMessage: 'Primal iOS TestFlight is Here!',
+    defaultMessage: 'Primal Mobile Apps are Here!',
     description: 'Title for the downloads\' page call-to-action',
   },
   callToActionDescription: {
     id: 'downloads.ctaDescription',
-    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    defaultMessage: 'The iOS app is in public TestFlight and ready to be used as a daily driver. The Android app is in alpha, but developing quickly!',
     description: 'Description for the downloads\' page call-to-action',
+  },
+  callToActionIOSTitle: {
+    id: 'downloads.ctaAndroidTitle',
+    defaultMessage: 'Primal iOS TestFlight',
+    description: 'Title for the iOS downloads\' page call-to-action',
+  },
+  callToActionIOSDescription: {
+    id: 'downloads.ctaAndroidDescription',
+    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    description: 'Description for the iOS downloads\' page call-to-action',
   },
   callToActionAndroidTitle: {
     id: 'downloads.ctaAndroidTitle',
@@ -145,6 +155,11 @@ export const downloads = {
       id: 'downloads.cachingService',
       defaultMessage: 'Primal Caching Service',
       description: 'Label for the link to the caching service',
+    },
+    primalServer: {
+      id: 'downloads.primalServer',
+      defaultMessage: 'Primal Server',
+      description: 'Label for the link to the primal server',
     },
   },
 };

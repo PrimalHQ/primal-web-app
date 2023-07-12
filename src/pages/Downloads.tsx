@@ -88,6 +88,13 @@ const Downloads: Component = () => {
               label={intl.formatMessage(t.links.cachingService)}
               href='https://github.com/PrimalHQ/primal-caching-service'
             />
+
+            <ExternalLink
+              darkIcon={gitHubLight}
+              lightIcon={gitHubDark}
+              label={intl.formatMessage(t.links.primalServer)}
+              href='https://github.com/PrimalHQ/primal-server'
+            />
           </div>
         </div>
       </StickySidebar>
@@ -139,6 +146,16 @@ const Downloads: Component = () => {
       <div class={styles.linkHolder}>
         <div class={styles.appStore}>
           <div>{intl.formatMessage(t.appStoreCaption)}</div>
+
+          <div class={styles.callToActionIOS}>
+            <div class={styles.ctaTitle}>
+              {intl.formatMessage(t.callToActionIOSTitle)}
+            </div>
+            <div class={styles.ctaDescription}>
+              {intl.formatMessage(t.callToActionIOSDescription)}
+            </div>
+          </div>
+
           <a
             href='https://testflight.apple.com/join/Is4tmDDR'
             target='_blank'
