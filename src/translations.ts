@@ -842,6 +842,21 @@ export const toast = {
     defaultMessage: 'You can only upload images and videos. This file type is not supported.',
     description: 'Feedback when user tries to upload an unsupported file type',
   },
+  publishNoteSuccess: {
+    id: 'toast.publishNoteSuccess',
+    defaultMessage: 'Message posted successfully',
+    description: 'Toast message confirming successfull publication of the post',
+  },
+  publishNoteTimeout: {
+    id: 'toast.publishNoteTimeout',
+    defaultMessage: 'No relay confirmed reception of your post after 8 seconds',
+    description: 'Toast message indicating that no relay confirmed note reception',
+  },
+  publishNoteFail: {
+    id: 'toast.publishNoteFail',
+    defaultMessage: 'Failed to publish post',
+    description: 'Toast message indicating that post publishing has failed',
+  },
   noRelays: {
     id: 'toast.noRelays',
     defaultMessage: 'You need to declare at least one relay to perform this action',
@@ -851,6 +866,11 @@ export const toast = {
     id: 'toast.noRelaysConnected',
     defaultMessage: '"We are trying to connect to your relays. Please try again in a few moments.',
     description: 'Toast message indicating user is not connected to aany relay',
+  },
+  noExtension: {
+    id: 'toast.noExtension',
+    defaultMessage: 'Nostr extension is required to send events',
+    description: 'Toast message indicating no extension was found',
   },
   noteNostrLinkCoppied: {
     id: 'noteNostrLinkCoppied',

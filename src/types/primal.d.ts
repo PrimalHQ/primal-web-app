@@ -515,3 +515,8 @@ export type ScopeDescriptor = {
   label: MessageDescriptor,
   description: MessageDescriptor,
 }
+
+export type SendNoteResult = {
+  success: boolean,
+  reasons?: string[],
+};

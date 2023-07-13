@@ -484,7 +484,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    const success = await sendEvent(event, account?.relays);
+    const { success } = await sendEvent(event, account?.relays);
 
     if (success) {
       const msg = { ...message, content: sanitize(message.content) };

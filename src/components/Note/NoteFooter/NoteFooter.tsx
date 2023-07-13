@@ -61,7 +61,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
-    const success = await sendRepost(props.note, account.relays);
+    const { success } = await sendRepost(props.note, account.relays);
 
     if (success) {
       setReposts(reposts() + 1);
@@ -89,14 +89,14 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     if (Object.keys(account.relaySettings).length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelaysMessage),
+        intl.formatMessage(t.noRelays),
       );
       return;
     }
 
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayConnectedMessage),
+        intl.formatMessage(t.noRelaysConnected),
       );
       return;
     }
@@ -127,14 +127,14 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
 
     if (Object.keys(account.relaySettings).length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelaysMessage),
+        intl.formatMessage(t.noRelays),
       );
       return;
     }
 
     if (account.relays.length === 0) {
       toast?.sendWarning(
-        intl.formatMessage(noRelayConnectedMessage),
+        intl.formatMessage(t.noRelaysConnected),
       );
       return;
     }

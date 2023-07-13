@@ -3,7 +3,7 @@ import { getLinkPreview } from "link-preview-js";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
-import { NostrWindow, PrimalNote } from "../types/primal";
+import { NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl } from "./media";
 
 const getLikesStorageKey = () => {
@@ -252,7 +252,6 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
   return await sendEvent(event, relays);
 }
 
-
 export const sendNote = async (text: string, relays: Relay[], tags: string[][]) => {
   const event = {
     content: text,
@@ -280,39 +279,59 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
   const nostr = win.nostr;
 
   if (nostr === undefined) {
-    return false;
+    return { success: false , reasons: ['no_extension']};
   }
 
   const signedNote = await nostr.signEvent(event);
 
-  return new Promise<boolean>((resolve) => {
-    const numberOfRelays = relays.length;
-    let failed = 0;
+  let responses = [];
+  let reasons: string[] = [];
 
-    relays.forEach(relay => {
+  for (let i = 0;i < relays.length;i++) {
+    const relay = relays[i];
+
+    responses.push(new Promise<string>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.log(`Publishing post to ${relay.url} has timed out`);
+        reasons.push('timeout');
+        reject('timeout');
+      }, 8_000);
+
       try {
         let pub = relay.publish(signedNote);
 
+
+        console.log('publishing to relay: ', relay)
+
         pub.on('ok', () => {
           console.log(`${relay.url} has accepted our event`);
-          resolve(true);
+          clearTimeout(timeout);
+          resolve('success');
         });
 
         pub.on('failed', (reason: any) => {
           console.log(`failed to publish to ${relay.url}: ${reason}`)
-          failed += 1;
-          if (failed >= numberOfRelays) {
-            resolve(false);
-          }
+          clearTimeout(timeout);
+          reasons.push(reason);
+          reject('failed');
         });
-      } catch (e) {
-        console.log('Failed sending note: ', e);
-        failed += 1;
-        if (failed >= numberOfRelays) {
-          resolve(false);
-        }
-      }
-    });
 
-  });
+      } catch (e) {
+        console.log('Failed publishing note: ', e);
+        clearTimeout(timeout);
+        reasons.push(`${e}`);
+        reject(e);
+      }
+    }));
+  }
+
+  try {
+    await Promise.any(responses);
+
+    return { success: true } as SendNoteResult;
+  }
+  catch (e) {
+    console.log('ERROR PUBLISHING POST: ', e);
+    return { success: false, reasons} as SendNoteResult;
+  }
 }

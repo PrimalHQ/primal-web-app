@@ -491,14 +491,26 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         tags.push(['p', props.replyToNote.post.pubkey]);
       }
 
-      const success = await sendNote(messageToSend, account.relays, tags);
+      const { success, reasons } = await sendNote(messageToSend, account.relays, tags);
 
       if (success) {
-        toast?.sendSuccess('Message posted successfully');
+        toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+        closeEditor();
+        return;
       }
-      else {
-        toast?.sendWarning('Failed to send message');
+
+      if (reasons?.includes('no_extension')) {
+        toast?.sendWarning(intl.formatMessage(tToast.noExtension));
+        return;
       }
+
+      if (reasons?.includes('timeout')) {
+        toast?.sendWarning(intl.formatMessage(tToast.publishNoteTimeout));
+        return;
+      }
+
+      toast?.sendWarning(intl.formatMessage(tToast.publishNoteFail));
+      return;
     }
 
     closeEditor();
