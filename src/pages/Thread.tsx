@@ -1,7 +1,7 @@
 import { Component, createEffect, For, onCleanup, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import { PrimalNote } from '../types/primal';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
@@ -24,6 +24,7 @@ const Thread: Component = () => {
   const account = useAccountContext();
   const params = useParams();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const postId = () => {
     if (params.postId.startsWith('note')) {
@@ -36,15 +37,21 @@ const Thread: Component = () => {
   const threadContext = useThreadContext();
 
   const primaryNote = () => {
-    // const id = postId();
-    // const savedNote = threadContext?.primaryNote;
 
+    let note = threadContext?.notes.find(n => n.post.noteId === postId());
 
-    // if (savedNote?.post.noteId === postId()) {
-    //   return savedNote;
-    // }
+    // Return the note if found
+    if (note) {
+      return note;
+    }
 
-    return threadContext?.notes.find(n => n.post.noteId === postId());
+    // Since there is no note see if this is a repost
+    note = threadContext?.notes.find(n => n.repost?.note.noteId === postId());
+
+    // If reposted note found redirect to it's thread
+    note && navigate(`/thread/${note?.post.noteId}`)
+
+    return note;
   };
 
   const parentNotes = () => {
@@ -130,35 +137,11 @@ const Thread: Component = () => {
         />
       </Wormhole>
 
-      <Show
-        when={!isFetching()}
-      >
-        <For each={parentNotes()}>
-          {note =>
-            <div class={styles.threadList}>
-              <Note note={note} />
-            </div>
-          }
-        </For>
-      </Show>
-
-      <Show when={primaryNote()}>
-        <div id="primary_note" class={styles.threadList}>
-          <NotePrimary
-            note={primaryNote() as PrimalNote}
-          />
-          <Show when={account?.hasPublicKey()}>
-            <ReplyToNote note={primaryNote() as PrimalNote} />
-          </Show>
-        </div>
-      </Show>
-
-      <div class={styles.repliesHolder}>
+      <Show when={account?.isKeyLookupDone}>
         <Show
           when={!isFetching()}
-          fallback={<div class={styles.noContent}><Loader /></div>}
         >
-          <For each={replyNotes()}>
+          <For each={parentNotes()}>
             {note =>
               <div class={styles.threadList}>
                 <Note note={note} />
@@ -166,7 +149,34 @@ const Thread: Component = () => {
             }
           </For>
         </Show>
-      </div>
+
+        <Show when={primaryNote()}>
+          <div id="primary_note" class={styles.threadList}>
+            <NotePrimary
+              note={primaryNote() as PrimalNote}
+            />
+            <Show when={account?.hasPublicKey()}>
+              <ReplyToNote note={primaryNote() as PrimalNote} />
+            </Show>
+          </div>
+        </Show>
+
+        <div class={styles.repliesHolder}>
+          <Show
+            when={!isFetching()}
+            fallback={<div class={styles.noContent}><Loader /></div>}
+          >
+            <For each={replyNotes()}>
+              {note =>
+                <div class={styles.threadList}>
+                  <Note note={note} />
+                </div>
+              }
+            </For>
+          </Show>
+        </div>
+      </Show>
+
     </div>
   )
 }
