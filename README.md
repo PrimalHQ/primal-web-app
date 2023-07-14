@@ -105,6 +105,10 @@ Clone this repo then run the following commands:
 - `npm install` (to install dependencies)
 - `npm run dev` (to stand a local instance)
 
+The caching service and the upload server urls can be configured with the following two environment variables which could be passed in via command line or read from the `.env` file:
+- `PRIMAL_CACHE_URL` (caching service websocket url)
+- `PRIMAL_UPLOAD_URL` (upload server websocket url)
+
 ### Development
 
 This code is still very much a work-in-progress. Expect major changes of the structure and logic to be happening somewhat frequently.
