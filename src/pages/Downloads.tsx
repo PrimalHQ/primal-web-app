@@ -105,43 +105,15 @@ const Downloads: Component = () => {
         </div>
       </div>
 
-      <div class={styles.callToAction}>
-        <div class={styles.ctaTitle}>
-          {intl.formatMessage(t.callToActionTitle)}
-        </div>
-        <div class={styles.ctaDescription}>
-          {intl.formatMessage(t.callToActionDescription)}
-        </div>
+      <div class={styles.promoHolder}>
+        <video
+          controls={true}
+          muted={true}
+          autoplay={true}
+          poster='/public/primal_mobile_poster.png'
+          src='https://primal.b-cdn.net/media-cache?s=o&a=1&u=https%3A%2F%2Fmedia.primal.net%2Fuploads%2F9%2Fd6%2F91%2F9d691046b2b73d13e48ed08bf4b3fd64560bac40e5e6a1e4f65fd7d40cfcedee.mp4'
+        />
       </div>
-
-      <Show
-        when={['sunset', 'midnight'].includes(settings?.theme || 'sunset')}
-        fallback={
-          <div class={styles.promoHolder}>
-            <div class={styles.phones}>
-              <img src={iphoneLight} />
-              <img src={androidLight} />
-            </div>
-            <div class={styles.backdropLight}></div>
-            <div class={styles.phoneReflections}>
-              <img src={iphoneReflectionLight} />
-              <img src={androidReflectionLight} />
-            </div>
-          </div>
-        }
-      >
-        <div class={styles.promoHolder}>
-          <div class={styles.phones}>
-            <img src={iphone} />
-            <img src={android} />
-          </div>
-          <div class={styles.backdrop}></div>
-          <div class={styles.phoneReflections}>
-            <img src={iphoneReflection} />
-            <img src={androidReflection} />
-          </div>
-        </div>
-      </Show>
 
       <div class={styles.linkHolder}>
         <div class={styles.appStore}>
@@ -150,9 +122,6 @@ const Downloads: Component = () => {
           <div class={styles.callToActionIOS}>
             <div class={styles.ctaTitle}>
               {intl.formatMessage(t.callToActionIOSTitle)}
-            </div>
-            <div class={styles.ctaDescription}>
-              {intl.formatMessage(t.callToActionIOSDescription)}
             </div>
           </div>
 
@@ -169,9 +138,6 @@ const Downloads: Component = () => {
           <div class={styles.callToActionAndroid}>
             <div class={styles.ctaTitle}>
               {intl.formatMessage(t.callToActionAndroidTitle)}
-            </div>
-            <div class={styles.ctaDescription}>
-              {intl.formatMessage(t.callToActionAndroidDescription)}
             </div>
           </div>
 

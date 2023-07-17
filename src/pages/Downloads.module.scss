@@ -44,54 +44,22 @@
 
 .promoHolder {
   position: relative;
-  height: 560px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-top: 24px;
+  margin-bottom: 24px;
 
-  .phones {
-    z-index: 10;
-    >img {
-      height: 536px;
-    }
-  }
-
-  .phoneReflections {
-    margin-top: -27px;
-
-    >img:last-child {
-      margin-left: 44px;
-    }
-  }
-
-  .backdrop {
-    position: absolute;
-    top: 24px;
-    width: 563px;
-    height: 496px;
-    border-radius: 563px;
-    background: linear-gradient(161deg, rgba(255, 159, 47, 0.30) 0%, rgba(250, 67, 67, 0.30) 27.67%, rgba(188, 24, 112, 0.30) 60.59%, rgba(91, 18, 164, 0.30) 85.21%);
-    filter: blur(60px);
-  }
-
-  .backdropLight {
-    position: absolute;
-    top: 24px;
-    width: 563px;
-    height: 496px;
-    border-radius: 563px;
-    background: rgba(0, 0, 0, 0.12);
-    filter: blur(60px);
+  >video {
+    width: 100%;
+    border-radius: 8px;
   }
 }
 
 .linkHolder {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  margin-top: -27px;
 
   >div {
     display: flex;
@@ -99,10 +67,6 @@
     justify-content: center;
     align-items: center;
     width: 290px;
-
-    &:last-child {
-      width: 279px;
-    }
   }
 
   div {
@@ -115,6 +79,10 @@
 
 
   .appStore {
+    padding-block: 24px;
+    width: 308px;
+    background-color: var(--background-card);
+    border-radius: 8px;
     >a {
       margin-top: 16px;
       width: 120px;
@@ -123,6 +91,10 @@
   }
 
   .playStore {
+    padding-block: 24px;
+    width: 308px;
+    background-color: var(--background-card);
+    border-radius: 8px;
     >a {
       margin-top: 16px;
       width: 134px;
@@ -176,9 +148,6 @@
 }
 
 @media only screen and (max-width: 720px) {
-  .promoHolder {
-    display: none;
-  }
 
   .callToAction {
     display: none;
@@ -206,8 +175,15 @@
     }
 
     .appStore {
+      width: calc(100% - 40px);
+      margin-inline: 20px;
       .callToActionIOS {
         display: flex;
+        .ctaTitle {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 24px;
+        }
       }
       >a {
         width: 188px;
@@ -216,11 +192,16 @@
     }
 
     .playStore {
-      margin-top: 77px;
+      width: calc(100% - 40px);
+      margin-top: 4px;
       margin-bottom: 250px;
-      width: 100% !important;
       .callToActionAndroid {
         display: flex;
+        .ctaTitle {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 24px;
+        }
       }
       >a {
         width: 188px;
