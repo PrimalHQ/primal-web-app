@@ -32,6 +32,7 @@ import {
   actions as tActions,
   search as tSearch,
 } from '../translations';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -923,11 +924,7 @@ const Messages: Component = () => {
         />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div>
-          {intl.formatMessage(tMessages.title)}
-        </div>
-      </div>
+      <PageCaption title={intl.formatMessage(tMessages.title)} />
 
       <div class={styles.messagesContent}>
 

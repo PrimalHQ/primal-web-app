@@ -21,3 +21,11 @@ export const uuidv4 = () => {
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
 }
+
+export const getPreConfiguredRelays = () => {
+  return 'ws://relay.primal.net';
+};
+
+export const titleCase = (text: string) => {
+  return text[0].toUpperCase() + text.slice(1).toLowerCase();
+}

@@ -14,14 +14,13 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { toast as t, explore as tExplore, actions as tAction } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
+import PageCaption from '../components/PageCaption/PageCaption';
+import { titleCase } from '../utils';
+import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
 const timeframes = ['latest', 'trending', 'popular', 'mostzapped'];
-
-const titleCase = (text: string) => {
-  return text[0].toUpperCase() + text.slice(1).toLowerCase();
-}
 
 const Explore: Component = () => {
 
@@ -77,42 +76,29 @@ const Explore: Component = () => {
           <Search />
         </Wormhole>
 
-        <div id="central_header" class={styles.fullHeader}>
-          <Show
-            when={hasParams()}
-            fallback={<div class={styles.exploreCaption}>
-              {intl.formatMessage(tExplore.genericCaption)}
-            </div>}
-          >
-              <div class={styles.exploreCaption}>
-                {intl.formatMessage(
-                  tExplore.title,
-                  {
-                    timeframe: timeframeLabels[params.timeframe],
-                    scope: scopeLabels[params.scope],
-                  },
-                )}
-              </div>
-              <div class={styles.addToFeed}>
-                <Show
-                  when={!hasFeedAtHome()}
-                  fallback={
-                    <div class={styles.noAdd}>
-                      {intl.formatMessage(tAction.disabledAddFeedToHome)}
-                    </div>
-                  }
-                >
-                  <button
-                    class={styles.addButton}
-                    onClick={addToHomeFeed}
-                  >
-                    <span>+</span>
-                    {intl.formatMessage(tAction.addFeedToHome)}
-                  </button>
-                </Show>
-              </div>
-          </Show>
-        </div>
+        <Show
+          when={hasParams()}
+          fallback={<PageCaption title={intl.formatMessage(tExplore.genericCaption)} />}
+        >
+          <PageCaption>
+            <div class={styles.exploreCaption}>
+              {intl.formatMessage(
+                tExplore.title,
+                {
+                  timeframe: timeframeLabels[params.timeframe],
+                  scope: scopeLabels[params.scope],
+                },
+              )}
+            </div>
+            <AddToHomeFeedButton
+              disabled={hasFeedAtHome()}
+              onAdd={addToHomeFeed}
+              activeLabel={intl.formatMessage(tAction.addFeedToHome)}
+              disabledLabel={intl.formatMessage(tAction.disabledAddFeedToHome)}
+            />
+          </PageCaption>
+
+        </Show>
 
         <StickySidebar>
           <ExploreSidebar />

@@ -26,6 +26,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { andRD, iosRD, today } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 const Downloads: Component = () => {
 
@@ -99,17 +100,14 @@ const Downloads: Component = () => {
         </div>
       </StickySidebar>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div>
-          {intl.formatMessage(t.title)}
-        </div>
-      </div>
+      <PageCaption title={intl.formatMessage(t.title)} />
 
       <div class={styles.promoHolder}>
         <video
-          controls={true}
-          muted={true}
-          autoplay={true}
+          controls
+          muted
+          autoplay
+          playsinline
           poster='/public/primal_mobile_poster.png'
           src='https://primal.b-cdn.net/media-cache?s=o&a=1&u=https%3A%2F%2Fmedia.primal.net%2Fuploads%2F9%2Fd6%2F91%2F9d691046b2b73d13e48ed08bf4b3fd64560bac40e5e6a1e4f65fd7d40cfcedee.mp4'
         />

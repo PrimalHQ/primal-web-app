@@ -13,6 +13,7 @@ import { settings as t } from '../translations';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import Modal from '../components/Modal/Modal';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 const Settings: Component = () => {
 
@@ -38,11 +39,8 @@ const Settings: Component = () => {
         <Search />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div>
-          {intl.formatMessage(t.title)}
-        </div>
-      </div>
+      <PageCaption title={intl.formatMessage(t.title)} />
+
       <div class={styles.settingsCaption}>
         {intl.formatMessage(t.theme)}
       </div>
