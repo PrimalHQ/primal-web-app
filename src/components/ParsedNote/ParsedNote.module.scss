@@ -88,3 +88,15 @@
 .error {
   color: var(--brand-1);
 }
+
+.imagesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.postLink {
+  text-decoration: none !important;
+  color: unset;
+  margin: 0px;
+}
