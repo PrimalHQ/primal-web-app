@@ -37,7 +37,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
   return (
     <A
       class={styles.postLink}
-      href={`/thread/${props.note?.post.noteId}`}
+      href={`/e/${props.note?.post.noteId}`}
       onClick={() => navToThread(props.note)}
       data-event={props.note.post.id}
       data-event-bech32={props.note.post.noteId}
@@ -46,7 +46,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
         <div class={styles.repostedBy}>
           <div class={styles.repostIcon}></div>
           <span>
-            <A href={`/profile/${repost()?.user.npub}`} >
+            <A href={`/p/${repost()?.user.npub}`} >
               {reposterName()}
             </A>
             <span>

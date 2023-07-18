@@ -18,7 +18,7 @@ const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) =>
         <For each={people()}>
           {
             (person) =>
-              <A href={`/profile/${person?.npub}`} class={styles.peopleList}>
+              <A href={`/p/${person?.npub}`} class={styles.peopleList}>
                 <div class={styles.avatar}>
                   <Avatar
                     src={person?.picture}

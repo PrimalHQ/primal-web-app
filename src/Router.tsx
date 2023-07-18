@@ -71,12 +71,14 @@ const Router: Component = () => {
           <Route path="/" element={<Navigate href="/home" />} />
           <Route path="/home" component={Home} />
           <Route path="/thread/:postId" component={Thread} />
+          <Route path="/e/:postId" component={Thread} />
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />
           <Route path="/settings" component={Settings} />
           <Route path="/profile/:npub?" component={Profile} />
+          <Route path="/p/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
           <Route path="/search/:query" component={Search} />
           <Route path="/rest" component={Explore} />

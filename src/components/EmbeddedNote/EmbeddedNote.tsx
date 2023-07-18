@@ -115,7 +115,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
     return (
       <A
-        href={`/thread/${noteId()}`}
+        href={`/e/${noteId()}`}
         class={styles.mentionedNote}
         onClick={() => navToThread()}
         data-event={props.note.post.id}

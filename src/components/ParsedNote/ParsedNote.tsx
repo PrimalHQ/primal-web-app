@@ -32,7 +32,7 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       const hex = typeof eventId === 'string' ? eventId : eventId.id;
       const noteId = nip19.noteEncode(hex);
 
-      const path = `/thread/${noteId}`;
+      const path = `/e/${noteId}`;
 
       const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
@@ -74,7 +74,7 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
       const npub = hexToNpub(hex);
 
-      const path = `/profile/${npub}`;
+      const path = `/p/${npub}`;
 
       const user = note.mentionedUsers && note.mentionedUsers[hex];
 

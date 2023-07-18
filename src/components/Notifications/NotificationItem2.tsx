@@ -126,7 +126,7 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
       <div class={styles.notifContent}>
         <div class={styles.avatars}>
           <A
-            href={`/profile/${user()?.npub}`} class={styles.avatar}
+            href={`/p/${user()?.npub}`} class={styles.avatar}
             title={userName(user())}
           >
             <Avatar src={user()?.picture} size="xs" />

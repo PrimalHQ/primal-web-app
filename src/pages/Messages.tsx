@@ -60,7 +60,7 @@ export const parseNoteLinks = (text: string, mentionedNotes: Record<string, Prim
     try {
       const note = mentionedNotes[id];
 
-      const path = `/thread/${id}`;
+      const path = `/e/${id}`;
 
       const link = highlightOnly ?
         <span class='linkish' >{url}</span> :
@@ -100,7 +100,7 @@ export const parseNpubLinks = (text: string, mentionedUsers: Record<string, Prim
 
       const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
       const npub = hexToNpub(hex);
-      const path = `/profile/${npub}`;
+      const path = `/p/${npub}`;
 
       const user = mentionedUsers[hex];
 
@@ -1069,7 +1069,7 @@ const Messages: Component = () => {
                     fallback={
                       <div class={styles.myThread}>
                         <A
-                          href={`/profile/${hexToNpub(thread.author)}`}
+                          href={`/p/${hexToNpub(thread.author)}`}
                           class={styles.avatar}
                         >
                           <Avatar src={account?.activeUser?.picture} size="xxs" />
@@ -1096,7 +1096,7 @@ const Messages: Component = () => {
                   >
                     <div class={styles.theirThread}>
                       <A
-                        href={`/profile/${hexToNpub(thread.author)}`}
+                        href={`/p/${hexToNpub(thread.author)}`}
                         class={styles.avatar}
                       >
                         <Avatar src={user(thread.author)?.picture} size="xxs" />

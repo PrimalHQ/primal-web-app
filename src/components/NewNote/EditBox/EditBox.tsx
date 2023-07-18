@@ -606,8 +606,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         const user = userRefs[userId];
 
         const link = user ?
-          <a href={`${window.location.origin}/profile/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}/profile/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
+          <a href={`${window.location.origin}/p/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
+          <a href={`${window.location.origin}/p/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
 
         // @ts-ignore
         return link.outerHTML || url;

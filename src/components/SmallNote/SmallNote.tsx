@@ -73,11 +73,11 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
   return (
     <div>
       <div class={styles.smallNote}>
-        <A href={`/profile/${props.note.user.npub}`} class={styles.avatar}>
+        <A href={`/p/${props.note.user.npub}`} class={styles.avatar}>
           <Avatar src={props.note.user?.picture} size="xxs" />
         </A>
         <A
-          href={`/thread/${props.note.post.noteId}`}
+          href={`/e/${props.note.post.noteId}`}
           class={styles.content}
           onClick={() => navToThread(props.note)}
         >

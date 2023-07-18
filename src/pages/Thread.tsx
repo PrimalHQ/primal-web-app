@@ -49,7 +49,7 @@ const Thread: Component = () => {
     note = threadContext?.notes.find(n => n.repost?.note.noteId === postId());
 
     // If reposted note found redirect to it's thread
-    note && navigate(`/thread/${note?.post.noteId}`)
+    note && navigate(`/e/${note?.post.noteId}`)
 
     return note;
   };

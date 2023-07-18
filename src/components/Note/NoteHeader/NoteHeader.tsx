@@ -38,7 +38,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
 
   const copyPrimalLink = (e: MouseEvent) => {
     e.preventDefault();
-    navigator.clipboard.writeText(`${window.location.origin}/thread/${props.note.post.noteId}`);
+    navigator.clipboard.writeText(`${window.location.origin}/e/${props.note.post.noteId}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
@@ -73,7 +73,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
             title={props.note?.user?.npub}
           >
             <A
-              href={`/profile/${props.note.user.npub}`}
+              href={`/p/${props.note.user.npub}`}
             >
               <Avatar
                 src={props.note?.user?.picture}
