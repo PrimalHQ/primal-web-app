@@ -22,22 +22,22 @@ export const closeRelays = async (relays: Relay[], success = () => {}, fail = ()
   }
 };
 
-const connectToRelay = (relay: Relay) => new Promise(
+const connectToRelay: (relay: Relay) => Promise<Relay> = (relay: Relay) => new Promise(
   (resolve, reject) => {
     const timeout = setTimeout(() => {
       relay.close();
       logError(relay, null, true);
-      reject();
+      reject(relay);
     }, relayConnectingTimeout);
 
     relay.connect()
       .then(() => {
         clearTimeout(timeout);
-        resolve(true);
+        resolve(relay);
       })
       .catch((e: any) => {
         logError(relay, e);
-        reject();
+        reject(relay);
       });
   },
 );
@@ -49,19 +49,28 @@ export const connectRelays = async (
 
   const urls = Object.keys(relaySettings);
   const relays = urls.map(u => relayInit(u));
-  const connected: Relay[] = [];
+  let promisses: Promise<Relay>[] = [];
 
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
 
     if (relay.status === WebSocket.CLOSED) {
       try {
-        await connectToRelay(relay);
-        connected.push(relay);
+        promisses.push(connectToRelay(relay));
       } catch(e){
         logError(relay, e);
       };
     }
   }
+
+  const result: PromiseSettledResult<Relay>[] = await Promise.allSettled(promisses);
+
+  const connected: Relay[] = result.reduce((acc, r) =>
+    r.status === 'fulfilled' ?
+      [...acc, r.value] :
+      [...acc],
+    [] as Relay[],
+  );
+
   onConnect(connected);
 };
