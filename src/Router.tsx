@@ -76,6 +76,7 @@ const Router: Component = () => {
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />
+          <Route path="/download" element={<Navigate href='/downloads' />} />;
           <Route path="/settings" component={Settings} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />
