@@ -272,6 +272,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }, 1000);
   });
 
+  onMount(() => {
+    const pubkey = localStorage.getItem('pubkey');
+    if (!pubkey) {
+      return;
+    }
+
+    const storage = getStorage(pubkey);
+
+    updateStore('relaySettings', () => ({ ...storage.relaySettings }));
+  });
+
   createEffect(() => {
     if (store.publicKey && store.publicKey !== noKey) {
 
@@ -304,9 +315,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     ) {
       setTimeout(() => {
         connectToRelays(store.relaySettings);
-      }, 2000);
+      }, 200);
     }
-  })
+  });
 
   createEffect(() => {
     if (isConnected()) {
