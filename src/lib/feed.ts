@@ -1,17 +1,17 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "nostr-tools";
-import { day, hour, noKey } from "../constants";
+import { day, hour } from "../constants";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
-  if (!pubkey || pubkey === noKey) {
+  if (!pubkey) {
     return;
   }
 
   let payload: { since: number, pubkey: string, user_pubkey?: string, limit: number } =
     { since, pubkey, limit: 1000 };
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -23,14 +23,14 @@ export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string | 
 };
 
 export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
-  if (!pubkey || pubkey === noKey) {
+  if (!pubkey) {
     return;
   }
   const start = until === 0 ? 'since' : 'until';
 
   let payload = { limit, [start]: until, pubkey };
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -46,7 +46,7 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
   let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =
     { event_ids: eventIds } ;
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -63,7 +63,7 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
 };
 
 export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, until = 0, limit = 20) => {
-  if (!pubkey || pubkey === noKey) {
+  if (!pubkey) {
     return;
   }
 
@@ -71,7 +71,7 @@ export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | un
 
   let payload = { pubkey, limit, notes: 'authored', [start]: until } ;
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -103,7 +103,7 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   let payload:  { user_pubkey?: string, limit: number, event_id: string, until?: number } =
     { event_id, limit: 100 } ;
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -125,7 +125,7 @@ export const getFutureExploreFeed = (
   let payload: { timeframe: string, scope: string, since: number, user_pubkey?: string, created_after?: number, limit: number } =
     { timeframe, scope, since, limit: 1000, };
 
-  if (user_pubkey && user_pubkey !== noKey) {
+  if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
@@ -168,7 +168,7 @@ export const getExploreFeed = (
 
   let payload: ExploreFeedPayload = { timeframe, scope, limit };
 
-  if (pubkey && pubkey !== noKey) {
+  if (pubkey) {
     payload.user_pubkey = pubkey;
   }
 

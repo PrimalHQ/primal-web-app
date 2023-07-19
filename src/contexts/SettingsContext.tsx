@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, noKey, defaultNotificationSettings, themes, trendingFeed } from "../constants";
+import { defaultFeeds, defaultNotificationSettings, themes, trendingFeed } from "../constants";
 import {
   createContext,
   createEffect,
@@ -308,7 +308,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const loadSettings = (pubkey: string | undefined) => {
-    if (!pubkey || pubkey === noKey) {
+    if (!pubkey) {
       return;
     }
 

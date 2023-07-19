@@ -1,4 +1,4 @@
-import { defaultFeeds, noKey } from "../constants";
+import { defaultFeeds } from "../constants";
 import { PrimalFeed } from "../types/primal";
 import { getStorage, saveFeeds } from "./localStore";
 

@@ -16,7 +16,7 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { Kind, noKey } from "../constants";
+import { Kind } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
 import { sendContacts, sendLike } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
@@ -66,11 +66,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   const setPublicKey = (pubkey: string | undefined) => {
     updateStore('publicKey', () => pubkey);
+    pubkey ? localStorage.setItem('pubkey', pubkey) : localStorage.removeItem('pubkey');
     updateStore('isKeyLookupDone', true);
   };
 
   const hasPublicKey: () => boolean = () => {
-    return !!store.publicKey && store.publicKey !== noKey;
+    return !!store.publicKey;
   };
 
   const setRelaySettings = (settings: NostrRelays) => {
@@ -132,13 +133,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
       else {
         setPublicKey(key);
-        localStorage.setItem('pubkey', key);
-        // getRelays();
         getUserProfiles([key], `user_profile_${APP_ID}`);
       }
     } catch (e: any) {
-      setPublicKey(noKey);
-      localStorage.setItem('pubkey', noKey);
+      setPublicKey(undefined);
+      localStorage.removeItem('pubkey');
       console.log('error fetching public key: ', e);
     }
   }
@@ -272,8 +271,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }, 1000);
   });
 
-  onMount(() => {
-    const pubkey = localStorage.getItem('pubkey');
+  createEffect(() => {
+    const pubkey = store.publicKey;
+
     if (!pubkey) {
       return;
     }
@@ -284,7 +284,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
-    if (store.publicKey && store.publicKey !== noKey) {
+    if (store.publicKey) {
 
       const storage = getStorage(store.publicKey);
 
@@ -308,16 +308,16 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   // If user has relays but none is connected, retry connecting after a delay
-  createEffect(() => {
-    if (
-      Object.keys(store.relaySettings).length > 0 &&
-      store.relays.length === 0
-    ) {
-      setTimeout(() => {
-        connectToRelays(store.relaySettings);
-      }, 200);
-    }
-  });
+  // createEffect(() => {
+  //   if (
+  //     Object.keys(store.relaySettings).length > 0 &&
+  //     store.relays.length === 0
+  //   ) {
+  //     setTimeout(() => {
+  //       connectToRelays(store.relaySettings);
+  //     }, 200);
+  //   }
+  // });
 
   createEffect(() => {
     if (isConnected()) {

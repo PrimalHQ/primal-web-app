@@ -30,6 +30,15 @@ const connectToRelay: (relay: Relay) => Promise<Relay> = (relay: Relay) => new P
       reject(relay);
     }, relayConnectingTimeout);
 
+    relay.on('connect', () => {
+      console.log('CONNECTED: ', relay);
+    })
+
+    relay.on('disconnect', () => {
+      console.log('DISCONNECTED', relay);
+      relay.connect();
+    })
+
     relay.connect()
       .then(() => {
         clearTimeout(timeout);

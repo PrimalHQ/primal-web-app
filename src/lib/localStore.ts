@@ -1,4 +1,3 @@
-import { noKey } from "../constants"
 import { NostrRelays, PrimalFeed } from "../types/primal";
 
 export type LocalStore = {
@@ -20,7 +19,7 @@ export const emptyStorage = {
 }
 
 export const storageName = (pubkey?: string) => {
-  if (!pubkey || pubkey === noKey) {
+  if (!pubkey) {
     return 'anon';
   }
 

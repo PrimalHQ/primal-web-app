@@ -1,6 +1,6 @@
 // @ts-ignore Bad types in nostr-tools
 import { Relay, Event } from "nostr-tools";
-import { Kind, minKnownProfiles, noKey } from "../constants";
+import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrWindow, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
@@ -13,9 +13,9 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
   ]));
 }
 
-export const getUserProfileInfo = (pubkey: string, subid: string) => {
-  if (pubkey === noKey) {
-    return
+export const getUserProfileInfo = (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) {
+    return;
   }
   sendMessage(JSON.stringify([
     "REQ",
@@ -24,9 +24,9 @@ export const getUserProfileInfo = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const getProfileContactList = (pubkey: string, subid: string) => {
-  if (pubkey === noKey) {
-    return
+export const getProfileContactList = (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) {
+    return;
   }
 
   sendMessage(JSON.stringify([
@@ -36,7 +36,11 @@ export const getProfileContactList = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const getProfileScoredNotes = (pubkey: string, subid: string, limit = 5) => {
+export const getProfileScoredNotes = (pubkey: string | undefined, subid: string, limit = 5) => {
+  if (!pubkey) {
+    return;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -61,8 +65,8 @@ export const trimVerification = (address: string | undefined) => {
   return address.split('@');
 }
 
-export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: string[]) => void) => {
-  if (pubkey === noKey) {
+export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: (likes: string[]) => void) => {
+  if (!pubkey) {
     return;
   }
 
@@ -91,7 +95,7 @@ export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: stri
       ]);
 
       sub.on('event', (event: Event) => {
-        const e = event.tags.find(t => t[0] === 'e');
+        const e = event.tags.find((t: string[]) => t[0] === 'e');
 
         e && e[1] && likes.add(e[1]);
       })
