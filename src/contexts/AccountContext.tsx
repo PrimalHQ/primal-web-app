@@ -16,7 +16,7 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { Kind } from "../constants";
+import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
 import { sendContacts, sendLike } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
@@ -24,7 +24,7 @@ import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
-import { closeRelays, connectRelays } from "../lib/relays";
+import { closeRelays, connectRelays, getPreConfiguredRelays } from "../lib/relays";
 
 export type AccountContextStore = {
   likes: string[],
@@ -79,24 +79,33 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     saveRelaySettings(store.publicKey, settings)
   }
 
+  const attachDefaultRelays = (relaySettings: NostrRelays) => {
+    const defaultRelays = getPreConfiguredRelays();
+
+    return { ...relaySettings, ...defaultRelays };
+
+  };
+
   let connecting = false;
 
   const connectToRelays = (relaySettings: NostrRelays) => {
 
     if (connecting) {
+      setTimeout(() => { connectToRelays(relaySettings) }, relayConnectingTimeout);
       return;
     }
 
-    connecting = true;
+    connecting = true
+
+    const relaysToConnect = attachDefaultRelays(relaySettings);
 
     closeRelays(store.relays,
       () => {
-        connectRelays(relaySettings, (connected) => {
+        connectRelays(relaysToConnect, (connected) => {
           updateStore('relays', () => [ ...connected ]);
           console.log('Connected relays: ', connected);
           connecting = false;
         });
-
       },
       () => {
         console.log('Failed to close all relays');
@@ -329,9 +338,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
-    if (Object.keys(store.relaySettings).length > 0) {
-      connectToRelays(store.relaySettings);
-    }
+    connectToRelays(store.relaySettings);
   });
 
   onCleanup(() => {

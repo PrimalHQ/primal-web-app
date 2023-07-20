@@ -83,3 +83,13 @@ export const connectRelays = async (
 
   onConnect(connected);
 };
+
+export const getPreConfiguredRelays = () => {
+  const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+  return rels.reduce(
+    (acc: NostrRelays, r: string) =>
+      ({ ...acc, [r]: { read: true, write: true } }),
+    {},
+  );
+};
