@@ -33,9 +33,7 @@ const Settings: Component = () => {
         <Branding small={false} />
       </Wormhole>
 
-      <Wormhole
-        to="search_section"
-      >
+      <Wormhole to="search_section">
         <Search />
       </Wormhole>
 

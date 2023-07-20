@@ -266,6 +266,24 @@ export const feedback = {
   },
 };
 
+export const home = {
+  trending: {
+    id: 'home.sidebar.caption.trending',
+    defaultMessage: 'Trending',
+    description: 'Caption for the home page sidebar showing a list of trending notes',
+  },
+  mostZapped: {
+    id: 'home.sidebar.caption.mostzapped',
+    defaultMessage: 'Most Zapped',
+    description: 'Caption for the home page sidebar showing a list of most zapped notes',
+  },
+  zapPostfix: {
+    id: 'home.sidebar.note.zaps',
+    defaultMessage: '{zaps} zaps, {sats} sats',
+    description: 'Zaps data for a small note on home sidebar',
+  },
+};
+
 export const messages = {
   title: {
     id: 'messages.title',

@@ -201,9 +201,7 @@ const Profile: Component = () => {
         <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
       </StickySidebar>
 
-      <Wormhole
-        to="search_section"
-      >
+      <Wormhole to='search_section'>
         <Search />
       </Wormhole>
 
