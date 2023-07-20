@@ -169,7 +169,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return false;
     }
 
-    const { success } = await sendLike(note, store.relays);
+    const { success } = await sendLike(note, store.relays, store.relaySettings);
 
     if (success) {
       updateStore('likes', (likes) => [ ...likes, note.post.id]);
@@ -207,7 +207,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           const date = Math.floor((new Date()).getTime() / 1000);
           const following = [...store.following, pubkey];
 
-          const { success } = await sendContacts(following, date, relayInfo, store.relays);
+          const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('following', () => following);
@@ -245,7 +245,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           const date = Math.floor((new Date()).getTime() / 1000);
           const following = store.following.filter(f => f !== pubkey);
 
-          const { success } = await sendContacts(following, date, relayInfo, store.relays);
+          const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('following', () => following);

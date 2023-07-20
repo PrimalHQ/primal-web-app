@@ -3,7 +3,7 @@ import { getLinkPreview } from "link-preview-js";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
-import { NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
+import { NostrRelays, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl } from "./media";
 
 const getLikesStorageKey = () => {
@@ -223,7 +223,7 @@ export const parseNote3 = (content: string) => urlify(addlineBreaks(content), fa
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
-export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
+export const sendLike = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
@@ -234,11 +234,11 @@ export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 
 }
 
-export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
+export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -249,10 +249,10 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 }
 
-export const sendNote = async (text: string, relays: Relay[], tags: string[][]) => {
+export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const event = {
     content: text,
     kind: Kind.Text,
@@ -260,10 +260,10 @@ export const sendNote = async (text: string, relays: Relay[], tags: string[][]) 
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 }
 
-export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[]) => {
+export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.Contacts,
@@ -271,10 +271,10 @@ export const sendContacts = async (contacts: string[], date: number, content: st
     created_at: date,
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 };
 
-export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
+export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
   const win = window as NostrWindow;
   const nostr = win.nostr;
 
@@ -290,6 +290,12 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
   for (let i = 0;i < relays.length;i++) {
     const relay = relays[i];
 
+    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+
+    if (!settings.write) {
+      continue;
+    }
+
     responses.push(new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
         console.log(`Publishing post to ${relay.url} has timed out`);
@@ -299,7 +305,6 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
 
       try {
         let pub = relay.publish(signedNote);
-
 
         console.log('publishing to relay: ', relay)
 

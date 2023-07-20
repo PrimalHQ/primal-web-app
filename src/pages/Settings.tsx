@@ -1,4 +1,4 @@
-import { Component, createSignal, Show } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import styles from './Settings.module.scss';
 
@@ -11,7 +11,6 @@ import Search from '../components/Search/Search';
 import SettingsNotifications from '../components/SettingsNotifications/SettingsNotifications';
 import { settings as t } from '../translations';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import Modal from '../components/Modal/Modal';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import PageCaption from '../components/PageCaption/PageCaption';
 

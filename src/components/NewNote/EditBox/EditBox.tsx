@@ -454,12 +454,12 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
-    if (Object.keys(account.relaySettings).length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(tToast.noRelays),
-      );
-      return;
-    }
+    // if (Object.keys(account.relaySettings).length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(tToast.noRelays),
+    //   );
+    //   return;
+    // }
 
     if (account.relays.length === 0) {
       toast?.sendWarning(
@@ -491,7 +491,7 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         tags.push(['p', props.replyToNote.post.pubkey]);
       }
 
-      const { success, reasons } = await sendNote(messageToSend, account.relays, tags);
+      const { success, reasons } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
 
       if (success) {
         toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));

@@ -61,7 +61,7 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       return;
     }
 
-    const { success } = await sendRepost(props.note, account.relays);
+    const { success } = await sendRepost(props.note, account.relays, account.relaySettings);
 
     if (success) {
       setReposts(reposts() + 1);
