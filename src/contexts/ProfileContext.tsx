@@ -267,8 +267,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
-      getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
       getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
+      setTimeout(() => {
+        getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
+      }, 100);
     }
   }
 

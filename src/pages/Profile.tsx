@@ -75,31 +75,10 @@ const Profile: Component = () => {
   }
 
   const setProfile = (hex: string | undefined) => {
-    // if (hex === profile?.profileKey) {
-    //   return;
-    // }
-
     profile?.actions.setProfileKey(hex);
     profile?.actions.clearNotes();
     profile?.actions.fetchNotes(hex);
   }
-
-  // const react = createReaction(() => {
-  //   setProfile(getHex());
-  // });
-
-  // onMount(() => {
-  //   // If connection doesn't exist at mount time,
-  //   // create a one-time reaction, when connection is established
-  //   // to fetch profile data.
-  //   if (!isConnected()) {
-  //     react(() => isConnected());
-  //     return;
-  //   }
-
-  //   // Otherwise, fetch profile data.
-  //   setProfile(getHex());
-  // });
 
   createEffect(() => {
     if (account?.isKeyLookupDone) {
