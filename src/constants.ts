@@ -122,7 +122,7 @@ export enum Kind  {
   Uploaded = 10_000_121,
 }
 
-export const relayConnectingTimeout = 5000;
+export const relayConnectingTimeout = 1000;
 
 export enum NotificationType {
   NEW_USER_FOLLOWED_YOU = 1,//
