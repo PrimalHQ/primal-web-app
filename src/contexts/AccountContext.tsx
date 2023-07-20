@@ -25,6 +25,7 @@ import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
 import { closeRelays, connectRelays, getPreConfiguredRelays } from "../lib/relays";
+import { account } from "../translations";
 
 export type AccountContextStore = {
   likes: string[],
