@@ -13,6 +13,7 @@ import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
 import { convertToNotes } from '../../stores/note';
 import { useProfileContext } from '../../contexts/ProfileContext';
+import { refreshFeedDelay } from '../../constants';
 
 
 const Layout: Component = () => {
@@ -63,7 +64,7 @@ const Layout: Component = () => {
       // check for new notes on the home feed
       setTimeout(() => {
         home.actions.checkForNewNotes(home.selectedFeed?.hex)
-      }, 2000);
+      }, refreshFeedDelay);
       return;
     }
 
@@ -72,7 +73,7 @@ const Layout: Component = () => {
       // check for new notes on the profile feed
       setTimeout(() => {
         profile.actions.checkForNewNotes(pubkey || account?.publicKey)
-      }, 2000);
+      }, refreshFeedDelay);
       return;
     }
   }

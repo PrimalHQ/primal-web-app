@@ -1,8 +1,8 @@
-import { Component, createEffect, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useNavigate, useParams } from '@solidjs/router';
-import { PrimalNote } from '../types/primal';
+import { PrimalNote, SendNoteResult } from '../types/primal';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
@@ -18,6 +18,7 @@ import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { thread as t } from '../translations';
+import { refreshFeedDelay } from '../constants';
 
 
 const Thread: Component = () => {
@@ -36,7 +37,7 @@ const Thread: Component = () => {
 
   const threadContext = useThreadContext();
 
-  const primaryNote = () => {
+  const primaryNote = createMemo(() => {
 
     let note = threadContext?.notes.find(n => n.post.noteId === postId());
 
@@ -52,7 +53,7 @@ const Thread: Component = () => {
     note && navigate(`/e/${note?.post.noteId}`)
 
     return note;
-  };
+  });
 
   const parentNotes = () => {
     const note = primaryNote();
@@ -118,6 +119,13 @@ const Thread: Component = () => {
     pn && observer?.unobserve(pn);
   });
 
+
+  const onNotePosted = (note: SendNoteResult) => {
+    setTimeout(() => {
+      threadContext?.actions.fetchNotes(postId());
+    }, refreshFeedDelay);
+  };
+
   return (
     <div>
       <Wormhole to='branding_holder'>
@@ -156,16 +164,15 @@ const Thread: Component = () => {
               note={primaryNote() as PrimalNote}
             />
             <Show when={account?.hasPublicKey()}>
-              <ReplyToNote note={primaryNote() as PrimalNote} />
+              <ReplyToNote
+                note={primaryNote() as PrimalNote}
+                onNotePosted={onNotePosted}
+              />
             </Show>
           </div>
         </Show>
 
         <div class={styles.repliesHolder}>
-          <Show
-            when={!isFetching()}
-            fallback={<div class={styles.noContent}><Loader /></div>}
-          >
             <For each={replyNotes()}>
               {note =>
                 <div class={styles.threadList}>
@@ -173,7 +180,6 @@ const Thread: Component = () => {
                 </div>
               }
             </For>
-          </Show>
         </div>
       </Show>
 

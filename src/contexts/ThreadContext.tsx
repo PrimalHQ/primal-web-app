@@ -51,6 +51,7 @@ export type ThreadContextStore = {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
     fetchNotes: (noteId: string, until?: number) => void,
+    updateNotes: (noteId: string, until?: number) => void,
     fetchNextPage: () => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
@@ -87,7 +88,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 // ACTIONS --------------------------------------
 
   const saveNotes = (newNotes: PrimalNote[]) => {
-    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
+    const oldNotesIds = store.notes.map(n => n.post.id);
+    const reallyNewNotes = newNotes.filter(n => !oldNotesIds.includes(n.post.id));
+
+    updateStore('notes', (notes) => [ ...notes, ...reallyNewNotes ]);
     updateStore('isFetching', () => false);
   };
 
@@ -96,6 +100,11 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     updateStore('noteId', noteId)
     getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
     updateStore('isFetching', () => true);
+  }
+
+  const updateNotes = (noteId: string, until = 0, limit = 100) => {
+    getThread(account?.publicKey, noteId, `thread_${APP_ID}`, until, limit);
+    // updateStore('isFetching', () => true);
   }
 
   const clearNotes = () => {
@@ -297,6 +306,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     actions: {
       saveNotes,
       fetchNotes,
+      updateNotes,
       clearNotes,
       fetchNextPage,
       updatePage,
