@@ -24,6 +24,18 @@ export const getUserProfileInfo = (pubkey: string | undefined, subid: string) =>
   ]));
 }
 
+export const isUserFollowing = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string) => {
+  if (!pubkey || !user_pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["is_user_following", { pubkey, user_pubkey }]},
+  ]));
+};
+
 export const getProfileContactList = (pubkey: string | undefined, subid: string) => {
   if (!pubkey) {
     return;

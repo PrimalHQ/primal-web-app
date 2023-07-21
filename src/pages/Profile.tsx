@@ -155,7 +155,7 @@ const Profile: Component = () => {
   }
 
   const isFollowingYou = () => {
-    return account?.publicKey && profile?.following.includes(account.publicKey);
+    return profile?.isProfileFollowing;
   }
 
   const [isBannerCached, setisBannerCached] = createSignal(false);

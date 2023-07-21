@@ -52,11 +52,6 @@ const Layout: Component = () => {
     window.removeEventListener('resize', onResize);
   });
 
-  createEffect(() => {
-    const path = location.pathname.split('/');
-    console.log('ROUTE: ', path)
-  })
-
   const onNewNotePosted = (note: SendNoteResult) => {
     const path = location.pathname.split('/');
 

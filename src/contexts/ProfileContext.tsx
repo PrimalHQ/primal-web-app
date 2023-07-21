@@ -37,6 +37,7 @@ import {
   getProfileContactList,
   getProfileScoredNotes,
   getUserProfileInfo,
+  isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
 
@@ -56,6 +57,7 @@ export type ProfileContextStore = {
     page: FeedPage,
     reposts: Record<string, string> | undefined,
   },
+  isProfileFollowing: boolean,
   isFetching: boolean,
   page: FeedPage,
   reposts: Record<string, string> | undefined,
@@ -89,6 +91,7 @@ export const initialData = {
   knownProfiles: { names: {} },
   notes: [],
   isFetching: false,
+  isProfileFollowing: false,
   page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
   lastNote: undefined,
@@ -194,8 +197,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const checkForNewNotes = (pubkey: string | undefined) => {
-
-    console.log('CHECKING FOR NEW NOTES ', pubkey);
 
     if (store.future.notes.length > 100) {
       return;
@@ -383,9 +384,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
-      setTimeout(() => {
-        getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
-      }, 100);
+
+      isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
+
+      // setTimeout(() => {
+      //   getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
+      // }, 100);
     }
   }
 
@@ -491,6 +495,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         updateStore('following', () => contacts);
       }
       return;
+    }
+
+    if (subId === `is_profile_following_${APP_ID}`) {
+      if (type === 'EVENT') {
+        updateStore('isProfileFollowing', JSON.parse(content?.content || 'false'))
+        return;
+      }
     }
 
     if (subId === `profile_scored_${APP_ID}`) {
