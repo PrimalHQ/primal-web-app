@@ -24,7 +24,7 @@ import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
-import { closeRelays, connectRelays, getPreConfiguredRelays } from "../lib/relays";
+import { closeRelays, connectRelays, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { account } from "../translations";
 
 export type AccountContextStore = {
@@ -96,10 +96,13 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
-    connecting = true
+    connecting = true;
+
+    if (Object.keys(relaySettings).length === 0) {
+      getDefaultRelays(`default_relays_${APP_ID}`)
+    }
 
     const relaysToConnect = attachDefaultRelays(relaySettings);
-
     closeRelays(store.relays,
       () => {
         connectRelays(relaysToConnect, (connected) => {
@@ -386,6 +389,18 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         updateContacts(content);
       }
       return;
+    }
+
+    if (subId === `default_relays_${APP_ID}`) {
+      if (type === 'EVENT') {
+        const resp = JSON.parse(content.content || '[]');
+
+        const relaySettings = resp.reduce((acc, r) => ({ ...acc, [r]: { read: true, write: true }}), {});
+
+        if (Object.keys(relaySettings).length > 0) {
+          connectToRelays(relaySettings);
+        }
+      }
     }
 
   };

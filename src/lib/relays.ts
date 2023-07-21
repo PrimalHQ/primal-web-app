@@ -1,7 +1,16 @@
 // @ts-ignore Bad types in nostr-tools
 import { relayInit, Relay } from "nostr-tools";
 import { relayConnectingTimeout } from "../constants";
+import { sendMessage } from "../sockets";
 import { NostrRelays } from "../types/primal";
+
+const attemptLimit = 6;
+
+let reconnAttempts: Record<string, number> = {};
+
+const attemptDelay = (attempt: number) => {
+  return 100 + attempt * 500;
+}
 
 const logError = (relay: Relay, e: any, timedOut?: boolean) => {
   const message = timedOut ?
@@ -31,12 +40,29 @@ const connectToRelay: (relay: Relay) => Promise<Relay> = (relay: Relay) => new P
     }, relayConnectingTimeout);
 
     relay.on('connect', () => {
-      console.log('CONNECTED: ', relay);
+      console.log('CONNECTED ', relay.url);
+      if (!reconnAttempts[relay.url]) {
+        reconnAttempts[relay.url] = 0
+      }
     })
 
     relay.on('disconnect', () => {
-      console.log('DISCONNECTED', relay);
-      relay.connect();
+      console.log('DISCONNECTED ', relay.url);
+      const attempt = reconnAttempts[relay.url];
+
+      if (attempt === attemptLimit) {
+        console.log('ATTEMPT LIMIT REACHED ', relay.url);
+        return;
+      }
+
+      const delay = attemptDelay(attempt);
+
+      console.log('RECONNECTING TO ', relay.url, ' IN ', delay, 'ms');
+
+      setTimeout(() => {
+        reconnAttempts[relay.url]++;
+        relay.connect();
+      }, delay);
     })
 
     relay.connect()
@@ -92,4 +118,12 @@ export const getPreConfiguredRelays = () => {
       ({ ...acc, [r]: { read: true, write: true } }),
     {},
   );
+};
+
+export const getDefaultRelays = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_default_relays"]},
+  ]))
 };
