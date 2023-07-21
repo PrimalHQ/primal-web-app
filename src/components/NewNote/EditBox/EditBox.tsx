@@ -14,7 +14,7 @@ import { subscribeTo } from "../../../sockets";
 import { subscribeTo as uploadSub } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -38,7 +38,12 @@ import {
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 
-const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPrefix?: string } > = (props) => {
+const EditBox: Component<{
+  replyToNote?: PrimalNote,
+  onClose?: () => void,
+  onSuccess?: (note: SendNoteResult) => void,
+  idPrefix?: string
+} > = (props) => {
 
   const intl = useIntl();
 
@@ -491,10 +496,11 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         tags.push(['p', props.replyToNote.post.pubkey]);
       }
 
-      const { success, reasons } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
+      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
 
       if (success) {
         toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+        props.onSuccess && props.onSuccess(note);
         closeEditor();
         return;
       }

@@ -133,20 +133,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         store.notes[0].post.created_at;
     }
 
-    // if (store.future.notes[0]) {
-    //   since = store.future.notes[0].post.created_at;
-    // }
-
     clearFuture();
 
 
     if (scope && timeframe) {
-
-      // if (scope === 'search') {
-      //   searchFutureContent(`home_future_${APP_ID}`, decodeURI(timeframe), since);
-      //   return;
-      // }
-
       getFutureExploreFeed(
         account?.publicKey,
         `home_future_${APP_ID}`,

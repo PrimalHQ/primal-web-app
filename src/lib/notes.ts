@@ -279,7 +279,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   const nostr = win.nostr;
 
   if (nostr === undefined) {
-    return { success: false , reasons: ['no_extension']};
+    return { success: false , reasons: ['no_extension']} as SendNoteResult;
   }
 
   const signedNote = await nostr.signEvent(event);
@@ -333,10 +333,10 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   try {
     await Promise.any(responses);
 
-    return { success: true } as SendNoteResult;
+    return { success: true, note: signedNote } as SendNoteResult;
   }
   catch (e) {
     console.log('ERROR PUBLISHING POST: ', e);
-    return { success: false, reasons} as SendNoteResult;
+    return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
 }

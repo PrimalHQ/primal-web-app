@@ -82,7 +82,31 @@ export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | un
   ]));
 }
 
-export const getThread = (user_pubkey: string | undefined, postId: string, subid: string, until = 0, limit = 20) => {
+export const getFutureUserFeed = (
+  user_pubkey: string | undefined,
+  pubkey: string | undefined,
+  subid: string,
+  since: number,
+  ) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload: { pubkey: string, since: number, notes: string, user_pubkey?: string, created_after?: number, limit: number } =
+    { pubkey, since, notes: 'authored', limit: 1000, };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["feed", payload]},
+  ]));
+};
+
+export const getThread = (user_pubkey: string | undefined, postId: string, subid: string, until = 0, limit = 100) => {
 
   const decoded = nip19.decode(postId).data;
   let event_id = '';
@@ -101,7 +125,7 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   }
 
   let payload:  { user_pubkey?: string, limit: number, event_id: string, until?: number } =
-    { event_id, limit: 100 } ;
+    { event_id, limit } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;

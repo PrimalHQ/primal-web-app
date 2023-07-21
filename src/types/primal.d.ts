@@ -519,4 +519,5 @@ export type ScopeDescriptor = {
 export type SendNoteResult = {
   success: boolean,
   reasons?: string[],
+  note?: NostrRelaySignedEvent,
 };

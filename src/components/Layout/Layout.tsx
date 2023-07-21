@@ -2,18 +2,26 @@ import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import { Outlet } from '@solidjs/router';
+import { Outlet, useLocation, useParams } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
 import zapSM from '../../assets/lottie/zap_sm.json';
 import zapMD from '../../assets/lottie/zap_md.json';
+import { useHomeContext } from '../../contexts/HomeContext';
+import { SendNoteResult } from '../../types/primal';
+import { convertToNotes } from '../../stores/note';
+import { useProfileContext } from '../../contexts/ProfileContext';
 
 
 const Layout: Component = () => {
 
   const account = useAccountContext();
+  const home = useHomeContext();
+  const profile = useProfileContext();
+  const location = useLocation();
+  const params = useParams();
 
   let container: HTMLDivElement | undefined;
 
@@ -42,6 +50,32 @@ const Layout: Component = () => {
   onCleanup(() => {
     window.removeEventListener('resize', onResize);
   });
+
+  createEffect(() => {
+    const path = location.pathname.split('/');
+    console.log('ROUTE: ', path)
+  })
+
+  const onNewNotePosted = (note: SendNoteResult) => {
+    const path = location.pathname.split('/');
+
+    if (path[1] === 'home' && home) {
+      // check for new notes on the home feed
+      setTimeout(() => {
+        home.actions.checkForNewNotes(home.selectedFeed?.hex)
+      }, 2000);
+      return;
+    }
+
+    if (['p', 'profile'].includes(path[1]) && profile) {
+      const pubkey = params.npub;
+      // check for new notes on the profile feed
+      setTimeout(() => {
+        profile.actions.checkForNewNotes(pubkey || account?.publicKey)
+      }, 2000);
+      return;
+    }
+  }
 
   return (
     <>
@@ -84,7 +118,7 @@ const Layout: Component = () => {
         <div class={styles.centerColumn}>
           <div class={styles.centerContent}>
             <div id="new_note_input" class={styles.headerFloater}>
-              <NewNote />
+              <NewNote onSuccess={onNewNotePosted}/>
             </div>
 
             <div>
