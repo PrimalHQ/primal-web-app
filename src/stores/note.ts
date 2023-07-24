@@ -137,7 +137,15 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
-    const userMeta = JSON.parse(user?.content || '{}');
+    let userMeta: any = {};
+
+    try {
+      userMeta = JSON.parse(user?.content || '{}');
+    } catch (e) {
+      console.log('Error in user meta JSON: ', e);
+      userMeta = {};
+    }
+
 
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);

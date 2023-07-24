@@ -16,7 +16,15 @@ export const truncateName = (name: string, limit = 20) => {
 };
 
 export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
-  const userMeta = JSON.parse(user.content || '{}');
+
+  let userMeta: any = {};
+
+  try {
+    userMeta = JSON.parse(user.content || '{}');
+  } catch (e) {
+    console.log('Error in user meta JSON: ', e);
+    userMeta = {};
+  }
 
   return {
     id: user.id,
