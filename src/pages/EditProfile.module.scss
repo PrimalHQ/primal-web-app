@@ -1,0 +1,421 @@
+.container {
+  // background-color: var(--background-card);
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.fullHeader {
+  position: relative;
+  // background-color: var(--background-card);
+  padding-bottom: 20px;
+}
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: 214px;
+
+  .uploadingOverlay {
+    position: absolute;
+    width: 100%;
+    height: 214px;
+    background-color: var(--background-card);
+    z-index: 1;
+    opacity: 0.6;
+  }
+
+  >label {
+    position: relative;
+    cursor: pointer;
+
+    >img {
+      width: 100%;
+      height: 214px;
+      object-fit: cover;
+    }
+
+    >div {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--background-card);
+      color: var(--text-primary);
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+    }
+
+    &:hover {
+      >div {
+        opacity: 0.8;
+        transition: opacity 0.25s ease-in;
+      }
+    }
+  }
+}
+
+.userImage {
+  position: absolute;
+  top: 148px;
+  left: 15px;
+  z-index: 2;
+
+  .avatar {
+    border: solid 4px var(--background-card);
+    border-radius: 50%;
+    background-color: var(--background-card);
+
+    .uploadingOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background-color: var(--background-card);
+      z-index: 3;
+      opacity: 0.6;
+    }
+  }
+
+}
+
+.phoneAvatar {
+  display: none;
+}
+
+.desktopAvatar {
+  position: relative;
+  display: block;
+
+  .uploadAction {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+  }
+
+  &:hover {
+    .uploadAction {
+      opacity: 0.8;
+      transition: opacity 0.25s ease-in;
+    }
+  }
+}
+
+.uploadActions {
+  display: flex;
+  justify-content: flex-end;
+
+  .separator {
+    width: 1px;
+    height: 20px;
+    margin-block: 28px;
+    background-color: var(--subtile-devider);
+  }
+
+  .uploadButton {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--accent-1);
+    width: auto;
+    padding: 0;
+    margin-block: 28px;
+    margin-inline: 10px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    text-transform: lowercase;
+
+    >label {
+      cursor: pointer;
+    }
+  }
+}
+
+form {
+  .inputLabel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    label {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 22px;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .required {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 22px;
+      color: var(--text-tertiary-2);
+
+      .star {
+        color: var(--warning-color);
+        font-weight: 600;
+        margin-right: 2PX;
+      }
+    }
+  }
+
+  input, textarea {
+    border: none;
+    border-radius: 8px;
+    background: var(--background-card);
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 20px;
+    padding-block: 14px;
+    padding-inline: 19px;
+    width: 100%;
+    margin-bottom: 16px;
+
+    &:focus {
+      outline: none;
+      border: none;
+      box-shadow: none;
+    }
+
+    &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: var(--text-tertiary-2);
+      opacity: 1; /* Firefox */
+    }
+
+    &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+      color: var(--text-tertiary-2);
+    }
+
+    &::-ms-input-placeholder { /* Microsoft Edge */
+      color: var(--text-tertiary-2);
+    }
+  }
+
+  .inputWithPrefix {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing);
+    .inputPrefix {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+      height: 59px;
+      color: var(--text-tertiary-2);
+      padding-left: 19px;
+      border-radius: 8px 0px 0px 8px;
+      background: var(--background-card);
+    }
+
+    >input {
+      margin-bottom: 0;
+      padding-left: 8px;
+      border-radius: 0px 8px 8px 0px;
+    }
+  }
+}
+
+@media only screen and (max-width: 720px) {
+
+  .banner {
+    width: 100%;
+    height: 125px;
+
+    >label {
+      >img {
+        width: 100%;
+        height: 125px;
+        object-fit: cover;
+      }
+    }
+  }
+
+  .userImage {
+    position: absolute;
+    top: 96px;
+    left: 15px;
+  }
+
+  .phoneAvatar {
+    display: block;
+    position: relative;
+
+    .uploadAction {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--background-card);
+      color: var(--text-primary);
+      text-align: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+    }
+
+    &:hover {
+      .uploadAction {
+        opacity: 0.8;
+        transition: opacity 0.25s ease-in;
+      }
+    }
+  }
+  .desktopAvatar {
+    display: none;
+  }
+}
+
+.cacheFlag {
+  img {
+    border: 1px solid red;
+  }
+}
+
+.horizontalSeparator {
+  width: 100%;
+  height: 1px;
+  margin-block: 16px;
+  background-color: var(--subtile-devider);
+}
+
+.moreTrigger {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--subtile-devider);
+  padding-block: 16px;
+
+
+  button {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--accent-1);
+    width: auto;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    text-transform: capitalize;
+    margin: 0;
+
+    &.hidden {
+      &::after {
+        border-style: solid;
+        border-width: 0.1em 0.1em 0 0;
+        content: '';
+        display: inline-block;
+        height: 6px;
+        width: 6px;
+        margin-top: 4px;
+        margin-left: 4px;
+        position: relative;
+        transform: rotate(-220deg);
+        vertical-align: top;
+      }
+    }
+
+    &.shown {
+      &::after {
+      border-style: solid;
+      border-width: 0.1em 0.1em 0 0;
+      content: '';
+      display: inline-block;
+      height: 6px;
+      width: 6px;
+      margin-top: 8px;
+      margin-left: 4px;
+      position: relative;
+      transform: rotate(-45deg);
+      vertical-align: top;
+    }
+    }
+  }
+}
+
+.moreInputs {
+  overflow: hidden;
+  &.hide {
+    max-height: 0;
+    transition: max-height 0.25s ease-out;
+  }
+  &.show {
+    max-height: 210px;
+    transition: max-height 0.25s ease-in;
+  }
+}
+
+.formSubmit {
+  display: flex;
+  justify-content: flex-start;
+
+  button {
+    width: 80px;
+    height: 28px;
+    margin: 0px 16px 11px 0px;
+
+    &.primaryButton {
+      border: none;
+      border-radius: 6px;
+      padding: 0px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      background: var(--brand-gradient-vertical);
+      color: var(--text-primary);
+      >span {
+        opacity: 0.75;
+      }
+    }
+
+    &.secondaryButton {
+      border: none;
+      border-radius: 6px;
+      padding: 1px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      background: var(--brand-gradient-vertical);
+      color: var(--text-tertiary-2);
+      >div {
+        width: 100%;
+        height: 100%;
+        vertical-align: middle;
+        border-radius: 6px;
+        background-color: var(--background-card);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+}

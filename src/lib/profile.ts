@@ -2,8 +2,9 @@
 import { Relay, Event } from "nostr-tools";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow, VanityProfiles } from "../types/primal";
+import { NostrRelays, NostrWindow, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
+import { sendEvent } from "./notes";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
@@ -137,4 +138,16 @@ export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles>
 
     return { ...minKnownProfiles };
   }
+};
+
+
+export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: JSON.stringify(metaData),
+    kind: Kind.Metadata,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings);
 };

@@ -71,6 +71,11 @@ export const actions = {
     defaultMessage: 'send',
     description: 'Send direct message action, button label',
   },
+  save: {
+    id: 'actions.save',
+    defaultMessage: 'save',
+    description: 'Save changes action label',
+  },
 };
 
 export const branding = {
@@ -738,7 +743,125 @@ export const settings = {
       defaultMessage: 'A post your post was mentioned in was:',
       description: 'Title of the notification settings sub-section for posts your post was mentioned in',
     },
-  }
+  },
+  profile: {
+    title: {
+      id: 'pages.settings.profile.title',
+      defaultMessage: 'Edit Profile',
+      description: 'Title of the edit profile page',
+    },
+    uploadAvatar: {
+      id: 'pages.settings.profile.uploadAvatar',
+      defaultMessage: 'Upload Avatar',
+      description: 'Label for avatar upload on edit profile page',
+    },
+    uploadBanner: {
+      id: 'pages.settings.profile.uploadBanner',
+      defaultMessage: 'Upload Banner',
+      description: 'Label for banner upload on edit profile page',
+    },
+    displayName: {
+      label: {
+        id: 'pages.settings.profile.displayName.label',
+        defaultMessage: 'Display Name',
+        description: 'Label for display name input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.displayName.placeholder',
+        defaultMessage: 'Enter display name',
+        description: 'Placeholder for display name input on edit profile page',
+      },
+    },
+    required: {
+      id: 'pages.settings.profile.reqired',
+      defaultMessage: 'required',
+      description: 'Label indicating an input is required',
+    },
+    name: {
+      label: {
+        id: 'pages.settings.profile.name.label',
+        defaultMessage: 'Handle',
+        description: 'Label for name input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.name.placeholder',
+        defaultMessage: 'Enter handle',
+        description: 'Placeholder for name input on edit profile page',
+      },
+    },
+    website: {
+      label: {
+        id: 'pages.settings.profile.website.label',
+        defaultMessage: 'Website',
+        description: 'Label for website input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.website.placeholder',
+        defaultMessage: 'https://www.mysite.com',
+        description: 'Placeholder for website input on edit profile page',
+      },
+    },
+    about: {
+      label: {
+        id: 'pages.settings.profile.about.label',
+        defaultMessage: 'About Me',
+        description: 'Label for about input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.about.placeholder',
+        defaultMessage: 'Say something about yourself',
+        description: 'Placeholder for about input on edit profile page',
+      },
+    },
+    lud16: {
+      label: {
+        id: 'pages.settings.profile.lud16.label',
+        defaultMessage: 'Lightning Address',
+        description: 'Label for lud16 input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.lud16.placeholder',
+        defaultMessage: 'Enter your LN address',
+        description: 'Placeholder for lud16 input on edit profile page',
+      },
+    },
+    nip05: {
+      label: {
+        id: 'pages.settings.profile.nip05.label',
+        defaultMessage: 'Verified Nostr Id (Nip-05)',
+        description: 'Label for nip-05 input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.nip05.placeholder',
+        defaultMessage: 'Enter your NIP-05 Verified Nostr ID',
+        description: 'Placeholder for nip-05 input on edit profile page',
+      },
+    },
+    picture: {
+      label: {
+        id: 'pages.settings.profile.picture.label',
+        defaultMessage: 'Avatar Imagge Url',
+        description: 'Label for avatar input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.picture.placeholder',
+        defaultMessage: 'Enter your avatar url',
+        description: 'Placeholder for avatar input on edit profile page',
+      },
+    },
+    banner: {
+      label: {
+        id: 'pages.settings.profile.banner.label',
+        defaultMessage: 'Banner Image Url',
+        description: 'Label for banner input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.banner.placeholder',
+        defaultMessage: 'Enter your banner url',
+        description: 'Placeholder for banner input on edit profile page',
+      },
+    },
+  },
 };
 
 export const scopeDescriptors: Record<string, ScopeDescriptor> = {
@@ -919,6 +1042,16 @@ export const toast = {
     id: 'toast.zapUnavailable',
     defaultMessage: 'Author of this post cannot be zapped',
     description: 'Toast message indicating user cannot receieve a zap',
+  },
+  updateProfileSuccess: {
+    id: 'toast.updateProfileSuccess',
+    defaultMessage: 'Profile updated successfully',
+    description: 'Toast message indicating that profile was successfully updated',
+  },
+  updateProfileFail: {
+    id: 'toast.updateProfileFail',
+    defaultMessage: 'Failed to update profile, please try again',
+    description: 'Toast message indicating that profile has failed to updated',
   },
 };
 

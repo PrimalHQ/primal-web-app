@@ -24,6 +24,7 @@ import { useMessagesContext } from './contexts/MessagesContext';
 import { useMediaContext } from './contexts/MediaContext';
 import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
+import EditProfile from './pages/EditProfile';
 
 const primalWindow = window as PrimalWindow;
 
@@ -78,6 +79,7 @@ const Router: Component = () => {
           <Route path="/downloads" component={Downloads} />
           <Route path="/download" element={<Navigate href='/downloads' />} />;
           <Route path="/settings" component={Settings} />
+          <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
