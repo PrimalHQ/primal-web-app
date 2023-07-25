@@ -93,25 +93,64 @@
   height: 40px;
   border: none;
   border-radius: 6px;
+  background: none;
   margin: 0px 6px;
   padding: 0px;
+  color: var(--text-primary);
 }
 
 .smallSecondaryButton {
   @include smallButton();
 
-  background-color: var(--background-card);
-  background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
-                var(--brand-gradient-vertical) border-box;
-  border: 1px solid transparent;
+  background: var(--background-card);
+  border: 1px solid var(--subtile-devider);
+
+  &:hover {
+    border: 1px solid var(--text-tertiary);
+  }
 }
 
 .smallPrimaryButton {
   @include smallButton();
-  background: var(--brand-gradient-vertical);
 
-  .addFeedIcon {
-    background-color: white;
+  background: var(--background-site);
+  background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                var(--brand-gradient) border-box;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
+                  var(--brand-gradient) border-box;
+  }
+}
+
+.editProfileButton {
+  width: auto;
+  height: 40px;
+  border: none;
+  border-radius: 6px;
+  padding: 1px;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  background: var(--brand-gradient-vertical);
+  color: var(--text-primary);
+
+  >div {
+    width: 100%;
+    height: 100%;
+    padding-inline: 12px;
+    vertical-align: middle;
+    border-radius: 6px;
+    background-color: var(--background-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: var(--background-site);
+    }
   }
 }
 

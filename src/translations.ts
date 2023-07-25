@@ -76,6 +76,11 @@ export const actions = {
     defaultMessage: 'save',
     description: 'Save changes action label',
   },
+  editProfile: {
+    id: 'actions.editProfile',
+    defaultMessage: 'edit profile',
+    description: 'Edit profile action label',
+  },
 };
 
 export const branding = {
@@ -840,7 +845,7 @@ export const settings = {
     picture: {
       label: {
         id: 'pages.settings.profile.picture.label',
-        defaultMessage: 'Avatar Imagge Url',
+        defaultMessage: 'Avatar Image Url',
         description: 'Label for avatar input on edit profile page',
       },
       placeholder : {

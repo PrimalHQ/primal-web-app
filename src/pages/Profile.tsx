@@ -230,51 +230,66 @@ const Profile: Component = () => {
         </Show>
 
         <div class={styles.profileActions}>
-          <button
-            class={styles.smallSecondaryButton}
-            onClick={onNotImplemented}
-          >
-            <div class={styles.zapIcon}></div>
-          </button>
-          <button
-            class={styles.smallSecondaryButton}
-            onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-          >
-            <div class={styles.messageIcon}></div>
-          </button>
+          <Show when={profile?.profileKey !== account?.publicKey}>
+            <button
+              class={styles.smallPrimaryButton}
+              onClick={onNotImplemented}
+            >
+              <div class={styles.zapIcon}></div>
+            </button>
+          </Show>
+
+          <Show when={account?.publicKey}>
+            <button
+              class={styles.smallPrimaryButton}
+              onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+            >
+              <div class={styles.messageIcon}></div>
+            </button>
+          </Show>
 
           <div class={styles.addToFeedButton}>
-            <Show
-              when={!hasFeedAtHome()}
-              fallback={
+            <Show when={profile?.profileKey !== account?.publicKey}>
+              <Show
+                when={!hasFeedAtHome()}
+                fallback={
+                  <button
+                    class={styles.smallSecondaryButton}
+                    onClick={removeFromHome}
+                    title={intl.formatMessage(
+                      tActions.removeFromHomeFeedNamed,
+                      { name: profileName() },
+                    )}
+                  >
+                    <div class={styles.removeFeedIcon}></div>
+                  </button>
+                }
+              >
                 <button
-                  class={styles.smallSecondaryButton}
-                  onClick={removeFromHome}
+                  class={styles.smallPrimaryButton}
+                  onClick={addToHome}
                   title={intl.formatMessage(
-                    tActions.removeFromHomeFeedNamed,
+                    tActions.addFeedToHomeNamed,
                     { name: profileName() },
                   )}
-                  disabled={profile?.profileKey === account?.publicKey}
                 >
-                  <div class={styles.removeFeedIcon}></div>
+                  <div class={styles.addFeedIcon}></div>
                 </button>
-              }
-            >
-              <button
-                class={styles.smallPrimaryButton}
-                onClick={addToHome}
-                title={intl.formatMessage(
-                  tActions.addFeedToHomeNamed,
-                  { name: profileName() },
-                )}
-              >
-                <div class={styles.addFeedIcon}></div>
-              </button>
+              </Show>
             </Show>
           </div>
 
           <FollowButton person={profile?.userProfile} large={true} />
 
+          <Show when={account?.publicKey && profile?.userProfile?.pubkey === account?.publicKey}>
+            <button
+              class={styles.editProfileButton}
+              onClick={() => navigate('/settings/profile')}
+              title={intl.formatMessage(tActions.editProfile)}
+            >
+              <div>{intl.formatMessage(tActions.editProfile)}</div>
+            </button>
+          </Show>
         </div>
 
         <Show when={profile?.userProfile && !profile?.isFetching}>

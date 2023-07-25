@@ -20,6 +20,7 @@ import { subscribeTo as uploadSub } from "../uploadSocket";
 import { Kind } from '../constants';
 import { uploadMedia } from '../lib/media';
 import Loader from '../components/Loader/Loader';
+import { useNavigate } from '@solidjs/router';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -31,12 +32,11 @@ const EditProfile: Component = () => {
   const media = useMediaContext();
   const account = useAccountContext();
   const toast = useToastContext();
+  const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
   let fileUploadAvatar: HTMLInputElement | undefined;
-  let fileUploadAvatarImage: HTMLInputElement | undefined;
   let fileUploadBanner: HTMLInputElement | undefined;
-  let fileUploadBannerImage: HTMLInputElement | undefined;
 
   const [isBannerCached, setIsBannerCached] = createSignal(false);
   const [isMoreVisible, setIsMoreVisible] = createSignal(false);
@@ -274,7 +274,12 @@ const EditProfile: Component = () => {
           </Show>
           <Show
             when={banner()}
-            fallback={<div class={styles.bannerPlaceholder}></div>}
+            fallback={
+            <div class={styles.bannerPlaceholder}>
+              <label for="upload-banner">
+                <div>{intl.formatMessage(tSettings.profile.uploadBanner)}</div>
+              </label>
+            </div>}
           >
             <label for="upload-banner">
               <img
@@ -292,7 +297,7 @@ const EditProfile: Component = () => {
               <Show when={isUploadingAvatar()}>
                 <div class={styles.uploadingOverlay}><Loader /></div>
               </Show>
-              <label for="upload-avatar-image">
+              <label for="upload-avatar">
                 <div class={styles.desktopAvatar}>
                   <Avatar src={avatarPreview()} size="xxl" />
                   <div class={styles.uploadAction}>
@@ -439,7 +444,7 @@ const EditProfile: Component = () => {
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.picture.placeholder)}
             value={avatarPreview() || ''}
-            onInput={(e: InputEvent) => {
+            onChange={(e: Event) => {
               const target = e.target as HTMLInputElement;
               target.value && setAvatarPreview(target.value);
             }}
@@ -453,7 +458,7 @@ const EditProfile: Component = () => {
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.banner.placeholder)}
             value={bannerPreview() || ''}
-            onInput={(e: InputEvent) => {
+            onChange={(e: Event) => {
               const target = e.target as HTMLInputElement;
               target.value && setBannerPreview(target.value);
             }}
@@ -467,7 +472,11 @@ const EditProfile: Component = () => {
           >
             {intl.formatMessage(tActions.save)}
           </button>
-          <button type='button' class={styles.secondaryButton}>
+          <button
+            type='button'
+            class={styles.secondaryButton}
+            onClick={() => navigate('/profile')}
+          >
             <div>
               <span>{intl.formatMessage(tActions.cancel)}</span>
             </div>

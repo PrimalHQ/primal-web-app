@@ -1,9 +1,7 @@
 
   @mixin followButton {
     grid-area: follow;
-    align-items: center;
     display: flex;
-    align-items: center;
     button {
       background: var(--brand-gradient-vertical);
       border-radius: 6px;
@@ -23,18 +21,28 @@
   .follow {
     @include followButton;
     button {
-      border: none;
+      color: var(--text-primary);
+      background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                    var(--brand-gradient) border-box;
+      border: 1px solid transparent;
+
+      &:hover {
+        background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
+                      var(--brand-gradient) border-box;
+      }
     }
   }
 
   .unfollow {
     @include followButton;
     button {
-      color: var(--text-secondary);
-      background-color: var(--background-card);
-      background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
-                    var(--brand-gradient) border-box;
-      border: 1px solid transparent;
+      color: var(--text-primary);
+      background: var(--background-card);
+      border: 1px solid var(--subtile-devider);
+
+      &:hover {
+        border: 1px solid var(--text-tertiary);
+      }
     }
   }
 
