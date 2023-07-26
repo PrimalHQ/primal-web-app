@@ -251,7 +251,10 @@ export const defaultNotificationSettings: Record<string, boolean> = {
 export const emojiSearchLimit = 1;
 
 export const today = (new Date()).getTime();
-export const iosRD = (new Date('07/11/2023')).getTime();
-export const andRD = (new Date('07/12/2023')).getTime();
+export const iosRD = (new Date('07/26/2023')).getTime();
+export const andRD = (new Date('07/19/2023')).getTime();
+
+export const iosCheck = '7/26/23';
+export const andCheck = 'seen';
 
 export const refreshFeedDelay = 2_500;

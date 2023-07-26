@@ -1,17 +1,7 @@
-import { Component, onMount, Show } from 'solid-js';
+import { Component, onMount } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Search from '../components/Search/Search';
-
-import iphone from '../assets/images/primal_iphone.png';
-import android from '../assets/images/primal_android.png';
-import iphoneReflection from '../assets/images/primal_iphone_reflection.png';
-import androidReflection from '../assets/images/primal_android_reflection.png';
-
-import iphoneLight from '../assets/images/primal_iphone_light.png';
-import androidLight from '../assets/images/primal_android_light.png';
-import iphoneReflectionLight from '../assets/images/primal_iphone_reflection_light.png';
-import androidReflectionLight from '../assets/images/primal_android_reflection_light.png';
 
 import appStore from '../assets/images/appstore_download.svg';
 import apkDownload from '../assets/images/primal_apk_download.svg';
@@ -23,23 +13,21 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import { andRD, iosRD, today } from '../constants';
+import { andCheck, andRD, iosCheck, iosRD, today } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 
 const Downloads: Component = () => {
 
   const intl = useIntl();
-  const settings = useSettingsContext();
 
   onMount(() => {
     if (today > iosRD) {
-      localStorage.setItem('iosDownload', 'seen');
+      localStorage.setItem('iosDownload', iosCheck);
     }
 
     if (today > andRD) {
-      localStorage.setItem('andDownload', 'seen');
+      localStorage.setItem('andDownload', andCheck);
     }
   });
 
@@ -129,7 +117,7 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>July 26, 2023</div>
+              <div>july 26, 2023</div>
               <div>0.23.1</div>
             </div>
           </div>
@@ -156,13 +144,13 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>July 26, 2023</div>
-              <div>0.12.3</div>
+              <div>july 19, 2023</div>
+              <div>0.11.2</div>
             </div>
           </div>
 
           <a
-            href='https://downloads.primal.net/android/primal-0.12.3.apk'
+            href='https://downloads.primal.net/android/primal-0.11.2.apk'
             target='_blank'
           >
             <img src={apkDownload} />
