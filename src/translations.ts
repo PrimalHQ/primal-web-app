@@ -117,7 +117,7 @@ export const downloads = {
   },
   callToActionAndroidTitle: {
     id: 'downloads.ctaAndroidTitle',
-    defaultMessage: 'Primal Android Alpha',
+    defaultMessage: 'Primal Android Beta',
     description: 'Title for the Android downloads\' page call-to-action',
   },
   callToActionAndroidDescription: {

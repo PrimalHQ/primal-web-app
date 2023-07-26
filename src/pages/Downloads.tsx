@@ -115,11 +115,22 @@ const Downloads: Component = () => {
 
       <div class={styles.linkHolder}>
         <div class={styles.appStore}>
-          <div>{intl.formatMessage(t.appStoreCaption)}</div>
+          <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionIOSTitle)}</div>
 
           <div class={styles.callToActionIOS}>
             <div class={styles.ctaTitle}>
               {intl.formatMessage(t.callToActionIOSTitle)}
+            </div>
+          </div>
+
+          <div class={styles.buidDetails}>
+            <div>
+              <div>released:</div>
+              <div>build:</div>
+            </div>
+            <div>
+              <div>July 26, 2023</div>
+              <div>0.23.1</div>
             </div>
           </div>
 
@@ -131,11 +142,22 @@ const Downloads: Component = () => {
           </a>
         </div>
         <div class={styles.playStore}>
-          <div>{intl.formatMessage(t.apkDownload)}</div>
+          <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionAndroidTitle)}</div>
 
           <div class={styles.callToActionAndroid}>
             <div class={styles.ctaTitle}>
               {intl.formatMessage(t.callToActionAndroidTitle)}
+            </div>
+          </div>
+
+          <div class={styles.buidDetails}>
+            <div>
+              <div>released:</div>
+              <div>build:</div>
+            </div>
+            <div>
+              <div>July 26, 2023</div>
+              <div>0.12.3</div>
             </div>
           </div>
 
