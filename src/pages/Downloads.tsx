@@ -162,7 +162,7 @@ const Downloads: Component = () => {
           </div>
 
           <a
-            href='https://downloads.primal.net/android/primal-0.11.2.apk'
+            href='https://downloads.primal.net/android/primal-0.12.3.apk'
             target='_blank'
           >
             <img src={apkDownload} />
