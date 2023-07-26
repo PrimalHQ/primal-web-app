@@ -21,6 +21,8 @@ import { Kind } from '../constants';
 import { uploadMedia } from '../lib/media';
 import Loader from '../components/Loader/Loader';
 import { useNavigate } from '@solidjs/router';
+import Branding from '../components/Branding/Branding';
+import Wormhole from '../components/Wormhole/Wormhole';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -266,6 +268,10 @@ const EditProfile: Component = () => {
   return (
     <div class={styles.container}>
       <PageCaption title={intl.formatMessage(tSettings.profile.title)} />
+
+      <Wormhole to="branding_holder">
+        <Branding small={false} />
+      </Wormhole>
 
       <div id="central_header" class={styles.fullHeader}>
         <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
