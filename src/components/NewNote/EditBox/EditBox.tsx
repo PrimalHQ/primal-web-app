@@ -42,7 +42,7 @@ const EditBox: Component<{
   replyToNote?: PrimalNote,
   onClose?: () => void,
   onSuccess?: (note: SendNoteResult) => void,
-  idPrefix?: string
+  idPrefix?: string,
 } > = (props) => {
 
   const intl = useIntl();
@@ -425,6 +425,15 @@ const EditBox: Component<{
     debounce(() => {
       setQuery(() => preQ)
     }, 500);
+  })
+
+  createEffect(() => {
+    if (account?.quotedNote && textArea) {
+      setMessage((msg) => `${msg}${account.quotedNote} `);
+      textArea.value = message();
+      onExpandableTextareaInput(new InputEvent('input'))
+      account.actions.quoteNote(undefined);
+    }
   })
 
   const onEscape = (e: KeyboardEvent) => {

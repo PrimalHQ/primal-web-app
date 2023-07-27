@@ -2,7 +2,8 @@
 import { Relay, Event } from "nostr-tools";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrRelays, NostrWindow, VanityProfiles } from "../types/primal";
+import { userName } from "../stores/profile";
+import { NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
 import { sendEvent } from "./notes";
 
@@ -46,6 +47,18 @@ export const getProfileContactList = (pubkey: string | undefined, subid: string)
     "REQ",
     subid,
     {cache: ["contact_list", { pubkey }]},
+  ]));
+}
+
+export const getProfileMuteList = (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mutelist", { pubkey }]},
   ]));
 }
 
@@ -150,4 +163,36 @@ export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?
   };
 
   return await sendEvent(event, relays, relaySettings);
+};
+
+export const muteUser = async (pubkey: string, relays: Relay[], relaySettings?: NostrRelays) => {
+
+};
+
+export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const win = window as NostrWindow;
+  const nostr = win.nostr;
+
+  if (nostr === undefined) {
+    return false;
+  }
+
+  const event = {
+    content: `{ "description": "report user '${userName(user)}'"}`,
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.ceil((new Date()).getTime() / 1000),
+  };
+
+  const signedEvent = await nostr.signEvent(event);
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
+  ]));
 };

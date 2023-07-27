@@ -11,51 +11,13 @@
 .post {
   position: relative;
   background-color: var(--background-card);
-  margin-top: 0px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   padding: 16px 20px;
-  // grid-template-columns: 122px 1fr;
-  // grid-template-rows: 1fr;
-  // grid-template-areas: "avatar content";
-  // padding: 16px 16px 16px 20px;
   border-radius: 0px 4px 4px 0px;
 
-  // .avatar {
-  //   grid-area: avatar;
-  //   display: grid;
-  //   grid-template-columns: 1fr;
-  //   grid-template-rows: 80px 1fr;
-  //   grid-row-gap: 6px;
-  //   justify-items: center;
-
-  //   >a {
-  //     text-decoration: none;
-  //   }
-
-  //   .avatarName {
-  //     width: 100%;
-  //     padding: 0px 6px;
-  //     text-align: center;
-  //     display: inline-block;
-  //     font-size: 16px;
-  //     line-height: 12px;
-  //     font-weight: 400;
-  //     color: var(--text-primary);
-  //     align-self: flex-start;
-  //     text-overflow: ellipsis;
-  //     white-space: nowrap;
-  //     overflow: hidden;
-  //   }
-  // }
-
   .content {
-    // grid-area: content;
-    // display: grid;
-    // grid-template-columns: 1fr;
-    // grid-template-rows: 48px 1fr 28px;
-    // grid-row-gap: 16px;
-    // grid-template-areas: "header" "message" "footer";
     grid-area: content;
     display: flex;
     flex-direction: column;
@@ -71,8 +33,6 @@
       font-size: 16px;
       line-height: 24px;
       width: 100%;
-      // max-height: 650px;
-      // overflow: hidden;
       margin-bottom: 17px;
 
       a:hover {
@@ -98,7 +58,6 @@
 @media only screen and (max-width: 720px) {
   .post {
     width: 100vw;
-    // grid-template-columns: 62px 1fr;
     margin-left: 0px;
     margin-right: 0px;
     padding-right: 12px;

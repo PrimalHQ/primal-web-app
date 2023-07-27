@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { PrimalNote } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
@@ -34,6 +34,8 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
       truncateNpub(r.user.npub);
   }
 
+  const [openCustomZap, setOpenCustomZap] = createSignal(false);
+
   return (
     <A
       class={styles.postLink}
@@ -56,12 +58,15 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
         </div>
       </Show>
       <div class={styles.post}>
-        <NoteHeader note={props.note} />
+        <NoteHeader note={props.note} openCustomZap={() => {
+          setOpenCustomZap(true);
+          setTimeout(() => setOpenCustomZap(false), 10);
+        }} />
         <div class={styles.content}>
           <div class={styles.message}>
             <ParsedNote note={props.note} />
           </div>
-          <NoteFooter note={props.note} />
+          <NoteFooter note={props.note} doCustomZap={openCustomZap()} />
         </div>
       </div>
     </A>

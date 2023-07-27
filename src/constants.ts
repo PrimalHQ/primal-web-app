@@ -100,6 +100,9 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  MuteList = 10_000,
+  MuteList2 = 30_000,
+
   Settings = 30_078,
 
   ACK = 10_000_098,

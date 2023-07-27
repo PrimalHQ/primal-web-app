@@ -3,6 +3,8 @@ import { NostrRelays, PrimalFeed } from "../types/primal";
 export type LocalStore = {
   following: string[],
   followingSince: number,
+  muted: string[],
+  mutedSince: number,
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
@@ -12,6 +14,8 @@ export type LocalStore = {
 export const emptyStorage = {
   following: [],
   followingSince: 0,
+  muted: [],
+  mutedSince: 0,
   relaySettings: {},
   likes: [],
   feeds: [],
@@ -59,6 +63,19 @@ export const saveFollowing = (pubkey: string | undefined, following: string[], s
 
   store.following = [...following];
   store.followingSince = since;
+
+  setStorage(pubkey, store);
+}
+
+export const saveMuted = (pubkey: string | undefined, muted: string[], since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.muted = [...muted];
+  store.mutedSince = since;
 
   setStorage(pubkey, store);
 }

@@ -521,3 +521,10 @@ export type SendNoteResult = {
   reasons?: string[],
   note?: NostrRelaySignedEvent,
 };
+
+export type MenuItem = {
+  action: () => void,
+  label: string,
+  icon?: string,
+  warning?: boolean,
+};

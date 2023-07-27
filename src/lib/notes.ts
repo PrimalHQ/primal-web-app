@@ -3,7 +3,7 @@ import { getLinkPreview } from "link-preview-js";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
-import { NostrRelays, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
+import { NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl } from "./media";
 
 const getLikesStorageKey = () => {
@@ -272,6 +272,76 @@ export const sendContacts = async (contacts: string[], date: number, content: st
   };
 
   return await sendEvent(event, relays, relaySettings);
+};
+
+export const sendMuteList = async (muteList: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content,
+    kind: Kind.MuteList,
+    tags: muteList.map(c => ['p', c]),
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+};
+
+export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+
+  let responses = [];
+  let reasons: string[] = [];
+
+  for (let i = 0;i < relays.length;i++) {
+    const relay = relays[i];
+
+    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+
+    if (!settings.write) {
+      continue;
+    }
+
+    responses.push(new Promise<string>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.log(`Publishing post to ${relay.url} has timed out`);
+        reasons.push('timeout');
+        reject('timeout');
+      }, 8_000);
+
+      try {
+        let pub = relay.publish(event);
+
+        console.log('publishing to relay: ', relay)
+
+        pub.on('ok', () => {
+          console.log(`${relay.url} has accepted our event`);
+          clearTimeout(timeout);
+          resolve('success');
+        });
+
+        pub.on('failed', (reason: any) => {
+          console.log(`failed to publish to ${relay.url}: ${reason}`)
+          clearTimeout(timeout);
+          reasons.push(reason);
+          reject('failed');
+        });
+
+      } catch (e) {
+        console.log('Failed publishing note: ', e);
+        clearTimeout(timeout);
+        reasons.push(`${e}`);
+        reject(e);
+      }
+    }));
+  }
+
+  try {
+    await Promise.any(responses);
+
+    return { success: true, note: event } as SendNoteResult;
+  }
+  catch (e) {
+    console.log('ERROR BRAODCASTING POST: ', e);
+    return { success: false, reasons, note: event} as SendNoteResult;
+  }
 };
 
 export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {

@@ -18,12 +18,12 @@ import {
 } from '../types/primal';
 import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
-import { sendContacts, sendLike } from "../lib/notes";
+import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
-import { getStorage, saveFollowing, saveLikes, saveRelaySettings } from "../lib/localStore";
+import { getStorage, saveFollowing, saveLikes, saveMuted, saveRelaySettings } from "../lib/localStore";
 import { closeRelays, connectRelays, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { account } from "../translations";
 
@@ -36,8 +36,11 @@ export type AccountContextStore = {
   showNewNoteForm: boolean,
   following: string[],
   followingSince: number,
+  muted: string[],
+  mutedSince: number,
   hasPublicKey: () => boolean,
   isKeyLookupDone: boolean,
+  quotedNote: string | undefined,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -46,6 +49,8 @@ export type AccountContextStore = {
     setPublicKey: (pubkey: string | undefined) => void,
     addFollow: (pubkey: string) => void,
     removeFollow: (pubkey: string) => void,
+    quoteNote: (noteId: string | undefined) => void,
+    addToMuteList: (pubkey: string) => void,
   },
 }
 
@@ -59,6 +64,7 @@ const initialData = {
   following: [],
   followingSince: 0,
   isKeyLookupDone: false,
+  quotedNote: undefined,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -103,6 +109,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
 
     const relaysToConnect = attachDefaultRelays(relaySettings);
+
     closeRelays(store.relays,
       () => {
         connectRelays(relaysToConnect, (connected) => {
@@ -202,7 +209,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
-    const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
 
         if (!store.following.includes(pubkey)) {
@@ -273,6 +280,47 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     getProfileContactList(store.publicKey, `before_unfollow_${APP_ID}`);
 
   }
+
+  const quoteNote = (noteId: string | undefined) => {
+    updateStore('quotedNote', () => noteId);
+  }
+
+  const addToMuteList = (pubkey: string) => {
+    if (!store.publicKey || store.muted.includes(pubkey)) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        if (!store.muted.includes(pubkey)) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const muted = [...store.muted, pubkey];
+
+          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+
+          if (success) {
+            updateStore('muted', () => muted);
+            updateStore('mutedSince', () => date);
+            saveMuted(store.publicKey, muted, date);
+          }
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateContacts(content);
+      }
+    });
+
+    getProfileContactList(store.publicKey, `before_mute_${APP_ID}`);
+  };
 
 
 // EFFECTS --------------------------------------
@@ -418,6 +466,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setPublicKey,
     addFollow,
     removeFollow,
+    quoteNote,
+    addToMuteList,
   },
 });
 

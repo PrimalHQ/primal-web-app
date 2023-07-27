@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
-import { PrimalNote } from '../../../types/primal';
+import { MenuItem, PrimalNote } from '../../../types/primal';
 import { sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
@@ -16,8 +16,9 @@ import zapSM from '../../../assets/lottie/zap_sm.json';
 import zapMD from '../../../assets/lottie/zap_md.json';
 import { medZapLimit } from '../../../constants';
 import { toast as t } from '../../../translations';
+import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 
-const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
+const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (props) => {
 
   const account = useAccountContext();
   const toast = useToastContext();
@@ -37,12 +38,52 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
   const [replies, setReplies] = createSignal(props.note.post.replies);
   const [zaps, setZaps] = createSignal(props.note.post.satszapped);
 
+  const [isRepostMenuVisible, setIsRepostMenuVisible] = createSignal(false);
+
   let footerDiv: HTMLDivElement | undefined;
 
-  const doRepost = async (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const repostMenuItems: MenuItem[] = [
+    {
+      action: () => doRepost(),
+      label: 'Repost Note',
+      icon: 'feed_repost',
+    },
+    {
+      action: () => doQuote(),
+      label: 'Quote Note',
+      icon: 'quote',
+    },
+  ];
 
+  const onClickOutside = (e: MouseEvent) => {
+    if (
+      !document?.getElementById(`repost_menu_${props.note.post.id}`)?.contains(e.target as Node)
+    ) {
+      setIsRepostMenuVisible(false);
+    }
+  }
+
+  createEffect(() => {
+    if (isRepostMenuVisible()) {
+      document.addEventListener('click', onClickOutside);
+    }
+    else {
+      document.removeEventListener('click', onClickOutside);
+    }
+  });
+
+  const showRepostMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    setIsRepostMenuVisible(true);
+  };
+
+  const doQuote = () => {
+    setIsRepostMenuVisible(false);
+    account?.actions?.quoteNote(`nostr:${props.note.post.noteId}`);
+    account?.actions?.showNewNoteForm();
+  };
+
+  const doRepost = async () => {
     if (!account) {
       return;
     }
@@ -60,6 +101,8 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       );
       return;
     }
+
+    setIsRepostMenuVisible(false);
 
     const { success } = await sendRepost(props.note, account.relays, account.relaySettings);
 
@@ -325,7 +368,13 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
       setZappedNow(false);
     }
 
-  })
+  });
+
+  createEffect(() => {
+    if (props.doCustomZap) {
+      setIsCustomZap(true);
+    }
+  });
 
   const [showSmallZapAnim, setShowSmallZapAnim] = createSignal(false);
   const [showMedZapAnim, setShowMedZapAnim] = createSignal(false);
@@ -382,13 +431,30 @@ const NoteFooter: Component<{ note: PrimalNote}> = (props) => {
         title: likes().toLocaleString(),
       })}
 
-      {actionButton({
-        onClick: doRepost,
-        type: 'repost',
-        highlighted: reposted(),
-        label: reposts() === 0 ? '' : truncateNumber(reposts(), 2),
-        title: reposts().toLocaleString(),
-      })}
+
+      <button
+        id={`btn_repost_${props.note.post.id}`}
+        class={`${styles.stat} ${reposted() ? styles.highlighted : ''}`}
+        onClick={showRepostMenu}
+        title={reposts().toLocaleString()}
+      >
+        <div class={`${buttonTypeClasses.repost}`}>
+          <div
+            class={styles.icon}
+            style={'visibility: visible'}
+          ></div>
+          <div class={styles.statNumber}>
+            {reposts() === 0 ? '' : truncateNumber(reposts(), 2)}
+          </div>
+          <Show when={isRepostMenuVisible()}>
+          <PrimalMenu
+            id={`repost_menu_${props.note.post.id}`}
+            items={repostMenuItems}
+            left={true}
+          />
+        </Show>
+        </div>
+      </button>
 
       <CustomZap
         open={isCustomZap()}

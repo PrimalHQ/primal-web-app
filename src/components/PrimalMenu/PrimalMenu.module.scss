@@ -1,0 +1,16 @@
+.contextMenuOptions {
+  position: absolute;
+  top: 18px;
+  right: 8px;
+  padding: 8px;
+  background-color: var(--background-site);
+  border: solid 1px var(--text-tertiary-2);
+  border-radius: 4px;
+  z-index: var(--z-index-header);
+
+  &.left {
+    top: 26px;
+    left: 0px;
+    right: unset;
+  }
+}

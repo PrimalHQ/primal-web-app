@@ -81,6 +81,16 @@ export const actions = {
     defaultMessage: 'edit profile',
     description: 'Edit profile action label',
   },
+  reportUserConfirm: {
+    id: 'settings.reportUserConfirm',
+    defaultMessage: 'Report user {name}?',
+    description: 'Label for report user confirmation',
+  },
+  muteUserConfirm: {
+    id: 'settings.muteUserConfirm',
+    defaultMessage: 'Add {name} to your mute list?',
+    description: 'Label for mute user confirmation',
+  },
 };
 
 export const branding = {
@@ -1019,14 +1029,44 @@ export const toast = {
     description: 'Toast message indicating no extension was found',
   },
   noteNostrLinkCoppied: {
-    id: 'noteNostrLinkCoppied',
+    id: 'toast.noteNostrLinkCoppied',
     defaultMessage: 'Note\'s nostr link copied',
     description: 'Confirmation message that the note\'s link has been copied',
   },
   notePrimalLinkCoppied: {
-    id: 'notePrimalLinkCoppied',
-    defaultMessage: 'Note\'s Primal link copied',
+    id: 'toast.notePrimalLinkCoppied',
+    defaultMessage: 'Note\'s link copied',
     description: 'Confirmation message that the note\'s link has been copied',
+  },
+  notePrimalTextCoppied: {
+    id: 'toast.notePrimalTextCoppied',
+    defaultMessage: 'Note\'s text copied',
+    description: 'Confirmation message that the note\'s text has been copied',
+  },
+  noteIdCoppied: {
+    id: 'toast.noteIdCoppied',
+    defaultMessage: 'Note\'s id copied',
+    description: 'Confirmation message that the note\'s id has been copied',
+  },
+  noteRawDataCoppied: {
+    id: 'toast.noteRawDataCoppied',
+    defaultMessage: 'Note\'s raw data copied',
+    description: 'Confirmation message that the note\'s raw data has been copied',
+  },
+  noteAuthorNpubCoppied: {
+    id: 'toast.noteAuthorNpubCoppied',
+    defaultMessage: 'Note\'s author npub copied',
+    description: 'Confirmation message that the note\'s author npub has been copied',
+  },
+  noteBroadcastSuccess: {
+    id: 'toast.noteBroadcastSuccess',
+    defaultMessage: 'Note has been broadcasted to your relays',
+    description: 'Confirmation message that the note has been broadcasted',
+  },
+  noteBroadcastFail: {
+    id: 'toast.noteBroadcastFail',
+    defaultMessage: 'We were unable to broadcats this note',
+    description: 'Failure message that the note has not been broadcasted',
   },
   repostSuccess: {
     id: 'toast.repostSuccess',
@@ -1037,6 +1077,11 @@ export const toast = {
     id: 'toast.repostFailed',
     defaultMessage: 'Failed to repost',
     description: 'Toast message indicating failed repost',
+  },
+  noteAuthorReported: {
+    id: 'toast.noteAuthorReported',
+    defaultMessage: 'User {name} reported',
+    description: 'Toast message indicating successfull user report',
   },
   zapAsGuest: {
     id: 'toast.zapAsGuest',

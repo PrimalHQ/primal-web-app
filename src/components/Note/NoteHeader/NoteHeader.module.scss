@@ -1,10 +1,10 @@
 .header {
   grid-area: header;
-  align-items: center;
+  align-items: flex-start;
   color: var(--text-tertiary-2);
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  width: calc(100% + 8px);
   height: 48px;
 
   .headerInfo {
@@ -68,69 +68,49 @@
 
   }
 
-
   .contextMenu {
     position: relative;
-    width: 16px;
-    height: 16px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     text-align: center;
     font-weight: bold;
 
     .contextButton {
-      height: 16px;
+      width: 32px;
+      height: 32px;
       padding: 0;
       margin: 0;
       background: none;
       border: none;
       outline: none;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
 
       &:focus {
         outline: none;
         box-shadow: none;
       }
+
+      .contextIcon {
+        width: 16px;
+        height: 16px;
+        background-color: var(--text-secondary-2);
+        -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+
+      }
+
+      &:hover {
+        .contextIcon {
+          background-color: var(--text-primary);
+        }
+      }
     }
   }
 
-}
-
-.contextIcon {
-  width: 16px;
-  height: 16px;
-  background-color: var(--text-secondary-2);
-  -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
-  mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
-
-  &:hover {
-    background-color: var(--text-primary);
-  }
-}
-
-.contextMenuOptions {
-  position: absolute;
-  top: 16px;
-  right: 0px;
-  min-width: 160px;
-  background-color: var(--background-site);
-  border: solid 1px var(--text-tertiary-2);
-  border-radius: 4px;
-  z-index: 20;
-}
-
-.contextOption {
-  background-color: var(--background-site);
-  border: none;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 16px;
-  color: var(--text-secondary-2);
-  padding: 10px;
-  margin: 0px;
-
-  &:hover, &:focus {
-    background-color: var(--background-input);
-  }
 }
 
 @media only screen and (max-width: 720px) {
