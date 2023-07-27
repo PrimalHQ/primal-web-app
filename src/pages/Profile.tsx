@@ -334,7 +334,7 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout} innerHTML={replaceLinkPreviews(urlify(sanitize(profile?.userProfile?.about || ''), false, false))}>
+        <div class={styles.profileAbout} innerHTML={replaceLinkPreviews(urlify(sanitize(profile?.userProfile?.about || ''), false, false).urlified)}>
         </div>
 
         <div class={styles.profileLinks}>

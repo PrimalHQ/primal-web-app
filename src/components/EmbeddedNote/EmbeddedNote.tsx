@@ -169,7 +169,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           parseNpubLinks(
             parsedContent(
               highlightHashtags(
-                parseNote2(props.note.post.content)
+                parseNote2(props.note.post.content).urlified
               ),
             ),
             props.note,

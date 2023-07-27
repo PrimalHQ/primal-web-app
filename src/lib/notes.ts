@@ -55,13 +55,17 @@ export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\
 export const urlify = (text: string, highlightOnly = false, skipEmbed = false, skipLinkPreview = false) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
-  return text.replace(urlRegex, (url) => {
+  const imageUrls = [];
+
+  const result = text.replace(urlRegex, (url) => {
     if (!skipEmbed) {
 
       const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
       if (isImage) {
-        return '<img src="' + getMediaUrl(url) + '" class="postImage"/>'
+        imageUrls.push(getMediaUrl(url));
+        return '';
+        // return '<img src="' + getMediaUrl(url) + '" class="postImage"/>'
       }
 
       const isMp4Video = url.includes('.mp4') || url.includes('.mov');
@@ -187,6 +191,11 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false, s
 
     return `__LINK__${url}__LINK__`;
   })
+
+  return {
+    imageUrls,
+    urlified: result
+  };
 }
 
 export const replaceLinkPreviews = (text: string) => {

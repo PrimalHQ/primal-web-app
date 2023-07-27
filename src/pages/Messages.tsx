@@ -307,7 +307,7 @@ const Messages: Component = () => {
     return parseNoteLinks(
       parseNpubLinks(
         highlightHashtags(
-          parseNote3(message)
+          parseNote3(message).urlified
         ),
         messages?.referecedUsers,
       ),

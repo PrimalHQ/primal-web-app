@@ -814,7 +814,7 @@ const EditBox: Component<{
 
 
   const parseForReferece = (value: string) => {
-    const content = replaceLinkPreviews(parseUserMentions(highlightHashtags(parseNote1(value))));
+    const content = replaceLinkPreviews(parseUserMentions(highlightHashtags(parseNote1(value).urlified)));
 
     parseNpubLinks(content);
     parseNoteLinks(content);
