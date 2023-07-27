@@ -180,6 +180,13 @@ const Profile: Component = () => {
     return styles.cacheFlag;
   }
 
+  const isCurrentUser = () => {
+    if (!account || !profile || !account.isKeyLookupDone) {
+      return false;
+    }
+    return account?.publicKey === profile?.profileKey;
+  };
+
   return (
     <>
       <PageTitle title={
@@ -230,7 +237,7 @@ const Profile: Component = () => {
         </Show>
 
         <div class={styles.profileActions}>
-          <Show when={profile?.profileKey !== account?.publicKey}>
+          <Show when={!isCurrentUser()}>
             <button
               class={styles.smallPrimaryButton}
               onClick={onNotImplemented}
@@ -249,7 +256,7 @@ const Profile: Component = () => {
           </Show>
 
           <div class={styles.addToFeedButton}>
-            <Show when={profile?.profileKey !== account?.publicKey}>
+            <Show when={!isCurrentUser()}>
               <Show
                 when={!hasFeedAtHome()}
                 fallback={
@@ -281,7 +288,7 @@ const Profile: Component = () => {
 
           <FollowButton person={profile?.userProfile} large={true} />
 
-          <Show when={account?.publicKey && profile?.userProfile?.pubkey === account?.publicKey}>
+          <Show when={isCurrentUser()}>
             <button
               class={styles.editProfileButton}
               onClick={() => navigate('/settings/profile')}
