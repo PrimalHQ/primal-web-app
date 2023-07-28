@@ -209,7 +209,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
-    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
 
         if (!store.following.includes(pubkey)) {
