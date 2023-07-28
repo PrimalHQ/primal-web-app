@@ -88,13 +88,6 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
       return;
     }
 
-    if (Object.keys(account.relaySettings).length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelays),
-      );
-      return;
-    }
-
     if (account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
@@ -130,13 +123,6 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
       return;
     }
 
-    if (Object.keys(account.relaySettings).length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelays),
-      );
-      return;
-    }
-
     if (account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
@@ -165,13 +151,6 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
         intl.formatMessage(t.zapAsGuest),
       );
       setIsZapping(false);
-      return;
-    }
-
-    if (Object.keys(account.relaySettings).length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelays),
-      );
       return;
     }
 
