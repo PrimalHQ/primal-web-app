@@ -162,6 +162,18 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
   ];
 
   const noteContextForOtherPeople: MenuItem[] = [
+    {
+      label: 'Mute user',
+      action: () => setConfirmMuteUser(true),
+      icon: 'mute_user',
+      warning: true,
+    },
+    {
+      label: 'Report user',
+      action: () => setConfirmReportUser(true),
+      icon: 'report',
+      warning: true,
+    },
   ];
 
   const noteContext = account?.publicKey !== props.note.post.pubkey ?

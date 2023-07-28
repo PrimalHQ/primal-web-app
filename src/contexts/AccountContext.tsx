@@ -323,40 +323,40 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   }
 
   const addToMuteList = (pubkey: string) => {
-    if (!store.publicKey || store.muted.includes(pubkey)) {
-      return;
-    }
+    // if (!store.publicKey || store.muted.includes(pubkey)) {
+    //   return;
+    // }
 
-    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    // const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
+    //   if (type === 'EOSE') {
 
-        if (!store.muted.includes(pubkey)) {
-          const date = Math.floor((new Date()).getTime() / 1000);
-          const muted = [...store.muted, pubkey];
+    //     if (!store.muted.includes(pubkey)) {
+    //       const date = Math.floor((new Date()).getTime() / 1000);
+    //       const muted = [...store.muted, pubkey];
 
-          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+    //       const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
 
-          if (success) {
-            updateStore('muted', () => muted);
-            updateStore('mutedSince', () => date);
-            saveMuted(store.publicKey, muted, date);
-          }
-        }
+    //       if (success) {
+    //         updateStore('muted', () => muted);
+    //         updateStore('mutedSince', () => date);
+    //         saveMuted(store.publicKey, muted, date);
+    //       }
+    //     }
 
-        unsub();
-        return;
-      }
+    //     unsub();
+    //     return;
+    //   }
 
-      if (content &&
-        content.kind === Kind &&
-        content.created_at &&
-        content.created_at > store.followingSince
-      ) {
-        updateContacts(content);
-      }
-    });
+    //   if (content &&
+    //     content.kind === Kind &&
+    //     content.created_at &&
+    //     content.created_at > store.followingSince
+    //   ) {
+    //     updateContacts(content);
+    //   }
+    // });
 
-    getProfileContactList(store.publicKey, `before_mute_${APP_ID}`);
+    // getProfileContactList(store.publicKey, `before_mute_${APP_ID}`);
   };
 
 
