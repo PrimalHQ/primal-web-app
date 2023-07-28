@@ -24,7 +24,7 @@ import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveMuted, saveRelaySettings } from "../lib/localStore";
-import { closeRelays, connectRelays, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
+import { closeRelays, connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { account } from "../translations";
 
 export type AccountContextStore = {
@@ -82,7 +82,22 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   };
 
   const setRelaySettings = (settings: NostrRelays) => {
-    updateStore('relaySettings', () => ({ ...settings }));
+
+    const rs = store.relaySettings;
+
+    let toSave = Object.keys(settings).reduce((acc, url) => {
+      if (rs[url]) {
+        return acc;
+      }
+
+      return { ...acc, [url]: settings[url] };
+    }, {});
+
+    if (Object.keys(toSave).length === 0) {
+      return;
+    }
+
+    updateStore('relaySettings', () => ({ ...toSave }));
     saveRelaySettings(store.publicKey, settings)
   }
 
@@ -93,36 +108,55 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   };
 
-  let connecting = false;
+  let relayAtempts: Record<string, number> = {};
+  const relayAtemptLimit = 10;
+
+  let relayReliability: Record<string, number> = {};
 
   const connectToRelays = (relaySettings: NostrRelays) => {
 
-    if (connecting) {
-      setTimeout(() => { connectToRelays(relaySettings) }, relayConnectingTimeout);
-      return;
-    }
-
-    connecting = true;
-
     if (Object.keys(relaySettings).length === 0) {
-      getDefaultRelays(`default_relays_${APP_ID}`)
+      getDefaultRelays(`default_relays_${APP_ID}`);
+      return;
     }
 
     const relaysToConnect = attachDefaultRelays(relaySettings);
 
-    closeRelays(store.relays,
-      () => {
-        connectRelays(relaysToConnect, (connected) => {
-          updateStore('relays', () => [ ...connected ]);
-          console.log('Connected relays: ', connected);
-          connecting = false;
-        });
-      },
-      () => {
-        console.log('Failed to close all relays');
-        connecting = false;
-      },
-    );
+    const onConnect = (connectedRelay: Relay) => {
+      if (store.relays.find(r => r.url === connectedRelay.url)) {
+        return;
+      }
+
+      // Reset atempts after stable connection
+      relayReliability[connectedRelay.url] = setTimeout(() => {
+        relayAtempts[connectedRelay.url] = 0;
+      }, 3 * relayConnectingTimeout)
+
+      updateStore('relays', (rs) => [ ...rs, { ...connectedRelay } ]);
+    };
+
+    const onFail = (failedRelay: Relay, reasons: any) => {
+      console.log('Connection failed to relay ', failedRelay.url, ' because: ', reasons);
+
+      // connection is unstable, clear reliability timeout
+      relayReliability[failedRelay.url] && clearTimeout(relayReliability[failedRelay.url]);
+
+      updateStore('relays', (rs) => rs.filter(r => r.url !== failedRelay.url));
+
+      if ((relayAtempts[failedRelay.url] || 0) < relayAtemptLimit) {
+        relayAtempts[failedRelay.url] = (relayAtempts[failedRelay.url] || 0) + 1;
+
+        // Reconnect with a progressive delay
+        setTimeout(() => {
+          console.log('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
+          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail);
+        }, relayConnectingTimeout * relayAtempts[failedRelay.url]);
+        return;
+      }
+      console.log('Reached atempt limit ', failedRelay.url)
+    };
+
+    connectRelays(relaysToConnect, onConnect, onFail);
 
   };
 
@@ -198,7 +232,10 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
     }, []);
 
-    setRelaySettings(JSON.parse(content.content || '{}'));
+    const relaySettings = JSON.parse(content.content || '{}');
+
+    setRelaySettings(relaySettings);
+
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
     saveFollowing(store.publicKey, contacts, followingSince || 0);
@@ -368,18 +405,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
   });
 
-  // If user has relays but none is connected, retry connecting after a delay
-  // createEffect(() => {
-  //   if (
-  //     Object.keys(store.relaySettings).length > 0 &&
-  //     store.relays.length === 0
-  //   ) {
-  //     setTimeout(() => {
-  //       connectToRelays(store.relaySettings);
-  //     }, 200);
-  //   }
-  // });
-
   createEffect(() => {
     if (isConnected()) {
       refreshSocketListeners(
@@ -390,7 +415,18 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
-    connectToRelays(store.relaySettings);
+    let relaySettings = { ...store.relaySettings };
+
+    if (Object.keys(relaySettings).length > 0) {
+      connectToRelays(relaySettings);
+      return;
+    }
+
+    if (store.isKeyLookupDone && store.publicKey) {
+      relaySettings = { ...getStorage(store.publicKey).relaySettings };
+      connectToRelays(relaySettings);
+      return;
+    }
   });
 
   onCleanup(() => {
@@ -426,9 +462,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     if (subId === `user_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
-        if (Object.keys(store.relaySettings).length === 0) {
-          setRelaySettings(JSON.parse(content.content || '{}'));
-        }
 
         if (!content.created_at || content.created_at <= store.followingSince) {
           return;

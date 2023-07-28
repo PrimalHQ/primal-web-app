@@ -31,83 +31,67 @@ export const closeRelays = async (relays: Relay[], success = () => {}, fail = ()
   }
 };
 
-const connectToRelay: (relay: Relay) => Promise<Relay> = (relay: Relay) => new Promise(
-  (resolve, reject) => {
-    const timeout = setTimeout(() => {
+type ConnectToRelay = (
+  relay: Relay,
+  timeout: number,
+  onConnect: (relay: Relay) => void,
+  onFail: (relay: Relay, reasons: any) => void,
+) => void;
+
+export const connectToRelay: ConnectToRelay =
+  (relay, timeout, onConnect, onFail) => {
+    const tOut = setTimeout(() => {
       relay.close();
-      logError(relay, null, true);
-      reject(relay);
-    }, relayConnectingTimeout);
+      onFail(relay, 'timeout');
+    }, timeout);
 
     relay.on('connect', () => {
       console.log('CONNECTED ', relay.url);
+      clearTimeout(tOut);
       if (!reconnAttempts[relay.url]) {
         reconnAttempts[relay.url] = 0
       }
+      onConnect(relay);
     })
 
     relay.on('disconnect', () => {
       console.log('DISCONNECTED ', relay.url);
-      const attempt = reconnAttempts[relay.url];
-
-      if (attempt === attemptLimit) {
-        console.log('ATTEMPT LIMIT REACHED ', relay.url);
-        return;
-      }
-
-      const delay = attemptDelay(attempt);
-
-      console.log('RECONNECTING TO ', relay.url, ' IN ', delay, 'ms');
-
-      setTimeout(() => {
-        reconnAttempts[relay.url]++;
-        relay.connect();
-      }, delay);
+      clearTimeout(tOut);
+      relay.close();
+      onFail(relay, 'disconnect');
     })
 
-    relay.connect()
-      .then(() => {
-        clearTimeout(timeout);
-        resolve(relay);
-      })
-      .catch((e: any) => {
-        logError(relay, e);
-        reject(relay);
-      });
-  },
-);
+    relay.on('error', () => {
+      console.log('ERROR CONNECTING ', relay.url);
+      clearTimeout(tOut);
+      relay.close();
+      onFail(relay, 'failed connection');
+    })
+
+    try {
+      relay.connect();
+    } catch (e) {
+      console.log('CAUGHT ERROR ', e)
+    }
+  };
 
 export const connectRelays = async (
   relaySettings: NostrRelays,
-  onConnect: (relays: Relay[]) => void,
+  onConnect: (relay: Relay) => void,
+  onFail: (relay: Relay, reasons: any) => void,
 ) => {
 
   const urls = Object.keys(relaySettings);
-  const relays = urls.map(u => relayInit(u));
-  let promisses: Promise<Relay>[] = [];
+  const relays: Relay[] = urls.map(relayInit);
 
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
 
     if (relay.status === WebSocket.CLOSED) {
-      try {
-        promisses.push(connectToRelay(relay));
-      } catch(e){
-        logError(relay, e);
-      };
+      console.log('CONNECTING TO: ', relay.url);
+      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail)
     }
   }
-
-  const result: PromiseSettledResult<Relay>[] = await Promise.allSettled(promisses);
-
-  const connected: Relay[] = result.reduce((acc, r) =>
-    r.status === 'fulfilled' ?
-      [...acc, r.value] :
-      [...acc],
-    [] as Relay[],
-  );
-
-  onConnect(connected);
 };
 
 export const getPreConfiguredRelays = () => {
