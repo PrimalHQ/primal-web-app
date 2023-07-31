@@ -5,9 +5,11 @@ import styles from './LinkPreview.module.scss';
 
 const LinkPreview: Component<{ preview: any }> = (props) => {
 
+  const encodedUrl = encodeURI(props.preview.url);
+
   return (
     <a
-      href={props.preview.url}
+      href={encodedUrl} 
       class={styles.linkPreview}
     >
       <Show when={props.preview.images && props.preview.images[0]}>
@@ -17,8 +19,8 @@ const LinkPreview: Component<{ preview: any }> = (props) => {
       </Show>
 
       <div class={styles.previewInfo}>
-        <Show when={props.preview.url}>
-          <div class={styles.previewUrl}>{props.preview.url}</div>
+        <Show when={encodedUrl}>
+          <div class={styles.previewUrl}>{encodedUrl}</div>
         </Show>
 
         <Show when={props.preview.title}>
@@ -26,7 +28,7 @@ const LinkPreview: Component<{ preview: any }> = (props) => {
         </Show>
 
         <Show when={props.preview.description}>
-          <div class={styles.previewDescription}>{props.preview.description}</div>
+          <div class={styles.previewDescription}>{props.preview.description}</div> 
         </Show>
       </div>
     </a>
