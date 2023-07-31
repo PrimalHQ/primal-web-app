@@ -168,13 +168,19 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
   const noteContextForOtherPeople: MenuItem[] = [
     {
       label: intl.formatMessage(tActions.noteContext.muteAuthor),
-      action: () => setConfirmMuteUser(true),
+      action: () => {
+        setConfirmMuteUser(true);
+        setContext(false);
+      },
       icon: 'mute_user',
       warning: true,
     },
     {
       label: intl.formatMessage(tActions.noteContext.reportAuthor),
-      action: () => setConfirmReportUser(true),
+      action: () => {
+        setConfirmReportUser(true);
+        setContext(false);
+      },
       icon: 'report',
       warning: true,
     },
