@@ -187,6 +187,45 @@ const Profile: Component = () => {
     return account?.publicKey === profile?.profileKey;
   };
 
+  const [isUnmuted, setIsUnmuted] = createSignal(false);
+
+  createEffect(() => {
+    const pk = getHex();
+
+    if (!pk) {
+      return;
+    }
+
+    if (isUnmuted() && !account?.muted.includes(pk)) {
+      profile?.actions.fetchNotes(pk);
+      setIsUnmuted(false);
+    }
+  });
+  createEffect(() => {
+    const pk = getHex();
+
+    if (!pk) {
+      return;
+    }
+
+    if (account?.muted.includes(pk)) {
+      profile?.actions.clearNotes();
+    }
+  });
+
+  const isMuted = (pk: string | undefined) => {
+    return pk && account?.muted.includes(pk);
+  };
+
+  const unMuteProfile = () => {
+    if (!account || !profile?.profileKey) {
+      return;
+    }
+
+    setIsUnmuted(true);
+    account.actions.removeFromMuteList(profile.profileKey);
+  };
+
   return (
     <>
       <PageTitle title={
@@ -389,6 +428,16 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
+        <Show when={isMuted(profile?.profileKey)}>
+          <div class={styles.mutedProfile}>
+            Profile is muted
+            <button
+              onClick={unMuteProfile}
+            >
+              click to unmute
+            </button>
+          </div>
+        </Show>
         <For each={profile?.notes}>
           {note => (
             <Note note={note} />

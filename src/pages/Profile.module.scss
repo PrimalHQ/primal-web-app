@@ -374,6 +374,31 @@
   display: block;
 }
 
+.mutedProfile {
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+
+  button {
+    margin: 0;
+    padding: 0;
+    margin-left: 4px;
+    background: none;
+    border: none;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 20px;
+    color: var(--accent-2);
+    width: auto;
+    height: auto;
+  }
+}
+
 @media only screen and (max-width: 720px) {
 
   .banner {
@@ -447,6 +472,10 @@
   }
   .profileAbout {
     margin-top: 0px;
+  }
+
+  .mutedProfile {
+    flex-direction: column;
   }
 }
 

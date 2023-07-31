@@ -47,6 +47,10 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
     account?.actions.addToMuteList(props.note.post.pubkey);
   };
 
+  const doUnmuteUser = () => {
+    account?.actions.removeFromMuteList(props.note.post.pubkey);
+  };
+
   const doReportUser = () => {
     reportUser(props.note.user.pubkey, `report_user_${APP_ID}`, props.note.user);
     setContext(false);

@@ -101,7 +101,7 @@ export enum Kind  {
   ChannelMuteUser = 44,
 
   MuteList = 10_000,
-  MuteList2 = 30_000,
+  CategorizedPeople = 30_000,
 
   Settings = 30_078,
 

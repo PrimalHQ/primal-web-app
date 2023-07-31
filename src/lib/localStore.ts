@@ -4,6 +4,7 @@ export type LocalStore = {
   following: string[],
   followingSince: number,
   muted: string[],
+  mutedPrivate: string,
   mutedSince: number,
   relaySettings: NostrRelays,
   likes: string[],
@@ -15,6 +16,7 @@ export const emptyStorage = {
   following: [],
   followingSince: 0,
   muted: [],
+  mutedPrivate: '',
   mutedSince: 0,
   relaySettings: {},
   likes: [],
@@ -63,6 +65,20 @@ export const saveFollowing = (pubkey: string | undefined, following: string[], s
 
   store.following = [...following];
   store.followingSince = since;
+
+  setStorage(pubkey, store);
+}
+
+export const saveMuteList = (pubkey: string | undefined, muted: string[], mutedPrivate: string, since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.muted = [...muted];
+  store.mutedPrivate = mutedPrivate;
+  store.mutedSince = since;
 
   setStorage(pubkey, store);
 }

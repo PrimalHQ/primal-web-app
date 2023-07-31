@@ -11,6 +11,7 @@ import {
   NostrContactsContent,
   NostrEOSE,
   NostrEvent,
+  NostrMutedContent,
   NostrRelays,
   NostrWindow,
   PrimalNote,
@@ -22,8 +23,8 @@ import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getLikes, getProfileContactList, getUserProfiles } from "../lib/profile";
-import { getStorage, saveFollowing, saveLikes, saveMuted, saveRelaySettings } from "../lib/localStore";
+import { getLikes, getProfileContactList, getProfileMuteList, getUserProfiles } from "../lib/profile";
+import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
 import { closeRelays, connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { account } from "../translations";
 
@@ -37,6 +38,7 @@ export type AccountContextStore = {
   following: string[],
   followingSince: number,
   muted: string[],
+  mutedPrivate: string,
   mutedSince: number,
   hasPublicKey: () => boolean,
   isKeyLookupDone: boolean,
@@ -51,6 +53,7 @@ export type AccountContextStore = {
     removeFollow: (pubkey: string) => void,
     quoteNote: (noteId: string | undefined) => void,
     addToMuteList: (pubkey: string) => void,
+    removeFromMuteList: (pubkey: string) => void,
   },
 }
 
@@ -63,6 +66,9 @@ const initialData = {
   showNewNoteForm: false,
   following: [],
   followingSince: 0,
+  muted: [],
+  mutedPrivate: '',
+  mutedSince: 0,
   isKeyLookupDone: false,
   quotedNote: undefined,
 };
@@ -241,6 +247,36 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     saveFollowing(store.publicKey, contacts, followingSince || 0);
   };
 
+  const updateMuted = (content: NostrMutedContent) => {
+
+    const mutedSince = content.created_at;
+    const tags = content.tags;
+
+    if (content.kind === Kind.CategorizedPeople && tags.find(t => t[0] === 'd' && t[1] === 'mute')) {
+      return;
+    }
+
+    const muted = tags.reduce((acc, t) => {
+      if (t[0] !== 'p') {
+        return acc;
+      }
+
+      const pubkey = t[1];
+
+      if (store.muted.includes(pubkey)) {
+        return acc;
+      }
+
+      return [ ...acc, pubkey ];
+    }, []);
+
+    updateStore('muted', (ml) => [ ...ml, ...muted]);
+    updateStore('mutedPrivate', () => content.content);
+    updateStore('mutedSince', () => mutedSince || 0);
+
+    saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
+  };
+
   const addFollow = (pubkey: string) => {
     if (!store.publicKey || store.following.includes(pubkey)) {
       return;
@@ -323,40 +359,77 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   }
 
   const addToMuteList = (pubkey: string) => {
-    // if (!store.publicKey || store.muted.includes(pubkey)) {
-    //   return;
-    // }
+    if (!store.publicKey || !store.muted || store.muted.includes(pubkey)) {
+      return;
+    }
 
-    // const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
-    //   if (type === 'EOSE') {
+    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
 
-    //     if (!store.muted.includes(pubkey)) {
-    //       const date = Math.floor((new Date()).getTime() / 1000);
-    //       const muted = [...store.muted, pubkey];
+        if (!store.muted.includes(pubkey)) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const muted = [...store.muted, pubkey];
 
-    //       const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
 
-    //       if (success) {
-    //         updateStore('muted', () => muted);
-    //         updateStore('mutedSince', () => date);
-    //         saveMuted(store.publicKey, muted, date);
-    //       }
-    //     }
+          if (success) {
+            updateStore('muted', () => muted);
+            updateStore('mutedSince', () => date);
+            saveMuted(store.publicKey, muted, date);
+          }
+        }
 
-    //     unsub();
-    //     return;
-    //   }
+        unsub();
+        return;
+      }
 
-    //   if (content &&
-    //     content.kind === Kind &&
-    //     content.created_at &&
-    //     content.created_at > store.followingSince
-    //   ) {
-    //     updateContacts(content);
-    //   }
-    // });
+      if (content &&
+        (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateMuted(content);
+      }
+    });
 
-    // getProfileContactList(store.publicKey, `before_mute_${APP_ID}`);
+    getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
+  };
+
+  const removeFromMuteList = (pubkey: string) => {
+    if (!store.publicKey || !store.muted || !store.muted.includes(pubkey)) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_unmute_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        if (store.muted.includes(pubkey)) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const muted = store.muted.filter(m => m !== pubkey);
+
+          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+
+          if (success) {
+            updateStore('muted', () => muted);
+            updateStore('mutedSince', () => date);
+            saveMuted(store.publicKey, muted, date);
+          }
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        ([Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateMuted(content as NostrMutedContent);
+      }
+    });
+
+    getProfileMuteList(store.publicKey, `before_unmute_${APP_ID}`);
   };
 
 
@@ -382,7 +455,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
-    if (store.publicKey) {
+    if (store.isKeyLookupDone && store.publicKey) {
 
       const storage = getStorage(store.publicKey);
 
@@ -392,6 +465,20 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
 
       getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
+    }
+  });
+
+  createEffect(() => {
+    if (store.isKeyLookupDone && hasPublicKey()) {
+      const storage = getStorage(store.publicKey);
+
+      if (store.mutedSince < storage.mutedSince) {
+        updateStore('muted', () => ({ ...storage.muted }));
+        updateStore('mutedSince', () => storage.mutedSince);
+        updateStore('mutedPrivate', () => storage.mutedPrivate);
+      }
+
+      getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
     }
   });
 
@@ -472,11 +559,23 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
+    if (subId === `mutelist_${APP_ID}`) {
+      if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
+
+        if (!content.created_at || content.created_at <= store.mutedSince) {
+          return;
+        }
+
+        updateMuted(content as NostrMutedContent);
+      }
+      return;
+    }
+
     if (subId === `default_relays_${APP_ID}`) {
       if (type === 'EVENT') {
         const resp = JSON.parse(content.content || '[]');
 
-        const relaySettings = resp.reduce((acc, r) => ({ ...acc, [r]: { read: true, write: true }}), {});
+        const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
 
         if (Object.keys(relaySettings).length > 0) {
           connectToRelays(relaySettings);
@@ -501,6 +600,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     removeFollow,
     quoteNote,
     addToMuteList,
+    removeFromMuteList,
   },
 });
 

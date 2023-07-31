@@ -76,6 +76,14 @@ export type NostrContactsContent = {
   tags: string[][],
 };
 
+export type NostrMutedContent = {
+  kind: Kind.MuteList | Kind.CategorizedPeople,
+  content: string,
+  pubkey?: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrScoredUsersContent = {
   kind: Kind.UserScore,
   content: string,
@@ -137,16 +145,19 @@ export type NostrMessageEncryptedContent = {
 export type NostrFeedRange = {
   kind: Kind.FeedRange,
   content: string,
+  created_at?: number,
 };
 
 export type NostrMediaInfo = {
   kind: Kind.MediaInfo,
   content: string,
+  created_at?: number,
 };
 
 export type NostrMediaUploaded = {
   kind: Kind.Uploaded,
   content: string,
+  created_at?: number,
 };
 
 export type NostrEventContent =
@@ -159,6 +170,7 @@ export type NostrEventContent =
   NostrMentionContent |
   NostrOldestEventContent |
   NostrContactsContent |
+  NostrMutedContent |
   NostrScoredUsersContent |
   NostrNotificationContent |
   NostrNotificationLastSeenContent |
