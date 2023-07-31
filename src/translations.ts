@@ -82,14 +82,76 @@ export const actions = {
     description: 'Edit profile action label',
   },
   reportUserConfirm: {
-    id: 'settings.reportUserConfirm',
+    id: 'actions.reportUserConfirm',
     defaultMessage: 'Report user {name}?',
     description: 'Label for report user confirmation',
   },
   muteUserConfirm: {
-    id: 'settings.muteUserConfirm',
+    id: 'actions.muteUserConfirm',
     defaultMessage: 'Add {name} to your mute list?',
     description: 'Label for mute user confirmation',
+  },
+  mute: {
+    id: 'actions.mute',
+    defaultMessage: 'click to unmute',
+    description: 'Label un-mute button',
+  },
+  noteContext: {
+    zap: {
+      id: 'actions.zapNote',
+      defaultMessage: 'Zap',
+      description: 'Label for note zap from context menu',
+    },
+    copyLink: {
+      id: 'actions.copyLink',
+      defaultMessage: 'Copy note link',
+      description: 'Label for copy note link from context menu',
+    },
+    copyText: {
+      id: 'actions.copytext',
+      defaultMessage: 'Copy note text',
+      description: 'Label for copy note text from context menu',
+    },
+    copyId: {
+      id: 'actions.copyId',
+      defaultMessage: 'Copy note ID',
+      description: 'Label for copy note ID from context menu',
+    },
+    copyRaw: {
+      id: 'actions.copyRaw',
+      defaultMessage: 'Copy raw data',
+      description: 'Label for copy note raw data from context menu',
+    },
+    copyPubkey: {
+      id: 'actions.copyPubkey',
+      defaultMessage: 'Copy user public key',
+      description: 'Label for copy note author\'s pubkey from context menu',
+    },
+    breadcast: {
+      id: 'actions.breadcast',
+      defaultMessage: 'Broadcast note',
+      description: 'Label for note broadcast from context menu',
+    },
+    muteAuthor: {
+      id: 'actions.muteAuthor',
+      defaultMessage: 'Mute user',
+      description: 'Label for muting user from context menu',
+    },
+    reportAuthor: {
+      id: 'actions.reportAuthor',
+      defaultMessage: 'Report user',
+      description: 'Label for reporting user from context menu',
+    },
+    repostNote: {
+      id: 'actions.repostNote',
+      defaultMessage: 'Repost note',
+      description: 'Label for reposting note from context menu',
+    },
+    quoteNote: {
+      id: 'actions.quoteNote',
+      defaultMessage: 'Quote note',
+      description: 'Label for quoting note from context menu',
+    },
   },
 };
 
@@ -655,6 +717,11 @@ export const profile = {
       defaultMessage: 'Posts',
       description: 'Label for notes profile stat',
     },
+  },
+  isMuted: {
+    id: 'profile.isMuted',
+    defaultMessage: '{name} is muted',
+    description: 'Label indicating that the profile is muted',
   },
 };
 

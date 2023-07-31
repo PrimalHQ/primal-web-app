@@ -14,7 +14,7 @@ import Branding from '../components/Branding/Branding';
 import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
-import { nip05Verification, truncateNpub } from '../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../stores/profile';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
@@ -34,6 +34,7 @@ import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
 import { useMediaContext } from '../contexts/MediaContext';
 import { profile as t, actions as tActions } from '../translations';
+import Loader from '../components/Loader/Loader';
 
 const Profile: Component = () => {
 
@@ -197,10 +198,13 @@ const Profile: Component = () => {
     }
 
     if (isUnmuted() && !account?.muted.includes(pk)) {
-      profile?.actions.fetchNotes(pk);
       setIsUnmuted(false);
+      setTimeout(() => {
+        profile?.actions.fetchNotes(pk);
+      }, 500);
     }
   });
+
   createEffect(() => {
     const pk = getHex();
 
@@ -428,22 +432,38 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
-        <Show when={isMuted(profile?.profileKey)}>
-          <div class={styles.mutedProfile}>
-            Profile is muted
-            <button
-              onClick={unMuteProfile}
-            >
-              click to unmute
-            </button>
-          </div>
+        <Show
+          when={!isMuted(profile?.profileKey)}
+          fallback={
+            <div class={styles.mutedProfile}>
+              {intl.formatMessage(
+                t.isMuted,
+                { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+              )}
+              <button
+                onClick={unMuteProfile}
+              >
+                {intl.formatMessage(tActions.mute)}
+              </button>
+            </div>
+          }
+        >
+          <Show
+            when={profile && profile.notes.length > 0}
+            fallback={
+              <div style="margin-top: 40px;">
+                <Loader />
+              </div>}
+          >
+            <For each={profile?.notes}>
+              {note => (
+                <Note note={note} />
+              )}
+            </For>
+            <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
+          </Show>
         </Show>
-        <For each={profile?.notes}>
-          {note => (
-            <Note note={note} />
-          )}
-        </For>
-        <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
+
       </div>
     </>
   )

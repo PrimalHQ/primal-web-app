@@ -126,7 +126,7 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
 
   const noteContextForEveryone: MenuItem[] = [
     {
-      label: 'Zap',
+      label: intl.formatMessage(tActions.noteContext.zap),
       action: () => {
         props.openCustomZap && props.openCustomZap();
         setContext(false);
@@ -134,32 +134,32 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
       icon: 'feed_zap',
     },
     {
-      label: 'Copy note link',
+      label: intl.formatMessage(tActions.noteContext.copyLink),
       action: copyNoteLink,
       icon: 'copy_note_link',
     },
     {
-      label: 'Copy note text',
+      label: intl.formatMessage(tActions.noteContext.copyText),
       action: copyNoteText,
       icon: 'copy_note_text',
     },
     {
-      label: 'Copy note ID',
+      label: intl.formatMessage(tActions.noteContext.copyId),
       action: copyNoteId,
       icon: 'copy_note_id',
     },
     {
-      label: 'Copy raw data',
+      label: intl.formatMessage(tActions.noteContext.copyRaw),
       action: copyRawData,
       icon: 'copy_raw_data',
     },
     {
-      label: 'Broadcast note',
+      label: intl.formatMessage(tActions.noteContext.breadcast),
       action: broadcastNote,
       icon: 'broadcast',
     },
     {
-      label: 'Copy user public key',
+      label: intl.formatMessage(tActions.noteContext.copyPubkey),
       action: copyUserNpub,
       icon: 'copy_pubkey',
     },
@@ -167,13 +167,13 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
 
   const noteContextForOtherPeople: MenuItem[] = [
     {
-      label: 'Mute user',
+      label: intl.formatMessage(tActions.noteContext.muteAuthor),
       action: () => setConfirmMuteUser(true),
       icon: 'mute_user',
       warning: true,
     },
     {
-      label: 'Report user',
+      label: intl.formatMessage(tActions.noteContext.reportAuthor),
       action: () => setConfirmReportUser(true),
       icon: 'report',
       warning: true,
