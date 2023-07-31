@@ -144,13 +144,13 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>july 27, 2023</div>
-              <div>0.12.4</div>
+              <div>july 31, 2023</div>
+              <div>0.12.5</div>
             </div>
           </div>
 
           <a
-            href='https://downloads.primal.net/android/primal-0.12.4.apk'
+            href='https://downloads.primal.net/android/primal-0.12.5.apk'
             target='_blank'
           >
             <img src={apkDownload} />

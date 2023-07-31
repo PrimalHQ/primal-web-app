@@ -255,9 +255,9 @@ export const emojiSearchLimit = 1;
 
 export const today = (new Date()).getTime();
 export const iosRD = (new Date('07/26/2023')).getTime();
-export const andRD = (new Date('07/27/2023')).getTime();
+export const andRD = (new Date('07/31/2023')).getTime();
 
 export const iosCheck = '7/26/23';
-export const andCheck = '7/27/23';
+export const andCheck = '7/31/23';
 
 export const refreshFeedDelay = 2_500;
