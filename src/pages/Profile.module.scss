@@ -164,6 +164,16 @@
   mask: url(../assets/icons/zaps.svg) no-repeat 0px / 18px;
 }
 
+.contextIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/context.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/context.svg) no-repeat 0px / 18px;
+}
+
 .messageIcon {
   width: 18px;
   height: 18px;
@@ -396,6 +406,14 @@
     color: var(--accent-2);
     width: auto;
     height: auto;
+  }
+}
+
+.contextArea {
+  position: relative;
+  padding: 0;
+  button {
+    margin-left: 0;
   }
 }
 

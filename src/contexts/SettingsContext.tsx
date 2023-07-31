@@ -141,7 +141,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       );
 
       !temp && saveSettings();
-      toaster?.sendSuccess(`"${feed.name}" has been removed from your home page`);
     }
   };
 

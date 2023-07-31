@@ -7,16 +7,30 @@ import PrimalMenuItem from "./PrimalMenuItem";
 export default function PrimalMenu(props: {
   id: string,
   items: MenuItem[],
-  left?: boolean,
+  position?: 'note_footer' | 'profile',
+  reverse?: boolean
 }) {
+
+  const positionClass = () => {
+    if (props.position == 'note_footer') {
+      return styles.noteFooter
+    }
+
+    if (props.position == 'profile') {
+      return styles.profile
+    }
+
+    return '';
+  }
+
   return (
     <div
       id={props.id}
-      class={`${styles.contextMenuOptions} ${props.left ? styles.left : ''}`}
+      class={`${styles.contextMenuOptions} ${positionClass()}`}
     >
       <For each={props.items}>
         {item => (
-          <PrimalMenuItem item={item} />
+          <PrimalMenuItem item={item} reverse={props.reverse} />
         )}
       </For>
     </div>

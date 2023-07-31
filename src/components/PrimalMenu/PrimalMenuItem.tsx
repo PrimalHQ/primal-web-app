@@ -5,6 +5,7 @@ import styles from  "./PrimalMenuItem.module.scss";
 
 export default function PrimalMenuItem(props: {
   item: MenuItem,
+  reverse?: boolean,
 }) {
 
   const [icon, setIcon] = createSignal<string>()
@@ -19,6 +20,10 @@ export default function PrimalMenuItem(props: {
     });
   };
 
+  const warningClass= () => props.item.warning ? styles.warning : '';
+
+  const reverseClass= () => props.reverse ? styles.reverse : '';
+
   onMount(getIcon);
 
   return (
@@ -28,7 +33,7 @@ export default function PrimalMenuItem(props: {
         e.stopPropagation();
         props.item.action();
       }}
-      class={`${styles.contextOption} ${props.item.warning ? styles.warning : ''}`}
+      class={`${styles.contextOption} ${warningClass()}  ${reverseClass()}`}
     >
       <span>
         {props.item.label}

@@ -96,59 +96,96 @@ export const actions = {
     defaultMessage: 'click to unmute',
     description: 'Label un-mute button',
   },
+  profileContext: {
+    copyPubkey: {
+      id: 'actions.profileContext.copyPubkey',
+      defaultMessage: 'Copy user public key',
+      description: 'Label for copy user\'s pubkey from profile context menu',
+    },
+    copyLink: {
+      id: 'actions.profileContext.copyLink',
+      defaultMessage: 'Copy user link',
+      description: 'Label for copy user\'s link from profile context menu',
+    },
+    addFeed: {
+      id: 'actions.profileContext.addFeed',
+      defaultMessage: 'Add user feed',
+      description: 'Label for adding user\'s feed to home, from profile context menu',
+    },
+    removeFeed: {
+      id: 'actions.profileContext.removeFeed',
+      defaultMessage: 'Remove user feed',
+      description: 'Label for removing user\'s feed from home, from profile context menu',
+    },
+    muteUser: {
+      id: 'actions.profileContext.muteUser',
+      defaultMessage: 'Mute user',
+      description: 'Label for muting user from profile context menu',
+    },
+    unmuteUser: {
+      id: 'actions.profileContext.unmuteUser',
+      defaultMessage: 'Unmute user',
+      description: 'Label for unmuting user from profile context menu',
+    },
+    reportUser: {
+      id: 'actions.profileContext.reportUser',
+      defaultMessage: 'Report user',
+      description: 'Label for reporting user from profile context menu',
+    },
+  },
   noteContext: {
     zap: {
-      id: 'actions.zapNote',
+      id: 'actions.noteContext.zapNote',
       defaultMessage: 'Zap',
       description: 'Label for note zap from context menu',
     },
     copyLink: {
-      id: 'actions.copyLink',
+      id: 'actions.noteContext.copyLink',
       defaultMessage: 'Copy note link',
       description: 'Label for copy note link from context menu',
     },
     copyText: {
-      id: 'actions.copytext',
+      id: 'actions.noteContext.copytext',
       defaultMessage: 'Copy note text',
       description: 'Label for copy note text from context menu',
     },
     copyId: {
-      id: 'actions.copyId',
+      id: 'actions.noteContext.copyId',
       defaultMessage: 'Copy note ID',
       description: 'Label for copy note ID from context menu',
     },
     copyRaw: {
-      id: 'actions.copyRaw',
+      id: 'actions.noteContext.copyRaw',
       defaultMessage: 'Copy raw data',
       description: 'Label for copy note raw data from context menu',
     },
     copyPubkey: {
-      id: 'actions.copyPubkey',
+      id: 'actions.noteContext.copyPubkey',
       defaultMessage: 'Copy user public key',
       description: 'Label for copy note author\'s pubkey from context menu',
     },
     breadcast: {
-      id: 'actions.breadcast',
+      id: 'actions.noteContext.breadcast',
       defaultMessage: 'Broadcast note',
       description: 'Label for note broadcast from context menu',
     },
     muteAuthor: {
-      id: 'actions.muteAuthor',
+      id: 'actions.noteContext.muteAuthor',
       defaultMessage: 'Mute user',
       description: 'Label for muting user from context menu',
     },
     reportAuthor: {
-      id: 'actions.reportAuthor',
+      id: 'actions.noteContext.reportAuthor',
       defaultMessage: 'Report user',
       description: 'Label for reporting user from context menu',
     },
     repostNote: {
-      id: 'actions.repostNote',
+      id: 'actions.noteContext.repostNote',
       defaultMessage: 'Repost note',
       description: 'Label for reposting note from context menu',
     },
     quoteNote: {
-      id: 'actions.quoteNote',
+      id: 'actions.noteContext.quoteNote',
       defaultMessage: 'Quote note',
       description: 'Label for quoting note from context menu',
     },
@@ -323,6 +360,12 @@ export const explore = {
       description: 'Label for number of all stats',
     },
   }
+};
+
+export const feedProfile = {
+  id: 'feedName',
+  defaultMessage: '{name}\'s feed',
+  description: 'Generic name for a feed created from a profile',
 };
 
 export const feedNewPosts = {
@@ -1060,6 +1103,11 @@ export const toast = {
     defaultMessage: '"{name}" has been added to your home page',
     description: 'Toast message confirming successfull adding of the feed to home to the list of available feeds',
   },
+  removeFeedFromHomeSuccess: {
+    id: 'toasts.removeFeedToHome.success',
+    defaultMessage: '"{name}" has been removed from your home page',
+    description: 'Toast message confirming successfull removal of the feed from home\'s list of available feeds',
+  },
   fileTypeUpsupported: {
     id: 'toast.unsupportedFileType',
     defaultMessage: 'You can only upload images and videos. This file type is not supported.',
@@ -1124,6 +1172,11 @@ export const toast = {
     id: 'toast.noteAuthorNpubCoppied',
     defaultMessage: 'Note\'s author npub copied',
     description: 'Confirmation message that the note\'s author npub has been copied',
+  },
+  profileNpubCoppied: {
+    id: 'toast.noteAuthorNpubCoppied',
+    defaultMessage: 'User\'s npub copied',
+    description: 'Confirmation message that the user\'s npub has been copied',
   },
   noteBroadcastSuccess: {
     id: 'toast.noteBroadcastSuccess',

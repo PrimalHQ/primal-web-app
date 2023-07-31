@@ -429,7 +429,7 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
           <PrimalMenu
             id={`repost_menu_${props.note.post.id}`}
             items={repostMenuItems}
-            left={true}
+            position="note_footer"
           />
         </Show>
         </div>

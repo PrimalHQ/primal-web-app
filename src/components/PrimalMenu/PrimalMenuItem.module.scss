@@ -1,6 +1,7 @@
 
 .contextOption {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
 
@@ -40,6 +41,15 @@
 
     &:hover, &:focus {
       background-color: color-mix(in srgb, var(--warning-color) 25%, var(--background-site));
+    }
+  }
+
+  &.reverse{
+    flex-direction: row-reverse;
+    text-align: left;
+    justify-content: flex-end;
+    span {
+      margin-left: 12px;
     }
   }
 
