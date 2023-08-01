@@ -117,8 +117,8 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>july 26, 2023</div>
-              <div>0.23.1</div>
+              <div>august 1, 2023</div>
+              <div>0.24.3</div>
             </div>
           </div>
 
