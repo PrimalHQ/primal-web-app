@@ -454,33 +454,33 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     updateStore('relaySettings', () => ({ ...storage.relaySettings }));
   });
 
-  createEffect(() => {
-    if (store.isKeyLookupDone && store.publicKey) {
+  // createEffect(() => {
+  //   if (store.isKeyLookupDone && store.publicKey) {
 
-      const storage = getStorage(store.publicKey);
+  //     const storage = getStorage(store.publicKey);
 
-      if (store.followingSince < storage.followingSince) {
-        updateStore('following', () => ({ ...storage.following }));
-        updateStore('followingSince', () => storage.followingSince);
-      }
+  //     if (store.followingSince < storage.followingSince) {
+  //       updateStore('following', () => ({ ...storage.following }));
+  //       updateStore('followingSince', () => storage.followingSince);
+  //     }
 
-      getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
-    }
-  });
+  //     getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
+  //   }
+  // });
 
-  createEffect(() => {
-    if (store.isKeyLookupDone && hasPublicKey()) {
-      const storage = getStorage(store.publicKey);
+  // createEffect(() => {
+  //   if (store.isKeyLookupDone && hasPublicKey()) {
+  //     const storage = getStorage(store.publicKey);
 
-      if (store.mutedSince < storage.mutedSince) {
-        updateStore('muted', () => ({ ...storage.muted }));
-        updateStore('mutedSince', () => storage.mutedSince);
-        updateStore('mutedPrivate', () => storage.mutedPrivate);
-      }
+  //     if (store.mutedSince < storage.mutedSince) {
+  //       updateStore('muted', () => ({ ...storage.muted }));
+  //       updateStore('mutedSince', () => storage.mutedSince);
+  //       updateStore('mutedPrivate', () => storage.mutedPrivate);
+  //     }
 
-      getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
-    }
-  });
+  //     getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
+  //   }
+  // });
 
   createEffect(() => {
     if (store.publicKey && store.relays.length > 0) {
