@@ -38,7 +38,7 @@ export const isUserFollowing = (pubkey: string | undefined, user_pubkey: string 
   ]));
 };
 
-export const getProfileContactList = (pubkey: string | undefined, subid: string) => {
+export const getProfileContactList = (pubkey: string | undefined, subid: string, extended = false) => {
   if (!pubkey) {
     return;
   }
@@ -46,11 +46,11 @@ export const getProfileContactList = (pubkey: string | undefined, subid: string)
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["contact_list", { pubkey }]},
+    {cache: ["contact_list", { pubkey, extended_response: extended }]},
   ]));
 }
 
-export const getProfileMuteList = (pubkey: string | undefined, subid: string) => {
+export const getProfileMuteList = (pubkey: string | undefined, subid: string, extended?: boolean) => {
   if (!pubkey) {
     return;
   }
@@ -58,7 +58,7 @@ export const getProfileMuteList = (pubkey: string | undefined, subid: string) =>
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["mutelist", { pubkey }]},
+    {cache: ["mutelist", { pubkey, extended_response: extended }]},
   ]));
 }
 

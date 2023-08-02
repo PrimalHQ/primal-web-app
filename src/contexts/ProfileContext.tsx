@@ -34,7 +34,6 @@ import {
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
-  getProfileContactList,
   getProfileScoredNotes,
   getUserProfileInfo,
   isUserFollowing,
@@ -386,10 +385,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
-
-      // setTimeout(() => {
-      //   getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
-      // }, 100);
     }
   }
 
