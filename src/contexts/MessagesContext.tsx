@@ -63,7 +63,7 @@ export type MessagesContextStore = {
   messageCount: number,
   messageCountPerSender: Record<string, SenderMessageCount>,
   senders: Record<string, PrimalUser>;
-  selectedSender: PrimalUser | null,
+  selectedSender: string | null,
   encryptedMessages: NostrMessageEncryptedContent[],
   messages: DirectMessage[],
   conversation: DirectMessageThread[],
@@ -80,7 +80,7 @@ export type MessagesContextStore = {
     selectSender: (senderId: string | undefined) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
-    sendMessage: (receiver: PrimalUser, message: DirectMessage) => Promise<boolean>,
+    sendMessage: (receiver: string, message: DirectMessage) => Promise<boolean>,
     resetAllMessages: () => Promise<void>,
     addSender: (user: PrimalUser) => void,
     getNextConversationPage: () => void,
@@ -193,8 +193,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
-    updateStore('selectedSender', () => null);
-    updateStore('selectedSender', () => ({ ...sender }));
+    updateStore('selectedSender', () => sender.pubkey);
   };
 
   const findMissingUser = (pubkey: string) => {
@@ -222,13 +221,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     markAllAsRead(subidResetMsgCounts);
   };
 
-  const getConversationWithSender = (sender: PrimalUser | null, until = 0) => {
+  const getConversationWithSender = (sender: string | null, until = 0) => {
     if (!account?.isKeyLookupDone || !account.hasPublicKey() || !sender) {
       return;
     }
     resetConversationLoaded();
+
     // @ts-ignore
-    getOldMessages(account.publicKey, sender.pubkey, subidCoversation, until);
+    getOldMessages(account.publicKey, sender, subidCoversation, until);
   };
 
   const getNextConversationPage = () => {
@@ -245,7 +245,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('encryptedMessages', () => []);
 
     // @ts-ignore
-    lastMessage.created_at > 0 && getOldMessages(account.publicKey, store.selectedSender.pubkey, subidCoversationNextPage, lastMessage.created_at);
+    lastMessage.created_at > 0 && getOldMessages(account.publicKey, store.selectedSender, subidCoversationNextPage, lastMessage.created_at);
   };
 
   const decryptMessages = async (then: (messages: DirectMessage[]) => void) => {
@@ -262,7 +262,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
       if (!store.messages.find(m => eMsg.id === m.id) && store.selectedSender) {
         try {
-          const content = await nostr.nip04.decrypt(store.selectedSender.pubkey, eMsg.content);
+          const content = await nostr.nip04.decrypt(store.selectedSender, eMsg.content);
 
           const msg: DirectMessage = {
             sender: eMsg.pubkey,
@@ -279,8 +279,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
 
     updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
-    resetMessageCount(store.selectedSender.pubkey, subidResetMsgCount);
-    updateStore('messageCountPerSender', store.selectedSender.pubkey, 'cnt', 0)
+    resetMessageCount(store.selectedSender, subidResetMsgCount);
+    updateStore('messageCountPerSender', store.selectedSender, 'cnt', 0)
 
     parseForMentions(newMessages);
     then(newMessages);
@@ -321,6 +321,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       return '';
 
     });
+
     const noteIds = noteRefs.map(x => {
       const decoded = nip19.decode(x);
 
@@ -346,8 +347,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     getUserProfiles(pubkeys, subidUserRef);
     getEvents(account?.publicKey, noteIds, subidNoteRef, true);
-
-
   };
 
   const prependToConversation = (messages: DirectMessage[]) => {
@@ -420,8 +419,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const generateConversation = (messages: DirectMessage[]) => {
 
     let author: string | undefined;
-    let thread: DirectMessageThread = { author: '', messages: [] };
-    let conversation: any[] = [];
+    let thread: DirectMessageThread = store.conversation[store.conversation.length -1] || { author: '', messages: [] };
+    let conversation: DirectMessageThread[] = [];
 
     for (let i=0;i<messages.length;i++) {
       const message = messages[i];
@@ -438,10 +437,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     };
 
-    thread.messages.length > 0 && conversation.push(thread);
+    if (thread.messages.length > 0) {
+      conversation.push(thread);
 
-    updateStore('conversation', (conv) => [...conv, ...conversation]);
-    updateStore('isConversationLoaded', () => true);
+      updateStore('conversation', (conv) => [...conv, ...conversation]);
+      updateStore('isConversationLoaded', () => true);
+    }
   };
 
   const resetConversationLoaded = () => {
@@ -469,18 +470,18 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('referecedNotes', (nts) => ({ ...nts, ...notes }));
   };
 
-  const sendMessage = async (receiver: PrimalUser, message: DirectMessage) => {
+  const sendMessage = async (receiver: string, message: DirectMessage) => {
     const nostr = getNostr();
     if (!account || !nostr) {
       return false;
     }
 
-    const content = await nostr.nip04.encrypt(receiver.pubkey, message.content);
+    const content = await nostr.nip04.encrypt(receiver, message.content);
 
     const event = {
       content,
       kind: Kind.EncryptedDirectMessage,
-      tags: [['p', receiver.pubkey]],
+      tags: [['p', receiver]],
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
@@ -489,7 +490,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     if (success) {
       const msg = { ...message, content: sanitize(message.content) };
       addToConversation([msg]);
-      updateStore('messageCountPerSender', receiver.pubkey, 'latest_at', message.created_at);
+      updateStore('messageCountPerSender', receiver, 'latest_at', message.created_at);
     }
 
     return success;
@@ -756,8 +757,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     if (
       account?.hasPublicKey() &&
       store.selectedSender &&
-      store.messageCountPerSender[store.selectedSender?.pubkey] &&
-      store.messageCountPerSender[store.selectedSender.pubkey].cnt > 0
+      store.messageCountPerSender[store.selectedSender] &&
+      store.messageCountPerSender[store.selectedSender].cnt > 0
     ) {
 
       updateStore('encryptedMessages', () => []);
@@ -777,7 +778,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       getNewMessages(
         // @ts-ignore
         account?.publicKey,
-        store.selectedSender.pubkey,
+        store.selectedSender,
         subidNewMsg,
         time,
       );

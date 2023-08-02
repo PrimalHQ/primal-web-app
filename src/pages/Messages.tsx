@@ -220,10 +220,9 @@ const Messages: Component = () => {
   });
 
   createEffect(() => {
-    if (messages?.selectedSender &&
-      currentUrl !== messages?.selectedSender?.npub
-    ) {
-      navigate(`/messages/${messages?.selectedSender.npub}`);
+    if (messages?.selectedSender && currentUrl !== messages.selectedSender) {
+      const npub = hexToNpub(messages.selectedSender)
+      navigate(`/messages/${npub}`);
       return;
     }
   });
@@ -651,7 +650,7 @@ const Messages: Component = () => {
       newMessageWrapper.style.height = '32px';
 
       setTimeout(() => {
-        const element = document.querySelector(`[data-user="${messages?.selectedSender?.pubkey}"]`);
+        const element = document.querySelector(`[data-user="${messages?.selectedSender}"]`);
 
         if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
           element.scrollIntoView();
@@ -860,7 +859,7 @@ const Messages: Component = () => {
   createEffect(() => {
     if (messages?.selectedSender) {
 
-      const element = document.querySelector(`[data-user="${messages.selectedSender.pubkey}"]`);
+      const element = document.querySelector(`[data-user="${messages.selectedSender}"]`);
 
       if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
         element.scrollIntoView();
