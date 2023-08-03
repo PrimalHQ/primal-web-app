@@ -819,36 +819,6 @@ const Messages: Component = () => {
     const e = new Event('input', { bubbles: true, cancelable: true});
     newMessageInput.dispatchEvent(e);
   };
-  // const selectUser = (user: PrimalUser) => {
-
-  //   if (!newMessageInput) {
-  //     return;
-  //   }
-  //   const name = userName(user);
-
-  //   setUserRefs((refs) => ({
-  //     ...refs,
-  //     [name]: user,
-  //   }));
-
-  //   messages?.actions.addUserReference(user);
-
-  //   let value = message();
-
-  //   value = value.slice(0, value.lastIndexOf('@'));
-
-  //   setQuery('');
-
-  //   setMessage(`${value}@\`${name}\` `);
-  //   newMessageInput.value = message();
-
-  //   newMessageInput.focus();
-
-
-  //   // Dispatch input event to recalculate UI position
-  //   const e = new Event('input', { bubbles: true, cancelable: true});
-  //   newMessageInput.dispatchEvent(e);
-  // };
 
   createEffect(() => {
     if (account?.hasPublicKey()) {

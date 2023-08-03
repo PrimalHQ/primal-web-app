@@ -248,6 +248,25 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     lastMessage.created_at > 0 && getOldMessages(account.publicKey, store.selectedSender, subidCoversationNextPage, lastMessage.created_at);
   };
 
+  const actualDecrypt = (sender: string, message: string) => {
+    const nostr = getNostr();
+
+    if (!nostr) {
+      throw(new Error('Decrypt: Nostr extension is not availablle'));
+    }
+
+    return new Promise<string>((resolve) => {
+      nostr.nip04.decrypt(sender, message).then((m) => {
+        resolve(m)
+      }).catch((reason) => {
+        console.error('FAILED to decrypt: ', message, reason);
+        setTimeout(() => {
+          resolve(actualDecrypt(sender, message));
+        }, 10 + Math.random() * 300);
+      });
+    });
+  }
+
   const decryptMessages = async (then: (messages: DirectMessage[]) => void) => {
     const nostr = getNostr();
 
@@ -261,8 +280,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       const eMsg = store.encryptedMessages[i];
 
       if (!store.messages.find(m => eMsg.id === m.id) && store.selectedSender) {
+
         try {
-          const content = await nostr.nip04.decrypt(store.selectedSender, eMsg.content);
+          const content = await actualDecrypt(store.selectedSender, eMsg.content);
 
           const msg: DirectMessage = {
             sender: eMsg.pubkey,
@@ -284,7 +304,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     parseForMentions(newMessages);
     then(newMessages);
-    // areNewMessages ? addToConversation(newMessages, true) : generateConversation(newMessages);
   };
 
   const parseForMentions = (messages: DirectMessage[]) => {
