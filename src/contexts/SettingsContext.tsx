@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, defaultNotificationSettings, themes, trendingFeed } from "../constants";
+import { defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, themes, trendingFeed } from "../constants";
 import {
   createContext,
   createEffect,
@@ -55,6 +55,7 @@ export type SettingsContextStore = {
     loadSettings: (pubkey: string) => void,
     setDefaultZapAmount: (amount: number) => void,
     setZapOptions: (amount:number, index: number) => void,
+    resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
   }
@@ -66,15 +67,8 @@ export const initialData = {
   themes,
   availableFeeds: [],
   defaultFeed: defaultFeeds[0],
-  defaultZapAmount: 10,
-  availableZapOptions: [
-    21,
-    420,
-    10_000,
-    69_420,
-    100_000,
-    1_000_000,
-  ],
+  defaultZapAmount: defaultZapAmount,
+  availableZapOptions: defaultZapOptions,
   notificationSettings: { ...defaultNotificationSettings },
 };
 
@@ -98,6 +92,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     updateStore('availableZapOptions', index, () => amount);
     !temp && saveSettings();
   };
+
+  const resetZapOptionsToDefault = (temp?: boolean) => {
+    updateStore('availableZapOptions', () => defaultZapOptions);
+    updateStore('defaultZapAmount', () => defaultZapAmount);
+    !temp && saveSettings();
+  }
 
   const setTheme = (theme: PrimalTheme | null, temp?: boolean) => {
     if (!theme) {
@@ -466,6 +466,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       restoreDefaultFeeds,
       setDefaultZapAmount,
       setZapOptions,
+      resetZapOptionsToDefault,
       updateNotificationSettings,
     },
   });

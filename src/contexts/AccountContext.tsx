@@ -12,6 +12,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrMutedContent,
+  NostrRelay,
   NostrRelays,
   NostrWindow,
   PrimalNote,
@@ -21,7 +22,7 @@ import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
-import { Relay } from "nostr-tools";
+import { Relay, relayInit } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getProfileMuteList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
@@ -43,6 +44,7 @@ export type AccountContextStore = {
   hasPublicKey: () => boolean,
   isKeyLookupDone: boolean,
   quotedNote: string | undefined,
+  connectToPrimaryRelays: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -54,6 +56,9 @@ export type AccountContextStore = {
     quoteNote: (noteId: string | undefined) => void,
     addToMuteList: (pubkey: string) => void,
     removeFromMuteList: (pubkey: string) => void,
+    addRelay: (url: string) => void,
+    removeRelay: (url: string) => void,
+    setConnectToPrimaryRelays: (flag: boolean) => void,
   },
 }
 
@@ -71,6 +76,7 @@ const initialData = {
   mutedSince: 0,
   isKeyLookupDone: false,
   quotedNote: undefined,
+  connectToPrimaryRelays: true,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -97,14 +103,16 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
 
       return { ...acc, [url]: settings[url] };
-    }, {});
+    }, rs);
+
+    console.log('TO SAVE: ', toSave)
 
     if (Object.keys(toSave).length === 0) {
       return;
     }
 
     updateStore('relaySettings', () => ({ ...toSave }));
-    saveRelaySettings(store.publicKey, settings)
+    saveRelaySettings(store.publicKey, toSave)
   }
 
   const attachDefaultRelays = (relaySettings: NostrRelays) => {
@@ -116,8 +124,13 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   let relayAtempts: Record<string, number> = {};
   const relayAtemptLimit = 10;
+  let relaysExplicitlyClosed: string[] = [];
 
   let relayReliability: Record<string, number> = {};
+
+  const setConnectToPrimaryRelays = (flag: boolean) => {
+    updateStore('connectToPrimaryRelays', () => flag);
+  }
 
   const connectToRelays = (relaySettings: NostrRelays) => {
 
@@ -126,7 +139,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
-    const relaysToConnect = attachDefaultRelays(relaySettings);
+    const relaysToConnect = store.connectToPrimaryRelays ?
+      attachDefaultRelays(relaySettings) :
+      relaySettings;
 
     const onConnect = (connectedRelay: Relay) => {
       if (store.relays.find(r => r.url === connectedRelay.url)) {
@@ -148,6 +163,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       relayReliability[failedRelay.url] && clearTimeout(relayReliability[failedRelay.url]);
 
       updateStore('relays', (rs) => rs.filter(r => r.url !== failedRelay.url));
+
+      if (relaysExplicitlyClosed.includes(failedRelay.url)) {
+        relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== failedRelay.url);
+        return;
+      }
 
       if ((relayAtempts[failedRelay.url] || 0) < relayAtemptLimit) {
         relayAtempts[failedRelay.url] = (relayAtempts[failedRelay.url] || 0) + 1;
@@ -227,6 +247,90 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
 
     return success;
+  };
+
+  const addRelay = (url: string) => {
+    const relay: NostrRelays = { [url]: { write: true, read: true }};
+
+    setRelaySettings(relay);
+
+    relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
+
+    const unsub = subscribeTo(`before_add_relay_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        const relayInfo = JSON.stringify(store.relaySettings);
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const following = [...store.following];
+
+        const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+
+        if (success) {
+          updateStore('following', () => following);
+          updateStore('followingSince', () => date);
+          saveFollowing(store.publicKey, following, date);
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.Contacts &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateContacts(content);
+      }
+    });
+
+    getProfileContactList(store.publicKey, `before_add_relay_${APP_ID}`);
+  };
+
+  const removeRelay = (url: string) => {
+    const relay: Relay = store.relays.find(r => r.url === url);
+
+    if (relay) {
+      relay.close();
+      updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+    }
+
+    relaysExplicitlyClosed.push(url);
+    relayAtempts[url] = 0;
+
+    updateStore('relaySettings', () => ({ [url]: undefined }));
+
+    setRelaySettings(store.relaySettings);
+
+    const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        const relayInfo = JSON.stringify(store.relaySettings);
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const following = [...store.following];
+
+        const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+
+        if (success) {
+          updateStore('following', () => following);
+          updateStore('followingSince', () => date);
+          saveFollowing(store.publicKey, following, date);
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.Contacts &&
+        content.created_at &&
+        content.created_at > store.followingSince
+      ) {
+        updateContacts(content);
+      }
+    });
+
+    getProfileContactList(store.publicKey, `before_remove_relay_${APP_ID}`);
   };
 
   const updateContacts = (content: NostrContactsContent) => {
@@ -516,6 +620,27 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
   });
 
+  createEffect(() => {
+    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+    if (store.connectToPrimaryRelays) {
+      const relaySettings = rels.reduce((acc, r) => ({ ...acc, [r]: { read: true, write: true } }), {});
+
+      connectToRelays(relaySettings)
+    }
+    else {
+      for (let i = 0; i < rels.length; i++) {
+        const url = rels[i];
+        const relay = store.relays.find(r => r.url === url);
+
+        if (relay) {
+          relay.close();
+          updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+        }
+      }
+    }
+  });
+
   onCleanup(() => {
     removeSocketListeners(
       socket(),
@@ -601,6 +726,9 @@ const [store, updateStore] = createStore<AccountContextStore>({
     quoteNote,
     addToMuteList,
     removeFromMuteList,
+    addRelay,
+    removeRelay,
+    setConnectToPrimaryRelays,
   },
 });
 

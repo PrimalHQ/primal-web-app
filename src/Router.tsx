@@ -1,5 +1,6 @@
-import { Component, createReaction, createResource, lazy, Resource } from 'solid-js';
+import { Component, createResource, lazy } from 'solid-js';
 import { Routes, Route, Navigate, RouteDataFuncArgs } from "@solidjs/router"
+
 import Home from './pages/Home';
 import Layout from './components/Layout/Layout';
 import Explore from './pages/Explore';
@@ -7,9 +8,20 @@ import Thread from './pages/Thread';
 import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Downloads from './pages/Downloads';
-import Settings from './pages/Settings';
+import Settings from './pages/Settings/Settings';
 import Help from './pages/Help';
-// import Profile from './pages/Profile';
+import Search from './pages/Search';
+import NotFound from './pages/NotFound';
+import EditProfile from './pages/EditProfile';
+
+import NotifSettings from './pages/Settings/Notifications';
+import Appearance from './pages/Settings/Appearance';
+import HomeFeeds from './pages/Settings/HomeFeeds';
+import ZapSettings from './pages/Settings/Zaps';
+import Muted from './pages/Settings/Muted';
+import Network from './pages/Settings/Network';
+import Menu from './pages/Settings/Menu';
+
 import { PrimalWindow } from './types/primal';
 import { useHomeContext } from './contexts/HomeContext';
 import { useExploreContext } from './contexts/ExploreContext';
@@ -17,14 +29,12 @@ import { useThreadContext } from './contexts/ThreadContext';
 import { useAccountContext } from './contexts/AccountContext';
 import { useProfileContext } from './contexts/ProfileContext';
 import { useSettingsContext } from './contexts/SettingsContext';
-import NotFound from './pages/NotFound';
 import { fetchKnownProfiles } from './lib/profile';
-import Search from './pages/Search';
 import { useMessagesContext } from './contexts/MessagesContext';
 import { useMediaContext } from './contexts/MediaContext';
 import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
-import EditProfile from './pages/EditProfile';
+
 
 const primalWindow = window as PrimalWindow;
 
@@ -78,7 +88,15 @@ const Router: Component = () => {
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />
           <Route path="/download" element={<Navigate href='/downloads' />} />;
-          <Route path="/settings" component={Settings} />
+          <Route path="/settings" component={Settings}>
+            <Route path="/" component={Menu} />
+            <Route path="/appearance" component={Appearance} />
+            <Route path="/feeds" component={HomeFeeds} />
+            <Route path="/notifications" component={NotifSettings} />
+            <Route path="/zaps" component={ZapSettings} />
+            <Route path="/muted" component={Muted} />
+            <Route path="/network" component={Network} />
+          </Route>
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />

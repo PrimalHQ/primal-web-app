@@ -91,9 +91,9 @@ export const actions = {
     defaultMessage: 'Add {name} to your mute list?',
     description: 'Label for mute user confirmation',
   },
-  mute: {
-    id: 'actions.mute',
-    defaultMessage: 'click to unmute',
+  unmute: {
+    id: 'actions.unmute',
+    defaultMessage: 'unmute',
     description: 'Label un-mute button',
   },
   profileContext: {
@@ -812,6 +812,96 @@ export const search = {
 };
 
 export const settings = {
+  index: {
+    title: {
+      id: 'settings.index.title',
+      defaultMessage: 'Settings',
+      description: 'Title of the settings page',
+    },
+  },
+  appearance: {
+    title: {
+      id: 'settings.appearance.title',
+      defaultMessage: 'Appearance',
+      description: 'Title of the appearance settings sub-page',
+    },
+    caption: {
+      id: 'settings.appearance.caption',
+      defaultMessage: 'Select a theme',
+      description: 'Caption for theme selection',
+    },
+  },
+  homeFeeds: {
+    title: {
+      id: 'settings.homeFeeds.title',
+      defaultMessage: 'Home Feeds',
+      description: 'Title of the home feeds settings sub-page',
+    },
+    caption: {
+      id: 'settings.homeFeeds.caption',
+      defaultMessage: 'Edit and order your home page feeds',
+      description: 'Caption for home feed ordering',
+    },
+  },
+  muted: {
+    title: {
+      id: 'settings.muted.title',
+      defaultMessage: 'Muted Accounts',
+      description: 'Title of the muted accounts settings sub-page',
+    },
+    empty: {
+      id: 'settings.muted.empty',
+      defaultMessage: 'No muted users',
+      description: 'Caption indicating that there are no muted users',
+    },
+  },
+  network: {
+    title: {
+      id: 'settings.network.title',
+      defaultMessage: 'Network',
+      description: 'Title of the network settings sub-page',
+    },
+    relays: {
+      id: 'settings.network.relays',
+      defaultMessage: 'Relays',
+      description: 'Title of the Relays section of the Network settings sub-page',
+    },
+    myRelays: {
+      id: 'settings.network.myRelays',
+      defaultMessage: 'My Relays',
+      description: 'Title of the My Relays section of the Network settings sub-page',
+    },
+    recomended: {
+      id: 'settings.network.recomended',
+      defaultMessage: 'Recomended Relays',
+      description: 'Title of the Recomended Relays section of the Network settings sub-page',
+    },
+    customRelay: {
+      id: 'settings.network.customRelay',
+      defaultMessage: 'Connect to relay',
+      description: 'Title of the Customd Relays section of the Network settings sub-page',
+    },
+    cachingService: {
+      id: 'settings.network.cachingService',
+      defaultMessage: 'Caching Service',
+      description: 'Title of the Caching Service section of the Network settings sub-page',
+    },
+    connectedCachingService: {
+      id: 'settings.network.connectedCachingService',
+      defaultMessage: 'Connected caching service',
+      description: 'Title of the Caching Service section of the Network settings sub-page',
+    },
+  },
+  relays: {
+    id: 'settings.relays',
+    defaultMessage: 'Relays',
+    description: 'Title of the relays sections of the settings sidebar',
+  },
+  cashingService: {
+    id: 'settings.cashingService',
+    defaultMessage: 'Caching Service',
+    description: 'Title of the caching service sections of the settings sidebar',
+  },
   title: {
     id: 'settings.title',
     defaultMessage: 'Settings',
@@ -829,13 +919,18 @@ export const settings = {
   },
   feedsRestore: {
     id: 'settings.feedsRestore',
-    defaultMessage: 'Reset to default feeds',
+    defaultMessage: 'restore defaults',
     description: 'Label for the button for restoring default feeds to the feeds list',
   },
   feedsRestoreConfirm: {
     id: 'settings.feedsRestoreConfirm',
     defaultMessage: 'Restoring default feeds will erase all your custom feed settings',
     description: 'Label explaining the impact of restoring default feeds',
+  },
+  zapsRestoreConfirm: {
+    id: 'settings.zapsRestoreConfirm',
+    defaultMessage: 'This action will restore all your zap settings to their default values',
+    description: 'Label explaining the impact of restoring default zaps',
   },
   feedLatest: {
     id: 'feeds.latestFollowing',

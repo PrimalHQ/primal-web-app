@@ -261,3 +261,14 @@ export const iosCheck = '8/01/23';
 export const andCheck = '8/07/23';
 
 export const refreshFeedDelay = 2_500;
+
+export const defaultZapAmount = 10;
+
+export const defaultZapOptions = [
+  21,
+  420,
+  10_000,
+  69_420,
+  100_000,
+  1_000_000,
+];

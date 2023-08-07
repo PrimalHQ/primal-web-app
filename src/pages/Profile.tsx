@@ -563,7 +563,7 @@ const Profile: Component = () => {
               <button
                 onClick={unMuteProfile}
               >
-                {intl.formatMessage(tActions.mute)}
+                {intl.formatMessage(tActions.unmute)}
               </button>
             </div>
           }

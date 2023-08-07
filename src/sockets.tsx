@@ -27,9 +27,11 @@ const onError = (error: Event) => {
   console.log("ws error: ", error);
 };
 
+export let cacheServer = '';
+
 export const connect = () => {
   if (isNotConnected()) {
-    const cacheServer =
+    cacheServer =
       localStorage.getItem('cacheServer') ||
       import.meta.env.PRIMAL_CACHE_URL ||
       'wss://cache3.primal.net/cache17';

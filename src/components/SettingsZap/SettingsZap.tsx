@@ -1,12 +1,24 @@
-import { Component, For } from 'solid-js';
+import { Component, createSignal, For } from 'solid-js';
 
 import styles from './SettingsZap.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { debounce } from '../../utils';
+import { useIntl } from '@cookbook/solid-intl';
+import ConfirmModal from '../ConfirmModal/ConfirmModal';
+import { settings as t } from '../../translations';
 
 const SettingsZap: Component = () => {
 
+  const intl = useIntl();
   const settings = useSettingsContext();
+
+
+  const [isRestoringZaps, setIsRestoringZaps] = createSignal(false);
+
+  const onRestoreZaps = () => {
+    settings?.actions.resetZapOptionsToDefault();
+    setIsRestoringZaps(false);
+  };
 
   const changeDefaultZap = (e: InputEvent) => {
     debounce(() => {
@@ -65,6 +77,21 @@ const SettingsZap: Component = () => {
           </For>
         </div>
       </div>
+
+      <div class={styles.restoreZaps}>
+        <button
+            onClick={() => setIsRestoringZaps(true)}
+        >
+          {intl.formatMessage(t.feedsRestore)}
+        </button>
+      </div>
+
+      <ConfirmModal
+        open={isRestoringZaps()}
+        description={intl.formatMessage(t.zapsRestoreConfirm)}
+        onConfirm={onRestoreZaps}
+        onAbort={() => setIsRestoringZaps(false)}
+      />
     </div>
   );
 }

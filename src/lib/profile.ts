@@ -165,10 +165,6 @@ export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?
   return await sendEvent(event, relays, relaySettings);
 };
 
-export const muteUser = async (pubkey: string, relays: Relay[], relaySettings?: NostrRelays) => {
-
-};
-
 export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
   if (!pubkey) {
     return;
