@@ -10,6 +10,8 @@ const Menu: Component = () => {
 
   const intl = useIntl();
 
+  const version = import.meta.env.PRIMAL_VERSION;
+
   return (
     <div>
       <PageCaption title={intl.formatMessage(t.title)} />
@@ -39,6 +41,11 @@ const Menu: Component = () => {
           {intl.formatMessage(t.zaps)}
           <div class={styles.chevron}></div>
         </Link>
+      </div>
+
+      <div class={styles.webVersion}>
+        <div class={styles.title}>version</div>
+        <div class={styles.value}>{version}</div>
       </div>
     </div>
   )

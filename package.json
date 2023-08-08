@@ -1,6 +1,6 @@
 {
   "name": "vite-template-solid",
-  "version": "1.0.0",
+  "version": "0.71.8",
   "description": "",
   "scripts": {
     "start": "vite",

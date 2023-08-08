@@ -419,3 +419,27 @@
   line-height: 20px;
   text-align: left;
 }
+
+.webVersion {
+  width: fit-content;
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .title {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    text-transform: uppercase;
+  }
+
+  .value {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 28px;
+  }
+}

@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
+import packageJson from './package.json';
+
 
 export default defineConfig({
   plugins: [solidPlugin()],
@@ -11,4 +13,7 @@ export default defineConfig({
     sourcemap: true,
   },
   envPrefix: 'PRIMAL_',
+  define: {
+    'import.meta.env.PRIMAL_VERSION': JSON.stringify(packageJson.version),
+  },
 });
