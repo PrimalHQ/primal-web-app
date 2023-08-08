@@ -4,7 +4,12 @@ import { Relay, relayInit } from "nostr-tools";
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
-import { settings as t } from '../../translations';
+import {
+  settings as t,
+  actions as tActions,
+  errors as tErrors,
+  placeholders as tPlaceholders,
+} from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -24,8 +29,10 @@ const Network: Component = () => {
   const [recomendedRelays, setRecomendedRelays] = createStore<Relay[]>([]);
   const [confirmRemoveRelay, setConfirmRemoveRelay] = createSignal('');
   const [invalidCustomRelay, setInvalidCustomRelay] = createSignal(false);
+  const [invalidCachingService, setInvalidCachingService] = createSignal(false);
 
   let customRelayInput: HTMLInputElement | undefined;
+  let cachingServiceInput: HTMLInputElement | undefined;
 
   const relays = () => {
     let settingsRelays = [];
@@ -50,7 +57,7 @@ const Network: Component = () => {
         const a = new URL(r);
         const b = new URL(relay.url);
 
-        return a.origin === b.origin;
+        return a.href === b.href;
       });
 
       if (!exists) {
@@ -76,6 +83,58 @@ const Network: Component = () => {
     account?.actions.setConnectToPrimaryRelays(!account.connectToPrimaryRelays)
   };
 
+  const onAddRelay = (url: string) => {
+    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+    if (rels.includes(url)) {
+      account?.actions.setConnectToPrimaryRelays(true);
+    }
+    account?.actions.addRelay(url);
+  };
+
+  const onRemoveRelay = (url: string) => {
+    account?.actions.removeRelay(url);
+  };
+
+  const onCustomRelayInput = () => {
+    if (!customRelayInput || customRelayInput.value === '') {
+      return;
+    }
+
+    try {
+      const url = new URL(customRelayInput.value);
+      if (!url.origin.startsWith('wss://')) {
+        throw(new Error('must be a wss'))
+      }
+
+      customRelayInput.value = '';
+      account?.actions.addRelay(url.href);
+      setInvalidCustomRelay(false);
+    } catch (e) {
+      console.log('invalid url ', e);
+      setInvalidCustomRelay(true);
+    }
+  }
+
+  const onCachingServiceInput = () => {
+    if (!cachingServiceInput || cachingServiceInput.value === '') {
+      return;
+    }
+
+    try {
+      const url = new URL(cachingServiceInput.value);
+      if (!url.origin.startsWith('wss://')) {
+        throw(new Error('must be a wss'))
+      }
+
+      cachingServiceInput.value = '';
+      account?.actions.changeCachingService(url.href);
+      setInvalidCachingService(false);
+    } catch (e) {
+      console.log('invalid url', e);
+      setInvalidCachingService(true);
+    }
+  }
+
   createEffect(() => {
     const unsub = subscribeTo(`settings_drs_${APP_ID}`, (type, subId, content) => {
       if (type === 'EVENT' && content) {
@@ -90,38 +149,6 @@ const Network: Component = () => {
 
     getDefaultRelays(`settings_drs_${APP_ID}`);
   });
-
-  const onAddRelay = (url: string) => {
-    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-    if (rels.includes(url)) {
-      account?.actions.setConnectToPrimaryRelays(true);
-    }
-    account?.actions.addRelay(url);
-  };
-
-  const onRemoveRelay = (url: string) => {
-    account?.actions.removeRelay(url);
-  };
-
-  const onCustomRelayInput = () => {
-    if (!customRelayInput) {
-      return;
-    }
-
-    try {
-      const url = new URL(customRelayInput.value);
-      if (!url.origin.startsWith('wss://')) {
-        throw(new Error('must be a wss'))
-      }
-
-      customRelayInput.value = '';
-      account?.actions.addRelay(url.origin);
-      setInvalidCustomRelay(false);
-    } catch (e) {
-      console.log('invalid url');
-      setInvalidCustomRelay(true);
-    }
-  }
 
   return (
     <div>
@@ -153,7 +180,7 @@ const Network: Component = () => {
                 {relay.url}
               </span>
             </div>
-            <div class={styles.remove}><div class={styles.closeIcon}></div> remove</div>
+            <div class={styles.remove}><div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}</div>
           </button>
         )}
       </For>
@@ -181,7 +208,7 @@ const Network: Component = () => {
                 {url}
               </span>
             </div>
-            <div class={styles.add}><div class={styles.addIcon}></div> add</div>
+            <div class={styles.add}><div class={styles.addIcon}></div> {intl.formatMessage(tActions.addRelay)}</div>
           </button>
         )}
       </For>
@@ -197,7 +224,7 @@ const Network: Component = () => {
         <input
           ref={customRelayInput}
           type="text"
-          placeholder="wss://relay.url"
+          placeholder={intl.formatMessage(tPlaceholders.relayUrl)}
           onChange={() => onCustomRelayInput()}
         />
         <button onClick={() => onCustomRelayInput()}>
@@ -207,7 +234,7 @@ const Network: Component = () => {
 
       <Show when={invalidCustomRelay()}>
         <div class={styles.invalidInput}>
-          Invalid relay url
+          {intl.formatMessage(tErrors.invalidRelayUrl)}
         </div>
       </Show>
 
@@ -234,9 +261,46 @@ const Network: Component = () => {
         </div>
       </div>
 
+
+      <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
+        {intl.formatMessage(t.network.alternativeCachingService)}
+      </div>
+
+      <div
+        class={styles.relayInput}
+      >
+        <div class={styles.webIcon}></div>
+        <input
+          ref={cachingServiceInput}
+          type="text"
+          placeholder={intl.formatMessage(tPlaceholders.cachingServiceUrl)}
+          onChange={() => onCachingServiceInput()}
+        />
+        <button onClick={() => onCachingServiceInput()}>
+          <div class={styles.connectIcon}></div>
+        </button>
+      </div>
+
+      <Show when={invalidCachingService()}>
+        <div class={styles.invalidInput}>
+          {intl.formatMessage(tErrors.invalidRelayUrl)}
+        </div>
+      </Show>
+
+      <div style="height: 20px"></div>
+
+      <button
+        class={styles.restoreFeedsButton}
+        onClick={() => account?.actions.changeCachingService()}
+      >
+        {intl.formatMessage(tActions.restoreCachingService)}
+      </button>
+
+      <div style="height: 48px"></div>
+
       <ConfirmModal
         open={confirmRemoveRelay().length > 0}
-        description="Remove Relay?"
+        description={intl.formatMessage(tActions.confirmRemoveRelay, { url: confirmRemoveRelay() })}
         onConfirm={() => {
           onRemoveRelay(confirmRemoveRelay())
           setConfirmRemoveRelay('');

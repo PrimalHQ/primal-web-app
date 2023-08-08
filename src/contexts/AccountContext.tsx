@@ -19,7 +19,7 @@ import {
   PrimalUser,
 } from '../types/primal';
 import { Kind, relayConnectingTimeout } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo } from "../sockets";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
 import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
 import { Relay, relayInit } from "nostr-tools";
@@ -59,6 +59,7 @@ export type AccountContextStore = {
     addRelay: (url: string) => void,
     removeRelay: (url: string) => void,
     setConnectToPrimaryRelays: (flag: boolean) => void,
+    changeCachingService: (url?: string) => void,
   },
 }
 
@@ -104,8 +105,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
       return { ...acc, [url]: settings[url] };
     }, rs);
-
-    console.log('TO SAVE: ', toSave)
 
     if (Object.keys(toSave).length === 0) {
       return;
@@ -254,6 +253,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     setRelaySettings(relay);
 
+    // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
 
     const unsub = subscribeTo(`before_add_relay_${APP_ID}`, async (type, subId, content) => {
@@ -290,17 +290,22 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   const removeRelay = (url: string) => {
     const relay: Relay = store.relays.find(r => r.url === url);
 
+    // if relay is connected, close it and remove it from the list of open relays
     if (relay) {
       relay.close();
       updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
     }
 
+    // Add relay to the list of explicitly closed relays
     relaysExplicitlyClosed.push(url);
+
+    // Reset connection attempts
     relayAtempts[url] = 0;
 
+    // Remove relay from the user's relay settings
     updateStore('relaySettings', () => ({ [url]: undefined }));
 
-    setRelaySettings(store.relaySettings);
+    saveRelaySettings(store.publicKey, store.relaySettings);
 
     const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -536,6 +541,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     getProfileMuteList(store.publicKey, `before_unmute_${APP_ID}`);
   };
 
+  const changeCachingService = (url?: string) => {
+    if (!url) {
+      localStorage.removeItem('cacheServer');
+    }
+    else {
+      localStorage.setItem('cacheServer', url);
+    }
+
+    reset();
+  };
+
 
 // EFFECTS --------------------------------------
 
@@ -729,6 +745,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     addRelay,
     removeRelay,
     setConnectToPrimaryRelays,
+    changeCachingService,
   },
 });
 

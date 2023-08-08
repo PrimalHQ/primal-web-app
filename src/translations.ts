@@ -96,6 +96,26 @@ export const actions = {
     defaultMessage: 'unmute',
     description: 'Label un-mute button',
   },
+  addRelay: {
+    id: 'actions.addRelay',
+    defaultMessage: 'add',
+    description: 'Label for add relay action',
+  },
+  removeRelay: {
+    id: 'actions.removeRelay',
+    defaultMessage: 'remove',
+    description: 'Label for remove relay action',
+  },
+  confirmRemoveRelay: {
+    id: 'actions.confirmRemoveRelay',
+    defaultMessage: 'Remove {url} from your relay list? This will disconnect you from the relay.',
+    description: 'Label for remove relay confirmation',
+  },
+  restoreCachingService: {
+    id: 'actions.restoreCachingService',
+    defaultMessage: 'Restore default caching service',
+    description: 'Label for restore default caching service',
+  },
   profileContext: {
     copyPubkey: {
       id: 'actions.profileContext.copyPubkey',
@@ -716,6 +736,16 @@ export const placeholders = {
     defaultMessage: 'Page not found',
     description: 'Placholder text for missing page',
   },
+  relayUrl: {
+    id: 'placeholders.relayUrl',
+    defaultMessage: 'wss://relay.url',
+    description: 'Placholder relay url input',
+  },
+  cachingServiceUrl: {
+    id: 'placeholders.cachingServiceUrl',
+    defaultMessage: 'wss://cachingservice.url',
+    description: 'Placholder relay url input',
+  },
 };
 
 export const profile = {
@@ -864,32 +894,37 @@ export const settings = {
     relays: {
       id: 'settings.network.relays',
       defaultMessage: 'Relays',
-      description: 'Title of the Relays section of the Network settings sub-page',
+      description: 'Title of the relays section of the network settings sub-page',
     },
     myRelays: {
       id: 'settings.network.myRelays',
       defaultMessage: 'My Relays',
-      description: 'Title of the My Relays section of the Network settings sub-page',
+      description: 'Title of the my relays section of the network settings sub-page',
     },
     recomended: {
       id: 'settings.network.recomended',
       defaultMessage: 'Recomended Relays',
-      description: 'Title of the Recomended Relays section of the Network settings sub-page',
+      description: 'Title of the recomended relays section of the network settings sub-page',
     },
     customRelay: {
       id: 'settings.network.customRelay',
       defaultMessage: 'Connect to relay',
-      description: 'Title of the Customd Relays section of the Network settings sub-page',
+      description: 'Title of the custom relays section of the network settings sub-page',
     },
     cachingService: {
       id: 'settings.network.cachingService',
       defaultMessage: 'Caching Service',
-      description: 'Title of the Caching Service section of the Network settings sub-page',
+      description: 'Title of the caching service section of the network settings sub-page',
     },
     connectedCachingService: {
       id: 'settings.network.connectedCachingService',
       defaultMessage: 'Connected caching service',
-      description: 'Title of the Caching Service section of the Network settings sub-page',
+      description: 'Title of the caching service section of the network settings sub-page',
+    },
+    alternativeCachingService: {
+      id: 'settings.network.alternativeCachingService',
+      defaultMessage: 'Connect to a different caching service',
+      description: 'Title of the alternative caching service section of the Network settings sub-page',
     },
   },
   relays: {
@@ -1324,4 +1359,12 @@ export const zapCustomOption = {
   id: 'zap.custom.option',
   defaultMessage: `Zap {user} `,
   description: 'Caption for custom zap amount modal',
+};
+
+export const errors = {
+  invalidRelayUrl: {
+    id: 'placeholders.invalidRelayUrl',
+    defaultMessage: 'Invalid url',
+    description: 'Error text for invalid url',
+  },
 };

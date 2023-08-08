@@ -60,21 +60,21 @@
   .settingsCaption {
     margin-bottom: 0px;
   }
+}
 
-  .restoreFeedsButton {
-    background: none;
-    color: var(--accent-1);
-    width: auto;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 20px;
-    border: none;
-    margin: 0;
-    padding: 0;
+.restoreFeedsButton {
+  background: none;
+  color: var(--accent-1);
+  width: auto;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  border: none;
+  margin: 0;
+  padding: 0;
 
-    &:hover {
-      text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -361,6 +361,7 @@
     border-radius: 8px;
     color: var(--text-secondary);
     margin-bottom: 0;
+    background-color: var(--background-input);
 
     &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: var(--text-tertiary-2);
