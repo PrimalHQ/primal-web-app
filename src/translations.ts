@@ -902,6 +902,11 @@ export const settings = {
       defaultMessage: 'My Relays',
       description: 'Title of the my relays section of the network settings sub-page',
     },
+    noMyRelays: {
+      id: 'settings.networks.noMyRelays',
+      defaultMessage: 'Your Nostr account doesn\'t have any relays specified, so we connected you to a default set of relays. To configure your desired set of relays, please select them from the list below.',
+      description: 'Caption informing the user that he has no relays configured',
+    },
     recomended: {
       id: 'settings.network.recomended',
       defaultMessage: 'Recomended Relays',

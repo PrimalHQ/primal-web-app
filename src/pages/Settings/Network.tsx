@@ -86,9 +86,17 @@ const Network: Component = () => {
 
   const onAddRelay = (url: string) => {
     const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
     if (rels.includes(url)) {
       account?.actions.setConnectToPrimaryRelays(true);
     }
+
+    const myRelays = relays();
+
+    if (myRelays.length === 0) {
+      account?.actions.dissconnectDefaultRelays()
+    }
+
     account?.actions.addRelay(url);
   };
 
@@ -166,25 +174,31 @@ const Network: Component = () => {
         {intl.formatMessage(t.network.myRelays)}
       </div>
 
-      <For each={relays()}>
-        {relay => (
-          <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay.url)}>
-            <div class={styles.relayEntry}>
-              <Show
-                when={isConnected(relay.url)}
-                fallback={<div class={styles.disconnected}></div>}
-              >
-                <div class={styles.connected}></div>
-              </Show>
-              <div class={styles.webIcon}></div>
-              <span class={styles.relayUrl} title={relay.url}>
-                {relay.url}
-              </span>
-            </div>
-            <div class={styles.remove}><div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}</div>
-          </button>
-        )}
-      </For>
+      <Show
+        when={relays().length > 0}
+        fallback={<div class={styles.noMyRelays}>{intl.formatMessage(t.network.noMyRelays)}</div>}
+      >
+        <For each={relays()}>
+          {relay => (
+            <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay.url)}>
+              <div class={styles.relayEntry}>
+                <Show
+                  when={isConnected(relay.url)}
+                  fallback={<div class={styles.disconnected}></div>}
+                >
+                  <div class={styles.connected}></div>
+                </Show>
+                <div class={styles.webIcon}></div>
+                <span class={styles.relayUrl} title={relay.url}>
+                  {relay.url}
+                </span>
+              </div>
+              <div class={styles.remove}><div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}</div>
+            </button>
+          )}
+        </For>
+      </Show>
+
 
       <Show when={!isPrimalRelayInUserSettings()}>
         <Checkbox
@@ -195,24 +209,27 @@ const Network: Component = () => {
         />
       </Show>
 
-      <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-        {intl.formatMessage(t.network.recomended)}
-      </div>
+      <Show when={otherRelays().length > 0}>
+        <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
+          {intl.formatMessage(t.network.recomended)}
+        </div>
 
-      <For each={otherRelays()}>
-        {url => (
-          <button class={styles.relayItem} onClick={() => onAddRelay(url)}>
-            <div class={styles.relayEntry}>
-              <div class={styles.addIcon}></div>
-              <div class={styles.webIcon}></div>
-              <span>
-                {url}
-              </span>
-            </div>
-            <div class={styles.add}><div class={styles.addIcon}></div> {intl.formatMessage(tActions.addRelay)}</div>
-          </button>
-        )}
-      </For>
+        <For each={otherRelays()}>
+          {url => (
+            <button class={styles.relayItem} onClick={() => onAddRelay(url)}>
+              <div class={styles.relayEntry}>
+                <div class={styles.addIcon}></div>
+                <div class={styles.webIcon}></div>
+                <span>
+                  {url}
+                </span>
+              </div>
+              <div class={styles.add}><div class={styles.addIcon}></div> {intl.formatMessage(tActions.addRelay)}</div>
+            </button>
+          )}
+        </For>
+
+      </Show>
 
       <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
         {intl.formatMessage(t.network.customRelay)}

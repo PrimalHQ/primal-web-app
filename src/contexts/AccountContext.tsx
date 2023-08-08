@@ -31,6 +31,7 @@ import { account } from "../translations";
 
 export type AccountContextStore = {
   likes: string[],
+  defaultRelays: string[],
   relays: Relay[],
   relaySettings: NostrRelays,
   publicKey: string | undefined,
@@ -60,11 +61,13 @@ export type AccountContextStore = {
     removeRelay: (url: string) => void,
     setConnectToPrimaryRelays: (flag: boolean) => void,
     changeCachingService: (url?: string) => void,
+    dissconnectDefaultRelays: () => void,
   },
 }
 
 const initialData = {
   likes: [],
+  defaultRelays: [],
   relays: [],
   relaySettings: {},
   publicKey: undefined,
@@ -562,6 +565,28 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     reset();
   };
 
+  const dissconnectDefaultRelays = () => {
+    console.log('dissconnectDefaultRelays');
+    for(let i=0; i < store.defaultRelays.length; i++) {
+      const url = store.defaultRelays[i];
+
+      const relay = store.relays.find(r => r.url === url);
+
+      if (relay) {
+        console.log('dissconnectDefaultRelays: ', relay.url);
+        relay.close();
+        updateStore('relays', () => store.relays.filter(r => r.url !== url));
+      }
+
+      // Add relay to the list of explicitly closed relays
+      relaysExplicitlyClosed.push(url);
+
+      // Reset connection attempts
+      relayAtempts[url] = 0;
+    }
+
+  };
+
 
 // EFFECTS --------------------------------------
 
@@ -726,6 +751,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       if (type === 'EVENT') {
         const resp = JSON.parse(content.content || '[]');
 
+        updateStore('defaultRelays', () => [...resp]);
+
         const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
 
         if (Object.keys(relaySettings).length > 0) {
@@ -756,6 +783,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     removeRelay,
     setConnectToPrimaryRelays,
     changeCachingService,
+    dissconnectDefaultRelays,
   },
 });
 
