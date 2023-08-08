@@ -38,7 +38,7 @@ const SettingsSidebar: Component = () => {
         {relay => (
           <div class={styles.relayEntry}>
             <div class={styles.connected}></div>
-            <span>
+            <span class={styles.relayUrl} title={relay.url}>
               {relay.url}
             </span>
           </div>
@@ -48,7 +48,7 @@ const SettingsSidebar: Component = () => {
         {relay => (
           <div class={styles.relayEntry}>
             <div class={styles.disconnected}></div>
-            <span>
+            <span class={styles.relayUrl} title={relay.url}>
               {relay.url}
             </span>
           </div>

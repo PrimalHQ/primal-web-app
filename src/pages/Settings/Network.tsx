@@ -102,7 +102,7 @@ const Network: Component = () => {
 
     try {
       const url = new URL(customRelayInput.value);
-      if (!url.origin.startsWith('wss://')) {
+      if (!url.origin.startsWith('wss://') && !url.origin.startsWith('ws://')) {
         throw(new Error('must be a wss'))
       }
 
@@ -122,7 +122,7 @@ const Network: Component = () => {
 
     try {
       const url = new URL(cachingServiceInput.value);
-      if (!url.origin.startsWith('wss://')) {
+      if (!url.origin.startsWith('wss://') && !url.origin.startsWith('ws://')) {
         throw(new Error('must be a wss'))
       }
 
@@ -138,7 +138,7 @@ const Network: Component = () => {
   createEffect(() => {
     const unsub = subscribeTo(`settings_drs_${APP_ID}`, (type, subId, content) => {
       if (type === 'EVENT' && content) {
-        const urls = JSON.parse(content.content || '[]');
+        const urls = JSON.parse(content.content || '[]') || [];
         setRecomendedRelays(() => urls.map(relayInit));
       }
 
@@ -176,7 +176,7 @@ const Network: Component = () => {
                 <div class={styles.connected}></div>
               </Show>
               <div class={styles.webIcon}></div>
-              <span>
+              <span class={styles.relayUrl} title={relay.url}>
                 {relay.url}
               </span>
             </div>

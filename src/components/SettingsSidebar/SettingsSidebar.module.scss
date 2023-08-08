@@ -64,6 +64,13 @@
     margin-right: 8px;
   }
 
+  .relayUrl {
+    max-width: 274px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   .relayActions {
     display: flex;
     font-size: 12px;

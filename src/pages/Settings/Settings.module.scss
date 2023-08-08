@@ -87,13 +87,15 @@
 .subpageLinks {
   display: flex;
   flex-direction: column;
+  margin-top: -14px;
   a {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 
-    padding-block: 16px;
+    padding-top: 15px;
+    padding-bottom: 14px;
     padding-right: 20px;
     border-bottom: 1px solid var(--background-input);
     width: 100%;
@@ -254,6 +256,13 @@
       height: 6px;
       border-radius: 2px;
       margin-right: 8px;
+    }
+
+    .relayUrl {
+      max-width: 450px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
     }
 
     .relayActions {
