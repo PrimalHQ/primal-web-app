@@ -102,6 +102,14 @@ const Network: Component = () => {
 
   const onRemoveRelay = (url: string) => {
     account?.actions.removeRelay(url);
+
+    const myRelays = relays();
+
+    if (myRelays.length === 0) {
+      setTimeout(() => {
+        account?.actions.connectToRelays({});
+      }, 200);
+    }
   };
 
   const onCustomRelayInput = () => {

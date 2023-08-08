@@ -62,6 +62,7 @@ export type AccountContextStore = {
     setConnectToPrimaryRelays: (flag: boolean) => void,
     changeCachingService: (url?: string) => void,
     dissconnectDefaultRelays: () => void,
+    connectToRelays: (relaySettings: NostrRelays) => void,
   },
 }
 
@@ -784,6 +785,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setConnectToPrimaryRelays,
     changeCachingService,
     dissconnectDefaultRelays,
+    connectToRelays,
   },
 });
 
