@@ -84,6 +84,14 @@ export const AccountContext = createContext<AccountContextStore>();
 
 export function AccountProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
 
+  let relayAtempts: Record<string, number> = {};
+  const relayAtemptLimit = 10;
+  let relaysExplicitlyClosed: string[] = [];
+
+  let relayReliability: Record<string, number> = {};
+
+  let connectedRelaysCopy: Relay[] = [];
+
   const setPublicKey = (pubkey: string | undefined) => {
     updateStore('publicKey', () => pubkey);
     pubkey ? localStorage.setItem('pubkey', pubkey) : localStorage.removeItem('pubkey');
@@ -121,12 +129,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   };
 
-  let relayAtempts: Record<string, number> = {};
-  const relayAtemptLimit = 10;
-  let relaysExplicitlyClosed: string[] = [];
-
-  let relayReliability: Record<string, number> = {};
-
   const setConnectToPrimaryRelays = (flag: boolean) => {
     updateStore('connectToPrimaryRelays', () => flag);
   }
@@ -141,6 +143,14 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     const relaysToConnect = store.connectToPrimaryRelays ?
       attachDefaultRelays(relaySettings) :
       relaySettings;
+
+    for (let i = 0; i < connectedRelaysCopy.length; i ++) {
+      const relay = connectedRelaysCopy[i];
+
+      if (relaysToConnect[relay.url]) {
+        delete relaysToConnect[relay.url];
+      }
+    }
 
     const onConnect = (connectedRelay: Relay) => {
       if (store.relays.find(r => r.url === connectedRelay.url)) {
@@ -603,9 +613,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   });
 
   createEffect(() => {
+    connectedRelaysCopy = [...store.relays];
     if (store.publicKey && store.relays.length > 0) {
       getLikes(store.publicKey, store.relays, (likes: string[]) => {
-
         updateStore('likes', () => [...likes]);
         saveLikes(store.publicKey, likes);
       });
