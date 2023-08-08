@@ -2,6 +2,7 @@ import { MessageDescriptor } from "@cookbook/solid-intl";
 import { NotificationType } from "./constants";
 import { ScopeDescriptor } from "./types/primal";
 
+
 export const account = {
   follow: {
     id: 'actions.follow',
@@ -108,7 +109,7 @@ export const actions = {
   },
   confirmRemoveRelay: {
     id: 'actions.confirmRemoveRelay',
-    defaultMessage: 'Remove {url} from your relay list? This will disconnect you from the relay.',
+    defaultMessage: 'Remove <b>{url}</b> from your relay list? This will disconnect you from the relay.',
     description: 'Label for remove relay confirmation',
   },
   restoreCachingService: {

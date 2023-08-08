@@ -18,8 +18,9 @@ import { APP_ID } from '../../App';
 import { isConnected as isSocketConnected, socket, subscribeTo } from '../../sockets';
 import { createStore } from 'solid-js/store';
 import Checkbox from '../../components/Checkbox/Checkbox';
-import { store } from '../../services/StoreService';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import { interpretBold } from '../../translationHelpers';
+
 
 const Network: Component = () => {
 
@@ -300,7 +301,10 @@ const Network: Component = () => {
 
       <ConfirmModal
         open={confirmRemoveRelay().length > 0}
-        description={intl.formatMessage(tActions.confirmRemoveRelay, { url: confirmRemoveRelay() })}
+        description={intl.formatMessage(tActions.confirmRemoveRelay, {
+          url: confirmRemoveRelay(),
+          b: interpretBold,
+        }) as string}
         onConfirm={() => {
           onRemoveRelay(confirmRemoveRelay())
           setConfirmRemoveRelay('');
