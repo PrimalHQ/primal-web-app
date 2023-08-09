@@ -106,7 +106,26 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     return !!store.publicKey;
   };
 
-  const setRelaySettings = (settings: NostrRelays) => {
+  const setRelaySettings = (settings: NostrRelays, replace?: boolean) => {
+
+    if (replace) {
+      for (let url in store.relaySettings) {
+        if (settings[url]) {
+          continue;
+        }
+        updateStore('relaySettings', () => ({[url]: undefined}));
+        const relay = store.relays.find(r => r.url === url);
+
+        if (relay) {
+          relay.close();
+          updateStore('relays', () => store.relays.filter(r => r.url !== url));
+        }
+      }
+
+      updateStore('relaySettings', () => ({...settings}));
+      saveRelaySettings(store.publicKey, settings);
+      return;
+    }
 
     const rs = store.relaySettings;
 
@@ -363,7 +382,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     const relaySettings = JSON.parse(content.content || '{}');
 
-    setRelaySettings(relaySettings);
+    setRelaySettings(relaySettings, true);
 
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
@@ -727,7 +746,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (subId === `user_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
 
-        if (!content.created_at || content.created_at <= store.followingSince) {
+        console.log('CONTACTS: ', JSON.parse(content.content), new Date((content.created_at || 0) * 1000));
+
+        if (!content.created_at || content.created_at < store.followingSince) {
           return;
         }
 
@@ -739,7 +760,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (subId === `mutelist_${APP_ID}`) {
       if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
 
-        if (!content.created_at || content.created_at <= store.mutedSince) {
+        if (!content.created_at || content.created_at < store.mutedSince) {
           return;
         }
 
