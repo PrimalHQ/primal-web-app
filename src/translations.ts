@@ -1321,7 +1321,7 @@ export const toast = {
   },
   noteBroadcastFail: {
     id: 'toast.noteBroadcastFail',
-    defaultMessage: 'We were unable to broadcats this note',
+    defaultMessage: 'We were unable to broadcast this note',
     description: 'Failure message that the note has not been broadcasted',
   },
   repostSuccess: {
