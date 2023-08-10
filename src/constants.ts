@@ -258,7 +258,7 @@ export const iosRD = (new Date('08/01/2023')).getTime();
 export const andRD = (new Date('08/10/2023')).getTime();
 
 export const iosCheck = '8/01/23';
-export const andCheck = '8/10/23';
+export const andCheck = '8/10-1/23';
 
 export const refreshFeedDelay = 2_500;
 
