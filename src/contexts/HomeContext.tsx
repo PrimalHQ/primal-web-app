@@ -168,7 +168,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (scope && timeframe) {
 
       if (scope === 'search') {
-        searchContent(`home_feed_${subId}`, decodeURI(timeframe));
+        searchContent(account?.publicKey, `home_feed_${subId}`, decodeURI(timeframe));
         return;
       }
 
