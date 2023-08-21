@@ -123,6 +123,7 @@ export enum Kind  {
   MediaInfo = 10_000_119,
   Upload = 10_000_120,
   Uploaded = 10_000_121,
+  ImportResponse = 10_000_127,
 }
 
 export const relayConnectingTimeout = 1000;

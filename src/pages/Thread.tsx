@@ -119,11 +119,8 @@ const Thread: Component = () => {
     pn && observer?.unobserve(pn);
   });
 
-
-  const onNotePosted = (note: SendNoteResult) => {
-    setTimeout(() => {
-      threadContext?.actions.fetchNotes(postId());
-    }, refreshFeedDelay);
+  const onNotePosted = (result: SendNoteResult) => {
+    threadContext?.actions.fetchNotes(postId());
   };
 
   return (

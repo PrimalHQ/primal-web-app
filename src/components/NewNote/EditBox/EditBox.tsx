@@ -8,7 +8,7 @@ import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { subscribeTo as uploadSub } from "../../../uploadSocket";
@@ -508,9 +508,24 @@ const EditBox: Component<{
       const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
 
       if (success) {
-        toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-        props.onSuccess && props.onSuccess(note);
-        closeEditor();
+
+        const importId = `import_note_${APP_ID}`;
+
+        const unsub = subscribeTo(importId, (type, _, response) => {
+          console.log('IMPORTED: ', type, response)
+
+          if (type === 'EOSE') {
+            if (note) {
+              toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+              props.onSuccess && props.onSuccess({ success, reasons, note });
+              closeEditor();
+            }
+            unsub();
+          }
+        });
+
+        note && importEvents([note], importId);
+
         return;
       }
 

@@ -52,23 +52,19 @@ const Layout: Component = () => {
     window.removeEventListener('resize', onResize);
   });
 
-  const onNewNotePosted = (note: SendNoteResult) => {
+  const onNewNotePosted = (result: SendNoteResult) => {
     const path = location.pathname.split('/');
 
     if (path[1] === 'home' && home) {
       // check for new notes on the home feed
-      setTimeout(() => {
-        home.actions.checkForNewNotes(home.selectedFeed?.hex)
-      }, refreshFeedDelay);
+      home.actions.checkForNewNotes(home.selectedFeed?.hex)
       return;
     }
 
     if (['p', 'profile'].includes(path[1]) && profile) {
       const pubkey = params.npub;
       // check for new notes on the profile feed
-      setTimeout(() => {
-        profile.actions.checkForNewNotes(pubkey || account?.publicKey)
-      }, refreshFeedDelay);
+      profile.actions.checkForNewNotes(pubkey || account?.publicKey);
       return;
     }
   }

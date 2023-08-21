@@ -3,6 +3,7 @@ import { getLinkPreview } from "link-preview-js";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
+import { sendMessage } from "../sockets";
 import { NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl } from "./media";
 
@@ -219,6 +220,17 @@ export const highlightHashtags = (text: string) => {
 export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
 export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
 export const parseNote3 = (content: string) => urlify(addlineBreaks(content), false, false, true);
+
+
+export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => {
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["import_events", { events }]},
+  ]));
+};
+
 
 type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
