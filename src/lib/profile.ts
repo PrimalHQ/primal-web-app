@@ -5,6 +5,7 @@ import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
 import { NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
+import { signEvent } from "./nostrAPI";
 import { sendEvent } from "./notes";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
@@ -167,13 +168,6 @@ export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?
 
 export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
   if (!pubkey) {
-    return;
-  }
-
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined) {
     return false;
   }
 
@@ -184,11 +178,18 @@ export const reportUser = async (pubkey: string, subid: string, user?: PrimalUse
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
-  const signedEvent = await nostr.signEvent(event);
+  try {
+    const signedEvent = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
-  ]));
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to report user: ', reason);
+    return false;
+  }
 };

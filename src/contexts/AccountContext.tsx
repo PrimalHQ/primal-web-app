@@ -12,7 +12,6 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrMutedContent,
-  NostrRelay,
   NostrRelays,
   NostrWindow,
   PrimalNote,
@@ -22,12 +21,12 @@ import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
 import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
-import { Relay, relayInit } from "nostr-tools";
+import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getProfileContactList, getProfileMuteList, getUserProfiles } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
-import { closeRelays, connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
-import { account } from "../translations";
+import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
+import { getPublicKey } from "../lib/nostrAPI";
 
 export type AccountContextStore = {
   likes: string[],
@@ -238,7 +237,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     }
 
     try {
-      const key = await nostr.getPublicKey();
+      const key = await getPublicKey();
 
       if (key === undefined) {
         setTimeout(fetchNostrKey, 1000);

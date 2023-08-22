@@ -302,20 +302,25 @@ interface SendPaymentResponse {
   preimage: string;
 }
 
+export type NostrExtension = {
+  getPublicKey: () => Promise<string>,
+  getRelays: () => Promise<NostrRelays>,
+  signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
+  nip04: {
+    encrypt: (pubkey: string, message: string) => Promise<string>,
+    decrypt: (pubkey: string, message: string) => Promise<string>,
+  },
+};
+
+export type WebLnExtension = {
+  enable: () => Promise<void>,
+  sendPayment: (req: string) => Promise<SendPaymentResponse>;
+};
+
 export type NostrWindow = Window & typeof globalThis & {
-  nostr?: {
-    getPublicKey: () => Promise<string>,
-    getRelays: () => Promise<NostrRelays>,
-    signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
-    nip04: {
-      encrypt: (pubkey: string, message: string) => Promise<string>,
-      decrypt: (pubkey: string, message: string) => Promise<string>,
-    },
-  },
-  webln?: {
-    enable: () => Promise<void>,
-    sendPayment: (req: string) => Promise<SendPaymentResponse>;
-  },
+  nostr?: NostrExtension,
+  webln?: WebLnExtension,
+  walletStore: any,
 };
 
 export type PrimalWindow = Window & typeof globalThis & {

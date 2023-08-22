@@ -1,6 +1,6 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow } from "../types/primal";
+import { signEvent } from "./nostrAPI";
 
 export const getNotifications = (
   user_pubkey: string | undefined,
@@ -67,13 +67,6 @@ export const setLastSeen = async (
   subid: string,
   timestamp: number,
 ) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined) {
-    return false;
-  }
-
   const event = {
     content: '{ "description": "update notifications last seen timestamp"}',
     kind: Kind.Settings,
@@ -81,15 +74,22 @@ export const setLastSeen = async (
     created_at: timestamp,
   };
 
-  const signedNote = await nostr.signEvent(event);
+  try {
+    const signedNote = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["set_notifications_seen", {
-      event_from_user: signedNote,
-    }]},
-  ]));
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["set_notifications_seen", {
+        event_from_user: signedNote,
+      }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to set last seen: ', reason);
+    return false;
+  }
 
 };
 

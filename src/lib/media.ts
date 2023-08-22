@@ -1,6 +1,6 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../uploadSocket";
-import { NostrWindow } from "../types/primal";
+import { signEvent } from "./nostrAPI";
 
 export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) => {
   if (!url) {
@@ -23,7 +23,7 @@ export const uploadMedia = async (
   content: string,
 ) => {
   if (!uploader) {
-    return;
+    return false;
   }
 
   const event = {
@@ -33,18 +33,18 @@ export const uploadMedia = async (
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
+  try {
+    const signedNote = await signEvent(event);
 
-  if (nostr === undefined) {
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["upload", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to upload: ', reason);
     return false;
   }
-
-  const signedNote = await nostr.signEvent(event);
-
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["upload", { event_from_user: signedNote }]},
-  ]));
 };

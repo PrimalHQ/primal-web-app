@@ -6,6 +6,7 @@ import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl } from "./media";
+import { signEvent } from "./nostrAPI";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -357,14 +358,15 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
 };
 
 export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
+  let signedNote: NostrRelaySignedEvent | undefined;
 
-  if (nostr === undefined) {
-    return { success: false , reasons: ['no_extension']} as SendNoteResult;
+  try {
+    signedNote = await signEvent(event);
+    if (!signedNote) throw('event_not_signed');
+  } catch (reason) {
+    console.error('Failed to send event: ', reason);
+    return { success: false , reasons: [reason]} as SendNoteResult;
   }
-
-  const signedNote = await nostr.signEvent(event);
 
   let responses = [];
   let reasons: string[] = [];

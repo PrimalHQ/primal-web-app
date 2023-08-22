@@ -39,6 +39,7 @@ import { getEvents } from "../lib/feed";
 import { nip19 } from "nostr-tools";
 import { convertToNotes } from "../stores/note";
 import { sanitize, sendEvent } from "../lib/notes";
+import { decrypt, encrypt } from "../lib/nostrAPI";
 
 
 type DirectMessage = {
@@ -127,12 +128,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const subidNewMsg = `msg_new_ ${APP_ID}`;
   const subidNoteRef = `msg_note_ ${APP_ID}`;
   const subidUserRef = `msg_user_ ${APP_ID}`;
-
-
-  const getNostr = () => {
-    const win = window as NostrWindow;
-    return win.nostr;
-  }
 
 // ACTIONS --------------------------------------
 
@@ -249,17 +244,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const actualDecrypt = (sender: string, message: string) => {
-    const nostr = getNostr();
-
-    if (!nostr) {
-      throw(new Error('Decrypt: Nostr extension is not availablle'));
-    }
-
     return new Promise<string>((resolve) => {
-      nostr.nip04.decrypt(sender, message).then((m) => {
+      decrypt(sender, message).then((m) => {
         resolve(m)
       }).catch((reason) => {
-        console.error('FAILED to decrypt: ', message, reason);
+        console.warn('Failed to decrypt, will retry: ', message, reason);
         setTimeout(() => {
           resolve(actualDecrypt(sender, message));
         }, 10 + Math.random() * 300);
@@ -268,9 +257,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   }
 
   const decryptMessages = async (then: (messages: DirectMessage[]) => void) => {
-    const nostr = getNostr();
 
-    if (nostr === undefined || store.selectedSender === null) {
+    if (store.selectedSender === null) {
       return;
     }
 
@@ -294,6 +282,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           newMessages.push(msg);
         } catch (e) {
           console.warn('Falied to decrypt message: ', e);
+          return;
         }
       }
     }
@@ -490,29 +479,34 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const sendMessage = async (receiver: string, message: DirectMessage) => {
-    const nostr = getNostr();
-    if (!account || !nostr) {
+    if (!account) {
       return false;
     }
 
-    const content = await nostr.nip04.encrypt(receiver, message.content);
+    try {
+      const content = await encrypt(receiver, message.content);
 
-    const event = {
-      content,
-      kind: Kind.EncryptedDirectMessage,
-      tags: [['p', receiver]],
-      created_at: Math.floor((new Date).getTime() / 1000),
-    };
+      const event = {
+        content,
+        kind: Kind.EncryptedDirectMessage,
+        tags: [['p', receiver]],
+        created_at: Math.floor((new Date).getTime() / 1000),
+      };
 
-    const { success } = await sendEvent(event, account?.relays, account?.relaySettings);
+      const { success } = await sendEvent(event, account?.relays, account?.relaySettings);
 
-    if (success) {
-      const msg = { ...message, content: sanitize(message.content) };
-      addToConversation([msg]);
-      updateStore('messageCountPerSender', receiver, 'latest_at', message.created_at);
+      if (success) {
+        const msg = { ...message, content: sanitize(message.content) };
+        addToConversation([msg]);
+        updateStore('messageCountPerSender', receiver, 'latest_at', message.created_at);
+      }
+
+      return success;
+    } catch (reason) {
+      console.error('Failed to send message: ', reason);
+      return false;
     }
 
-    return success;
   }
 
   const addNewSender = (user: PrimalUser) => {

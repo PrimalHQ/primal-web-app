@@ -1,6 +1,7 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow, UserRelation } from "../types/primal";
+import { UserRelation } from "../types/primal";
+import { signEvent } from "./nostrAPI";
 
 
 export const subscribeToMessagesStats = (pubkey: string, subid: string) => {
@@ -12,14 +13,6 @@ export const subscribeToMessagesStats = (pubkey: string, subid: string) => {
 }
 
 export const resetMessageCount = async (sender: string, subid: string) => {
-
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined) {
-    return false;
-  }
-
   const event = {
     content: `{ "description": "reset messages from '${sender}'"}`,
     kind: Kind.Settings,
@@ -27,16 +20,22 @@ export const resetMessageCount = async (sender: string, subid: string) => {
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
-  const signedEvent = await nostr.signEvent(event);
+  try {
+    const signedEvent = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["reset_directmsg_count", {
-      event_from_user: signedEvent,
-      sender,
-    }]},
-  ]));
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["reset_directmsg_count", {
+        event_from_user: signedEvent,
+        sender,
+      }]},
+    ]));
+    return true;
+  } catch (reason) {
+    console.error('Failed to reset message count: ', reason);
+    return false;
+  }
 }
 
 export const getMessageCounts = (user_pubkey: string, relation: UserRelation, subid: string) => {
@@ -69,14 +68,6 @@ export const getNewMessages = (receiver: string, sender: string, subid: string, 
 }
 
 export const markAllAsRead = async (subid: string) => {
-
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined) {
-    return false;
-  }
-
   const event = {
     content: `{ "description": "mark all messages as read"}`,
     kind: Kind.Settings,
@@ -84,13 +75,20 @@ export const markAllAsRead = async (subid: string) => {
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
-  const signedEvent = await nostr.signEvent(event);
+  try {
+    const signedEvent = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["reset_directmsg_counts", {
-      event_from_user: signedEvent,
-    }]},
-  ]));
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["reset_directmsg_counts", {
+        event_from_user: signedEvent,
+      }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to mark as read: ', reason);
+    return false;
+  }
 }

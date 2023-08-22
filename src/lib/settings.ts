@@ -1,6 +1,7 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow, PrimalFeed } from "../types/primal";
+import { PrimalFeed } from "../types/primal";
+import { signEvent } from "./nostrAPI";
 
 type PrimalSettings = {
   theme: string,
@@ -9,13 +10,6 @@ type PrimalSettings = {
 };
 
 export const sendSettings = async (settings: PrimalSettings, subid: string) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined) {
-    return false;
-  }
-
   const content = { description: 'Sync app settings', ...settings };
 
   const event = {
@@ -25,23 +19,22 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const signedNote = await nostr.signEvent(event);
+  try {
+    const signedNote = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["set_app_settings", { settings_event: signedNote }]},
-  ]))
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["set_app_settings", { settings_event: signedNote }]},
+    ]));
+    return true;
+  } catch (reason) {
+    console.error('Failed to send settings: ', reason);
+    return false;
+  }
 };
 
 export const getSettings = async (pubkey: string | undefined, subid: string) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-
-  if (nostr === undefined || !pubkey) {
-    return false;
-  }
-
   const event = {
     content: '{ "description": "Sync app settings" }',
     kind: Kind.Settings,
@@ -49,13 +42,21 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const signedNote = await nostr.signEvent(event);
+  try {
+    const signedNote = await signEvent(event);
 
-  sendMessage(JSON.stringify([
-    "REQ",
-    subid,
-    {cache: ["get_app_settings", { event_from_user: signedNote }]},
-  ]))
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["get_app_settings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to get settings: ', reason);
+    return false;
+  }
+
 };
 
 export const getDefaultSettings = async (subid: string) => {
