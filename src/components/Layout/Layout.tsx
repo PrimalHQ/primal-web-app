@@ -11,9 +11,7 @@ import zapSM from '../../assets/lottie/zap_sm.json';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
-import { convertToNotes } from '../../stores/note';
 import { useProfileContext } from '../../contexts/ProfileContext';
-import { refreshFeedDelay } from '../../constants';
 
 
 const Layout: Component = () => {

@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, PrimalNote } from '../../../types/primal';
 import { sendRepost } from '../../../lib/notes';
 
