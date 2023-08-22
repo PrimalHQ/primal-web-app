@@ -34,6 +34,7 @@ import {
   search as tSearch,
   actions as tActions,
 } from "../../../translations";
+import { useMediaContext } from "../../../contexts/MediaContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -46,6 +47,7 @@ const EditBox: Component<{
 } > = (props) => {
 
   const intl = useIntl();
+  const media = useMediaContext();
 
   const instanceId = uuidv4();
 
@@ -838,7 +840,13 @@ const EditBox: Component<{
 
 
   const parseForReferece = (value: string) => {
-    const content = replaceLinkPreviews(parseUserMentions(highlightHashtags(parseNote1(value))));
+    const content = replaceLinkPreviews(
+      parseUserMentions(
+        highlightHashtags(
+          parseNote1(value, media?.actions.getMediaUrl)
+        )
+      )
+    );
 
     parseNpubLinks(content);
     parseNoteLinks(content);

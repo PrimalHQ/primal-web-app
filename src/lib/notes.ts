@@ -4,8 +4,8 @@ import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
-import { getMediaUrl } from "./media";
+import { MediaSize, NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
+import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
 
 const getLikesStorageKey = () => {
@@ -54,7 +54,13 @@ export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|a
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
 
-export const urlify = (text: string, highlightOnly = false, skipEmbed = false, skipLinkPreview = false) => {
+export const urlify = (
+  text: string,
+  getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined,
+  highlightOnly = false,
+  skipEmbed = false,
+  skipLinkPreview = false,
+) => {
   const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
   return text.replace(urlRegex, (url) => {
@@ -63,7 +69,14 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false, s
       const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
       if (isImage) {
-        return '<img src="' + getMediaUrl(url) + '" class="postImage"/>'
+        const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+        let imgUrl = getMediaUrl && getMediaUrl(url);
+
+        if (!imgUrl) {
+          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
+        }
+
+        return `<img src="${imgUrl}" class="postImage"/>`;
       }
 
       const isMp4Video = url.includes('.mp4') || url.includes('.mov');
@@ -218,9 +231,12 @@ export const highlightHashtags = (text: string) => {
   return text.replace(regex, "$1<span class='hash_tag'>$2</span>");
 };
 
-export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
-export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
-export const parseNote3 = (content: string) => urlify(addlineBreaks(content), false, false, true);
+export const parseNote1 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl);
+export const parseNote2 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl, true);
+export const parseNote3 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl, false, false, true);
 
 
 export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => {
@@ -232,8 +248,6 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
   ]));
 };
 
-
-type ReplyTo = { e?: string, p?: string };
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
 export const sendLike = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {

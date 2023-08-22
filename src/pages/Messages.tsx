@@ -33,6 +33,7 @@ import {
   search as tSearch,
 } from '../translations';
 import PageCaption from '../components/PageCaption/PageCaption';
+import { useMediaContext } from '../contexts/MediaContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -133,6 +134,7 @@ const Messages: Component = () => {
   const messages = useMessagesContext();
   const account = useAccountContext();
   const profile = useProfileContext();
+  const media = useMediaContext();
 
   const navigate = useNavigate();
 
@@ -306,7 +308,7 @@ const Messages: Component = () => {
     return parseNoteLinks(
       parseNpubLinks(
         highlightHashtags(
-          parseNote3(message)
+          parseNote3(message, media?.actions.getMediaUrl)
         ),
         messages?.referecedUsers,
       ),

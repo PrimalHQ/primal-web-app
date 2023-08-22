@@ -2,6 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
 import { Component, createMemo, JSXElement, Show } from 'solid-js';
+import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { parseNote2 } from '../../lib/notes';
@@ -18,6 +19,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
   const threadContext = useThreadContext();
   const intl = useIntl();
+  const media = useMediaContext();
 
   const noteId = () => nip19.noteEncode(props.note.post.id);
 
@@ -169,7 +171,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           parseNpubLinks(
             parsedContent(
               highlightHashtags(
-                parseNote2(props.note.post.content)
+                parseNote2(props.note.post.content, media?.actions.getMediaUrl)
               ),
             ),
             props.note,

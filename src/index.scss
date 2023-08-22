@@ -348,6 +348,10 @@ body {
   color: var(--accent-1);
 }
 
+.redBorder {
+  border: 2px solid red;
+}
+
 .reply_icon {
   -webkit-mask: url(./assets/icons/feed_reply.svg) no-repeat 0 / 100%;
   mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
