@@ -319,17 +319,14 @@ export const referencesToTags = (value: string) => {
   const regexMention =
     /\bnostr:((note|npub|nevent|nprofile)1\w+)\b|#\[(\d+)\]/g;
 
-  let hashtags: string[] = [];
   let refs: string[] = [];
   let tags: string[][] = [];
   let match;
 
   // Parse hashtags to add to tags
   while((match = regexHashtag.exec(value)) != null) {
-    hashtags.push(match[0]);
+    tags.push(['t', match[0].trim().slice(1)]);
   }
-
-  tags = hashtags.map(h => ['t', h.slice(2)]);
 
   // Parse mentions to add to tags
   while((match = regexMention.exec(value)) !== null) {
