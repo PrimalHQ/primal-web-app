@@ -255,13 +255,12 @@ export const defaultNotificationSettings: Record<string, boolean> = {
 export const emojiSearchLimit = 1;
 
 export const today = (new Date()).getTime();
+
 export const iosRD = (new Date('08/01/2023')).getTime();
-export const andRD = (new Date('08/10/2023')).getTime();
+export const iosVersion = '8/01/23';
 
-export const iosCheck = '8/01/23';
-export const andCheck = '8/10-1/23';
-
-export const refreshFeedDelay = 2_500;
+export const andRD = (new Date('08/23/2023')).getTime();
+export const andVersion = '0.15.1';
 
 export const defaultZapAmount = 10;
 

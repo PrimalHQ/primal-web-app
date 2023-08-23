@@ -13,7 +13,7 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { andCheck, andRD, iosCheck, iosRD, today } from '../constants';
+import { andVersion, andRD, iosVersion, iosRD, today } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 
@@ -23,13 +23,21 @@ const Downloads: Component = () => {
 
   onMount(() => {
     if (today > iosRD) {
-      localStorage.setItem('iosDownload', iosCheck);
+      localStorage.setItem('iosDownload', iosVersion);
     }
 
     if (today > andRD) {
-      localStorage.setItem('andDownload', andCheck);
+      localStorage.setItem('andDownload', andVersion);
     }
   });
+
+  const displayDate = (dateValue: number) => {
+    const date = new Date(dateValue);
+
+    return new Intl.DateTimeFormat("en-US", {
+      year: 'numeric', month: 'long', day: 'numeric',
+    }).format(date);
+  }
 
   return (
     <div class={styles.downloadsContainer}>
@@ -117,7 +125,7 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>august 1, 2023</div>
+              <div>{displayDate(iosRD).toLowerCase()}</div>
               <div>0.24.3</div>
             </div>
           </div>
@@ -144,13 +152,13 @@ const Downloads: Component = () => {
               <div>build:</div>
             </div>
             <div>
-              <div>august 10, 2023</div>
-              <div>0.14.3</div>
+              <div>{displayDate(andRD).toLowerCase()}</div>
+              <div>{andVersion}</div>
             </div>
           </div>
 
           <a
-            href='https://downloads.primal.net/android/primal-0.14.3.apk'
+            href={`https://downloads.primal.net/android/primal-${andVersion}.apk`}
             target='_blank'
           >
             <img src={apkDownload} />

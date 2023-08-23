@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { andCheck, andRD, iosCheck, iosRD, Kind, today } from "../constants";
+import { andVersion, andRD, iosVersion, iosRD, Kind, today } from "../constants";
 import {
   createContext,
   createEffect,
@@ -58,11 +58,11 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
     let count = 0;
 
-    if (iosDownload !== iosCheck && today > iosRD) {
+    if (iosDownload !== iosVersion && today > iosRD) {
       count++;
     }
 
-    if (andDownload !== andCheck && today > andRD) {
+    if (andDownload !== andVersion && today > andRD) {
       count++;
     }
 

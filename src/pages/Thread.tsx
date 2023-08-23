@@ -8,7 +8,6 @@ import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
-import Loader from '../components/Loader/Loader';
 import { nip19 } from 'nostr-tools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
@@ -18,7 +17,6 @@ import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { thread as t } from '../translations';
-import { refreshFeedDelay } from '../constants';
 
 
 const Thread: Component = () => {
