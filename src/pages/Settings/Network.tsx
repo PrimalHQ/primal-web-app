@@ -126,13 +126,14 @@ const Network: Component = () => {
     }
 
     try {
-      const url = new URL(customRelayInput.value);
+      const value = customRelayInput.value;
+      const url = new URL(value);
       if (!url.origin.startsWith('wss://') && !url.origin.startsWith('ws://')) {
         throw(new Error('must be a wss'))
       }
 
       customRelayInput.value = '';
-      account?.actions.addRelay(url.href);
+      account?.actions.addRelay(value);
       setInvalidCustomRelay(false);
     } catch (e) {
       console.log('invalid url ', e);
