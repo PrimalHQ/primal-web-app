@@ -1,10 +1,10 @@
-import { getLinkPreview } from "link-preview-js";
 // @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
+import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { MediaSize, NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
+import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
 
@@ -28,16 +28,19 @@ export const sanitize = (html: string) => {
 export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
 
 export const addLinkPreviews = async (url: string) => {
-  try {
-    const preview = await getLinkPreview(url);
+  if (linkPreviews[url]) {
+    return { ...linkPreviews[url] };
+  }
 
-    // const preview = await fetch(`link-preview?u=https://yahoo.com`);
-    // console.log('PREV: ', preview);
-    setLinkPreviews((p) => ({ ...p, [url]: { ...preview }}));
+  try {
+    const origin = window.location.origin.startsWith('http://localhost') ? 'https://primal.net' : window.location.origin;
+
+    const preview = await fetch(`${origin}/link-preview?u=${encodeURI(url)}`);
+    return preview;
 
   } catch (e) {
     console.log('Failed to get preview for: ', url);
-    setLinkPreviews((p) => ({ ...p, [url]: { noPreview: url }}));
+    return;
   }
 };
 
@@ -198,23 +201,30 @@ export const urlify = (
       return `<a link href="${url}" target="_blank" >${url}</a>`;
     }
 
-    addLinkPreviews(url);
-
     return `__LINK__${url}__LINK__`;
   })
 }
 
-export const replaceLinkPreviews = (text: string) => {
+export const replaceLinkPreviews = async (text: string) => {
   let parsed = text;
 
   const regex = /__LINK__.*?__LINK__/ig;
 
-  parsed = parsed.replace(regex, (link) => {
-    const url = link.split('__LINK__')[1];
+  const matched = parsed.match(regex) || [];
 
-    return `<a link href="${url}" target="_blank" >${url}</a>`;
+  for (let i = 0;i < matched.length; i++) {
+    const m = matched[i];
+    const url = m.split('__LINK__')[1];
 
-  });
+    const preview = await addLinkPreviews(url);
+
+    const c = preview ?
+      // @ts-ignore
+      (<div class="bordered"><LinkPreview preview={preview} /></div>)?.outerHTML :
+      `<a link href="${url}" target="_blank" >${url}</a>`;
+
+    parsed = parsed.replace(m, c);
+  }
 
   return parsed;
 }

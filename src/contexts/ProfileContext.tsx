@@ -39,6 +39,7 @@ import {
   isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
+import { setLinkPreviews } from "../lib/notes";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -314,6 +315,28 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         return;
       }
       updateStore('page', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
+      return;
+    }
+
+    if (content.kind === Kind.LinkMetadata) {
+      const metadata = JSON.parse(content.content);
+
+      const data = metadata.resources[0];
+      if (!data) {
+        return;
+      }
+
+      const preview = {
+        url: data.url,
+        title: data.md_title,
+        description: data.md_description,
+        mediaType: data.mimetype,
+        contentType: data.mimetype,
+        images: [data.md_image],
+        favicons: [data.icon_url],
+      };
+
+      setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
   };

@@ -184,12 +184,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
       const preview = previews[url];
 
-      // No preview? That can only mean that we are still waiting.
       if (!preview) {
-        return link;
-      }
-
-      if (preview.noPreview) {
         return `<a link href="${url}" target="_blank" >${url}</a>`;
       }
 

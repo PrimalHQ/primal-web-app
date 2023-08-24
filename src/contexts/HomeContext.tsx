@@ -4,6 +4,7 @@ import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
+import { setLinkPreviews } from "../lib/notes";
 import { searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
@@ -341,6 +342,28 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       updateStore('page', 'noteActions',
         (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
+      return;
+    }
+
+    if (content.kind === Kind.LinkMetadata) {
+      const metadata = JSON.parse(content.content);
+
+      const data = metadata.resources[0];
+      if (!data) {
+        return;
+      }
+
+      const preview = {
+        url: data.url,
+        title: data.md_title,
+        description: data.md_description,
+        mediaType: data.mimetype,
+        contentType: data.mimetype,
+        images: [data.md_image],
+        favicons: [data.icon_url],
+      };
+
+      setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
   };

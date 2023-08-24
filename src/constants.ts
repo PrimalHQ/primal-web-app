@@ -2,6 +2,7 @@ import { FeedPage, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
 import { MessageDescriptor } from "@cookbook/solid-intl";
+import { linkPreviews } from "./lib/notes";
 
 export const second = 1000;
 export const minute = 60 * second;
@@ -124,6 +125,7 @@ export enum Kind  {
   Upload = 10_000_120,
   Uploaded = 10_000_121,
   ImportResponse = 10_000_127,
+  LinkMetadata = 10_000_128,
 }
 
 export const relayConnectingTimeout = 1000;

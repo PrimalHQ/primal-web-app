@@ -37,6 +37,7 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
+import { setLinkPreviews } from "../lib/notes";
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
@@ -180,6 +181,28 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       updateStore('page', 'noteActions',
         (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
       );
+      return;
+    }
+
+    if (content.kind === Kind.LinkMetadata) {
+      const metadata = JSON.parse(content.content);
+
+      const data = metadata.resources[0];
+      if (!data) {
+        return;
+      }
+
+      const preview = {
+        url: data.url,
+        title: data.md_title,
+        description: data.md_description,
+        mediaType: data.mimetype,
+        contentType: data.mimetype,
+        images: [data.md_image],
+        favicons: [data.icon_url],
+      };
+
+      setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
   };

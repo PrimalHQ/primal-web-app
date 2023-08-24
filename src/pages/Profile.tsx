@@ -355,6 +355,20 @@ const Profile: Component = () => {
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
+  const [renderProfileAbout, setRenderProfileAbout] = createSignal('');
+
+  const getProfileAbout = async (about: string) => {
+    const a = await replaceLinkPreviews(urlify(sanitize(about), () => '', false, false))
+
+    console.log('PREVIEW: ', a);
+
+    setRenderProfileAbout(a)
+  };
+
+  createEffect(() => {
+    getProfileAbout(profile?.userProfile?.about || '');
+  });
+
   createEffect(() => {
     if (showContext()) {
       document.addEventListener('click', onClickOutside);
@@ -497,7 +511,8 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout} innerHTML={replaceLinkPreviews(urlify(sanitize(profile?.userProfile?.about || ''), false, false))}>
+        <div class={styles.profileAbout}>
+          {renderProfileAbout()}
         </div>
 
         <div class={styles.profileLinks}>

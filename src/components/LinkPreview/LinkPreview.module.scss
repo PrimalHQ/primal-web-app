@@ -21,3 +21,17 @@
 .previewTitle {
   color: var(--text-primary);
 }
+
+.previewUrlLine {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-block: 8px;
+
+  >img {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+  }
+}

@@ -839,8 +839,8 @@ const EditBox: Component<{
   };
 
 
-  const parseForReferece = (value: string) => {
-    const content = replaceLinkPreviews(
+  const parseForReferece = async (value: string) => {
+    const content = await replaceLinkPreviews(
       parseUserMentions(
         highlightHashtags(
           parseNote1(value, media?.actions.getMediaUrl)
@@ -877,8 +877,8 @@ const EditBox: Component<{
     }
     const msg = sanitize(message());
 
-    delayForMedia = setTimeout(() => {
-      const p = parseForReferece(msg);
+    delayForMedia = setTimeout(async () => {
+      const p = await parseForReferece(msg);
       setParsedMessage(p);
     }, 500);
 

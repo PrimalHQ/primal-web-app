@@ -160,6 +160,12 @@ export type NostrMediaUploaded = {
   created_at?: number,
 };
 
+export type NostrLinkMetadata = {
+  kind: Kind.LinkMetadata,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -181,7 +187,8 @@ export type NostrEventContent =
   NostrMessageEncryptedContent |
   NostrFeedRange |
   NostrMediaInfo |
-  NostrMediaUploaded;
+  NostrMediaUploaded |
+  NostrLinkMetadata;
 
 export type NostrEvent = [
   type: "EVENT",
