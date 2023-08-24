@@ -19,7 +19,7 @@ const LinkPreview: Component<{ preview: any }> = (props) => {
 
       <div class={styles.previewInfo}>
         <div class={styles.previewUrlLine}>
-          <Show when={props.preview.favicons[0]}>
+          <Show when={props.preview.favicons && props.preview.favicons[0]}>
             <img src={props.preview.favicons[0]} />
           </Show>
 

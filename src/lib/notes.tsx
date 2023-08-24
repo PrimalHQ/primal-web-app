@@ -33,14 +33,16 @@ export const addLinkPreviews = async (url: string) => {
   }
 
   try {
-    const origin = window.location.origin.startsWith('http://localhost') ? 'https://primal.net' : window.location.origin;
+    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
 
     const preview = await fetch(`${origin}/link-preview?u=${encodeURI(url)}`);
-    return preview;
+    const data = await preview.json();
+
+    return { url, description: data.description, title: data.title, images: [data.image], favicons: [data.icon_url] };
 
   } catch (e) {
     console.log('Failed to get preview for: ', url);
-    return;
+    return { url };
   }
 };
 
@@ -218,7 +220,10 @@ export const replaceLinkPreviews = async (text: string) => {
 
     const preview = await addLinkPreviews(url);
 
-    const c = preview ?
+    const hasMinimalPreviewData = preview && preview.url &&
+      ((preview.description && preview.description.length > 0) || preview.image || preview.title);
+
+    const c = hasMinimalPreviewData ?
       // @ts-ignore
       (<div class="bordered"><LinkPreview preview={preview} /></div>)?.outerHTML :
       `<a link href="${url}" target="_blank" >${url}</a>`;
