@@ -9,9 +9,13 @@ import {
   useContext
 } from "solid-js";
 import {
+  cacheServer,
+  cacheServerList,
+  disconnect,
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
+  setCacheServerList,
   socket,
   subscribeTo
 } from "../sockets";
@@ -44,6 +48,7 @@ export type SettingsContextStore = {
   defaultZapAmount: number,
   availableZapOptions: number[],
   notificationSettings: Record<string, boolean>,
+  cachingServiceList: string[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -58,6 +63,7 @@ export type SettingsContextStore = {
     resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
+    saveCachingServiceList: () => void,
   }
 }
 
@@ -70,6 +76,7 @@ export const initialData = {
   defaultZapAmount: defaultZapAmount,
   availableZapOptions: defaultZapOptions,
   notificationSettings: { ...defaultNotificationSettings },
+  cachingServiceList: [],
 };
 
 
@@ -176,6 +183,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     !temp && saveSettings();
   };
 
+  const saveCachingServiceList = () => {
+    updateStore('cachingServiceList', () => [...cacheServerList]);
+    saveSettings(() => {
+      if (!store.cachingServiceList.includes(cacheServer)) {
+        disconnect();
+      }
+    });
+  };
+
   const restoreDefaultFeeds = () => {
 
     const subid = `restore_default_${APP_ID}`;
@@ -224,13 +240,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultSettings(subid)
   };
 
-  const saveSettings = () => {
+  const saveSettings = (then?: () => void) => {
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
       defaultZapAmount: store.defaultZapAmount,
       zapOptions: store.availableZapOptions,
       notifications: store.notificationSettings,
+      cachingServiceList: store.cachingServiceList,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -244,7 +261,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         }));
       }
 
-      unsub();
+      if (type === 'EOSE') {
+        then && then();
+        unsub();
+      }
+
       return;
     });
 
@@ -317,7 +338,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT' && content?.content) {
         try {
-          const { theme, feeds, defaultZapAmount, zapOptions, notifications } = JSON.parse(content?.content);
+          const {
+            theme,
+            feeds,
+            defaultZapAmount,
+            zapOptions,
+            notifications,
+            cachingServiceList,
+          } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
           feeds && setAvailableFeeds(feeds, true);
@@ -329,6 +357,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
           else {
             updateStore('notificationSettings', () => ({ ...defaultNotificationSettings}));
+          }
+
+          if (cachingServiceList && Array.isArray(cachingServiceList) && cachingServiceList.length > 0) {
+            updateStore('cachingServiceList', () => [ ...cachingServiceList ]);
+            setCacheServerList(store.cachingServiceList);
+            disconnect();
           }
         }
         catch (e) {
@@ -434,6 +468,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   createEffect(() => {
+    if (store.cachingServiceList.length > 0) {
+      setCacheServerList([...store.cachingServiceList]);
+    }
+  });
+
+  createEffect(() => {
     if (isConnected()) {
       refreshSocketListeners(
         socket(),
@@ -468,6 +508,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setZapOptions,
       resetZapOptionsToDefault,
       updateNotificationSettings,
+      saveCachingServiceList,
     },
   });
 

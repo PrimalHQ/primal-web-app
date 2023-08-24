@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { createStore } from "solid-js/store";
 import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
@@ -6,6 +7,10 @@ export const [socket, setSocket] = createSignal<WebSocket>();
 export const [isConnected, setConnected] = createSignal<Boolean>(false);
 
 export const isNotConnected = () => !isConnected();
+
+export let cacheServer = '';
+
+export const [cacheServerList, setCacheServerList] = createStore<string[]>([]);
 
 const onOpen = () => {
   setConnected(true);
@@ -27,21 +32,59 @@ const onError = (error: Event) => {
   console.log("ws error: ", error);
 };
 
-export let cacheServer = '';
+const getRandomCacheServer = (except?: string) => {
+  const eligableList = except ?
+    cacheServerList.filter(url => url !== except) :
+    [...cacheServerList];
+
+  const index = eligableList.length < 2 ?
+    0 :
+    Math.round(Math.random() * (eligableList.length - 1));
+
+  return eligableList[index];
+}
+
+export const cacheServerListPath = () =>  {
+  return import.meta.env.PRIMAL_CACHE_LIST_URL;
+};
+
+
+export const connectToDefault = async () => {
+  const url = cacheServerListPath();
+
+  if (url) {
+    const response = await fetch(url);
+    const list = await response.json();
+
+    setCacheServerList(() => [...list]);
+  }
+
+  if (isConnected()) {
+    disconnect();
+    return;
+  }
+
+  connect();
+}
 
 export const connect = () => {
-  if (isNotConnected()) {
-    cacheServer =
-      localStorage.getItem('cacheServer') ||
-      import.meta.env.PRIMAL_CACHE_URL;
-
-    setSocket(new WebSocket(cacheServer));
-    console.log('CACHE SOCKET: ', socket());
-
-    socket()?.addEventListener('open', onOpen);
-    socket()?.addEventListener('close', onClose);
-    socket()?.addEventListener('error', onError);
+  if (isConnected()) {
+    return;
   }
+
+  const selectedCacheServer = getRandomCacheServer(cacheServer);
+
+  cacheServer =
+    localStorage.getItem('cacheServer') ||
+    selectedCacheServer ||
+    import.meta.env.PRIMAL_CACHE_URL;
+
+  setSocket(new WebSocket(cacheServer));
+  console.log('CACHE SOCKET: ', socket());
+
+  socket()?.addEventListener('open', onOpen);
+  socket()?.addEventListener('close', onClose);
+  socket()?.addEventListener('error', onError);
 };
 
 export const disconnect = () => {
@@ -50,7 +93,7 @@ export const disconnect = () => {
 
 export const reset = () => {
   disconnect();
-  setTimeout(connect, 1000);
+  setTimeout(connect, 200);
 };
 
 export const sendMessage = (message: string) => {

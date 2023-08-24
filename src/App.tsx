@@ -1,6 +1,6 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import { AccountProvider } from './contexts/AccountContext';
-import { connect, disconnect } from './sockets';
+import { connectToDefault, disconnect } from './sockets';
 import { connect as uploadConnect, disconnect as uploadDisconnet } from './uploadSocket';
 import styles from './App.module.scss';
 import Toaster from './components/Toaster/Toaster';
@@ -22,7 +22,7 @@ export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
 const App: Component = () => {
 
   onMount(() => {
-    connect();
+    connectToDefault();
     uploadConnect();
   });
 
