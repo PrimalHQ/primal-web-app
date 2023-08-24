@@ -32,6 +32,7 @@ const Network: Component = () => {
   const [recomendedRelays, setRecomendedRelays] = createStore<Relay[]>([]);
   const [confirmRemoveRelay, setConfirmRemoveRelay] = createSignal('');
   const [confirmRemoveCacheService, setConfirmRemoveCacheService] = createSignal('');
+  const [tryToRemoveLastCachingService, setTryToRemoveLastCachingService] = createSignal(false);
   const [invalidCustomRelay, setInvalidCustomRelay] = createSignal(false);
   const [invalidCachingService, setInvalidCachingService] = createSignal(false);
 
@@ -296,13 +297,28 @@ const Network: Component = () => {
       </div>
 
       <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.network.connectedCachingService)}
+        <div>
+          {intl.formatMessage(t.network.connectedCachingService)}
+        </div>
+        <div class={styles.helpContent}>
+          <div class={styles.helpIcon}></div>
+          <div class={styles.content}>
+            {intl.formatMessage(tPlaceholders.cachingPoolHelp)}
+          </div>
+        </div>
       </div>
 
 
       <For each={cacheServerList}>
         {cs => (
-          <button class={styles.relayItem} onClick={() => setConfirmRemoveCacheService(cs)}>
+          <button class={styles.relayItem} onClick={() => {
+            if (cacheServerList.length === 1) {
+              setTryToRemoveLastCachingService(true);
+              return;
+            }
+
+            setConfirmRemoveCacheService(cs)
+          }}>
             <div class={styles.relayEntry}>
               <Show
                 when={isCachingServiceConnected(cs)}
@@ -382,6 +398,29 @@ const Network: Component = () => {
           setConfirmRemoveCacheService('');
         }}
         onAbort={() => setConfirmRemoveCacheService('')}
+      />
+
+      <ConfirmModal
+        open={confirmRemoveCacheService().length > 0}
+        description={intl.formatMessage(tActions.confirmRemoveCacheService, {
+          url: confirmRemoveCacheService(),
+          b: interpretBold,
+        }) as string}
+        onConfirm={() => {
+          onRemoveCacheService(confirmRemoveCacheService())
+          setConfirmRemoveCacheService('');
+        }}
+        onAbort={() => setConfirmRemoveCacheService('')}
+      />
+
+      <ConfirmModal
+        open={tryToRemoveLastCachingService()}
+        description={intl.formatMessage(tPlaceholders.mustHaveOneCachingService)}
+        title="Primal requires one caching service"
+        confirmLabel="OK"
+        onConfirm={() => {
+          setTryToRemoveLastCachingService(false);
+        }}
       />
     </div>
   )

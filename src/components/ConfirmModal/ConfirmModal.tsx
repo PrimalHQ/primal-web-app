@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { zapNote } from '../../lib/zap';
@@ -20,8 +20,8 @@ const ConfirmModal: Component<{
   description?: string,
   confirmLabel?: string,
   abortLablel?: string
-  onConfirm: () => void,
-  onAbort: () => void,
+  onConfirm?: () => void,
+  onAbort?: () => void,
 }> = (props) => {
 
   const intl = useIntl();
@@ -36,19 +36,23 @@ const ConfirmModal: Component<{
           {props.description}
         </div>
         <div class={styles.feedConfirmationActions}>
-          <button
-            class={styles.feedRestoreConfirm}
-            onClick={props.onConfirm}
-          >
-          {props.confirmLabel || intl.formatMessage(t.confirm)}
-          </button>
+          <Show when={props.onConfirm}>
+            <button
+              class={styles.feedRestoreConfirm}
+              onClick={props.onConfirm}
+            >
+            {props.confirmLabel || intl.formatMessage(t.confirm)}
+            </button>
+          </Show>
 
-          <button
-            class={styles.feedRestoreAbort}
-            onClick={props.onAbort}
-          >
-          {props.abortLablel || intl.formatMessage(t.abort)}
-          </button>
+          <Show when={props.onAbort}>
+            <button
+              class={styles.feedRestoreAbort}
+              onClick={props.onAbort}
+            >
+            {props.abortLablel || intl.formatMessage(t.abort)}
+            </button>
+          </Show>
         </div>
       </div>
 

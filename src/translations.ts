@@ -687,6 +687,16 @@ export const notifications = {
 };
 
 export const placeholders = {
+  mustHaveOneCachingService: {
+    id: 'placeholders.mustHaveOneCachingService',
+    defaultMessage: 'At this time, client needs to have at least one caching service to operate. In the future we will add the ability to use Primal without a caching service, but this is not yet supported.',
+    description: 'Description when trying to remove the last caching service from the pool',
+  },
+  cachingPoolHelp: {
+    id: 'placeholders.cachingPoolHelp',
+    defaultMessage: 'Client will randomly connect to one of the caching services in this pool. This helps with fail-over if some of the services are down. You can add or remove services. If you wish to always connect to exatly one caching service, you should leave only one entry in this pool.',
+    description: 'text for caching pool help bubble',
+  },
   comingSoon: {
     id: 'placeholders.comingSoon',
     defaultMessage: 'Coming soon',

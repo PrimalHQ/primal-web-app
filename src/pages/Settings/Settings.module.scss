@@ -46,6 +46,7 @@
   line-height: 20px;
   color: var(--text-secondary);
   margin-bottom: 20px;
+  display: flex;
 }
 
 .secondCaption {
@@ -77,6 +78,36 @@
   &:hover {
     text-decoration: underline;
   }
+}
+
+.helpContent {
+  position: relative;
+  .content {
+    display: none;
+    position: absolute;
+    top: 22px;
+    left: 0px;
+    background-color: var(--background-card);
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    width: 300px;
+    padding: 8px;
+    border: 1px solid var(--text-tertiary-2);
+    border-radius: 8px;
+    z-index: var(--z-index-lifted);
+  }
+
+  &:hover {
+    .helpIcon {
+      background-color: var(--text-primary);
+    }
+    .content {
+      display: block;
+    }
+  }
+
 }
 
 .devider {
@@ -220,6 +251,15 @@
   margin-inline: 8px;
   -webkit-mask: url(../../assets/icons/connect.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/connect.svg) no-repeat 0 / 100%;
+}
+
+.helpIcon {
+  width: 18px;
+  height: 18px;
+  background-color: var(--text-secondary);
+  margin-inline: 8px;
+  -webkit-mask: url(../../assets/icons/help.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/help.svg) no-repeat 0 / 100%;
 }
 
 .relayItem {
