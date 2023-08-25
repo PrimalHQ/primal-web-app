@@ -305,11 +305,11 @@ export const sendNote = async (text: string, relays: Relay[], tags: string[][], 
   return await sendEvent(event, relays, relaySettings);
 }
 
-export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendContacts = async (tags: string[][], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.Contacts,
-    tags: contacts.map(c => ['p', c]),
+    tags: [...tags],
     created_at: date,
   };
 

@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import {
   createContext,
   createEffect,
@@ -45,6 +45,7 @@ export type AccountContextStore = {
   isKeyLookupDone: boolean,
   quotedNote: string | undefined,
   connectToPrimaryRelays: boolean,
+  contactsTags: string[][],
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -81,6 +82,7 @@ const initialData = {
   isKeyLookupDone: false,
   quotedNote: undefined,
   connectToPrimaryRelays: true,
+  contactsTags: [],
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -293,12 +295,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
         const relayInfo = JSON.stringify(store.relaySettings);
         const date = Math.floor((new Date()).getTime() / 1000);
+        const existingTags = unwrap(store.contactsTags);
         const following = [...store.following];
 
-        const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+        const { success } = await sendContacts(existingTags, date, relayInfo, store.relays, store.relaySettings);
 
         if (success) {
-          updateStore('following', () => following);
           updateStore('followingSince', () => date);
           saveFollowing(store.publicKey, following, date);
         }
@@ -344,12 +346,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
         const relayInfo = JSON.stringify(store.relaySettings);
         const date = Math.floor((new Date()).getTime() / 1000);
+        const existingTags = unwrap(store.contactsTags);
         const following = [...store.following];
 
-        const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+        const { success } = await sendContacts(existingTags, date, relayInfo, store.relays, store.relaySettings);
 
         if (success) {
-          updateStore('following', () => following);
           updateStore('followingSince', () => date);
           saveFollowing(store.publicKey, following, date);
         }
@@ -385,6 +387,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
+    updateStore('contactsTags', () => [...tags]);
     saveFollowing(store.publicKey, contacts, followingSince || 0);
   };
 
@@ -429,13 +432,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         if (!store.following.includes(pubkey)) {
           const relayInfo = JSON.stringify(store.relaySettings);
           const date = Math.floor((new Date()).getTime() / 1000);
+          const existingTags = unwrap(store.contactsTags);
           const following = [...store.following, pubkey];
 
-          const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+          const tags = [ ...existingTags, ['p', pubkey]];
+
+          const { success } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('following', () => following);
             updateStore('followingSince', () => date);
+            updateStore('contactsTags', () => [...tags]);
             saveFollowing(store.publicKey, following, date);
           }
         }
@@ -467,13 +474,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         if (store.following.includes(pubkey)) {
           const relayInfo = JSON.stringify(store.relaySettings);
           const date = Math.floor((new Date()).getTime() / 1000);
+          const existingTags = unwrap(store.contactsTags);
           const following = store.following.filter(f => f !== pubkey);
 
-          const { success } = await sendContacts(following, date, relayInfo, store.relays, store.relaySettings);
+          const tags = existingTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+          const { success } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('following', () => following);
             updateStore('followingSince', () => date);
+            updateStore('contactsTags', () => [...tags]);
             saveFollowing(store.publicKey, following, date);
           }
         }
