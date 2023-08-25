@@ -1158,7 +1158,7 @@ const EditBox: Component<{
         </div>
       </Show>
 
-      <Show when={isEmojiInput() && emojiQuery().length > emojiSearchLimit}>
+      <Show when={isEmojiInput() && emojiQuery().length > emojiSearchLimit && emojiResults.length > 0}>
         <div
           class={styles.emojiSuggestions}
           ref={emojiOptions}
