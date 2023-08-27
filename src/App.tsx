@@ -35,8 +35,8 @@ const App: Component = () => {
     <TranslatorProvider>
       <Toaster>
         <MediaProvider>
-          <SearchProvider>
-            <AccountProvider>
+          <AccountProvider>
+            <SearchProvider>
               <SettingsProvider>
                 <ProfileProvider>
                   <MessagesProvider>
@@ -53,8 +53,8 @@ const App: Component = () => {
                   </MessagesProvider>
                 </ProfileProvider>
               </SettingsProvider>
-            </AccountProvider>
-          </SearchProvider>
+            </SearchProvider>
+          </AccountProvider>
         </MediaProvider>
       </Toaster>
     </TranslatorProvider>

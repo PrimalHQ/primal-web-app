@@ -21,6 +21,7 @@ import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import HelpTip from '../../components/HelpTip/HelpTip';
 
 
 const Network: Component = () => {
@@ -301,12 +302,9 @@ const Network: Component = () => {
         <div>
           {intl.formatMessage(t.network.connectedCachingService)}
         </div>
-        <div class={styles.helpContent}>
-          <div class={styles.helpIcon}></div>
-          <div class={styles.content}>
-            {intl.formatMessage(tPlaceholders.cachingPoolHelp)}
-          </div>
-        </div>
+        <HelpTip>
+          <span>{intl.formatMessage(tPlaceholders.cachingPoolHelp)}</span>
+        </HelpTip>
       </div>
 
 

@@ -4,7 +4,7 @@ import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { APP_ID } from '../../App';
 import { getExploreFeed } from '../../lib/feed';
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
+import { cacheServer, isConnected, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
 import { sortingPlan, convertToNotes } from '../../stores/note';
 import { convertToUser, emptyUser, truncateNpub } from '../../stores/profile';
 import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
@@ -15,10 +15,12 @@ import { useIntl } from '@cookbook/solid-intl';
 import { getTrendingUsers } from '../../lib/profile';
 import { hexToNpub } from '../../lib/keys';
 import { exploreSidebarCaption } from '../../translations';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const ExploreSidebar: Component = () => {
 
   const intl = useIntl();
+  const account = useAccountContext();
 
   const [store, setStore] = createStore<{ users: Record<string, NostrUserContent>, scores: Record<string, number> }>({
     users: {},
@@ -110,7 +112,7 @@ const ExploreSidebar: Component = () => {
         scores: {},
       }));
 
-      getTrendingUsers(`explore_sidebar_${APP_ID}`);
+      getTrendingUsers(`explore_sidebar_${APP_ID}`, account?.publicKey);
 		}
 	});
 

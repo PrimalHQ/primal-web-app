@@ -28,6 +28,7 @@ const Search = lazy(() => import('./pages/Search'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Mutelist = lazy(() => import('./pages/Mutelist'));
 
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
@@ -35,6 +36,7 @@ const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
+const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 
 const primalWindow = window as PrimalWindow;
@@ -95,6 +97,7 @@ const Router: Component = () => {
             <Route path="/zaps" component={ZapSettings} />
             <Route path="/muted" component={Muted} />
             <Route path="/network" component={Network} />
+            <Route path="/filters" component={Moderation} />
           </Route>
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
@@ -102,6 +105,7 @@ const Router: Component = () => {
           <Route path="/help" component={Help} />
           <Route path="/search/:query" component={Search} />
           <Route path="/rest" component={Explore} />
+          <Route path="/mutelist/:npub" component={Mutelist} />
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName" component={Profile} data={getKnownProfiles} />
         </Route>

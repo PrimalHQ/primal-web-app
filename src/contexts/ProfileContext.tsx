@@ -405,7 +405,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
-      getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
+      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
     }

@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, themes, trendingFeed } from "../constants";
+import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -20,6 +20,7 @@ import {
   subscribeTo
 } from "../sockets";
 import {
+  ContentModeration,
   ContextChildren,
   PrimalFeed,
   PrimalTheme,
@@ -38,6 +39,8 @@ import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
+import { getFilterlists } from "../lib/profile";
+
 
 export type SettingsContextStore = {
   locale: string,
@@ -49,6 +52,8 @@ export type SettingsContextStore = {
   availableZapOptions: number[],
   notificationSettings: Record<string, boolean>,
   cachingServiceList: string[],
+  applyContentModeration: boolean,
+  contentModeration: ContentModeration[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -64,6 +69,8 @@ export type SettingsContextStore = {
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
     saveCachingServiceList: () => void,
+    setApplyContentModeration: (flag: boolean) => void,
+    modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
   }
 }
 
@@ -77,6 +84,8 @@ export const initialData = {
   availableZapOptions: defaultZapOptions,
   notificationSettings: { ...defaultNotificationSettings },
   cachingServiceList: [],
+  applyContentModeration: true,
+  contentModeration: [...defaultContentModeration],
 };
 
 
@@ -124,6 +133,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const availableTheme = store.themes.find(t => t.name === name);
     availableTheme && setTheme(availableTheme, temp);
   }
+
+  const setApplyContentModeration = (flag = true) => {
+    updateStore('applyContentModeration', () => flag);
+
+    saveSettings();
+  };
 
   const addAvailableFeed = (feed: PrimalFeed, addToTop = false, temp?: boolean) => {
     if (!feed) {
@@ -240,6 +255,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultSettings(subid)
   };
 
+  const modifyContentModeration = (name: string, content = true, trending = true) => {
+    let scopes: string[] = [];
+    if (content) scopes.push(contentScope);
+    if (trending) scopes.push(trendingScope);
+
+    updateStore('contentModeration', x => x.name === name, () => ({ scopes }));
+    saveSettings();
+  };
+
   const saveSettings = (then?: () => void) => {
     const settings = {
       theme: store.theme,
@@ -248,6 +272,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       zapOptions: store.availableZapOptions,
       notifications: store.notificationSettings,
       cachingServiceList: store.cachingServiceList,
+      applyContentModeration: store.applyContentModeration,
+      contentModeration: store.contentModeration,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -345,6 +371,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             zapOptions,
             notifications,
             cachingServiceList,
+            applyContentModeration,
+            contentModeration,
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
@@ -363,6 +391,24 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             updateStore('cachingServiceList', () => [ ...cachingServiceList ]);
             setCacheServerList(store.cachingServiceList);
             disconnect();
+          }
+
+          updateStore('applyContentModeration', () => applyContentModeration);
+
+          if (Array.isArray(contentModeration) && contentModeration.length === 0) {
+            updateStore('contentModeration', () => [...defaultContentModeration]);
+          }
+          else if (Array.isArray(contentModeration)) {
+            for (let i=0; i < contentModeration.length; i++) {
+              const m = contentModeration[i];
+              const index = store.contentModeration.findIndex(x => x.name === m.name);
+
+              updateStore(
+                'contentModeration',
+                index < 0 ? store.contentModeration.length : index,
+                () => ({...m}),
+              );
+            }
           }
         }
         catch (e) {
@@ -419,6 +465,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   // TODO Solve this.
   const feedLabel = intl.formatMessage(t.feedLatest);
 
+  let publicKey: string | undefined;
 
   // Initial setup for a user with a public key
   createEffect(() => {
@@ -427,20 +474,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    const pubkey = account?.publicKey;
+    publicKey = account?.publicKey;
 
-    const initFeeds = initAvailableFeeds(pubkey);
+    const initFeeds = initAvailableFeeds(publicKey);
 
     if (initFeeds && initFeeds.length > 0) {
       updateStore('defaultFeed', () => initFeeds[0]);
-      updateStore('availableFeeds', () => replaceAvailableFeeds(pubkey, initFeeds));
+      updateStore('availableFeeds', () => replaceAvailableFeeds(publicKey, initFeeds));
     }
-
 
     const feed = {
       name: feedLabel,
-      hex: pubkey,
-      npub: hexToNpub(pubkey),
+      hex: publicKey,
+      npub: hexToNpub(publicKey),
     };
 
     // Add trendingFeed if it's missing
@@ -455,9 +501,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       addAvailableFeed(feed, true, true);
     }
 
-
     setTimeout(() => {
-      loadSettings(pubkey);
+      loadSettings(publicKey);
     }, 100);
   });
 
@@ -509,6 +554,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       resetZapOptionsToDefault,
       updateNotificationSettings,
       saveCachingServiceList,
+      setApplyContentModeration,
+      modifyContentModeration,
     },
   });
 

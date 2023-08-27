@@ -19,12 +19,13 @@ import {
 import { Kind } from "../constants";
 import { APP_ID } from "../App";
 import { getUserProfiles } from "../lib/profile";
-import { searchContent, searchUsers } from "../lib/search";
+import { searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes } from "../stores/note";
 import { subscribeTo } from "../sockets";
 import { nip19 } from "nostr-tools";
 import { useAccountContext } from "./AccountContext";
+import { npubToHex } from "../lib/keys";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -51,6 +52,7 @@ export type SearchContextStore = {
   page: FeedPage,
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
+  filteringReasons: string[],
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
@@ -58,6 +60,7 @@ export type SearchContextStore = {
     findContent: (query: string) => void,
     setContentQuery: (query: string) => void,
     getRecomendedUsers: () => void,
+    findFilteredUserByNpub: (npub: string) => void,
   },
 }
 
@@ -73,6 +76,7 @@ const initialData = {
   page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
   mentionedNotes: {},
+  filteringReasons: [],
 };
 
 export const SearchContext = createContext<SearchContextStore>();
@@ -385,6 +389,45 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
     updateStore('contentQuery', () => query);
   };
 
+  const findFilteredUserByNpub = (npub: string) => {
+    const pubkey = npubToHex(npub);
+
+    let reasons: string[] = [];
+
+    if (pubkey.length > 0) {
+      const subId = `search_filtered_users_${APP_ID}`;
+
+      const unsub = subscribeTo(subId, (type, _, response) => {
+        if (type === 'EVENT') {
+          if (response?.kind === Kind.FilteringReason) {
+            const content: { action: 'block' | 'allow', pubkey?: string, group?: string } = JSON.parse(response.content);
+
+            if (content.action === 'allow') {
+              return;
+            }
+
+            if (content.pubkey) {
+              reasons.push(content.pubkey);
+              return
+            }
+
+            if (content.group) {
+              reasons.push(content.group);
+              return
+            }
+          }
+        }
+
+        if (type === 'EOSE') {
+          updateStore('filteringReasons', () => [...reasons]);
+          unsub();
+        }
+      });
+
+      searchFilteredUsers(pubkey, account?.publicKey, subId);
+    }
+  }
+
 
 
 // EFFECTS --------------------------------------
@@ -403,6 +446,7 @@ const [store, updateStore] = createStore<SearchContextStore>({
     findContentUsers,
     setContentQuery,
     getRecomendedUsers,
+    findFilteredUserByNpub,
   },
 });
 

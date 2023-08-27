@@ -153,6 +153,16 @@ export const actions = {
       defaultMessage: 'Unmute user',
       description: 'Label for unmuting user from profile context menu',
     },
+    followMute: {
+      id: 'actions.profileContext.followMute',
+      defaultMessage: 'Follow user\'s mute list',
+      description: 'Label for following user\'s mute list',
+    },
+    unfollowMute: {
+      id: 'actions.profileContext.unfollowMute',
+      defaultMessage: 'Unfollow user\'s mute list',
+      description: 'Label for unfollowing user\'s mute list',
+    },
     reportUser: {
       id: 'actions.profileContext.reportUser',
       defaultMessage: 'Report user',
@@ -687,6 +697,16 @@ export const notifications = {
 };
 
 export const placeholders = {
+  searchByNpub: {
+    id: 'placeholders.searchByNpub',
+    defaultMessage: 'search by npub...',
+    description: 'Placeholder for searching by npub',
+  },
+  addNpub: {
+    id: 'placeholders.addNpub',
+    defaultMessage: 'add npub...',
+    description: 'Placeholder for adding npub',
+  },
   mustHaveOneCachingService: {
     id: 'placeholders.mustHaveOneCachingService',
     defaultMessage: 'At this time, client needs to have at least one caching service to operate. In the future we will add the ability to use Primal without a caching service, but this is not yet supported.',
@@ -887,6 +907,97 @@ export const settings = {
       id: 'settings.homeFeeds.caption',
       defaultMessage: 'Edit and order your home page feeds',
       description: 'Caption for home feed ordering',
+    },
+  },
+  moderation: {
+    title: {
+      id: 'settings.filters.title',
+      defaultMessage: 'Content Moderation',
+      description: 'Title of the content filtering settings sub-page',
+    },
+    description: {
+      id: 'settings.filters.description',
+      defaultMessage: 'Primal offers customizable content filtering services. In addition to your own mute list, you may subscribe to other users’ mute lists. Primal runs real time spam detection systems as well as Not-Safe-For-Work content, to which you may also subscribe.',
+      description: 'Description of the content filtering settings sub-page',
+    },
+    applyFiltering: {
+      id: 'settings.filters.applyFiltering',
+      defaultMessage: 'Apply Content Filtering',
+      description: 'Caption for home feed ordering',
+    },
+    searchFilteredAccount: {
+      id: 'settings.filters.searchFilteredAccount',
+      defaultMessage: 'Search Filtered Accounts',
+      description: 'Caption for home feed ordering',
+    },
+    allowList: {
+      id: 'settings.filters.allowList',
+      defaultMessage: 'My Allowlist',
+      description: 'Caption for home feed ordering',
+    },
+    moderationItem: {
+      id: 'settings.contentModeration.item',
+      defaultMessage: '{name}\'s mute list',
+      description: 'Caption for my mute list algo',
+    },
+    searchForFiltered: {
+      id: 'settings.contentModeration.searchForFiltered',
+      defaultMessage: 'Search to find out if a user account is included in any of the filter lists:',
+      description: 'Description for search for filtered users',
+    },
+    allowListsDescription: {
+      id: 'settings.contentModeration.allowListsDescription',
+      defaultMessage: 'Add user accounts that should be excluded from filtering:',
+      description: 'Description for allow lists',
+    },
+    table: {
+      mutelists: {
+        id: 'settings.contentModeration.table.mutelists',
+        defaultMessage: 'Mute Lists',
+        description: 'Caption for mutelists column on moderation settings page',
+      },
+      algos: {
+        id: 'settings.contentModeration.table.algos',
+        defaultMessage: 'Algorithms',
+        description: 'Caption for algorithms column on moderation settings page',
+      },
+      content: {
+        id: 'settings.contentModeration.table.content',
+        defaultMessage: 'Hide Content',
+        description: 'Caption for content column on moderation settings page',
+      },
+      trending: {
+        id: 'settings.contentModeration.table.trending',
+        defaultMessage: 'Don\’t Recommend',
+        description: 'Caption for trending column on moderation settings page',
+      },
+      trendingHelp: {
+        id: 'settings.contentModeration.table.trendingHelp',
+        defaultMessage: 'Content won\’t be recommended in trending and most-zapped feeds',
+        description: 'Help description for trending filter',
+      },
+      contentHelp: {
+        id: 'settings.contentModeration.table.contentHelp',
+        defaultMessage: 'Content will be hidden from all feeds, threads, and search results',
+        description: 'Help description for content filter',
+      },
+    },
+    algos: {
+      my: {
+        id: 'settings.contentModeration.algos.my',
+        defaultMessage: 'My mute list',
+        description: 'Caption for my mute list algo',
+      },
+      primal_spam: {
+        id: 'settings.contentModeration.algos.spam',
+        defaultMessage: 'Primal spam filter',
+        description: 'Caption for spam algo',
+      },
+      primal_nsfw: {
+        id: 'settings.contentModeration.algos.nsfw',
+        defaultMessage: 'Primal NSFW filter',
+        description: 'Caption for NSFW algo',
+      },
     },
   },
   muted: {

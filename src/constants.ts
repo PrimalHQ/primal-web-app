@@ -1,4 +1,4 @@
-import { FeedPage, } from "./types/primal";
+import { ContentModeration, FeedPage, Filterlist, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
 import { MessageDescriptor } from "@cookbook/solid-intl";
@@ -126,6 +126,7 @@ export enum Kind  {
   Uploaded = 10_000_121,
   ImportResponse = 10_000_127,
   LinkMetadata = 10_000_128,
+  FilteringReason = 10_000_131,
 }
 
 export const relayConnectingTimeout = 1000;
@@ -274,3 +275,24 @@ export const defaultZapOptions = [
   100_000,
   1_000_000,
 ];
+
+export const contentScope = 'content';
+export const trendingScope = 'trending';
+
+export const spamContentModeration = {
+  name: 'primal_spam',
+  scopes: [contentScope, trendingScope],
+};
+export const nsfwContentModeration = {
+  name: 'primal_nsfw',
+  scopes: [trendingScope],
+};
+
+export const defaultContentModeration: ContentModeration[] = [
+  spamContentModeration,
+  nsfwContentModeration,
+];
+
+export const algoNpub ='npub1tkpg9lyfgy83c4mgrgkrhzl90t732ekzvt73m6658xva88g5rj6qy6ntw4';
+
+export const specialAlgos = ['primal_spam', 'primal_nsfw'];

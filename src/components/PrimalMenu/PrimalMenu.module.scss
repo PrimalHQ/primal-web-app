@@ -7,6 +7,7 @@
   border: solid 1px var(--text-tertiary-2);
   border-radius: 4px;
   z-index: var(--z-index-header);
+  width: max-content;
 
   &.noteFooter {
     top: 26px;

@@ -8,6 +8,7 @@ import {
   useContext
 } from "solid-js";
 import {
+  Filterlist,
   NostrContactsContent,
   NostrEOSE,
   NostrEvent,
@@ -19,11 +20,11 @@ import {
 } from '../types/primal';
 import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
-import { sendContacts, sendLike, sendMuteList } from "../lib/notes";
+import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getLikes, getProfileContactList, getProfileMuteList, getUserProfiles } from "../lib/profile";
+import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
@@ -46,6 +47,10 @@ export type AccountContextStore = {
   quotedNote: string | undefined,
   connectToPrimaryRelays: boolean,
   contactsTags: string[][],
+  mutelists: Filterlist[],
+  mutelistSince: number,
+  allowlist: string[],
+  allowlistSince: number,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -63,6 +68,11 @@ export type AccountContextStore = {
     changeCachingService: (url?: string) => void,
     dissconnectDefaultRelays: () => void,
     connectToRelays: (relaySettings: NostrRelays) => void,
+    addFilterList: (pubkey: string | undefined) => void,
+    removeFilterList: (pubkey: string | undefined) => void,
+    updateFilterList: (pubkey: string | undefined, content?: boolean, trending?: boolean) => void,
+    addToAllowlist: (pubkey: string | undefined) => void,
+    removeFromAllowlist: (pubkey: string | undefined) => void,
   },
 }
 
@@ -83,6 +93,10 @@ const initialData = {
   quotedNote: undefined,
   connectToPrimaryRelays: true,
   contactsTags: [],
+  mutelists: [],
+  mutelistSince: 0,
+  allowlist: [],
+  allowlistSince: 0,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -538,7 +552,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       if (content &&
         (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
         content.created_at &&
-        content.created_at > store.followingSince
+        content.created_at > store.mutedSince
       ) {
         updateMuted(content);
       }
@@ -596,14 +610,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
   };
 
   const dissconnectDefaultRelays = () => {
-    console.log('dissconnectDefaultRelays');
     for(let i=0; i < store.defaultRelays.length; i++) {
       const url = store.defaultRelays[i];
 
       const relay = store.relays.find(r => r.url === url);
 
       if (relay) {
-        console.log('dissconnectDefaultRelays: ', relay.url);
         relay.close();
         updateStore('relays', () => store.relays.filter(r => r.url !== url));
       }
@@ -614,6 +626,333 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       // Reset connection attempts
       relayAtempts[url] = 0;
     }
+
+  };
+
+  const updateFilterlists = (mutelists: NostrMutedContent) => {
+
+    let filterlists: Filterlist[] = [];
+    const since = mutelists.created_at;
+    const tags = mutelists.tags;
+
+    if (mutelists.kind !== Kind.CategorizedPeople || !tags.find(t => t[0] === 'd' && t[1] === 'mutelists')) {
+      return [...store.mutelists];
+    }
+
+    updateStore('mutelistSince', () => since || 0);
+
+    if (!tags || tags.length === 0) {
+      return [];
+    }
+
+    for (let i=0;i<tags.length;i++) {
+      const tag = tags[i];
+
+      if (tag[0] === 'd') {
+        continue;
+      }
+
+      if (tag[0] === 'p') {
+        const content = tag[4] && tag[4].includes('content') ? true : false;
+        const trending = tag[4] && tag[4].includes('trending') ? true : false;
+
+        const index = store.mutelists.findIndex(m => m.pubkey === tag[1]);
+
+        const newList = {
+          pubkey: tag[1],
+          relay: tag[2] || '',
+          petname: tag[3] || '',
+          content,
+          trending,
+        };
+
+        if (index === -1) {
+          filterlists.push(newList)
+          continue;
+        }
+
+        filterlists[index] = newList;
+        continue;
+      }
+    }
+
+    return filterlists;
+  };
+
+  const getFilterLists = (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const subId = `filterlists_${APP_ID}`;
+    let filterlists: Filterlist[] = [];
+
+
+    const unsub = subscribeTo(subId, (type, _, response) => {
+
+      if (type === 'EVENT') {
+        filterlists = updateFilterlists(response as NostrMutedContent);
+      }
+
+      if (type === 'EOSE') {
+        if (store.publicKey && !filterlists.find(l => l.pubkey === store.publicKey)) {
+          filterlists.unshift({ pubkey: store.publicKey, content: true, trending: true });
+        }
+        updateStore('mutelists', () => [...filterlists]);
+        unsub();
+      }
+
+    });
+
+    getFilterlists(pubkey, subId);
+  };
+
+  const addFilterList = async (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    let filterlists: Filterlist[] = [];
+
+    const unsub = subscribeTo(`before_mutelists_add_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+        updateStore('mutelists', () => [...filterlists]);
+
+        if (store.mutelists.find(m => m.pubkey === pubkey)) {
+          return;
+        }
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+
+        updateStore('mutelists', (mls) => [ ...mls, { pubkey, content: true, trending: true } ]);
+
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+
+        if (success) {
+          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`)
+          return;
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        filterlists = updateFilterlists(content);
+      }
+    });
+
+    getFilterlists(store.publicKey, `before_mutelists_add_${APP_ID}`);
+
+  };
+
+  const removeFilterList = async (pubkey: string | undefined) => {
+    if (!pubkey || pubkey === store.publicKey) {
+      return;
+    }
+
+    let filterlists: Filterlist[] = [];
+
+    const unsub = subscribeTo(`before_mutelists_remove_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+        updateStore('mutelists', () => [...filterlists]);
+
+        const modified = store.mutelists.filter(m => m.pubkey !== pubkey);
+        const date = Math.floor((new Date()).getTime() / 1000);
+
+        updateStore('mutelists', () => [ ...modified ]);
+
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+
+        if (success) {
+          note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`)
+          return;
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        filterlists = updateFilterlists(content);
+      }
+    });
+
+    getFilterlists(store.publicKey, `before_mutelists_remove_${APP_ID}`);
+  };
+
+  const updateFilterList = async (pubkey: string | undefined, content = true, trending = true) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_mutelists_update_${APP_ID}`, async (type, subId, c) => {
+      if (type === 'EOSE') {
+
+        if (!store.mutelists.find(m => m.pubkey === pubkey)) {
+          unsub();
+          return;
+        }
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+
+        updateStore('mutelists',
+          m => m.pubkey === pubkey,
+          () => ({ content, trending }),
+        );
+
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+
+        if (success) {
+          note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
+        }
+
+        unsub();
+        return;
+      }
+
+      if (c &&
+        c.kind === Kind.CategorizedPeople &&
+        c.created_at &&
+        c.created_at > store.mutelistSince
+      ) {
+        updateFilterlists(c);
+      }
+    });
+
+    getFilterlists(store.publicKey, `before_mutelists_update_${APP_ID}`);
+
+  };
+
+
+
+  const updateAllowlist = (allowlist: NostrMutedContent) => {
+
+    const since = allowlist.created_at;
+    const tags = allowlist.tags;
+
+    if (allowlist.kind !== Kind.CategorizedPeople || !tags.find(t => t[0] === 'd' && t[1] === 'allowlist')) {
+      return;
+    }
+
+    updateStore('mutelistSince', () => since || 0);
+
+    const pubkeys = tags.reduce((acc, t) => {
+      return t[0] === 'p' ? [...acc, t[1]] : acc;
+    }, []);
+
+    updateStore('allowlist', () => pubkeys);
+  }
+
+  const getAllowList = (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const subId = `allowlist_${APP_ID}`;
+
+
+    const unsub = subscribeTo(subId, (type, _, response) => {
+
+      if (type === 'EVENT') {
+        updateAllowlist(response as NostrMutedContent);
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+      }
+
+    });
+
+    getAllowlist(pubkey, subId);
+  };
+
+  const addToAllowlist = async (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_allowlist_add_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        if (store.allowlist.includes(pubkey)) {
+          return;
+        }
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+
+        updateStore('allowlist', store.allowlist.length, () => pubkey);
+
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+
+        if (success) {
+          note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
+          return;
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.allowlistSince
+      ) {
+        updateAllowlist(content);
+      }
+    });
+
+    getAllowlist(store.publicKey, `before_allowlist_add_${APP_ID}`);
+
+  };
+
+  const removeFromAllowlist = async (pubkey: string | undefined) => {
+    if (!pubkey) {
+      return;
+    }
+
+    const unsub = subscribeTo(`before_allowlist_remove_${APP_ID}`, async (type, subId, content) => {
+      if (type === 'EOSE') {
+
+        if (!store.allowlist.includes(pubkey)) {
+          return;
+        }
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const newList = store.allowlist.filter(pk => pk !== pubkey);
+
+        updateStore('allowlist', () => [...newList]);
+
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+
+        if (success) {
+          note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
+          return;
+        }
+
+        unsub();
+        return;
+      }
+
+      if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.allowlistSince
+      ) {
+        updateAllowlist(content);
+      }
+    });
+
+    getAllowlist(store.publicKey, `before_allowlist_remove_${APP_ID}`);
 
   };
 
@@ -664,6 +1003,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
 
       getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
+      getFilterLists(store.publicKey);
+      getAllowList(store.publicKey);
     }
   });
 
@@ -755,9 +1096,6 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     if (subId === `user_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
-
-        console.log('CONTACTS: ', JSON.parse(content.content), new Date((content.created_at || 0) * 1000));
-
         if (!content.created_at || content.created_at < store.followingSince) {
           return;
         }
@@ -817,6 +1155,11 @@ const [store, updateStore] = createStore<AccountContextStore>({
     changeCachingService,
     dissconnectDefaultRelays,
     connectToRelays,
+    addFilterList,
+    removeFilterList,
+    updateFilterList,
+    addToAllowlist,
+    removeFromAllowlist,
   },
 });
 

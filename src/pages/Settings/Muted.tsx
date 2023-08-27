@@ -1,10 +1,10 @@
-import { Component, createEffect, For } from 'solid-js';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A, Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getUserProfiles } from '../../lib/profile';
 import { APP_ID } from '../../App';
@@ -24,6 +24,8 @@ const Muted: Component = () => {
 
   const mutedMetadataSubId = `muted_metadata_${APP_ID}`;
 
+  const [isFetching, setIsFetching] = createSignal(true);
+
   createEffect(() => {
     if (account && account.isKeyLookupDone) {
 
@@ -38,6 +40,7 @@ const Muted: Component = () => {
 
         if (type === 'EOSE') {
           setMutedUsers(() => [ ...users ]);
+          setIsFetching(false);
           unsub();
         }
       });
@@ -61,20 +64,22 @@ const Muted: Component = () => {
         <For
           each={mutedUsers}
           fallback={
-            <div class={styles.emptyListBanner}>
-              {intl.formatMessage(t.muted.empty)}
-            </div>
+            <Show when={!isFetching()}>
+              <div class={styles.emptyListBanner}>
+                {intl.formatMessage(t.muted.empty)}
+              </div>
+            </Show>
           }
         >
           {user => (
             <div class={styles.mutedUser}>
-              <div class={styles.userInfo}>
+              <A class={styles.userInfo} href={`/p/${user.npub}`}>
                 <Avatar src={user.picture} size='sm' />
                 <div class={styles.userName}>
                   <div class={styles.title}>{userName(user)}</div>
                   <div class={styles.verification}>{nip05Verification(user)}</div>
                 </div>
-              </div>
+              </A>
               <button onClick={() => unMuteUser(user)}>
                 {intl.formatMessage(tActions.unmute)}
               </button>

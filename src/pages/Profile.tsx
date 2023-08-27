@@ -190,8 +190,6 @@ const Profile: Component = () => {
     return account?.publicKey === profile?.profileKey;
   };
 
-  const [isUnmuted, setIsUnmuted] = createSignal(false);
-
   createEffect(() => {
     const pk = getHex();
 
@@ -199,8 +197,7 @@ const Profile: Component = () => {
       return;
     }
 
-    if (isUnmuted() && !account?.muted.includes(pk)) {
-      setIsUnmuted(false);
+    if (!isMuted(pk)) {
       setTimeout(() => {
         profile?.actions.fetchNotes(pk);
       }, 500);
@@ -219,8 +216,12 @@ const Profile: Component = () => {
     }
   });
 
-  const isMuted = (pk: string | undefined) => {
-    return pk && account?.muted.includes(pk);
+  const isMuted = (pk: string | undefined, ignoreContentCheck = false) => {
+    const isContentMuted = account?.mutelists.find(x => x.pubkey === account.publicKey)?.content;
+
+    return pk &&
+      account?.muted.includes(pk) &&
+      (ignoreContentCheck ? true : isContentMuted);
   };
 
   const unMuteProfile = () => {
@@ -228,8 +229,21 @@ const Profile: Component = () => {
       return;
     }
 
-    setIsUnmuted(true);
     account.actions.removeFromMuteList(profile.profileKey);
+  };
+
+  const isFollowingMute = (pk: string | undefined) => {
+    if (!pk) return false;
+
+    return account?.mutelists.find(l => l.pubkey === pk);
+  };
+
+  const followMute = () => {
+    account?.actions.addFilterList(profile?.profileKey);
+  };
+
+  const unfollowMute = () => {
+    account?.actions.removeFilterList(profile?.profileKey);
   };
 
   const openContextMenu = (e: MouseEvent) => {
@@ -288,27 +302,46 @@ const Profile: Component = () => {
 
   const profileContextForOtherPeople: () => MenuItem[] = () => {
 
-    const muteAction = isMuted(getHex()) ?
-    {
-      label: intl.formatMessage(tActions.profileContext.unmuteUser),
-      action: () => {
-        unMuteProfile();
-        setContext(false);
-      },
-      icon: 'mute_user',
-      warning: true,
-    } :
-    {
-      label: intl.formatMessage(tActions.profileContext.muteUser),
-      action: () => {
-        setConfirmMuteUser(true);
-        setContext(false);
-      },
-      icon: 'mute_user',
-      warning: true,
-    };
+    const muteAction = isMuted(getHex(), true) ?
+      {
+        label: intl.formatMessage(tActions.profileContext.unmuteUser),
+        action: () => {
+          unMuteProfile();
+          setContext(false);
+        },
+        icon: 'mute_user',
+        warning: true,
+      } :
+      {
+        label: intl.formatMessage(tActions.profileContext.muteUser),
+        action: () => {
+          setConfirmMuteUser(true);
+          setContext(false);
+        },
+        icon: 'mute_user',
+        warning: true,
+      };
+
+    const followMuteAction = isFollowingMute(getHex()) ?
+      {
+        label: intl.formatMessage(tActions.profileContext.unfollowMute),
+        action: () => {
+          unfollowMute();
+          setContext(false);
+        },
+        icon: 'mute_user',
+      } :
+      {
+        label: intl.formatMessage(tActions.profileContext.followMute),
+        action: () => {
+          followMute();
+          setContext(false);
+        },
+        icon: 'mute_user',
+      };
 
     return [
+      followMuteAction,
       muteAction,
       {
         label: intl.formatMessage(tActions.profileContext.reportUser),
@@ -359,8 +392,6 @@ const Profile: Component = () => {
 
   const getProfileAbout = async (about: string) => {
     const a = await replaceLinkPreviews(urlify(sanitize(about), () => '', false, false))
-
-    console.log('PREVIEW: ', a);
 
     setRenderProfileAbout(a)
   };

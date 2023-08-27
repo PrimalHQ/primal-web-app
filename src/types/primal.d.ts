@@ -166,6 +166,12 @@ export type NostrLinkMetadata = {
   created_at?: number,
 };
 
+export type NostrFilteringReason = {
+  kind: Kind.FilteringReason,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -188,7 +194,8 @@ export type NostrEventContent =
   NostrFeedRange |
   NostrMediaInfo |
   NostrMediaUploaded |
-  NostrLinkMetadata;
+  NostrLinkMetadata |
+  NostrFilteringReason;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -552,3 +559,16 @@ export type MenuItem = {
   icon?: string,
   warning?: boolean,
 };
+
+export type Filterlist = {
+  pubkey: string,
+  relay?: string,
+  petname?: string,
+  content: boolean,
+  trending: boolean,
+};
+
+export type ContentModeration = {
+  name: string,
+  scopes: string[],
+}

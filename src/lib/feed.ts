@@ -224,6 +224,7 @@ export const getExploreFeed = (
 };
 
 export const getTrending24h = (
+  user_pubkey: string | undefined,
   subid: string,
 ) => {
   sendMessage(JSON.stringify([
@@ -231,11 +232,13 @@ export const getTrending24h = (
     subid,
     {cache: [
       "explore_global_trending_24h",
+      { user_pubkey },
     ]},
   ]));
 };
 
 export const getMostZapped4h = (
+  user_pubkey: string | undefined,
   subid: string,
 ) => {
   sendMessage(JSON.stringify([
@@ -243,6 +246,7 @@ export const getMostZapped4h = (
     subid,
     {cache: [
       "explore_global_mostzapped_4h",
+      { user_pubkey },
     ]},
   ]));
 };

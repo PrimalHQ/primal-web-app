@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component, JSXElement, Match, Show, Switch } from 'solid-js';
 
 import styles from './Checkbox.module.scss';
 
@@ -6,8 +6,9 @@ const Checkbox: Component<{
   id: string,
   onChange: (e: Event) => void,
   checked?: boolean,
-  label: string,
+  label?: string,
   icon?: string,
+  children?: JSXElement,
 }> = (props) => {
 
   return (
@@ -21,7 +22,14 @@ const Checkbox: Component<{
       <Show when={props.icon}>
         <img src={props.icon} />
       </Show>
-      <label for={props.id}>{props.label}</label>
+      <Switch>
+        <Match when={props.children}>
+          {props.children}
+        </Match>
+        <Match when={props.label}>
+          <label for={props.id}>{props.label}</label>
+        </Match>
+      </Switch>
     </div>
   )
 }

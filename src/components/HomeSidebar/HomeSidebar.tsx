@@ -26,6 +26,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { hourNarrow } from '../../formats';
 
 import { home as t } from '../../translations';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const [init, setInit] = createSignal(false);
 
@@ -49,6 +50,7 @@ const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNot
 const HomeSidebar: Component = () => {
 
   const intl = useIntl();
+  const account = useAccountContext();
 
   onCleanup(() => {
     removeSocketListeners(
@@ -82,8 +84,8 @@ const HomeSidebar: Component = () => {
         },
       }));
 
-      getTrending24h(`sidebar_trending_${APP_ID}`);
-      getMostZapped4h(`sidebar_zapped_${APP_ID}`);
+      getTrending24h(account?.publicKey, `sidebar_trending_${APP_ID}`);
+      getMostZapped4h(account?.publicKey, `sidebar_zapped_${APP_ID}`);
 		}
 	});
 

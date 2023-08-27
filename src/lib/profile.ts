@@ -3,7 +3,7 @@ import { Relay, Event } from "nostr-tools";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
-import { NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
+import { Filterlist, NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
 import { signEvent } from "./nostrAPI";
 import { sendEvent } from "./notes";
@@ -63,7 +63,7 @@ export const getProfileMuteList = (pubkey: string | undefined, subid: string, ex
   ]));
 }
 
-export const getProfileScoredNotes = (pubkey: string | undefined, subid: string, limit = 5) => {
+export const getCategorizedList = (pubkey: string | undefined, category: string, subid: string, extended?: boolean) => {
   if (!pubkey) {
     return;
   }
@@ -71,15 +71,27 @@ export const getProfileScoredNotes = (pubkey: string | undefined, subid: string,
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_profile_scored_content", { pubkey, limit }]},
+    {cache: ["parameterized_replaceable_list", { pubkey, identifier: category, extended_response: extended }]},
   ]));
 }
 
-export const getTrendingUsers = (subid: string) => {
+export const getProfileScoredNotes = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string, limit = 5) => {
+  if (!pubkey) {
+    return;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["scored_users_24h"]},
+    {cache: ["user_profile_scored_content", { pubkey, limit, user_pubkey }]},
+  ]));
+}
+
+export const getTrendingUsers = (subid: string, user_pubkey: string | undefined) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["scored_users_24h", { user_pubkey }]},
   ]));
 }
 
@@ -192,4 +204,67 @@ export const reportUser = async (pubkey: string, subid: string, user?: PrimalUse
     console.error('Failed to report user: ', reason);
     return false;
   }
+};
+
+export const getFilterlists = (pubkey: string | undefined, subid: string, extended?: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mutelists", { pubkey, extended_response: extended }]},
+  ]));
+};
+
+export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+  const tags = filterLists.reduce((acc, fl) => {
+    let s = [];
+    if (fl.content) s.push('content');
+    if (fl.trending) s.push('trending');
+
+    if (fl.pubkey) {
+      return [...acc, ['p', fl.pubkey, fl.relay || '', fl.petname || '', JSON.stringify(s)]];
+    }
+
+    return acc;
+  }, [['d', 'mutelists']]);
+
+
+  const event = {
+    content,
+    kind: Kind.CategorizedPeople,
+    tags,
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+};
+
+export const getAllowlist = (pubkey: string | undefined, subid: string, extended?: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["allowlist", { pubkey, extended_response: extended }]},
+  ]));
+};
+
+export const sendAllowList = async (allowlist: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+  const tags = allowlist.reduce((acc, pk) => {
+    return [...acc, ['p', pk]];
+  }, [['d', 'allowlist']]);
+
+  const event = {
+    content,
+    kind: Kind.CategorizedPeople,
+    tags,
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings);
 };

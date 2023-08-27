@@ -3,7 +3,7 @@ import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { Kind } from "../constants";
-import { sendMessage } from "../sockets";
+import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
@@ -453,3 +453,16 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
 }
+
+
+export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string) => {
+
+  const unsub = subscribeTo(subId, (type) => {
+
+    if (type === 'EOSE') {
+      unsub();
+    }
+  });
+
+  importEvents(events, subId);
+};
