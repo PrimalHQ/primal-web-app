@@ -32,6 +32,8 @@ import {
   actions as tActions,
   search as tSearch,
 } from '../translations';
+import PageCaption from '../components/PageCaption/PageCaption';
+import { useMediaContext } from '../contexts/MediaContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -59,7 +61,7 @@ export const parseNoteLinks = (text: string, mentionedNotes: Record<string, Prim
     try {
       const note = mentionedNotes[id];
 
-      const path = `/thread/${id}`;
+      const path = `/e/${id}`;
 
       const link = highlightOnly ?
         <span class='linkish' >{url}</span> :
@@ -99,7 +101,7 @@ export const parseNpubLinks = (text: string, mentionedUsers: Record<string, Prim
 
       const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
       const npub = hexToNpub(hex);
-      const path = `/profile/${npub}`;
+      const path = `/p/${npub}`;
 
       const user = mentionedUsers[hex];
 
@@ -132,6 +134,7 @@ const Messages: Component = () => {
   const messages = useMessagesContext();
   const account = useAccountContext();
   const profile = useProfileContext();
+  const media = useMediaContext();
 
   const navigate = useNavigate();
 
@@ -219,10 +222,9 @@ const Messages: Component = () => {
   });
 
   createEffect(() => {
-    if (messages?.selectedSender &&
-      currentUrl !== messages?.selectedSender?.npub
-    ) {
-      navigate(`/messages/${messages?.selectedSender.npub}`);
+    if (messages?.selectedSender && currentUrl !== messages.selectedSender) {
+      const npub = hexToNpub(messages.selectedSender)
+      navigate(`/messages/${npub}`);
       return;
     }
   });
@@ -306,7 +308,7 @@ const Messages: Component = () => {
     return parseNoteLinks(
       parseNpubLinks(
         highlightHashtags(
-          parseNote3(message)
+          parseNote3(message, media?.actions.getMediaUrl)
         ),
         messages?.referecedUsers,
       ),
@@ -650,7 +652,7 @@ const Messages: Component = () => {
       newMessageWrapper.style.height = '32px';
 
       setTimeout(() => {
-        const element = document.querySelector(`[data-user="${messages?.selectedSender?.pubkey}"]`);
+        const element = document.querySelector(`[data-user="${messages?.selectedSender}"]`);
 
         if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
           element.scrollIntoView();
@@ -819,36 +821,6 @@ const Messages: Component = () => {
     const e = new Event('input', { bubbles: true, cancelable: true});
     newMessageInput.dispatchEvent(e);
   };
-  // const selectUser = (user: PrimalUser) => {
-
-  //   if (!newMessageInput) {
-  //     return;
-  //   }
-  //   const name = userName(user);
-
-  //   setUserRefs((refs) => ({
-  //     ...refs,
-  //     [name]: user,
-  //   }));
-
-  //   messages?.actions.addUserReference(user);
-
-  //   let value = message();
-
-  //   value = value.slice(0, value.lastIndexOf('@'));
-
-  //   setQuery('');
-
-  //   setMessage(`${value}@\`${name}\` `);
-  //   newMessageInput.value = message();
-
-  //   newMessageInput.focus();
-
-
-  //   // Dispatch input event to recalculate UI position
-  //   const e = new Event('input', { bubbles: true, cancelable: true});
-  //   newMessageInput.dispatchEvent(e);
-  // };
 
   createEffect(() => {
     if (account?.hasPublicKey()) {
@@ -859,7 +831,7 @@ const Messages: Component = () => {
   createEffect(() => {
     if (messages?.selectedSender) {
 
-      const element = document.querySelector(`[data-user="${messages.selectedSender.pubkey}"]`);
+      const element = document.querySelector(`[data-user="${messages.selectedSender}"]`);
 
       if (element && sendersListElement && !isVisibleInContainer(element, sendersListElement)) {
         element.scrollIntoView();
@@ -923,11 +895,7 @@ const Messages: Component = () => {
         />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div>
-          {intl.formatMessage(tMessages.title)}
-        </div>
-      </div>
+      <PageCaption title={intl.formatMessage(tMessages.title)} />
 
       <div class={styles.messagesContent}>
 
@@ -1072,7 +1040,7 @@ const Messages: Component = () => {
                     fallback={
                       <div class={styles.myThread}>
                         <A
-                          href={`/profile/${hexToNpub(thread.author)}`}
+                          href={`/p/${hexToNpub(thread.author)}`}
                           class={styles.avatar}
                         >
                           <Avatar src={account?.activeUser?.picture} size="xxs" />
@@ -1099,7 +1067,7 @@ const Messages: Component = () => {
                   >
                     <div class={styles.theirThread}>
                       <A
-                        href={`/profile/${hexToNpub(thread.author)}`}
+                        href={`/p/${hexToNpub(thread.author)}`}
                         class={styles.avatar}
                       >
                         <Avatar src={user(thread.author)?.picture} size="xxs" />

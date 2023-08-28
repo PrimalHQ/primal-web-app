@@ -100,6 +100,9 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  MuteList = 10_000,
+  CategorizedPeople = 30_000,
+
   Settings = 30_078,
 
   ACK = 10_000_098,
@@ -120,9 +123,10 @@ export enum Kind  {
   MediaInfo = 10_000_119,
   Upload = 10_000_120,
   Uploaded = 10_000_121,
+  ImportResponse = 10_000_127,
 }
 
-export const relayConnectingTimeout = 5000;
+export const relayConnectingTimeout = 1000;
 
 export enum NotificationType {
   NEW_USER_FOLLOWED_YOU = 1,//
@@ -249,3 +253,22 @@ export const defaultNotificationSettings: Record<string, boolean> = {
 };
 
 export const emojiSearchLimit = 1;
+
+export const today = (new Date()).getTime();
+
+export const iosRD = (new Date('08/01/2023')).getTime();
+export const iosVersion = '8/01/23';
+
+export const andRD = (new Date('08/23/2023')).getTime();
+export const andVersion = '0.15.1';
+
+export const defaultZapAmount = 10;
+
+export const defaultZapOptions = [
+  21,
+  420,
+  10_000,
+  69_420,
+  100_000,
+  1_000_000,
+];

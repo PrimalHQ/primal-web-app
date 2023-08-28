@@ -133,20 +133,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         store.notes[0].post.created_at;
     }
 
-    // if (store.future.notes[0]) {
-    //   since = store.future.notes[0].post.created_at;
-    // }
-
     clearFuture();
 
 
     if (scope && timeframe) {
-
-      // if (scope === 'search') {
-      //   searchFutureContent(`home_future_${APP_ID}`, decodeURI(timeframe), since);
-      //   return;
-      // }
-
       getFutureExploreFeed(
         account?.publicKey,
         `home_future_${APP_ID}`,
@@ -178,7 +168,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (scope && timeframe) {
 
       if (scope === 'search') {
-        searchContent(`home_feed_${subId}`, decodeURI(timeframe));
+        searchContent(account?.publicKey, `home_feed_${subId}`, decodeURI(timeframe));
         return;
       }
 

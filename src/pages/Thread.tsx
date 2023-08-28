@@ -1,14 +1,13 @@
-import { Component, createEffect, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
-import { useParams } from '@solidjs/router';
-import { PrimalNote } from '../types/primal';
+import { useNavigate, useParams } from '@solidjs/router';
+import { PrimalNote, SendNoteResult } from '../types/primal';
 import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
 import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
-import Loader from '../components/Loader/Loader';
 import { nip19 } from 'nostr-tools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
@@ -24,6 +23,7 @@ const Thread: Component = () => {
   const account = useAccountContext();
   const params = useParams();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const postId = () => {
     if (params.postId.startsWith('note')) {
@@ -35,17 +35,23 @@ const Thread: Component = () => {
 
   const threadContext = useThreadContext();
 
-  const primaryNote = () => {
-    // const id = postId();
-    // const savedNote = threadContext?.primaryNote;
+  const primaryNote = createMemo(() => {
 
+    let note = threadContext?.notes.find(n => n.post.noteId === postId());
 
-    // if (savedNote?.post.noteId === postId()) {
-    //   return savedNote;
-    // }
+    // Return the note if found
+    if (note) {
+      return note;
+    }
 
-    return threadContext?.notes.find(n => n.post.noteId === postId());
-  };
+    // Since there is no note see if this is a repost
+    note = threadContext?.notes.find(n => n.repost?.note.noteId === postId());
+
+    // If reposted note found redirect to it's thread
+    note && navigate(`/e/${note?.post.noteId}`)
+
+    return note;
+  });
 
   const parentNotes = () => {
     const note = primaryNote();
@@ -111,6 +117,10 @@ const Thread: Component = () => {
     pn && observer?.unobserve(pn);
   });
 
+  const onNotePosted = (result: SendNoteResult) => {
+    threadContext?.actions.fetchNotes(postId());
+  };
+
   return (
     <div>
       <Wormhole to='branding_holder'>
@@ -130,35 +140,11 @@ const Thread: Component = () => {
         />
       </Wormhole>
 
-      <Show
-        when={!isFetching()}
-      >
-        <For each={parentNotes()}>
-          {note =>
-            <div class={styles.threadList}>
-              <Note note={note} />
-            </div>
-          }
-        </For>
-      </Show>
-
-      <Show when={primaryNote()}>
-        <div id="primary_note" class={styles.threadList}>
-          <NotePrimary
-            note={primaryNote() as PrimalNote}
-          />
-          <Show when={account?.hasPublicKey()}>
-            <ReplyToNote note={primaryNote() as PrimalNote} />
-          </Show>
-        </div>
-      </Show>
-
-      <div class={styles.repliesHolder}>
+      <Show when={account?.isKeyLookupDone}>
         <Show
           when={!isFetching()}
-          fallback={<div class={styles.noContent}><Loader /></div>}
         >
-          <For each={replyNotes()}>
+          <For each={parentNotes()}>
             {note =>
               <div class={styles.threadList}>
                 <Note note={note} />
@@ -166,7 +152,32 @@ const Thread: Component = () => {
             }
           </For>
         </Show>
-      </div>
+
+        <Show when={primaryNote()}>
+          <div id="primary_note" class={styles.threadList}>
+            <NotePrimary
+              note={primaryNote() as PrimalNote}
+            />
+            <Show when={account?.hasPublicKey()}>
+              <ReplyToNote
+                note={primaryNote() as PrimalNote}
+                onNotePosted={onNotePosted}
+              />
+            </Show>
+          </div>
+        </Show>
+
+        <div class={styles.repliesHolder}>
+            <For each={replyNotes()}>
+              {note =>
+                <div class={styles.threadList}>
+                  <Note note={note} />
+                </div>
+              }
+            </For>
+        </div>
+      </Show>
+
     </div>
   )
 }

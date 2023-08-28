@@ -171,7 +171,7 @@ const Search: Component<{
           <For each={search?.users}>
             {(user) => (
               <SearchOption
-                href={props.noLinks ? undefined : `/profile/${user.npub}`}
+                href={props.noLinks ? undefined : `/p/${user.npub}`}
                 title={userName(user)}
                 description={nip05Verification(user)}
                 icon={<Avatar src={user.picture} size="xs" />}

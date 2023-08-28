@@ -25,6 +25,8 @@ import SmallNote from '../SmallNote/SmallNote';
 import { useIntl } from '@cookbook/solid-intl';
 import { hourNarrow } from '../../formats';
 
+import { home as t } from '../../translations';
+
 const [init, setInit] = createSignal(false);
 
 const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
@@ -155,11 +157,7 @@ const HomeSidebar: Component = () => {
       <div class={styles.headingTrending}>
         <div>
           <div class={styles.flameIcon}></div>
-          {intl.formatMessage({
-            id: 'home.sidebar.caption.trending',
-            defaultMessage: 'Trending',
-            description: 'Caption for the home page sidebar showing a list of trending notes',
-          })}
+          {intl.formatMessage(t.trending)}
           <span>
             {intl.formatNumber(24, hourNarrow)}
           </span>
@@ -173,11 +171,7 @@ const HomeSidebar: Component = () => {
       <div class={styles.headingZapped}>
         <div>
           <div class={styles.zapIcon}></div>
-          {intl.formatMessage({
-            id: 'home.sidebar.caption.mostzapped',
-            defaultMessage: 'Most Zapped',
-            description: 'Caption for the home page sidebar showing a list of most zapped notes',
-          })}
+          {intl.formatMessage(t.mostZapped)}
           <span>
             {intl.formatNumber(4, hourNarrow)}
           </span>
@@ -189,11 +183,7 @@ const HomeSidebar: Component = () => {
             <SmallNote
               note={note}
             >
-            {intl.formatMessage({
-              id: 'home.sidebar.note.zaps',
-              defaultMessage: '{zaps} zaps, {sats} sats',
-              description: 'Zaps data for a small note on home sidebar',
-            },
+            {intl.formatMessage(t.zapPostfix,
             {
               zaps: humanizeNumber(note.post.zaps, true),
               sats: humanizeNumber(note.post.satszapped, true),

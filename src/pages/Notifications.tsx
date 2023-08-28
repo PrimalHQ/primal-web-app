@@ -24,6 +24,7 @@ import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteConten
 import { notifications as t } from '../translations';
 
 import styles from './Notifications.module.scss';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 const Notifications: Component = () => {
 
@@ -1059,12 +1060,7 @@ const Notifications: Component = () => {
         <Search />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div>
-          {intl.formatMessage(t.title)}
-        </div>
-      </div>
-
+      <PageCaption title={intl.formatMessage(t.title)} />
 
       <Show when={newNotifCount() > 0 && !account?.showNewNoteForm}>
         <div class={styles.newContentNotification}>

@@ -126,7 +126,7 @@ const ExploreSidebar: Component = () => {
           {
             user => (
               <A
-                href={`/profile/${user.npub}`}
+                href={`/p/${user.npub}`}
                 class={styles.user}
                 title={authorName(user)}
               >

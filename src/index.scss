@@ -191,7 +191,6 @@
   }
 }
 
-
 @mixin ice_wave {
   --brand-1: #0090F8;
   --brand-2: #4C00C7;
@@ -299,6 +298,8 @@
   --dark-input: #222222;
   --dark-back: #000000;
 
+  --warning-color: #FA3C3C;
+
   .mentioned_user {
     color: var(--accent-1);
   }
@@ -309,6 +310,8 @@
   .postImage {
     display: block;
     width: 100%;
+    max-height: 1200px;
+    object-fit: contain;
     border-radius: 12px;
   }
 
@@ -343,6 +346,10 @@ body {
 
 .linkish {
   color: var(--accent-1);
+}
+
+.redBorder {
+  border: 2px solid red;
 }
 
 .reply_icon {

@@ -3,7 +3,13 @@ import { Component, Show } from 'solid-js';
 
 import styles from './NavLink.module.scss';
 
-const NavLink: Component<{ to: string, label: string, icon: string, bubble?: () => number}> = (props) => {
+const NavLink: Component<{
+  to: string,
+  label: string,
+  icon: string,
+  bubble?: () => number,
+  hiddenOnSmallScreens?: boolean,
+}> = (props) => {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,7 +40,7 @@ const NavLink: Component<{ to: string, label: string, icon: string, bubble?: () 
   }
 
     return (
-      <button class={styles.navLink} onClick={onClick}>
+      <button class={`${styles.navLink} ${props.hiddenOnSmallScreens ? styles.hiddenOnSmallScreens : ''}`} onClick={onClick}>
         <Show when={props.bubble && props.bubble() > 0}>
           <div class={`${styles.bubble} ${bubbleClass()}`}>
             <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>

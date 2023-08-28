@@ -2,6 +2,7 @@ import { MessageDescriptor } from "@cookbook/solid-intl";
 import { NotificationType } from "./constants";
 import { ScopeDescriptor } from "./types/primal";
 
+
 export const account = {
   follow: {
     id: 'actions.follow',
@@ -71,12 +72,254 @@ export const actions = {
     defaultMessage: 'send',
     description: 'Send direct message action, button label',
   },
+  save: {
+    id: 'actions.save',
+    defaultMessage: 'save',
+    description: 'Save changes action label',
+  },
+  editProfile: {
+    id: 'actions.editProfile',
+    defaultMessage: 'edit profile',
+    description: 'Edit profile action label',
+  },
+  reportUserConfirm: {
+    id: 'actions.reportUserConfirm',
+    defaultMessage: 'Report user {name}?',
+    description: 'Label for report user confirmation',
+  },
+  muteUserConfirm: {
+    id: 'actions.muteUserConfirm',
+    defaultMessage: 'Add {name} to your mute list?',
+    description: 'Label for mute user confirmation',
+  },
+  unmute: {
+    id: 'actions.unmute',
+    defaultMessage: 'unmute',
+    description: 'Label un-mute button',
+  },
+  addRelay: {
+    id: 'actions.addRelay',
+    defaultMessage: 'add',
+    description: 'Label for add relay action',
+  },
+  removeRelay: {
+    id: 'actions.removeRelay',
+    defaultMessage: 'remove',
+    description: 'Label for remove relay action',
+  },
+  confirmRemoveRelay: {
+    id: 'actions.confirmRemoveRelay',
+    defaultMessage: 'Remove <b>{url}</b> from your relay list? This will disconnect you from the relay.',
+    description: 'Label for remove relay confirmation',
+  },
+  restoreCachingService: {
+    id: 'actions.restoreCachingService',
+    defaultMessage: 'Restore default caching service',
+    description: 'Label for restore default caching service',
+  },
+  profileContext: {
+    copyPubkey: {
+      id: 'actions.profileContext.copyPubkey',
+      defaultMessage: 'Copy user public key',
+      description: 'Label for copy user\'s pubkey from profile context menu',
+    },
+    copyLink: {
+      id: 'actions.profileContext.copyLink',
+      defaultMessage: 'Copy user link',
+      description: 'Label for copy user\'s link from profile context menu',
+    },
+    addFeed: {
+      id: 'actions.profileContext.addFeed',
+      defaultMessage: 'Add user feed',
+      description: 'Label for adding user\'s feed to home, from profile context menu',
+    },
+    removeFeed: {
+      id: 'actions.profileContext.removeFeed',
+      defaultMessage: 'Remove user feed',
+      description: 'Label for removing user\'s feed from home, from profile context menu',
+    },
+    muteUser: {
+      id: 'actions.profileContext.muteUser',
+      defaultMessage: 'Mute user',
+      description: 'Label for muting user from profile context menu',
+    },
+    unmuteUser: {
+      id: 'actions.profileContext.unmuteUser',
+      defaultMessage: 'Unmute user',
+      description: 'Label for unmuting user from profile context menu',
+    },
+    reportUser: {
+      id: 'actions.profileContext.reportUser',
+      defaultMessage: 'Report user',
+      description: 'Label for reporting user from profile context menu',
+    },
+  },
+  noteContext: {
+    zap: {
+      id: 'actions.noteContext.zapNote',
+      defaultMessage: 'Zap',
+      description: 'Label for note zap from context menu',
+    },
+    copyLink: {
+      id: 'actions.noteContext.copyLink',
+      defaultMessage: 'Copy note link',
+      description: 'Label for copy note link from context menu',
+    },
+    copyText: {
+      id: 'actions.noteContext.copytext',
+      defaultMessage: 'Copy note text',
+      description: 'Label for copy note text from context menu',
+    },
+    copyId: {
+      id: 'actions.noteContext.copyId',
+      defaultMessage: 'Copy note ID',
+      description: 'Label for copy note ID from context menu',
+    },
+    copyRaw: {
+      id: 'actions.noteContext.copyRaw',
+      defaultMessage: 'Copy raw data',
+      description: 'Label for copy note raw data from context menu',
+    },
+    copyPubkey: {
+      id: 'actions.noteContext.copyPubkey',
+      defaultMessage: 'Copy user public key',
+      description: 'Label for copy note author\'s pubkey from context menu',
+    },
+    breadcast: {
+      id: 'actions.noteContext.breadcast',
+      defaultMessage: 'Broadcast note',
+      description: 'Label for note broadcast from context menu',
+    },
+    muteAuthor: {
+      id: 'actions.noteContext.muteAuthor',
+      defaultMessage: 'Mute user',
+      description: 'Label for muting user from context menu',
+    },
+    reportAuthor: {
+      id: 'actions.noteContext.reportAuthor',
+      defaultMessage: 'Report user',
+      description: 'Label for reporting user from context menu',
+    },
+    repostNote: {
+      id: 'actions.noteContext.repostNote',
+      defaultMessage: 'Repost note',
+      description: 'Label for reposting note from context menu',
+    },
+    quoteNote: {
+      id: 'actions.noteContext.quoteNote',
+      defaultMessage: 'Quote note',
+      description: 'Label for quoting note from context menu',
+    },
+  },
 };
 
 export const branding = {
   id: 'branding',
   defaultMessage: 'Primal',
   description: 'Brand name',
+};
+
+export const downloads = {
+  title: {
+    id: 'downloads.title',
+    defaultMessage: 'Downloads',
+    description: 'Title of the downloads page',
+  },
+  callToActionTitle: {
+    id: 'downloads.ctaTitle',
+    defaultMessage: 'Primal Mobile Apps are Here!',
+    description: 'Title for the downloads\' page call-to-action',
+  },
+  callToActionDescription: {
+    id: 'downloads.ctaDescription',
+    defaultMessage: 'The iOS app is in public TestFlight and ready to be used as a daily driver. The Android app is in alpha, but developing quickly!',
+    description: 'Description for the downloads\' page call-to-action',
+  },
+  callToActionIOSTitle: {
+    id: 'downloads.ctaAndroidTitle',
+    defaultMessage: 'Primal iOS TestFlight',
+    description: 'Title for the iOS downloads\' page call-to-action',
+  },
+  callToActionIOSDescription: {
+    id: 'downloads.ctaAndroidDescription',
+    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    description: 'Description for the iOS downloads\' page call-to-action',
+  },
+  callToActionAndroidTitle: {
+    id: 'downloads.ctaAndroidTitle',
+    defaultMessage: 'Primal Android Beta',
+    description: 'Title for the Android downloads\' page call-to-action',
+  },
+  callToActionAndroidDescription: {
+    id: 'downloads.ctaAndroidDescription',
+    defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
+    description: 'Description for the Android downloads\' page call-to-action',
+  },
+  appStoreCaption: {
+    id: 'downloads.appStoreCaption',
+    defaultMessage: 'TestFlight Available Now',
+    description: 'AppStore promo caption',
+  },
+  playStoreCaption: {
+    id: 'downloads.playStoreCaption',
+    defaultMessage: 'Coming soon to Android',
+    description: 'PlayStore promo caption',
+  },
+  apkDownload: {
+    id: 'downloads.apkDownload',
+    defaultMessage: 'Alpha Build Available Now',
+    description: 'APK download caption',
+  },
+  links: {
+    title: {
+      id: 'downloads.sidebarTitle',
+      defaultMessage: 'Source code',
+      description: 'Daownload sidebar links title',
+    },
+    webApp: {
+      id: 'downloads.webAppLink',
+      defaultMessage: 'Primal Web App',
+      description: 'Label for the link to the web app',
+    },
+    iosApp: {
+      id: 'downloads.iosAppLink',
+      defaultMessage: 'Primal iOS App',
+      description: 'Label for the link to the iOS app',
+    },
+    andApp: {
+      id: 'downloads.andAppLink',
+      defaultMessage: 'Primal Android App',
+      description: 'Label for the link to the Android app',
+    },
+    cachingService: {
+      id: 'downloads.cachingService',
+      defaultMessage: 'Primal Caching Service',
+      description: 'Label for the link to the caching service',
+    },
+    primalServer: {
+      id: 'downloads.primalServer',
+      defaultMessage: 'Primal Server',
+      description: 'Label for the link to the primal server',
+    },
+  },
+};
+
+export const confirmDefaults = {
+  title: {
+    id: 'confirm.title',
+    defaultMessage: 'Are you sure?',
+    description: 'Default title of the confirmation dialog',
+  },
+  confirm: {
+    id: 'confirm.yes',
+    defaultMessage: 'Yes',
+    description: 'Default label form positive response to the confirmation dialog',
+  },
+  abort: {
+    id: 'confirm.no',
+    defaultMessage: 'No',
+    description: 'Default label form negative response to the confirmation dialog',
+  },
 };
 
 export const exploreSidebarCaption = {
@@ -140,6 +383,12 @@ export const explore = {
   }
 };
 
+export const feedProfile = {
+  id: 'feedName',
+  defaultMessage: '{name}\'s feed',
+  description: 'Generic name for a feed created from a profile',
+};
+
 export const feedNewPosts = {
   id: 'feed.newPosts',
   defaultMessage: `{number, plural,
@@ -160,6 +409,24 @@ export const feedback = {
     id: 'feedback.uploading',
     defaultMessage: 'uploading...',
     description: 'Label accompanying the uploading spinner'
+  },
+};
+
+export const home = {
+  trending: {
+    id: 'home.sidebar.caption.trending',
+    defaultMessage: 'Trending',
+    description: 'Caption for the home page sidebar showing a list of trending notes',
+  },
+  mostZapped: {
+    id: 'home.sidebar.caption.mostzapped',
+    defaultMessage: 'Most Zapped',
+    description: 'Caption for the home page sidebar showing a list of most zapped notes',
+  },
+  zapPostfix: {
+    id: 'home.sidebar.note.zaps',
+    defaultMessage: '{zaps} zaps, {sats} sats',
+    description: 'Zaps data for a small note on home sidebar',
   },
 };
 
@@ -470,6 +737,16 @@ export const placeholders = {
     defaultMessage: 'Page not found',
     description: 'Placholder text for missing page',
   },
+  relayUrl: {
+    id: 'placeholders.relayUrl',
+    defaultMessage: 'wss://relay.url',
+    description: 'Placholder relay url input',
+  },
+  cachingServiceUrl: {
+    id: 'placeholders.cachingServiceUrl',
+    defaultMessage: 'wss://cachingservice.url',
+    description: 'Placholder relay url input',
+  },
 };
 
 export const profile = {
@@ -514,6 +791,11 @@ export const profile = {
       defaultMessage: 'Posts',
       description: 'Label for notes profile stat',
     },
+  },
+  isMuted: {
+    id: 'profile.isMuted',
+    defaultMessage: '{name} is muted',
+    description: 'Label indicating that the profile is muted',
   },
 };
 
@@ -561,6 +843,106 @@ export const search = {
 };
 
 export const settings = {
+  index: {
+    title: {
+      id: 'settings.index.title',
+      defaultMessage: 'Settings',
+      description: 'Title of the settings page',
+    },
+  },
+  appearance: {
+    title: {
+      id: 'settings.appearance.title',
+      defaultMessage: 'Appearance',
+      description: 'Title of the appearance settings sub-page',
+    },
+    caption: {
+      id: 'settings.appearance.caption',
+      defaultMessage: 'Select a theme',
+      description: 'Caption for theme selection',
+    },
+  },
+  homeFeeds: {
+    title: {
+      id: 'settings.homeFeeds.title',
+      defaultMessage: 'Home Feeds',
+      description: 'Title of the home feeds settings sub-page',
+    },
+    caption: {
+      id: 'settings.homeFeeds.caption',
+      defaultMessage: 'Edit and order your home page feeds',
+      description: 'Caption for home feed ordering',
+    },
+  },
+  muted: {
+    title: {
+      id: 'settings.muted.title',
+      defaultMessage: 'Muted Accounts',
+      description: 'Title of the muted accounts settings sub-page',
+    },
+    empty: {
+      id: 'settings.muted.empty',
+      defaultMessage: 'No muted users',
+      description: 'Caption indicating that there are no muted users',
+    },
+  },
+  network: {
+    title: {
+      id: 'settings.network.title',
+      defaultMessage: 'Network',
+      description: 'Title of the network settings sub-page',
+    },
+    relays: {
+      id: 'settings.network.relays',
+      defaultMessage: 'Relays',
+      description: 'Title of the relays section of the network settings sub-page',
+    },
+    myRelays: {
+      id: 'settings.network.myRelays',
+      defaultMessage: 'My Relays',
+      description: 'Title of the my relays section of the network settings sub-page',
+    },
+    noMyRelays: {
+      id: 'settings.networks.noMyRelays',
+      defaultMessage: 'Your Nostr account doesn\'t have any relays specified, so we connected you to a default set of relays. To configure your desired set of relays, please select them from the list below.',
+      description: 'Caption informing the user that he has no relays configured',
+    },
+    recomended: {
+      id: 'settings.network.recomended',
+      defaultMessage: 'Recomended Relays',
+      description: 'Title of the recomended relays section of the network settings sub-page',
+    },
+    customRelay: {
+      id: 'settings.network.customRelay',
+      defaultMessage: 'Connect to relay',
+      description: 'Title of the custom relays section of the network settings sub-page',
+    },
+    cachingService: {
+      id: 'settings.network.cachingService',
+      defaultMessage: 'Caching Service',
+      description: 'Title of the caching service section of the network settings sub-page',
+    },
+    connectedCachingService: {
+      id: 'settings.network.connectedCachingService',
+      defaultMessage: 'Connected caching service',
+      description: 'Title of the caching service section of the network settings sub-page',
+    },
+    alternativeCachingService: {
+      id: 'settings.network.alternativeCachingService',
+      defaultMessage: 'Connect to a different caching service',
+      description: 'Title of the alternative caching service section of the Network settings sub-page',
+    },
+  },
+  relays: {
+    id: 'settings.relays',
+    defaultMessage: 'Relays',
+    description: 'Title of the relays sections of the settings sidebar',
+  },
+  cashingService: {
+    id: 'settings.cashingService',
+    defaultMessage: 'Caching Service',
+    description: 'Title of the caching service sections of the settings sidebar',
+  },
   title: {
     id: 'settings.title',
     defaultMessage: 'Settings',
@@ -575,6 +957,26 @@ export const settings = {
     id: 'settings.sections.feeds',
     defaultMessage: 'Home page feeds',
     description: 'Title of the feeds section on the settings page',
+  },
+  feedsRestore: {
+    id: 'settings.feedsRestore',
+    defaultMessage: 'restore defaults',
+    description: 'Label for the button for restoring default feeds to the feeds list',
+  },
+  feedsRestoreConfirm: {
+    id: 'settings.feedsRestoreConfirm',
+    defaultMessage: 'Restoring default feeds will erase all your custom feed settings',
+    description: 'Label explaining the impact of restoring default feeds',
+  },
+  zapsRestoreConfirm: {
+    id: 'settings.zapsRestoreConfirm',
+    defaultMessage: 'This action will restore all your zap settings to their default values',
+    description: 'Label explaining the impact of restoring default zaps',
+  },
+  feedLatest: {
+    id: 'feeds.latestFollowing',
+    defaultMessage: 'Latest',
+    description: 'Label for the `latest;following` (active user\'s) feed',
   },
   zaps: {
     id: 'settings.sections.zaps',
@@ -602,7 +1004,125 @@ export const settings = {
       defaultMessage: 'A post your post was mentioned in was:',
       description: 'Title of the notification settings sub-section for posts your post was mentioned in',
     },
-  }
+  },
+  profile: {
+    title: {
+      id: 'pages.settings.profile.title',
+      defaultMessage: 'Edit Profile',
+      description: 'Title of the edit profile page',
+    },
+    uploadAvatar: {
+      id: 'pages.settings.profile.uploadAvatar',
+      defaultMessage: 'Upload Avatar',
+      description: 'Label for avatar upload on edit profile page',
+    },
+    uploadBanner: {
+      id: 'pages.settings.profile.uploadBanner',
+      defaultMessage: 'Upload Banner',
+      description: 'Label for banner upload on edit profile page',
+    },
+    displayName: {
+      label: {
+        id: 'pages.settings.profile.displayName.label',
+        defaultMessage: 'Display Name',
+        description: 'Label for display name input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.displayName.placeholder',
+        defaultMessage: 'Enter display name',
+        description: 'Placeholder for display name input on edit profile page',
+      },
+    },
+    required: {
+      id: 'pages.settings.profile.reqired',
+      defaultMessage: 'required',
+      description: 'Label indicating an input is required',
+    },
+    name: {
+      label: {
+        id: 'pages.settings.profile.name.label',
+        defaultMessage: 'Handle',
+        description: 'Label for name input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.name.placeholder',
+        defaultMessage: 'Enter handle',
+        description: 'Placeholder for name input on edit profile page',
+      },
+    },
+    website: {
+      label: {
+        id: 'pages.settings.profile.website.label',
+        defaultMessage: 'Website',
+        description: 'Label for website input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.website.placeholder',
+        defaultMessage: 'https://www.mysite.com',
+        description: 'Placeholder for website input on edit profile page',
+      },
+    },
+    about: {
+      label: {
+        id: 'pages.settings.profile.about.label',
+        defaultMessage: 'About Me',
+        description: 'Label for about input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.about.placeholder',
+        defaultMessage: 'Say something about yourself',
+        description: 'Placeholder for about input on edit profile page',
+      },
+    },
+    lud16: {
+      label: {
+        id: 'pages.settings.profile.lud16.label',
+        defaultMessage: 'Lightning Address',
+        description: 'Label for lud16 input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.lud16.placeholder',
+        defaultMessage: 'Enter your LN address',
+        description: 'Placeholder for lud16 input on edit profile page',
+      },
+    },
+    nip05: {
+      label: {
+        id: 'pages.settings.profile.nip05.label',
+        defaultMessage: 'Verified Nostr Id (Nip-05)',
+        description: 'Label for nip-05 input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.nip05.placeholder',
+        defaultMessage: 'Enter your NIP-05 Verified Nostr ID',
+        description: 'Placeholder for nip-05 input on edit profile page',
+      },
+    },
+    picture: {
+      label: {
+        id: 'pages.settings.profile.picture.label',
+        defaultMessage: 'Avatar Image Url',
+        description: 'Label for avatar input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.picture.placeholder',
+        defaultMessage: 'Enter your avatar url',
+        description: 'Placeholder for avatar input on edit profile page',
+      },
+    },
+    banner: {
+      label: {
+        id: 'pages.settings.profile.banner.label',
+        defaultMessage: 'Banner Image Url',
+        description: 'Label for banner input on edit profile page',
+      },
+      placeholder : {
+        id: 'pages.settings.profile.banner.placeholder',
+        defaultMessage: 'Enter your banner url',
+        description: 'Placeholder for banner input on edit profile page',
+      },
+    },
+  },
 };
 
 export const scopeDescriptors: Record<string, ScopeDescriptor> = {
@@ -719,10 +1239,30 @@ export const toast = {
     defaultMessage: '"{name}" has been added to your home page',
     description: 'Toast message confirming successfull adding of the feed to home to the list of available feeds',
   },
+  removeFeedFromHomeSuccess: {
+    id: 'toasts.removeFeedToHome.success',
+    defaultMessage: '"{name}" has been removed from your home page',
+    description: 'Toast message confirming successfull removal of the feed from home\'s list of available feeds',
+  },
   fileTypeUpsupported: {
     id: 'toast.unsupportedFileType',
     defaultMessage: 'You can only upload images and videos. This file type is not supported.',
     description: 'Feedback when user tries to upload an unsupported file type',
+  },
+  publishNoteSuccess: {
+    id: 'toast.publishNoteSuccess',
+    defaultMessage: 'Message posted successfully',
+    description: 'Toast message confirming successfull publication of the post',
+  },
+  publishNoteTimeout: {
+    id: 'toast.publishNoteTimeout',
+    defaultMessage: 'No relay confirmed reception of your post after 8 seconds',
+    description: 'Toast message indicating that no relay confirmed note reception',
+  },
+  publishNoteFail: {
+    id: 'toast.publishNoteFail',
+    defaultMessage: 'Failed to publish post',
+    description: 'Toast message indicating that post publishing has failed',
   },
   noRelays: {
     id: 'toast.noRelays',
@@ -734,15 +1274,55 @@ export const toast = {
     defaultMessage: '"We are trying to connect to your relays. Please try again in a few moments.',
     description: 'Toast message indicating user is not connected to aany relay',
   },
+  noExtension: {
+    id: 'toast.noExtension',
+    defaultMessage: 'Nostr extension is required to send events',
+    description: 'Toast message indicating no extension was found',
+  },
   noteNostrLinkCoppied: {
-    id: 'noteNostrLinkCoppied',
+    id: 'toast.noteNostrLinkCoppied',
     defaultMessage: 'Note\'s nostr link copied',
     description: 'Confirmation message that the note\'s link has been copied',
   },
   notePrimalLinkCoppied: {
-    id: 'notePrimalLinkCoppied',
-    defaultMessage: 'Note\'s Primal link copied',
+    id: 'toast.notePrimalLinkCoppied',
+    defaultMessage: 'Note\'s link copied',
     description: 'Confirmation message that the note\'s link has been copied',
+  },
+  notePrimalTextCoppied: {
+    id: 'toast.notePrimalTextCoppied',
+    defaultMessage: 'Note\'s text copied',
+    description: 'Confirmation message that the note\'s text has been copied',
+  },
+  noteIdCoppied: {
+    id: 'toast.noteIdCoppied',
+    defaultMessage: 'Note\'s id copied',
+    description: 'Confirmation message that the note\'s id has been copied',
+  },
+  noteRawDataCoppied: {
+    id: 'toast.noteRawDataCoppied',
+    defaultMessage: 'Note\'s raw data copied',
+    description: 'Confirmation message that the note\'s raw data has been copied',
+  },
+  noteAuthorNpubCoppied: {
+    id: 'toast.noteAuthorNpubCoppied',
+    defaultMessage: 'Note\'s author npub copied',
+    description: 'Confirmation message that the note\'s author npub has been copied',
+  },
+  profileNpubCoppied: {
+    id: 'toast.noteAuthorNpubCoppied',
+    defaultMessage: 'User\'s npub copied',
+    description: 'Confirmation message that the user\'s npub has been copied',
+  },
+  noteBroadcastSuccess: {
+    id: 'toast.noteBroadcastSuccess',
+    defaultMessage: 'Note has been broadcasted to your relays',
+    description: 'Confirmation message that the note has been broadcasted',
+  },
+  noteBroadcastFail: {
+    id: 'toast.noteBroadcastFail',
+    defaultMessage: 'We were unable to broadcast this note',
+    description: 'Failure message that the note has not been broadcasted',
   },
   repostSuccess: {
     id: 'toast.repostSuccess',
@@ -754,6 +1334,11 @@ export const toast = {
     defaultMessage: 'Failed to repost',
     description: 'Toast message indicating failed repost',
   },
+  noteAuthorReported: {
+    id: 'toast.noteAuthorReported',
+    defaultMessage: 'User {name} reported',
+    description: 'Toast message indicating successfull user report',
+  },
   zapAsGuest: {
     id: 'toast.zapAsGuest',
     defaultMessage: 'You must be logged-in to perform a zap',
@@ -764,10 +1349,28 @@ export const toast = {
     defaultMessage: 'Author of this post cannot be zapped',
     description: 'Toast message indicating user cannot receieve a zap',
   },
+  updateProfileSuccess: {
+    id: 'toast.updateProfileSuccess',
+    defaultMessage: 'Profile updated successfully',
+    description: 'Toast message indicating that profile was successfully updated',
+  },
+  updateProfileFail: {
+    id: 'toast.updateProfileFail',
+    defaultMessage: 'Failed to update profile, please try again',
+    description: 'Toast message indicating that profile has failed to updated',
+  },
 };
 
 export const zapCustomOption = {
   id: 'zap.custom.option',
   defaultMessage: `Zap {user} `,
   description: 'Caption for custom zap amount modal',
+};
+
+export const errors = {
+  invalidRelayUrl: {
+    id: 'placeholders.invalidRelayUrl',
+    defaultMessage: 'Invalid url',
+    description: 'Error text for invalid url',
+  },
 };

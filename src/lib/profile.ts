@@ -1,8 +1,12 @@
-import { Event, Relay } from "nostr-tools";
-import { Kind, minKnownProfiles, noKey } from "../constants";
+// @ts-ignore Bad types in nostr-tools
+import { Relay, Event } from "nostr-tools";
+import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
-import { NostrWindow, VanityProfiles } from "../types/primal";
+import { userName } from "../stores/profile";
+import { NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
+import { signEvent } from "./nostrAPI";
+import { sendEvent } from "./notes";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
@@ -12,9 +16,9 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
   ]));
 }
 
-export const getUserProfileInfo = (pubkey: string, subid: string) => {
-  if (pubkey === noKey) {
-    return
+export const getUserProfileInfo = (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) {
+    return;
   }
   sendMessage(JSON.stringify([
     "REQ",
@@ -23,19 +27,47 @@ export const getUserProfileInfo = (pubkey: string, subid: string) => {
   ]));
 }
 
-export const getProfileContactList = (pubkey: string, subid: string) => {
-  if (pubkey === noKey) {
-    return
+export const isUserFollowing = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string) => {
+  if (!pubkey || !user_pubkey) {
+    return;
   }
 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["contact_list", { pubkey }]},
+    {cache: ["is_user_following", { pubkey, user_pubkey }]},
+  ]));
+};
+
+export const getProfileContactList = (pubkey: string | undefined, subid: string, extended = false) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["contact_list", { pubkey, extended_response: extended }]},
   ]));
 }
 
-export const getProfileScoredNotes = (pubkey: string, subid: string, limit = 5) => {
+export const getProfileMuteList = (pubkey: string | undefined, subid: string, extended?: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mutelist", { pubkey, extended_response: extended }]},
+  ]));
+}
+
+export const getProfileScoredNotes = (pubkey: string | undefined, subid: string, limit = 5) => {
+  if (!pubkey) {
+    return;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -60,8 +92,8 @@ export const trimVerification = (address: string | undefined) => {
   return address.split('@');
 }
 
-export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: string[]) => void) => {
-  if (pubkey === noKey) {
+export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: (likes: string[]) => void) => {
+  if (!pubkey) {
     return;
   }
 
@@ -90,7 +122,7 @@ export const getLikes = (pubkey: string, relays: Relay[], callback: (likes: stri
       ]);
 
       sub.on('event', (event: Event) => {
-        const e = event.tags.find(t => t[0] === 'e');
+        const e = event.tags.find((t: string[]) => t[0] === 'e');
 
         e && e[1] && likes.add(e[1]);
       })
@@ -119,5 +151,45 @@ export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles>
     console.log('Failed to fetch known users: ', e);
 
     return { ...minKnownProfiles };
+  }
+};
+
+
+export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: JSON.stringify(metaData),
+    kind: Kind.Metadata,
+    tags: [],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+};
+
+export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const event = {
+    content: `{ "description": "report user '${userName(user)}'"}`,
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.ceil((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedEvent = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["report_user", { pubkey, event_from_user: signedEvent }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to report user: ', reason);
+    return false;
   }
 };

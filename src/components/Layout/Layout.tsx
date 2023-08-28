@@ -2,18 +2,25 @@ import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import { Outlet } from '@solidjs/router';
+import { Outlet, useLocation, useParams } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
 import zapSM from '../../assets/lottie/zap_sm.json';
 import zapMD from '../../assets/lottie/zap_md.json';
+import { useHomeContext } from '../../contexts/HomeContext';
+import { SendNoteResult } from '../../types/primal';
+import { useProfileContext } from '../../contexts/ProfileContext';
 
 
 const Layout: Component = () => {
 
   const account = useAccountContext();
+  const home = useHomeContext();
+  const profile = useProfileContext();
+  const location = useLocation();
+  const params = useParams();
 
   let container: HTMLDivElement | undefined;
 
@@ -42,6 +49,23 @@ const Layout: Component = () => {
   onCleanup(() => {
     window.removeEventListener('resize', onResize);
   });
+
+  const onNewNotePosted = (result: SendNoteResult) => {
+    const path = location.pathname.split('/');
+
+    if (path[1] === 'home' && home) {
+      // check for new notes on the home feed
+      home.actions.checkForNewNotes(home.selectedFeed?.hex)
+      return;
+    }
+
+    if (['p', 'profile'].includes(path[1]) && profile) {
+      const pubkey = params.npub;
+      // check for new notes on the profile feed
+      profile.actions.checkForNewNotes(pubkey || account?.publicKey);
+      return;
+    }
+  }
 
   return (
     <>
@@ -84,7 +108,7 @@ const Layout: Component = () => {
         <div class={styles.centerColumn}>
           <div class={styles.centerContent}>
             <div id="new_note_input" class={styles.headerFloater}>
-              <NewNote />
+              <NewNote onSuccess={onNewNotePosted}/>
             </div>
 
             <div>

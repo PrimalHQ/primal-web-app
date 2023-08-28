@@ -29,8 +29,8 @@ const onError = (error: Event) => {
 
 export const connect = () => {
   if (isNotConnected()) {
-    const cacheServer = localStorage.getItem('uploadServer') ??
-      'wss://uploads.primal.net/v1';
+    const cacheServer = localStorage.getItem('uploadServer') ||
+      import.meta.env.PRIMAL_UPLOAD_URL;
 
     setSocket(new WebSocket(cacheServer));
     console.log('UPLOAD SOCKET: ', socket());

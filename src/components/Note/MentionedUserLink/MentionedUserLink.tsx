@@ -12,8 +12,8 @@ const MentionedUserLink: Component<{
 
   const LinkComponent: Component<{ children: JSXElement }> = (p) => {
     return props.openInNewTab ?
-      <a class={styles.userMention} href={`/profile/${props.user.npub}`} target="_blank">{p.children}</a> :
-      <A class={styles.userMention} href={`/profile/${props.user.npub}`}>{p.children}</A>;
+      <a class={styles.userMention} href={`/p/${props.user.npub}`} target="_blank">{p.children}</a> :
+      <A class={styles.userMention} href={`/p/${props.user.npub}`}>{p.children}</A>;
   };
 
   return (

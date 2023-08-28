@@ -137,7 +137,15 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
-    const userMeta = JSON.parse(user?.content || '{}');
+    let userMeta: any = {};
+
+    try {
+      userMeta = JSON.parse(user?.content || '{}');
+    } catch (e) {
+      console.log('Error in user meta JSON: ', e);
+      userMeta = {};
+    }
+
 
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
@@ -307,14 +315,21 @@ type NoteStore = {
 }
 
 export const referencesToTags = (value: string) => {
-  const regex =
+  const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
+  const regexMention =
     /\bnostr:((note|npub|nevent|nprofile)1\w+)\b|#\[(\d+)\]/g;
 
   let refs: string[] = [];
   let tags: string[][] = [];
   let match;
 
-  while((match = regex.exec(value)) !== null) {
+  // Parse hashtags to add to tags
+  while((match = regexHashtag.exec(value)) != null) {
+    tags.push(['t', match[0].trim().slice(1)]);
+  }
+
+  // Parse mentions to add to tags
+  while((match = regexMention.exec(value)) !== null) {
     refs.push(match[0]);
   }
 

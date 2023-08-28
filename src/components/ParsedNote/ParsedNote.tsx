@@ -14,6 +14,7 @@ import styles from './ParsedNote.module.scss';
 import { nip19 } from 'nostr-tools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
+import { useMediaContext } from '../../contexts/MediaContext';
 
 
 export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
@@ -32,7 +33,7 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
       const hex = typeof eventId === 'string' ? eventId : eventId.id;
       const noteId = nip19.noteEncode(hex);
 
-      const path = `/thread/${noteId}`;
+      const path = `/e/${noteId}`;
 
       const ment = note.mentionedNotes && note.mentionedNotes[hex];
 
@@ -74,7 +75,7 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
       const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
       const npub = hexToNpub(hex);
 
-      const path = `/profile/${npub}`;
+      const path = `/p/${npub}`;
 
       const user = note.mentionedUsers && note.mentionedUsers[hex];
 
@@ -98,6 +99,8 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
 };
 
 const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
+
+  const media = useMediaContext();
 
   const parsedContent = (text: string) => {
     const regex = /\#\[([0-9]*)\]/g;
@@ -204,7 +207,7 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
       parseNpubLinks(
         parsedContent(
           highlightHashtags(
-            parseNote1(props.note.post.content)
+            parseNote1(props.note.post.content, media?.actions.getMediaUrl)
           ),
         ),
         props.note,

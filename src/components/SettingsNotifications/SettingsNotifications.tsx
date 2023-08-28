@@ -27,7 +27,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
 import Checkbox from '../Checkbox/Checkbox';
 
-const SettingsZap: Component = () => {
+const SettingsNotifications: Component = () => {
 
   const settings = useSettingsContext();
   const intl = useIntl();
@@ -173,4 +173,4 @@ const SettingsZap: Component = () => {
   );
 }
 
-export default SettingsZap;
+export default SettingsNotifications;

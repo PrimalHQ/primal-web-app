@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal, Show } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { userName } from "../../stores/profile";
 import { actions as t } from "../../translations";
-import { PrimalNote } from "../../types/primal";
+import { PrimalNote, SendNoteResult } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import EditBox from "../NewNote/EditBox/EditBox";
 import styles from  "./ReplyToNote.module.scss";
@@ -40,7 +40,7 @@ const onExpandableTextareaInput: (event: InputEvent) => void = (event) => {
   elm.rows = minRows + rows
 }
 
-const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
+const ReplyToNote: Component<{ note: PrimalNote, onNotePosted?: (note: SendNoteResult) => void }> = (props) => {
 
   const intl = useIntl();
 
@@ -125,6 +125,7 @@ const ReplyToNote: Component<{ note: PrimalNote }> = (props) => {
               idPrefix="reply_"
               replyToNote={props.note}
               onClose={closeReplyToNote}
+              onSuccess={props.onNotePosted}
             />
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { MessageDescriptor } from "@cookbook/solid-intl";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
@@ -75,6 +76,14 @@ export type NostrContactsContent = {
   tags: string[][],
 };
 
+export type NostrMutedContent = {
+  kind: Kind.MuteList | Kind.CategorizedPeople,
+  content: string,
+  pubkey?: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrScoredUsersContent = {
   kind: Kind.UserScore,
   content: string,
@@ -136,16 +145,19 @@ export type NostrMessageEncryptedContent = {
 export type NostrFeedRange = {
   kind: Kind.FeedRange,
   content: string,
+  created_at?: number,
 };
 
 export type NostrMediaInfo = {
   kind: Kind.MediaInfo,
   content: string,
+  created_at?: number,
 };
 
 export type NostrMediaUploaded = {
   kind: Kind.Uploaded,
   content: string,
+  created_at?: number,
 };
 
 export type NostrEventContent =
@@ -158,6 +170,7 @@ export type NostrEventContent =
   NostrMentionContent |
   NostrOldestEventContent |
   NostrContactsContent |
+  NostrMutedContent |
   NostrScoredUsersContent |
   NostrNotificationContent |
   NostrNotificationLastSeenContent |
@@ -289,20 +302,25 @@ interface SendPaymentResponse {
   preimage: string;
 }
 
+export type NostrExtension = {
+  getPublicKey: () => Promise<string>,
+  getRelays: () => Promise<NostrRelays>,
+  signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
+  nip04: {
+    encrypt: (pubkey: string, message: string) => Promise<string>,
+    decrypt: (pubkey: string, message: string) => Promise<string>,
+  },
+};
+
+export type WebLnExtension = {
+  enable: () => Promise<void>,
+  sendPayment: (req: string) => Promise<SendPaymentResponse>;
+};
+
 export type NostrWindow = Window & typeof globalThis & {
-  nostr?: {
-    getPublicKey: () => Promise<string>,
-    getRelays: () => Promise<NostrRelays>,
-    signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,
-    nip04: {
-      encrypt: (pubkey: string, message: string) => Promise<string>,
-      decrypt: (pubkey: string, message: string) => Promise<string>,
-    },
-  },
-  webln?: {
-    enable: () => Promise<void>,
-    sendPayment: (req: string) => Promise<SendPaymentResponse>;
-  },
+  nostr?: NostrExtension,
+  webln?: WebLnExtension,
+  walletStore: any,
 };
 
 export type PrimalWindow = Window & typeof globalThis & {
@@ -514,3 +532,16 @@ export type ScopeDescriptor = {
   label: MessageDescriptor,
   description: MessageDescriptor,
 }
+
+export type SendNoteResult = {
+  success: boolean,
+  reasons?: string[],
+  note?: NostrRelaySignedEvent,
+};
+
+export type MenuItem = {
+  action: () => void,
+  label: string,
+  icon?: string,
+  warning?: boolean,
+};

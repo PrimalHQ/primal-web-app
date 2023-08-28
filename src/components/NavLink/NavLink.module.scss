@@ -119,6 +119,12 @@
   }
 }
 
+@media only screen and (max-width: 720px) {
+  .hiddenOnSmallScreens {
+    display: none
+  }
+}
+
 .bubble {
   position: absolute;
   text-align: center;

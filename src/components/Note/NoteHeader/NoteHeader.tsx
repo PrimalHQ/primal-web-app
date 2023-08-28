@@ -1,24 +1,38 @@
 import { Component, createEffect, createSignal, Show } from 'solid-js';
-import { PrimalNote } from '../../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
 import { date } from '../../../lib/dates';
-import { nip05Verification, truncateNpub } from '../../../stores/profile';
+import { nip05Verification, truncateNpub, userName } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
 import VerificationCheck from '../../VerificationCheck/VerificationCheck';
 import Avatar from '../../Avatar/Avatar';
 import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions } from '../../../translations';
+import PrimalMenu from '../../PrimalMenu/PrimalMenu';
+import CustomZap from '../../CustomZap/CustomZap';
+import { broadcastEvent, sendNote } from '../../../lib/notes';
+import { useAccountContext } from '../../../contexts/AccountContext';
+import { reportUser } from '../../../lib/profile';
+import { APP_ID } from '../../../App';
+import ConfirmModal from '../../ConfirmModal/ConfirmModal';
+import { hexToNpub } from '../../../lib/keys';
 
-const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
+const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (props) => {
 
   const intl = useIntl();
   const toaster = useToastContext();
+  const account = useAccountContext();
 
   const [showContext, setContext] = createSignal(false);
+  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
+  const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
 
   const authorName = () => {
+    if (!props.note.user) {
+      return hexToNpub(props.note.post.pubkey);
+    }
     return props.note.user?.displayName ||
       props.note.user?.name ||
       truncateNpub(props.note.user.npub);
@@ -29,18 +43,63 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
     setContext(true);
   };
 
-  const copyNostrLink = (e: MouseEvent) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(`nostr:${props.note.post.noteId}`);
-    setContext(false);
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteNostrLinkCoppied));
+  const doMuteUser = () => {
+    account?.actions.addToMuteList(props.note.post.pubkey);
   };
 
-  const copyPrimalLink = (e: MouseEvent) => {
-    e.preventDefault();
-    navigator.clipboard.writeText(`${window.location.origin}/thread/${props.note.post.noteId}`);
+  const doUnmuteUser = () => {
+    account?.actions.removeFromMuteList(props.note.post.pubkey);
+  };
+
+  const doReportUser = () => {
+    reportUser(props.note.user.pubkey, `report_user_${APP_ID}`, props.note.user);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(props.note.user)}));
+  };
+
+  const copyNoteLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/e/${props.note.post.noteId}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
+  };
+
+  const copyNoteText = () => {
+    navigator.clipboard.writeText(`${props.note.post.content}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
+  };
+
+  const copyNoteId = () => {
+    navigator.clipboard.writeText(`${props.note.post.noteId}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
+  };
+
+  const copyRawData = () => {
+    navigator.clipboard.writeText(`${JSON.stringify(props.note.msg)}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteRawDataCoppied));
+  };
+
+  const copyUserNpub = () => {
+    navigator.clipboard.writeText(`${props.note.user.npub}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
+  };
+
+  const broadcastNote = async () => {
+    if (!account) {
+      return;
+    }
+
+    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
+    setContext(false);
+
+    if (success) {
+      toaster?.sendSuccess(intl.formatMessage(tToast.noteBroadcastSuccess));
+      return;
+    }
+    toaster?.sendWarning(intl.formatMessage(tToast.noteBroadcastFail));
   };
 
   const onClickOutside = (e: MouseEvent) => {
@@ -65,6 +124,72 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
       props.note.user.nip05.endsWith('primal.net');
   }
 
+  const noteContextForEveryone: MenuItem[] = [
+    {
+      label: intl.formatMessage(tActions.noteContext.zap),
+      action: () => {
+        props.openCustomZap && props.openCustomZap();
+        setContext(false);
+      },
+      icon: 'feed_zap',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.copyLink),
+      action: copyNoteLink,
+      icon: 'copy_note_link',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.copyText),
+      action: copyNoteText,
+      icon: 'copy_note_text',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.copyId),
+      action: copyNoteId,
+      icon: 'copy_note_id',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.copyRaw),
+      action: copyRawData,
+      icon: 'copy_raw_data',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.breadcast),
+      action: broadcastNote,
+      icon: 'broadcast',
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.copyPubkey),
+      action: copyUserNpub,
+      icon: 'copy_pubkey',
+    },
+  ];
+
+  const noteContextForOtherPeople: MenuItem[] = [
+    {
+      label: intl.formatMessage(tActions.noteContext.muteAuthor),
+      action: () => {
+        setConfirmMuteUser(true);
+        setContext(false);
+      },
+      icon: 'mute_user',
+      warning: true,
+    },
+    {
+      label: intl.formatMessage(tActions.noteContext.reportAuthor),
+      action: () => {
+        setConfirmReportUser(true);
+        setContext(false);
+      },
+      icon: 'report',
+      warning: true,
+    },
+  ];
+
+  const noteContext = account?.publicKey !== props.note.post.pubkey ?
+      [ ...noteContextForEveryone, ...noteContextForOtherPeople] :
+      noteContextForEveryone;
+
   return (
     <div class={styles.header}>
       <div class={styles.headerInfo}>
@@ -73,7 +198,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
             title={props.note?.user?.npub}
           >
             <A
-              href={`/profile/${props.note.user.npub}`}
+              href={`/p/${props.note.user.npub}`}
             >
               <Avatar
                 src={props.note?.user?.picture}
@@ -111,6 +236,7 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
           </Show>
         </div>
       </div>
+
       <div class={styles.contextMenu}>
         <button
           class={styles.contextButton}
@@ -119,25 +245,32 @@ const NoteHeader: Component<{ note: PrimalNote}> = (props) => {
           <div class={styles.contextIcon} ></div>
         </button>
         <Show when={showContext()}>
-          <div
+          <PrimalMenu
             id={`note_context_${props.note.post.id}`}
-            class={styles.contextMenuOptions}
-          >
-            <button
-              onClick={copyNostrLink}
-              class={styles.contextOption}
-            >
-              {intl.formatMessage(tActions.noteCopyNostrLink)}
-            </button>
-            <button
-              onClick={copyPrimalLink}
-              class={styles.contextOption}
-            >
-              {intl.formatMessage(tActions.noteCopyPrimalLink)}
-            </button>
-          </div>
+            items={noteContext}
+          />
         </Show>
       </div>
+
+      <ConfirmModal
+        open={confirmReportUser()}
+        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName() })}
+        onConfirm={() => {
+          doReportUser();
+          setConfirmReportUser(false);
+        }}
+        onAbort={() => setConfirmReportUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteUser()}
+        description={intl.formatMessage(tActions.muteUserConfirm, { name: authorName() })}
+        onConfirm={() => {
+          doMuteUser();
+          setConfirmMuteUser(false);
+        }}
+        onAbort={() => setConfirmMuteUser(false)}
+      />
     </div>
   )
 }

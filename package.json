@@ -1,6 +1,6 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
+  "name": "primal-web-app",
+  "version": "0.74.8",
   "description": "",
   "scripts": {
     "start": "vite",

@@ -1,6 +1,8 @@
 import { bech32 } from "@scure/base";
+// @ts-ignore Bad types in nostr-tools
 import { nip57, Relay, utils } from "nostr-tools";
-import { NostrWindow, PrimalNote, PrimalUser } from "../types/primal";
+import { PrimalNote, PrimalUser } from "../types/primal";
+import { enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 
 export const zapNote = async (note: PrimalNote, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
   if (!sender) {
@@ -23,27 +25,20 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
     relays: relays.map(r => r.url)
   });
 
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-  const webln = win.webln
-
-  if (!nostr || !webln) {
-    return false;
-  }
-
   try {
-    const signedEvent = await nostr.signEvent(zapReq);
+    const signedEvent = await signEvent(zapReq);
 
     const event = encodeURI(JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    await webln.enable();
-    await webln.sendPayment(pr);
+    await enableWebLn();
+    await sendPayment(pr);
 
     return true;
-  } catch (e) {
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
     return false;
   }
 }

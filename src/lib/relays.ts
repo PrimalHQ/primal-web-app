@@ -1,6 +1,16 @@
+// @ts-ignore Bad types in nostr-tools
 import { relayInit, Relay } from "nostr-tools";
 import { relayConnectingTimeout } from "../constants";
+import { sendMessage } from "../sockets";
 import { NostrRelays } from "../types/primal";
+
+const attemptLimit = 6;
+
+let reconnAttempts: Record<string, number> = {};
+
+const attemptDelay = (attempt: number) => {
+  return 100 + attempt * 500;
+}
 
 const logError = (relay: Relay, e: any, timedOut?: boolean) => {
   const message = timedOut ?
@@ -21,46 +31,83 @@ export const closeRelays = async (relays: Relay[], success = () => {}, fail = ()
   }
 };
 
-const connectToRelay = (relay: Relay) => new Promise(
-  (resolve, reject) => {
-    const timeout = setTimeout(() => {
-      relay.close();
-      logError(relay, null, true);
-      reject();
-    }, relayConnectingTimeout);
+type ConnectToRelay = (
+  relay: Relay,
+  timeout: number,
+  onConnect: (relay: Relay) => void,
+  onFail: (relay: Relay, reasons: any) => void,
+) => void;
 
-    relay.connect()
-      .then(() => {
-        clearTimeout(timeout);
-        resolve(true);
-      })
-      .catch((e) => {
-        logError(relay, e);
-        reject();
-      });
-  },
-);
+export const connectToRelay: ConnectToRelay =
+  (relay, timeout, onConnect, onFail) => {
+    const tOut = setTimeout(() => {
+      relay.close();
+      onFail(relay, 'timeout');
+    }, timeout);
+
+    relay.on('connect', () => {
+      console.log('CONNECTED ', relay.url);
+      clearTimeout(tOut);
+      if (!reconnAttempts[relay.url]) {
+        reconnAttempts[relay.url] = 0
+      }
+      onConnect(relay);
+    })
+
+    relay.on('disconnect', () => {
+      console.log('DISCONNECTED ', relay.url);
+      clearTimeout(tOut);
+      relay.close();
+      onFail(relay, 'disconnect');
+    })
+
+    relay.on('error', () => {
+      console.log('ERROR CONNECTING ', relay.url);
+      clearTimeout(tOut);
+      relay.close();
+      onFail(relay, 'failed connection');
+    })
+
+    try {
+      relay.connect();
+    } catch (e) {
+      console.log('CAUGHT ERROR ', e)
+    }
+  };
 
 export const connectRelays = async (
   relaySettings: NostrRelays,
-  onConnect: (relays: Relay[]) => void,
+  onConnect: (relay: Relay) => void,
+  onFail: (relay: Relay, reasons: any) => void,
 ) => {
 
   const urls = Object.keys(relaySettings);
-  const relays = urls.map(u => relayInit(u));
-  const connected: Relay[] = [];
+  const relays: Relay[] = urls.map(relayInit);
 
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
 
     if (relay.status === WebSocket.CLOSED) {
-      try {
-        await connectToRelay(relay);
-        connected.push(relay);
-      } catch(e){
-        logError(relay, e);
-      };
+      console.log('CONNECTING TO: ', relay.url);
+      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail)
     }
   }
-  onConnect(connected);
+};
+
+export const getPreConfiguredRelays = () => {
+  const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+  return rels.reduce(
+    (acc: NostrRelays, r: string) =>
+      ({ ...acc, [r]: { read: true, write: true } }),
+    {},
+  );
+};
+
+export const getDefaultRelays = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_default_relays"]},
+  ]))
 };

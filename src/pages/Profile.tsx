@@ -14,7 +14,7 @@ import Branding from '../components/Branding/Branding';
 import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
 import { humanizeNumber } from '../lib/stats';
-import { nip05Verification, truncateNpub } from '../stores/profile';
+import { authorName, nip05Verification, truncateNpub, userName } from '../stores/profile';
 import Paginator from '../components/Paginator/Paginator';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
@@ -28,12 +28,17 @@ import { shortDate } from '../lib/dates';
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
-import { VanityProfiles } from '../types/primal';
+import { MenuItem, VanityProfiles } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
 import { useMediaContext } from '../contexts/MediaContext';
-import { profile as t, actions as tActions } from '../translations';
+import { profile as t, actions as tActions, toast as tToast, feedProfile } from '../translations';
+import Loader from '../components/Loader/Loader';
+import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
+import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
+import { reportUser } from '../lib/profile';
+import { APP_ID } from '../App';
 
 const Profile: Component = () => {
 
@@ -48,6 +53,10 @@ const Profile: Component = () => {
   const params = useParams();
 
   const routeData = useRouteData<(opts: RouteDataFuncArgs) => Resource<VanityProfiles>>();
+
+  const [showContext, setContext] = createSignal(false);
+  const [confirmReportUser, setConfirmReportUser] = createSignal(false);
+  const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
 
   const getHex = () => {
     if (params.vanityName && routeData()) {
@@ -75,31 +84,10 @@ const Profile: Component = () => {
   }
 
   const setProfile = (hex: string | undefined) => {
-    // if (hex === profile?.profileKey) {
-    //   return;
-    // }
-
     profile?.actions.setProfileKey(hex);
     profile?.actions.clearNotes();
     profile?.actions.fetchNotes(hex);
   }
-
-  // const react = createReaction(() => {
-  //   setProfile(getHex());
-  // });
-
-  // onMount(() => {
-  //   // If connection doesn't exist at mount time,
-  //   // create a one-time reaction, when connection is established
-  //   // to fetch profile data.
-  //   if (!isConnected()) {
-  //     react(() => isConnected());
-  //     return;
-  //   }
-
-  //   // Otherwise, fetch profile data.
-  //   setProfile(getHex());
-  // });
 
   createEffect(() => {
     if (account?.isKeyLookupDone) {
@@ -119,24 +107,24 @@ const Profile: Component = () => {
 
   const addToHome = () => {
     const feed = {
-      name: `${profileName()}'s feed`,
+      name: intl.formatMessage(feedProfile, { name: profileName() }),
       hex: profile?.profileKey,
       npub: profileNpub(),
     };
 
     settings?.actions.addAvailableFeed(feed);
-    toaster?.sendSuccess(`${profileName()}'s feed added to home page`);
+    toaster?.sendSuccess(intl.formatMessage(tToast.addFeedToHomeSuccess, { name: profileName()}));
   };
 
   const removeFromHome = () => {
     const feed = {
-      name: `${profileName()}'s feed`,
+      name: intl.formatMessage(feedProfile, { name: profileName() }),
       hex: profile?.profileKey,
       npub: profileNpub(),
     };
 
     settings?.actions.removeAvailableFeed(feed);
-    toaster?.sendSuccess(`${profileName()}'s feed removed from home page`);
+    toaster?.sendSuccess(intl.formatMessage(tToast.removeFeedFromHomeSuccess, { name: profileName()}));
   };
 
   const hasFeedAtHome = () => {
@@ -148,12 +136,6 @@ const Profile: Component = () => {
   }
 
   const imgError = (event: any) => {
-    // Temprary solution until we decide what to to when banner is missing.
-
-    // const image = event.target;
-    // image.onerror = "";
-    // image.src = defaultAvatar;
-
     const banner = document.getElementById('profile_banner');
 
     if (banner) {
@@ -176,7 +158,7 @@ const Profile: Component = () => {
   }
 
   const isFollowingYou = () => {
-    return account?.publicKey && profile?.following.includes(account.publicKey);
+    return profile?.isProfileFollowing;
   }
 
   const [isBannerCached, setisBannerCached] = createSignal(false);
@@ -201,6 +183,187 @@ const Profile: Component = () => {
     return styles.cacheFlag;
   }
 
+  const isCurrentUser = () => {
+    if (!account || !profile || !account.isKeyLookupDone) {
+      return false;
+    }
+    return account?.publicKey === profile?.profileKey;
+  };
+
+  const [isUnmuted, setIsUnmuted] = createSignal(false);
+
+  createEffect(() => {
+    const pk = getHex();
+
+    if (!pk) {
+      return;
+    }
+
+    if (isUnmuted() && !account?.muted.includes(pk)) {
+      setIsUnmuted(false);
+      setTimeout(() => {
+        profile?.actions.fetchNotes(pk);
+      }, 500);
+    }
+  });
+
+  createEffect(() => {
+    const pk = getHex();
+
+    if (!pk) {
+      return;
+    }
+
+    if (account?.muted.includes(pk)) {
+      profile?.actions.clearNotes();
+    }
+  });
+
+  const isMuted = (pk: string | undefined) => {
+    return pk && account?.muted.includes(pk);
+  };
+
+  const unMuteProfile = () => {
+    if (!account || !profile?.profileKey) {
+      return;
+    }
+
+    setIsUnmuted(true);
+    account.actions.removeFromMuteList(profile.profileKey);
+  };
+
+  const openContextMenu = (e: MouseEvent) => {
+    e.preventDefault();
+    setContext(true);
+  };
+
+  const onClickOutside = (e: MouseEvent) => {
+    if (
+      !document?.getElementById('profile_context')?.contains(e.target as Node)
+    ) {
+      setContext(false);
+    }
+  }
+
+  const profileContextForEveryone: () => MenuItem[] = () => {
+
+    const addToFeedAction = hasFeedAtHome() ?
+    {
+      label: intl.formatMessage(tActions.profileContext.removeFeed),
+      action: () => {
+        removeFromHome();
+        setContext(false);
+      },
+      icon: 'feed_remove',
+    } :
+    {
+      label: intl.formatMessage(tActions.profileContext.addFeed),
+      action: () => {
+        addToHome();
+        setContext(false);
+      },
+      icon: 'feed_add',
+    };
+
+    return [
+      addToFeedAction,
+      {
+        label: intl.formatMessage(tActions.profileContext.copyLink),
+        action: () => {
+          copyProfileLink();
+          setContext(false);
+        },
+        icon: 'copy_note_link',
+      },
+      {
+        label: intl.formatMessage(tActions.profileContext.copyPubkey),
+        action: () => {
+          copyUserNpub();
+          setContext(false);
+        },
+        icon: 'copy_pubkey',
+      },
+    ];
+  };
+
+  const profileContextForOtherPeople: () => MenuItem[] = () => {
+
+    const muteAction = isMuted(getHex()) ?
+    {
+      label: intl.formatMessage(tActions.profileContext.unmuteUser),
+      action: () => {
+        unMuteProfile();
+        setContext(false);
+      },
+      icon: 'mute_user',
+      warning: true,
+    } :
+    {
+      label: intl.formatMessage(tActions.profileContext.muteUser),
+      action: () => {
+        setConfirmMuteUser(true);
+        setContext(false);
+      },
+      icon: 'mute_user',
+      warning: true,
+    };
+
+    return [
+      muteAction,
+      {
+        label: intl.formatMessage(tActions.profileContext.reportUser),
+        action: () => {
+          setConfirmReportUser(true);
+          setContext(false);
+        },
+        icon: 'report',
+        warning: true,
+      },
+    ];
+  };
+
+  const profileContext = () => account?.publicKey !== getHex() ?
+      [ ...profileContextForEveryone(), ...profileContextForOtherPeople()] :
+      profileContextForEveryone();
+
+  const doMuteUser = () => {
+    const pk = getHex();
+    pk && account?.actions.addToMuteList(pk);
+  };
+
+  const doReportUser = () => {
+    const pk = getHex();
+
+    if (!pk) {
+      return;
+    }
+
+    reportUser(pk, `report_user_${APP_ID}`, profile?.userProfile);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
+  };
+
+  const copyProfileLink = () => {
+    navigator.clipboard.writeText(`${window.location.href}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
+  };
+
+  const copyUserNpub = () => {
+    navigator.clipboard.writeText(`${hexToNpub(getHex())}`);
+    setContext(false);
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
+  };
+
+  createEffect(() => {
+    if (showContext()) {
+      document.addEventListener('click', onClickOutside);
+    }
+    else {
+      document.removeEventListener('click', onClickOutside);
+    }
+  });
+
   return (
     <>
       <PageTitle title={
@@ -222,9 +385,7 @@ const Profile: Component = () => {
         <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
       </StickySidebar>
 
-      <Wormhole
-        to="search_section"
-      >
+      <Wormhole to='search_section'>
         <Search />
       </Wormhole>
 
@@ -253,51 +414,52 @@ const Profile: Component = () => {
         </Show>
 
         <div class={styles.profileActions}>
-          <button
-            class={styles.smallSecondaryButton}
-            onClick={onNotImplemented}
-          >
-            <div class={styles.zapIcon}></div>
-          </button>
-          <button
-            class={styles.smallSecondaryButton}
-            onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-          >
-            <div class={styles.messageIcon}></div>
-          </button>
-
-          <div class={styles.addToFeedButton}>
-            <Show
-              when={!hasFeedAtHome()}
-              fallback={
-                <button
-                  class={styles.smallSecondaryButton}
-                  onClick={removeFromHome}
-                  title={intl.formatMessage(
-                    tActions.removeFromHomeFeedNamed,
-                    { name: profileName() },
-                  )}
-                  disabled={profile?.profileKey === account?.publicKey}
-                >
-                  <div class={styles.removeFeedIcon}></div>
-                </button>
-              }
+          <div class={styles.contextArea}>
+            <button
+              class={styles.smallPrimaryButton}
+              onClick={openContextMenu}
             >
-              <button
-                class={styles.smallPrimaryButton}
-                onClick={addToHome}
-                title={intl.formatMessage(
-                  tActions.addFeedToHomeNamed,
-                  { name: profileName() },
-                )}
-              >
-                <div class={styles.addFeedIcon}></div>
-              </button>
+              <div class={styles.contextIcon}></div>
+            </button>
+            <Show when={showContext()}>
+              <PrimalMenu
+                id={'profile_context'}
+                items={profileContext()}
+                position="profile"
+                reverse={true}
+              />
             </Show>
           </div>
 
+          <Show when={!isCurrentUser()}>
+            <button
+              class={styles.smallPrimaryButton}
+              onClick={onNotImplemented}
+            >
+              <div class={styles.zapIcon}></div>
+            </button>
+          </Show>
+
+          <Show when={account?.publicKey}>
+            <button
+              class={styles.smallPrimaryButton}
+              onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+            >
+              <div class={styles.messageIcon}></div>
+            </button>
+          </Show>
+
           <FollowButton person={profile?.userProfile} large={true} />
 
+          <Show when={isCurrentUser()}>
+            <button
+              class={styles.editProfileButton}
+              onClick={() => navigate('/settings/profile')}
+              title={intl.formatMessage(tActions.editProfile)}
+            >
+              <div>{intl.formatMessage(tActions.editProfile)}</div>
+            </button>
+          </Show>
         </div>
 
         <Show when={profile?.userProfile && !profile?.isFetching}>
@@ -390,13 +552,59 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
-        <For each={profile?.notes}>
-          {note => (
-            <Note note={note} />
-          )}
-        </For>
-        <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
+        <Show
+          when={!isMuted(profile?.profileKey)}
+          fallback={
+            <div class={styles.mutedProfile}>
+              {intl.formatMessage(
+                t.isMuted,
+                { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+              )}
+              <button
+                onClick={unMuteProfile}
+              >
+                {intl.formatMessage(tActions.unmute)}
+              </button>
+            </div>
+          }
+        >
+          <Show
+            when={profile && profile.notes.length > 0}
+            fallback={
+              <div style="margin-top: 40px;">
+                <Loader />
+              </div>}
+          >
+            <For each={profile?.notes}>
+              {note => (
+                <Note note={note} />
+              )}
+            </For>
+            <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
+          </Show>
+        </Show>
+
       </div>
+
+      <ConfirmModal
+        open={confirmReportUser()}
+        description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
+        onConfirm={() => {
+          doReportUser();
+          setConfirmReportUser(false);
+        }}
+        onAbort={() => setConfirmReportUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteUser()}
+        description={intl.formatMessage(tActions.muteUserConfirm, { name: userName(profile?.userProfile) })}
+        onConfirm={() => {
+          doMuteUser();
+          setConfirmMuteUser(false);
+        }}
+        onAbort={() => setConfirmMuteUser(false)}
+      />
     </>
   )
 }

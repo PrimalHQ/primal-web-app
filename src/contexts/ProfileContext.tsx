@@ -1,6 +1,6 @@
 import { nip19 } from "nostr-tools";
 import { createStore } from "solid-js/store";
-import { getEvents, getUserFeed } from "../lib/feed";
+import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
 import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
@@ -34,9 +34,9 @@ import {
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
-  getProfileContactList,
   getProfileScoredNotes,
   getUserProfileInfo,
+  isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
 
@@ -51,6 +51,12 @@ export type ProfileContextStore = {
   },
   knownProfiles: VanityProfiles,
   notes: PrimalNote[],
+  future: {
+    notes: PrimalNote[],
+    page: FeedPage,
+    reposts: Record<string, string> | undefined,
+  },
+  isProfileFollowing: boolean,
   isFetching: boolean,
   page: FeedPage,
   reposts: Record<string, string> | undefined,
@@ -65,6 +71,8 @@ export type ProfileContextStore = {
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
     setProfileKey: (profileKey?: string) => void,
+    refreshNotes: () => void,
+    checkForNewNotes: (pubkey: string | undefined) => void,
   }
 }
 
@@ -82,6 +90,7 @@ export const initialData = {
   knownProfiles: { names: {} },
   notes: [],
   isFetching: false,
+  isProfileFollowing: false,
   page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
   lastNote: undefined,
@@ -92,6 +101,17 @@ export const initialData = {
     postStats: {},
     notes: [],
     noteActions: {},
+  },
+  future: {
+    notes: [],
+    reposts: {},
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    },
   },
 };
 
@@ -104,7 +124,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const saveNotes = (newNotes: PrimalNote[]) => {
+  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
+    if (scope) {
+      console.log('SAVED NEW NOTES ', newNotes);
+      updateStore(scope, 'notes', (notes) => [ ...notes, ...newNotes ]);
+      loadFutureContent();
+      return;
+    }
     updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
     updateStore('isFetching', () => false);
   };
@@ -155,17 +181,87 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const updatePage = (content: NostrEventContent) => {
+  const clearFuture = () => {
+    updateStore('future', () => ({
+      notes: [],
+      reposts: {},
+      page: {
+        messages: [],
+        users: {},
+        postStats: {},
+        mentions: {},
+        noteActions: {},
+      },
+    }))
+  }
+
+  const checkForNewNotes = (pubkey: string | undefined) => {
+
+    if (store.future.notes.length > 100) {
+      return;
+    }
+
+    let since = 0;
+
+    if (store.notes[0]) {
+      since = store.notes[0].repost ?
+        store.notes[0].repost.note.created_at :
+        store.notes[0].post.created_at;
+    }
+
+    clearFuture();
+
+    getFutureUserFeed(
+      account?.publicKey,
+      pubkey,
+      `profile_future_${APP_ID}`,
+      since,
+    );
+  }
+
+  const loadFutureContent = () => {
+    if (store.future.notes.length === 0) {
+      return;
+    }
+    console.log('loadFutureContent', store.future.notes);
+
+    updateStore('notes', (notes) => [...store.future.notes, ...notes]);
+    clearFuture();
+  };
+
+  const updatePage = (content: NostrEventContent, scope?: 'future') => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateStore('page', 'users', () => ({ [user.pubkey]: user}));
+      if (scope) {
+        updateStore(scope, 'page', 'users',
+          () => ({ [user.pubkey]: { ...user } })
+        );
+        return;
+      }
+
+      updateStore('page', 'users',
+        () => ({ [user.pubkey]: { ...user } })
+      );
       return;
     }
 
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
       const messageId = nip19.noteEncode(message.id);
+
+      if (scope) {
+        const isFirstNote = message.kind === Kind.Text ?
+          store.notes[0]?.post?.noteId === messageId :
+          store.notes[0]?.repost?.note.noteId === messageId;
+
+          if (!isFirstNote) {
+            updateStore(scope, 'page', 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+          }
+        return;
+      }
 
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :
@@ -182,6 +278,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
+      if (scope) {
+        updateStore(scope, 'page', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+        );
+        return;
+      }
+
       updateStore('page', 'postStats', () => ({ [stat.event_id]: stat }));
       return;
     }
@@ -190,7 +293,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
 
-      updateStore('page', 'mentions', () => ({ [mention.id]: mention }));
+      if (scope) {
+        updateStore(scope, 'page', 'mentions',
+        () => ({ [mention.id]: { ...mention } })
+        );
+        return;
+      }
+      updateStore('page', 'mentions', () => ({ [mention.id]: { ...mention } }));
       return;
     }
 
@@ -198,15 +307,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
+      if (scope) {
+        updateStore(scope, 'page', 'noteActions',
+        () => ({ [noteActions.event_id]: { ...noteActions } })
+        );
+        return;
+      }
       updateStore('page', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
       return;
     }
   };
 
-  const savePage = (page: FeedPage) => {
+  const savePage = (page: FeedPage, scope?: 'future') => {
     const newPosts = sortByRecency(convertToNotes(page));
 
-    saveNotes(newPosts);
+    saveNotes(newPosts, scope);
   };
 
 
@@ -267,10 +382,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
-      getProfileContactList(profileKey, `profile_contacts_${APP_ID}`);
       getProfileScoredNotes(profileKey, `profile_scored_${APP_ID}`, 10);
+
+      isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
     }
   }
+
+  const refreshNotes = () => {
+  };
 
 // SOCKET HANDLERS ------------------------------
 
@@ -373,6 +492,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    if (subId === `is_profile_following_${APP_ID}`) {
+      if (type === 'EVENT') {
+        updateStore('isProfileFollowing', JSON.parse(content?.content || 'false'))
+        return;
+      }
+    }
+
     if (subId === `profile_scored_${APP_ID}`) {
       if (type === 'EOSE') {
         saveSidebar(store.sidebar);
@@ -381,6 +507,48 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT') {
         updateSidebar(content);
+        return;
+      }
+    }
+
+    if (subId === `profile_future_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const reposts = parseEmptyReposts(store.future.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          savePage(store.future.page, 'future');
+          return;
+        }
+
+        updateStore('future', 'reposts', () => reposts);
+
+        getEvents(account?.publicKey, ids, `profile_future_reposts_${APP_ID}`);
+
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content, 'future');
+        return;
+      }
+    }
+
+    if (subId === `profile_future_reposts_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.future.page, 'future');
+        return;
+      }
+
+      if (type === 'EVENT') {
+        const repostId = (content as NostrNoteContent).id;
+        const reposts = store.future.reposts || {};
+        const parent = store.future.page.messages.find(m => m.id === reposts[repostId]);
+
+        if (parent) {
+          updateStore('future', 'page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+        }
+
         return;
       }
     }
@@ -426,6 +594,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updatePage,
       savePage,
       setProfileKey,
+      refreshNotes,
+      checkForNewNotes,
     },
   });
 

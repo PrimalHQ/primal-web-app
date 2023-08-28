@@ -1,9 +1,12 @@
 import { getLinkPreview } from "link-preview-js";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
-import { NostrWindow, PrimalNote } from "../types/primal";
-import { getMediaUrl } from "./media";
+import { sendMessage } from "../sockets";
+import { MediaSize, NostrRelays, NostrRelaySignedEvent, NostrWindow, PrimalNote, SendNoteResult } from "../types/primal";
+import { getMediaUrl as getMediaUrlDefault } from "./media";
+import { signEvent } from "./nostrAPI";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -51,8 +54,14 @@ export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|a
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
 
-export const urlify = (text: string, highlightOnly = false, skipEmbed = false, skipLinkPreview = false) => {
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
+export const urlify = (
+  text: string,
+  getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined,
+  highlightOnly = false,
+  skipEmbed = false,
+  skipLinkPreview = false,
+) => {
+  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/g;
 
   return text.replace(urlRegex, (url) => {
     if (!skipEmbed) {
@@ -60,7 +69,14 @@ export const urlify = (text: string, highlightOnly = false, skipEmbed = false, s
       const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
       if (isImage) {
-        return '<img src="' + getMediaUrl(url) + '" class="postImage"/>'
+        const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+        let imgUrl = getMediaUrl && getMediaUrl(url);
+
+        if (!imgUrl) {
+          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
+        }
+
+        return `<img src="${imgUrl}" class="postImage"/>`;
       }
 
       const isMp4Video = url.includes('.mp4') || url.includes('.mov');
@@ -215,14 +231,26 @@ export const highlightHashtags = (text: string) => {
   return text.replace(regex, "$1<span class='hash_tag'>$2</span>");
 };
 
-export const parseNote1 = (content: string) => urlify(addlineBreaks(content));
-export const parseNote2 = (content: string) => urlify(addlineBreaks(content), true);
-export const parseNote3 = (content: string) => urlify(addlineBreaks(content), false, false, true);
+export const parseNote1 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl);
+export const parseNote2 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl, true);
+export const parseNote3 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl, false, false, true);
 
-type ReplyTo = { e?: string, p?: string };
+
+export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => {
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["import_events", { events }]},
+  ]));
+};
+
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
-export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
+export const sendLike = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
@@ -233,11 +261,11 @@ export const sendLike = async (note: PrimalNote, relays: Relay[]) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 
 }
 
-export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
+export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -248,11 +276,10 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[]) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 }
 
-
-export const sendNote = async (text: string, relays: Relay[], tags: string[][]) => {
+export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const event = {
     content: text,
     kind: Kind.Text,
@@ -260,10 +287,10 @@ export const sendNote = async (text: string, relays: Relay[], tags: string[][]) 
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 }
 
-export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[]) => {
+export const sendContacts = async (contacts: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.Contacts,
@@ -271,47 +298,143 @@ export const sendContacts = async (contacts: string[], date: number, content: st
     created_at: date,
   };
 
-  return await sendEvent(event, relays);
+  return await sendEvent(event, relays, relaySettings);
 };
 
-export const sendEvent = async (event: NostrEvent, relays: Relay[]) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
+export const sendMuteList = async (muteList: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content,
+    kind: Kind.MuteList,
+    tags: muteList.map(c => ['p', c]),
+    created_at: date,
+  };
 
-  if (nostr === undefined) {
-    return false;
-  }
+  return await sendEvent(event, relays, relaySettings);
+};
 
-  const signedNote = await nostr.signEvent(event);
+export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
 
-  return new Promise<boolean>((resolve) => {
-    const numberOfRelays = relays.length;
-    let failed = 0;
+  let responses = [];
+  let reasons: string[] = [];
 
-    relays.forEach(relay => {
+  for (let i = 0;i < relays.length;i++) {
+    const relay = relays[i];
+
+    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+
+    if (!settings.write) {
+      continue;
+    }
+
+    responses.push(new Promise<string>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.log(`Publishing post to ${relay.url} has timed out`);
+        reasons.push('timeout');
+        reject('timeout');
+      }, 8_000);
+
       try {
-        let pub = relay.publish(signedNote);
+        let pub = relay.publish(event);
+
+        console.log('publishing to relay: ', relay)
 
         pub.on('ok', () => {
           console.log(`${relay.url} has accepted our event`);
-          resolve(true);
+          clearTimeout(timeout);
+          resolve('success');
         });
 
         pub.on('failed', (reason: any) => {
           console.log(`failed to publish to ${relay.url}: ${reason}`)
-          failed += 1;
-          if (failed >= numberOfRelays) {
-            resolve(false);
-          }
+          clearTimeout(timeout);
+          reasons.push(reason);
+          reject('failed');
         });
-      } catch (e) {
-        console.log('Failed sending note: ', e);
-        failed += 1;
-        if (failed >= numberOfRelays) {
-          resolve(false);
-        }
-      }
-    });
 
-  });
+      } catch (e) {
+        console.log('Failed publishing note: ', e);
+        clearTimeout(timeout);
+        reasons.push(`${e}`);
+        reject(e);
+      }
+    }));
+  }
+
+  try {
+    await Promise.any(responses);
+
+    return { success: true, note: event } as SendNoteResult;
+  }
+  catch (e) {
+    console.log('ERROR BRAODCASTING POST: ', e);
+    return { success: false, reasons, note: event} as SendNoteResult;
+  }
+};
+
+export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+  let signedNote: NostrRelaySignedEvent | undefined;
+
+  try {
+    signedNote = await signEvent(event);
+    if (!signedNote) throw('event_not_signed');
+  } catch (reason) {
+    console.error('Failed to send event: ', reason);
+    return { success: false , reasons: [reason]} as SendNoteResult;
+  }
+
+  let responses = [];
+  let reasons: string[] = [];
+
+  for (let i = 0;i < relays.length;i++) {
+    const relay = relays[i];
+
+    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+
+    if (!settings.write) {
+      continue;
+    }
+
+    responses.push(new Promise<string>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        console.log(`Publishing post to ${relay.url} has timed out`);
+        reasons.push('timeout');
+        reject('timeout');
+      }, 8_000);
+
+      try {
+        let pub = relay.publish(signedNote);
+
+        console.log('publishing to relay: ', relay)
+
+        pub.on('ok', () => {
+          console.log(`${relay.url} has accepted our event`);
+          clearTimeout(timeout);
+          resolve('success');
+        });
+
+        pub.on('failed', (reason: any) => {
+          console.log(`failed to publish to ${relay.url}: ${reason}`)
+          clearTimeout(timeout);
+          reasons.push(reason);
+          reject('failed');
+        });
+
+      } catch (e) {
+        console.log('Failed publishing note: ', e);
+        clearTimeout(timeout);
+        reasons.push(`${e}`);
+        reject(e);
+      }
+    }));
+  }
+
+  try {
+    await Promise.any(responses);
+
+    return { success: true, note: signedNote } as SendNoteResult;
+  }
+  catch (e) {
+    console.log('ERROR PUBLISHING POST: ', e);
+    return { success: false, reasons, note: signedNote} as SendNoteResult;
+  }
 }

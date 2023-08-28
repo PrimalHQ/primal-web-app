@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { PrimalNote } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
@@ -34,10 +34,12 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
       truncateNpub(r.user.npub);
   }
 
+  const [openCustomZap, setOpenCustomZap] = createSignal(false);
+
   return (
     <A
       class={styles.postLink}
-      href={`/thread/${props.note?.post.noteId}`}
+      href={`/e/${props.note?.post.noteId}`}
       onClick={() => navToThread(props.note)}
       data-event={props.note.post.id}
       data-event-bech32={props.note.post.noteId}
@@ -46,7 +48,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
         <div class={styles.repostedBy}>
           <div class={styles.repostIcon}></div>
           <span>
-            <A href={`/profile/${repost()?.user.npub}`} >
+            <A href={`/p/${repost()?.user.npub}`} >
               {reposterName()}
             </A>
             <span>
@@ -56,12 +58,15 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
         </div>
       </Show>
       <div class={styles.post}>
-        <NoteHeader note={props.note} />
+        <NoteHeader note={props.note} openCustomZap={() => {
+          setOpenCustomZap(true);
+          setTimeout(() => setOpenCustomZap(false), 10);
+        }} />
         <div class={styles.content}>
           <div class={styles.message}>
             <ParsedNote note={props.note} />
           </div>
-          <NoteFooter note={props.note} />
+          <NoteFooter note={props.note} doCustomZap={openCustomZap()} />
         </div>
       </div>
     </A>

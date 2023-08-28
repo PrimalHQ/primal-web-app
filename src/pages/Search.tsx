@@ -20,6 +20,8 @@ import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import SearchComponent from '../components/Search/Search';
 import { toast as t, search as tSearch, actions as tActions  } from '../translations';
+import PageCaption from '../components/PageCaption/PageCaption';
+import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 
 const Search: Component = () => {
   const params = useParams();
@@ -81,32 +83,21 @@ const Search: Component = () => {
         <SearchComponent />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
+      <PageCaption>
         <div class={styles.caption}>
           {intl.formatMessage(
             tSearch.title,
             { query: query() || '' },
           )}
         </div>
-        <div class={styles.addToFeed}>
-          <Show
-            when={!hasFeedAtHome()}
-            fallback={
-              <div class={styles.noAdd}>
-                {intl.formatMessage(tActions.disabledAddFeedToHome)}
-              </div>
-            }
-          >
-            <button
-              class={styles.addButton}
-              onClick={addToHomeFeed}
-            >
-              <span>+</span>
-              {intl.formatMessage(tActions.addFeedToHome)}
-            </button>
-          </Show>
-        </div>
-      </div>
+        <AddToHomeFeedButton
+          disabled={hasFeedAtHome()}
+          onAdd={addToHomeFeed}
+          activeLabel={intl.formatMessage(tActions.addFeedToHome)}
+          disabledLabel={intl.formatMessage(tActions.disabledAddFeedToHome)}
+        />
+      </PageCaption>
+
 
       <div class={styles.searchContent}>
         <Show

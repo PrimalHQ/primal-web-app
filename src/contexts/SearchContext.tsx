@@ -24,6 +24,7 @@ import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes } from "../stores/note";
 import { subscribeTo } from "../sockets";
 import { nip19 } from "nostr-tools";
+import { useAccountContext } from "./AccountContext";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -77,6 +78,8 @@ const initialData = {
 export const SearchContext = createContext<SearchContextStore>();
 
 export function SearchProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
+
+  const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
@@ -375,7 +378,7 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
     updateStore('isFetchingContent', () => true);
     updateStore('notes', () => []);
     updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} })
-    searchContent(subid, query);
+    searchContent(account?.publicKey, subid, query);
   }
 
   const setContentQuery = (query: string) => {

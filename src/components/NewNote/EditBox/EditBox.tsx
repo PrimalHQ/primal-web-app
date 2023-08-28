@@ -8,13 +8,13 @@ import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { subscribeTo as uploadSub } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -34,13 +34,20 @@ import {
   search as tSearch,
   actions as tActions,
 } from "../../../translations";
+import { useMediaContext } from "../../../contexts/MediaContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 
-const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPrefix?: string } > = (props) => {
+const EditBox: Component<{
+  replyToNote?: PrimalNote,
+  onClose?: () => void,
+  onSuccess?: (note: SendNoteResult) => void,
+  idPrefix?: string,
+} > = (props) => {
 
   const intl = useIntl();
+  const media = useMediaContext();
 
   const instanceId = uuidv4();
 
@@ -422,6 +429,15 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
     }, 500);
   })
 
+  createEffect(() => {
+    if (account?.quotedNote && textArea) {
+      setMessage((msg) => `${msg}${account.quotedNote} `);
+      textArea.value = message();
+      onExpandableTextareaInput(new InputEvent('input'))
+      account.actions.quoteNote(undefined);
+    }
+  })
+
   const onEscape = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
       !isMentioning() && !isEmojiInput() ?
@@ -454,12 +470,12 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
       return;
     }
 
-    if (Object.keys(account.relaySettings).length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(tToast.noRelays),
-      );
-      return;
-    }
+    // if (Object.keys(account.relaySettings).length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(tToast.noRelays),
+    //   );
+    //   return;
+    // }
 
     if (account.relays.length === 0) {
       toast?.sendWarning(
@@ -491,14 +507,42 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         tags.push(['p', props.replyToNote.post.pubkey]);
       }
 
-      const success = await sendNote(messageToSend, account.relays, tags);
+      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
 
       if (success) {
-        toast?.sendSuccess('Message posted successfully');
+
+        const importId = `import_note_${APP_ID}`;
+
+        const unsub = subscribeTo(importId, (type, _, response) => {
+          console.log('IMPORTED: ', type, response)
+
+          if (type === 'EOSE') {
+            if (note) {
+              toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+              props.onSuccess && props.onSuccess({ success, reasons, note });
+              closeEditor();
+            }
+            unsub();
+          }
+        });
+
+        note && importEvents([note], importId);
+
+        return;
       }
-      else {
-        toast?.sendWarning('Failed to send message');
+
+      if (reasons?.includes('no_extension')) {
+        toast?.sendWarning(intl.formatMessage(tToast.noExtension));
+        return;
       }
+
+      if (reasons?.includes('timeout')) {
+        toast?.sendWarning(intl.formatMessage(tToast.publishNoteTimeout));
+        return;
+      }
+
+      toast?.sendWarning(intl.formatMessage(tToast.publishNoteFail));
+      return;
     }
 
     closeEditor();
@@ -594,8 +638,8 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
         const user = userRefs[userId];
 
         const link = user ?
-          <a href={`${window.location.origin}/profile/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}/profile/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
+          <a href={`${window.location.origin}/p/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
+          <a href={`${window.location.origin}/p/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
 
         // @ts-ignore
         return link.outerHTML || url;
@@ -796,7 +840,13 @@ const EditBox: Component<{ replyToNote?: PrimalNote, onClose?: () => void, idPre
 
 
   const parseForReferece = (value: string) => {
-    const content = replaceLinkPreviews(parseUserMentions(highlightHashtags(parseNote1(value))));
+    const content = replaceLinkPreviews(
+      parseUserMentions(
+        highlightHashtags(
+          parseNote1(value, media?.actions.getMediaUrl)
+        )
+      )
+    );
 
     parseNpubLinks(content);
     parseNoteLinks(content);

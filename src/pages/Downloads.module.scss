@@ -1,0 +1,268 @@
+.callToAction, .callToActionAndroid, .callToActionIOS {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .ctaTitle {
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 36px;
+    font-weight: 600;
+    line-height: 36px;
+    margin-bottom: 8px;
+  }
+
+  .ctaDescription {
+    color: var(--text-secondary-2);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    max-width: 430px;
+  }
+}
+
+.callToActionAndroid, .callToActionIOS {
+  display: none;
+}
+
+.promoHolder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+
+  >video {
+    width: 100%;
+    border-radius: 8px;
+  }
+}
+
+.linkHolder {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  >div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 290px;
+  }
+
+  .appStore {
+    padding-block: 24px;
+    width: 308px;
+    background-color: var(--background-card);
+    border-radius: 8px;
+
+
+    .desktopCTA {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+      margin-bottom: 9px;
+    }
+
+    .buidDetails {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      color: var(--text-tertiary-2);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18px;
+
+      >div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-right: 8px;
+        color: var(--text-tertiary-2);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+      >div:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        color: var(--text-tertiary-2);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+    }
+
+    >a {
+      margin-top: 16px;
+      width: 120px;
+      height: 40px;
+    }
+  }
+
+  .playStore {
+    padding-block: 24px;
+    width: 308px;
+    background-color: var(--background-card);
+    border-radius: 8px;
+    >a {
+      margin-top: 16px;
+      width: 134px;
+      height: 40px;
+    }
+
+    .desktopCTA {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+      margin-bottom: 9px;
+    }
+
+    .buidDetails {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      color: var(--text-tertiary-2);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18px;
+
+      >div:first-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        margin-right: 8px;
+        color: var(--text-tertiary-2);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+      >div:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        color: var(--text-tertiary-2);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+    }
+  }
+}
+
+.downloadsSidebar {
+  .title {
+    color: var(--text-secondary-2);
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 20px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .list {
+    >div {
+      display: flex;
+      align-items: center;
+
+      .githubIcon {
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        margin-right: 9px;
+        background-image: url( '../assets/icons/github.svg');
+        background-size: contain;
+      }
+
+      .githubIconLight {
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        margin-right: 9px;
+        background-image: url( '../assets/icons/github_light.svg');
+        background-size: contain;
+      }
+
+
+      >a {
+        color: var(--text-secondary-2);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 40px;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 720px) {
+
+  .callToAction {
+    display: none;
+  }
+
+  .linkHolder {
+    margin-top: 20px;
+    flex-direction: column;
+
+    >div {
+      .desktopCTA {
+        display: none;
+      }
+
+      >a {
+        >img {
+          max-width: none;
+          width: 188px;
+          height: 63px;
+        }
+      }
+
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .appStore {
+      width: calc(100% - 40px);
+      margin-inline: 20px;
+      .callToActionIOS {
+        display: flex;
+        .ctaTitle {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 24px;
+        }
+      }
+      >a {
+        width: 188px;
+        height: 63px;
+      }
+    }
+
+    .playStore {
+      width: calc(100% - 40px);
+      margin-top: 4px;
+      margin-bottom: 250px;
+      .callToActionAndroid {
+        display: flex;
+        .ctaTitle {
+          font-size: 24px;
+          font-weight: 600;
+          line-height: 24px;
+        }
+      }
+      >a {
+        width: 188px;
+        height: 63px;
+      }
+    }
+  }
+}
