@@ -9,13 +9,9 @@ import {
   useContext
 } from "solid-js";
 import {
-  cacheServer,
-  cacheServerList,
-  disconnect,
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
-  setCacheServerList,
   socket,
   subscribeTo
 } from "../sockets";
@@ -51,7 +47,6 @@ export type SettingsContextStore = {
   defaultZapAmount: number,
   availableZapOptions: number[],
   notificationSettings: Record<string, boolean>,
-  cachingServiceList: string[],
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
   actions: {
@@ -68,7 +63,6 @@ export type SettingsContextStore = {
     resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
-    saveCachingServiceList: () => void,
     setApplyContentModeration: (flag: boolean) => void,
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
   }
@@ -83,7 +77,6 @@ export const initialData = {
   defaultZapAmount: defaultZapAmount,
   availableZapOptions: defaultZapOptions,
   notificationSettings: { ...defaultNotificationSettings },
-  cachingServiceList: [],
   applyContentModeration: true,
   contentModeration: [...defaultContentModeration],
 };
@@ -198,15 +191,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     !temp && saveSettings();
   };
 
-  const saveCachingServiceList = () => {
-    updateStore('cachingServiceList', () => [...cacheServerList]);
-    saveSettings(() => {
-      if (!store.cachingServiceList.includes(cacheServer)) {
-        disconnect();
-      }
-    });
-  };
-
   const restoreDefaultFeeds = () => {
 
     const subid = `restore_default_${APP_ID}`;
@@ -271,7 +255,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       defaultZapAmount: store.defaultZapAmount,
       zapOptions: store.availableZapOptions,
       notifications: store.notificationSettings,
-      cachingServiceList: store.cachingServiceList,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
     };
@@ -287,11 +270,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         }));
       }
 
-      if (type === 'EOSE') {
-        then && then();
-        unsub();
-      }
-
+      unsub();
       return;
     });
 
@@ -370,7 +349,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             defaultZapAmount,
             zapOptions,
             notifications,
-            cachingServiceList,
             applyContentModeration,
             contentModeration,
           } = JSON.parse(content?.content);
@@ -385,12 +363,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
           else {
             updateStore('notificationSettings', () => ({ ...defaultNotificationSettings}));
-          }
-
-          if (cachingServiceList && Array.isArray(cachingServiceList) && cachingServiceList.length > 0) {
-            updateStore('cachingServiceList', () => [ ...cachingServiceList ]);
-            setCacheServerList(store.cachingServiceList);
-            disconnect();
           }
 
           updateStore('applyContentModeration', () => applyContentModeration);
@@ -513,12 +485,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   createEffect(() => {
-    if (store.cachingServiceList.length > 0) {
-      setCacheServerList([...store.cachingServiceList]);
-    }
-  });
-
-  createEffect(() => {
     if (isConnected()) {
       refreshSocketListeners(
         socket(),
@@ -553,7 +519,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setZapOptions,
       resetZapOptionsToDefault,
       updateNotificationSettings,
-      saveCachingServiceList,
       setApplyContentModeration,
       modifyContentModeration,
     },
