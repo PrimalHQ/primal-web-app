@@ -39,7 +39,7 @@ import { profile as t, actions as tActions, toast as tToast, feedProfile } from 
 import Loader from '../components/Loader/Loader';
 import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
-import { reportUser } from '../lib/profile';
+import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 
 const Profile: Component = () => {
@@ -421,6 +421,31 @@ const Profile: Component = () => {
     }
   });
 
+  const [verification, setVerification] = createSignal(false);
+
+  const checkVerification = async (pubkey: string | undefined) => {
+    if(!pubkey) {
+      setVerification(false);
+    }
+
+    const v = await isAccountVerified(profile?.userProfile?.nip05);
+
+    console.log('IS V: ', v, pubkey)
+
+    if (v && v.pubkey === pubkey) {
+      setVerification(true);
+      return;
+    }
+
+    setVerification(false);
+  };
+
+  createEffect(() => {
+    if (profile?.profileKey) {
+      checkVerification(profile?.profileKey)
+    }
+  })
+
   return (
     <>
       <PageTitle title={
@@ -519,7 +544,7 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={profile?.userProfile && !profile?.isFetching}>
+        <Show when={profile?.userProfile && !profile?.isFetching && verification()}>
           <div class={styles.profileVerification}>
             <div class={styles.avatarName}>
               {profileName()}
