@@ -430,8 +430,6 @@ const Profile: Component = () => {
 
     const v = await isAccountVerified(profile?.userProfile?.nip05);
 
-    console.log('IS V: ', v, pubkey)
-
     if (v && v.pubkey === pubkey) {
       setVerification(true);
       return;
@@ -544,11 +542,11 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={profile?.userProfile && !profile?.isFetching && verification()}>
+        <Show when={profile?.userProfile && !profile?.isFetching}>
           <div class={styles.profileVerification}>
             <div class={styles.avatarName}>
               {profileName()}
-              <Show when={profile?.userProfile?.nip05}>
+              <Show when={profile?.userProfile?.nip05 && verification()}>
                 <div class={styles.verifiedIconL}></div>
               </Show>
               <Show when={isFollowingYou()}>
