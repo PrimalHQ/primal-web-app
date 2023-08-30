@@ -925,6 +925,11 @@ export const settings = {
       defaultMessage: 'Primal offers customizable content filtering services. In addition to your own mute list, you may subscribe to other users’ mute lists. Primal runs real time spam detection systems as well as Not-Safe-For-Work content, to which you may also subscribe.',
       description: 'Description of the content filtering settings sub-page',
     },
+    shortDescription: {
+      id: 'settings.filters.shortDescription',
+      defaultMessage: 'Subscribe to a user’s mute list by going to their profile page:',
+      description: 'Short Description of the content filtering settings sub-page',
+    },
     applyFiltering: {
       id: 'settings.filters.applyFiltering',
       defaultMessage: 'Apply Content Filtering',

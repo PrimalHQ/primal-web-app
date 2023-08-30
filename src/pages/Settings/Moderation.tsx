@@ -196,7 +196,7 @@ const Moderation: Component = () => {
       </div>
 
       <div class={styles.moderationDescription}>
-        Specify the filter lists you wish to use below:
+        {intl.formatMessage(t.moderation.shortDescription)}
       </div>
 
       <div class={styles.filterListTable}>
