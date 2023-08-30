@@ -261,8 +261,8 @@ export const today = (new Date()).getTime();
 export const iosRD = (new Date('08/01/2023')).getTime();
 export const iosVersion = '8/01/23';
 
-export const andRD = (new Date('08/23/2023')).getTime();
-export const andVersion = '0.15.1';
+export const andRD = (new Date('08/30/2023')).getTime();
+export const andVersion = '0.15.2';
 
 export const defaultZapAmount = 10;
 
