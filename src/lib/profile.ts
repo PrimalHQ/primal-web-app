@@ -16,14 +16,23 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
   ]));
 }
 
-export const getUserProfileInfo = (pubkey: string | undefined, subid: string) => {
+export const getUserProfileInfo = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string) => {
   if (!pubkey) {
     return;
   }
+
+  let payload: any = {
+    pubkey,
+  };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_profile", { pubkey }]},
+    {cache: ["user_profile", payload]},
   ]));
 }
 

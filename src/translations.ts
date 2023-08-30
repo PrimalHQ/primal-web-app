@@ -97,6 +97,11 @@ export const actions = {
     defaultMessage: 'unmute',
     description: 'Label un-mute button',
   },
+  addToAllowlist: {
+    id: 'actions.addToAllowlist',
+    defaultMessage: 'Add to allowlist',
+    description: 'Label add-to-allowlist button',
+  },
   addRelay: {
     id: 'actions.addRelay',
     defaultMessage: 'add',
@@ -826,6 +831,11 @@ export const profile = {
     id: 'profile.isMuted',
     defaultMessage: '{name} is muted',
     description: 'Label indicating that the profile is muted',
+  },
+  isFiltered: {
+    id: 'profile.isFiltered',
+    defaultMessage: 'This account is hidden per your filter settings.',
+    description: 'Label indicating that the profile is filtered',
   },
 };
 

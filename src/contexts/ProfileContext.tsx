@@ -64,6 +64,7 @@ export type ProfileContextStore = {
   lastNote: PrimalNote | undefined,
   following: string[],
   sidebar: FeedPage & { notes: PrimalNote[] },
+  filterReason: { action: 'block' | 'allow', pubkey?: string, group?: string } | null,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -96,6 +97,7 @@ export const initialData = {
   reposts: {},
   lastNote: undefined,
   following: [],
+  filterReason: null,
   sidebar: {
     messages: [],
     users: {},
@@ -402,9 +404,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('profileKey', () => profileKey);
 
     if (profileKey) {
+      updateStore('filterReason', () => null);
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
-      getUserProfileInfo(profileKey, `profile_info_${APP_ID}`);
+      getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
@@ -444,6 +447,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
 
     if (subId === `profile_info_${APP_ID}`) {
+      if (content?.kind === Kind.FilteringReason) {
+        const reason:  { action: 'block' | 'allow', pubkey?: string, group?: string } | null =
+          JSON.parse(content.content) || null;
+
+        if (reason?.action === 'block') {
+          updateStore('filterReason', () => ({ ...reason }));
+        }
+      }
 
       if (content?.kind === Kind.Metadata) {
         let user = JSON.parse(content.content);

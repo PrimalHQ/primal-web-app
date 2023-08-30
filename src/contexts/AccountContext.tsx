@@ -71,7 +71,7 @@ export type AccountContextStore = {
     addFilterList: (pubkey: string | undefined) => void,
     removeFilterList: (pubkey: string | undefined) => void,
     updateFilterList: (pubkey: string | undefined, content?: boolean, trending?: boolean) => void,
-    addToAllowlist: (pubkey: string | undefined) => void,
+    addToAllowlist: (pubkey: string | undefined, then?: () => void) => void,
     removeFromAllowlist: (pubkey: string | undefined) => void,
   },
 }
@@ -881,7 +881,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     getAllowlist(pubkey, subId);
   };
 
-  const addToAllowlist = async (pubkey: string | undefined) => {
+  const addToAllowlist = async (pubkey: string | undefined, then?: () => void) => {
     if (!pubkey) {
       return;
     }
@@ -903,9 +903,9 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
-          return;
         }
 
+        then && then();
         unsub();
         return;
       }

@@ -6,8 +6,10 @@ import {
   createMemo,
   createSignal,
   For,
+  Match,
   Resource,
-  Show
+  Show,
+  Switch
 } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
 import Branding from '../components/Branding/Branding';
@@ -197,10 +199,8 @@ const Profile: Component = () => {
       return;
     }
 
-    if (!isMuted(pk)) {
-      setTimeout(() => {
-        profile?.actions.fetchNotes(pk);
-      }, 500);
+    if (!isMuted(pk) && account?.isKeyLookupDone) {
+      profile?.actions.fetchNotes(pk);
     }
   });
 
@@ -222,6 +222,10 @@ const Profile: Component = () => {
     return pk &&
       account?.muted.includes(pk) &&
       (ignoreContentCheck ? true : isContentMuted);
+  };
+
+  const isFiltered = () => {
+    return profile?.filterReason !== null;
   };
 
   const unMuteProfile = () => {
@@ -374,6 +378,14 @@ const Profile: Component = () => {
     reportUser(pk, `report_user_${APP_ID}`, profile?.userProfile);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
+  };
+
+
+  const addToAllowlist = async () => {
+    const pk = getHex();
+    if (pk) {
+      account?.actions.addToAllowlist(pk, () => { setProfile(pk) });
+    }
   };
 
   const copyProfileLink = () => {
@@ -598,9 +610,13 @@ const Profile: Component = () => {
       </div>
 
       <div class={styles.userFeed}>
-        <Show
-          when={!isMuted(profile?.profileKey)}
+        <Switch
           fallback={
+            <div style="margin-top: 40px;">
+              <Loader />
+            </div>
+        }>
+          <Match when={isMuted(profile?.profileKey)}>
             <div class={styles.mutedProfile}>
               {intl.formatMessage(
                 t.isMuted,
@@ -612,24 +628,26 @@ const Profile: Component = () => {
                 {intl.formatMessage(tActions.unmute)}
               </button>
             </div>
-          }
-        >
-          <Show
-            when={profile && profile.notes.length > 0}
-            fallback={
-              <div style="margin-top: 40px;">
-                <Loader />
-              </div>}
-          >
+          </Match>
+          <Match when={isFiltered()}>
+            <div class={styles.mutedProfile}>
+              {intl.formatMessage(t.isFiltered)}
+              <button
+                onClick={addToAllowlist}
+              >
+                {intl.formatMessage(tActions.addToAllowlist)}
+              </button>
+            </div>
+          </Match>
+          <Match when={profile && profile.notes.length > 0}>
             <For each={profile?.notes}>
               {note => (
                 <Note note={note} />
               )}
             </For>
             <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
-          </Show>
-        </Show>
-
+          </Match>
+        </Switch>
       </div>
 
       <ConfirmModal

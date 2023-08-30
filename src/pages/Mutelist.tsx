@@ -91,7 +91,7 @@ const Mutelist: Component = () => {
       }
     });
 
-    getUserProfileInfo(pubkey, subId);
+    getUserProfileInfo(pubkey, undefined, subId);
   };
 
   const user = (pubkey: string) => mutedUsers[pubkey];
