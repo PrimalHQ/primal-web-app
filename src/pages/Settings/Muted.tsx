@@ -14,32 +14,40 @@ import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../../components/Avatar/Avatar';
+import { hexToNpub } from '../../lib/keys';
 
 const Muted: Component = () => {
 
   const intl = useIntl();
   const account = useAccountContext();
 
-  const [mutedUsers, setMutedUsers] = createStore<PrimalUser[]>([]);
+  const [mutedUsers, setMutedUsers] = createStore<Record<string,PrimalUser>>({});
 
   const mutedMetadataSubId = `muted_metadata_${APP_ID}`;
 
   const [isFetching, setIsFetching] = createSignal(true);
 
+  const user = (pubkey: string) => mutedUsers[pubkey];
+
   createEffect(() => {
     if (account && account.isKeyLookupDone) {
 
-      let users: PrimalUser[] = [];
+      let pubkeys: string[] = [];
+      let users: Record<string, PrimalUser> = {};
 
-      const unsub = subscribeTo(mutedMetadataSubId, (type, subId, content) => {
+      const unsub = subscribeTo(mutedMetadataSubId, (type, subId, response) => {
         if (type === 'EVENT') {
-          if (content?.kind === Kind.Metadata) {
-            users.push(convertToUser(content));
+          if (response && [Kind.MuteList].includes(response?.kind || 0)) {
+            // @ts-ignore
+            pubkeys = response.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+          }
+          if (response?.kind === Kind.Metadata) {
+            users[response.pubkey] = convertToUser(response);
           }
         }
 
         if (type === 'EOSE') {
-          setMutedUsers(() => [ ...users ]);
+          setMutedUsers(() => ({ ...users }));
           setIsFetching(false);
           unsub();
         }
@@ -62,7 +70,7 @@ const Muted: Component = () => {
 
       <div>
         <For
-          each={mutedUsers}
+          each={account?.muted}
           fallback={
             <Show when={!isFetching()}>
               <div class={styles.emptyListBanner}>
@@ -71,18 +79,34 @@ const Muted: Component = () => {
             </Show>
           }
         >
-          {user => (
+          {pubkey => (
             <div class={styles.mutedUser}>
-              <A class={styles.userInfo} href={`/p/${user.npub}`}>
-                <Avatar src={user.picture} size='sm' />
-                <div class={styles.userName}>
-                  <div class={styles.title}>{userName(user)}</div>
-                  <div class={styles.verification}>{nip05Verification(user)}</div>
-                </div>
-              </A>
-              <button onClick={() => unMuteUser(user)}>
-                {intl.formatMessage(tActions.unmute)}
-              </button>
+              <Show
+                when={user(pubkey)}
+                fallback={
+                  <>
+                    <Link class={styles.userInfo} href={`/p/${hexToNpub(pubkey)}`}>
+                      <div class={styles.userName}>
+                        <div class={styles.verification}>{hexToNpub(pubkey)}</div>
+                      </div>
+                    </Link>
+                    <button onClick={() => unMuteUser(user(pubkey))}>
+                      {intl.formatMessage(tActions.unmute)}
+                    </button>
+                  </>
+                }
+              >
+                <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
+                  <Avatar src={user(pubkey).picture} size='sm' />
+                  <div class={styles.userName}>
+                    <div class={styles.title}>{userName(user(pubkey))}</div>
+                    <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
+                  </div>
+                </Link>
+                <button onClick={() => unMuteUser(user(pubkey))}>
+                  {intl.formatMessage(tActions.unmute)}
+                </button>
+              </Show>
             </div>
           )}
         </For>
