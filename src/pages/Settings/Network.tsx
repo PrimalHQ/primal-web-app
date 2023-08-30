@@ -15,24 +15,20 @@ import { Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getDefaultRelays } from '../../lib/relays';
 import { APP_ID } from '../../App';
-import { cacheServer, cacheServerList, connectToDefault, isConnected as isSocketConnected, setCacheServerList, socket, subscribeTo } from '../../sockets';
+import { isConnected as isSocketConnected, socket, subscribeTo } from '../../sockets';
 import { createStore } from 'solid-js/store';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 
 
 const Network: Component = () => {
 
   const intl = useIntl();
   const account = useAccountContext();
-  const settings = useSettingsContext();
 
   const [recomendedRelays, setRecomendedRelays] = createStore<Relay[]>([]);
   const [confirmRemoveRelay, setConfirmRemoveRelay] = createSignal('');
-  const [confirmRemoveCacheService, setConfirmRemoveCacheService] = createSignal('');
-  const [tryToRemoveLastCachingService, setTryToRemoveLastCachingService] = createSignal(false);
   const [invalidCustomRelay, setInvalidCustomRelay] = createSignal(false);
   const [invalidCachingService, setInvalidCachingService] = createSignal(false);
 
@@ -73,13 +69,9 @@ const Network: Component = () => {
     return unusedRelays;
   }
 
-  const isRelayConnected = (url: string) => {
+  const isConnected = (url: string) => {
     const relay: Relay | undefined = account?.relays.find(r => r.url === url);
     return relay && relay.status === WebSocket.OPEN;
-  };
-
-  const isCachingServiceConnected = (url: string) => {
-    return isSocketConnected() && cacheServer === url;
   };
 
   const isPrimalRelayInUserSettings = () => {
@@ -141,38 +133,19 @@ const Network: Component = () => {
     }
   }
 
-  const onRestoreCachingService = () => {
-    connectToDefault();
-
-    setTimeout(() => {
-      settings?.actions.saveCachingServiceList();
-    }, 300);
-  };
-
-  const onRemoveCacheService = (url: string) => {
-    setCacheServerList(list => list.filter(cs => cs !== url));
-
-    settings?.actions.saveCachingServiceList();
-  };
-
   const onCachingServiceInput = () => {
+    if (!cachingServiceInput || cachingServiceInput.value === '') {
+      return;
+    }
+
     try {
-      if (!cachingServiceInput || cachingServiceInput.value === '') {
-        return;
-      }
-
-      const value = cachingServiceInput.value;
-
-      const url = new URL(value);
-
+      const url = new URL(cachingServiceInput.value);
       if (!url.origin.startsWith('wss://') && !url.origin.startsWith('ws://')) {
         throw(new Error('must be a wss'))
       }
 
-      setCacheServerList(list => [...list, value]);
-      settings?.actions.saveCachingServiceList();
       cachingServiceInput.value = '';
-      // account?.actions.changeCachingService(url.href);
+      account?.actions.changeCachingService(url.href);
       setInvalidCachingService(false);
     } catch (e) {
       console.log('invalid url', e);
@@ -219,7 +192,7 @@ const Network: Component = () => {
             <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay.url)}>
               <div class={styles.relayEntry}>
                 <Show
-                  when={isRelayConnected(relay.url)}
+                  when={isConnected(relay.url)}
                   fallback={<div class={styles.disconnected}></div>}
                 >
                   <div class={styles.connected}></div>
@@ -229,13 +202,12 @@ const Network: Component = () => {
                   {relay.url}
                 </span>
               </div>
-              <div class={styles.remove}>
-                <div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}
-              </div>
+              <div class={styles.remove}><div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}</div>
             </button>
           )}
         </For>
       </Show>
+
 
       <Show when={!isPrimalRelayInUserSettings()}>
         <Checkbox
@@ -309,35 +281,21 @@ const Network: Component = () => {
         </div>
       </div>
 
+      <div class={styles.relayItem}>
+        <div class={styles.relayEntry}>
+          <Show
+            when={isSocketConnected()}
+            fallback={<div class={styles.disconnected}></div>}
+          >
+            <div class={styles.connected}></div>
+          </Show>
+          <div class={styles.webIcon}></div>
+          <span>
+            {socket()?.url}
+          </span>
+        </div>
+      </div>
 
-      <For each={cacheServerList}>
-        {cs => (
-          <button class={styles.relayItem} onClick={() => {
-            if (cacheServerList.length === 1) {
-              setTryToRemoveLastCachingService(true);
-              return;
-            }
-
-            setConfirmRemoveCacheService(cs)
-          }}>
-            <div class={styles.relayEntry}>
-              <Show
-                when={isCachingServiceConnected(cs)}
-                fallback={<div class={styles.inactive}></div>}
-              >
-                <div class={styles.connected}></div>
-              </Show>
-              <div class={styles.webIcon}></div>
-              <span class={styles.relayUrl} title={cs}>
-                {cs}
-              </span>
-            </div>
-            <div class={styles.remove}>
-              <div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}
-            </div>
-          </button>
-        )}
-      </For>
 
       <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
         {intl.formatMessage(t.network.alternativeCachingService)}
@@ -368,7 +326,7 @@ const Network: Component = () => {
 
       <button
         class={styles.restoreFeedsButton}
-        onClick={onRestoreCachingService}
+        onClick={() => account?.actions.changeCachingService()}
       >
         {intl.formatMessage(tActions.restoreCachingService)}
       </button>
@@ -386,42 +344,6 @@ const Network: Component = () => {
           setConfirmRemoveRelay('');
         }}
         onAbort={() => setConfirmRemoveRelay('')}
-      />
-
-      <ConfirmModal
-        open={confirmRemoveCacheService().length > 0}
-        description={intl.formatMessage(tActions.confirmRemoveCacheService, {
-          url: confirmRemoveCacheService(),
-          b: interpretBold,
-        }) as string}
-        onConfirm={() => {
-          onRemoveCacheService(confirmRemoveCacheService())
-          setConfirmRemoveCacheService('');
-        }}
-        onAbort={() => setConfirmRemoveCacheService('')}
-      />
-
-      <ConfirmModal
-        open={confirmRemoveCacheService().length > 0}
-        description={intl.formatMessage(tActions.confirmRemoveCacheService, {
-          url: confirmRemoveCacheService(),
-          b: interpretBold,
-        }) as string}
-        onConfirm={() => {
-          onRemoveCacheService(confirmRemoveCacheService())
-          setConfirmRemoveCacheService('');
-        }}
-        onAbort={() => setConfirmRemoveCacheService('')}
-      />
-
-      <ConfirmModal
-        open={tryToRemoveLastCachingService()}
-        description={intl.formatMessage(tPlaceholders.mustHaveOneCachingService)}
-        title="Primal requires one caching service"
-        confirmLabel="OK"
-        onConfirm={() => {
-          setTryToRemoveLastCachingService(false);
-        }}
       />
     </div>
   )

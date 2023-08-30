@@ -112,11 +112,6 @@ export const actions = {
     defaultMessage: 'Remove <b>{url}</b> from your relay list? This will disconnect you from the relay.',
     description: 'Label for remove relay confirmation',
   },
-  confirmRemoveCacheService: {
-    id: 'actions.confirmRemoveCacheService',
-    defaultMessage: 'Remove <b>{url}</b> from your cache services list? This will disconnect you from this caching service, if connected.',
-    description: 'Label for remove caching service confirmation',
-  },
   restoreCachingService: {
     id: 'actions.restoreCachingService',
     defaultMessage: 'Restore default caching service',
@@ -934,17 +929,17 @@ export const settings = {
     },
     cachingService: {
       id: 'settings.network.cachingService',
-      defaultMessage: 'Caching Services',
+      defaultMessage: 'Caching Service',
       description: 'Title of the caching service section of the network settings sub-page',
     },
     connectedCachingService: {
       id: 'settings.network.connectedCachingService',
-      defaultMessage: 'Caching service pool',
+      defaultMessage: 'Connected caching service',
       description: 'Title of the caching service section of the network settings sub-page',
     },
     alternativeCachingService: {
       id: 'settings.network.alternativeCachingService',
-      defaultMessage: 'Add a caching service url to the pool',
+      defaultMessage: 'Connect to a different caching service',
       description: 'Title of the alternative caching service section of the Network settings sub-page',
     },
   },
