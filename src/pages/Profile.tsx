@@ -515,7 +515,6 @@ const Profile: Component = () => {
             <div class={styles.verificationInfo}>
               <Show when={profile?.userProfile?.nip05}>
                 <div class={styles.verified}>
-                  <div class={styles.verifiedIconS}></div>
                   <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
                 </div>
               </Show>

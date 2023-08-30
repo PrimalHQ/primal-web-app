@@ -245,8 +245,7 @@
       max-width: 50%;
       align-items: center;
       .nip05 {
-        margin-left: 6px;
-        width: calc(100% - 6px);
+        width: 100%;
         overflow: hidden;
       }
     }
