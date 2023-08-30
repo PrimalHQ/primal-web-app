@@ -297,6 +297,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           updateStore('defaultFeed', () => store.availableFeeds[0]);
 
           updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
+          updateStore('applyContentModeration', () => true);
 
           const defaultZaps = settings.defaultZapAmount || 10;
 
@@ -365,7 +366,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             updateStore('notificationSettings', () => ({ ...defaultNotificationSettings}));
           }
 
-          updateStore('applyContentModeration', () => applyContentModeration);
+          updateStore('applyContentModeration', () => applyContentModeration === false ? false : true);
 
           if (Array.isArray(contentModeration) && contentModeration.length === 0) {
             updateStore('contentModeration', () => [...defaultContentModeration]);
