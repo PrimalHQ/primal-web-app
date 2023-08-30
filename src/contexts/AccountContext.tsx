@@ -22,7 +22,7 @@ import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
-import { Relay } from "nostr-tools";
+import { generatePrivateKey, Relay } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
 import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
@@ -631,7 +631,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   const updateFilterlists = (mutelists: NostrMutedContent) => {
 
-    let filterlists: Filterlist[] = [];
+    let filterlists: Filterlist[] = [...store.mutelists];
     const since = mutelists.created_at;
     const tags = mutelists.tags;
 
@@ -684,7 +684,8 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
-    const subId = `filterlists_${APP_ID}`;
+    const random = generatePrivateKey();
+    const subId = `fl_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [];
 
 
@@ -712,9 +713,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
+    const random = generatePrivateKey();
+    const subId = `bma_${random}_${APP_ID}`;
+
     let filterlists: Filterlist[] = [];
 
-    const unsub = subscribeTo(`before_mutelists_add_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
         updateStore('mutelists', () => [...filterlists]);
 
@@ -729,8 +733,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
 
         if (success) {
-          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`)
-          return;
+          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
         }
 
         unsub();
@@ -742,11 +745,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         content.created_at &&
         content.created_at > store.mutelistSince
       ) {
-        filterlists = updateFilterlists(content);
+        filterlists = [...updateFilterlists(content)];
       }
     });
 
-    getFilterlists(store.publicKey, `before_mutelists_add_${APP_ID}`);
+    getFilterlists(store.publicKey, subId);
 
   };
 
@@ -755,9 +758,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       return;
     }
 
+    const random = generatePrivateKey();
+    const subId = `bmr_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [];
 
-    const unsub = subscribeTo(`before_mutelists_remove_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
         updateStore('mutelists', () => [...filterlists]);
 
@@ -769,8 +774,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
         const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
 
         if (success) {
-          note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`)
-          return;
+          note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
         }
 
         unsub();
@@ -786,15 +790,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
     });
 
-    getFilterlists(store.publicKey, `before_mutelists_remove_${APP_ID}`);
+    getFilterlists(store.publicKey, subId);
   };
 
   const updateFilterList = async (pubkey: string | undefined, content = true, trending = true) => {
     if (!pubkey) {
       return;
     }
+    const random = generatePrivateKey();
+    const subId = `bmu_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(`before_mutelists_update_${APP_ID}`, async (type, subId, c) => {
+    const unsub = subscribeTo(subId, async (type, subId, c) => {
       if (type === 'EOSE') {
 
         if (!store.mutelists.find(m => m.pubkey === pubkey)) {
@@ -828,7 +834,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
     });
 
-    getFilterlists(store.publicKey, `before_mutelists_update_${APP_ID}`);
+    getFilterlists(store.publicKey, subId);
 
   };
 
@@ -879,8 +885,10 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (!pubkey) {
       return;
     }
+    const random = generatePrivateKey();
+    const subId = `baa_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(`before_allowlist_add_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
 
         if (store.allowlist.includes(pubkey)) {
@@ -911,7 +919,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
     });
 
-    getAllowlist(store.publicKey, `before_allowlist_add_${APP_ID}`);
+    getAllowlist(store.publicKey, subId);
 
   };
 
@@ -919,8 +927,10 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     if (!pubkey) {
       return;
     }
+    const random = generatePrivateKey();
+    const subId = `bar_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(`before_allowlist_remove_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
 
         if (!store.allowlist.includes(pubkey)) {
@@ -952,7 +962,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
       }
     });
 
-    getAllowlist(store.publicKey, `before_allowlist_remove_${APP_ID}`);
+    getAllowlist(store.publicKey, subId);
 
   };
 
