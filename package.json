@@ -1,10 +1,6 @@
 {
   "name": "primal-web-app",
-<<<<<<< HEAD
-  "version": "0.77.8",
-=======
-  "version": "0.77.12",
->>>>>>> 3809393 (Nip05 verification on profile page)
+  "version": "0.77.13",
   "description": "",
   "scripts": {
     "start": "vite",
