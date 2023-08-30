@@ -5,7 +5,7 @@ import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import PageCaption from '../components/PageCaption/PageCaption';
 import { algoNpub, Kind, specialAlgos } from '../constants';
-import { npubToHex } from '../lib/keys';
+import { hexToNpub, npubToHex } from '../lib/keys';
 import { getCategorizedList, getFilterlists, getProfileMuteList, getUserProfileInfo, getUserProfiles } from '../lib/profile';
 import { subscribeTo } from '../sockets';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
@@ -30,7 +30,8 @@ const Mutelist: Component = () => {
   const intl = useIntl();
   const toast = useToastContext();
 
-  const [mutedUsers, setMutedUsers] = createStore<PrimalUser[]>([]);
+  const [mutedUsers, setMutedUsers] = createStore<Record<string,PrimalUser>>({});
+  const [mutedPubkeys, setMutedPubkeys] = createStore<string[]>([]);
   const [author, setAuthor] = createSignal<PrimalUser>();
 
   const [isFetching, setIsFetching] = createSignal(true);
@@ -40,17 +41,23 @@ const Mutelist: Component = () => {
     const pubkey = npub.startsWith('npub') ? npubToHex(npub) : npub;
     const random = Math.floor(Math.random() * 10_000);
     const subId = `prl_${random}_${APP_ID}`;
-    let users: PrimalUser[] = [];
+    let pubkeys: string[] = [];
+    let users: Record<string, PrimalUser> = {};
 
     const unsub = subscribeTo(subId, (type, _, response) => {
       if (type === 'EVENT') {
+        if (response && [Kind.CategorizedPeople, Kind.MuteList].includes(response?.kind || 0)) {
+          // @ts-ignore
+          pubkeys = response.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+        }
         if (response?.kind === Kind.Metadata) {
-          users.push(convertToUser(response));
+          users[response.pubkey] = convertToUser(response);
         }
       }
 
       if (type === 'EOSE') {
-        setMutedUsers(() => [ ...users ]);
+        setMutedPubkeys(() => [...pubkeys]);
+        setMutedUsers(() => ({ ...users }));
         setIsFetching(false);
         unsub();
       }
@@ -86,6 +93,8 @@ const Mutelist: Component = () => {
 
     getUserProfileInfo(pubkey, subId);
   };
+
+  const user = (pubkey: string) => mutedUsers[pubkey];
 
   createEffect(() => {
     if (params.npub) {
@@ -134,7 +143,7 @@ const Mutelist: Component = () => {
 
       <div>
         <For
-          each={mutedUsers}
+          each={mutedPubkeys}
           fallback={
             <Show when={!isFetching()}>
               <div class={styles.emptyListBanner}>
@@ -143,15 +152,26 @@ const Mutelist: Component = () => {
             </Show>
           }
         >
-          {user => (
+          {pubkey => (
             <div class={styles.mutedUser}>
-              <Link class={styles.userInfo} href={`/p/${user.npub}`}>
-                <Avatar src={user.picture} size='sm' />
-                <div class={styles.userName}>
-                  <div class={styles.title}>{userName(user)}</div>
-                  <div class={styles.verification}>{nip05Verification(user)}</div>
-                </div>
-              </Link>
+              <Show
+                when={user(pubkey)}
+                fallback={
+                  <Link class={styles.userInfo} href={`/p/${hexToNpub(pubkey)}`}>
+                    <div class={styles.userName}>
+                      <div class={styles.verification}>{hexToNpub(pubkey)}</div>
+                    </div>
+                  </Link>
+                }
+              >
+                <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
+                  <Avatar src={user(pubkey).picture} size='sm' />
+                  <div class={styles.userName}>
+                    <div class={styles.title}>{userName(user(pubkey))}</div>
+                    <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
+                  </div>
+                </Link>
+              </Show>
             </div>
           )}
         </For>
