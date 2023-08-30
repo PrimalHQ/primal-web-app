@@ -716,7 +716,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     const random = generatePrivateKey();
     const subId = `bma_${random}_${APP_ID}`;
 
-    let filterlists: Filterlist[] = [];
+    let filterlists: Filterlist[] = [...store.mutelists];
 
     const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -760,7 +760,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
     const random = generatePrivateKey();
     const subId = `bmr_${random}_${APP_ID}`;
-    let filterlists: Filterlist[] = [];
+    let filterlists: Filterlist[] = [...store.mutelists];
 
     const unsub = subscribeTo(subId, async (type, subId, content) => {
       if (type === 'EOSE') {
