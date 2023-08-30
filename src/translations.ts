@@ -963,12 +963,12 @@ export const settings = {
       },
       trending: {
         id: 'settings.contentModeration.table.trending',
-        defaultMessage: 'Don\’t Recommend',
+        defaultMessage: 'Don\'t Recommend',
         description: 'Caption for trending column on moderation settings page',
       },
       trendingHelp: {
         id: 'settings.contentModeration.table.trendingHelp',
-        defaultMessage: 'Content won\’t be recommended in trending and most-zapped feeds',
+        defaultMessage: 'Content won\'t be recommended in trending and most-zapped feeds',
         description: 'Help description for trending filter',
       },
       contentHelp: {
@@ -1005,6 +1005,11 @@ export const settings = {
       id: 'settings.muted.empty',
       defaultMessage: 'No muted users',
       description: 'Caption indicating that there are no muted users',
+    },
+    emptyOther: {
+      id: 'settings.muted.emptyOther',
+      defaultMessage: 'This user didn\'t mute anyone or they use a non-standard mute list',
+      description: 'Caption indicating that there are no muted users on someone else\'s list',
     },
   },
   network: {

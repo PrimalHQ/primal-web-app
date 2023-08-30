@@ -147,7 +147,7 @@ const Mutelist: Component = () => {
           fallback={
             <Show when={!isFetching()}>
               <div class={styles.emptyListBanner}>
-                {intl.formatMessage(t.muted.empty)}
+                {intl.formatMessage(t.muted.emptyOther)}
               </div>
             </Show>
           }
