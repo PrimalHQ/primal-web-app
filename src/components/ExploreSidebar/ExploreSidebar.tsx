@@ -112,7 +112,7 @@ const ExploreSidebar: Component = () => {
         scores: {},
       }));
 
-      getTrendingUsers(`explore_sidebar_${APP_ID}`, account?.publicKey);
+      account?.isKeyLookupDone && getTrendingUsers(`explore_sidebar_${APP_ID}`, account?.publicKey);
 		}
 	});
 

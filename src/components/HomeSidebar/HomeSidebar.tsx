@@ -84,8 +84,10 @@ const HomeSidebar: Component = () => {
         },
       }));
 
-      getTrending24h(account?.publicKey, `sidebar_trending_${APP_ID}`);
-      getMostZapped4h(account?.publicKey, `sidebar_zapped_${APP_ID}`);
+      if (account?.isKeyLookupDone) {
+        getTrending24h(account?.publicKey, `sidebar_trending_${APP_ID}`);
+        getMostZapped4h(account?.publicKey, `sidebar_zapped_${APP_ID}`);
+      }
 		}
 	});
 
