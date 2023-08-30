@@ -131,7 +131,7 @@ const Mutelist: Component = () => {
           <button
             class={styles.clearButton}
             onClick={() => {
-              window.navigator.clipboard.writeText(mutedUsers.map(u => u.npub).join());
+              window.navigator.clipboard.writeText(mutedPubkeys.map(hexToNpub).join());
               toast?.sendSuccess('Mute list copied to clipboard')
             }}
             title="copy mutelist to clipboard"
