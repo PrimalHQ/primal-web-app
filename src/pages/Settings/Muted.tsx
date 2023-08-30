@@ -27,7 +27,7 @@ const Muted: Component = () => {
 
   const [isFetching, setIsFetching] = createSignal(true);
 
-  const user = (pubkey: string) => mutedUsers[pubkey];
+  const user = (pubkey: string) => mutedUsers[pubkey] || { pubkey, npub: hexToNpub(pubkey) };
 
   createEffect(() => {
     if (account && account.isKeyLookupDone) {

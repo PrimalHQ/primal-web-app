@@ -96,7 +96,7 @@ export const nip05Verification = (user: PrimalUser | undefined) => {
     return '';
   }
 
-  if (user.nip05.startsWith('_@')) {
+  if (user.nip05?.startsWith('_@')) {
     return user.nip05.slice(2);
   }
 
