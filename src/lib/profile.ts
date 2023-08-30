@@ -1,5 +1,5 @@
 // @ts-ignore Bad types in nostr-tools
-import { Relay, Event } from "nostr-tools";
+import { Relay, Event, nip05, nip19 } from "nostr-tools";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
@@ -151,6 +151,18 @@ export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles>
     console.log('Failed to fetch known users: ', e);
 
     return { ...minKnownProfiles };
+  }
+};
+
+export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {
+  try {
+    const profile = await nip05.queryProfile(domain);
+
+    return profile || null;
+  } catch (e) {
+    console.log('Failed to nip05 verify user: ', e);
+
+    return null;
   }
 };
 
