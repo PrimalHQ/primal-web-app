@@ -188,10 +188,15 @@ const Moderation: Component = () => {
           checked={settings?.applyContentModeration}
         />
         <span>{intl.formatMessage(t.moderation.applyFiltering)}</span>
+        <HelpTip zIndex={1_000}>
+          <span>
+            {intl.formatMessage(t.moderation.description)}
+          </span>
+        </HelpTip>
       </div>
 
       <div class={styles.moderationDescription}>
-        {intl.formatMessage(t.moderation.description)}
+        Specify the filter lists you wish to use below:
       </div>
 
       <div class={styles.filterListTable}>
