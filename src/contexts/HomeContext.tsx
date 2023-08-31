@@ -136,8 +136,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     clearFuture();
 
-
     if (scope && timeframe) {
+      if (timeframe !== 'latest') {
+        return;
+      }
+
       getFutureExploreFeed(
         account?.publicKey,
         `home_future_${APP_ID}`,

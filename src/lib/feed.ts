@@ -9,7 +9,7 @@ export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string | 
   }
 
   let payload: { since: number, pubkey: string, user_pubkey?: string, limit: number } =
-    { since, pubkey, limit: 1000 };
+    { since, pubkey, limit: 100 };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
@@ -93,7 +93,7 @@ export const getFutureUserFeed = (
   }
 
   let payload: { pubkey: string, since: number, notes: string, user_pubkey?: string, created_after?: number, limit: number } =
-    { pubkey, since, notes: 'authored', limit: 1000, };
+    { pubkey, since, notes: 'authored', limit: 100, };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
@@ -147,7 +147,7 @@ export const getFutureExploreFeed = (
   ) => {
 
   let payload: { timeframe: string, scope: string, since: number, user_pubkey?: string, created_after?: number, limit: number } =
-    { timeframe, scope, since, limit: 1000, };
+    { timeframe, scope, since, limit: 100, };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
