@@ -9,6 +9,7 @@ const Checkbox: Component<{
   label?: string,
   icon?: string,
   children?: JSXElement,
+  disabled?: boolean,
 }> = (props) => {
 
   return (
@@ -18,6 +19,7 @@ const Checkbox: Component<{
         type='checkbox'
         checked={props.checked}
         onChange={props.onChange}
+        disabled={props.disabled}
       />
       <Show when={props.icon}>
         <img src={props.icon} />

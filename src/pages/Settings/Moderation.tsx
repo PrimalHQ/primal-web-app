@@ -240,6 +240,7 @@ const Moderation: Component = () => {
                 id={`${my()?.pubkey}_content`}
                 onChange={() => account?.actions.updateFilterList(my()?.pubkey, !my()?.content, my()?.trending)}
                 checked={my()?.content}
+                disabled={true}
               />
             </div>
             <div class={styles.filterListCheck}>
@@ -247,6 +248,7 @@ const Moderation: Component = () => {
                 id={`${my()?.pubkey}_trending`}
                 onChange={() => account?.actions.updateFilterList(my()?.pubkey, my()?.content, !my()?.trending)}
                 checked={my()?.trending}
+                disabled={true}
               />
             </div>
           </div>
