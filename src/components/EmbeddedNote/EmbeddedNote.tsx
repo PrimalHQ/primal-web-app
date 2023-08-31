@@ -12,6 +12,7 @@ import { note as t } from '../../translations';
 import { PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import { parseNoteLinks, parseNpubLinks } from '../ParsedNote/ParsedNote';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
 
@@ -148,7 +149,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
               <span class={styles.userName}>
                 {verification()[0]}
               </span>
-              <span class={styles.verifiedIcon} />
+              <VerificationCheck user={props.note.user} />
               <span
                 class={styles.verifiedBy}
                 title={props.note.user.nip05}
