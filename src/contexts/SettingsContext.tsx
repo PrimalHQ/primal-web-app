@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, themes, trendingFeed, trendingScope } from "../constants";
+import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -294,7 +294,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             () => replaceAvailableFeeds(account?.publicKey, feeds),
           );
 
-          updateStore('defaultFeed', () => store.availableFeeds[0]);
+          updateStore('defaultFeed', () => store.availableFeeds.find(x => x.hex === nostrHighlights) || store.availableFeeds[0]);
 
           updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
           updateStore('applyContentModeration', () => true);
