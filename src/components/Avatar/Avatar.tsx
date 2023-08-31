@@ -2,14 +2,15 @@ import { Component, createMemo, createSignal, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_nostrich.svg';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { getMediaUrl } from '../../lib/media';
-import { MediaSize } from '../../types/primal';
+import { MediaSize, PrimalUser } from '../../types/primal';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src: string | undefined,
   size?: "xxs" | "xss" | "xs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
-  verified?: string,
+  user?: PrimalUser,
   highlightBorder?: boolean,
 }> = (props) => {
 
@@ -109,9 +110,9 @@ const Avatar: Component<{
           <img src={imageSrc()} alt="avatar" onerror={imgError}/>
         </div>
       </Show>
-      <Show when={props.verified}>
+      <Show when={props.user}>
         <div class={styles.iconBackground}>
-          <div class={styles.verifiedIcon}></div>
+          <VerificationCheck user={props.user} />
         </div>
       </Show>
     </div>

@@ -89,7 +89,7 @@ const ReplyToNote: Component<{ note: PrimalNote, onNotePosted?: (note: SendNoteR
             <Avatar
               src={activeUser()?.picture}
               size="md"
-              verified={activeUser()?.nip05}
+              user={activeUser()}
             />
           </div>
           <div class={styles.rightSideClosed}>
@@ -117,7 +117,7 @@ const ReplyToNote: Component<{ note: PrimalNote, onNotePosted?: (note: SendNoteR
             <Avatar
               src={activeUser()?.picture}
               size="md"
-              verified={activeUser()?.nip05}
+              user={activeUser()}
             />
           </div>
           <div class={styles.rightSide}>

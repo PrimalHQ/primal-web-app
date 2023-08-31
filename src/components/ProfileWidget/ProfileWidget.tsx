@@ -21,7 +21,7 @@ const ProfileWidget: Component = () => {
             <Avatar
               size="vs"
               src={activeUser()?.picture}
-              verified={activeUser()?.nip05}
+              user={activeUser()}
             />
           </div>
           <div class={styles.userInfo}>

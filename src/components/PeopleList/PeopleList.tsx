@@ -23,7 +23,7 @@ const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) =>
                   <Avatar
                     src={person?.picture}
                     size="md"
-                    verified={person?.nip05}
+                    user={person}
                   />
                 </div>
                 <div class={styles.content}>

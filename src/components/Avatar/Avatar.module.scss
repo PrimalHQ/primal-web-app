@@ -31,7 +31,6 @@
   bottom: 0px;
   width: 15px;
   height: 15px;
-  background-color: var(--background-site);
   border-radius: 50%;
 }
 
@@ -98,8 +97,6 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: 0px;
-    right: 0px;
   }
 }
 
@@ -115,8 +112,6 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: 0px;
-    right: 0px;
   }
 }
 
@@ -132,8 +127,6 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: 0px;
-    right: 0px;
   }
 }
 

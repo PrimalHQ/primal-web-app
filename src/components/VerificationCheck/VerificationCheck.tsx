@@ -32,7 +32,13 @@ const VerificationCheck: Component<{ user: PrimalUser | undefined }> = (props) =
   })
 
   return (
-    <Show when={isVerified()}>
+    <Show
+      when={isVerified()}
+      fallback={
+        <div class={styles.verificationIcon}>
+        </div>
+      }
+    >
       <Show
         when={isVerifiedByPrimal()}
         fallback={

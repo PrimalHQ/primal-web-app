@@ -20,7 +20,7 @@ const NewNote: Component<{ onSuccess: (note: SendNoteResult) => void}> = (props)
               <Avatar
                 src={activeUser()?.picture}
                 size="md"
-                verified={activeUser()?.nip05}
+                user={activeUser()}
               />
             </div>
             <div class={styles.rightSide}>
