@@ -61,7 +61,7 @@ export type AccountContextStore = {
     removeFollow: (pubkey: string) => void,
     quoteNote: (noteId: string | undefined) => void,
     addToMuteList: (pubkey: string) => void,
-    removeFromMuteList: (pubkey: string) => void,
+    removeFromMuteList: (pubkey: string, then?: () => void) => void,
     addRelay: (url: string) => void,
     removeRelay: (url: string) => void,
     setConnectToPrimaryRelays: (flag: boolean) => void,
@@ -536,12 +536,13 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...store.muted, pubkey];
 
-          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
             updateStore('mutedSince', () => date);
             saveMuted(store.publicKey, muted, date);
+            note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
           }
         }
 
@@ -561,7 +562,7 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
   };
 
-  const removeFromMuteList = (pubkey: string) => {
+  const removeFromMuteList = (pubkey: string, then?: () => void) => {
     if (!store.publicKey || !store.muted || !store.muted.includes(pubkey)) {
       return;
     }
@@ -573,15 +574,17 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = store.muted.filter(m => m !== pubkey);
 
-          const { success } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
             updateStore('mutedSince', () => date);
             saveMuted(store.publicKey, muted, date);
+            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
           }
         }
 
+        then && then();
         unsub();
         return;
       }

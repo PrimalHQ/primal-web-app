@@ -129,7 +129,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
     if (scope) {
-      console.log('SAVED NEW NOTES ', newNotes);
       updateStore(scope, 'notes', (notes) => [ ...notes, ...newNotes ]);
       loadFutureContent();
       return;
@@ -226,7 +225,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (store.future.notes.length === 0) {
       return;
     }
-    console.log('loadFutureContent', store.future.notes);
 
     updateStore('notes', (notes) => [...store.future.notes, ...notes]);
     clearFuture();

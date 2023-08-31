@@ -192,17 +192,17 @@ const Profile: Component = () => {
     return account?.publicKey === profile?.profileKey;
   };
 
-  createEffect(() => {
-    const pk = getHex();
+  // createEffect(() => {
+  //   const pk = getHex();
 
-    if (!pk) {
-      return;
-    }
+  //   if (!pk) {
+  //     return;
+  //   }
 
-    if (!isMuted(pk) && account?.isKeyLookupDone) {
-      profile?.actions.fetchNotes(pk);
-    }
-  });
+  //   if (!isMuted(pk) && account?.isKeyLookupDone) {
+  //     profile?.actions.fetchNotes(pk);
+  //   }
+  // });
 
   createEffect(() => {
     const pk = getHex();
@@ -233,7 +233,7 @@ const Profile: Component = () => {
       return;
     }
 
-    account.actions.removeFromMuteList(profile.profileKey);
+    account.actions.removeFromMuteList(profile.profileKey, () => setProfile(profile.profileKey));
   };
 
   const isFollowingMute = (pk: string | undefined) => {
@@ -667,7 +667,9 @@ const Profile: Component = () => {
                 <Note note={note} />
               )}
             </For>
-            <Paginator loadNextPage={profile?.actions.fetchNextPage}/>
+            <Paginator loadNextPage={() => {
+              profile?.actions.fetchNextPage();
+            }}/>
           </Match>
         </Switch>
       </div>
