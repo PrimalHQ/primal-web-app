@@ -15,6 +15,7 @@ import { nip19 } from 'nostr-tools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
+import { hookForDev } from '../../lib/devTools';
 
 
 export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
@@ -98,7 +99,7 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
 
 };
 
-const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}> = (props) => {
+const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean, id?: string }> = (props) => {
 
   const media = useMediaContext();
 
@@ -221,9 +222,9 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean}>
 
 
   return (
-    <div innerHTML={displayedContent()}>
+    <div id={props.id} innerHTML={displayedContent()}>
     </div>
   );
 };
 
-export default ParsedNote;
+export default hookForDev(ParsedNote);

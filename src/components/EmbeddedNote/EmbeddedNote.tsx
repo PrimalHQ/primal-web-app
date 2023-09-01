@@ -133,7 +133,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     <>
       <div class={styles.mentionedNoteHeader}>
         <Avatar
-          src={props.note.user.picture}
+          user={props.note.user}
           size="xxs"
         />
         <span class={styles.postInfo}>

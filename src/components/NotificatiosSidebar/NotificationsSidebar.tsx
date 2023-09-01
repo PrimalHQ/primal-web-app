@@ -6,6 +6,7 @@ import { PrimalNotification, PrimalNotifUser, SortedNotifications } from '../../
 import { notificationsSidebar as t } from '../../translations';
 
 import styles from './NotificationsSidebar.module.scss';
+import { hookForDev } from '../../lib/devTools';
 
 const uniqueifyUsers = (users: PrimalNotifUser[]) => {
   return users.reduce<PrimalNotifUser[]>((acc, u) => {
@@ -15,6 +16,7 @@ const uniqueifyUsers = (users: PrimalNotifUser[]) => {
 }
 
 const NotificationsSidebar: Component<{
+  id?: string,
   notifications: SortedNotifications,
   getUsers: (notifs: PrimalNotification[], type: NotificationType) => PrimalNotifUser[],
 }> = (props) => {
@@ -29,8 +31,6 @@ const NotificationsSidebar: Component<{
     const lost = props.getUsers(unffolowNotifs, NotificationType.USER_UNFOLLOWED_YOU);
 
     return [uniqueifyUsers(followers).length, uniqueifyUsers(lost).length];
-
-
   };
 
   const mentions = () => {
@@ -158,7 +158,7 @@ const NotificationsSidebar: Component<{
   }
 
   return (
-    <>
+    <div id={props.id}>
       <div class={styles.sidebarHeading}>
         {intl.formatMessage(t.heading)}
       </div>
@@ -368,8 +368,8 @@ const NotificationsSidebar: Component<{
           </div>
         </div>
       </Show>
-    </>
+    </div>
   )
 }
 
-export default NotificationsSidebar;
+export default hookForDev(NotificationsSidebar);

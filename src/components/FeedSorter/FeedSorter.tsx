@@ -1,12 +1,13 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { hookForDev } from '../../lib/devTools';
 import { PrimalFeed } from '../../types/primal';
 
 import styles from './FeedSorter.module.scss';
 
 
-const FeedSorter: Component = () => {
+const FeedSorter: Component<{ id?: string }> = (props) => {
 
   let sorter: any;
 
@@ -109,7 +110,7 @@ const FeedSorter: Component = () => {
   });
 
   return (
-    <div id="feed_sorter" class={styles.feedSorter} ref={sorter}>
+    <div id={props.id} class={styles.feedSorter} ref={sorter}>
       <Show when={availableFeeds().length > 0}>
         <For each={availableFeeds()}>
           {(feed, index) => (
@@ -176,4 +177,4 @@ const FeedSorter: Component = () => {
   )
 }
 
-export default FeedSorter;
+export default hookForDev(FeedSorter);

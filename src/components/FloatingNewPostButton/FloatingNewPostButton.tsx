@@ -1,8 +1,10 @@
+import { Component } from "solid-js";
 import { useAccountContext } from "../../contexts/AccountContext";
+import { hookForDev } from "../../lib/devTools";
 
 import styles from  "./FloatingNewPostButton.module.scss";
 
-export default function FloatingNewPostButton() {
+const FloatingNewPostButton: Component<{ id?: string }> = (props) => {
     const account = useAccountContext();
 
     const showNewNoteForm = () => {
@@ -12,6 +14,7 @@ export default function FloatingNewPostButton() {
 
     return (
       <button
+        id={props.id}
         class={styles.newPostButton}
         onClick={showNewNoteForm}
       >
@@ -19,3 +22,5 @@ export default function FloatingNewPostButton() {
       </button>
     )
 }
+
+export default hookForDev(FloatingNewPostButton);

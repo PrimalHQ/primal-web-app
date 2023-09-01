@@ -27,6 +27,7 @@ import { hourNarrow } from '../../formats';
 
 import { home as t } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { hookForDev } from '../../lib/devTools';
 
 const [init, setInit] = createSignal(false);
 
@@ -47,7 +48,7 @@ const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNot
   },
 });
 
-const HomeSidebar: Component = () => {
+const HomeSidebar: Component< { id?: string } > = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
@@ -157,7 +158,7 @@ const HomeSidebar: Component = () => {
   };
 
   return (
-    <div>
+    <div id={props.id}>
       <div class={styles.headingTrending}>
         <div>
           <div class={styles.flameIcon}></div>
@@ -199,4 +200,4 @@ const HomeSidebar: Component = () => {
   );
 }
 
-export default HomeSidebar;
+export default hookForDev(HomeSidebar);

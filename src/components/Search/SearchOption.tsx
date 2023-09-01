@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router';
 import { Component, JSXElement, Show } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 import { truncateNumber } from '../../lib/notifications';
 import { truncateName, } from '../../stores/profile';
 
@@ -17,6 +18,7 @@ const SearchOption: Component<{
   underline?: boolean,
   onClick?: (e?: MouseEvent) => void,
   highlighted?: boolean,
+  id?: string,
 }> = (props) => {
 
   const Content: Component<{ children: JSXElement }> = (prp) => {
@@ -29,6 +31,7 @@ const SearchOption: Component<{
         when={props.href}
         fallback={
           <div
+            id={props.id}
             class={klass()}
             onClick={props.onClick}
           >
@@ -37,6 +40,7 @@ const SearchOption: Component<{
         }
       >
         <A
+          id={props.id}
           href={props.href || ''}
           class={klass()}
           tabIndex={0}
@@ -77,4 +81,4 @@ const SearchOption: Component<{
   );
 }
 
-export default SearchOption;
+export default hookForDev(SearchOption);

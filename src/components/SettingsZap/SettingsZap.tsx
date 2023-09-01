@@ -6,8 +6,9 @@ import { debounce } from '../../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { settings as t } from '../../translations';
+import { hookForDev } from '../../lib/devTools';
 
-const SettingsZap: Component = () => {
+const SettingsZap: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
   const settings = useSettingsContext();
@@ -29,7 +30,6 @@ const SettingsZap: Component = () => {
         return;
       }
 
-
       settings?.actions.setDefaultZapAmount(val);
     }, 500)
   };
@@ -48,7 +48,7 @@ const SettingsZap: Component = () => {
   };
 
   return (
-    <div class={styles.zapSettings}>
+    <div id={props.id} class={styles.zapSettings}>
       <div class={styles.defaultZaps}>
         <div class={styles.caption}>
           Set default zap amount:
@@ -96,4 +96,4 @@ const SettingsZap: Component = () => {
   );
 }
 
-export default SettingsZap;
+export default hookForDev(SettingsZap);

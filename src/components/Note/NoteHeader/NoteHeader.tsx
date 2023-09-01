@@ -18,8 +18,9 @@ import { reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
+import { hookForDev } from '../../../lib/devTools';
 
-const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (props) => {
+const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?: string }> = (props) => {
 
   const intl = useIntl();
   const toaster = useToastContext();
@@ -191,7 +192,7 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
       noteContextForEveryone;
 
   return (
-    <div class={styles.header}>
+    <div id={props.id} class={styles.header}>
       <div class={styles.headerInfo}>
         <div
             class={styles.avatar}
@@ -201,7 +202,7 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
               href={`/p/${props.note.user.npub}`}
             >
               <Avatar
-                src={props.note?.user?.picture}
+                user={props.note?.user}
                 size="sm"
                 highlightBorder={isVerifiedByPrimal()}
               />
@@ -275,4 +276,4 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void}> = (
   )
 }
 
-export default NoteHeader;
+export default hookForDev(NoteHeader);

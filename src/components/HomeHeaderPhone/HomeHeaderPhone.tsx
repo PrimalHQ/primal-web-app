@@ -4,17 +4,18 @@ import styles from './HomeHeaderPhone.module.scss';
 import FeedSelect from '../FeedSelect/FeedSelect';
 import Branding from '../Branding/Branding';
 import { useHomeContext } from '../../contexts/HomeContext';
+import { hookForDev } from '../../lib/devTools';
 
-const HomeHeaderPhone: Component = () => {
+const HomeHeaderPhone: Component< { id?: string } > = (props) => {
 
   const home = useHomeContext();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+  let smallHeader: HTMLDivElement | undefined;
+  let border: HTMLDivElement | undefined;
 
   const onScroll = () => {
     const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-    const smallHeader = document.getElementById('phone_header');
-    const border = document.getElementById('small_bottom_border');
 
     home?.actions?.updateScrollTop(scrollTop);
 
@@ -58,7 +59,7 @@ const HomeHeaderPhone: Component = () => {
   });
 
   return (
-    <div id="phone_header" class={styles.fullHeader}>
+    <div id={props.id} class={styles.fullHeader} ref={smallHeader}>
       <div class={styles.phoneHeader}>
         <div class={styles.logo}>
           <Branding small={true} />
@@ -68,7 +69,7 @@ const HomeHeaderPhone: Component = () => {
         </Show>
       </div>
       <div
-        id="small_bottom_border"
+        ref={border}
         class={styles.smallHeaderBottomBorder}
       >
         <div class={styles.leftCorner}></div>
@@ -78,4 +79,4 @@ const HomeHeaderPhone: Component = () => {
   );
 }
 
-export default HomeHeaderPhone;
+export default hookForDev(HomeHeaderPhone);

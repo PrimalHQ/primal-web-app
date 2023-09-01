@@ -227,7 +227,7 @@ const Moderation: Component = () => {
             <div class={styles.filterListName} title={my()?.pubkey}>
               <A href='/p' class={styles.avatar}>
                 <Avatar
-                  src={account?.activeUser?.picture}
+                  user={account?.activeUser}
                   size='xs'
                 />
               </A>
@@ -259,7 +259,7 @@ const Moderation: Component = () => {
                 <div class={styles.filterListName} title={mutelist.pubkey}>
                   <A href={`/p/${users[mutelist.pubkey || '']?.npub}`} class={styles.avatar}>
                     <Avatar
-                      src={users[mutelist.pubkey || '']?.picture}
+                      user={users[mutelist.pubkey || '']}
                       size='xs'
                     />
                   </A>
@@ -385,7 +385,7 @@ const Moderation: Component = () => {
                     <div class={styles.filterListName} title={reason}>
                       <A href={`/p/${users[reason || '']?.npub}`} class={styles.avatar}>
                         <Avatar
-                          src={users[reason || '']?.picture}
+                          user={users[reason || '']}
                           size='xs'
                         />
                       </A>
@@ -446,7 +446,7 @@ const Moderation: Component = () => {
                 <div class={styles.allowlistInfo} title={hexToNpub(pubkey)}>
                   <div class={styles.avatar}>
                     <Avatar
-                      src={users[pubkey || '']?.picture}
+                      user={users[pubkey || '']}
                       size='xs'
                     />
                   </div>

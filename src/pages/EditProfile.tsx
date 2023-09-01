@@ -49,7 +49,7 @@ const EditProfile: Component = () => {
   const [bannerPreview, setBannerPreview] = createSignal<string>();
 
   const flagBannerForWarning = () => {
-    const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+    const dev = localStorage.getItem('devMode') === 'true';
 
     // @ts-ignore
     if (isBannerCached() || !dev) {

@@ -1,5 +1,6 @@
 import { Component, Show } from 'solid-js';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './ExternalLink.module.scss';
 
@@ -8,12 +9,13 @@ const ExternalLink: Component<{
   darkIcon: string,
   label: string,
   href: string,
+  id?: string,
 }> = (props) => {
 
   const settings = useSettingsContext();
 
   return (
-    <div class={styles.externalLink}>
+    <div id={props.id} class={styles.externalLink}>
       <Show
         when={['sunset', 'midnight'].includes(settings?.theme || 'sunset')}
         fallback={
@@ -32,4 +34,4 @@ const ExternalLink: Component<{
   );
 }
 
-export default ExternalLink;
+export default hookForDev(ExternalLink);

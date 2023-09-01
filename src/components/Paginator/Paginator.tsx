@@ -1,11 +1,14 @@
-import { onCleanup, onMount } from "solid-js";
+import { Component, onCleanup, onMount } from "solid-js";
+import { hookForDev } from "../../lib/devTools";
 import styles from  "./Paginator.module.scss";
 
-export default function Paginator(props: {
+const Paginator: Component<{
+  id?: string,
   loadNextPage: (() => void) | undefined,
   isSmall?: boolean,
-}) {
+}> = (props) => {
   let observer: IntersectionObserver | undefined;
+  let trigger: HTMLDivElement | undefined;
 
   onMount(() => {
     observer = new IntersectionObserver(entries => {
@@ -28,7 +31,9 @@ export default function Paginator(props: {
   });
 
   return (
-    <div id="pagination_trigger" class={props.isSmall ? styles.smallPaginator : styles.paginator}>
+    <div id={props.id} ref={trigger} class={props.isSmall ? styles.smallPaginator : styles.paginator}>
     </div>
   )
 }
+
+export default hookForDev(Paginator);

@@ -1,12 +1,14 @@
-import { createSignal, onMount, Show } from "solid-js";
+import { Component, createSignal, onMount, Show } from "solid-js";
+import { hookForDev } from "../../lib/devTools";
 import { MenuItem } from "../../types/primal";
 import styles from  "./PrimalMenuItem.module.scss";
 
 
-export default function PrimalMenuItem(props: {
+const PrimalMenuItem: Component<{
   item: MenuItem,
   reverse?: boolean,
-}) {
+  id?: string,
+}> = (props) => {
 
   const [icon, setIcon] = createSignal<string>()
 
@@ -28,6 +30,7 @@ export default function PrimalMenuItem(props: {
 
   return (
     <button
+      id={props.id}
       onClick={(e: MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -44,3 +47,5 @@ export default function PrimalMenuItem(props: {
     </button>
   )
 }
+
+export default hookForDev(PrimalMenuItem);

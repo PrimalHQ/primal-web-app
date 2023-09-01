@@ -9,8 +9,9 @@ import NavLink from '../NavLink/NavLink';
 import FloatingNewPostButton from '../FloatingNewPostButton/FloatingNewPostButton';
 
 import styles from './NavMenu.module.scss';
+import { hookForDev } from '../../lib/devTools';
 
-const NavMenu: Component = () => {
+const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
   const messages = useMessagesContext();
@@ -62,7 +63,7 @@ const NavMenu: Component = () => {
   ];
 
   return (
-    <div class={styles.navMenu}>
+    <div id={props.id} class={styles.navMenu}>
       <nav class={styles.sideNav}>
         <For each={links}>
           {({ to, label, icon, bubble, hiddenOnSmallScreens }) => {
@@ -86,4 +87,4 @@ const NavMenu: Component = () => {
   )
 }
 
-export default NavMenu;
+export default hookForDev(NavMenu);

@@ -1,15 +1,16 @@
-import { For } from "solid-js";
+import { Component, For } from "solid-js";
+import { hookForDev } from "../../lib/devTools";
 import { MenuItem } from "../../types/primal";
 import styles from  "./PrimalMenu.module.scss";
 import PrimalMenuItem from "./PrimalMenuItem";
 
 
-export default function PrimalMenu(props: {
+const PrimalMenu: Component<{
   id: string,
   items: MenuItem[],
   position?: 'note_footer' | 'profile',
-  reverse?: boolean
-}) {
+  reverse?: boolean,
+}> = (props) => {
 
   const positionClass = () => {
     if (props.position == 'note_footer') {
@@ -36,3 +37,5 @@ export default function PrimalMenu(props: {
     </div>
   )
 }
+
+export default hookForDev(PrimalMenu);

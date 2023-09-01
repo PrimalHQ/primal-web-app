@@ -1,16 +1,17 @@
 import { Component, JSXElement } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 import Wormhole from '../Wormhole/Wormhole';
 
 import styles from './StickySidebar.module.scss';
 
-const StickySidebar: Component<{ children: JSXElement }> = (props) => {
+const StickySidebar: Component<{ children: JSXElement, id?: string }> = (props) => {
 
   return (
     <Wormhole
       to="right_sidebar"
     >
-      <div id="trending_wrapper" class={styles.stickyWrapper}>
-        <div id="trending_section" class={styles.trendingSection}>
+      <div id={props.id} class={styles.stickyWrapper}>
+        <div class={styles.trendingSection}>
           {props.children}
         </div>
       </div>
@@ -18,4 +19,4 @@ const StickySidebar: Component<{ children: JSXElement }> = (props) => {
   );
 }
 
-export default StickySidebar;
+export default hookForDev(StickySidebar);

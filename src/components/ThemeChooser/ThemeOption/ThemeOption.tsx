@@ -3,11 +3,13 @@ import styles from './ThemeOption.module.scss';
 
 import check from '../../../assets/icons/check.svg';
 import { PrimalTheme } from '../../../types/primal';
+import { hookForDev } from '../../../lib/devTools';
 
 const ThemeOption: Component<{
   theme: PrimalTheme,
   isSelected: boolean,
   onSelect: (value: PrimalTheme) => void,
+  id?: string,
 }> = (props) => {
 
   const selectedClass = () => {
@@ -19,7 +21,7 @@ const ThemeOption: Component<{
   }
 
   return (
-      <div class={styles.themeOption}>
+      <div id={props.id} class={styles.themeOption}>
         <button
           class={`${styles[props.theme.name]} ${selectedClass()}`}
           onClick={() => props.onSelect(props.theme)}
@@ -37,4 +39,4 @@ const ThemeOption: Component<{
   );
 }
 
-export default ThemeOption;
+export default hookForDev(ThemeOption);

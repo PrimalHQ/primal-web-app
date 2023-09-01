@@ -17,8 +17,9 @@ import zapMD from '../../../assets/lottie/zap_md.json';
 import { medZapLimit } from '../../../constants';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
+import { hookForDev } from '../../../lib/devTools';
 
-const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (props) => {
+const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: string }> = (props) => {
 
   const account = useAccountContext();
   const toast = useToastContext();
@@ -360,7 +361,7 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
   const [hideZapIcon, setHideZapIcon] = createSignal(false);
 
   return (
-    <div class={styles.footer} ref={footerDiv}>
+    <div id={props.id} class={styles.footer} ref={footerDiv}>
       <Show when={showSmallZapAnim()}>
         <lottie-player
           id={`note-small-zap-${props.note.post.id}`}
@@ -472,4 +473,4 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean }> = (prop
   )
 }
 
-export default NoteFooter;
+export default hookForDev(NoteFooter);

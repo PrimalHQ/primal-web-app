@@ -26,8 +26,9 @@ import styles from './SettingsNotifications.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
 import Checkbox from '../Checkbox/Checkbox';
+import { hookForDev } from '../../lib/devTools';
 
-const SettingsNotifications: Component = () => {
+const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
   const settings = useSettingsContext();
   const intl = useIntl();
@@ -109,7 +110,7 @@ const SettingsNotifications: Component = () => {
   }
 
   return (
-    <div class={styles.notificationSettings}>
+    <div id={props.id} class={styles.notificationSettings}>
 
       <div class={styles.caption}>
         {intl.formatMessage(t.notifications.core)}
@@ -173,4 +174,4 @@ const SettingsNotifications: Component = () => {
   );
 }
 
-export default SettingsNotifications;
+export default hookForDev(SettingsNotifications);

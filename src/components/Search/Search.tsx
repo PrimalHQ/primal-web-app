@@ -12,6 +12,7 @@ import { placeholders, search as t } from '../../translations';
 
 import styles from './Search.module.scss';
 import SearchOption from './SearchOption';
+import { hookForDev } from '../../lib/devTools';
 
 
 const Search: Component<{
@@ -20,6 +21,7 @@ const Search: Component<{
   noLinks?: boolean,
   hideDefault?: boolean,
   placeholder?: string,
+  id?: string,
 }> = (props) => {
 
   const toaster = useToastContext();
@@ -113,7 +115,7 @@ const Search: Component<{
   });
 
   return (
-    <div class={styles.searchHolder}>
+    <div id={props.id} class={styles.searchHolder}>
       <form
         class={styles.search}
         onsubmit={onSearch}
@@ -174,7 +176,7 @@ const Search: Component<{
                 href={props.noLinks ? undefined : `/p/${user.npub}`}
                 title={userName(user)}
                 description={nip05Verification(user)}
-                icon={<Avatar src={user.picture} size="xs" />}
+                icon={<Avatar user={user} size="xs" />}
                 statNumber={search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage(t.followers)}
                 onClick={() => selectUser(user)}
@@ -184,8 +186,7 @@ const Search: Component<{
         </div>
       </Show>
     </div>
-
   )
 }
 
-export default Search;
+export default hookForDev(Search);

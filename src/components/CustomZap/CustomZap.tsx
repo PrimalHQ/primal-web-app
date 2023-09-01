@@ -2,6 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, For } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { hookForDev } from '../../lib/devTools';
 import { zapNote } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption } from '../../translations';
@@ -13,6 +14,7 @@ import { useToastContext } from '../Toaster/Toaster';
 import styles from './CustomZap.module.scss';
 
 const CustomZap: Component<{
+  id?: string,
   open?: boolean,
   note: PrimalNote,
   onConfirm: (amount?: number) => void,
@@ -96,7 +98,7 @@ const CustomZap: Component<{
 
   return (
     <Modal open={props.open}>
-      <div class={styles.customZap}>
+      <div id={props.id} class={styles.customZap}>
         <div class={styles.header}>
           <div class={styles.title}>
             <div class={styles.zapIcon}></div>
@@ -153,4 +155,4 @@ const CustomZap: Component<{
   );
 }
 
-export default CustomZap;
+export default hookForDev(CustomZap);

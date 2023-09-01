@@ -1,6 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { hookForDev } from '../../lib/devTools';
 import { account as t } from '../../translations';
 import { PrimalUser } from '../../types/primal';
 import { useToastContext } from '../Toaster/Toaster';
@@ -8,7 +9,7 @@ import { useToastContext } from '../Toaster/Toaster';
 import styles from './FollowButton.module.scss';
 
 
-const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean }> = (props) => {
+const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean, id?: string }> = (props) => {
 
   const toast = useToastContext()
   const account = useAccountContext();
@@ -40,7 +41,7 @@ const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean 
 
   return (
     <Show when={props.person}>
-      <div class={klass()}>
+      <div id={props.id} class={klass()}>
         <button onClick={onFollow} >
           <Show
             when={isFollowed()}
@@ -54,4 +55,4 @@ const FollowButton: Component<{ person: PrimalUser | undefined, large?: boolean 
   )
 }
 
-export default FollowButton;
+export default hookForDev(FollowButton);

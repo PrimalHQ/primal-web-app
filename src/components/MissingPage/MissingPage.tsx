@@ -1,5 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, JSXElement, Show } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 import { placeholders as t } from '../../translations';
 import Branding from '../Branding/Branding';
 import Search from '../Search/Search';
@@ -7,12 +8,12 @@ import Wormhole from '../Wormhole/Wormhole';
 import styles from './MissingPage.module.scss';
 
 
-const MissingPage: Component<{ title: string, children?: JSXElement }> = (props) => {
+const MissingPage: Component<{ title: string, children?: JSXElement, id?: string }> = (props) => {
 
   const intl = useIntl();
 
   return (
-    <>
+    <div id={props.id}>
       <Wormhole to="branding_holder" >
         <Branding small={false} />
       </Wormhole>
@@ -44,8 +45,8 @@ const MissingPage: Component<{ title: string, children?: JSXElement }> = (props)
           {props.children}
         </div>
       </Show>
-    </>
+    </div>
   )
 }
 
-export default MissingPage;
+export default hookForDev(MissingPage);

@@ -340,6 +340,8 @@ export type NostrWindow = Window & typeof globalThis & {
 export type PrimalWindow = Window & typeof globalThis & {
   loadPrimalStores: () => void,
   primal?: any,
+  onPrimalComponentMount?: (data: any) => void,
+  onPrimalComponentCleanup?: (data: any) => void,
 };
 
 export type NostrEventType = "EVENT" | "EOSE" | "NOTICE";
@@ -571,4 +573,10 @@ export type Filterlist = {
 export type ContentModeration = {
   name: string,
   scopes: string[],
+}
+
+export type ComponentLog = {
+  name: string,
+  domId: string,
+  props: any,
 }

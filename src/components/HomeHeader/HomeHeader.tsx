@@ -9,8 +9,9 @@ import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { placeholders as t } from '../../translations';
+import { hookForDev } from '../../lib/devTools';
 
-const HomeHeader: Component = () => {
+const HomeHeader: Component< { id?: string} > = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
@@ -73,7 +74,7 @@ const HomeHeader: Component = () => {
   const activeUser = () => account?.activeUser;
 
   return (
-    <div class={styles.fullHeader}>
+    <div id={props.id} class={styles.fullHeader}>
       <Show
         when={account?.hasPublicKey()}
         fallback={<div class={styles.welcomeMessage}>
@@ -82,7 +83,7 @@ const HomeHeader: Component = () => {
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
           <Avatar
-            src={activeUser()?.picture}
+            user={activeUser()}
             size="lg"
           />
 
@@ -128,4 +129,4 @@ const HomeHeader: Component = () => {
   );
 }
 
-export default HomeHeader;
+export default hookForDev(HomeHeader);

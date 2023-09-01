@@ -1,17 +1,18 @@
 import { Component, createMemo, createSignal, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_nostrich.svg';
 import { useMediaContext } from '../../contexts/MediaContext';
-import { getMediaUrl } from '../../lib/media';
+import { hookForDev } from '../../lib/devTools';
 import { MediaSize, PrimalUser } from '../../types/primal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
-  src: string | undefined,
+  src?: string | undefined,
   size?: "xxs" | "xss" | "xs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
+  id?: string,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -78,15 +79,21 @@ const Avatar: Component<{
         break;
     };
 
-    const url = media?.actions.getMediaUrl(props.src, size, true);
+    const src = props.user?.picture || props.src;
+
+    if (!src) {
+      return defaultAvatar;
+    }
+
+    const url = media?.actions.getMediaUrl(src, size, true);
 
     setIsCached(!!url);
 
-    return url ?? props.src;
+    return url ?? src;
   });
 
   const notCachedFlag = () => {
-    const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+    const dev = localStorage.getItem('devMode') === 'true';
 
     // @ts-ignore
     if (isCached() || !dev) {
@@ -97,7 +104,11 @@ const Avatar: Component<{
   }
 
   return (
-    <div class={`${avatarClass[selectedSize]} ${highlightClass()}`}>
+    <div
+      id={props.id}
+      class={`${avatarClass[selectedSize]} ${highlightClass()}`}
+      data-user={props.user?.pubkey}
+    >
       <Show
         when={imageSrc()}
         fallback={
@@ -119,4 +130,4 @@ const Avatar: Component<{
   )
 }
 
-export default Avatar;
+export default hookForDev(Avatar);

@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
@@ -8,11 +9,11 @@ import FollowButton from '../FollowButton/FollowButton';
 import styles from './PeopleList.module.scss';
 
 
-const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) => {
+const PeopleList: Component<{ people: PrimalUser[], label: string, id?: string }> = (props) => {
   const people = () => props.people;
 
   return (
-    <div id="trending_wrapper" class={styles.stickyWrapper}>
+    <div id={props.id} class={styles.stickyWrapper}>
       <div class={styles.heading}>{props.label}</div>
       <div id="trending_section" class={styles.trendingSection}>
         <For each={people()}>
@@ -21,7 +22,6 @@ const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) =>
               <A href={`/p/${person?.npub}`} class={styles.peopleList}>
                 <div class={styles.avatar}>
                   <Avatar
-                    src={person?.picture}
                     size="md"
                     user={person}
                   />
@@ -53,4 +53,4 @@ const PeopleList: Component<{ people: PrimalUser[], label: string}> = (props) =>
   );
 }
 
-export default PeopleList;
+export default hookForDev(PeopleList);

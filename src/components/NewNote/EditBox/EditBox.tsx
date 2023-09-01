@@ -35,11 +35,13 @@ import {
   actions as tActions,
 } from "../../../translations";
 import { useMediaContext } from "../../../contexts/MediaContext";
+import { hookForDev } from "../../../lib/devTools";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 
 const EditBox: Component<{
+  id?: string,
   replyToNote?: PrimalNote,
   onClose?: () => void,
   onSuccess?: (note: SendNoteResult) => void,
@@ -1085,6 +1087,7 @@ const EditBox: Component<{
 
   return (
     <div
+      id={props.id}
       class={styles.noteEditBox}
       ref={editWrap}
       onDrop={onDrop}
@@ -1147,7 +1150,7 @@ const EditBox: Component<{
               <SearchOption
                 title={userName(user)}
                 description={nip05Verification(user)}
-                icon={<Avatar src={user.picture} size="xs" />}
+                icon={<Avatar user={user} size="xs" />}
                 statNumber={search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage(tSearch.followers)}
                 onClick={() => selectUser(user)}
@@ -1210,4 +1213,4 @@ const EditBox: Component<{
   )
 }
 
-export default EditBox;
+export default hookForDev(EditBox);

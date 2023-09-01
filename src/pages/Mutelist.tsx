@@ -165,7 +165,7 @@ const Mutelist: Component = () => {
                 }
               >
                 <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
-                  <Avatar src={user(pubkey).picture} size='sm' />
+                  <Avatar user={user(pubkey)} size='sm' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>
                     <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>

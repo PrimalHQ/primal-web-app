@@ -1,9 +1,11 @@
 import { A, useLocation, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './NavLink.module.scss';
 
 const NavLink: Component<{
+  id?: string,
   to: string,
   label: string,
   icon: string,
@@ -40,7 +42,7 @@ const NavLink: Component<{
   }
 
     return (
-      <button class={`${styles.navLink} ${props.hiddenOnSmallScreens ? styles.hiddenOnSmallScreens : ''}`} onClick={onClick}>
+      <button id={props.id} class={`${styles.navLink} ${props.hiddenOnSmallScreens ? styles.hiddenOnSmallScreens : ''}`} onClick={onClick}>
         <Show when={props.bubble && props.bubble() > 0}>
           <div class={`${styles.bubble} ${bubbleClass()}`}>
             <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
@@ -54,4 +56,4 @@ const NavLink: Component<{
     )
 }
 
-export default NavLink;
+export default hookForDev(NavLink);

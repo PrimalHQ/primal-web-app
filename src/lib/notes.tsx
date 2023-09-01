@@ -74,7 +74,7 @@ export const urlify = (
       const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
 
       if (isImage) {
-        const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+        const dev = localStorage.getItem('devMode') === 'true';
         let imgUrl = getMediaUrl && getMediaUrl(url);
 
         if (!imgUrl) {

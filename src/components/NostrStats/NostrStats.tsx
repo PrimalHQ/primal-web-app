@@ -3,22 +3,24 @@ import { Component } from "solid-js";
 import { PrimalNetStats } from "../../types/primal";
 import styles from  "./NostrStats.module.scss";
 import { explore as t } from '../../translations';
+import { hookForDev } from "../../lib/devTools";
 
-const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
+const NostrStats: Component<{ stats: PrimalNetStats, id?: string }> = (props) => {
 
   const intl = useIntl();
 
-  const statDisplay = (
+  const statDisplay = (opts:{
     stat: number | string | undefined,
     key: string,
-  ) => {
+    id?: string,
+  }) => {
     // @ts-ignore Record find entry by key
-    const label = t.statDisplay[key] || '';
+    const label = t.statDisplay[opts.key] || '';
 
     return (
-      <div class={styles.netstat}>
+      <div id={opts.id} class={styles.netstat}>
         <div class={styles.number}>
-          {stat?.toLocaleString()}
+          {opts.stat?.toLocaleString()}
         </div>
         <div class={styles.label}>
           {intl.formatMessage(label)}
@@ -29,17 +31,17 @@ const NostrStats: Component<{ stats: PrimalNetStats }> = (props) => {
 
 
   return (
-    <div class={styles.netstats}>
-      {statDisplay(props.stats.users, 'users')}
-      {statDisplay(props.stats.pubkeys, 'pubkeys')}
-      {statDisplay(props.stats.zaps, 'zaps')}
-      {statDisplay((props.stats.satszapped /100000000).toFixed(8), 'btcZapped')}
-      {statDisplay(props.stats.pubnotes, 'pubnotes')}
-      {statDisplay(props.stats.reposts, 'reposts')}
-      {statDisplay(props.stats.reactions, 'reactions')}
-      {statDisplay(props.stats.any, 'any')}
+    <div id={props.id} class={styles.netstats}>
+      {hookForDev(statDisplay)({ stat: props.stats.users, key: 'users' })}
+      {hookForDev(statDisplay)({ stat: props.stats.pubkeys, key: 'pubkeys' })}
+      {hookForDev(statDisplay)({ stat: props.stats.zaps, key: 'zaps' })}
+      {hookForDev(statDisplay)({ stat: (props.stats.satszapped /100000000).toFixed(8), key: 'btcZapped' })}
+      {hookForDev(statDisplay)({ stat: props.stats.pubnotes, key: 'pubnotes' })}
+      {hookForDev(statDisplay)({ stat: props.stats.reposts, key: 'reposts' })}
+      {hookForDev(statDisplay)({ stat: props.stats.reactions, key: 'reactions' })}
+      {hookForDev(statDisplay)({ stat: props.stats.any, key: 'any' })}
     </div>
   )
 }
 
-export default NostrStats;
+export default hookForDev(NostrStats);

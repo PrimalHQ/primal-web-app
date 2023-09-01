@@ -10,8 +10,9 @@ import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { truncateNpub } from '../../stores/profile';
 import { note as t } from '../../translations';
+import { hookForDev } from '../../lib/devTools';
 
-const Note: Component<{ note: PrimalNote }> = (props) => {
+const Note: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -38,6 +39,7 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
 
   return (
     <A
+      id={props.id}
       class={styles.postLink}
       href={`/e/${props.note?.post.noteId}`}
       onClick={() => navToThread(props.note)}
@@ -73,4 +75,4 @@ const Note: Component<{ note: PrimalNote }> = (props) => {
   )
 }
 
-export default Note;
+export default hookForDev(Note);

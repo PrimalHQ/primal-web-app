@@ -8,8 +8,9 @@ import { Relay, relayInit } from "nostr-tools";
 
 import styles from './SettingsSidebar.module.scss';
 import { cacheServer, isConnected, socket } from '../../sockets';
+import { hookForDev } from '../../lib/devTools';
 
-const SettingsSidebar: Component = () => {
+const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
@@ -27,7 +28,7 @@ const SettingsSidebar: Component = () => {
   };
 
   return (
-    <>
+    <div id={props.id}>
       <div class={styles.headingConnectedRelays}>
         <div>
           {intl.formatMessage(t.relays)}
@@ -72,8 +73,8 @@ const SettingsSidebar: Component = () => {
           {socket()?.url || cacheServer}
         </span>
       </div>
-    </>
+    </div>
   )
 }
 
-export default SettingsSidebar;
+export default hookForDev(SettingsSidebar);

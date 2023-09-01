@@ -1,10 +1,11 @@
 import { Component } from 'solid-js';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { hookForDev } from '../../lib/devTools';
 import { FeedOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 
-const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
+const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
 
   const home = useHomeContext();
   const settings = useSettingsContext();
@@ -88,4 +89,4 @@ const FeedSelect: Component<{ isPhone?: boolean}> = (props) => {
   );
 }
 
-export default FeedSelect;
+export default hookForDev(FeedSelect);

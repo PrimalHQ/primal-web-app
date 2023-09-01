@@ -1,11 +1,12 @@
 import { Component, JSXElement } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './HelpTip.module.scss';
 
-const HelpTip: Component<{ children?: JSXElement, zIndex?: number }> = (props) => {
+const HelpTip: Component<{ children?: JSXElement, zIndex?: number, id?: string }> = (props) => {
 
   return (
-    <div class={styles.helpContent} style={props.zIndex ? `z-index: ${props.zIndex}` : ''}>
+    <div id={props.id} class={styles.helpContent} style={props.zIndex ? `z-index: ${props.zIndex}` : ''}>
       <div class={styles.helpIcon}></div>
       <div class={styles.content}>
         {props.children}
@@ -14,4 +15,4 @@ const HelpTip: Component<{ children?: JSXElement, zIndex?: number }> = (props) =
   );
 }
 
-export default HelpTip;
+export default hookForDev(HelpTip);

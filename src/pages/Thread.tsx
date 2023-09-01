@@ -156,6 +156,7 @@ const Thread: Component = () => {
         <Show when={primaryNote()}>
           <div id="primary_note" class={styles.threadList}>
             <NotePrimary
+              id="bojan"
               note={primaryNote() as PrimalNote}
             />
             <Show when={account?.hasPublicKey()}>

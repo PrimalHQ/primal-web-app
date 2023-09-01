@@ -1,7 +1,7 @@
 import { Component, createResource, lazy } from 'solid-js';
 import { Routes, Route, Navigate, RouteDataFuncArgs } from "@solidjs/router";
 
-import { PrimalWindow } from './types/primal';
+import { ComponentLog, PrimalWindow } from './types/primal';
 import { fetchKnownProfiles } from './lib/profile';
 
 import { useHomeContext } from './contexts/HomeContext';
@@ -41,6 +41,8 @@ const Menu = lazy(() => import('./pages/Settings/Menu'));
 
 const primalWindow = window as PrimalWindow;
 
+const isDev = localStorage.getItem('devMode') === 'true';
+
 const Router: Component = () => {
 
   const account = useAccountContext();
@@ -54,7 +56,7 @@ const Router: Component = () => {
   const notifications = useNotificationsContext();
   const search = useSearchContext();
 
-  const loadPrimalStores = () => {
+  if (isDev) {
     primalWindow.primal = {
       account,
       explore,
@@ -67,9 +69,10 @@ const Router: Component = () => {
       settings,
       thread,
     };
-  };
 
-  primalWindow.loadPrimalStores = loadPrimalStores;
+    primalWindow.onPrimalComponentMount = (data: ComponentLog) => {};
+    primalWindow.onPrimalComponentCleanup = (data: ComponentLog) => {};
+  }
 
   const getKnownProfiles = ({ params }: RouteDataFuncArgs) => {
     const [profiles] = createResource(params.vanityName, fetchKnownProfiles)

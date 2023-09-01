@@ -9,9 +9,10 @@ import { date } from '../../lib/dates';
 import { authorName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
+import { hookForDev } from '../../lib/devTools';
 
 
-const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props) => {
+const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: string }> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -71,37 +72,35 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement }> = (props
   };
 
   return (
-    <div>
-      <div class={styles.smallNote}>
-        <A href={`/p/${props.note.user.npub}`} class={styles.avatar}>
-          <Avatar src={props.note.user?.picture} size="xxs" />
-        </A>
-        <A
-          href={`/e/${props.note.post.noteId}`}
-          class={styles.content}
-          onClick={() => navToThread(props.note)}
-        >
-          <div class={styles.header}>
-            <div class={styles.name} title={nameOfAuthor()}>
-              {nameOfAuthor()}
-            </div>
-            <div class={styles.time}>
-              <Show
-                when={props.children}
-                fallback={date(props.note.post?.created_at).label}
-              >
-                {props.children}
-              </Show>
-            </div>
+    <div id={props.id} class={styles.smallNote}>
+      <A href={`/p/${props.note.user.npub}`} class={styles.avatar}>
+        <Avatar user={props.note.user} size="xxs" />
+      </A>
+      <A
+        href={`/e/${props.note.post.noteId}`}
+        class={styles.content}
+        onClick={() => navToThread(props.note)}
+      >
+        <div class={styles.header}>
+          <div class={styles.name} title={nameOfAuthor()}>
+            {nameOfAuthor()}
           </div>
-          <div class={styles.message}>
-            <div innerHTML={parsedContent(props.note.post.content)}>
-            </div>
+          <div class={styles.time}>
+            <Show
+              when={props.children}
+              fallback={date(props.note.post?.created_at).label}
+            >
+              {props.children}
+            </Show>
           </div>
-        </A>
-      </div>
+        </div>
+        <div class={styles.message}>
+          <div innerHTML={parsedContent(props.note.post.content)}>
+          </div>
+        </div>
+      </A>
     </div>
   );
 }
 
-export default SmallNote;
+export default hookForDev(SmallNote);

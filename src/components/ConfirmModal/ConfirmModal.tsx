@@ -13,8 +13,10 @@ import { useToastContext } from '../Toaster/Toaster';
 import { confirmDefaults as t } from '../../translations';
 
 import styles from './ConfirmModal.module.scss';
+import { hookForDev } from '../../lib/devTools';
 
 const ConfirmModal: Component<{
+  id?: string,
   open?: boolean,
   title?: string,
   description?: string,
@@ -28,7 +30,7 @@ const ConfirmModal: Component<{
 
   return (
     <Modal open={props.open}>
-      <div class={styles.feedsRestoreModal}>
+      <div id={props.id} class={styles.feedsRestoreModal}>
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}
         </div>
@@ -60,4 +62,4 @@ const ConfirmModal: Component<{
   );
 }
 
-export default ConfirmModal;
+export default hookForDev(ConfirmModal);

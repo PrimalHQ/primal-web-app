@@ -1,13 +1,15 @@
 import { Component, Show } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './LinkPreview.module.scss';
 
-const LinkPreview: Component<{ preview: any }> = (props) => {
+const LinkPreview: Component<{ preview: any, id?: string }> = (props) => {
 
   const encodedUrl = encodeURI(new URL(props.preview.url).origin);
 
   return (
     <a
+      id={props.id}
       href={props.preview.url}
       class={styles.linkPreview}
     >
@@ -40,4 +42,4 @@ const LinkPreview: Component<{ preview: any }> = (props) => {
   );
 }
 
-export default LinkPreview;
+export default hookForDev(LinkPreview);

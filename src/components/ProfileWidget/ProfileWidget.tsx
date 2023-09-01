@@ -6,21 +6,21 @@ import { trimVerification } from '../../lib/profile';
 import { hexToNpub } from '../../lib/keys';
 
 import styles from './ProfileWidget.module.scss';
+import { hookForDev } from '../../lib/devTools';
 
-const ProfileWidget: Component = () => {
+const ProfileWidget: Component<{ id?: string }> = (props) => {
 
   const account = useAccountContext()
 
   const activeUser = () => account?.activeUser;
 
   return (
-    <div>
+    <div id={props.id}>
       <Show when={account?.hasPublicKey()}>
         <A href="/profile" class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
               size="vs"
-              src={activeUser()?.picture}
               user={activeUser()}
             />
           </div>
@@ -37,4 +37,4 @@ const ProfileWidget: Component = () => {
   );
 }
 
-export default ProfileWidget;
+export default hookForDev(ProfileWidget);

@@ -1,6 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import type { Component } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 import { scopeDescriptors, timeframeDescriptors } from '../../translations';
 import { ScopeDescriptor } from '../../types/primal';
 
@@ -33,7 +34,7 @@ const timeframeIcons: Record<string, string> = {
   latest: styles.clockIcon,
 }
 
-const ExploreMenuItem: Component<{ scope: string, stat: number }> = (props) => {
+const ExploreMenuItem: Component<{ scope: string, stat: number, id?: string }> = (props) => {
 
   const intl = useIntl();
 
@@ -52,7 +53,7 @@ const ExploreMenuItem: Component<{ scope: string, stat: number }> = (props) => {
   }
 
   return (
-    <div class={styles.exploreMenuItem}>
+    <div id={props.id} class={styles.exploreMenuItem}>
       <div class={styles.itemInfo}>
         <div class={item().icon} ></div>
 
@@ -82,4 +83,4 @@ const ExploreMenuItem: Component<{ scope: string, stat: number }> = (props) => {
   )
 }
 
-export default ExploreMenuItem;
+export default hookForDev(ExploreMenuItem);

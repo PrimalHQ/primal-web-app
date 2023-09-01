@@ -32,6 +32,7 @@ import mentionedPostReplied from '../../assets/icons/notifications/mentioned_pos
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 import { notificationsNew as t } from '../../translations';
+import { hookForDev } from '../../lib/devTools';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -58,6 +59,7 @@ const typeIcons: Record<string, string> = {
 }
 
 type NotificationItemProps = {
+  id?: string,
   type: NotificationType,
   users?: PrimalNotifUser[],
   note?: PrimalNote,
@@ -141,7 +143,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   });
 
   return (
-    <div class={styles.notifItem}>
+    <div id={props.id} class={styles.notifItem}>
       <div class={styles.notifType}>
         <img src={typeIcon()} alt="notification icon" />
         <div class={styles.iconInfo} title={props.iconTooltip}>
@@ -157,7 +159,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
                   href={`/p/${user.npub}`} class={styles.avatar}
                   title={userName(user)}
                 >
-                  <Avatar src={user.picture} size="xs" />
+                  <Avatar user={user} size="xs" />
                 </A>
               )}
             </For>
@@ -192,4 +194,4 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   );
 }
 
-export default NotificationItem;
+export default hookForDev(NotificationItem);

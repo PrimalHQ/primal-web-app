@@ -175,7 +175,7 @@ const Profile: Component = () => {
   }
 
   const flagBannerForWarning = () => {
-    const dev = JSON.parse(localStorage.getItem('devMode') || 'false');
+    const dev = localStorage.getItem('devMode') === 'true';
 
     // @ts-ignore
     if (isBannerCached() || !dev) {
@@ -483,11 +483,11 @@ const Profile: Component = () => {
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <div class={styles.desktopAvatar}>
-                <Avatar src={profile?.userProfile?.picture} size="xxl" />
+                <Avatar user={profile?.userProfile} size="xxl" />
               </div>
 
               <div class={styles.phoneAvatar}>
-                <Avatar src={profile?.userProfile?.picture} size="lg" />
+                <Avatar user={profile?.userProfile} size="lg" />
               </div>
             </div>
           </div>

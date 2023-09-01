@@ -1,12 +1,13 @@
 import { Component } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './Loader.module.scss';
 
-const Loader: Component = () => {
+const Loader: Component< { id?: string } > = (props) => {
 
   return (
-    <div class={styles.loader}><span></span></div>
+    <div id={props.id} class={styles.loader}><span></span></div>
   );
 }
 
-export default Loader;
+export default hookForDev(Loader);

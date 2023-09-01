@@ -1,9 +1,10 @@
 import { Component, JSXElement, Match, Show, Switch } from 'solid-js';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './Checkbox.module.scss';
 
 const Checkbox: Component<{
-  id: string,
+  id?: string,
   onChange: (e: Event) => void,
   checked?: boolean,
   label?: string,
@@ -13,9 +14,11 @@ const Checkbox: Component<{
 }> = (props) => {
 
   return (
-    <div class={styles.checkbox}>
+    <div
+      id={props.id}
+      class={styles.checkbox}
+    >
       <input
-        id={props.id}
         type='checkbox'
         checked={props.checked}
         onChange={props.onChange}
@@ -36,4 +39,4 @@ const Checkbox: Component<{
   )
 }
 
-export default Checkbox;
+export default hookForDev(Checkbox);

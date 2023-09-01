@@ -4,8 +4,9 @@ import styles from './ThemeChooser.module.scss';
 import ThemeOption from './ThemeOption/ThemeOption';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { PrimalTheme } from '../../types/primal';
+import { hookForDev } from '../../lib/devTools';
 
-const ThemeChooser: Component = () => {
+const ThemeChooser: Component<{ id?: string }> = (props) => {
 
   const settings = useSettingsContext();
 
@@ -14,7 +15,7 @@ const ThemeChooser: Component = () => {
   };
 
   return (
-    <div class={styles.themeChooser}>
+    <div id={props.id} class={styles.themeChooser}>
       <For each={settings?.themes}>
         {(theme) => (
           <ThemeOption
@@ -28,4 +29,4 @@ const ThemeChooser: Component = () => {
   );
 }
 
-export default ThemeChooser;
+export default hookForDev(ThemeChooser);

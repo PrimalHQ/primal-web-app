@@ -933,7 +933,7 @@ const Messages: Component = () => {
                   onClick={() => selectSender(sender.npub)}
                   data-user={sender.pubkey}
                 >
-                  <Avatar src={sender.picture} size="vs" />
+                  <Avatar user={sender} size="vs" />
                   <div class={styles.senderInfo}>
                     <div class={styles.firstLine}>
                       <div class={styles.senderName}>
@@ -993,7 +993,7 @@ const Messages: Component = () => {
                     <SearchOption
                       title={userName(user)}
                       description={user.nip05}
-                      icon={<Avatar src={user.picture} size="xs" />}
+                      icon={<Avatar user={user} size="xs" />}
                       statNumber={search?.scores[user.pubkey]}
                       statLabel={intl.formatMessage(tSearch.followers)}
                       onClick={() => selectUser(user)}
@@ -1043,7 +1043,7 @@ const Messages: Component = () => {
                           href={`/p/${hexToNpub(thread.author)}`}
                           class={styles.avatar}
                         >
-                          <Avatar src={account?.activeUser?.picture} size="xxs" />
+                          <Avatar user={account?.activeUser} size="xxs" />
                         </A>
                         <div class={styles.threadMessages}>
                           <For each={thread.messages}>
@@ -1070,7 +1070,7 @@ const Messages: Component = () => {
                         href={`/p/${hexToNpub(thread.author)}`}
                         class={styles.avatar}
                       >
-                        <Avatar src={user(thread.author)?.picture} size="xxs" />
+                        <Avatar user={user(thread.author)} size="xxs" />
                       </A>
                       <div class={styles.threadMessages}>
                         <For each={thread.messages}>

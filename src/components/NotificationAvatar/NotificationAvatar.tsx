@@ -1,12 +1,14 @@
 import { Component, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_nostrich.svg';
+import { hookForDev } from '../../lib/devTools';
 
 import styles from './NotificationAvatar.module.scss';
 
 const NotificationAvatar: Component<{
   number: number | undefined,
   size?: "xxs" | "xs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
-  verified?: string
+  verified?: string,
+  id?: string,
 }> = (props) => {
 
   const selectedSize = props.size || 'sm';
@@ -41,7 +43,7 @@ const NotificationAvatar: Component<{
   }
 
   return (
-    <div class={avatarClass[selectedSize]}>
+    <div id={props.id} class={avatarClass[selectedSize]}>
       <Show
         when={props.number}
         fallback={
@@ -59,4 +61,4 @@ const NotificationAvatar: Component<{
   )
 }
 
-export default NotificationAvatar;
+export default hookForDev(NotificationAvatar);

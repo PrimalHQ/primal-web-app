@@ -16,8 +16,9 @@ import { getTrendingUsers } from '../../lib/profile';
 import { hexToNpub } from '../../lib/keys';
 import { exploreSidebarCaption } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { hookForDev } from '../../lib/devTools';
 
-const ExploreSidebar: Component = () => {
+const ExploreSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
@@ -119,7 +120,7 @@ const ExploreSidebar: Component = () => {
 // RENDER ---------------------------------------
 
   return (
-    <>
+    <div id={props.id}>
       <div class={styles.trendingUsersCaption}>
         {intl.formatMessage(exploreSidebarCaption)}
       </div>
@@ -132,15 +133,15 @@ const ExploreSidebar: Component = () => {
                 class={styles.user}
                 title={authorName(user)}
               >
-                <Avatar src={user.picture} size="vs" />
+                <Avatar user={user} size="vs" />
                 <div class={styles.name}>{authorName(user)}</div>
               </A>
             )
           }
         </For>
       </div>
-    </>
+    </div>
   )
 }
 
-export default ExploreSidebar;
+export default hookForDev(ExploreSidebar);

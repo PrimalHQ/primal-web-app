@@ -6,8 +6,9 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { PrimalUser } from '../../types/primal';
 import { placeholders } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
+import { hookForDev } from '../../lib/devTools';
 
-const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined }> = (params) => {
+const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined, id?: string }> = (props) => {
 
   const account = useAccountContext();
   const intl = useIntl();
@@ -17,9 +18,9 @@ const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined }> = (pa
   };
 
   return (
-    <button class={styles.callToAction} onClick={showNewNoteForm}>
+    <button id={props.id} class={styles.callToAction} onClick={showNewNoteForm}>
       <Avatar
-        src={params.activeUser?.picture}
+        user={props.activeUser}
         size="xs"
       />
 
@@ -32,4 +33,4 @@ const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined }> = (pa
   );
 }
 
-export default SmallCallToAction;
+export default hookForDev(SmallCallToAction);
