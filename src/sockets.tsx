@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent } from "./types/primal";
+import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
 
@@ -9,6 +9,11 @@ export const isNotConnected = () => !isConnected();
 
 const onOpen = () => {
   setConnected(true);
+  if (localStorage.getItem('devMode') === 'true') {
+    const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
+
+    hook && hook(cacheServer);
+  }
 }
 
 const onClose = () => {
@@ -17,10 +22,19 @@ const onClose = () => {
   socket()?.removeEventListener('open', onOpen);
   socket()?.removeEventListener('close', onClose);
   socket()?.removeEventListener('error', onError);
+  socket()?.removeEventListener('message', onMessage);
 
   setTimeout(() => {
     connect();
   }, 200);
+}
+
+const onMessage = (event: MessageEvent) => {
+  if (localStorage.getItem('devMode') === 'true') {
+    const hook = (window as PrimalWindow).onPrimalCacheServerMessage;
+
+    hook && hook(event);
+  }
 }
 
 const onError = (error: Event) => {
@@ -41,6 +55,7 @@ export const connect = () => {
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
     socket()?.addEventListener('error', onError);
+    socket()?.addEventListener('message', onMessage);
   }
 };
 
