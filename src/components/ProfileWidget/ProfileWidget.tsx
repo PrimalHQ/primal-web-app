@@ -23,6 +23,7 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
             <Avatar
               size="vs"
               user={activeUser()}
+              showCheck={true}
             />
           </div>
           <div class={styles.userInfo}>

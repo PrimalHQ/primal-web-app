@@ -13,6 +13,7 @@ const Avatar: Component<{
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
+  showCheck?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -121,7 +122,7 @@ const Avatar: Component<{
           <img src={imageSrc()} alt="avatar" onerror={imgError}/>
         </div>
       </Show>
-      <Show when={props.user}>
+      <Show when={props.user && props.showCheck}>
         <div class={styles.iconBackground}>
           <VerificationCheck user={props.user} />
         </div>

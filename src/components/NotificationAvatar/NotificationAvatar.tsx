@@ -52,11 +52,6 @@ const NotificationAvatar: Component<{
       >
         +{props.number}
       </Show>
-      <Show when={props.verified}>
-        <div class={styles.iconBackground}>
-          <div class={styles.verifiedIcon}></div>
-        </div>
-      </Show>
     </div>
   )
 }
