@@ -576,8 +576,7 @@ const Profile: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.profileAbout}>
-          {renderProfileAbout()}
+        <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
         </div>
 
         <div class={styles.profileLinks}>
