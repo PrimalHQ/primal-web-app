@@ -16,4 +16,7 @@ export default defineConfig({
   define: {
     'import.meta.env.PRIMAL_VERSION': JSON.stringify(packageJson.version),
   },
+  esbuild: {
+    keepNames: true,
+  },
 });
