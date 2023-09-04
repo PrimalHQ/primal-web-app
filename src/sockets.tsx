@@ -12,7 +12,7 @@ const onOpen = () => {
   if (localStorage.getItem('devMode') === 'true') {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
 
-    hook && hook(cacheServer);
+    hook && hook(cacheServer, socket());
   }
 }
 
@@ -22,19 +22,10 @@ const onClose = () => {
   socket()?.removeEventListener('open', onOpen);
   socket()?.removeEventListener('close', onClose);
   socket()?.removeEventListener('error', onError);
-  socket()?.removeEventListener('message', onMessage);
 
   setTimeout(() => {
     connect();
   }, 200);
-}
-
-const onMessage = (event: MessageEvent) => {
-  if (localStorage.getItem('devMode') === 'true') {
-    const hook = (window as PrimalWindow).onPrimalCacheServerMessage;
-
-    hook && hook(event);
-  }
 }
 
 const onError = (error: Event) => {
@@ -55,7 +46,6 @@ export const connect = () => {
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
     socket()?.addEventListener('error', onError);
-    socket()?.addEventListener('message', onMessage);
   }
 };
 
@@ -69,7 +59,11 @@ export const reset = () => {
 };
 
 export const sendMessage = (message: string) => {
-  isConnected() && socket()?.send(message);
+  if (isConnected()) {
+    const e = new CustomEvent('send', { detail: { message, ws: socket() }});
+    socket()?.send(message);
+    socket()?.dispatchEvent(e);
+  }
 }
 
 export const refreshSocketListeners = (

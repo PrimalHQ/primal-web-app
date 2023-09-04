@@ -73,7 +73,7 @@ const Router: Component = () => {
     primalWindow.onPrimalComponentMount = () => {};
     primalWindow.onPrimalComponentCleanup = () => {};
     primalWindow.onPrimalCacheServerConnected = () => {};
-    primalWindow.onPrimalCacheServerMessage = () => {};
+    primalWindow.onPrimalUploadServerConnected = () => {};
   }
 
   const getKnownProfiles = ({ params }: RouteDataFuncArgs) => {

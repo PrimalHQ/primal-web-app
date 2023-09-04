@@ -342,8 +342,8 @@ export type PrimalWindow = Window & typeof globalThis & {
   primal?: any,
   onPrimalComponentMount?: (data: any) => void,
   onPrimalComponentCleanup?: (data: any) => void,
-  onPrimalCacheServerConnected?: (url: string) => void,
-  onPrimalCacheServerMessage?: (message: MessageEvent) => void,
+  onPrimalCacheServerConnected?: (url: string, ws: WebSocket | undefined) => void,
+  onPrimalUploadServerConnected?: (url: string, ws: WebSocket | undefined) => void,
 };
 
 export type NostrEventType = "EVENT" | "EOSE" | "NOTICE";

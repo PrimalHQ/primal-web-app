@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent } from "./types/primal";
+import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
 
@@ -9,6 +9,11 @@ export const isNotConnected = () => !isConnected();
 
 const onOpen = () => {
   setConnected(true);
+  if (localStorage.getItem('devMode') === 'true') {
+    const hook = (window as PrimalWindow).onPrimalUploadServerConnected;
+
+    hook && hook(uploadServer, socket());
+  }
 }
 
 const onClose = () => {
@@ -27,12 +32,14 @@ const onError = (error: Event) => {
   console.log("ws error: ", error);
 };
 
+export let uploadServer = '';
+
 export const connect = () => {
   if (isNotConnected()) {
-    const cacheServer = localStorage.getItem('uploadServer') ||
+    uploadServer = localStorage.getItem('uploadServer') ||
       import.meta.env.PRIMAL_UPLOAD_URL;
 
-    setSocket(new WebSocket(cacheServer));
+    setSocket(new WebSocket(uploadServer));
     console.log('UPLOAD SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
@@ -51,7 +58,11 @@ export const reset = () => {
 };
 
 export const sendMessage = (message: string) => {
-  isConnected() && socket()?.send(message);
+  if (isConnected()) {
+    const e = new CustomEvent('send', { detail: { message, ws: socket() }});
+    socket()?.send(message);
+    socket()?.dispatchEvent(e);
+  }
 }
 
 export const refreshSocketListeners = (
