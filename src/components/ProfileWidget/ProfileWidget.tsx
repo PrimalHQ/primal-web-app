@@ -7,6 +7,7 @@ import { hexToNpub } from '../../lib/keys';
 
 import styles from './ProfileWidget.module.scss';
 import { hookForDev } from '../../lib/devTools';
+import { userName } from '../../stores/profile';
 
 const ProfileWidget: Component<{ id?: string }> = (props) => {
 
@@ -25,7 +26,7 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
             />
           </div>
           <div class={styles.userInfo}>
-            <div class={styles.userName}>{activeUser()?.name || hexToNpub(account?.publicKey)}</div>
+            <div class={styles.userName}>{userName(activeUser())}</div>
             <div class={styles.userVerification}>
               {trimVerification(activeUser()?.nip05)[1]}
             </div>
