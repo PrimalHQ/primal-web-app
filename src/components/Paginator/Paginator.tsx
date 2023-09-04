@@ -18,16 +18,11 @@ const Paginator: Component<{
         }
       });
     });
-
-    const pag = document.getElementById('pagination_trigger');
-
-    pag && observer?.observe(pag);
+    trigger && observer?.observe(trigger);
   });
 
   onCleanup(() => {
-    const pag = document.getElementById('pagination_trigger');
-
-    pag && observer?.unobserve(pag);
+    trigger && observer?.unobserve(trigger);
   });
 
   return (
