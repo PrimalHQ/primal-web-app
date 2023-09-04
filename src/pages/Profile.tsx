@@ -402,8 +402,8 @@ const Profile: Component = () => {
 
   const [renderProfileAbout, setRenderProfileAbout] = createSignal('');
 
-  const getProfileAbout = async (about: string) => {
-    const a = await replaceLinkPreviews(urlify(sanitize(about), () => '', false, false))
+  const getProfileAbout = (about: string) => {
+    const a = urlify(sanitize(about), () => '', false, false, true);
 
     setRenderProfileAbout(a)
   };
