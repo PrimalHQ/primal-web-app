@@ -408,10 +408,10 @@ export const feedNewPosts = {
   id: 'feed.newPosts',
   defaultMessage: `{number, plural,
     =0 {}
-    one {# new post}
-    =100 {99+ new posts}
-    other {# new posts}}`,
-  description: 'Label for a button to load new posts',
+    one {# new note}
+    =100 {99+ new notes}
+    other {# new notes}}`,
+  description: 'Label for a button to load new notes',
 };
 
 export const feedback = {
@@ -514,7 +514,7 @@ export const note = {
   },
   mentionIndication: {
     id: 'note.mentionIndication',
-    defaultMessage: '\[post by {name}\]',
+    defaultMessage: '\[note by {name}\]',
     description: 'Label indicating that a note has been metioned in the small note display'
   },
   reposted: {
@@ -528,23 +528,23 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: 'followed you',
   [NotificationType.USER_UNFOLLOWED_YOU]: 'unfollowed you',
 
-  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your post',
-  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your post',
-  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your post',
-  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your post',
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your note',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your note',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your note',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your note',
 
-  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a post',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your post',
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a note',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your note',
 
-  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'zapped a post you were mentioned in',
-  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'liked a post you were mentioned in',
-  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'reposted a post you were mentioned in',
-  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a post you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'zapped a note you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'liked a note you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: 'reposted a note you were mentioned in',
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a note you were mentioned in',
 
-  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'zapped a post your post was mentioned in',
-  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'liked a post your post was mentioned in',
-  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a post your post was mentioned in',
-  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a post your post was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: 'zapped a note your note was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'liked a note your note was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a note your note was mentioned in',
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a note your note was mentioned in',
 }
 
 export const notificationsNew: Record<number, MessageDescriptor> = Object.values(NotificationType).reduce((acc, type) => ({
@@ -631,9 +631,9 @@ export const notificationsSidebar = {
     id: 'notifications.sidebar.mentionsYourPost',
     defaultMessage: `{number, plural,
       =0 {}
-      one {mention of your post}
-      other {mentions of your posts}}`,
-    description: 'Sidebar mentions your post stats description on the notification page',
+      one {mention of your note}
+      other {mentions of your notes}}`,
+    description: 'Sidebar mentions your note stats description on the notification page',
   },
   replies: {
     id: 'notifications.sidebar.replies',
@@ -787,12 +787,12 @@ export const placeholders = {
 export const profile = {
   sidebarCaption: {
     id: 'profile.sidebar.caption',
-    defaultMessage: 'Popular posts',
+    defaultMessage: 'Popular notes',
     description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
   },
   sidebarNoNotes: {
     id: 'profile.sidebar.noNotes',
-    defaultMessage: 'No trending posts',
+    defaultMessage: 'No trending notes',
     description: 'Placeholde for profile sidebar when the profile is missing trending notes',
   },
   title: {
@@ -823,7 +823,7 @@ export const profile = {
     },
     notes: {
       id: 'profile.stats.notes',
-      defaultMessage: 'Posts',
+      defaultMessage: 'Notes',
       description: 'Label for notes profile stat',
     },
   },
@@ -1137,13 +1137,13 @@ export const settings = {
     },
     yourMentions: {
       id: 'settings.sections.notifications.yourMentions',
-      defaultMessage: 'A post you were mentioned in was:',
-      description: 'Title of the notification settings sub-section for posts you were mentioned in',
+      defaultMessage: 'A note you were mentioned in was:',
+      description: 'Title of the notification settings sub-section for notes you were mentioned in',
     },
     yourPostMentions: {
       id: 'settings.sections.notifications.yourPostMentions',
-      defaultMessage: 'A post your post was mentioned in was:',
-      description: 'Title of the notification settings sub-section for posts your post was mentioned in',
+      defaultMessage: 'A note your note was mentioned in was:',
+      description: 'Title of the notification settings sub-section for notes your note was mentioned in',
     },
   },
   profile: {
@@ -1392,18 +1392,18 @@ export const toast = {
   },
   publishNoteSuccess: {
     id: 'toast.publishNoteSuccess',
-    defaultMessage: 'Message posted successfully',
-    description: 'Toast message confirming successfull publication of the post',
+    defaultMessage: 'Message noteed successfully',
+    description: 'Toast message confirming successfull publication of the note',
   },
   publishNoteTimeout: {
     id: 'toast.publishNoteTimeout',
-    defaultMessage: 'No relay confirmed reception of your post after 8 seconds',
+    defaultMessage: 'No relay confirmed reception of your note after 8 seconds',
     description: 'Toast message indicating that no relay confirmed note reception',
   },
   publishNoteFail: {
     id: 'toast.publishNoteFail',
-    defaultMessage: 'Failed to publish post',
-    description: 'Toast message indicating that post publishing has failed',
+    defaultMessage: 'Failed to publish note',
+    description: 'Toast message indicating that note publishing has failed',
   },
   noRelays: {
     id: 'toast.noRelays',
@@ -1487,7 +1487,7 @@ export const toast = {
   },
   zapUnavailable: {
     id: 'toast.zapUnavailable',
-    defaultMessage: 'Author of this post cannot be zapped',
+    defaultMessage: 'Author of this note cannot be zapped',
     description: 'Toast message indicating user cannot receieve a zap',
   },
   updateProfileSuccess: {
