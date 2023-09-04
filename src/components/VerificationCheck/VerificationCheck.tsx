@@ -11,8 +11,9 @@ const VerificationCheck: Component<{ user: PrimalUser | undefined, id?: string }
   const [isVerified, setIsVerified] = createSignal(true);
 
   const isVerifiedByPrimal = () => {
-    return isVerified() &&
-      props.user?.nip05.endsWith('primal.net');
+    const nip05 = props.user?.nip05;
+
+    return isVerified() && nip05 && nip05.endsWith('primal.net');
   }
 
   const checkVerification = () => {
