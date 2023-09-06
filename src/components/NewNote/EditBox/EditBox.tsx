@@ -75,7 +75,6 @@ const EditBox: Component<{
   const [isEmojiInput, setEmojiInput] = createSignal(false);
   const [emojiQuery, setEmojiQuery] = createSignal('');
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
-  const [firstEmojiChar, setfirstEmojiChar] = createSignal('');
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
 
@@ -155,8 +154,6 @@ const EditBox: Component<{
     // Emojis are only generated when starting with ':' 
     if (!isMentioning() && !isEmojiInput() && e.key === ':') {
       emojiCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
-      // Enables searching emojis with ;, 8 etc. in the future (?)
-      setfirstEmojiChar(e.key);
       setEmojiInput(true);
       return false;
     }
@@ -245,7 +242,7 @@ const EditBox: Component<{
           return false;
         }
         e.preventDefault();
-        setEmojiResults(emojiSearch(firstEmojiChar() + emojiQuery()));
+        setEmojiResults(emojiSearch(':' + emojiQuery()));
         // highlightedEmoji is always 0 here
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
