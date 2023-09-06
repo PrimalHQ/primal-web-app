@@ -472,6 +472,7 @@ const Messages: Component = () => {
           return false;
         }
         e.preventDefault();
+        setEmojiResults(emojiSearch(emojiQuery()));
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
