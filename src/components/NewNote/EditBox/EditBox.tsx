@@ -241,8 +241,7 @@ const EditBox: Component<{
           return false;
         }
         e.preventDefault();
-        setEmojiResults(emojiSearch(':' + emojiQuery()));
-        // highlightedEmoji is always 0 here
+        setEmojiResults(emojiSearch(emojiQuery()));
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
