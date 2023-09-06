@@ -457,10 +457,6 @@ const Profile: Component = () => {
         )}
       />
 
-      <Wormhole to='branding_holder'>
-        <Branding small={false} />
-      </Wormhole>
-
       <StickySidebar>
         <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
       </StickySidebar>

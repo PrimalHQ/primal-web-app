@@ -67,12 +67,6 @@ const Search: Component = () => {
 
   return (
     <>
-      <Wormhole
-        to="branding_holder"
-      >
-        <Branding small={false} />
-      </Wormhole>
-
       <StickySidebar>
         <SearchSidebar users={search?.contentUsers || []} />
       </StickySidebar>

@@ -105,10 +105,6 @@ const Mutelist: Component = () => {
 
   return (
     <div class={styles.settingsContainer}>
-      <Wormhole to='branding_holder'>
-        <Branding small={false} />
-      </Wormhole>
-
       <PageCaption>
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
           <div style="display: flex; align-items: center;">

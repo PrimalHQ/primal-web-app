@@ -1,4 +1,4 @@
-import { Component, createEffect, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
@@ -12,7 +12,10 @@ import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
 import { useProfileContext } from '../../contexts/ProfileContext';
+import Branding from '../Branding/Branding';
 
+export const [isHome, setIsHome] = createSignal(false);
+export const [showNav, setShowNav] = createSignal(false);
 
 const Layout: Component = () => {
 
@@ -92,6 +95,7 @@ const Layout: Component = () => {
         <div class={styles.leftColumn}>
           <div>
             <div id="branding_holder" class={styles.leftHeader}>
+              <Branding isHome={isHome()} showNav={showNav()} />
             </div>
 
             <div class={styles.leftContent}>

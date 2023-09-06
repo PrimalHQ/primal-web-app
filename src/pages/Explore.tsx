@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component, createEffect, onCleanup, onMount, Show } from 'solid-js';
 import styles from './Explore.module.scss';
 import ExploreMenu from './ExploreMenu';
 import Feed from './Feed';
@@ -17,6 +17,7 @@ import Search from '../components/Search/Search';
 import PageCaption from '../components/PageCaption/PageCaption';
 import { titleCase } from '../utils';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
+import { setShowNav } from '../components/Layout/Layout';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -59,17 +60,16 @@ const Explore: Component = () => {
       ));
     };
 
+    createEffect(() => {
+      setShowNav(hasParams());
+    });
+
+    onCleanup(() => {
+      setShowNav(false);
+    });
+
     return (
       <>
-        <Wormhole to="branding_holder">
-          <Show
-            when={hasParams()}
-            fallback={<Branding small={false} />}
-          >
-            <PageNav />
-          </Show>
-        </Wormhole>
-
         <Wormhole
           to="search_section"
         >

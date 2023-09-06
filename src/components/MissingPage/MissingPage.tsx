@@ -14,10 +14,6 @@ const MissingPage: Component<{ title: string, children?: JSXElement, id?: string
 
   return (
     <div id={props.id}>
-      <Wormhole to="branding_holder" >
-        <Branding small={false} />
-      </Wormhole>
-
       <Wormhole
         to="search_section"
       >

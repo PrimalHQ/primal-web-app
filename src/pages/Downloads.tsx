@@ -41,10 +41,6 @@ const Downloads: Component = () => {
 
   return (
     <div class={styles.downloadsContainer}>
-      <Wormhole to="branding_holder">
-        <Branding small={false} />
-      </Wormhole>
-
       <Wormhole
         to="search_section"
       >

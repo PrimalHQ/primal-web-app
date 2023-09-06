@@ -29,6 +29,7 @@ import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
 import { feedNewPosts, placeholders } from '../translations';
 import Search from '../components/Search/Search';
+import { setIsHome } from '../components/Layout/Layout';
 
 
 const Home: Component = () => {
@@ -50,6 +51,7 @@ const Home: Component = () => {
 
 
   onMount(() => {
+    setIsHome(true);
     scrollWindowTo(context?.scrollTop);
   });
 
@@ -99,6 +101,7 @@ const Home: Component = () => {
 
   onCleanup(()=> {
     clearInterval(checkNewNotesTimer);
+    setIsHome(false);
   });
 
   const loadNewContent = () => {
@@ -115,12 +118,6 @@ const Home: Component = () => {
 
   return (
     <div class={styles.homeContent}>
-      <Wormhole
-        to="branding_holder"
-      >
-        <Branding small={false} isHome={true} />
-      </Wormhole>
-
       <Wormhole
         to="search_section"
       >

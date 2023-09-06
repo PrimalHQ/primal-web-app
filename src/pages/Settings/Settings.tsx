@@ -20,10 +20,6 @@ const Settings: Component = () => {
 
   return (
     <div class={styles.settingsContainer}>
-      <Wormhole to="branding_holder">
-        <Branding small={false} />
-      </Wormhole>
-
       <Wormhole to="search_section">
         <Search />
       </Wormhole>

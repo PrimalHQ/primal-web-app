@@ -269,10 +269,6 @@ const EditProfile: Component = () => {
     <div class={styles.container}>
       <PageCaption title={intl.formatMessage(tSettings.profile.title)} />
 
-      <Wormhole to="branding_holder">
-        <Branding small={false} />
-      </Wormhole>
-
       <div id="central_header" class={styles.fullHeader}>
         <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
           <Show when={isUploadingBanner()}>

@@ -877,10 +877,6 @@ const Messages: Component = () => {
 
   return (
     <div>
-      <Wormhole to="branding_holder">
-        <Branding small={false} />
-      </Wormhole>
-
       <Wormhole
         to="search_section"
       >

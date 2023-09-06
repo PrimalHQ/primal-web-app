@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useNavigate, useParams } from '@solidjs/router';
@@ -17,6 +17,7 @@ import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { thread as t } from '../translations';
+import { setShowNav } from '../components/Layout/Layout';
 
 
 const Thread: Component = () => {
@@ -111,10 +112,15 @@ const Thread: Component = () => {
     }
   });
 
+  onMount(() => {
+    setShowNav(true);
+  });
+
   onCleanup(() => {
     const pn = document.getElementById('primary_note');
 
     pn && observer?.unobserve(pn);
+    setShowNav(false);
   });
 
   const onNotePosted = (result: SendNoteResult) => {
@@ -123,9 +129,6 @@ const Thread: Component = () => {
 
   return (
     <div>
-      <Wormhole to='branding_holder'>
-        <PageNav />
-      </Wormhole>
 
       <Wormhole
         to="search_section"
