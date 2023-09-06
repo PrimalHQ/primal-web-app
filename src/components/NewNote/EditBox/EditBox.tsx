@@ -151,7 +151,6 @@ const EditBox: Component<{
       return false;
     }
 
-    // Emojis are only generated when starting with ':' 
     if (!isMentioning() && !isEmojiInput() && e.key === ':') {
       emojiCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
       setEmojiInput(true);
