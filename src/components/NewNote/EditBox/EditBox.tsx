@@ -617,7 +617,7 @@ const EditBox: Component<{
         <span class='linkish'> @{name}</span>;
 
         // @ts-ignore
-      return link.outerHTML || ` @${name}`;
+      return ` ${link.outerHTML}` || ` @${name}`;
     });
   };
 
