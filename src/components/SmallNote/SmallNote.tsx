@@ -10,6 +10,7 @@ import { authorName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
+import ParsedNote from '../ParsedNote/ParsedNote';
 
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: string }> = (props) => {
@@ -95,7 +96,8 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
           </div>
         </div>
         <div class={styles.message}>
-          <div innerHTML={parsedContent(props.note.post.content)}>
+          <div>
+            <ParsedNote note={props.note} noLinks="text" ignoreMedia={true} />
           </div>
         </div>
       </A>

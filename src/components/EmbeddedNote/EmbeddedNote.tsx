@@ -176,7 +176,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
               ),
             ),
             props.note,
-            true,
+            'links',
           ),
           props.note,
           !props.includeEmbeds,

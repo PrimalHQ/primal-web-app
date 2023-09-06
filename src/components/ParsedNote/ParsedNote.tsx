@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
-import { linkPreviews, parseNote1 } from '../../lib/notes';
+import { linkPreviews, parseNote1, parseNote3 } from '../../lib/notes';
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
@@ -59,7 +59,7 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
 
 };
 
-export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
+export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly?: 'links' | 'text') => {
 
   const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
 
@@ -80,14 +80,16 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
 
       const user = note.mentionedUsers && note.mentionedUsers[hex];
 
-      let link = highlightOnly ?
-        <span class='linkish'>@{truncateNpub(npub)}</span> :
-        <A href={path}>@{truncateNpub(npub)}</A>;
+      const label = user ? userName(user) : truncateNpub(npub);
 
-      if (user) {
-        link = highlightOnly ?
-          <span class='linkish'>@{userName(user)}</span> :
-          MentionedUserLink({ user });
+      let link = <span>@{label}</span>;
+
+      if (highlightOnly === 'links') {
+        link = <span class='linkish'>@{label}</span>;
+      }
+
+      if (!highlightOnly) {
+        link = user ? <A href={path}>@{label}</A> : MentionedUserLink({ user });
       }
 
       // @ts-ignore
@@ -99,7 +101,13 @@ export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly = f
 
 };
 
-const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean, id?: string }> = (props) => {
+const ParsedNote: Component<{
+  note: PrimalNote,
+  ignoreMentionedNotes?: boolean,
+  id?: string,
+  ignoreMedia?: boolean,
+  noLinks?: 'links' | 'text',
+}> = (props) => {
 
   const media = useMediaContext();
 
@@ -156,12 +164,17 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean, 
 
   };
 
-  const highlightHashtags = (text: string) => {
+  const highlightHashtags = (text: string, noLinks?: 'links' | 'text') => {
     const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
 
     return text.replace(regex, (token) => {
       const [space, term] = token.split('#');
-      const embeded = (
+      const embeded = noLinks === 'text' ? (
+        <span>
+          {space}
+          <span>#{term}</span>
+        </span>
+      ) : (
         <span>
           {space}
           <A
@@ -207,12 +220,29 @@ const ParsedNote: Component<{ note: PrimalNote, ignoreMentionedNotes?: boolean, 
           ),
         ),
         props.note,
+        props.noLinks,
       ),
       props.note,
     );
   };
 
-  const [displayedContent, setDisplayedContent] = createSignal<string>(content());
+  const smallContent = () => {
+    return parseNoteLinks(
+      parseNpubLinks(
+        parsedContent(
+          highlightHashtags(
+            props.note.post.content,
+            props.noLinks,
+          ),
+        ),
+        props.note,
+        props.noLinks,
+      ),
+      props.note,
+    );
+  };
+
+  const [displayedContent, setDisplayedContent] = createSignal<string>(props.ignoreMedia ? smallContent() : content());
 
   createEffect(() => {
     const newContent = replaceLinkPreviews(displayedContent(), { ...linkPreviews });
