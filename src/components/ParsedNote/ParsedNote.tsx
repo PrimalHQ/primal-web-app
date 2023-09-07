@@ -18,8 +18,7 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 
 
-export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = false) => {
-
+export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly?: 'text' | 'links') => {
   const regex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
 
   return text.replace(regex, (url) => {
@@ -36,11 +35,16 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
 
       const path = `/e/${noteId}`;
 
-      const ment = note.mentionedNotes && note.mentionedNotes[hex];
+      let link = <span>{url}</span>;
 
-      const link = highlightOnly ?
-        <span class='linkish' >{url}</span> :
-        ment ?
+      if (highlightOnly === 'links') {
+        link = <span class='linkish'>@{url}</span>;
+      }
+
+      if (!highlightOnly) {
+        const ment = note.mentionedNotes && note.mentionedNotes[hex];
+
+        link = ment ?
           <div>
             <EmbeddedNote
               note={ment}
@@ -48,6 +52,7 @@ export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly = f
             />
           </div> :
           <A href={path}>{url}</A>;
+      }
 
       // @ts-ignore
       return link.outerHTML || url;
@@ -111,7 +116,7 @@ const ParsedNote: Component<{
 
   const media = useMediaContext();
 
-  const parsedContent = (text: string) => {
+  const parsedContent = (text: string, highlightOnly?: 'text' | 'links') => {
     const regex = /\#\[([0-9]*)\]/g;
     let parsed = text;
 
@@ -135,15 +140,28 @@ const ParsedNote: Component<{
           props.note.mentionedNotes &&
           props.note.mentionedNotes[tag[1]]
         ) {
-          const embeded = (
-            <div>
-              <EmbeddedNote
-                note={props.note.mentionedNotes[tag[1]]}
-                mentionedUsers={props.note.mentionedUsers}
-              />
-            </div>
-          );
+          const hex = tag[1];
+          const noteId = `nostr:${nip19.noteEncode(hex)}`;
+          const path = `/e/${nip19.noteEncode(hex)}`;
 
+          let embeded = <span>{noteId}</span>;
+
+          if (highlightOnly === 'links') {
+            embeded = <span class='linkish'>@{noteId}</span>;
+          }
+
+          if (!highlightOnly) {
+            const ment = props.note.mentionedNotes[hex];
+
+            embeded = ment ?
+              <div>
+                <EmbeddedNote
+                  note={ment}
+                  mentionedUsers={props.note.mentionedUsers}
+                />
+              </div> :
+              <A href={path}>{noteId}</A>;
+          }
 
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
@@ -152,7 +170,19 @@ const ParsedNote: Component<{
         if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
           const user = props.note.mentionedUsers[tag[1]];
 
-          const link = MentionedUserLink({ user });
+          const path = `/p/${user.npub}`;
+
+          const label = userName(user);
+
+          let link = <span>@{label}</span>;
+
+          if (highlightOnly === 'links') {
+            link = <span class='linkish'>@{label}</span>;
+          }
+
+          if (!highlightOnly) {
+            link = user ? <A href={path}>@{label}</A> : MentionedUserLink({ user });
+          }
 
           // @ts-ignore
           parsed = parsed.replace(`#[${r}]`, link.outerHTML);
@@ -218,11 +248,13 @@ const ParsedNote: Component<{
           highlightHashtags(
             parseNote1(props.note.post.content, media?.actions.getMediaUrl)
           ),
+          props.noLinks,
         ),
         props.note,
         props.noLinks,
       ),
       props.note,
+      props.noLinks,
     );
   };
 
@@ -234,11 +266,13 @@ const ParsedNote: Component<{
             props.note.post.content,
             props.noLinks,
           ),
+          props.noLinks,
         ),
         props.note,
         props.noLinks,
       ),
       props.note,
+      props.noLinks,
     );
   };
 

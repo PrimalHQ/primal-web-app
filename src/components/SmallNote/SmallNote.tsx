@@ -73,7 +73,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
   };
 
   return (
-    <div id={props.id} class={styles.smallNote}>
+    <div id={props.id} class={styles.smallNote} data-note-id={props.note.post.noteId}>
       <A href={`/p/${props.note.user.npub}`} class={styles.avatar}>
         <Avatar user={props.note.user} size="xxs" />
       </A>
