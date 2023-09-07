@@ -11,8 +11,12 @@ const onOpen = () => {
   setConnected(true);
   if (localStorage.getItem('devMode') === 'true') {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
-
     hook && hook(cacheServer, socket());
+
+    socket().addEventListener('message', function(event) {
+        const hook = (window as PrimalWindow).onPrimalCacheServerMessageReceived;
+        hook && hook(cacheServer, event.data);
+    });
   }
 }
 
@@ -63,6 +67,9 @@ export const sendMessage = (message: string) => {
     const e = new CustomEvent('send', { detail: { message, ws: socket() }});
     socket()?.send(message);
     socket()?.dispatchEvent(e);
+
+    const hook = (window as PrimalWindow).onPrimalCacheServerMessageSent;
+    hook && hook(cacheServer, message);
   }
 }
 
@@ -103,7 +110,6 @@ export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: str
     if (subId === subscriptionId) {
       cb(type, subscriptionId, content);
     }
-
   };
 
   socket()?.addEventListener('message', listener);
