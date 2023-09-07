@@ -228,7 +228,10 @@ const ParsedNote: Component<{
 
       const preview = previews[url];
 
-      if (!preview) {
+      const hasMinimalPreviewData = preview && preview.url &&
+        ((preview.description && preview.description.length > 0) || preview.image || preview.title);
+
+      if (!hasMinimalPreviewData) {
         return `<a link href="${url}" target="_blank" >${url}</a>`;
       }
 
