@@ -23,7 +23,11 @@ export const hookForDev = (fn: Function) => {
       hook('onPrimalComponentCleanup', scope);
     })
 
-    props.id = domId;
+    try {
+        props.id = domId;
+    } catch (ex) {
+        console.log(ex);
+    }
 
     return fn(props);
   };
