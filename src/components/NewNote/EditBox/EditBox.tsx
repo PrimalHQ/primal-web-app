@@ -467,6 +467,8 @@ const EditBox: Component<{
     setEmojiResults(() => []);
   };
 
+  const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
+
   const postNote = async () => {
     if (!account || !account.hasPublicKey() || isUploading() || isInputting()) {
       return;
@@ -509,6 +511,8 @@ const EditBox: Component<{
         tags.push(['p', props.replyToNote.post.pubkey]);
       }
 
+      setIsPostingInProgress(true);
+
       const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
 
       if (success) {
@@ -516,12 +520,11 @@ const EditBox: Component<{
         const importId = `import_note_${APP_ID}`;
 
         const unsub = subscribeTo(importId, (type, _, response) => {
-          console.log('IMPORTED: ', type, response)
-
           if (type === 'EOSE') {
             if (note) {
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note });
+              setIsPostingInProgress(false);
               closeEditor();
             }
             unsub();
@@ -535,18 +538,22 @@ const EditBox: Component<{
 
       if (reasons?.includes('no_extension')) {
         toast?.sendWarning(intl.formatMessage(tToast.noExtension));
+        setIsPostingInProgress(false);
         return;
       }
 
       if (reasons?.includes('timeout')) {
         toast?.sendWarning(intl.formatMessage(tToast.publishNoteTimeout));
+        setIsPostingInProgress(false);
         return;
       }
 
       toast?.sendWarning(intl.formatMessage(tToast.publishNoteFail));
+      setIsPostingInProgress(false);
       return;
     }
 
+    setIsPostingInProgress(false);
     closeEditor();
   };
 
@@ -1196,6 +1203,7 @@ const EditBox: Component<{
         <button
           class={styles.primaryButton}
           onClick={postNote}
+          disabled={isPostingInProgress()}
         >
           <span>
             {intl.formatMessage(tActions.notePostNew)}
