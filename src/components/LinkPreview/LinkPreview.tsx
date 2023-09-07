@@ -21,10 +21,6 @@ const LinkPreview: Component<{ preview: any, id?: string }> = (props) => {
 
       <div class={styles.previewInfo}>
         <div class={styles.previewUrlLine}>
-          <Show when={props.preview.favicons && props.preview.favicons[0]}>
-            <img src={props.preview.favicons[0]} />
-          </Show>
-
           <Show when={encodedUrl}>
             <div class={styles.previewUrl}>{encodedUrl}</div>
           </Show>
