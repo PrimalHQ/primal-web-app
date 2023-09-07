@@ -122,7 +122,7 @@ const Downloads: Component = () => {
             </div>
             <div>
               <div>{displayDate(iosRD).toLowerCase()}</div>
-              <div>0.24.3</div>
+              <div>{iosVersion}</div>
             </div>
           </div>
 
