@@ -102,6 +102,7 @@ const EditBox: Component<{
     const elm = textArea as AutoSizedTextArea;
     const preview = textPreview;
 
+
     if(elm.nodeName !== 'TEXTAREA' || elm.id !== `${prefix()}new_note_text_area` || !preview) {
       return;
     }
@@ -110,18 +111,19 @@ const EditBox: Component<{
 
     !elm._baseScrollHeight && getScrollHeight(elm);
 
-
     if (elm.scrollHeight >= (maxHeight / 3)) {
       elm.style.height = '46vh';
       return;
     }
 
     elm.style.height = 'auto';
+
     elm.rows = minRows;
     const rows = Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
     elm.rows = minRows + rows;
 
     const rect = elm.getBoundingClientRect();
+
 
     preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
@@ -163,7 +165,6 @@ const EditBox: Component<{
     }
 
     if (isEmojiInput()) {
-
       if (e.code === 'ArrowDown') {
         e.preventDefault();
         setHighlightedEmoji(i => {
@@ -246,6 +247,7 @@ const EditBox: Component<{
           return false;
         }
         e.preventDefault();
+        emojiResults.length === 0 && setEmojiResults(emojiSearch(emojiQuery()));
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
@@ -261,7 +263,7 @@ const EditBox: Component<{
           setEmojiInput(false);
           return false;
         }
-      } else {
+      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setEmojiQuery(q => q + e.key);
         return false;
       }
@@ -341,7 +343,7 @@ const EditBox: Component<{
           setMentioning(false);
           return false;
         }
-      } else {
+      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setPreQuery(q => q + e.key);
         return false
       }
@@ -927,7 +929,10 @@ const EditBox: Component<{
   });
 
   const selectEmoji = (emoji: EmojiOption) => {
-    if (!textArea) {
+    if (!textArea || !emoji) {
+      setEmojiInput(false);
+      setEmojiQuery('');
+      setEmojiResults(() => []);
       return;
     }
 

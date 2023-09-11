@@ -257,7 +257,7 @@ export const defaultNotificationSettings: Record<string, boolean> = {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
 };
 
-export const emojiSearchLimit = 1;
+export const emojiSearchLimit = 0;
 
 export const today = (new Date()).getTime();
 

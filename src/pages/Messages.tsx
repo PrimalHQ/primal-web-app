@@ -20,7 +20,7 @@ import SearchOption from '../components/Search/SearchOption';
 import { debounce, isVisibleInContainer, uuidv4 } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
-import { editMentionRegex } from '../constants';
+import { editMentionRegex, emojiSearchLimit } from '../constants';
 import Search from '../components/Search/Search';
 import { useProfileContext } from '../contexts/ProfileContext';
 import Paginator from '../components/Paginator/Paginator';
@@ -124,8 +124,6 @@ export const parseNpubLinks = (text: string, mentionedUsers: Record<string, Prim
   });
 
 };
-
-const emojiSearchLimit = 2;
 
 const Messages: Component = () => {
   const instanceId = uuidv4();
@@ -371,7 +369,7 @@ const Messages: Component = () => {
       return false;
     }
 
-    const mentionSeparators = ['Enter', 'Space', 'Comma'];
+    const mentionSeparators = ['Enter', 'Space', 'Comma', 'Tab'];
 
     if (!isMentioning() && !isEmojiInput() && e.code === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -472,6 +470,7 @@ const Messages: Component = () => {
           return false;
         }
         e.preventDefault();
+        emojiResults.length === 0 && setEmojiResults(emojiSearch(emojiQuery()));
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
@@ -487,15 +486,10 @@ const Messages: Component = () => {
           setEmojiInput(false);
           return false;
         }
-      } else {
+      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setEmojiQuery(q => q + e.key);
         return false;
       }
-
-      // if (emojiQuery().length === 0) {
-      //   setEmojiInput(false);
-      //   return false;
-      // }
 
       return false;
     }
@@ -572,15 +566,10 @@ const Messages: Component = () => {
           setMentioning(false);
           return false;
         }
-      } else {
+      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setPreQuery(q => q + e.key);
         return false
       }
-
-      // if (preQuery().length === 0) {
-      //   setMentioning(false);
-      //   return false;
-      // }
 
       return false;
     }
@@ -748,7 +737,10 @@ const Messages: Component = () => {
   };
 
   const selectEmoji = (emoji: EmojiOption) => {
-    if (!newMessageInput) {
+    if (!newMessageInput || !emoji) {
+      setEmojiInput(false);
+      setEmojiQuery('');
+      setEmojiResults(() => []);
       return;
     }
 
