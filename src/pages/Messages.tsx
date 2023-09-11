@@ -464,7 +464,10 @@ const Messages: Component = () => {
         return false;
       }
 
-      if (mentionSeparators.includes(e.code)) {
+      if (e.code === 'Semicolon') {
+      }
+
+      if (mentionSeparators.includes(e.code) || e.code === 'Semicolon') {
         if (emojiQuery().trim().length === 0) {
           setEmojiInput(false);
           return false;
@@ -486,7 +489,11 @@ const Messages: Component = () => {
           setEmojiInput(false);
           return false;
         }
-      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
+
+        return false;
+      }
+
+      if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setEmojiQuery(q => q + e.key);
         return false;
       }

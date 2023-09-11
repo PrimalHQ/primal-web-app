@@ -241,7 +241,7 @@ const EditBox: Component<{
         return false;
       }
 
-      if (mentionSeparators.includes(e.code)) {
+      if (mentionSeparators.includes(e.code) || e.code === 'Semicolon') {
         if (emojiQuery().trim().length === 0) {
           setEmojiInput(false);
           return false;
@@ -263,7 +263,11 @@ const EditBox: Component<{
           setEmojiInput(false);
           return false;
         }
-      } else if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
+
+        return false;
+      }
+
+      if (!['Shift', 'Control', 'Meta'].includes(e.key)) {
         setEmojiQuery(q => q + e.key);
         return false;
       }
