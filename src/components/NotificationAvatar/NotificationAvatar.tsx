@@ -1,5 +1,5 @@
 import { Component, Show } from 'solid-js';
-import defaultAvatar from '../../assets/icons/default_nostrich.svg';
+import defaultAvatar from '../../assets/icons/default_avatar.svg';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './NotificationAvatar.module.scss';
