@@ -112,9 +112,11 @@ const EditBox: Component<{
 
 
     if (elm.scrollHeight >= (maxHeight / 3)) {
+      elm.style.height = '46vh';
       return;
     }
 
+    elm.style.height = 'auto';
     elm.rows = minRows;
     const rows = Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
     elm.rows = minRows + rows;
@@ -146,7 +148,7 @@ const EditBox: Component<{
       return;
     }
 
-    const mentionSeparators = ['Enter', 'Space', 'Comma'];
+    const mentionSeparators = ['Enter', 'Space', 'Comma', 'Tab'];
 
     if (e.code === 'Enter' && e.metaKey) {
       e.preventDefault();
