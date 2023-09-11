@@ -289,7 +289,13 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
     resetMessageCount(store.selectedSender, subidResetMsgCount);
-    updateStore('messageCountPerSender', store.selectedSender, 'cnt', 0)
+
+    if (store.messageCountPerSender[store.selectedSender]) {
+      updateStore('messageCountPerSender', store.selectedSender, 'cnt', 0);
+    }
+    else {
+      updateStore('messageCountPerSender', store.selectedSender, () => ({ cnt: 0 }));
+    }
 
     parseForMentions(newMessages);
     then(newMessages);
