@@ -349,6 +349,11 @@ export const explore = {
     defaultMessage: 'explore nostr',
     description: 'Generic caption for the explore page',
   },
+  pageTitle: {
+    id: 'explore.pageTitle',
+    defaultMessage: 'Explore Nostr',
+    description: 'Title of the explore page',
+  },
   title: {
     id: 'explore.title',
     defaultMessage: '{timeframe}: {scope}',
@@ -1370,6 +1375,11 @@ export const thread = {
   sidebar: {
     id: 'thread.sidebar.title',
     defaultMessage: 'People in this thread',
+    description: 'Title of the Thread page sidebar',
+  },
+  pageTitle: {
+    id: 'thread.page.title',
+    defaultMessage: 'Note by {name}',
     description: 'Title of the Thread page sidebar',
   },
 };

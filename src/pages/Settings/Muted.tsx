@@ -15,6 +15,7 @@ import { createStore } from 'solid-js/store';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
+import PageTitle from '../../components/PageTitle/PageTitle';
 
 const Muted: Component = () => {
 
@@ -63,6 +64,8 @@ const Muted: Component = () => {
 
   return (
     <div>
+      <PageTitle title={`${intl.formatMessage(t.muted.title)} ${intl.formatMessage(t.title)}`} />
+
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.muted.title)}</div>

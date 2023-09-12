@@ -23,6 +23,7 @@ import Loader from '../components/Loader/Loader';
 import { useNavigate } from '@solidjs/router';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -267,6 +268,8 @@ const EditProfile: Component = () => {
 
   return (
     <div class={styles.container}>
+      <PageTitle title={intl.formatMessage(tSettings.profile.title)} />
+
       <PageCaption title={intl.formatMessage(tSettings.profile.title)} />
 
       <div id="central_header" class={styles.fullHeader}>

@@ -25,6 +25,7 @@ import { notifications as t } from '../translations';
 
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 const Notifications: Component = () => {
 
@@ -999,9 +1000,9 @@ const Notifications: Component = () => {
     const knownUsers = Object.keys(users);
 
     const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
-      const pk = note.user.pubkey;
+      const pk: string = note.user.pubkey;
 
-      const rUser = knownUsers.includes(pk) ?
+      const rUser: PrimalUser = knownUsers.includes(pk) ?
         convertToUser(users[pk]) :
         emptyUser(pk);
 
@@ -1050,6 +1051,10 @@ const Notifications: Component = () => {
 
   return (
     <div>
+      <PageTitle title={
+        intl.formatMessage(t.title)}
+      />
+
       <Wormhole
         to="search_section"
       >

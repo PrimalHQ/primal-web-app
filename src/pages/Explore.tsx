@@ -18,6 +18,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import { titleCase } from '../utils';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 import { setShowNav } from '../components/Layout/Layout';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 
 const scopes = ['follows', 'tribe', 'network', 'global'];
@@ -70,6 +71,8 @@ const Explore: Component = () => {
 
     return (
       <>
+        <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
+
         <Wormhole
           to="search_section"
         >

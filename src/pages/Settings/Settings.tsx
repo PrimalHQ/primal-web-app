@@ -12,14 +12,16 @@ import { Link, Outlet } from '@solidjs/router';
 import HomeSidebar from '../../components/HomeSidebar/HomeSidebar';
 import StickySidebar from '../../components/StickySidebar/StickySidebar';
 import SettingsSidebar from '../../components/SettingsSidebar/SettingsSidebar';
+import PageTitle from '../../components/PageTitle/PageTitle';
 
 const Settings: Component = () => {
 
   const intl = useIntl();
-  const settings = useSettingsContext();
 
   return (
     <div class={styles.settingsContainer}>
+      <PageTitle title={intl.formatMessage(t.title)} />
+
       <Wormhole to="search_section">
         <Search />
       </Wormhole>

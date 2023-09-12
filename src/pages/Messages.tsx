@@ -34,6 +34,7 @@ import {
 } from '../translations';
 import PageCaption from '../components/PageCaption/PageCaption';
 import { useMediaContext } from '../contexts/MediaContext';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -876,6 +877,8 @@ const Messages: Component = () => {
 
   return (
     <div>
+      <PageTitle title={intl.formatMessage(tMessages.title)} />
+
       <Wormhole
         to="search_section"
       >

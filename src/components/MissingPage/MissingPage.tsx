@@ -3,6 +3,7 @@ import { Component, JSXElement, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 import { placeholders as t } from '../../translations';
 import Branding from '../Branding/Branding';
+import PageTitle from '../PageTitle/PageTitle';
 import Search from '../Search/Search';
 import Wormhole from '../Wormhole/Wormhole';
 import styles from './MissingPage.module.scss';
@@ -14,6 +15,12 @@ const MissingPage: Component<{ title: string, children?: JSXElement, id?: string
 
   return (
     <div id={props.id}>
+      <PageTitle title={intl.formatMessage(
+          t.pageWIPTitle,
+          { title: props.title },
+        )}
+      />
+
       <Wormhole
         to="search_section"
       >

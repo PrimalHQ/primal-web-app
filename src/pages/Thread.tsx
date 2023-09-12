@@ -18,6 +18,8 @@ import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { thread as t } from '../translations';
 import { setShowNav } from '../components/Layout/Layout';
+import { userName } from '../stores/profile';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 
 const Thread: Component = () => {
@@ -129,6 +131,12 @@ const Thread: Component = () => {
 
   return (
     <div>
+      <PageTitle title={
+        intl.formatMessage(
+          t.pageTitle,
+          { name: userName(primaryNote()?.user) },
+        )}
+      />
 
       <Wormhole
         to="search_section"

@@ -27,9 +27,10 @@ import { PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
-import { feedNewPosts, placeholders } from '../translations';
+import { feedNewPosts, placeholders, branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 
 const Home: Component = () => {
@@ -118,6 +119,7 @@ const Home: Component = () => {
 
   return (
     <div class={styles.homeContent}>
+      <PageTitle title={intl.formatMessage(branding)} />
       <Wormhole
         to="search_section"
       >

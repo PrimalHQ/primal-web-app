@@ -8,6 +8,7 @@ import { Link } from '@solidjs/router';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
+import PageTitle from '../../components/PageTitle/PageTitle';
 
 const HomeFeeds: Component = () => {
 
@@ -23,6 +24,8 @@ const HomeFeeds: Component = () => {
 
   return (
     <div>
+      <PageTitle title={`${intl.formatMessage(t.homeFeeds.title)} ${intl.formatMessage(t.title)}`} />
+
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.homeFeeds.title)}</div>

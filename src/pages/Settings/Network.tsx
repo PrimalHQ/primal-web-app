@@ -22,6 +22,7 @@ import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import HelpTip from '../../components/HelpTip/HelpTip';
+import PageTitle from '../../components/PageTitle/PageTitle';
 
 
 const Network: Component = () => {
@@ -172,6 +173,8 @@ const Network: Component = () => {
 
   return (
     <div>
+      <PageTitle title={`${intl.formatMessage(t.network.title)} ${intl.formatMessage(t.title)}`} />
+
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.network.title)}</div>

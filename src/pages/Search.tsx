@@ -22,6 +22,7 @@ import SearchComponent from '../components/Search/Search';
 import { toast as t, search as tSearch, actions as tActions  } from '../translations';
 import PageCaption from '../components/PageCaption/PageCaption';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 const Search: Component = () => {
   const params = useParams();
@@ -67,6 +68,13 @@ const Search: Component = () => {
 
   return (
     <>
+      <PageTitle title={
+        intl.formatMessage(
+          tSearch.title,
+          { query: query() || '' },
+        )}
+      />
+
       <StickySidebar>
         <SearchSidebar users={search?.contentUsers || []} />
       </StickySidebar>

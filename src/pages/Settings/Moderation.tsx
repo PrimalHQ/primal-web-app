@@ -7,6 +7,7 @@ import Avatar from '../../components/Avatar/Avatar';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageCaption from '../../components/PageCaption/PageCaption';
+import PageTitle from '../../components/PageTitle/PageTitle';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { contentScope, Kind, specialAlgos, trendingScope } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -175,6 +176,8 @@ const Moderation: Component = () => {
 
   return (
     <div>
+      <PageTitle title={`${intl.formatMessage(t.moderation.title)} ${intl.formatMessage(t.title)}`} />
+
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.moderation.title)}</div>

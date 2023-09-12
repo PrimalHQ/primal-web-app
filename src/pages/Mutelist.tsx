@@ -18,6 +18,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../components/Toaster/Toaster';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 const lists: Record<string, string> = {
   primal_nsfw: 'nsfw_list',
@@ -105,6 +106,14 @@ const Mutelist: Component = () => {
 
   return (
     <div class={styles.settingsContainer}>
+      <PageTitle title={
+        specialAlgos.includes(params.npub) ?
+          // @ts-ignore
+          intl.formatMessage(t.moderation.algos[params.npub]) :
+          intl.formatMessage(t.moderation.moderationItem, { name: userName(author()) })
+        }
+      />
+
       <PageCaption>
         <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
           <div style="display: flex; align-items: center;">

@@ -16,6 +16,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { andVersion, andRD, iosVersion, iosRD, today } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 const Downloads: Component = () => {
 
@@ -91,6 +92,8 @@ const Downloads: Component = () => {
           </div>
         </div>
       </StickySidebar>
+
+      <PageTitle title={intl.formatMessage(t.title)} />
 
       <PageCaption title={intl.formatMessage(t.title)} />
 
