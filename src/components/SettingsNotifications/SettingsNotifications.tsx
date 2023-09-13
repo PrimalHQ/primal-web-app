@@ -67,13 +67,13 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     NEW_USER_FOLLOWED_YOU: 'new user followed you',
     USER_UNFOLLOWED_YOU: 'a user unfollowed you',
 
-    YOUR_POST_WAS_ZAPPED: 'your post was zapped',
-    YOUR_POST_WAS_LIKED: 'your post was liked',
-    YOUR_POST_WAS_REPOSTED: 'your post was reposted',
-    YOUR_POST_WAS_REPLIED_TO: 'your post was replied to',
+    YOUR_POST_WAS_ZAPPED: 'your note was zapped',
+    YOUR_POST_WAS_LIKED: 'your note was liked',
+    YOUR_POST_WAS_REPOSTED: 'your note was reposted',
+    YOUR_POST_WAS_REPLIED_TO: 'your note was replied to',
 
-    YOU_WERE_MENTIONED_IN_POST: 'you were mentioned in a post',
-    YOUR_POST_WAS_MENTIONED_IN_POST: 'your post was mentioned in a post',
+    YOU_WERE_MENTIONED_IN_POST: 'you were mentioned in a note',
+    YOUR_POST_WAS_MENTIONED_IN_POST: 'your note was mentioned in a note',
 
     POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: 'zapped',
     POST_YOU_WERE_MENTIONED_IN_WAS_LIKED: 'liked',
