@@ -2,6 +2,7 @@
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
+import NoteImage from "../components/NoteImage/NoteImage";
 import { Kind } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
@@ -58,6 +59,23 @@ export const nostrNestsRegex = /nostrnests\.com\/[a-zA-Z0-9]+/i;
 export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|album\/[.a-zA-Z0-9-]+|[.a-zA-Z0-9-]+)/i;
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
+export const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/g;
+
+
+export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif', '.format=png'].some(x => url.includes(x));
+export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));
+export const isOggVideo = (url: string) => ['.ogg'].some(x => url.includes(x));
+export const isWebmVideo = (url: string) => ['.webm'].some(x => url.includes(x));
+
+export const isYouTube = (url: string) => youtubeRegex.test(url);
+export const isSpotify = (url: string) => spotifyRegex.test(url);
+export const isTwitch = (url: string) => twitchRegex.test(url);
+export const isMixCloud = (url: string) => mixCloudRegex.test(url);
+export const isSoundCloud = (url: string) => soundCloudRegex.test(url);
+export const isAppleMusic = (url: string) => appleMusicRegex.test(url);
+export const isNostrNests = (url: string) => nostrNestsRegex.test(url);
+export const isWavelake = (url: string) => wavlakeRegex.test(url);
+
 
 export const urlify = (
   text: string,
@@ -66,43 +84,38 @@ export const urlify = (
   skipEmbed = false,
   skipLinkPreview = false,
 ) => {
-  const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/g;
 
-  return text.replace(urlRegex, (url) => {
+  return text.replace(urlRegex, (url: string) => {
     if (!skipEmbed) {
 
-      const isImage = url.includes('.jpg')|| url.includes('.jpeg')|| url.includes('.webp') || url.includes('.png') || url.includes('.gif') || url.includes('format=png');
-
-      if (isImage) {
+      if (isImage(url)) {
         const dev = localStorage.getItem('devMode') === 'true';
         let imgUrl = getMediaUrl && getMediaUrl(url);
 
         if (!imgUrl) {
-          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
+          // @ts-ignore
+          return (<div><NoteImage src={getMediaUrlDefault(url)} isDev={dev} /></div>).outerHTML;
+          // return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
         }
 
-        return `<img src="${imgUrl}" class="postImage"/>`;
+        // @ts-ignore
+        return (<div><NoteImage src={imgUrl} isDev={dev} /></div>).outerHTML;
+        // return `<img src="${imgUrl}" class="postImage"/>`;
       }
 
-      const isMp4Video = url.includes('.mp4') || url.includes('.mov');
-
-      if (isMp4Video) {
+      if (isMp4Video(url)) {
         return `<video class="w-max" controls><source src="${url}" type="video/mp4"></video>`;
       }
 
-      const isOggVideo = url.includes('.ogg');
-
-      if (isOggVideo) {
+      if (isOggVideo(url)) {
         return `<video class="w-max" controls><source src="${url}" type="video/ogg"></video>`;
       }
 
-      const isWebmVideo = url.includes('.webm');
-
-      if (isWebmVideo) {
+      if (isWebmVideo(url)) {
         return `<video class="w-max" controls><source src="${url}" type="video/webm"></video>`;
       }
 
-      if (youtubeRegex.test(url)) {
+      if (isYouTube(url)) {
         const youtubeId = youtubeRegex.test(url) && RegExp.$1;
 
         return `<iframe
@@ -116,20 +129,20 @@ export const urlify = (
         ></iframe>`;
       }
 
-      if (spotifyRegex.test(url)) {
+      if (isSpotify(url)) {
         const convertedUrl = url.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
         return `<iframe style="borderRadius: 12" src="${convertedUrl}" width="100%" height="352" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
       }
 
-      if (twitchRegex.test(url)) {
+      if (isTwitch(url)) {
         const channel = url.split("/").slice(-1);
 
         const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
         return `<iframe src="https://player.twitch.tv/${args}" className="w-max" allowFullScreen></iframe>`;
       }
 
-      if (mixCloudRegex.test(url)) {
+      if (isMixCloud(url)) {
         const feedPath = (mixCloudRegex.test(url) && RegExp.$1) + "%2F" + (mixCloudRegex.test(url) && RegExp.$2);
 
         // const lightTheme = useLogin().preferences.theme === "light";
@@ -145,7 +158,7 @@ export const urlify = (
             ></iframe>`;
       }
 
-      if (soundCloudRegex.test(url)) {
+      if (isSoundCloud(url)) {
         return `<iframe
             width="100%"
             height="166"
@@ -154,7 +167,7 @@ export const urlify = (
             src="https://w.soundcloud.com/player/?url=${url}"></iframe>`;
       }
 
-      if (appleMusicRegex.test(url)) {
+      if (isAppleMusic(url)) {
         const convertedUrl = url.replace("music.apple.com", "embed.music.apple.com");
         const isSongLink = /\?i=\d+$/.test(convertedUrl);
 
@@ -169,7 +182,7 @@ export const urlify = (
         `;
       }
 
-      if (nostrNestsRegex.test(url)) {
+      if (isNostrNests(url)) {
         return `
           <iframe
             src="${url}"
@@ -181,7 +194,7 @@ export const urlify = (
           ></iframe>`;
       }
 
-      if (wavlakeRegex.test(url)) {
+      if (isWavelake(url)) {
         const convertedUrl = url.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
         return `

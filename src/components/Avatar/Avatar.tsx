@@ -3,6 +3,7 @@ import defaultAvatar from '../../assets/icons/default_avatar.svg';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import { MediaSize, PrimalUser } from '../../types/primal';
+import NoteImage from '../NoteImage/NoteImage';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './Avatar.module.scss';
@@ -14,6 +15,7 @@ const Avatar: Component<{
   highlightBorder?: boolean,
   id?: string,
   showCheck?: boolean,
+  zoomable?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -119,7 +121,11 @@ const Avatar: Component<{
         }
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
-          <img src={imageSrc()} alt="avatar" onerror={imgError}/>
+          <Show when={props.zoomable} fallback={
+            <img src={imageSrc()} alt="avatar" onerror={imgError}/>
+          }>
+            <NoteImage src={imageSrc()} onError={imgError} />
+          </Show>
         </div>
       </Show>
       <Show when={props.user && props.showCheck}>

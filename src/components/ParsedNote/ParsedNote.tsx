@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
-import { linkPreviews, parseNote1, parseNote3 } from '../../lib/notes';
+import { linkPreviews, parseNote1 } from '../../lib/notes';
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
@@ -286,7 +286,6 @@ const ParsedNote: Component<{
 
     setDisplayedContent(() => newContent);
   });
-
 
   return (
     <div id={props.id} innerHTML={displayedContent()}>

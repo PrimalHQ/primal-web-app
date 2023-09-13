@@ -479,11 +479,11 @@ const Profile: Component = () => {
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <div class={styles.desktopAvatar}>
-                <Avatar user={profile?.userProfile} size="xxl" />
+                <Avatar user={profile?.userProfile} size="xxl" zoomable={true} />
               </div>
 
               <div class={styles.phoneAvatar}>
-                <Avatar user={profile?.userProfile} size="lg" />
+                <Avatar user={profile?.userProfile} size="lg" zoomable={true} />
               </div>
             </div>
           </div>
