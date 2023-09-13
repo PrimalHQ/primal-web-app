@@ -76,18 +76,6 @@ const Router: Component = () => {
     primalWindow.onPrimalUploadServerConnected = () => {};
     primalWindow.onPrimalCacheServerMessageReceived = () => {};
     primalWindow.onPrimalCacheServerMessageSent = () => {};
-
-    try {
-      const exts = localStorage.getItem('primalExtensions');
-      if (exts) {
-        for (const url of JSON.parse(exts)) {
-          console.log("loading primal extension:", url);
-          const el = window.document.createElement("script");
-          el.setAttribute("src", url);
-          window.document.body.appendChild(el);
-        }
-      }
-    } catch (ex) { console.log(ex); }
   }
 
   const getKnownProfiles = ({ params }: RouteDataFuncArgs) => {
