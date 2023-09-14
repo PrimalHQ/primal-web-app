@@ -422,7 +422,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
       continue;
     }
 
-    responses.push(new Promise<string>((resolve, reject) => {
+    responses.push(new Promise<string>(async (resolve, reject) => {
       const timeout = setTimeout(() => {
         console.log(`Publishing post to ${relay.url} has timed out`);
         reasons.push('timeout');
@@ -430,25 +430,16 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
       }, 8_000);
 
       try {
-        let pub = relay.publish(signedNote);
-
         console.log('publishing to relay: ', relay)
 
-        pub.on('ok', () => {
-          console.log(`${relay.url} has accepted our event`);
-          clearTimeout(timeout);
-          resolve('success');
-        });
+        let pub = await relay.publish(signedNote);
 
-        pub.on('failed', (reason: any) => {
-          console.log(`failed to publish to ${relay.url}: ${reason}`)
-          clearTimeout(timeout);
-          reasons.push(reason);
-          reject('failed');
-        });
+        console.log(`${relay.url} has accepted our event`);
+        clearTimeout(timeout);
+        resolve('success');
 
       } catch (e) {
-        console.log('Failed publishing note: ', e);
+        console.log(`Failed publishing note to ${relay.url}: `, e);
         clearTimeout(timeout);
         reasons.push(`${e}`);
         reject(e);
