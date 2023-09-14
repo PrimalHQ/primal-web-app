@@ -759,7 +759,7 @@ const Messages: Component = () => {
 
     // Get index of the token and insert emoji character
     const index = msg.slice(0, cursor).lastIndexOf(':');
-    const value = msg.slice(0, index) + emoji.char + msg.slice(cursor);
+    const value = msg.slice(0, index) + emoji.name + msg.slice(cursor);
 
     // Reset query, update message and text area value
     setMessage(value);
@@ -1014,7 +1014,7 @@ const Messages: Component = () => {
                     class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
                     onClick={() => selectEmoji(emoji)}
                     >
-                      {emoji.char}
+                      {emoji.name}
                     </button>
                   )}
                 </For>
