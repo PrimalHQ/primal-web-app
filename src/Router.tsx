@@ -39,6 +39,8 @@ const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 
+const Terms = lazy(() => import('./pages/Terms'));
+
 const primalWindow = window as PrimalWindow;
 
 const isDev = localStorage.getItem('devMode') === 'true';
@@ -86,6 +88,7 @@ const Router: Component = () => {
   return (
     <>
       <Routes>
+        <Route path="/terms" component={Terms} />
         <Route path="/" component={Layout} >
           <Route path="/" element={<Navigate href="/home" />} />
           <Route path="/home" component={Home} />

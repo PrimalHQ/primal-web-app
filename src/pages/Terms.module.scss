@@ -1,0 +1,23 @@
+.terms {
+  background-color: black;
+  color: white;
+  max-width: 840px;
+  min-width: 600px;
+  margin-inline: auto;
+  min-height: 100vh;
+  padding-inline: 20px;
+  padding-bottom: 20px;
+
+  h1, h2, p {
+    color: white;
+    margin: 0;
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .terms {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+  }
+}
