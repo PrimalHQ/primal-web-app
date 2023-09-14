@@ -10,12 +10,10 @@
 /build
 out
 
-# misc
 .DS_Store
 .eslintcache
 /.env.*
 
-npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
