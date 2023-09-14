@@ -1,4 +1,4 @@
-import { Component, JSX, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, JSX, onCleanup, onMount } from "solid-js";
 import styles from "./NoteImage.module.scss";
 import mediumZoom from "medium-zoom";
 import type { Zoom } from 'medium-zoom';
@@ -24,6 +24,8 @@ const NoteImage: Component<{
     if (!e.target || (e.target as HTMLImageElement).id !== imgId) {
       return;
     }
+    e.preventDefault();
+    e.stopPropagation();
 
     zoomRef?.open();
   };
@@ -43,16 +45,18 @@ const NoteImage: Component<{
 
   onMount(() => {
     getZoom();
-    document.addEventListener('click', doZoom)
   });
 
   onCleanup(() => {
     const iRef = imgRef();
     iRef && zoomRef && zoomRef.detach(iRef);
-    document.removeEventListener('click', doZoom)
   });
 
-  return <img id={imgId} src={props.src} class={klass()} onerror={props.onError} />;
+  return (
+    <div>
+      <img id={imgId} src={props.src} class={klass()} onerror={props.onError} onClick={doZoom} />
+    </div>
+  );
 }
 
 export default NoteImage;

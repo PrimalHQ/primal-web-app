@@ -5,13 +5,12 @@ import { Component, createMemo, JSXElement, Show } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
-import { parseNote2 } from '../../lib/notes';
 import { trimVerification } from '../../lib/profile';
 import { nip05Verification, userName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
-import { parseNoteLinks, parseNpubLinks } from '../ParsedNote/ParsedNote';
+import ParsedNote from '../ParsedNote/ParsedNote';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
@@ -20,7 +19,6 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
 
   const threadContext = useThreadContext();
   const intl = useIntl();
-  const media = useMediaContext();
 
   const noteId = () => nip19.noteEncode(props.note.post.id);
 
@@ -31,77 +29,6 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
   const verification = createMemo(() => {
     return trimVerification(props.note.user?.nip05);
   });
-
-  const parsedContent = (text: string) => {
-    const regex = /\#\[([0-9]*)\]/g;
-    let parsed = text;
-
-    let refs = [];
-    let match;
-
-    while((match = regex.exec(text)) !== null) {
-      refs.push(match[1]);
-    }
-
-    if (refs.length > 0) {
-      for(let i =0; i < refs.length; i++) {
-        let r = parseInt(refs[i]);
-
-        const tag = props.note.post.tags[r];
-        if (
-          tag[0] === 'e' &&
-          props.note.mentionedNotes &&
-          props.note.mentionedNotes[tag[1]]
-        ) {
-          const embeded = (
-            <span>
-              {intl.formatMessage(
-                t.mentionIndication,
-                { name: userName(props.note.user) },
-              )}
-            </span>
-          );
-
-          // @ts-ignore
-          parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
-        }
-
-        if (tag[0] === 'p' && props.mentionedUsers && props.mentionedUsers[tag[1]]) {
-          const user = props.mentionedUsers[tag[1]];
-
-          const link =  (
-            <span class='linkish'>
-              @{userName(user)}
-            </span>
-          );
-
-
-          // @ts-ignore
-          parsed = parsed.replace(`#[${r}]`, link.outerHTML);
-        }
-      }
-    }
-
-    return parsed;
-
-  };
-
-  const highlightHashtags = (text: string) => {
-    const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
-
-    return text.replace(regex, (token) => {
-      const [space, term] = token.split('#');
-      const embeded = (
-        <span>
-          {space}
-          <span class="linkish">#{term}</span>
-        </span>
-      );
-
-      // @ts-ignore
-      return embeded.outerHTML;
-    });
-  }
 
   const wrapper = (children: JSXElement) => {
     if (props.includeEmbeds) {
@@ -167,21 +94,8 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           </span>
         </span>
       </div>
-      <div class={styles.noteContent} innerHTML={
-        parseNoteLinks(
-          parseNpubLinks(
-            parsedContent(
-              highlightHashtags(
-                parseNote2(props.note.post.content, media?.actions.getMediaUrl)
-              ),
-            ),
-            props.note,
-            'links',
-          ),
-          props.note,
-          !props.includeEmbeds,
-        )
-      }>
+      <div class={styles.noteContent}>
+        <ParsedNote note={props.note} noLinks="links" />
       </div>
     </>
   );
