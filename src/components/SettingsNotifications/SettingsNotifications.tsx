@@ -40,7 +40,6 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
   const basicNotifications = [
     'NEW_USER_FOLLOWED_YOU',
-    'USER_UNFOLLOWED_YOU',
     'YOUR_POST_WAS_ZAPPED',
     'YOUR_POST_WAS_LIKED',
     'YOUR_POST_WAS_REPOSTED',
@@ -65,7 +64,6 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
   const notificationLabels: Record<string, string> = {
     NEW_USER_FOLLOWED_YOU: 'new user followed you',
-    USER_UNFOLLOWED_YOU: 'a user unfollowed you',
 
     YOUR_POST_WAS_ZAPPED: 'your note was zapped',
     YOUR_POST_WAS_LIKED: 'your note was liked',
