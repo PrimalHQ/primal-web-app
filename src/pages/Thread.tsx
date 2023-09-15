@@ -33,6 +33,10 @@ const Thread: Component = () => {
       return params.postId;
     }
 
+    if (params.postId.startsWith('nevent')) {
+      return nip19.noteEncode(nip19.decode(params.postId).data.id);
+    }
+
     return nip19.noteEncode(params.postId);
   };
 
