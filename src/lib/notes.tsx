@@ -182,17 +182,17 @@ export const urlify = (
         `;
       }
 
-      if (isNostrNests(url)) {
-        return `
-          <iframe
-            src="${url}"
-            allow="microphone"
-            width="480"
-            height="680"
-            style="maxHeight: 680"
-            sandbox="allow-same-origin allow-scripts"
-          ></iframe>`;
-      }
+      // if (isNostrNests(url)) {
+      //   return `
+      //     <iframe
+      //       src="${url}"
+      //       allow="microphone"
+      //       width="480"
+      //       height="680"
+      //       style="maxHeight: 680"
+      //       sandbox="allow-same-origin allow-scripts"
+      //     ></iframe>`;
+      // }
 
       if (isWavelake(url)) {
         const convertedUrl = url.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
