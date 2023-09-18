@@ -1402,7 +1402,7 @@ export const toast = {
   },
   publishNoteSuccess: {
     id: 'toast.publishNoteSuccess',
-    defaultMessage: 'Message noteed successfully',
+    defaultMessage: 'Note posted successfully',
     description: 'Toast message confirming successfull publication of the note',
   },
   publishNoteTimeout: {
