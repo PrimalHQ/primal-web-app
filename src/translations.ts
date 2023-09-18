@@ -842,6 +842,11 @@ export const profile = {
     defaultMessage: 'This account is hidden per your filter settings.',
     description: 'Label indicating that the profile is filtered',
   },
+  noNotes: {
+    id: 'profile.noNotes',
+    defaultMessage: '{name} hasn\'t posted any notes',
+    description: 'Label indicating that the profile has no notes',
+  },
 };
 
 export const search = {

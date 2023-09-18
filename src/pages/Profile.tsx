@@ -656,6 +656,14 @@ const Profile: Component = () => {
               </button>
             </div>
           </Match>
+          <Match when={profile && profile.notes.length === 0 && !profile.isFetching}>
+            <div class={styles.mutedProfile}>
+              {intl.formatMessage(
+                t.noNotes,
+                { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+              )}
+            </div>
+          </Match>
           <Match when={profile && profile.notes.length > 0}>
             <For each={profile?.notes}>
               {note => (
