@@ -1,7 +1,7 @@
 import { Component, createResource, lazy } from 'solid-js';
 import { Routes, Route, Navigate, RouteDataFuncArgs } from "@solidjs/router";
 
-import { ComponentLog, PrimalWindow } from './types/primal';
+import { PrimalWindow } from './types/primal';
 import { fetchKnownProfiles } from './lib/profile';
 
 import { useHomeContext } from './contexts/HomeContext';

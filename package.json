@@ -23,6 +23,7 @@
   "dependencies": {
     "@cookbook/solid-intl": "0.1.2",
     "@jukben/emoji-search": "3.0.0",
+    "@kobalte/core": "^0.11.0",
     "@picocss/pico": "1.5.10",
     "@scure/base": "1.1.3",
     "@solidjs/router": "0.8.3",
