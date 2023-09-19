@@ -8,7 +8,6 @@ import {
   isInterpunction,
   isMixCloud,
   isMp4Video,
-  isNostrNests,
   isNoteMention,
   isOggVideo,
   isSoundCloud,
@@ -203,20 +202,6 @@ const ParsedNote: Component<{
                 style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
                 sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
                 src={convertedUrl}
-              ></iframe>
-            );
-            continue;
-          }
-
-          if (isNostrNests(token)) {
-            setElements(elements.length,
-              <iframe
-                src={token}
-                allow="microphone"
-                width="480"
-                height="680"
-                style="maxHeight: 680"
-                sandbox="allow-same-origin allow-scripts"
               ></iframe>
             );
             continue;
