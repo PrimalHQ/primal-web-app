@@ -284,7 +284,7 @@ export const iosRD = (new Date('09/07/2023')).getTime();
 export const iosVersion = '0.28.2';
 
 export const andRD = (new Date('09/26/2023')).getTime();
-export const andVersion = '0.16.8';
+export const andVersion = '0.16.9';
 
 export const defaultZapAmount = 10;
 
