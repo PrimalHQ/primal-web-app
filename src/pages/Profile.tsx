@@ -41,7 +41,6 @@ import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
-import NoteImage from '../components/NoteImage/NoteImage';
 
 const Profile: Component = () => {
 
@@ -472,7 +471,7 @@ const Profile: Component = () => {
             when={profile?.userProfile?.banner}
             fallback={<div class={styles.bannerPlaceholder}></div>}
           >
-            <NoteImage src={banner()} onError={imgError} />
+            <img src={banner()} onerror={imgError}/>
           </Show>
         </div>
 

@@ -3,7 +3,7 @@ import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import NoteImage from "../components/NoteImage/NoteImage";
-import { appleMusicRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, wavlakeRegex, youtubeRegex } from "../constants";
+import { Kind } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
@@ -47,14 +47,20 @@ export const addLinkPreviews = async (url: string) => {
   }
 };
 
+export const spotifyRegex = /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
+export const twitchRegex = /twitch.tv\/([a-z0-9_]+$)/i;
+export const mixCloudRegex = /mixcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+// export const tidalRegex = /tidal\.com\/(?:browse\/)?(\w+)\/([a-z0-9-]+)/i;
+export const soundCloudRegex = /soundcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+// export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
+export const appleMusicRegex = /music\.apple\.com\/([a-z]{2}\/)?(?:album|playlist)\/[\w\d-]+\/([.a-zA-Z0-9-]+)(?:\?i=\d+)?/i;
+export const nostrNestsRegex = /nostrnests\.com\/[a-zA-Z0-9]+/i;
+// export const magnetRegex = /(magnet:[\S]+)/i;
+export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|album\/[.a-zA-Z0-9-]+|[.a-zA-Z0-9-]+)/i;
+// export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
+export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
+export const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/g;
 
-export const isUrl = (url: string) => urlRegex.test(url);
-export const isHashtag = (url: string) => hashtagRegex.test(url);
-export const isLinebreak = (url: string) => linebreakRegex.test(url);
-export const isTagMention = (url: string) => tagMentionRegex.test(url);
-export const isNoteMention = (url: string) => noteRegex.test(url);
-export const isUserMention = (url: string) => profileRegex.test(url);
-export const isInterpunction = (url: string) => interpunctionRegex.test(url);
 
 export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif', '.format=png'].some(x => url.includes(x));
 export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));
@@ -255,8 +261,8 @@ export const highlightHashtags = (text: string) => {
 
 export const parseNote1 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
   urlify(addlineBreaks(content), getMediaUrl);
-// export const parseNote2 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
-//   urlify(addlineBreaks(content), getMediaUrl, true);
+export const parseNote2 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
+  urlify(addlineBreaks(content), getMediaUrl, true);
 export const parseNote3 = (content: string, getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined) =>
   urlify(addlineBreaks(content), getMediaUrl, false, false, true);
 

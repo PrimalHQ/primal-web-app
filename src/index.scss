@@ -396,16 +396,16 @@ body {
   overflow: hidden;
 }
 
-
+.medium-zoom-image {
+  cursor: pointer !important;
+}
 .medium-zoom-overlay {
+  cursor: pointer !important;
   z-index: var(--z-index-header);
 }
-
 .medium-zoom-image-opened {
   z-index: var(--z-index-floater);
-}
 
-.whole {
 }
 
 // Scrollbars
