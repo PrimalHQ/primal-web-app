@@ -41,6 +41,7 @@ import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
+import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 
 const Profile: Component = () => {
 
@@ -87,8 +88,15 @@ const Profile: Component = () => {
 
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
+
     profile?.actions.clearNotes();
+    profile?.actions.clearReplies();
+    profile?.actions.clearContacts();
+
     profile?.actions.fetchNotes(hex);
+    profile?.actions.fetchReplies(hex);
+    profile?.actions.fetchContactList(hex);
+    profile?.actions.fetchFollowerList(hex);
   }
 
   createEffect(() => {
@@ -596,86 +604,9 @@ const Profile: Component = () => {
           </div>
         </div>
 
-        <div class={styles.userStats}>
-          <div class={styles.userStat}>
-            <div class={styles.statNumber}>
-              {humanizeNumber(profile?.userStats?.follows_count || 0)}
-            </div>
-            <div class={styles.statName}>
-              {intl.formatMessage(t.stats.follow)}
-            </div>
-          </div>
-          <div class={styles.userStat}>
-            <div class={styles.statNumber}>
-              {humanizeNumber(profile?.userStats?.followers_count || 0)}
-            </div>
-            <div class={styles.statName}>
-              {intl.formatMessage(t.stats.followers)}
-            </div>
-          </div>
-          <div class={styles.userStat}>
-            <div class={styles.statNumber}>
-              {humanizeNumber(profile?.userStats?.note_count || 0)}
-            </div>
-            <div class={styles.statName}>
-              {intl.formatMessage(t.stats.notes)}
-            </div>
-          </div>
-
-        </div>
-
       </div>
 
-      <div class={styles.userFeed}>
-        <Switch
-          fallback={
-            <div style="margin-top: 40px;">
-              <Loader />
-            </div>
-        }>
-          <Match when={isMuted(profile?.profileKey)}>
-            <div class={styles.mutedProfile}>
-              {intl.formatMessage(
-                t.isMuted,
-                { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-              )}
-              <button
-                onClick={unMuteProfile}
-              >
-                {intl.formatMessage(tActions.unmute)}
-              </button>
-            </div>
-          </Match>
-          <Match when={isFiltered()}>
-            <div class={styles.mutedProfile}>
-              {intl.formatMessage(t.isFiltered)}
-              <button
-                onClick={addToAllowlist}
-              >
-                {intl.formatMessage(tActions.addToAllowlist)}
-              </button>
-            </div>
-          </Match>
-          <Match when={profile && profile.notes.length === 0 && !profile.isFetching}>
-            <div class={styles.mutedProfile}>
-              {intl.formatMessage(
-                t.noNotes,
-                { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-              )}
-            </div>
-          </Match>
-          <Match when={profile && profile.notes.length > 0}>
-            <For each={profile?.notes}>
-              {note => (
-                <Note note={note} />
-              )}
-            </For>
-            <Paginator loadNextPage={() => {
-              profile?.actions.fetchNextPage();
-            }}/>
-          </Match>
-        </Switch>
-      </div>
+      <ProfileTabs />
 
       <ConfirmModal
         open={confirmReportUser()}

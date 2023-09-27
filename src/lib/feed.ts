@@ -62,14 +62,14 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
 
 };
 
-export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, until = 0, limit = 20) => {
+export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies', until = 0, limit = 20) => {
   if (!pubkey) {
     return;
   }
 
   const start = until === 0 ? 'since' : 'until';
 
-  let payload = { pubkey, limit, notes: 'authored', [start]: until } ;
+  let payload = { pubkey, limit, notes, [start]: until } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;

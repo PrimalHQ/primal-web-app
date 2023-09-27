@@ -129,6 +129,7 @@ export enum Kind  {
   ImportResponse = 10_000_127,
   LinkMetadata = 10_000_128,
   FilteringReason = 10_000_131,
+  UserFollowerCounts= 10_000_133,
 }
 
 export const relayConnectingTimeout = 1000;

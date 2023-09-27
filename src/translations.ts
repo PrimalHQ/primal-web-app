@@ -831,6 +831,11 @@ export const profile = {
       defaultMessage: 'Notes',
       description: 'Label for notes profile stat',
     },
+    replies: {
+      id: 'profile.stats.replies',
+      defaultMessage: 'Replies',
+      description: 'Label for replies profile stat',
+    },
   },
   isMuted: {
     id: 'profile.isMuted',

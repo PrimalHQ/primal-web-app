@@ -1,0 +1,64 @@
+.profileTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  padding-inline: 8px;
+  background-color: var(--background-card);
+  width: 100%;
+  border-radius: 0 0 8px 8px;
+}
+
+.profileTab {
+  position: relative;
+  display: inline-block;
+  padding-inline: 14px;
+  padding-block: 2px;
+  border: none;
+  background: none;
+  width: fit-content;
+  height: 40px;
+  margin: 0;
+  margin-bottom: 12px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.profileTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 48px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: linear-gradient(0deg, #CA079F 0%, #CA079F 100%), linear-gradient(134deg, #EF404A 0%, #5B12A4 100%), #121212;
+  transition: all 250ms;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  .statNumber {
+    font-weight: 400;
+    font-size: 24px;
+    line-height: 24px;
+    color: var(--text-primary);
+  }
+
+  .statName {
+    font-weight: 300;
+    font-size: 14px;
+    line-height: 16px;
+    color: var(--text-tertiary-2);
+    text-transform: lowercase;
+  }
+}
+
+.profileNotes {
+  position: relative;
+}

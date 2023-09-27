@@ -2,7 +2,7 @@ import { createStore, unwrap } from "solid-js/store";
 import {
   createContext,
   createEffect,
-  JSX,
+  JSXElement,
   onCleanup,
   onMount,
   useContext
@@ -39,6 +39,7 @@ export type AccountContextStore = {
   showNewNoteForm: boolean,
   following: string[],
   followingSince: number,
+  followInProgress: string,
   muted: string[],
   mutedPrivate: string,
   mutedSince: number,
@@ -57,8 +58,8 @@ export type AccountContextStore = {
     setActiveUser: (user: PrimalUser) => void,
     addLike: (note: PrimalNote) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
-    addFollow: (pubkey: string) => void,
-    removeFollow: (pubkey: string) => void,
+    addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
+    removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     quoteNote: (noteId: string | undefined) => void,
     addToMuteList: (pubkey: string) => void,
     removeFromMuteList: (pubkey: string, then?: () => void) => void,
@@ -86,6 +87,7 @@ const initialData = {
   showNewNoteForm: false,
   following: [],
   followingSince: 0,
+  followInProgress: '',
   muted: [],
   mutedPrivate: '',
   mutedSince: 0,
@@ -101,7 +103,7 @@ const initialData = {
 
 export const AccountContext = createContext<AccountContextStore>();
 
-export function AccountProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
+export function AccountProvider(props: { children: JSXElement }) {
 
   let relayAtempts: Record<string, number> = {};
   const relayAtemptLimit = 10;
@@ -435,10 +437,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
     saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
   };
 
-  const addFollow = (pubkey: string) => {
+  const addFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
     if (!store.publicKey || store.following.includes(pubkey)) {
       return;
     }
+
+    updateStore('followInProgress', () => pubkey);
 
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -458,9 +462,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
             updateStore('followingSince', () => date);
             updateStore('contactsTags', () => [...tags]);
             saveFollowing(store.publicKey, following, date);
+            cb && cb(false, pubkey);
           }
         }
 
+        updateStore('followInProgress', () => '');
         unsub();
         return;
       }
@@ -478,10 +484,12 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
 
   }
 
-  const removeFollow = (pubkey: string) => {
+  const removeFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
     if (!store.publicKey || !store.following.includes(pubkey)) {
       return;
     }
+
+    updateStore('followInProgress', () => pubkey);
 
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -500,9 +508,11 @@ export function AccountProvider(props: { children: number | boolean | Node | JSX
             updateStore('followingSince', () => date);
             updateStore('contactsTags', () => [...tags]);
             saveFollowing(store.publicKey, following, date);
+            cb && cb(true, pubkey);
           }
         }
 
+        updateStore('followInProgress', () => '');
         unsub();
         return;
       }

@@ -60,6 +60,18 @@ export const getProfileContactList = (pubkey: string | undefined, subid: string,
   ]));
 }
 
+export const getProfileFollowerList = (pubkey: string | undefined, subid: string, extended = false) => {
+  if (!pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_followers", { pubkey }]},
+  ]));
+}
+
 export const getProfileMuteList = (pubkey: string | undefined, subid: string, extended?: boolean) => {
   if (!pubkey) {
     return;

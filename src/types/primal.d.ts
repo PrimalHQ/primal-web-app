@@ -172,6 +172,12 @@ export type NostrFilteringReason = {
   created_at?: number,
 };
 
+export type NostrUserFollwerCounts = {
+  kind: Kind.UserFollowerCounts,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -195,7 +201,8 @@ export type NostrEventContent =
   NostrMediaInfo |
   NostrMediaUploaded |
   NostrLinkMetadata |
-  NostrFilteringReason;
+  NostrFilteringReason |
+  NostrUserFollwerCounts;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -490,13 +497,12 @@ export type ContextChildren =
   boolean |
   Node |
   JSX.ArrayElement |
-  JSX.FunctionElement |
   (string & {}) | null | undefined;
 
 
 export type PrimalTheme = { name: string, label: string, logo: string, dark?: boolean};
 
-export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };
+export type ChildrenProp = { children: number | boolean | Node | JSX.ArrayElement | (string & {}) | null | undefined; };
 
 export type VanityProfiles = { names: Record<string, string> };
 
