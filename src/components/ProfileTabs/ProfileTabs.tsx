@@ -47,6 +47,7 @@ const ProfileTabs: Component<{
   const unMuteProfile = () => {
     const pk = profile?.profileKey;
     const setP = props.setProfile;
+
     if (!account || !pk || !setP) {
       return;
     }

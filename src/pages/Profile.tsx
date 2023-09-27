@@ -606,7 +606,7 @@ const Profile: Component = () => {
 
       </div>
 
-      <ProfileTabs />
+      <ProfileTabs setProfile={setProfile} />
 
       <ConfirmModal
         open={confirmReportUser()}

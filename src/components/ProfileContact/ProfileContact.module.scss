@@ -29,6 +29,13 @@
         font-size: 14px;
         font-weight: 400;
         line-height: 14px;
+        span {
+          display: inline-block;
+          width: 440px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          word-wrap: normal;
+        }
       }
     }
 
