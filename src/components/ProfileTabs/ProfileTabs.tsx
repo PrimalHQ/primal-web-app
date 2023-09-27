@@ -124,7 +124,7 @@ const ProfileTabs: Component<{
         <Tabs.Trigger class={styles.profileTab} value="follows">
           <div class={styles.stat}>
             <div class={styles.statNumber}>
-              {humanizeNumber(profile?.contacts.length || profile?.userStats?.follows_count || 0)}
+              {humanizeNumber(profile?.userStats?.follows_count || 0)}
             </div>
             <div class={styles.statName}>
               {intl.formatMessage(t.stats.follow)}
@@ -135,7 +135,7 @@ const ProfileTabs: Component<{
         <Tabs.Trigger class={styles.profileTab} value="followers">
           <div class={styles.stat}>
             <div class={styles.statNumber}>
-              {humanizeNumber(profile?.followers.length || profile?.userStats?.followers_count || 0)}
+              {humanizeNumber(profile?.userStats?.followers_count || 0)}
             </div>
             <div class={styles.statName}>
               {intl.formatMessage(t.stats.followers)}
