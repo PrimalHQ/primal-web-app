@@ -136,8 +136,13 @@ const Profile: Component = () => {
     return !!settings?.availableFeeds.find(f => f.hex === profile?.profileKey);
   };
 
+  const [copying, setCopying] = createSignal(false);
+
   const copyNpub = () => {
     navigator.clipboard.writeText(profile?.userProfile?.npub || profileNpub());
+    setCopying(true);
+
+    setTimeout(() => setCopying(false), 2_000);
   }
 
   const imgError = (event: any) => {
@@ -568,7 +573,12 @@ const Profile: Component = () => {
                   onClick={copyNpub}
                   >
                     {truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                  <div class={styles.copyIcon}></div>
+                  <Show
+                    when={copying()}
+                    fallback={<div class={styles.copyIcon}></div>}
+                  >
+                    <div class={styles.checkIcon}></div>
+                  </Show>
                 </button>
               </div>
             </div>
