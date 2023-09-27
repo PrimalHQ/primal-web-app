@@ -541,8 +541,8 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={profile?.userProfile && !profile?.isFetching}>
-          <div class={styles.profileVerification}>
+        <div class={styles.profileVerification}>
+          <Show when={profile?.userProfile && !profile?.isFetching}>
             <div class={styles.avatarName}>
               {profileName()}
               <Show when={profile?.userProfile?.nip05 && verification()}>
@@ -567,13 +567,13 @@ const Profile: Component = () => {
                   title={profile?.userProfile?.npub || profileNpub()}
                   onClick={copyNpub}
                   >
-                  {truncateNpub(profile?.userProfile?.npub || profileNpub())}
+                    {truncateNpub(profile?.userProfile?.npub || profileNpub())}
                   <div class={styles.copyIcon}></div>
                 </button>
               </div>
             </div>
-          </div>
-        </Show>
+          </Show>
+        </div>
 
         <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
         </div>

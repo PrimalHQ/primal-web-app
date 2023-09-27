@@ -1,7 +1,8 @@
 .fullHeader {
   position: relative;
   background-color: var(--background-card);
-  padding-bottom: 20px;
+  padding-bottom: 4px;
+  min-height: 474px;
 }
 
 .banner {
@@ -82,6 +83,7 @@
   padding-top: 20px;
   padding-right: 8px;
   padding-bottom: 36px;
+  min-height: 96px;
 }
 
 @mixin smallButton {
@@ -219,8 +221,10 @@
 
 
 .profileVerification {
+  display: block;
   margin-top: 12px;
   margin-inline: 20px;
+  height: 52px;
   .avatarName {
     display: flex;
     align-items: center;
@@ -239,6 +243,7 @@
     line-height: 16px;
     margin-top: 10px;
     justify-content: space-between;
+    height: 16px;
     .verified {
       display: flex;
       max-width: 50%;
@@ -387,6 +392,7 @@
 }
 .desktopAvatar {
   display: block;
+  min-height: 142px;
 }
 .addToFeedButton {
   display: block;
