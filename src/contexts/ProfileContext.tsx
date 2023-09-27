@@ -118,6 +118,7 @@ export const initialData = {
   profileKey: undefined,
   userProfile: undefined,
   userStats: { ...emptyStats },
+  fetchedUserStats: false,
   knownProfiles: { names: {} },
   notes: [],
   replies: [],
@@ -388,7 +389,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNextRepliesPage = () => {
-    const lastReply = store.notes[store.notes.length - 1];
+    const lastReply = store.replies[store.replies.length - 1];
 
     if (!lastReply) {
       return;
