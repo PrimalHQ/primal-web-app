@@ -149,6 +149,7 @@ const EditBox: Component<{
     if (isUploading()) {
       return;
     }
+    const previousChar = textArea.value[textArea.selectionStart - 1];
 
     const mentionSeparators = ['Enter', 'Space', 'Comma', 'Tab'];
 
@@ -158,7 +159,7 @@ const EditBox: Component<{
       return false;
     }
 
-    if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+    if (!isMentioning() && !isEmojiInput() && e.key === ':' && previousChar === ' ') {
       emojiCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
       setEmojiInput(true);
       return false;
