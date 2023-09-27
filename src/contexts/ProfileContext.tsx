@@ -193,14 +193,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetchingContacts', () => true);
 
     const subIdContacts = `profile_contacts_${APP_ID}`;
-    const subIdProfiles = `profile_contacts_2_${APP_ID}`;
 
-    let ids: string[] = [];
+    const unsubContacts = subscribeTo(subIdContacts, (type, _, content) => {
 
-    const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
       if (type === 'EOSE') {
         updateStore('isFetchingContacts', () => false);
-        unsubProfiles();
+        unsubContacts();
         return;
       }
 
@@ -228,36 +226,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       }
     });
 
-    const unsubContacts = subscribeTo(subIdContacts, (type, _, content) => {
-
-      if (type === 'EOSE') {
-        getUserProfiles(ids, subIdProfiles);
-        unsubContacts();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (content && content.kind === Kind.Contacts) {
-          const tags = content.tags;
-
-          for (let i = 0;i<tags.length;i++) {
-            const tag = tags[i];
-            if (tag[0] === 'p') {
-              ids.push(tag[1]);
-            }
-          }
-        }
-      }
-    });
-
     updateStore('isFetchingContacts', () => true);
 
-    getProfileContactList(pubkey, subIdContacts);
+    getProfileContactList(pubkey, subIdContacts, true);
   };
 
   const fetchFollowerList = (pubkey: string | undefined) => {
     if (!pubkey) return;
-    const subIdProfiles = `profile_followers_2_${APP_ID}`;
+    const subIdProfiles = `profile_followers_${APP_ID}`;
 
     const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
       if (type === 'EOSE') {
