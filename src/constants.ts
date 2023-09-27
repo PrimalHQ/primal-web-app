@@ -299,3 +299,5 @@ export const defaultContentModeration: ContentModeration[] = [
 export const algoNpub ='npub1tkpg9lyfgy83c4mgrgkrhzl90t732ekzvt73m6658xva88g5rj6qy6ntw4';
 
 export const specialAlgos = ['primal_spam', 'primal_nsfw'];
+
+export const profileContactListPage = 50;

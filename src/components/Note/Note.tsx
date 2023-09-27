@@ -38,14 +38,6 @@ const Note: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
   const [openCustomZap, setOpenCustomZap] = createSignal(false);
 
-  createEffect(() => {
-    const n = props.note;
-
-    console.log('NOTE: ', n);
-    console.log('REPLY: ', n.replyTo);
-    console.log('------------------------')
-  })
-
   return (
     <A
       id={props.id}

@@ -55,6 +55,7 @@ export type ProfileContextStore = {
     reply_count: number,
     time_joined: number,
   },
+  fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
   notes: PrimalNote[],
   replies: PrimalNote[],
@@ -172,11 +173,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-const addContact = (pubkey: string, source: PrimalUser[]) => {
-  const newContact = source.find(c => c.pubkey === pubkey);
+  const addContact = (pubkey: string, source: PrimalUser[]) => {
+    const newContact = source.find(c => c.pubkey === pubkey);
 
-  newContact && updateStore('contacts', store.contacts.length, reconcile(newContact));
-};
+    newContact && updateStore('contacts', store.contacts.length, reconcile(newContact));
+  };
 
   const removeContact = (pubkey: string) => {
     const newContacts = store.contacts.filter(c => c.pubkey !== pubkey);
@@ -248,19 +249,19 @@ const addContact = (pubkey: string, source: PrimalUser[]) => {
       }
     });
 
+    updateStore('isFetchingContacts', () => true);
+
     getProfileContactList(pubkey, subIdContacts);
   };
 
   const fetchFollowerList = (pubkey: string | undefined) => {
     if (!pubkey) return;
-
-    updateStore('isFetchingFollowers', () => true);
-
     const subIdProfiles = `profile_followers_2_${APP_ID}`;
 
     const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
       if (type === 'EOSE') {
         updateStore('isFetchingFollowers', () => false);
+        console.log('FETCHING FOLLOWERS DONE: ', store.isFetchingFollowers)
         unsubProfiles();
         return;
       }
@@ -288,6 +289,10 @@ const addContact = (pubkey: string, source: PrimalUser[]) => {
         }
       }
     });
+
+    updateStore('isFetchingFollowers', () => true);
+
+    console.log('FETCHING FOLLOWERS: ', store.isFetchingFollowers)
 
     getProfileFollowerList(pubkey, subIdProfiles);
   };
@@ -327,7 +332,7 @@ const addContact = (pubkey: string, source: PrimalUser[]) => {
       return;
     }
 
-    updateStore('isFetching', () => true);
+    updateStore('isFetchingReplies', () => true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', until, limit);
   }
@@ -752,6 +757,7 @@ const addContact = (pubkey: string, source: PrimalUser[]) => {
       updateStore('filterReason', () => null);
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
+      updateStore('fetchedUserStats', () => false);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
 
@@ -831,6 +837,7 @@ const addContact = (pubkey: string, source: PrimalUser[]) => {
         const stats = JSON.parse(content.content);
 
         updateStore('userStats', () => ({ ...stats }));
+        updateStore('fetchedUserStats', () => true);
         return;
       }
     }

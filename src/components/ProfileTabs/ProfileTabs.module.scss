@@ -34,7 +34,7 @@
   top: 48px;
   left: 0;
   border-radius: 2px 2px 0px 0px;
-  background: linear-gradient(0deg, #CA079F 0%, #CA079F 100%), linear-gradient(134deg, #EF404A 0%, #5B12A4 100%), #121212;
+  background: var(--accent-1);
   transition: all 250ms;
 }
 
@@ -86,4 +86,9 @@
     width: auto;
     height: auto;
   }
+}
+
+.separator {
+  display: block;
+  width: 24px;
 }

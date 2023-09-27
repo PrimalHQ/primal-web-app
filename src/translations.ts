@@ -857,6 +857,16 @@ export const profile = {
     defaultMessage: '{name} hasn\'t posted any notes',
     description: 'Label indicating that the profile has no notes',
   },
+  noFollowers: {
+    id: 'profile.noFollowers',
+    defaultMessage: '{name} has no followers',
+    description: 'Label indicating that the profile has no followers',
+  },
+  noFollows: {
+    id: 'profile.noFollows',
+    defaultMessage: 'No one is following {name}',
+    description: 'Label indicating that the profile has no followers',
+  },
 };
 
 export const search = {

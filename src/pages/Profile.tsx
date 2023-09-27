@@ -90,13 +90,8 @@ const Profile: Component = () => {
     profile?.actions.setProfileKey(hex);
 
     profile?.actions.clearNotes();
-    profile?.actions.clearReplies();
-    profile?.actions.clearContacts();
 
     profile?.actions.fetchNotes(hex);
-    profile?.actions.fetchReplies(hex);
-    profile?.actions.fetchContactList(hex);
-    profile?.actions.fetchFollowerList(hex);
   }
 
   createEffect(() => {
@@ -606,7 +601,7 @@ const Profile: Component = () => {
 
       </div>
 
-      <ProfileTabs setProfile={setProfile} />
+      <ProfileTabs setProfile={setProfile} profile={profile?.userProfile}/>
 
       <ConfirmModal
         open={confirmReportUser()}
