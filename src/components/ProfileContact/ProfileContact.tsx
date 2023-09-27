@@ -8,7 +8,7 @@ import styles from './ProfileContact.module.scss';
 import SmallNote from '../SmallNote/SmallNote';
 import { useIntl } from '@cookbook/solid-intl';
 import { nip05Verification, userName } from '../../stores/profile';
-import { profile, profile as t } from '../../translations';
+import { profile as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
@@ -22,6 +22,8 @@ const ProfileContact: Component<{
   postAction?: (remove: boolean, pubkey: string) => void,
   id?: string,
 }> = (props) => {
+
+  const intl = useIntl();
 
   return (
     <div id={props.id} class={styles.profileContact}>
@@ -48,7 +50,7 @@ const ProfileContact: Component<{
               {humanizeNumber(props.profileStats)}
             </div>
             <div class={styles.label}>
-              followers
+              {intl.formatMessage(t.stats.followers)}
             </div>
           </div>
         </Show>

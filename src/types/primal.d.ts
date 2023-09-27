@@ -410,6 +410,7 @@ export type PrimalNote = {
   msg: NostrNoteContent,
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
+  replyTo?: string,
 };
 
 export type PrimalFeed = {

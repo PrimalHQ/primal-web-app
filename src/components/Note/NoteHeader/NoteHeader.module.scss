@@ -66,6 +66,22 @@
         }
       }
     }
+    .replyingTo {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 16px;
+      .label {
+        color: var(--text-secondary);
+      }
+      .author {
+        color: var(--accent-1);
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
 
   }
 

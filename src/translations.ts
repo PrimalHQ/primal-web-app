@@ -527,6 +527,11 @@ export const note = {
     defaultMessage: 'Reposted',
     description: 'Label indicating that the note is a repost',
   },
+  reply: {
+    id: 'note.reply',
+    defaultMessage: 'replying to',
+    description: 'Label indicating that the note is a reply',
+  },
 };
 
 export const notificationTypeTranslations: Record<string, string> = {

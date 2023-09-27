@@ -150,6 +150,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
+    const replyTo = message.tags.find(t => t[0] === 'e' && (t[3] === 'root' || t[3] === 'reply')) ;
+
     let mentionedNotes: Record<string, PrimalNote> = {};
     let mentionedUsers: Record<string, PrimalUser> = {};
 
@@ -234,6 +236,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
       msg,
       mentionedNotes,
       mentionedUsers,
+      replyTo: replyTo && replyTo[1],
     };
   });
 }
