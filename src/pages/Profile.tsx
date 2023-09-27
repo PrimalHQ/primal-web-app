@@ -90,6 +90,8 @@ const Profile: Component = () => {
     profile?.actions.setProfileKey(hex);
 
     profile?.actions.clearNotes();
+    profile?.actions.clearReplies();
+    profile?.actions.clearContacts();
 
     profile?.actions.fetchNotes(hex);
   }
@@ -199,18 +201,6 @@ const Profile: Component = () => {
     }
     return account?.publicKey === profile?.profileKey;
   };
-
-  // createEffect(() => {
-  //   const pk = getHex();
-
-  //   if (!pk) {
-  //     return;
-  //   }
-
-  //   if (!isMuted(pk) && account?.isKeyLookupDone) {
-  //     profile?.actions.fetchNotes(pk);
-  //   }
-  // });
 
   createEffect(() => {
     const pk = getHex();
