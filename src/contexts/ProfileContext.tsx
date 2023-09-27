@@ -238,7 +238,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
       if (type === 'EOSE') {
         updateStore('isFetchingFollowers', () => false);
-        console.log('FETCHING FOLLOWERS DONE: ', store.isFetchingFollowers)
         unsubProfiles();
         return;
       }
@@ -268,8 +267,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     });
 
     updateStore('isFetchingFollowers', () => true);
-
-    console.log('FETCHING FOLLOWERS: ', store.isFetchingFollowers)
 
     getProfileFollowerList(pubkey, subIdProfiles);
   };
@@ -310,7 +307,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
 
     updateStore('isFetchingReplies', () => true);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {} }));
     getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', until, limit);
   }
 
