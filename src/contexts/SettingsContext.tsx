@@ -485,13 +485,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // Add active user's feed if it's missing
     // @ts-ignore
     if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex)) {
-      console.log('FIND LATEST')
       addAvailableFeed(feedLatest, true, true);
     }
     // Add active user's feed if it's missing
     // @ts-ignore
     if (initFeeds && !initFeeds.find(f => f.hex === feedLatestWithReplies.hex && feedLatestWithReplies.includeReplies)) {
-      console.log('FIND REPLIES')
       addAvailableFeed(feedLatestWithReplies, true, true);
     }
 
