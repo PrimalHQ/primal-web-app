@@ -24,6 +24,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
   };
 
   const selectFeed = (option: FeedOption) => {
+
     const [hex, includeReplies] = option.value?.split('_') || [];
     const selector = document.getElementById('defocus');
 

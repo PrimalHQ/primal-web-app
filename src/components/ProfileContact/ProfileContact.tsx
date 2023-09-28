@@ -27,7 +27,9 @@ const ProfileContact: Component<{
 
   return (
     <div id={props.id} class={styles.profileContact}>
-      <Avatar src={props.profile?.picture} size="sm" />
+      <A href={`/p/${props.profile?.npub}`}>
+        <Avatar src={props.profile?.picture} size="sm" />
+      </A>
 
       <A href={`/p/${props.profile?.npub}`} class={styles.info}>
         <div class={styles.profileInfo}>

@@ -242,7 +242,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const selectFeed = (feed: PrimalFeed | undefined) => {
     if (feed !== undefined && feed.hex !== undefined) {
-      updateStore('selectedFeed', reconcile(feed ));
+      updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
     }

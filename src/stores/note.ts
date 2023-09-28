@@ -149,7 +149,27 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
-    const replyTo = message.tags.find(t => t[0] === 'e' && (t[3] === 'root' || t[3] === 'reply')) ;
+    let replyTo: string[] | undefined;
+
+    // Determine parent by finding the `e` tag with `reply` then `root` as `marker`
+    // If both fail return the last `e` tag
+    for (let i=0; i<message.tags.length; i++) {
+      const tag = message.tags[i];
+
+      if (tag[0] !== 'e') continue;
+
+      if (tag[3] === 'reply') {
+        replyTo = [...tag];
+        break;
+      }
+
+      if (tag[3] === 'root') {
+        replyTo = [...tag];
+        break;
+      }
+
+      replyTo = [...tag];
+    }
 
     let mentionedNotes: Record<string, PrimalNote> = {};
     let mentionedUsers: Record<string, PrimalUser> = {};
