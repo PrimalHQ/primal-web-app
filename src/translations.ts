@@ -1145,9 +1145,14 @@ export const settings = {
     description: 'Label explaining the impact of restoring default zaps',
   },
   feedLatest: {
-    id: 'feeds.latestFollowing',
+    id: 'feeds.feedLatest',
     defaultMessage: 'Latest',
     description: 'Label for the `latest;following` (active user\'s) feed',
+  },
+  feedLatestWithReplies: {
+    id: 'feeds.feedLatestWithReplies',
+    defaultMessage: 'Latest with replies',
+    description: 'Label for the `latest;following` with `include_replies` flag (active user\'s) feed',
   },
   zaps: {
     id: 'settings.sections.zaps',

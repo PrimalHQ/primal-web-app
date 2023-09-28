@@ -146,7 +146,6 @@ export const convertToNotes: ConvertToNotes = (page) => {
       userMeta = {};
     }
 
-
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = message.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 

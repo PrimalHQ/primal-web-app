@@ -22,16 +22,21 @@ export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string | 
   ]));
 };
 
-export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
+export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, include_replies?: boolean) => {
   if (!pubkey) {
     return;
   }
+
   const start = until === 0 ? 'since' : 'until';
 
   let payload = { limit, [start]: until, pubkey };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
+  }
+  if (include_replies) {
+    // @ts-ignore dynamic property
+    payload.include_replies = include_replies;
   }
 
   sendMessage(JSON.stringify([

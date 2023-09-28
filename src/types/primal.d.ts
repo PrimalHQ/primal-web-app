@@ -417,6 +417,7 @@ export type PrimalFeed = {
   name: string,
   npub?: string,
   hex?: string,
+  includeReplies?: boolean,
 };
 
 export type PrimalScopeFeed = {

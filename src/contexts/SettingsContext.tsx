@@ -205,7 +205,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
           if (account?.hasPublicKey()) {
             feeds.unshift({
-              name: feedLabel,
+              name: feedLatestWithRepliesLabel,
+              hex: account?.publicKey,
+              npub: hexToNpub(account?.publicKey),
+              includeReplies: true,
+            });
+            feeds.unshift({
+              name: feedLatestLabel,
               hex: account?.publicKey,
               npub: hexToNpub(account?.publicKey),
             });
@@ -436,7 +442,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   // This is here as to not trigger the effect
   // TODO Solve this.
-  const feedLabel = intl.formatMessage(t.feedLatest);
+  const feedLatestLabel = intl.formatMessage(t.feedLatest);
+  const feedLatestWithRepliesLabel = intl.formatMessage(t.feedLatestWithReplies);
 
   let publicKey: string | undefined;
 
@@ -456,10 +463,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       updateStore('availableFeeds', () => replaceAvailableFeeds(publicKey, initFeeds));
     }
 
-    const feed = {
-      name: feedLabel,
+    const feedLatest = {
+      name: feedLatestLabel,
       hex: publicKey,
       npub: hexToNpub(publicKey),
+    };
+
+    const feedLatestWithReplies = {
+      name: feedLatestWithRepliesLabel,
+      hex: publicKey,
+      npub: hexToNpub(publicKey),
+      includeReplies: true,
     };
 
     // Add trendingFeed if it's missing
@@ -470,8 +484,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Add active user's feed if it's missing
     // @ts-ignore
-    if (initFeeds && !initFeeds.find(f => f.hex === feed.hex)) {
-      addAvailableFeed(feed, true, true);
+    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex)) {
+      console.log('FIND LATEST')
+      addAvailableFeed(feedLatest, true, true);
+    }
+    // Add active user's feed if it's missing
+    // @ts-ignore
+    if (initFeeds && !initFeeds.find(f => f.hex === feedLatestWithReplies.hex && feedLatestWithReplies.includeReplies)) {
+      console.log('FIND REPLIES')
+      addAvailableFeed(feedLatestWithReplies, true, true);
     }
 
     setTimeout(() => {

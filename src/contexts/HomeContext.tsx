@@ -1,6 +1,6 @@
 import { nip19 } from "nostr-tools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
@@ -163,7 +163,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNotes = (topic: string, subId: string, until = 0) => {
+  const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
     const [scope, timeframe] = topic.split(';');
 
     updateStore('isFetching', true);
@@ -186,7 +186,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    getFeed(account?.publicKey, topic, `home_feed_${subId}`, until);
+    getFeed(account?.publicKey, topic, `home_feed_${subId}`, until, 20, includeReplies);
   };
 
   const clearNotes = () => {
@@ -209,6 +209,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('lastNote', () => ({ ...lastNote }));
 
     const topic = store.selectedFeed?.hex;
+    const includeReplies = store.selectedFeed?.includeReplies;
 
     if (!topic) {
       return;
@@ -231,7 +232,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     const until = noteData[criteria];
 
     if (until > 0) {
-      fetchNotes(topic, `${APP_ID}`, until);
+      fetchNotes(topic, `${APP_ID}`, until, includeReplies);
     }
   };
 
@@ -241,9 +242,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const selectFeed = (feed: PrimalFeed | undefined) => {
     if (feed !== undefined && feed.hex !== undefined) {
-      updateStore('selectedFeed', () => ({ ...feed }));
+      updateStore('selectedFeed', reconcile(feed ));
       clearNotes();
-      fetchNotes(feed.hex , `${APP_ID}`);
+      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
     }
   };
 
