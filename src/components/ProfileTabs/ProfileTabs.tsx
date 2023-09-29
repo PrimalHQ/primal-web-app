@@ -280,7 +280,7 @@ const ProfileTabs: Component<{
               <Match when={profile && profile.replies.length === 0 && !profile.isFetchingReplies}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
-                    t.noNotes,
+                    t.noReplies,
                     { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
                   )}
                 </div>
