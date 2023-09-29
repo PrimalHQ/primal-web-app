@@ -27,9 +27,10 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
   };
 
   const editFeed = (feed: PrimalFeed) => {
-    setEditMode(() => feed.hex || '');
+    const id = `${feed.hex}_${feed.includeReplies}`;
+    setEditMode(() => id);
     setNewName(() => feed.name);
-    const input = document.getElementById(`input_${feed.hex}`);
+    const input = document.getElementById(`input_${id}`);
     input && input.focus();
   };
 
@@ -116,7 +117,7 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
           {(feed, index) => (
             <div class={styles.feedItem} data-value={feed.hex} data-index={index()}>
               <Show
-                when={editMode() === feed.hex}
+                when={editMode() === `${feed.hex}_${feed.includeReplies}`}
                 fallback={
                   <>
                     <Show when={account?.hasPublicKey()}>
@@ -124,10 +125,17 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
                         <div class={styles.dragIcon}></div>
                       </div>
                       <div class={styles.manageControls}>
-                        <button class={styles.mngButton} onClick={() => editFeed(feed)}>
+                        <button
+                          class={styles.mngButton}
+                          onClick={() => editFeed(feed)}
+                        >
                           <div class={styles.editButton}></div>
                         </button>
-                        <button class={styles.mngButton} onClick={() => removeFeed(feed)}>
+                        <button
+                          class={styles.mngButton}
+                          onClick={() => removeFeed(feed)}
+                          disabled={!!account?.publicKey && feed.hex === account.publicKey}
+                        >
                           <div class={styles.deleteButton}></div>
                         </button>
                       </div>
@@ -138,7 +146,7 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
               >
                 <div class={styles.feedEdit}>
                   <input
-                    id={`input_${feed.hex}`}
+                    id={`input_${feed.hex}_${feed.includeReplies}`}
                     class={styles.feedNameInput}
                     value={newName()}
                     // @ts-ignore

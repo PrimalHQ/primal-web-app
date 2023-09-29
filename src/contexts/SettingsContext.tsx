@@ -180,7 +180,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const renameAvailableFeed = (feed: PrimalFeed, newName: string) => {
     const list = store.availableFeeds.map(af => {
-      return af.hex === feed.hex ? { ...af, name: newName } : { ...af };
+      return af.hex === feed.hex && af.includeReplies === feed.includeReplies ? { ...af, name: newName } : { ...af };
     });
     setAvailableFeeds(list);
   };
@@ -361,7 +361,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
-          feeds && setAvailableFeeds(feeds, true);
           defaultZapAmount && setDefaultZapAmount(defaultZapAmount, true);
           zapOptions && updateStore('availableZapOptions', () => zapOptions);
 
@@ -388,6 +387,33 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
                 () => ({...m}),
               );
             }
+          }
+
+          if (feeds) {
+
+            let fs = [...feeds];
+
+            const feedLatest = {
+              name: feedLatestLabel,
+              hex: publicKey,
+              npub: hexToNpub(publicKey),
+            };
+
+            const feedLatestWithReplies = {
+              name: feedLatestWithRepliesLabel,
+              hex: publicKey,
+              npub: hexToNpub(publicKey),
+              includeReplies: true,
+            };
+
+            if (!fs.find(f => f.hex === feedLatest.hex && f.includeReplies === undefined)) {
+              fs.push(feedLatest);
+            }
+            if (!fs.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === true)) {
+              fs.push(feedLatestWithReplies);
+            }
+
+            setAvailableFeeds(fs, true);
           }
         }
         catch (e) {
@@ -484,7 +510,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Add active user's feed if it's missing
     // @ts-ignore
-    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex)) {
+    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && !feedLatest.includeReplies)) {
       addAvailableFeed(feedLatest, true, true);
     }
     // Add active user's feed if it's missing

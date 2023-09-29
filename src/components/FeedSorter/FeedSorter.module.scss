@@ -51,6 +51,12 @@
       @include controlButton();
       width: 32px;
       height: 32px;
+
+      &:disabled {
+        .deleteButton, .editButton {
+          background-color: var(--subtile-devider);
+        }
+      }
     }
 
     .deleteButton {
