@@ -51,7 +51,7 @@ export const removeFromAvailableFeeds = (
   feed: PrimalFeed,
   feeds: PrimalFeed[],
 ) => {
-  const newFeeds = feeds.filter(f => f.hex !== feed.hex);
+  const newFeeds = feeds.filter(f => f.hex !== feed.hex || f.includeReplies !== feed.includeReplies);
 
   saveFeeds(pubkey, newFeeds);
 

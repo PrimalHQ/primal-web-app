@@ -409,8 +409,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             if (!fs.find(f => f.hex === feedLatest.hex && f.includeReplies === undefined)) {
               fs.push(feedLatest);
             }
+
             if (!fs.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === true)) {
-              fs.push(feedLatestWithReplies);
+              const latestIndex = fs.findIndex(f => f.hex === feedLatest.hex && f.includeReplies === undefined);
+
+              if (latestIndex >= 0) {
+                fs.splice(latestIndex + 1, 0, feedLatestWithReplies);
+              }
+              else {
+                fs.push(feedLatestWithReplies);
+              }
             }
 
             setAvailableFeeds(fs, true);
