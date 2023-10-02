@@ -40,6 +40,7 @@ const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 
 const Terms = lazy(() => import('./pages/Terms'));
+const Support = lazy(() => import('./pages/Support'));
 
 const primalWindow = window as PrimalWindow;
 
@@ -89,6 +90,7 @@ const Router: Component = () => {
     <>
       <Routes>
         <Route path="/terms" component={Terms} />
+        <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >
           <Route path="/" element={<Navigate href="/home" />} />
           <Route path="/home" component={Home} />
