@@ -14,6 +14,7 @@ import { userName } from "../../stores/profile";
 import { profile as t, actions as tActions } from "../../translations";
 import { PrimalUser } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
+import ButtonCopy from "../Buttons/ButtonCopy";
 import Loader from "../Loader/Loader";
 import Note from "../Note/Note";
 import Paginator from "../Paginator/Paginator";
@@ -141,6 +142,9 @@ const ProfileTabs: Component<{
       case 'zaps':
         profile?.zaps.length === 0 && profile?.actions.fetchZapList(props.profile.pubkey);
         break;
+      case 'relays':
+        profile?.contacts.length === 0 && profile?.actions.fetchContactList(props.profile.pubkey, false);
+        break;
     }
   };
 
@@ -159,8 +163,6 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          <div class={styles.separator}></div>
-
           <Tabs.Trigger class={styles.profileTab} value="replies">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
@@ -168,32 +170,6 @@ const ProfileTabs: Component<{
               </div>
               <div class={styles.statName}>
                 {intl.formatMessage(t.stats.replies)}
-              </div>
-            </div>
-          </Tabs.Trigger>
-
-          <div class={styles.separator}></div>
-
-          <Tabs.Trigger class={styles.profileTab} value="follows">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.follows_count || 0)}
-              </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.follow)}
-              </div>
-            </div>
-          </Tabs.Trigger>
-
-          <div class={styles.separator}></div>
-
-          <Tabs.Trigger class={styles.profileTab} value="followers">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.followers_count || 0)}
-              </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.followers)}
               </div>
             </div>
           </Tabs.Trigger>
@@ -208,6 +184,40 @@ const ProfileTabs: Component<{
               </div>
             </div>
           </Tabs.Trigger>
+
+          <Tabs.Trigger class={styles.profileTab} value="follows">
+            <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(profile?.userStats?.follows_count || 0)}
+              </div>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.follow)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
+          <Tabs.Trigger class={styles.profileTab} value="followers">
+            <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(profile?.userStats?.followers_count || 0)}
+              </div>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.followers)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
+          <Tabs.Trigger class={styles.profileTab} value="relays">
+            <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(profile?.userStats?.relay_count || 0)}
+              </div>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.relays)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
 
           <Tabs.Indicator class={styles.profileTabIndicator} />
         </Tabs.List>
@@ -455,6 +465,26 @@ const ProfileTabs: Component<{
               </For>
               <Paginator loadNextPage={profile?.actions.fetchNextZapsPage}/>
             </Show>
+          </div>
+        </Tabs.Content>
+
+
+        <Tabs.Content class={styles.tabContent} value="relays">
+          <div class={styles.profileRelays}>
+            <For each={Object.keys(profile?.relays || {})}>
+              {relayUrl => (
+                <div class={styles.profileRelay}>
+                  <div class={styles.relayIcon}></div>
+                  <div class={styles.relayUrl}>
+                    {relayUrl}
+                  </div>
+                  <ButtonCopy
+                    copyValue={relayUrl}
+                    label={intl.formatMessage(tActions.copy)}
+                  />
+                </div>
+              )}
+            </For>
           </div>
         </Tabs.Content>
       </Tabs.Root>

@@ -24,6 +24,8 @@ import {
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
+  NostrRelay,
+  NostrRelays,
   NostrStatsContent,
   NostrUserContent,
   NostrUserZaps,
@@ -96,6 +98,7 @@ export type ProfileContextStore = {
   isFetchingFollowers: boolean,
   isFetchingZaps: boolean,
   profileStats: Record<string, number>,
+  relays: NostrRelays,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -113,7 +116,7 @@ export type ProfileContextStore = {
     setProfileKey: (profileKey?: string) => void,
     refreshNotes: () => void,
     checkForNewNotes: (pubkey: string | undefined) => void,
-    fetchContactList: (pubkey: string | undefined) => void,
+    fetchContactList: (pubkey: string | undefined, extended?: boolean) => void,
     fetchFollowerList: (pubkey: string | undefined) => void,
     clearContacts: () => void,
     removeContact: (pubkey: string) => void,
@@ -162,6 +165,7 @@ export const initialData = {
   isFetchingContacts: false,
   followers: [],
   isFetchingFollowers: false,
+  relays: {},
   sidebar: {
     messages: [],
     users: {},
@@ -308,7 +312,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   };
 
-  const fetchContactList = (pubkey: string | undefined) => {
+  const fetchContactList = (pubkey: string | undefined, extended = true) => {
     if (!pubkey) return;
 
     updateStore('isFetchingContacts', () => true);
@@ -344,12 +348,19 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
           updateStore('profileStats', () => ({ ...stats }));
           return;
         }
+
+        if (content?.kind === Kind.Contacts) {
+          const relays = JSON.parse(content.content) as NostrRelays;
+
+          updateStore('relays', reconcile(relays));
+          return;
+        }
       }
     });
 
     updateStore('isFetchingContacts', () => true);
 
-    getProfileContactList(pubkey, subIdContacts, true);
+    getProfileContactList(pubkey, subIdContacts, extended);
   };
 
   const fetchFollowerList = (pubkey: string | undefined) => {

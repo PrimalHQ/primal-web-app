@@ -34,3 +34,53 @@
     justify-content: center;
   }
 }
+
+
+
+.copy {
+  .copyIcon {
+    width: 16px;
+    height: 16px;
+    margin-inline: 8px;
+    background-color: var(--text-tertiary-2);
+    -webkit-mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
+    mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
+  }
+
+
+  .checkIcon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-inline: 8px;
+    background-color: var(--success-color);
+    -webkit-mask: url(../../assets/icons/check.svg) no-repeat 0 / 80%;
+    mask: url(../../assets/icons/check.svg) no-repeat 0 / 80%;
+  }
+
+  color: var(--text-tertiary-2);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 12px;
+  background: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+
+
+  &:focus {
+    box-shadow: none;
+  }
+
+  &:hover {
+    transition-duration: 0ms;
+    color: var(--text-primary);
+    .copyIcon {
+      background-color: var(--text-primary);
+    }
+  }
+}

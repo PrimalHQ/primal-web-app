@@ -42,6 +42,7 @@ import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
+import ButtonCopy from '../components/Buttons/ButtonCopy';
 
 const Profile: Component = () => {
 
@@ -136,15 +137,6 @@ const Profile: Component = () => {
   const hasFeedAtHome = () => {
     return !!settings?.availableFeeds.find(f => f.hex === profile?.profileKey);
   };
-
-  const [copying, setCopying] = createSignal(false);
-
-  const copyNpub = () => {
-    navigator.clipboard.writeText(profile?.userProfile?.npub || profileNpub());
-    setCopying(true);
-
-    setTimeout(() => setCopying(false), 2_000);
-  }
 
   const imgError = (event: any) => {
     const banner = document.getElementById('profile_banner');
@@ -556,19 +548,10 @@ const Profile: Component = () => {
               </Show>
               <div class={styles.publicKey}>
                 <div class={styles.keyIcon}></div>
-                <button
-                  class={styles.npub}
-                  title={profile?.userProfile?.npub || profileNpub()}
-                  onClick={copyNpub}
-                  >
-                    {truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                  <Show
-                    when={copying()}
-                    fallback={<div class={styles.copyIcon}></div>}
-                  >
-                    <div class={styles.checkIcon}></div>
-                  </Show>
-                </button>
+                <div>
+                  {truncateNpub(profile?.userProfile?.npub || profileNpub())}
+                </div>
+                <ButtonCopy copyValue={profile?.userProfile?.npub || profileNpub()} />
               </div>
             </div>
           </Show>

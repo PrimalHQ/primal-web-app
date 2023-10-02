@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: row;
-  justify-content: left;
+  justify-content: space-between;
   align-items: center;
   padding-inline: 8px;
   background-color: var(--background-card);
@@ -187,6 +187,42 @@
     text-transform: lowercase;
     span {
       margin-right: 6px;
+    }
+  }
+}
+
+.profileRelays {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 8px;
+  .profileRelay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 11px;
+    padding-inline: 16px;
+    background-color: var(--background-card);
+    border-bottom: 1px solid var(--background-input);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .relayIcon {
+      width: 18px;
+      height: 18px;
+      background-color: var(--text-secondary);
+      margin-inline: 8px;
+      -webkit-mask: url(../../assets/icons/global.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/global.svg) no-repeat 0 / 100%;
+    }
+
+    .relayUrl {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18px;
+      width: min(560px, 100%);
     }
   }
 }

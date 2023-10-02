@@ -27,6 +27,11 @@ export const actions = {
     defaultMessage: 'cancel',
     description: 'Cancel action, button label',
   },
+  copy: {
+    id: 'actions.copy',
+    defaultMessage: 'copy',
+    description: 'Copy action, button label',
+  },
   addFeedToHome: {
     id: 'actions.addFeedToHome',
     defaultMessage: 'add this feed to my home page',
@@ -855,6 +860,11 @@ export const profile = {
       id: 'profile.stats.replies',
       defaultMessage: 'Replies',
       description: 'Label for replies profile stat',
+    },
+    relays: {
+      id: 'profile.stats.relays',
+      defaultMessage: 'Relays',
+      description: 'Label for sats profile relays',
     },
   },
   isMuted: {
