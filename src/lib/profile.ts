@@ -72,6 +72,30 @@ export const getProfileFollowerList = (pubkey: string | undefined, subid: string
   ]));
 }
 
+
+export const getProfileZapList = (pubkey: string | undefined, subid: string, until = 0, offset = 0, extended = false) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload = {
+    receiver: pubkey,
+    limit: 20,
+    offset,
+  };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["user_zaps_by_satszapped", payload]},
+  ]));
+}
+
 export const getProfileMuteList = (pubkey: string | undefined, subid: string, extended?: boolean) => {
   if (!pubkey) {
     return;

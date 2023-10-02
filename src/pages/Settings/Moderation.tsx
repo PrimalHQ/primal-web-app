@@ -61,11 +61,7 @@ const Moderation: Component = () => {
   const pubkey = () => account?.publicKey;
 
   const mutelists = () => {
-    const a = account?.mutelists.filter(m => m.pubkey && m.pubkey !== pubkey());
-
-    console.log('LIST: ', a)
-
-    return a;
+    return account?.mutelists.filter(m => m.pubkey && m.pubkey !== pubkey());
   };
 
   const algorithms = () => settings?.contentModeration.filter(x => x.name !== 'my').map(x => ({

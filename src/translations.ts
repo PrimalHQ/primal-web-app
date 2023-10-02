@@ -831,6 +831,21 @@ export const profile = {
       defaultMessage: 'Followers',
       description: 'Label for followers profile stat',
     },
+    zaps: {
+      id: 'profile.stats.zaps',
+      defaultMessage: 'Zaps',
+      description: 'Label for zaps profile stat',
+    },
+    sats: {
+      id: 'profile.stats.sats',
+      defaultMessage: 'Sats',
+      description: 'Label for sats profile stat',
+    },
+    totalSats: {
+      id: 'profile.stats.totalSats',
+      defaultMessage: 'Total',
+      description: 'Label for total sats profile stat',
+    },
     notes: {
       id: 'profile.stats.notes',
       defaultMessage: 'Notes',
@@ -871,6 +886,11 @@ export const profile = {
     id: 'profile.noFollows',
     defaultMessage: 'No one is following {name}',
     description: 'Label indicating that the profile has no followers',
+  },
+  noZaps: {
+    id: 'profile.noZaps',
+    defaultMessage: 'No one zapped {name}',
+    description: 'Label indicating that the profile has no zaps',
   },
 };
 

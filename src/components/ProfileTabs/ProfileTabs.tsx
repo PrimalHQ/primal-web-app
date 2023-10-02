@@ -1,15 +1,19 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core";
+import { A } from "@solidjs/router";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
+import { date } from "../../lib/dates";
 import { hookForDev } from "../../lib/devTools";
 import { humanizeNumber } from "../../lib/stats";
+import { store } from "../../services/StoreService";
 import { userName } from "../../stores/profile";
 import { profile as t, actions as tActions } from "../../translations";
 import { PrimalUser } from "../../types/primal";
+import Avatar from "../Avatar/Avatar";
 import Loader from "../Loader/Loader";
 import Note from "../Note/Note";
 import Paginator from "../Paginator/Paginator";
@@ -66,6 +70,7 @@ const ProfileTabs: Component<{
     }
   };
 
+  // We have a client side paginataion
   const [contactsOffset, setContactsOffset] = createSignal(0);
   const [contacts, setContacts] = createStore<PrimalUser[]>([]);
 
@@ -91,7 +96,7 @@ const ProfileTabs: Component<{
     setContactsOffset(contactsOffset() + profileContactListPage);
   }
 
-
+  // We have a client side paginataion
   const [followersOffset, setFollowersOffset] = createSignal(0);
   const [followers, setFollowers] = createStore<PrimalUser[]>([]);
 
@@ -132,6 +137,9 @@ const ProfileTabs: Component<{
         break;
       case 'followers':
         profile?.followers.length === 0 && profile?.actions.fetchFollowerList(props.profile.pubkey);
+        break;
+      case 'zaps':
+        profile?.zaps.length === 0 && profile?.actions.fetchZapList(props.profile.pubkey);
         break;
     }
   };
@@ -186,6 +194,17 @@ const ProfileTabs: Component<{
               </div>
               <div class={styles.statName}>
                 {intl.formatMessage(t.stats.followers)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
+          <Tabs.Trigger class={styles.profileTab} value="zaps">
+            <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(profile?.userStats?.total_zap_count || 0)}
+              </div>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.zaps)}
               </div>
             </div>
           </Tabs.Trigger>
@@ -360,6 +379,81 @@ const ProfileTabs: Component<{
                 }
               </For>
               <Paginator loadNextPage={loadMoreFollowers}/>
+            </Show>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content class={styles.tabContent} value="zaps">
+          <div class={styles.totalSats}>
+            <span class={styles.totalSatsLabel}>
+              {intl.formatMessage(t.stats.totalSats)}:
+            </span>
+            <span class={styles.totalSatsAmount}>
+              <span>
+                {humanizeNumber(profile?.userStats.total_satszapped || 0)}
+              </span>
+              <span>
+                {intl.formatMessage(t.stats.sats)}
+              </span>
+            </span>
+          </div>
+          <div class={styles.profileNotes}>
+            <Show
+              when={!profile?.isFetchingZaps}
+              fallback={
+                  <div style="margin-top: 40px;">
+                    <Loader />
+                  </div>
+              }
+            >
+              <For each={profile?.zaps} fallback={
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(
+                    t.noZaps,
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                  )}
+                </div>
+              }>
+                {zap =>
+                  <A
+                    class={styles.zapItem}
+                    href={`/p/${zap.sender?.npub}`}
+                    data-zap-id={zap.id}
+                  >
+                    <Avatar src={zap.sender?.picture} size="xs" />
+
+                    <div class={styles.zapInfo}>
+                      <div class={styles.zapHeader}>
+                        <span class={styles.zapName}>
+                          {userName(zap.sender)}
+                        </span>
+
+                        <Show when={zap.created_at}>
+                          <span
+                            class={styles.zapTime}
+                            title={date(zap.created_at || 0).date.toLocaleString()}
+                          >
+                            {date(zap.created_at || 0).label}
+                          </span>
+                        </Show>
+                      </div>
+                      <div class={styles.zapMessage}>
+                        {zap.message}
+                      </div>
+                    </div>
+
+                    <div class={styles.zapValue} title={`${zap.amount} ${intl.formatMessage(t.stats.sats)}`}>
+                      <div class={styles.zapAmount}>
+                        {humanizeNumber(zap.amount)}
+                      </div>
+                      <div class={styles.zapUnit}>
+                        {intl.formatMessage(t.stats.sats)}
+                      </div>
+                    </div>
+                  </A>
+                }
+              </For>
+              <Paginator loadNextPage={profile?.actions.fetchNextZapsPage}/>
             </Show>
           </div>
         </Tabs.Content>

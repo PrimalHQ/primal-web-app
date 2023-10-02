@@ -26,9 +26,11 @@ import {
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
+  NostrUserZaps,
   NoteActions,
   PrimalNote,
   PrimalUser,
+  PrimalZap,
   VanityProfiles,
 } from "../types/primal";
 import { APP_ID } from "../App";
@@ -37,6 +39,7 @@ import {
   getProfileContactList,
   getProfileFollowerList,
   getProfileScoredNotes,
+  getProfileZapList,
   getUserProfileInfo,
   getUserProfiles,
   isUserFollowing,
@@ -44,6 +47,9 @@ import {
 import { useAccountContext } from "./AccountContext";
 import { setLinkPreviews } from "../lib/notes";
 import { subscribeTo } from "../sockets";
+import { parseBolt11 } from "../utils";
+import { convertToUser } from "../stores/profile";
+import { sortBreakpoints } from "@solid-primitives/media";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -54,11 +60,17 @@ export type ProfileContextStore = {
     note_count: number,
     reply_count: number,
     time_joined: number,
+    total_zap_count: number,
+    total_satszapped: number,
+    relay_count: number,
   },
   fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
   notes: PrimalNote[],
   replies: PrimalNote[],
+  zaps: PrimalZap[],
+  zapListOffset: number,
+  lastZap: PrimalZap | undefined,
   future: {
     notes: PrimalNote[],
     page: FeedPage,
@@ -79,14 +91,17 @@ export type ProfileContextStore = {
   filterReason: { action: 'block' | 'allow', pubkey?: string, group?: string } | null,
   contacts: PrimalUser[],
   followers: PrimalUser[],
+  zappers: Record<string, PrimalUser>,
   isFetchingContacts: boolean,
   isFetchingFollowers: boolean,
+  isFetchingZaps: boolean,
   profileStats: Record<string, number>,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
     saveReplies: (newNotes: PrimalNote[]) => void,
     clearReplies: () => void,
+    clearZaps: () => void,
     fetchReplies: (noteId: string | undefined, until?: number) => void,
     fetchNextRepliesPage: () => void,
     fetchNotes: (noteId: string | undefined, until?: number) => void,
@@ -103,6 +118,8 @@ export type ProfileContextStore = {
     clearContacts: () => void,
     removeContact: (pubkey: string) => void,
     addContact: (pubkey: string, source: PrimalUser[]) => void,
+    fetchZapList: (pubkey: string | undefined) => void,
+    fetchNextZapsPage: () => void,
   }
 }
 
@@ -112,6 +129,9 @@ export const emptyStats = {
   note_count: 0,
   reply_count: 0,
   time_joined: 0,
+  total_zap_count: 0,
+  total_satszapped: 0,
+  relay_count: 0,
 };
 
 export const initialData = {
@@ -125,11 +145,16 @@ export const initialData = {
   isFetching: false,
   isFetchingReplies: false,
   isProfileFollowing: false,
+  isFetchingZaps: false,
   page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
   reposts: {},
+  zaps: [],
+  zappers: {},
+  zapListOffset: 0,
   lastNote: undefined,
   lastReply: undefined,
+  lastZap: undefined,
   following: [],
   filterReason: null,
   contacts: [],
@@ -173,6 +198,102 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+
+
+  const fetchZapList = (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
+    if (!pubkey) return;
+    const subIdProfiles = `profile_zaps_${APP_ID}`;
+
+    let zapList: NostrUserZaps[] = [];
+
+    const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
+      if (type === 'EOSE') {
+        // let zapsToAdd: PrimalZap[] = [];
+        for (let i=0; i< zapList.length; i++) {
+          const zapContent = zapList[i];
+
+          const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+          const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+          const senderPubkey = zapEvent.pubkey as string;
+
+          const zap: PrimalZap = {
+            id: zapContent.id,
+            message: zapEvent.content || '',
+            amount: parseBolt11(bolt11) || 0,
+            sender: store.zappers[senderPubkey],
+            reciver: store.userProfile,
+            created_at: zapContent.created_at,
+          };
+
+          // zapsToAdd.push(zap);
+          updateStore('zaps', store.zaps.length, () => ({ ...zap }));
+        }
+
+        // updateStore('zaps', (zs) => [...zs, ...zapsToAdd]);
+
+        // updateStore('zaps', store.zaps.length, () => ({
+        //   amount: store.zaps[store.zaps.length -1].amount,
+        //   id: 'PAGE_END',
+        // }));
+
+        updateStore('isFetchingZaps', () => false);
+        unsubProfiles();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.Zap) {
+          zapList.push(content);
+        }
+
+        if (content?.kind === Kind.Metadata) {
+          let user = JSON.parse(content.content);
+
+          if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+            user.displayName = user.display_name;
+          }
+          user.pubkey = content.pubkey;
+          user.npub = hexToNpub(content.pubkey);
+          user.created_at = content.created_at;
+
+          updateStore('zappers', () => ({ [user.pubkey]: { ...user } }));
+          return;
+        }
+      }
+    });
+
+    if (store.lastZap) {
+      updateStore('lastZap', () => ({ ...store.lastZap }));
+    }
+
+    indicateFetching && updateStore('isFetchingZaps', () => true);
+
+    getProfileZapList(pubkey, subIdProfiles, until, offset);
+  };
+
+  const fetchNextZapsPage = () => {
+    const lastZap = store.zaps[store.zaps.length - 1];
+
+    if (!lastZap) {
+      return;
+    }
+
+    const lastAmount = lastZap.amount;
+
+    const offset = store.zaps.reduce((acc, zap) =>
+      zap.amount === lastAmount ? acc+1 : acc,
+      0,
+    );
+
+    updateStore('lastZap', () => ({ ...lastZap }));
+
+    const until = lastZap.amount || 0;
+
+    if (until > 0 && store.profileKey) {
+      fetchZapList(store.profileKey, until, offset, false);
+    }
+  };
 
   const addContact = (pubkey: string, source: PrimalUser[]) => {
     const newContact = source.find(c => c.pubkey === pubkey);
@@ -329,6 +450,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('replies', () => []);
     updateStore('lastReply', () => undefined);
+  };
+
+  const clearZaps = () => {
+    updateStore('zaps', () => []);
+    updateStore('zappers', reconcile({}));
+    updateStore('lastZap', () => undefined);
   };
 
   const clearContacts = () => {
@@ -979,6 +1106,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearContacts,
       addContact,
       removeContact,
+      fetchZapList,
+      fetchNextZapsPage,
+      clearZaps,
     },
   });
 

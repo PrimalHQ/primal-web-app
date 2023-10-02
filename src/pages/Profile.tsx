@@ -92,7 +92,7 @@ const Profile: Component = () => {
     profile?.actions.clearNotes();
     profile?.actions.clearReplies();
     profile?.actions.clearContacts();
-
+    profile?.actions.clearZaps();
   }
 
   createEffect(() => {

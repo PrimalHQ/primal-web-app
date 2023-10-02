@@ -103,6 +103,8 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  Zap = 9735,
+
   MuteList = 10_000,
   CategorizedPeople = 30_000,
 

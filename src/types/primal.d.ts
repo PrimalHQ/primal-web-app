@@ -178,6 +178,15 @@ export type NostrUserFollwerCounts = {
   created_at?: number,
 };
 
+export type NostrUserZaps = {
+  kind: Kind.Zap,
+  content: string,
+  pubkey: string,
+  tags: string[][],
+  created_at?: number,
+  id: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -202,7 +211,8 @@ export type NostrEventContent =
   NostrMediaUploaded |
   NostrLinkMetadata |
   NostrFilteringReason |
-  NostrUserFollwerCounts;
+  NostrUserFollwerCounts |
+  NostrUserZaps;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -458,7 +468,16 @@ export type FeedOption = {
 export type PrimalRepost = {
   user: PrimalUser,
   note: PrimalNoteData,
-}
+};
+
+export type PrimalZap = {
+  sender?: PrimalUser,
+  reciver?: PrimalUser,
+  created_at?: number,
+  amount: number,
+  message: string,
+  id: string,
+};
 
 export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
 
