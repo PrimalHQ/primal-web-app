@@ -560,10 +560,11 @@ const Profile: Component = () => {
                 </div>
               </Show>
               <div class={styles.publicKey}>
-                <div>
-                  {truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                </div>
-                <ButtonCopy copyValue={profile?.userProfile?.npub || profileNpub()} />
+                <ButtonCopy
+                  copyValue={profile?.userProfile?.npub || profileNpub()}
+                  labelBeforeIcon={true}
+                  label={truncateNpub(profile?.userProfile?.npub || profileNpub())}
+                />
               </div>
             </div>
 

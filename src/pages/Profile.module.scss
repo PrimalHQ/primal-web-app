@@ -174,8 +174,8 @@
   display: inline-block;
   margin: 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/zaps.svg) no-repeat 0px / 20px;
-  mask: url(../assets/icons/zaps.svg) no-repeat 0px / 20px;
+  -webkit-mask: url(../assets/icons/feed_zap.svg) no-repeat 0px / 20px;
+  mask: url(../assets/icons/feed_zap.svg) no-repeat 0px / 20px;
 }
 
 .contextIcon {
@@ -403,7 +403,7 @@
 .followsBadge {
   background-color: var(--background-input);
   width: 80px;
-  height: 16px;
+  height: 18px;
   border-radius: 4px;
   font-weight: 300;
   font-size: 12px;
@@ -456,7 +456,7 @@
   position: relative;
   padding: 0;
   button {
-    margin-left: 0;
+    margin-inline: 4px;
   }
 }
 

@@ -94,8 +94,8 @@
   border: none;
   border-radius: 6px;
   margin: 0px;
-  padding: 8px;
-  font-size: 14px;
+  padding: 10px;
+  font-size: 16px;
   line-height: 20px;
   font-weight: 700;
   background: var(--background-input);
@@ -103,6 +103,10 @@
 
   &:hover {
     background-color: var(--subtile-devider);
+  }
+
+  &:focus {
+    box-shadow: none;
   }
 }
 
@@ -112,10 +116,11 @@
   justify-content: center;
   width: fit-content;
   height: fit-content;
+  min-width: 96px;
   border: none;
   border-radius: 6px;
   margin: 0px;
-  padding: 8px;
+  padding: 10px;
   font-size: 16px;
   line-height: 20px;
   font-weight: 700;
@@ -125,6 +130,10 @@
   &:hover {
     color: var(--subtile-devider);
   }
+
+  &:focus {
+    box-shadow: none;
+  }
 }
 
 .unfollow {
@@ -133,10 +142,11 @@
   justify-content: center;
   width: fit-content;
   height: fit-content;
+  min-width: 96px;
   border: none;
   border-radius: 6px;
   margin: 0px;
-  padding: 8px;
+  padding: 10px;
   font-size: 16px;
   line-height: 20px;
   font-weight: 700;
@@ -145,5 +155,9 @@
 
   &:hover {
     background-color: var(--subtile-devider);
+  }
+
+  &:focus {
+    box-shadow: none;
   }
 }
