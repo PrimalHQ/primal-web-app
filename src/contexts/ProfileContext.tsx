@@ -123,6 +123,7 @@ export type ProfileContextStore = {
     addContact: (pubkey: string, source: PrimalUser[]) => void,
     fetchZapList: (pubkey: string | undefined) => void,
     fetchNextZapsPage: () => void,
+    resetProfile: () => void,
   }
 }
 
@@ -877,6 +878,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
   }
 
+  const resetProfile = () => {
+    updateStore('userProfile', () => undefined);
+    updateStore('isFetching', () => false);
+    updateStore('userStats', reconcile(emptyStats));
+  };
+
   const refreshNotes = () => {
   };
 
@@ -1120,6 +1127,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       fetchZapList,
       fetchNextZapsPage,
       clearZaps,
+      resetProfile,
     },
   });
 

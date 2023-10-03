@@ -5,6 +5,13 @@
   // min-height: 474px;
 }
 
+.emptyHeader {
+  position: relative;
+  background-color: var(--background-card);
+  padding-bottom: 4px;
+  height: 466px;
+}
+
 .banner {
   width: 100%;
   height: 214px;

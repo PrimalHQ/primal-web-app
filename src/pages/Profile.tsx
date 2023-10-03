@@ -7,6 +7,8 @@ import {
   createSignal,
   For,
   Match,
+  onCleanup,
+  onMount,
   Resource,
   Show,
   Switch
@@ -456,17 +458,21 @@ const Profile: Component = () => {
         <Search />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
-          <Show
-            when={profile?.userProfile?.banner}
-            fallback={<div class={styles.bannerPlaceholder}></div>}
-          >
-            <img src={banner()} onerror={imgError}/>
-          </Show>
-        </div>
+      <Show
+        when={profile?.userProfile && profile.userProfile.pubkey === getHex()}
+        fallback={<div id="central_header" class={styles.emptyHeader}></div>}
+      >
 
-        <Show when={profile?.userProfile && !profile?.isFetching}>
+        <div id="central_header" class={styles.fullHeader}>
+          <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
+            <Show
+              when={profile?.userProfile?.banner}
+              fallback={<div class={styles.bannerPlaceholder}></div>}
+            >
+              <img src={banner()} onerror={imgError}/>
+            </Show>
+          </div>
+
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <div class={styles.desktopAvatar}>
@@ -478,137 +484,138 @@ const Profile: Component = () => {
               </div>
             </div>
           </div>
-        </Show>
 
-        <div class={styles.profileActions}>
-          <div class={styles.contextArea}>
-            <ButtonProfile
-              onClick={openContextMenu}
-            >
-              <div class={styles.contextIcon}></div>
-            </ButtonProfile>
-            <Show when={showContext()}>
-              <PrimalMenu
-                id={'profile_context'}
-                items={profileContext()}
-                position="profile"
-                reverse={true}
-              />
+          <div class={styles.profileActions}>
+            <div class={styles.contextArea}>
+              <ButtonProfile
+                onClick={openContextMenu}
+              >
+                <div class={styles.contextIcon}></div>
+              </ButtonProfile>
+              <Show when={showContext()}>
+                <PrimalMenu
+                  id={'profile_context'}
+                  items={profileContext()}
+                  position="profile"
+                  reverse={true}
+                />
+              </Show>
+            </div>
+
+            <Show when={!isCurrentUser()}>
+              <ButtonProfile
+                onClick={onNotImplemented}
+              >
+                <div class={styles.zapIcon}></div>
+              </ButtonProfile>
+            </Show>
+
+            <Show when={account?.publicKey}>
+              <ButtonProfile
+                onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+              >
+                <div class={styles.messageIcon}></div>
+              </ButtonProfile>
+            </Show>
+
+            <ButtonFollow person={profile?.userProfile} />
+
+            <Show when={isCurrentUser()}>
+              <ButtonProfile
+                onClick={() => navigate('/settings/profile')}
+                title={intl.formatMessage(tActions.editProfile)}
+              >
+                <div>{intl.formatMessage(tActions.editProfile)}</div>
+              </ButtonProfile>
             </Show>
           </div>
 
-          <Show when={!isCurrentUser()}>
-            <ButtonProfile
-              onClick={onNotImplemented}
-            >
-              <div class={styles.zapIcon}></div>
-            </ButtonProfile>
-          </Show>
+          <div class={styles.profileVerification}>
+            <Show
+              when={profile?.userProfile}>
+              <div class={styles.basicInfo}>
+                <div class={styles.name}>
+                  {profileName()}
+                  <Show when={profile?.userProfile?.nip05 && verification()}>
+                    <div class={styles.verifiedIconL}></div>
+                  </Show>
+                  <Show when={isFollowingYou()}>
+                    <div class={styles.followsBadge}>
+                      {intl.formatMessage(t.followsYou)}
+                    </div>
+                  </Show>
 
-          <Show when={account?.publicKey}>
-            <ButtonProfile
-              onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-            >
-              <div class={styles.messageIcon}></div>
-            </ButtonProfile>
-          </Show>
+                </div>
 
-          <ButtonFollow person={profile?.userProfile} />
-
-          <Show when={isCurrentUser()}>
-            <ButtonProfile
-              onClick={() => navigate('/settings/profile')}
-              title={intl.formatMessage(tActions.editProfile)}
-            >
-              <div>{intl.formatMessage(tActions.editProfile)}</div>
-            </ButtonProfile>
-          </Show>
-        </div>
-
-        <div class={styles.profileVerification}>
-          <Show when={profile?.userProfile && !profile?.isFetching}>
-            <div class={styles.basicInfo}>
-              <div class={styles.name}>
-                {profileName()}
-                <Show when={profile?.userProfile?.nip05 && verification()}>
-                  <div class={styles.verifiedIconL}></div>
-                </Show>
-                <Show when={isFollowingYou()}>
-                  <div class={styles.followsBadge}>
-                    {intl.formatMessage(t.followsYou)}
+                <Show when={profile?.userStats.time_joined}>
+                  <div class={styles.joined}>
+                    {intl.formatMessage(
+                      t.jointDate,
+                      {
+                        date: shortDate(profile?.userStats.time_joined),
+                      },
+                    )}
                   </div>
                 </Show>
-
               </div>
 
-              <Show when={profile?.userStats.time_joined}>
-                <div class={styles.joined}>
-                  {intl.formatMessage(
-                    t.jointDate,
-                    {
-                      date: shortDate(profile?.userStats.time_joined),
-                    },
-                  )}
+              <div class={styles.verificationInfo}>
+                <Show when={profile?.userProfile?.nip05}>
+                  <div class={styles.verified}>
+                    <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                  </div>
+                </Show>
+                <div class={styles.publicKey}>
+                  <ButtonCopy
+                    copyValue={profile?.userProfile?.npub || profileNpub()}
+                    labelBeforeIcon={true}
+                    label={truncateNpub(profile?.userProfile?.npub || profileNpub())}
+                  />
                 </div>
-              </Show>
-            </div>
+              </div>
 
-            <div class={styles.verificationInfo}>
-              <Show when={profile?.userProfile?.nip05}>
-                <div class={styles.verified}>
-                  <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                </div>
-              </Show>
-              <div class={styles.publicKey}>
-                <ButtonCopy
-                  copyValue={profile?.userProfile?.npub || profileNpub()}
-                  labelBeforeIcon={true}
-                  label={truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                />
+            </Show>
+          </div>
+
+          <Show when={renderProfileAbout().length > 0}>
+            <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
+            </div>
+          </Show>
+
+
+          <Show when={profile?.userProfile?.website}>
+            <div class={styles.profileLinks}>
+              <div class={styles.website}>
+                  <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                    {sanitize(profile?.userProfile?.website || '')}
+                  </a>
               </div>
             </div>
-
           </Show>
         </div>
 
-        <Show when={renderProfileAbout().length > 0}>
-          <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
-          </div>
-        </Show>
+        <ProfileTabs profile={profile?.userProfile}/>
 
+        <ConfirmModal
+          open={confirmReportUser()}
+          description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
+          onConfirm={() => {
+            doReportUser();
+            setConfirmReportUser(false);
+          }}
+          onAbort={() => setConfirmReportUser(false)}
+        />
 
-        <Show when={profile?.userProfile?.website}>
-          <div class={styles.profileLinks}>
-            <div class={styles.website}>
-                <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                  {sanitize(profile?.userProfile?.website || '')}
-                </a>
-            </div>
-          </div>
-        </Show>
-      </div>
-
-      <ProfileTabs profile={profile?.userProfile}/>
-
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
-
-      <ConfirmModal
-        open={confirmMuteUser()}
-        description={intl.formatMessage(tActions.muteUserConfirm, { name: userName(profile?.userProfile) })}
-        onConfirm={() => {
-          doMuteUser();
-          setConfirmMuteUser(false);
-        }}
-        onAbort={() => setConfirmMuteUser(false)}
-      />
+        <ConfirmModal
+          open={confirmMuteUser()}
+          description={intl.formatMessage(tActions.muteUserConfirm, { name: userName(profile?.userProfile) })}
+          onConfirm={() => {
+            doMuteUser();
+            setConfirmMuteUser(false);
+          }}
+          onAbort={() => setConfirmMuteUser(false)}
+        />
+      </Show>
     </>
   )
 }
