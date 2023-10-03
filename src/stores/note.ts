@@ -146,16 +146,18 @@ export const convertToNotes: ConvertToNotes = (page) => {
     }
 
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
-    const userMentionIds = msg.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+    const userMentionIds = msg.tags?.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
     const repost = message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined;
 
     let replyTo: string[] | undefined;
 
+    const tgs = msg.tags || [];
+
     // Determine parent by finding the `e` tag with `reply` then `root` as `marker`
     // If both fail return the last `e` tag
-    for (let i=0; i<msg.tags.length; i++) {
-      const tag = msg.tags[i];
+    for (let i=0; i<tgs.length; i++) {
+      const tag = tgs[i];
 
       if (tag[0] !== 'e') continue;
 
@@ -200,7 +202,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
       }
     }
 
-    if (userMentionIds.length > 0) {
+    if (userMentionIds && userMentionIds.length > 0) {
       for (let i = 0;i<userMentionIds.length;i++) {
         const id = userMentionIds[i];
         const m = page.users && page.users[id];
