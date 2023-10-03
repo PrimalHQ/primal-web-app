@@ -43,6 +43,8 @@ import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonCopy from '../components/Buttons/ButtonCopy';
+import ButtonProfile from '../components/Buttons/ButtonProfile';
+import ButtonFollow from '../components/Buttons/ButtonFollow';
 
 const Profile: Component = () => {
 
@@ -480,12 +482,11 @@ const Profile: Component = () => {
 
         <div class={styles.profileActions}>
           <div class={styles.contextArea}>
-            <button
-              class={styles.smallPrimaryButton}
+            <ButtonProfile
               onClick={openContextMenu}
             >
               <div class={styles.contextIcon}></div>
-            </button>
+            </ButtonProfile>
             <Show when={showContext()}>
               <PrimalMenu
                 id={'profile_context'}
@@ -497,49 +498,61 @@ const Profile: Component = () => {
           </div>
 
           <Show when={!isCurrentUser()}>
-            <button
-              class={styles.smallPrimaryButton}
+            <ButtonProfile
               onClick={onNotImplemented}
             >
               <div class={styles.zapIcon}></div>
-            </button>
+            </ButtonProfile>
           </Show>
 
           <Show when={account?.publicKey}>
-            <button
-              class={styles.smallPrimaryButton}
+            <ButtonProfile
               onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
             >
               <div class={styles.messageIcon}></div>
-            </button>
+            </ButtonProfile>
           </Show>
 
-          <FollowButton person={profile?.userProfile} large={true} />
+          <ButtonFollow person={profile?.userProfile} />
 
           <Show when={isCurrentUser()}>
-            <button
-              class={styles.editProfileButton}
+            <ButtonProfile
               onClick={() => navigate('/settings/profile')}
               title={intl.formatMessage(tActions.editProfile)}
             >
               <div>{intl.formatMessage(tActions.editProfile)}</div>
-            </button>
+            </ButtonProfile>
           </Show>
         </div>
 
         <div class={styles.profileVerification}>
           <Show when={profile?.userProfile && !profile?.isFetching}>
-            <div class={styles.avatarName}>
-              {profileName()}
-              <Show when={profile?.userProfile?.nip05 && verification()}>
-                <div class={styles.verifiedIconL}></div>
-              </Show>
-              <Show when={isFollowingYou()}>
-                <div class={styles.followsBadge}>
-                  {intl.formatMessage(t.followsYou)}
+            <div class={styles.basicInfo}>
+              <div class={styles.name}>
+                {profileName()}
+                <Show when={profile?.userProfile?.nip05 && verification()}>
+                  <div class={styles.verifiedIconL}></div>
+                </Show>
+                <Show when={isFollowingYou()}>
+                  <div class={styles.followsBadge}>
+                    {intl.formatMessage(t.followsYou)}
+                  </div>
+                </Show>
+
+              </div>
+
+              <Show when={profile?.userStats.time_joined}>
+                <div class={styles.joined}>
+                  {intl.formatMessage(
+                    t.jointDate,
+                    {
+                      date: shortDate(profile?.userStats.time_joined),
+                    },
+                  )}
                 </div>
               </Show>
             </div>
+
             <div class={styles.verificationInfo}>
               <Show when={profile?.userProfile?.nip05}>
                 <div class={styles.verified}>
@@ -547,40 +560,31 @@ const Profile: Component = () => {
                 </div>
               </Show>
               <div class={styles.publicKey}>
-                <div class={styles.keyIcon}></div>
                 <div>
                   {truncateNpub(profile?.userProfile?.npub || profileNpub())}
                 </div>
                 <ButtonCopy copyValue={profile?.userProfile?.npub || profileNpub()} />
               </div>
             </div>
+
           </Show>
         </div>
 
-        <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
-        </div>
-
-        <div class={styles.profileLinks}>
-          <div class={styles.website}>
-            <Show when={profile?.userProfile?.website}>
-              <div class={styles.linkIcon}></div>
-              <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                {sanitize(profile?.userProfile?.website || '')}
-              </a>
-            </Show>
+        <Show when={renderProfileAbout().length > 0}>
+          <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
           </div>
-          <div class={styles.joined}>
-            <Show when={profile?.userStats.time_joined}>
-              {intl.formatMessage(
-                t.jointDate,
-                {
-                  date: shortDate(profile?.userStats.time_joined),
-                },
-              )}
-            </Show>
-          </div>
-        </div>
+        </Show>
 
+
+        <Show when={profile?.userProfile?.website}>
+          <div class={styles.profileLinks}>
+            <div class={styles.website}>
+                <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                  {sanitize(profile?.userProfile?.website || '')}
+                </a>
+            </div>
+          </div>
+        </Show>
       </div>
 
       <ProfileTabs profile={profile?.userProfile}/>

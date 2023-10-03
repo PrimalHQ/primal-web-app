@@ -149,7 +149,10 @@ const ProfileTabs: Component<{
   };
 
   return (
-    <Show when={profile && props.profile && profile.fetchedUserStats}>
+    <Show
+      when={profile && props.profile && profile.fetchedUserStats}
+      fallback={<div class={styles.profileTabsPlaceholder}></div>}
+    >
       <Tabs.Root onChange={onChangeValue}>
         <Tabs.List class={styles.profileTabs}>
           <Tabs.Trigger class={styles.profileTab} value="notes">
