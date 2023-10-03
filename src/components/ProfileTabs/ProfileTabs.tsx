@@ -177,7 +177,7 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="zaps">
+          {/* <Tabs.Trigger class={styles.profileTab} value="zaps">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
                 {humanizeNumber(profile?.userStats?.total_zap_count || 0)}
@@ -186,7 +186,7 @@ const ProfileTabs: Component<{
                 {intl.formatMessage(t.stats.zaps)}
               </div>
             </div>
-          </Tabs.Trigger>
+          </Tabs.Trigger> */}
 
           <Tabs.Trigger class={styles.profileTab} value="follows">
             <div class={styles.stat}>
