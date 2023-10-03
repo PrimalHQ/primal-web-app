@@ -11,7 +11,6 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   const userMeta = JSON.parse(user?.content || '{}');
   const stat = page?.postStats[message.id];
 
-
   const noActions = {
     event_id: message.id,
     liked: false,
@@ -149,7 +148,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
     const userMentionIds = msg.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
-    const repost = message.kind === Kind.Repost ? getRepostInfo(page, msg) : undefined;
+    const repost = message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined;
 
     let replyTo: string[] | undefined;
 

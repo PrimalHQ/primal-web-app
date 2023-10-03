@@ -8,7 +8,7 @@ import NoteHeader from './NoteHeader/NoteHeader';
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { truncateNpub } from '../../stores/profile';
+import { authorName, truncateNpub } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import NoteReplyHeader from './NoteHeader/NoteReplyHeader';
@@ -31,9 +31,7 @@ const Note: Component<{ note: PrimalNote, id?: string }> = (props) => {
       return '';
     }
 
-    return r.user?.displayName ||
-      r.user?.name ||
-      truncateNpub(r.user.npub);
+    return authorName(r.user);
   }
 
   const [openCustomZap, setOpenCustomZap] = createSignal(false);
