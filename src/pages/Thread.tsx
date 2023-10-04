@@ -193,7 +193,6 @@ const Thread: Component = () => {
             </For>
         </div>
       </Show>
-
     </div>
   )
 }

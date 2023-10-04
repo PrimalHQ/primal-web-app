@@ -491,27 +491,8 @@ export type ExploreFeedPayload = {
   created_after?: number,
 }
 
-export type UserReference = {
-  id: string,
-  pubkey: string,
-  kind: number,
-  tags: string[][],
-  npub?: string,
-  name?: string,
-  about?: string,
-  picture?: string,
-  nip05?: string,
-  banner?: string,
-  display_name?: string,
-  displayName?: string,
-  location?: string,
-  lud06?: string,
-  lud16?: string,
-  website?: string,
-  content?: string,
-  created_at?: number,
-  sig?: string,
-};
+export type UserReference = Record<string, PrimalUser>;
+export type NoteReference = Record<string, PrimalNote>;
 
 export type ContextChildren =
   number |
@@ -520,6 +501,13 @@ export type ContextChildren =
   JSX.ArrayElement |
   (string & {}) | null | undefined;
 
+export type PrimalLinkPreview = {
+  url: string,
+  description?: string,
+  title?: string,
+  images?: string[],
+  favicons?: string[],
+};
 
 export type PrimalTheme = { name: string, label: string, logo: string, dark?: boolean};
 

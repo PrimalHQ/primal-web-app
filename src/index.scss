@@ -398,10 +398,10 @@ body {
 }
 
 .medium-zoom-image {
-  cursor: pointer !important;
+  // cursor: pointer !important;
 }
 .medium-zoom-overlay {
-  cursor: pointer !important;
+  // cursor: pointer !important;
   z-index: var(--z-index-header);
 }
 .medium-zoom-image-opened {

@@ -230,9 +230,27 @@ export const notificationTypeNoteProps: Record<string, string> = {
 
 }
 
-export const noteRegex = /nostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
-export const profileRegex = /nostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
-export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
+// export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
+// export const magnetRegex = /(magnet:[\S]+)/i;
+// export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
+// export const tidalRegex = /tidal\.com\/(?:browse\/)?(\w+)\/([a-z0-9-]+)/i;
+export const spotifyRegex = /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
+export const twitchRegex = /twitch.tv\/([a-z0-9_]+$)/i;
+export const mixCloudRegex = /mixcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+export const soundCloudRegex = /soundcloud\.com\/(?!live)([a-zA-Z0-9]+)\/([a-zA-Z0-9-]+)/;
+export const appleMusicRegex = /music\.apple\.com\/([a-z]{2}\/)?(?:album|playlist)\/[\w\d-]+\/([.a-zA-Z0-9-]+)(?:\?i=\d+)?/i;
+export const nostrNestsRegex = /nostrnests\.com\/[a-zA-Z0-9]+/i;
+export const wavlakeRegex = /(?:player\.)?wavlake\.com\/(track\/[.a-zA-Z0-9-]+|album\/[.a-zA-Z0-9-]+|[.a-zA-Z0-9-]+)/i;
+export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
+export const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/;
+export const interpunctionRegex = /^(\.|,|;|\?|\!)$/;
+
+export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
+export const linebreakRegex = /(\r\n|\r|\n)/ig;
+export const tagMentionRegex = /\#\[([0-9]*)\]/;
+export const noteRegex = /nostr:((note|nevent)1\w+)\b/;
+export const profileRegex = /nostr:((npub|nprofile)1\w+)\b/;
+export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/i;
 
 export const medZapLimit = 1000;
 

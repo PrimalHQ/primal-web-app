@@ -1,12 +1,32 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
-import { linkPreviews, parseNote1 } from '../../lib/notes';
+import {
+  addLinkPreviews,
+  isAppleMusic,
+  isHashtag,
+  isImage,
+  isInterpunction,
+  isMixCloud,
+  isMp4Video,
+  isNoteMention,
+  isOggVideo,
+  isSoundCloud,
+  isSpotify,
+  isTagMention,
+  isTwitch,
+  isUrl,
+  isUserMention,
+  isWavelake,
+  isWebmVideo,
+  isYouTube,
+} from '../../lib/notes';
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createEffect, createSignal,
+  Component, createEffect, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
+  PrimalLinkPreview,
   PrimalNote,
 } from '../../types/primal';
 
@@ -16,124 +36,378 @@ import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
+import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
+import NoteImage from '../NoteImage/NoteImage';
+import { createStore } from 'solid-js/store';
+import { linebreakRegex } from '../../constants';
 
-
-export const parseNoteLinks = (text: string, note: PrimalNote, highlightOnly?: 'text' | 'links') => {
-  const regex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
-
-  return text.replace(regex, (url) => {
-    const [_, id] = url.split(':');
-
-    if (!id) {
-      return url;
-    }
-
-    try {
-      const eventId = nip19.decode(id).data as string | nip19.EventPointer;
-      const hex = typeof eventId === 'string' ? eventId : eventId.id;
-      const noteId = nip19.noteEncode(hex);
-
-      const path = `/e/${noteId}`;
-
-      let link = <span>{url}</span>;
-
-      if (highlightOnly === 'links') {
-        link = <span class='linkish'>@{url}</span>;
-      }
-
-      if (!highlightOnly) {
-        const ment = note.mentionedNotes && note.mentionedNotes[hex];
-
-        link = ment ?
-          <div>
-            <EmbeddedNote
-              note={ment}
-              mentionedUsers={note.mentionedUsers || {}}
-            />
-          </div> :
-          <A href={path}>{url}</A>;
-      }
-
-      // @ts-ignore
-      return link.outerHTML || url;
-    } catch (e) {
-      return `<span class="${styles.error}">${url}</span>`;
-    }
-
-  });
-
-};
-
-export const parseNpubLinks = (text: string, note: PrimalNote, highlightOnly?: 'links' | 'text') => {
-
-  const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
-
-  return text.replace(regex, (url) => {
-    const [_, id] = url.split(':');
-
-    if (!id) {
-      return url;
-    }
-
-    try {
-      const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
-
-      const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-      const npub = hexToNpub(hex);
-
-      const path = `/p/${npub}`;
-
-      const user = note.mentionedUsers && note.mentionedUsers[hex];
-
-      const label = user ? userName(user) : truncateNpub(npub);
-
-      let link = <span>@{label}</span>;
-
-      if (highlightOnly === 'links') {
-        link = <span class='linkish'>@{label}</span>;
-      }
-
-      if (!highlightOnly) {
-        link = user ? <A href={path}>@{label}</A> : MentionedUserLink({ user });
-      }
-
-      // @ts-ignore
-      return link.outerHTML || url;
-    } catch (e) {
-      return `<span class="${styles.error}">${url}</span>`;
-    }
-  });
-
-};
 
 const ParsedNote: Component<{
   note: PrimalNote,
-  ignoreMentionedNotes?: boolean,
   id?: string,
   ignoreMedia?: boolean,
   noLinks?: 'links' | 'text',
+  noPreviews?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
 
-  const parsedContent = (text: string, highlightOnly?: 'text' | 'links') => {
-    const regex = /\#\[([0-9]*)\]/g;
-    let parsed = text;
+  const [tokens, setTokens] = createStore<string[]>([])
+  const [renderedUrl, setRenderedUrl] = createStore<Record<string, any>>({});
 
-    let refs = [];
-    let match;
+  const parseContent = () => {
+    const content = props.note.post.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+    const tokens = content.split(/[\s]+/);
 
-    while((match = regex.exec(text)) !== null) {
-      refs.push(match[1]);
-    }
+    setTokens(() => [...tokens]);
+  }
 
-    if (refs.length > 0) {
-      for(let i =0; i < refs.length; i++) {
-        let r = parseInt(refs[i]);
+  const parseToken: (token: string) => JSXElement  = (token: string) => {
+
+      if (token === '__LB__') {
+        // setElements(elements.length, <br />);
+        return <br />;
+      }
+      if (token === '__SP__') {
+        // setElements(elements.length, <br />);
+        return <> </>;
+      }
+
+      if (isInterpunction(token)) {
+        // setElements(elements.length, <span>{token}</span>)
+        return <span>{token}</span>;
+      }
+
+      if (isUrl(token)) {
+        const index = token.indexOf('http');
+
+        if (index > 0) {
+          const prefix = token.slice(0, index);
+          const url = token.slice(index);
+          // tokens.splice(i+1, 0, prefix);
+          // tokens.splice(i+2, 0, url);
+          return <>{parseToken(prefix)} {parseToken(url)}</>;
+        }
+
+        if (!props.ignoreMedia) {
+          if (isImage(token)) {
+            const dev = localStorage.getItem('devMode') === 'true';
+            let imgUrl = media?.actions.getMediaUrl(token);
+            const url = imgUrl || getMediaUrlDefault(token)
+
+            // setElements(elements.length, <NoteImage src={url} isDev={dev} />);
+            return <NoteImage src={url} isDev={dev} />;
+          }
+
+          if (isMp4Video(token)) {
+            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/mp4" /></video>);
+            return <video class="w-max" controls><source src={token} type="video/mp4" /></video>;
+          }
+
+          if (isOggVideo(token)) {
+            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/ogg" /></video>);
+            return <video class="w-max" controls><source src={token} type="video/ogg" /></video>;
+          }
+
+          if (isWebmVideo(token)) {
+            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/webm" /></video>);
+            return <video class="w-max" controls><source src={token} type="video/webm" /></video>;
+          }
+
+          if (isYouTube(token)) {
+            const youtubeId = isYouTube(token) && RegExp.$1;
+
+            // setElements(elements.length,
+            //   <iframe
+            //     class="w-max"
+            //     src={`https://www.youtube.com/embed/${youtubeId}`}
+            //     title="YouTube video player"
+            //     // @ts-ignore no property
+            //     key={youtubeId}
+            //     frameBorder="0"
+            //     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            //     allowFullScreen
+            //   ></iframe>
+            // );
+            return <iframe
+              class="w-max"
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title="YouTube video player"
+              // @ts-ignore no property
+              key={youtubeId}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>;
+          }
+
+          if (isSpotify(token)) {
+            const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
+
+            // setElements(elements.length,
+            //   <iframe
+            //     style="borderRadius: 12"
+            //     src={convertedUrl}
+            //     width="100%"
+            //     height="352"
+            //     // @ts-ignore no property
+            //     frameBorder="0"
+            //     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            //     loading="lazy"
+            //   ></iframe>
+            // );
+            return <iframe
+              style="borderRadius: 12"
+              src={convertedUrl}
+              width="100%"
+              height="352"
+              // @ts-ignore no property
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>;
+          }
+
+          if (isTwitch(token)) {
+            const channel = token.split("/").slice(-1);
+
+            const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
+
+            // setElements(elements.length,
+            //   <iframe
+            //     src={`https://player.twitch.tv/${args}`}
+            //     // @ts-ignore no property
+            //     className="w-max"
+            //     allowFullScreen
+            //   ></iframe>
+            // );
+            return <iframe
+              src={`https://player.twitch.tv/${args}`}
+              // @ts-ignore no property
+              className="w-max"
+              allowFullScreen
+            ></iframe>;
+          }
+
+          if (isMixCloud(token)) {
+            const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
+
+            // setElements(elements.length,
+            //   <div>
+            //     <iframe
+            //       title="SoundCloud player"
+            //       width="100%"
+            //       height="120"
+            //       // @ts-ignore no property
+            //       frameBorder="0"
+            //       src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F`}
+            //     ></iframe>
+            //   </div>
+            // );
+
+            return <div>
+              <iframe
+                title="SoundCloud player"
+                width="100%"
+                height="120"
+                // @ts-ignore no property
+                frameBorder="0"
+                src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F`}
+              ></iframe>
+            </div>;
+          }
+
+          if (isSoundCloud(token)) {
+            // setElements(elements.length,
+            //   <iframe
+            //     width="100%"
+            //     height="166"
+            //     // @ts-ignore no property
+            //     scrolling="no"
+            //     allow="autoplay"
+            //     src={`https://w.soundcloud.com/player/?url=${token}`}
+            //   ></iframe>
+            // );
+            return <iframe
+              width="100%"
+              height="166"
+              // @ts-ignore no property
+              scrolling="no"
+              allow="autoplay"
+              src={`https://w.soundcloud.com/player/?url=${token}`}
+            ></iframe>;
+          }
+
+          if (isAppleMusic(token)) {
+            const convertedUrl = token.replace("music.apple.com", "embed.music.apple.com");
+            const isSongLink = /\?i=\d+$/.test(convertedUrl);
+
+            // setElements(elements.length,
+            //   <iframe
+            //     allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+            //     // @ts-ignore no property
+            //     frameBorder="0"
+            //     height={`${isSongLink ? 175 : 450}`}
+            //     style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
+            //     sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+            //     src={convertedUrl}
+            //   ></iframe>
+            // );
+            return <iframe
+              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+              // @ts-ignore no property
+              frameBorder="0"
+              height={`${isSongLink ? 175 : 450}`}
+              style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
+              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+              src={convertedUrl}
+            ></iframe>;
+          }
+
+          if (isWavelake(token)) {
+            const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
+
+            // setElements(elements.length,
+            //   <iframe
+            //     style="borderRadius: 12"
+            //     src={convertedUrl}
+            //     width="100%"
+            //     height="380"
+            //     // @ts-ignore no property
+            //     frameBorder="0"
+            //     loading="lazy"
+            //   ></iframe>
+            // );
+            return <iframe
+              style="borderRadius: 12"
+              src={convertedUrl}
+              width="100%"
+              height="380"
+              // @ts-ignore no property
+              frameBorder="0"
+              loading="lazy"
+            ></iframe>;
+          }
+        }
+
+        if (props.noLinks === 'text') {
+          // setElements(elements.length, <span class="whole">{token}</span>);
+          return <span class="whole">{token}</span>;
+        }
+
+        addLinkPreviews(token).then(preview => {
+          replaceLink(token, preview);
+        });
+
+        // setElements(elements.length, c);
+        return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
+      }
+
+      if (isNoteMention(token)) {
+        const [_, id] = token.split(':');
+
+        if (!id) {
+          return token;
+        }
+
+        let link = <span>{token}</span>;
+
+        try {
+          const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+          const hex = typeof eventId === 'string' ? eventId : eventId.id;
+          const noteId = nip19.noteEncode(hex);
+
+          const path = `/e/${noteId}`;
+
+          if (props.noLinks === 'links') {
+            link = <span class='linkish'>@{token}</span>;
+          }
+
+          if (!props.noLinks) {
+            const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+
+            link = ment ?
+              <div>
+                <EmbeddedNote
+                  note={ment}
+                  mentionedUsers={props.note.mentionedUsers || {}}
+                />
+              </div> :
+              <A href={path}>{token}</A>;
+          }
+
+        } catch (e) {
+          link = <span class={styles.error}>{token}</span>;
+        }
+
+        // setElements(elements.length, <span class="whole"> {link}</span>);
+        return <span class="whole"> {link}</span>;
+      }
+
+      if (isUserMention(token)) {
+        let [_, id] = token.split(':');
+
+        if (!id) {
+          return token;
+        }
+
+        let end = id[id.length - 1];
+
+        if ([',', '?', ';', '!'].some(x => end === x)) {
+          id = id.slice(0, -1);
+        } else {
+          end = '';
+        }
+
+        try {
+          const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
+
+          const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+          const npub = hexToNpub(hex);
+
+          const path = `/p/${npub}`;
+
+          let user = props.note.mentionedUsers && props.note.mentionedUsers[hex];
+
+          const label = user ? userName(user) : truncateNpub(npub);
+
+          let link = <span>@{label}{end}</span>;
+
+          if (props.noLinks === 'links') {
+            link = <><span class='linkish'>@{label}</span>{end}</>;
+          }
+
+          if (!props.noLinks) {
+            link = !user ?
+              <><A href={path}>@{label}</A>{end}</> :
+              <>{MentionedUserLink({ user })}{end}</>;
+          }
+
+          // setElements(elements.length, <span class="whole"> {link}</span>);
+          return <span class="whole"> {link}</span>;
+        } catch (e) {
+          // setElements(elements.length, <span class={styles.error}> {token}</span>);
+          return <span class={styles.error}> {token}</span>;
+        }
+      }
+
+      if (isTagMention(token)) {
+        let t = `${token}`;
+
+
+        let end = t[t.length - 1];
+
+        if ([',', '?', ';', '!'].some(x => end === x)) {
+          t = t.slice(0, -1);
+        } else {
+          end = '';
+        }
+
+        let r = parseInt(t.slice(2, t.length - 1));
 
         const tag = props.note.post.tags[r];
 
-        if (tag === undefined || tag.length === 0) continue;
+        if (tag === undefined || tag.length === 0) return;
 
         if (
           tag[0] === 'e' &&
@@ -144,13 +418,13 @@ const ParsedNote: Component<{
           const noteId = `nostr:${nip19.noteEncode(hex)}`;
           const path = `/e/${nip19.noteEncode(hex)}`;
 
-          let embeded = <span>{noteId}</span>;
+          let embeded = <span>{noteId}{end}</span>;
 
-          if (highlightOnly === 'links') {
-            embeded = <span class='linkish'>@{noteId}</span>;
+          if (props.noLinks === 'links') {
+            embeded = <><span class='linkish'>@{noteId}</span>{end}</>;
           }
 
-          if (!highlightOnly) {
+          if (!props.noLinks) {
             const ment = props.note.mentionedNotes[hex];
 
             embeded = ment ?
@@ -159,12 +433,13 @@ const ParsedNote: Component<{
                   note={ment}
                   mentionedUsers={props.note.mentionedUsers}
                 />
+                {end}
               </div> :
-              <A href={path}>{noteId}</A>;
+              <><A href={path}>{noteId}</A>{end}</>;
           }
 
-          // @ts-ignore
-          parsed = parsed.replace(`#[${r}]`, embeded.outerHTML);
+          // setElements(elements.length, <span class="whole"> embeded</span>);
+          return <span class="whole"> embeded</span>;
         }
 
         if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
@@ -174,121 +449,70 @@ const ParsedNote: Component<{
 
           const label = userName(user);
 
-          let link = <span>@{label}</span>;
+          let link = <span>@{label}{end}</span>;
 
-          if (highlightOnly === 'links') {
-            link = <span class='linkish'>@{label}</span>;
+          if (props.noLinks === 'links') {
+            link = <><span class='linkish'>@{label}</span>{end}</>;
           }
 
-          if (!highlightOnly) {
-            link = user ? <A href={path}>@{label}</A> : MentionedUserLink({ user });
+          if (!props.noLinks) {
+            link = user ?
+              <><A href={path}>@{label}</A>{end}</> :
+              <>{MentionedUserLink({ user })}{end}</>;
           }
 
-          // @ts-ignore
-          parsed = parsed.replace(`#[${r}]`, link.outerHTML);
+          // setElements(elements.length, <span> {link}</span>);
+          return <span> {link}</span>;
         }
       }
-    }
 
-    return parsed;
+      if (isHashtag(token)) {
+        const [_, term] = token.split('#');
+        const embeded = props.noLinks === 'text' ?
+          <span>#{term}</span> :
+          <A href={`/search/%23${term}`}>#{term}</A>;
 
-  };
-
-  const highlightHashtags = (text: string, noLinks?: 'links' | 'text') => {
-    const regex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
-
-    return text.replace(regex, (token) => {
-      const [space, term] = token.split('#');
-      const embeded = noLinks === 'text' ? (
-        <span>
-          {space}
-          <span>#{term}</span>
-        </span>
-      ) : (
-        <span>
-          {space}
-          <A
-            href={`/search/%23${term}`}
-          >#{term}</A>
-        </span>
-      );
-
-      // @ts-ignore
-      return embeded.outerHTML;
-    });
-  }
-
-  const replaceLinkPreviews = (text: string, previews: Record<string, any>) => {
-    let parsed = text;
-
-    const regex = /__LINK__.*?__LINK__/ig;
-
-    parsed = parsed.replace(regex, (link) => {
-      const url = link.split('__LINK__')[1];
-
-      const preview = previews[url];
-
-      const hasMinimalPreviewData = preview && preview.url &&
-        ((preview.description && preview.description.length > 0) || preview.image || preview.title);
-
-      if (!hasMinimalPreviewData) {
-        return `<a link href="${url}" target="_blank" >${url}</a>`;
+        // setElements(elements.length, <span class="whole"> {embeded}</span>);
+        return <span class="whole"> {embeded}</span>;
       }
 
-      const linkElement = (<div class={styles.bordered}><LinkPreview preview={preview} /></div>);
+      // const c = <span class="whole">
+      //   <Show when={i > 0}> </Show>
+      //   {token}
+      // </span>;
 
-      // @ts-ignore
-      return linkElement.outerHTML;
-    });
-
-    return parsed;
-  }
-
-  const content = () => {
-    return parseNoteLinks(
-      parseNpubLinks(
-        parsedContent(
-          highlightHashtags(
-            parseNote1(props.note.post.content, media?.actions.getMediaUrl)
-          ),
-          props.noLinks,
-        ),
-        props.note,
-        props.noLinks,
-      ),
-      props.note,
-      props.noLinks,
-    );
+      // setElements(elements.length, c);
+      return <span class="whole">{token}</span>;
   };
 
-  const smallContent = () => {
-    return parseNoteLinks(
-      parseNpubLinks(
-        parsedContent(
-          highlightHashtags(
-            props.note.post.content,
-            props.noLinks,
-          ),
-          props.noLinks,
-        ),
-        props.note,
-        props.noLinks,
-      ),
-      props.note,
-      props.noLinks,
-    );
-  };
-
-  const [displayedContent, setDisplayedContent] = createSignal<string>(props.ignoreMedia ? smallContent() : content());
-
-  createEffect(() => {
-    const newContent = replaceLinkPreviews(displayedContent(), { ...linkPreviews });
-
-    setDisplayedContent(() => newContent);
+  onMount(() => {
+    parseContent();
   });
 
+  let noteHolder: HTMLDivElement | undefined;
+
+  const replaceLink = (url: string, preview: PrimalLinkPreview) => {
+    if (!noteHolder) return;
+
+    const hasMinimalPreviewData = !props.noPreviews &&
+      preview &&
+      preview.url &&
+      ((preview.description && preview.description.length > 0) ||
+        preview.images ||
+        preview.title
+      );
+
+    if (hasMinimalPreviewData) {
+      // @ts-ignore
+      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div class="bordered"><LinkPreview preview={preview} /></div>).outerHTML;
+    }
+  };
+
   return (
-    <div id={props.id} innerHTML={displayedContent()}>
+    <div id={props.id} ref={noteHolder}>
+      <For each={tokens}>
+        {(token) => <>{parseToken(token)}</>}
+      </For>
     </div>
   );
 };
