@@ -1186,7 +1186,7 @@ export const settings = {
   },
   feedLatestWithReplies: {
     id: 'feeds.feedLatestWithReplies',
-    defaultMessage: 'Latest with replies',
+    defaultMessage: 'Latest with Replies',
     description: 'Label for the `latest;following` with `include_replies` flag (active user\'s) feed',
   },
   zaps: {

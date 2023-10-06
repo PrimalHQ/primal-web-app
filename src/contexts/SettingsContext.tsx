@@ -518,13 +518,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Add active user's feed if it's missing
     // @ts-ignore
-    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && !feedLatest.includeReplies)) {
+    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && f.includeReplies === feedLatest.includeReplies)) {
       addAvailableFeed(feedLatest, true, true);
     }
+
+    const fwr = initFeeds?.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === feedLatestWithReplies.includeReplies);
+
     // Add active user's feed if it's missing
     // @ts-ignore
-    if (initFeeds && !initFeeds.find(f => f.hex === feedLatestWithReplies.hex && feedLatestWithReplies.includeReplies)) {
+    if (!fwr) {
       addAvailableFeed(feedLatestWithReplies, true, true);
+    }
+    else if (fwr.name === 'Latest with replies') {
+      renameAvailableFeed(fwr, feedLatestWithRepliesLabel);
     }
 
     setTimeout(() => {
