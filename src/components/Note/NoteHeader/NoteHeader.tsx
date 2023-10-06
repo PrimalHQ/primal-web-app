@@ -245,12 +245,11 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
         >
           <div class={styles.contextIcon} ></div>
         </button>
-        <Show when={showContext()}>
           <PrimalMenu
             id={`note_context_${props.note.post.id}`}
             items={noteContext}
+            hidden={!showContext()}
           />
-        </Show>
       </div>
 
       <ConfirmModal

@@ -492,14 +492,13 @@ const Profile: Component = () => {
               >
                 <div class={styles.contextIcon}></div>
               </ButtonProfile>
-              <Show when={showContext()}>
-                <PrimalMenu
-                  id={'profile_context'}
-                  items={profileContext()}
-                  position="profile"
-                  reverse={true}
-                />
-              </Show>
+              <PrimalMenu
+                id={'profile_context'}
+                items={profileContext()}
+                position="profile"
+                reverse={true}
+                hidden={!showContext()}
+              />
             </div>
 
             <Show when={!isCurrentUser()}>

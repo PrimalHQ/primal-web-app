@@ -426,13 +426,12 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
           <div class={styles.statNumber}>
             {reposts() === 0 ? '' : truncateNumber(reposts(), 2)}
           </div>
-          <Show when={isRepostMenuVisible()}>
           <PrimalMenu
             id={`repost_menu_${props.note.post.id}`}
             items={repostMenuItems}
             position="note_footer"
+            hidden={!isRepostMenuVisible()}
           />
-        </Show>
         </div>
       </button>
 

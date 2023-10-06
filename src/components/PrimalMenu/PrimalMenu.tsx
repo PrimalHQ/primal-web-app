@@ -10,7 +10,16 @@ const PrimalMenu: Component<{
   items: MenuItem[],
   position?: 'note_footer' | 'profile',
   reverse?: boolean,
+  hidden?: boolean,
 }> = (props) => {
+
+  const visibilityClass = () => {
+    if (props.hidden) {
+      return styles.hidden;
+    }
+
+    return '';
+  };
 
   const positionClass = () => {
     if (props.position == 'note_footer') {
@@ -27,7 +36,7 @@ const PrimalMenu: Component<{
   return (
     <div
       id={props.id}
-      class={`${styles.contextMenuOptions} ${positionClass()}`}
+      class={`${styles.contextMenuOptions} ${positionClass()} ${visibilityClass()}`}
     >
       <For each={props.items}>
         {item => (

@@ -19,4 +19,7 @@
     left: 4px;
     right: unset;
   }
+  &.hidden {
+    visibility: hidden;
+  }
 }
