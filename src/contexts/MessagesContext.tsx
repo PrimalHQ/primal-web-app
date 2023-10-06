@@ -455,8 +455,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       conversation.push(thread);
 
       updateStore('conversation', (conv) => [...conv, ...conversation]);
-      updateStore('isConversationLoaded', () => true);
     }
+    updateStore('isConversationLoaded', () => true);
   };
 
   const resetConversationLoaded = () => {
