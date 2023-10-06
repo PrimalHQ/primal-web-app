@@ -246,6 +246,15 @@ form {
       border-radius: 0px 8px 8px 0px;
     }
   }
+
+  .inputError {
+    color: var(--warning-color);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    margin-top: calc(var(--spacing) * (-1));
+    margin-bottom: 6px;
+  }
 }
 
 @media only screen and (max-width: 720px) {

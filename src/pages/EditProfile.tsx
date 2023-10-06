@@ -17,7 +17,7 @@ import { sendProfile } from '../lib/profile';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { APP_ID } from '../App';
 import { subscribeTo as uploadSub } from "../uploadSocket";
-import { Kind } from '../constants';
+import { Kind, usernameRegex } from '../constants';
 import { uploadMedia } from '../lib/media';
 import Loader from '../components/Loader/Loader';
 import { useNavigate } from '@solidjs/router';
@@ -40,6 +40,7 @@ const EditProfile: Component = () => {
   let textArea: HTMLTextAreaElement | undefined;
   let fileUploadAvatar: HTMLInputElement | undefined;
   let fileUploadBanner: HTMLInputElement | undefined;
+  let nameInput: HTMLInputElement | undefined;
 
   const [isBannerCached, setIsBannerCached] = createSignal(false);
   const [isMoreVisible, setIsMoreVisible] = createSignal(false);
@@ -48,6 +49,8 @@ const EditProfile: Component = () => {
 
   const [avatarPreview, setAvatarPreview] = createSignal<string>();
   const [bannerPreview, setBannerPreview] = createSignal<string>();
+
+  const [isNameValid, setIsNameValid] = createSignal<boolean>(true);
 
   const flagBannerForWarning = () => {
     const dev = localStorage.getItem('devMode') === 'true';
@@ -140,6 +143,12 @@ const EditProfile: Component = () => {
     }
   });
 
+  const onNameInput = () => {
+    const value = nameInput?.value || '';
+
+    setIsNameValid(usernameRegex.test(value))
+  };
+
   const onUpload = (target: 'picture' | 'banner', fileUpload: HTMLInputElement | undefined) => {
 
     if (!fileUpload) {
@@ -224,11 +233,10 @@ const EditProfile: Component = () => {
 
     const data = new FormData(e.target as HTMLFormElement);
 
-    const displayName = data.get('displayName');
-    const name = data.get('name');
+    const name = data.get('name')?.toString() || '';
 
-    if (displayName == null || name == null || displayName.toString().length == 0 || name.toString().length === 0) {
-      toast?.sendWarning('Required fields are not filled');
+    if (!usernameRegex.test(name)) {
+      toast?.sendWarning(intl.formatMessage(tSettings.profile.name.formError));
       return false;
     }
 
@@ -355,19 +363,6 @@ const EditProfile: Component = () => {
       </div>
 
       <form onSubmit={onSubmit}>
-        <div class={styles.inputLabel}>
-          <label for='displayName'>{intl.formatMessage(tSettings.profile.displayName.label)}</label>
-          <span class={styles.required}>
-            <span class={styles.star}>*</span>
-            {intl.formatMessage(tSettings.profile.required)}
-          </span>
-        </div>
-        <input
-          name='displayName'
-          type='text'
-          placeholder={intl.formatMessage(tSettings.profile.displayName.placeholder)}
-          value={profile?.userProfile?.displayName || profile?.userProfile?.display_name || ''}
-        />
 
         <div class={styles.inputLabel}>
           <label for='name'>{intl.formatMessage(tSettings.profile.name.label)}</label>
@@ -383,11 +378,28 @@ const EditProfile: Component = () => {
           <input
             name='name'
             type='text'
+            ref={nameInput}
             class={styles.inputWithPrefix}
             placeholder={intl.formatMessage(tSettings.profile.name.placeholder)}
             value={profile?.userProfile?.name || ''}
+            onInput={onNameInput}
           />
         </div>
+          <Show when={!isNameValid()}>
+            <div class={styles.inputError}>
+              {intl.formatMessage(tSettings.profile.name.error)}
+            </div>
+          </Show>
+
+        <div class={styles.inputLabel}>
+          <label for='displayName'>{intl.formatMessage(tSettings.profile.displayName.label)}</label>
+        </div>
+        <input
+          name='displayName'
+          type='text'
+          placeholder={intl.formatMessage(tSettings.profile.displayName.placeholder)}
+          value={profile?.userProfile?.displayName || profile?.userProfile?.display_name || ''}
+        />
 
         <div class={styles.inputLabel}>
           <label for='website'>{intl.formatMessage(tSettings.profile.website.label)}</label>
@@ -474,6 +486,7 @@ const EditProfile: Component = () => {
           <button
             type='submit'
             class={styles.primaryButton}
+            disabled={!isNameValid()}
           >
             {intl.formatMessage(tActions.save)}
           </button>

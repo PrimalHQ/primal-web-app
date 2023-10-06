@@ -230,6 +230,7 @@ export const notificationTypeNoteProps: Record<string, string> = {
 
 }
 
+export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 // export const magnetRegex = /(magnet:[\S]+)/i;
 // export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;

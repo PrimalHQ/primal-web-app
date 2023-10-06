@@ -1252,13 +1252,23 @@ export const settings = {
     name: {
       label: {
         id: 'pages.settings.profile.name.label',
-        defaultMessage: 'Handle',
+        defaultMessage: 'Username',
         description: 'Label for name input on edit profile page',
       },
       placeholder : {
         id: 'pages.settings.profile.name.placeholder',
-        defaultMessage: 'Enter handle',
+        defaultMessage: 'Enter username',
         description: 'Placeholder for name input on edit profile page',
+      },
+      error: {
+        id: 'pages.settings.profile.name.error',
+        defaultMessage: 'Spaces and special characters are not allowed in the username',
+        description: 'Error label for name input on edit profile page',
+      },
+      formError: {
+        id: 'pages.settings.profile.name.formError',
+        defaultMessage: 'Username is not valid',
+        description: 'Error label for invalid form on edit profile page',
       },
     },
     website: {
