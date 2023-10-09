@@ -41,6 +41,7 @@ import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import { linebreakRegex } from '../../constants';
 
+const specialChars = [",", "?", ";", "!", "'"];
 
 const ParsedNote: Component<{
   note: PrimalNote,
@@ -351,12 +352,18 @@ const ParsedNote: Component<{
           return token;
         }
 
-        let end = id[id.length - 1];
+        let end = '';
 
-        if ([',', '?', ';', '!'].some(x => end === x)) {
-          id = id.slice(0, -1);
-        } else {
-          end = '';
+        for (let i=0; i<specialChars.length; i++) {
+          const char = specialChars[i];
+
+          const index = id.indexOf(char);
+
+          if (index >= 0) {
+            end = id.slice(index);
+            id = id.slice(0, index);
+            break;
+          }
         }
 
         try {
