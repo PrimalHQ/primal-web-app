@@ -53,9 +53,7 @@ const NoteImage: Component<{
   });
 
   return (
-    <div>
-      <img id={imgId} src={props.src} class={klass()} onerror={props.onError} onClick={doZoom} />
-    </div>
+    <img id={imgId} src={props.src} class={klass()} onerror={props.onError} onClick={doZoom} />
   );
 }
 
