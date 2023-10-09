@@ -66,16 +66,13 @@ const ParsedNote: Component<{
   const parseToken: (token: string) => JSXElement  = (token: string) => {
 
       if (token === '__LB__') {
-        // setElements(elements.length, <br />);
         return <br />;
       }
       if (token === '__SP__') {
-        // setElements(elements.length, <br />);
         return <> </>;
       }
 
       if (isInterpunction(token)) {
-        // setElements(elements.length, <span>{token}</span>)
         return <span>{token}</span>;
       }
 
@@ -85,8 +82,6 @@ const ParsedNote: Component<{
         if (index > 0) {
           const prefix = token.slice(0, index);
           const url = token.slice(index);
-          // tokens.splice(i+1, 0, prefix);
-          // tokens.splice(i+2, 0, url);
           return <>{parseToken(prefix)} {parseToken(url)}</>;
         }
 
@@ -96,40 +91,24 @@ const ParsedNote: Component<{
             let imgUrl = media?.actions.getMediaUrl(token);
             const url = imgUrl || getMediaUrlDefault(token)
 
-            // setElements(elements.length, <NoteImage src={url} isDev={dev} />);
             return <NoteImage src={url} isDev={dev} />;
           }
 
           if (isMp4Video(token)) {
-            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/mp4" /></video>);
             return <video class="w-max" controls><source src={token} type="video/mp4" /></video>;
           }
 
           if (isOggVideo(token)) {
-            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/ogg" /></video>);
             return <video class="w-max" controls><source src={token} type="video/ogg" /></video>;
           }
 
           if (isWebmVideo(token)) {
-            // setElements(elements.length, <video class="w-max" controls><source src={token} type="video/webm" /></video>);
             return <video class="w-max" controls><source src={token} type="video/webm" /></video>;
           }
 
           if (isYouTube(token)) {
             const youtubeId = isYouTube(token) && RegExp.$1;
 
-            // setElements(elements.length,
-            //   <iframe
-            //     class="w-max"
-            //     src={`https://www.youtube.com/embed/${youtubeId}`}
-            //     title="YouTube video player"
-            //     // @ts-ignore no property
-            //     key={youtubeId}
-            //     frameBorder="0"
-            //     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            //     allowFullScreen
-            //   ></iframe>
-            // );
             return <iframe
               class="w-max"
               src={`https://www.youtube.com/embed/${youtubeId}`}
@@ -145,18 +124,6 @@ const ParsedNote: Component<{
           if (isSpotify(token)) {
             const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
-            // setElements(elements.length,
-            //   <iframe
-            //     style="borderRadius: 12"
-            //     src={convertedUrl}
-            //     width="100%"
-            //     height="352"
-            //     // @ts-ignore no property
-            //     frameBorder="0"
-            //     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            //     loading="lazy"
-            //   ></iframe>
-            // );
             return <iframe
               style="borderRadius: 12"
               src={convertedUrl}
@@ -174,14 +141,6 @@ const ParsedNote: Component<{
 
             const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
 
-            // setElements(elements.length,
-            //   <iframe
-            //     src={`https://player.twitch.tv/${args}`}
-            //     // @ts-ignore no property
-            //     className="w-max"
-            //     allowFullScreen
-            //   ></iframe>
-            // );
             return <iframe
               src={`https://player.twitch.tv/${args}`}
               // @ts-ignore no property
@@ -192,19 +151,6 @@ const ParsedNote: Component<{
 
           if (isMixCloud(token)) {
             const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
-
-            // setElements(elements.length,
-            //   <div>
-            //     <iframe
-            //       title="SoundCloud player"
-            //       width="100%"
-            //       height="120"
-            //       // @ts-ignore no property
-            //       frameBorder="0"
-            //       src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F`}
-            //     ></iframe>
-            //   </div>
-            // );
 
             return <div>
               <iframe
@@ -219,16 +165,7 @@ const ParsedNote: Component<{
           }
 
           if (isSoundCloud(token)) {
-            // setElements(elements.length,
-            //   <iframe
-            //     width="100%"
-            //     height="166"
-            //     // @ts-ignore no property
-            //     scrolling="no"
-            //     allow="autoplay"
-            //     src={`https://w.soundcloud.com/player/?url=${token}`}
-            //   ></iframe>
-            // );
+
             return <iframe
               width="100%"
               height="166"
@@ -243,17 +180,6 @@ const ParsedNote: Component<{
             const convertedUrl = token.replace("music.apple.com", "embed.music.apple.com");
             const isSongLink = /\?i=\d+$/.test(convertedUrl);
 
-            // setElements(elements.length,
-            //   <iframe
-            //     allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-            //     // @ts-ignore no property
-            //     frameBorder="0"
-            //     height={`${isSongLink ? 175 : 450}`}
-            //     style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
-            //     sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-            //     src={convertedUrl}
-            //   ></iframe>
-            // );
             return <iframe
               allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
               // @ts-ignore no property
@@ -268,17 +194,6 @@ const ParsedNote: Component<{
           if (isWavelake(token)) {
             const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
-            // setElements(elements.length,
-            //   <iframe
-            //     style="borderRadius: 12"
-            //     src={convertedUrl}
-            //     width="100%"
-            //     height="380"
-            //     // @ts-ignore no property
-            //     frameBorder="0"
-            //     loading="lazy"
-            //   ></iframe>
-            // );
             return <iframe
               style="borderRadius: 12"
               src={convertedUrl}
@@ -292,7 +207,6 @@ const ParsedNote: Component<{
         }
 
         if (props.noLinks === 'text') {
-          // setElements(elements.length, <span class="whole">{token}</span>);
           return <span class="whole">{token}</span>;
         }
 
@@ -300,7 +214,6 @@ const ParsedNote: Component<{
           replaceLink(token, preview);
         });
 
-        // setElements(elements.length, c);
         return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
       }
 
@@ -341,7 +254,6 @@ const ParsedNote: Component<{
           link = <span class={styles.error}>{token}</span>;
         }
 
-        // setElements(elements.length, <span class="whole"> {link}</span>);
         return <span class="whole"> {link}</span>;
       }
 
@@ -390,10 +302,8 @@ const ParsedNote: Component<{
               <>{MentionedUserLink({ user })}{end}</>;
           }
 
-          // setElements(elements.length, <span class="whole"> {link}</span>);
           return <span class="whole"> {link}</span>;
         } catch (e) {
-          // setElements(elements.length, <span class={styles.error}> {token}</span>);
           return <span class={styles.error}> {token}</span>;
         }
       }
@@ -445,7 +355,6 @@ const ParsedNote: Component<{
               <><A href={path}>{noteId}</A>{end}</>;
           }
 
-          // setElements(elements.length, <span class="whole"> embeded</span>);
           return <span class="whole"> embeded</span>;
         }
 
@@ -468,7 +377,6 @@ const ParsedNote: Component<{
               <>{MentionedUserLink({ user })}{end}</>;
           }
 
-          // setElements(elements.length, <span> {link}</span>);
           return <span> {link}</span>;
         }
       }
@@ -479,16 +387,9 @@ const ParsedNote: Component<{
           <span>#{term}</span> :
           <A href={`/search/%23${term}`}>#{term}</A>;
 
-        // setElements(elements.length, <span class="whole"> {embeded}</span>);
         return <span class="whole"> {embeded}</span>;
       }
 
-      // const c = <span class="whole">
-      //   <Show when={i > 0}> </Show>
-      //   {token}
-      // </span>;
-
-      // setElements(elements.length, c);
       return <span class="whole">{token}</span>;
   };
 

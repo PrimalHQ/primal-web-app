@@ -529,9 +529,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!fwr) {
       addAvailableFeed(feedLatestWithReplies, true, true);
     }
-    else if (fwr.name === 'Latest with replies') {
-      renameAvailableFeed(fwr, feedLatestWithRepliesLabel);
-    }
 
     setTimeout(() => {
       loadSettings(publicKey);
