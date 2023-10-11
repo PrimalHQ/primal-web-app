@@ -334,8 +334,6 @@ interface SendPaymentResponse {
 }
 
 export type NostrExtension = {
-  sec?: string,
-  pubkey?: string,
   getPublicKey: () => Promise<string>,
   getRelays: () => Promise<NostrRelays>,
   signEvent: (event: NostrRelayEvent) => Promise<NostrRelaySignedEvent>,

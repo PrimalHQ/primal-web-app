@@ -48,12 +48,22 @@ export const pin = {
   title: {
     id: 'pin.title',
     defaultMessage: 'Create Pin',
-    description: 'Create Pin ',
+    description: 'Create Pin modal title',
   },
   description: {
     id: 'pin.description',
     defaultMessage: 'Create a PIN to secure your account. You will need to enter this PIN every time you login to the Primal web app:',
     description: 'Label describing what the pin is used for',
+  },
+  enter: {
+    id: 'pin.enter',
+    defaultMessage: 'Enter your PIN to login: ',
+    description: 'Label instructing the user to enter the pin',
+  },
+  enterTitle: {
+    id: 'pin.enterTitle',
+    defaultMessage: 'Enter Pin',
+    description: 'Enter Pin modal title',
   },
   reEnter: {
     id: 'pin.reEnter',

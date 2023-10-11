@@ -33,7 +33,6 @@ const LoginModal: Component<{
     if (!isValidNsec()) return;
 
     account?.actions.setSec(sec);
-    storeSec(sec);
     setStep(() => 'pin');
   };
 
@@ -57,7 +56,6 @@ const LoginModal: Component<{
 
     if (key.startsWith('nsec')) {
       try {
-        console.log('KEY: ', key)
         const decoded = nip19.decode(key);
 
         return decoded.type === 'nsec' && decoded.data;

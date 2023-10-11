@@ -1,24 +1,15 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { zapNote } from '../../lib/zap';
-import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
-import { PrimalNote } from '../../types/primal';
-import { debounce } from '../../utils';
+import { Component, createEffect, createSignal } from 'solid-js';
 import Modal from '../Modal/Modal';
-import { useToastContext } from '../Toaster/Toaster';
 
 import { login as tLogin, pin as tPin, actions as tActions } from '../../translations';
 
 import styles from './CreatePinModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import ButtonLink from '../Buttons/ButtonLink';
-import { useNavigate } from '@solidjs/router';
 import TextInput from '../TextInput/TextInput';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import { encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
 
 const CreatePinModal: Component<{
   id?: string,
@@ -29,23 +20,29 @@ const CreatePinModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const navigate = useNavigate();
 
   let pinInput: HTMLInputElement | undefined;
 
   const [pin, setPin] = createSignal('');
   const [rePin, setRePin] = createSignal('');
 
-  const encriptWithPin = () => {
-    const val = props.valueToEncrypt || '<NA>';
-    return `${val}_${pin()}`;
+  const encWithPin = async () => {
+    const val = props.valueToEncrypt || '';
+    const enc = await encryptWithPin(pin(), val);
+    return enc;
   };
 
-  const onSetPin = () => {
-    // Verify pin
+  const onSetPin = async() => {
+    if (!isValidPin || !isValidRePin()) return;
+
     // Encrypt private key
+    const enc = await encWithPin();
+
+    // Save PIN for the session
+    setCurrentPin(pin());
+
     // Execute callback
-    props.onPinApplied && props.onPinApplied(encriptWithPin());
+    props.onPinApplied && props.onPinApplied(enc);
   };
 
   const onOptout = () => {

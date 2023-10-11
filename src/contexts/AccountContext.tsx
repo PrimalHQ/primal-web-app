@@ -18,7 +18,7 @@ import {
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
-import { Kind, relayConnectingTimeout } from "../constants";
+import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
@@ -29,6 +29,7 @@ import { getStorage, readSecFromStorage, saveFollowing, saveLikes, saveMuted, sa
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import { generateKeys } from "../lib/PrimalNostr";
+import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
 
 export type AccountContextStore = {
   likes: string[],
@@ -54,6 +55,7 @@ export type AccountContextStore = {
   allowlist: string[],
   allowlistSince: number,
   sec: string | undefined,
+  showPin: string,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -103,6 +105,7 @@ const initialData = {
   allowlist: [],
   allowlistSince: 0,
   sec: undefined,
+  showPin: '',
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -124,8 +127,8 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('sec', () => sec);
       const pubkey = nostrGetPubkey(decoded.data);
       setPublicKey(pubkey);
+      getUserProfiles([pubkey], `user_profile_${APP_ID}`);
     }
-
   }
 
   const setPublicKey = (pubkey: string | undefined) => {
@@ -268,7 +271,12 @@ export function AccountProvider(props: { children: JSXElement }) {
       const sec = readSecFromStorage();
 
       if (sec) {
-        setSec(sec);
+        if (sec.startsWith(pinEncodePrefix)) {
+          updateStore('showPin', () => sec);
+        }
+        else {
+          setSec(sec);
+        }
       } else {
         updateStore('publicKey', () => undefined);
       }
@@ -1213,6 +1221,15 @@ const [store, updateStore] = createStore<AccountContextStore>({
   return (
     <AccountContext.Provider value={store}>
       {props.children}
+      <EnterPinModal
+        open={store.showPin.length > 0}
+        valueToDecrypt={store.showPin}
+        onSuccess={(sec: string) => {
+          setSec(sec);
+          updateStore('showPin', () => '');
+        }}
+        onAbort={() => updateStore('showPin', () => '')}
+      />
     </AccountContext.Provider>
   );
 }
