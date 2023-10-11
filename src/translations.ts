@@ -19,9 +19,90 @@ export const account = {
     defaultMessage: 'You need to be signed in to perform this action',
     description: 'Message to user that an action cannot be preformed without a public key',
   },
+  createNewDescription: {
+    id: 'account.createNewDescription',
+    defaultMessage: 'New to Nostr? Create your account now and join this magical place. It’s quick and easy!',
+    description: 'Label inviting users to join Nostr',
+  },
+};
+
+export const login = {
+  title: {
+    id: 'login.title',
+    defaultMessage: 'Login',
+    description: 'Login ',
+  },
+  description: {
+    id: 'login.description',
+    defaultMessage: 'Enter your Nostr private key (starting with “nsec”):',
+    description: 'Label describing the login proccess',
+  },
+  invalidNsec: {
+    id: 'login.invalidNsec',
+    defaultMessage: 'Please enter a valid Nostr private key',
+    description: 'Label informing the user of an invalid nsec key',
+  },
+};
+
+export const pin = {
+  title: {
+    id: 'pin.title',
+    defaultMessage: 'Create Pin',
+    description: 'Create Pin ',
+  },
+  description: {
+    id: 'pin.description',
+    defaultMessage: 'Create a PIN to secure your account. You will need to enter this PIN every time you login to the Primal web app:',
+    description: 'Label describing what the pin is used for',
+  },
+  reEnter: {
+    id: 'pin.reEnter',
+    defaultMessage: 'Re-type your PIN:',
+    description: 'Label instructing the user to re-enter the pin',
+  },
+  invalidPin: {
+    id: 'pin.invalidPin',
+    defaultMessage: 'PIN must be at least 4 characters',
+    description: 'Label instructing the user on the valid pin requirements',
+  },
+  invalidRePin: {
+    id: 'pin.invalidRePin',
+    defaultMessage: 'PINs don\'t match',
+    description: 'Label instructing the user that the two pins don\'t match',
+  },
 };
 
 export const actions = {
+  createPin: {
+    id: 'actions.createPin',
+    defaultMessage: 'Set PIN',
+    description: 'Create PIN action, button label',
+  },
+  optoutPin: {
+    id: 'actions.optoutPin',
+    defaultMessage: 'Continue without a PIN',
+    description: 'opt-out of PIN action, button label',
+  },
+  createAccount: {
+    id: 'actions.createAccount',
+    defaultMessage: 'Create Account',
+    description: 'Create account action, button label',
+  },
+  login: {
+    id: 'actions.login',
+    defaultMessage: 'Login',
+    description: 'Login action, button label',
+  },
+  loginNow: {
+    id: 'actions.loginNow',
+    defaultMessage: 'Login now',
+    description: 'Login Now action, button label',
+  },
+  getStarted: {
+    id: 'actions.getStarted',
+    defaultMessage: 'Get Started',
+    description: 'Get Started action, button label',
+  },
   cancel: {
     id: 'actions.cancel',
     defaultMessage: 'cancel',

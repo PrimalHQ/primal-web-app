@@ -22,12 +22,13 @@ import { Kind, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey, Relay } from "nostr-tools";
+import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
-import { getStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings } from "../lib/localStore";
+import { getStorage, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
+import { generateKeys } from "../lib/PrimalNostr";
 
 export type AccountContextStore = {
   likes: string[],
@@ -52,6 +53,7 @@ export type AccountContextStore = {
   mutelistSince: number,
   allowlist: string[],
   allowlistSince: number,
+  sec: string | undefined,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -74,6 +76,7 @@ export type AccountContextStore = {
     updateFilterList: (pubkey: string | undefined, content?: boolean, trending?: boolean) => void,
     addToAllowlist: (pubkey: string | undefined, then?: () => void) => void,
     removeFromAllowlist: (pubkey: string | undefined) => void,
+    setSec: (sec: string | undefined) => void,
   },
 }
 
@@ -99,6 +102,7 @@ const initialData = {
   mutelistSince: 0,
   allowlist: [],
   allowlistSince: 0,
+  sec: undefined,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -112,6 +116,17 @@ export function AccountProvider(props: { children: JSXElement }) {
   let relayReliability: Record<string, number> = {};
 
   let connectedRelaysCopy: Relay[] = [];
+
+  const setSec = (sec: string | undefined) => {
+    const decoded = nip19.decode(sec);
+
+    if (decoded.type === 'nsec' && decoded.data) {
+      updateStore('sec', () => sec);
+      const pubkey = nostrGetPubkey(decoded.data);
+      setPublicKey(pubkey);
+    }
+
+  }
 
   const setPublicKey = (pubkey: string | undefined) => {
     updateStore('publicKey', () => pubkey);
@@ -242,7 +257,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     const nostr = win.nostr;
 
     if (nostr === undefined) {
-      console.log('No WebLn extension');
+      console.log('Nostr extension not found');
       // Try again after one second if extensionAttempts are not exceeded
       if (extensionAttempt < 1) {
         extensionAttempt += 1;
@@ -250,7 +265,15 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
 
-      updateStore('isKeyLookupDone', true);
+      const sec = readSecFromStorage();
+
+      if (sec) {
+        setSec(sec);
+      } else {
+        updateStore('publicKey', () => undefined);
+      }
+
+      updateStore('isKeyLookupDone', () => true);
       return;
     }
 
@@ -1183,6 +1206,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     updateFilterList,
     addToAllowlist,
     removeFromAllowlist,
+    setSec,
   },
 });
 

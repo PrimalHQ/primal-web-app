@@ -7,6 +7,7 @@ import {
   SendPaymentResponse,
   WebLnExtension,
  } from "../types/primal";
+import { PrimalNostr } from "./PrimalNostr";
 
 
 type QueueItem = {
@@ -75,7 +76,7 @@ const enqueueWebLn = async <T>(action: (webln: WebLnExtension) => Promise<T>) =>
 
 const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) => {
   const win = window as NostrWindow;
-  const nostr = win.nostr;
+  const nostr = win.nostr || PrimalNostr();
 
   if (nostr === undefined) {
     throw('no_nostr_extension');

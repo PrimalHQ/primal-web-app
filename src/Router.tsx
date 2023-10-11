@@ -29,6 +29,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Mutelist = lazy(() => import('./pages/Mutelist'));
+const CreateAccount = lazy(() => import('./pages/CreateAccount'));
 
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
@@ -118,6 +119,7 @@ const Router: Component = () => {
           <Route path="/search/:query" component={Search} />
           <Route path="/rest" component={Explore} />
           <Route path="/mutelist/:npub" component={Mutelist} />
+          <Route path="/new" component={CreateAccount} />
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName" component={Profile} data={getKnownProfiles} />
         </Route>

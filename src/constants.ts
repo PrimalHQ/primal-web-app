@@ -255,7 +255,6 @@ export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 
 export const medZapLimit = 1000;
 
-
 export const defaultNotificationSettings: Record<string, boolean> = {
   NEW_USER_FOLLOWED_YOU: true,
   USER_UNFOLLOWED_YOU: true,

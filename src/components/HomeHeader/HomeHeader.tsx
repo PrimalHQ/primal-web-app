@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
@@ -8,8 +8,11 @@ import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { placeholders as t } from '../../translations';
+import { placeholders as t, actions as tActions } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import ButtonPrimary from '../Buttons/ButtonPrimary';
+import CreateAccountModal from '../CreateAccountModal/CreateAccountModal';
+import LoginModal from '../LoginModal/LoginModal';
 
 const HomeHeader: Component< { id?: string} > = (props) => {
 
@@ -73,13 +76,31 @@ const HomeHeader: Component< { id?: string} > = (props) => {
 
   const activeUser = () => account?.activeUser;
 
+  const [showGettingStarted, setShowGettingStarted] = createSignal(false);
+  const [showLogin, setShowLogin] = createSignal(false);
+
+  const onGetStarted = () => {
+    setShowGettingStarted(true);
+  };
+
+  const doCreateAccount = () => {};
+
   return (
     <div id={props.id} class={styles.fullHeader}>
       <Show
         when={account?.hasPublicKey()}
-        fallback={<div class={styles.welcomeMessage}>
-          {intl.formatMessage(t.guestUserGreeting)}
-        </div>}
+        fallback={
+          <Show when={account?.isKeyLookupDone}>
+            <div class={styles.welcomeMessage}>
+              <div>
+                {intl.formatMessage(t.guestUserGreeting)}
+              </div>
+              <ButtonPrimary onClick={onGetStarted}>
+              {intl.formatMessage(tActions.getStarted)}
+              </ButtonPrimary>
+            </div>
+          </Show>
+        }
       >
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
           <Avatar
@@ -125,6 +146,18 @@ const HomeHeader: Component< { id?: string} > = (props) => {
           <div class={styles.rightCorner}></div>
         </div>
       </div>
+      <CreateAccountModal
+        open={showGettingStarted()}
+        onAbort={() => setShowGettingStarted(false)}
+        onLogin={() => {
+          setShowGettingStarted(false);
+          setShowLogin(true);
+        }}
+      />
+      <LoginModal
+        open={showLogin()}
+        onAbort={() => setShowLogin(false)}
+      />
     </div>
   );
 }

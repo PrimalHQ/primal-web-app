@@ -1,0 +1,84 @@
+.modal {
+  position: fixed;
+  width: 420px;
+  color: var(--text-secondary);
+  background-color: var(--background-site);
+  background: linear-gradient(var(--background-site),
+    var(--background-site)) padding-box,
+    var(--brand-gradient) border-box;
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+
+  .xClose {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: fit-content;
+
+    position: absolute;
+    top: 18px;
+    right: 18px;
+
+    .iconClose {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    &:hover {
+      .iconClose {
+        background-color: var(--text-primary);
+      }
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+
+  .title {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .description {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 28px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+
+    button {
+      width: fit-content;
+      padding: 10px;
+      margin: 0px;
+    }
+  }
+
+  .alternative {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+}

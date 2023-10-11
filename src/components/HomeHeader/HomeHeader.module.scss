@@ -135,14 +135,21 @@
 }
 
 .welcomeMessage {
-  display: grid;
-  align-content: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   height: 72px;
   font-weight: 300;
   font-size: 32px;
   line-height: 34px;
   color: var(--brand-text);
   text-transform: lowercase;
+
+  button {
+    width: fit-content;
+    min-width: 117px;
+    padding: 8px;
+  }
 }
 
 .welcomeMessageSmall {
