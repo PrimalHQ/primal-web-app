@@ -1,8 +1,12 @@
 .modal {
   background-color: var(--background-modal);
   width: 100vw;
-  height:100vh;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  &.opaque {
+    background-color: var(--background-site);
+  }
 }

@@ -76,7 +76,7 @@ const EnterPinModal: Component<{
 
   createEffect(() => {
     if (props.open) {
-      pinInput?.focus();
+      setTimeout(() => pinInput?.focus(), 200);
     }
   });
 
@@ -86,7 +86,7 @@ const EnterPinModal: Component<{
 
 
   return (
-    <Modal open={props.open}>
+    <Modal open={props.open} opaqueBackdrop={true}>
       <div id={props.id} class={styles.modal}>
         <button class={styles.xClose} onClick={props.onAbort}>
           <div class={styles.iconClose}></div>
@@ -110,7 +110,7 @@ const EnterPinModal: Component<{
             onClick={onConfirm}
             disabled={!isValidPin()}
           >
-            {intl.formatMessage(tActions.createPin)}
+            {intl.formatMessage(tActions.login)}
           </ButtonPrimary>
         </div>
       </div>
