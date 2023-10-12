@@ -101,6 +101,14 @@ export const subscribeToNotificationStats = (pubkey: string, subid: string) => {
   ]));
 }
 
+export const unsubscribeToNotificationStats = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "CLOSE",
+    subid,
+    {cache: ["notification_counts", { subid }]},
+  ]));
+}
+
 export const truncateNumber = (amount: number, from?: 1 | 2 | 3 | 4) => {
   const t = 1_000;
   const s = from || 1;

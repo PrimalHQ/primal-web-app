@@ -32,6 +32,7 @@ const Mutelist = lazy(() => import('./pages/Mutelist'));
 const CreateAccount = lazy(() => import('./pages/CreateAccount'));
 
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
+const Account = lazy(() => import('./pages/Settings/Account'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
 const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
@@ -104,6 +105,7 @@ const Router: Component = () => {
           <Route path="/download" element={<Navigate href='/downloads' />} />;
           <Route path="/settings" component={Settings}>
             <Route path="/" component={Menu} />
+            <Route path="/account" component={Account} />
             <Route path="/appearance" component={Appearance} />
             <Route path="/feeds" component={HomeFeeds} />
             <Route path="/notifications" component={NotifSettings} />

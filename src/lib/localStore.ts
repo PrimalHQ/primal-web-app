@@ -155,3 +155,7 @@ export const storeSec = (sec: string | undefined) => {
   localStorage.setItem('primalSec', sec);
 
 };
+
+export const clearSec = () => {
+  localStorage.removeItem('primalSec');
+};

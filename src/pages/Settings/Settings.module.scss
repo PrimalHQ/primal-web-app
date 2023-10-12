@@ -50,6 +50,95 @@
   align-items: center;
 }
 
+.settingsDescription {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+  margin-top: 8px;
+}
+
+.settingsAccountCaption {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 46px;
+
+  .caption {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 20px;
+    text-transform: uppercase;
+  }
+
+  .copy {
+    color: var(--accent-1);
+    background: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0;
+    border: none;
+    width: fit-content;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    .checkIcon {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      margin-inline: 2px;
+      background-color: var(--success-color);
+      -webkit-mask: url(../../assets/icons/check.svg) no-repeat 0 / 80%;
+      mask: url(../../assets/icons/check.svg) no-repeat 0 / 80%;
+    }
+  }
+}
+
+.settingsKeyArea {
+  background-color: var(--background-input);
+  padding-inline: 12px;
+  padding-block: 10px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .key {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    margin-left: 12px;
+    border: none;
+    height: 20px;
+  }
+
+  .icon {
+    margin: 7px;
+  }
+
+  .keyIcon {
+    min-width: 28px;
+    height: 28px;
+    display: block;
+    margin: 0px;
+    background-color: var(--text-secondary);
+    -webkit-mask: url(../../assets/icons/key.svg) no-repeat 0 0 / 28px 28px;
+    mask: url(../../assets/icons/key.svg) no-repeat 0 0 / 28px 28px;
+  }
+}
+
 .secondCaption {
   margin-top: 24px;
 }
@@ -108,7 +197,31 @@
     line-height: 28px;
     text-decoration: none;
 
-    >div {
+    .caption {
+      display: flex;
+      justify-content: flex-start;
+
+      .bubble {
+        text-align: center;
+        padding-top: 2px;
+        padding-inline: 4px;
+        margin-inline: 8px;
+        width: 18px;
+        height: 18px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 12px;
+        line-height: 12px;
+
+        background: var(--brand-gradient);
+        border: 1px solid var(--background-site);
+
+        color: white;
+        text-shadow: 0.5px 0.5px 0px black;
+      }
+    }
+
+    .chevron {
       width: 12px;
       height: 20px;
       background-color: var(--text-tertiary);
@@ -117,7 +230,7 @@
     }
 
     &:hover {
-      >div {
+      .chevron {
         background-color: var(--text-primary);
       }
     }
@@ -862,5 +975,30 @@
     >div {
       background-color: var(--text-primary);
     }
+  }
+}
+
+.securityWarning {
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .securityMessage {
+    display: inline-block;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 17px;
+    margin-left: 22px;
+  }
+
+  .securityIcon {
+    min-width: 54px;
+    height: 54px;
+    display: inline-block;
+    margin: 0px;
+    background-color: var(--text-secondary);
+    -webkit-mask: url(../../assets/icons/report.svg) no-repeat 0 0 / 54px 54px;
+    mask: url(../../assets/icons/report.svg) no-repeat 0 0 / 54px 54px;
   }
 }

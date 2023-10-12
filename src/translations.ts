@@ -108,6 +108,11 @@ export const actions = {
     defaultMessage: 'Login now',
     description: 'Login Now action, button label',
   },
+  logout: {
+    id: 'actions.logout',
+    defaultMessage: 'Logout',
+    description: 'Logout action, button label',
+  },
   getStarted: {
     id: 'actions.getStarted',
     defaultMessage: 'Get Started',
@@ -122,6 +127,16 @@ export const actions = {
     id: 'actions.copy',
     defaultMessage: 'copy',
     description: 'Copy action, button label',
+  },
+  copyPubkey: {
+    id: 'actions.copyPubkey',
+    defaultMessage: 'copy public key',
+    description: 'Copy pubkey action, button label',
+  },
+  copyPrivkey: {
+    id: 'actions.copyPrivkey',
+    defaultMessage: 'copy private key',
+    description: 'Copy private key action, button label',
   },
   addFeedToHome: {
     id: 'actions.addFeedToHome',
@@ -1044,6 +1059,38 @@ export const settings = {
       id: 'settings.index.title',
       defaultMessage: 'Settings',
       description: 'Title of the settings page',
+    },
+  },
+  account: {
+    title: {
+      id: 'settings.account.title',
+      defaultMessage: 'Account',
+      description: 'Title of the account settings sub-page',
+    },
+    description: {
+      id: 'settings.account.description',
+      defaultMessage: "You can improve your account security by installing a Nostr browser extension, like {link}. By storing your Nostr private key within a browser extension, you will be able to securely sign into any Nostr web app, including Primal.",
+      description: 'Warning about account security',
+    },
+    pubkey: {
+      id: 'settings.account.pubkey',
+      defaultMessage: 'Your Public Key',
+      description: 'Your public key section caption',
+    },
+    pubkeyDesc: {
+      id: 'settings.account.pubkeyDesc',
+      defaultMessage: 'Anyone on Nostr can find you via your public key. Feel free to share anywhere.',
+      description: 'Label describing the public key',
+    },
+    privkey: {
+      id: 'settings.account.privkey',
+      defaultMessage: 'Your Private Key',
+      description: 'Your private key section caption',
+    },
+    privkeyDesc: {
+      id: 'settings.account.privkeyDesc',
+      defaultMessage: 'This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.',
+      description: 'Label describing the private key',
     },
   },
   appearance: {

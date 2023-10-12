@@ -25,7 +25,7 @@ import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../li
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
-import { getStorage, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import { generateKeys } from "../lib/PrimalNostr";
@@ -79,6 +79,7 @@ export type AccountContextStore = {
     addToAllowlist: (pubkey: string | undefined, then?: () => void) => void,
     removeFromAllowlist: (pubkey: string | undefined) => void,
     setSec: (sec: string | undefined) => void,
+    logout: () => void,
   },
 }
 
@@ -119,6 +120,12 @@ export function AccountProvider(props: { children: JSXElement }) {
   let relayReliability: Record<string, number> = {};
 
   let connectedRelaysCopy: Relay[] = [];
+
+  const logout = () => {
+    updateStore('sec', () => undefined);
+    updateStore('publicKey', () => undefined);
+    clearSec();
+  };
 
   const setSec = (sec: string | undefined) => {
     const decoded = nip19.decode(sec);
@@ -1215,6 +1222,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     addToAllowlist,
     removeFromAllowlist,
     setSec,
+    logout,
   },
 });
 

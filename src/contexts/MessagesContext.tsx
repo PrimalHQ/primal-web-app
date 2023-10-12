@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -31,7 +31,7 @@ import {
   UserRelation,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats } from "../lib/messages";
+import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
 import { convertToUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
@@ -739,6 +739,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         socket(),
         { message: onMessage, close: onSocketClose },
       );
+    }
+  });
+
+  createEffect(() => {
+    if (!account?.sec) {
+      unsubscribeToMessagesStats(subidMsgCount);
+      updateStore('messageCount', () => 0);
+      updateStore('messageCountPerSender', reconcile({}));
     }
   });
 

@@ -12,6 +12,14 @@ export const subscribeToMessagesStats = (pubkey: string, subid: string) => {
   ]));
 }
 
+export const unsubscribeToMessagesStats = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "CLOSE",
+    subid,
+    {cache: ["directmsg_count"]},
+  ]));
+}
+
 export const resetMessageCount = async (sender: string, subid: string) => {
   const event = {
     content: `{ "description": "reset messages from '${sender}'"}`,

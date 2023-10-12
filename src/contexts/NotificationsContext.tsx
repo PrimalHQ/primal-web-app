@@ -18,7 +18,7 @@ import {
   NostrEvent,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { subscribeToNotificationStats } from "../lib/notifications";
+import { subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
 import { useAccountContext } from "./AccountContext";
 
 export type NotificationsContextStore = {
@@ -124,7 +124,12 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  createEffect(() => {});
+  createEffect(() => {
+    if (!account?.sec) {
+      unsubscribeToNotificationStats(subid);
+      updateStore('notificationCount', () => 0);
+    }
+  });
 
   onCleanup(() => {
     removeSocketListeners(

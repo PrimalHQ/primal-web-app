@@ -2,10 +2,11 @@ import { Component, Show } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
-import { settings as t } from '../../translations';
+import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
+import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 
 const Menu: Component = () => {
 
@@ -19,6 +20,18 @@ const Menu: Component = () => {
       <PageCaption title={intl.formatMessage(t.title)} />
 
       <div class={styles.subpageLinks}>
+        <Show when={account?.sec != undefined}>
+          <Link href="/settings/account">
+            <div class={styles.caption}>
+              {intl.formatMessage(t.account.title)}
+              <div class={styles.bubble}>
+                <div>{1}</div>
+              </div>
+            </div>
+            <div class={styles.chevron}></div>
+          </Link>
+        </Show>
+
         <Link href="/settings/appearance">
           {intl.formatMessage(t.appearance.title)}
           <div class={styles.chevron}></div>
@@ -56,6 +69,14 @@ const Menu: Component = () => {
           </Link>
         </Show>
       </div>
+
+      <Show when={account?.sec}>
+        <div class={styles.webVersion}>
+          <ButtonPrimary onClick={account?.actions.logout}>
+            {intl.formatMessage(tActions.logout)}
+          </ButtonPrimary>
+        </div>
+      </Show>
 
       <div class={styles.webVersion}>
         <div class={styles.title}>version</div>

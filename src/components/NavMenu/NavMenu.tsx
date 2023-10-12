@@ -53,6 +53,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
       label: intl.formatMessage(t.settings),
       icon: 'settingsIcon',
       hiddenOnSmallScreens: true,
+      bubble: () => account?.sec ? 1 : 0,
     },
     {
       to: '/help',
