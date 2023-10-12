@@ -24,6 +24,21 @@ export const account = {
     defaultMessage: 'New to Nostr? Create your account now and join this magical place. It’s quick and easy!',
     description: 'Label inviting users to join Nostr',
   },
+  create: {
+    title: {
+      id: 'settings.account.title',
+      defaultMessage: 'Create Account',
+      description: 'Title of the create account page',
+    },
+    descriptions: {
+      step_one: {
+        id: 'settings.account.descriptions.step_on',
+        defaultMessage: "Let’s start with the basics. Only the username is required!",
+        description: 'Description on step one',
+      },
+
+    }
+  },
 };
 
 export const login = {
@@ -187,6 +202,21 @@ export const actions = {
     id: 'actions.save',
     defaultMessage: 'save',
     description: 'Save changes action label',
+  },
+  previous: {
+    id: 'actions.previous',
+    defaultMessage: 'previous',
+    description: 'Go to previous step action label',
+  },
+  next: {
+    id: 'actions.next',
+    defaultMessage: 'next',
+    description: 'Go to next step action label',
+  },
+  finish: {
+    id: 'actions.finish',
+    defaultMessage: 'finish',
+    description: 'Finish the wizard action label',
   },
   editProfile: {
     id: 'actions.editProfile',
