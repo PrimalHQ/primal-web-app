@@ -9,6 +9,8 @@ import { createSignal } from 'solid-js';
 
 export const [currentPin, setCurrentPin] = createSignal('');
 
+export const [tempNsec, setTempNsec] = createSignal<string | undefined>();
+
 export const generateKeys = (forceNewKey?: boolean) => {
   const sec = forceNewKey ?
     generatePrivateKey() :
@@ -79,11 +81,14 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
 
 export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
   const getSec = async () => {
-    let sec: string = pk || readSecFromStorage() || generatePrivateKey();
+    let sec: string = pk || readSecFromStorage() || tempNsec() || generatePrivateKey();
 
     if (sec.startsWith(pinEncodePrefix)) {
       sec = await decryptWithPin(currentPin(), sec);
     }
+
+    console.log('SEC: ', sec)
+
     const decoded = nip19.decode(sec);
 
     if (decoded.type !== 'nsec' || !decoded.data) {

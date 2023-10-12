@@ -325,3 +325,8 @@ export const sendAllowList = async (allowlist: string[], date: number, content: 
 
   return await sendEvent(event, relays, relaySettings);
 };
+
+export const getSuggestions = async () => {
+  const resp = await fetch('https://media.primal.net/api/suggestions');
+  console.log('>>>> ', resp)
+};
