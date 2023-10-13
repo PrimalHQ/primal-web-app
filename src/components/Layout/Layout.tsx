@@ -107,7 +107,9 @@ const Layout: Component = () => {
             </div>
 
             <div class={styles.leftFooter}>
-              <ProfileWidget />
+              <Show when={location.pathname !== '/new'}>
+                <ProfileWidget />
+              </Show>
             </div>
           </div>
         </div>
