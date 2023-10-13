@@ -15,6 +15,7 @@ const TextInput: Component<{
   validationState?: 'valid' | 'invalid',
   type?: string,
   autocomplete?: string,
+  name?: string,
 }> = (props) => {
 
   return (
@@ -36,7 +37,8 @@ const TextInput: Component<{
             ref={props.ref}
             class={styles.input}
             readOnly={props.readonly}
-            type={props.type}
+            type={props.type || 'search'}
+            name={props.name || 'searchTerm'}
             autocomplete={props.autocomplete || "off"}
           />
 
