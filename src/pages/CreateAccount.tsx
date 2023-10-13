@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import Loader from '../components/Loader/Loader';
@@ -245,6 +245,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
     if (success) {
       await (new Promise((res) => setTimeout(() => res(true), 100)));
+
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
@@ -402,6 +403,18 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
       <div class={['name', 'info'].includes(currentStep()) ? '' : 'invisible'}>
         <div id="central_header" class={styles.fullHeader}>
+          <Switch>
+            <Match when={currentStep() === 'name'}>
+              <div class={styles.stepIntro}>
+                Let’s start with the basics. Only the username is required!
+              </div>
+            </Match>
+            <Match when={currentStep() === 'info'}>
+              <div class={styles.stepIntro}>
+                Tell us a bit more about yourself. Everything on this page is optional!
+              </div>
+            </Match>
+          </Switch>
           <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
             <Show when={isUploadingBanner()}>
               <div class={styles.uploadingOverlay}><Loader /></div>
@@ -601,6 +614,9 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
 
         <div class={currentStep() === 'follow' ? '' : 'invisible'}>
+          <div class={styles.stepIntro}>
+            We found some Nostr accounts for you to follow:
+          </div>
           <div class={styles.recomendedFollowsCaption}>
             <div class={styles.caption}>
               {intl.formatMessage(tAccount.prominentNostriches)}
@@ -621,7 +637,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
               </Show>
             </div>
           </div>
-          <div>
+          <div class={styles.suggestedUsers}>
             <For each={suggestedUsers}>
               {user => (
                 <div class={styles.userToFollow}>

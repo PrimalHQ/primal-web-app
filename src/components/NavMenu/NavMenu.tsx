@@ -86,7 +86,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
         </div>
       </Show>
 
-      <Show when={!account?.hasPublicKey()}>
+      <Show when={account?.isKeyLookupDone && !account?.hasPublicKey()}>
         <div class={styles.callToAction}>
           <div class={styles.message}>
             {intl.formatMessage(tPlaceholders.welcomeMessage)}
