@@ -79,6 +79,10 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
   };
 
   const doQuote = () => {
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
     setIsRepostMenuVisible(false);
     account?.actions?.quoteNote(`nostr:${props.note.post.noteId}`);
     account?.actions?.showNewNoteForm();
@@ -86,6 +90,11 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
 
   const doRepost = async () => {
     if (!account) {
+      return;
+    }
+
+    if (!account.hasPublicKey()) {
+      account.actions.showGetStarted();
       return;
     }
 
@@ -124,6 +133,11 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
       return;
     }
 
+    if (!account.hasPublicKey()) {
+      account.actions.showGetStarted();
+      return;
+    }
+
     if (account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
@@ -148,9 +162,10 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
     e.stopPropagation();
 
     if (!account?.hasPublicKey()) {
-      toast?.sendWarning(
-        intl.formatMessage(t.zapAsGuest),
-      );
+      account?.actions.showGetStarted()
+      // toast?.sendWarning(
+      //   intl.formatMessage(t.zapAsGuest),
+      // );
       setIsZapping(false);
       return;
     }
@@ -182,7 +197,12 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey() || account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
+
+    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
       return;
     }
 
@@ -278,22 +298,24 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
   }
 
   const doQuickZap = async () => {
-
-    if (account?.hasPublicKey()) {
-      setZappedAmount(() => settings?.defaultZapAmount || 0);
-      setZappedNow(true);
-      animateZap();
-      const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
-      setIsZapping(false);
-
-      if (success) {
-        return;
-      }
-
-        setZappedAmount(() => -(settings?.defaultZapAmount || 0));
-        setZappedNow(true);
-        setZapped(props.note.post.noteActions.zapped);
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
     }
+
+    setZappedAmount(() => settings?.defaultZapAmount || 0);
+    setZappedNow(true);
+    animateZap();
+    const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
+    setIsZapping(false);
+
+    if (success) {
+      return;
+    }
+
+    setZappedAmount(() => -(settings?.defaultZapAmount || 0));
+    setZappedNow(true);
+    setZapped(props.note.post.noteActions.zapped);
   }
 
   const buttonTypeClasses: Record<string, string> = {

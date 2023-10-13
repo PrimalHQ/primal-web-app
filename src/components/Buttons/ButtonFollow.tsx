@@ -36,7 +36,8 @@ const ButtonFollow: Component<{
 
 
     if (!account || !account.hasPublicKey() || !props.person) {
-      toast?.sendWarning(intl.formatMessage(t.needToLogin))
+      account?.actions.showGetStarted();
+      // toast?.sendWarning(intl.formatMessage(t.needToLogin))
       return;
     }
 
