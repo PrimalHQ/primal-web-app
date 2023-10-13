@@ -30,6 +30,8 @@ import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays
 import { getPublicKey } from "../lib/nostrAPI";
 import { generateKeys } from "../lib/PrimalNostr";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
+import CreateAccountModal from "../components/CreateAccountModal/CreateAccountModal";
+import LoginModal from "../components/LoginModal/LoginModal";
 
 export type AccountContextStore = {
   likes: string[],
@@ -56,6 +58,8 @@ export type AccountContextStore = {
   allowlistSince: number,
   sec: string | undefined,
   showPin: string,
+  showGettingStarted: boolean,
+  showLogin: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -80,6 +84,7 @@ export type AccountContextStore = {
     removeFromAllowlist: (pubkey: string | undefined) => void,
     setSec: (sec: string | undefined) => void,
     logout: () => void,
+    showGetStarted: () => void,
   },
 }
 
@@ -107,6 +112,8 @@ const initialData = {
   allowlistSince: 0,
   sec: undefined,
   showPin: '',
+  showGettingStarted: false,
+  showLogin: false,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -120,6 +127,10 @@ export function AccountProvider(props: { children: JSXElement }) {
   let relayReliability: Record<string, number> = {};
 
   let connectedRelaysCopy: Relay[] = [];
+
+  const showGetStarted = () => {
+    updateStore('showGettingStarted', () => true);
+  }
 
   const logout = () => {
     updateStore('sec', () => undefined);
@@ -1228,6 +1239,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     removeFromAllowlist,
     setSec,
     logout,
+    showGetStarted,
   },
 });
 
@@ -1242,6 +1254,18 @@ const [store, updateStore] = createStore<AccountContextStore>({
           updateStore('showPin', () => '');
         }}
         onAbort={() => updateStore('showPin', () => '')}
+      />
+      <CreateAccountModal
+        open={store.showGettingStarted}
+        onAbort={() => updateStore('showGettingStarted', () => false)}
+        onLogin={() => {
+          updateStore('showGettingStarted', () => false);
+          updateStore('showLogin', () => true);
+        }}
+      />
+      <LoginModal
+        open={store.showLogin}
+        onAbort={() => updateStore('showLogin', () => false)}
       />
     </AccountContext.Provider>
   );

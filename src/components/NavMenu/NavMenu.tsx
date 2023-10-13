@@ -4,12 +4,13 @@ import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useMessagesContext } from '../../contexts/MessagesContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
-import { navBar as t } from '../../translations';
+import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
 import FloatingNewPostButton from '../FloatingNewPostButton/FloatingNewPostButton';
 
 import styles from './NavMenu.module.scss';
 import { hookForDev } from '../../lib/devTools';
+import ButtonPrimary from '../Buttons/ButtonPrimary';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
@@ -82,6 +83,19 @@ const NavMenu: Component< { id?: string } > = (props) => {
       <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
         <div class={styles.callToAction}>
           <FloatingNewPostButton />
+        </div>
+      </Show>
+
+      <Show when={!account?.hasPublicKey()}>
+        <div class={styles.callToAction}>
+          <div class={styles.message}>
+            {intl.formatMessage(tPlaceholders.welcomeMessage)}
+          </div>
+          <div class={styles.action}>
+            <ButtonPrimary onClick={account?.actions.showGetStarted}>
+              {intl.formatMessage(tActions.getStarted)}
+            </ButtonPrimary>
+          </div>
         </div>
       </Show>
     </div>

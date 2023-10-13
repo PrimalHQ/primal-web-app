@@ -76,15 +76,6 @@ const HomeHeader: Component< { id?: string} > = (props) => {
 
   const activeUser = () => account?.activeUser;
 
-  const [showGettingStarted, setShowGettingStarted] = createSignal(false);
-  const [showLogin, setShowLogin] = createSignal(false);
-
-  const onGetStarted = () => {
-    setShowGettingStarted(true);
-  };
-
-  const doCreateAccount = () => {};
-
   return (
     <div id={props.id} class={styles.fullHeader}>
       <Show
@@ -95,8 +86,8 @@ const HomeHeader: Component< { id?: string} > = (props) => {
               <div>
                 {intl.formatMessage(t.guestUserGreeting)}
               </div>
-              <ButtonPrimary onClick={onGetStarted}>
-              {intl.formatMessage(tActions.getStarted)}
+              <ButtonPrimary onClick={account?.actions.showGetStarted}>
+                {intl.formatMessage(tActions.getStarted)}
               </ButtonPrimary>
             </div>
           </Show>
@@ -146,18 +137,6 @@ const HomeHeader: Component< { id?: string} > = (props) => {
           <div class={styles.rightCorner}></div>
         </div>
       </div>
-      <CreateAccountModal
-        open={showGettingStarted()}
-        onAbort={() => setShowGettingStarted(false)}
-        onLogin={() => {
-          setShowGettingStarted(false);
-          setShowLogin(true);
-        }}
-      />
-      <LoginModal
-        open={showLogin()}
-        onAbort={() => setShowLogin(false)}
-      />
     </div>
   );
 }

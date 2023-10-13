@@ -29,6 +29,7 @@ const CreateAccountModal: Component<{
   const navigate = useNavigate();
 
   const onCreateAccount = () => {
+    props.onAbort && props.onAbort();
     navigate('/new');
   };
 
