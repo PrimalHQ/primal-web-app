@@ -4,6 +4,11 @@ import { ScopeDescriptor } from "./types/primal";
 
 
 export const account = {
+  prominentNostriches: {
+    id: 'actions.prominentNostriches',
+    defaultMessage: 'Prominent Nostriches',
+    description: 'Prominent Nostriches label',
+  },
   follow: {
     id: 'actions.follow',
     defaultMessage: 'follow',
@@ -13,6 +18,16 @@ export const account = {
     id: 'actions.unfollow',
     defaultMessage: 'unfollow',
     description: 'Unfollow button label',
+  },
+  followAll: {
+    id: 'actions.followAll',
+    defaultMessage: 'follow all',
+    description: 'Follow all button label',
+  },
+  unfollowAll: {
+    id: 'actions.unfollowAll',
+    defaultMessage: 'unfollow all',
+    description: 'Unfollow all button label',
   },
   needToLogin: {
     id: 'account.needToLogin',

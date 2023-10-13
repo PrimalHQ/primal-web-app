@@ -84,6 +84,11 @@ const EnterPinModal: Component<{
     return pin().length > 3;
   }
 
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === 'Enter' && isValidPin()) {
+      onConfirm();
+    }
+  };
 
   return (
     <Modal open={props.open} opaqueBackdrop={true}>
@@ -99,6 +104,7 @@ const EnterPinModal: Component<{
             type="password"
             ref={pinInput}
             value={pin()}
+            onKeyUp={onKeyUp}
             onChange={(val: string) => setPin(val)}
             label={intl.formatMessage(tPin.enter)}
             validationState={pin().length === 0 || isValidPin() ? 'valid' : 'invalid'}

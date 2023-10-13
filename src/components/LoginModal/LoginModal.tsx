@@ -73,6 +73,12 @@ const LoginModal: Component<{
     }
   });
 
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === 'Enter' && isValidNsec()) {
+      onLogin();
+    }
+  };
+
   return (
     <Switch>
       <Match when={step() === 'login'}>
@@ -92,6 +98,7 @@ const LoginModal: Component<{
                 ref={loginInput}
                 type="password"
                 value={enteredKey()}
+                onKeyUp={onKeyUp}
                 onChange={setEnteredKey}
                 validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
                 errorMessage={intl.formatMessage(tLogin.invalidNsec)}

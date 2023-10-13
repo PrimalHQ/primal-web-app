@@ -9,6 +9,7 @@ const TextInput: Component<{
   errorMessage?: string,
   value?: string,
   onChange?: (value: string) => void,
+  onKeyUp?: (e: KeyboardEvent) => void,
   children?: JSXElement,
   readonly?: boolean,
   ref?: HTMLInputElement,
@@ -40,6 +41,7 @@ const TextInput: Component<{
             type={props.type || 'search'}
             name={props.name || 'searchTerm'}
             autocomplete={props.autocomplete || "off"}
+            onKeyUp={props.onKeyUp}
           />
 
           <div class={styles.inputAfter}>

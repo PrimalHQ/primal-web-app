@@ -571,7 +571,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         <div class={currentStep() === 'follow' ? '' : 'invisible'}>
           <div class={styles.recomendedFollowsCaption}>
             <div class={styles.caption}>
-              Prominent Nostriches
+              {intl.formatMessage(tAccount.prominentNostriches)}
             </div>
             <div class={styles.action}>
 
@@ -579,12 +579,12 @@ const CreateAccount: Component = () => {  const intl = useIntl();
                 when={isFollowingAllProminent()}
                 fallback={
                   <ButtonSecondary onClick={onFollowProminent}>
-                    <span>Follow All</span>
+                    <span>{intl.formatMessage(tAccount.followAll)}</span>
                   </ButtonSecondary>
                 }
               >
                 <ButtonTertiary onClick={onUnfollowProminent}>
-                  Unfollow all
+                  {intl.formatMessage(tAccount.unfollowAll)}
                 </ButtonTertiary>
               </Show>
             </div>
@@ -609,12 +609,12 @@ const CreateAccount: Component = () => {  const intl = useIntl();
                       when={followed.includes(user.pubkey)}
                       fallback={
                         <ButtonSecondary onClick={() => onFollow(user.pubkey)}>
-                          Follow
+                          {intl.formatMessage(tAccount.follow)}
                         </ButtonSecondary>
                       }
                     >
                       <ButtonTertiary onClick={() => onUnfollow(user.pubkey)}>
-                        Unfollow
+                        {intl.formatMessage(tAccount.unfollow)}
                       </ButtonTertiary>
                     </Show>
                   </div>

@@ -63,6 +63,13 @@ const CreatePinModal: Component<{
     return rePin() === pin();
   };
 
+  const onKeyUp = (e: KeyboardEvent) => {
+    if (e.code === 'Enter' && isValidPin() && isValidRePin()) {
+      onSetPin();
+    }
+  };
+
+
 
   return (
     <Modal open={props.open}>
@@ -81,6 +88,7 @@ const CreatePinModal: Component<{
             type="password"
             ref={pinInput}
             value={pin()}
+            onKeyUp={onKeyUp}
             onChange={(val: string) => setPin(val)}
             validationState={isValidPin() ? 'valid' : 'invalid'}
             errorMessage={intl.formatMessage(tPin.invalidPin)}
@@ -88,6 +96,7 @@ const CreatePinModal: Component<{
           <TextInput
             type="password"
             value={rePin()}
+            onKeyUp={onKeyUp}
             onChange={(val: string) => setRePin(val)}
             label={intl.formatMessage(tPin.reEnter)}
             validationState={rePin().length === 0 || isValidRePin() ? 'valid' : 'invalid'}
