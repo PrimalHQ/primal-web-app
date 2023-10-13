@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
@@ -47,6 +47,7 @@ const Layout: Component = () => {
 
   onMount(() => {
     window.addEventListener('resize', onResize);
+    console.log('OVERLAY: ', location)
   });
 
   onCleanup(() => {
@@ -100,6 +101,9 @@ const Layout: Component = () => {
 
             <div class={styles.leftContent}>
               <NavMenu />
+              <Show when={location.pathname === '/new'}>
+                <div class={styles.overlay}></div>
+              </Show>
             </div>
 
             <div class={styles.leftFooter}>

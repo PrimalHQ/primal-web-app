@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import Loader from '../components/Loader/Loader';
@@ -12,7 +12,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { useMediaContext } from '../contexts/MediaContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { uploadMedia } from '../lib/media';
-import { getSuggestions, sendProfile } from '../lib/profile';
+import { getProfileContactList, getSuggestions, getUserProfiles, sendProfile } from '../lib/profile';
 import { subscribeTo as uploadSub } from "../uploadSocket";
 import {
   actions as tActions,
@@ -29,6 +29,12 @@ import { hexToNpub, hexToNsec } from '../lib/keys';
 import { storeSec } from '../lib/localStore';
 import { getPreConfiguredRelays } from '../lib/relays';
 import CreatePinModal from '../components/CreatePinModal/CreatePinModal';
+import { useSearchContext } from '../contexts/SearchContext';
+import ButtonFollow from '../components/Buttons/ButtonFollow';
+import ButtonTertiary from '../components/Buttons/ButtonTertiary';
+import { sendContacts } from '../lib/notes';
+import ButtonSecondary from '../components/Buttons/ButtonSecondary';
+import { nip05Verification } from '../stores/profile';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -36,6 +42,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const profile = useProfileContext();
   const media = useMediaContext();
   const account = useAccountContext();
+  const search = useSearchContext();
   const toast = useToastContext();
   const navigate = useNavigate();
 
@@ -203,6 +210,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       return false;
     }
 
+    const pubkey = account.publicKey;
+
     const data = new FormData(e.target as HTMLFormElement);
 
     const name = data.get('name')?.toString() || '';
@@ -234,11 +243,21 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       }
     });
 
-
     const { success } = await sendProfile({ ...metadata }, account.relays, relaySettings);
 
     if (success) {
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
+      pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
+
+      const tags = followed.map(pk => ['p', pk]);
+      const relayInfo = JSON.stringify(relaySettings);
+      const date = Math.floor((new Date()).getTime() / 1000);
+
+      const { success: succ } = await sendContacts(tags, date, relayInfo, account.relays, relaySettings);
+
+      if (succ) {
+        getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
+      }
 
       setShowCreatePin(true);
 
@@ -289,7 +308,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     setTempNsec(nsec);
 
     setCreatedAccount(() => ({ sec: nsec, pubkey }));
-    getSuggestions()
+    getSuggestions();
+    search?.actions.getRecomendedUsers();
   });
 
 
@@ -303,6 +323,37 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
   const onAbort = () => {
     setShowCreatePin(false);
+  }
+
+  const clearNewAccount = () => {
+    account?.actions.setSec(undefined);
+    setTempNsec(undefined);
+    setCreatedAccount(reconcile({}));
+    navigate('/');
+  }
+
+  const [followed, setFollowed] = createStore<string[]>([])
+
+  const isFollowingAllProminent = () => {
+    return !search?.users.some((u) => !followed.includes(u.pubkey));
+  };
+
+  const onFollowProminent = () => {
+    const pubkeys = search?.users.map(u => u.pubkey) || [];
+    setFollowed(() => [ ...pubkeys ]);
+  };
+
+  const onUnfollowProminent = () => {
+    setFollowed(() => []);
+  };
+
+  const onFollow = (pubkey: string) => {
+    setFollowed(followed.length, () => pubkey);
+  }
+
+  const onUnfollow = (pubkey: string) => {
+    const follows = followed.filter(f => f !== pubkey)
+    setFollowed(() => [...follows]);
   }
 
   return (
@@ -518,8 +569,58 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         </div>
 
         <div class={currentStep() === 'follow' ? '' : 'invisible'}>
+          <div class={styles.recomendedFollowsCaption}>
+            <div class={styles.caption}>
+              Prominent Nostriches
+            </div>
+            <div class={styles.action}>
+
+              <Show
+                when={isFollowingAllProminent()}
+                fallback={
+                  <ButtonSecondary onClick={onFollowProminent}>
+                    <span>Follow All</span>
+                  </ButtonSecondary>
+                }
+              >
+                <ButtonTertiary onClick={onUnfollowProminent}>
+                  Unfollow all
+                </ButtonTertiary>
+              </Show>
+            </div>
+          </div>
           <div>
-            HERE BE FOLLOWS
+            <For each={search?.users}>
+              {user => (
+                <div class={styles.userToFollow}>
+                  <div class={styles.info}>
+                    <Avatar user={user} />
+                    <div class={styles.nameAndNip05}>
+                      <div class={styles.name}>
+                        {user.name}
+                      </div>
+                      <div class={styles.nip05}>
+                        {nip05Verification(user)}
+                      </div>
+                    </div>
+                  </div>
+                  <div class={styles.action}>
+                    <Show
+                      when={followed.includes(user.pubkey)}
+                      fallback={
+                        <ButtonSecondary onClick={() => onFollow(user.pubkey)}>
+                          Follow
+                        </ButtonSecondary>
+                      }
+                    >
+                      <ButtonTertiary onClick={() => onUnfollow(user.pubkey)}>
+                        Unfollow
+                      </ButtonTertiary>
+                    </Show>
+                  </div>
+                </div>
+              )}
+            </For>
           </div>
         </div>
 
@@ -561,7 +662,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           <button
             type='button'
             class={styles.secondaryButton}
-            onClick={() => navigate('/profile')}
+            onClick={clearNewAccount}
           >
             <div>
               <span>{intl.formatMessage(tActions.cancel)}</span>

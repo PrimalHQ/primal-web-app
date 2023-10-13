@@ -128,6 +128,11 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const setSec = (sec: string | undefined) => {
+    if (!sec) {
+      logout();
+      return;
+    }
+
     const decoded = nip19.decode(sec);
 
     if (decoded.type === 'nsec' && decoded.data) {

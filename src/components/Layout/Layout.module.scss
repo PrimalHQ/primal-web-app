@@ -26,9 +26,21 @@
   }
 
   .leftContent {
+    position: relative;
     display: grid;
     height: 100%;
     justify-content: right;
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: calc(100% + 18px);
+      height: 100%;
+      background-color: var(--background-site);
+      opacity: 0.8;
+      z-index: var(--z-index-overlay);
+    }
   }
 
   .leftFooter {

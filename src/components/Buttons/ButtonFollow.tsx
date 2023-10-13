@@ -13,6 +13,7 @@ import styles from './Buttons.module.scss';
 const ButtonFollow: Component<{
   person: PrimalUser | undefined,
   id?: string,
+  onFollow?: (person: PrimalUser | undefined) => void,
   then?: (remove: boolean, pubkey: string) => void,
 }> = (props) => {
 
@@ -28,6 +29,12 @@ const ButtonFollow: Component<{
 
   const onFollow = (e: MouseEvent) => {
     e.preventDefault();
+    if (props.onFollow) {
+      props.onFollow(props.person);
+      return
+    }
+
+
     if (!account || !account.hasPublicKey() || !props.person) {
       toast?.sendWarning(intl.formatMessage(t.needToLogin))
       return;

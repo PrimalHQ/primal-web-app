@@ -33,6 +33,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding-inline: 10px;
+    padding-block: 6px;
   }
 }
 
@@ -186,4 +188,21 @@
   &:focus {
     box-shadow: none;
   }
+}
+
+.tertiary {
+    border-radius: 6px;
+    padding-inline: 10px;
+    padding-block: 6px;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+    margin: 0px;
+    color: var(--text-primary);
+    background: var(--background-card);
+    border: 1px solid var(--subtile-devider);
+
+    &:hover {
+      border: 1px solid var(--text-tertiary);
+    }
 }
