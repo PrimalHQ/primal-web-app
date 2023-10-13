@@ -68,3 +68,10 @@ export const parseBolt11 = (bolt11: string) => {
 
   return amount;
 }
+
+export const arrayMerge: <T, >(a: T[], b: T[], predicate?: (x: T, y: T) => boolean) => T[]  = (a, b, predicate = (a, b) => a === b) => {
+  const c = [...a]; // copy to avoid side effects
+  // add all items from B to copy C if they're not already present
+  b.forEach((bItem) => (c.some((cItem) => predicate(bItem, cItem)) ? null : c.push(bItem)))
+  return c;
+}

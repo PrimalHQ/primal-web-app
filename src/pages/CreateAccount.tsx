@@ -1,13 +1,13 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onMount, Show } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import Loader from '../components/Loader/Loader';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useToastContext } from '../components/Toaster/Toaster';
-import { usernameRegex, Kind } from '../constants';
+import { usernameRegex, Kind, suggestedUsersToFollow } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMediaContext } from '../contexts/MediaContext';
 import { useProfileContext } from '../contexts/ProfileContext';
@@ -20,7 +20,7 @@ import {
   settings as tSettings,
   toast as tToast,
 } from '../translations';
-import { NostrMediaUploaded, NostrRelays } from '../types/primal';
+import { NostrMediaUploaded, NostrRelays, NostrUserContent, PrimalUser, UserCategory } from '../types/primal';
 
 import styles from './CreateAccount.module.scss';
 import { createStore, reconcile } from 'solid-js/store';
@@ -34,7 +34,9 @@ import ButtonFollow from '../components/Buttons/ButtonFollow';
 import ButtonTertiary from '../components/Buttons/ButtonTertiary';
 import { sendContacts } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import { nip05Verification } from '../stores/profile';
+import { convertToUser, nip05Verification } from '../stores/profile';
+import { subscribeTo } from '../sockets';
+import { arrayMerge } from '../utils';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -297,6 +299,43 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     }
   };
 
+  const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
+
+  const getSugestedUsers = () => {
+    const subId = `get_suggested_users_${APP_ID}`;
+
+    let users: PrimalUser[] = [];
+
+    const unsub = subscribeTo(subId, (type, _, content) => {
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.SuggestedUsersByCategory) {
+        }
+
+        if (content?.kind === Kind.Metadata) {
+          const userData = content as NostrUserContent;
+          const user = convertToUser(userData);
+
+          if (suggestedUsersToFollow.includes(user.pubkey)){
+            users.push({ ...user });
+          }
+        }
+      }
+
+      if (type === 'EOSE') {
+
+        setSuggestedUsers(() => [...users]);
+
+        const pks = users.map(x => x.pubkey);
+
+        setFollowed(() => [...pks]);
+
+        unsub();
+      }
+    });
+
+    getSuggestions(subId);
+  };
+
   onMount(() => {
     const { sec, pubkey } = generateKeys(true);
 
@@ -306,8 +345,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     setTempNsec(nsec);
 
     setCreatedAccount(() => ({ sec: nsec, pubkey }));
-    getSuggestions();
-    search?.actions.getRecomendedUsers();
+    getSugestedUsers();
   });
 
 
@@ -333,11 +371,11 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const [followed, setFollowed] = createStore<string[]>([])
 
   const isFollowingAllProminent = () => {
-    return !search?.users.some((u) => !followed.includes(u.pubkey));
+    return !suggestedUsers.some((u) => !followed.includes(u.pubkey));
   };
 
   const onFollowProminent = () => {
-    const pubkeys = search?.users.map(u => u.pubkey) || [];
+    const pubkeys = suggestedUsers.map(u => u.pubkey) || [];
     setFollowed(() => [ ...pubkeys ]);
   };
 
@@ -566,6 +604,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           />
         </div>
 
+
         <div class={currentStep() === 'follow' ? '' : 'invisible'}>
           <div class={styles.recomendedFollowsCaption}>
             <div class={styles.caption}>
@@ -588,7 +627,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             </div>
           </div>
           <div>
-            <For each={search?.users}>
+            <For each={suggestedUsers}>
               {user => (
                 <div class={styles.userToFollow}>
                   <div class={styles.info}>

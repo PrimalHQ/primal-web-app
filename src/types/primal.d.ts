@@ -187,6 +187,11 @@ export type NostrUserZaps = {
   id: string,
 };
 
+export type NostrSuggestedUsers = {
+  kind: Kind.SuggestedUsersByCategory,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -212,7 +217,8 @@ export type NostrEventContent =
   NostrLinkMetadata |
   NostrFilteringReason |
   NostrUserFollwerCounts |
-  NostrUserZaps;
+  NostrUserZaps |
+  NostrSuggestedUsers;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -598,4 +604,9 @@ export type ComponentLog = {
   name: string,
   domId: string,
   props: any,
+}
+
+export type UserCategory = {
+  group: string,
+  members: { name?: string, pubkey: string }[],
 }
