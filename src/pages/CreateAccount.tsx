@@ -244,6 +244,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     const { success } = await sendProfile({ ...metadata }, account.relays, relaySettings);
 
     if (success) {
+      await (new Promise((res) => setTimeout(() => res(true), 100)));
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
@@ -508,7 +509,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
               ref={nameInput}
               class={styles.inputWithPrefix}
               placeholder={intl.formatMessage(tSettings.profile.name.placeholder)}
-              value={profile?.userProfile?.name || ''}
               onInput={onNameInput}
             />
           </div>
@@ -525,7 +525,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             name='displayName'
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.displayName.placeholder)}
-            value={profile?.userProfile?.displayName || profile?.userProfile?.display_name || ''}
           />
 
           <div class={`${styles.moreInputs} ${isMoreVisible() ? styles.show : styles.hide}`}>
@@ -567,7 +566,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             name='website'
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.website.placeholder)}
-            value={profile?.userProfile?.website || ''}
           />
 
           <div class={styles.inputLabel}>
@@ -576,7 +574,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           <textarea
             name='about'
             placeholder={intl.formatMessage(tSettings.profile.about.placeholder)}
-            value={profile?.userProfile?.about || ''}
             ref={textArea}
             rows={1}
             data-min-rows={1}
@@ -590,7 +587,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             name='lud16'
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.lud16.placeholder)}
-            value={profile?.userProfile?.lud16 || ''}
           />
 
           <div class={styles.inputLabel}>
@@ -600,7 +596,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             name='nip05'
             type='text'
             placeholder={intl.formatMessage(tSettings.profile.nip05.placeholder)}
-            value={profile?.userProfile?.nip05 || ''}
           />
         </div>
 

@@ -513,13 +513,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // Add trendingFeed if it's missing
     // @ts-ignore
     if (initFeeds && !initFeeds.find((f) => f.hex === trendingFeed.hex)) {
-      addAvailableFeed(trendingFeed, true, true);
-    }
-
-    // Add active user's feed if it's missing
-    // @ts-ignore
-    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && f.includeReplies === feedLatest.includeReplies)) {
-      addAvailableFeed(feedLatest, true, true);
+      addAvailableFeed(trendingFeed, true, false);
     }
 
     const fwr = initFeeds?.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === feedLatestWithReplies.includeReplies);
@@ -527,9 +521,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // Add active user's feed if it's missing
     // @ts-ignore
     if (!fwr) {
-      addAvailableFeed(feedLatestWithReplies, true, true);
+      addAvailableFeed(feedLatestWithReplies, true, false);
     }
 
+
+    // Add active user's feed if it's missing
+    // @ts-ignore
+    if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && f.includeReplies === feedLatest.includeReplies)) {
+      addAvailableFeed(feedLatest, true, false);
+    }
     setTimeout(() => {
       loadSettings(publicKey);
     }, 100);

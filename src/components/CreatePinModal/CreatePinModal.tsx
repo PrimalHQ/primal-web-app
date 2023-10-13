@@ -90,7 +90,7 @@ const CreatePinModal: Component<{
             value={pin()}
             onKeyUp={onKeyUp}
             onChange={(val: string) => setPin(val)}
-            validationState={isValidPin() ? 'valid' : 'invalid'}
+            validationState={pin().length === 0 || isValidPin() ? 'valid' : 'invalid'}
             errorMessage={intl.formatMessage(tPin.invalidPin)}
           />
           <TextInput

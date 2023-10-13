@@ -190,6 +190,7 @@ export type NostrUserZaps = {
 export type NostrSuggestedUsers = {
   kind: Kind.SuggestedUsersByCategory,
   content: string,
+  created_at?: number,
 };
 
 export type NostrEventContent =
