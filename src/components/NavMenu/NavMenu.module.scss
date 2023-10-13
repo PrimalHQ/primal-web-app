@@ -28,6 +28,15 @@
   }
 }
 
+@media only screen and (max-width: 1300px) {
+
+  .callToAction {
+    .message, .action {
+      display: none;
+    }
+  }
+}
+
 @media only screen and (max-width: 720px) {
   .navMenu {
     width: 100%;
@@ -50,5 +59,9 @@
     position: fixed;
     bottom: 56px;
     right: 24px;
+
+    .message, .action {
+      display: none;
+    }
   }
 }

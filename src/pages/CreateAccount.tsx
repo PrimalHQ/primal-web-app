@@ -91,12 +91,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     return url ?? src;
   }
 
-  const setProfile = (hex: string | undefined) => {
-    profile?.actions.setProfileKey(hex);
-    profile?.actions.clearNotes();
-    profile?.actions.fetchNotes(hex);
-  }
-
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
     elm.value = ''
@@ -212,7 +206,9 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
     const pubkey = account.publicKey;
 
-    const data = new FormData(e.target as HTMLFormElement);
+    const form = e.target as HTMLFormElement;
+
+    const data = new FormData(form);
 
     const name = data.get('name')?.toString() || '';
 
@@ -258,6 +254,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       if (succ) {
         getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
       }
+
+      form.reset();
 
       setShowCreatePin(true);
 

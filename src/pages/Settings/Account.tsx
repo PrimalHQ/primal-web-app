@@ -9,6 +9,7 @@ import { Link } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import { useAccountContext } from '../../contexts/AccountContext';
 import Avatar from '../../components/Avatar/Avatar';
+import { hexToNpub } from '../../lib/keys';
 
 const Account: Component = () => {
 
@@ -48,9 +49,9 @@ const Account: Component = () => {
         </div>
         <button
           class={styles.copy}
-          onClick={() => onCopy(account?.activeUser?.npub || '')}
+          onClick={() => onCopy(hexToNpub(account?.publicKey) || '')}
         >
-          <Show when={isCoppied() === account?.activeUser?.npub}>
+          <Show when={isCoppied() === hexToNpub(account?.publicKey)}>
             <div class={styles.checkIcon}></div>
           </Show>
           {intl.formatMessage(tActions.copyPubkey)}
@@ -63,7 +64,7 @@ const Account: Component = () => {
           size="vs"
         />
         <div class={styles.key}>
-          {account?.activeUser?.npub}
+          {hexToNpub(account?.publicKey)}
         </div>
       </div>
 

@@ -4,7 +4,7 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { Link, useNavigate } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 
@@ -12,6 +12,7 @@ const Menu: Component = () => {
 
   const intl = useIntl();
   const account = useAccountContext();
+  const navigate = useNavigate();
 
   const version = import.meta.env.PRIMAL_VERSION;
 
@@ -72,7 +73,10 @@ const Menu: Component = () => {
 
       <Show when={account?.sec}>
         <div class={styles.webVersion}>
-          <ButtonPrimary onClick={account?.actions.logout}>
+          <ButtonPrimary onClick={() => {
+            account?.actions.logout();
+            navigate('/');
+          }}>
             {intl.formatMessage(tActions.logout)}
           </ButtonPrimary>
         </div>
