@@ -61,6 +61,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const [avatarPreview, setAvatarPreview] = createSignal<string>();
   const [bannerPreview, setBannerPreview] = createSignal<string>();
 
+  const [accountName, setAccountName] = createSignal('');
   const [isNameValid, setIsNameValid] = createSignal<boolean>(false);
 
   const flagBannerForWarning = () => {
@@ -121,6 +122,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const onNameInput = () => {
     const value = nameInput?.value || '';
 
+    setAccountName(() => value);
     setIsNameValid(usernameRegex.test(value))
   };
 
@@ -219,7 +221,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       return false;
     }
 
-    let relaySettings = getPreConfiguredRelays();
+    let relaySettings = account.defaultRelays.reduce((acc, r) => ({ ...acc, [r]: { write: true, read: true }}), {});
 
     let metadata: Record<string, string> = {};
 
@@ -525,7 +527,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
               onInput={onNameInput}
             />
           </div>
-          <Show when={!isNameValid()}>
+          <Show when={accountName().length > 0 && !isNameValid()}>
             <div class={styles.inputError}>
               {intl.formatMessage(tSettings.profile.name.error)}
             </div>
