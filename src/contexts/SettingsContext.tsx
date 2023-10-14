@@ -512,9 +512,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Add trendingFeed if it's missing
     // @ts-ignore
-    if (initFeeds && !initFeeds.find((f) => f.hex === trendingFeed.hex)) {
-      addAvailableFeed(trendingFeed, true, false);
-    }
+    // if (initFeeds && !initFeeds.find((f) => f.hex === trendingFeed.hex)) {
+    //   addAvailableFeed(trendingFeed, true, false);
+    // }
 
     const fwr = initFeeds?.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === feedLatestWithReplies.includeReplies);
 
