@@ -419,9 +419,10 @@ const ParsedNote: Component<{
     const hasMinimalPreviewData = !props.noPreviews &&
       preview &&
       preview.url &&
-      ((preview.description && preview.description.length > 0) ||
-        preview.images ||
-        preview.title
+      ((!!preview.description && preview.description.length > 0) ||
+        !preview.images?.some(x => x === '') ||
+        !preview.favicons?.some(x => x === '') ||
+        !!preview.title
       );
 
     if (hasMinimalPreviewData) {
