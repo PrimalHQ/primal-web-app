@@ -39,7 +39,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { linebreakRegex } from '../../constants';
+import { linebreakRegex, urlExtractRegex } from '../../constants';
 
 const specialChars = [",", "?", ";", "!", "'", ".", "-"];
 
@@ -81,8 +81,14 @@ const ParsedNote: Component<{
 
         if (index > 0) {
           const prefix = token.slice(0, index);
-          const url = token.slice(index);
-          return <>{parseToken(prefix)} {parseToken(url)}</>;
+          
+          const matched = token.match(urlExtractRegex)[0];
+          if (matched) {
+            const suffix = token.substring(matched.length + index, token.length);
+            return <>{parseToken(prefix)}{parseToken(matched)}{parseToken(suffix)}</>;
+          } else {
+            return <>{parseToken(prefix)}{parseToken(token.slice(index))}</>;
+          }
         }
 
         if (!props.ignoreMedia) {
@@ -421,7 +427,6 @@ const ParsedNote: Component<{
       preview.url &&
       ((!!preview.description && preview.description.length > 0) ||
         !preview.images?.some(x => x === '') ||
-        !preview.favicons?.some(x => x === '') ||
         !!preview.title
       );
 
