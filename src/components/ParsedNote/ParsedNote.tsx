@@ -41,7 +41,7 @@ import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import { linebreakRegex } from '../../constants';
 
-const specialChars = [",", "?", ";", "!", "'", "."];
+const specialChars = [",", "?", ";", "!", "'", ".", "-"];
 
 const ParsedNote: Component<{
   note: PrimalNote,
