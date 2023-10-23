@@ -87,8 +87,6 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
       sec = await decryptWithPin(currentPin(), sec);
     }
 
-    console.log('SEC: ', sec)
-
     const decoded = nip19.decode(sec);
 
     if (decoded.type !== 'nsec' || !decoded.data) {

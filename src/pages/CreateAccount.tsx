@@ -34,9 +34,10 @@ import ButtonFollow from '../components/Buttons/ButtonFollow';
 import ButtonTertiary from '../components/Buttons/ButtonTertiary';
 import { sendContacts } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import { convertToUser, nip05Verification } from '../stores/profile';
+import { convertToUser, nip05Verification, userName } from '../stores/profile';
 import { subscribeTo } from '../sockets';
 import { arrayMerge } from '../utils';
+import { stringStyleToObject } from '@solid-primitives/props';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -303,36 +304,47 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     }
   };
 
-  const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
+  type SuggestedUserData = {
+    users: Record<string, PrimalUser>,
+    groupNames: string[],
+    groups: Record<string, string[]>,
+  }
+
+  const [suggestedData, setSuggestedData] = createStore<SuggestedUserData>({
+    users: {},
+    groupNames: [],
+    groups: {},
+  });
 
   const getSugestedUsers = () => {
     const subId = `get_suggested_users_${APP_ID}`;
 
-    let users: PrimalUser[] = [];
-
     const unsub = subscribeTo(subId, (type, _, content) => {
       if (type === 'EVENT') {
         if (content?.kind === Kind.SuggestedUsersByCategory) {
+          const list = JSON.parse(content.content);
+          let groups: Record<string, string[]> = {};
+
+          for(let i=0; i<list.length; i++) {
+            const item = list[i];
+
+            groups[item.group] = [ ...item.members.map((u: { pubkey: string }) => u.pubkey) ];
+          }
+
+          setSuggestedData('groups', () => ({...groups}));
+          setSuggestedData('groupNames', () => Object.keys(groups));
         }
 
         if (content?.kind === Kind.Metadata) {
           const userData = content as NostrUserContent;
           const user = convertToUser(userData);
 
-          if (suggestedUsersToFollow.includes(user.pubkey)){
-            users.push({ ...user });
-          }
+          !followed.includes(user.pubkey) && setFollowed(followed.length, user.pubkey);
+          setSuggestedData('users', () => ({ [user.pubkey]: { ...user }}))
         }
       }
 
       if (type === 'EOSE') {
-
-        setSuggestedUsers(() => [...users]);
-
-        const pks = users.map(x => x.pubkey);
-
-        setFollowed(() => [...pks]);
-
         unsub();
       }
     });
@@ -374,27 +386,37 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
   const [followed, setFollowed] = createStore<string[]>([])
 
-  const isFollowingAllProminent = () => {
-    return !suggestedUsers.some((u) => !followed.includes(u.pubkey));
+  const isFollowingAllInGroup = (group: string) => {
+    const pubkeys = suggestedData.groups[group] || [];
+    return !pubkeys.some((p) => !followed.includes(p));
   };
 
-  const onFollowProminent = () => {
-    const pubkeys = suggestedUsers.map(u => u.pubkey) || [];
-    setFollowed(() => [ ...pubkeys ]);
+  const onFollowGroup = (group: string) => {
+    const pubkeys = suggestedData.groups[group] || [];
+    let newFollows = pubkeys.filter(p => !followed.includes(p));
+    setFollowed((fs) => [ ...fs, ...newFollows ]);
   };
 
-  const onUnfollowProminent = () => {
-    setFollowed(() => []);
+  const onUnfollowGroup = (group: string) => {
+    const pubkeys = suggestedData.groups[group] || [];
+
+    const newFollows = followed.filter(p => !pubkeys.includes(p));
+
+    setFollowed(() => [ ...newFollows ]);
   };
 
   const onFollow = (pubkey: string) => {
     setFollowed(followed.length, () => pubkey);
+    console.log('FOL: ', followed);
   }
 
   const onUnfollow = (pubkey: string) => {
-    const follows = followed.filter(f => f !== pubkey)
+    const follows = followed.filter(f => f !== pubkey);
+    console.log('UNFOL: ', follows);
     setFollowed(() => [...follows]);
   }
+
+  const suggestedUser = (pubkey: string) => suggestedData.users[pubkey];
 
   return (
 
@@ -619,57 +641,67 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           <div class={styles.stepIntro}>
             We found some Nostr accounts for you to follow:
           </div>
-          <div class={styles.recomendedFollowsCaption}>
-            <div class={styles.caption}>
-              {intl.formatMessage(tAccount.prominentNostriches)}
-            </div>
-            <div class={styles.action}>
+          <div class={styles.suggestions}>
+            <For each={suggestedData.groupNames}>
+              {(groupName) => (
+                <>
+                  <div class={styles.recomendedFollowsCaption}>
+                    <div class={styles.caption}>
+                      {groupName}
+                    </div>
+                    <div class={styles.action}>
 
-              <Show
-                when={isFollowingAllProminent()}
-                fallback={
-                  <ButtonSecondary onClick={onFollowProminent}>
-                    <span>{intl.formatMessage(tAccount.followAll)}</span>
-                  </ButtonSecondary>
-                }
-              >
-                <ButtonTertiary onClick={onUnfollowProminent}>
-                  {intl.formatMessage(tAccount.unfollowAll)}
-                </ButtonTertiary>
-              </Show>
-            </div>
-          </div>
-          <div class={styles.suggestedUsers}>
-            <For each={suggestedUsers}>
-              {user => (
-                <div class={styles.userToFollow}>
-                  <div class={styles.info}>
-                    <Avatar user={user} />
-                    <div class={styles.nameAndNip05}>
-                      <div class={styles.name}>
-                        {user.name}
-                      </div>
-                      <div class={styles.nip05}>
-                        {nip05Verification(user)}
-                      </div>
+                      <Show
+                        when={isFollowingAllInGroup(groupName)}
+                        fallback={
+                          <ButtonSecondary onClick={() => onFollowGroup(groupName)}>
+                            <span>{intl.formatMessage(tAccount.followAll)}</span>
+                          </ButtonSecondary>
+                        }
+                      >
+                        <ButtonTertiary onClick={() => onUnfollowGroup(groupName)}>
+                          {intl.formatMessage(tAccount.unfollowAll)}
+                        </ButtonTertiary>
+                      </Show>
                     </div>
                   </div>
-                  <div class={styles.action}>
-                    <Show
-                      when={followed.includes(user.pubkey)}
-                      fallback={
-                        <ButtonSecondary onClick={() => onFollow(user.pubkey)}>
-                          {intl.formatMessage(tAccount.follow)}
-                        </ButtonSecondary>
-                      }
-                    >
-                      <ButtonTertiary onClick={() => onUnfollow(user.pubkey)}>
-                        {intl.formatMessage(tAccount.unfollow)}
-                      </ButtonTertiary>
-                    </Show>
+
+                  <div class={styles.suggestedUsers}>
+                    <For each={suggestedData.groups[groupName]}>
+                      {pubkey => (
+                        <div class={styles.userToFollow}>
+                          <div class={styles.info}>
+                            <Avatar user={suggestedUser(pubkey)} />
+                            <div class={styles.nameAndNip05}>
+                              <div class={styles.name}>
+                                {userName(suggestedUser(pubkey))}
+                              </div>
+                              <div class={styles.nip05}>
+                                {nip05Verification(suggestedUser(pubkey))}
+                              </div>
+                            </div>
+                          </div>
+                          <div class={styles.action}>
+                            <Show
+                              when={followed.includes(pubkey)}
+                              fallback={
+                                <ButtonSecondary onClick={() => onFollow(pubkey)}>
+                                  {intl.formatMessage(tAccount.follow)}
+                                </ButtonSecondary>
+                              }
+                            >
+                              <ButtonTertiary onClick={() => onUnfollow(pubkey)}>
+                                {intl.formatMessage(tAccount.unfollow)}
+                              </ButtonTertiary>
+                            </Show>
+                          </div>
+                        </div>
+                      )}
+                    </For>
                   </div>
-                </div>
+                </>
               )}
+
             </For>
           </div>
         </div>
