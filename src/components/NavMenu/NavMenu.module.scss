@@ -58,7 +58,7 @@
   .callToAction {
     position: fixed;
     bottom: 56px;
-    right: 24px;
+    left: calc(100vw - 48px);
 
     .message, .action {
       display: none;

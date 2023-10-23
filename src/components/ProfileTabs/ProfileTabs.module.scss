@@ -243,3 +243,12 @@
   border-radius: 0 0 8px 8px;
   padding-top: 22px;
 }
+
+
+@media only screen and (max-width: 720px) {
+  .profileTab {
+    &[data-key=zaps], &[data-key=relays] {
+      display: none;
+    }
+  }
+}
