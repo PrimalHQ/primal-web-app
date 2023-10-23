@@ -47,6 +47,7 @@ const ParsedNote: Component<{
   note: PrimalNote,
   id?: string,
   ignoreMedia?: boolean,
+  ignoreLinebreaks?: boolean,
   noLinks?: 'links' | 'text',
   noPreviews?: boolean,
 }> = (props) => {
@@ -57,7 +58,9 @@ const ParsedNote: Component<{
   const [renderedUrl, setRenderedUrl] = createStore<Record<string, any>>({});
 
   const parseContent = () => {
-    const content = props.note.post.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+    const content = props.ignoreLinebreaks ?
+      props.note.post.content.replace(/\s+/g, ' __SP__ ') :
+      props.note.post.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
     const tokens = content.split(/[\s]+/);
 
     setTokens(() => [...tokens]);
@@ -81,7 +84,7 @@ const ParsedNote: Component<{
 
         if (index > 0) {
           const prefix = token.slice(0, index);
-          
+
           const matched = token.match(urlExtractRegex)[0];
           if (matched) {
             const suffix = token.substring(matched.length + index, token.length);

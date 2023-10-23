@@ -97,7 +97,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
         </div>
         <div class={styles.message}>
           <div>
-            <ParsedNote note={props.note} noLinks="text" ignoreMedia={true} />
+            <ParsedNote note={props.note} noLinks="text" ignoreMedia={true} ignoreLinebreaks={true} />
           </div>
         </div>
       </A>
