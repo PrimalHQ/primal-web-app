@@ -42,9 +42,9 @@ let currentUrl = '';
 
 type EmojiOption = {
   keywords: string[],
-  char: string,
-  fitzpatrick_scale: boolean,
-  category: string,
+  // char: string,
+  // fitzpatrick_scale: boolean,
+  // category: string,
   name: string,
 };
 
@@ -348,14 +348,14 @@ const Messages: Component = () => {
     const rows = elm.value === '' ? 0 : Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
 
     elm.rows = minRows + rows;
-    elm.style.height = `${32 + (20 * rows)}px`;
+    elm.style.height = `${40 + (20 * rows)}px`;
 
     if (newMessageWrapper) {
-      newMessageWrapper.style.height = `${32 + (20 * rows)}px`;
+      newMessageWrapper.style.height = `${80 + (20 * rows)}px`;
     }
 
     if (newMessageInputBorder) {
-      newMessageInputBorder.style.height = `${34 + (20 * rows)}px`;
+      newMessageInputBorder.style.height = `${82 + (20 * rows)}px`;
     }
 
     // debounce(() => {
@@ -474,7 +474,7 @@ const Messages: Component = () => {
           return false;
         }
         e.preventDefault();
-        emojiResults.length === 0 && setEmojiResults(emojiSearch(emojiQuery()));
+        emojiResults.length === 0 && setEmojiResults(() => emojiSearch(emojiQuery()));
         selectEmoji(emojiResults[highlightedEmoji()]);
         setHighlightedEmoji(0);
         return false;
@@ -644,9 +644,9 @@ const Messages: Component = () => {
 
     if (success) {
       newMessageInput.value = '';
-      newMessageInput.style.height = '32px';
+      newMessageInput.style.height = '40px';
       newMessageInputBorder.style.height = '34px';
-      newMessageWrapper.style.height = '32px';
+      newMessageWrapper.style.height = '40px';
 
       setTimeout(() => {
         const element = document.querySelector(`[data-user="${messages?.selectedSender}"]`);
@@ -904,13 +904,14 @@ const Messages: Component = () => {
               onClick={() => messages?.actions.changeSenderRelation('follows')}
             >
               {intl.formatMessage(tMessages.follows)}
+              <div class={styles.indicator}></div>
             </button>
-            <div class={styles.separator}></div>
             <button
               class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
               onClick={() => messages?.actions.changeSenderRelation('other')}
             >
               {intl.formatMessage(tMessages.other)}
+              <div class={styles.indicator}></div>
             </button>
           </div>
           <button
@@ -931,15 +932,16 @@ const Messages: Component = () => {
                   onClick={() => selectSender(sender.npub)}
                   data-user={sender.pubkey}
                 >
-                  <Avatar user={sender} size="vs" />
+                  <Avatar user={sender} size="md" />
                   <div class={styles.senderInfo}>
                     <div class={styles.firstLine}>
                       <div class={styles.senderName}>
                         {userName(sender)}
                       </div>
                       <Show when={messages?.messageCountPerSender[sender.pubkey] && messages?.messageCountPerSender[sender.pubkey].latest_at > 0}>
+                        <div class={styles.dotSeparator}></div>
                         <div class={styles.lastMessageTime}>
-                          {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'short', messages?.now).label}
+                          {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'narrow', messages?.now).label}
                         </div>
                       </Show>
                     </div>
@@ -973,11 +975,7 @@ const Messages: Component = () => {
               class={sendButtonClass()}
               onClick={sendMessage}
             >
-              <div>
-                <span>
-                  {intl.formatMessage(tActions.sendDirectMessage)}
-                </span>
-              </div>
+              <div class={styles.iconSend}></div>
             </button>
 
             <Show when={isMentioning()}>

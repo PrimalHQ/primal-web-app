@@ -9,6 +9,7 @@ const ButtonPrimary: Component<{
   onClick?: (e: MouseEvent) => void,
   children?: JSXElement,
   disabled?: boolean,
+  type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
   return (
     <Button.Root
@@ -16,6 +17,7 @@ const ButtonPrimary: Component<{
       class={styles.primary}
       onClick={props.onClick}
       disabled={props.disabled}
+      type={props.type}
     >
       <span>
         {props.children}

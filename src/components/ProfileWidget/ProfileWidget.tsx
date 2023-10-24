@@ -21,9 +21,9 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
         <A href="/profile" class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
-              size="vs"
+              size="vvs"
               user={activeUser()}
-              showCheck={true}
+              showCheck={false}
             />
           </div>
           <div class={styles.userInfo}>
@@ -32,7 +32,6 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
               {trimVerification(activeUser()?.nip05)[1]}
             </div>
           </div>
-          <div class={styles.background}></div>
         </A>
       </Show>
     </div>

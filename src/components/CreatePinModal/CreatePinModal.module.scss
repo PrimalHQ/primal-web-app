@@ -1,17 +1,13 @@
 .modal {
   position: fixed;
-  width: 452px;
-  color: var(--text-secondary);
-  background-color: var(--background-site);
-  background: linear-gradient(var(--background-site),
-    var(--background-site)) padding-box,
-    var(--brand-gradient) border-box;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  width: 440px;
+  color: var(--text-primary);
+  background-color: var(--background-input);
+  border-radius: 8px;
 
   display: flex;
   flex-direction: column;
-  padding: 22px;
+  padding: 24px;
 
   .xClose {
     background: none;
@@ -46,49 +42,45 @@
   }
 
   .title {
-    font-weight: 800;
     font-size: 18px;
-    line-height: 18px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
     margin-bottom: 20px;
   }
 
   .description {
-    color: var(--text-secondary);
-    font-size: 16px;
+    color: var(--text-primary);
+    font-size: 15px;
     font-weight: 400;
     line-height: 20px;
     margin-bottom: 28px;
   }
 
   .inputs {
-    margin-bottom: 4px;
-    > div {
-      margin-bottom: 4px;
+    .description {
+      margin-bottom: 20px;
     }
   }
 
   .actions {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 20px;
 
     button {
       width: fit-content;
-      min-width: 192px;
+      padding-block: 10px;
+      padding-inline: 36px;
       margin: 0px;
-      >div {
-        padding: 10px;
-      }
     }
   }
 
   .alternative {
-    color: var(--text-secondary);
-    font-size: 14px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-style: normal;
     font-weight: 400;
-    line-height: 24px;
+    line-height: 20px;
   }
 
 }

@@ -222,7 +222,7 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
         return;
       }
 
-      const newLeft = 116;
+      const newLeft = 120;
       const newTop =  -8;
 
       smallZapAnimation.style.left = `${newLeft}px`;
@@ -257,7 +257,7 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
         return;
       }
 
-      const newLeft = 20;
+      const newLeft = 24;
       const newTop = -35;
 
       medZapAnimation.style.left = `${newLeft}px`;

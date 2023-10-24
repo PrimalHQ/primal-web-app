@@ -122,6 +122,11 @@ export const pin = {
 };
 
 export const actions = {
+  newNote: {
+    id: 'actions.newNote',
+    defaultMessage: 'New Note',
+    description: 'New note action label',
+  },
   createPin: {
     id: 'actions.createPin',
     defaultMessage: 'Set PIN',
@@ -159,7 +164,7 @@ export const actions = {
   },
   cancel: {
     id: 'actions.cancel',
-    defaultMessage: 'cancel',
+    defaultMessage: 'Cancel',
     description: 'Cancel action, button label',
   },
   copy: {
@@ -209,7 +214,7 @@ export const actions = {
   },
   notePostNew: {
     id: 'actions.notePostNew',
-    defaultMessage: 'post',
+    defaultMessage: 'Post',
     description: 'Send new note, button label',
   },
   noteReply: {
@@ -337,7 +342,7 @@ export const actions = {
   noteContext: {
     zap: {
       id: 'actions.noteContext.zapNote',
-      defaultMessage: 'Zap',
+      defaultMessage: 'Custom Zap',
       description: 'Label for note zap from context menu',
     },
     copyLink: {
@@ -578,9 +583,9 @@ export const feedNewPosts = {
   id: 'feed.newPosts',
   defaultMessage: `{number, plural,
     =0 {}
-    one {# new note}
-    =100 {99+ new notes}
-    other {# new notes}}`,
+    one {# New Note}
+    =99 {99+ New Notes}
+    other {# New Notes}}`,
   description: 'Label for a button to load new notes',
 };
 
@@ -909,7 +914,7 @@ export const placeholders = {
   },
   noteCallToAction: {
     id: 'placeholders.callToAction.note',
-    defaultMessage: 'say something on nostr...',
+    defaultMessage: 'Say something on nostr...',
     description: 'Placeholder for new note call-to-action',
   },
   pageWIPTitle: {
@@ -934,7 +939,7 @@ export const placeholders = {
   },
   search: {
     id: 'placeholders.search',
-    defaultMessage: 'search',
+    defaultMessage: 'Search...',
     description: 'Search input placeholder',
   },
   selectFeed: {
@@ -1082,7 +1087,7 @@ export const search = {
   },
   searchNostr: {
     id: 'search.searchNostr',
-    defaultMessage: 'search nostr',
+    defaultMessage: 'Search nostr',
     description: 'Label explaining full search action',
   },
   sidebarCaption: {

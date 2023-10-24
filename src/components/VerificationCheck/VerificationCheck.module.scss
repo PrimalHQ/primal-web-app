@@ -15,12 +15,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-inline: 4px;
 }
 
 .verifiedIconPrimal {
   width: 100%;
   height: 100%;
-  background: var(--brand-gradient);
+  background: var(--accent);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
 }

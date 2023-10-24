@@ -17,7 +17,6 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
       data-event={props.note.post.id}
       data-event-bech32={props.note.post.noteId}
     >
-      <div class={styles.border}></div>
       <NoteHeader note={props.note} />
       <div class={styles.content}>
 

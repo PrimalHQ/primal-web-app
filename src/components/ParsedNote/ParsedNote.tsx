@@ -436,7 +436,7 @@ const ParsedNote: Component<{
 
     if (hasMinimalPreviewData) {
       // @ts-ignore
-      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div class="bordered"><LinkPreview preview={preview} /></div>).outerHTML;
+      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div><LinkPreview preview={preview} /></div>).outerHTML;
     }
   };
 

@@ -1,4 +1,4 @@
-import { NostrRelays, PrimalFeed } from "../types/primal";
+import { NostrRelays, PrimalFeed, SelectionOption } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -10,6 +10,7 @@ export type LocalStore = {
   likes: string[],
   feeds: PrimalFeed[];
   theme: string,
+  homeSidebarSelection: SelectionOption | undefined,
 };
 
 export const emptyStorage = {
@@ -22,6 +23,7 @@ export const emptyStorage = {
   likes: [],
   feeds: [],
   theme: 'sunset',
+  homeSidebarSelection: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -140,6 +142,28 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
   store.theme = theme;
 
   setStorage(pubkey, store);
+};
+
+export const saveHomeSidebarSelection = (pubkey: string | undefined, selection: SelectionOption | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.homeSidebarSelection = selection ? { ...selection } : undefined;
+
+  setStorage(pubkey, store);
+}
+
+export const readHomeSidebarSelection = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return undefined;
+  }
+  const store = getStorage(pubkey)
+  const selection = store.homeSidebarSelection;
+
+  return selection ? selection as SelectionOption : undefined;
 };
 
 export const readSecFromStorage = () => {

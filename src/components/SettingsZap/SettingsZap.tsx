@@ -7,6 +7,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { settings as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import ButtonLink from '../Buttons/ButtonLink';
 
 const SettingsZap: Component<{ id?: string }> = (props) => {
 
@@ -79,11 +80,11 @@ const SettingsZap: Component<{ id?: string }> = (props) => {
       </div>
 
       <div class={styles.restoreZaps}>
-        <button
-            onClick={() => setIsRestoringZaps(true)}
+        <ButtonLink
+          onClick={() => setIsRestoringZaps(true)}
         >
           {intl.formatMessage(t.feedsRestore)}
-        </button>
+        </ButtonLink>
       </div>
 
       <ConfirmModal

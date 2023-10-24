@@ -4,6 +4,8 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { account as t, actions } from '../../translations';
 import { PrimalUser } from '../../types/primal';
+import ButtonFlip from '../Buttons/ButtonFlip';
+import ButtonFollow from '../Buttons/ButtonFlip';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FollowButton.module.scss';
@@ -42,20 +44,20 @@ const FollowButton: Component<{
   }
 
   const klass = () => {
-    return `${isFollowed() ? styles.unfollow : styles.follow} ${props.large ? styles.large : styles.small}`;
+    return props.large ? styles.large : styles.small;
   }
 
   return (
     <Show when={props.person}>
       <div id={props.id} class={klass()}>
-        <button onClick={onFollow} disabled={account?.followInProgress === props.person?.pubkey}>
-          <Show
-            when={isFollowed()}
-            fallback={intl.formatMessage(t.follow)}
-          >
-            {intl.formatMessage(t.unfollow)}
-          </Show>
-        </button>
+        <ButtonFlip
+          onClick={onFollow}
+          disabled={account?.followInProgress === props.person?.pubkey}
+          when={isFollowed()}
+          fallback={intl.formatMessage(t.follow)}
+        >
+          {intl.formatMessage(t.unfollow)}
+        </ButtonFlip>
       </div>
     </Show>
   )

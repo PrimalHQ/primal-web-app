@@ -25,32 +25,32 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
 
   if ( diff > year) {
     const years = Math.floor(diff / year);
-    return { date, label: rtf.format(-years, 'years') };
+    return { date, label: rtf.format(-years, 'years').replace(' ago', '') };
   }
 
   if (diff > month) {
     const months = Math.floor(diff / month);
-    return { date, label: rtf.format(-months, 'months') };
+    return { date, label: rtf.format(-months, 'months').replace(' ago', '') };
   }
 
   if (diff > week) {
     const weeks = Math.floor(diff / week);
-    return { date, label: rtf.format(-weeks, 'weeks') };
+    return { date, label: rtf.format(-weeks, 'weeks').replace(' ago', '') };
   }
 
   if (diff > day) {
     const days = Math.floor(diff / day);
-    return { date, label: rtf.format(-days, 'days') };
+    return { date, label: rtf.format(-days, 'days').replace(' ago', '') };
   }
 
   if (diff > hour) {
     const hours = Math.floor(diff / hour);
-    return { date, label: rtf.format(-hours, 'hours') };
+    return { date, label: rtf.format(-hours, 'hours').replace(' ago', '') };
   }
 
   if (diff > minute) {
     const minutes = Math.floor(diff / minute);
-    return { date, label: rtf.format(-minutes, 'minutes') };
+    return { date, label: rtf.format(-minutes, 'minutes').replace(' ago', '') };
   }
 
   return { date, label: `${diff}s` };

@@ -1,0 +1,278 @@
+@mixin sunset_wave {
+  --brand-text: #D5D5D5;
+
+  --background-site: #000000;
+  --background-card: #000000;
+  --background-input: #222222;
+  --background-sheet: #121212;
+  --background-header-input: #1a1a1a;
+
+  --devider: #222222;
+
+  --text-primary: #ffffff;
+  --text-primary-button: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-secondary-2: #aaaaaa;
+  --text-tertiary: #757575;
+  --text-tertiary-2: #666666;
+
+  --subtile-devider: #444444;
+
+  --accent: #ca077c;
+  --accent-links: #f800c1;
+  --accent-dm: #ca077c;
+
+  --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
+
+  --success-bright: #66e205;
+  --success-dim: #142d01;
+  --warning-bright: #e20505;
+  --warning-bright-shadow: #e2050588;
+  --warning-dim: #480101;
+
+  --active-reply: #cccccc;
+  --active-zap: #ffa02f;
+  --active-liked: #f800c1;
+  --active-reposted: #66e205;
+  --background-modal: #00000070;
+
+  --profile-indicator-border: var(--background-site);
+
+  --check-image: url('./assets/icons/check.svg');
+  --logo: url('./assets/icons/logo_fire.svg');
+  --icon-follows: url('./assets/icons/follows.svg');
+  --icon-tribe: url('./assets/icons/tribe.svg');
+  --icon-global: url('./assets/icons/global.svg');
+  --icon-network: url('./assets/icons/network.svg');
+
+  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+
+  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+
+  --icon-global-latest: url('./assets/icons/global_latest.svg');
+  --icon-global-popular: url('./assets/icons/global_popular.svg');
+  --icon-global-trending: url('./assets/icons/global_trending.svg');
+
+  --icon-network-latest: url('./assets/icons/network_latest.svg');
+  --icon-network-popular: url('./assets/icons/network_popular.svg');
+  --icon-network-trending: url('./assets/icons/network_trending.svg');
+
+
+  select {
+    background-color: var(--background-site);
+  }
+
+}
+
+@mixin midnight_wave {
+  --brand-text: #D5D5D5;
+
+  --background-site: #000000;
+  --background-card: #000000;
+  --background-input: #222222;
+  --background-sheet: #121212;
+  --background-header-input: #1a1a1a;
+
+  --devider: #222222;
+
+  --text-primary: #ffffff;
+  --text-primary-button: #ffffff;
+  --text-secondary: #aaaaaa;
+  --text-secondary-2: #aaaaaa;
+  --text-tertiary: #757575;
+  --text-tertiary-2: #666666;
+
+  --subtile-devider: #444444;
+
+  --accent: #2394EF;
+  --accent-links: #2394EF;
+  --accent-dm: #0C7DD8;
+
+  --brand-gradient: linear-gradient(128deg, #14B9FF 0%, #690DFF 100%);
+
+  --success-bright: #66e205;
+  --success-dim: #142d01;
+  --warning-bright: #e20505;
+  --warning-bright-shadow: #e2050588;
+  --warning-dim: #480101;
+
+  --active-reply: #cccccc;
+  --active-zap: #ffa02f;
+  --active-liked: #f800c1;
+  --active-reposted: #66e205;
+  --background-modal: #00000070;
+
+  --profile-indicator-border: var(--background-site);
+
+  --check-image: url('./assets/icons/check.svg');
+  --logo: url('./assets/icons/logo_ice.svg');
+  --icon-follows: url('./assets/icons/follows.svg');
+  --icon-tribe: url('./assets/icons/tribe.svg');
+  --icon-global: url('./assets/icons/global.svg');
+  --icon-network: url('./assets/icons/network.svg');
+
+  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+
+  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+
+  --icon-global-latest: url('./assets/icons/global_latest.svg');
+  --icon-global-popular: url('./assets/icons/global_popular.svg');
+  --icon-global-trending: url('./assets/icons/global_trending.svg');
+
+  --icon-network-latest: url('./assets/icons/network_latest.svg');
+  --icon-network-popular: url('./assets/icons/network_popular.svg');
+  --icon-network-trending: url('./assets/icons/network_trending.svg');
+
+
+  select {
+    background-color: var(--background-site);
+  }
+}
+
+@mixin sunrise_wave {
+  --brand-text: #444444;
+
+  --background-site: #f5f5f5;
+  --background-card: #ffffff;
+  --background-input: #e5e5e5;
+  --background-sheet: #f5f5f5;
+  --background-header-input: #eeeeee;
+
+  --devider: #e5e5e5;
+
+  --text-primary: #111111;
+  --text-primary-button: #ffffff;
+  --text-secondary: #666666;
+  --text-secondary-2: #666666;
+  --text-tertiary: #808080;
+  --text-tertiary-2: #808080;
+
+  --subtile-devider: #c8c8c8;
+
+  --accent: #ca077c;
+  --accent-links: #CA077C;
+  --accent-dm: #CA077C;
+
+  --brand-gradient: linear-gradient(141deg, #EF404A 6.36%, #5B12A4 97.61%);
+
+  --success-bright: #52CE0A;
+  --success-dim: #C4F49F;
+  --warning-bright: #C40000;
+  --warning-bright-shadow: #C4000088;
+  --warning-dim: #FAC3C3;
+
+  --active-reply: #444444;
+  --active-zap: #ffa02f;
+  --active-liked: #CA079F;
+  --active-reposted: #52CE0A;
+  --background-modal: #f5f5f570;
+
+  --profile-indicator-border: var(--accent);
+
+  --check-image: url('./assets/icons/check.svg');
+  --logo: url('./assets/icons/logo_fire.svg');
+  --icon-follows: url('./assets/icons/follows.svg');
+  --icon-tribe: url('./assets/icons/tribe.svg');
+  --icon-global: url('./assets/icons/global.svg');
+  --icon-network: url('./assets/icons/network.svg');
+
+  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+
+  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+
+  --icon-global-latest: url('./assets/icons/global_latest.svg');
+  --icon-global-popular: url('./assets/icons/global_popular.svg');
+  --icon-global-trending: url('./assets/icons/global_trending.svg');
+
+  --icon-network-latest: url('./assets/icons/network_latest.svg');
+  --icon-network-popular: url('./assets/icons/network_popular.svg');
+  --icon-network-trending: url('./assets/icons/network_trending.svg');
+
+
+  select {
+    background-color: var(--background-site);
+  }
+}
+
+
+@mixin ice_wave {
+  --brand-text: #444444;
+
+  --background-site: #f5f5f5;
+  --background-card: #ffffff;
+  --background-input: #e5e5e5;
+  --background-sheet: #f5f5f5;
+  --background-header-input: #eeeeee;
+
+  --devider: #e5e5e5;
+
+  --text-primary: #111111;
+  --text-primary-button: #ffffff;
+  --text-secondary: #666666;
+  --text-secondary-2: #666666;
+  --text-tertiary: #808080;
+  --text-tertiary-2: #808080;
+
+  --subtile-devider: #c8c8c8;
+
+  --accent: #2394EF;
+  --accent-links: #2394EF;
+  --accent-dm: #0C7DD8;
+
+  --brand-gradient: linear-gradient(128deg, #14B9FF 0%, #690DFF 100%);
+
+  --success-bright: #52CE0A;
+  --success-dim: #C4F49F;
+  --warning-bright: #C40000;
+  --warning-bright-shadow: #C4000088;
+  --warning-dim: #FAC3C3;
+
+  --active-reply: #444444;
+  --active-zap: #ffa02f;
+  --active-liked: #CA079F;
+  --active-reposted: #52CE0A;
+  --background-modal: #f5f5f570;
+
+  --profile-indicator-border: var(--accent);
+
+  --check-image: url('./assets/icons/check.svg');
+  --logo: url('./assets/icons/logo_ice.svg');
+  --icon-follows: url('./assets/icons/follows.svg');
+  --icon-tribe: url('./assets/icons/tribe.svg');
+  --icon-global: url('./assets/icons/global.svg');
+  --icon-network: url('./assets/icons/network.svg');
+
+  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
+  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
+  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
+
+  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
+  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
+  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
+
+  --icon-global-latest: url('./assets/icons/global_latest.svg');
+  --icon-global-popular: url('./assets/icons/global_popular.svg');
+  --icon-global-trending: url('./assets/icons/global_trending.svg');
+
+  --icon-network-latest: url('./assets/icons/network_latest.svg');
+  --icon-network-popular: url('./assets/icons/network_popular.svg');
+  --icon-network-trending: url('./assets/icons/network_trending.svg');
+
+
+  select {
+    background-color: var(--background-site);
+  }
+
+}

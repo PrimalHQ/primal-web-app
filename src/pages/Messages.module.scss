@@ -3,7 +3,7 @@
   padding-inline: 16px;
   margin-bottom: 8px;
   width: fit-content;
-  max-width: calc(640px + 12px - 40px);
+  max-width: calc(600px + 12px - 40px);
 }
 
 @mixin thread($align-end) {
@@ -32,11 +32,11 @@
       @if $align-end {
         align-self: flex-end;
         text-align: left;
-        border-radius: 8px 0px 8px 8px;
+        border-radius: 12px;
       } @else {
         align-items: flex-start;
         text-align: left;
-        border-radius: 0px 8px 8px 8px;
+        border-radius: 12px;
       }
 
       font-weight: 400;
@@ -58,28 +58,41 @@
   position: relative;
 
   .sendersHeader {
-    height: 40px;
-    width: 294px;
-    background-color: var(--background-input);
-    border-radius: 8px;
+    height: 48px;
+    width: 334px;
+    background: none;
+    border-radius: 0;
+    border: 1px solid var(--devider);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-inline: 12px;
-    margin-bottom: 8px;
+    padding-top: 16px;
+    padding-left: 8px;
+    padding-right: 24px;
+    margin-bottom: 0;
     .senderCategorySelector {
       display: flex;
       .categorySelector {
         border: none;
         outline: none;
-        padding: 0;
+        padding-block: 0;
+        padding-inline: 16px;
         margin: 0;
         background: none;
-        color: var(--text-tertiary);
-        font-weight: 400;
+        color: var(--text-primary);
         font-size: 14px;
-        line-height: 16px;
+        font-weight: 400;
+        line-height: 14px;
         text-transform: uppercase;
+
+        .indicator {
+          visibility: hidden;
+          border-radius: 2px 0px;
+          width: 100%;
+          height: 4px;
+          margin-top: 12px;
+          background-color: var(--accent);
+        }
 
         &:focus {
           background: none;
@@ -87,8 +100,20 @@
           outline: none;
         }
 
-        &.highlight, &:hover {
+        &.highlight {
           color: var(--text-primary);
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 14px;
+
+          .indicator {
+            visibility: visible;
+            border-radius: 2px 0px;
+            width: 100%;
+            height: 4px;
+            margin-top: 12px;
+            background-color: var(--accent);
+          }
         }
 
       }
@@ -99,14 +124,18 @@
     }
 
     .markAsRead {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      height: 30px;
       border: none;
       outline: none;
       padding: 0;
       margin: 0;
       background: none;
-      color: var(--accent-1);
+      color: var(--accent);
+      font-size: 14px;
       font-weight: 400;
-      font-size: 13px;
       line-height: 16px;
       width: auto;
 
@@ -122,21 +151,23 @@
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
-    width: 308px;
+    width: 334px;
     height: calc(100vh - 176px);
     padding-right: 8px;
+    border-radius: 0;
+    border-left: 1px solid var(--devider);
 
 
     .senderItem {
       position: relative;
       display: flex;
-      height: 65px;
       background-color: var(--background-card);
       padding-inline: 15px;
       padding-block: 12px;
-      border-radius: 8px;
+      border-radius: 0;
       border: none;
-      margin-bottom: 8px;
+      border-bottom: 1px solid var(--devider);
+      margin-bottom: 0px;
       align-items: center;
 
       &:hover, &.selected {
@@ -147,24 +178,28 @@
         margin-left: 12px;
         display: flex;
         flex-direction: column;
-        font-size: 16px;
-        line-height: 16px;
         .firstLine {
           display: flex;
           justify-content: flex-start;
+          align-items: center;
           .senderName {
             color: var(--text-primary);
+            font-size: 16px;
             font-weight: 700;
+            line-height: 16px;
+          }
+          .dotSeparator {
+            width: 4px;
+            height: 4px;
+            margin-inline: 6px;
+            border-radius: 2px;
+            background-color: var(--text-tertiary-2);
           }
           .lastMessageTime {
             color: var(--text-tertiary-2);
+            font-size: 16px;
             font-weight: 400;
-            margin-left: 2px;
-
-            &::before {
-              content: "|";
-              padding: 0px 2px;
-            }
+            line-height: 16px;
           }
         }
 
@@ -190,30 +225,33 @@
     top: 0;
     left: 320px;
     background-color: var(--background-card );
-    border-radius: 8px;
-    width: calc(640px + 12px);
-    height: calc(100vh - 128px);
+    width: 600px;
+    height: calc(100vh - var(--header-height));
     z-index: var(--z-index-lifted);
     overflow: hidden;
-    padding: 12px;
     display: flex;
     flex-direction: column-reverse;
 
     .messages {
       width: 100%;
-      height: calc(100% - 44px);
-      margin-bottom: 12px;
+      height: 100%;
       overflow-y: scroll;
       display: flex;
       flex-direction: column-reverse;
-      padding-right: 8px;
+      padding: 16px;
       position: relative;
+      border-radius: 0;
+      border: 1px solid var(--devider);
 
       .myThread {
         @include thread(true);
         .threadMessages {
           .message {
-            background-color: var(--subtile-devider);
+            background-color: var(--accent);
+            border-radius: 12px 0px 0px 12px;
+            &:last-child {
+              border-radius: 12px 12px 0px 12px;
+            }
           }
         }
         + .myThread {
@@ -226,6 +264,10 @@
         .threadMessages {
           .message {
             background-color: var(--background-input);
+            border-radius: 0px 12px 12px 0px;
+            &:last-child {
+              border-radius: 12px 12px 12px 0px;
+            }
           }
         }
         + .theirThread {
@@ -235,32 +277,34 @@
     }
 
     .newMessage {
-      height: 32px;
       width: 100%;
       position: relative;
       vertical-align: bottom;
-      display: table-cell;
+      display: flex;
+      border-radius: 0;
+      border: 1px solid var(--devider);
+      border-top: none;
+      border-bottom: none;
+      padding: 16px 16px 24px 16px;
 
       .textAreaBorder {
         padding: 1px;
-        background: var(--brand-gradient);
         border-radius: 8px;
         width: 510px;
         height: 34px;
         box-sizing: border-box;
 
         textarea {
-          // border: 1px solid var(--brand-gradient-vertical);
-          background: var(--background-site);
-          border-radius: 8px;
           color: var(--text-primary);
+          background-color: var(--background-header-input);
+          border-radius: 20px;
+          border: none;
+          font-size: 15px;
           font-weight: 400;
-          font-size: 14px;
           line-height: 20px;
-          height: 32px;
+          height: 40px;
           margin: 0;
-          margin-right: 12px;
-          padding-inline: 8px;
+          padding-inline: 16px;
           padding-block: 8px;
           width: 508px;
           max-height: none;
@@ -272,49 +316,31 @@
       }
 
       .secondaryButton {
-        position: absolute;
-        top: 0;
-        right: 14px;
-        width: 80px;
-        height: 32px;
+        width: 40px;
+        height: 40px;
+        margin: 0;
+        margin-left: 12px;
         border: none;
-        border-radius: 6px;
-        padding: 1px;
-        font-size: 14px;
-        line-height: 20px;
-        font-weight: 700;
-        background: var(--brand-gradient-vertical);
-        color: var(--text-tertiary-2);
-        >div {
-          width: 100%;
-          height: 100%;
-          vertical-align: middle;
-          border-radius: 6px;
-          background-color: var(--background-card);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-      }
-
-      .primaryButton {
-        position: absolute;
-        top: 0;
-        right: 14px;
-        width: 80px;
-        height: 32px;
-        border: none;
-        border-radius: 6px;
+        border-radius: 20px;
         padding: 0px;
         font-size: 14px;
         line-height: 20px;
         font-weight: 700;
-        background: var(--brand-gradient-vertical);
-        color: white;
-        >span {
-          opacity: 0.75;
-        }
+        background: var(--background-input);
+      }
+
+      .primaryButton {
+        width: 40px;
+        height: 40px;
+        margin: 0;
+        margin-left: 12px;
+        border: none;
+        border-radius: 20px;
+        padding: 0px;
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 700;
+        background: var(--accent);
       }
     }
   }
@@ -329,16 +355,16 @@
   right: 12px;
   min-width: 18px;
   min-height: 18px;
-  border-radius: 8px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 12px;
   line-height: 12px;
   z-index: var(--z-index-lifted);
 
-  background: var(--brand-gradient);
+  background: var(--accent);
   border: 1px solid var(--background-site);
+  border-radius: 8px;
 
-  color: white;
+  color: var(--text-primary-button);
   text-shadow: 0.5px 0.5px 0px black;
 
   &.doubleSize {
@@ -358,9 +384,8 @@
 
 .searchSuggestions {
   width: 300px;
-  background-color: var(--background-site);
-  border: 1px solid var(--text-tertiary-2);
-  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  background-color: var(--background-input);
+  border: none;
   border-radius: 4px;
 
   position: absolute;
@@ -378,9 +403,8 @@
   max-height: 200px;
   overflow-y: scroll;
   padding: 4px;
-  background-color: var(--background-site);
-  border: 1px solid var(--text-tertiary-2);
-  // box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.8);
+  background-color: var(--background-input);
+  border: none;
   border-radius: 8px;
 
   bottom: 32px;
@@ -408,4 +432,15 @@
       border: none;
     }
   }
+}
+
+.iconSend {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/send.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../assets/icons/send.svg) no-repeat 0 0 / 16px 16px;
+
 }

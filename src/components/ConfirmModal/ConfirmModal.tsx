@@ -14,6 +14,8 @@ import { confirmDefaults as t } from '../../translations';
 
 import styles from './ConfirmModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
+import ButtonPrimary from '../Buttons/ButtonPrimary';
+import ButtonSecondary from '../Buttons/ButtonSecondary';
 
 const ConfirmModal: Component<{
   id?: string,
@@ -39,21 +41,20 @@ const ConfirmModal: Component<{
         </div>
         <div class={styles.feedConfirmationActions}>
           <Show when={props.onConfirm}>
-            <button
-              class={styles.feedRestoreConfirm}
+            <ButtonPrimary
               onClick={props.onConfirm}
             >
-            {props.confirmLabel || intl.formatMessage(t.confirm)}
-            </button>
+              {props.confirmLabel || intl.formatMessage(t.confirm)}
+            </ButtonPrimary>
           </Show>
 
           <Show when={props.onAbort}>
-            <button
-              class={styles.feedRestoreAbort}
+            <ButtonSecondary
               onClick={props.onAbort}
+              light={true}
             >
-            {props.abortLablel || intl.formatMessage(t.abort)}
-            </button>
+              {props.abortLablel || intl.formatMessage(t.abort)}
+            </ButtonSecondary>
           </Show>
         </div>
       </div>

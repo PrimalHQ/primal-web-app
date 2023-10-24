@@ -1,18 +1,23 @@
 .fullHeader {
   display: flex;
-  height: 128px;
+  height: var(--header-height);
   align-items: center;
   justify-content: left;
   position: relative;
 
-  font-weight: 300;
+  font-weight: 400;
   font-size: 32px;
   line-height: 34px;
   color: var(--text-secondary);
   text-transform: lowercase;
 
+  padding-left: 24px;
+
+  border-radius: 0;
+  border: none;
+
   a {
-    font-weight: 300;
+    font-weight: 400;
     font-size: 32px;
     line-height: 34px;
     color: var(--text-secondary);

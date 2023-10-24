@@ -586,6 +586,7 @@ export type MenuItem = {
   label: string,
   icon?: string,
   warning?: boolean,
+  separator?: boolean,
 };
 
 export type Filterlist = {
@@ -610,4 +611,11 @@ export type ComponentLog = {
 export type UserCategory = {
   group: string,
   members: { name?: string, pubkey: string }[],
+}
+
+export type SelectionOption = {
+  label: string,
+  value: string,
+  disabled?: boolean,
+  separator?: boolean,
 }

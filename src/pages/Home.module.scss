@@ -1,12 +1,14 @@
 .homeContent {
   position: relative;
+  border: none;
+  min-height: 100vh;
 }
 
 .paginate {
   color: var(--text-tertiary-2);
   position: absolute;
   bottom: 1280px;
-  width: 640px;
+  width: 600px;
   height: 100px;
 }
 
@@ -61,51 +63,6 @@
   }
 }
 
-.newContentNotification {
-  position: fixed;
-  top: 42px;
-  left: calc(calc(100vw - 1240px) / 2 + 176px + 32px);
-  width: 640px;
-  z-index: 20;
-  display: flex;
-  justify-content: center;
-
-  >button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: auto;
-    height: 40px;
-    background: var(--brand-gradient);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 18px;
-    border: none;
-    border-radius: 20px;
-    padding-block: 0;
-    padding-left: 4px;
-    margin: 0;
-
-    .avatars {
-      display: flex;
-      align-items: center;
-      height: 40px;
-      .avatar {
-        border: solid 2px var(--text-primary);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        transition: margin-right 0.2s;
-        margin-right: -9px;
-      }
-    }
-
-    .counter {
-      margin-left: 24px;
-    }
-  }
-
-}
 @media only screen and (max-width: 1300px) {
   .newContentNotification {
     left: calc(calc(100vw - 1032px) / 2 + 48px + 32px);
@@ -129,7 +86,9 @@
   }
 
   .phoneCentralHeader {
+    position: relative;
     display: block;
     width: 100%;
+    z-index: var(--z-index-header);
   }
 }

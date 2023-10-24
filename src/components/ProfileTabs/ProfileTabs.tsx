@@ -229,7 +229,7 @@ const ProfileTabs: Component<{
           <div class={styles.profileNotes}>
             <Switch
               fallback={
-                <div style="margin-top: 40px;">
+                <div class={styles.loader}>
                   <Loader />
                 </div>
             }>

@@ -2,12 +2,9 @@
   position: fixed;
   width: 420px;
   height: 285px;
-  color: var(--text-secondary);
-  background-color: var(--background-site);
-  background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
-                var(--brand-gradient) border-box;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  color: var(--text-primary);
+  background-color: var(--background-input);
+  border-radius: 8px;
 
   display: flex;
   flex-direction: column;

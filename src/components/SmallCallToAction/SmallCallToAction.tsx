@@ -21,13 +21,11 @@ const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined, id?: st
     <button id={props.id} class={styles.callToAction} onClick={showNewNoteForm}>
       <Avatar
         user={props.activeUser}
-        size="xs"
+        size="vs"
       />
 
-      <div class={styles.border}>
-        <div class={styles.input}>
-          {intl.formatMessage(placeholders.noteCallToAction)}
-        </div>
+      <div class={styles.input}>
+        {intl.formatMessage(placeholders.noteCallToAction)}
       </div>
     </button>
   );

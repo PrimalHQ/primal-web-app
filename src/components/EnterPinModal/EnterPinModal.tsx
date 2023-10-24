@@ -99,6 +99,9 @@ const EnterPinModal: Component<{
         <div class={styles.title}>
           {intl.formatMessage(tPin.enterTitle)}
         </div>
+        <div class={styles.description}>
+          {intl.formatMessage(tPin.enter)}
+        </div>
         <div class={styles.inputs}>
           <TextInput
             type="password"
@@ -106,7 +109,6 @@ const EnterPinModal: Component<{
             value={pin()}
             onKeyUp={onKeyUp}
             onChange={(val: string) => setPin(val)}
-            label={intl.formatMessage(tPin.enter)}
             validationState={pin().length === 0 || isValidPin() ? 'valid' : 'invalid'}
             errorMessage={intl.formatMessage(tPin.invalidRePin)}
           />

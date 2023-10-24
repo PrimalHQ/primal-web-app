@@ -34,10 +34,10 @@ const VerificationCheck: Component<{ user: PrimalUser | undefined, id?: string }
   })
 
   return (
-    <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
-      <Show
-        when={isVerified()}
-      >
+    <Show
+      when={isVerified()}
+    >
+      <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
         <Show
           when={isVerifiedByPrimal()}
           fallback={
@@ -47,8 +47,8 @@ const VerificationCheck: Component<{ user: PrimalUser | undefined, id?: string }
           <span class={styles.whiteCheck} />
           <span class={styles.verifiedIconPrimal} />
         </Show>
-      </Show>
-    </div>
+      </div>
+    </Show>
   )
 }
 

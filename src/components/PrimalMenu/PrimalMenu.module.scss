@@ -1,18 +1,18 @@
 .contextMenuOptions {
   position: absolute;
   top: 18px;
-  right: 8px;
+  right: 0px;
   padding: 8px;
-  background-color: var(--background-site);
-  border: solid 1px var(--text-tertiary-2);
-  border-radius: 4px;
+  background-color: var(--background-input);
+  border: none;
+  border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
 
   &.noteFooter {
     top: 26px;
-    left: 0px;
-    right: unset;
+    left: unset;
+    right: 0px;
   }
   &.profile {
     top: 46px;

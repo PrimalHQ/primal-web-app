@@ -6,41 +6,38 @@
   align-items: center;
 
   text-align: left;
-  background-color: var(--background-site);
+  background-color: var(--background-input);
   border: none;
-  border-radius: 2px;
+  border-radius: 0;
+  font-size: 16px;
   font-weight: 400;
-  font-size: 14px;
-  line-height: 16px;
-  color: var(--text-secondary-2);
+  line-height: 20px;
+  color: var(--text-primary);
   padding: 10px 12px;
   margin: 0px;
-  min-width: 196px;
+  min-width: 220px;
 
   div {
     display: inline-block;
     width: 16px;
     height: 16px;
-    background-color: var(--text-secondary);
+    background-color: var(--text-primary);
   }
 
   &:hover, &:focus {
-    background-color: var(--background-input);
+    background-color: var(--subtile-devider);
     color: var(--text-primary);
-
-    div {
-      background-color: var(--text-primary);
-    }
+    border-radius: 8px;
   }
 
   &.warning {
-    color: var(--warning-color);
+    color: var(--warning-bright);
     div {
-      background-color: var(--warning-color);
+      background-color: var(--warning-bright);
     }
 
     &:hover, &:focus {
-      background-color: color-mix(in srgb, var(--warning-color) 25%, var(--background-site));
+      background-color: var(--warning-dim);
     }
   }
 
@@ -53,4 +50,10 @@
     }
   }
 
+}
+
+.separator {
+  border-top: 1px solid var(--subtile-devider);
+  width: 100%;
+  height: 0px;
 }

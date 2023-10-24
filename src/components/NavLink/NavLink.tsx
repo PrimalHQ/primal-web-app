@@ -12,21 +12,15 @@ const NavLink: Component<{
   bubble?: () => number,
   hiddenOnSmallScreens?: boolean,
 }> = (props) => {
-
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const shouldScroll = () => props.to === location.pathname;
-
-  const onClick = (e: Event) => {
-    if (shouldScroll()) {
+  const scrollIfInactive = (e: Event) => {
+    if (props.to === location.pathname) {
       e.preventDefault();
 
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       return;
     }
-
-    navigate('/home');
   }
 
   const bubbleClass = () => {
@@ -42,17 +36,22 @@ const NavLink: Component<{
   }
 
     return (
-      <button id={props.id} class={`${styles.navLink} ${props.hiddenOnSmallScreens ? styles.hiddenOnSmallScreens : ''}`} onClick={onClick}>
+      <div id={props.id} class={styles.navLink}>
+        <A
+          href={props.to}
+          activeClass={styles.active}
+          inactiveClass={styles.inactive}
+          onClick={scrollIfInactive}
+        >
+          <div class={styles[props.icon]}></div>
+          <div class={styles.label}>{props.label}</div>
+        </A>
         <Show when={props.bubble && props.bubble() > 0}>
           <div class={`${styles.bubble} ${bubbleClass()}`}>
             <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
           </div>
         </Show>
-        <A href={props.to} activeClass={styles.active} inactiveClass={styles.inactive}>
-          <div class={styles[props.icon]}></div>
-          <p>{props.label}</p>
-        </A>
-      </button>
+      </div>
     )
 }
 

@@ -9,6 +9,7 @@ import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import ButtonLink from '../../components/Buttons/ButtonLink';
 
 const HomeFeeds: Component = () => {
 
@@ -36,12 +37,11 @@ const HomeFeeds: Component = () => {
         {intl.formatMessage(t.homeFeeds.caption)}
         </div>
 
-        <button
-          class={styles.restoreFeedsButton}
+        <ButtonLink
           onClick={() => setIsRestoringFeeds(true)}
         >
           {intl.formatMessage(t.feedsRestore)}
-        </button>
+        </ButtonLink>
 
         <ConfirmModal
           open={isRestoringFeeds()}

@@ -1,10 +1,8 @@
 .callToAction {
-  display: grid;
-  // height: 32px;
+  display: flex;
   min-width: 50%;
-  grid-template-columns: 32px 1fr;
-  grid-column-gap: 10px;
   align-items: center;
+  justify-content: flex-start;
   background-color: unset;
   margin: 0px;
   padding: 0px;
@@ -26,17 +24,20 @@
   }
 
   .input {
-    height: 26px;
-    font-size: 14px;
+    height: 36px;
+    width: 100%;
+    font-size: 16px;
     line-height: 20px;
     font-weight: 400;
     margin: 0px;
-    border-radius: 6px;
+    margin-left: 8px;
+    border-radius: 18px;
     border: none;
     color: var(--text-tertiary);
-    background-color: var(--background-site);
+    background-color: var(--background-input);
     display: flex;
     align-items: center;
-    padding-left: 12px;
+    justify-content: flex-start;
+    padding-inline: 16px;
   }
 }

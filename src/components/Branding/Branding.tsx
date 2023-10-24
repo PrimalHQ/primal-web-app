@@ -10,20 +10,20 @@ const Branding: Component<{ small?: boolean, isHome?: boolean, showNav?: boolean
   const navigate = useNavigate();
   const intl = useIntl();
 
-  const onClick = () => {
+  const toHomeOrScrollToTop = () => {
     if (props.isHome) {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       return;
     }
 
-    navigate('/home');
+    navigate('/');
   }
 
   return (
     <Show when={!props.showNav} fallback={<PageNav />}>
       <button
         class={styles.logoLink}
-        onClick={onClick}
+        onClick={toHomeOrScrollToTop}
       >
         <Show
           when={!props.small}

@@ -2,8 +2,9 @@ import { Component } from 'solid-js';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { FeedOption, PrimalFeed } from '../../types/primal';
+import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
+import SelectionBox from '../SelectionBox/SelectionBox';
 
 const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
 
@@ -61,17 +62,15 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     return false;
   }
 
-  const options:() => FeedOption[] = () => {
+  const options:() => SelectionOption[] = () => {
     if (settings?.availableFeeds === undefined) {
      return [];
     }
 
-    return settings.availableFeeds.map(feed => {
-      return ({
-        label: feed.name,
-        value: `${feed.hex}_${feed.includeReplies}`,
-      });
-    });
+    return settings.availableFeeds.map(feed => ({
+      label: feed.name,
+      value: `${feed.hex}_${feed.includeReplies}`,
+    }));
   };
 
   const initialValue = () => {
@@ -100,11 +99,19 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     }
   }
 
+  const selectedValue = () => {
+    if (!home?.selectedFeed)
+      return initialValue();
+
+    return { label: home.selectedFeed.name, value: `${home.selectedFeed.hex}_${home.selectedFeed.includeReplies}` };
+  };
+
   return (
-    <SelectBox
-      options={options}
+    <SelectionBox
+      options={options()}
       onChange={selectFeed}
       initialValue={initialValue()}
+      value={selectedValue()}
       isSelected={isSelected}
       isPhone={props.isPhone}
     />

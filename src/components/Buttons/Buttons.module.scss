@@ -1,42 +1,70 @@
 .primary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: none;
-  border-radius: 6px;
-  margin: 0px 8px;
-  padding-inline: 10px;
-  padding-block: 6px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 700;
-  background: var(--brand-gradient-vertical);
-  color: white;
-  >span {
-    opacity: 0.75;
-  }
+  border-radius: 99999px;
+  margin: 0px;
+  padding-inline: 18px;
+  padding-block: 10px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 600;
+  background: var(--accent);
+  color: var(--text-primary-button);
+  width: fit-content;
+  min-height: 36px;
 }
 
 .secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border: none;
-  border-radius: 6px;
-  padding: 1px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 700;
-  background: var(--brand-gradient-vertical);
-  color: var(--text-tertiary-2);
-  >div {
-    width: 100%;
-    height: 100%;
-    vertical-align: middle;
-    border-radius: 6px;
-    background-color: var(--background-card);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding-inline: 10px;
-    padding-block: 6px;
+  border-radius: 99999px;
+  margin: 0px;
+  padding-inline: 38px;
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 600;
+  background: var(--background-input);
+  color: var(--text-secondary);
+  width: fit-content;
+  height: 36px;
+
+  &.light {
+    background-color: var(--subtile-devider);
   }
 }
+
+.shrunk {
+  padding-inline: 0;
+  min-width: 36px;
+}
+
+// .secondary {
+//   border: none;
+//   border-radius: 6px;
+//   padding: 1px;
+//   font-size: 14px;
+//   line-height: 20px;
+//   font-weight: 700;
+//   background: var(--brand-gradient-vertical);
+//   color: var(--text-tertiary-2);
+//   >div {
+//     width: 100%;
+//     height: 100%;
+//     vertical-align: middle;
+//     border-radius: 6px;
+//     background-color: var(--background-card);
+//     display: flex;
+//     flex-direction: column;
+//     align-items: center;
+//     justify-content: center;
+//     padding-inline: 10px;
+//     padding-block: 6px;
+//   }
+// }
 
 
 
@@ -64,7 +92,7 @@
   color: var(--text-tertiary-2);
   font-size: 14px;
   font-weight: 400;
-  line-height: 12px;
+  line-height: 16px;
   background: none;
   margin: 0;
   padding: 0;
@@ -113,52 +141,44 @@
   }
 }
 
-.follow {
+.flipInactive {
   display: flex;
-  align-items: center;
   justify-content: center;
-  width: fit-content;
-  height: fit-content;
-  min-width: 96px;
+  align-items: center;
   border: none;
-  border-radius: 6px;
+  border-radius: 99999px;
   margin: 0px;
-  padding: 10px;
+  padding-inline: 18px;
+  padding-block: 10px;
   font-size: 16px;
-  line-height: 20px;
-  font-weight: 700;
+  line-height: 16px;
+  font-weight: 600;
   background: var(--text-primary);
   color: var(--background-site);
-
-  &:hover {
-    color: var(--subtile-devider);
-  }
+  width: fit-content;
 
   &:focus {
     box-shadow: none;
   }
 }
 
-.unfollow {
+.flipActive {
   display: flex;
   align-items: center;
   justify-content: center;
   width: fit-content;
   height: fit-content;
-  min-width: 96px;
+  border-radius: 99999px;
   border: none;
-  border-radius: 6px;
   margin: 0px;
-  padding: 10px;
+  padding-inline: 18px;
+  padding-block: 10px;
   font-size: 16px;
   line-height: 20px;
   font-weight: 700;
   background: var(--background-input);
   color: var(--text-primary);
-
-  &:hover {
-    background-color: var(--subtile-devider);
-  }
+  width: fit-content;
 
   &:focus {
     box-shadow: none;
@@ -175,11 +195,11 @@
   border-radius: 6px;
   margin: 0px;
   padding: 0px;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 20px;
-  font-weight: 700;
+  font-weight: 400;
   background: none;
-  color: var(--accent-1);
+  color: var(--accent);
 
   &:hover {
     text-decoration: underline;
@@ -191,18 +211,18 @@
 }
 
 .tertiary {
-    border-radius: 6px;
-    padding-inline: 10px;
-    padding-block: 6px;
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 700;
-    margin: 0px;
-    color: var(--text-primary);
-    background: var(--background-card);
-    border: 1px solid var(--subtile-devider);
+  border-radius: 6px;
+  padding-inline: 10px;
+  padding-block: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  margin: 0px;
+  color: var(--text-primary);
+  background: var(--background-card);
+  border: 1px solid var(--subtile-devider);
 
-    &:hover {
-      border: 1px solid var(--text-tertiary);
-    }
+  &:hover {
+    border: 1px solid var(--text-tertiary);
+  }
 }

@@ -62,25 +62,19 @@ const ReplyToNote: Component<{
           <button class={styles.replyBox} onClick={openReplyBox}>
             <div class={styles.leftSideClosed}>
               <Avatar
-                size="md"
+                size="sm"
                 user={activeUser()}
               />
             </div>
-            <div class={styles.rightSideClosed}>
-              <div class={styles.border}>
-                <div
-                  class={styles.input}
-                >
-                  <span>
-                    {intl.formatMessage(
-                      t.noteReply,
-                      {
-                        name: userName(props.note.user),
-                      },
-                    )}
-                  </span>
-                </div>
-              </div>
+            <div
+              class={styles.input}
+            >
+              {intl.formatMessage(
+                t.noteReply,
+                {
+                  name: userName(props.note.user),
+                },
+              )}
             </div>
           </button>
         }

@@ -83,26 +83,29 @@ const CreatePinModal: Component<{
         <div class={styles.description}>
           {intl.formatMessage(tPin.description)}
         </div>
-        <div class={styles.inputs}>
-          <TextInput
-            type="password"
-            ref={pinInput}
-            value={pin()}
-            onKeyUp={onKeyUp}
-            onChange={(val: string) => setPin(val)}
-            validationState={pin().length === 0 || isValidPin() ? 'valid' : 'invalid'}
-            errorMessage={intl.formatMessage(tPin.invalidPin)}
-          />
-          <TextInput
-            type="password"
-            value={rePin()}
-            onKeyUp={onKeyUp}
-            onChange={(val: string) => setRePin(val)}
-            label={intl.formatMessage(tPin.reEnter)}
-            validationState={rePin().length === 0 || isValidRePin() ? 'valid' : 'invalid'}
-            errorMessage={intl.formatMessage(tPin.invalidRePin)}
-          />
+
+        <TextInput
+          type="password"
+          ref={pinInput}
+          value={pin()}
+          onKeyUp={onKeyUp}
+          onChange={(val: string) => setPin(val)}
+          validationState={pin().length === 0 || isValidPin() ? 'valid' : 'invalid'}
+          errorMessage={intl.formatMessage(tPin.invalidPin)}
+        />
+
+        <div class={styles.description}>
+          {intl.formatMessage(tPin.reEnter)}
         </div>
+        <TextInput
+          type="password"
+          value={rePin()}
+          onKeyUp={onKeyUp}
+          onChange={(val: string) => setRePin(val)}
+          validationState={rePin().length === 0 || isValidRePin() ? 'valid' : 'invalid'}
+          errorMessage={intl.formatMessage(tPin.invalidRePin)}
+        />
+
         <div class={styles.actions}>
           <ButtonPrimary
             onClick={onSetPin}
@@ -112,6 +115,7 @@ const CreatePinModal: Component<{
           </ButtonPrimary>
           <ButtonSecondary
             onClick={onOptout}
+            light={true}
           >
             {intl.formatMessage(tActions.optoutPin)}
           </ButtonSecondary>

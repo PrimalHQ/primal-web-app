@@ -2,52 +2,65 @@
 .userResult {
   display: grid;
   grid-template-columns: 36px 1fr 60px;
-  padding: 8px;
-  margin: 4px;
+  padding-block: 10px;
+  padding-inline: 13px;
+  margin-inline: 4px;
   text-decoration: none;
   border-radius: 4px;
   cursor: pointer;
 
   &:hover, &:focus, &.highlight {
-    background-color: var(--background-input);
+    background-color: var(--subtile-devider);
   }
 
   .userAvatar {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 36px;
 
     .searchIcon {
       display: inline-block;
       width: 18px;
       height: 18px;
 
-      background-color: var(--text-primary);
+      background-color: var(--text-tertiary-2);
       -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
       mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
     }
   }
 
   .userInfo {
-    margin-left: 6px;
+    margin-left: 12px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    max-width: 172px;
+    max-width: 166px;
   }
 
   .userName {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 16px;
     color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+
+    &.darkTitle {
+      color: var(--text-tertiary);
+    }
   }
 
   .verification {
     font-weight: 400;
-    font-size: 14px;
-    line-height: 16px;
-    color: var(--text-secondary-2);
+    font-size: 12px;
+    line-height: 12px;
+    color: var(--text-tertiary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .userStats {
@@ -56,7 +69,7 @@
     align-items: flex-end;
     .followerNumber {
       font-weight: 700;
-      font-size: 12px;
+      font-size: 15px;
       line-height: 16px;
       color: var(--text-primary)
     }
@@ -64,12 +77,16 @@
     .followerLabel {
       font-weight: 400;
       font-size: 12px;
-      line-height: 14px;
-      color: var(--text-secondary-2);
+      line-height: 12px;
+      color: var(--text-tertiary);
     }
   }
 }
 
 .underline {
   border-bottom: 1px solid var(--subtile-devider);
+}
+
+.narrow {
+  padding-block: 4px;
 }

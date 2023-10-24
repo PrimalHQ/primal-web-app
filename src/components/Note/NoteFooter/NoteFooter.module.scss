@@ -6,13 +6,14 @@
 
 @mixin typeDiv {
   display: flex;
-  min-width: 64px;
   align-items: center;
 }
 
 .footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: 128px 128px 128px 128px;
   position: relative;
+  width: 100%;
 
   .stat {
     // display: grid;
@@ -20,16 +21,14 @@
     // grid-template-rows: 1fr;
     // grid-column-gap: 5px;
     font-weight: 400;
-    font-size: 18px;
+    font-size: 14px;
     line-height: 16px;
     align-items: center;
     margin: 0px;
     padding: 0px;
-    margin-right: 60px;
     border: none;
     background-color: unset;
-    width: auto;
-    min-width: 64px;
+    width: fit-content;
     position: relative;
 
     .likeType {
@@ -71,10 +70,10 @@
     &:hover, &.highlighted {
       .zapType {
         .statNumber {
-          color: #FF9F2F;
+          color: var(--active-zap);
         }
         .icon {
-          background-color: #FF9F2F;
+          background-color: var(--active-zap);
           -webkit-mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
           mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
         }
@@ -82,10 +81,10 @@
 
       .likeType {
         .statNumber {
-          color: #BC1870;
+          color: var(--active-liked);
         }
         .icon {
-          background-color: #BC1870;
+          background-color: var(--active-liked);
           -webkit-mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
           mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
         }
@@ -93,10 +92,10 @@
 
       .replyType {
         .statNumber {
-          color: #CCCCCC;
+          color: var(--active-reply);
         }
         .icon {
-          background-color: #CCCCCC;
+          background-color: var(--active-reply);
           -webkit-mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
           mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
         }
@@ -104,10 +103,10 @@
 
       .repostType {
         .statNumber {
-          color: #66E205;
+          color: var(--active-reposted);
         }
         .icon {
-          background-color: #66E205;
+          background-color: var(--active-reposted);
           -webkit-mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
           mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
         }
@@ -119,8 +118,8 @@
 
     .statNumber {
       text-align: left;
-      color: var(--text-secondary);
-      margin-left: 7px;
+      color: var(--text-tertiary-2);
+      padding-left: 7px;
     }
   }
 }

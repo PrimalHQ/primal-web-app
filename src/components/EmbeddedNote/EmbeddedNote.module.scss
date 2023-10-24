@@ -1,8 +1,8 @@
 
 .mentionedNote {
-  border: solid 1px var(--border-embedded-card);
+  border: none;
   border-radius: 8px;
-  background-color: var(--background-embedded_card);
+  background-color: var(--background-input);
   margin-block: 6px;
   padding: 18px;
   display: grid;

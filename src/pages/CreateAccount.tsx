@@ -30,7 +30,7 @@ import { storeSec } from '../lib/localStore';
 import { getPreConfiguredRelays } from '../lib/relays';
 import CreatePinModal from '../components/CreatePinModal/CreatePinModal';
 import { useSearchContext } from '../contexts/SearchContext';
-import ButtonFollow from '../components/Buttons/ButtonFollow';
+import ButtonFollow from '../components/Buttons/ButtonFlip';
 import ButtonTertiary from '../components/Buttons/ButtonTertiary';
 import { sendContacts } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
@@ -38,6 +38,7 @@ import { convertToUser, nip05Verification, userName } from '../stores/profile';
 import { subscribeTo } from '../sockets';
 import { arrayMerge } from '../utils';
 import { stringStyleToObject } from '@solid-primitives/props';
+import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -721,33 +722,26 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           <Show
             when={currentStep() === 'follow'}
             fallback={
-              <button
-                type='button'
-                class={styles.primaryButton}
+              <ButtonPrimary
                 disabled={currentStep() === 'name' && !isNameValid()}
                 onClick={toNext}
               >
                 {intl.formatMessage(tActions.next)}
-              </button>
+              </ButtonPrimary>
             }
           >
-            <button
-              type='submit'
-              class={styles.primaryButton}
+            <ButtonPrimary
+              type="submit"
               disabled={!isNameValid()}
             >
-              {intl.formatMessage(tActions.finish)}
-            </button>
+              {intl.formatMessage(tActions.next)}
+            </ButtonPrimary>
           </Show>
-          <button
-            type='button'
-            class={styles.secondaryButton}
+          <ButtonSecondary
             onClick={clearNewAccount}
           >
-            <div>
-              <span>{intl.formatMessage(tActions.cancel)}</span>
-            </div>
-          </button>
+            {intl.formatMessage(tActions.cancel)}
+          </ButtonSecondary>
         </div>
       </form>
 

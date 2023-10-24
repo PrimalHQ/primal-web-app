@@ -27,25 +27,26 @@ const ProfileContact: Component<{
 
   return (
     <div id={props.id} class={styles.profileContact}>
-      <A href={`/p/${props.profile?.npub}`}>
-        <Avatar src={props.profile?.picture} size="sm" />
-      </A>
-
       <A href={`/p/${props.profile?.npub}`} class={styles.info}>
-        <div class={styles.profileInfo}>
-          <div class={styles.name}>{userName(props.profile)}</div>
-          <div class={styles.nip05}>
-            <Show when={props.profile?.nip05}>
-              <span
-                class={styles.verifiedBy}
-                title={props.profile?.nip05}
-              >
-                {nip05Verification(props.profile)}
-              </span>
-            </Show>
-          </div>
-        </div>
+        <div class={styles.personal}>
+          <Avatar src={props.profile?.picture} size="sm" />
 
+          <div class={styles.profileInfo}>
+            <div class={styles.name}>{userName(props.profile)}</div>
+            <div class={styles.nip05}>
+              <Show when={props.profile?.nip05}>
+                <span
+                  class={styles.verifiedBy}
+                  title={props.profile?.nip05}
+                >
+                  {nip05Verification(props.profile)}
+                </span>
+              </Show>
+            </div>
+        </div>
+        </div>
+      </A>
+      <div class={styles.action}>
         <Show when={props.profileStats}>
           <div class={styles.stats}>
             <div class={styles.number}>
@@ -56,9 +57,6 @@ const ProfileContact: Component<{
             </div>
           </div>
         </Show>
-      </A>
-
-      <div class={styles.action}>
         <FollowButton person={props.profile} postAction={props.postAction} />
       </div>
     </div>

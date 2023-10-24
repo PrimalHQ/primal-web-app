@@ -34,7 +34,7 @@
   width: 100%;
   height: 100%;
   padding: 1px;
-  background: var(--brand-gradient);
+  background: none;
   border-radius: 6px;
   display: block;
   position: relative;
@@ -48,7 +48,7 @@
   line-height: 20px;
   margin: 0px;
   border-radius: 6px;
-  border: none;
+  border: 2px solid var(--accent);
   color: var(--text-tertiary);
   background-color: var(--background-site);
   padding-bottom: 11px;

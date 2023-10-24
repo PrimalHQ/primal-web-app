@@ -82,7 +82,12 @@ const NavMenu: Component< { id?: string } > = (props) => {
       </nav>
       <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
         <div class={styles.callToAction}>
-          <FloatingNewPostButton />
+          <ButtonPrimary
+            id={props.id}
+            onClick={account?.actions?.showNewNoteForm}
+          >
+            {intl.formatMessage(tActions.newNote)}
+          </ButtonPrimary>
         </div>
       </Show>
 
@@ -91,11 +96,9 @@ const NavMenu: Component< { id?: string } > = (props) => {
           <div class={styles.message}>
             {intl.formatMessage(tPlaceholders.welcomeMessage)}
           </div>
-          <div class={styles.action}>
-            <ButtonPrimary onClick={account?.actions.showGetStarted}>
-              {intl.formatMessage(tActions.getStarted)}
-            </ButtonPrimary>
-          </div>
+          <ButtonPrimary onClick={account?.actions.showGetStarted}>
+            {intl.formatMessage(tActions.getStarted)}
+          </ButtonPrimary>
         </div>
       </Show>
     </div>

@@ -23,6 +23,7 @@ import { interpretBold } from '../../translationHelpers';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import ButtonLink from '../../components/Buttons/ButtonLink';
 
 
 const Network: Component = () => {
@@ -326,12 +327,11 @@ const Network: Component = () => {
 
       <div style="height: 20px"></div>
 
-      <button
-        class={styles.restoreFeedsButton}
+      <ButtonLink
         onClick={() => account?.actions.changeCachingService()}
       >
         {intl.formatMessage(tActions.restoreCachingService)}
-      </button>
+      </ButtonLink>
 
       <div style="height: 48px"></div>
 

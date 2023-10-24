@@ -159,20 +159,22 @@ const Thread: Component = () => {
         <Show
           when={!isFetching()}
         >
-          <For each={parentNotes()}>
-            {note =>
-              <div class={styles.threadList}>
-                <Note note={note} />
-              </div>
-            }
-          </For>
+          <div class={styles.parentsHolder}>
+            <For each={parentNotes()}>
+              {note =>
+                <div class={styles.threadList}>
+                  <Note note={note} parent={true} />
+                </div>
+              }
+            </For>
+          </div>
         </Show>
 
         <Show when={primaryNote()}>
           <div id="primary_note" class={styles.threadList}>
             <NotePrimary
-              id="bojan"
               note={primaryNote() as PrimalNote}
+              hasParent={parentNotes().length > 0}
             />
             <Show when={account?.hasPublicKey()}>
               <ReplyToNote
@@ -184,13 +186,13 @@ const Thread: Component = () => {
         </Show>
 
         <div class={styles.repliesHolder}>
-            <For each={replyNotes()}>
-              {note =>
-                <div class={styles.threadList}>
-                  <Note note={note} />
-                </div>
-              }
-            </For>
+          <For each={replyNotes()}>
+            {note =>
+              <div class={styles.threadList}>
+                <Note note={note} />
+              </div>
+            }
+          </For>
         </div>
       </Show>
     </div>

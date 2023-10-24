@@ -31,15 +31,17 @@ const Layout: Component = () => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-    if (!newNote || !newNoteTextArea) {
-      return;
-    }
-
     if (account?.showNewNoteForm) {
+      if (!newNote || !newNoteTextArea) {
+        return;
+      }
       newNote?.classList.add(styles.animatedShow);
       newNoteTextArea?.focus();
     }
     else {
+      if (!newNote || !newNoteTextArea) {
+        return;
+      }
       newNote?.classList.remove(styles.animatedShow);
       newNoteTextArea.value = '';
     }
@@ -120,15 +122,17 @@ const Layout: Component = () => {
 
 
         <div class={styles.centerColumn}>
-          <div class={styles.centerContent}>
-            <div id="new_note_input" class={styles.headerFloater}>
-              <NewNote onSuccess={onNewNotePosted}/>
-            </div>
+          <Show when={account?.isKeyLookupDone}>
+            <div class={styles.centerContent}>
+              <div id="new_note_input" class={styles.headerFloater}>
+                <NewNote onSuccess={onNewNotePosted}/>
+              </div>
 
-            <div>
-              <Outlet />
+              <div>
+                <Outlet />
+              </div>
             </div>
-          </div>
+          </Show>
         </div>
 
 

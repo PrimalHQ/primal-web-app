@@ -217,6 +217,17 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
 
             <VerificationCheck user={props.note.user} />
 
+            <Show
+              when={props.note.user?.nip05}
+            >
+              <span
+                class={styles.verification}
+                title={props.note.user?.nip05}
+              >
+                {nip05Verification(props.note.user)}
+              </span>
+            </Show>
+
             <span
               class={styles.time}
               title={date(props.note.post?.created_at).date.toLocaleString()}
@@ -225,16 +236,6 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
             </span>
           </div>
 
-          <Show
-            when={props.note.user?.nip05}
-          >
-            <span
-              class={styles.verification}
-              title={props.note.user?.nip05}
-            >
-              {nip05Verification(props.note.user)}
-            </span>
-          </Show>
         </div>
       </div>
 

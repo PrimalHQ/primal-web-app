@@ -16,6 +16,8 @@ const SearchOption: Component<{
   statNumber?: number,
   statLabel?: string,
   underline?: boolean,
+  darkTitle?: boolean,
+  narrow?: boolean,
   onClick?: (e?: MouseEvent) => void,
   highlighted?: boolean,
   id?: string,
@@ -24,7 +26,8 @@ const SearchOption: Component<{
   const Content: Component<{ children: JSXElement }> = (prp) => {
     const klass = () => `${styles.userResult}
       ${props.underline ? styles.underline : ''}
-      ${props.highlighted ? styles.highlight : ''}`;
+      ${props.highlighted ? styles.highlight : ''}
+      ${props.narrow ? styles.narrow : ''}`;
 
     return (
       <Show
@@ -58,12 +61,12 @@ const SearchOption: Component<{
         {props.icon}
       </div>
       <div class={styles.userInfo}>
-        <div class={styles.userName}>
+        <div class={`${styles.userName} ${props.darkTitle ? styles.darkTitle : ''}`}>
           {props.title}
         </div>
         <Show when={props.description && props.description.length > 0}>
           <div class={styles.verification} title={props.description}>
-            {truncateName(props.description || '')}
+            {props.description || ''}
           </div>
         </Show>
       </div>
