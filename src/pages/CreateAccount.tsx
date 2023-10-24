@@ -407,12 +407,10 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
   const onFollow = (pubkey: string) => {
     setFollowed(followed.length, () => pubkey);
-    console.log('FOL: ', followed);
   }
 
   const onUnfollow = (pubkey: string) => {
     const follows = followed.filter(f => f !== pubkey);
-    console.log('UNFOL: ', follows);
     setFollowed(() => [...follows]);
   }
 
@@ -430,12 +428,12 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           <Switch>
             <Match when={currentStep() === 'name'}>
               <div class={styles.stepIntro}>
-                Let’s start with the basics. Only the username is required!
+                {intl.formatMessage(tAccount.create.descriptions.step_one)}
               </div>
             </Match>
             <Match when={currentStep() === 'info'}>
               <div class={styles.stepIntro}>
-                Tell us a bit more about yourself. Everything on this page is optional!
+                {intl.formatMessage(tAccount.create.descriptions.step_two)}
               </div>
             </Match>
           </Switch>
@@ -639,7 +637,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
         <div class={currentStep() === 'follow' ? '' : 'invisible'}>
           <div class={styles.stepIntro}>
-            We found some Nostr accounts for you to follow:
+            {intl.formatMessage(tAccount.create.descriptions.step_three)}
           </div>
           <div class={styles.suggestions}>
             <For each={suggestedData.groupNames}>

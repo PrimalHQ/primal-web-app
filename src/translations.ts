@@ -47,11 +47,20 @@ export const account = {
     },
     descriptions: {
       step_one: {
-        id: 'settings.account.descriptions.step_on',
+        id: 'settings.account.descriptions.step_one',
         defaultMessage: "Let’s start with the basics. Only the username is required!",
         description: 'Description on step one',
       },
-
+      step_two: {
+        id: 'settings.account.descriptions.step_two',
+        defaultMessage: "Tell us a bit more about yourself. Everything on this page is optional!",
+        description: 'Description on step two',
+      },
+      step_three: {
+        id: 'settings.account.descriptions.step_three',
+        defaultMessage: "We found some Nostr accounts for you to follow:",
+        description: 'Description on step three',
+      },
     }
   },
 };
