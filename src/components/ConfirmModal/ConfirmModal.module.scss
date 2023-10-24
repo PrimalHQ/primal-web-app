@@ -4,10 +4,7 @@
   position: fixed;
   width: 420px;
   color: var(--text-secondary);
-  background-color: var(--background-site);
-  background: linear-gradient(var(--background-site),
-    var(--background-site)) padding-box,
-    var(--brand-gradient) border-box;
+  background-color: var(--background-input);
   border: 1px solid transparent;
   border-radius: 6px;
 
@@ -35,6 +32,10 @@
   .feedConfirmationActions {
     display: flex;
     justify-content: space-between;
+
+    >button {
+      min-width: 178px;
+    }
 
     .feedRestoreConfirm {
       background: var(--brand-gradient-vertical);

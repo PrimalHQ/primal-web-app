@@ -17,7 +17,6 @@ import Search from '../components/Search/Search';
 import PageCaption from '../components/PageCaption/PageCaption';
 import { titleCase } from '../utils';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
-import { setShowNav } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 
 
@@ -61,14 +60,6 @@ const Explore: Component = () => {
       ));
     };
 
-    createEffect(() => {
-      setShowNav(hasParams());
-    });
-
-    onCleanup(() => {
-      setShowNav(false);
-    });
-
     return (
       <>
         <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
@@ -81,24 +72,30 @@ const Explore: Component = () => {
 
         <Show
           when={hasParams()}
-          fallback={<PageCaption title={intl.formatMessage(tExplore.genericCaption)} />}
+          fallback={<PageCaption
+            title={intl.formatMessage(tExplore.genericCaption)}
+          />}
         >
-          <PageCaption>
-            <div class={styles.exploreCaption}>
-              {intl.formatMessage(
-                tExplore.title,
-                {
-                  timeframe: timeframeLabels[params.timeframe],
-                  scope: scopeLabels[params.scope],
-                },
-              )}
+          <PageCaption extended={true}>
+            <div class={styles.exploreHeader}>
+              <div class={styles.exploreCaption}>
+                {intl.formatMessage(
+                  tExplore.title,
+                  {
+                    timeframe: timeframeLabels[params.timeframe],
+                    scope: scopeLabels[params.scope],
+                  },
+                )}
+              </div>
+              <div class={styles.addToFeed}>
+                <AddToHomeFeedButton
+                  disabled={hasFeedAtHome()}
+                  onAdd={addToHomeFeed}
+                  activeLabel={intl.formatMessage(tAction.addFeedToHome)}
+                  disabledLabel={intl.formatMessage(tAction.disabledAddFeedToHome)}
+                />
+              </div>
             </div>
-            <AddToHomeFeedButton
-              disabled={hasFeedAtHome()}
-              onAdd={addToHomeFeed}
-              activeLabel={intl.formatMessage(tAction.addFeedToHome)}
-              disabledLabel={intl.formatMessage(tAction.disabledAddFeedToHome)}
-            />
           </PageCaption>
 
         </Show>

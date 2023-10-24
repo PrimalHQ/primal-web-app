@@ -1,12 +1,14 @@
 .exploreMenuItem {
   display: flex;
-  width: 100%;
+  width: calc(100% - 2px);
   height: 100px;
   background-color: var(--background-card);
   justify-content: space-between;
-  padding-left: 24px;
-  margin-bottom: 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 0;
+
+  border-bottom: 1px solid var(--devider);
+
 
   .itemInfo {
     display: flex;
@@ -25,16 +27,16 @@
 
         .itemCaption {
           font-size: 18px;
+          font-weight: 600;
           line-height: 24px;
-          font-weight: 700;
           color: var(--text-primary);
           margin-right: 12px;
         }
 
         .itemStat {
           font-size: 24px;
+          font-weight: 400;
           line-height: 28px;
-          font-weight: 300;
           color: var(--text-primary);
 
         }
@@ -44,8 +46,8 @@
 
         .itemDescription {
           font-size: 12px;
+          font-weight: 400;
           line-height: 16px;
-          font-weight: 300;
           color: var(--text-secondary);
         }
       }
@@ -60,7 +62,7 @@
 
     .option {
       width: 72px;
-      height: 92px;
+      height: 100%;
       border: none;
       margin: 4px;
       padding: 0px;
@@ -71,6 +73,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      border-radius: var(--border-radius-big);
       cursor: pointer;
 
       >div {
@@ -89,11 +92,9 @@
       &:hover {
         outline: none;
         text-decoration: none;
-        border: solid 1px var(--subtile-devider);
-        border-radius: 4px;
         background-color: var(--background-input);
         >div {
-          background: var(--highlight-gradient);
+          background: var(--accent);
         }
       }
     }

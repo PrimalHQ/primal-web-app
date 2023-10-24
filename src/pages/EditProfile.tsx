@@ -24,6 +24,8 @@ import { useNavigate } from '@solidjs/router';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import PageTitle from '../components/PageTitle/PageTitle';
+import ButtonPrimary from '../components/Buttons/ButtonPrimary';
+import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -344,7 +346,6 @@ const EditProfile: Component = () => {
             </label>
           </div>
 
-          <div class={styles.separator}></div>
 
           <div class={styles.uploadButton}>
             <input
@@ -483,22 +484,18 @@ const EditProfile: Component = () => {
         </div>
 
         <div class={styles.formSubmit}>
-          <button
+          <ButtonPrimary
             type='submit'
-            class={styles.primaryButton}
             disabled={!isNameValid()}
           >
             {intl.formatMessage(tActions.save)}
-          </button>
-          <button
+          </ButtonPrimary>
+          <ButtonSecondary
             type='button'
-            class={styles.secondaryButton}
             onClick={() => navigate('/profile')}
           >
-            <div>
-              <span>{intl.formatMessage(tActions.cancel)}</span>
-            </div>
-          </button>
+            {intl.formatMessage(tActions.cancel)}
+          </ButtonSecondary>
         </div>
       </form>
     </div>

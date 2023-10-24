@@ -15,7 +15,6 @@ import { useProfileContext } from '../../contexts/ProfileContext';
 import Branding from '../Branding/Branding';
 
 export const [isHome, setIsHome] = createSignal(false);
-export const [showNav, setShowNav] = createSignal(false);
 
 const Layout: Component = () => {
 
@@ -31,15 +30,17 @@ const Layout: Component = () => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-    if (!newNote || !newNoteTextArea) {
-      return;
-    }
-
     if (account?.showNewNoteForm) {
+      if (!newNote || !newNoteTextArea) {
+        return;
+      }
       newNote?.classList.add(styles.animatedShow);
       newNoteTextArea?.focus();
     }
     else {
+      if (!newNote || !newNoteTextArea) {
+        return;
+      }
       newNote?.classList.remove(styles.animatedShow);
       newNoteTextArea.value = '';
     }
@@ -51,7 +52,6 @@ const Layout: Component = () => {
 
   onMount(() => {
     window.addEventListener('resize', onResize);
-    console.log('OVERLAY: ', location)
   });
 
   onCleanup(() => {
@@ -100,7 +100,7 @@ const Layout: Component = () => {
         <div class={styles.leftColumn}>
           <div>
             <div id="branding_holder" class={styles.leftHeader}>
-              <Branding isHome={isHome()} showNav={showNav()} />
+              <Branding isHome={isHome()} />
             </div>
 
             <div class={styles.leftContent}>
@@ -120,15 +120,17 @@ const Layout: Component = () => {
 
 
         <div class={styles.centerColumn}>
-          <div class={styles.centerContent}>
-            <div id="new_note_input" class={styles.headerFloater}>
-              <NewNote onSuccess={onNewNotePosted}/>
-            </div>
+          <Show when={account?.isKeyLookupDone}>
+            <div class={styles.centerContent}>
+              <div id="new_note_input" class={styles.headerFloater}>
+                <NewNote onSuccess={onNewNotePosted}/>
+              </div>
 
-            <div>
-              <Outlet />
+              <div>
+                <Outlet />
+              </div>
             </div>
-          </div>
+          </Show>
         </div>
 
 

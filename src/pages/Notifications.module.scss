@@ -15,9 +15,9 @@
 
 .newContentNotification {
   position: fixed;
-  top: 42px;
-  left: calc(calc(100vw - 1240px) / 2 + 176px + 32px);
-  width: 640px;
+  top: 94px;
+  left: calc(calc(100vw - var(--full-site-w)) / 2 + var(--left-col-w));
+  width: 600px;
   z-index: 20;
   display: flex;
   justify-content: center;
@@ -28,15 +28,17 @@
     justify-content: center;
     width: auto;
     height: 40px;
-    background: var(--brand-gradient);
-    font-weight: 400;
+    color: var(--text-primary-button);
+    background: var(--accent);
     font-size: 14px;
+    font-weight: 400;
     line-height: 18px;
     border: none;
     border-radius: 20px;
     padding-block: 0;
-    padding-left: 2px;
+    padding-left: 4px;
     margin: 0;
+    text-transform: lowercase;
 
     .avatars {
       display: flex;
@@ -45,10 +47,10 @@
       .avatar {
         border: solid 2px var(--text-primary);
         border-radius: 50%;
-        width: 36px;
-        height: 36px;
+        width: 30px;
+        height: 30px;
         transition: margin-right 0.2s;
-        margin-right: -16px;
+        margin-right: -9px;
       }
     }
 

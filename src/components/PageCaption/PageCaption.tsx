@@ -1,13 +1,25 @@
-import { Component, JSXElement } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './PageCaption.module.scss';
 
-const PageCaption: Component<{ title?: string, children?: JSXElement, id?: string }> = (props) => {
+const PageCaption: Component<{
+  title?: string,
+  children?: JSXElement,
+  id?: string,
+  extended?: boolean,
+}> = (props) => {
   return (
-    <div id={props.id} class={styles.fullHeader}>
+    <div id={props.id} class={`${styles.fullHeader} ${props.extended ? styles.extended : ''}`}>
       <div class={styles.logo}></div>
-      {props.children || props.title || ''}
+      <div class={styles.title}>
+        <Show
+          when={props.children}
+          fallback={props.title}
+        >
+          {props.children}
+        </Show>
+      </div>
     </div>
   )
 }

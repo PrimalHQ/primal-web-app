@@ -28,6 +28,10 @@ export const sanitize = (html: string) => {
 
 export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
 
+export const getLinkPreview = (url: string) => {
+  return { ...linkPreviews[url] };
+};
+
 export const addLinkPreviews = async (url: string) => {
   if (linkPreviews[url]) {
     return { ...linkPreviews[url] };

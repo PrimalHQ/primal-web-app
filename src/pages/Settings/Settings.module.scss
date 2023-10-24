@@ -1,6 +1,5 @@
 .settingsContainer {
   background-color: var(--background-card);
-  padding-inline: 28px;
   min-height: 100vh;
   padding-bottom: 20px;
 }
@@ -12,7 +11,7 @@
   justify-content: left;
 
   >div {
-    font-weight: 300;
+    font-weight: 400;
     font-size: 32px;
     line-height: 34px;
     color: var(--brand-text);
@@ -20,19 +19,11 @@
   }
 }
 
-.comingSoon {
-  font-weight: 300;
-  font-size: 18px;
-  line-height: 34px;
-  color: var(--text-secondary);
-}
-
 .bigCaption {
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   line-height: 20px;
-  text-transform: uppercase;
   margin-bottom: 24px;
 }
 
@@ -58,6 +49,27 @@
   margin-top: 8px;
 }
 
+.settingsContent {
+  padding-inline: 20px;
+  padding-top: 28px;
+  border-top: 1px solid var(--devider);
+}
+
+.settingsContentFull {
+  padding-inline: 0px;
+  padding-block: 28px;
+  border-top: 1px solid var(--devider);
+}
+
+.settingsContentBorderless {
+  padding-inline: 20px;
+  padding-block: 28px;
+}
+
+.settingsContentPaddingOnly {
+  padding-inline: 20px;
+}
+
 .settingsAccountCaption {
   display: flex;
   justify-content: space-between;
@@ -73,7 +85,7 @@
   }
 
   .copy {
-    color: var(--accent-1);
+    color: var(--accent);
     background: none;
     font-size: 14px;
     font-weight: 500;
@@ -179,17 +191,17 @@
 .subpageLinks {
   display: flex;
   flex-direction: column;
-  margin-top: -14px;
+  border-top: 1px solid var(--devider);
+
   a {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
 
-    padding-top: 15px;
-    padding-bottom: 14px;
-    padding-right: 20px;
-    border-bottom: 1px solid var(--background-input);
+    padding-block: 16px;
+    padding-inline: 20px;
+    border-bottom: 1px solid var(--devider);
     width: 100%;
     color: var(--text-primary);
     font-size: 20px;
@@ -202,22 +214,24 @@
       justify-content: flex-start;
 
       .bubble {
-        text-align: center;
-        padding-top: 2px;
-        padding-inline: 4px;
-        margin-inline: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 18px;
         height: 18px;
-        border-radius: 8px;
+
+        margin-left: 2px;
+
+        font-family: 'Roboto Condensed';
         font-weight: 500;
         font-size: 12px;
-        line-height: 12px;
+        line-height: 11px;
 
-        background: var(--brand-gradient);
+        background: var(--accent);
         border: 1px solid var(--background-site);
+        border-radius: 9px;
 
-        color: white;
-        text-shadow: 0.5px 0.5px 0px black;
+        color: var(--text-primary-button);
       }
     }
 
@@ -230,6 +244,7 @@
     }
 
     &:hover {
+      background-color: var(--background-input);
       .chevron {
         background-color: var(--text-primary);
       }
@@ -254,13 +269,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-block: 12px;
+  padding: 12px;
   border-bottom: 1px solid var(--background-input);
   .userInfo {
     display: flex;
     align-items: center;
     text-decoration: none;
     height: 36px;
+    max-width: 440px;
     .userName {
       display: flex;
       flex-direction: column;
@@ -268,38 +284,34 @@
       margin-left: 8px;
       .title {
         color: var(--text-primary);
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 700;
         line-height: 16px;
+        max-width: 440px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
       .verification {
         color: var(--text-tertiary-2);
         font-size: 14px;
         font-weight: 400;
         line-height: 14px;
+        max-width: 440px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
     }
   }
 
   button {
-    width: auto;
-    border-radius: 6px;
-    padding: 0px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 18px;
-    padding-block: 7px;
-    padding-inline: 12px;
-    margin: 0px;
+    padding-inline: 14px;
+    padding-block: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
     color: var(--text-primary);
-    background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
-                  var(--brand-gradient) border-box;
-    border: 1px solid transparent;
-
-    &:hover {
-      background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
-                    var(--brand-gradient) border-box;
-    }
   }
 }
 
@@ -388,9 +400,10 @@
   display: flex;
   justify-content: space-between;
   padding-block: 11px;
-  padding-inline: 0;
-  border-bottom: 1px solid var(--background-input);
+  padding-inline: 20px;
   border: none;
+  border-bottom: 1px solid var(--devider);
+  border-radius: 0;
   outline: none;
   margin: 0;
   background: none;
@@ -466,49 +479,36 @@
   }
 
   .remove, .add {
-    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
     border: none;
     outline: none;
     margin: 0;
     padding: 0;
-    color: var(--text-tertiary-2);
-    background: none;
+    height: 28px;
+    border-radius: 14px;
+    color: var(--text-secondary);
+    background-color: var(--background-input);
     font-size: 14px;
-    font-weight: 700;
-    line-height: 12px;
+    font-weight: 600;
+    line-height: 14px;
     transition: color 0s linear;
-
-    .removeIcon, .addIcon {
-      background-color: var(--text-tertiary-2);
-    }
   }
 
   &:hover {
-
+    background-color: var(--background-input);
     .relayEntry {
       color: var(--text-primary);
 
-      .webIcon, .addIcon {
+      .webIcon {
         background-color: var(--text-primary);
       }
     }
 
-    .remove {
-      color: #E20505;
-      transition: color 0s linear;
-
-      .closeIcon {
-        background-color: #E20505;
-      }
-    }
-
-    .add {
-      color: #66E205;
-      transition: color 0s linear;
-
-      .addIcon {
-        background-color: #66E205;
-      }
+    .remove, .add {
+      background-color: var(--subtile-devider);
     }
   }
 
@@ -519,18 +519,19 @@
 
   .webIcon {
     position: absolute;
-    top: 11px;
+    top: 8px;
     left: 4px;
   }
 
   input {
     font-size: 16px;
-    font-weight: 400;
+    font-style: normal;
+    font-weight: 600;
     line-height: 20px;
     padding-inline: 40px;
-    height: 40px;
-    border: 1px solid var(--subtile-devider);
-    border-radius: 8px;
+    height: 36px;
+    border: none;
+    border-radius: 18px;
     color: var(--text-secondary);
     margin-bottom: 0;
     background-color: var(--background-input);
@@ -560,9 +561,9 @@
   button {
     position: absolute;
     top: 0px;
-    right: 0px;
-    width: 40px;
-    height: 40px;
+    right: 4px;
+    width: 36px;
+    height: 36px;
     background: none;
     margin: 0;
     padding: 0;
@@ -597,6 +598,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-left: 20px;
 
   .title {
     color: var(--text-secondary);
@@ -663,6 +665,7 @@
 
       &:first-child {
         width: 222px;
+        padding: 20px;
       }
     }
 
@@ -679,6 +682,7 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
+    padding: 20px;
 
     &:first-child {
       border-top: 1px solid var(--background-input);
@@ -807,7 +811,7 @@
           .verification {
             color: var(--text-tertiary);
             font-size: 12px;
-            font-weight: 300;
+            font-weight: 400;
             line-height: 12px;
             margin-left: 8px;
           }
@@ -818,7 +822,7 @@
           align-items: center;
           color: var(--text-secondary);
           font-size: 10px;
-          font-weight: 300;
+          font-weight: 400;
           line-height: 12px;
           height: 18px;
         }
@@ -886,24 +890,29 @@
   }
 
   input {
-    font-size: 14px;
-    font-weight: 400;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
     line-height: 20px;
     padding-inline: 40px;
-    height: 40px;
-    border: 1px solid var(--subtile-devider);
-    border-radius: 8px;
+    height: 36px;
+    border: none;
+    border-radius: 18px;
     color: var(--text-secondary);
     margin-bottom: 0;
     background-color: var(--background-input);
 
     &.noIcon {
-      padding-left: 8px;
+      padding-inline: 16px;
     }
 
     &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
       color: var(--text-tertiary-2);
       opacity: 1; /* Firefox */
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 20px;
     }
 
     &:-ms-input-placeholder { /* Internet Explorer 10-11 */
@@ -922,9 +931,9 @@
   button {
     position: absolute;
     top: 0px;
-    right: 0px;
-    width: 40px;
-    height: 40px;
+    right: 6px;
+    width: 36px;
+    height: 36px;
     background: none;
     margin: 0;
     padding: 0;
@@ -936,9 +945,13 @@
     justify-content: center;
     align-items: center;
 
+    >div {
+      background-color: var(--text-tertiary-2);
+    }
+
     &:hover {
-      .connectIcon {
-        background-color: var(--text-primary);
+      >div {
+        background-color: var(--text-secondary);
       }
     }
   }

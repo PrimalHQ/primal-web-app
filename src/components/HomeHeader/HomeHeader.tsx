@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
@@ -8,24 +8,34 @@ import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { placeholders as t, actions as tActions } from '../../translations';
+import { placeholders as t, actions as tActions, feedNewPosts } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import CreateAccountModal from '../CreateAccountModal/CreateAccountModal';
 import LoginModal from '../LoginModal/LoginModal';
+import { userName } from '../../stores/profile';
+import { PrimalUser } from '../../types/primal';
 
-const HomeHeader: Component< { id?: string} > = (props) => {
+const HomeHeader: Component< {
+  id?: string,
+  hasNewPosts: () => boolean,
+  loadNewContent: () => void,
+  newPostCount: () => number,
+  newPostAuthors: PrimalUser[],
+} > = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
   const settings = useSettingsContext();
   const intl = useIntl();
 
+  let smallHeader: HTMLDivElement | undefined;
+
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
   const onScroll = () => {
     const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-    const smallHeader = document.getElementById('small_header');
+    // const smallHeader = document.getElementById('small_header');
     const border = document.getElementById('small_bottom_border');
 
     home?.actions.updateScrollTop(scrollTop);
@@ -33,16 +43,17 @@ const HomeHeader: Component< { id?: string} > = (props) => {
     const isScrollingDown = scrollTop > lastScrollTop;
     lastScrollTop = scrollTop;
 
-    if (scrollTop < 117) {
+    if (scrollTop < 2) {
       if (border) {
         border.style.display = 'none';
       }
+      smallHeader?.classList.add(styles.instaHide);
       smallHeader?.classList.remove(styles.hiddenSelector);
       smallHeader?.classList.remove(styles.fixedSelector);
       return;
     }
 
-    if (lastScrollTop < 117) {
+    if (lastScrollTop < 2) {
       smallHeader?.classList.add(styles.instaHide);
       return;
     }
@@ -96,18 +107,41 @@ const HomeHeader: Component< { id?: string} > = (props) => {
         <button class={styles.callToAction} onClick={onShowNewNoteinput}>
           <Avatar
             user={activeUser()}
-            size="lg"
+            size="vs"
           />
 
-          <div class={styles.border}>
-            <div class={styles.input}>
-              {intl.formatMessage(t.noteCallToAction)}
-            </div>
+          <div class={styles.input}>
+            {intl.formatMessage(t.noteCallToAction)}
           </div>
         </button>
       </Show>
+      <div class={styles.bigFeedSelect}>
+        <Show
+          when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}
+        >
+          <FeedSelect />
+        </Show>
 
-      <div id="small_header" class={styles.smallHeader}>
+        <Show
+          when={props.hasNewPosts()}
+        >
+          <button
+            class={styles.newContentItem}
+            onClick={props.loadNewContent}
+          >
+            <div class={styles.counter}>
+              {intl.formatMessage(
+                feedNewPosts,
+                {
+                  number: props.newPostCount() >= 99 ? 99 : props.newPostCount(),
+                },
+              )}
+            </div>
+          </button>
+        </Show>
+      </div>
+
+      <div class={`${styles.smallHeader} ${styles.instaHide}`} ref={smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
             when={account?.hasPublicKey()}
@@ -136,6 +170,38 @@ const HomeHeader: Component< { id?: string} > = (props) => {
           <div class={styles.leftCorner}></div>
           <div class={styles.rightCorner}></div>
         </div>
+
+
+      <Show when={
+        props.hasNewPosts() && !account?.showNewNoteForm
+      }>
+        <div class={styles.newContentNotification}>
+          <button
+            onClick={props.loadNewContent}
+          >
+            <div class={styles.avatars}>
+              <For each={props.newPostAuthors}>
+                {(user) => (
+                  <div
+                    class={styles.avatar}
+                    title={userName(user)}
+                  >
+                    <Avatar user={user} size="xss" />
+                  </div>
+                )}
+              </For>
+            </div>
+            <div class={styles.counter}>
+              {intl.formatMessage(
+                feedNewPosts,
+                {
+                  number: props.newPostCount(),
+                },
+              )}
+            </div>
+          </button>
+        </div>
+      </Show>
       </div>
     </div>
   );

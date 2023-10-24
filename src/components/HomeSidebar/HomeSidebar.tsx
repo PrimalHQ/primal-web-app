@@ -1,15 +1,16 @@
-import { Component, createEffect, createSignal, For, onCleanup } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { getMostZapped4h, getTrending24h } from '../../lib/feed';
 import { humanizeNumber } from '../../lib/stats';
-import { convertToNotes, sortingPlan } from '../../stores/note';
+import { convertToNotes, sortByRecency, sortingPlan } from '../../stores/note';
 import { Kind } from '../../constants';
 import {
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
-  socket
+  socket,
+  subscribeTo
 } from '../../sockets';
 import {
   FeedPage,
@@ -17,7 +18,13 @@ import {
   NostrEvent,
   NostrEventContent,
   NostrMentionContent,
-  PrimalNote
+  NostrNoteActionsContent,
+  NostrNoteContent,
+  NostrStatsContent,
+  NostrUserContent,
+  NoteActions,
+  PrimalNote,
+  SelectionOption
 } from '../../types/primal';
 
 import styles from './HomeSidebar.module.scss';
@@ -28,174 +35,211 @@ import { hourNarrow } from '../../formats';
 import { home as t } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
+import SelectionBox from '../SelectionBox/SelectionBox';
+import { getScoredUsers, searchContent } from '../../lib/search';
+import { store } from '../../services/StoreService';
+import Loader from '../Loader/Loader';
+import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/localStore';
 
-const [init, setInit] = createSignal(false);
+const sidebarOptions = [
+  {
+    label: 'Trending 24h',
+    value: 'trending_24h',
+  },
+  {
+    label: 'Trending 12h',
+    value: 'trending_12h',
+  },
+  {
+    label: 'Trending 4h',
+    value: 'trending_4h',
+  },
+  {
+    label: 'Trending 1h',
+    value: 'trending_1h',
+  },
+  {
+    label: '',
+    value: '',
+    disabled: true,
+    separator: true,
+  },
 
-const [data, setData] = createStore<Record<string, FeedPage & { notes: PrimalNote[] }>>({
-  trending: {
-    messages: [],
-    users: {},
-    postStats: {},
-    notes: [],
-    mentions: {},
+  {
+    label: 'Most-zapped 24h',
+    value: 'mostzapped_24h',
   },
-  mostzapped: {
-    messages: [],
-    users: {},
-    postStats: {},
-    notes: [],
-    mentions: {},
+  {
+    label: 'Most-zapped 12h',
+    value: 'mostzapped_12h',
   },
-});
+  {
+    label: 'Most-zapped 4h',
+    value: 'mostzapped_4h',
+  },
+  {
+    label: 'Most-zapped 1h',
+    value: 'mostzapped_1h',
+  },
+];
 
 const HomeSidebar: Component< { id?: string } > = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
 
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
+  const [searchResults, setSearchResults] = createStore<{ notes: PrimalNote[], page: FeedPage, isFetching: boolean, query: SelectionOption | undefined }>({
+    notes: [],
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    },
+    isFetching: false,
+    query: undefined,
   });
 
+  const saveNotes = (newNotes: PrimalNote[]) => {
+    setSearchResults('notes', () => [ ...newNotes.slice(0, 24) ]);
+    setSearchResults('isFetching', () => false);
+  };
 
-	createEffect(() => {
-    if (isConnected() && !init()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
+  const updatePage = (content: NostrEventContent) => {
+    if (content.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      setSearchResults('page', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
       );
-
-      setData(() => ({
-        trending: {
-          messages: [],
-          users: {},
-          postStats: {},
-          notes: [],
-          mentions: {},
-        },
-        mostzapped: {
-          messages: [],
-          users: {},
-          postStats: {},
-          notes: [],
-          mentions: {},
-        },
-      }));
-
-      if (account?.isKeyLookupDone) {
-        getTrending24h(account?.publicKey, `sidebar_trending_${APP_ID}`);
-        getMostZapped4h(account?.publicKey, `sidebar_zapped_${APP_ID}`);
-      }
-		}
-	});
-
-  const processNotes = (type: string, key: string, content: NostrEventContent | undefined) => {
-
-    const sort = sortingPlan(key);
-
-    if (type === 'EOSE') {
-      const newPosts = sort(convertToNotes({
-        users: data[key].users,
-        messages: data[key].messages,
-        postStats: data[key].postStats,
-        mentions: data[key].mentions,
-      }));
-
-      setData(key, 'notes', () => [ ...newPosts ]);
-
-      setInit(true);
       return;
     }
 
-    if (type === 'EVENT') {
-      if (content && content.kind === Kind.Metadata) {
-        setData(key, 'users', (users) => ({ ...users, [content.pubkey]: content}))
-      }
-      if (content && (content.kind === Kind.Text || content.kind === Kind.Repost)) {
-        setData(key, 'messages',  (msgs) => [ ...msgs, content]);
-      }
-      if (content && content.kind === Kind.NoteStats) {
-        const stat = JSON.parse(content.content);
-        setData(key, 'postStats', (stats) => ({ ...stats, [stat.event_id]: stat }))
-      }
-      if (content && content.kind === Kind.Mentions) {
-        const mentionContent = content as NostrMentionContent;
-        const mention = JSON.parse(mentionContent.content);
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+      const message = content as NostrNoteContent;
 
-        setData(key, 'mentions',
-          (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-        );
+      if (searchResults.page.messages.find(m => m.id === message.id)) {
         return;
       }
-    }
-  };
 
-// SOCKET HANDLERS ------------------------------
+      setSearchResults('page', 'messages',
+        (msgs) => [ ...msgs, { ...message }]
+      );
 
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    webSocket.removeEventListener('message', onMessage);
-    webSocket.removeEventListener('close', onSocketClose);
-  };
-
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    const [type, subId, content] = message;
-
-    if (subId === `sidebar_trending_${APP_ID}`) {
-      processNotes(type, 'trending', content);
       return;
     }
-    if (subId === `sidebar_zapped_${APP_ID}`) {
-      processNotes(type, 'mostzapped', content);
+
+    if (content.kind === Kind.NoteStats) {
+      const statistic = content as NostrStatsContent;
+      const stat = JSON.parse(statistic.content);
+
+      setSearchResults('page', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      setSearchResults('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      setSearchResults('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
       return;
     }
   };
+
+  const savePage = (page: FeedPage) => {
+    const newPosts = convertToNotes(page);
+
+    saveNotes(newPosts);
+  };
+
+  const doSearch = (query: string) => {
+    const subid = `home_sidebar_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, (type, _, content) => {
+
+      if (type === 'EOSE') {
+        savePage(searchResults.page);
+        unsub();
+        return;
+      }
+
+      if (!content) {
+        return;
+      }
+
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
+
+    });
+
+    setSearchResults('isFetching', () => true);
+    setSearchResults('notes', () => []);
+    setSearchResults('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+
+    getScoredUsers(account?.publicKey, query, 10, subid);
+  }
+
+  createEffect(() => {
+    const query = searchResults.query?.value;
+    query && doSearch(query);
+  });
+
+  createEffect(() => {
+    if (account?.isKeyLookupDone) {
+      const stored = readHomeSidebarSelection(account.publicKey);
+
+      if (stored) {
+        setSearchResults('query', () => ({...stored}));
+        return;
+      }
+      setSearchResults('query', () => ({ ...sidebarOptions[0]}));
+    }
+  });
 
   return (
     <div id={props.id}>
+    <Show when={account?.isKeyLookupDone}>
       <div class={styles.headingTrending}>
-        <div>
-          <div class={styles.flameIcon}></div>
-          {intl.formatMessage(t.trending)}
-          <span>
-            {intl.formatNumber(24, hourNarrow)}
-          </span>
-        </div>
+        <SelectionBox
+          options={sidebarOptions}
+          value={searchResults.query}
+          onChange={(option: SelectionOption) => {
+            setSearchResults('query', () => ({...option}));
+            saveHomeSidebarSelection(account?.publicKey, option)
+          }}
+        />
       </div>
 
-      <For each={data.trending.notes}>
-        {(note) => <SmallNote note={note} />}
-      </For>
-
-      <div class={styles.headingZapped}>
-        <div>
-          <div class={styles.zapIcon}></div>
-          {intl.formatMessage(t.mostZapped)}
-          <span>
-            {intl.formatNumber(4, hourNarrow)}
-          </span>
-        </div>
-      </div>
-      <For each={data.mostzapped.notes}>
-        {
-          (note) =>
-            <SmallNote
-              note={note}
-            >
-            {intl.formatMessage(t.zapPostfix,
-            {
-              zaps: humanizeNumber(note.post.zaps, true),
-              sats: humanizeNumber(note.post.satszapped, true),
-            })}
-            </SmallNote>
+      <Show
+        when={!searchResults.isFetching}
+        fallback={
+          <Loader />
         }
-      </For>
+      >
+        <For each={searchResults.notes}>
+          {(note) => <SmallNote note={note} />}
+        </For>
+      </Show>
+
+    </Show>
     </div>
   );
 }

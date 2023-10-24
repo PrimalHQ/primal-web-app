@@ -1,22 +1,19 @@
 .customZap {
   position: fixed;
-  width: 420px;
-  height: 285px;
-  color: var(--text-secondary);
-  background-color: var(--background-site);
-  background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
-                var(--brand-gradient) border-box;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  width: 432px;
+  color: var(--text-primary);
+  background-color: var(--background-input);
+  border-radius: 8px;
 
   display: flex;
   flex-direction: column;
-  padding: 22px;
+  padding: 20px;
 
   .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin-bottom: 24px;
 
     .title {
       display: flex;
@@ -28,13 +25,13 @@
         font-size: 18px;
         line-height: 18px;
         color: var(--text-secondary);
-        text-transform: uppercase;
 
         .amount {
           color: var(--text-primary);
         }
 
         .units {
+          margin-left: 8px;
           font-weight: 800;
           font-size: 12px;
           line-height: 20px;
@@ -62,28 +59,71 @@
     }
   }
 
+  .description {
+    color: var(--text-secondary);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 24px;
+
+
+    .amount {
+      color: var(--text-primary);
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 24px;
+    }
+
+    .units {
+      margin-left: 4px;
+    }
+  }
+
   .options {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 120px 120px 120px;
     grid-column-gap: 12px;
-    grid-row-gap: 16px;
+    grid-row-gap: 12px;
     margin-top: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--subtile-devider);
 
     .zapOption {
-      height: 40px;
-      border-radius: 20px;
+      width: 120px;
+      height: 36px;
+      border-radius: 18px;
       border: none;
       outline: none;
       padding: 0;
+      padding-top: 4px;
+      padding-left: 16px;
       margin: 0;
       box-shadow: none;
-      background-color: var(--background-input);
+      background-color: var(--background-header-input);
       color: var(--text-primary);
-      text-transform: uppercase;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 20px;
+
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+
+      .sats {
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 20px;
+      }
 
       &.selected, &:hover {
         background-color: var(--text-primary);
         color: var(--background-site);
+
+        .sats {
+          color: var(--text-tertiary-2);
+        }
       }
 
     }
@@ -96,12 +136,10 @@
     border-radius: 6px;
     background-color: var(--background-site);
     color: var(--text-secondary);
-    padding-block: 6px;
     padding-inline: 13px;
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
-    margin-top: 16px;
 
     &::placeholder {
       color: var(--subtile-devider);
@@ -113,19 +151,10 @@
   }
 
   .action {
-    width: 100%;
-    height: 32px;
-    background: var(--brand-gradient-vertical);
-    border: none;
-    outline: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-    .caption {
-      font-weight: 700;
-      font-size: 14px;
-      line-height: 20px;
-      color: white;
+    margin-top: 24px;
+    >button {
+      width: 100%;
+      height: 38px;
     }
   }
 

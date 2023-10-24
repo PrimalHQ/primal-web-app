@@ -3,6 +3,9 @@
   padding: 0;
   border: none;
   background-color: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   opacity: 0.7;
   transition: opacity 0.4s;
@@ -20,11 +23,11 @@
 .feedItem {
   width: 100%;
   height: 40px;
-  background-color: var(--background-site);
-  color: var(--text-tertiary);
-  font-size: 16px;
-  line-height: 14px;
+  background-color: var(--background-sheet);
+  color: var(--active-reply);
+  font-size: 14px;
   font-weight: 400;
+  line-height: 12px;
   padding-inline: 12px;
   margin-block: 8px;
 
@@ -33,6 +36,10 @@
   align-items: center;
   justify-content: flex-start;
   cursor: grab;
+
+  &:hover, &:focus {
+    background-color: var(--background-input);
+  }
 
   .sortControls {
     margin-right: 5px;
@@ -85,26 +92,30 @@
     width: 100%;
     .feedNameInput {
       height: 32px;
-      background-color: var(--background-site);
+      background-color: var(--background-header-input);
       color: var(--text-tertiary);
       font-size: 16px;
       line-height: 14px;
       font-weight: 400;
       margin: 0;
+      border: none;
+      box-shadow: none;
+      outline: none;
+      border-radius: 16px;
     }
     .feedEditControl {
       position: absolute;
       top: 2px;
-      right: 0;
-      height: 32px;
+      right: 4px;
+      height: 28px;
       display: flex;
       justify-content: flex-end;
       align-items: center;
 
       >button {
         @include controlButton();
-        width: 32px;
-        height: 32px;
+        width: 20px;
+        height: 28px;
       }
     }
 
@@ -122,8 +133,8 @@
 }
 
 .closeIcon {
-  width: 20px;
-  height: 20px;
+  width: 10px;
+  height: 10px;
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
@@ -132,8 +143,8 @@
 }
 
 .checkIcon {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);

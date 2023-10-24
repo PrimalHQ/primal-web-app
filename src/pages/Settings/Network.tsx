@@ -23,6 +23,7 @@ import { interpretBold } from '../../translationHelpers';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import ButtonLink from '../../components/Buttons/ButtonLink';
 
 
 const Network: Component = () => {
@@ -180,17 +181,25 @@ const Network: Component = () => {
         <div>{intl.formatMessage(t.network.title)}</div>
       </PageCaption>
 
-      <div class={styles.bigCaption}>
-        {intl.formatMessage(t.network.relays)}
-      </div>
+      <div class={styles.settingsContent}>
+        <div class={styles.bigCaption}>
+          {intl.formatMessage(t.network.relays)}
+        </div>
 
-      <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.network.myRelays)}
+        <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.network.myRelays)}
+        </div>
       </div>
 
       <Show
         when={relays().length > 0}
-        fallback={<div class={styles.noMyRelays}>{intl.formatMessage(t.network.noMyRelays)}</div>}
+        fallback={
+          <div class={styles.settingsContentPaddingOnly}>
+            <div class={styles.noMyRelays}>
+              {intl.formatMessage(t.network.noMyRelays)}
+            </div>
+          </div>
+        }
       >
         <For each={relays()}>
           {relay => (
@@ -207,7 +216,9 @@ const Network: Component = () => {
                   {relay.url}
                 </span>
               </div>
-              <div class={styles.remove}><div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}</div>
+              <div class={styles.remove}>
+                {intl.formatMessage(tActions.removeRelay)}
+              </div>
             </button>
           )}
         </For>
@@ -238,102 +249,102 @@ const Network: Component = () => {
                   {url}
                 </span>
               </div>
-              <div class={styles.add}><div class={styles.addIcon}></div> {intl.formatMessage(tActions.addRelay)}</div>
+              <div class={styles.add}>{intl.formatMessage(tActions.addRelay)}</div>
             </button>
           )}
         </For>
 
       </Show>
 
-      <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-        {intl.formatMessage(t.network.customRelay)}
-      </div>
-
-      <div
-        class={styles.relayInput}
-      >
-        <div class={styles.webIcon}></div>
-        <input
-          ref={customRelayInput}
-          type="text"
-          placeholder={intl.formatMessage(tPlaceholders.relayUrl)}
-          onChange={() => onCustomRelayInput()}
-        />
-        <button onClick={() => onCustomRelayInput()}>
-          <div class={styles.connectIcon}></div>
-        </button>
-      </div>
-
-      <Show when={invalidCustomRelay()}>
-        <div class={styles.invalidInput}>
-          {intl.formatMessage(tErrors.invalidRelayUrl)}
+      <div class={styles.settingsContentBorderless}>
+        <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
+          {intl.formatMessage(t.network.customRelay)}
         </div>
-      </Show>
 
-      <div class={`${styles.bigCaption} ${styles.secondBigCaption}`}>
-        {intl.formatMessage(t.network.cachingService)}
-      </div>
-
-      <div class={styles.settingsCaption}>
-        <div>
-          {intl.formatMessage(t.network.connectedCachingService)}
-        </div>
-        <HelpTip>
-          <span>{intl.formatMessage(tPlaceholders.cachingPoolHelp)}</span>
-        </HelpTip>
-      </div>
-
-      <div class={styles.relayItem}>
-        <div class={styles.relayEntry}>
-          <Show
-            when={isSocketConnected()}
-            fallback={<div class={styles.disconnected}></div>}
-          >
-            <div class={styles.connected}></div>
-          </Show>
+        <div
+          class={styles.relayInput}
+        >
           <div class={styles.webIcon}></div>
-          <span>
-            {socket()?.url}
-          </span>
+          <input
+            ref={customRelayInput}
+            type="text"
+            placeholder={intl.formatMessage(tPlaceholders.relayUrl)}
+            onChange={() => onCustomRelayInput()}
+          />
+          <button onClick={() => onCustomRelayInput()}>
+            <div class={styles.connectIcon}></div>
+          </button>
         </div>
-      </div>
 
+        <Show when={invalidCustomRelay()}>
+          <div class={styles.invalidInput}>
+            {intl.formatMessage(tErrors.invalidRelayUrl)}
+          </div>
+        </Show>
 
-      <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-        {intl.formatMessage(t.network.alternativeCachingService)}
-      </div>
-
-      <div
-        class={styles.relayInput}
-      >
-        <div class={styles.webIcon}></div>
-        <input
-          ref={cachingServiceInput}
-          type="text"
-          placeholder={intl.formatMessage(tPlaceholders.cachingServiceUrl)}
-          onChange={() => onCachingServiceInput()}
-        />
-        <button onClick={() => onCachingServiceInput()}>
-          <div class={styles.connectIcon}></div>
-        </button>
-      </div>
-
-      <Show when={invalidCachingService()}>
-        <div class={styles.invalidInput}>
-          {intl.formatMessage(tErrors.invalidRelayUrl)}
+        <div class={`${styles.bigCaption} ${styles.secondBigCaption}`}>
+          {intl.formatMessage(t.network.cachingService)}
         </div>
-      </Show>
 
-      <div style="height: 20px"></div>
+        <div class={styles.settingsCaption}>
+          <div>
+            {intl.formatMessage(t.network.connectedCachingService)}
+          </div>
+          <HelpTip>
+            <span>{intl.formatMessage(tPlaceholders.cachingPoolHelp)}</span>
+          </HelpTip>
+        </div>
 
-      <button
-        class={styles.restoreFeedsButton}
-        onClick={() => account?.actions.changeCachingService()}
-      >
-        {intl.formatMessage(tActions.restoreCachingService)}
-      </button>
+        <div class={styles.relayItem}>
+          <div class={styles.relayEntry}>
+            <Show
+              when={isSocketConnected()}
+              fallback={<div class={styles.disconnected}></div>}
+            >
+              <div class={styles.connected}></div>
+            </Show>
+            <div class={styles.webIcon}></div>
+            <span>
+              {socket()?.url}
+            </span>
+          </div>
+        </div>
 
-      <div style="height: 48px"></div>
+        <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
+          {intl.formatMessage(t.network.alternativeCachingService)}
+        </div>
+
+        <div
+          class={styles.relayInput}
+        >
+          <div class={styles.webIcon}></div>
+          <input
+            ref={cachingServiceInput}
+            type="text"
+            placeholder={intl.formatMessage(tPlaceholders.cachingServiceUrl)}
+            onChange={() => onCachingServiceInput()}
+          />
+          <button onClick={() => onCachingServiceInput()}>
+            <div class={styles.connectIcon}></div>
+          </button>
+        </div>
+
+        <Show when={invalidCachingService()}>
+          <div class={styles.invalidInput}>
+            {intl.formatMessage(tErrors.invalidRelayUrl)}
+          </div>
+        </Show>
+
+        <div style="height: 20px"></div>
+
+        <ButtonLink
+          onClick={() => account?.actions.changeCachingService()}
+        >
+          {intl.formatMessage(tActions.restoreCachingService)}
+        </ButtonLink>
+
+        <div style="height: 48px"></div>
+      </div>
 
       <ConfirmModal
         open={confirmRemoveRelay().length > 0}

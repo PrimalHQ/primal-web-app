@@ -8,6 +8,7 @@
   height: 100%;
   overflow: hidden;
   overflow-y: scroll;
+  padding-left: 8px;
 
   &::-webkit-scrollbar{
     display: none;

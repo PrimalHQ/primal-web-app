@@ -13,18 +13,20 @@ const Notifications: Component = () => {
   const intl = useIntl();
 
   return (
-    <div>
+    <>
       <PageTitle title={`${intl.formatMessage(t.notifications.title)} ${intl.formatMessage(t.title)}`} />
-
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.notifications.title)}</div>
       </PageCaption>
+      <div class={styles.settingsContent}>
 
-      <div class={styles.notificationSettings}>
-        <SettingsNotifications />
+
+        <div class={styles.notificationSettings}>
+          <SettingsNotifications />
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

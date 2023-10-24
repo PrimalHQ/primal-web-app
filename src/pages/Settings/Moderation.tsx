@@ -179,23 +179,25 @@ const Moderation: Component = () => {
         <div>{intl.formatMessage(t.moderation.title)}</div>
       </PageCaption>
 
-      <div class={styles.settingsCaption}>
-        <Checkbox
-          id='applyFiltering'
-          label=""
-          onChange={() => {settings?.actions.setApplyContentModeration(!settings.applyContentModeration)}}
-          checked={settings?.applyContentModeration}
-        />
-        <span>{intl.formatMessage(t.moderation.applyFiltering)}</span>
-        <HelpTip zIndex={1_000}>
-          <span>
-            {intl.formatMessage(t.moderation.description)}
-          </span>
-        </HelpTip>
-      </div>
+      <div class={styles.settingsContent}>
+        <div class={styles.settingsCaption}>
+          <Checkbox
+            id='applyFiltering'
+            label=""
+            onChange={() => {settings?.actions.setApplyContentModeration(!settings.applyContentModeration)}}
+            checked={settings?.applyContentModeration}
+          />
+          <span>{intl.formatMessage(t.moderation.applyFiltering)}</span>
+          <HelpTip zIndex={1_000}>
+            <span>
+              {intl.formatMessage(t.moderation.description)}
+            </span>
+          </HelpTip>
+        </div>
 
-      <div class={styles.moderationDescription}>
-        {intl.formatMessage(t.moderation.shortDescription)}
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.moderation.shortDescription)}
+        </div>
       </div>
 
       <div class={styles.filterListTable}>
@@ -336,152 +338,152 @@ const Moderation: Component = () => {
         </div>
       </div>
 
-
-      <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.moderation.searchFilteredAccount)}
-      </div>
-
-      <div class={styles.moderationDescription}>
-        {intl.formatMessage(t.moderation.searchForFiltered)}
-      </div>
-
-      <div class={styles.searchFilteredAccount}>
-        <div
-          class={styles.npubInput}
-        >
-          <input
-            ref={searchFilteredAccount}
-            type="text"
-            placeholder={intl.formatMessage(tPlaceholders.searchByNpub)}
-            class={styles.noIcon}
-            onChange={() => onSearchFilteredAccount()}
-          />
-          <button onClick={() => onSearchFilteredAccount()}>
-            <div class={styles.searchIcon}></div>
-          </button>
+      <div class={styles.settingsContentBorderless}>
+        <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.moderation.searchFilteredAccount)}
         </div>
-      </div>
 
-      <Show when={isSearching()}>
-        <Show when={reasons().length > 0}>
-          <div class={styles.fiterSearchCaption}>
-            This npub is included in:
-          </div>
-        </Show>
-        <div class={styles.filterListTable}>
-          <For each={reasons()}
-            fallback={
-              <div class={styles.fiterSearchCaption}>
-                This npub is not included in any of your filter lists.
-              </div>
-            }
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.moderation.searchForFiltered)}
+        </div>
+
+        <div class={styles.searchFilteredAccount}>
+          <div
+            class={styles.npubInput}
           >
-            {reason => (
-              <Show
-                when={specialAlgos.includes(reason)}
-                fallback={(
+            <input
+              ref={searchFilteredAccount}
+              type="text"
+              placeholder={intl.formatMessage(tPlaceholders.searchByNpub)}
+              class={styles.noIcon}
+              onChange={() => onSearchFilteredAccount()}
+            />
+            <button onClick={() => onSearchFilteredAccount()}>
+              <div class={styles.searchIcon}></div>
+            </button>
+          </div>
+        </div>
+
+        <Show when={isSearching()}>
+          <Show when={reasons().length > 0}>
+            <div class={styles.fiterSearchCaption}>
+              This npub is included in:
+            </div>
+          </Show>
+          <div class={styles.filterListTable}>
+            <For each={reasons()}
+              fallback={
+                <div class={styles.fiterSearchCaption}>
+                  This npub is not included in any of your filter lists.
+                </div>
+              }
+            >
+              {reason => (
+                <Show
+                  when={specialAlgos.includes(reason)}
+                  fallback={(
+                    <div class={styles.filterListItem}>
+                      <div class={styles.filterListName} title={reason}>
+                        <A href={`/p/${users[reason || '']?.npub}`} class={styles.avatar}>
+                          <Avatar
+                            user={users[reason || '']}
+                            size='xs'
+                          />
+                        </A>
+                        <span>
+                          <Show when={reason !== account?.publicKey} fallback={intl.formatMessage(t.moderation.algos.my)}>
+                            {intl.formatMessage(t.moderation.moderationItem, { name: userName(users[reason || '']) })}
+                          </Show>
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                >
                   <div class={styles.filterListItem}>
                     <div class={styles.filterListName} title={reason}>
-                      <A href={`/p/${users[reason || '']?.npub}`} class={styles.avatar}>
-                        <Avatar
-                          user={users[reason || '']}
-                          size='xs'
-                        />
-                      </A>
-                      <span>
-                        <Show when={reason !== account?.publicKey} fallback={intl.formatMessage(t.moderation.algos.my)}>
-                          {intl.formatMessage(t.moderation.moderationItem, { name: userName(users[reason || '']) })}
-                        </Show>
-                      </span>
+                      <div class={styles.algoLogo}></div>
+                      {
+                        // @ts-ignore
+                        intl.formatMessage(t.moderation.algos[reason])
+                      }
                     </div>
                   </div>
-                )}
-              >
-                <div class={styles.filterListItem}>
-                  <div class={styles.filterListName} title={reason}>
-                    <div class={styles.algoLogo}></div>
-                    {
-                      // @ts-ignore
-                      intl.formatMessage(t.moderation.algos[reason])
-                    }
+                </Show>
+              )}
+            </For>
+          </div>
+        </Show>
+
+        <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.moderation.allowList)}
+        </div>
+
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.moderation.allowListsDescription)}
+        </div>
+
+        <div class={styles.searchFilteredAccount}>
+          <div
+            class={styles.npubInput}
+          >
+            <input
+              ref={allowlistInput}
+              type="text"
+              placeholder={intl.formatMessage(tPlaceholders.addNpub)}
+              class={styles.noIcon}
+              onChange={() => onAddToAllowlist()}
+            />
+            <button onClick={() => onAddToAllowlist()}>
+              <div class={styles.addIconBig}></div>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <For each={account?.allowlist}>
+            {pubkey => (
+              <button class={styles.allowlistItem} onClick={() => onRemoveFromAllowlist(pubkey)}>
+                <div class={styles.allowlistEntry}>
+                  <div class={styles.allowlistInfo} title={hexToNpub(pubkey)}>
+                    <div class={styles.avatar}>
+                      <Avatar
+                        user={users[pubkey || '']}
+                        size='xs'
+                      />
+                    </div>
+                    <div class={styles.allowlistUserInfo}>
+                      <div class={styles.firstLine}>
+                        <span>
+                          {userName(users[pubkey || ''])}
+                        </span>
+
+                        <VerificationCheck user={users[pubkey || '']} />
+
+                        <Show
+                          when={users[pubkey || '']?.nip05}
+                        >
+                          <span
+                            class={styles.verification}
+                            title={users[pubkey || '']?.nip05}
+                          >
+                            {nip05Verification(users[pubkey || ''])}
+                          </span>
+                        </Show>
+                      </div>
+                      <div class={styles.npub}>
+                        {hexToNpub(pubkey)}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Show>
+                <div class={styles.remove}>
+                  <div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}
+                </div>
+              </button>
             )}
           </For>
         </div>
-      </Show>
-
-      <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.moderation.allowList)}
       </div>
-
-      <div class={styles.moderationDescription}>
-        {intl.formatMessage(t.moderation.allowListsDescription)}
-      </div>
-
-      <div class={styles.searchFilteredAccount}>
-        <div
-          class={styles.npubInput}
-        >
-          <input
-            ref={allowlistInput}
-            type="text"
-            placeholder={intl.formatMessage(tPlaceholders.addNpub)}
-            class={styles.noIcon}
-            onChange={() => onAddToAllowlist()}
-          />
-          <button onClick={() => onAddToAllowlist()}>
-            <div class={styles.addIconBig}></div>
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <For each={account?.allowlist}>
-          {pubkey => (
-            <button class={styles.allowlistItem} onClick={() => onRemoveFromAllowlist(pubkey)}>
-              <div class={styles.allowlistEntry}>
-                <div class={styles.allowlistInfo} title={hexToNpub(pubkey)}>
-                  <div class={styles.avatar}>
-                    <Avatar
-                      user={users[pubkey || '']}
-                      size='xs'
-                    />
-                  </div>
-                  <div class={styles.allowlistUserInfo}>
-                    <div class={styles.firstLine}>
-                      <span>
-                        {userName(users[pubkey || ''])}
-                      </span>
-
-                      <VerificationCheck user={users[pubkey || '']} />
-
-                      <Show
-                        when={users[pubkey || '']?.nip05}
-                      >
-                        <span
-                          class={styles.verification}
-                          title={users[pubkey || '']?.nip05}
-                        >
-                          {nip05Verification(users[pubkey || ''])}
-                        </span>
-                      </Show>
-                    </div>
-                    <div class={styles.npub}>
-                      {hexToNpub(pubkey)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class={styles.remove}>
-                <div class={styles.closeIcon}></div> {intl.formatMessage(tActions.removeRelay)}
-              </div>
-            </button>
-          )}
-        </For>
-      </div>
-
 
     </div>);
 }

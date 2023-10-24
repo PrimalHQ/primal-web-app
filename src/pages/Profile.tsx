@@ -46,7 +46,9 @@ import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonCopy from '../components/Buttons/ButtonCopy';
 import ButtonProfile from '../components/Buttons/ButtonProfile';
-import ButtonFollow from '../components/Buttons/ButtonFollow';
+import ButtonFollow from '../components/Buttons/ButtonFlip';
+import ButtonSecondary from '../components/Buttons/ButtonSecondary';
+import Menu from '../components/Menu/Menu';
 
 const Profile: Component = () => {
 
@@ -337,8 +339,15 @@ const Profile: Component = () => {
         icon: 'mute_user',
       };
 
+    const separatorItem = {
+      action: () => {},
+      label: '',
+      separator: true,
+    }
+
     return [
       followMuteAction,
+      separatorItem,
       muteAction,
       {
         label: intl.formatMessage(tActions.profileContext.reportUser),
@@ -487,11 +496,12 @@ const Profile: Component = () => {
 
           <div class={styles.profileActions}>
             <div class={styles.contextArea}>
-              <ButtonProfile
+              <ButtonSecondary
                 onClick={openContextMenu}
+                shrink={true}
               >
                 <div class={styles.contextIcon}></div>
-              </ButtonProfile>
+              </ButtonSecondary>
               <PrimalMenu
                 id={'profile_context'}
                 items={profileContext()}
@@ -502,30 +512,34 @@ const Profile: Component = () => {
             </div>
 
             <Show when={!isCurrentUser()}>
-              <ButtonProfile
+              <ButtonSecondary
                 onClick={onNotImplemented}
+                shrink={true}
               >
                 <div class={styles.zapIcon}></div>
-              </ButtonProfile>
+              </ButtonSecondary>
             </Show>
 
             <Show when={account?.publicKey}>
-              <ButtonProfile
+              <ButtonSecondary
                 onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+                shrink={true}
               >
                 <div class={styles.messageIcon}></div>
-              </ButtonProfile>
+              </ButtonSecondary>
             </Show>
 
-            <ButtonFollow person={profile?.userProfile} />
+            <FollowButton person={profile?.userProfile} large={true} />
 
             <Show when={isCurrentUser()}>
-              <ButtonProfile
-                onClick={() => navigate('/settings/profile')}
-                title={intl.formatMessage(tActions.editProfile)}
-              >
-                <div>{intl.formatMessage(tActions.editProfile)}</div>
-              </ButtonProfile>
+              <div class={styles.editProfileButton}>
+                <ButtonSecondary
+                  onClick={() => navigate('/settings/profile')}
+                  title={intl.formatMessage(tActions.editProfile)}
+                >
+                  <div>{intl.formatMessage(tActions.editProfile)}</div>
+                </ButtonSecondary>
+              </div>
             </Show>
           </div>
 

@@ -1,65 +1,86 @@
-
-  @mixin followButton {
-    grid-area: follow;
-    display: flex;
-    button {
-      background: var(--brand-gradient-vertical);
-      border-radius: 6px;
-      padding: 0px;
-      font-size: 12px;
-      line-height: 16px;
-      font-weight: 700;
-      margin: 0px;
-    }
+.large {
+  button {
+    width: 100px;
+    text-transform: lowercase;
   }
+}
 
-  .primaryButton {
-    width: 90px;
-    height: 40px;
+.small {
+  max-width: 72px;
+
+  button {
+    max-width: 100%;
+    height: 28px;
+    padding-block: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 12px;
+    text-transform: lowercase;
   }
+}
 
-  .follow {
-    @include followButton;
-    button {
-      color: var(--text-primary);
-      background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
-                    var(--brand-gradient) border-box;
-      border: 1px solid transparent;
 
-      &:hover {
-        background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
-                      var(--brand-gradient) border-box;
-      }
-    }
-  }
+  // @mixin followButton {
+  //   grid-area: follow;
+  //   display: flex;
+  //   button {
+  //     background: var(--brand-gradient-vertical);
+  //     border-radius: 6px;
+  //     padding: 0px;
+  //     font-size: 12px;
+  //     line-height: 16px;
+  //     font-weight: 700;
+  //     margin: 0px;
+  //   }
+  // }
 
-  .unfollow {
-    @include followButton;
-    button {
-      color: var(--text-primary);
-      background: var(--background-card);
-      border: 1px solid var(--subtile-devider);
+  // .primaryButton {
+  //   width: 90px;
+  //   height: 40px;
+  // }
 
-      &:hover {
-        border: 1px solid var(--text-tertiary);
-      }
-    }
-  }
+  // .follow {
+  //   @include followButton;
+  //   button {
+  //     color: var(--text-primary);
+  //     background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+  //                   var(--brand-gradient) border-box;
+  //     border: 1px solid transparent;
 
-  .large {
-    button {
-      width: 90px;
-      height: 40px;
-      margin: 0px 8px;
-      font-size: 16px;
-      line-height: 20px;
-    }
+  //     &:hover {
+  //       background: linear-gradient(var(--background-site), var(--background-site)) padding-box,
+  //                     var(--brand-gradient) border-box;
+  //     }
+  //   }
+  // }
 
-  }
+  // .unfollow {
+  //   @include followButton;
+  //   button {
+  //     color: var(--text-primary);
+  //     background: var(--background-card);
+  //     border: 1px solid var(--subtile-devider);
 
-  .small {
-    button {
-      width: 64px;
-      height: 40px;
-    }
-  }
+  //     &:hover {
+  //       border: 1px solid var(--text-tertiary);
+  //     }
+  //   }
+  // }
+
+  // .large {
+  //   button {
+  //     width: 90px;
+  //     height: 40px;
+  //     margin: 0px 8px;
+  //     font-size: 16px;
+  //     line-height: 20px;
+  //   }
+
+  // }
+
+  // .small {
+  //   button {
+  //     width: 64px;
+  //     height: 40px;
+  //   }
+  // }

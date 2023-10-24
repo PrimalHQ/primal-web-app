@@ -29,22 +29,28 @@ const PrimalMenuItem: Component<{
   onMount(getIcon);
 
   return (
-    <button
-      id={props.id}
-      onClick={(e: MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        props.item.action();
-      }}
-      class={`${styles.contextOption} ${warningClass()}  ${reverseClass()}`}
+    <Show
+      when={!props.item.separator}
+      fallback={<div class={styles.separator}></div>}
     >
-      <span>
-        {props.item.label}
-      </span>
-      <Show when={icon()}>
-        <div style={`-webkit-mask: url(${icon()}) no-repeat 0 / 100%; mask: url(${icon()}) no-repeat 0 / 100%;`} />
-      </Show>
-    </button>
+      <button
+        id={props.id}
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          props.item.action();
+        }}
+        class={`${styles.contextOption} ${warningClass()}  ${reverseClass()}`}
+      >
+
+        <span>
+          {props.item.label}
+        </span>
+        <Show when={icon()}>
+          <div style={`-webkit-mask: url(${icon()}) no-repeat 0 / 100%; mask: url(${icon()}) no-repeat 0 / 100%;`} />
+        </Show>
+      </button>
+    </Show>
   )
 }
 

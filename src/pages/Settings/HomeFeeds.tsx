@@ -9,6 +9,7 @@ import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import ButtonLink from '../../components/Buttons/ButtonLink';
 
 const HomeFeeds: Component = () => {
 
@@ -31,28 +32,29 @@ const HomeFeeds: Component = () => {
         <div>{intl.formatMessage(t.homeFeeds.title)}</div>
       </PageCaption>
 
-      <div class={styles.feedCaption}>
-        <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.homeFeeds.caption)}
+      <div class={styles.settingsContent}>
+        <div class={styles.feedCaption}>
+          <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.homeFeeds.caption)}
+          </div>
+
+          <ButtonLink
+            onClick={() => setIsRestoringFeeds(true)}
+          >
+            {intl.formatMessage(t.feedsRestore)}
+          </ButtonLink>
+
+          <ConfirmModal
+            open={isRestoringFeeds()}
+            description={intl.formatMessage(t.feedsRestoreConfirm)}
+            onConfirm={onRestoreFeeds}
+            onAbort={() => setIsRestoringFeeds(false)}
+          ></ConfirmModal>
         </div>
 
-        <button
-          class={styles.restoreFeedsButton}
-          onClick={() => setIsRestoringFeeds(true)}
-        >
-          {intl.formatMessage(t.feedsRestore)}
-        </button>
-
-        <ConfirmModal
-          open={isRestoringFeeds()}
-          description={intl.formatMessage(t.feedsRestoreConfirm)}
-          onConfirm={onRestoreFeeds}
-          onAbort={() => setIsRestoringFeeds(false)}
-        ></ConfirmModal>
-      </div>
-
-      <div class={styles.feedSettings}>
-        <FeedSorter />
+        <div class={styles.feedSettings}>
+          <FeedSorter />
+        </div>
       </div>
     </div>
   )

@@ -1,35 +1,33 @@
 .container {
-  width: 1240px;
-  // height: 100vh;
+  width: var(--full-site-w);
   margin: 0px auto;
 
   display: grid;
-  grid-template-columns: 176px 640px 300px;
-  grid-column-gap: 32px;
+  grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
 }
 
 .leftColumn {
-
   >div {
     position: fixed;
-    width: 176px;
+    width: var(--left-col-w);
     display: grid;
-    grid-template-rows: 128px 1fr 82px;
+    grid-template-rows: var(--header-height) 1fr 82px;
     height: 100%;
   }
 
   .leftHeader {
-    height: 128px;
+    height: var(--header-height);
     display: grid;
     align-items: center;
-    justify-content: right;
+    justify-content: flex-start;
   }
 
   .leftContent {
     position: relative;
     display: grid;
     height: 100%;
-    justify-content: right;
+    padding-top: 30px;
+    justify-content: left;
 
     .overlay {
       position: absolute;
@@ -46,28 +44,28 @@
   .leftFooter {
     height: 82px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 
 
 .centerColumn {
-  display: grid;
-  grid-template-rows: 128px 1fr;
   position: relative;
+  border-inline: 1px solid var(--devider);
+  min-height: 100vh;
 }
 
 .centerHeader {
-  width: 640px;
+  width: 600px;
 }
 
 .centerContent {
-  width: 640px;
+  width: 600px;
   .headerFloater {
     position: fixed;
     opacity: 0;
     pointer-events: none;
-    width: 640px;
+    width: 600px;
     z-index: var(--z-index-floater);
 
     &.animatedShow {
@@ -80,23 +78,39 @@
 
 .rightColumn {
   display: grid;
-  width: 300px;
-  grid-template-rows: 128px 1fr;
+  width: var(--right-col-w);
+  grid-template-rows: var(--header-height) 1fr;
   grid-row-gap: 28px;
 }
 
 .rightHeader {
-  height: 128px;
+  width: var(--right-col-w);
+  height: var(--header-height);
   display: grid;
   align-items: center;
   justify-content: left;
   position: fixed;
   // background-color: var(--background-site);
   z-index: var(--z-index-header);
+
+  >div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: var(--header-height);
+    width: var(--right-col-w);
+
+    >div {
+      height: 52px;
+    }
+  }
 }
 
 .rightContent {
-  margin-top: 128px;
+  margin-top: 112px;
+  >div {
+    margin-left: 24px;
+  }
 }
 
 .modal {
@@ -115,13 +129,23 @@
 @media only screen and (max-width: 1300px) {
   .container {
     width: 1032px;
-    grid-template-columns: 48px 640px 300px;
+    grid-template-columns: 48px 600px 332px;
   }
 
   .leftColumn {
     >div {
       position: fixed;
       width: 48px;
+    }
+
+    .leftHeader {
+      display: flex;
+      justify-content: flex-start;
+    }
+
+
+    .leftFooter {
+      justify-content: flex-start;
     }
   }
 
@@ -133,7 +157,7 @@
 @media only screen and (max-width: 1087px) {
   .container {
     width: 720px;
-    grid-template-columns: 48px 640px;
+    grid-template-columns: 48px 600px;
   }
 
   .rightColumn {
@@ -145,7 +169,7 @@
   .container {
     width: 100%;
     // height: 100vh;
-    grid-template-columns: 1fr;
+    grid-template-columns: 98%;
     grid-template-rows: 1fr 48px;
     grid-template-areas: "content" "footer";
   }

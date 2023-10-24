@@ -1,83 +1,154 @@
-.post {
-  background-color: var(--background-card);
+.note {
   display: flex;
   flex-direction: column;
-  // grid-template-columns: 60px 1fr;
-  // grid-template-rows: 1fr;
-  // grid-template-areas: "avatar content";
-  padding: 0px;
-  border-radius: 8px;
-  // pointer-events: none;
+  padding: 12px;
+  margin: 0px;
+
+  text-decoration: none;
+  color: unset;
+  background-color: var(--background-site);
+  border: none;
+  border-bottom: 1px solid var(--devider);
+  border-radius: 0;
+
+  width: calc(100% - 2px);
+
+  &.parent {
+    border: none;
+  }
+
+  .header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .repostedBy {
+      padding-bottom: 16px;
+      display: flex;
+      >span {
+        >a {
+          margin-inline: 5px;
+          color: var(--text-tertiary);
+          text-decoration: none;
+        }
+        color: var(--text-tertiary);
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: 400;
+        >span {
+          text-transform: lowercase;
+        }
+      }
+    }
+  }
 
   .content {
-    grid-area: content;
-    display: flex;
-    flex-direction: column;
-    margin-top: 21px;
-    margin-left: 60px;
-    // grid-template-columns: 1fr;
-    // grid-template-rows: 48px 1fr 28px;
-    // grid-row-gap: 16px;
-    // grid-template-areas: "header" "message" "footer";
+    display: grid;
+    grid-template-columns: 50px 1fr;
 
+    .leftSide {
+      width: 42px;
+      margin-right: 8px;
 
-    .message {
-      position: relative;
-      grid-area: message;
-      color: var(--text-primary);
-      word-break: break-word;
-      font-size: 16px;
-      line-height: 24px;
-      width: 100%;
-      // max-height: 650px;
-      // overflow: hidden;
-      margin-bottom: 17px;
+      .ancestorLine {
+        border-left: 1px solid var(--devider);
+        height: calc(100% - 12px);
+        margin-left: 21px;
+      }
+    }
 
-      a:hover {
-        text-decoration: underline;
+    .rightSide {
+      display: flex;
+      flex-direction: column;
+
+      .message {
+        color: var(--text-primary);
+        word-break: break-word;
+        font-size: 15px;
+        font-weight: 400px;
+        line-height: 20px;
+        margin-top: 4px;
+        margin-bottom: 16px;
       }
 
-      .messageFade {
-        position: absolute;
-        z-index: 1;
-        top: 610px;
-        left: 0;
-        pointer-events: none;
-        background-image: var(--fade-note-vertical);
-        width: 100%;
-        height: 40px;
-      }
+      .replyingTo {
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 6px;
+        .label {
+          color: var(--text-primary);
+        }
+        .author {
+          color: var(--accent);
+          text-decoration: none;
 
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
     }
   }
 }
 
+.authorInfo {
+  display: flex;
+  justify-content: flex-start;
+  overflow: hidden;
+  align-items: center;
+  justify-content: flex-start;
+  width: 524px;
+  position: relative;
+  .userName {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 226px;
+    color: var(--text-primary);
 
-.postLink {
-  text-decoration: none;
-  color: unset;
-  margin: 0px;
-  padding: 16px 20px;
-  // background: var(--brand-gradient-vertical);
-  background-color: var(--background-card);
-  border-radius: 8px;
-  display: block;
-  transition: 0.2s padding;
-  margin-top: 8px;
-  >div {
-    border-radius: 4px;
-    transition: 0.2s border-radius ease-out;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 14px;
   }
+  .time{
+    display: flex;
+    margin-left: 2px;
+    min-width: fit-content;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    color: var(--text-tertiary);
 
-  // &:hover {
-  //   padding-left: 4px;
-  //   transition: 0.2s padding;
-  //   border-radius: 4px;
-  //   >div {
-  //     border-radius: 0px 4px 4px 0px;
-  //     transition: 0.2s border-radius ease-out;
-  //   }
-  // }
+    .ellipsisIcon {
+      width: 11px;
+      height: 14px;
+      background-color: var(--text-tertiary);
+      -webkit-mask: url(../../assets/icons/ellipsis.svg) no-repeat center;
+      mask: url(../../assets/icons/ellipsis.svg) no-repeat center;
+    }
+  }
+  .verification {
+    max-width: 216px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    color: var(--text-tertiary);
+
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+}
+
+.repostIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
 }
 
 .repostedBy {
@@ -86,10 +157,12 @@
   >span {
     >a {
       margin-inline: 5px;
+      color: var(--text-tertiary);
+      text-decoration: none;
     }
     color: var(--text-tertiary);
-    font-size: 16px;
-    line-height: 16px;
+    font-size: 14px;
+    line-height: 14px;
     font-weight: 400;
     >span {
       text-transform: lowercase;
@@ -97,21 +170,61 @@
   }
 }
 
+.contextMenu {
+  position: relative;
+  width: 16px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-weight: bold;
 
-@media only screen and (max-width: 720px) {
-  .postLink {
-    width: 100vw;
-    .post {
-      width: 100%;
-      // grid-template-columns: 62px 1fr;
-      margin-left: 0px;
-      margin-right: 0px;
-      padding-right: 0px;
-      .content {
-        margin-left: 0;
-      }
+  .contextButton {
+    width: 16px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
     }
 
+    .contextIcon {
+      width: 16px;
+      height: 14px;
+      background-color: var(--text-secondary-2);
+      -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+    }
+
+    &:hover {
+      .contextIcon {
+        background-color: var(--text-primary);
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .note {
+    width: 100vw;
+
+    .content {
+      .rightSide {
+        width: calc(100% - 2px);
+      }
+    }
+  }
+
+  .authorInfo{
+    width: 100%;
   }
 
 }

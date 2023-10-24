@@ -127,75 +127,30 @@ const Home: Component = () => {
       </Wormhole>
 
       <div class={styles.normalCentralHeader}>
-        <HomeHeader />
+        <HomeHeader
+          hasNewPosts={hasNewPosts}
+          loadNewContent={loadNewContent}
+          newPostCount={newPostCount}
+          newPostAuthors={newPostAuthors}
+        />
       </div>
 
       <div class={styles.phoneCentralHeader}>
         <HomeHeaderPhone />
       </div>
 
-      <Show when={
-        hasNewPosts() &&
-        (context?.scrollTop && context.scrollTop > 40) &&
-        !account?.showNewNoteForm
-      }>
-        <div class={styles.newContentNotification}>
-          <button
-            onClick={loadNewContent}
-          >
-            <div class={styles.avatars}>
-              <For each={newPostAuthors}>
-                {(user) => (
-                  <div
-                    class={styles.avatar}
-                    title={userName(user)}
-                  >
-                    <Avatar user={user} size="xss" />
-                  </div>
-                )}
-              </For>
-            </div>
-            <div class={styles.counter}>
-              {intl.formatMessage(
-                feedNewPosts,
-                {
-                  number: newPostCount(),
-                },
-              )}
-            </div>
-          </button>
-        </div>
-      </Show>
-
       <StickySidebar>
         <HomeSidebar />
       </StickySidebar>
 
       <Show
-        when={hasNewPosts() && (context?.scrollTop !== undefined && context.scrollTop <= 40)}
-      >
-        <div class={styles.newContentItem}>
-          <button
-            onClick={loadNewContent}
-          >
-            <div class={styles.counter}>
-              {intl.formatMessage(
-                feedNewPosts,
-                {
-                  number: newPostCount(),
-                },
-              )}
-            </div>
-          </button>
-        </div>
-      </Show>
-
-      <Show
         when={context?.notes && context.notes.length > 0}
       >
-        <For each={context?.notes} >
-          {note => <Note note={note} />}
-        </For>
+        <div class={styles.feed}>
+          <For each={context?.notes} >
+            {note => <Note note={note} />}
+          </For>
+        </div>
       </Show>
 
       <Switch>

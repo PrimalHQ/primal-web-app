@@ -1,13 +1,19 @@
 .fullHeader {
   position: relative;
-  background-color: var(--background-card);
+  background-color: var(--background-site);
   padding-bottom: 4px;
-  // min-height: 474px;
+  border-inline: 1px solid var(--devider);
+}
+
+.editProfileButton {
+  button {
+    padding: 16px;
+  }
 }
 
 .emptyHeader {
   position: relative;
-  background-color: var(--background-card);
+  background-color: var(--background-site);
   padding-bottom: 4px;
   height: 466px;
 }
@@ -28,9 +34,9 @@
   top: 148px;
   left: 15px;
   .avatar {
-    border: solid 4px var(--background-card);
+    border: solid 4px var(--background-site);
     border-radius: 50%;
-    background-color: var(--background-card);
+    background-color: var(--background-site);
   }
 }
 
@@ -101,8 +107,8 @@
   padding-right: 8px;
   padding-bottom: 20px;
   height: 76px;
-  >button {
-    margin-inline: 4px;
+  button {
+    margin-left: 8px;
   }
 }
 
@@ -278,7 +284,7 @@
     align-items: flex-start;
     color: var(--text-tertiary-2);
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 16px;
     margin-top: 10px;
     margin-bottom: 16px;
@@ -299,7 +305,7 @@
     align-items: center;
     color: var(--text-tertiary-2);
     font-weight: 400;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 16px;
 
     .npub {
@@ -313,7 +319,7 @@
       white-space: nowrap;
       overflow: hidden;
       font-weight: 400;
-      font-size: 12px;
+      font-size: 14px;
       line-height: 16px;
       display: flex;
 
@@ -386,7 +392,7 @@
     }
 
     .statName {
-      font-weight: 300;
+      font-weight: 400;
       font-size: 16px;
       line-height: 19px;
       color: var(--text-tertiary-2);
@@ -412,7 +418,7 @@
   width: 80px;
   height: 18px;
   border-radius: 4px;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 12px;
   line-height: 16px;
   color: var(--text-tertiary-2);
@@ -462,9 +468,6 @@
 .contextArea {
   position: relative;
   padding: 0;
-  button {
-    margin-inline: 4px;
-  }
 }
 
 @media only screen and (max-width: 720px) {

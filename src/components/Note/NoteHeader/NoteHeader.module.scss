@@ -28,7 +28,6 @@
   }
   .postInfo {
     display: flex;
-    flex-direction: column;
     font-size: 14px;
     line-height: 16px;
     font-weight: 400;
@@ -117,7 +116,6 @@
         background-color: var(--text-secondary-2);
         -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
         mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
-
       }
 
       &:hover {

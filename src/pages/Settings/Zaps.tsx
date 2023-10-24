@@ -13,18 +13,17 @@ const Zaps: Component = () => {
   const intl = useIntl();
 
   return (
-    <div>
+    <>
       <PageTitle title={`${intl.formatMessage(t.zaps)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
         <div>{intl.formatMessage(t.zaps)}</div>
       </PageCaption>
-
-      <div class={styles.zapSettings}>
+      <div class={styles.settingsContent}>
         <SettingsZap />
       </div>
-    </div>
+    </>
   )
 }
 

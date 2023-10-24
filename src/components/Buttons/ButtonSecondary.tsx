@@ -9,19 +9,32 @@ const ButtonSecondary: Component<{
   onClick?: (e: MouseEvent) => void,
   children?: JSXElement,
   disabled?: boolean,
+  shrink?: boolean,
+  light?: boolean,
+  type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
+
+  const klass = () => {
+    let cls = styles.secondary;
+
+    if (props.shrink)
+      cls += ` ${styles.shrunk}`;
+
+    if (props.light)
+    cls += ` ${styles.light}`;
+
+    return cls;
+  }
+
   return (
     <Button.Root
       id={props.id}
-      class={styles.secondary}
+      class={klass()}
       onClick={props.onClick}
       disabled={props.disabled}
+      type={props.type || "button"}
     >
-      <div>
-        <span>
-          {props.children}
-        </span>
-      </div>
+      {props.children}
     </Button.Root>
   );
 }

@@ -5,10 +5,12 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { zapNote } from '../../lib/zap';
 import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
+import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import { PrimalNote } from '../../types/primal';
 import { debounce } from '../../utils';
+import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
+import TextInput from '../TextInput/TextInput';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './CustomZap.module.scss';
@@ -28,21 +30,13 @@ const CustomZap: Component<{
   const settings = useSettingsContext();
 
   const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || 10);
+  const [comment, setComment] = createSignal('');
 
   createEffect(() => {
     setSelectedValue(settings?.availableZapOptions[0] || 10)
   });
 
   const isSelected = (value: number) => value === selectedValue();
-
-  let comment = '';
-
-  const setComment = (e: InputEvent) => {
-    debounce(() => {
-      const target = e.target as HTMLInputElement;
-      comment = target.value;
-    }, 500);
-  };
 
   const truncateNumber = (amount: number) => {
     const t = 1000;
@@ -81,7 +75,13 @@ const CustomZap: Component<{
   const submit = async () => {
     if (account?.hasPublicKey()) {
       props.onConfirm(selectedValue());
-      const success = await zapNote(props.note, account.publicKey, selectedValue(), comment, account.relays);
+      const success = await zapNote(
+        props.note,
+        account.publicKey,
+        selectedValue(),
+        comment(),
+        account.relays,
+      );
 
       if (success) {
         props.onSuccess(selectedValue());
@@ -101,18 +101,23 @@ const CustomZap: Component<{
       <div id={props.id} class={styles.customZap}>
         <div class={styles.header}>
           <div class={styles.title}>
-            <div class={styles.zapIcon}></div>
             <div class={styles.caption}>
-              {intl.formatMessage(zapCustomOption,{
-                user: userName(props.note.user),
-              })}
-              <span class={styles.amount}>
-                {truncateNumber(selectedValue())}
-              </span> <span class={styles.units}>sats</span>
+              {intl.formatMessage(tActions.zap)}
             </div>
           </div>
           <button class={styles.close} onClick={() => props.onFail(0)}>
           </button>
+        </div>
+
+        <div class={styles.description}>
+          {intl.formatMessage(zapCustomOption,{
+            user: userName(props.note.user),
+          })}
+
+          <span class={styles.amount}>
+              {truncateNumber(selectedValue())}
+          </span>
+          <span class={styles.units}>sats</span>
         </div>
 
         <div class={styles.options}>
@@ -122,33 +127,33 @@ const CustomZap: Component<{
                 class={`${styles.zapOption} ${isSelected(value) ? styles.selected : ''}`}
                 onClick={() => setSelectedValue(value)}
               >
-                {truncateNumber(value)}
+                <div>
+                  {truncateNumber(value)} <span class={styles.sats}>sats</span>
+                </div>
               </button>
             }
           </For>
         </div>
 
-        <input
+        <TextInput
           type="text"
-          class={styles.comment}
-          value={comment}
-          placeholder={'Comment'}
-          onInput={setComment}
+          value={comment()}
+          placeholder={intl.formatMessage(tPlaceholders.addComment)}
+          onChange={setComment}
+          noExtraSpace={true}
         />
 
-        <button
+        <div
           class={styles.action}
-          onClick={submit}
         >
-          <div class={styles.caption}>
-              {intl.formatMessage(zapCustomOption,{
-                user: userName(props.note.user),
-              })}
-            <span class={styles.amount}>
-              {truncateNumber(selectedValue())}
-            </span> <span class={styles.units}>sats</span>
-          </div>
-        </button>
+          <ButtonPrimary
+            onClick={submit}
+          >
+            <div class={styles.caption}>
+              {intl.formatMessage(tActions.zap)}
+            </div>
+          </ButtonPrimary>
+        </div>
 
       </div>
     </Modal>

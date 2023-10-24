@@ -2,6 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import type { Component } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
+import { interpretLineBreak } from '../../translationHelpers';
 import { scopeDescriptors, timeframeDescriptors } from '../../translations';
 import { ScopeDescriptor } from '../../types/primal';
 
@@ -68,7 +69,9 @@ const ExploreMenuItem: Component<{ scope: string, stat: number, id?: string }> =
           </div>
           <div class={styles.footer}>
             <div class={styles.itemDescription}>
-              {intl.formatMessage(item().description)}
+              {intl.formatMessage(item().description, {
+                div: interpretLineBreak,
+              })}
             </div>
           </div>
         </div>

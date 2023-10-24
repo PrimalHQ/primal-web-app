@@ -102,10 +102,6 @@ const Search: Component<{
   }
 
   createEffect(() => {
-    if (!isFocused()) {
-      return;
-    }
-
     if (query().length === 0) {
       search?.actions.getRecomendedUsers();
       return;
@@ -115,7 +111,7 @@ const Search: Component<{
   });
 
   return (
-    <div id={props.id} class={styles.searchHolder}>
+    <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''}`}>
       <form
         class={styles.search}
         onsubmit={onSearch}
@@ -139,35 +135,36 @@ const Search: Component<{
       </form>
 
       <Show when={isFocused()}>
-        <div class={styles.searchSuggestions}>
-          <Show when={search?.isFetchingUsers}>
-            <div class={styles.loadingOverlay}>
-              <Loader />
-            </div>
-          </Show>
+        <Show
+          when={!props.hideDefault}
+        >
           <Show
-              when={!props.hideDefault}
-            >
-            <Show
-              when={query().length > 0}
-              fallback={
-                <SearchOption
-                  title={intl.formatMessage(t.emptyQueryResult)}
-                  description={intl.formatMessage(t.searchNostr)}
-                  icon={<div class={styles.searchIcon}></div>}
-                  underline={true}
-                />
-              }
-            >
+            when={query().length > 0}
+            fallback={
               <SearchOption
-                href={props.noLinks ? undefined : `/search/${queryUrl()}`}
-                title={query()}
-                description={intl.formatMessage(t.searchNostr)}
-                icon={<div class={styles.searchIcon}></div>}
-                underline={true}
-                onClick={resetQuery}
+                title={intl.formatMessage(t.searchNostr)}
+                narrow={true}
+                darkTitle={true}
+                icon={<div class={styles.searchIconDark}></div>}
               />
-            </Show>
+            }
+          >
+            <SearchOption
+              href={props.noLinks ? undefined : `/search/${queryUrl()}`}
+              title={query()}
+              icon={<div class={styles.searchIcon}></div>}
+              onClick={resetQuery}
+            />
+          </Show>
+        </Show>
+
+        <div class={styles.searchSuggestions}>
+          <Show when={search?.isFetchingUsers && query().length > 0}>
+            <div class={styles.loadingOverlay}>
+              <div>
+                <Loader />
+              </div>
+            </div>
           </Show>
 
           <For each={search?.users}>
@@ -176,7 +173,7 @@ const Search: Component<{
                 href={props.noLinks ? undefined : `/p/${user.npub}`}
                 title={userName(user)}
                 description={nip05Verification(user)}
-                icon={<Avatar user={user} size="xs" />}
+                icon={<Avatar user={user} size="vvs" />}
                 statNumber={search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage(t.followers)}
                 onClick={() => selectUser(user)}

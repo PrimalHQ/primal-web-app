@@ -4,6 +4,7 @@ import {
   createEffect,
   JSXElement,
   onCleanup,
+  onMount,
   useContext
 } from "solid-js";
 import { MediaEvent, MediaSize, MediaVariant, NostrEOSE, NostrEvent } from "../types/primal";
@@ -11,6 +12,7 @@ import { removeSocketListeners, isConnected, refreshSocketListeners, socket } fr
 import { Kind } from "../constants";
 
 export type MediaContextStore = {
+  windowSize: { w: number, h: number },
   media: Record<string, MediaVariant[]>,
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
@@ -20,6 +22,7 @@ export type MediaContextStore = {
 
 const initialData = {
   media: {},
+  windowSize: { w: window.innerWidth, h: window.innerHeight },
 };
 
 export const MediaContext = createContext<MediaContextStore>();
@@ -44,6 +47,10 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
     return media?.media_url;
   }
+
+  const onResize = () => {
+    updateStore('windowSize', () => ({ w: window.innerWidth, h: window.innerHeight }));
+  };
 
 // SOCKET HANDLERS ------------------------------
 
@@ -78,6 +85,15 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   };
 
 // EFFECTS --------------------------------------
+
+  onMount(() => {
+    window.addEventListener('resize', onResize);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('resize', onResize);
+  });
+
 
   createEffect(() => {
     if (isConnected()) {

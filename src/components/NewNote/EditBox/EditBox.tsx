@@ -36,6 +36,8 @@ import {
 } from "../../../translations";
 import { useMediaContext } from "../../../contexts/MediaContext";
 import { hookForDev } from "../../../lib/devTools";
+import ButtonPrimary from "../../Buttons/ButtonPrimary";
+import ButtonSecondary from "../../Buttons/ButtonSecondary";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -1212,22 +1214,15 @@ const EditBox: Component<{
           <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
           </label>
         </div>
-        <button
-          class={styles.primaryButton}
+        <ButtonPrimary
           onClick={postNote}
           disabled={isPostingInProgress()}
         >
-          <span>
-            {intl.formatMessage(tActions.notePostNew)}
-          </span>
-        </button>
-        <button class={styles.secondaryButton} onClick={closeEditor}>
-          <div>
-            <span>
-              {intl.formatMessage(tActions.cancel)}
-            </span>
-          </div>
-        </button>
+          {intl.formatMessage(tActions.notePostNew)}
+        </ButtonPrimary>
+        <ButtonSecondary onClick={closeEditor}>
+          {intl.formatMessage(tActions.cancel)}
+        </ButtonSecondary>
       </div>
     </div>
   )

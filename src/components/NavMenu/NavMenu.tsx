@@ -11,6 +11,7 @@ import FloatingNewPostButton from '../FloatingNewPostButton/FloatingNewPostButto
 import styles from './NavMenu.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
+import { useMediaContext } from '../../contexts/MediaContext';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
@@ -18,6 +19,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const messages = useMessagesContext();
   const intl = useIntl();
   const loc = useLocation();
+  const media = useMediaContext();
 
   const links = [
     {
@@ -64,6 +66,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
     },
   ];
 
+  const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
+
   return (
     <div id={props.id} class={styles.navMenu}>
       <nav class={styles.sideNav}>
@@ -82,20 +86,35 @@ const NavMenu: Component< { id?: string } > = (props) => {
       </nav>
       <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
         <div class={styles.callToAction}>
-          <FloatingNewPostButton />
+          <Show
+            when={isBigScreen()}
+            fallback={
+              <ButtonPrimary
+                id={props.id}
+                onClick={account?.actions?.showNewNoteForm}
+              >
+                <div class={styles.postIcon}></div>
+              </ButtonPrimary>
+            }
+          >
+            <ButtonPrimary
+              id={props.id}
+              onClick={account?.actions?.showNewNoteForm}
+            >
+              {intl.formatMessage(tActions.newNote)}
+            </ButtonPrimary>
+          </Show>
         </div>
       </Show>
 
-      <Show when={account?.isKeyLookupDone && !account?.hasPublicKey()}>
+      <Show when={account?.isKeyLookupDone && !account?.hasPublicKey() && isBigScreen()}>
         <div class={styles.callToAction}>
           <div class={styles.message}>
             {intl.formatMessage(tPlaceholders.welcomeMessage)}
           </div>
-          <div class={styles.action}>
-            <ButtonPrimary onClick={account?.actions.showGetStarted}>
-              {intl.formatMessage(tActions.getStarted)}
-            </ButtonPrimary>
-          </div>
+          <ButtonPrimary onClick={account?.actions.showGetStarted}>
+            {intl.formatMessage(tActions.getStarted)}
+          </ButtonPrimary>
         </div>
       </Show>
     </div>

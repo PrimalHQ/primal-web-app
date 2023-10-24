@@ -34,74 +34,76 @@ const Account: Component = () => {
         <div>{intl.formatMessage(t.account.title)}</div>
       </PageCaption>
 
-      <div class={styles.securityWarning}>
-        <div class={styles.securityIcon}></div>
-        <div class={styles.securityMessage}>
-          {intl.formatMessage(t.account.description, {
-            link: <a href="https://getalby.com" target='_blank'>Alby</a>,
-          })}
+      <div class={styles.settingsContent}>
+        <div class={styles.securityWarning}>
+          <div class={styles.securityIcon}></div>
+          <div class={styles.securityMessage}>
+            {intl.formatMessage(t.account.description, {
+              link: <a href="https://getalby.com" target='_blank'>Alby</a>,
+            })}
+          </div>
         </div>
-      </div>
 
-      <div class={styles.settingsAccountCaption}>
-        <div class={styles.caption}>
-          {intl.formatMessage(t.account.pubkey)}
+        <div class={styles.settingsAccountCaption}>
+          <div class={styles.caption}>
+            {intl.formatMessage(t.account.pubkey)}
+          </div>
+          <button
+            class={styles.copy}
+            onClick={() => onCopy(hexToNpub(account?.publicKey) || '')}
+          >
+            <Show when={isCoppied() === hexToNpub(account?.publicKey)}>
+              <div class={styles.checkIcon}></div>
+            </Show>
+            {intl.formatMessage(tActions.copyPubkey)}
+          </button>
         </div>
-        <button
-          class={styles.copy}
-          onClick={() => onCopy(hexToNpub(account?.publicKey) || '')}
-        >
-          <Show when={isCoppied() === hexToNpub(account?.publicKey)}>
-            <div class={styles.checkIcon}></div>
-          </Show>
-          {intl.formatMessage(tActions.copyPubkey)}
-        </button>
-      </div>
 
-      <div class={styles.settingsKeyArea}>
-        <Avatar
-          src={account?.activeUser?.picture}
-          size="vs"
-        />
-        <div class={styles.key}>
-          {hexToNpub(account?.publicKey)}
+        <div class={styles.settingsKeyArea}>
+          <Avatar
+            src={account?.activeUser?.picture}
+            size="vs"
+          />
+          <div class={styles.key}>
+            {hexToNpub(account?.publicKey)}
+          </div>
         </div>
-      </div>
 
-      <div class={styles.settingsDescription}>
-        {intl.formatMessage(t.account.pubkeyDesc)}
-      </div>
-
-
-      <div class={styles.settingsAccountCaption}>
-        <div class={styles.caption}>
-          {intl.formatMessage(t.account.privkey)}
+        <div class={styles.settingsDescription}>
+          {intl.formatMessage(t.account.pubkeyDesc)}
         </div>
-        <button
-          class={styles.copy}
-          onClick={() => onCopy(account?.sec || '')}
-        >
-          <Show when={isCoppied() === account?.sec}>
-            <div class={styles.checkIcon}></div>
-          </Show>
-          {intl.formatMessage(tActions.copyPrivkey)}
-        </button>
-      </div>
 
-      <div class={styles.settingsKeyArea}>
-        <div class={styles.icon}>
-          <div class={styles.keyIcon}></div>
+
+        <div class={styles.settingsAccountCaption}>
+          <div class={styles.caption}>
+            {intl.formatMessage(t.account.privkey)}
+          </div>
+          <button
+            class={styles.copy}
+            onClick={() => onCopy(account?.sec || '')}
+          >
+            <Show when={isCoppied() === account?.sec}>
+              <div class={styles.checkIcon}></div>
+            </Show>
+            {intl.formatMessage(tActions.copyPrivkey)}
+          </button>
         </div>
-        <input
-          class={styles.key}
-          value={account?.sec || ''}
-          readOnly={true}
-          type="password"
-        />
-      </div>
 
-      <div class={styles.settingsDescription}>
-        {intl.formatMessage(t.account.privkeyDesc)}
+        <div class={styles.settingsKeyArea}>
+          <div class={styles.icon}>
+            <div class={styles.keyIcon}></div>
+          </div>
+          <input
+            class={styles.key}
+            value={account?.sec || ''}
+            readOnly={true}
+            type="password"
+          />
+        </div>
+
+        <div class={styles.settingsDescription}>
+          {intl.formatMessage(t.account.privkeyDesc)}
+        </div>
       </div>
 
     </div>

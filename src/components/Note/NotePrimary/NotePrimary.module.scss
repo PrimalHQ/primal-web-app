@@ -1,21 +1,14 @@
-.border {
-  background: var(--brand-gradient-vertical);
-  border-radius: 4px 0px 0px 4px;
-  width: 4px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-}
-
 .post {
   position: relative;
   background-color: var(--background-card);
-  margin-top: 8px;
   display: flex;
   flex-direction: column;
-  padding: 16px 20px;
-  border-radius: 0px 4px 4px 0px;
+  padding: 12px;
+  padding-top: 0;
+  border-radius: 0;
+  border: 1px solid var(--devider);
+  border-top: none;
+  border-bottom: none;
 
   .content {
     grid-area: content;

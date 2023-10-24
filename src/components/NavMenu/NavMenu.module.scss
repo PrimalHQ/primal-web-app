@@ -1,38 +1,41 @@
 .sideNav {
   display: flex;
   flex-direction: column;
-
-  > div {
-    margin-bottom: 28px;
-  }
+  margin-left: 8px;
 }
 
 .callToAction {
-  display: grid;
-  justify-content: right;
-  margin-top: 15px;
+  margin-left: 8px;
+  width: 156px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  >button {
+    margin: 0;
+    width: 100% ;
+  }
 
   .message {
     color: var(--text-tertiary);
     text-align: right;
     font-size: 15px;
+    font-style: normal;
     font-weight: 400;
     line-height: 16px;
-    margin-bottom: 4px;
-  }
-
-  .action {
-    button {
-      margin: 0;
-    }
+    margin-bottom: 8px;
   }
 }
 
 @media only screen and (max-width: 1300px) {
-
   .callToAction {
-    .message, .action {
-      display: none;
+    margin-left: 2px;
+    width: 36px;
+    height: 36px;
+
+    >button {
+      padding: 0;
+      margin: 0;
     }
   }
 }
@@ -64,4 +67,16 @@
       display: none;
     }
   }
+}
+
+
+.postIcon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+
+  background-color: var(--text-primary-button);
+  -webkit-mask: url(../../assets/icons/post.svg) no-repeat 0 0 / 18px 18px;
+  mask: url(../../assets/icons/post.svg) no-repeat  0 0 / 18px 18px;
 }

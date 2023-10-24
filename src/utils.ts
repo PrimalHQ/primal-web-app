@@ -75,3 +75,22 @@ export const arrayMerge: <T, >(a: T[], b: T[], predicate?: (x: T, y: T) => boole
   b.forEach((bItem) => (c.some((cItem) => predicate(bItem, cItem)) ? null : c.push(bItem)))
   return c;
 }
+
+export const getScreenCordinates = (obj: any) =>  {
+  let p: { x?: number, y?: number } = {};
+
+  p.x = obj.offsetLeft;
+  p.y = obj.offsetTop;
+
+  while (obj.offsetParent) {
+    p.x = p.x + obj.offsetParent.offsetLeft;
+    p.y = p.y + obj.offsetParent.offsetTop;
+    if (obj == document.getElementsByTagName("body")[0]) {
+      break;
+    }
+    else {
+      obj = obj.offsetParent;
+    }
+  }
+  return p;
+}

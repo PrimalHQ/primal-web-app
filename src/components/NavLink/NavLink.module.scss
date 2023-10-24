@@ -1,20 +1,31 @@
 @mixin iconNav {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background-color: var(--text-secondary);
 }
 
 .navLink {
   position: relative;
-  text-align: right;
-  margin: 0px 0px 28px 0px;
+  margin: 0px 0px 36px 0px;
   padding: 0px;
   background: none;
   border: none;
   border-radius: 0px;
+  display: flex;
+  justify-content: flex-start;
 
-  div {
-    display: inline;
+  a {
+    .label {
+      margin-left: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 20px;
+      display: flex;
+    }
+
+    &:focus {
+      background: none;
+    }
   }
 
   p {
@@ -34,8 +45,8 @@
 
 .exploreIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/explore.svg) no-repeat center;
-  mask: url(../../assets/icons/explore.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/search.svg) no-repeat center;
+  mask: url(../../assets/icons/search.svg) no-repeat center;
 }
 .messagesIcon {
   @include iconNav;
@@ -64,91 +75,103 @@
 }
 
 .active {
-  p {
-    color: var(--active-link);
-    text-decoration: underline;
-  }
-  div {
-    background-color: var(--active-link);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  background: none;
+
+  >div {
+    background-color: var(--text-primary);
   }
 
-  .homeIcon {
-    background-color: var(--text-primary);
-  }
-  .exploreIcon {
-    background-color: var(--text-primary);
-  }
-  .messagesIcon {
-    background-color: var(--text-primary);
-  }
-  .notificationsIcon {
-    background-color: var(--text-primary);
-  }
-  .downloadIcon {
-    background-color: var(--text-primary);
-  }
-  .settingsIcon {
-    background-color: var(--text-primary);
-  }
-  .helpIcon {
-    background-color: var(--text-primary);
+  .label {
+    color: var(--text-primary);
+    background: none;
   }
 }
 
 .inactive {
-  p {
-    color: var(--inactive-link);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  >div {
+    background-color: var(--text-secondary);
   }
-  div {
-    background-color: var(--inactive-link);
+
+  .label {
+    color: var(--text-secondary);
+    background: none;
+  }
+}
+
+.bubble {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 18px;
+  height: 18px;
+
+  margin-left: 2px;
+
+  font-family: 'Roboto Condensed';
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 11px;
+
+  background: var(--accent);
+  border: 1px solid var(--background-site);
+  border-radius: 9px;
+
+  color: var(--text-primary-button);
+
+  &.doubleSize {
+    width: 24px;
+  }
+
+  &.tripleSize {
+    width: 26px;
+    padding-left: 2px;
   }
 }
 
 @media only screen and (max-width: 1300px) {
   .navLink {
-    margin-bottom: 22px;
+    a {
+      .label {
+        display: none;
+      }
+    }
+  }
 
-    width: fit-content;
-    div {
-      display: inline-block;
+  .bubble {
+    width: 8px;
+    height: 8px;
+    >div {
+      display: none;
     }
 
-    p {
-      display: none;
+    &.doubleSize {
+      width: 8px;
+      height: 8px;
+    }
+
+    &.tripleSize {
+      width: 8px;
+      height: 8px;
     }
   }
 }
 
 @media only screen and (max-width: 720px) {
+  .navLink {
+    a {
+      .label {
+        display: none;
+      }
+    }
+  }
   .hiddenOnSmallScreens {
     display: none
-  }
-}
-
-.bubble {
-  position: absolute;
-  text-align: center;
-  padding-top: 2px;
-  padding-inline: 4px;
-  top: 0;
-  right: -18px;
-  min-width: 18px;
-  min-height: 18px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 12px;
-
-  background: var(--brand-gradient);
-  border: 1px solid var(--background-site);
-
-  color: white;
-  text-shadow: 0.5px 0.5px 0px black;
-
-  &.doubleSize {
-    right: -24px;
-  }
-  &.tripleSize {
-    right: -30px;
   }
 }

@@ -20,7 +20,7 @@
   height: 15px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--accent-2);
+  background-color: var(--accent);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
   mask: url(../../assets/icons/verified.svg) no-repeat 0px / 15px;
 }
@@ -76,6 +76,23 @@
   .missingBack {
     width: 32px;
     height: 32px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+}
+
+.vvsAvatar {
+  @include avatar;
+  width: 36px;
+  height: 36px;
+
+  .missingBack {
+    width: 36px;
+    height: 36px;
   }
 
   .iconBackground {
@@ -221,6 +238,13 @@
   font-size: 10px;
 }
 
+.vvsMissing {
+  @include missing;
+  width: 36px;
+  height: 36px;
+  font-size: 10px;
+}
+
 .vsMissing {
   @include missing;
   width: 42px;
@@ -264,8 +288,8 @@
 }
 
 .highlightBorder {
-  background: var(--brand-gradient);
-  padding: 2px;
+  background: none;
+  // padding: 2px;
 }
 
 .cacheFlag {

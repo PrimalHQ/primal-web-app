@@ -17,9 +17,9 @@ import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { thread as t } from '../translations';
-import { setShowNav } from '../components/Layout/Layout';
 import { userName } from '../stores/profile';
 import PageTitle from '../components/PageTitle/PageTitle';
+import NavHeader from '../components/NavHeader/NavHeader';
 
 
 const Thread: Component = () => {
@@ -110,7 +110,9 @@ const Thread: Component = () => {
           if (!entry.isIntersecting) {
             scrollWindowTo(rect.top);
           }
-          observer?.unobserve(pn);
+          setTimeout(() => {
+            observer?.unobserve(pn);
+          }, 100);
         });
       });
 
@@ -118,15 +120,10 @@ const Thread: Component = () => {
     }
   });
 
-  onMount(() => {
-    setShowNav(true);
-  });
-
   onCleanup(() => {
     const pn = document.getElementById('primary_note');
 
     pn && observer?.unobserve(pn);
-    setShowNav(false);
   });
 
   const onNotePosted = (result: SendNoteResult) => {
@@ -155,23 +152,26 @@ const Thread: Component = () => {
         />
       </Wormhole>
 
+      <NavHeader title="Thread" />
+
       <Show when={account?.isKeyLookupDone}>
         <Show
           when={!isFetching()}
         >
-          <For each={parentNotes()}>
-            {note =>
-              <div class={styles.threadList}>
-                <Note note={note} />
-              </div>
-            }
-          </For>
+          <div class={styles.parentsHolder}>
+            <For each={parentNotes()}>
+              {note =>
+                <div class={styles.threadList}>
+                  <Note note={note} parent={true} />
+                </div>
+              }
+            </For>
+          </div>
         </Show>
 
         <Show when={primaryNote()}>
           <div id="primary_note" class={styles.threadList}>
-            <NotePrimary
-              id="bojan"
+            <Note
               note={primaryNote() as PrimalNote}
             />
             <Show when={account?.hasPublicKey()}>
@@ -184,13 +184,13 @@ const Thread: Component = () => {
         </Show>
 
         <div class={styles.repliesHolder}>
-            <For each={replyNotes()}>
-              {note =>
-                <div class={styles.threadList}>
-                  <Note note={note} />
-                </div>
-              }
-            </For>
+          <For each={replyNotes()}>
+            {note =>
+              <div class={styles.threadList}>
+                <Note note={note} />
+              </div>
+            }
+          </For>
         </div>
       </Show>
     </div>

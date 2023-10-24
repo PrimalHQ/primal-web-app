@@ -1,40 +1,21 @@
 .userProfile {
-  display: grid;
-  width: 146px;
-  height: 46px;
-  grid-template-columns: 42px 1fr;
-  grid-column-gap: 5px;
   position: relative;
+  display: flex;
+  justify-content: flex-start;
   align-items: center;
+  width: 156px;
+  height: 48px;
+  border-radius: 24px;
   text-decoration: none;
-
-  .background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 146px;
-    height: 46px;
-    background-color: var(--background-input);
-    background: linear-gradient(var(--background-input), var(--background-input)) padding-box,
-                var(--brand-gradient) border-box;
-    border-radius: 21px;
-    border: 1px solid transparent;
-    opacity: 0.5;
-    transition: opacity 0.4s;
-
-  }
+  padding-inline: 6px;
+  background-color: var(--background-sheet);
+  border: none;
+  margin-left: 8px;
 
   &:hover {
-    .background {
-      opacity: 1;
-      transition: opacity 0.4s;
-    }
+    background-color: var(--background-input);
   }
 
-}
-.avatar {
-  z-index: 1;
-  padding: 2px;
 }
 
 .userInfo {
@@ -42,15 +23,14 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  z-index: 1;
-  padding: 2px;
+  padding-left: 6px;
 }
 
 .userName {
   font-size: 12px;
-  line-height: 16px;
   font-weight: 700;
-  color: var(--text-primary);
+  line-height: 16px;
+  color: var(--active-reply);
   width: 90px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -87,13 +67,16 @@
 @media only screen and (max-width: 1300px) {
   .userProfile {
     display: grid;
-    width: 48px;
-    grid-template-columns: 48px;
+    width: 40px;
+    height: 40px;
+    grid-template-columns: 40px;
     grid-column-gap: 0px;
+    margin: 0;
+    padding-inline: 2px;
 
     .background {
-      width: 46px;
-      height: 46px;
+      width: 40px;
+      height: 40px;
     }
   }
 

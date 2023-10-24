@@ -21,11 +21,13 @@ const Appearance: Component = () => {
         <div>{intl.formatMessage(t.appearance.title)}</div>
       </PageCaption>
 
-      <div class={styles.settingsCaption}>
-        {intl.formatMessage(t.appearance.caption)}
-      </div>
+      <div class={styles.settingsContent}>
+        <div class={styles.settingsCaption}>
+          {intl.formatMessage(t.appearance.caption)}
+        </div>
 
-      <ThemeChooser />
+        <ThemeChooser />
+      </div>
     </div>
   )
 }

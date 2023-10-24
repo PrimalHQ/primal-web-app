@@ -4,6 +4,12 @@
   padding-bottom: 20px;
 }
 
+.creationContent {
+  padding-inline: 20px;
+  padding-top: 24px;
+  border-top: 1px solid var(--devider);
+}
+
 .fullHeader {
   position: relative;
   // background-color: var(--background-card);
@@ -14,13 +20,14 @@
   position: relative;
   width: 100%;
   height: 214px;
+  background-color: var(--background-header-input);
 }
 
 .banner {
   position: relative;
   width: 100%;
   height: 214px;
-  background-color: var(--background-card);
+  background-color: var(--background-header-input);
 
   .uploadingOverlay {
     position: absolute;
@@ -144,17 +151,23 @@
   }
 
   .uploadButton {
-    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--background-input);
     border: none;
+    border-radius: 16px;
     outline: none;
-    color: var(--accent-1);
-    width: auto;
+    color: var(--text-primary);
+    min-width: 140px;
+    height: 32px;
     padding: 0;
+    padding-top: 4px;
     margin-block: 28px;
     margin-inline: 10px;
     font-size: 16px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 16px;
     text-transform: lowercase;
 
     >label {
@@ -168,14 +181,22 @@ form {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 12px;
 
     label {
-      color: var(--text-secondary);
-      font-size: 16px;
+      color: var(--text-primary);
+      font-size: 15px;
       font-weight: 400;
-      line-height: 22px;
-      text-transform: uppercase;
+      line-height: 20px;
       margin: 0;
+
+      .help {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+        margin-left: 8px;
+        color: var(--text-tertiary);
+      }
     }
 
     .required {
@@ -197,16 +218,14 @@ form {
 
   input, textarea {
     border: none;
-    border-radius: 8px;
-    background: var(--background-card);
+    border-radius: 18px;
+    background: var(--background-header-input);
     color: var(--text-primary);
     font-size: 18px;
     font-weight: 400;
     line-height: 20px;
-    padding-block: 14px;
     padding-inline: 19px;
     width: 100%;
-    margin-bottom: 16px;
 
     &:focus {
       outline: none;
@@ -228,25 +247,37 @@ form {
     }
   }
 
+  input {
+    height: 36px !important;
+  }
+
+  textarea {
+    padding-block: 8px;
+    min-height: 104px;
+  }
+
   .inputWithPrefix {
     display: flex;
     align-items: center;
-    margin-bottom: var(--spacing);
+    margin-bottom: 32px;
+    background-color: var(--background-header-input);
+    height: 36px;
+    border-radius: 18px;
     .inputPrefix {
       display: flex;
       align-items: center;
       font-size: 18px;
       font-weight: 400;
       line-height: 20px;
-      height: 59px;
+      height: 36px;
       color: var(--text-tertiary-2);
-      padding-left: 19px;
-      border-radius: 8px 0px 0px 8px;
-      background: var(--background-card);
+      padding-left: 12px;
     }
 
     >input {
+      height: 36px;
       margin-bottom: 0;
+      background: none;
       padding-left: 8px;
       border-radius: 0px 8px 8px 0px;
     }
@@ -404,44 +435,12 @@ form {
   justify-content: flex-start;
 
   button {
-    width: 80px;
-    height: 28px;
-    margin: 0px 16px 11px 0px;
-
-    &.primaryButton {
-      border: none;
-      border-radius: 6px;
-      padding: 0px;
-      font-size: 14px;
-      line-height: 20px;
-      font-weight: 700;
-      background: var(--brand-gradient-vertical);
-      color: var(--text-primary);
-      >span {
-        opacity: 0.75;
-      }
-    }
-
-    &.secondaryButton {
-      border: none;
-      border-radius: 6px;
-      padding: 1px;
-      font-size: 14px;
-      line-height: 20px;
-      font-weight: 700;
-      background: var(--brand-gradient-vertical);
-      color: var(--text-tertiary-2);
-      >div {
-        width: 100%;
-        height: 100%;
-        vertical-align: middle;
-        border-radius: 6px;
-        background-color: var(--background-card);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
+    min-width: 120px;
+    height: 36px;
+    margin-right: 16px;
+    >span {
+      display: block;
+      padding-top: 2px;
     }
   }
 
@@ -484,17 +483,25 @@ form {
     .nameAndNip05 {
       display: flex;
       flex-direction: column;
+      max-width: 370px;
+
       .name {
         color: var(--text-primary);
         font-size: 14px;
         font-weight: 700;
         line-height: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
       }
       .nip05 {
         color: var(--text-tertiary-2);
         font-size: 12px;
         font-weight: 400;
         line-height: 16px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
       }
     }
   }
@@ -516,9 +523,32 @@ form {
 }
 
 .stepIntro {
-  color: var(--text-secondary);
-  font-size: 16px;
+  color: var(--text-primary);
+  font-size: 15px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 20px;
   margin-bottom: 21px;
+}
+
+.stepIndicator {
+  width: 100%;
+  height: 28px;
+  margin-top: -22px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .indicate {
+    width: 6px;
+    height: 6px;
+    border-radius: 3px;
+    margin-inline: 4px;
+
+    &.light {
+      background-color: var(--accent);
+    }
+    &.dark {
+      background-color: var(--text-tertiary-2);
+    }
+  }
 }

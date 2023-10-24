@@ -5,10 +5,12 @@
   justify-content: space-between;
   align-items: center;
   padding-inline: 8px;
-  background-color: var(--background-card);
+  // background-color: var(--background-card);
   width: 100%;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0;
   padding-top: 22px;
+  border: 1px solid var(--devider);
+  border-top: none;
 }
 
 .profileTab {
@@ -35,7 +37,7 @@
   top: 70px;
   left: 0;
   border-radius: 2px 2px 0px 0px;
-  background: var(--accent-1);
+  background: var(--accent);
   transition: all 250ms;
 }
 
@@ -52,7 +54,7 @@
   }
 
   .statName {
-    font-weight: 300;
+    font-weight: 400;
     font-size: 14px;
     line-height: 16px;
     color: var(--text-tertiary-2);
@@ -72,7 +74,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 40px;
+  padding-top: 40px;
 
   button {
     margin: 0;
@@ -100,7 +102,8 @@
   justify-content: space-between;
   border-bottom: 1px solid var(--background-input);
   padding-block: 12px;
-  width: min(640px, 100%);
+  padding-inline: 20px;
+  width: min(600px, 100%);
   text-decoration: none;
 
   .zapInfo {
@@ -173,7 +176,9 @@
 }
 
 .totalSats {
-  margin-block: 16px;
+  padding-top: 16px;
+  padding-left: 16px;
+  margin-bottom: 16px;
   .totalSatsLabel {
     color: var(--text-tertiary);
     font-size: 18px;
@@ -194,10 +199,14 @@
   }
 }
 
+.tabContent {
+  border-inline: 1px solid var(--devider);
+  min-height: 100vh;
+}
+
 .profileRelays {
   border-radius: 8px;
   overflow: hidden;
-  margin-top: 8px;
   .profileRelay {
     display: flex;
     align-items: center;
@@ -244,6 +253,11 @@
   padding-top: 22px;
 }
 
+.loader {
+  min-height: 60px;
+  padding-top: 40px;
+  background: none;
+}
 
 @media only screen and (max-width: 720px) {
   .profileTab {

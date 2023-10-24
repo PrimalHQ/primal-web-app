@@ -1,256 +1,6 @@
 @import "@picocss/pico/scss/pico";
 
-@mixin sunset_wave {
-  --brand-1: #FA3C3C;
-  --brand-2: #5B09AD;
-  --brand-3: #FA9A43;
-  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.3%, var(--brand-2) 100%);
-  --accent-1: #CA079F;
-  --accent-2: #AB268E;
-
-  --brand-text: #D5D5D5;
-  --background-site: #000000;
-  --background-card: #121212;
-  --background-input: #222222;
-  --background-modal: #00000066;
-  --background-embedded_card: #1A1A1A;
-  --border-embedded-card: #282828;
-  --text-primary: #FFFFFF;
-  --text-secondary: #AAAAAA;
-  --text-secondary-2: #AAAAAA;
-  --text-tertiary: #757575;
-  --text-tertiary-2: #666666;
-  --subtile-devider: #444444;
-  --check-image: url('./assets/icons/check.svg');
-
-  --primary: var(--accent-1);
-  --primary-hover: var(--accent-2);
-  --primary-focus: var(--background-color);
-  --background-color: var(--background-site);
-
-  --active-link: var(--text-primary);
-  --inactive-link: var(--text-secondary);
-  --fade-gradient-vertical: linear-gradient(180deg, #000000FF 80%, #00000000 100%);
-  --fade-note-vertical: linear-gradient(180deg, #12121200, #121212FF 90%);
-
-  --logo: url('./assets/icons/logo_fire.svg');
-  --icon-follows: url('./assets/icons/follows.svg');
-  --icon-tribe: url('./assets/icons/tribe.svg');
-  --icon-global: url('./assets/icons/global.svg');
-  --icon-network: url('./assets/icons/network.svg');
-
-  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
-
-  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
-
-  --icon-global-latest: url('./assets/icons/global_latest.svg');
-  --icon-global-popular: url('./assets/icons/global_popular.svg');
-  --icon-global-trending: url('./assets/icons/global_trending.svg');
-
-  --icon-network-latest: url('./assets/icons/network_latest.svg');
-  --icon-network-popular: url('./assets/icons/network_popular.svg');
-  --icon-network-trending: url('./assets/icons/network_trending.svg');
-
-
-  select {
-    background-color: var(--background-site);
-  }
-
-}
-
-@mixin sunrise_wave {
-  --brand-1: #FA3C3C;
-  --brand-2: #5B09AD;
-  --brand-3: #5B09AD;
-  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.3%, var(--brand-2) 100%);
-  --accent-1: #CA079F;
-  --accent-2: #AB268E;
-
-  --brand-text: #444444;
-  --background-site: #F5F5F5;
-  --background-card: #FFFFFF;
-  --background-input: #E5E5E5;
-  --background-modal: #F5F5F566;
-  --background-embedded_card: #F5F5F5;
-  --border-embedded-card: #E5E5E5;
-  --text-primary: #111111;
-  --text-secondary: #444444;
-  --text-secondary-2: #666666;
-  --text-tertiary: #808080;
-  --text-tertiary-2: #808080;
-  --subtile-devider: #C8C8C8;
-  --check-image: url('./assets/icons/check-black.svg');
-
-  --primary: var(--accent-1);
-  --primary-hover: var(--accent-2);
-  --primary-focus: var(--background-color);
-  --background-color: var(--background-site);
-
-  --active-link: var(--text-primary);
-  --inactive-link: var(--text-secondary);
-  --fade-gradient-vertical: linear-gradient(180deg, #F5F5F5FF 80%, #F5F5F500 100%);
-  --fade-note-vertical: linear-gradient(180deg, #FFFFFF00, #FFFFFFFF 90%);
-
-  --logo: url('./assets/icons/logo_fire.svg');
-  --icon-follows: url('./assets/icons/follows_light.svg');
-  --icon-tribe: url('./assets/icons/tribe_light.svg');
-  --icon-global: url('./assets/icons/global_light.svg');
-  --icon-network: url('./assets/icons/network_light.svg');
-
-  --icon-follows-latest: url('./assets/icons/follows_latest_light.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular_light.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending_light.svg');
-
-  --icon-tribe-latest: url('./assets/icons/tribe_latest_light.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular_light.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending_light.svg');
-
-  --icon-global-latest: url('./assets/icons/global_latest_light.svg');
-  --icon-global-popular: url('./assets/icons/global_popular_light.svg');
-  --icon-global-trending: url('./assets/icons/global_trending_light.svg');
-
-  --icon-network-latest: url('./assets/icons/network_latest_light.svg');
-  --icon-network-popular: url('./assets/icons/network_popular_light.svg');
-  --icon-network-trending: url('./assets/icons/network_trending_light.svg');
-
-  select {
-    background-color: var(--background-site);
-  }
-}
-
-@mixin midnight_wave {
-  --brand-1: #0090F8;
-  --brand-2: #4C00C7;
-  --brand-3: #00E0FF;
-  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.22%, var(--brand-2) 100%);
-
-  --accent-1: #2394EF;
-  --accent-2: #0C7DD8;
-
-  --brand-text: #D5D5D5;
-  --background-site: #000000;
-  --background-card: #121212;
-  --background-input: #222222;
-  --background-modal: #00000066;
-  --background-embedded_card: #1A1A1A;
-  --border-embedded-card: #282828;
-  --text-primary: #FFFFFF;
-  --text-secondary: #AAAAAA;
-  --text-secondary-2: #AAAAAA;
-  --text-tertiary: #757575;
-  --text-tertiary-2: #666666;
-  --subtile-devider: #444444;
-  --card-border: #282828;
-  --check-image: url('./assets/icons/check.svg');
-
-  --primary: var(--accent-1);
-  --primary-hover: var(--accent-2);
-  --primary-focus: var(--background-color);
-  --background-color: var(--background-site);
-
-  --active-link: var(--text-primary);
-  --inactive-link: var(--text-secondary);
-  --fade-gradient-vertical: linear-gradient(180deg, #000000FF 80%, #00000000 100%);
-  --fade-note-vertical: linear-gradient(180deg, #12121200, #121212FF 90%);
-
-  --logo: url('./assets/icons/logo_ice.svg');
-  --icon-follows: url('./assets/icons/follows.svg');
-  --icon-tribe: url('./assets/icons/tribe.svg');
-  --icon-global: url('./assets/icons/global.svg');
-  --icon-network: url('./assets/icons/network.svg');
-
-  --icon-follows-latest: url('./assets/icons/follows_latest.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending.svg');
-
-  --icon-tribe-latest: url('./assets/icons/tribe_latest.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending.svg');
-
-  --icon-global-latest: url('./assets/icons/global_latest.svg');
-  --icon-global-popular: url('./assets/icons/global_popular.svg');
-  --icon-global-trending: url('./assets/icons/global_trending.svg');
-
-  --icon-network-latest: url('./assets/icons/network_latest.svg');
-  --icon-network-popular: url('./assets/icons/network_popular.svg');
-  --icon-network-trending: url('./assets/icons/network_trending.svg');
-
-
-  select {
-    background-color: var(--background-site);
-  }
-}
-
-@mixin ice_wave {
-  --brand-1: #0090F8;
-  --brand-2: #4C00C7;
-  --brand-3: #00E0FF;
-  --brand-gradient: linear-gradient(135deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --brand-gradient-vertical: linear-gradient(180deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  --highlight-gradient: linear-gradient(137.63deg, var(--brand-3) 0%, var(--brand-1) 32.22%, var(--brand-2) 100%);
-  --accent-1: #2394EF;
-  --accent-2: #0C7DD8;
-
-  --brand-text: #444444;
-  --background-site: #F5F5F5;
-  --background-card: #FFFFFF;
-  --background-input: #E5E5E5;
-  --background-modal: #F5F5F566;
-  --background-embedded_card: #F5F5F5;
-  --border-embedded-card: #E5E5E5;
-  --text-primary: #111111;
-  --text-secondary: #444444;
-  --text-secondary-2: #666666;
-  --text-tertiary: #808080;
-  --text-tertiary-2: #808080;
-  --subtile-devider: #C8C8C8;
-  --check-image: url('./assets/icons/check-black.svg');
-
-  --primary: var(--accent-1);
-  --primary-hover: var(--accent-2);
-  --primary-focus: var(--background-color);
-  --background-color: var(--background-site);
-
-  --active-link: var(--text-primary);
-  --inactive-link: var(--text-secondary);
-  --fade-gradient-vertical: linear-gradient(180deg, #F5F5F5FF 80%, #F5F5F500 100%);
-  --fade-note-vertical: linear-gradient(180deg, #FFFFFF00, #FFFFFFFF 90%);
-
-  --logo: url('./assets/icons/logo_ice.svg');
-  --icon-follows: url('./assets/icons/follows_light.svg');
-  --icon-tribe: url('./assets/icons/tribe_light.svg');
-  --icon-global: url('./assets/icons/global_light.svg');
-  --icon-network: url('./assets/icons/network_light.svg');
-
-  --icon-follows-latest: url('./assets/icons/follows_latest_light.svg');
-  --icon-follows-popular: url('./assets/icons/follows_popular_light.svg');
-  --icon-follows-trending: url('./assets/icons/follows_trending_light.svg');
-
-  --icon-tribe-latest: url('./assets/icons/tribe_latest_light.svg');
-  --icon-tribe-popular: url('./assets/icons/tribe_popular_light.svg');
-  --icon-tribe-trending: url('./assets/icons/tribe_trending_light.svg');
-
-  --icon-global-latest: url('./assets/icons/global_latest_light.svg');
-  --icon-global-popular: url('./assets/icons/global_popular_light.svg');
-  --icon-global-trending: url('./assets/icons/global_trending_light.svg');
-
-  --icon-network-latest: url('./assets/icons/network_latest_light.svg');
-  --icon-network-popular: url('./assets/icons/network_popular_light.svg');
-  --icon-network-trending: url('./assets/icons/network_trending_light.svg');
-  select {
-    background-color: var(--background-site);
-  }
-}
+@import "./palette.scss";
 
 /* Default theme */
 :root[data-theme="dark"],
@@ -292,6 +42,11 @@
   --z-index-floater: 30;
   --z-index-overlay: 40;
 
+  --border-radius-small: 8px;
+  --border-radius-big: 12px;
+
+  --central-content-width: 600px;
+
   --sidebar-section-icon-gradient: linear-gradient(175.11deg, #FA9A43 6.94%, #FA4343 29.79%, #5B12A4 97.76%), linear-gradient(170.29deg, #CCCCCC 12.73%, #808080 94.98%), #D9D9D9;
 
   --light-input: #E5E5E5;
@@ -301,6 +56,14 @@
 
   --warning-color: #FA3C3C;
   --success-color: #66E205;
+
+  --left-col-w: 187px;
+  --center-col-w: 602px;
+  --right-col-w: 348px;
+  --full-site-w: 1137px;
+  --header-height: 84px;
+
+  background-color: var(--background-site);
 
   .mentioned_user {
     color: var(--accent-1);
@@ -339,15 +102,19 @@
 
 body {
   margin: 0;
-  font-family: 'Roboto Flex', sans-serif;
+  font-family: 'Nacelle', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-y: scroll;
   background-color: var(--background-site);
 }
 
+a {
+  color: var(--accent-links)
+}
+
 .linkish {
-  color: var(--accent-1);
+  color: var(--accent-links);
 }
 
 .redBorder {

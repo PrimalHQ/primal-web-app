@@ -1,6 +1,6 @@
 .fullHeader {
   display: grid;
-  width: 100%;
+  width: 100vw;
   grid-template-columns: 1fr;
   grid-template-rows: 48px 4px;
   grid-template-areas: "phone_header" "phone_border";

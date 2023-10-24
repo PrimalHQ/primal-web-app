@@ -73,7 +73,7 @@ export const userName = (user: PrimalUser | undefined) => {
     user.npub;
 
   return name ?
-    truncateName(name) :
+    name :
     truncateNpub(hexToNpub(user.pubkey) || '');
 };
 
@@ -87,7 +87,7 @@ export const authorName = (user: PrimalUser | undefined) => {
     user.npub;
 
   return name ?
-    truncateName(name) :
+    name :
     truncateNpub(hexToNpub(user.pubkey) || '');
 };
 

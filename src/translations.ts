@@ -122,6 +122,11 @@ export const pin = {
 };
 
 export const actions = {
+  newNote: {
+    id: 'actions.newNote',
+    defaultMessage: 'New Note',
+    description: 'New note action label',
+  },
   createPin: {
     id: 'actions.createPin',
     defaultMessage: 'Set PIN',
@@ -159,7 +164,7 @@ export const actions = {
   },
   cancel: {
     id: 'actions.cancel',
-    defaultMessage: 'cancel',
+    defaultMessage: 'Cancel',
     description: 'Cancel action, button label',
   },
   copy: {
@@ -209,7 +214,7 @@ export const actions = {
   },
   notePostNew: {
     id: 'actions.notePostNew',
-    defaultMessage: 'post',
+    defaultMessage: 'Post',
     description: 'Send new note, button label',
   },
   noteReply: {
@@ -229,17 +234,17 @@ export const actions = {
   },
   previous: {
     id: 'actions.previous',
-    defaultMessage: 'previous',
+    defaultMessage: 'Previous',
     description: 'Go to previous step action label',
   },
   next: {
     id: 'actions.next',
-    defaultMessage: 'next',
+    defaultMessage: 'Next',
     description: 'Go to next step action label',
   },
   finish: {
     id: 'actions.finish',
-    defaultMessage: 'finish',
+    defaultMessage: 'Finish',
     description: 'Finish the wizard action label',
   },
   editProfile: {
@@ -337,7 +342,7 @@ export const actions = {
   noteContext: {
     zap: {
       id: 'actions.noteContext.zapNote',
-      defaultMessage: 'Zap',
+      defaultMessage: 'Custom Zap',
       description: 'Label for note zap from context menu',
     },
     copyLink: {
@@ -390,6 +395,11 @@ export const actions = {
       defaultMessage: 'Quote note',
       description: 'Label for quoting note from context menu',
     },
+  },
+  zap: {
+    id: 'actions.zap',
+    defaultMessage: 'Zap',
+    description: 'Label for zap',
   },
 };
 
@@ -511,12 +521,12 @@ export const exploreSidebarCaption = {
 export const explore = {
   genericCaption: {
     id: 'explore.genericCaption',
-    defaultMessage: 'explore nostr',
+    defaultMessage: 'explore',
     description: 'Generic caption for the explore page',
   },
   pageTitle: {
     id: 'explore.pageTitle',
-    defaultMessage: 'Explore Nostr',
+    defaultMessage: 'Explore',
     description: 'Title of the explore page',
   },
   title: {
@@ -578,9 +588,9 @@ export const feedNewPosts = {
   id: 'feed.newPosts',
   defaultMessage: `{number, plural,
     =0 {}
-    one {# new note}
-    =100 {99+ new notes}
-    other {# new notes}}`,
+    one {# New Note}
+    =99 {99+ New Notes}
+    other {# New Notes}}`,
   description: 'Label for a button to load new notes',
 };
 
@@ -872,6 +882,11 @@ export const notifications = {
 };
 
 export const placeholders = {
+  addComment: {
+    id: 'placeholders.addComment',
+    defaultMessage: 'Add a comment...',
+    description: 'Placeholder for adding a comment',
+  },
   searchByNpub: {
     id: 'placeholders.searchByNpub',
     defaultMessage: 'search by npub...',
@@ -894,7 +909,7 @@ export const placeholders = {
   },
   comingSoon: {
     id: 'placeholders.comingSoon',
-    defaultMessage: 'Coming soon',
+    defaultMessage: 'Coming soon. Seriously. Help is on the way. ;)',
     description: 'Placholder text for missing content',
   },
   endOfFeed: {
@@ -909,7 +924,7 @@ export const placeholders = {
   },
   noteCallToAction: {
     id: 'placeholders.callToAction.note',
-    defaultMessage: 'say something on nostr...',
+    defaultMessage: 'Say something on nostr...',
     description: 'Placeholder for new note call-to-action',
   },
   pageWIPTitle: {
@@ -934,7 +949,7 @@ export const placeholders = {
   },
   search: {
     id: 'placeholders.search',
-    defaultMessage: 'search',
+    defaultMessage: 'Search...',
     description: 'Search input placeholder',
   },
   selectFeed: {
@@ -1082,7 +1097,7 @@ export const search = {
   },
   searchNostr: {
     id: 'search.searchNostr',
-    defaultMessage: 'search nostr',
+    defaultMessage: 'Search nostr',
     description: 'Label explaining full search action',
   },
   sidebarCaption: {
@@ -1297,7 +1312,7 @@ export const settings = {
     },
     myRelays: {
       id: 'settings.network.myRelays',
-      defaultMessage: 'My Relays',
+      defaultMessage: 'My relays',
       description: 'Title of the my relays section of the network settings sub-page',
     },
     noMyRelays: {
@@ -1338,7 +1353,7 @@ export const settings = {
   },
   cashingService: {
     id: 'settings.cashingService',
-    defaultMessage: 'Caching Service',
+    defaultMessage: 'Caching services',
     description: 'Title of the caching service sections of the settings sidebar',
   },
   title: {
@@ -1430,6 +1445,11 @@ export const settings = {
         defaultMessage: 'Display Name',
         description: 'Label for display name input on edit profile page',
       },
+      help: {
+        id: 'pages.settings.profile.displayName.help',
+        defaultMessage: 'Pick a longer display name (e. g. “Satoshi Nakamoto”)',
+        description: 'Help for displayName input on edit profile page',
+      },
       placeholder : {
         id: 'pages.settings.profile.displayName.placeholder',
         defaultMessage: 'Enter display name',
@@ -1446,6 +1466,11 @@ export const settings = {
         id: 'pages.settings.profile.name.label',
         defaultMessage: 'Username',
         description: 'Label for name input on edit profile page',
+      },
+      help: {
+        id: 'pages.settings.profile.name.help',
+        defaultMessage: 'Pick a short user handle (e. g. “satoshi”)',
+        description: 'Help for name input on edit profile page',
       },
       placeholder : {
         id: 'pages.settings.profile.name.placeholder',
@@ -1569,7 +1594,7 @@ export const scopeDescriptors: Record<string, ScopeDescriptor> = {
     },
     description: {
       id: 'explore.scopes.tribe.description',
-      defaultMessage: 'accounts you follow + your followers',
+      defaultMessage: 'accounts you follow <div>+ your followers</div>',
       description: 'Description of the tribe scope description',
     },
   },
@@ -1586,7 +1611,7 @@ export const scopeDescriptors: Record<string, ScopeDescriptor> = {
     },
     description: {
       id: 'explore.scopes.network.description',
-      defaultMessage: 'accounts you follow + everyone they follow',
+      defaultMessage: 'accounts you follow <div>+ everyone they follow</div>',
       description: 'Description of the network scope description',
     },
   },

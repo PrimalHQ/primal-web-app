@@ -16,6 +16,7 @@ import { PrimalUser } from '../../types/primal';
 import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 
 const Muted: Component = () => {
 
@@ -71,7 +72,7 @@ const Muted: Component = () => {
         <div>{intl.formatMessage(t.muted.title)}</div>
       </PageCaption>
 
-      <div>
+      <div class={styles.settingsContentFull}>
         <For
           each={account?.muted}
           fallback={
@@ -100,15 +101,15 @@ const Muted: Component = () => {
                 }
               >
                 <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
-                  <Avatar user={user(pubkey)} size='sm' />
+                  <Avatar user={user(pubkey)} size='vvs' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>
                     <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
                   </div>
                 </Link>
-                <button onClick={() => unMuteUser(user(pubkey))}>
+                <ButtonSecondary onClick={() => unMuteUser(user(pubkey))}>
                   {intl.formatMessage(tActions.unmute)}
-                </button>
+                </ButtonSecondary>
               </Show>
             </div>
           )}

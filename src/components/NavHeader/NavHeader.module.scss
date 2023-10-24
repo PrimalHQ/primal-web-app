@@ -1,0 +1,53 @@
+.navHeader {
+  position: fixed;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 72px;
+  width: calc(var(--central-content-width) - 2px);
+  margin: 0;
+  padding: 0;
+  padding-top: 32px;
+  background-color: var(--background-modal);
+  z-index: var(--z-index-header);
+  backdrop-filter: blur(10px);
+
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--text-secondary);
+
+  border: none;
+  border-bottom: 1px solid var(--devider);
+  border-radius: 0;
+
+  outline: none;
+  box-shadow: none;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+}
+
+.title {
+  height: 16px;
+  padding-top: 1px;
+}
+
+.backIcon {
+  display: inline-block;
+  border: none;
+  box-shadow: none;
+  background-color: unset;
+  margin: 0px;
+  padding: 0px;
+  width: 16px;
+  height: 16px;
+  margin-left: 20px;
+  margin-right: 12px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/back.svg) no-repeat center;
+  mask: url(../../assets/icons/back.svg) no-repeat center;
+}

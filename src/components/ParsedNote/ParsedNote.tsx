@@ -2,6 +2,7 @@ import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
 import {
   addLinkPreviews,
+  getLinkPreview,
   isAppleMusic,
   isHashtag,
   isImage,
@@ -220,9 +221,19 @@ const ParsedNote: Component<{
           return <span class="whole">{token}</span>;
         }
 
-        addLinkPreviews(token).then(preview => {
-          replaceLink(token, preview);
-        });
+        const preview = getLinkPreview(token);
+
+        const hasMinimalPreviewData = !props.noPreviews &&
+          preview &&
+          preview.url &&
+          ((!!preview.description && preview.description.length > 0) ||
+            !preview.images?.some((x:any) => x === '') ||
+            !!preview.title
+          );
+
+        if (hasMinimalPreviewData) {
+          return <LinkPreview preview={preview} />;
+        }
 
         return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
       }
@@ -379,7 +390,7 @@ const ParsedNote: Component<{
               <><A href={path}>{noteId}</A>{end}</>;
           }
 
-          return <span class="whole"> embeded</span>;
+          return <span class="whole"> {embeded}</span>;
         }
 
         if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
@@ -436,7 +447,7 @@ const ParsedNote: Component<{
 
     if (hasMinimalPreviewData) {
       // @ts-ignore
-      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div class="bordered"><LinkPreview preview={preview} /></div>).outerHTML;
+      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div><LinkPreview preview={preview} /></div>).outerHTML;
     }
   };
 

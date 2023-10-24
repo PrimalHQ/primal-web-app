@@ -1,3 +1,4 @@
+import { minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { sanitize } from "./notes";
 
@@ -51,7 +52,6 @@ export const searchFutureContent = (subid: string, query: string, since:number, 
 }
 
 export const searchFilteredUsers = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string) => {
-  console.log('searchFily=tered: ', pubkey, user_pubkey)
   if (!pubkey || !user_pubkey) {
     return;
   }
@@ -61,5 +61,17 @@ export const searchFilteredUsers = (pubkey: string | undefined, user_pubkey: str
     "REQ",
     subid,
     {cache: ["search_filterlist", { pubkey, user_pubkey }]},
+  ]));
+};
+
+export const getScoredUsers = (user_pubkey: string | undefined, selector: string, limit: number, subid: string) => {
+  if (!user_pubkey) {
+    user_pubkey = minKnownProfiles.names.primal;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['scored', { user_pubkey, selector }]},
   ]));
 };

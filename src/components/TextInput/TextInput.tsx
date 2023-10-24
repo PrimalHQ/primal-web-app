@@ -7,6 +7,7 @@ const TextInput: Component<{
   label?: string,
   description?: string,
   errorMessage?: string,
+  placeholder?: string,
   value?: string,
   onChange?: (value: string) => void,
   onKeyUp?: (e: KeyboardEvent) => void,
@@ -17,10 +18,11 @@ const TextInput: Component<{
   type?: string,
   autocomplete?: string,
   name?: string,
+  noExtraSpace?: boolean,
 }> = (props) => {
 
   return (
-    <div class={styles.container}>
+    <div class={`${styles.container} ${props.noExtraSpace ? styles.noExtra : ''}`}>
       <TextField.Root
         class={styles.root}
         value={props.value}
@@ -42,6 +44,7 @@ const TextInput: Component<{
             name={props.name || 'searchTerm'}
             autocomplete={props.autocomplete || "off"}
             onKeyUp={props.onKeyUp}
+            placeholder={props.placeholder}
           />
 
           <div class={styles.inputAfter}>

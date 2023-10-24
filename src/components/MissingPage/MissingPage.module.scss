@@ -1,21 +1,26 @@
 .fullHeader {
   display: grid;
-  height: 120px;
+  height: 84px;
   align-items: center;
   justify-content: left;
+  padding-inline: 20px;
+
+  border-bottom: 1px solid var(--devider);
 
   >div {
-    font-weight: 300;
     font-size: 32px;
+    font-weight: 400;
     line-height: 34px;
-    color: var(--brand-text);
+    color: var(--text-secondary);
     text-transform: lowercase;
   }
 }
 
 .comingSoon {
-  font-weight: 300;
+  font-weight: 400;
   font-size: 18px;
   line-height: 34px;
+  padding-inline: 20px;
+  margin-top: 24px;
   color: var(--text-secondary);
 }
