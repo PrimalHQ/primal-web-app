@@ -1,22 +1,47 @@
-import { Component, createEffect, JSX, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, createMemo, JSX, onCleanup, onMount } from "solid-js";
 import styles from "./NoteImage.module.scss";
 import mediumZoom from "medium-zoom";
 import type { Zoom } from 'medium-zoom';
 // @ts-ignore Bad types in nostr-tools
 import { generatePrivateKey } from "nostr-tools";
+import { MediaVariant } from "../../types/primal";
 
 const NoteImage: Component<{
+  media?: MediaVariant,
+  width?: number,
   src?: string,
   isDev?: boolean,
   onError?: JSX.EventHandlerUnion<HTMLImageElement, Event>,
 }> = (props) => {
   const imgId = generatePrivateKey();
+  let zoomRef: Zoom | undefined;
+
+  let imgRefActual: HTMLImageElement | undefined;
 
   const imgRef = () => {
     return document.getElementById(imgId)
   };
 
-  let zoomRef: Zoom | undefined;
+  const src = () => props.media?.media_url || props.src;
+
+  const height = createMemo(() => {
+    if (!props.media) {
+      return '100%';
+    }
+
+    const mediaHeight = props.media.h;
+    const mediaWidth = props.media.w || 0;
+    const rect = imgRefActual?.getBoundingClientRect();
+    const imgWidth = props.width || rect?.width || 0;
+
+    const ratio = mediaWidth / imgWidth;
+
+    const h = ratio > 1 ?
+      mediaHeight / ratio :
+      mediaHeight * ratio;
+
+    return `${h}px`;
+  });
 
   const klass = () => `${styles.noteImage} ${props.isDev ? 'redBorder' : ''}`;
 
@@ -53,7 +78,16 @@ const NoteImage: Component<{
   });
 
   return (
-    <img id={imgId} src={props.src} class={klass()} onerror={props.onError} onClick={doZoom} />
+    <div style={`width: 100%; height: ${height()};`}>
+      <img
+        id={imgId}
+        ref={imgRefActual}
+        src={src()}
+        class={klass()}
+        onerror={props.onError}
+        onClick={doZoom}
+      />
+    </div>
   );
 }
 

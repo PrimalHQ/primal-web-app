@@ -85,7 +85,8 @@ const ParsedNote: Component<{
         if (index > 0) {
           const prefix = token.slice(0, index);
 
-          const matched = token.match(urlExtractRegex)[0];
+          const matched = (token.match(urlExtractRegex) || [])[0];
+
           if (matched) {
             const suffix = token.substring(matched.length + index, token.length);
             return <>{parseToken(prefix)}{parseToken(matched)}{parseToken(suffix)}</>;
@@ -97,10 +98,10 @@ const ParsedNote: Component<{
         if (!props.ignoreMedia) {
           if (isImage(token)) {
             const dev = localStorage.getItem('devMode') === 'true';
-            let imgUrl = media?.actions.getMediaUrl(token);
-            const url = imgUrl || getMediaUrlDefault(token)
+            let image = media?.actions.getMedia(token, 'o');
+            const url = image?.media_url || getMediaUrlDefault(token)
 
-            return <NoteImage src={url} isDev={dev} />;
+            return <NoteImage src={url} isDev={dev} media={image} width={514} />;
           }
 
           if (isMp4Video(token)) {

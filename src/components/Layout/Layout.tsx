@@ -31,6 +31,10 @@ const Layout: Component = () => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
+    if (!newNote || !newNoteTextArea) {
+      return;
+    }
+
     if (account?.showNewNoteForm) {
       newNote?.classList.add(styles.animatedShow);
       newNoteTextArea?.focus();

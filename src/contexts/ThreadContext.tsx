@@ -26,6 +26,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrMediaInfo,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
