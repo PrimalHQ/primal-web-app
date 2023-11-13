@@ -284,8 +284,8 @@ export const emojiSearchLimit = 0;
 
 export const today = (new Date()).getTime();
 
-export const iosRD = (new Date('09/29/2023')).getTime();
-export const iosVersion = '0.30.4';
+export const iosRD = (new Date('11/13/2023')).getTime();
+export const iosVersion = '0.90.3';
 
 export const andRD = (new Date('11/13/2023')).getTime();
 export const andVersion = '0.20.4';
