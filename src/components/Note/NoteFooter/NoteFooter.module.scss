@@ -15,11 +15,17 @@
   position: relative;
   width: 100%;
 
+  .context {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
   .stat {
-    // display: grid;
-    // grid-template-columns: 18px 1fr;
-    // grid-template-rows: 1fr;
-    // grid-column-gap: 5px;
     font-weight: 400;
     font-size: 14px;
     line-height: 16px;

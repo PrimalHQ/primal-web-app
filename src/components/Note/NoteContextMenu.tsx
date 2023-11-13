@@ -199,6 +199,7 @@ const NoteContextMenu: Component<{
         id={`note_context_${props.note.post.id}`}
         items={noteContext}
         hidden={!showContext()}
+        position="note_footer"
       />
     </div>
   )

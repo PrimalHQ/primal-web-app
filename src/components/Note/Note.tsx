@@ -30,8 +30,6 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (pr
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const [openCustomZap, setOpenCustomZap] = createSignal(false);
-
   return (
     <A
       id={props.id}
@@ -45,16 +43,6 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (pr
         <Show when={repost()}>
           <NoteRepostHeader repost={props.note.repost} />
         </Show>
-
-        <div class={styles.context}>
-          <NoteContextMenu
-            note={props.note}
-            openCustomZap={() => {
-              setOpenCustomZap(true);
-              setTimeout(() => setOpenCustomZap(false), 10);
-            }}
-            />
-        </div>
       </div>
       <div class={styles.content}>
         <div class={styles.leftSide}>
@@ -80,48 +68,9 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (pr
             <ParsedNote note={props.note} />
           </div>
 
-          <NoteFooter note={props.note} doCustomZap={openCustomZap()} />
+          <NoteFooter note={props.note} />
         </div>
       </div>
-
-      {/* <div class={styles.post}>
-        <Show
-          when={props.note.replyTo}
-          fallback={
-            <NoteHeader
-              note={props.note}
-              openCustomZap={() => {
-                setOpenCustomZap(true);
-                setTimeout(() => setOpenCustomZap(false), 10);
-              }}
-            />
-          }
-        >
-          <NoteReplyHeader
-            note={props.note}
-            openCustomZap={() => {
-              setOpenCustomZap(true);
-              setTimeout(() => setOpenCustomZap(false), 10);
-            }}
-          />
-        </Show>
-        <div class={styles.content}>
-          <div class={styles.message}>
-            <Show
-              when={props.parent}
-              fallback={<div class={styles.leftMargin}></div>}
-            >
-              <div class={styles.leftMarginParent}></div>
-            </Show>
-            <div class={styles.noteContent}>
-              <div class={styles.noteText}>
-                <ParsedNote note={props.note} />
-              </div>
-              <NoteFooter note={props.note} doCustomZap={openCustomZap()} />
-            </div>
-          </div>
-        </div>
-      </div> */}
     </A>
   )
 }

@@ -40,55 +40,6 @@
         }
       }
     }
-
-    .context {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background: none;
-
-      .contextMenu {
-        position: relative;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        text-align: center;
-        font-weight: bold;
-
-        .contextButton {
-          width: 32px;
-          height: 32px;
-          padding: 0;
-          margin: 0;
-          background: none;
-          border: none;
-          outline: none;
-          display: flex;
-          justify-content: center;
-          align-items: flex-start;
-
-          &:focus {
-            outline: none;
-            box-shadow: none;
-          }
-
-          .contextIcon {
-            width: 16px;
-            height: 14px;
-            background-color: var(--text-secondary-2);
-            -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-            mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-          }
-
-          &:hover {
-            .contextIcon {
-              background-color: var(--text-primary);
-            }
-          }
-        }
-      }
-    }
   }
 
   .content {
@@ -147,13 +98,13 @@
   overflow: hidden;
   align-items: center;
   justify-content: flex-start;
-  width: 490px;
+  width: 524px;
   position: relative;
   .userName {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    max-width: 50%;
+    max-width: 226px;
     color: var(--text-primary);
 
     font-size: 14px;
@@ -162,8 +113,8 @@
   }
   .time{
     display: flex;
-    margin: 0px 2px;
-    min-width: 80px;
+    margin-left: 2px;
+    min-width: fit-content;
     font-size: 14px;
     font-weight: 400;
     line-height: 14px;
@@ -178,7 +129,7 @@
     }
   }
   .verification {
-    max-width: 50%;
+    max-width: 216px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -217,6 +168,47 @@
   }
 }
 
+.contextMenu {
+  position: relative;
+  width: 16px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-weight: bold;
+
+  .contextButton {
+    width: 16px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .contextIcon {
+      width: 16px;
+      height: 14px;
+      background-color: var(--text-secondary-2);
+      -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+    }
+
+    &:hover {
+      .contextIcon {
+        background-color: var(--text-primary);
+      }
+    }
+  }
+}
 
 @media only screen and (max-width: 720px) {
   .postLink {

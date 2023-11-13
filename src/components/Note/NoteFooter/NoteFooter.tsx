@@ -18,8 +18,9 @@ import { medZapLimit } from '../../../constants';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
+import NoteContextMenu from '../NoteContextMenu';
 
-const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: string }> = (props) => {
+const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
   const account = useAccountContext();
   const toast = useToastContext();
@@ -372,12 +373,6 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
 
   });
 
-  createEffect(() => {
-    if (props.doCustomZap) {
-      setIsCustomZap(true);
-    }
-  });
-
   const [showSmallZapAnim, setShowSmallZapAnim] = createSignal(false);
   const [showMedZapAnim, setShowMedZapAnim] = createSignal(false);
   const [hideZapIcon, setHideZapIcon] = createSignal(false);
@@ -457,17 +452,27 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
         </div>
       </button>
 
+      <div class={styles.context}>
+        <NoteContextMenu
+          note={props.note}
+          openCustomZap={() => {
+            setIsCustomZap(true);
+            setTimeout(() => setIsCustomZap(false), 10);
+          }}
+        />
+      </div>
+
       <CustomZap
         open={isCustomZap()}
         note={props.note}
-        onConfirm={(amount) => {
+        onConfirm={(amount: number) => {
           setIsCustomZap(false);
           setZappedAmount(() => amount || 0);
           setZappedNow(true);
           setZapped(true);
           animateZap();
         }}
-        onSuccess={(amount) => {
+        onSuccess={(amount: number) => {
           setIsCustomZap(false);
           setIsZapping(false);
           // setZappedAmount(() => amount || 0);
@@ -478,7 +483,7 @@ const NoteFooter: Component<{ note: PrimalNote, doCustomZap?: boolean, id?: stri
           setHideZapIcon(false);
           setZapped(true);
         }}
-        onFail={(amount) => {
+        onFail={(amount: number) => {
           setZappedAmount(() => -(amount || 0));
           setZappedNow(true);
           setIsCustomZap(false);
