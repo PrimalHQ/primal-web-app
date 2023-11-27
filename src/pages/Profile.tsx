@@ -467,10 +467,6 @@ const Profile: Component = () => {
         <Search />
       </Wormhole>
 
-      <Show
-        when={profile?.userProfile && profile.userProfile.pubkey === getHex()}
-        fallback={<div id="central_header" class={styles.emptyHeader}></div>}
-      >
 
         <div id="central_header" class={styles.fullHeader}>
           <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
@@ -545,7 +541,8 @@ const Profile: Component = () => {
 
           <div class={styles.profileVerification}>
             <Show
-              when={profile?.userProfile}>
+              when={profile?.profileKey}
+            >
               <div class={styles.basicInfo}>
                 <div class={styles.name}>
                   {profileName()}
@@ -628,7 +625,6 @@ const Profile: Component = () => {
           }}
           onAbort={() => setConfirmMuteUser(false)}
         />
-      </Show>
     </>
   )
 }
