@@ -40,6 +40,7 @@ const VerificationCheck: Component<{
   return (
     <Show
       when={isVerified()}
+      fallback={<div class={styles.verificationFailed}></div>}
     >
       <Show
         when={props.large}
