@@ -417,12 +417,22 @@ const ParsedNote: Component<{
       }
 
       if (isHashtag(token)) {
-        const [_, term] = token.split('#');
+        let [_, term] = token.split('#');
+        let end = '';
+
+        let match = specialCharsRegex.exec(term);
+
+        if (match) {
+          const i = match.index;
+          end = term.slice(i);
+          term = term.slice(0, i);
+        }
+
         const embeded = props.noLinks === 'text' ?
           <span>#{term}</span> :
           <A href={`/search/%23${term}`}>#{term}</A>;
 
-        return <span class="whole"> {embeded}</span>;
+        return <span class="whole"> {embeded}{end}</span>;
       }
 
       return <span class="whole">{convertHTMLEntity(token)}</span>;
