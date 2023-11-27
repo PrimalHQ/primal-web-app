@@ -40,26 +40,6 @@
   }
 }
 
-.verifiedIconL {
-  width: 22px;
-  height: 22px;
-  display: inline-block;
-  margin: 0px 0px 0px 4px;
-  background-color: var(--accent-2);
-  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
-  mask: url(../assets/icons/verified.svg) no-repeat 0px / 22px;
-}
-
-.verifiedIconS {
-  width: 12px;
-  height: 12px;
-  display: inline-block;
-  margin: 0px 2px;
-  background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../assets/icons/verified.svg) no-repeat 0px / 12px;
-  mask: url(../assets/icons/verified.svg) no-repeat 0px / 12px;
-}
-
 .keyIcon {
   min-width: 16px;
   height: 16px;

@@ -6,7 +6,11 @@ import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
 
 
-const VerificationCheck: Component<{ user: PrimalUser | undefined, id?: string }> = (props) => {
+const VerificationCheck: Component<{
+  user: PrimalUser | undefined,
+  large?: boolean,
+  id?: string,
+}> = (props) => {
 
   const [isVerified, setIsVerified] = createSignal(true);
 
@@ -37,17 +41,34 @@ const VerificationCheck: Component<{ user: PrimalUser | undefined, id?: string }
     <Show
       when={isVerified()}
     >
-      <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
-        <Show
-          when={isVerifiedByPrimal()}
-          fallback={
-            <span class={styles.verifiedIcon} />
-          }
-        >
-          <span class={styles.whiteCheck} />
-          <span class={styles.verifiedIconPrimal} />
-        </Show>
-      </div>
+      <Show
+        when={props.large}
+        fallback={
+          <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
+          <Show
+            when={isVerifiedByPrimal()}
+            fallback={
+              <span class={styles.verifiedIcon} />
+            }
+          >
+            <span class={styles.whiteCheck} />
+            <span class={styles.verifiedIconPrimal} />
+          </Show>
+        </div>
+        }
+      >
+        <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIconL}>
+          <Show
+            when={isVerifiedByPrimal()}
+            fallback={
+              <span class={styles.verifiedIcon} />
+            }
+          >
+            <span class={styles.whiteCheckL} />
+            <span class={styles.verifiedIconPrimal} />
+          </Show>
+        </div>
+      </Show>
     </Show>
   )
 }

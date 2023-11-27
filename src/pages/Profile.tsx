@@ -49,6 +49,7 @@ import ButtonProfile from '../components/Buttons/ButtonProfile';
 import ButtonFollow from '../components/Buttons/ButtonFlip';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import Menu from '../components/Menu/Menu';
+import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 
 const Profile: Component = () => {
 
@@ -547,7 +548,7 @@ const Profile: Component = () => {
                 <div class={styles.name}>
                   {profileName()}
                   <Show when={profile?.userProfile?.nip05 && verification()}>
-                    <div class={styles.verifiedIconL}></div>
+                    <VerificationCheck user={profile?.userProfile} large={true} />
                   </Show>
                   <Show when={isFollowingYou()}>
                     <div class={styles.followsBadge}>
