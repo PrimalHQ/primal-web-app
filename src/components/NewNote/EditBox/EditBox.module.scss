@@ -223,9 +223,9 @@ textarea::-webkit-scrollbar{
 .editor {
   max-width: calc(100% - 14px);
   min-height: 60px;
-  max-height: 46vh;
   outline: 0px solid transparent;
   word-wrap: break-word;
+  word-break: break-all;
   font-size: 16px;
   line-height: 20px;
   font-weight: 400;
