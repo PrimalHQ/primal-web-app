@@ -40,25 +40,18 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { linebreakRegex, urlExtractRegex } from '../../constants';
+import { linebreakRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 
-const specialChars = [
-  ",",
-  "?",
-  ";",
-  "!",
-  "'",
-  ".",
-  "-",
-  ")",
-  "(",
-  "[",
-  "]",
-  "{",
-  "}",
-];
 
-const rgx = /[^A-Za-z0-9]/;
+const convertHTMLEntity = (text: string) => {
+  const span = document.createElement('span');
+
+  return text
+  .replace(/&[#A-Za-z0-9]+;/gi, (entity)=> {
+      span.innerHTML = entity;
+      return span.innerText;
+  });
+}
 
 const ParsedNote: Component<{
   note: PrimalNote,
@@ -262,7 +255,7 @@ const ParsedNote: Component<{
 
         let end = '';
 
-        let match = rgx.exec(id);
+        let match = specialCharsRegex.exec(id);
 
         if (match) {
           const i = match.index;
@@ -312,7 +305,7 @@ const ParsedNote: Component<{
 
         let end = '';
 
-        let match = rgx.exec(id);
+        let match = specialCharsRegex.exec(id);
 
         if (match) {
           const i = match.index;
@@ -432,7 +425,7 @@ const ParsedNote: Component<{
         return <span class="whole"> {embeded}</span>;
       }
 
-      return <span class="whole">{token}</span>;
+      return <span class="whole">{convertHTMLEntity(token)}</span>;
   };
 
   onMount(() => {

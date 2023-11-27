@@ -255,6 +255,9 @@ export const noteRegex = /nostr:((note|nevent)1\w+)\b/g;
 export const profileRegex = /nostr:((npub|nprofile)1\w+)\b/;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 
+export const specialCharsRegex = /[^A-Za-z0-9]/;
+
+
 export const medZapLimit = 1000;
 
 export const defaultNotificationSettings: Record<string, boolean> = {
