@@ -42,7 +42,23 @@ import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import { linebreakRegex, urlExtractRegex } from '../../constants';
 
-const specialChars = [",", "?", ";", "!", "'", ".", "-"];
+const specialChars = [
+  ",",
+  "?",
+  ";",
+  "!",
+  "'",
+  ".",
+  "-",
+  ")",
+  "(",
+  "[",
+  "]",
+  "{",
+  "}",
+];
+
+const rgx = /[^A-Za-z0-9]/;
 
 const ParsedNote: Component<{
   note: PrimalNote,
@@ -56,7 +72,6 @@ const ParsedNote: Component<{
   const media = useMediaContext();
 
   const [tokens, setTokens] = createStore<string[]>([])
-  const [renderedUrl, setRenderedUrl] = createStore<Record<string, any>>({});
 
   const parseContent = () => {
     const content = props.ignoreLinebreaks ?
@@ -247,16 +262,12 @@ const ParsedNote: Component<{
 
         let end = '';
 
-        for (let i=0; i<specialChars.length; i++) {
-          const char = specialChars[i];
+        let match = rgx.exec(id);
 
-          const index = id.indexOf(char);
-
-          if (index >= 0) {
-            end = id.slice(index);
-            id = id.slice(0, index);
-            break;
-          }
+        if (match) {
+          const i = match.index;
+          end = id.slice(i);
+          id = id.slice(0, i);
         }
 
         let link = <span>{token}</span>;
@@ -289,7 +300,7 @@ const ParsedNote: Component<{
           link = <span class={styles.error}>{token}</span>;
         }
 
-        return <span class="whole"> {link}</span>;
+        return <span class="whole"> {link}{end}</span>;
       }
 
       if (isUserMention(token)) {
@@ -301,16 +312,12 @@ const ParsedNote: Component<{
 
         let end = '';
 
-        for (let i=0; i<specialChars.length; i++) {
-          const char = specialChars[i];
+        let match = rgx.exec(id);
 
-          const index = id.indexOf(char);
-
-          if (index >= 0) {
-            end = id.slice(index);
-            id = id.slice(0, index);
-            break;
-          }
+        if (match) {
+          const i = match.index;
+          end = id.slice(i);
+          id = id.slice(0, i);
         }
 
         try {
