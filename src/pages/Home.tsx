@@ -162,13 +162,6 @@ const Home: Component = () => {
           </div>
         </Match>
         <Match
-          when={!isPageLoading()}
-        >
-          <div class={styles.endOfContent}>
-            {intl.formatMessage(placeholders.endOfFeed)}
-          </div>
-        </Match>
-        <Match
           when={isPageLoading()}
         >
           <div class={styles.noContent}>
