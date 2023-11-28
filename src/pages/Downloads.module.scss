@@ -35,6 +35,9 @@
   align-items: center;
   margin-bottom: 24px;
 
+  border-block: 1px solid var(--devider);
+  padding: 16px;
+
   >video {
     width: 100%;
     border-radius: 8px;
@@ -44,7 +47,9 @@
 .linkHolder {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 36px;
+  max-width: 598px;
 
   >div {
     display: flex;
@@ -55,7 +60,6 @@
   }
 
   .appStore {
-    padding-block: 24px;
     width: 308px;
     background-color: var(--background-card);
     border-radius: 8px;
@@ -84,19 +88,12 @@
         flex-direction: column;
         align-items: flex-end;
         margin-right: 8px;
-        color: var(--text-tertiary-2);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 18px;
       }
       >div:last-child {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        color: var(--text-tertiary-2);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 18px;
+        text-transform: capitalize;
       }
     }
 
@@ -108,14 +105,18 @@
   }
 
   .playStore {
-    padding-block: 24px;
     width: 308px;
     background-color: var(--background-card);
     border-radius: 8px;
-    >a {
+    .playstoreLink {
       margin-top: 16px;
-      width: 134px;
-      height: 40px;
+    }
+
+    .apkLink {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 18px;
+      margin-top: 12px;
     }
 
     .desktopCTA {
@@ -141,19 +142,13 @@
         flex-direction: column;
         align-items: flex-end;
         margin-right: 8px;
-        color: var(--text-tertiary-2);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 18px;
       }
+
       >div:last-child {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        color: var(--text-tertiary-2);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 18px;
+        text-transform: capitalize;
       }
     }
   }
@@ -212,6 +207,7 @@
   .linkHolder {
     margin-top: 20px;
     flex-direction: column;
+    align-items: center;
 
     >div {
       .desktopCTA {
@@ -231,7 +227,6 @@
     }
 
     .appStore {
-      width: calc(100% - 40px);
       margin-inline: 20px;
       .callToActionIOS {
         display: flex;
@@ -248,9 +243,10 @@
     }
 
     .playStore {
-      width: calc(100% - 40px);
       margin-top: 4px;
       margin-bottom: 250px;
+      flex-direction: column;
+      align-items: center;
       .callToActionAndroid {
         display: flex;
         .ctaTitle {
@@ -258,10 +254,6 @@
           font-weight: 600;
           line-height: 24px;
         }
-      }
-      >a {
-        width: 188px;
-        height: 63px;
       }
     }
   }

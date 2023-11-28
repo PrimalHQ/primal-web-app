@@ -3,8 +3,8 @@ import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Search from '../components/Search/Search';
 
-import appStore from '../assets/images/appstore_download.svg';
-import apkDownload from '../assets/images/primal_apk_download.svg';
+import appstoreImg from '../assets/images/appstore_download.svg';
+import playstoreImg from '../assets/images/playstore_download.svg';
 
 import gitHubLight from '../assets/icons/github_light.svg';
 import gitHubDark from '../assets/icons/github.svg';
@@ -13,7 +13,7 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { andVersion, andRD, iosVersion, iosRD, today } from '../constants';
+import { andVersion, andRD, iosVersion, iosRD, today, appStoreLink, playstoreLink } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -36,7 +36,7 @@ const Downloads: Component = () => {
     const date = new Date(dateValue);
 
     return new Intl.DateTimeFormat("en-US", {
-      year: 'numeric', month: 'long', day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     }).format(date);
   }
 
@@ -120,8 +120,8 @@ const Downloads: Component = () => {
 
           <div class={styles.buidDetails}>
             <div>
-              <div>released:</div>
-              <div>build:</div>
+              <div>{intl.formatMessage(t.released)}:</div>
+              <div>{intl.formatMessage(t.build)}:</div>
             </div>
             <div>
               <div>{displayDate(iosRD).toLowerCase()}</div>
@@ -130,10 +130,10 @@ const Downloads: Component = () => {
           </div>
 
           <a
-            href='https://testflight.apple.com/join/Is4tmDDR'
+            href={appStoreLink}
             target='_blank'
           >
-            <img src={appStore} />
+            <img src={appstoreImg} />
           </a>
         </div>
         <div class={styles.playStore}>
@@ -147,8 +147,8 @@ const Downloads: Component = () => {
 
           <div class={styles.buidDetails}>
             <div>
-              <div>released:</div>
-              <div>build:</div>
+              <div>{intl.formatMessage(t.released)}:</div>
+              <div>{intl.formatMessage(t.build)}:</div>
             </div>
             <div>
               <div>{displayDate(andRD).toLowerCase()}</div>
@@ -157,10 +157,19 @@ const Downloads: Component = () => {
           </div>
 
           <a
-            href={`https://downloads.primal.net/android/primal-${andVersion}.apk`}
+            href={playstoreLink}
             target='_blank'
+            class={styles.playstoreLink}
           >
-            <img src={apkDownload} />
+            <img src={playstoreImg} />
+          </a>
+
+          <a
+            href={`https://github.com/PrimalHQ/primal-android-app/releases/tag/${andVersion}`}
+            target='_blank'
+            class={styles.apkLink}
+          >
+            {intl.formatMessage(t.getApk)}
           </a>
         </div>
       </div>

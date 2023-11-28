@@ -415,6 +415,21 @@ export const downloads = {
     defaultMessage: 'Downloads',
     description: 'Title of the downloads page',
   },
+  build: {
+    id: 'downloads.build',
+    defaultMessage: 'build',
+    description: 'Build label',
+  },
+  released: {
+    id: 'downloads.released',
+    defaultMessage: 'released',
+    description: 'Released label',
+  },
+  getApk: {
+    id: 'downloads.getApk',
+    defaultMessage: 'Get APK instead',
+    description: 'APK download label',
+  },
   callToActionTitle: {
     id: 'downloads.ctaTitle',
     defaultMessage: 'Primal Mobile Apps are Here!',

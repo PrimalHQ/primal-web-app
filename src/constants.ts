@@ -289,9 +289,11 @@ export const today = (new Date()).getTime();
 
 export const iosRD = (new Date('11/13/2023')).getTime();
 export const iosVersion = '0.90.3';
+export const appStoreLink = 'https://testflight.apple.com/join/Is4tmDDR';
 
-export const andRD = (new Date('11/13/2023')).getTime();
-export const andVersion = '0.20.4';
+export const andRD = (new Date('11/28/2023')).getTime();
+export const andVersion = '0.21.4';
+export const playstoreLink = 'https://play.google.com/store/apps/details?id=net.primal.android';
 
 export const defaultZapAmount = 10;
 
