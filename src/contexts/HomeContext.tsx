@@ -5,7 +5,7 @@ import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { setLinkPreviews } from "../lib/notes";
-import { searchContent } from "../lib/search";
+import { getScoredUsers, searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import {
@@ -22,6 +22,7 @@ import {
   NoteActions,
   PrimalFeed,
   PrimalNote,
+  SelectionOption,
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
@@ -40,6 +41,12 @@ type HomeContextStore = {
     page: FeedPage,
     reposts: Record<string, string> | undefined,
   },
+  sidebar: {
+    notes: PrimalNote[],
+    page: FeedPage,
+    isFetching: boolean,
+    query: SelectionOption | undefined,
+  },
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -51,6 +58,8 @@ type HomeContextStore = {
     savePage: (page: FeedPage) => void,
     checkForNewNotes: (topic: string | undefined) => void,
     loadFutureContent: () => void,
+    doSidebarSearch: (query: string) => void,
+    updateSidebarQuery: (selection: SelectionOption) => void,
   }
 }
 
@@ -80,6 +89,18 @@ const initialHomeData = {
       noteActions: {},
     },
   },
+  sidebar: {
+    notes: [],
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    },
+    isFetching: false,
+    query: undefined,
+  }
 };
 
 export const HomeContext = createContext<HomeContextStore>();
@@ -90,6 +111,106 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const updateSidebarQuery = (selection: SelectionOption) => {
+    updateStore('sidebar', 'query', () => ({ ...selection }));
+  };
+
+  const saveSidebarNotes = (newNotes: PrimalNote[]) => {
+    updateStore('sidebar', 'notes', () => [ ...newNotes.slice(0, 24) ]);
+    updateStore('sidebar', 'isFetching', () => false);
+  };
+
+  const updateSidebarPage = (content: NostrEventContent) => {
+    if (content.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      updateStore('sidebar', 'page', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      );
+      return;
+    }
+
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      if (store.sidebar.page.messages.find(m => m.id === message.id)) {
+        return;
+      }
+
+      updateStore('sidebar', 'page', 'messages',
+        (msgs) => [ ...msgs, { ...message }]
+      );
+
+      return;
+    }
+
+    if (content.kind === Kind.NoteStats) {
+      const statistic = content as NostrStatsContent;
+      const stat = JSON.parse(statistic.content);
+
+      updateStore('sidebar', 'page', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('sidebar', 'page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('sidebar', 'page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
+      return;
+    }
+  };
+
+  const saveSidebarPage = (page: FeedPage) => {
+    const newPosts = convertToNotes(page);
+
+    saveSidebarNotes(newPosts);
+  };
+
+  const doSidebarSearch = (query: string) => {
+    const subid = `home_sidebar_${APP_ID}`;
+
+    // const unsub = subscribeTo(subid, (type, _, content) => {
+
+    //   if (type === 'EOSE') {
+    //     saveSidebarPage(store.sidebar.page);
+    //     unsub();
+    //     return;
+    //   }
+
+    //   if (!content) {
+    //     return;
+    //   }
+
+
+    //   if (type === 'EVENT') {
+    //     updateSidebarPage(content);
+    //     return;
+    //   }
+
+    // });
+
+    updateStore('sidebar', 'isFetching', () => true);
+    updateStore('sidebar', 'notes', () => []);
+    updateStore('sidebar', 'page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+
+    getScoredUsers(account?.publicKey, query, 10, subid);
+  }
 
   const clearFuture = () => {
     updateStore('future', () => ({
@@ -388,6 +509,23 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
+    if (subId === `home_sidebar_${APP_ID}`) {
+      if (type === 'EOSE') {
+        saveSidebarPage(store.sidebar.page);
+        return;
+      }
+
+      if (!content) {
+        return;
+      }
+
+
+      if (type === 'EVENT') {
+        updateSidebarPage(content);
+        return;
+      }
+    }
+
     if (subId === `home_feed_${APP_ID}`) {
       if (type === 'EOSE') {
         const reposts = parseEmptyReposts(store.page);
@@ -524,6 +662,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       savePage,
       checkForNewNotes,
       loadFutureContent,
+      doSidebarSearch,
+      updateSidebarQuery,
     },
   });
 

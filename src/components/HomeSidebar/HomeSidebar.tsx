@@ -1,45 +1,17 @@
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { APP_ID } from '../../App';
-import { getMostZapped4h, getTrending24h } from '../../lib/feed';
-import { humanizeNumber } from '../../lib/stats';
-import { convertToNotes, sortByRecency, sortingPlan } from '../../stores/note';
-import { Kind } from '../../constants';
+import { Component, For, onMount, Show } from 'solid-js';
+
 import {
-  isConnected,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
-  subscribeTo
-} from '../../sockets';
-import {
-  FeedPage,
-  NostrEOSE,
-  NostrEvent,
-  NostrEventContent,
-  NostrMentionContent,
-  NostrNoteActionsContent,
-  NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
-  NoteActions,
-  PrimalNote,
   SelectionOption
 } from '../../types/primal';
 
 import styles from './HomeSidebar.module.scss';
 import SmallNote from '../SmallNote/SmallNote';
-import { useIntl } from '@cookbook/solid-intl';
-import { hourNarrow } from '../../formats';
-
-import { home as t } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import SelectionBox from '../SelectionBox/SelectionBox';
-import { getScoredUsers, searchContent } from '../../lib/search';
-import { store } from '../../services/StoreService';
 import Loader from '../Loader/Loader';
 import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/localStore';
+import { useHomeContext } from '../../contexts/HomeContext';
 
 const sidebarOptions = [
   {
@@ -85,132 +57,15 @@ const sidebarOptions = [
 
 const HomeSidebar: Component< { id?: string } > = (props) => {
 
-  const intl = useIntl();
   const account = useAccountContext();
+  const home = useHomeContext();
 
-  const [searchResults, setSearchResults] = createStore<{ notes: PrimalNote[], page: FeedPage, isFetching: boolean, query: SelectionOption | undefined }>({
-    notes: [],
-    page: {
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-    },
-    isFetching: false,
-    query: undefined,
-  });
+  onMount(() => {
+    if (account?.isKeyLookupDone && home?.sidebar.notes.length === 0) {
+      const stored = readHomeSidebarSelection(account.publicKey) || sidebarOptions[0];
 
-  const saveNotes = (newNotes: PrimalNote[]) => {
-    setSearchResults('notes', () => [ ...newNotes.slice(0, 24) ]);
-    setSearchResults('isFetching', () => false);
-  };
-
-  const updatePage = (content: NostrEventContent) => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      setSearchResults('page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
-      return;
-    }
-
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-
-      if (searchResults.page.messages.find(m => m.id === message.id)) {
-        return;
-      }
-
-      setSearchResults('page', 'messages',
-        (msgs) => [ ...msgs, { ...message }]
-      );
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      setSearchResults('page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      setSearchResults('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      setSearchResults('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
-      return;
-    }
-  };
-
-  const savePage = (page: FeedPage) => {
-    const newPosts = convertToNotes(page);
-
-    saveNotes(newPosts);
-  };
-
-  const doSearch = (query: string) => {
-    const subid = `home_sidebar_${APP_ID}`;
-
-    const unsub = subscribeTo(subid, (type, _, content) => {
-
-      if (type === 'EOSE') {
-        savePage(searchResults.page);
-        unsub();
-        return;
-      }
-
-      if (!content) {
-        return;
-      }
-
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-
-    });
-
-    setSearchResults('isFetching', () => true);
-    setSearchResults('notes', () => []);
-    setSearchResults('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
-
-    getScoredUsers(account?.publicKey, query, 10, subid);
-  }
-
-  createEffect(() => {
-    const query = searchResults.query?.value;
-    query && doSearch(query);
-  });
-
-  createEffect(() => {
-    if (account?.isKeyLookupDone) {
-      const stored = readHomeSidebarSelection(account.publicKey);
-
-      if (stored) {
-        setSearchResults('query', () => ({...stored}));
-        return;
-      }
-      setSearchResults('query', () => ({ ...sidebarOptions[0]}));
+      home?.actions.updateSidebarQuery(stored);
+      home?.actions.doSidebarSearch(home?.sidebar.query?.value || '');
     }
   });
 
@@ -220,21 +75,22 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       <div class={styles.headingTrending}>
         <SelectionBox
           options={sidebarOptions}
-          value={searchResults.query}
+          value={home?.sidebar.query}
           onChange={(option: SelectionOption) => {
-            setSearchResults('query', () => ({...option}));
-            saveHomeSidebarSelection(account?.publicKey, option)
+            home?.actions.updateSidebarQuery(option);
+            saveHomeSidebarSelection(account?.publicKey, option);
+            home?.actions.doSidebarSearch(home?.sidebar.query?.value || '');
           }}
         />
       </div>
 
       <Show
-        when={!searchResults.isFetching}
+        when={!home?.sidebar.isFetching}
         fallback={
           <Loader />
         }
       >
-        <For each={searchResults.notes}>
+        <For each={home?.sidebar.notes}>
           {(note) => <SmallNote note={note} />}
         </For>
       </Show>
