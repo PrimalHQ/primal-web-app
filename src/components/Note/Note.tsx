@@ -19,7 +19,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import NoteContextMenu from './NoteContextMenu';
 import NoteReplyToHeader from './NoteReplyToHeader';
 
-const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (props) => {
+const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean, shorten?: boolean }> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -66,7 +66,7 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (pr
           <NoteReplyToHeader note={props.note} />
 
           <div class={styles.message}>
-            <ParsedNote note={props.note} />
+            <ParsedNote note={props.note} shorten={props.shorten} />
           </div>
 
           <NoteFooter note={props.note} />

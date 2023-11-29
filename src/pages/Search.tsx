@@ -117,7 +117,7 @@ const Search: Component = () => {
             }
           >
             <For each={search?.notes} >
-              {note => <Note note={note} />}
+              {note => <Note note={note} shorten={true} />}
             </For>
           </Show>
         </Show>

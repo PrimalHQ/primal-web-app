@@ -40,7 +40,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { linebreakRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 
 
 const convertHTMLEntity = (text: string) => {
@@ -60,16 +60,31 @@ const ParsedNote: Component<{
   ignoreLinebreaks?: boolean,
   noLinks?: 'links' | 'text',
   noPreviews?: boolean,
+  shorten?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
 
-  const [tokens, setTokens] = createStore<string[]>([])
+  const [tokens, setTokens] = createStore<string[]>([]);
+
+  let wordsDisplayed = 0;
+
+  const shouldShowToken = () => {
+    if (!props.shorten) return true;
+
+
+    if (wordsDisplayed < shortNoteWords) {
+      return true;
+    }
+
+    return false;
+  };
 
   const parseContent = () => {
     const content = props.ignoreLinebreaks ?
       props.note.post.content.replace(/\s+/g, ' __SP__ ') :
       props.note.post.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+
     const tokens = content.split(/[\s]+/);
 
     setTokens(() => [...tokens]);
@@ -83,6 +98,8 @@ const ParsedNote: Component<{
       if (token === '__SP__') {
         return <> </>;
       }
+
+      wordsDisplayed++;
 
       if (isInterpunction(token)) {
         return <span>{token}</span>;
@@ -108,24 +125,31 @@ const ParsedNote: Component<{
           if (isImage(token)) {
             const dev = localStorage.getItem('devMode') === 'true';
             let image = media?.actions.getMedia(token, 'o');
-            const url = image?.media_url || getMediaUrlDefault(token)
+            const url = image?.media_url || getMediaUrlDefault(token);
+
+            wordsDisplayed += shortMentionInWords;
 
             return <NoteImage src={url} isDev={dev} media={image} width={514} />;
           }
 
           if (isMp4Video(token)) {
+            wordsDisplayed += shortMentionInWords;
             return <video class="w-max" controls><source src={token} type="video/mp4" /></video>;
           }
 
           if (isOggVideo(token)) {
+            wordsDisplayed += shortMentionInWords;
             return <video class="w-max" controls><source src={token} type="video/ogg" /></video>;
           }
 
           if (isWebmVideo(token)) {
+            wordsDisplayed += shortMentionInWords;
             return <video class="w-max" controls><source src={token} type="video/webm" /></video>;
           }
 
           if (isYouTube(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const youtubeId = isYouTube(token) && RegExp.$1;
 
             return <iframe
@@ -141,6 +165,8 @@ const ParsedNote: Component<{
           }
 
           if (isSpotify(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
             return <iframe
@@ -156,6 +182,8 @@ const ParsedNote: Component<{
           }
 
           if (isTwitch(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const channel = token.split("/").slice(-1);
 
             const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
@@ -169,6 +197,8 @@ const ParsedNote: Component<{
           }
 
           if (isMixCloud(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
 
             return <div>
@@ -184,6 +214,7 @@ const ParsedNote: Component<{
           }
 
           if (isSoundCloud(token)) {
+            wordsDisplayed += shortMentionInWords;
 
             return <iframe
               width="100%"
@@ -196,6 +227,8 @@ const ParsedNote: Component<{
           }
 
           if (isAppleMusic(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const convertedUrl = token.replace("music.apple.com", "embed.music.apple.com");
             const isSongLink = /\?i=\d+$/.test(convertedUrl);
 
@@ -211,6 +244,8 @@ const ParsedNote: Component<{
           }
 
           if (isWavelake(token)) {
+            wordsDisplayed += shortMentionInWords;
+
             const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
             return <iframe
@@ -240,6 +275,7 @@ const ParsedNote: Component<{
           );
 
         if (hasMinimalPreviewData) {
+          wordsDisplayed += shortMentionInWords;
           return <LinkPreview preview={preview} />;
         }
 
@@ -279,14 +315,18 @@ const ParsedNote: Component<{
           if (!props.noLinks) {
             const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
 
-            link = ment ?
-              <div>
+            link = <A href={path}>{token}</A>;
+
+            if (ment) {
+              wordsDisplayed += shortMentionInWords;
+
+              link = <div>
                 <EmbeddedNote
                   note={ment}
                   mentionedUsers={props.note.mentionedUsers || {}}
                 />
-              </div> :
-              <A href={path}>{token}</A>;
+              </div>;
+            }
           }
 
         } catch (e) {
@@ -379,15 +419,19 @@ const ParsedNote: Component<{
           if (!props.noLinks) {
             const ment = props.note.mentionedNotes[hex];
 
-            embeded = ment ?
-              <div>
+            embeded = <><A href={path}>{noteId}</A>{end}</>;
+
+            if (ment) {
+              wordsDisplayed += shortMentionInWords;
+
+              embeded = <div>
                 <EmbeddedNote
                   note={ment}
                   mentionedUsers={props.note.mentionedUsers}
                 />
                 {end}
-              </div> :
-              <><A href={path}>{noteId}</A>{end}</>;
+              </div>;
+            }
           }
 
           return <span class="whole"> {embeded}</span>;
@@ -442,30 +486,20 @@ const ParsedNote: Component<{
     parseContent();
   });
 
-  let noteHolder: HTMLDivElement | undefined;
-
-  const replaceLink = (url: string, preview: PrimalLinkPreview) => {
-    if (!noteHolder) return;
-
-    const hasMinimalPreviewData = !props.noPreviews &&
-      preview &&
-      preview.url &&
-      ((!!preview.description && preview.description.length > 0) ||
-        !preview.images?.some(x => x === '') ||
-        !!preview.title
-      );
-
-    if (hasMinimalPreviewData) {
-      // @ts-ignore
-      noteHolder.querySelector(`[data-url="${url}"]`).innerHTML = (<div><LinkPreview preview={preview} /></div>).outerHTML;
-    }
-  };
-
   return (
-    <div id={props.id} ref={noteHolder}>
+    <div id={props.id}>
       <For each={tokens}>
-        {(token) => <>{parseToken(token)}</>}
+        {(token) =>
+          <Show when={shouldShowToken()}>
+            <>{parseToken(token)}</>
+          </Show>
+        }
       </For>
+      <Show when={props.shorten && tokens.length > shortNoteWords}>
+        <span class={styles.more}>
+          ... <span class="linkish">see more</span>
+        </span>
+      </Show>
     </div>
   );
 };

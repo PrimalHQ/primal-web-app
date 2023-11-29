@@ -257,6 +257,11 @@ export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 
+// How long, in words, should a short note be
+export const shortNoteWords = 200;
+
+// How long we would assume mentioned will be for purposes of shortening the note
+export const shortMentionInWords = 99;
 
 export const medZapLimit = 1000;
 

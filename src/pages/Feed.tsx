@@ -28,7 +28,7 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         fallback={<Loader />}
       >
         <For each={explore?.notes} >
-          {(note) => <Note note={note} />}
+          {(note) => <Note note={note} shorten={true} />}
         </For>
         <Paginator loadNextPage={explore?.actions.fetchNextPage} />
       </Show>

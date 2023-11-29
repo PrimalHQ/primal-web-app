@@ -148,7 +148,7 @@ const Home: Component = () => {
       >
         <div class={styles.feed}>
           <For each={context?.notes} >
-            {note => <Note note={note} />}
+            {note => <Note note={note} shorten={true} />}
           </For>
         </div>
       </Show>

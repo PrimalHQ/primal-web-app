@@ -267,7 +267,7 @@ const ProfileTabs: Component<{
               <Match when={profile && profile.notes.length > 0}>
                 <For each={profile?.notes}>
                   {note => (
-                    <Note note={note} />
+                    <Note note={note} shorten={true} />
                   )}
                 </For>
                 <Paginator loadNextPage={() => {
@@ -320,7 +320,7 @@ const ProfileTabs: Component<{
               <Match when={profile && profile.replies.length > 0}>
                 <For each={profile?.replies}>
                   {reply => (
-                    <Note note={reply} />
+                    <Note note={reply} shorten={true} />
                   )}
                 </For>
                 <Paginator loadNextPage={() => {

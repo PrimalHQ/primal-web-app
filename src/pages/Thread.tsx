@@ -20,6 +20,7 @@ import { thread as t } from '../translations';
 import { userName } from '../stores/profile';
 import PageTitle from '../components/PageTitle/PageTitle';
 import NavHeader from '../components/NavHeader/NavHeader';
+import Loader from '../components/Loader/Loader';
 
 
 const Thread: Component = () => {
@@ -157,12 +158,13 @@ const Thread: Component = () => {
       <Show when={account?.isKeyLookupDone}>
         <Show
           when={!isFetching()}
+          fallback={<Loader />}
         >
           <div class={styles.parentsHolder}>
             <For each={parentNotes()}>
               {note =>
                 <div class={styles.threadList}>
-                  <Note note={note} parent={true} />
+                  <Note note={note} parent={true} shorten={true} />
                 </div>
               }
             </For>
@@ -187,7 +189,7 @@ const Thread: Component = () => {
           <For each={replyNotes()}>
             {note =>
               <div class={styles.threadList}>
-                <Note note={note} />
+                <Note note={note} shorten={true} />
               </div>
             }
           </For>
