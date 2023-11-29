@@ -25,7 +25,7 @@ import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../li
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
-import { clearSec, getStorage, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, getStoredProfile, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import { generateKeys } from "../lib/PrimalNostr";
@@ -148,8 +148,20 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     if (decoded.type === 'nsec' && decoded.data) {
       updateStore('sec', () => sec);
+
       const pubkey = nostrGetPubkey(decoded.data);
+
       setPublicKey(pubkey);
+
+      // Read profile from storage
+      const storedUser = getStoredProfile(pubkey);
+
+      if (storedUser) {
+        // If it exists, set it as active user
+        updateStore('activeUser', () => ({...storedUser}));
+      }
+
+      // Fetch it anyway, maybe there is an update
       getUserProfiles([pubkey], `user_profile_${APP_ID}`);
     }
   }
@@ -285,9 +297,10 @@ export function AccountProvider(props: { children: JSXElement }) {
     if (nostr === undefined) {
       console.log('Nostr extension not found');
       // Try again after one second if extensionAttempts are not exceeded
-      if (extensionAttempt < 1) {
+      if (extensionAttempt < 4) {
         extensionAttempt += 1;
-        setTimeout(fetchNostrKey, 1000);
+        console.log('ATTEMPT: ', extensionAttempt)
+        setTimeout(fetchNostrKey, 250);
         return;
       }
 
@@ -312,10 +325,20 @@ export function AccountProvider(props: { children: JSXElement }) {
       const key = await getPublicKey();
 
       if (key === undefined) {
-        setTimeout(fetchNostrKey, 1000);
+        setTimeout(fetchNostrKey, 250);
       }
       else {
         setPublicKey(key);
+
+        // Read profile from storage
+        const storedUser = getStoredProfile(key);
+
+        if (storedUser) {
+          // If it exists, set it as active user
+          updateStore('activeUser', () => ({...storedUser}));
+        }
+
+        // Fetch it anyway, maybe there is an update
         getUserProfiles([key], `user_profile_${APP_ID}`);
       }
     } catch (e: any) {
@@ -1167,6 +1190,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         const user = JSON.parse(content.content);
 
         updateStore('activeUser', () => ({...user}));
+        setStoredProfile(user);
       }
       return;
     }

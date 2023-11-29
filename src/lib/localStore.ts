@@ -1,4 +1,4 @@
-import { NostrRelays, PrimalFeed, SelectionOption } from "../types/primal";
+import { NostrRelays, PrimalFeed, PrimalUser, SelectionOption } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -11,6 +11,7 @@ export type LocalStore = {
   feeds: PrimalFeed[];
   theme: string,
   homeSidebarSelection: SelectionOption | undefined,
+  userProfile: PrimalUser | undefined,
 };
 
 export const emptyStorage = {
@@ -24,6 +25,7 @@ export const emptyStorage = {
   feeds: [],
   theme: 'sunset',
   homeSidebarSelection: undefined,
+  userProfile: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -182,4 +184,23 @@ export const storeSec = (sec: string | undefined) => {
 
 export const clearSec = () => {
   localStorage.removeItem('primalSec');
+};
+
+export const getStoredProfile = (pubkey: string) => {
+  const store = getStorage(pubkey)
+  const user = store.userProfile;
+
+  if (user && user.pubkey === pubkey) {
+    return user;
+  }
+
+  return undefined;
+};
+
+export const setStoredProfile = (profile: PrimalUser) => {
+  const store = getStorage(profile.pubkey);
+
+  store.userProfile = {...profile};
+
+  setStorage(profile.pubkey, store);
 };
