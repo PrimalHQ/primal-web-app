@@ -69,12 +69,14 @@ const ReplyToNote: Component<{
             <div
               class={styles.input}
             >
-              {intl.formatMessage(
-                t.noteReply,
-                {
-                  name: userName(props.note.user),
-                },
-              )}
+              <div>
+                {intl.formatMessage(
+                  t.noteReply,
+                  {
+                    name: userName(props.note.user),
+                  },
+                )}
+              </div>
             </div>
           </button>
         }

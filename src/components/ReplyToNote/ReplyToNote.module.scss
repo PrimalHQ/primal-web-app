@@ -112,14 +112,16 @@
     align-items: center;
     justify-content: flex-start;
     padding-inline: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 
-    .userName {
-      max-width: 408px;
+    >div {
+      max-width: 100%;
       text-overflow: ellipsis;
       white-space: nowrap;
       word-wrap: break-word;
       overflow: hidden;
-      margin-left: 6px;
     }
   }
 
