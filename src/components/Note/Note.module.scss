@@ -11,6 +11,11 @@
   border-bottom: 1px solid var(--devider);
   border-radius: 0;
 
+  -webkit-user-select: text;
+  -moz-select: text;
+  -ms-select: text;
+  user-select: text;
+
   width: calc(100% - 2px);
 
   &.parent {

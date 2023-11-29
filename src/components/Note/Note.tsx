@@ -38,6 +38,7 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean }> = (pr
       onClick={() => navToThread(props.note)}
       data-event={props.note.post.id}
       data-event-bech32={props.note.post.noteId}
+      draggable={false}
     >
       <div class={styles.header}>
         <Show when={repost()}>
