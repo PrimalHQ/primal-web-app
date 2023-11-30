@@ -13,7 +13,7 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { andVersion, andRD, iosVersion, iosRD, today, appStoreLink, playstoreLink } from '../constants';
+import { andVersion, andRD, iosVersion, iosRD, today, appStoreLink, playstoreLink, apkLink } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -165,7 +165,7 @@ const Downloads: Component = () => {
           </a>
 
           <a
-            href={`https://github.com/PrimalHQ/primal-android-app/releases/tag/${andVersion}`}
+            href={apkLink}
             target='_blank'
             class={styles.apkLink}
           >

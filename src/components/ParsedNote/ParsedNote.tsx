@@ -41,6 +41,8 @@ import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import { linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { useIntl } from '@cookbook/solid-intl';
+import { actions } from '../../translations';
 
 
 const convertHTMLEntity = (text: string) => {
@@ -63,6 +65,7 @@ const ParsedNote: Component<{
   shorten?: boolean,
 }> = (props) => {
 
+  const intl = useIntl();
   const media = useMediaContext();
 
   const [tokens, setTokens] = createStore<string[]>([]);
@@ -497,7 +500,7 @@ const ParsedNote: Component<{
       </For>
       <Show when={props.shorten && tokens.length > shortNoteWords}>
         <span class={styles.more}>
-          ... <span class="linkish">see more</span>
+          ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
       </Show>
     </div>

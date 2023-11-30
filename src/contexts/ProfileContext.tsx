@@ -82,6 +82,7 @@ export type ProfileContextStore = {
   },
   isProfileFollowing: boolean,
   isFetching: boolean,
+  isProfileFetched: boolean,
   isFetchingReplies: boolean,
   page: FeedPage,
   repliesPage: FeedPage,
@@ -147,6 +148,7 @@ export const initialData = {
   notes: [],
   replies: [],
   isFetching: false,
+  isProfileFetched: false,
   isFetchingReplies: false,
   isProfileFollowing: false,
   isFetchingZaps: false,
@@ -871,6 +873,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userProfile', () => undefined);
       updateStore('userStats', () => ({ ...emptyStats }));
       updateStore('fetchedUserStats', () => false);
+      updateStore('isProfileFetched', () => false);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
 
@@ -879,6 +882,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const resetProfile = () => {
+    updateStore('isProfileFetched', () => false);
+    updateStore('profileKey', () => undefined);
     updateStore('userProfile', () => undefined);
     updateStore('isFetching', () => false);
     updateStore('userStats', reconcile(emptyStats));
@@ -929,6 +934,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
 
     if (subId === `profile_info_${APP_ID}`) {
+      if (type === 'EOSE') {
+        updateStore('isProfileFetched', () => true);
+        return;
+      }
+
       if (content?.kind === Kind.FilteringReason) {
         const reason:  { action: 'block' | 'allow', pubkey?: string, group?: string } | null =
           JSON.parse(content.content) || null;

@@ -122,6 +122,11 @@ export const pin = {
 };
 
 export const actions = {
+  seeMore: {
+    id: 'actions.seeMore',
+    defaultMessage: 'see more',
+    description: 'See more label',
+  },
   newNote: {
     id: 'actions.newNote',
     defaultMessage: 'New Note',

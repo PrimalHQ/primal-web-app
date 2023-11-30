@@ -5,28 +5,21 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  For,
-  Match,
   onCleanup,
   onMount,
   Resource,
   Show,
-  Switch
 } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
-import Branding from '../components/Branding/Branding';
-import Note from '../components/Note/Note';
 import { hexToNpub } from '../lib/keys';
-import { humanizeNumber } from '../lib/stats';
-import { authorName, nip05Verification, truncateNpub, userName } from '../stores/profile';
-import Paginator from '../components/Paginator/Paginator';
+import { nip05Verification, truncateNpub, userName } from '../stores/profile';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
-import { urlify, sanitize, replaceLinkPreviews } from '../lib/notes';
+import { urlify, sanitize } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
@@ -38,17 +31,13 @@ import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
 import { useMediaContext } from '../contexts/MediaContext';
 import { profile as t, actions as tActions, toast as tToast, feedProfile } from '../translations';
-import Loader from '../components/Loader/Loader';
 import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonCopy from '../components/Buttons/ButtonCopy';
-import ButtonProfile from '../components/Buttons/ButtonProfile';
-import ButtonFollow from '../components/Buttons/ButtonFlip';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import Menu from '../components/Menu/Menu';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 
 const Profile: Component = () => {
@@ -445,7 +434,15 @@ const Profile: Component = () => {
     if (profile?.profileKey) {
       checkVerification(profile?.profileKey)
     }
-  })
+  });
+
+  onCleanup(() => {
+    profile?.actions.resetProfile();
+  });
+
+  const isProfileLoaded = () => {
+    return !profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex();
+  };
 
   return (
     <>
@@ -542,7 +539,7 @@ const Profile: Component = () => {
 
           <div class={styles.profileVerification}>
             <Show
-              when={profile?.profileKey}
+              when={isProfileLoaded()}
             >
               <div class={styles.basicInfo}>
                 <div class={styles.name}>
