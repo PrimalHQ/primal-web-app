@@ -435,19 +435,9 @@ export const downloads = {
     defaultMessage: 'Get APK instead',
     description: 'APK download label',
   },
-  callToActionTitle: {
-    id: 'downloads.ctaTitle',
-    defaultMessage: 'Primal Mobile Apps are Here!',
-    description: 'Title for the downloads\' page call-to-action',
-  },
-  callToActionDescription: {
-    id: 'downloads.ctaDescription',
-    defaultMessage: 'The iOS app is in public TestFlight and ready to be used as a daily driver. The Android app is in alpha, but developing quickly!',
-    description: 'Description for the downloads\' page call-to-action',
-  },
   callToActionIOSTitle: {
-    id: 'downloads.ctaAndroidTitle',
-    defaultMessage: 'Primal iOS TestFlight',
+    id: 'downloads.ctaIOSTitle',
+    defaultMessage: 'Primal iOS',
     description: 'Title for the iOS downloads\' page call-to-action',
   },
   callToActionIOSDescription: {

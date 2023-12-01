@@ -294,9 +294,9 @@ export const today = (new Date()).getTime();
 
 // Downloads page info --------------------
 // iOS
-export const iosRD = (new Date('11/13/2023')).getTime();
-export const iosVersion = '0.90.3';
-export const appStoreLink = 'https://testflight.apple.com/join/Is4tmDDR';
+export const iosRD = (new Date('12/01/2023')).getTime();
+export const iosVersion = '1.0.4';
+export const appStoreLink = 'https://apps.apple.com/us/app/primal/id1673134518';
 
 // Android
 export const andRD = (new Date('11/28/2023')).getTime();
