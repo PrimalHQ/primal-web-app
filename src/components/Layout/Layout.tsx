@@ -79,9 +79,10 @@ const Layout: Component = () => {
 
   const linkToiOS = () => {
     const appstoreFail = 'https://apps.apple.com/us/app/primal/id1673134518';
-    const appUrlScheme = "primal://";
+    const appUrlScheme = `primal:/${window.location.pathname}`;
 
     if (isIOS()) {
+      console.log('LOC: ', appUrlScheme)
       // Try launching the app using URL schemes
       window.open(appUrlScheme, "_self");
 
