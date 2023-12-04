@@ -27,6 +27,10 @@
           font-size: 16px;
           font-weight: 700;
           line-height: 16px;
+          max-width: 362px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
         }
 
         .nip05 {

@@ -373,14 +373,17 @@ const ProfileTabs: Component<{
                   </div>
               }
             >
-              <For each={followers} fallback={
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noFollowers,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
-                </div>
-              }>
+              <For
+                each={followers}
+                fallback={
+                  <div class={styles.mutedProfile}>
+                    {intl.formatMessage(
+                      t.noFollowers,
+                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    )}
+                  </div>
+                }
+              >
                 {follower =>
                   <div>
                     <ProfileContact
