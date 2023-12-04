@@ -1,3 +1,9 @@
+.parsedNote {
+  img {
+    background-color: var(--background-input);
+  }
+}
+
 .mentionedUser {
   color: var(--accent-1);
   text-decoration: none;
@@ -87,10 +93,6 @@
 
 .error {
   color: var(--brand-1);
-}
-
-img {
-  background-color: var(--background-input);
 }
 
 .more {

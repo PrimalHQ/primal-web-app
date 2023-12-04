@@ -490,7 +490,7 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div id={props.id}>
+    <div id={props.id} class={styles.parsedNote} >
       <For each={tokens}>
         {(token) =>
           <Show when={shouldShowToken()}>
