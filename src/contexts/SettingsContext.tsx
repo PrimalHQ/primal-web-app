@@ -103,9 +103,40 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const resetZapOptionsToDefault = (temp?: boolean) => {
-    updateStore('availableZapOptions', () => defaultZapOptions);
-    updateStore('defaultZapAmount', () => defaultZapAmount);
-    !temp && saveSettings();
+    const subid = `restore_default_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EVENT' && content?.content) {
+        try {
+          const settings = JSON.parse(content?.content);
+
+          let options = settings.zapOptions as number[];
+          let amount = settings.defaultZapAmount as number;
+
+          updateStore('availableZapOptions', () => options);
+          updateStore('defaultZapAmount', () => amount);
+
+          !temp && saveSettings();
+        }
+        catch (e) {
+          console.log('Error parsing settings response: ', e);
+        }
+      }
+
+      if (type === 'NOTICE') {
+        toaster?.sendWarning(intl.formatMessage({
+          id: 'settings.loadFail',
+          defaultMessage: 'Failed to load settings. Will be using local settings.',
+          description: 'Toast message after settings have failed to be loaded from the server',
+        }));
+      }
+
+      unsub();
+      return;
+    });
+
+    getDefaultSettings(subid);
   }
 
   const setTheme = (theme: PrimalTheme | null, temp?: boolean) => {
@@ -305,18 +336,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
           updateStore('applyContentModeration', () => true);
 
-          const defaultZaps = settings.defaultZapAmount || 10;
 
-          const zapOptions = settings.zapOptions || [
-            21,
-            420,
-            10_000,
-            69_420,
-            100_000,
-            1_000_000,
-          ];
+          let zapOptions = settings.zapOptions as number[];
+          let zapAmount = settings.defaultZapAmount as number;
 
-          updateStore('defaultZapAmount', () => defaultZaps);
+          updateStore('defaultZapAmount', () => zapAmount);
           updateStore('availableZapOptions', () => zapOptions);
         }
         catch (e) {

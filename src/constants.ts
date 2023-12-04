@@ -306,15 +306,15 @@ export const apkLink = `https://github.com/PrimalHQ/primal-android-app/releases/
 
 // ----------------------------------------
 
-export const defaultZapAmount = 10;
+export const defaultZapAmount = 42;
 
 export const defaultZapOptions = [
   21,
   420,
+  1_000,
+  5_000,
   10_000,
-  69_420,
   100_000,
-  1_000_000,
 ];
 
 export const contentScope = 'content';
