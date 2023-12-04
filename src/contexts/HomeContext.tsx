@@ -321,6 +321,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNextPage = () => {
+    if (store.isFetching) {
+      return;
+    }
     const lastNote = store.notes[store.notes.length - 1];
 
     if (!lastNote) {
