@@ -57,6 +57,27 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   }
 };
 
+export const isRepostInCollection = (collection: NostrNoteContent[], repost: NostrNoteContent) => {
+
+  const tag = repost.tags.find(t => t[0] === 'e');
+  const otherTags = collection.reduce((acc: string[][], m) => {
+    if (m.kind !== Kind.Repost) return acc;
+
+    const t = m.tags.find(t => t[0] === 'e');
+
+    if (!t) return acc;
+
+    return [...acc, t];
+  }, []);
+
+  return tag && !!otherTags.find(t => t[1] === tag[1]);
+
+};
+
+export const isInTags = (tags: string[][], tagName: string, value: string) => {
+  return !!tags.find(tag => tag[0] === tagName && tag[1] === value);
+}
+
 export const parseEmptyReposts = (page: FeedPage) => {
   let reposts: Record<string, string> = {};
 

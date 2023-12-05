@@ -42,7 +42,7 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean, shorten
     >
       <div class={styles.header}>
         <Show when={repost()}>
-          <NoteRepostHeader repost={props.note.repost} />
+          <NoteRepostHeader note={props.note} />
         </Show>
       </div>
       <div class={styles.content}>

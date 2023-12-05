@@ -1,41 +1,42 @@
 import { A } from '@solidjs/router';
-import { Component, createSignal, Show } from 'solid-js';
-import { PrimalNote, PrimalRepost, PrimalUser } from '../../types/primal';
-import ParsedNote from '../ParsedNote/ParsedNote';
-import NoteFooter from './NoteFooter/NoteFooter';
-import NoteHeader from './NoteHeader/NoteHeader';
+import { Component, Show } from 'solid-js';
+import { PrimalNote } from '../../types/primal';
 
 import styles from './Note.module.scss';
-import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
+import { authorName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
-import NoteReplyHeader from './NoteHeader/NoteReplyHeader';
-import Avatar from '../Avatar/Avatar';
-import { date } from '../../lib/dates';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
+
 
 const NoteRepostHeader: Component<{
-  repost?: PrimalRepost,
+  note?: PrimalNote,
   id?: string,
 }> = (props) => {
   const intl = useIntl();
 
-  const reposterName = () => {
-    if (!props.repost) {
-      return '';
-    }
+  const repost = () => props.note?.repost;
 
-    return authorName(props.repost.user);
+  const reposterName = () =>  authorName(repost()?.user);
+
+  const others = () => {
+    const reposts = props.note?.post.reposts || 0;
+
+    return reposts > 0 ? reposts - 1 : 0;
   }
 
   return (
     <div class={styles.repostedBy}>
       <div class={styles.repostIcon}></div>
       <span>
-        <A href={`/p/${props.repost?.user.npub}`} >
+        <A href={`/p/${repost()?.user.npub}`} >
           {reposterName()}
+          {intl.formatMessage(
+            t.repostedOthers,
+            {
+              number: others(),
+            },
+          )}
         </A>
         <span>
           {intl.formatMessage(t.reposted)}

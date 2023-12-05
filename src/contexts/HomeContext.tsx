@@ -7,7 +7,7 @@ import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed
 import { setLinkPreviews } from "../lib/notes";
 import { getScoredUsers, searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
+import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan, isInTags, isRepostInCollection } from "../stores/note";
 import {
   ContextChildren,
   FeedPage,
@@ -184,26 +184,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const doSidebarSearch = (query: string) => {
     const subid = `home_sidebar_${APP_ID}`;
-
-    // const unsub = subscribeTo(subid, (type, _, content) => {
-
-    //   if (type === 'EOSE') {
-    //     saveSidebarPage(store.sidebar.page);
-    //     unsub();
-    //     return;
-    //   }
-
-    //   if (!content) {
-    //     return;
-    //   }
-
-
-    //   if (type === 'EVENT') {
-    //     updateSidebarPage(content);
-    //     return;
-    //   }
-
-    // });
 
     updateStore('sidebar', 'isFetching', () => true);
     updateStore('sidebar', 'notes', () => []);
@@ -393,32 +373,38 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       const message = content as NostrNoteContent;
       const messageId = nip19.noteEncode(message.id);
 
+      const isRepost = message.kind === Kind.Repost;
+
       if (scope) {
         const isFirstNote = message.kind === Kind.Text ?
           store.notes[0]?.post?.noteId === messageId :
           store.notes[0]?.repost?.note.noteId === messageId;
 
+        let isAlreadyReposted = isRepost && isRepostInCollection(store[scope].page.messages, message);
+
         // const isAlreadyFetched = message.kind === Kind.Text ?
         //   store.future.notes[0]?.post?.noteId === messageId :
         //   store.future.notes[0]?.repost?.note.noteId === messageId;
 
-          if (!isFirstNote) {
-            updateStore(scope, 'page', 'messages',
-              (msgs) => [ ...msgs, { ...message }]
-            );
-          }
+        if (isFirstNote || (isRepost && isAlreadyReposted)) return;
+
+        updateStore(scope, 'page', 'messages',
+          (msgs) => [ ...msgs, { ...message }]
+        );
+
         return;
       }
 
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :
         store.lastNote?.repost?.note.noteId === messageId;
+        let isAlreadyReposted = isRepost && isRepostInCollection(store.page.messages, message);
 
-      if (!isLastNote) {
-        updateStore('page', 'messages',
-          (msgs) => [ ...msgs, { ...message }]
-        );
-      }
+      if (isLastNote || (isRepost && isAlreadyReposted)) return;
+
+      updateStore('page', 'messages',
+        (msgs) => [ ...msgs, { ...message }]
+      );
 
       return;
     }

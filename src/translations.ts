@@ -712,6 +712,14 @@ export const note = {
     defaultMessage: 'Reposted',
     description: 'Label indicating that the note is a repost',
   },
+  repostedOthers: {
+    id: 'note.repostedOthers',
+    defaultMessage: `{number, plural,
+      =0 {}
+      one { and # other}
+      other { and # others}}`,
+    description: 'Label indicating that the note is reposted more than once',
+  },
   reply: {
     id: 'note.reply',
     defaultMessage: 'replying to',
