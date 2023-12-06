@@ -584,8 +584,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
             return;
           }
 
-          const user = convertToUser(content);
 
+          const user = convertToUser(content);
           updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
         }
       }

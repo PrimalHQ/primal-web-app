@@ -92,7 +92,7 @@ export const authorName = (user: PrimalUser | undefined) => {
 };
 
 export const nip05Verification = (user: PrimalUser | undefined) => {
-  if (!user) {
+  if (!user || typeof user.nip05 !== 'string') {
     return '';
   }
 
