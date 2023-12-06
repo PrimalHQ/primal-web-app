@@ -282,7 +282,7 @@ const ParsedNote: Component<{
           return <LinkPreview preview={preview} />;
         }
 
-        return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
+        return <span data-url={token}><a link href={token.toLowerCase()} target="_blank" >{token}</a></span>;
       }
 
       if (isNoteMention(token)) {

@@ -8,7 +8,7 @@ const LinkPreview: Component<{ preview: any, id?: string }> = (props) => {
 
   const media = useMediaContext();
 
-  const encodedUrl = encodeURI(new URL(props.preview.url).origin);
+  const encodedUrl = encodeURI(new URL(props.preview.url.toLowerCase()).origin);
 
   const image = () => {
     const i = media?.actions.getMedia(props.preview.images[0] || '', 'm');
