@@ -1,7 +1,14 @@
 import { nip19 } from "nostr-tools"
 
 export const hexToNpub = (hex: string | undefined): string =>  {
-  return hex ? nip19.npubEncode(hex) : '';
+
+  try {
+    return hex ? nip19.npubEncode(hex) : '';
+  } catch (e) {
+    console.warn(`Invalid pubkey hex ${hex}: `, e);
+    return '';
+  }
+
 }
 export const hexToNsec = (hex: string | undefined): string =>  {
   return hex ? nip19.nsecEncode(hex) : '';
