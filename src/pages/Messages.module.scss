@@ -170,8 +170,10 @@
       margin-bottom: 0px;
       align-items: center;
 
-      &:hover, &.selected {
+      &:hover, &.selected, &.focus {
         background-color: var(--background-input);
+        box-shadow: none;
+        outline: none;
       }
 
       .senderInfo {
@@ -352,6 +354,10 @@
         line-height: 20px;
         font-weight: 700;
         background: var(--accent);
+
+        .iconSend {
+          background-color: var(--text-primary-button);
+        }
       }
     }
   }

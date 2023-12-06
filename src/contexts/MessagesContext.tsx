@@ -785,7 +785,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       account?.hasPublicKey() &&
       store.selectedSender &&
       store.messageCountPerSender[store.selectedSender] &&
-      store.messageCountPerSender[store.selectedSender].cnt > 0
+      store.messageCountPerSender[store.selectedSender].cnt > 0,
+      store.isConversationLoaded
     ) {
 
       updateStore('encryptedMessages', () => []);
