@@ -369,3 +369,6 @@ export const suggestedUsersToFollow = [
   "eda6845cc2269bea10f010744ad79409acb7129d96857d4bf19e027696299292", //brianna
   "d61f3bc5b3eb4400efdae6169a5c17cabf3246b514361de939ce4a1a0da6ef4a", //miljan
 ];
+
+// Messages separated by more than this will not be grouped in the same thread
+export const threadLenghtInMs = 900;

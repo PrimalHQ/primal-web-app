@@ -1,5 +1,5 @@
 import { createStore, reconcile } from "solid-js/store";
-import { Kind } from "../constants";
+import { Kind, threadLenghtInMs } from "../constants";
 import {
   createContext,
   createEffect,
@@ -406,7 +406,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       if (
         lastThread &&
         message.sender === lastThread.author &&
-        Math.abs(lastThread.messages[lastThread.messages.length - 1].created_at - message.created_at) < 900
+        Math.abs(lastThread.messages[lastThread.messages.length - 1].created_at - message.created_at) < threadLenghtInMs
       ) {
 
         updateStore('conversation',
@@ -440,7 +440,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       const message = messages[i];
 
       if (message.sender !== author || (
-        thread.messages.length > 0 && Math.abs(thread.messages[thread.messages.length - 1].created_at - message.created_at) > 900
+        thread.messages.length > 0 &&
+        Math.abs(thread.messages[thread.messages.length - 1].created_at - message.created_at) > threadLenghtInMs
       )) {
         author = message.sender;
         thread.messages.length > 0 && conversation.push(thread);
