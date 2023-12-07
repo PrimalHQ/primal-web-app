@@ -75,10 +75,11 @@ export type MessagesContextStore = {
   now: number,
   senderRelation: UserRelation,
   addSender: PrimalUser | undefined,
+  orderedSenders: () => PrimalUser[],
   actions: {
     getMessagesPerSender: () => void,
     changeSenderRelation: (relation: UserRelation) => void,
-    selectSender: (senderId: string | undefined) => void,
+    selectSender: (senderId?: string | undefined) => void,
     resetConversationLoaded: () => void,
     addToConversation: (messages: DirectMessage[]) => void,
     sendMessage: (receiver: string, message: DirectMessage) => Promise<boolean>,
@@ -156,8 +157,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const selectSender = async (senderId: string | undefined) => {
+  const selectSender = async (senderId?: string | undefined) => {
     if (!senderId) {
+      updateStore('selectedSender', () => null);
       return;
     }
 
@@ -545,6 +547,32 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
 
+  const orderedSenders = () => {
+    if (!store.senders) {
+      return [];
+    }
+    const senders = store.senders;
+    const counts = store.messageCountPerSender;
+
+    const ids = Object.keys(senders);
+    const latests = ids.map(id => ({ latest_at: counts[id]?.latest_at || null, id }));
+
+    const ordered = latests.sort((a, b) => {
+      if (!a.latest_at) {
+        return -1;
+      }
+
+      if (!b.latest_at) {
+        return 1;
+      }
+
+      return b.latest_at - a.latest_at
+    });
+
+    return ordered.map(o => senders[o.id]);
+  };
+
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -558,6 +586,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
         if (count !== store.messageCount) {
           updateStore('messageCount', () => count);
+          updateStore('selectedSender', () => null);
         }
 
       }
@@ -596,6 +625,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           const key = store.addSender.pubkey;
           const user = { ...store.addSender }
 
+
           updateStore('senders', () => ({ [key]: user }));
           updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
           selectSender(store.addSender.pubkey);
@@ -603,9 +633,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           return;
         }
 
-        const senderIds = Object.keys(store.senders);
+        const senders = orderedSenders();
         if (!store.selectedSender) {
-          selectSender(senderIds[0]);
+          selectSender(senders[0].npub);
         }
         // !store.selectedSender && updateStore('selectedSender', () => ({ ...store.senders[senderIds[0]] }));
       }
@@ -820,6 +850,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const [store, updateStore] = createStore<MessagesContextStore>({
     ...initialData,
+    orderedSenders,
     actions: {
       getMessagesPerSender,
       selectSender,

@@ -165,31 +165,6 @@ const Messages: Component = () => {
     return nip19.noteEncode(params.sender);
   };
 
-  const orderedSenders = () => {
-    if (!messages || !messages.senders) {
-      return [];
-    }
-    const senders = messages.senders;
-    const counts = messages.messageCountPerSender;
-
-    const ids = Object.keys(senders);
-    const latests = ids.map(id => ({ latest_at: counts[id]?.latest_at || null, id }));
-
-    const ordered = latests.sort((a, b) => {
-      if (!a.latest_at) {
-        return -1;
-      }
-
-      if (!b.latest_at) {
-        return 1;
-      }
-
-      return b.latest_at - a.latest_at
-    });
-
-    return ordered.map(o => senders[o.id]);
-  };
-
   const senderPubkey = () => {
     if (!params.sender) {
       return '';
@@ -222,7 +197,7 @@ const Messages: Component = () => {
 
   createEffect(() => {
     if (messages?.selectedSender && currentUrl !== messages.selectedSender) {
-      const npub = hexToNpub(messages.selectedSender)
+      const npub = hexToNpub(messages.selectedSender);
       navigate(`/messages/${npub}`);
       return;
     }
@@ -235,8 +210,6 @@ const Messages: Component = () => {
 
     const senderIds = Object.keys(messages.senders);
     senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]].npub}`);
-    return;
-
   });
 
   createEffect(() => {
@@ -614,6 +587,7 @@ const Messages: Component = () => {
   onCleanup(() => {
     newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
+    messages?.actions.selectSender();
   });
 
   const sendMessage = async () => {
@@ -924,7 +898,7 @@ const Messages: Component = () => {
         </div>
 
         <div class={styles.sendersList} ref={sendersListElement}>
-          <For each={orderedSenders()}>
+          <For each={messages?.orderedSenders() || []}>
             {
               (sender) => (
                 <button
