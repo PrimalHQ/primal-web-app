@@ -7,7 +7,7 @@ export const getNotifications = (
   pubkey: string | undefined,
   subid: string,
   since = 0,
-  limit = 1000,
+  limit = 100,
 ) => {
   if (!pubkey) {
     return;

@@ -4,7 +4,6 @@ import { nip19 } from 'nostr-tools';
 import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
-import Branding from '../components/Branding/Branding';
 import Loader from '../components/Loader/Loader';
 import NotificationItem from '../components/Notifications/NotificationItem';
 import NotificationItem2 from '../components/Notifications/NotificationItem2';
