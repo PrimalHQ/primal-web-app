@@ -59,7 +59,6 @@ export const getRepostInfo: RepostInfo = (page, message) => {
 
 export const isRepostInCollection = (collection: NostrNoteContent[], repost: NostrNoteContent) => {
 
-  const tag = repost.tags.find(t => t[0] === 'e');
   const otherTags = collection.reduce((acc: string[][], m) => {
     if (m.kind !== Kind.Repost) return acc;
 
@@ -70,7 +69,19 @@ export const isRepostInCollection = (collection: NostrNoteContent[], repost: Nos
     return [...acc, t];
   }, []);
 
-  return tag && !!otherTags.find(t => t[1] === tag[1]);
+  if (repost.kind === Kind.Repost) {
+    const tag = repost.tags.find(t => t[0] === 'e');
+
+    return tag && !!otherTags.find(t => t[1] === tag[1]);
+  }
+
+  if (repost.kind === Kind.Text) {
+    const id = repost.id;
+
+    return !!otherTags.find(t => t[1] === id);
+  }
+
+  return false;
 
 };
 

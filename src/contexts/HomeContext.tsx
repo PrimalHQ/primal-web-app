@@ -380,13 +380,13 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
           store.notes[0]?.post?.noteId === messageId :
           store.notes[0]?.repost?.note.noteId === messageId;
 
-        let isAlreadyReposted = isRepost && isRepostInCollection(store[scope].page.messages, message);
+        let isAlreadyReposted = isRepostInCollection(store[scope].page.messages, message);
 
         // const isAlreadyFetched = message.kind === Kind.Text ?
         //   store.future.notes[0]?.post?.noteId === messageId :
         //   store.future.notes[0]?.repost?.note.noteId === messageId;
 
-        if (isFirstNote || (isRepost && isAlreadyReposted)) return;
+        if (isFirstNote || isAlreadyReposted) return;
 
         updateStore(scope, 'page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
@@ -398,9 +398,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       const isLastNote = message.kind === Kind.Text ?
         store.lastNote?.post?.noteId === messageId :
         store.lastNote?.repost?.note.noteId === messageId;
-        let isAlreadyReposted = isRepost && isRepostInCollection(store.page.messages, message);
 
-      if (isLastNote || (isRepost && isAlreadyReposted)) return;
+      let isAlreadyReposted = isRepostInCollection(store.page.messages, message);
+
+      if (isLastNote || isAlreadyReposted) return;
 
       updateStore('page', 'messages',
         (msgs) => [ ...msgs, { ...message }]
