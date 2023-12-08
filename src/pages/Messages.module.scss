@@ -189,6 +189,10 @@
             font-size: 16px;
             font-weight: 700;
             line-height: 16px;
+            max-width: 178px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
           .dotSeparator {
             width: 4px;
@@ -213,7 +217,7 @@
           line-height: 16px;
           margin-top: 4px;
           padding: 0;
-          max-width: 200px;
+          max-width: 228px;
           text-overflow: ellipsis;
           white-space: nowrap;
           overflow: hidden;
