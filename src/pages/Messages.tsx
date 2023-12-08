@@ -208,8 +208,8 @@ const Messages: Component = () => {
       return;
     }
 
-    const senderIds = Object.keys(messages.senders);
-    senderIds.length > 0 && navigate(`/messages/${messages.senders[senderIds[0]].npub}`);
+    const senders = messages.orderedSenders();
+    senders.length > 0 && navigate(`/messages/${senders[0].npub}`);
   });
 
   createEffect(() => {
@@ -587,7 +587,7 @@ const Messages: Component = () => {
   onCleanup(() => {
     newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
-    messages?.actions.selectSender();
+    // messages?.actions.selectSender();
   });
 
   const sendMessage = async () => {

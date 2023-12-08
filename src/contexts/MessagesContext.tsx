@@ -251,9 +251,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         resolve(m)
       }).catch((reason) => {
         console.warn('Failed to decrypt, will retry: ', message, reason);
-        setTimeout(() => {
-          resolve(actualDecrypt(sender, message));
-        }, 10 + Math.random() * 300);
+        resolve('');
+
+        // setTimeout(() => {
+        //   resolve(actualDecrypt(sender, message));
+        // }, 10 + Math.random() * 300);
       });
     });
   }
@@ -274,6 +276,10 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         try {
           const content = await actualDecrypt(store.selectedSender, eMsg.content);
 
+          if (content === '') {
+            throw(eMsg.content);
+          }
+
           const msg: DirectMessage = {
             sender: eMsg.pubkey,
             content: sanitize(content),
@@ -284,7 +290,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           newMessages.push(msg);
         } catch (e) {
           console.warn('Falied to decrypt message: ', e);
-          return;
+          continue;
         }
       }
     }
