@@ -73,6 +73,7 @@
     .senderCategorySelector {
       display: flex;
       .categorySelector {
+        position: relative;
         border: none;
         outline: none;
         padding-block: 0;
@@ -464,4 +465,38 @@
   -webkit-mask: url(../assets/icons/send.svg) no-repeat 0 0 / 16px 16px;
   mask: url(../assets/icons/send.svg) no-repeat 0 0 / 16px 16px;
 
+}
+
+.bubble {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 8px;
+  height: 8px;
+
+  position: absolute;
+  top: -8px;
+  right: 0;
+
+  margin-left: 2px;
+
+  font-family: 'Roboto Condensed';
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 11px;
+
+  background: var(--accent);
+  border: 1px solid var(--background-site);
+  border-radius: 9px;
+
+  color: var(--text-primary-button);
+
+  &.doubleSize {
+    width: 24px;
+  }
+
+  &.tripleSize {
+    width: 26px;
+    padding-left: 2px;
+  }
 }

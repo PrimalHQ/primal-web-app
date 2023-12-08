@@ -877,15 +877,25 @@ const Messages: Component = () => {
               class={`${styles.categorySelector} ${messages?.senderRelation === 'follows' ? styles.highlight : ''}`}
               onClick={() => messages?.actions.changeSenderRelation('follows')}
             >
-              {intl.formatMessage(tMessages.follows)}
+              <div>
+                {intl.formatMessage(tMessages.follows)}
+              </div>
               <div class={styles.indicator}></div>
+              <Show when={messages?.senderRelation === 'other' && messages?.hasMessagesInDifferentTab}>
+                <div class={styles.bubble}></div>
+              </Show>
             </button>
             <button
               class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
               onClick={() => messages?.actions.changeSenderRelation('other')}
             >
-              {intl.formatMessage(tMessages.other)}
+              <div>
+                {intl.formatMessage(tMessages.other)}
+              </div>
               <div class={styles.indicator}></div>
+              <Show when={messages?.senderRelation === 'follows' && messages?.hasMessagesInDifferentTab}>
+                <div class={styles.bubble}></div>
+              </Show>
             </button>
           </div>
           <button

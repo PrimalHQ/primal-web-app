@@ -63,6 +63,7 @@ type SenderMessageCount = {
 export type MessagesContextStore = {
   messageCount: number,
   messageCountPerSender: Record<string, SenderMessageCount>,
+  hasMessagesInDifferentTab: boolean,
   senders: Record<string, PrimalUser>;
   selectedSender: string | null,
   encryptedMessages: NostrMessageEncryptedContent[],
@@ -93,6 +94,7 @@ export type MessagesContextStore = {
 export const initialData = {
   messageCount: 0,
   messageCountPerSender: {},
+  hasMessagesInDifferentTab: false,
   senders: {},
   selectedSender: null,
   encryptedMessages: [],
@@ -137,6 +139,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     // @ts-ignore
     updateStore('senders', () => undefined );
     updateStore('senders', () => ({}));
+    updateStore('hasMessagesInDifferentTab' , () => false);
     getMessagesPerSender(true);
   };
 
@@ -627,9 +630,17 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EOSE') {
+        const keys = Object.keys(store.messageCountPerSender);
+        const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
+
+        if (store.messageCount > cnt) {
+          updateStore('hasMessagesInDifferentTab', () => true);
+        }
+
         if (store.addSender !== undefined) {
           const key = store.addSender.pubkey;
           const user = { ...store.addSender }
+
 
 
           updateStore('senders', () => ({ [key]: user }));
