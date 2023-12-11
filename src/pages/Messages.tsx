@@ -238,6 +238,17 @@ const Messages: Component = () => {
     }
   });
 
+  createEffect(() => {
+    if (messages?.selectedSender) {
+      setTimeout(() => {
+        const el = document.querySelector(`[data-user="${messages.selectedSender}"]`);
+
+        // @ts-ignore
+        el?.scrollIntoView({ behaviour: 'smooth' });
+      }, 100);
+    }
+  });
+
   const user = (pubkey: string) => {
     return messages?.senders && messages.senders[pubkey];
   }
