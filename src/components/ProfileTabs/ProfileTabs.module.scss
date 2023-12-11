@@ -74,7 +74,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 40px;
+  padding: 40px;
+  overflow: hidden;
+  line-break: anywhere;
 
   button {
     margin: 0;
