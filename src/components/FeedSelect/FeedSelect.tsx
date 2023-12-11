@@ -33,7 +33,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     selector?.blur();
 
     if (hex && !isSelected(option)) {
-      const feed = findFeed(hex, includeReplies);
+      const feed = findFeed(decodeURI(hex), includeReplies);
 
       if (hex !== initialValue()?.value) {
         home?.actions.clearNotes();
@@ -51,7 +51,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (selected?.hex && option.value) {
       const t = option.value.split('_');
 
-      const isHex = selected.hex == t[0];
+      const isHex = encodeURI(selected.hex) == t[0];
       const isOpt = t[1] === 'undefined' ?
         selected.includeReplies === undefined :
         selected.includeReplies?.toString() === t[1];
@@ -69,7 +69,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
 
     return settings.availableFeeds.map(feed => ({
       label: feed.name,
-      value: `${feed.hex}_${feed.includeReplies}`,
+      value: `${encodeURI(feed.hex || '')}_${feed.includeReplies}`,
     }));
   };
 
@@ -90,7 +90,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (feed) {
       const [scope, timeframe] = feed.hex?.split(';') || [];
 
-      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${feed.hex}_${feed.includeReplies}`;
+      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${encodeURI(feed.hex || '')}_${feed.includeReplies}`;
 
       return {
         label: feed.name,
@@ -103,7 +103,12 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (!home?.selectedFeed)
       return initialValue();
 
-    return { label: home.selectedFeed.name, value: `${home.selectedFeed.hex}_${home.selectedFeed.includeReplies}` };
+    const value = `${encodeURI(home.selectedFeed.hex || '')}_${home.selectedFeed.includeReplies}`;
+
+    return {
+      label: home.selectedFeed.name,
+      value,
+    };
   };
 
   return (
