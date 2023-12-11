@@ -587,7 +587,7 @@ const Messages: Component = () => {
   onCleanup(() => {
     newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
-    // messages?.actions.selectSender();
+    messages?.actions.selectSender();
   });
 
   const sendMessage = async () => {
