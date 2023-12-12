@@ -244,7 +244,7 @@ const Messages: Component = () => {
         const el = document.querySelector(`[data-user="${messages.selectedSender}"]`);
 
         // @ts-ignore
-        el?.scrollIntoView({ behaviour: 'smooth' });
+        el?.scrollIntoView({ behaviour: 'smooth', block: 'nearest' });
       }, 100);
     }
   });
