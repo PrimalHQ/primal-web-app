@@ -602,7 +602,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
         if (count !== store.messageCount) {
           updateStore('messageCount', () => count);
-          updateStore('selectedSender', () => null);
+          // updateStore('selectedSender', () => null);
         }
 
       }

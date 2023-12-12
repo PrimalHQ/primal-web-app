@@ -12,7 +12,7 @@ import styles from './Messages.module.scss';
 import EmbeddedNote from '../components/EmbeddedNote/EmbeddedNote';
 import { A, useNavigate, useParams } from '@solidjs/router';
 import { parseNote3 } from '../lib/notes';
-import { hexToNpub } from '../lib/keys';
+import { hexToNpub, npubToHex } from '../lib/keys';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Loader from '../components/Loader/Loader';
@@ -189,9 +189,19 @@ const Messages: Component = () => {
   }
 
   createEffect(() => {
-    if(params.sender && currentUrl !== params.sender) {
-      currentUrl = params.sender;
-      messages?.actions.selectSender(params.sender);
+    if (!params.sender) return;
+
+    const sender =  params.sender.startsWith('npub') ?
+      npubToHex(params.sender) :
+      params.sender;
+
+    const url = currentUrl.startsWith('npub') ?
+      npubToHex(currentUrl) :
+      currentUrl;
+
+    if(currentUrl !== sender) {
+      currentUrl = sender;
+      messages?.actions.selectSender(sender);
     }
   });
 
@@ -212,7 +222,7 @@ const Messages: Component = () => {
     senders.length > 0 && navigate(`/messages/${senders[0].npub}`);
   });
 
-  createEffect(() => {
+  onMount(() => {
     const count = messages?.messageCount || 0;
 
     if (account?.isKeyLookupDone && account.hasPublicKey() && count === 0) {
