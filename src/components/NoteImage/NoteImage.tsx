@@ -24,6 +24,8 @@ const NoteImage: Component<{
 
   const src = () => props.media?.media_url || props.src;
 
+  const isCached = () => !props.isDev || props.media;
+
   const height = createMemo(() => {
     if (!props.media) {
       return '100%';
@@ -43,7 +45,7 @@ const NoteImage: Component<{
     return `${h}px`;
   });
 
-  const klass = () => `${styles.noteImage} ${props.isDev ? 'redBorder' : ''}`;
+  const klass = () => `${styles.noteImage} ${isCached() ? '' : 'redBorder'}`;
 
   const doZoom = (e: MouseEvent) => {
     if (!e.target || (e.target as HTMLImageElement).id !== imgId) {
