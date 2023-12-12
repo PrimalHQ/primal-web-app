@@ -4,9 +4,11 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './LinkPreview.module.scss';
 
-const LinkPreview: Component<{ preview: any, id?: string }> = (props) => {
+const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> = (props) => {
 
   const media = useMediaContext();
+
+  let imgContainer: HTMLDivElement | undefined;
 
   const encodedUrl = encodeURI(new URL(props.preview.url.toLowerCase()).origin);
 
@@ -16,39 +18,38 @@ const LinkPreview: Component<{ preview: any, id?: string }> = (props) => {
     return i;
   };
 
-  const height = () => {
+  const ratio = () => {
     const img = image();
 
-    if (!img) {
-      return '100%';
+    if (!img) return 2;
+
+    return img.w / img.h;
+  };
+
+  const klass = () => {
+    let k = image() && ratio() <= 1.2 ? styles.linkPreviewH : styles.linkPreview;
+
+    if (props.bordered) {
+      k += ` ${styles.bordered}`;
     }
 
-    const mediaHeight = img.h;
-    const mediaWidth = img.w || 0;
-    const imgWidth = 524;
-
-    const ratio = mediaWidth / imgWidth;
-
-    const h = ratio > 1 ?
-      mediaHeight / ratio :
-      mediaHeight * ratio;
-
-    return `${h}px`;
+    return k;
   };
 
   return (
     <a
       id={props.id}
       href={props.preview.url}
-      class={styles.linkPreview}
+      class={klass()}
     >
       <Show when={image()}>
         <div
+          ref={imgContainer}
           class={styles.previewImage}
-          style={`width: 100%; height: ${height()}`}
         >
           <img
             src={image()?.media_url}
+            width="100%"
           />
         </div>
       </Show>

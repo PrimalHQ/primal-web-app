@@ -1,7 +1,6 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
 import {
-  addLinkPreviews,
   getLinkPreview,
   isAppleMusic,
   isHashtag,
@@ -24,10 +23,9 @@ import {
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createEffect, For, JSXElement, onMount, Show,
+  Component, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
-  PrimalLinkPreview,
   PrimalNote,
 } from '../../types/primal';
 
@@ -63,6 +61,7 @@ const ParsedNote: Component<{
   noLinks?: 'links' | 'text',
   noPreviews?: boolean,
   shorten?: boolean,
+  isEmbeded?: boolean,
 }> = (props) => {
 
   const intl = useIntl();
@@ -279,7 +278,7 @@ const ParsedNote: Component<{
 
         if (hasMinimalPreviewData) {
           wordsDisplayed += shortMentionInWords;
-          return <LinkPreview preview={preview} />;
+          return <LinkPreview preview={preview} bordered={props.isEmbeded} />;
         }
 
         return <span data-url={token}><a link href={token.toLowerCase()} target="_blank" >{token}</a></span>;

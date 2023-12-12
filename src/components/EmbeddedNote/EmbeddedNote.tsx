@@ -95,7 +95,12 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
         </span>
       </div>
       <div class={styles.noteContent}>
-        <ParsedNote note={props.note} ignoreMentionedNotes={true} shorten={true} />
+        <ParsedNote
+          note={props.note}
+          ignoreMentionedNotes={true}
+          shorten={true}
+          isEmbeded={true}
+        />
       </div>
     </>
   );
