@@ -598,6 +598,7 @@ const Messages: Component = () => {
   onCleanup(() => {
     newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
+    messages?.actions.clearAllMessages();
     messages?.actions.selectSender();
   });
 

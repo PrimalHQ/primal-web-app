@@ -88,6 +88,7 @@ export type MessagesContextStore = {
     addSender: (user: PrimalUser) => void,
     getNextConversationPage: () => void,
     addUserReference: (user: PrimalUser) => void,
+    clearAllMessages: () => void,
   }
 }
 
@@ -219,6 +220,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const resetAllMessages = async () => {
     markAllAsRead(subidResetMsgCounts);
+  };
+
+  const clearAllMessages = () => {
+    updateStore('encryptedMessages', () => []);
+    updateStore('conversation', () => []);
+    updateStore('messages', () => []);
   };
 
   const getConversationWithSender = (sender: string | null, until = 0) => {
@@ -879,6 +886,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       addSender,
       getNextConversationPage,
       addUserReference,
+      clearAllMessages,
     },
   });
 
