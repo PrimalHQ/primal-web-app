@@ -26,6 +26,16 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
     return img.w / img.h;
   };
 
+  const height = () => {
+    const img = image();
+
+    if (!img || ratio() <= 1.2) return 'auto';
+
+    const h = img.h / ratio();
+
+    return `${h}px`;
+  };
+
   const klass = () => {
     let k = image() && ratio() <= 1.2 ? styles.linkPreviewH : styles.linkPreview;
 
@@ -49,7 +59,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
         >
           <img
             src={image()?.media_url}
-            width="100%"
+            style={`width: 100%; height: ${height()}`}
           />
         </div>
       </Show>
