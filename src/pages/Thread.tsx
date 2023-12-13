@@ -105,19 +105,10 @@ const Thread: Component = () => {
         return;
       }
 
-      observer = new IntersectionObserver(entries => {
+      setTimeout(() => {
         const rect = pn.getBoundingClientRect();
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) {
-            scrollWindowTo(rect.top);
-          }
-          setTimeout(() => {
-            observer?.unobserve(pn);
-          }, 100);
-        });
-      });
-
-      observer?.observe(pn);
+        scrollWindowTo(rect.top - 72);
+      }, 0)
     }
   });
 
