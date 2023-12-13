@@ -29,6 +29,8 @@ const Thread: Component = () => {
   const intl = useIntl();
   const navigate = useNavigate();
 
+  let repliesHolder: HTMLDivElement | undefined;
+
   const postId = () => {
     if (params.postId.startsWith('note')) {
       return params.postId;
@@ -106,8 +108,21 @@ const Thread: Component = () => {
       }
 
       setTimeout(() => {
+        if (!repliesHolder) return;
+
         const rect = pn.getBoundingClientRect();
-        scrollWindowTo(rect.top - 72);
+        const repRect = repliesHolder.getBoundingClientRect();
+
+        const vh = window.innerHeight;
+        const header = 72;
+        const note = rect.height;
+
+        const minHeight = vh - note - header;
+        const offset = repRect.height > minHeight ? header : 0;
+
+        repliesHolder.setAttribute('style',`min-height: ${minHeight}px`);
+
+        scrollWindowTo(rect.top - offset);
       }, 0)
     }
   });
@@ -176,7 +191,7 @@ const Thread: Component = () => {
           </div>
         </Show>
 
-        <div class={styles.repliesHolder}>
+        <div class={styles.repliesHolder} ref={repliesHolder}>
           <For each={replyNotes()}>
             {note =>
               <div class={styles.threadList}>
