@@ -34,6 +34,7 @@
 
   .previewImage {
     width: 130px;
+    object-fit: cover;
   }
 
   .previewInfo {
@@ -70,6 +71,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  object-fit: cover;
 }
 
 .previewTitle {
