@@ -8,8 +8,6 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
 
   const media = useMediaContext();
 
-  let imgContainer: HTMLDivElement | undefined;
-
   const encodedUrl = encodeURI(new URL(props.preview.url.toLowerCase()).origin);
 
   const image = () => {
@@ -31,7 +29,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
 
     if (!img || ratio() <= 1.2) return 'auto';
 
-    const h = img.h / ratio();
+    // width of the note over the ratio of the preview image
+    const h = 524 / ratio();
 
     return `${h}px`;
   };
@@ -54,7 +53,6 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
     >
       <Show when={image()}>
         <div
-          ref={imgContainer}
           class={styles.previewImage}
         >
           <img
