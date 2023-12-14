@@ -20,7 +20,7 @@
     right: unset;
   }
   &.hidden {
-    display: none;
+    visibility: hidden;
   }
 }
 
@@ -46,6 +46,6 @@
     right: unset;
   }
   &.hidden {
-    display: none;
+    visibility: hidden;
   }
 }
