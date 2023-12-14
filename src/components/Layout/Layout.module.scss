@@ -6,6 +6,16 @@
   grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
 }
 
+.containerIOS {
+  z-index: 1;
+  margin-top: 54px;
+  width: 100%;
+  grid-template-columns: 98%;
+  grid-template-rows: 1fr 48px;
+  grid-template-areas: "content" "footer";
+  background-color: var(--background-site);
+}
+
 .leftColumn {
   >div {
     position: fixed;
@@ -230,45 +240,5 @@
 
   .rightColumn {
     display: none;
-  }
-
-  // body {
-  //   overflow-x: hidden;
-  // }
-}
-
-.iosBanner {
-  width: 100%;
-  color: var(--text-primary-button);
-  background: linear-gradient(93deg, #FA3C3C -4.27%, #5B09AD 107.61%);
-  border: none;
-  outline: none;
-  border-radius: 0;
-  >div {
-    width: 100%;
-    display: flex;
-    align-items: center;
-
-    .iosDesc {
-      flex-grow: 1;
-      margin-inline: 8px;
-
-      .title {
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 18px;
-        text-align: left;
-      }
-      .desc {
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 12px;
-        text-align: left;
-      }
-    }
-
-    img {
-      background: none;
-    }
   }
 }

@@ -21,6 +21,7 @@ import { userName } from '../stores/profile';
 import PageTitle from '../components/PageTitle/PageTitle';
 import NavHeader from '../components/NavHeader/NavHeader';
 import Loader from '../components/Loader/Loader';
+import { isIOS } from '../components/BannerIOS/BannerIOS';
 
 
 const Thread: Component = () => {
@@ -116,13 +117,14 @@ const Thread: Component = () => {
         const vh = window.innerHeight;
         const header = 72;
         const note = rect.height;
+        const banner = isIOS() ? 54 : 0;
 
-        const minHeight = vh - note - header;
+        const minHeight = vh - note - header - banner;
         const offset = repRect.height > minHeight ? header : 0;
 
         repliesHolder.setAttribute('style',`min-height: ${minHeight}px`);
 
-        scrollWindowTo(rect.top - offset);
+        scrollWindowTo(rect.top - offset - banner);
       }, 0)
     }
   });

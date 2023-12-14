@@ -9,12 +9,11 @@ import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
 import zapSM from '../../assets/lottie/zap_sm.json';
 import zapMD from '../../assets/lottie/zap_md.json';
-import primalWhite from '../../assets/icons/primal_white.svg';
-import openWhite from '../../assets/icons/open_white.svg';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import Branding from '../Branding/Branding';
+import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -77,29 +76,6 @@ const Layout: Component = () => {
     }
   }
 
-  const linkToiOS = () => {
-    const appstoreFail = 'https://apps.apple.com/us/app/primal/id1673134518';
-    const appUrlScheme = `primal:/${window.location.pathname}`;
-
-    if (isIOS()) {
-      console.log('LOC: ', appUrlScheme)
-      // Try launching the app using URL schemes
-      window.open(appUrlScheme, "_self");
-
-      // If the app is not installed the script will wait for 2sec and redirect to web.
-      setTimeout(function() {
-        window.location.href = appstoreFail;
-      } , 2_000);
-    } else {
-        // Launch the website
-        window.location.href = appstoreFail;
-    }
-  };
-
-  const isIOS = () => {
-    return /(iPad|iPhone|iPod)/.test(navigator.userAgent);
-  };
-
   return (
     <>
       <div class={styles.preload}>
@@ -121,19 +97,8 @@ const Layout: Component = () => {
         ></lottie-player>
       </div>
       <div id="modal" class={styles.modal}></div>
-      <Show when={isIOS()}>
-        <button class={styles.iosBanner} onClick={linkToiOS}>
-          <div>
-            <img src={primalWhite} />
-            <div class={styles.iosDesc}>
-              <div class={styles.title}>Primal</div>
-              <div class={styles.desc}>Open in Primal app</div>
-            </div>
-            <img src={openWhite} />
-          </div>
-        </button>
-      </Show>
-      <div id="container" ref={container} class={styles.container}>
+      <BannerIOS />
+      <div id="container" ref={container} class={isIOS() ? styles.containerIOS : styles.container}>
         <div class={styles.leftColumn}>
           <div>
             <div id="branding_holder" class={styles.leftHeader}>

@@ -1,0 +1,41 @@
+
+
+.iosBanner {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  color: var(--text-primary-button);
+  background: linear-gradient(93deg, #FA3C3C -4.27%, #5B09AD 107.61%);
+  border: none;
+  outline: none;
+  border-radius: 0;
+  margin: 0;
+  z-index: var(--z-index-overlay);
+  >div {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    .iosDesc {
+      flex-grow: 1;
+      margin-inline: 8px;
+
+      .title {
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 18px;
+        text-align: left;
+      }
+      .desc {
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+        text-align: left;
+      }
+    }
+
+    img {
+      background: none;
+    }
+  }
+}
