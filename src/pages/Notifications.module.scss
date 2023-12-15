@@ -6,6 +6,7 @@
 
 .oldNotifications {
   position: relative;
+  padding-right: 2px;
 }
 
 .loader {
@@ -79,4 +80,67 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+
+
+.notificationTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-inline: 8px;
+  // background-color: var(--background-card);
+  width: 100%;
+  border-radius: 0;
+  border-bottom: 1px solid var(--devider);
+  // border-top: none;
+}
+
+.notificationTab {
+  position: relative;
+  display: inline-block;
+  padding-inline: 14px;
+  padding-block: 2px;
+  border: none;
+  background: none;
+  width: fit-content;
+  height: 40px;
+  margin: 0;
+  text-transform: uppercase;
+
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 14px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.notificationTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 36px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
+
+.notificationTabsPlaceholder {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 8px;
+  background-color: var(--background-card);
+  width: 100%;
+  height: 74px;
+  border-radius: 0 0 8px 8px;
+  padding-top: 22px;
 }

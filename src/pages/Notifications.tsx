@@ -21,6 +21,7 @@ import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
+import { Tabs } from "@kobalte/core";
 
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -272,6 +273,7 @@ const Notifications: Component = () => {
   };
 
   createEffect(() => {
+    console.log('fetch new')
     const pk = publicKey();
 
     if (!pk || notifSince() === undefined) {
@@ -280,6 +282,15 @@ const Notifications: Component = () => {
 
     fetchNewNotifications(pk as string, notificationGroup());
   });
+
+  const resetNotifContent = () => {
+    setLastNotification(undefined);
+    setOldNotifications('notifications', []);
+    setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
+    // setNotifSince(0);
+    setSortedNotifications({})
+
+  };
 
   onCleanup(() => {
     setLastNotification(undefined);
@@ -384,6 +395,8 @@ const Notifications: Component = () => {
 
         const sorted = sortNotifByRecency(notifs);
 
+        console.log('fetch sorted: ', sorted);
+
         setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted])
 
         // Convert related notes
@@ -417,6 +430,7 @@ const Notifications: Component = () => {
 
   // Fetch old notifications
   createEffect(() => {
+    console.log('fetch old')
     if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince() !== undefined) {
       fetchOldNotifications(notifSince() || 0, notificationGroup());
     }
@@ -1079,71 +1093,131 @@ const Notifications: Component = () => {
         </div>
       </Show>
 
+      <StickySidebar>
+        <NotificationsSidebar
+          notifications={sortedNotifications}
+          getUsers={getUsers}
+        />
+      </StickySidebar>
 
-      <Show
-        when={publicKey() && allSet()}
-        fallback={
-          <div class={styles.loader}>
-            <Loader />
-          </div>
-        }
+      <Tabs.Root
+        onChange={(group: NotificationGroup) => {
+          // setNotifSince(0);
+          resetNotifContent();
+          setNotificationGroup(group);
+        }}
       >
-        <StickySidebar>
-          <NotificationsSidebar
-            notifications={sortedNotifications}
-            getUsers={getUsers}
-          />
-        </StickySidebar>
+        <Tabs.List class={styles.notificationTabs}>
+          <Tabs.Trigger class={styles.notificationTab} value="all">
+            All
+          </Tabs.Trigger>
 
-        {newUserFollowedYou()}
-        {userUnfollowedYou()}
+          <Tabs.Trigger class={styles.notificationTab} value="zaps">
+            Zaps
+          </Tabs.Trigger>
 
-        {yourPostWasZapped()}
+          <Tabs.Trigger class={styles.notificationTab} value="replies">
+            Replies
+          </Tabs.Trigger>
 
-        {yourPostWasRepliedTo()}
-        {yourPostWasReposted()}
-        {yourPostWasLiked()}
+          <Tabs.Trigger class={styles.notificationTab} value="mentions">
+            Mentions
+          </Tabs.Trigger>
 
-        {youWereMentioned()}
-        {yourPostWasMentioned()}
+          <Tabs.Indicator class={styles.notificationTabIndicator} />
+        </Tabs.List>
 
-        {postYouWereMentionedInWasZapped()}
-        {postYouWereMentionedInWasRepliedTo()}
-        {postYouWereMentionedInWasReposted()}
-        {postYouWereMentionedInWasLiked()}
+        <Tabs.Content class={styles.notificationTabContent} value="all">
+          <Show
+            when={publicKey() && allSet()}
+            fallback={
+              <div class={styles.loader}>
+                <Loader />
+              </div>
+            }
+          >
 
-        {postYourPostWasMentionedInWasZapped()}
-        {postYourPostWasMentionedInWasRepliedTo()}
-        {postYourPostWasMentionedInWasReposted()}
-        {postYourPostWasMentionedInWasLiked()}
+            {newUserFollowedYou()}
+            {userUnfollowedYou()}
 
-        <Show when={hasNewNotifications()}>
-          <div class={styles.separator}></div>
-        </Show>
+            {yourPostWasZapped()}
 
-        <Show when={fetchingOldNotifs()}>
-          <div class={styles.loader}>
-            <Loader />
-          </div>
-        </Show>
+            {yourPostWasRepliedTo()}
+            {yourPostWasReposted()}
+            {yourPostWasLiked()}
 
-        <Show when={oldNotifications.notifications.length > 0}>
-          <div class={styles.oldNotifications}>
-            <For each={oldNotifications.notifications}>
-              {notif => (
-                <NotificationItem2
-                  notification={notif}
-                  users={oldNotifications.users}
-                  userStats={oldNotifications.userStats}
-                  notes={oldNotifications.notes}
-                />
-              )}
-            </For>
-            <Paginator loadNextPage={fetchMoreNotifications} />
-          </div>
-        </Show>
+            {youWereMentioned()}
+            {yourPostWasMentioned()}
 
-      </Show>
+            {postYouWereMentionedInWasZapped()}
+            {postYouWereMentionedInWasRepliedTo()}
+            {postYouWereMentionedInWasReposted()}
+            {postYouWereMentionedInWasLiked()}
+
+            {postYourPostWasMentionedInWasZapped()}
+            {postYourPostWasMentionedInWasRepliedTo()}
+            {postYourPostWasMentionedInWasReposted()}
+            {postYourPostWasMentionedInWasLiked()}
+
+            <Show when={hasNewNotifications()}>
+              <div class={styles.separator}></div>
+            </Show>
+
+            <Show when={fetchingOldNotifs()}>
+              <div class={styles.loader}>
+                <Loader />
+              </div>
+            </Show>
+
+            <Show when={oldNotifications.notifications.length > 0}>
+              <div class={styles.oldNotifications}>
+                <For each={oldNotifications.notifications}>
+                  {notif => (
+                    <NotificationItem2
+                      notification={notif}
+                      users={oldNotifications.users}
+                      userStats={oldNotifications.userStats}
+                      notes={oldNotifications.notes}
+                    />
+                  )}
+                </For>
+                <Paginator loadNextPage={fetchMoreNotifications} />
+              </div>
+            </Show>
+
+          </Show>
+        </Tabs.Content>
+
+        <For each={['zaps', 'replies', 'mentions']}>
+          {group =>
+            <Tabs.Content class={styles.notificationTabContent} value={group}>
+              <Show
+                when={oldNotifications.notifications.length > 0}
+                fallback={
+                  <div class={styles.loader}>
+                    <Loader />
+                  </div>
+                }
+              >
+                <div class={styles.oldNotifications}>
+                  <For each={oldNotifications.notifications}>
+                    {notif => (
+                      <NotificationItem2
+                        notification={notif}
+                        users={oldNotifications.users}
+                        userStats={oldNotifications.userStats}
+                        notes={oldNotifications.notes}
+                      />
+                    )}
+                  </For>
+                  <Paginator loadNextPage={fetchMoreNotifications} />
+                </div>
+              </Show>
+            </Tabs.Content>
+          }
+        </For>
+
+      </Tabs.Root>
     </div>
   );
 }
