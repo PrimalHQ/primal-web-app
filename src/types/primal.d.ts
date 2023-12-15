@@ -619,3 +619,5 @@ export type SelectionOption = {
   disabled?: boolean,
   separator?: boolean,
 }
+
+export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions';

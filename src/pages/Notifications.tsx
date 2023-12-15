@@ -19,7 +19,7 @@ import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, trunca
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
 
 import styles from './Notifications.module.scss';
@@ -45,6 +45,7 @@ const Notifications: Component = () => {
   const [allSet, setAllSet] = createSignal(false);
   const [fetchingOldNotifs, setfetchingOldNotifs] = createSignal(false);
 
+  const [notificationGroup, setNotificationGroup] = createSignal<NotificationGroup>('all');
 
   const newNotifCount = () => {
     if (!notifications?.notificationCount) {
@@ -169,7 +170,7 @@ const Notifications: Component = () => {
   let newNotifs: Record<string, PrimalNotification[]> = {};
 
   // Fetch new notifications
-  const fetchNewNotifications = (pk: string) => {
+  const fetchNewNotifications = (pk: string, group: NotificationGroup) => {
     const subid = `notif_${APP_ID}`
 
     const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -266,7 +267,7 @@ const Notifications: Component = () => {
     const since = queryParams.ignoreLastSeen ? 0 : notifSince();
 
     newNotifs = {};
-    getNotifications(account?.publicKey, pk as string, subid, since);
+    getNotifications(account?.publicKey, pk as string, subid, group, since);
 
   };
 
@@ -277,7 +278,7 @@ const Notifications: Component = () => {
       return;
     }
 
-    fetchNewNotifications(pk as string);
+    fetchNewNotifications(pk as string, notificationGroup());
   });
 
   onCleanup(() => {
@@ -294,7 +295,7 @@ const Notifications: Component = () => {
     });
   }
 
-  const fetchOldNotifications = (until: number) => {
+  const fetchOldNotifications = (until: number, group: NotificationGroup) => {
     const subid = `notif_old_${APP_ID}`
 
     const unsub = subscribeTo(subid, async (type, _, content) => {
@@ -409,7 +410,7 @@ const Notifications: Component = () => {
 
     if (pk) {
       setfetchingOldNotifs(true);
-      getOldNotifications(account?.publicKey, pk as string, subid, until);
+      getOldNotifications(account?.publicKey, pk as string, subid, group, until);
     }
 
   }
@@ -417,7 +418,7 @@ const Notifications: Component = () => {
   // Fetch old notifications
   createEffect(() => {
     if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince() !== undefined) {
-      fetchOldNotifications(notifSince() || 0);
+      fetchOldNotifications(notifSince() || 0, notificationGroup());
     }
   });
 
@@ -1039,12 +1040,12 @@ const Notifications: Component = () => {
     const until = lastNotif.created_at;
 
     if (until > 0) {
-      fetchOldNotifications(until);
+      fetchOldNotifications(until, notificationGroup());
     }
   }
 
   const loadNewContent = () => {
-    fetchNewNotifications(publicKey() as string);
+    fetchNewNotifications(publicKey() as string, notificationGroup());
     setLastSeen(`notif_sls_${APP_ID}`, Math.floor((new Date()).getTime() / 1000));
   }
 

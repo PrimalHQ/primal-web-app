@@ -1,11 +1,13 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
+import { NotificationGroup } from "../types/primal";
 import { signEvent } from "./nostrAPI";
 
 export const getNotifications = (
   user_pubkey: string | undefined,
   pubkey: string | undefined,
   subid: string,
+  type_group: NotificationGroup = 'all',
   since = 0,
   limit = 100,
 ) => {
@@ -13,7 +15,13 @@ export const getNotifications = (
     return;
   }
 
-  let payload: { pubkey: string, limit: number, since: number, user_pubkey?: string } = { pubkey, limit, since };
+  let payload: {
+    pubkey: string,
+    limit: number,
+    since: number,
+    type_group: NotificationGroup,
+    user_pubkey?: string,
+  } = { pubkey, limit, since, type_group };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
@@ -30,6 +38,7 @@ export const getOldNotifications = (
   user_pubkey: string | undefined,
   pubkey: string | undefined,
   subid: string,
+  type_group: NotificationGroup = 'all',
   until = 0,
   limit = 20,
 ) => {
@@ -37,7 +46,13 @@ export const getOldNotifications = (
     return;
   }
 
-  let payload: { pubkey: string, limit: number, until: number, user_pubkey?: string } = { pubkey, limit, until };
+  let payload: {
+    pubkey: string,
+    limit: number,
+    until: number,
+    user_pubkey?: string,
+    type_group: NotificationGroup,
+  } = { pubkey, limit, until, type_group };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
