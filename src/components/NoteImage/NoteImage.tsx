@@ -26,24 +26,49 @@ const NoteImage: Component<{
 
   const isCached = () => !props.isDev || props.media;
 
-  const height = createMemo(() => {
+  const ratio = () => {
+    const img = props.media;
+
+    if (!img) return 2;
+
+    return img.w / img.h;
+  };
+
+  const height = () => {
     if (!props.media) {
       return '100%';
     }
 
-    const mediaHeight = props.media.h;
-    const mediaWidth = props.media.w || 0;
-    const rect = imgRefActual?.getBoundingClientRect();
-    const imgWidth = props.width || rect?.width || 0;
+    const img = props.media;
 
-    const ratio = mediaWidth / imgWidth;
+    if (!img || ratio() <= 1.2) return 'auto';
 
-    const h = ratio > 1 ?
-      mediaHeight / ratio :
-      mediaHeight * ratio;
+    // width of the note over the ratio of the preview image
+    const h = 524 / ratio();
 
     return `${h}px`;
-  });
+  };
+
+  // const height = createMemo(() => {
+  //   if (!props.media) {
+  //     return '100%';
+  //   }
+
+
+  //   const mediaHeight = props.media.h;
+  //   const mediaWidth = props.media.w || 0;
+  //   const rect = imgRefActual?.getBoundingClientRect();
+  //   const imgWidth = props.width || rect?.width || 0;
+
+  //   const ratio = mediaWidth / imgWidth;
+
+  //   const h = ratio > 1 ?
+  //   mediaHeight / ratio :
+  //   mediaHeight * ratio;
+
+  //   console.log('MEDIA: ', props.media, h, ratio);
+  //   return `${h}px`;
+  // });
 
   const klass = () => `${styles.noteImage} ${isCached() ? '' : 'redBorder'}`;
 
