@@ -25,6 +25,7 @@ export type NotificationsContextStore = {
   notificationCount: number,
   downloadsCount: number,
   actions: {
+    resetNotificationCounter: () => void,
   }
 }
 
@@ -69,6 +70,8 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     updateStore('downloadsCount', () => count);
 
   };
+
+  const resetNotificationCounter = () => updateStore('notificationCount', () => 0);
 
 // SOCKET HANDLERS ------------------------------
 
@@ -144,6 +147,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
   const [store, updateStore] = createStore<NotificationsContextStore>({
     ...initialData,
     actions: {
+      resetNotificationCounter,
     },
   });
 

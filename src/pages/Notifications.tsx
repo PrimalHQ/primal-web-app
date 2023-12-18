@@ -27,6 +27,15 @@ import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 
+
+const timeNow = () => Math.floor((new Date()).getTime() / 1000);
+
+let notifSince = timeNow();
+
+const setNotifSince = (val: number) => {
+  notifSince = val;
+}
+
 const Notifications: Component = () => {
 
   const account = useAccountContext();
@@ -35,11 +44,6 @@ const Notifications: Component = () => {
 
   const [queryParams, setQueryParams] = useSearchParams();
 
-  let notifSince = Math.floor((new Date()).getTime() / 1000);
-
-  const setNotifSince = (val: number) => {
-    notifSince = val;
-  }
 
   const [sortedNotifications, setSortedNotifications] = createStore<SortedNotifications>({});
 
@@ -166,8 +170,8 @@ const Notifications: Component = () => {
       });
 
       setTimeout(() => {
-        setLastSeen(subid, Math.floor((new Date()).getTime() / 1000));
-      }, 1000);
+        setLastSeen(subid, timeNow());
+      }, 1_000);
 
     }
   });
@@ -263,7 +267,7 @@ const Notifications: Component = () => {
         setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
-        setNotifSince(Math.floor((new Date()).getTime() / 1000))
+        setNotifSince(timeNow());
         unsub();
         return;
       }
@@ -291,7 +295,6 @@ const Notifications: Component = () => {
     setLastNotification(undefined);
     setOldNotifications('notifications', []);
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
-    // setNotifSince(0);
     setSortedNotifications({})
 
   };
@@ -300,7 +303,6 @@ const Notifications: Component = () => {
     setLastNotification(undefined);
     setOldNotifications('notifications', []);
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
-    setNotifSince(0);
     setSortedNotifications({})
   });
 
@@ -399,8 +401,6 @@ const Notifications: Component = () => {
 
         const sorted = sortNotifByRecency(notifs);
 
-        console.log('fetch sorted: ', sorted);
-
         setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted])
 
         // Convert related notes
@@ -434,8 +434,11 @@ const Notifications: Component = () => {
 
   // Fetch old notifications
   createEffect(() => {
-    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince !== undefined) {
-      fetchOldNotifications(notifSince || 0, notificationGroup());
+    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen) {
+      const notifGroup = notificationGroup();
+      setTimeout(() => {
+        fetchOldNotifications(notifSince || 0, notifGroup);
+      }, 10);
     }
   });
 
@@ -1061,12 +1064,34 @@ const Notifications: Component = () => {
     }
   }
 
+  const copyNewNotifsToOld = () => {
+    const keys = Object.keys(newNotifs);
+
+    let notifs: PrimalNotification[] = []
+
+    for (let i=0;i<keys.length;i++) {
+      notifs = [...notifs, ...newNotifs[keys[i]]];
+    }
+
+    const sorted = sortNotifByRecency(notifs);
+
+    setOldNotifications('notifications', (old) => [ ...sorted, ...old ]);
+    setOldNotifications('notes', (old) => [ ...relatedNotes.notes, ...old ]);
+    setOldNotifications('reposts', () => ({ ...relatedNotes.reposts }));
+
+    const users = relatedNotes.users.reduce((acc, u) => ({ ...acc, [u.pubkey]: u }), {});
+
+    setOldNotifications('users', () => ({ ...users }));
+  }
+
   const loadNewContent = () => {
-    setLastSeen(`notif_sls_${APP_ID}`, Math.floor((new Date()).getTime() / 1000));
+    copyNewNotifsToOld();
+
+    notifications?.actions.resetNotificationCounter();
+    setLastSeen(`notif_sls_${APP_ID}`, timeNow());
     notificationGroup() !== 'all' && resetNotifContent();
     setNotificationGroup('all');
     fetchNewNotifications(publicKey() as string, notificationGroup());
-
   }
 
   return (
@@ -1164,10 +1189,6 @@ const Notifications: Component = () => {
             {postYourPostWasMentionedInWasRepliedTo()}
             {postYourPostWasMentionedInWasReposted()}
             {postYourPostWasMentionedInWasLiked()}
-
-            <Show when={hasNewNotifications()}>
-              <div class={styles.separator}></div>
-            </Show>
 
             <Show when={fetchingOldNotifs()}>
               <div class={styles.loader}>
