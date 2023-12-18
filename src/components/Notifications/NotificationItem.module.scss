@@ -1,10 +1,36 @@
 .notifItem {
+  position: relative;
   display: grid;
   grid-template-columns: 44px 1fr;
 
   padding-top: 12px;
   padding-bottom: 17px;
   border-bottom: 1px solid var(--subtile-devider);
+
+  .newBubble {
+    position: absolute;
+    top: 8px;
+    right: 14px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 10px;
+    height: 10px;
+
+    margin-left: 2px;
+
+    font-family: 'Roboto Condensed';
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 11px;
+
+    background: var(--accent);
+    border: 1px solid var(--background-site);
+    border-radius: 5px;
+
+    color: var(--text-primary-button);
+  }
 
   .notifType {
     display: flex;

@@ -144,6 +144,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   return (
     <div id={props.id} class={styles.notifItem}>
+      <div class={styles.newBubble}></div>
       <div class={styles.notifType}>
         <img src={typeIcon()} alt="notification icon" />
         <div class={styles.iconInfo} title={props.iconTooltip}>

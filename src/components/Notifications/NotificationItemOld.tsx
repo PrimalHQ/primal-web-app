@@ -66,7 +66,7 @@ type NotificationItemProps = {
   notification: PrimalNotification,
 };
 
-const NotificationItem2: Component<NotificationItemProps> = (props) => {
+const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
 
@@ -160,4 +160,4 @@ const NotificationItem2: Component<NotificationItemProps> = (props) => {
   );
 }
 
-export default hookForDev(NotificationItem2);
+export default hookForDev(NotificationItemOld);

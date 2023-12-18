@@ -68,7 +68,7 @@ export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  
       return body.callback;
     }
   } catch (err) {
-    console.log('E: ', err);
+    console.log('Error zapping: ', err);
     return null;
     /*-*/
   }

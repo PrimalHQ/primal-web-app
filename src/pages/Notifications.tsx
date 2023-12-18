@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
 import NotificationItem from '../components/Notifications/NotificationItem';
-import NotificationItem2 from '../components/Notifications/NotificationItem2';
+import NotificationItemOld from '../components/Notifications/NotificationItemOld';
 import NotificationsSidebar from '../components/NotificatiosSidebar/NotificationsSidebar';
 import Paginator from '../components/Paginator/Paginator';
 import Search from '../components/Search/Search';
@@ -35,7 +35,11 @@ const Notifications: Component = () => {
 
   const [queryParams, setQueryParams] = useSearchParams();
 
-  const [notifSince, setNotifSince] = createSignal<number>();
+  let notifSince = Math.floor((new Date()).getTime() / 1000);
+
+  const setNotifSince = (val: number) => {
+    notifSince = val;
+  }
 
   const [sortedNotifications, setSortedNotifications] = createStore<SortedNotifications>({});
 
@@ -132,7 +136,7 @@ const Notifications: Component = () => {
         }
 
         if (type === 'EOSE') {
-          if (!notifSince()) {
+          if (!notifSince) {
             setNotifSince(0);
           }
         }
@@ -259,13 +263,14 @@ const Notifications: Component = () => {
         setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
+        setNotifSince(Math.floor((new Date()).getTime() / 1000))
         unsub();
         return;
       }
 
     });
 
-    const since = queryParams.ignoreLastSeen ? 0 : notifSince();
+    const since = queryParams.ignoreLastSeen ? 0 : notifSince;
 
     newNotifs = {};
     getNotifications(account?.publicKey, pk as string, subid, group, since);
@@ -273,10 +278,9 @@ const Notifications: Component = () => {
   };
 
   createEffect(() => {
-    console.log('fetch new')
     const pk = publicKey();
 
-    if (!pk || notifSince() === undefined) {
+    if (!pk || notifSince === undefined) {
       return;
     }
 
@@ -430,9 +434,8 @@ const Notifications: Component = () => {
 
   // Fetch old notifications
   createEffect(() => {
-    console.log('fetch old')
-    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince() !== undefined) {
-      fetchOldNotifications(notifSince() || 0, notificationGroup());
+    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen && notifSince !== undefined) {
+      fetchOldNotifications(notifSince || 0, notificationGroup());
     }
   });
 
@@ -1059,8 +1062,11 @@ const Notifications: Component = () => {
   }
 
   const loadNewContent = () => {
-    fetchNewNotifications(publicKey() as string, notificationGroup());
     setLastSeen(`notif_sls_${APP_ID}`, Math.floor((new Date()).getTime() / 1000));
+    notificationGroup() !== 'all' && resetNotifContent();
+    setNotificationGroup('all');
+    fetchNewNotifications(publicKey() as string, notificationGroup());
+
   }
 
   return (
@@ -1101,27 +1107,27 @@ const Notifications: Component = () => {
       </StickySidebar>
 
       <Tabs.Root
-        onChange={(group: NotificationGroup) => {
-          // setNotifSince(0);
+        value={notificationGroup()}
+        onChange={(group: string) => {
           resetNotifContent();
-          setNotificationGroup(group);
+          setNotificationGroup(group as NotificationGroup);
         }}
       >
         <Tabs.List class={styles.notificationTabs}>
           <Tabs.Trigger class={styles.notificationTab} value="all">
-            All
+            {intl.formatMessage(t.all)}
           </Tabs.Trigger>
 
           <Tabs.Trigger class={styles.notificationTab} value="zaps">
-            Zaps
+            {intl.formatMessage(t.zaps)}
           </Tabs.Trigger>
 
           <Tabs.Trigger class={styles.notificationTab} value="replies">
-            Replies
+            {intl.formatMessage(t.replies)}
           </Tabs.Trigger>
 
           <Tabs.Trigger class={styles.notificationTab} value="mentions">
-            Mentions
+            {intl.formatMessage(t.mentions)}
           </Tabs.Trigger>
 
           <Tabs.Indicator class={styles.notificationTabIndicator} />
@@ -1173,7 +1179,7 @@ const Notifications: Component = () => {
               <div class={styles.oldNotifications}>
                 <For each={oldNotifications.notifications}>
                   {notif => (
-                    <NotificationItem2
+                    <NotificationItemOld
                       notification={notif}
                       users={oldNotifications.users}
                       userStats={oldNotifications.userStats}
@@ -1202,7 +1208,7 @@ const Notifications: Component = () => {
                 <div class={styles.oldNotifications}>
                   <For each={oldNotifications.notifications}>
                     {notif => (
-                      <NotificationItem2
+                      <NotificationItemOld
                         notification={notif}
                         users={oldNotifications.users}
                         userStats={oldNotifications.userStats}

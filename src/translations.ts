@@ -897,6 +897,26 @@ export const notifications = {
       other {# new notifications}}`,
     description: 'Label for a button to load new notifications',
   },
+  all: {
+    id: 'pages.notifications.all',
+    defaultMessage: 'All',
+    description: 'Title of the All notifications tab',
+  },
+  zaps: {
+    id: 'pages.notifications.zaps',
+    defaultMessage: 'Zaps',
+    description: 'Title of the Zaps notifications tab',
+  },
+  replies: {
+    id: 'pages.notifications.replies',
+    defaultMessage: 'Replies',
+    description: 'Title of the Replies notifications tab',
+  },
+  mentions: {
+    id: 'pages.notifications.mentions',
+    defaultMessage: 'Mentions',
+    description: 'Title of the Mentions notifications tab',
+  },
 };
 
 export const placeholders = {
