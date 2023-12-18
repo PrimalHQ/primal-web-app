@@ -120,11 +120,10 @@ const Thread: Component = () => {
         const banner = isIOS() ? 54 : 0;
 
         const minHeight = vh - note - header - banner;
-        const offset = repRect.height > minHeight ? header : 0;
 
         repliesHolder.setAttribute('style',`min-height: ${minHeight}px`);
 
-        scrollWindowTo(rect.top - offset - banner);
+        scrollWindowTo(rect.top - header - banner);
       }, 0)
     }
   });
