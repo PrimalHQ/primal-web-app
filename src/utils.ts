@@ -94,3 +94,5 @@ export const getScreenCordinates = (obj: any) =>  {
   }
   return p;
 }
+
+export const timeNow = () => Math.floor((new Date()).getTime() / 1000);

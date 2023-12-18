@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -14,7 +14,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
-import { useNotificationsContext } from '../contexts/NotificationsContext';
+import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
 import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subscribeTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
@@ -26,15 +26,9 @@ import { Tabs } from "@kobalte/core";
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { timeNow } from '../utils';
 
 
-const timeNow = () => Math.floor((new Date()).getTime() / 1000);
-
-let notifSince = timeNow();
-
-const setNotifSince = (val: number) => {
-  notifSince = val;
-}
 
 const Notifications: Component = () => {
 
@@ -44,6 +38,7 @@ const Notifications: Component = () => {
 
   const [queryParams, setQueryParams] = useSearchParams();
 
+  const [gotLastSeen, setGotLastSeen] = createSignal(false);
 
   const [sortedNotifications, setSortedNotifications] = createStore<SortedNotifications>({});
 
@@ -120,36 +115,6 @@ const Notifications: Component = () => {
 
     return account?.publicKey;
   }
-
-  createEffect(() => {
-    const pk = publicKey();
-    if (pk) {
-      const subid = `notif_ls_${APP_ID}`
-
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EVENT' && content?.kind === Kind.Timestamp) {
-
-          const timestamp = parseInt(content.content);
-
-          if (!isNaN(timestamp)) {
-            setNotifSince(timestamp);
-          }
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EOSE') {
-          if (!notifSince) {
-            setNotifSince(0);
-          }
-        }
-
-      });
-
-      getLastSeen(pk as string, subid);
-    }
-  });
 
   createEffect(() => {
     if (account?.hasPublicKey() && publicKey() === account.publicKey) {
@@ -284,11 +249,14 @@ const Notifications: Component = () => {
   createEffect(() => {
     const pk = publicKey();
 
-    if (!pk || notifSince === undefined) {
+    if (!pk) {
       return;
     }
+    const notifGroup = notificationGroup();
 
-    fetchNewNotifications(pk as string, notificationGroup());
+    setTimeout(() => {
+      fetchNewNotifications(pk as string, notificationGroup());
+    }, 10)
   });
 
   const resetNotifContent = () => {

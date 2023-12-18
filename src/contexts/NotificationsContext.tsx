@@ -10,7 +10,8 @@ import {
   isConnected,
   refreshSocketListeners,
   removeSocketListeners,
-  socket
+  socket,
+  subscribeTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -18,8 +19,9 @@ import {
   NostrEvent,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
+import { getLastSeen, subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
 import { useAccountContext } from "./AccountContext";
+import { timeNow } from "../utils";
 
 export type NotificationsContextStore = {
   notificationCount: number,
@@ -33,6 +35,12 @@ export const initialData = {
   notificationCount: 0,
   downloadsCount: 0,
 };
+
+export let notifSince = timeNow();
+
+export const setNotifSince = (val: number) => {
+  notifSince = val;
+}
 
 export const NotificationsContext = createContext<NotificationsContextStore>();
 
@@ -131,6 +139,38 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     if (!account?.sec) {
       unsubscribeToNotificationStats(subid);
       updateStore('notificationCount', () => 0);
+    }
+  });
+
+
+  createEffect(() => {
+    const pk = account?.publicKey;
+
+    if (pk) {
+      const subid = `notif_ls_${APP_ID}`
+
+      const unsub = subscribeTo(subid, async (type, _, content) => {
+        if (type === 'EVENT' && content?.kind === Kind.Timestamp) {
+
+          const timestamp = parseInt(content.content);
+
+          if (!isNaN(timestamp)) {
+            setNotifSince(timestamp);
+          }
+
+          unsub();
+          return;
+        }
+
+        if (type === 'EOSE') {
+          if (!notifSince) {
+            setNotifSince(0);
+          }
+        }
+
+      });
+
+      getLastSeen(pk as string, subid);
     }
   });
 
