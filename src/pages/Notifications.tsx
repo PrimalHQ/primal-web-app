@@ -2,7 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
 import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
 import NotificationItem from '../components/Notifications/NotificationItem';
@@ -242,6 +242,7 @@ const Notifications: Component = () => {
     const since = queryParams.ignoreLastSeen ? 0 : notifSince;
 
     newNotifs = {};
+    setSortedNotifications(reconcile({}));
     getNotifications(account?.publicKey, pk as string, subid, group, since);
 
   };
@@ -255,7 +256,7 @@ const Notifications: Component = () => {
     const notifGroup = notificationGroup();
 
     setTimeout(() => {
-      fetchNewNotifications(pk as string, notificationGroup());
+      fetchNewNotifications(pk as string, notifGroup);
     }, 10)
   });
 
@@ -1057,9 +1058,14 @@ const Notifications: Component = () => {
 
     notifications?.actions.resetNotificationCounter();
     setLastSeen(`notif_sls_${APP_ID}`, timeNow());
-    notificationGroup() !== 'all' && resetNotifContent();
-    setNotificationGroup('all');
-    fetchNewNotifications(publicKey() as string, notificationGroup());
+
+    if (notificationGroup() !== 'all') {
+      resetNotifContent();
+      setNotificationGroup('all');
+    }
+    else {
+      fetchNewNotifications(publicKey() as string, notificationGroup());
+    }
   }
 
   return (
