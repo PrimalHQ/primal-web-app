@@ -294,8 +294,8 @@ export const today = (new Date()).getTime();
 
 // Downloads page info --------------------
 // iOS
-export const iosRD = (new Date('12/01/2023')).getTime();
-export const iosVersion = '1.0.4';
+export const iosRD = (new Date('12/19/2023')).getTime();
+export const iosVersion = '1.1.10';
 export const appStoreLink = 'https://apps.apple.com/us/app/primal/id1673134518';
 
 // Android
