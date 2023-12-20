@@ -80,7 +80,7 @@
 .fixedSelector {
   position:fixed;
   top: 0px;
-  width: calc(var(--central-content-width) - 2px);
+  width: var(--central-content-width);
   height: var(--header-height);
   z-index: var(--z-index-header);
   transition: 0.3s;

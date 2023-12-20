@@ -16,7 +16,7 @@
   -ms-select: text;
   user-select: text;
 
-  width: calc(100% - 2px);
+  width: 100%;
 
   &.parent {
     border: none;
@@ -227,7 +227,7 @@
 
     .content {
       .rightSide {
-        width: calc(100% - 2px);
+        width: 100%;
       }
     }
   }

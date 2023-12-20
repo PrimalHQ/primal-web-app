@@ -124,6 +124,10 @@ const Thread: Component = () => {
         repliesHolder.setAttribute('style',`min-height: ${minHeight}px`);
 
         scrollWindowTo(rect.top - header - banner);
+
+        repliesHolder.setAttribute('style', `height: ${document.documentElement.scrollHeight}px;`)
+
+        console.log('TOTAL: ', document.documentElement.getBoundingClientRect(), repliesHolder.getBoundingClientRect())
       }, 0)
     }
   });
@@ -202,6 +206,7 @@ const Thread: Component = () => {
           </For>
         </div>
       </Show>
+      <div class={styles.bojan}></div>
     </div>
   )
 }

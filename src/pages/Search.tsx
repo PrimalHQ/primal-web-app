@@ -85,26 +85,30 @@ const Search: Component = () => {
         <SearchComponent />
       </Wormhole>
 
-      <PageCaption>
-        <div class={styles.caption}>
-          {intl.formatMessage(
-            tSearch.title,
-            { query: query() || '' },
-          )}
+      <PageCaption extended={true}>
+        <div class={styles.searchHeader}>
+          <div class={styles.caption}>
+            {intl.formatMessage(
+              tSearch.title,
+              { query: query() || '' },
+            )}
+          </div>
+          <div class={styles.addToFeed}>
+            <AddToHomeFeedButton
+              disabled={hasFeedAtHome()}
+              onAdd={addToHomeFeed}
+              activeLabel={intl.formatMessage(tActions.addFeedToHome)}
+              disabledLabel={intl.formatMessage(tActions.disabledAddFeedToHome)}
+            />
+          </div>
         </div>
-        <AddToHomeFeedButton
-          disabled={hasFeedAtHome()}
-          onAdd={addToHomeFeed}
-          activeLabel={intl.formatMessage(tActions.addFeedToHome)}
-          disabledLabel={intl.formatMessage(tActions.disabledAddFeedToHome)}
-        />
       </PageCaption>
 
 
       <div class={styles.searchContent}>
         <Show
           when={!search?.isFetchingContent}
-          fallback={<Loader />}
+          fallback={<div class={styles.loader}><Loader /></div>}
         >
           <Show
             when={search?.notes && search.notes.length > 0}

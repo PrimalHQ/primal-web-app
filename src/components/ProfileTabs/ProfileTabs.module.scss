@@ -9,7 +9,7 @@
   width: 100%;
   border-radius: 0;
   padding-top: 22px;
-  border: 1px solid var(--devider);
+  border-bottom: 1px solid var(--devider);
   border-top: none;
 }
 
@@ -202,7 +202,6 @@
 }
 
 .tabContent {
-  border-inline: 1px solid var(--devider);
   min-height: 100vh;
 }
 

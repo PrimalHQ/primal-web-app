@@ -137,12 +137,14 @@ const Layout: Component = () => {
 
 
         <div class={styles.rightColumn}>
-          <div class={styles.rightHeader}>
-            <div id="search_section">
+          <div>
+            <div class={styles.rightHeader}>
+              <div id="search_section">
+              </div>
             </div>
-          </div>
-          <div class={styles.rightContent}>
-            <div id="right_sidebar">
+            <div class={styles.rightContent}>
+              <div id="right_sidebar">
+              </div>
             </div>
           </div>
         </div>

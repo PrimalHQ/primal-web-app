@@ -90,7 +90,7 @@
   outline: none;
   display: flex;
   align-items: center;
-  width: calc(100% - 2px);
+  width: var(--central-content-width);
 
   .leftSideClosed {
     width: 60px;
