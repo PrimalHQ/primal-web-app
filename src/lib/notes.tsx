@@ -3,7 +3,7 @@ import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import NoteImage from "../components/NoteImage/NoteImage";
-import { appleMusicRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, wavlakeRegex, youtubeRegex } from "../constants";
+import { appleMusicRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
@@ -82,7 +82,7 @@ export const urlify = (
   skipLinkPreview = false,
 ) => {
 
-  return text.replace(urlRegex, (url: string) => {
+  return text.replace(urlRegexG, (url: string) => {
     if (!skipEmbed) {
 
       if (isImage(url)) {
