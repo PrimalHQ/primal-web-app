@@ -42,6 +42,8 @@ import { linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex,
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
+import PhotoSwipeLightbox from 'photoswipe/lightbox';
+
 
 const convertHTMLEntity = (text: string) => {
   const span = document.createElement('span');
@@ -66,6 +68,27 @@ const ParsedNote: Component<{
 
   const intl = useIntl();
   const media = useMediaContext();
+
+  const id = () => {
+    console.log('ID: ', props.id);
+    // if (props.id) return props.id;
+
+    return `note_${props.note.post.noteId}`;
+  }
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: `#${id()}`,
+    children: `a.image_${props.note.post.noteId}`,
+    showHideAnimationType: 'zoom',
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 2,
+    maxZoomLevel: 3,
+    pswpModule: () => import('photoswipe')
+  });
+
+  onMount(() => {
+    lightbox.init();
+  });
 
   const [tokens, setTokens] = createStore<string[]>([]);
 
@@ -131,7 +154,7 @@ const ParsedNote: Component<{
 
             wordsDisplayed += shortMentionInWords;
 
-            return <NoteImage src={url} isDev={dev} media={image} width={514} />;
+            return <NoteImage class={`image_${props.note.post.noteId}`} src={url} isDev={dev} media={image} width={514} />;
           }
 
           if (isMp4Video(token)) {
@@ -489,7 +512,7 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div id={props.id} class={styles.parsedNote} >
+    <div id={id()} class={styles.parsedNote} >
       <For each={tokens}>
         {(token) =>
           <Show when={shouldShowToken()}>

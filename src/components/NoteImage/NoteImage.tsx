@@ -7,6 +7,7 @@ import { generatePrivateKey } from "nostr-tools";
 import { MediaVariant } from "../../types/primal";
 
 const NoteImage: Component<{
+  class?: string,
   media?: MediaVariant,
   width?: number,
   src?: string,
@@ -49,26 +50,26 @@ const NoteImage: Component<{
     return `${h}px`;
   };
 
-  // const height = createMemo(() => {
-  //   if (!props.media) {
-  //     return '100%';
-  //   }
+  const zoomW = () => {
+    if (!props.media) {
+      return 100;
+    }
 
+    if (ratio() > 1) {
+      return window.innerWidth;
+    }
 
-  //   const mediaHeight = props.media.h;
-  //   const mediaWidth = props.media.w || 0;
-  //   const rect = imgRefActual?.getBoundingClientRect();
-  //   const imgWidth = props.width || rect?.width || 0;
+    return window.innerHeight * ratio();
+  };
 
-  //   const ratio = mediaWidth / imgWidth;
+  const zoomH = () => {
 
-  //   const h = ratio > 1 ?
-  //   mediaHeight / ratio :
-  //   mediaHeight * ratio;
+    if (ratio() > 1) {
+      return window.innerWidth / ratio();
+    }
 
-  //   console.log('MEDIA: ', props.media, h, ratio);
-  //   return `${h}px`;
-  // });
+    return window.innerHeight;
+  };
 
   const klass = () => `${styles.noteImage} ${isCached() ? '' : 'redBorder'}`;
 
@@ -96,25 +97,30 @@ const NoteImage: Component<{
   }
 
   onMount(() => {
-    getZoom();
+    // getZoom();
   });
 
   onCleanup(() => {
-    const iRef = imgRef();
-    iRef && zoomRef && zoomRef.detach(iRef);
+    // const iRef = imgRef();
+    // iRef && zoomRef && zoomRef.detach(iRef);
   });
 
   return (
-    <div style={`width: 100%; height: ${height()};`}>
+    <a
+      class={props.class || ''}
+      style={`width: 100%; height: ${height()};`}
+      href={src()}
+      data-pswp-width={zoomW()}
+      data-pswp-height={zoomH()}
+    >
       <img
         id={imgId}
         ref={imgRefActual}
         src={src()}
         class={klass()}
         onerror={props.onError}
-        onClick={doZoom}
       />
-    </div>
+    </a>
   );
 }
 
