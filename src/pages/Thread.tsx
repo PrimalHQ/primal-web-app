@@ -112,7 +112,6 @@ const Thread: Component = () => {
         if (!repliesHolder) return;
 
         const rect = pn.getBoundingClientRect();
-        const repRect = repliesHolder.getBoundingClientRect();
 
         const vh = window.innerHeight;
         const header = 72;
@@ -126,8 +125,6 @@ const Thread: Component = () => {
         scrollWindowTo(rect.top - header - banner);
 
         repliesHolder.setAttribute('style', `height: ${document.documentElement.scrollHeight}px;`)
-
-        console.log('TOTAL: ', document.documentElement.getBoundingClientRect(), repliesHolder.getBoundingClientRect())
       }, 0)
     }
   });
@@ -206,7 +203,6 @@ const Thread: Component = () => {
           </For>
         </div>
       </Show>
-      <div class={styles.bojan}></div>
     </div>
   )
 }

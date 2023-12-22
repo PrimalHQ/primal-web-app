@@ -8,6 +8,7 @@ import { MediaVariant } from "../../types/primal";
 
 const NoteImage: Component<{
   class?: string,
+  imageGroup?: string,
   media?: MediaVariant,
   width?: number,
   src?: string,
@@ -107,11 +108,13 @@ const NoteImage: Component<{
 
   return (
     <a
-      class={props.class || ''}
+      class={`${props.class || ''} roundedImage`}
       style={`width: 100%; height: ${height()};`}
       href={src()}
       data-pswp-width={zoomW()}
       data-pswp-height={zoomH()}
+      data-image-group={props.imageGroup}
+      data-cropped={true}
     >
       <img
         id={imgId}

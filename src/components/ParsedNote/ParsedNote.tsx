@@ -30,7 +30,8 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-import { nip19 } from 'nostr-tools';
+// @ts-ignore Bad types in nostr-tools
+import { nip19, generatePrivateKey } from 'nostr-tools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
@@ -44,6 +45,7 @@ import { actions } from '../../translations';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 
+const groupGridLimit = 7;
 
 const convertHTMLEntity = (text: string) => {
   const span = document.createElement('span');
@@ -70,11 +72,15 @@ const ParsedNote: Component<{
   const media = useMediaContext();
 
   const id = () => {
-    console.log('ID: ', props.id);
     // if (props.id) return props.id;
 
     return `note_${props.note.post.noteId}`;
   }
+
+  let thisNote: HTMLDivElement | undefined;
+
+  let imageGroup: string = generatePrivateKey()
+  let consecutiveImages: number = 0;
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: `#${id()}`,
@@ -88,6 +94,75 @@ const ParsedNote: Component<{
 
   onMount(() => {
     lightbox.init();
+
+    setTimeout(() => {
+      // Go through the note and find all images to group them in sections separated by non-image content.
+      // Once grouped we will combine them in a grid layout to save screen space.
+
+      if (!thisNote) return;
+
+      // Get all images
+      const allImgs: NodeListOf<HTMLAnchorElement> = thisNote.querySelectorAll('a.noteimage');
+
+      if (allImgs.length === 0) return;
+
+      // If there is only a single image, just remove thumbnail cropping, nothing more is needed.
+      if (allImgs.length === 1) {
+        allImgs[0].removeAttribute('data-cropped');
+        return;
+      }
+
+      let grouped: { group: string, images: HTMLAnchorElement[]}[] = [];
+
+      // Sort images into groups, based on `data-image-group` attribute
+      allImgs.forEach((img) => {
+        // @ts-ignore
+        const group: string = img.attributes['data-image-group'].nodeValue;
+
+        let g = grouped.find((g) => g.group === group);
+
+        if (g) {
+          g.images.push(img);
+        }
+        else {
+          grouped.push({ group, images: [img] })
+        }
+      });
+
+      // Wrap each group into a div with a grid layout,
+      grouped.forEach(group => {
+        // if there is only one image in this group nothing further is needed
+        if (group.images.length < 2) return;
+
+        const groupCount = group.images.length;
+        const gridClass = groupCount < groupGridLimit ? `grid-${groupCount}` : 'grid-large';
+
+        const first = group.images[0];
+        const parent = first.parentElement;
+
+        // Create the wrapper for this group
+        const wrapper = document.createElement('div');
+
+        // Insert the wrapper into the note content, before the first image of the group
+        parent?.insertBefore(wrapper, first);
+
+        // Move each image of the group into the wrapper, also setting css classes and atributes for proper display
+        group.images.forEach((img, index) => {
+          img.classList.add(`cell_${index+1}`);
+          img.setAttribute('style', 'width: 100%; height: 100%;');
+          img.classList.remove('noteimage');
+          img.classList.add('noteimage_gallery');
+
+          img.classList.remove('roundedImage');
+          wrapper.appendChild(img as Node)
+        });
+
+        // Add classes to the wrapper for layouting
+        wrapper.classList.add('imageGrid');
+        wrapper.classList.add(gridClass)
+
+      });
+    }, 0);
   });
 
   const [tokens, setTokens] = createStore<string[]>([]);
@@ -120,6 +195,7 @@ const ParsedNote: Component<{
       if (token === '__LB__') {
         return <br />;
       }
+
       if (token === '__SP__') {
         return <> </>;
       }
@@ -148,14 +224,30 @@ const ParsedNote: Component<{
 
         if (!props.ignoreMedia) {
           if (isImage(token)) {
+            consecutiveImages++;
             const dev = localStorage.getItem('devMode') === 'true';
             let image = media?.actions.getMedia(token, 'o');
             const url = image?.media_url || getMediaUrlDefault(token);
 
-            wordsDisplayed += shortMentionInWords;
+            if (consecutiveImages > 1) {
+              // There are consecutive images, so reduce the impact of each image in order to show them grouped
+              wordsDisplayed += 10;
+            } else {
+              wordsDisplayed += shortMentionInWords
+            }
 
-            return <NoteImage class={`image_${props.note.post.noteId}`} src={url} isDev={dev} media={image} width={514} />;
+            return <NoteImage
+              class={`noteimage image_${props.note.post.noteId}`}
+              src={url}
+              isDev={dev}
+              media={image}
+              width={514}
+              imageGroup={imageGroup}
+            />;
           }
+
+          consecutiveImages = 0;
+          imageGroup = generatePrivateKey();
 
           if (isMp4Video(token)) {
             wordsDisplayed += shortMentionInWords;
@@ -306,6 +398,9 @@ const ParsedNote: Component<{
 
         return <span data-url={token}><a link href={token.toLowerCase()} target="_blank" >{token}</a></span>;
       }
+
+      consecutiveImages = 0;
+      imageGroup = generatePrivateKey();
 
       if (isNoteMention(token)) {
         let [_, id] = token.split(':');
@@ -512,7 +607,7 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div id={id()} class={styles.parsedNote} >
+    <div ref={thisNote} id={id()} class={styles.parsedNote} >
       <For each={tokens}>
         {(token) =>
           <Show when={shouldShowToken()}>
