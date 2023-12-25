@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, JSX, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, createMemo, createSignal, JSX, onCleanup, onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
 import mediumZoom from "medium-zoom";
 import type { Zoom } from 'medium-zoom';
@@ -16,13 +16,11 @@ const NoteImage: Component<{
   onError?: JSX.EventHandlerUnion<HTMLImageElement, Event>,
 }> = (props) => {
   const imgId = generatePrivateKey();
-  let zoomRef: Zoom | undefined;
 
-  let imgRefActual: HTMLImageElement | undefined;
+  let imgVirtual: HTMLImageElement | undefined;
+  let imgActual: HTMLImageElement | undefined;
 
-  const imgRef = () => {
-    return document.getElementById(imgId)
-  };
+  const [isImageLoaded, setIsImageLoaded] = createSignal(false);
 
   const src = () => props.media?.media_url || props.src;
 
@@ -31,9 +29,11 @@ const NoteImage: Component<{
   const ratio = () => {
     const img = props.media;
 
-    if (!img) return 2;
+    if (img) return img.w / img.h;
 
-    return img.w / img.h;
+    return imgVirtual ?
+      imgVirtual.width / imgVirtual.height :
+      2;
   };
 
   const height = () => {
@@ -52,9 +52,6 @@ const NoteImage: Component<{
   };
 
   const zoomW = () => {
-    if (!props.media) {
-      return 100;
-    }
 
     if (ratio() > 1) {
       return window.innerWidth;
@@ -74,56 +71,40 @@ const NoteImage: Component<{
 
   const klass = () => `${styles.noteImage} ${isCached() ? '' : 'redBorder'}`;
 
-  const doZoom = (e: MouseEvent) => {
-    if (!e.target || (e.target as HTMLImageElement).id !== imgId) {
-      return;
-    }
-    e.preventDefault();
-    e.stopPropagation();
-
-    zoomRef?.open();
-  };
-
-  const getZoom = () => {
-    const iRef = imgRef();
-    if (zoomRef || !iRef) {
-      return zoomRef;
-    }
-
-   zoomRef = mediumZoom(iRef, {
-        background: "var(--background-site)",
-    });
-
-    zoomRef.attach(iRef);
-  }
-
   onMount(() => {
-    // getZoom();
-  });
+    // if we have media info, shortcut image dimenzion calc
+    if (props.media) {
+      setIsImageLoaded(true);
+    }
 
-  onCleanup(() => {
-    // const iRef = imgRef();
-    // iRef && zoomRef && zoomRef.detach(iRef);
+    // Virtually load an image, to be able to get it's dimensions to zoom it properly
+    imgVirtual = new Image();
+    imgVirtual.src = src() || '';
+    imgVirtual.onload = () => {
+      setIsImageLoaded(true);
+    }
   });
 
   return (
-    <a
-      class={`${props.class || ''} roundedImage`}
-      style={`width: 100%; height: ${height()};`}
-      href={src()}
-      data-pswp-width={zoomW()}
-      data-pswp-height={zoomH()}
-      data-image-group={props.imageGroup}
-      data-cropped={true}
-    >
-      <img
-        id={imgId}
-        ref={imgRefActual}
-        src={src()}
-        class={klass()}
-        onerror={props.onError}
-      />
-    </a>
+    <Show when={isImageLoaded()}>
+      <a
+        class={`${props.class || ''} roundedImage`}
+        style={`width: 100%; height: ${height()};`}
+        href={src()}
+        data-pswp-width={zoomW()}
+        data-pswp-height={zoomH()}
+        data-image-group={props.imageGroup}
+        data-cropped={true}
+      >
+        <img
+          id={imgId}
+          ref={imgActual}
+          src={src()}
+          class={klass()}
+          onerror={props.onError}
+        />
+      </a>
+    </Show>
   );
 }
 
