@@ -265,17 +265,23 @@ const ParsedNote: Component<{
 
           if (isMp4Video(token)) {
             wordsDisplayed += shortMentionInWords;
-            return <video class="w-max" controls><source src={token} type="video/mp4" /></video>;
+            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/mp4" /></video>;
+            media?.actions.addVideo(video as HTMLVideoElement);
+            return video;
           }
 
           if (isOggVideo(token)) {
             wordsDisplayed += shortMentionInWords;
-            return <video class="w-max" controls><source src={token} type="video/ogg" /></video>;
+            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/ogg" /></video>;
+            media?.actions.addVideo(video as HTMLVideoElement);
+            return video;
           }
 
           if (isWebmVideo(token)) {
             wordsDisplayed += shortMentionInWords;
-            return <video class="w-max" controls><source src={token} type="video/webm" /></video>;
+            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/webm" /></video>;
+            media?.actions.addVideo(video as HTMLVideoElement);
+            return video;
           }
 
           if (isYouTube(token)) {

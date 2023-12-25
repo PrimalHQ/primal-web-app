@@ -17,6 +17,7 @@ export type MediaContextStore = {
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
+    addVideo: (video: HTMLVideoElement | undefined) => void,
   },
 }
 
@@ -28,6 +29,20 @@ const initialData = {
 export const MediaContext = createContext<MediaContextStore>();
 
 export const MediaProvider = (props: { children: JSXElement }) => {
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry) => {
+      if (entry.target.tagName !== 'VIDEO') return;
+
+      const video = entry.target as HTMLVideoElement;
+
+      if (entry.isIntersecting && video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+  });;
 
   const getMedia = (url: string, size?: MediaSize , animated?: boolean) => {
     const variants: MediaVariant[] = store.media[url] || [];
@@ -50,6 +65,12 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
   const onResize = () => {
     updateStore('windowSize', () => ({ w: window.innerWidth, h: window.innerHeight }));
+  };
+
+  const addVideo = (video: HTMLVideoElement | undefined) => {
+    if (!video) return;
+
+    observer.observe(video);
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -119,6 +140,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     actions: {
       getMedia,
       getMediaUrl,
+      addVideo,
     },
   });
 
