@@ -14,6 +14,8 @@ const NoteImage: Component<{
   src?: string,
   isDev?: boolean,
   onError?: JSX.EventHandlerUnion<HTMLImageElement, Event>,
+  onImageLoaded?: (url: string | undefined) => void,
+  shortHeight?: boolean,
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -69,7 +71,7 @@ const NoteImage: Component<{
     return window.innerHeight;
   };
 
-  const klass = () => `${styles.noteImage} ${isCached() ? '' : 'redBorder'}`;
+  const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
   onMount(() => {
     // if we have media info, shortcut image dimenzion calc
@@ -84,6 +86,10 @@ const NoteImage: Component<{
       setIsImageLoaded(true);
     }
   });
+
+  createEffect(() => {
+    isImageLoaded() && props.onImageLoaded && props.onImageLoaded(src());
+  })
 
   return (
     <Show when={isImageLoaded()}>

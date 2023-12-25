@@ -23,7 +23,7 @@ import {
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, For, JSXElement, onMount, Show,
+  Component, createEffect, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
   PrimalNote,
@@ -57,52 +57,16 @@ const convertHTMLEntity = (text: string) => {
   });
 }
 
-const ParsedNote: Component<{
-  note: PrimalNote,
-  id?: string,
-  ignoreMedia?: boolean,
-  ignoreLinebreaks?: boolean,
-  noLinks?: 'links' | 'text',
-  noPreviews?: boolean,
-  shorten?: boolean,
-  isEmbeded?: boolean,
-}> = (props) => {
 
-  const intl = useIntl();
-  const media = useMediaContext();
+export const groupGalleryImages = (noteHolder: HTMLDivElement | undefined) => {
 
-  const id = () => {
-    // if (props.id) return props.id;
-
-    return `note_${props.note.post.noteId}`;
-  }
-
-  let thisNote: HTMLDivElement | undefined;
-
-  let imageGroup: string = generatePrivateKey()
-  let consecutiveImages: number = 0;
-
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#${id()}`,
-    children: `a.image_${props.note.post.noteId}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    pswpModule: () => import('photoswipe')
-  });
-
-  onMount(() => {
-    lightbox.init();
-
-    setTimeout(() => {
       // Go through the note and find all images to group them in sections separated by non-image content.
       // Once grouped we will combine them in a grid layout to save screen space.
 
-      if (!thisNote) return;
+      if (!noteHolder) return;
 
       // Get all images
-      const allImgs: NodeListOf<HTMLAnchorElement> = thisNote.querySelectorAll('a.noteimage');
+      const allImgs: NodeListOf<HTMLAnchorElement> = noteHolder.querySelectorAll('a.noteimage');
 
       if (allImgs.length === 0) return;
 
@@ -162,10 +126,57 @@ const ParsedNote: Component<{
         wrapper.classList.add(gridClass)
 
       });
-    }, 0);
+};
+
+const ParsedNote: Component<{
+  note: PrimalNote,
+  id?: string,
+  ignoreMedia?: boolean,
+  ignoreLinebreaks?: boolean,
+  noLinks?: 'links' | 'text',
+  noPreviews?: boolean,
+  shorten?: boolean,
+  isEmbeded?: boolean,
+}> = (props) => {
+
+  const intl = useIntl();
+  const media = useMediaContext();
+
+  const id = () => {
+    // if (props.id) return props.id;
+
+    return `note_${props.note.post.noteId}`;
+  }
+
+  let thisNote: HTMLDivElement | undefined;
+
+  let imageGroup: string = generatePrivateKey()
+  let consecutiveImages: number = 0;
+  let imgCount = 0;
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: `#${id()}`,
+    children: `a.image_${props.note.post.noteId}`,
+    showHideAnimationType: 'zoom',
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 2,
+    maxZoomLevel: 3,
+    pswpModule: () => import('photoswipe')
+  });
+
+  onMount(() => {
+    lightbox.init();
+
+  });
+
+  createEffect(() => {
+    if (imagesLoaded() > 0 && imagesLoaded() === imgCount) {
+      groupGalleryImages(thisNote);
+    }
   });
 
   const [tokens, setTokens] = createStore<string[]>([]);
+  const [imagesLoaded, setImagesLoaded] = createSignal(0);
 
   let wordsDisplayed = 0;
 
@@ -224,6 +235,7 @@ const ParsedNote: Component<{
 
         if (!props.ignoreMedia) {
           if (isImage(token)) {
+            imgCount++;
             consecutiveImages++;
             const dev = localStorage.getItem('devMode') === 'true';
             let image = media?.actions.getMedia(token, 'o');
@@ -243,6 +255,8 @@ const ParsedNote: Component<{
               media={image}
               width={514}
               imageGroup={imageGroup}
+              onImageLoaded={() => setImagesLoaded(i => i+1)}
+              shortHeight={props.shorten}
             />;
           }
 
