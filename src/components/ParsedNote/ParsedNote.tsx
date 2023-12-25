@@ -265,21 +265,41 @@ const ParsedNote: Component<{
 
           if (isMp4Video(token)) {
             wordsDisplayed += shortMentionInWords;
-            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/mp4" /></video>;
+            let mVideo = media?.actions.getMedia(token, 'o');
+
+            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
+            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            const klass = mVideo ? 'w-cen' : 'w-max';
+
+            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/mp4" /></video>;
             media?.actions.addVideo(video as HTMLVideoElement);
+
+
             return video;
           }
 
           if (isOggVideo(token)) {
             wordsDisplayed += shortMentionInWords;
-            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/ogg" /></video>;
+            let mVideo = media?.actions.getMedia(token, 'o');
+
+            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
+            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            const klass = mVideo ? 'w-cen' : 'w-max';
+
+            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/ogg" /></video>;
             media?.actions.addVideo(video as HTMLVideoElement);
             return video;
           }
 
           if (isWebmVideo(token)) {
             wordsDisplayed += shortMentionInWords;
-            const video = <video class="w-max" controls muted={true} ><source src={token} type="video/webm" /></video>;
+            let mVideo = media?.actions.getMedia(token, 'o');
+
+            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
+            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            const klass = mVideo ? 'w-cen' : 'w-max';
+
+            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/webm" /></video>;
             media?.actions.addVideo(video as HTMLVideoElement);
             return video;
           }
