@@ -124,7 +124,12 @@ export const groupGalleryImages = (noteHolder: HTMLDivElement | undefined) => {
         // Add classes to the wrapper for layouting
         wrapper.classList.add('imageGrid');
         wrapper.classList.add(gridClass)
+      });
 
+      const brs = [].slice.call(noteHolder.querySelectorAll('br + br + br'));
+
+      brs.forEach((br: HTMLBRElement) =>{
+        br.parentNode?.removeChild(br);
       });
 };
 
