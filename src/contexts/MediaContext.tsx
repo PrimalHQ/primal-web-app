@@ -67,6 +67,17 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     updateStore('windowSize', () => ({ w: window.innerWidth, h: window.innerHeight }));
   };
 
+  let isFullscreen = false;
+
+  const onFullscreenChange = (e: Event) => {
+    if (isFullscreen) {
+      // @ts-ignore
+      e.target.scrollIntoView();
+    }
+
+    isFullscreen = !isFullscreen;
+  };
+
   const addVideo = (video: HTMLVideoElement | undefined) => {
     if (!video) return;
 
@@ -109,10 +120,12 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
   onMount(() => {
     window.addEventListener('resize', onResize);
+    window.addEventListener('fullscreenchange', onFullscreenChange);
   });
 
   onCleanup(() => {
     window.removeEventListener('resize', onResize);
+    window.removeEventListener('fullscreenchange', onFullscreenChange);
   });
 
 
