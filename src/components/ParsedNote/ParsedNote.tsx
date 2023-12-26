@@ -174,8 +174,11 @@ const ParsedNote: Component<{
 
   });
 
+  let allImagesLoaded = false;
+
   createEffect(() => {
-    if (imagesLoaded() > 0 && imagesLoaded() === imgCount) {
+    if (imagesLoaded() > 0 && imagesLoaded() === imgCount && !allImagesLoaded) {
+      allImagesLoaded = true;
       groupGalleryImages(thisNote);
     }
   });
