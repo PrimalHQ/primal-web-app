@@ -102,7 +102,11 @@ export const MediaProvider = (props: { children: JSXElement }) => {
           media[resource.url] = resource.variants;
         }
 
-        updateStore('media', () => ({ ...media }));
+        try {
+          updateStore('media', () => ({ ...media }));
+        } catch(e) {
+          console.warn('Error updating media: ', e);
+        }
       }
     }
   };
