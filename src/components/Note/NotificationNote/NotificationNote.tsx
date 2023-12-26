@@ -28,7 +28,7 @@ const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) =
       <div class={styles.post}>
         <div class={styles.content}>
           <div class={styles.message}>
-            <ParsedNote note={props.note} />
+            <ParsedNote note={props.note} shorten={true} />
           </div>
 
           <div class={styles.footer}>

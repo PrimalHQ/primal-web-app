@@ -917,6 +917,11 @@ export const notifications = {
     defaultMessage: 'Mentions',
     description: 'Title of the Mentions notifications tab',
   },
+  reposts: {
+    id: 'pages.notifications.reposts',
+    defaultMessage: 'Reposts',
+    description: 'Title of the Reposts notifications tab',
+  },
 };
 
 export const placeholders = {

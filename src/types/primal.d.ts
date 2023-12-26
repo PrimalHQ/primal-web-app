@@ -620,4 +620,4 @@ export type SelectionOption = {
   separator?: boolean,
 }
 
-export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions';
+export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions' | 'reposts';

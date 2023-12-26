@@ -1129,6 +1129,10 @@ const Notifications: Component = () => {
             {intl.formatMessage(t.mentions)}
           </Tabs.Trigger>
 
+          <Tabs.Trigger class={styles.notificationTab} value="reposts">
+            {intl.formatMessage(t.reposts)}
+          </Tabs.Trigger>
+
           <Tabs.Indicator class={styles.notificationTabIndicator} />
         </Tabs.List>
 
@@ -1189,7 +1193,7 @@ const Notifications: Component = () => {
           </Show>
         </Tabs.Content>
 
-        <For each={['zaps', 'replies', 'mentions']}>
+        <For each={['zaps', 'replies', 'mentions', 'reposts']}>
           {group =>
             <Tabs.Content class={styles.notificationTabContent} value={group}>
               <Show
