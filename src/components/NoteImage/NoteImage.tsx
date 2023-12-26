@@ -95,7 +95,6 @@ const NoteImage: Component<{
     <Show when={isImageLoaded()}>
       <a
         class={`${props.class || ''} roundedImage`}
-        style={`width: 100%; height: ${height()};`}
         href={src()}
         data-pswp-width={zoomW()}
         data-pswp-height={zoomH()}
