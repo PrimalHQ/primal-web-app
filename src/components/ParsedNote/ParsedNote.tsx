@@ -274,8 +274,18 @@ const ParsedNote: Component<{
             wordsDisplayed += shortMentionInWords;
             let mVideo = media?.actions.getMedia(token, 'o');
 
-            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            let h: number | undefined = undefined;
+            let w: number | undefined = undefined;
+
+            if (mVideo) {
+              const ratio = mVideo.w / mVideo.h;
+              h = (524 / ratio);
+              w = h > 680 ? 680 * ratio : 524;
+              h = h > 680 ? 680 : h;
+            }
+
+            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
             const klass = mVideo ? 'w-cen' : 'w-max';
 
             const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/mp4" /></video>;
@@ -289,11 +299,30 @@ const ParsedNote: Component<{
             wordsDisplayed += shortMentionInWords;
             let mVideo = media?.actions.getMedia(token, 'o');
 
-            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            let h: number | undefined = undefined;
+            let w: number | undefined = undefined;
+
+            if (mVideo) {
+              const ratio = mVideo.w / mVideo.h;
+              h = (524 / ratio);
+              w = h > 680 ? 680 * ratio : 524;
+              h = h > 680 ? 680 : h;
+            }
+
+            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
             const klass = mVideo ? 'w-cen' : 'w-max';
 
-            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/ogg" /></video>;
+            const video =
+              <video
+                class={klass}
+                width={w}
+                height={h}
+                controls
+                muted={true}
+              >
+                <source src={token} type="video/ogg" />
+              </video>;
             media?.actions.addVideo(video as HTMLVideoElement);
             return video;
           }
@@ -302,8 +331,18 @@ const ParsedNote: Component<{
             wordsDisplayed += shortMentionInWords;
             let mVideo = media?.actions.getMedia(token, 'o');
 
-            const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const h = mVideo ? mVideo?.w > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            let h: number | undefined = undefined;
+            let w: number | undefined = undefined;
+
+            if (mVideo) {
+              const ratio = mVideo.w / mVideo.h;
+              h = (524 / ratio);
+              w = h > 680 ? 680 * ratio : 524;
+              h = h > 680 ? 680 : h;
+            }
+
+            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
+            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
             const klass = mVideo ? 'w-cen' : 'w-max';
 
             const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/webm" /></video>;
