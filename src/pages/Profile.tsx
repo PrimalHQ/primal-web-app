@@ -499,7 +499,7 @@ const Profile: Component = () => {
           <div class={styles.userImage}>
             <div class={styles.avatar}>
               <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
-                <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} class="profile_image" />
+                <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
               </div>
             </div>
           </div>

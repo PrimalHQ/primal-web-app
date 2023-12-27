@@ -72,6 +72,14 @@ const NoteImage: Component<{
     return window.innerHeight;
   };
 
+  const willBeTooBig = () => {
+    const maxW = 524;
+
+    const h = maxW / ratio();
+
+    return h > 680;
+  };
+
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
   onMount(() => {
@@ -108,6 +116,7 @@ const NoteImage: Component<{
           src={src()}
           class={klass()}
           onerror={props.onError}
+          width={willBeTooBig() ? undefined : '524px'}
         />
       </a>
     </Show>

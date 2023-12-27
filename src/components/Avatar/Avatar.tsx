@@ -15,7 +15,7 @@ const Avatar: Component<{
   highlightBorder?: boolean,
   id?: string,
   showCheck?: boolean,
-  class?: string,
+  zoomable?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -124,7 +124,11 @@ const Avatar: Component<{
         }
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
-          <NoteImage class={props.class || ''} src={imageSrc()} onError={imgError} />
+          <Show when={props.zoomable} fallback={
+            <img src={imageSrc()} alt="avatar" onerror={imgError}/>
+          }>
+            <NoteImage class={props.zoomable ? 'profile_image' : ''} src={imageSrc()} onError={imgError} />
+          </Show>
         </div>
       </Show>
       <Show when={props.user && props.showCheck}>
