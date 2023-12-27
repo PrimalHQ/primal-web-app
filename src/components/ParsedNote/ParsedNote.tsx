@@ -171,7 +171,6 @@ const ParsedNote: Component<{
 
   onMount(() => {
     lightbox.init();
-
   });
 
   let allImagesLoaded = false;

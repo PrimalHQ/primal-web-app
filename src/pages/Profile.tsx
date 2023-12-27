@@ -40,6 +40,9 @@ import ButtonCopy from '../components/Buttons/ButtonCopy';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 
+import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import NoteImage from '../components/NoteImage/NoteImage';
+
 const Profile: Component = () => {
 
   const settings = useSettingsContext();
@@ -57,6 +60,16 @@ const Profile: Component = () => {
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: '#central_header',
+    children: 'a.profile_image',
+    showHideAnimationType: 'zoom',
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 2,
+    maxZoomLevel: 3,
+    pswpModule: () => import('photoswipe')
+  });
 
   const getHex = () => {
     if (params.vanityName && routeData()) {
@@ -97,6 +110,8 @@ const Profile: Component = () => {
       setProfile(getHex());
     }
   });
+
+  const isSmallScreen = () => window.innerWidth < 721;
 
   const profileNpub = createMemo(() => {
     return hexToNpub(profile?.profileKey);
@@ -436,6 +451,11 @@ const Profile: Component = () => {
     }
   });
 
+
+  onMount(() => {
+    lightbox.init();
+  });
+
   onCleanup(() => {
     profile?.actions.resetProfile();
   });
@@ -472,18 +492,14 @@ const Profile: Component = () => {
               when={profile?.userProfile?.banner}
               fallback={<div class={styles.bannerPlaceholder}></div>}
             >
-              <img src={banner()} onerror={imgError}/>
+              <NoteImage class="profile_image" src={banner()} onError={imgError} plainBorder={true} />
             </Show>
           </div>
 
           <div class={styles.userImage}>
             <div class={styles.avatar}>
-              <div class={styles.desktopAvatar}>
-                <Avatar user={profile?.userProfile} size="xxl" />
-              </div>
-
-              <div class={styles.phoneAvatar}>
-                <Avatar user={profile?.userProfile} size="lg" />
+              <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
+                <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} class="profile_image" />
               </div>
             </div>
           </div>

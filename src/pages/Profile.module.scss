@@ -21,7 +21,7 @@
   width: 100%;
   height: 214px;
 
-  >img {
+  img {
     width: 100%;
     height: 214px;
     object-fit: cover;
@@ -86,7 +86,7 @@
   padding-right: 8px;
   padding-bottom: 20px;
   height: 76px;
-  >button {
+  >button, >div {
     margin-left: 8px;
   }
 }
@@ -455,7 +455,7 @@
     width: 100%;
     height: 125px;
 
-    >img {
+    img {
       width: 100%;
       height: 125px;
       object-fit: cover;

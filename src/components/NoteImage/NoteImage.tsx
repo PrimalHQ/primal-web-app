@@ -16,6 +16,7 @@ const NoteImage: Component<{
   onError?: JSX.EventHandlerUnion<HTMLImageElement, Event>,
   onImageLoaded?: (url: string | undefined) => void,
   shortHeight?: boolean,
+  plainBorder?: boolean,
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -38,20 +39,20 @@ const NoteImage: Component<{
       2;
   };
 
-  const height = () => {
-    if (!props.media) {
-      return '100%';
-    }
+  // const height = () => {
+  //   if (!props.media) {
+  //     return '100%';
+  //   }
 
-    const img = props.media;
+  //   const img = props.media;
 
-    if (!img || ratio() <= 1.2) return 'auto';
+  //   if (!img || ratio() <= 1.2) return 'auto';
 
-    // width of the note over the ratio of the preview image
-    const h = 524 / ratio();
+  //   // width of the note over the ratio of the preview image
+  //   const h = 524 / ratio();
 
-    return `${h}px`;
-  };
+  //   return `${h}px`;
+  // };
 
   const zoomW = () => {
 
@@ -94,7 +95,7 @@ const NoteImage: Component<{
   return (
     <Show when={isImageLoaded()}>
       <a
-        class={`${props.class || ''} roundedImage`}
+        class={`${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
         href={src()}
         data-pswp-width={zoomW()}
         data-pswp-height={zoomH()}
