@@ -576,7 +576,13 @@ const EditBox: Component<{
     const taRect = textArea.getBoundingClientRect();
     const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top - wRect.top + mentionCursorPosition.top + 22;
+    let mTop = mentionCursorPosition.top;
+
+    if (textArea.scrollTop > 0) {
+      mTop -= textArea.scrollTop;
+    }
+
+    let newTop = taRect.top - wRect.top + mTop + 22;
     let newLeft = mentionCursorPosition.left + 16;
 
     if (newTop > document.documentElement.clientHeight - 200) {
@@ -595,7 +601,13 @@ const EditBox: Component<{
     const taRect = textArea.getBoundingClientRect();
     const wRect = editWrap.getBoundingClientRect();
 
-    let newTop = taRect.top - wRect.top + emojiCursorPosition.top + 22;
+    let mTop = emojiCursorPosition.top;
+
+    if (textArea.scrollTop > 0) {
+      mTop -= textArea.scrollTop;
+    }
+
+    let newTop = taRect.top - wRect.top + mTop + 22;
     let newLeft = emojiCursorPosition.left;
 
     if (newTop > document.documentElement.clientHeight - 200) {
