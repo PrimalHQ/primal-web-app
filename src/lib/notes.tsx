@@ -91,13 +91,13 @@ export const urlify = (
 
         if (!imgUrl) {
           // @ts-ignore
-          return (<div><NoteImage src={getMediaUrlDefault(url)} isDev={dev} /></div>).outerHTML;
-          // return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
+          // return (<div><NoteImage src={getMediaUrlDefault(url)} isDev={dev} /></div>).outerHTML;
+          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}"/>`;
         }
 
         // @ts-ignore
-        return (<div><NoteImage src={imgUrl} isDev={dev} /></div>).outerHTML;
-        // return `<img src="${imgUrl}" class="postImage"/>`;
+        // return (<div><NoteImage src={imgUrl} isDev={dev} /></div>).outerHTML;
+        return `<img src="${imgUrl}" class="postImage"/>`;
       }
 
       if (isMp4Video(url)) {

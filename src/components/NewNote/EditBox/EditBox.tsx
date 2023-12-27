@@ -124,10 +124,10 @@ const EditBox: Component<{
     const rows = Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
     elm.rows = minRows + rows;
 
-    const rect = elm.getBoundingClientRect();
+    // const rect = elm.getBoundingClientRect();
 
 
-    preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
+    // preview.style.maxHeight = `${maxHeight - rect.height - 120}px`;
   }
 
   createEffect(() => {
