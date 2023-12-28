@@ -461,6 +461,7 @@ const ParsedNote: Component<{
           height={h}
           controls
           muted={true}
+          loop={true}
         >
           <source src={token} type={item.meta?.videoType} />
         </video>;
