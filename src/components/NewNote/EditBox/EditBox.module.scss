@@ -195,7 +195,7 @@ textarea::-webkit-scrollbar{
   flex-direction: column;
   flex: 1;
   cursor: text;
-  // max-height: calc(100vh - 7px);
+  max-height: calc(100vh - 27px);
 }
 
 .previewCaption {
