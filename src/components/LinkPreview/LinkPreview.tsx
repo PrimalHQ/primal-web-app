@@ -50,6 +50,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
       id={props.id}
       href={props.preview.url}
       class={klass()}
+      target="_blank"
     >
       <Show when={image()}>
           <img
