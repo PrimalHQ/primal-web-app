@@ -27,10 +27,10 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
   const selectFeed = (option: FeedOption) => {
 
     const [hex, includeReplies] = option.value?.split('_') || [];
-    const selector = document.getElementById('defocus');
+    // const selector = document.getElementById('defocus');
 
-    selector?.focus();
-    selector?.blur();
+    // selector?.focus();
+    // selector?.blur();
 
     if (hex && !isSelected(option)) {
       const feed = findFeed(decodeURI(hex), includeReplies);

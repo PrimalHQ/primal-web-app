@@ -1,29 +1,18 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { zapNote } from '../../lib/zap';
-import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
-import { PrimalNote } from '../../types/primal';
-import { debounce } from '../../utils';
+import { Component, createEffect, createSignal } from 'solid-js';
 import Modal from '../Modal/Modal';
 import { useToastContext } from '../Toaster/Toaster';
-import { base64 } from '@scure/base';
 
-import { nip19, utils } from 'nostr-tools';
+import { nip19 } from 'nostr-tools';
 
 
-import { login as tLogin, pin as tPin, actions as tActions } from '../../translations';
+import { pin as tPin, actions as tActions } from '../../translations';
 
 import styles from './EnterPinModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import ButtonLink from '../Buttons/ButtonLink';
-import { useNavigate } from '@solidjs/router';
 import TextInput from '../TextInput/TextInput';
-import ButtonSecondary from '../Buttons/ButtonSecondary';
-import { decryptWithPin, encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
+import { decryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
 
 const EnterPinModal: Component<{
   id?: string,
@@ -43,9 +32,6 @@ const EnterPinModal: Component<{
   const decWithPin = async () => {
     const val = props.valueToDecrypt || '';
     const dec = await decryptWithPin(pin(), val);
-    // console.log('ENCODED: ', dec);
-    // console.log('PIN: ', pin());
-    // console.log('DECODE: ', decryptWithPin);
     return dec;
   };
 

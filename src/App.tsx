@@ -44,7 +44,6 @@ const App: Component = () => {
                       <HomeProvider>
                         <ExploreProvider>
                           <ThreadProvider>
-                            <input id="defocus" class={styles.invisible}/>
                             <Router />
                           </ThreadProvider>
                         </ExploreProvider>

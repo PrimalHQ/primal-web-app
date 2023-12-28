@@ -23,7 +23,7 @@ import {
 import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createEffect, createSignal, For, JSXElement, onMount, Show,
+  Component, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
   PrimalNote,
@@ -46,16 +46,6 @@ import { actions } from '../../translations';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 
 const groupGridLimit = 7;
-
-const convertHTMLEntity = (text: string) => {
-  const span = document.createElement('span');
-
-  return text
-  .replace(/&[#A-Za-z0-9]+;/gi, (entity)=> {
-      span.innerHTML = entity;
-      return span.innerText;
-  });
-}
 
 
 export const groupGalleryImages = (noteHolder: HTMLDivElement | undefined) => {
@@ -147,6 +137,8 @@ const ParsedNote: Component<{
   const intl = useIntl();
   const media = useMediaContext();
 
+  const dev = localStorage.getItem('devMode') === 'true';
+
   const id = () => {
     // if (props.id) return props.id;
 
@@ -154,10 +146,6 @@ const ParsedNote: Component<{
   }
 
   let thisNote: HTMLDivElement | undefined;
-
-  let imageGroup: string = generatePrivateKey()
-  let consecutiveImages: number = 0;
-  let imgCount = 0;
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: `#${id()}`,
@@ -173,29 +161,12 @@ const ParsedNote: Component<{
     lightbox.init();
   });
 
-  let allImagesLoaded = false;
-
-  createEffect(() => {
-    if (imagesLoaded() > 0 && imagesLoaded() === imgCount && !allImagesLoaded) {
-      allImagesLoaded = true;
-      groupGalleryImages(thisNote);
-    }
-  });
-
   const [tokens, setTokens] = createStore<string[]>([]);
-  const [imagesLoaded, setImagesLoaded] = createSignal(0);
 
-  let wordsDisplayed = 0;
+  const [wordsDisplayed, setWordsDisplayed] = createSignal(0);
 
-  const shouldShowToken = () => {
-    if (!props.shorten) return true;
-
-
-    if (wordsDisplayed < shortNoteWords) {
-      return true;
-    }
-
-    return false;
+  const isNoteTooLong = () => {
+    return props.shorten && wordsDisplayed() > shortNoteWords;
   };
 
   const parseContent = () => {
@@ -208,264 +179,458 @@ const ParsedNote: Component<{
     setTokens(() => [...tokens]);
   }
 
-  const parseToken: (token: string) => JSXElement  = (token: string) => {
+  type NoteContent = {
+    type: string,
+    tokens: string[],
+    meta?: Record<string, any>,
+  };
 
-      if (token === '__LB__') {
-        return <br />;
+  const [content, setContent] = createStore<NoteContent[]>([]);
+
+  const updateContent = (contentArray: NoteContent[], type: string, token: string, meta?: Record<string, any>) => {
+    if (contentArray.length > 0 && contentArray[contentArray.length -1].type === type) {
+      setContent(content.length -1, 'tokens' , (els) => [...els, token]);
+      meta && setContent(content.length -1, 'meta' , () => ({ ...meta }));
+      return;
+    }
+
+    setContent(content.length, () => ({ type, tokens: [token], meta }));
+  }
+
+  let lastSignificantContent = 'text';
+
+  const parseToken = (token: string) => {
+    if (token === '__LB__') {
+      lastSignificantContent !== 'image' && updateContent(content, 'linebreak', token);
+      return;
+    }
+
+    if (token === '__SP__') {
+      lastSignificantContent !== 'image' && updateContent(content, 'text', ' ');
+      return;
+    }
+
+    if (isInterpunction(token)) {
+      lastSignificantContent = 'text';
+      updateContent(content, 'text', token);
+      return;
+    }
+
+    if (isUrl(token)) {
+      const index = token.indexOf('http');
+
+      if (index > 0) {
+        const prefix = token.slice(0, index);
+
+        const matched = (token.match(urlExtractRegex) || [])[0];
+
+        if (matched) {
+          const suffix = token.substring(matched.length + index, token.length);
+
+          parseToken(prefix);
+          parseToken(matched);
+          parseToken(suffix);
+          return;
+        } else {
+          parseToken(prefix);
+          parseToken(token.slice(index));
+          return;
+        }
       }
 
-      if (token === '__SP__') {
-        return <> </>;
+      if (!props.ignoreMedia) {
+        if (isImage(token)) {
+          lastSignificantContent = 'image';
+          updateContent(content, 'image', token);
+          return;
+        }
+
+        if (isMp4Video(token)) {
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/mp4'});
+          return;
+        }
+
+        if (isOggVideo(token)) {
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/ogg'});
+          return;
+        }
+
+        if (isWebmVideo(token)) {
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/webm'});
+          return;
+        }
+
+        if (isYouTube(token)) {
+          lastSignificantContent = 'youtube';
+          updateContent(content, 'youtube', token);
+          return;
+        }
+
+        if (isSpotify(token)) {
+          lastSignificantContent = 'spotify';
+          updateContent(content, 'spotify', token);
+          return;
+        }
+
+        if (isTwitch(token)) {
+          lastSignificantContent = 'twitch';
+          updateContent(content, 'twitch', token);
+          return;
+        }
+
+        if (isMixCloud(token)) {
+          lastSignificantContent = 'mixcloud';
+          updateContent(content, 'mixcloud', token);
+          return;
+        }
+
+        if (isSoundCloud(token)) {
+          lastSignificantContent = 'soundcloud';
+          updateContent(content, 'soundcloud', token);
+          return;
+        }
+
+        if (isAppleMusic(token)) {
+          lastSignificantContent = 'applemusic';
+          updateContent(content, 'applemusic', token);
+          return;
+        }
+
+        if (isWavelake(token)) {
+          lastSignificantContent = 'wavelake';
+          updateContent(content, 'wavelake', token);
+          return;
+        }
       }
 
-      wordsDisplayed++;
-
-      if (isInterpunction(token)) {
-        return <span>{token}</span>;
+      if (props.noLinks === 'text') {
+        lastSignificantContent = 'text';
+        updateContent(content, 'text', token);
+        return;
       }
 
-      if (isUrl(token)) {
-        const index = token.indexOf('http');
+      lastSignificantContent = 'link';
+      updateContent(content, 'link', token);
+      return;
+    }
 
-        if (index > 0) {
-          const prefix = token.slice(0, index);
+    if (isNoteMention(token)) {
+      lastSignificantContent = 'notemention';
+      updateContent(content, 'notemention', token);
+      return;
+    }
 
-          const matched = (token.match(urlExtractRegex) || [])[0];
+    if (isUserMention(token)) {
+      lastSignificantContent = 'usermention';
+      updateContent(content, 'usermention', token);
+      return;
+    }
 
-          if (matched) {
-            const suffix = token.substring(matched.length + index, token.length);
-            return <>{parseToken(prefix)}{parseToken(matched)}{parseToken(suffix)}</>;
-          } else {
-            return <>{parseToken(prefix)}{parseToken(token.slice(index))}</>;
-          }
+    if (isTagMention(token)) {
+      lastSignificantContent = 'tagmention';
+      updateContent(content, 'tagmention', token);
+      return;
+    }
+
+    if (isHashtag(token)) {
+      lastSignificantContent = 'hashtag';
+      updateContent(content, 'hashtag', token);
+      return;
+    }
+
+    lastSignificantContent = 'text';
+    updateContent(content, 'text', token);
+    return;
+  };
+
+  const generateContent = () => {
+
+    parseContent();
+
+    for (let i=0; i<tokens.length; i++) {
+      const token = tokens[i];
+
+      parseToken(token);
+    }
+  };
+
+  const renderLinebreak = (item: NoteContent) => {
+    if (isNoteTooLong()) return;
+
+    // Allow only one consecutive linebreak
+    return <br />
+  };
+
+  const renderText = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {token => {
+        if (isNoteTooLong()) return;
+        if (token.trim().length > 0) {
+          setWordsDisplayed(w => w + 1);
+        }
+        return token
+      }}
+    </For>;
+  };
+
+  const renderImage = (item: NoteContent) => {
+
+    const groupCount = item.tokens.length;
+    const imageGroup = generatePrivateKey();
+
+    if (groupCount === 1) {
+      if (isNoteTooLong()) return;
+
+      const token = item.tokens[0];
+      let image = media?.actions.getMedia(token, 'o');
+      const url = image?.media_url || getMediaUrlDefault(token);
+
+      // Images tell a 100 words :)
+      setWordsDisplayed(w => w + 100);
+
+      return <NoteImage
+        class={`noteimage image_${props.note.post.noteId}`}
+        src={url}
+        isDev={dev}
+        media={image}
+        width={514}
+        imageGroup={imageGroup}
+        shortHeight={props.shorten}
+      />
+    }
+
+    const gridClass = groupCount < groupGridLimit ? `grid-${groupCount}` : 'grid-large';
+
+    return <div class={`imageGrid ${gridClass}`}>
+      <For each={item.tokens}>
+        {(token, index) => {
+          if (isNoteTooLong()) return;
+
+          let image = media?.actions.getMedia(token, 'o');
+          const url = image?.media_url || getMediaUrlDefault(token);
+
+          // There are consecutive images, so reduce the impact of each image in order to show them grouped
+          setWordsDisplayed(w => w + 10 * groupCount);
+
+          return <NoteImage
+            class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()}`}
+            src={url}
+            isDev={dev}
+            media={image}
+            width={514}
+            imageGroup={imageGroup}
+            shortHeight={props.shorten}
+            plainBorder={true}
+          />
+        }}
+      </For>
+    </div>
+  }
+
+  const renderVideo = (item: NoteContent) => {
+    return <For each={item.tokens}>{
+      (token) => {
+        if (isNoteTooLong()) return;
+
+        let mVideo = media?.actions.getMedia(token, 'o');
+
+        let h: number | undefined = undefined;
+        let w: number | undefined = undefined;
+
+        if (mVideo) {
+          const ratio = mVideo.w / mVideo.h;
+          h = (524 / ratio);
+          w = h > 680 ? 680 * ratio : 524;
+          h = h > 680 ? 680 : h;
         }
 
-        if (!props.ignoreMedia) {
-          if (isImage(token)) {
-            imgCount++;
-            consecutiveImages++;
-            const dev = localStorage.getItem('devMode') === 'true';
-            let image = media?.actions.getMedia(token, 'o');
-            const url = image?.media_url || getMediaUrlDefault(token);
+        let klass = mVideo ? 'w-cen' : 'w-max';
 
-            if (consecutiveImages > 1) {
-              // There are consecutive images, so reduce the impact of each image in order to show them grouped
-              wordsDisplayed += 10;
-            } else {
-              wordsDisplayed += shortMentionInWords
-            }
-
-            return <NoteImage
-              class={`noteimage image_${props.note.post.noteId}`}
-              src={url}
-              isDev={dev}
-              media={image}
-              width={514}
-              imageGroup={imageGroup}
-              onImageLoaded={() => setImagesLoaded(i => i+1)}
-              shortHeight={props.shorten}
-            />;
-          }
-
-          consecutiveImages = 0;
-          imageGroup = generatePrivateKey();
-
-          if (isMp4Video(token)) {
-            wordsDisplayed += shortMentionInWords;
-            let mVideo = media?.actions.getMedia(token, 'o');
-
-            let h: number | undefined = undefined;
-            let w: number | undefined = undefined;
-
-            if (mVideo) {
-              const ratio = mVideo.w / mVideo.h;
-              h = (524 / ratio);
-              w = h > 680 ? 680 * ratio : 524;
-              h = h > 680 ? 680 : h;
-            }
-
-            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
-            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const klass = mVideo ? 'w-cen' : 'w-max';
-
-            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/mp4" /></video>;
-            media?.actions.addVideo(video as HTMLVideoElement);
-
-
-            return video;
-          }
-
-          if (isOggVideo(token)) {
-            wordsDisplayed += shortMentionInWords;
-            let mVideo = media?.actions.getMedia(token, 'o');
-
-            let h: number | undefined = undefined;
-            let w: number | undefined = undefined;
-
-            if (mVideo) {
-              const ratio = mVideo.w / mVideo.h;
-              h = (524 / ratio);
-              w = h > 680 ? 680 * ratio : 524;
-              h = h > 680 ? 680 : h;
-            }
-
-            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
-            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const klass = mVideo ? 'w-cen' : 'w-max';
-
-            const video =
-              <video
-                class={klass}
-                width={w}
-                height={h}
-                controls
-                muted={true}
-              >
-                <source src={token} type="video/ogg" />
-              </video>;
-            media?.actions.addVideo(video as HTMLVideoElement);
-            return video;
-          }
-
-          if (isWebmVideo(token)) {
-            wordsDisplayed += shortMentionInWords;
-            let mVideo = media?.actions.getMedia(token, 'o');
-
-            let h: number | undefined = undefined;
-            let w: number | undefined = undefined;
-
-            if (mVideo) {
-              const ratio = mVideo.w / mVideo.h;
-              h = (524 / ratio);
-              w = h > 680 ? 680 * ratio : 524;
-              h = h > 680 ? 680 : h;
-            }
-
-            // const h = mVideo ? mVideo?.h > 524 ? 524 * mVideo?.h / mVideo?.w : mVideo?.h : undefined;
-            // const w = mVideo ? mVideo?.w > 524 ? 524 : mVideo?.w : undefined;
-            const klass = mVideo ? 'w-cen' : 'w-max';
-
-            const video = <video class={klass} width={w} height={h} controls muted={true} ><source src={token} type="video/webm" /></video>;
-            media?.actions.addVideo(video as HTMLVideoElement);
-            return video;
-          }
-
-          if (isYouTube(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const youtubeId = isYouTube(token) && RegExp.$1;
-
-            return <iframe
-              class="w-max"
-              src={`https://www.youtube.com/embed/${youtubeId}`}
-              title="YouTube video player"
-              // @ts-ignore no property
-              key={youtubeId}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>;
-          }
-
-          if (isSpotify(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
-
-            return <iframe
-              style="borderRadius: 12"
-              src={convertedUrl}
-              width="100%"
-              height="352"
-              // @ts-ignore no property
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            ></iframe>;
-          }
-
-          if (isTwitch(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const channel = token.split("/").slice(-1);
-
-            const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
-
-            return <iframe
-              src={`https://player.twitch.tv/${args}`}
-              // @ts-ignore no property
-              className="w-max"
-              allowFullScreen
-            ></iframe>;
-          }
-
-          if (isMixCloud(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
-
-            return <div>
-              <iframe
-                title="SoundCloud player"
-                width="100%"
-                height="120"
-                // @ts-ignore no property
-                frameBorder="0"
-                src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F`}
-              ></iframe>
-            </div>;
-          }
-
-          if (isSoundCloud(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            return <iframe
-              width="100%"
-              height="166"
-              // @ts-ignore no property
-              scrolling="no"
-              allow="autoplay"
-              src={`https://w.soundcloud.com/player/?url=${token}`}
-            ></iframe>;
-          }
-
-          if (isAppleMusic(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const convertedUrl = token.replace("music.apple.com", "embed.music.apple.com");
-            const isSongLink = /\?i=\d+$/.test(convertedUrl);
-
-            return <iframe
-              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-              // @ts-ignore no property
-              frameBorder="0"
-              height={`${isSongLink ? 175 : 450}`}
-              style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
-              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-              src={convertedUrl}
-            ></iframe>;
-          }
-
-          if (isWavelake(token)) {
-            wordsDisplayed += shortMentionInWords;
-
-            const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
-
-            return <iframe
-              style="borderRadius: 12"
-              src={convertedUrl}
-              width="100%"
-              height="380"
-              // @ts-ignore no property
-              frameBorder="0"
-              loading="lazy"
-            ></iframe>;
-          }
+        if (dev && !mVideo) {
+          klass += ' redBorder';
         }
 
-        if (props.noLinks === 'text') {
-          return <span class="whole">{token}</span>;
-        }
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const video = <video
+          class={klass}
+          width={w}
+          height={h}
+          controls
+          muted={true}
+        >
+          <source src={token} type={item.meta?.videoType} />
+        </video>;
+
+        media?.actions.addVideo(video as HTMLVideoElement);
+
+        return video;
+      }
+    }</For>;
+  }
+
+  const renderYouTube = (item: NoteContent) => {
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const youtubeId = isYouTube(token) && RegExp.$1;
+
+        return <iframe
+          class="w-max"
+          src={`https://www.youtube.com/embed/${youtubeId}`}
+          title="YouTube video player"
+          // @ts-ignore no property
+          key={youtubeId}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderSpotify = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
+
+        return <iframe
+          style="borderRadius: 12"
+          src={convertedUrl}
+          width="100%"
+          height="352"
+          // @ts-ignore no property
+          frameBorder="0"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderTwitch = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const channel = token.split("/").slice(-1);
+
+        const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
+
+        return <iframe
+          src={`https://player.twitch.tv/${args}`}
+          // @ts-ignore no property
+          className="w-max"
+          allowFullScreen
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderMixCloud = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
+
+        return <div>
+          <iframe
+            title="SoundCloud player"
+            width="100%"
+            height="120"
+            // @ts-ignore no property
+            frameBorder="0"
+            src={`https://www.mixcloud.com/widget/iframe/?hide_cover=1&feed=%2F${feedPath}%2F`}
+          ></iframe>
+        </div>;
+      }}
+    </For>
+  };
+
+  const renderSoundCloud = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <iframe
+          width="100%"
+          height="166"
+          // @ts-ignore no property
+          scrolling="no"
+          allow="autoplay"
+          src={`https://w.soundcloud.com/player/?url=${token}`}
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderAppleMusic = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const convertedUrl = token.replace("music.apple.com", "embed.music.apple.com");
+        const isSongLink = /\?i=\d+$/.test(convertedUrl);
+
+        return <iframe
+          allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+          // @ts-ignore no property
+          frameBorder="0"
+          height={`${isSongLink ? 175 : 450}`}
+          style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
+          sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+          src={convertedUrl}
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderWavelake = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
+
+        return <iframe
+          style="borderRadius: 12"
+          src={convertedUrl}
+          width="100%"
+          height="380"
+          // @ts-ignore no property
+          frameBorder="0"
+          loading="lazy"
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderLinks = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
 
         const preview = getLinkPreview(token);
 
@@ -478,21 +643,25 @@ const ParsedNote: Component<{
           );
 
         if (hasMinimalPreviewData) {
-          wordsDisplayed += shortMentionInWords;
+          setWordsDisplayed(w => w + shortMentionInWords);
           return <LinkPreview preview={preview} bordered={props.isEmbeded} />;
         }
 
+        setWordsDisplayed(w => w + 1);
         return <span data-url={token}><a link href={token.toLowerCase()} target="_blank" >{token}</a></span>;
-      }
+      }}
+    </For>
+  };
 
-      consecutiveImages = 0;
-      imageGroup = generatePrivateKey();
+  const renderNoteMention = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
 
-      if (isNoteMention(token)) {
         let [_, id] = token.split(':');
 
         if (!id) {
-          return token;
+          return <>{token}</>;
         }
 
         let end = '';
@@ -524,7 +693,7 @@ const ParsedNote: Component<{
             link = <A href={path}>{token}</A>;
 
             if (ment) {
-              wordsDisplayed += shortMentionInWords;
+              setWordsDisplayed(w => w + shortMentionInWords);
 
               link = <div>
                 <EmbeddedNote
@@ -536,17 +705,25 @@ const ParsedNote: Component<{
           }
 
         } catch (e) {
+          setWordsDisplayed(w => w + 1);
           link = <span class={styles.error}>{token}</span>;
         }
 
-        return <span class="whole"> {link}{end}</span>;
-      }
+        return link;}}
+    </For>
+  };
 
-      if (isUserMention(token)) {
+  const renderUserMention = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 1);
+
         let [_, id] = token.split(':');
 
         if (!id) {
-          return token;
+          return <>{token}</>;
         }
 
         let end = '';
@@ -582,16 +759,22 @@ const ParsedNote: Component<{
               <><A href={path}>@{label}</A>{end}</> :
               <>{MentionedUserLink({ user })}{end}</>;
           }
-
-          return <span class="whole"> {link}</span>;
+          return link;
         } catch (e) {
           return <span class={styles.error}> {token}</span>;
         }
-      }
+      }}
+    </For>
+  };
 
-      if (isTagMention(token)) {
+  const renderTagMention = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 1);
+
         let t = `${token}`;
-
 
         let end = t[t.length - 1];
 
@@ -628,7 +811,7 @@ const ParsedNote: Component<{
             embeded = <><A href={path}>{noteId}</A>{end}</>;
 
             if (ment) {
-              wordsDisplayed += shortMentionInWords;
+              setWordsDisplayed(w => w + shortMentionInWords - 1);
 
               embeded = <div>
                 <EmbeddedNote
@@ -661,12 +844,19 @@ const ParsedNote: Component<{
               <><A href={path}>@{label}</A>{end}</> :
               <>{MentionedUserLink({ user })}{end}</>;
           }
-
           return <span> {link}</span>;
         }
-      }
+      }}
+    </For>
+  };
 
-      if (isHashtag(token)) {
+  const renderHashtag = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 1);
+
         let [_, term] = token.split('#');
         let end = '';
 
@@ -683,25 +873,46 @@ const ParsedNote: Component<{
           <A href={`/search/%23${term}`}>#{term}</A>;
 
         return <span class="whole"> {embeded}{end}</span>;
-      }
+      }}
+    </For>
+  };
 
-      return <span class="whole">{convertHTMLEntity(token)}</span>;
+  const renderContent = (item: NoteContent) => {
+
+    const renderers: Record<string, (item: NoteContent) => JSXElement> = {
+      linebreak: renderLinebreak,
+      text: renderText,
+      image: renderImage,
+      video: renderVideo,
+      youtube: renderYouTube,
+      spotify: renderSpotify,
+      twitch: renderTwitch,
+      mixcloud: renderMixCloud,
+      soundcloud: renderSoundCloud,
+      applemusic: renderAppleMusic,
+      wavelake: renderWavelake,
+      link: renderLinks,
+      notemention: renderNoteMention,
+      usermention: renderUserMention,
+      tagmention: renderTagMention,
+      hashtag: renderHashtag,
+    }
+
+    return renderers[item.type] ?
+      renderers[item.type](item) :
+      <></>;
   };
 
   onMount(() => {
-    parseContent();
+    generateContent();
   });
 
   return (
     <div ref={thisNote} id={id()} class={styles.parsedNote} >
-      <For each={tokens}>
-        {(token) =>
-          <Show when={shouldShowToken()}>
-            <>{parseToken(token)}</>
-          </Show>
-        }
+      <For each={content}>
+        {(item) => renderContent(item)}
       </For>
-      <Show when={props.shorten && tokens.length > shortNoteWords}>
+      <Show when={isNoteTooLong()}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
