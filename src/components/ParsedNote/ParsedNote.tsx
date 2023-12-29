@@ -3,6 +3,7 @@ import { hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
   isAppleMusic,
+  isCustomEmoji,
   isHashtag,
   isImage,
   isInterpunction,
@@ -338,6 +339,12 @@ const ParsedNote: Component<{
     if (isHashtag(token)) {
       lastSignificantContent = 'hashtag';
       updateContent(content, 'hashtag', token);
+      return;
+    }
+
+    if (isCustomEmoji(token)) {
+      lastSignificantContent = 'emoji';
+      updateContent(content, 'emoji', token);
       return;
     }
 
@@ -878,6 +885,28 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderEmoji = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 1);
+
+        const emoji = token.split(':')[1];
+
+        const tag = props.note.post.tags.find(t => t[0] === 'emoji' && t[1] === emoji);
+
+        if (tag === undefined || tag.length === 0) return <>{token}</>;
+
+        const image = tag[2];
+
+        return image ?
+          <span><img height={15} width={15} src={image} alt={`emoji: ${emoji}`} /></span> :
+          <>{token}</>;
+      }}
+    </For>
+  };
+
   const renderContent = (item: NoteContent) => {
 
     const renderers: Record<string, (item: NoteContent) => JSXElement> = {
@@ -897,6 +926,7 @@ const ParsedNote: Component<{
       usermention: renderUserMention,
       tagmention: renderTagMention,
       hashtag: renderHashtag,
+      emoji: renderEmoji,
     }
 
     return renderers[item.type] ?
