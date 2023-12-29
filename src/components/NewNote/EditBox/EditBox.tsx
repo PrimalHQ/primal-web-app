@@ -443,12 +443,28 @@ const EditBox: Component<{
   })
 
   createEffect(() => {
-    if (account?.quotedNote && textArea) {
-      setMessage((msg) => `${msg}${account.quotedNote} `);
-      textArea.value = message();
-      onExpandableTextareaInput(new InputEvent('input'))
-      account.actions.quoteNote(undefined);
-    }
+    const quote = account?.quotedNote;
+    if (!textArea || !quote) return;
+
+    let position = textArea.selectionStart;
+
+    const isEmptyMessage = message().length === 0;
+
+    setMessage((msg) => {
+      if (isEmptyMessage) return `\r\n\r\n${quote} `;
+
+      return msg.slice(0, position) + quote + ' ' + msg.slice(position, msg.length);
+    });
+
+    position = isEmptyMessage ? 0 : position + quote.length + 1;
+
+    textArea.value = message();
+    account.actions.quoteNote(undefined);
+
+    onExpandableTextareaInput(new InputEvent('input'));
+
+    textArea.focus();
+    textArea.selectionEnd = position;
   })
 
   const onEscape = (e: KeyboardEvent) => {
