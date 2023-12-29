@@ -450,6 +450,11 @@
 }
 
 @media only screen and (max-width: 720px) {
+  .fullHeader {
+    width: 100dvw;
+    overflow-x: hidden;
+    margin-inline: 0;
+  }
 
   .banner {
     width: 100%;
