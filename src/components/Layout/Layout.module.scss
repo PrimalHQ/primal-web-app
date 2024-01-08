@@ -101,7 +101,18 @@
     height: 100%;
     border-left: 1px solid var(--devider);
   }
+
+  &.messagesHeader {
+    >div {
+      border-left: none;
+    }
+  }
 }
+
+.messagesSearch {
+  border-right: 1px solid var(--devider);
+}
+
 
 .rightHeader {
   width: var(--right-col-w);

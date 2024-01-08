@@ -136,10 +136,10 @@ const Layout: Component = () => {
         </div>
 
 
-        <div class={styles.rightColumn}>
+        <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
           <div>
             <div class={styles.rightHeader}>
-              <div id="search_section">
+              <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
               </div>
             </div>
             <div class={styles.rightContent}>

@@ -232,9 +232,8 @@
     top: 0;
     left: 320px;
     background-color: var(--background-card );
-    width: 600px;
+    width: 628px;
     height: calc(100vh - var(--header-height));
-    z-index: var(--z-index-lifted);
     overflow: hidden;
     display: flex;
     flex-direction: column-reverse;
@@ -302,7 +301,7 @@
       .textAreaBorder {
         padding: 1px;
         border-radius: 8px;
-        width: 510px;
+        width: 538px;
         height: 34px;
         box-sizing: border-box;
 
@@ -318,7 +317,7 @@
           margin: 0;
           padding-inline: 16px;
           padding-block: 8px;
-          width: 508px;
+          width: 536px;
           max-height: none;
 
           &:focus {
