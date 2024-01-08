@@ -505,3 +505,10 @@
     padding-left: 2px;
   }
 }
+
+
+@media only screen and (max-width: 1300px) {
+  .conversation {
+    width: 622px;
+  }
+}

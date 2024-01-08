@@ -349,7 +349,7 @@ const Messages: Component = () => {
     }
 
     if (newMessageInputBorder) {
-      newMessageInputBorder.style.height = `${42 + (20 * rows)}px`;
+      newMessageInputBorder.style.height = `${40 + (20 * rows)}px`;
     }
 
     // debounce(() => {

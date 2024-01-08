@@ -103,7 +103,9 @@
   }
 
   &.messagesColumn {
+    height: 85px;
     >div {
+      height: 85px;
       border-left: none;
     }
   }
