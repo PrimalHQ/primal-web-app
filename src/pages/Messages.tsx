@@ -498,6 +498,12 @@ const Messages: Component = () => {
 
     if (!isMentioning() && e.key === '@') {
       mentionCursorPosition = getCaretCoordinates(newMessageInput, newMessageInput.selectionStart);
+
+      // Ignore if `@` is a part of a word
+      if (newMessageInput.selectionStart > 0 && ![' ', '\r\n', '\r', '\n'].includes(newMessageInput.value[newMessageInput.selectionStart-1])) {
+        return false;
+      }
+
       setPreQuery('');
       setQuery('');
       setMentioning(true);
@@ -733,8 +739,12 @@ const Messages: Component = () => {
 
     const taRect = newMessageInput.getBoundingClientRect();
 
-    let newBottom = taRect.height - mentionCursorPosition.top;
+    let newBottom = taRect.height - mentionCursorPosition.top + 32;
     let newLeft = mentionCursorPosition.left;
+
+    if (newLeft + mentionOptions.getBoundingClientRect().width > 628) {
+      newLeft = 628 - mentionOptions.getBoundingClientRect().width;
+    }
 
     mentionOptions.style.bottom = `${newBottom}px`;
     mentionOptions.style.left = `${newLeft}px`;

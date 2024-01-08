@@ -280,6 +280,12 @@ const EditBox: Component<{
 
     if (!isMentioning() && e.key === '@') {
       mentionCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
+
+      // Ignore if `@` is a part of a word
+      if (textArea.selectionStart > 0 && ![' ', '\r\n', '\r', '\n'].includes(textArea.value[textArea.selectionStart-1])) {
+        return false;
+      }
+
       setPreQuery('');
       setQuery('');
       setMentioning(true);
