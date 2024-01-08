@@ -323,37 +323,37 @@ const Messages: Component = () => {
   const onExpandableTextareaInput = () => {
     const maxHeight = 800;
 
-    const elm = newMessageInput as AutoSizedTextArea;
+    const input = newMessageInput as AutoSizedTextArea;
 
-    if(!elm || elm.nodeName !== 'TEXTAREA') {
+    if(!input || input.nodeName !== 'TEXTAREA') {
       return;
     }
 
-    const minRows = parseInt(elm.getAttribute('data-min-rows') || '0');
+    const minRows = parseInt(input.getAttribute('data-min-rows') || '0');
 
-    !elm._baseScrollHeight && getScrollHeight(elm);
+    !input._baseScrollHeight && getScrollHeight(input);
 
 
-    if (elm.scrollHeight >= (maxHeight / 3)) {
+    if (input.scrollHeight >= (maxHeight / 3)) {
       return;
     }
 
-    elm.rows = minRows;
-    const rows = elm.value === '' ? 0 : Math.ceil((elm.scrollHeight - elm._baseScrollHeight) / 20);
+    input.rows = minRows;
+    const rows = input.value === '' ? 0 : Math.ceil((input.scrollHeight - input._baseScrollHeight) / 20);
 
-    elm.rows = minRows + rows;
-    elm.style.height = `${40 + (20 * rows)}px`;
+    input.rows = minRows + rows;
+    input.style.height = `${40 + (20 * rows)}px`;
 
     if (newMessageWrapper) {
       newMessageWrapper.style.height = `${80 + (20 * rows)}px`;
     }
 
     if (newMessageInputBorder) {
-      newMessageInputBorder.style.height = `${82 + (20 * rows)}px`;
+      newMessageInputBorder.style.height = `${42 + (20 * rows)}px`;
     }
 
     // debounce(() => {
-      setMessage(elm.value)
+      setMessage(input.value)
     // }, 300);
 
   }
@@ -909,77 +909,79 @@ const Messages: Component = () => {
 
       <div class={styles.messagesContent}>
 
-        <div class={styles.sendersHeader}>
-          <div class={styles.senderCategorySelector}>
+        <div class={styles.senders}>
+          <div class={styles.sendersHeader}>
+            <div class={styles.senderCategorySelector}>
+              <button
+                class={`${styles.categorySelector} ${messages?.senderRelation === 'follows' ? styles.highlight : ''}`}
+                onClick={() => messages?.actions.changeSenderRelation('follows')}
+              >
+                <div>
+                  {intl.formatMessage(tMessages.follows)}
+                </div>
+                <div class={styles.indicator}></div>
+                <Show when={messages?.senderRelation === 'other' && messages?.hasMessagesInDifferentTab}>
+                  <div class={styles.bubble}></div>
+                </Show>
+              </button>
+              <button
+                class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
+                onClick={() => messages?.actions.changeSenderRelation('other')}
+              >
+                <div>
+                  {intl.formatMessage(tMessages.other)}
+                </div>
+                <div class={styles.indicator}></div>
+                <Show when={messages?.senderRelation === 'follows' && messages?.hasMessagesInDifferentTab}>
+                  <div class={styles.bubble}></div>
+                </Show>
+              </button>
+            </div>
             <button
-              class={`${styles.categorySelector} ${messages?.senderRelation === 'follows' ? styles.highlight : ''}`}
-              onClick={() => messages?.actions.changeSenderRelation('follows')}
+              class={styles.markAsRead}
+              disabled={!messages?.messageCount}
+              onClick={markAllAsRead}
             >
-              <div>
-                {intl.formatMessage(tMessages.follows)}
-              </div>
-              <div class={styles.indicator}></div>
-              <Show when={messages?.senderRelation === 'other' && messages?.hasMessagesInDifferentTab}>
-                <div class={styles.bubble}></div>
-              </Show>
-            </button>
-            <button
-              class={`${styles.categorySelector} ${messages?.senderRelation === 'other' ? styles.highlight : ''}`}
-              onClick={() => messages?.actions.changeSenderRelation('other')}
-            >
-              <div>
-                {intl.formatMessage(tMessages.other)}
-              </div>
-              <div class={styles.indicator}></div>
-              <Show when={messages?.senderRelation === 'follows' && messages?.hasMessagesInDifferentTab}>
-                <div class={styles.bubble}></div>
-              </Show>
+              {intl.formatMessage(tMessages.markAsRead)}
             </button>
           </div>
-          <button
-            class={styles.markAsRead}
-            disabled={!messages?.messageCount}
-            onClick={markAllAsRead}
-          >
-            {intl.formatMessage(tMessages.markAsRead)}
-          </button>
-        </div>
 
-        <div class={styles.sendersList} ref={sendersListElement}>
-          <For each={messages?.orderedSenders() || []}>
-            {
-              (sender) => (
-                <button
-                  class={`${styles.senderItem} ${isSelectedSender(sender.npub) ? styles.selected : ''}`}
-                  onClick={() => selectSender(sender.npub)}
-                  data-user={sender.pubkey}
-                >
-                  <Avatar user={sender} size="md" />
-                  <div class={styles.senderInfo}>
-                    <div class={styles.firstLine}>
-                      <div class={styles.senderName}>
-                        {userName(sender)}
-                      </div>
-                      <Show when={messages?.messageCountPerSender[sender.pubkey] && messages?.messageCountPerSender[sender.pubkey].latest_at > 0}>
-                        <div class={styles.dotSeparator}></div>
-                        <div class={styles.lastMessageTime}>
-                          {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'narrow', messages?.now).label}
+          <div class={styles.sendersList} ref={sendersListElement}>
+            <For each={messages?.orderedSenders() || []}>
+              {
+                (sender) => (
+                  <button
+                    class={`${styles.senderItem} ${isSelectedSender(sender.npub) ? styles.selected : ''}`}
+                    onClick={() => selectSender(sender.npub)}
+                    data-user={sender.pubkey}
+                  >
+                    <Avatar user={sender} size="md" />
+                    <div class={styles.senderInfo}>
+                      <div class={styles.firstLine}>
+                        <div class={styles.senderName}>
+                          {userName(sender)}
                         </div>
-                      </Show>
+                        <Show when={messages?.messageCountPerSender[sender.pubkey] && messages?.messageCountPerSender[sender.pubkey].latest_at > 0}>
+                          <div class={styles.dotSeparator}></div>
+                          <div class={styles.lastMessageTime}>
+                            {date(messages?.messageCountPerSender[sender.pubkey].latest_at || 0,'narrow', messages?.now).label}
+                          </div>
+                        </Show>
+                      </div>
+                      <div class={styles.secondLine}>
+                        {nip05Verification(sender)}
+                      </div>
                     </div>
-                    <div class={styles.secondLine}>
-                      {nip05Verification(sender)}
-                    </div>
-                  </div>
-                  <Show when={mgsFromSender(sender) > 0}>
-                    <div class={styles.senderBubble}>
-                      {mgsFromSender(sender)}
-                    </div>
-                  </Show>
-                </button>
-              )
-            }
-          </For>
+                    <Show when={mgsFromSender(sender) > 0}>
+                      <div class={styles.senderBubble}>
+                        {mgsFromSender(sender)}
+                      </div>
+                    </Show>
+                  </button>
+                )
+              }
+            </For>
+          </div>
         </div>
 
         <div class={styles.conversation}>

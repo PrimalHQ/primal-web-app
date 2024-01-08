@@ -57,184 +57,190 @@
 .messagesContent {
   position: relative;
 
-  .sendersHeader {
-    height: 48px;
+  display: flex;
+  width: calc(var(--left-col-w) + var(--right-col-w) + 424px);
+
+  .senders {
     width: 334px;
-    background: none;
-    border-radius: 0;
-    border: 1px solid var(--devider);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 16px;
-    padding-left: 8px;
-    padding-right: 24px;
-    margin-bottom: 0;
-    .senderCategorySelector {
+
+    .sendersHeader {
+      height: 48px;
+      width: 100%;
+      background: none;
+      border-radius: 0;
+      border: 1px solid var(--devider);
       display: flex;
-      .categorySelector {
-        position: relative;
-        border: none;
-        outline: none;
-        padding-block: 0;
-        padding-inline: 16px;
-        margin: 0;
-        background: none;
-        color: var(--text-primary);
-        font-size: 14px;
-        font-weight: 400;
-        line-height: 14px;
-        text-transform: uppercase;
-
-        .indicator {
-          visibility: hidden;
-          border-radius: 2px 0px;
-          width: 100%;
-          height: 4px;
-          margin-top: 12px;
-          background-color: var(--accent);
-        }
-
-        &:focus {
-          background: none;
-          box-shadow: none;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 16px;
+      padding-left: 8px;
+      padding-right: 24px;
+      margin-bottom: 0;
+      .senderCategorySelector {
+        display: flex;
+        .categorySelector {
+          position: relative;
+          border: none;
           outline: none;
-        }
-
-        &.highlight {
+          padding-block: 0;
+          padding-inline: 16px;
+          margin: 0;
+          background: none;
           color: var(--text-primary);
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 400;
           line-height: 14px;
+          text-transform: uppercase;
 
           .indicator {
-            visibility: visible;
+            visibility: hidden;
             border-radius: 2px 0px;
             width: 100%;
             height: 4px;
             margin-top: 12px;
             background-color: var(--accent);
           }
+
+          &:focus {
+            background: none;
+            box-shadow: none;
+            outline: none;
+          }
+
+          &.highlight {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 14px;
+
+            .indicator {
+              visibility: visible;
+              border-radius: 2px 0px;
+              width: 100%;
+              height: 4px;
+              margin-top: 12px;
+              background-color: var(--accent);
+            }
+          }
+
+        }
+        .separator {
+          border-left: 1px solid var(--subtile-devider);
+          margin-inline: 8px;
+        }
+      }
+
+      .markAsRead {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        height: 30px;
+        border: none;
+        outline: none;
+        padding: 0;
+        margin: 0;
+        background: none;
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16px;
+        width: auto;
+
+        &:focus {
+          background: none;
+          box-shadow: none;
+          outline: none;
+        }
+      }
+    }
+
+    .sendersList {
+      display: flex;
+      flex-direction: column;
+      overflow-y: scroll;
+      overflow-y: overlay;
+      overflow-x: hidden;
+      width: 100%;
+      height: calc(100vh - 176px);
+      // padding-right: 8px;
+      border-radius: 0;
+      border-left: 1px solid var(--devider);
+
+
+      .senderItem {
+        position: relative;
+        display: flex;
+        background-color: var(--background-card);
+        padding-inline: 15px;
+        padding-block: 12px;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--devider);
+        margin-bottom: 0px;
+        align-items: center;
+        width: 334px;
+
+        &:hover, &.selected, &.focus {
+          background-color: var(--background-input);
+          box-shadow: none;
+          outline: none;
         }
 
-      }
-      .separator {
-        border-left: 1px solid var(--subtile-devider);
-        margin-inline: 8px;
-      }
-    }
-
-    .markAsRead {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      height: 30px;
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      background: none;
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 400;
-      line-height: 16px;
-      width: auto;
-
-      &:focus {
-        background: none;
-        box-shadow: none;
-        outline: none;
-      }
-    }
-  }
-
-  .sendersList {
-    display: flex;
-    flex-direction: column;
-    overflow-y: scroll;
-    width: 334px;
-    height: calc(100vh - 176px);
-    padding-right: 8px;
-    border-radius: 0;
-    border-left: 1px solid var(--devider);
-
-
-    .senderItem {
-      position: relative;
-      display: flex;
-      background-color: var(--background-card);
-      padding-inline: 15px;
-      padding-block: 12px;
-      border-radius: 0;
-      border: none;
-      border-bottom: 1px solid var(--devider);
-      margin-bottom: 0px;
-      align-items: center;
-
-      &:hover, &.selected, &.focus {
-        background-color: var(--background-input);
-        box-shadow: none;
-        outline: none;
-      }
-
-      .senderInfo {
-        margin-left: 12px;
-        display: flex;
-        flex-direction: column;
-        .firstLine {
+        .senderInfo {
+          margin-left: 12px;
           display: flex;
-          justify-content: flex-start;
-          align-items: center;
-          .senderName {
-            color: var(--text-primary);
-            font-size: 16px;
-            font-weight: 700;
+          flex-direction: column;
+          .firstLine {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            .senderName {
+              color: var(--text-primary);
+              font-size: 16px;
+              font-weight: 700;
+              line-height: 16px;
+              max-width: 178px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            .dotSeparator {
+              width: 4px;
+              height: 4px;
+              margin-inline: 6px;
+              border-radius: 2px;
+              background-color: var(--text-tertiary-2);
+            }
+            .lastMessageTime {
+              color: var(--text-tertiary-2);
+              font-size: 16px;
+              font-weight: 400;
+              line-height: 16px;
+            }
+          }
+
+          .secondLine {
+            text-align: left;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            font-size: 14px;
             line-height: 16px;
-            max-width: 178px;
-            overflow: hidden;
+            margin-top: 4px;
+            padding: 0;
+            max-width: 228px;
             text-overflow: ellipsis;
             white-space: nowrap;
+            overflow: hidden;
           }
-          .dotSeparator {
-            width: 4px;
-            height: 4px;
-            margin-inline: 6px;
-            border-radius: 2px;
-            background-color: var(--text-tertiary-2);
-          }
-          .lastMessageTime {
-            color: var(--text-tertiary-2);
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 16px;
-          }
-        }
-
-        .secondLine {
-          text-align: left;
-          color: var(--text-tertiary);
-          font-weight: 400;
-          font-size: 14px;
-          line-height: 16px;
-          margin-top: 4px;
-          padding: 0;
-          max-width: 228px;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          overflow: hidden;
         }
       }
     }
   }
 
+
   .conversation {
-    position: absolute;
-    top: 0;
-    left: 320px;
     background-color: var(--background-card );
-    width: 628px;
     height: calc(100vh - var(--header-height));
-    overflow: hidden;
     display: flex;
     flex-direction: column-reverse;
 
@@ -290,7 +296,7 @@
     .newMessage {
       width: 100%;
       position: relative;
-      vertical-align: bottom;
+      align-items: flex-end;
       display: flex;
       border-radius: 0;
       border: 1px solid var(--devider);
@@ -302,7 +308,7 @@
         padding: 1px;
         border-radius: 8px;
         width: 538px;
-        height: 34px;
+        height: 40px;
         box-sizing: border-box;
 
         textarea {

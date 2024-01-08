@@ -95,14 +95,14 @@
 
   >div {
     position: fixed;
-    width: var(--left-col-w);
+    width: var(--right-col-w);
     display: grid;
     grid-template-rows: var(--header-height) 1fr 82px;
     height: 100%;
     border-left: 1px solid var(--devider);
   }
 
-  &.messagesHeader {
+  &.messagesColumn {
     >div {
       border-left: none;
     }
@@ -110,6 +110,7 @@
 }
 
 .messagesSearch {
+  width: calc(var(--right-col-w) + 8px);
   border-right: 1px solid var(--devider);
 }
 
@@ -133,6 +134,14 @@
 
     >div {
       height: 52px;
+    }
+  }
+
+  &.messagesHeader {
+    width: calc(var(--right-col-w) + 8px);
+
+    >div {
+      width: calc(var(--right-col-w) + 8px);
     }
   }
 }
