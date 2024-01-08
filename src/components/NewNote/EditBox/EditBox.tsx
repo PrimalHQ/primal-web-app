@@ -161,7 +161,12 @@ const EditBox: Component<{
       return false;
     }
 
-    if (!isMentioning() && !isEmojiInput() && e.key === ':' && previousChar === ' ') {
+    if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+      // Ignore if `@` is a part of a word
+      if (textArea.selectionStart > 0 && ![' ', '\r\n', '\r', '\n'].includes(textArea.value[textArea.selectionStart-1])) {
+        return false;
+      }
+
       emojiCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
       setEmojiInput(true);
       return false;

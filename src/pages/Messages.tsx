@@ -376,6 +376,12 @@ const Messages: Component = () => {
     }
 
     if (!isMentioning() && !isEmojiInput() && e.key === ':') {
+
+      // Ignore if `:` is a part of a word
+      if (newMessageInput.selectionStart > 0 && ![' ', '\r\n', '\r', '\n'].includes(newMessageInput.value[newMessageInput.selectionStart-1])) {
+        return false;
+      }
+
       emojiCursorPosition = getCaretCoordinates(newMessageInput, newMessageInput.selectionStart);
       setEmojiInput(true);
       return false;
@@ -869,7 +875,7 @@ const Messages: Component = () => {
 
     const taRect = newMessageInput.getBoundingClientRect();
 
-    let newBottom = taRect.height - emojiCursorPosition.top;
+    let newBottom = taRect.height - emojiCursorPosition.top + 32;
     let newLeft = emojiCursorPosition.left;
 
     emojiOptions.style.bottom = `${newBottom}px`;
