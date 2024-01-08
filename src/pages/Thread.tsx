@@ -125,7 +125,7 @@ const Thread: Component = () => {
         scrollWindowTo(rect.top - header - banner);
 
         // repliesHolder.setAttribute('style', `height: ${document.documentElement.scrollHeight}px;`)
-      }, 1000)
+      }, 10)
     }
   });
 
