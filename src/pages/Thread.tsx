@@ -111,6 +111,10 @@ const Thread: Component = () => {
       setTimeout(() => {
         if (!repliesHolder) return;
 
+        if (parentNotes().length === 0) {
+          return;
+        }
+
         const rect = pn.getBoundingClientRect();
 
         const vh = window.innerHeight;
