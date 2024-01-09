@@ -20,6 +20,8 @@
     right: unset;
   }
   &.hidden {
+    height: 1px;
+    overflow: hidden;
     visibility: hidden;
   }
 }
