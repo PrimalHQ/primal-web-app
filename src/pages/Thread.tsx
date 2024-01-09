@@ -101,36 +101,15 @@ const Thread: Component = () => {
   let observer: IntersectionObserver | undefined;
 
   createEffect(() => {
-    if (primaryNote() && !threadContext?.isFetching) {
-      const pn = document.getElementById('primary_note');
+    if (!primaryNote() || threadContext?.isFetching) return;
 
-      if (!pn) {
-        return;
-      }
+    const pn = document.getElementById('primary_note');
 
-      setTimeout(() => {
-        if (!repliesHolder) return;
+    if (!pn) return;
 
-        if (parentNotes().length === 0) {
-          return;
-        }
-
-        const rect = pn.getBoundingClientRect();
-
-        const vh = window.innerHeight;
-        const header = 72;
-        const note = rect.height;
-        const banner = isIOS() ? 54 : 0;
-
-        const minHeight = vh - note - header - banner;
-
-        repliesHolder.setAttribute('style',`min-height: ${minHeight}px`);
-
-        scrollWindowTo(rect.top - header - banner);
-
-        // repliesHolder.setAttribute('style', `height: ${document.documentElement.scrollHeight}px;`)
-      }, 10)
-    }
+    setTimeout(() => {
+      pn.scrollIntoView({ block: 'end' });
+    }, 100);
   });
 
   onCleanup(() => {
@@ -175,7 +154,7 @@ const Thread: Component = () => {
           <div class={styles.parentsHolder}>
             <For each={parentNotes()}>
               {note =>
-                <div class={styles.threadList}>
+                <div>
                   <Note note={note} parent={true} shorten={true} />
                 </div>
               }
@@ -184,7 +163,7 @@ const Thread: Component = () => {
         </Show>
 
         <Show when={primaryNote()}>
-          <div id="primary_note" class={styles.threadList}>
+          <div id="primary_note">
             <Note
               note={primaryNote() as PrimalNote}
             />
@@ -200,7 +179,7 @@ const Thread: Component = () => {
         <div class={styles.repliesHolder} ref={repliesHolder}>
           <For each={replyNotes()}>
             {note =>
-              <div class={styles.threadList}>
+              <div>
                 <Note note={note} shorten={true} />
               </div>
             }
