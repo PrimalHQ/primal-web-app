@@ -2,6 +2,7 @@ import { Component, createMemo, createSignal, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_avatar.svg';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
+import { getMediaUrl } from '../../lib/media';
 import { MediaSize, PrimalUser } from '../../types/primal';
 import NoteImage from '../NoteImage/NoteImage';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
@@ -65,7 +66,6 @@ const Avatar: Component<{
     return '';
   };
 
-
   const imageSrc = createMemo(() => {
     let size: MediaSize = 'm';
 
@@ -109,6 +109,12 @@ const Avatar: Component<{
     return styles.cacheFlag;
   }
 
+  const imageMedia = () => {
+    const src = props.user?.picture || props.src || defaultAvatar;
+
+    return media?.actions.getMedia(src, 'o');
+  };
+
   return (
     <div
       id={props.id}
@@ -127,7 +133,12 @@ const Avatar: Component<{
           <Show when={props.zoomable} fallback={
             <img src={imageSrc()} alt="avatar" onerror={imgError}/>
           }>
-            <NoteImage class={props.zoomable ? 'profile_image' : ''} src={imageSrc()} onError={imgError} />
+            <NoteImage
+              class={props.zoomable ? 'profile_image' : ''}
+              media={imageMedia()}
+              src={imageSrc()}
+              onError={imgError}
+            />
           </Show>
         </div>
       </Show>
