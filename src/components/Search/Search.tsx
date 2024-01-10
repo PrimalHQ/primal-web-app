@@ -13,6 +13,7 @@ import { placeholders, search as t } from '../../translations';
 import styles from './Search.module.scss';
 import SearchOption from './SearchOption';
 import { hookForDev } from '../../lib/devTools';
+import { useProfileContext } from '../../contexts/ProfileContext';
 
 
 const Search: Component<{
@@ -28,6 +29,7 @@ const Search: Component<{
   const search = useSearchContext();
   const navigate = useNavigate();
   const intl = useIntl();
+  const profile = useProfileContext();
 
   const [query, setQuery] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
@@ -103,7 +105,7 @@ const Search: Component<{
 
   createEffect(() => {
     if (query().length === 0) {
-      search?.actions.getRecomendedUsers();
+      search?.actions.getRecomendedUsers(profile?.profileHistory.profiles || []);
       return;
     }
 
@@ -174,7 +176,7 @@ const Search: Component<{
                 title={userName(user)}
                 description={nip05Verification(user)}
                 icon={<Avatar user={user} size="vvs" />}
-                statNumber={search?.scores[user.pubkey]}
+                statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage(t.followers)}
                 onClick={() => selectUser(user)}
               />

@@ -53,19 +53,22 @@ import { parseBolt11 } from "../utils";
 import { convertToUser } from "../stores/profile";
 import { sortBreakpoints } from "@solid-primitives/media";
 
+export type UserStats = {
+  pubkey: string,
+  follows_count: number,
+  followers_count: number,
+  note_count: number,
+  reply_count: number,
+  time_joined: number,
+  total_zap_count: number,
+  total_satszapped: number,
+  relay_count: number,
+};
+
 export type ProfileContextStore = {
   profileKey: string | undefined,
   userProfile: PrimalUser | undefined,
-  userStats: {
-    follows_count: number,
-    followers_count: number,
-    note_count: number,
-    reply_count: number,
-    time_joined: number,
-    total_zap_count: number,
-    total_satszapped: number,
-    relay_count: number,
-  },
+  userStats: UserStats,
   fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
   notes: PrimalNote[],
@@ -100,6 +103,10 @@ export type ProfileContextStore = {
   isFetchingZaps: boolean,
   profileStats: Record<string, number>,
   relays: NostrRelays,
+  profileHistory: {
+    profiles: PrimalUser[],
+    stats: Record<string, UserStats>,
+  },
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -129,6 +136,7 @@ export type ProfileContextStore = {
 }
 
 export const emptyStats = {
+  pubkey: '',
   follows_count: 0,
   followers_count: 0,
   note_count: 0,
@@ -194,6 +202,10 @@ export const initialData = {
       mentions: {},
       noteActions: {},
     },
+  },
+  profileHistory: {
+    profiles: [],
+    stats: {},
   },
 };
 
@@ -892,6 +904,42 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const refreshNotes = () => {
   };
 
+  const addProfileToHistory = (user: PrimalUser) => {
+    let list = [...store.profileHistory.profiles];
+
+    const index = list.findIndex(u => u.pubkey === user.pubkey)
+
+    // user is first in the list so the job is done
+    if (index === 0) return;
+
+    if (index > 0) {
+      list.splice(index, 1);
+
+      updateStore('profileHistory', 'profiles', () => [user, ...list]);
+      return;
+    }
+
+    list.unshift(user);
+
+    if (list.length > 10) {
+      const last = list[list.length - 1].pubkey;
+
+      let stats = { ...store.profileHistory.stats };
+
+      delete stats[last];
+
+      updateStore('profileHistory', 'stats', reconcile(stats));
+
+      list.pop()
+    }
+
+    updateStore('profileHistory', 'profiles', () => [...list]);
+  };
+
+  const addStatsToHistory = (stats: UserStats) => {
+    updateStore('profileHistory', 'stats', () => ({ [stats.pubkey]: stats }));
+  };
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -959,6 +1007,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         user.created_at = content.created_at;
 
         updateStore('userProfile', () => user);
+        addProfileToHistory(user);
         return;
       }
 
@@ -966,6 +1015,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         const stats = JSON.parse(content.content);
 
         updateStore('userStats', () => ({ ...stats }));
+        addStatsToHistory(stats)
         updateStore('fetchedUserStats', () => true);
         return;
       }

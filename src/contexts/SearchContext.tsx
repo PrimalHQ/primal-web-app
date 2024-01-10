@@ -26,6 +26,7 @@ import { subscribeTo } from "../sockets";
 import { nip19 } from "nostr-tools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
+import { useProfileContext } from "./ProfileContext";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -59,7 +60,7 @@ export type SearchContextStore = {
     findContentUsers: (query: string, pubkey?: string) => void,
     findContent: (query: string) => void,
     setContentQuery: (query: string) => void,
-    getRecomendedUsers: () => void,
+    getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
   },
 }
@@ -147,7 +148,7 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
     getUserProfiles([hex], subId);
   };
 
-  const getRecomendedUsers = () => {
+  const getRecomendedUsers = (profiles?: PrimalUser[]) => {
     const subid = `recomended_users_${APP_ID}`;
 
     let users: PrimalUser[] = [];
@@ -181,6 +182,10 @@ export function SearchProvider(props: { children: number | boolean | Node | JSX.
           const index = recomendedUsers.indexOf(user.pubkey);
           sorted[index] = { ...user };
         });
+
+        if (profiles) {
+          sorted = [...profiles, ...sorted].slice(0, 9);
+        }
 
         updateStore('users', () => sorted);
         updateStore('isFetchingUsers', () => false);
