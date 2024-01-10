@@ -108,7 +108,14 @@ const Thread: Component = () => {
     if (!pn) return;
 
     setTimeout(() => {
-      pn.scrollIntoView({ block: 'end' });
+      const rect = pn.getBoundingClientRect();
+      const wh = window.innerHeight - 72;
+
+      const block = rect.height < wh && parentNotes().length > 0 ?
+        'end' : 'start';
+
+      pn.scrollIntoView({ block });
+      block === 'start' && window.scrollBy({ top: -72 });
     }, 100);
   });
 
