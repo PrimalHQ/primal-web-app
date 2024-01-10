@@ -12,9 +12,7 @@ import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 import CustomZap from '../../CustomZap/CustomZap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
-import zapSM from '../../../assets/lottie/zap_sm.json';
 import zapMD from '../../../assets/lottie/zap_md.json';
-import { medZapLimit } from '../../../constants';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
@@ -28,7 +26,6 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
   const intl = useIntl();
   const settings = useSettingsContext();
 
-  let smallZapAnimation: HTMLElement | undefined;
   let medZapAnimation: HTMLElement | undefined;
 
   const [liked, setLiked] = createSignal(props.note.post.noteActions.liked);
@@ -165,9 +162,6 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted()
-      // toast?.sendWarning(
-      //   intl.formatMessage(t.zapAsGuest),
-      // );
       setIsZapping(false);
       return;
     }
@@ -216,42 +210,8 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
   const [zappedNow, setZappedNow] = createSignal(false);
   const [zappedAmount, setZappedAmount] = createSignal(0);
 
-  const animateSmallZap = () => {
-    setTimeout(() => {
-      setHideZapIcon(true);
-
-      if (!smallZapAnimation) {
-        return;
-      }
-
-      const newLeft = 120;
-      const newTop =  -8;
-
-      smallZapAnimation.style.left = `${newLeft}px`;
-      smallZapAnimation.style.top = `${newTop}px`;
-
-      const onAnimDone = () => {
-        // setIsZapping(true);
-        setShowSmallZapAnim(false);
-        setHideZapIcon(false);
-        smallZapAnimation?.removeEventListener('complete', onAnimDone);
-      }
-
-      smallZapAnimation.addEventListener('complete', onAnimDone);
-
-      try {
-        // @ts-ignore
-        smallZapAnimation.seek(0);
-        // @ts-ignore
-        smallZapAnimation.play();
-      } catch (e) {
-        console.warn('Failed to animte zap:', e);
-        onAnimDone();
-      }
-    }, 10);
-  };
-
-  const animateMedZap = () => {
+  const animateZap = () => {
+    setShowZapAnim(true);
     setTimeout(() => {
       setHideZapIcon(true);
 
@@ -266,8 +226,7 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
       medZapAnimation.style.top = `${newTop}px`;
 
       const onAnimDone = () => {
-        // setIsZapping(true);
-        setShowMedZapAnim(false);
+        setShowZapAnim(false);
         setHideZapIcon(false);
         medZapAnimation?.removeEventListener('complete', onAnimDone);
       }
@@ -285,19 +244,6 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
       }
     }, 10);
   };
-
-
-  const animateZap = () => {
-    if (zappedAmount() > medZapLimit) {
-      setShowMedZapAnim(true);
-      animateMedZap();
-    }
-    else {
-      setShowSmallZapAnim(true);
-      animateSmallZap();
-    }
-
-  }
 
   const doQuickZap = async () => {
     if (!account?.hasPublicKey()) {
@@ -374,8 +320,7 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
   });
 
-  const [showSmallZapAnim, setShowSmallZapAnim] = createSignal(false);
-  const [showMedZapAnim, setShowMedZapAnim] = createSignal(false);
+  const [showZapAnim, setShowZapAnim] = createSignal(false);
   const [hideZapIcon, setHideZapIcon] = createSignal(false);
 
 
@@ -389,17 +334,8 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
   return (
     <div id={props.id} class={styles.footer} ref={footerDiv}>
-      <Show when={showSmallZapAnim()}>
-        <lottie-player
-          id={`note-small-zap-${props.note.post.id}`}
-          src={zapSM}
-          speed="1"
-          class={styles.smallZapLottie}
-          ref={smallZapAnimation}
-        ></lottie-player>
-      </Show>
 
-      <Show when={showMedZapAnim()}>
+      <Show when={showZapAnim()}>
         <lottie-player
           id={`note-med-zap-${props.note.post.id}`}
           src={zapMD}
@@ -489,11 +425,8 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
         onSuccess={(amount: number) => {
           setIsCustomZap(false);
           setIsZapping(false);
-          // setZappedAmount(() => amount || 0);
           setZappedNow(false);
-          // animateZap();
-          setShowMedZapAnim(false);
-          setShowSmallZapAnim(false);
+          setShowZapAnim(false);
           setHideZapIcon(false);
           setZapped(true);
         }}
@@ -502,8 +435,7 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
           setZappedNow(true);
           setIsCustomZap(false);
           setIsZapping(false);
-          setShowMedZapAnim(false);
-          setShowSmallZapAnim(false);
+          setShowZapAnim(false);
           setHideZapIcon(false);
           setZapped(props.note.post.noteActions.zapped);
         }}
