@@ -7,3 +7,10 @@
 .shortHeight {
   max-height: 680px;
 }
+
+.placeholderImage {
+  display: block;
+  width: 524px;
+  height: 680px;
+  background-color: var(--background-site);
+}

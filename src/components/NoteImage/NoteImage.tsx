@@ -101,7 +101,10 @@ const NoteImage: Component<{
   })
 
   return (
-    <Show when={isImageLoaded()}>
+    <Show
+      when={isImageLoaded()}
+      fallback={<div class={styles.placeholderImage}></div>}
+    >
       <a
         class={`${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
         href={src()}
