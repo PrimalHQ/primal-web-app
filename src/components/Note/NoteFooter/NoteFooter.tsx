@@ -18,6 +18,7 @@ import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
 import NoteContextMenu from '../NoteContextMenu';
 import { getScreenCordinates } from '../../../utils';
+import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 
 const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
@@ -336,13 +337,12 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
     <div id={props.id} class={styles.footer} ref={footerDiv}>
 
       <Show when={showZapAnim()}>
-        <lottie-player
+        <ZapAnimation
           id={`note-med-zap-${props.note.post.id}`}
           src={zapMD}
-          speed="1"
           class={styles.mediumZapLottie}
           ref={medZapAnimation}
-        ></lottie-player>
+        />
       </Show>
 
       {actionButton({

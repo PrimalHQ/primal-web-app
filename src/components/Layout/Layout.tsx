@@ -14,6 +14,7 @@ import { SendNoteResult } from '../../types/primal';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import Branding from '../Branding/Branding';
 import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
+import ZapAnimation from '../ZapAnimation/ZapAnimation';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -87,14 +88,7 @@ const Layout: Component = () => {
         <div class="zap_icon_fill"></div>
         <div class="like_icon"></div>
         <div class="like_icon_fill"></div>
-        <lottie-player
-          src={zapSM}
-          speed="1"
-        ></lottie-player>
-        <lottie-player
-          src={zapMD}
-          speed="1"
-        ></lottie-player>
+        <ZapAnimation src={zapMD} />
       </div>
       <div id="modal" class={styles.modal}></div>
       <BannerIOS />
