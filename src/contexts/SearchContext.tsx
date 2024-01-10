@@ -26,7 +26,6 @@ import { subscribeTo } from "../sockets";
 import { nip19 } from "nostr-tools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
-import { useProfileContext } from "./ProfileContext";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -82,7 +81,7 @@ const initialData = {
 
 export const SearchContext = createContext<SearchContextStore>();
 
-export function SearchProvider(props: { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; }) {
+export function SearchProvider(props: { children: JSX.Element }) {
 
   const account = useAccountContext();
 
