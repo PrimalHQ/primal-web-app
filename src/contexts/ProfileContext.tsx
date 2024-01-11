@@ -7,6 +7,7 @@ import {
   createContext,
   createEffect,
   onCleanup,
+  onMount,
   useContext
 } from "solid-js";
 import {
@@ -52,6 +53,7 @@ import { subscribeTo } from "../sockets";
 import { parseBolt11 } from "../utils";
 import { convertToUser } from "../stores/profile";
 import { sortBreakpoints } from "@solid-primitives/media";
+import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 
 export type UserStats = {
   pubkey: string,
@@ -916,6 +918,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       list.splice(index, 1);
 
       updateStore('profileHistory', 'profiles', () => [user, ...list]);
+
       return;
     }
 
@@ -1149,6 +1152,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         { message: onMessage, close: onSocketClose },
       );
     }
+  });
+
+  createEffect(() => {
+    if (account && account.hasPublicKey()) {
+      const history = readRecomendedUsers(account.publicKey);
+
+      history && updateStore('profileHistory', reconcile(history));
+    }
+  });
+
+  createEffect(() => {
+    const profiles = [...store.profileHistory.profiles];
+    const stats = { ...store.profileHistory.stats };
+
+    saveRecomendedUsers(account?.publicKey, { profiles, stats });
   });
 
   onCleanup(() => {

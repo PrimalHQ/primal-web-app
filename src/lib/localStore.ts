@@ -1,3 +1,4 @@
+import { UserStats } from "../contexts/ProfileContext";
 import { NostrRelays, PrimalFeed, PrimalUser, SelectionOption } from "../types/primal";
 
 export type LocalStore = {
@@ -12,6 +13,10 @@ export type LocalStore = {
   theme: string,
   homeSidebarSelection: SelectionOption | undefined,
   userProfile: PrimalUser | undefined,
+  recomended: {
+    profiles: PrimalUser[],
+    stats: Record<string, UserStats>,
+  },
 };
 
 export const emptyStorage = {
@@ -26,6 +31,7 @@ export const emptyStorage = {
   theme: 'sunset',
   homeSidebarSelection: undefined,
   userProfile: undefined,
+  recomended: { profiles: [], stats: {} },
 }
 
 export const storageName = (pubkey?: string) => {
@@ -145,6 +151,30 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
 
   setStorage(pubkey, store);
 };
+
+export const saveRecomendedUsers = (pubkey: string | undefined, recomended: { profiles: PrimalUser[], stats: Record<string, UserStats> }) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.recomended = recomended;
+
+  setStorage(pubkey, store);
+}
+
+export const readRecomendedUsers = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  const recomended = store.recomended;
+
+  return recomended ? recomended as { profiles: PrimalUser[], stats: Record<string, UserStats> } : undefined;
+}
 
 export const saveHomeSidebarSelection = (pubkey: string | undefined, selection: SelectionOption | undefined) => {
   if (!pubkey) {
