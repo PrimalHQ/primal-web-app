@@ -344,8 +344,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => top);
   };
 
+  let currentFeed = '';
+
   const selectFeed = (feed: PrimalFeed | undefined) => {
-    if (feed !== undefined && feed.hex !== undefined) {
+    if (feed?.hex !== undefined && feed.hex !== currentFeed) {
+      currentFeed = feed.hex;
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
@@ -623,8 +626,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   });
 
+  let keyIsDone = false;
+
   createEffect(() => {
-    if (account?.isKeyLookupDone) {
+    if (account?.isKeyLookupDone && !keyIsDone && settings?.defaultFeed) {
+      keyIsDone = true;
       selectFeed(settings?.defaultFeed);
     }
   });

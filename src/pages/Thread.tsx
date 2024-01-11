@@ -32,6 +32,8 @@ const Thread: Component = () => {
 
   let repliesHolder: HTMLDivElement | undefined;
 
+  let initialPostId = '';
+
   const postId = () => {
     if (params.postId.startsWith('note')) {
       return params.postId;
@@ -95,7 +97,12 @@ const Thread: Component = () => {
   const isFetching = () => threadContext?.isFetching;
 
   createEffect(() => {
-    threadContext?.actions.fetchNotes(postId());
+    const pid = postId();
+
+    if (pid !== initialPostId) {
+      threadContext?.actions.fetchNotes(pid);
+      initialPostId = pid;
+    }
   });
 
   let observer: IntersectionObserver | undefined;

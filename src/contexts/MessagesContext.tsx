@@ -564,10 +564,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
 
   const orderedSenders = () => {
-    if (!store.senders) {
+    const senders = store.senders;
+
+    if (!senders) {
       return [];
     }
-    const senders = store.senders;
+
     const counts = store.messageCountPerSender;
 
     const ids = Object.keys(senders);
@@ -797,8 +799,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   });
 
+  let isSecSet = false
+
   createEffect(() => {
-    if (!account?.sec) {
+    if (!account?.sec && !isSecSet) {
+      isSecSet = true;
       unsubscribeToMessagesStats(subidMsgCount);
       updateStore('messageCount', () => 0);
       updateStore('messageCountPerSender', reconcile({}));
@@ -818,9 +823,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('now', () => Math.floor((new Date()).getTime() / 1000));
   };
 
+  let currentSender = '';
+
   // When a sender is selected, get the first page of the conversation
   createEffect(() => {
-    if (store.selectedSender) {
+    if (store.selectedSender && store.selectedSender !== currentSender) {
+      currentSender = store.selectedSender;
       clearInterval(conversationRefreshInterval);
 
       updateStore('encryptedMessages', () => []);

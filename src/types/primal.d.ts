@@ -277,6 +277,8 @@ export type FeedPage = {
   postStats: NostrPostStats,
   mentions?: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
+  since?: number,
+  until?: number,
 };
 
 export type TrendingNotesStore = {

@@ -13,9 +13,9 @@ const onOpen = () => {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
     hook && hook(cacheServer, socket());
 
-    socket().addEventListener('message', function(event) {
-        const hook = (window as PrimalWindow).onPrimalCacheServerMessageReceived;
-        hook && hook(cacheServer, event.data);
+    socket()?.addEventListener('message', function(event) {
+      const hook = (window as PrimalWindow).onPrimalCacheServerMessageReceived;
+      hook && hook(cacheServer, event.data);
     });
   }
 }

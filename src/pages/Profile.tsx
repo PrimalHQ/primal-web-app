@@ -105,8 +105,11 @@ const Profile: Component = () => {
     profile?.actions.clearZaps();
   }
 
+  let keyIsDone = false
+
   createEffect(() => {
-    if (account?.isKeyLookupDone) {
+    if (account?.isKeyLookupDone && !keyIsDone) {
+      keyIsDone = true;
       setProfile(getHex());
     }
   });

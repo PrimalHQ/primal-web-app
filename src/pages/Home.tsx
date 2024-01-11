@@ -96,8 +96,6 @@ const Home: Component = () => {
     }
 
     setNewNotesCount(count);
-
-
   });
 
   onCleanup(()=> {
