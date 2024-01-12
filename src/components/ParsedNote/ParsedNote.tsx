@@ -372,15 +372,21 @@ const ParsedNote: Component<{
   };
 
   const renderText = (item: NoteContent) => {
-    return <For each={item.tokens}>
-      {token => {
-        if (isNoteTooLong()) return;
-        if (token.trim().length > 0) {
-          setWordsDisplayed(w => w + 1);
-        }
-        return token
-      }}
-    </For>;
+    let tokens = [];
+
+    for (let i=0;i<item.tokens.length;i++) {
+      const token = item.tokens[i];
+
+      if (isNoteTooLong()) break;
+      if (token.trim().length > 0) {
+        setWordsDisplayed(w => w + 1);
+      }
+      tokens.push(token)
+    }
+
+    const text = tokens.join(' ').replaceAll('&lt;', '<').replaceAll('&gt;', '>');
+
+    return <>{text}</>;
   };
 
   const renderImage = (item: NoteContent) => {
