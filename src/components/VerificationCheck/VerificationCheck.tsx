@@ -17,7 +17,7 @@ const VerificationCheck: Component<{
   const isVerifiedByPrimal = () => {
     const nip05 = props.user?.nip05;
 
-    return isVerified() && nip05 && nip05.endsWith('primal.net');
+    return isVerified() && nip05 && nip05.endsWith && nip05.endsWith('primal.net');
   }
 
   const checkVerification = () => {
