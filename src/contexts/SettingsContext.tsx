@@ -514,6 +514,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    if (publicKey) return;
+
     publicKey = account?.publicKey;
 
     const initFeeds = initAvailableFeeds(publicKey);
