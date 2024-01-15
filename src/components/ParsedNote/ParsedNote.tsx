@@ -133,6 +133,7 @@ const ParsedNote: Component<{
   noPreviews?: boolean,
   shorten?: boolean,
   isEmbeded?: boolean,
+  width?: number,
 }> = (props) => {
 
   const intl = useIntl();
@@ -145,6 +146,8 @@ const ParsedNote: Component<{
 
     return `note_${props.note.post.noteId}`;
   }
+
+  const noteWidth = () => props.width || 514;
 
   let thisNote: HTMLDivElement | undefined;
 
@@ -409,7 +412,7 @@ const ParsedNote: Component<{
         src={url}
         isDev={dev}
         media={image}
-        width={514}
+        width={noteWidth()}
         imageGroup={imageGroup}
         shortHeight={props.shorten}
       />
@@ -455,8 +458,8 @@ const ParsedNote: Component<{
 
         if (mVideo) {
           const ratio = mVideo.w / mVideo.h;
-          h = (524 / ratio);
-          w = h > 680 ? 680 * ratio : 524;
+          h = (noteWidth() / ratio);
+          w = h > 680 ? 680 * ratio : noteWidth();
           h = h > 680 ? 680 : h;
         }
 

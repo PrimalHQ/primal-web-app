@@ -49,7 +49,7 @@ const NoteImage: Component<{
   //   if (!img || ratio() <= 1.2) return 'auto';
 
   //   // width of the note over the ratio of the preview image
-  //   const h = 524 / ratio();
+  //   const h = props.width || 524 / ratio();
 
   //   return `${h}px`;
   // };
@@ -73,7 +73,7 @@ const NoteImage: Component<{
   };
 
   const willBeTooBig = () => {
-    const maxW = 524;
+    const maxW = props.width || 524;
 
     const h = maxW / ratio();
 
@@ -119,7 +119,7 @@ const NoteImage: Component<{
           src={src()}
           class={klass()}
           onerror={props.onError}
-          width={willBeTooBig() ? undefined : '524px'}
+          width={willBeTooBig() ? undefined : `${props.width || 524}px`}
         />
       </a>
     </Show>

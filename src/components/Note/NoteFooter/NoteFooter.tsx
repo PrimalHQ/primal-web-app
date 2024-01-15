@@ -20,7 +20,7 @@ import NoteContextMenu from '../NoteContextMenu';
 import { getScreenCordinates } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 
-const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
+const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> = (props) => {
 
   const account = useAccountContext();
   const toast = useToastContext();
@@ -220,8 +220,8 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
         return;
       }
 
-      const newLeft = 24;
-      const newTop = -35;
+      const newLeft = props.wide ? 36 : 24;
+      const newTop = props.wide ? -28 : -28;
 
       medZapAnimation.style.left = `${newLeft}px`;
       medZapAnimation.style.top = `${newTop}px`;
@@ -298,7 +298,6 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
         onTouchStart={opts.onTouchStart ?? (() => {})}
         onTouchEnd={opts.onTouchEnd ?? (() => {})}
         disabled={opts.disabled}
-        title={opts.title || ''}
       >
         <div class={`${buttonTypeClasses[opts.type]}`}>
           <div
@@ -334,7 +333,7 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
   }
 
   return (
-    <div id={props.id} class={styles.footer} ref={footerDiv}>
+    <div id={props.id} class={`${styles.footer} ${props.wide ? styles.wide : ''}`} ref={footerDiv}>
 
       <Show when={showZapAnim()}>
         <ZapAnimation

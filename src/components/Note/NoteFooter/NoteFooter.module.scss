@@ -11,9 +11,13 @@
 
 .footer {
   display: grid;
-  grid-template-columns: 128px 128px 128px 128px 1fr;
+  grid-template-columns: 128px 128px 128px 128px 16px;
   position: relative;
   width: 100%;
+
+  &.wide {
+    grid-template-columns: 140px 140px 140px 138px 16px;
+  }
 
   .context {
     background: none;
@@ -33,6 +37,7 @@
     background-color: unset;
     width: fit-content;
     position: relative;
+    padding-right: 48px;
 
     .likeType {
       @include typeDiv;

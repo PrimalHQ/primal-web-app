@@ -22,10 +22,10 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
       <div class={styles.content}>
 
         <div class={styles.message}>
-          <ParsedNote note={props.note} />
+          <ParsedNote note={props.note} width={574} />
         </div>
 
-        <NoteFooter note={props.note} />
+        <NoteFooter note={props.note} wide={true} />
       </div>
     </div>
   )
