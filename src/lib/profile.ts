@@ -212,6 +212,8 @@ export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles>
 };
 
 export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {
+  if (!domain) return null;
+
   try {
     const profile = await nip05.queryProfile(domain);
 

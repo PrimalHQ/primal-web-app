@@ -6,16 +6,14 @@
   padding: 12px;
   padding-top: 0;
   border-radius: 0;
-  border: 1px solid var(--devider);
-  border-top: none;
-  border-bottom: none;
+  border: none;
 
   .content {
     grid-area: content;
     display: flex;
     flex-direction: column;
-    margin-top: 21px;
-    margin-left: 60px;
+    margin-top: 12px;
+    margin-left: 12px;
 
 
     .message {
@@ -23,8 +21,9 @@
       grid-area: message;
       color: var(--text-primary);
       word-break: break-word;
-      font-size: 16px;
-      line-height: 24px;
+      font-size: 17px;
+      font-weight: 300;
+      line-height: 20px;
       width: 100%;
       margin-bottom: 17px;
 

@@ -11,14 +11,11 @@
 
 .footer {
   display: grid;
-  grid-template-columns: 128px 128px 128px 128px;
+  grid-template-columns: 128px 128px 128px 128px 1fr;
   position: relative;
   width: 100%;
 
   .context {
-    position: absolute;
-    top: 0;
-    right: 0;
     background: none;
     display: flex;
     justify-content: flex-end;
@@ -154,6 +151,7 @@
 
     .stat{
       min-width: 0px;
+      padding-right: 12px;
       margin-right: 0;
     }
 

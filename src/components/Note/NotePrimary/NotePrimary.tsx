@@ -25,7 +25,7 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
           <ParsedNote note={props.note} />
         </div>
 
-        <NoteFooter note={props.note}/>
+        <NoteFooter note={props.note} />
       </div>
     </div>
   )

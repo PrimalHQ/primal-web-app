@@ -185,7 +185,7 @@ const Thread: Component = () => {
 
         <Show when={primaryNote()}>
           <div id="primary_note">
-            <Note
+            <NotePrimary
               note={primaryNote() as PrimalNote}
             />
             <Show when={account?.hasPublicKey()}>

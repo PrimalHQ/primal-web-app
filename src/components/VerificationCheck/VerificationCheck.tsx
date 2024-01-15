@@ -1,6 +1,6 @@
 import styles from  "./VerificationCheck.module.scss";
 
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createSignal, JSXElement, onMount, Show } from "solid-js";
 import { PrimalUser } from "../../types/primal";
 import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
@@ -9,6 +9,7 @@ import { hookForDev } from "../../lib/devTools";
 const VerificationCheck: Component<{
   user: PrimalUser | undefined,
   large?: boolean,
+  fallback?: JSXElement,
   id?: string,
 }> = (props) => {
 
@@ -40,7 +41,7 @@ const VerificationCheck: Component<{
   return (
     <Show
       when={isVerified()}
-      fallback={<div class={styles.verificationFailed}></div>}
+      fallback={props.fallback}
     >
       <Show
         when={props.large}

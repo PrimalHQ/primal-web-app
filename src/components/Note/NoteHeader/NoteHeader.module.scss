@@ -14,7 +14,7 @@
   }
 
   .avatar {
-    margin-right: 12px;
+    margin-right: 8px;
 
     >a {
       text-decoration: none;
@@ -28,11 +28,13 @@
   }
   .postInfo {
     display: flex;
+    flex-direction: column;
     font-size: 14px;
     line-height: 16px;
     font-weight: 400;
     height: 48px;
-    justify-content: space-around;
+    align-items: flex-start;
+    justify-content: center;
 
     .verification {
       max-width: 470px;
@@ -57,12 +59,8 @@
         margin-right: 2px;
       }
       .time{
-        margin: 0px 2px;
+        margin: 0px;
         min-width: 80px;
-        &::before {
-          content: "|";
-          padding: 0px 2px;
-        }
       }
     }
     .replyingTo {
@@ -126,6 +124,14 @@
     }
   }
 
+}
+
+.ellipsisIcon {
+  width: 11px;
+  height: 14px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../../assets/icons/ellipsis.svg) no-repeat center;
+  mask: url(../../../assets/icons/ellipsis.svg) no-repeat center;
 }
 
 @media only screen and (max-width: 720px) {

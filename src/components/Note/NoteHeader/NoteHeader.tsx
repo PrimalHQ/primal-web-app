@@ -14,7 +14,7 @@ import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import CustomZap from '../../CustomZap/CustomZap';
 import { broadcastEvent, sendNote } from '../../../lib/notes';
 import { useAccountContext } from '../../../contexts/AccountContext';
-import { reportUser } from '../../../lib/profile';
+import { isAccountVerified, reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
@@ -203,7 +203,7 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
             >
               <Avatar
                 user={props.note?.user}
-                size="sm"
+                size="vs"
                 highlightBorder={isVerifiedByPrimal()}
               />
             </A>
@@ -215,18 +215,10 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
               {authorName()}
             </span>
 
-            <VerificationCheck user={props.note.user} />
-
-            <Show
-              when={props.note.user?.nip05}
-            >
-              <span
-                class={styles.verification}
-                title={props.note.user?.nip05}
-              >
-                {nip05Verification(props.note.user)}
-              </span>
-            </Show>
+            <VerificationCheck
+              user={props.note.user}
+              fallback={<div class={styles.ellipsisIcon}></div>}
+            />
 
             <span
               class={styles.time}
@@ -235,43 +227,19 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
               {date(props.note.post?.created_at).label}
             </span>
           </div>
-
+          <Show
+            when={props.note.user?.nip05}
+          >
+            <span
+              class={styles.verification}
+              title={props.note.user?.nip05}
+            >
+              {nip05Verification(props.note.user)}
+            </span>
+          </Show>
         </div>
+
       </div>
-
-      <div class={styles.contextMenu}>
-        <button
-          class={styles.contextButton}
-          onClick={openContextMenu}
-        >
-          <div class={styles.contextIcon} ></div>
-        </button>
-          <PrimalMenu
-            id={`note_context_${props.note.post.id}`}
-            items={noteContext}
-            hidden={!showContext()}
-          />
-      </div>
-
-      <ConfirmModal
-        open={confirmReportUser()}
-        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName() })}
-        onConfirm={() => {
-          doReportUser();
-          setConfirmReportUser(false);
-        }}
-        onAbort={() => setConfirmReportUser(false)}
-      />
-
-      <ConfirmModal
-        open={confirmMuteUser()}
-        description={intl.formatMessage(tActions.muteUserConfirm, { name: authorName() })}
-        onConfirm={() => {
-          doMuteUser();
-          setConfirmMuteUser(false);
-        }}
-        onAbort={() => setConfirmMuteUser(false)}
-      />
     </div>
   )
 }
