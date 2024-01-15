@@ -32,7 +32,9 @@ const NoteAuthorInfo: Component<{
         {authorName(props.author)}
       </span>
 
-      <VerificationCheck user={props.author} />
+      <VerificationCheck user={props.author} fallback={
+        <div class={styles.verificationFailed}></div>
+      } />
 
       <Show
         when={props.author.nip05}

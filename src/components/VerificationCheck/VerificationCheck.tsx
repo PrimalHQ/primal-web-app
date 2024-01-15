@@ -13,7 +13,7 @@ const VerificationCheck: Component<{
   id?: string,
 }> = (props) => {
 
-  const [isVerified, setIsVerified] = createSignal(true);
+  const [isVerified, setIsVerified] = createSignal(false);
 
   const isVerifiedByPrimal = () => {
     const nip05 = props.user?.nip05;
