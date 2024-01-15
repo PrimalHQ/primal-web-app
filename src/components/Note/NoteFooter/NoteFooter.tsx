@@ -407,7 +407,6 @@ const NoteFooter: Component<{ note: PrimalNote, id?: string }> = (props) => {
           note={props.note}
           openCustomZap={() => {
             setIsCustomZap(true);
-            setTimeout(() => setIsCustomZap(false), 10);
           }}
         />
       </div>
