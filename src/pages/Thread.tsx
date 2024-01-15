@@ -115,14 +115,21 @@ const Thread: Component = () => {
     if (!pn) return;
 
     setTimeout(() => {
+      const threadHeader = 72;
+      const iOSBanner = 54;
+
       const rect = pn.getBoundingClientRect();
-      const wh = window.innerHeight - 72;
+      const wh = window.innerHeight - threadHeader;
 
       const block = rect.height < wh && parentNotes().length > 0 ?
         'end' : 'start';
 
       pn.scrollIntoView({ block });
-      block === 'start' && window.scrollBy({ top: -72 });
+
+      if (block === 'start') {
+        const moreScroll = threadHeader + (isIOS() ? iOSBanner : 0);
+        window.scrollBy({ top: -moreScroll });
+      }
     }, 100);
   });
 
