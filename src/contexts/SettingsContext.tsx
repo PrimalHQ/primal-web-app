@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZapAmount, defaultZapOptions, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZap, defaultZapOptions, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -20,6 +20,7 @@ import {
   ContextChildren,
   PrimalFeed,
   PrimalTheme,
+  ZapOption,
 } from "../types/primal";
 import {
   initAvailableFeeds,
@@ -35,8 +36,6 @@ import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
-import { getFilterlists } from "../lib/profile";
-
 
 export type SettingsContextStore = {
   locale: string,
@@ -44,8 +43,8 @@ export type SettingsContextStore = {
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
   defaultFeed: PrimalFeed,
-  defaultZapAmount: number,
-  availableZapOptions: number[],
+  defaultZap: ZapOption,
+  availableZapOptions: ZapOption[],
   notificationSettings: Record<string, boolean>,
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
@@ -58,8 +57,8 @@ export type SettingsContextStore = {
     renameAvailableFeed: (feed: PrimalFeed, newName: string) => void,
     saveSettings: () => void,
     loadSettings: (pubkey: string) => void,
-    setDefaultZapAmount: (amount: number) => void,
-    setZapOptions: (amount:number, index: number) => void,
+    setDefaultZapAmount: (option: ZapOption, temp?: boolean) => void,
+    setZapOptions: (option: ZapOption, index: number, temp?: boolean) => void,
     resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
@@ -74,7 +73,7 @@ export const initialData = {
   themes,
   availableFeeds: [],
   defaultFeed: defaultFeeds[0],
-  defaultZapAmount: defaultZapAmount,
+  defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
   notificationSettings: { ...defaultNotificationSettings },
   applyContentModeration: true,
@@ -92,13 +91,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const setDefaultZapAmount = (amount: number, temp?: boolean) => {
-    updateStore('defaultZapAmount', () => amount);
+  const setDefaultZapAmount = (option: ZapOption, temp?: boolean) => {
+    updateStore('defaultZap', () => option);
     !temp && saveSettings();
   };
 
-  const setZapOptions = (amount: number, index: number, temp?: boolean) => {
-    updateStore('availableZapOptions', index, () => amount);
+  const setZapOptions = (option: ZapOption, index: number, temp?: boolean) => {
+    updateStore('availableZapOptions', index, () => ({ ...option }));
     !temp && saveSettings();
   };
 
@@ -111,11 +110,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         try {
           const settings = JSON.parse(content?.content);
 
-          let options = settings.zapOptions as number[];
-          let amount = settings.defaultZapAmount as number;
+          let options = settings.zapConfig;
+          let amount = settings.zapDefault;
 
           updateStore('availableZapOptions', () => options);
-          updateStore('defaultZapAmount', () => amount);
+          updateStore('defaultZap', () => amount);
 
           !temp && saveSettings();
         }
@@ -289,8 +288,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
-      defaultZapAmount: store.defaultZapAmount,
-      zapOptions: store.availableZapOptions,
+      defaultZap: store.defaultZap,
+      zapConfig: store.availableZapOptions,
       notifications: store.notificationSettings,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
@@ -336,11 +335,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
           updateStore('applyContentModeration', () => true);
 
+          let zapOptions = settings.zapConfig;
+          let zapAmount = settings.zapDefault;
 
-          let zapOptions = settings.zapOptions as number[];
-          let zapAmount = settings.defaultZapAmount as number;
-
-          updateStore('defaultZapAmount', () => zapAmount);
+          updateStore('defaultZap', () => zapAmount);
           updateStore('availableZapOptions', () => zapOptions);
         }
         catch (e) {
@@ -378,16 +376,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           const {
             theme,
             feeds,
-            defaultZapAmount,
-            zapOptions,
+            zapDefault,
+            zapConfig,
             notifications,
             applyContentModeration,
             contentModeration,
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
-          defaultZapAmount && setDefaultZapAmount(defaultZapAmount, true);
-          zapOptions && updateStore('availableZapOptions', () => zapOptions);
+          zapDefault && setDefaultZapAmount(zapDefault, true);
+          zapConfig && updateStore('availableZapOptions', () => zapConfig);
 
           if (notifications) {
             updateStore('notificationSettings', () => ({ ...notifications }));

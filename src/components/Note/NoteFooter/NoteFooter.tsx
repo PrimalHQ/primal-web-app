@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, Show } from 'solid-js';
-import { MenuItem, PrimalNote } from '../../../types/primal';
+import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
@@ -252,17 +252,17 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
       return;
     }
 
-    setZappedAmount(() => settings?.defaultZapAmount || 0);
+    setZappedAmount(() => settings?.defaultZap.amount || 0);
     setZappedNow(true);
     animateZap();
-    const success = await zapNote(props.note, account.publicKey, settings?.defaultZapAmount || 10, '', account.relays);
+    const success = await zapNote(props.note, account.publicKey, settings?.defaultZap.amount || 10, settings?.defaultZap.message || '', account.relays);
     setIsZapping(false);
 
     if (success) {
       return;
     }
 
-    setZappedAmount(() => -(settings?.defaultZapAmount || 0));
+    setZappedAmount(() => -(settings?.defaultZap.amount || 0));
     setZappedNow(true);
     setZapped(props.note.post.noteActions.zapped);
   }
@@ -413,14 +413,14 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
       <CustomZap
         open={isCustomZap()}
         note={props.note}
-        onConfirm={(amount: number) => {
+        onConfirm={(zapOption: ZapOption) => {
           setIsCustomZap(false);
-          setZappedAmount(() => amount || 0);
+          setZappedAmount(() => zapOption.amount || 0);
           setZappedNow(true);
           setZapped(true);
           animateZap();
         }}
-        onSuccess={(amount: number) => {
+        onSuccess={(zapOption: ZapOption) => {
           setIsCustomZap(false);
           setIsZapping(false);
           setZappedNow(false);
@@ -428,8 +428,8 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
           setHideZapIcon(false);
           setZapped(true);
         }}
-        onFail={(amount: number) => {
-          setZappedAmount(() => -(amount || 0));
+        onFail={(zapOption: ZapOption) => {
+          setZappedAmount(() => -(zapOption.amount || 0));
           setZappedNow(true);
           setIsCustomZap(false);
           setIsZapping(false);

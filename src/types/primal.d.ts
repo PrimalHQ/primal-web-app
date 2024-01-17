@@ -623,3 +623,9 @@ export type SelectionOption = {
 }
 
 export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions' | 'reposts';
+
+export type ZapOption = {
+  emoji?: string,
+  amount?: number,
+  message?: string,
+};

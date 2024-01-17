@@ -109,6 +109,10 @@
       justify-content: flex-start;
       align-items: center;
 
+      .emoji, .amount {
+        margin-right: 6px;
+      }
+
       .sats {
         color: var(--text-tertiary);
         font-size: 12px;

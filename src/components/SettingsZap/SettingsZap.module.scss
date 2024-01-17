@@ -6,11 +6,12 @@
     margin-bottom: 20px;
   }
   .zapOptions {
-    width: 396px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-column-gap: 12px;
-    grid-row-gap: 12px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .zapInput {
+      margin-bottom: 8px;
+    }
   }
 }
 
@@ -22,31 +23,180 @@
   margin-bottom: 20px;
 }
 
-input.zapInput {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 120px;
+.zapInput {
+  width: 100%;
   height: 36px;
-  text-align: center;
-  margin: 0;
-  padding: 0;
-  padding-top: 4px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 20px;
-  color: var(--text-primary);
   background-color: var(--background-header-input);
   border: none;
   border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 
-  &:focus {
-    background-color: var(--subtile-devider);
+  .optEmoji {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 36px;
+    border-radius: 18px 0 0 18px;
+    margin: 0;
+    padding-bottom: 0;
+    padding-top: 4px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 36px;
+    text-align: center;
+    margin: 0;
+    padding-bottom: 0;
+    padding-top: 4px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+
+    &.defAmount {
+      border-radius: 18px 0 0 18px;
+    }
+    &.defMessage {
+      border-radius: 0 18px 18px 0;
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+
+    &.optAmount {
+      border-radius: 0;
+    }
+    &.optMessage {
+      border-radius: 0 18px 18px 0;
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    &:focus, &:hover {
+      background-color: var(--subtile-devider);
+      outline: none;
+      box-shadow: none;
+    }
   }
 }
+
 
 .restoreZaps {
   display: flex;
   justify-content: flex-start;
   margin-top: 36px;
+}
+
+.zapEmojiChangeModal {
+  position: fixed;
+  width: 420px;
+  height: 344px;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+
+  justify-content: flex-start;
+  align-items: center;
+
+  input {
+    width: 220px;
+    height: 36px;
+    text-align: left;
+    margin: 0;
+    margin-bottom: 24px;
+    padding-bottom: 0;
+    padding-top: 4px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+    border-radius: 18px;
+
+    &:focus {
+      background-color: var(--subtile-devider);
+      outline: none;
+      box-shadow: none;
+    }
+
+    &::placeholder {
+      color: var(--text-tertiary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+
+  .title {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .xClose {
+    background: none;
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: fit-content;
+
+    position: absolute;
+    top: 16px;
+    right: 18px;
+
+    .iconClose {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    &:hover {
+      .iconClose {
+        background-color: var(--text-primary);
+      }
+    }
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
 }

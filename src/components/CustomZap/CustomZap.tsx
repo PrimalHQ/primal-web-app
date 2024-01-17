@@ -1,12 +1,13 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, For } from 'solid-js';
+import { defaultZap, defaultZapOptions } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { zapNote } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders } from '../../translations';
-import { PrimalNote } from '../../types/primal';
+import { PrimalNote, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
@@ -19,9 +20,9 @@ const CustomZap: Component<{
   id?: string,
   open?: boolean,
   note: PrimalNote,
-  onConfirm: (amount?: number) => void,
-  onSuccess: (amount?: number) => void,
-  onFail: (amount?: number) => void
+  onConfirm: (zapOption?: ZapOption) => void,
+  onSuccess: (zapOption?: ZapOption) => void,
+  onFail: (zapOption?: ZapOption) => void
 }> = (props) => {
 
   const toast = useToastContext();
@@ -29,14 +30,17 @@ const CustomZap: Component<{
   const intl = useIntl();
   const settings = useSettingsContext();
 
-  const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || 10);
-  const [comment, setComment] = createSignal('');
+  const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || defaultZapOptions[0]);
+  const [comment, setComment] = createSignal(defaultZapOptions[0].message || '');
 
   createEffect(() => {
-    setSelectedValue(settings?.availableZapOptions[0] || 10)
+    setSelectedValue(settings?.availableZapOptions[0] || defaultZapOptions[0])
   });
 
-  const isSelected = (value: number) => value === selectedValue();
+  const isSelected = (value: ZapOption) => {
+    const sel = selectedValue();
+    return value.amount === sel.amount && value.emoji === sel.emoji && value.message === sel.message;
+  };
 
   const truncateNumber = (amount: number) => {
     const t = 1000;
@@ -78,7 +82,7 @@ const CustomZap: Component<{
       const success = await zapNote(
         props.note,
         account.publicKey,
-        selectedValue(),
+        selectedValue().amount || 0,
         comment(),
         account.relays,
       );
@@ -105,7 +109,7 @@ const CustomZap: Component<{
               {intl.formatMessage(tActions.zap)}
             </div>
           </div>
-          <button class={styles.close} onClick={() => props.onFail(0)}>
+          <button class={styles.close} onClick={() => props.onFail({ amount: 0, message: '' })}>
           </button>
         </div>
 
@@ -115,7 +119,7 @@ const CustomZap: Component<{
           })}
 
           <span class={styles.amount}>
-              {truncateNumber(selectedValue())}
+            {truncateNumber(selectedValue().amount || 0)}
           </span>
           <span class={styles.units}>sats</span>
         </div>
@@ -125,10 +129,19 @@ const CustomZap: Component<{
             {(value) =>
               <button
                 class={`${styles.zapOption} ${isSelected(value) ? styles.selected : ''}`}
-                onClick={() => setSelectedValue(value)}
+                onClick={() => {
+                  setComment(value.message || '')
+                  setSelectedValue(value);
+                }}
               >
                 <div>
-                  {truncateNumber(value)} <span class={styles.sats}>sats</span>
+                  <span class={styles.emoji}>
+                    {value.emoji}
+                  </span>
+                  <span class={styles.amount}>
+                    {truncateNumber(value.amount || 0)}
+                  </span>
+                  <span class={styles.sats}>sats</span>
                 </div>
               </button>
             }

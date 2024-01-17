@@ -1429,6 +1429,16 @@ export const settings = {
     defaultMessage: 'This action will restore all your zap settings to their default values',
     description: 'Label explaining the impact of restoring default zaps',
   },
+  zapEmojiFilterTitle: {
+    id: 'settings.zapEmojiFilterTitle',
+    defaultMessage: 'Select an emoji',
+    description: 'Title for the select emoji modal',
+  },
+  zapEmojiFilterPlaceholder: {
+    id: 'settings.zapEmojiFilterPlaceholder',
+    defaultMessage: 'Type to filter...',
+    description: 'Placeholder for the emoji modal filter',
+  },
   feedLatest: {
     id: 'feeds.feedLatest',
     defaultMessage: 'Latest',

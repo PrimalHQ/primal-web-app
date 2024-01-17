@@ -269,6 +269,7 @@ const EditBox: Component<{
 
         if (lastEmojiTrigger < 0 || cursor - lastEmojiTrigger <= 1) {
           setEmojiInput(false);
+          setEmojiQuery('');
           return false;
         }
 

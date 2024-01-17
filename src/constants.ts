@@ -1,8 +1,6 @@
-import { ContentModeration, FeedPage, Filterlist, } from "./types/primal";
+import { ContentModeration, FeedPage, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
-import { MessageDescriptor } from "@cookbook/solid-intl";
-import { linkPreviews } from "./lib/notes";
 
 export const second = 1000;
 export const minute = 60 * second;
@@ -308,15 +306,15 @@ export const apkLink = `https://github.com/PrimalHQ/primal-android-app/releases/
 
 // ----------------------------------------
 
-export const defaultZapAmount = 42;
+export const defaultZap = { "amount": 42, "message": "Onward 🫡" };
 
 export const defaultZapOptions = [
-  21,
-  420,
-  1_000,
-  5_000,
-  10_000,
-  100_000,
+  { emoji: '👍', amount: 21, message: 'Great post 👍' },
+  { emoji: '🚀', amount: 420, message: 'Let\'s go 🚀' },
+  { emoji: '☕', amount: 1_000, message: 'Coffie on me ☕' },
+  { emoji: '🍻', amount: 5_000, message: 'Cheers 🍻' },
+  { emoji: '🍷', amount: 10_000, message: 'Party time 🍷' },
+  { emoji: '👑', amount: 100_000, message: 'Generational wealth 👑' },
 ];
 
 export const contentScope = 'content';

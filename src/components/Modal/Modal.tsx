@@ -9,12 +9,17 @@ const Modal: Component<{
   open?: boolean,
   id?: string,
   opaqueBackdrop?: boolean,
+  onBackdropClick?: () => void,
 }> = (props) => {
 
   return (
     <Show when={props.open}>
       <Portal mount={document.getElementById("modal") as Node}>
-        <div id={props.id} class={`${styles.modal} ${props.opaqueBackdrop ? styles.opaque : ''}`}>
+        <div
+          id={props.id}
+          class={`${styles.modal} ${props.opaqueBackdrop ? styles.opaque : ''}`}
+          onClick={props.onBackdropClick}
+        >
           {props.children}
         </div>
       </Portal>
