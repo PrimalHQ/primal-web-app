@@ -9,7 +9,7 @@ const Modal: Component<{
   open?: boolean,
   id?: string,
   opaqueBackdrop?: boolean,
-  onBackdropClick?: () => void,
+  onBackdropClick?: (e: MouseEvent) => void,
 }> = (props) => {
 
   return (
@@ -18,7 +18,13 @@ const Modal: Component<{
         <div
           id={props.id}
           class={`${styles.modal} ${props.opaqueBackdrop ? styles.opaque : ''}`}
-          onClick={props.onBackdropClick}
+          onClick={(e: MouseEvent) => {
+            if (!(e.target as Element).classList.contains(styles.modal)) {
+              return;
+            }
+
+            props.onBackdropClick && props.onBackdropClick(e)
+          }}
         >
           {props.children}
         </div>
