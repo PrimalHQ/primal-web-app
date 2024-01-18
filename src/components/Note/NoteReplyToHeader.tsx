@@ -11,9 +11,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { authorName, nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
-import Avatar from '../Avatar/Avatar';
-import { date } from '../../lib/dates';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import MentionedUserLink from './MentionedUserLink/MentionedUserLink';
 
 const NoteReplyHeader: Component<{
   note: PrimalNote,
@@ -40,7 +38,7 @@ const NoteReplyHeader: Component<{
           href={`/p/${rootAuthor()?.npub}`}
           class={styles.author}
         >
-          @{userName(rootAuthor())}
+          <MentionedUserLink user={rootAuthor()} />
         </A>
       </span>
     </Show>

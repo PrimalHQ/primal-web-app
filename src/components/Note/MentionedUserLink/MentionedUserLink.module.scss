@@ -1,39 +1,54 @@
 .userMention {
   position: relative;
   .userPreview {
+    position: absolute;
+    left: 0;
+    width: 220px;
+    z-index: var(--z-index-floater);
+    background-color: var(--background-site);
     display: none;
+    padding: 4px;
+    border: 1px solid var(--devider);
+    border-radius: 0;
+    color: var(--text-secondary-2);
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 400;
+    margin-top: 2px;
+    > div {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-left: 4px;
+
+      > div {
+        &.userName {
+          display: flex;
+          flex-direction: row;
+          font-weight: 800;
+          color: var(--text-primary);
+        }
+
+        &.verification {
+          max-width: 170px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          color: var(--text-tertiary);
+
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 14px;
+        }
+
+        padding-block: 2px;
+      }
+    }
   }
 
   &:hover {
     .userPreview {
-      position: absolute;
-      left: 0;
-      width: 220px;
-      z-index: var(--z-index-floater);
-      background-color: var(--background-input);
       display: flex;
-      padding: 4px;
-      border: 1px solid var(--text-tertiary-2);
-      border-radius: 8px;
-      color: var(--text-secondary-2);
-      font-size: 14px;
-      line-height: 16px;
-      font-weight: 400;
-      margin-top: 1px;
-      > div {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin-left: 4px;
-
-        > div {
-          &.userName {
-            font-weight: 800;
-            color: var(--text-primary);
-          }
-          padding-block: 2px;
-        }
-      }
     }
   }
 }
