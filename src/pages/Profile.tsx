@@ -25,7 +25,7 @@ import { shortDate } from '../lib/dates';
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
-import { MenuItem, VanityProfiles } from '../types/primal';
+import { MenuItem, PrimalUser, VanityProfiles } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
@@ -42,6 +42,7 @@ import VerificationCheck from '../components/VerificationCheck/VerificationCheck
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
+import { createStore } from 'solid-js/store';
 
 const Profile: Component = () => {
 
@@ -95,6 +96,20 @@ const Profile: Component = () => {
 
     return hex;
   }
+
+  let firstTime = true;
+
+  createEffect(() => {
+    const npub = params.npub;
+
+    if (firstTime && npub) {
+      firstTime = false;
+      return;
+    }
+
+    setProfile(getHex());
+
+  })
 
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
@@ -453,7 +468,6 @@ const Profile: Component = () => {
       checkVerification(profile?.profileKey)
     }
   });
-
 
   onMount(() => {
     lightbox.init();
