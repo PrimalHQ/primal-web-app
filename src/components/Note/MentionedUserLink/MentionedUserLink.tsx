@@ -32,21 +32,22 @@ const MentionedUserLink: Component<{
       </A>;
   };
 
+  const preview = () => <div class={styles.userPreview}>
+    <Avatar user={props.user} />
+    <div>
+      <div class={styles.userName}>
+        {userName(props.user)}
+        <VerificationCheck user={props.user} />
+      </div>
+      <div class={styles.verification}>
+        {nip05Verification(props.user)}
+      </div>
+    </div>
+  </div>
+
   return (
     <LinkComponent>
       @{userName(props.user)}
-      <div class={styles.userPreview}>
-        <Avatar user={props.user} />
-        <div>
-          <div class={styles.userName}>
-            {userName(props.user)}
-            <VerificationCheck user={props.user} />
-          </div>
-          <div class={styles.verification}>
-            {nip05Verification(props.user)}
-          </div>
-        </div>
-      </div>
     </LinkComponent>
   );
 }
