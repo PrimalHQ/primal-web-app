@@ -420,16 +420,20 @@ const ParsedNote: Component<{
 
     const gridClass = groupCount < groupGridLimit ? `grid-${groupCount}` : 'grid-large';
 
+    if (isNoteTooLong()) return <></>;
+
+    setWordsDisplayed(w => w + 100);
+
     return <div class={`imageGrid ${gridClass}`}>
       <For each={item.tokens}>
         {(token, index) => {
-          if (isNoteTooLong()) return;
 
           let image = media?.actions.getMedia(token, 'o');
           const url = image?.media_url || getMediaUrlDefault(token);
 
-          // There are consecutive images, so reduce the impact of each image in order to show them grouped
-          setWordsDisplayed(w => w + 10 * groupCount);
+          if (props.shorten && index() > 11) {
+            return <></>;
+          }
 
           return <NoteImage
             class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()}`}
