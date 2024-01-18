@@ -159,6 +159,10 @@ a {
   -webkit-mask: url(./assets/icons/attach_media.svg) no-repeat 0 / 100%;
   mask: url(./assets/icons/attach_media.svg) no-repeat 0 / 100%;
 }
+.emoji_icon {
+  -webkit-mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
+}
 
 .bordered {
   border:solid 1px var(--subtile-devider);

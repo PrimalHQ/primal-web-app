@@ -200,3 +200,21 @@
     border: 1px solid var(--text-tertiary);
   }
 }
+
+
+.ghost {
+  border-radius: 6px;
+  padding-inline: 10px;
+  padding-block: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+  margin: 0px;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+
+  &:hover {
+    background: none;
+  }
+}

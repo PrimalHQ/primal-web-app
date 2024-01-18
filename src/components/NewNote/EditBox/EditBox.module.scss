@@ -79,6 +79,7 @@
     margin-left: 8px;
   }
   .editorOptions {
+    display: flex;
     width: 100%;
 
     .attachIcon {
@@ -92,6 +93,26 @@
       &:hover {
         background-color: var(--text-secondary);
       }
+    }
+    .emojiIcon {
+      width: 21px;
+      height: 21px;
+      display: inline-block;
+      margin-right: 9px;
+      background-color: var(--text-tertiary);
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--text-secondary);
+      }
+    }
+
+    >button {
+      width: 26px;
+      height: 21px;
+      padding: 0;
+      margin-block: 0;
+      margin-inline: 8px;
     }
 
   }

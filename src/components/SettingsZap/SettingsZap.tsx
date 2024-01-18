@@ -15,6 +15,7 @@ import { createStore } from 'solid-js/store';
 import { EmojiOption } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
+import EmojiPickModal from '../EmojiPickModal/EmojiPickModal';
 
 const SettingsZap: Component<{ id?: string }> = (props) => {
 
@@ -176,35 +177,11 @@ const SettingsZap: Component<{ id?: string }> = (props) => {
         onAbort={() => setIsRestoringZaps(false)}
       />
 
-      <Modal
+      <EmojiPickModal
         open={isEmojiChange() >= 0}
-        onBackdropClick={() => setIsEmojiChange(-1)}
-      >
-        <div id={props.id} class={styles.zapEmojiChangeModal}>
-          <div class={styles.title}>
-            {intl.formatMessage(t.zapEmojiFilterTitle)}
-          </div>
-
-          <button class={styles.xClose} onClick={() => setIsEmojiChange(-1)}>
-            <div class={styles.iconClose}></div>
-          </button>
-
-          <input
-            ref={emojiInput}
-            onInput={(e: InputEvent) => {
-              const target = e.target as HTMLInputElement;
-              setEmojiSearchTerm(() => target.value);
-            }}
-            placeholder={intl.formatMessage(t.zapEmojiFilterPlaceholder)}
-          >
-          </input>
-
-          <EmojiPicker
-            filter={emojiSearchTerm()}
-            onSelect={changeZapOptionEmoji}
-          />
-        </div>
-      </Modal>
+        onClose={() => setIsEmojiChange(-1)}
+        onSelect={changeZapOptionEmoji}
+      />
     </div>
   );
 }

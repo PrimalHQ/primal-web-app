@@ -39,6 +39,9 @@ import { hookForDev } from "../../../lib/devTools";
 import ButtonPrimary from "../../Buttons/ButtonPrimary";
 import ButtonSecondary from "../../Buttons/ButtonSecondary";
 import { useProfileContext } from "../../../contexts/ProfileContext";
+import ButtonTertiary from "../../Buttons/ButtonTertiary";
+import ButtonGhost from "../../Buttons/ButtonGhost";
+import EmojiPickModal from "../../EmojiPickModal/EmojiPickModal";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -483,6 +486,9 @@ const EditBox: Component<{
 
   const onEscape = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
+      console.log('ESCAPE: ', isPickingEmoji())
+      if (isPickingEmoji()) return;
+
       !isMentioning() && !isEmojiInput() ?
         closeEditor() :
         closeEmojiAndMentions();
@@ -992,14 +998,14 @@ const EditBox: Component<{
 
     // Get index of the token and insert emoji character
     const index = msg.slice(0, cursor).lastIndexOf(':');
-    const value = msg.slice(0, index) + emoji.name + msg.slice(cursor);
+    const value = msg.slice(0, index) + `${emoji.name} ` + msg.slice(cursor);
 
     // Reset query, update message and text area value
     setMessage(value);
     textArea.value = message();
 
     // Calculate new cursor position
-    textArea.selectionEnd = index + 1;
+    textArea.selectionEnd = index + 3;
     textArea.focus();
 
     setEmojiInput(false);
@@ -1148,6 +1154,30 @@ const EditBox: Component<{
     callback && callback();
   }
 
+  const [isPickingEmoji, setIsPickingEmoji] = createSignal(false);
+
+  const addSelectedEmoji = (emoji: EmojiOption) => {
+    if (!textArea || !emoji) {
+      return;
+    }
+
+    const msg = message();
+
+    // Get cursor position to determine insertion point
+    let cursor = textArea.selectionStart;
+
+    // Get index of the token and insert emoji character
+    const value = msg.slice(0, cursor) + `${emoji.name} ` + msg.slice(cursor);
+
+    // Reset query, update message and text area value
+    setMessage(value);
+    textArea.value = message();
+
+    // Calculate new cursor position
+    textArea.selectionEnd = cursor + 3;
+    textArea.focus();
+  };
+
   return (
     <div
       id={props.id}
@@ -1255,6 +1285,9 @@ const EditBox: Component<{
           />
           <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
           </label>
+          <ButtonGhost onClick={() => {setIsPickingEmoji(true)}}>
+            <div class={`emoji_icon ${styles.emojiIcon}`}></div>
+          </ButtonGhost>
         </div>
         <ButtonPrimary
           onClick={postNote}
@@ -1266,6 +1299,17 @@ const EditBox: Component<{
           {intl.formatMessage(tActions.cancel)}
         </ButtonSecondary>
       </div>
+
+      <EmojiPickModal
+        open={isPickingEmoji()}
+        onClose={() => {
+          setTimeout(() => {
+            setIsPickingEmoji(false);
+            textArea?.focus();
+          }, 100)
+        }}
+        onSelect={addSelectedEmoji}
+      />
     </div>
   )
 }
