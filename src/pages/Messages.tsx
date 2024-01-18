@@ -1014,7 +1014,7 @@ const Messages: Component = () => {
                       title={userName(user)}
                       description={user.nip05}
                       icon={<Avatar user={user} size="xs" />}
-                      statNumber={search?.scores[user.pubkey]}
+                      statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
                       statLabel={intl.formatMessage(tSearch.followers)}
                       onClick={() => selectUser(user)}
                       highlighted={highlightedUser() === index()}

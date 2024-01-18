@@ -38,6 +38,7 @@ import { useMediaContext } from "../../../contexts/MediaContext";
 import { hookForDev } from "../../../lib/devTools";
 import ButtonPrimary from "../../Buttons/ButtonPrimary";
 import ButtonSecondary from "../../Buttons/ButtonSecondary";
+import { useProfileContext } from "../../../contexts/ProfileContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -58,6 +59,7 @@ const EditBox: Component<{
   const search = useSearchContext();
   const account = useAccountContext();
   const toast = useToastContext();
+  const profile = useProfileContext();
 
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
@@ -1212,7 +1214,7 @@ const EditBox: Component<{
                 title={userName(user)}
                 description={nip05Verification(user)}
                 icon={<Avatar user={user} size="xs" />}
-                statNumber={search?.scores[user.pubkey]}
+                statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
                 statLabel={intl.formatMessage(tSearch.followers)}
                 onClick={() => selectUser(user)}
                 highlighted={highlightedUser() === index()}
