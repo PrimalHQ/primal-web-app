@@ -45,6 +45,8 @@ export type SettingsContextStore = {
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
   availableZapOptions: ZapOption[],
+  defaultZapAmountOld: number,
+  zapOptionsOld: number[],
   notificationSettings: Record<string, boolean>,
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
@@ -75,6 +77,8 @@ export const initialData = {
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
+  defaultZapAmountOld: 21,
+  zapOptionsOld: [21, 420, 1_000, 5_000, 10_000, 100_000],
   notificationSettings: { ...defaultNotificationSettings },
   applyContentModeration: true,
   contentModeration: [...defaultContentModeration],
@@ -288,8 +292,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
-      defaultZap: store.defaultZap,
+      zapDefault: store.defaultZap,
       zapConfig: store.availableZapOptions,
+      defaultZapAmount: store.defaultZapAmountOld,
+      zapOptions: store.zapOptionsOld,
       notifications: store.notificationSettings,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
@@ -378,6 +384,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             feeds,
             zapDefault,
             zapConfig,
+            defaultZapAmount,
+            zapOptions,
             notifications,
             applyContentModeration,
             contentModeration,
@@ -386,6 +394,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           theme && setThemeByName(theme, true);
           zapDefault && setDefaultZapAmount(zapDefault, true);
           zapConfig && updateStore('availableZapOptions', () => zapConfig);
+
+          updateStore('defaultZapAmountOld' , () => defaultZapAmount);
+          updateStore('zapOptionsOld', () => zapOptions);
 
           if (notifications) {
             updateStore('notificationSettings', () => ({ ...notifications }));
