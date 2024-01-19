@@ -441,8 +441,12 @@ const EditBox: Component<{
   });
 
   createEffect(() => {
-    editWrap?.removeEventListener('keyup', onEscape);
-    editWrap?.addEventListener('keyup', onEscape);
+    if (isPickingEmoji()) {
+      editWrap?.removeEventListener('keydown', onEscape);
+    }
+    else {
+      editWrap?.addEventListener('keydown', onEscape);
+    }
   });
 
   createEffect(() => {
@@ -486,7 +490,6 @@ const EditBox: Component<{
 
   const onEscape = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
-      console.log('ESCAPE: ', isPickingEmoji())
       if (isPickingEmoji()) return;
 
       !isMentioning() && !isEmojiInput() ?
@@ -1302,11 +1305,9 @@ const EditBox: Component<{
 
       <EmojiPickModal
         open={isPickingEmoji()}
-        onClose={() => {
-          setTimeout(() => {
-            setIsPickingEmoji(false);
-            textArea?.focus();
-          }, 100)
+        onClose={(e) => {
+          setIsPickingEmoji(false);
+          textArea?.focus();
         }}
         onSelect={addSelectedEmoji}
       />
