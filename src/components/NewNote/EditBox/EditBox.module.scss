@@ -264,11 +264,9 @@ textarea::-webkit-scrollbar{
 .emojiSuggestions {
   position: absolute;
   display: grid;
-  grid-template-columns: 50px 50px 50px 50px 50px 50px;
-  width: 322px;
+  grid-template-columns: 42px 42px 42px 42px 42px 42px;
   max-height: 200px;
   overflow-y: scroll;
-  padding: 4px;
   background-color: var(--background-input);
   border: none;
   border-radius: 8px;
@@ -278,11 +276,12 @@ textarea::-webkit-scrollbar{
   z-index: var(--z-index-floater);
 
   .emojiOption {
+    height: 42px;
     margin-bottom: 5px;
     padding: 2px;
     background: none;
-    font-size: 16px;
-    line-height: 20px;
+    font-size: 26px;
+    line-height: 26px;
     font-weight: 400;
     border: none;
     display: flex;

@@ -441,10 +441,9 @@ const EditBox: Component<{
   });
 
   createEffect(() => {
-    if (isPickingEmoji()) {
-      editWrap?.removeEventListener('keydown', onEscape);
-    }
-    else {
+    editWrap?.removeEventListener('keydown', onEscape);
+
+    if (!isPickingEmoji()) {
       editWrap?.addEventListener('keydown', onEscape);
     }
   });
