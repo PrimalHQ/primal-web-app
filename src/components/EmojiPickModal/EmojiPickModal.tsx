@@ -16,6 +16,8 @@ import { EmojiOption } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
 
+const defaultTerm = 'smile';
+
 const EmojiPickModal: Component<{
   id?: string,
   open: boolean,
@@ -25,7 +27,7 @@ const EmojiPickModal: Component<{
 
   const intl = useIntl();
 
-  const [emojiSearchTerm, setEmojiSearchTerm] = createSignal('smile');
+  const [emojiSearchTerm, setEmojiSearchTerm] = createSignal(defaultTerm);
 
   const onKey = (e: KeyboardEvent) => {
     if (e.code === 'Escape') {
@@ -47,7 +49,13 @@ const EmojiPickModal: Component<{
     else {
       window.removeEventListener('keydown', onKey);
     }
-  })
+  });
+
+  createEffect(() => {
+    if (emojiSearchTerm().length === 0) {
+      setEmojiSearchTerm(() => defaultTerm)
+    }
+  });
 
   return (
     <Modal
@@ -75,7 +83,10 @@ const EmojiPickModal: Component<{
 
         <EmojiPicker
           filter={emojiSearchTerm()}
-          onSelect={props.onSelect}
+          onSelect={(emoji: EmojiOption) => {
+            props.onSelect(emoji);
+            emojiInput?.focus();
+          }}
         />
       </div>
     </Modal>

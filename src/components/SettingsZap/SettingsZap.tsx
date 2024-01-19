@@ -1,20 +1,15 @@
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createSignal, For } from 'solid-js';
 
 import styles from './SettingsZap.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
+import { debounce } from '../../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { settings as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import ButtonLink from '../Buttons/ButtonLink';
-import Modal from '../Modal/Modal';
 
-import emojiSearch from '@jukben/emoji-search';
-import { createStore } from 'solid-js/store';
 import { EmojiOption } from '../../types/primal';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
-import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickModal from '../EmojiPickModal/EmojiPickModal';
 
 const SettingsZap: Component<{ id?: string }> = (props) => {
@@ -84,28 +79,6 @@ const SettingsZap: Component<{ id?: string }> = (props) => {
     settings?.actions.setZapOptions({ emoji: emojiOption.name }, isEmojiChange());
     setIsEmojiChange(-1);
   };
-
-  const onKey = (e: KeyboardEvent) => {
-    if (e.code === 'Escape') {
-      setIsEmojiChange(-1);
-      return;
-    }
-  };
-
-  let emojiInput: HTMLInputElement | undefined;
-
-  createEffect(() => {
-    if (isEmojiChange() >= 0) {
-      window.addEventListener('keydown', onKey);
-      setTimeout(() => {
-        setEmojiSearchTerm(() => 'smile')
-        emojiInput?.focus();
-      }, 10);
-    }
-    else {
-      window.removeEventListener('keydown', onKey);
-    }
-  })
 
   return (
     <div id={props.id} class={styles.zapSettings}>
