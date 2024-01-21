@@ -71,6 +71,11 @@ export const sendMessage = (message: string) => {
     const hook = (window as PrimalWindow).onPrimalCacheServerMessageSent;
     hook && hook(cacheServer, message);
   }
+  else {
+    setTimeout(() => {
+      sendMessage(message);
+    }, 100);
+  }
 }
 
 export const refreshSocketListeners = (
