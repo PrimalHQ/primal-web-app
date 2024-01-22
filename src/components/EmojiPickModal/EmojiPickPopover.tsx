@@ -1,8 +1,8 @@
 import { Component, createEffect, createSignal, For } from 'solid-js';
 
-import styles from './EmojiPickModal.module.scss';
+import styles from './EmojiPickPopover.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
+import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from '../../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { settings as t } from '../../translations';
@@ -25,6 +25,7 @@ const EmojiPickModal: Component<{
   open: boolean,
   onClose: (e: MouseEvent | KeyboardEvent) => void,
   onSelect: (emoji: EmojiOption) => void,
+  orientation?: 'up' | 'down',
 }> = (props) => {
 
   const account = useAccountContext();
@@ -44,8 +45,8 @@ const EmojiPickModal: Component<{
     if (props.open) {
       window.addEventListener('keydown', onKey);
       setTimeout(() => {
-        setEmojiSearchTerm(() => 'smile')
-        setFocusInput(true);
+        setEmojiSearchTerm(() => 'smile');
+        setFocusInput(() => true);
         setFocusInput(() => false);
       }, 10);
     }
@@ -71,12 +72,13 @@ const EmojiPickModal: Component<{
     }
   };
 
+
   return (
-    <Modal
-      open={props.open}
-      onBackdropClick={(e: MouseEvent) => props.onClose(e)}
+    <div
+      id={props.id}
+      class={`${styles.emojiPickHolder} ${props.orientation && styles[props.orientation]}`}
     >
-      <div id={props.id} class={styles.zapEmojiChangeModal}>
+      <div class={styles.zapEmojiChangeModal}>
         <EmojiPickHeader
           focus={focusInput()}
           onInput={setEmojiSearchTerm}
@@ -91,9 +93,10 @@ const EmojiPickModal: Component<{
             setFocusInput(true);
             setFocusInput(() => false);
           }}
+          short={props.orientation === 'up'}
         />
       </div>
-    </Modal>
+    </div>
   );
 }
 

@@ -1,27 +1,40 @@
 .emojiSuggestions {
   position: relative;
-  display: grid;
-  grid-template-columns: 42px 42px 42px 42px 42px 42px;
   // width: 322px;
-  max-height: 200px;
+  max-height: 198px;
   overflow-y: scroll;
   // padding: 4px;
   background-color: var(--background-input);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius-small);
+
+  &.short {
+    max-height: 158px;
+  }
+
+  .group {
+    display: grid;
+    grid-template-columns: repeat(8, 36px);
+    grid-gap: 4px;
+    margin-bottom: 4px;
+  }
 
   .emojiOption {
-    height: 42px;
-    margin-bottom: 5px;
-    padding: 2px;
+    width: 36px;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    padding-top: 4px;
     background: none;
-    font-size: 26px;
-    line-height: 26px;
+    font-size: 24px;
+    line-height: 24px;
     font-weight: 400;
     border: none;
+    border-radius: var(--border-radius-small);
     display: flex;
     justify-content: center;
     align-items: center;
+    text-align: center;
 
     &:hover, &.highlight {
       background-color: var(--text-tertiary-2);

@@ -15,7 +15,7 @@ import { subscribeTo as uploadSub } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
-import { debounce, isVisibleInContainer, uuidv4 } from "../../../utils";
+import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
 import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
@@ -42,6 +42,8 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonTertiary from "../../Buttons/ButtonTertiary";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickModal from "../../EmojiPickModal/EmojiPickModal";
+import EmojiPicker from "../../EmojiPicker/EmojiPicker";
+import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -68,6 +70,7 @@ const EditBox: Component<{
   let textPreview: HTMLDivElement | undefined;
   let mentionOptions: HTMLDivElement | undefined;
   let emojiOptions: HTMLDivElement | undefined;
+  let emojiPicker: HTMLDivElement | undefined;
   let editWrap: HTMLDivElement | undefined;
   let fileUpload: HTMLInputElement | undefined;
 
@@ -993,6 +996,7 @@ const EditBox: Component<{
       return;
     }
 
+    account?.actions.saveEmoji(emoji);
     const msg = message();
 
     // Get cursor position to determine insertion point
@@ -1163,6 +1167,8 @@ const EditBox: Component<{
       return;
     }
 
+    account?.actions.saveEmoji(emoji);
+
     const msg = message();
 
     // Get cursor position to determine insertion point
@@ -1179,6 +1185,12 @@ const EditBox: Component<{
     textArea.selectionEnd = cursor + 3;
     textArea.focus();
   };
+
+  const determineOrient = () => {
+    const coor = getScreenCordinates(emojiPicker);
+    const height = 226;
+    return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
+  }
 
   return (
     <div
@@ -1277,39 +1289,56 @@ const EditBox: Component<{
 
       <div class={styles.controls}>
         <div class={styles.editorOptions}>
-          <input
-            id={`upload-${instanceId}`}
-            type="file"
-            onChange={onUpload}
-            ref={fileUpload}
-            hidden={true}
-            accept="image/*,video/*,audio/*"
-          />
-          <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
-          </label>
-          <ButtonGhost onClick={() => {setIsPickingEmoji(true)}}>
-            <div class={`emoji_icon ${styles.emojiIcon}`}></div>
-          </ButtonGhost>
-        </div>
-        <ButtonPrimary
-          onClick={postNote}
-          disabled={isPostingInProgress()}
-        >
-          {intl.formatMessage(tActions.notePostNew)}
-        </ButtonPrimary>
-        <ButtonSecondary onClick={closeEditor}>
-          {intl.formatMessage(tActions.cancel)}
-        </ButtonSecondary>
-      </div>
+          <div class={styles.editorOption}>
+            <input
+              id={`upload-${instanceId}`}
+              type="file"
+              onChange={onUpload}
+              ref={fileUpload}
+              hidden={true}
+              accept="image/*,video/*,audio/*"
+            />
+            <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
+            </label>
+          </div>
+          <div class={styles.editorOption}>
+            <ButtonGhost
+              highlight={isPickingEmoji()}
+              onClick={() => {
+                setIsPickingEmoji((v) => !v);
+                !isPickingEmoji() && textArea?.focus();
+              }}>
+              <div
+                ref={emojiPicker}
+                class={`emoji_icon ${styles.emojiIcon} ${isPickingEmoji() ? styles.highlight : ''}`}
+              ></div>
+            </ButtonGhost>
 
-      <EmojiPickModal
-        open={isPickingEmoji()}
-        onClose={(e) => {
-          setIsPickingEmoji(false);
-          textArea?.focus();
-        }}
-        onSelect={addSelectedEmoji}
-      />
+            <Show when={isPickingEmoji()}>
+              <EmojiPickPopover
+                open={isPickingEmoji()}
+                onClose={() => {
+                  setIsPickingEmoji(false);
+                  textArea?.focus();
+                }}
+                onSelect={addSelectedEmoji}
+                orientation={determineOrient()}
+              />
+            </Show>
+          </div>
+        </div>
+        <div class={styles.editorDescision}>
+          <ButtonPrimary
+            onClick={postNote}
+            disabled={isPostingInProgress()}
+          >
+            {intl.formatMessage(tActions.notePostNew)}
+          </ButtonPrimary>
+          <ButtonSecondary onClick={closeEditor}>
+            {intl.formatMessage(tActions.cancel)}
+          </ButtonSecondary>
+        </div>
+      </div>
     </div>
   )
 }

@@ -10,11 +10,12 @@ const ButtonGhost: Component<{
   onClick?: (e: MouseEvent) => void,
   children?: JSXElement,
   disabled?: boolean,
+  highlight?: boolean,
 }> = (props) => {
   return (
     <Button.Root
       id={props.id}
-      class={styles.ghost}
+      class={`${styles.ghost} ${props.highlight ? styles.highlight : ''}`}
       onClick={props.onClick}
       disabled={props.disabled}
     >

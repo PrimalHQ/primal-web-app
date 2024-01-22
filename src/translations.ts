@@ -1436,7 +1436,7 @@ export const settings = {
   },
   zapEmojiFilterPlaceholder: {
     id: 'settings.zapEmojiFilterPlaceholder',
-    defaultMessage: 'Type to filter...',
+    defaultMessage: 'Search...',
     description: 'Placeholder for the emoji modal filter',
   },
   feedLatest: {

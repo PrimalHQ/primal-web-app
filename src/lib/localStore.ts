@@ -1,5 +1,5 @@
 import { UserStats } from "../contexts/ProfileContext";
-import { NostrRelays, PrimalFeed, PrimalUser, SelectionOption } from "../types/primal";
+import { EmojiOption, NostrRelays, PrimalFeed, PrimalUser, SelectionOption } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -17,6 +17,7 @@ export type LocalStore = {
     profiles: PrimalUser[],
     stats: Record<string, UserStats>,
   },
+  emojiHistory: EmojiOption[],
 };
 
 export const emptyStorage = {
@@ -32,6 +33,7 @@ export const emptyStorage = {
   homeSidebarSelection: undefined,
   userProfile: undefined,
   recomended: { profiles: [], stats: {} },
+  emojiHistory: [],
 }
 
 export const storageName = (pubkey?: string) => {
@@ -174,6 +176,30 @@ export const readRecomendedUsers = (pubkey: string | undefined) => {
   const recomended = store.recomended;
 
   return recomended ? recomended as { profiles: PrimalUser[], stats: Record<string, UserStats> } : undefined;
+}
+
+export const saveEmojiHistory = (pubkey: string | undefined, emojis: EmojiOption[]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.emojiHistory = emojis;
+
+  setStorage(pubkey, store);
+}
+
+export const readEmojiHistory = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+
+  const store = getStorage(pubkey);
+
+  const emojis = store.emojiHistory;
+
+  return emojis || [];
 }
 
 export const saveHomeSidebarSelection = (pubkey: string | undefined, selection: SelectionOption | undefined) => {

@@ -8,6 +8,7 @@ import {
   useContext
 } from "solid-js";
 import {
+  EmojiOption,
   Filterlist,
   NostrContactsContent,
   NostrEOSE,
@@ -25,7 +26,7 @@ import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../li
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readSecFromStorage, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, getStoredProfile, readEmojiHistory, readSecFromStorage, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import { generateKeys } from "../lib/PrimalNostr";
@@ -60,6 +61,7 @@ export type AccountContextStore = {
   showPin: string,
   showGettingStarted: boolean,
   showLogin: boolean,
+  emojiHistory: EmojiOption[],
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -85,6 +87,7 @@ export type AccountContextStore = {
     setSec: (sec: string | undefined) => void,
     logout: () => void,
     showGetStarted: () => void,
+    saveEmoji: (emoji: EmojiOption) => void,
   },
 }
 
@@ -114,6 +117,7 @@ const initialData = {
   showPin: '',
   showGettingStarted: false,
   showLogin: false,
+  emojiHistory: [],
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -1056,6 +1060,21 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   };
 
+  const saveEmoji = (emoji: EmojiOption) => {
+    const history = store.emojiHistory;
+
+    if (history.find(e => e.name === emoji.name)) {
+      let sorted = history.sort((a, b) => a.name === emoji.name ? -1 : b.name === emoji.name ? 1 : 0);
+
+      updateStore('emojiHistory', () => [...sorted]);
+      saveEmojiHistory(store.publicKey, store.emojiHistory);
+
+      return;
+    }
+
+    updateStore('emojiHistory', (h) => [emoji, ...h].slice(0, 40));
+    saveEmojiHistory(store.publicKey, store.emojiHistory);
+  };
 
 // EFFECTS --------------------------------------
 
@@ -1089,6 +1108,8 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
+
+      updateStore('emojiHistory', () => readEmojiHistory(store.publicKey))
     }
   });
 
@@ -1264,6 +1285,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setSec,
     logout,
     showGetStarted,
+    saveEmoji,
   },
 });
 

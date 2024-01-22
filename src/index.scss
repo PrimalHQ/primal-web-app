@@ -163,6 +163,18 @@ a {
   -webkit-mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
   mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
 }
+.latest_icon {
+  -webkit-mask: url(./assets/icons/latest.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/latest.svg) no-repeat 0 / 100%;
+}
+.heart_icon {
+  -webkit-mask: url(./assets/icons/heart.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/heart.svg) no-repeat 0 / 100%;
+}
+.weather_icon {
+  -webkit-mask: url(./assets/icons/weather.svg) no-repeat 0 / 100%;
+  mask: url(./assets/icons/weather.svg) no-repeat 0 / 100%;
+}
 
 .bordered {
   border:solid 1px var(--subtile-devider);

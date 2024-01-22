@@ -74,19 +74,32 @@
   width: calc(100% - 16px);
   padding-top: 8px;
   background-color: var(--background-site);
-  >button {
-    min-width: 110px;
-    margin-left: 8px;
-  }
+
   .editorOptions {
     display: flex;
     width: 100%;
 
+    .editorOption {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      margin: 0;
+      margin-inline: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      &:first-child {
+        justify-content: flex-start;
+        margin-inline: 0;
+      }
+    }
+
     .attachIcon {
-      width: 26px;
-      height: 21px;
+      width: 24px;
+      height: 24px;
+      margin-top: 4px;
       display: inline-block;
-      margin-right: 9px;
       background-color: var(--text-tertiary);
       cursor: pointer;
 
@@ -94,30 +107,31 @@
         background-color: var(--text-secondary);
       }
     }
+
     .emojiIcon {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       display: inline-block;
-      margin-right: 9px;
       background-color: var(--text-tertiary);
       cursor: pointer;
+
+      &.highlight {
+        background-color: var(--text-secondary);
+      }
 
       &:hover {
         background-color: var(--text-secondary);
       }
     }
-
-    >button {
-      width: 26px;
-      height: 26px;
-      padding: 0;
-      margin-block: 0;
-      margin-inline: 8px;
-      margin-top: -3px;
-    }
-
   }
 
+  .editorDescision {
+    display: flex;
+    button {
+      min-width: 110px;
+      margin-left: 8px;
+    }
+  }
 }
 
 .primaryButton {
@@ -211,6 +225,7 @@ textarea::-webkit-scrollbar{
 .error {
   color: var(--brand-1);
 }
+
 
 .editorWrap {
   display: flex;

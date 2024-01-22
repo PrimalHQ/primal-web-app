@@ -1,35 +1,44 @@
 import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
 
 import styles from './EmojiPicker.module.scss';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
-import { useIntl } from '@cookbook/solid-intl';
-import ConfirmModal from '../ConfirmModal/ConfirmModal';
-import { settings as t } from '../../translations';
+import { isVisibleInContainer, uuidv4 } from '../../utils';
 import { hookForDev } from '../../lib/devTools';
-import ButtonLink from '../Buttons/ButtonLink';
-import Modal from '../Modal/Modal';
 
 import emojiSearch from '@jukben/emoji-search';
 import { createStore } from 'solid-js/store';
 import { EmojiOption } from '../../types/primal';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 
-const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: EmojiOption) => void }> = (props) => {
+const rowLength = 8;
+
+const EmojiPicker: Component<{
+  id?: string,
+  filter: string,
+  preset?: EmojiOption[],
+  short?: boolean,
+  onSelect: (emoji: EmojiOption) => void,
+}> = (props) => {
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   let emojiOptions: HTMLDivElement | undefined;
   const instanceId = uuidv4();
 
+  const preset = () => props.preset || [];
+
+  const completeCollection = () => [...preset(), ...emojiResults];
+
   const emojiChangeKeyboard = (e: KeyboardEvent) => {
     if (e.code === 'ArrowDown') {
       e.preventDefault();
       setHighlightedEmoji(i => {
-        if (emojiResults.length === 0) {
+        if (completeCollection().length === 0) {
           return 0;
         }
 
-        return i < emojiResults.length - 7 ? i + 6 : 0;
+        if (i < preset().length && i + rowLength > preset().length) {
+          return preset().length;
+        }
+
+        return i < completeCollection().length - rowLength ? i + rowLength : 0;
       });
 
       const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
@@ -44,11 +53,15 @@ const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: Em
     if (e.code === 'ArrowUp') {
       e.preventDefault();
       setHighlightedEmoji(i => {
-        if (emojiResults.length === 0) {
+        if (completeCollection().length === 0) {
           return 0;
         }
 
-        return i >= 6 ? i - 6 : emojiResults.length - 1;
+        if (i > preset().length - 1 && i - rowLength < preset().length) {
+          return preset().length - 1;
+        }
+
+        return i >= rowLength ? i - rowLength : completeCollection().length - 1;
       });
 
       const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
@@ -63,11 +76,11 @@ const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: Em
     if (e.code === 'ArrowRight') {
       e.preventDefault();
       setHighlightedEmoji(i => {
-        if (emojiResults.length === 0) {
+        if (completeCollection().length === 0) {
           return 0;
         }
 
-        return i < emojiResults.length - 1 ? i + 1 : 0;
+        return i < completeCollection().length - 1 ? i + 1 : 0;
       });
 
       const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
@@ -82,11 +95,11 @@ const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: Em
     if (e.code === 'ArrowLeft') {
       e.preventDefault();
       setHighlightedEmoji(i => {
-        if (emojiResults.length === 0) {
+        if (completeCollection().length === 0) {
           return 0;
         }
 
-        return i > 0 ? i - 1 : emojiResults.length - 1;
+        return i > 0 ? i - 1 : completeCollection().length - 1;
       });
 
       const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
@@ -99,7 +112,7 @@ const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: Em
     }
 
     if (['Enter', 'Space'].includes(e.code)) {
-      props.onSelect(emojiResults[highlightedEmoji()]);
+      props.onSelect(completeCollection()[highlightedEmoji()]);
       return;
     }
   };
@@ -120,22 +133,40 @@ const EmojiPicker: Component<{ id?: string, filter: string, onSelect: (emoji: Em
 
   return (
     <div
-      class={styles.emojiSuggestions}
+      class={`${styles.emojiSuggestions} ${props.short && styles.short}`}
       ref={emojiOptions}
     >
-      <For each={emojiResults}>
-        {(emoji, index) => (
-          <button
-            id={`${instanceId}-${index()}`}
-            class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
-            onClick={() => {
-              props.onSelect(emoji);
-            }}
-          >
-            {emoji.name}
-          </button>
-        )}
-      </For>
+      <div class={styles.group}>
+        <For each={preset()}>
+          {(emoji, index) => (
+            <button
+              id={`${instanceId}-${index()}`}
+              class={`${styles.emojiOption} ${highlightedEmoji() === index() ? styles.highlight : ''}`}
+              onClick={() => {
+                props.onSelect(emoji);
+              }}
+            >
+              {emoji.name}
+            </button>
+          )}
+        </For>
+      </div>
+
+      <div class={styles.group}>
+        <For each={emojiResults}>
+          {(emoji, index) => (
+            <button
+              id={`${instanceId}-${index()+preset().length}`}
+              class={`${styles.emojiOption} ${highlightedEmoji() === (index()+preset().length) ? styles.highlight : ''}`}
+              onClick={() => {
+                props.onSelect(emoji);
+              }}
+            >
+              {emoji.name}
+            </button>
+          )}
+        </For>
+      </div>
     </div>
   );
 }

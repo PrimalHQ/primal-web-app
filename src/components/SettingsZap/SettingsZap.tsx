@@ -11,12 +11,13 @@ import ButtonLink from '../Buttons/ButtonLink';
 
 import { EmojiOption } from '../../types/primal';
 import EmojiPickModal from '../EmojiPickModal/EmojiPickModal';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const SettingsZap: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
   const settings = useSettingsContext();
-
+  const account = useAccountContext();
 
   const [isRestoringZaps, setIsRestoringZaps] = createSignal(false);
 
@@ -76,6 +77,8 @@ const SettingsZap: Component<{ id?: string }> = (props) => {
   const changeZapOptionEmoji = (emojiOption: EmojiOption) => {
     if (isEmojiChange() < 0) return;
 
+
+    account?.actions.saveEmoji(emojiOption);
     settings?.actions.setZapOptions({ emoji: emojiOption.name }, isEmojiChange());
     setIsEmojiChange(-1);
   };
