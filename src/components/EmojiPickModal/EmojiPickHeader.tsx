@@ -33,15 +33,18 @@ const EmojiPickHeader: Component<{
 
   return (
     <div class={styles.emojiHeader}>
-      <input
-        ref={inputRef}
-        onInput={(e: InputEvent) => {
-          const target = e.target as HTMLInputElement;
-          props.onInput(target.value);
-        }}
-        placeholder={intl.formatMessage(t.zapEmojiFilterPlaceholder)}
-      >
-      </input>
+      <div class={styles.emojiInput}>
+        <div class={styles.searchIcon}></div>
+        <input
+          ref={inputRef}
+          onInput={(e: InputEvent) => {
+            const target = e.target as HTMLInputElement;
+            props.onInput(target.value);
+          }}
+          placeholder={intl.formatMessage(t.zapEmojiFilterPlaceholder)}
+        >
+        </input>
+      </div>
       <div class={styles.filters}>
         <ButtonGhost
           onClick={() => onFilter('default')}
