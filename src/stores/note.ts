@@ -193,6 +193,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
       if (tag[0] !== 'e') continue;
 
+      if (tag[3] === 'mention') continue;
+
       if (tag[3] === 'reply') {
         replyTo = [...tag];
         break;
