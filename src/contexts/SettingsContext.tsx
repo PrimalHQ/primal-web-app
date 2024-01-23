@@ -392,8 +392,23 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
-          zapDefault && setDefaultZapAmount(zapDefault, true);
-          zapConfig && updateStore('availableZapOptions', () => zapConfig);
+
+          // If new setting is missing, merge with the old setting
+          if (zapDefault) {
+            setDefaultZapAmount(zapDefault, true);
+          }
+          else {
+            setDefaultZapAmount({ ...defaultZap, amount: defaultZapAmount }, true);
+          }
+
+          // If new setting is missing, merge with the old setting
+          if (zapConfig) {
+            updateStore('availableZapOptions', () => [...zapConfig]);
+          }
+          else {
+            const newConfig = defaultZapOptions.map((o, i) => ({ ...o, amount: zapOptions[i]}));
+            updateStore('availableZapOptions', () => [...newConfig]);
+          }
 
           updateStore('defaultZapAmountOld' , () => defaultZapAmount);
           updateStore('zapOptionsOld', () => zapOptions);
