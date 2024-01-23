@@ -8,6 +8,7 @@
   display: block;
   position: relative;
   margin-block: 5px;
+  z-index: var(--z-index-floater);
 }
 
 .newNote {
