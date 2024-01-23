@@ -1064,7 +1064,8 @@ export function AccountProvider(props: { children: JSXElement }) {
     const history = store.emojiHistory;
 
     if (history.find(e => e.name === emoji.name)) {
-      let sorted = history.sort((a, b) => a.name === emoji.name ? -1 : b.name === emoji.name ? 1 : 0);
+      let sorted = [...history];
+      sorted.sort((a, b) => a.name === emoji.name ? -1 : b.name === emoji.name ? 1 : 0);
 
       updateStore('emojiHistory', () => [...sorted]);
       saveEmojiHistory(store.publicKey, store.emojiHistory);

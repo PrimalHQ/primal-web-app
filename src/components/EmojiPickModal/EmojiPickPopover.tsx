@@ -1,28 +1,15 @@
-import { Component, createEffect, createSignal, For } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './EmojiPickPopover.module.scss';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from '../../utils';
-import { useIntl } from '@cookbook/solid-intl';
-import ConfirmModal from '../ConfirmModal/ConfirmModal';
-import { settings as t } from '../../translations';
-import { hookForDev } from '../../lib/devTools';
-import ButtonLink from '../Buttons/ButtonLink';
-import Modal from '../Modal/Modal';
-
-import emojiSearch from '@jukben/emoji-search';
-import { createStore } from 'solid-js/store';
 import { EmojiOption } from '../../types/primal';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
 import { useAccountContext } from '../../contexts/AccountContext';
 
 const defaultTerm = 'smile';
 
-const EmojiPickModal: Component<{
+const EmojiPickPopover: Component<{
   id?: string,
-  open: boolean,
   onClose: (e: MouseEvent | KeyboardEvent) => void,
   onSelect: (emoji: EmojiOption) => void,
   orientation?: 'up' | 'down',
@@ -42,20 +29,6 @@ const EmojiPickModal: Component<{
   };
 
   createEffect(() => {
-    if (props.open) {
-      window.addEventListener('keydown', onKey);
-      setTimeout(() => {
-        setEmojiSearchTerm(() => 'smile');
-        setFocusInput(() => true);
-        setFocusInput(() => false);
-      }, 10);
-    }
-    else {
-      window.removeEventListener('keydown', onKey);
-    }
-  });
-
-  createEffect(() => {
     if (emojiSearchTerm().length === 0) {
       setEmojiSearchTerm(() => defaultTerm)
     }
@@ -72,16 +45,43 @@ const EmojiPickModal: Component<{
     }
   };
 
+  const onClickOutside = (e: MouseEvent) => {
+    props.onClose(e);
+  };
+
+  const onEmojiSearch = (term: string) => {
+    setEmojiSearchTerm(() => term);
+    setShowPreset(() => term.length === 0);
+  };
+
+  onMount(() => {
+    setTimeout(() => {
+      setEmojiSearchTerm(() => 'smile');
+      setFocusInput(() => true);
+      setFocusInput(() => false);
+      window.addEventListener('keydown', onKey);
+      window.addEventListener('click', onClickOutside);
+    }, 10);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('click', onClickOutside);
+  });
+
 
   return (
     <div
       id={props.id}
       class={`${styles.emojiPickHolder} ${props.orientation && styles[props.orientation]}`}
+      onClick={e => e.stopPropagation()}
     >
-      <div class={styles.zapEmojiChangeModal}>
+      <div
+        class={styles.zapEmojiChangeModal}
+      >
         <EmojiPickHeader
           focus={focusInput()}
-          onInput={setEmojiSearchTerm}
+          onInput={onEmojiSearch}
           onFilter={setFilter}
         />
 
@@ -100,4 +100,4 @@ const EmojiPickModal: Component<{
   );
 }
 
-export default EmojiPickModal;
+export default EmojiPickPopover;

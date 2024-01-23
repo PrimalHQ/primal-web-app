@@ -71,6 +71,11 @@ const EmojiPickModal: Component<{
     }
   };
 
+  const onEmojiSearch = (term: string) => {
+    setEmojiSearchTerm(() => term);
+    setShowPreset(() => term.length === 0);
+  };
+
   return (
     <Modal
       open={props.open}
@@ -79,7 +84,7 @@ const EmojiPickModal: Component<{
       <div id={props.id} class={styles.zapEmojiChangeModal}>
         <EmojiPickHeader
           focus={focusInput()}
-          onInput={setEmojiSearchTerm}
+          onInput={onEmojiSearch}
           onFilter={setFilter}
         />
 

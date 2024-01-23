@@ -1316,7 +1316,6 @@ const EditBox: Component<{
 
             <Show when={isPickingEmoji()}>
               <EmojiPickPopover
-                open={isPickingEmoji()}
                 onClose={() => {
                   setIsPickingEmoji(false);
                   textArea?.focus();
