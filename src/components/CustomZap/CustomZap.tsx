@@ -45,7 +45,9 @@ const CustomZap: Component<{
   const updateCustomAmount = (value: string) => {
     const amount = parseInt(value.replaceAll(',', ''));
 
-    if (isNaN(amount)) return;
+    if (isNaN(amount)) {
+      setSelectedValue(() => ({ amount: 0 }))
+    };
 
     setSelectedValue(()=> ({ amount }));
   };
@@ -160,7 +162,7 @@ const CustomZap: Component<{
           <TextInput
             name="customAmountInput"
             type="text"
-            value={intl.formatNumber(selectedValue().amount || 0)}
+            value={selectedValue().amount ? intl.formatNumber(selectedValue().amount || 0) : ''}
             placeholder="0 sats"
             onChange={updateCustomAmount}
             noExtraSpace={true}
