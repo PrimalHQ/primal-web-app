@@ -1863,6 +1863,12 @@ export const zapCustomOption = {
   description: 'Caption for custom zap amount modal',
 };
 
+export const zapCustomAmount = {
+  id: 'zap.custom.amount',
+  defaultMessage: `Custom amount:`,
+  description: 'Caption for custom zap amount input',
+};
+
 export const errors = {
   invalidRelayUrl: {
     id: 'placeholders.invalidRelayUrl',

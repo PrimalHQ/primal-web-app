@@ -85,8 +85,6 @@
     grid-row-gap: 12px;
     margin-top: 24px;
     margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--subtile-devider);
 
     .zapOption {
       width: 120px;
@@ -172,4 +170,26 @@
   background: var(--sidebar-section-icon-gradient);
   -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
   mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+}
+
+.customAmount {
+  width: 392px;
+  display: flex;
+  flex-flow: row-reverse;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 8px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--subtile-devider);
+  margin-bottom: 20px;
+
+  label {
+    min-width: 120px;
+    margin-right: 12px;
+    margin-top: 4px;
+    color: var(--text-tertiary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  }
 }

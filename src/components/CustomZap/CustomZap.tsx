@@ -6,7 +6,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { zapNote } from '../../lib/zap';
 import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders } from '../../translations';
+import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
 import { PrimalNote, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
@@ -40,6 +40,14 @@ const CustomZap: Component<{
   const isSelected = (value: ZapOption) => {
     const sel = selectedValue();
     return value.amount === sel.amount && value.emoji === sel.emoji && value.message === sel.message;
+  };
+
+  const updateCustomAmount = (value: string) => {
+    const amount = parseInt(value.replaceAll(',', ''));
+
+    if (isNaN(amount)) return;
+
+    setSelectedValue(()=> ({ amount }));
   };
 
   const truncateNumber = (amount: number) => {
@@ -146,6 +154,20 @@ const CustomZap: Component<{
               </button>
             }
           </For>
+        </div>
+
+        <div class={styles.customAmount}>
+          <TextInput
+            name="customAmountInput"
+            type="text"
+            value={intl.formatNumber(selectedValue().amount || 0)}
+            placeholder="0 sats"
+            onChange={updateCustomAmount}
+            noExtraSpace={true}
+          />
+          <label for="customAmountInput">
+            {intl.formatMessage(zapCustomAmount)}
+          </label>
         </div>
 
         <TextInput
