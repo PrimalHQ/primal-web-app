@@ -188,7 +188,7 @@ const EditBox: Component<{
             return 0;
           }
 
-          return i < emojiResults.length - 7 ? i + 6 : 0;
+          return i < emojiResults.length - 9 ? i + 8 : 0;
         });
 
         const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
@@ -207,7 +207,7 @@ const EditBox: Component<{
             return 0;
           }
 
-          return i >= 6 ? i - 6 : emojiResults.length - 1;
+          return i >= 8 ? i - 8 : emojiResults.length - 1;
         });
 
         const emojiHolder = document.getElementById(`${instanceId}-${highlightedEmoji()}`);
