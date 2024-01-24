@@ -86,7 +86,8 @@ const EmojiPickPopover: Component<{
         />
 
         <EmojiPicker
-          preset={showPreset() && account ? account.emojiHistory : []}
+          showPreset={showPreset()}
+          preset={account?.emojiHistory || []}
           filter={emojiSearchTerm()}
           onSelect={(emoji: EmojiOption) => {
             props.onSelect(emoji);

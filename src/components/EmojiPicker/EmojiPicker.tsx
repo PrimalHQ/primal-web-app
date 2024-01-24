@@ -14,6 +14,7 @@ const EmojiPicker: Component<{
   id?: string,
   filter: string,
   preset?: EmojiOption[],
+  showPreset?: boolean,
   short?: boolean,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
@@ -22,7 +23,9 @@ const EmojiPicker: Component<{
   let emojiOptions: HTMLDivElement | undefined;
   const instanceId = uuidv4();
 
-  const preset = () => props.preset || [];
+  const presetEmojis = props.preset || [];
+
+  const preset = () => props.showPreset ? presetEmojis : [];
 
   const completeCollection = () => [...preset(), ...emojiResults];
 
