@@ -31,7 +31,7 @@ const ConfirmModal: Component<{
   const intl = useIntl();
 
   return (
-    <Modal open={props.open}>
+    <Modal open={props.open} onClose={props.onAbort}>
       <div id={props.id} class={styles.feedsRestoreModal}>
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}

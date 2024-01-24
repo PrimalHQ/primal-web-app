@@ -1,4 +1,4 @@
-import { Component, JSXElement, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { hookForDev } from '../../lib/devTools';
 
@@ -9,8 +9,24 @@ const Modal: Component<{
   open?: boolean,
   id?: string,
   opaqueBackdrop?: boolean,
-  onBackdropClick?: (e: MouseEvent) => void,
+  onClose?: (e: MouseEvent | KeyboardEvent) => void,
 }> = (props) => {
+
+  const onKey = (e: KeyboardEvent) => {
+    if (e.code === 'Escape') {
+      props.onClose && props.onClose(e);
+      return;
+    }
+  };
+
+  createEffect(() => {
+    if (props.open) {
+      window.addEventListener('keydown', onKey);
+    }
+    else {
+      window.removeEventListener('keydown', onKey);
+    }
+  });
 
   return (
     <Show when={props.open}>
@@ -23,7 +39,7 @@ const Modal: Component<{
               return;
             }
 
-            props.onBackdropClick && props.onBackdropClick(e)
+            props.onClose && props.onClose(e)
           }}
         >
           {props.children}

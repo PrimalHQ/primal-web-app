@@ -34,7 +34,7 @@ const CreateAccountModal: Component<{
   };
 
   return (
-    <Modal open={props.open}>
+    <Modal open={props.open} onClose={props.onAbort}>
       <div id={props.id} class={styles.modal}>
         <button class={styles.xClose} onClick={props.onAbort}>
           <div class={styles.iconClose}></div>

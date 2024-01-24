@@ -111,7 +111,7 @@ const CustomZap: Component<{
   };
 
   return (
-    <Modal open={props.open}>
+    <Modal open={props.open} onClose={() => props.onFail({ amount: 0, message: '' })}>
       <div id={props.id} class={styles.customZap}>
         <div class={styles.header}>
           <div class={styles.title}>

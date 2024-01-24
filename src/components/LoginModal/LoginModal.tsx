@@ -82,7 +82,7 @@ const LoginModal: Component<{
   return (
     <Switch>
       <Match when={step() === 'login'}>
-        <Modal open={props.open}>
+        <Modal open={props.open} onClose={onAbort}>
           <div id={props.id} class={styles.modal}>
             <button class={styles.xClose} onClick={onAbort}>
               <div class={styles.iconClose}></div>
