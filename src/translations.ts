@@ -1882,3 +1882,16 @@ export const unknown = {
   defaultMessage: 'UNKNOWN',
   description: 'Error text for Unknown',
 };
+
+export const emojiGroups = {
+  preset: {
+    id: 'emoji.recent',
+    defaultMessage: 'Recently Used',
+    description: 'Recently used emoji group title',
+  },
+  face: {
+    id: 'emoji.face',
+    defaultMessage: 'Faces',
+    description: 'Faces emoji group title',
+  },
+};

@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './EmojiPicker.module.scss';
 import { isVisibleInContainer, uuidv4 } from '../../utils';
@@ -7,6 +7,8 @@ import { hookForDev } from '../../lib/devTools';
 import emojiSearch from '@jukben/emoji-search';
 import { createStore } from 'solid-js/store';
 import { EmojiOption } from '../../types/primal';
+import { useIntl } from '@cookbook/solid-intl';
+import { emojiGroups } from '../../translations';
 
 const rowLength = 8;
 
@@ -18,6 +20,9 @@ const EmojiPicker: Component<{
   short?: boolean,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
+
+  const intl = useIntl();
+
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   let emojiOptions: HTMLDivElement | undefined;
@@ -139,6 +144,9 @@ const EmojiPicker: Component<{
       class={`${styles.emojiSuggestions} ${props.short && styles.short}`}
       ref={emojiOptions}
     >
+      <Show when={props.showPreset}>
+        <div class={styles.groupTitle}>{intl.formatMessage(emojiGroups.preset)}</div>
+      </Show>
       <div class={styles.group}>
         <For each={preset()}>
           {(emoji, index) => (
@@ -155,6 +163,11 @@ const EmojiPicker: Component<{
         </For>
       </div>
 
+      <Show when={props.showPreset}>
+        <div class={styles.groupTitle}>
+          {intl.formatMessage(emojiGroups.face)}
+        </div>
+      </Show>
       <div class={styles.group}>
         <For each={emojiResults}>
           {(emoji, index) => (

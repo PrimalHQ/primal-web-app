@@ -8,7 +8,7 @@ import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
 import { useAccountContext } from '../../contexts/AccountContext';
 
-const defaultTerm = 'smile';
+const defaultTerm = 'face';
 
 const EmojiPickModal: Component<{
   id?: string,
@@ -26,7 +26,7 @@ const EmojiPickModal: Component<{
   createEffect(() => {
     if (props.open) {
       setTimeout(() => {
-        setEmojiSearchTerm(() => 'smile')
+        setEmojiSearchTerm(() => defaultTerm)
         setFocusInput(true);
         setFocusInput(() => false);
       }, 10);
@@ -42,7 +42,7 @@ const EmojiPickModal: Component<{
   const setFilter = (filter: string) => {
     if (filter === 'default') {
       setShowPreset(true);
-      setEmojiSearchTerm(() => 'smile');
+      setEmojiSearchTerm(() => defaultTerm);
     }
     else {
       setShowPreset(false);

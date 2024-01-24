@@ -6,7 +6,7 @@ import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
 import { useAccountContext } from '../../contexts/AccountContext';
 
-const defaultTerm = 'smile';
+const defaultTerm = 'face';
 
 const EmojiPickPopover: Component<{
   id?: string,
@@ -37,7 +37,7 @@ const EmojiPickPopover: Component<{
   const setFilter = (filter: string) => {
     if (filter === 'default') {
       setShowPreset(true);
-      setEmojiSearchTerm(() => 'smile');
+      setEmojiSearchTerm(() => defaultTerm);
     }
     else {
       setShowPreset(false);
@@ -56,7 +56,7 @@ const EmojiPickPopover: Component<{
 
   onMount(() => {
     setTimeout(() => {
-      setEmojiSearchTerm(() => 'smile');
+      setEmojiSearchTerm(() => defaultTerm);
       setFocusInput(() => true);
       setFocusInput(() => false);
       window.addEventListener('keydown', onKey);
