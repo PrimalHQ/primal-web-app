@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
@@ -526,13 +526,6 @@ const EditBox: Component<{
       return;
     }
 
-    // if (Object.keys(account.relaySettings).length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(tToast.noRelays),
-    //   );
-    //   return;
-    // }
-
     if (account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(tToast.noRelaysConnected),
@@ -556,11 +549,32 @@ const EditBox: Component<{
     })
 
     if (account) {
-      const tags = referencesToTags(messageToSend);
+      let tags = referencesToTags(messageToSend);
 
       if (props.replyToNote) {
-        tags.push(['e', props.replyToNote.post.id, '', 'reply']);
-        tags.push(['p', props.replyToNote.post.pubkey]);
+        const rep = props.replyToNote;
+        const rootTag = rep.post.tags.find(t => t[0] === 'e' && t[3] === 'root');
+
+        // If the note has a root tag, that meens it is not a root note itself
+        // So we need to copy the `root` tag and add a `reply` tag
+        if (rootTag) {
+          tags.push([...rootTag]);
+          tags.push(['e', rep.post.id, '', 'reply']);
+        }
+        // Otherwise, add the note as the root tag for this reply
+        else {
+          tags.push(['e', rep.post.id, '', 'root']);
+        }
+
+        // Copy all `p` tags from the note we are repling to
+        const repPeople = rep.post.tags.filter(t => t[0] === 'p');
+
+        tags = [...tags, ...(unwrap(repPeople))];
+
+        // If the author of the note is missing, add them
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.post.pubkey)) {
+          tags.push(['p', rep.post.pubkey]);
+        }
       }
 
       setIsPostingInProgress(true);
