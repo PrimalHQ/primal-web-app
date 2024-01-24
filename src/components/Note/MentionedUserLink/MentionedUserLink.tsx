@@ -1,7 +1,9 @@
+import { useIntl } from "@cookbook/solid-intl";
 import { A } from "@solidjs/router";
 import { Component, JSXElement } from "solid-js";
 import { hookForDev } from "../../../lib/devTools";
 import { nip05Verification, userName } from "../../../stores/profile";
+import { unknown } from "../../../translations";
 import { PrimalUser } from "../../../types/primal";
 import Avatar from "../../Avatar/Avatar";
 import VerificationCheck from "../../VerificationCheck/VerificationCheck";
@@ -13,17 +15,31 @@ const MentionedUserLink: Component<{
   id?: string,
 }> = (props) => {
 
+  const intl = useIntl();
+
   const LinkComponent: Component<{ children: JSXElement }> = (p) => {
-    return props.openInNewTab ?
-      <a
+
+    if (!props.user) {
+      return <div
+        id={props.id}
+        class="linkish"
+      >
+        {p.children}
+      </div>;
+    }
+
+    if (props.openInNewTab) {
+      return <a
         id={props.id}
         class={styles.userMention}
-        href={`/p/${props.user.npub}`}
+        href={`/p/${props.user?.npub}`}
         target="_blank"
       >
         {p.children}
-      </a> :
-      <A
+      </a>;
+    }
+
+    return <A
         id={props.id}
         class={styles.userMention}
         href={`/p/${props.user.npub}`}
@@ -47,7 +63,7 @@ const MentionedUserLink: Component<{
 
   return (
     <LinkComponent>
-      @{userName(props.user)}
+      @{userName(props.user) || intl.formatMessage(unknown)}
     </LinkComponent>
   );
 }

@@ -34,12 +34,7 @@ const NoteReplyHeader: Component<{
         <span class={styles.label}>
           {intl.formatMessage(t.reply)}
         </span>&nbsp;
-        <A
-          href={`/p/${rootAuthor()?.npub}`}
-          class={styles.author}
-        >
-          <MentionedUserLink user={rootAuthor()} />
-        </A>
+        <MentionedUserLink user={rootAuthor()} />
       </span>
     </Show>
   )

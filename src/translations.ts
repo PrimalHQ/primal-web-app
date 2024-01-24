@@ -1876,3 +1876,9 @@ export const errors = {
     description: 'Error text for invalid url',
   },
 };
+
+export const unknown = {
+  id: 'unknown',
+  defaultMessage: 'UNKNOWN',
+  description: 'Error text for Unknown',
+};
