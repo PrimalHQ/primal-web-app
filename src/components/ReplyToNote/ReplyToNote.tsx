@@ -26,6 +26,10 @@ const ReplyToNote: Component<{
 
   const openReplyBox = () => {
     setOpen(true);
+
+    const editor = document.getElementById('reply_to_editor');
+
+    editor?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   };
 
   const closeReplyToNote = () => {
@@ -91,6 +95,7 @@ const ReplyToNote: Component<{
             </div>
             <div class={styles.rightSide}>
               <EditBox
+                id="reply_to_editor"
                 idPrefix="reply_"
                 replyToNote={props.note}
                 onClose={closeReplyToNote}
