@@ -756,7 +756,6 @@ export const note = {
       defaultMessage: 'Continue editing now',
       description: 'Continue editing the note',
     },
-
   },
 };
 
@@ -1892,7 +1891,7 @@ export const toast = {
 
 export const zapCustomOption = {
   id: 'zap.custom.option',
-  defaultMessage: `Zap {user} `,
+  defaultMessage: 'Zap {user} ',
   description: 'Caption for custom zap amount modal',
 };
 
@@ -1925,6 +1924,19 @@ export const emojiGroups = {
   face: {
     id: 'emoji.face',
     defaultMessage: 'Faces',
+    description: 'Faces emoji group title',
+  },
+};
+
+export const upload = {
+  fail: {
+    id: 'upload.fail',
+    defaultMessage: 'Failed to upload file {file}',
+    description: 'Faces emoji group title',
+  },
+  fileTooBig: {
+    id: 'upload.fileTooBig',
+    defaultMessage: 'File too big, Upload limit is 100MB.',
     description: 'Faces emoji group title',
   },
 };

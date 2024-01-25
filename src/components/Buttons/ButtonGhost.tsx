@@ -11,11 +11,12 @@ const ButtonGhost: Component<{
   children?: JSXElement,
   disabled?: boolean,
   highlight?: boolean,
+  class?: string,
 }> = (props) => {
   return (
     <Button.Root
       id={props.id}
-      class={`${styles.ghost} ${props.highlight ? styles.highlight : ''}`}
+      class={`${styles.ghost} ${props.highlight ? styles.highlight : ''} ${props.class || ''}`}
       onClick={props.onClick}
       disabled={props.disabled}
     >

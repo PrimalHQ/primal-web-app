@@ -328,7 +328,7 @@ export type NostrRelays = Record<string, NostrRelay>;
 
 export type NostrRelayEvent = {
   kind: number,
-  content: string,
+  content: any,
   created_at: number,
   tags: string[][],
 };

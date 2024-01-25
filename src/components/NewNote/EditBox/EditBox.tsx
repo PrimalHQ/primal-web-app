@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import { createStore, unwrap } from "solid-js/store";
+import { createStore, reconcile, unwrap } from "solid-js/store";
 import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
@@ -11,10 +11,10 @@ import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
-import { subscribeTo as uploadSub } from "../../../uploadSocket";
+import { subscribeTo as uploadSub, uploadServer } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -24,7 +24,7 @@ import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
 import emojiSearch from '@jukben/emoji-search';
 import { getCaretCoordinates } from "../../../lib/textArea";
-import { uploadMedia } from "../../../lib/media";
+import { startTimes, uploadMedia, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from "../../../lib/media";
 import { APP_ID } from "../../../App";
 import Loader from "../../Loader/Loader";
 import {
@@ -33,6 +33,7 @@ import {
   note as tNote,
   search as tSearch,
   actions as tActions,
+  upload as tUpload,
 } from "../../../translations";
 import { useMediaContext } from "../../../contexts/MediaContext";
 import { hookForDev } from "../../../lib/devTools";
@@ -42,7 +43,8 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
-import { readNoteDraft, saveNoteDraft } from "../../../lib/localStore";
+import { readNoteDraft, readUploadTime, saveNoteDraft, saveUploadTime } from "../../../lib/localStore";
+import { Progress } from "@kobalte/core";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -97,9 +99,72 @@ const EditBox: Component<{
 
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
+  const MB = 1024 * 1024;
+  const maxParallelChunks = 5;
+  let chunkLimit = maxParallelChunks;
+
+  type FileSize = 'small' | 'medium' | 'large' | 'huge' | 'final';
+
+  type UploadState = {
+    isUploading: boolean,
+    progress: number,
+    id?: string,
+    file?: File,
+    offset: number,
+    chunkSize: number,
+    chunkMap: number[],
+    uploadedChunks: number,
+    chunkIndex: number,
+    fileSize: FileSize,
+  }
+
+  const [uploadState, setUploadState] = createStore<UploadState>({
+    isUploading: false,
+    progress: 0,
+    offset: 0,
+    chunkSize: MB,
+    chunkMap: [],
+    uploadedChunks: 0,
+    chunkIndex: 0,
+    fileSize: 'small',
+  });
+
   const location = useLocation();
 
   let currentPath = location.pathname;
+
+  let sockets: WebSocket[] = [];
+
+  createEffect(() => {
+    if (props.open) {
+      for (let i=0; i < maxParallelChunks; i++) {
+        const socket = new WebSocket(uploadServer);
+        sockets.push(socket);
+      }
+    }
+    else {
+      sockets.forEach(s => s.close());
+      sockets = [];
+    }
+  });
+
+  const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
+    const listener = (event: MessageEvent) => {
+      const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+      const [type, subscriptionId, content] = message;
+
+      if (subId === subscriptionId) {
+        cb(type, subscriptionId, content);
+      }
+
+    };
+
+    socket.addEventListener('message', listener);
+
+    return () => {
+      socket.removeEventListener('message', listener);
+    };
+  };
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -158,7 +223,7 @@ const EditBox: Component<{
       return false;
     }
 
-    if (isUploading()) {
+    if (uploadState.isUploading) {
       return;
     }
     const previousChar = textArea.value[textArea.selectionStart - 1];
@@ -519,6 +584,29 @@ const EditBox: Component<{
     }
   };
 
+  const resetUpload = () => {
+    setUploadState(reconcile({
+      isUploading: false,
+      file: undefined,
+      id: undefined,
+      progress: 0,
+      offset: 0,
+      chunkSize: MB,
+      chunkMap: [],
+      uploadedChunks: 0,
+      chunkIndex: 0,
+      fileSize: 'small',
+    }));
+
+    if (fileUpload) {
+      fileUpload.value = '';
+    }
+
+    uploadChunkAttempts = [];
+
+    console.log('UPLOAD RESET: ', {...uploadState})
+  };
+
   const clearEditor = () => {
     setUserRefs({});
     setMessage('');
@@ -528,6 +616,13 @@ const EditBox: Component<{
     setEmojiInput(false);
     setEmojiQuery('')
     setEmojiResults(() => []);
+
+    if (uploadState.isUploading) {
+      uploadMediaCancel(account?.publicKey, `up_c_${uploadState.id}`, uploadState.id || '');
+    }
+
+    resetUpload();
+
     props.onClose && props.onClose();
   };
 
@@ -556,7 +651,7 @@ const EditBox: Component<{
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postNote = async () => {
-    if (!account || !account.hasPublicKey() || isUploading() || isInputting()) {
+    if (!account || !account.hasPublicKey() || uploadState.isUploading || isInputting()) {
       return;
     }
 
@@ -978,7 +1073,7 @@ const EditBox: Component<{
   const [isInputting, setIsInputting] = createSignal(false);
 
   const onInput = (e: InputEvent) => {
-    if (isUploading()) {
+    if (uploadState.isUploading) {
       e.preventDefault();
       return false;
     }
@@ -1134,8 +1229,6 @@ const EditBox: Component<{
     textArea.focus();
   };
 
-  const [isUploading, setIsUploading] = createSignal(false);
-
   const isSupportedFileType = (file: File) => {
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
       toast?.sendWarning(intl.formatMessage(tToast.fileTypeUpsupported));
@@ -1154,58 +1247,237 @@ const EditBox: Component<{
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
     // @ts-ignore fileUpload.value assignment
-    file && isSupportedFileType(file) && uploadFile(file, () => fileUpload.value = null);
+    file && isSupportedFileType(file) && uploadFile(file);
 
   }
 
-  const uploadFile = (file: File, callback?: () => void) => {
-    setIsUploading(true);
+
+  const sha256 = async (file: File) => {
+    const obj = await file.arrayBuffer();
+    return crypto.subtle.digest('SHA-256', obj).then((hashBuffer) => {
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray
+        .map((bytes) => bytes.toString(16).padStart(2, '0'))
+        .join('');
+      return hashHex;
+    });
+  }
+
+  createEffect(() => {
+    if (uploadState.isUploading) {
+      uploadChunk(uploadState.chunkIndex);
+    }
+  })
+
+  let times: number[] = [];
+  let subIdComplete = 'up_comp_';
+
+  const maxChunkAttempts = 5;
+  let uploadChunkAttempts: number[] = [];
+
+  let initUploadTime = readUploadTime(account?.publicKey);
+
+  const failUpload = () => {
+    toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+      file: uploadState.file?.name,
+    }));
+
+    resetUpload();
+  };
+
+  const uploadChunk = (index: number) => {
+    const { file, chunkSize, id, chunkMap } = uploadState;
+
+    const offset = chunkMap[index];
+
+    if (!file || !id) return;
 
     const reader = new FileReader();
+
+    const nextOffset = offset + chunkSize;
+
+    let chunk = file.slice(offset, nextOffset);
 
     reader.onload = (e) => {
       if (!e.target?.result) {
         return;
       }
 
-      const subid = `upload_${APP_ID}`;
+      const subid = `up_${index}_${uploadChunkAttempts[index]}_${id}`;
 
       const data = e.target?.result as string;
 
-      const unsub = uploadSub(subid, (type, subId, content) => {
+      const soc = sockets[index % maxParallelChunks];
 
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
-
-          if (content.kind === Kind.Uploaded) {
-            const uploaded = content as NostrMediaUploaded;
-
-            insertAtCursor(uploaded.content);
-            return;
-          }
-        }
+      const unsub = subTo(soc, subid, async (type, subId, content) => {
 
         if (type === 'NOTICE') {
-          setIsUploading(false);
           unsub();
+          if (uploadChunkAttempts[index] < 1) {
+            failUpload();
+            return;
+          }
+
+          uploadChunkAttempts[index]--;
+          uploadChunk(index);
           return;
         }
 
         if (type === 'EOSE') {
-          setIsUploading(false);
           unsub();
-          return;
+
+          times[index] = Date.now() - startTimes[index];
+          console.log('UPLOADED: ', uploadState.uploadedChunks, times[index])
+
+          if (!uploadState.isUploading) return;
+
+          setUploadState('uploadedChunks', n => n+1);
+
+          const len = chunkMap.length;
+
+          const progress = Math.floor(uploadState.uploadedChunks * Math.floor(100 / uploadState.chunkMap.length)) - 1;
+          console.log('PROGRESS: ', progress, uploadState.uploadedChunks)
+          setUploadState('progress', () => progress);
+
+          if (uploadState.uploadedChunks < len && uploadState.chunkIndex < len - 1) {
+            setUploadState('chunkIndex', i => i+1);
+            return;
+          }
+
+          if (uploadState.uploadedChunks === len) {
+
+            console.log('UPLOADED LAST', times, (times.reduce((acc, t) => acc + t, 0) / times.length));
+
+            const sha = await sha256(file);
+
+            uploadMediaConfirm(account?.publicKey, subIdComplete, uploadState.id || '', file.size, sha);
+
+
+            setTimeout(() => {
+              resetUpload();
+            }, 1_000);
+
+            return;
+          }
+
         }
       });
 
-      uploadMedia(account?.publicKey, subid, data);
+      const rate = initUploadTime[uploadState.fileSize];
+      progressFill?.style.setProperty('--progress-rate', `${rate + rate / 4}ms`);
+
+      let fsize = file.size;
+
+      console.log('UPLOADING ', index, fsize)
+      uploadMediaChunk(account?.publicKey, subid, id, data, offset, fsize, soc, index);
     }
 
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(chunk);
 
-    callback && callback();
+  };
+
+  let totalStart = 0;
+  let totalEnd = 0;
+
+  const uploadFile = (file: File) => {
+    if (file.size >= MB * 100) {
+      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+      return;
+    }
+
+    let chunkSize = MB;
+    let fileSize: FileSize = 'huge';
+
+    if (file.size < MB / 2) {
+      chunkSize = file.size;
+      fileSize = 'small';
+    }
+    else if (file.size < MB) {
+      chunkSize = Math.ceil(MB / 4);
+      fileSize = 'medium';
+    }
+    else if (file.size < 12 * MB) {
+      chunkSize = Math.ceil(MB / 2);
+      fileSize = 'large';
+    }
+
+    let sum = 0;
+
+    let chunkMap: number[] = [];
+
+    while (sum < file.size) {
+      if (sum >= file.size) break;
+
+      chunkMap.push(sum);
+      sum += chunkSize;
+    }
+
+    console.log('FILE SIZE: ', fileSize)
+
+    setUploadState(() => ({
+      isUploading: true,
+      file,
+      id: uuidv4(),
+      progress: 0,
+      offset: 0,
+      chunkSize,
+      chunkMap,
+      chunkIndex: 0,
+      fileSize,
+    }))
+
+    subIdComplete = `up_comp_${uploadState.id}`;
+
+    const unsubComplete = uploadSub(subIdComplete, (type, subId, content) => {
+      if (type === 'NOTICE') {
+        unsubComplete();
+        failUpload();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (!content) {
+          return;
+        }
+
+        if (content.kind === Kind.Uploaded) {
+          const up = content as NostrMediaUploaded;
+
+          totalEnd = Date.now();
+          const average = (totalEnd - totalStart) / uploadState.uploadedChunks;
+
+          saveUploadTime(account?.publicKey, { [uploadState.fileSize]: average });
+
+          console.log('TOTAL TIME: ', uploadState.progress, totalEnd - totalStart, average);
+
+          progressFill?.style.setProperty('--progress-rate', `${100}ms`);
+          setTimeout(() => {
+            setUploadState('progress', () => 100);
+          }, 10)
+
+          insertAtCursor(`${up.content} `);
+          return;
+        }
+      }
+
+      if (type === 'EOSE') {
+        unsubComplete();
+        return;
+      }
+
+    });
+
+    uploadChunkAttempts = Array(chunkMap.length).fill(maxChunkAttempts);
+
+    console.log('UPLOAD ATTEMPTS: ', uploadChunkAttempts)
+
+    chunkLimit = Math.min(maxParallelChunks, chunkMap.length - 2);
+
+    totalStart = Date.now();
+
+    for (let i=0;i < chunkLimit; i++) {
+      setUploadState('chunkIndex', () => i);
+    }
   }
 
   const [isPickingEmoji, setIsPickingEmoji] = createSignal(false);
@@ -1240,6 +1512,8 @@ const EditBox: Component<{
     return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
   }
 
+  let progressFill: HTMLDivElement | undefined;
+
   return (
     <div
       id={props.id}
@@ -1257,15 +1531,6 @@ const EditBox: Component<{
         </div>
       </Show>
 
-      <Show when={isUploading()}>
-        <div class={styles.uploadLoader}>
-          <div>
-            <Loader />
-          </div>
-          <div>{intl.formatMessage(tFeedback.uploading)}</div>
-        </div>
-      </Show>
-
       <div class={styles.editorWrap} onClick={focusInput}>
         <div>
           <textarea
@@ -1275,7 +1540,7 @@ const EditBox: Component<{
             onInput={onInput}
             ref={textArea}
             onPaste={onPaste}
-            readOnly={isUploading()}
+            readOnly={uploadState.isUploading}
           >
           </textarea>
           <div
@@ -1292,8 +1557,39 @@ const EditBox: Component<{
             ref={textPreview}
             innerHTML={parsedMessage()}
           ></div>
+          <Show when={uploadState.id}>
+            <Progress.Root value={uploadState.progress} class={styles.uploadProgress}>
+              <div class={styles.progressLabelContainer}>
+                <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
+              </div>
+              <div class={styles.progressTrackContainer}>
+                <Progress.Track class={styles.progressTrack}>
+                  <Progress.Fill
+                    ref={progressFill}
+                    class={`${styles.progressFill} ${styles[uploadState.fileSize]}`}
+                  />
+                </Progress.Track>
+
+                <ButtonGhost
+                  onClick={() => {
+                    uploadMediaCancel(account?.publicKey, `up_c_${uploadState.id}`, uploadState.id || '');
+                    resetUpload();
+                  }}
+                  disabled={uploadState.progress > 100}
+                >
+                  <Show
+                    when={(uploadState.progress < 100)}
+                    fallback={<div class={styles.iconCheck}></div>}
+                  >
+                    <div class={styles.iconClose}></div>
+                  </Show>
+                </ButtonGhost>
+              </div>
+            </Progress.Root>
+          </Show>
         </div>
       </div>
+
 
       <Show when={isMentioning()}>
         <div
@@ -1399,7 +1695,7 @@ const EditBox: Component<{
         <div class={styles.editorDescision}>
           <ButtonPrimary
             onClick={postNote}
-            disabled={isPostingInProgress() || isUploading() || message().trim().length === 0}
+            disabled={isPostingInProgress() || uploadState.isUploading || message().trim().length === 0}
           >
             {intl.formatMessage(tActions.notePostNew)}
           </ButtonPrimary>

@@ -19,6 +19,23 @@ export type LocalStore = {
   },
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
+  uploadTime: Record<string, number>,
+};
+
+export type UploadTime = {
+  small: number,
+  medium: number,
+  large: number,
+  huge: number,
+  final: number,
+}
+
+export const defaultUploadTime: UploadTime = {
+  small: 250,
+  medium: 250,
+  large: 250,
+  huge: 250,
+  final: 100,
 };
 
 export const emptyStorage = {
@@ -36,6 +53,7 @@ export const emptyStorage = {
   recomended: { profiles: [], stats: {} },
   emojiHistory: [],
   noteDraft: {},
+  uploadTime: defaultUploadTime,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -236,6 +254,28 @@ export const readNoteDraft = (pubkey: string | undefined, replyTo?: string) => {
   const key = replyTo || 'root';
 
   return store.noteDraft[key] || '';
+}
+
+export const saveUploadTime = (pubkey: string | undefined, uploadTime: Record<string, number>) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.uploadTime = { ...store.uploadTime, ...uploadTime };
+
+  setStorage(pubkey, store);
+}
+
+export const readUploadTime = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return {...defaultUploadTime};
+  }
+
+  const store = getStorage(pubkey);
+
+  return { ...defaultUploadTime, ...store.uploadTime } as UploadTime;
 }
 
 export const saveHomeSidebarSelection = (pubkey: string | undefined, selection: SelectionOption | undefined) => {

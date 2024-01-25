@@ -131,6 +131,7 @@ export enum Kind  {
   FilteringReason = 10_000_131,
   UserFollowerCounts = 10_000_133,
   SuggestedUsersByCategory = 10_000_134,
+  UploadChunk = 10_000_135,
 }
 
 export const relayConnectingTimeout = 1000;

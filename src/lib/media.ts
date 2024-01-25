@@ -17,6 +17,8 @@ export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) =
   return `${mediaServer}/media-cache?s=${size}&a=${animated}&u=${encodedUrl}`;
 }
 
+export let startTimes: number[] = [];
+
 export const uploadMedia = async (
   uploader: string | undefined,
   subid: string,
@@ -40,6 +42,138 @@ export const uploadMedia = async (
       "REQ",
       subid,
       {cache: ["upload", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to upload: ', reason);
+    return false;
+  }
+};
+
+export const uploadMediaChunk = async (
+  uploader: string | undefined,
+  subid: string,
+  uploadId: string,
+  data: string,
+  offset: number,
+  fileLength: number,
+  socket: WebSocket | undefined,
+  index: number,
+) => {
+  if (!uploader) {
+    return false;
+  }
+
+  const event = {
+    kind: Kind.UploadChunk,
+    tags: [['p', uploader]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      file_length: fileLength,
+      upload_id: uploadId,
+      offset,
+      data,
+    }),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    const message = JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["upload_chunk", { event_from_user: signedNote }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      startTimes[index] = Date.now();
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      console.log('NO SOCKET')
+      sendMessage(JSON.stringify([
+        "REQ",
+        subid,
+        {cache: ["upload_chunk", { event_from_user: signedNote }]},
+      ]));
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to upload: ', reason);
+    return false;
+  }
+};
+
+
+export const uploadMediaCancel = async (
+  uploader: string | undefined,
+  subid: string,
+  uploadId: string,
+) => {
+  if (!uploader) {
+    return false;
+  }
+
+  const event = {
+    kind: Kind.UploadChunk,
+    tags: [['p', uploader]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      upload_id: uploadId,
+    }),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["upload_cancel", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to upload: ', reason);
+    return false;
+  }
+};
+
+export const uploadMediaConfirm = async (
+  uploader: string | undefined,
+  subid: string,
+  uploadId: string,
+  fileLength: number,
+  sha256: string,
+) => {
+  if (!uploader) {
+    return false;
+  }
+
+  const event = {
+    kind: Kind.UploadChunk,
+    tags: [['p', uploader]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      upload_id: uploadId,
+      file_length: fileLength,
+      sha256,
+    }),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["upload_complete", { event_from_user: signedNote }]},
     ]));
 
     return true;
