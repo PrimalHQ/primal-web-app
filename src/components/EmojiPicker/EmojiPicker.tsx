@@ -144,7 +144,7 @@ const EmojiPicker: Component<{
       class={`${styles.emojiSuggestions} ${props.short && styles.short}`}
       ref={emojiOptions}
     >
-      <Show when={props.showPreset}>
+      <Show when={props.showPreset && presetEmojis.length > 0}>
         <div class={styles.groupTitle}>{intl.formatMessage(emojiGroups.preset)}</div>
       </Show>
       <div class={styles.group}>
