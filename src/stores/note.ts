@@ -202,10 +202,19 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
       if (tag[3] === 'root') {
         replyTo = [...tag];
-        break;
+        continue;
       }
+    }
 
-      replyTo = [...tag];
+    if (!replyTo) {
+      const eTags = tgs.filter(t => t[0] === 'e');
+
+      if (eTags.length === 1) {
+        replyTo = [...eTags[0]];
+      }
+      else if (eTags.length > 1){
+        replyTo = [...eTags[eTags.length - 1]];
+      }
     }
 
     let mentionedNotes: Record<string, PrimalNote> = {};
