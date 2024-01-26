@@ -344,11 +344,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => top);
   };
 
-  let currentFeed = '';
+  let currentFeed: PrimalFeed | undefined;
 
   const selectFeed = (feed: PrimalFeed | undefined) => {
-    if (feed?.hex !== undefined && feed.hex !== currentFeed) {
-      currentFeed = feed.hex;
+    if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
+      currentFeed = { ...feed };
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
