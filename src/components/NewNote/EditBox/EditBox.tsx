@@ -493,7 +493,7 @@ const EditBox: Component<{
   });
 
   createEffect(() => {
-    if (props.open) {
+    if (props.open && !props.replyToNote) {
       const draft = readNoteDraft(account?.publicKey);
 
       setMessage(draft);
@@ -525,13 +525,18 @@ const EditBox: Component<{
   };
 
   const closeEditor = () => {
+    if (props.replyToNote) {
+      clearEditor();
+      return;
+    }
+
     if (message().trim().length > 0) {
       setConfirmEditorClose(true);
+      return;
     }
-    else {
-      saveNoteDraft(account?.publicKey, '');
-      clearEditor();
-    }
+
+    saveNoteDraft(account?.publicKey, '');
+    clearEditor();
   };
 
   const closeEmojiAndMentions = () => {
