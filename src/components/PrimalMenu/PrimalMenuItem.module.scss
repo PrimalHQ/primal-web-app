@@ -16,11 +16,12 @@
   padding: 10px 12px;
   margin: 0px;
   min-width: 220px;
+  vertical-align: bottom;
 
   div {
     display: inline-block;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     background-color: var(--text-primary);
   }
 
