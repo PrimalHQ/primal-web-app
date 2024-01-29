@@ -513,12 +513,17 @@ export const confirmDefaults = {
   confirm: {
     id: 'confirm.yes',
     defaultMessage: 'Yes',
-    description: 'Default label form positive response to the confirmation dialog',
+    description: 'Default label for positive response to the confirmation dialog',
   },
   abort: {
     id: 'confirm.no',
     defaultMessage: 'No',
-    description: 'Default label form negative response to the confirmation dialog',
+    description: 'Default label for negative response to the confirmation dialog',
+  },
+  cancel: {
+    id: 'confirm.cancel',
+    defaultMessage: 'Cancel',
+    description: 'Default label for cancel response to the confirmation dialog',
   },
 };
 
@@ -724,6 +729,34 @@ export const note = {
     id: 'note.reply',
     defaultMessage: 'replying to',
     description: 'Label indicating that the note is a reply',
+  },
+  saveNoteDraft: {
+    title: {
+      id: 'note.saveNoteDraft.title',
+      defaultMessage: 'Save draft?',
+      description: 'Title of the confirmation when the note is canceled',
+    },
+    description: {
+      id: 'note.saveNoteDraft.description',
+      defaultMessage: 'Do you whish to save this to continue editing it later?',
+      description: 'Description of the confirmation when the note is canceled',
+    },
+    optionYes: {
+      id: 'note.saveNoteDraft.yes',
+      defaultMessage: 'Yes',
+      description: 'Confirm saving not as draft',
+    },
+    optionNo: {
+      id: 'note.saveNoteDraft.no',
+      defaultMessage: 'No',
+      description: 'Decline saving not as draft',
+    },
+    optionCancel: {
+      id: 'note.saveNoteDraft.cancel',
+      defaultMessage: 'Continue editing now',
+      description: 'Continue editing the note',
+    },
+
   },
 };
 

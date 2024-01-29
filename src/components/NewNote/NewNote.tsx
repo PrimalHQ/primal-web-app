@@ -25,6 +25,7 @@ const NewNote: Component<{ onSuccess: (note: SendNoteResult) => void}> = (props)
             <div class={styles.rightSide}>
               <EditBox
                 onSuccess={props.onSuccess}
+                open={account?.showNewNoteForm}
                 onClose={account?.actions?.hideNewNoteForm}
               />
             </div>

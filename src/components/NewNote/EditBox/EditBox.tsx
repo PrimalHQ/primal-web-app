@@ -39,11 +39,10 @@ import { hookForDev } from "../../../lib/devTools";
 import ButtonPrimary from "../../Buttons/ButtonPrimary";
 import ButtonSecondary from "../../Buttons/ButtonSecondary";
 import { useProfileContext } from "../../../contexts/ProfileContext";
-import ButtonTertiary from "../../Buttons/ButtonTertiary";
 import ButtonGhost from "../../Buttons/ButtonGhost";
-import EmojiPickModal from "../../EmojiPickModal/EmojiPickModal";
-import EmojiPicker from "../../EmojiPicker/EmojiPicker";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
+import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
+import { readNoteDraft, saveNoteDraft } from "../../../lib/localStore";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -53,6 +52,7 @@ const EditBox: Component<{
   replyToNote?: PrimalNote,
   onClose?: () => void,
   onSuccess?: (note: SendNoteResult) => void,
+  open?: boolean,
   idPrefix?: string,
 } > = (props) => {
 
@@ -94,6 +94,8 @@ const EditBox: Component<{
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
+
+  const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
   const location = useLocation();
 
@@ -488,6 +490,16 @@ const EditBox: Component<{
 
     textArea.focus();
     textArea.selectionEnd = position;
+  });
+
+  createEffect(() => {
+    if (props.open) {
+      const draft = readNoteDraft(account?.publicKey);
+
+      setMessage(draft);
+      if (textArea)
+      textArea.value = draft;
+    }
   })
 
   const onEscape = (e: KeyboardEvent) => {
@@ -500,7 +512,7 @@ const EditBox: Component<{
     }
   };
 
-  const closeEditor = () => {
+  const clearEditor = () => {
     setUserRefs({});
     setMessage('');
     setParsedMessage('');
@@ -512,11 +524,26 @@ const EditBox: Component<{
     props.onClose && props.onClose();
   };
 
+  const closeEditor = () => {
+    if (message().trim().length > 0) {
+      setConfirmEditorClose(true);
+    }
+    else {
+      saveNoteDraft(account?.publicKey, '');
+      clearEditor();
+    }
+  };
+
   const closeEmojiAndMentions = () => {
     setMentioning(false);
     setEmojiInput(false);
     setEmojiQuery('')
     setEmojiResults(() => []);
+  };
+
+  const persistNote = (note: string) => {
+    saveNoteDraft(account?.publicKey, note);
+    clearEditor();
   };
 
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
@@ -1300,6 +1327,28 @@ const EditBox: Component<{
           </For>
         </div>
       </Show>
+
+      <ConfirmAlternativeModal
+        open={isConfirmEditorClose()}
+        title={intl.formatMessage(tNote.saveNoteDraft.title)}
+        description={intl.formatMessage(tNote.saveNoteDraft.description)}
+        confirmLabel={intl.formatMessage(tNote.saveNoteDraft.optionYes)}
+        abortLabel={intl.formatMessage(tNote.saveNoteDraft.optionNo)}
+        cancelLabel={intl.formatMessage(tNote.saveNoteDraft.optionCancel)}
+        onConfirm={() => {
+          persistNote(message());
+          setConfirmEditorClose(false);
+        }}
+        onAbort={() => {
+          persistNote('');
+          setConfirmEditorClose(false);
+          clearEditor();
+        }}
+        onCancel={() => {
+          setConfirmEditorClose(false);
+          textArea?.focus();
+        }}
+      />
 
       <div class={styles.controls}>
         <div class={styles.editorOptions}>

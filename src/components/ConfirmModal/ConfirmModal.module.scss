@@ -65,3 +65,71 @@
   }
 
 }
+
+.confirmAlternateModal {
+  position: fixed;
+  width: 480px;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+
+  .feedConfirmationTitle {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .feedConfirmationDescription {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 20px;
+  }
+
+  .feedConfirmationActions {
+    display: flex;
+    justify-content: space-between;
+
+    >button {
+      // min-width: 178px;
+    }
+
+    .feedRestoreConfirm {
+      background: var(--brand-gradient-vertical);
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      padding: 8px;
+      margin: 0px;
+      max-width: 40%;
+    }
+
+    .feedRestoreAbort {
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      background-color: var(--background-site);
+      background: linear-gradient(var(--background-site),
+        var(--background-site)) padding-box,
+        var(--brand-gradient) border-box;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 8px;
+      margin: 0;
+      max-width: 40%;
+    }
+  }
+
+}

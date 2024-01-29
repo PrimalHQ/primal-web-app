@@ -97,6 +97,7 @@ const ReplyToNote: Component<{
               <EditBox
                 id="reply_to_editor"
                 idPrefix="reply_"
+                open={open()}
                 replyToNote={props.note}
                 onClose={closeReplyToNote}
                 onSuccess={props.onNotePosted}
