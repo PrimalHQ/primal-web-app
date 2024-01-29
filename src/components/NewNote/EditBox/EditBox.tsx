@@ -455,7 +455,7 @@ const EditBox: Component<{
 
   createEffect(() => {
     if (location.pathname !== currentPath) {
-      closeEditor();
+      clearEditor();
     }
   })
 
@@ -618,7 +618,7 @@ const EditBox: Component<{
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note });
               setIsPostingInProgress(false);
-              closeEditor();
+              clearEditor();
             }
             unsub();
           }
@@ -647,7 +647,7 @@ const EditBox: Component<{
     }
 
     setIsPostingInProgress(false);
-    closeEditor();
+    clearEditor();
   };
 
   const mentionPositionOptions = () => {
