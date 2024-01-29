@@ -733,12 +733,12 @@ export const note = {
   saveNoteDraft: {
     title: {
       id: 'note.saveNoteDraft.title',
-      defaultMessage: 'Save draft?',
+      defaultMessage: 'Save Note Draft?',
       description: 'Title of the confirmation when the note is canceled',
     },
     description: {
       id: 'note.saveNoteDraft.description',
-      defaultMessage: 'Do you whish to save this to continue editing it later?',
+      defaultMessage: 'Do you whish to save this note to continue editing it later?',
       description: 'Description of the confirmation when the note is canceled',
     },
     optionYes: {
