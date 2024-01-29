@@ -880,6 +880,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const setProfileKey = (profileKey?: string) => {
+    if (profileKey === store.profileKey) return;
+
     updateStore('profileKey', () => profileKey);
 
     if (profileKey) {
