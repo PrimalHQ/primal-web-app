@@ -207,7 +207,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
     }
 
     if (!replyTo) {
-      const eTags = tgs.filter(t => t[0] === 'e');
+      const eTags = tgs.filter(t => t[0] === 'e' && t[3] !== 'mention');
 
       if (eTags.length === 1) {
         replyTo = [...eTags[0]];
