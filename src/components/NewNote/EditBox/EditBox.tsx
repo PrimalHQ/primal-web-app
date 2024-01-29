@@ -1343,7 +1343,7 @@ const EditBox: Component<{
         <div class={styles.editorDescision}>
           <ButtonPrimary
             onClick={postNote}
-            disabled={isPostingInProgress()}
+            disabled={isPostingInProgress() || isUploading() || message().trim().length === 0}
           >
             {intl.formatMessage(tActions.notePostNew)}
           </ButtonPrimary>
