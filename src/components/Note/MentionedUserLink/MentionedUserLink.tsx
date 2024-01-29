@@ -1,4 +1,3 @@
-import { useIntl } from "@cookbook/solid-intl";
 import { A } from "@solidjs/router";
 import { Component, JSXElement } from "solid-js";
 import { hookForDev } from "../../../lib/devTools";
@@ -14,8 +13,6 @@ const MentionedUserLink: Component<{
   openInNewTab?: boolean,
   id?: string,
 }> = (props) => {
-
-  const intl = useIntl();
 
   const LinkComponent: Component<{ children: JSXElement }> = (p) => {
 
@@ -63,7 +60,7 @@ const MentionedUserLink: Component<{
 
   return (
     <LinkComponent>
-      @{userName(props.user) || intl.formatMessage(unknown)}
+      @{userName(props.user) || 'UNKNOWN'}
     </LinkComponent>
   );
 }
