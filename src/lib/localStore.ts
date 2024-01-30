@@ -18,7 +18,7 @@ export type LocalStore = {
     stats: Record<string, UserStats>,
   },
   emojiHistory: EmojiOption[],
-  noteDraft: string,
+  noteDraft: Record<string, string>,
 };
 
 export const emptyStorage = {
@@ -35,7 +35,7 @@ export const emptyStorage = {
   userProfile: undefined,
   recomended: { profiles: [], stats: {} },
   emojiHistory: [],
-  noteDraft: '',
+  noteDraft: {},
 }
 
 export const storageName = (pubkey?: string) => {
@@ -204,26 +204,38 @@ export const readEmojiHistory = (pubkey: string | undefined) => {
   return emojis || [];
 }
 
-export const saveNoteDraft = (pubkey: string | undefined, draft: string) => {
+export const saveNoteDraft = (pubkey: string | undefined, draft: string, replyTo?: string) => {
   if (!pubkey) {
     return;
   }
 
   const store = getStorage(pubkey);
 
-  store.noteDraft = draft;
+  const key = replyTo || 'root';
+
+  if (!store.noteDraft || typeof store.noteDraft === 'string') {
+    store.noteDraft = {};
+  }
+
+  store.noteDraft[key] = draft;
 
   setStorage(pubkey, store);
 }
 
-export const readNoteDraft = (pubkey: string | undefined) => {
+export const readNoteDraft = (pubkey: string | undefined, replyTo?: string) => {
   if (!pubkey) {
     return '';
   }
 
   const store = getStorage(pubkey);
 
-  return store.noteDraft || '';
+  if (!store.noteDraft || typeof store.noteDraft === 'string') {
+    store.noteDraft = {};
+  }
+
+  const key = replyTo || 'root';
+
+  return store.noteDraft[key] || '';
 }
 
 export const saveHomeSidebarSelection = (pubkey: string | undefined, selection: SelectionOption | undefined) => {

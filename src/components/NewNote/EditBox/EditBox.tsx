@@ -434,22 +434,22 @@ const EditBox: Component<{
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.addEventListener('input', onExpandableTextareaInput);
-    editWrap?.addEventListener('keydown', onKeyDown);
+    editWrap?.addEventListener('keyup', onKeyDown);
     // editWrap?.addEventListener('drop', onDrop, false);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.removeEventListener('input', onExpandableTextareaInput);
-    editWrap?.removeEventListener('keydown', onKeyDown);
+    editWrap?.removeEventListener('keyup', onKeyDown);
     // editWrap?.removeEventListener('drop', onDrop, false);
   });
 
   createEffect(() => {
-    editWrap?.removeEventListener('keydown', onEscape);
+    editWrap?.removeEventListener('keyup', onEscape);
 
     if (!isPickingEmoji()) {
-      editWrap?.addEventListener('keydown', onEscape);
+      editWrap?.addEventListener('keyup', onEscape);
     }
   });
 
@@ -493,8 +493,8 @@ const EditBox: Component<{
   });
 
   createEffect(() => {
-    if (props.open && !props.replyToNote) {
-      const draft = readNoteDraft(account?.publicKey);
+    if (props.open) {
+      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
 
       setMessage(draft);
       if (textArea)
@@ -503,12 +503,18 @@ const EditBox: Component<{
   })
 
   const onEscape = (e: KeyboardEvent) => {
+    if (isConfirmEditorClose()) return;
+
+    e.stopPropagation();
     if (e.code === 'Escape') {
       if (isPickingEmoji()) return;
 
-      !isMentioning() && !isEmojiInput() ?
-        closeEditor() :
+      if (isMentioning() || isEmojiInput()) {
         closeEmojiAndMentions();
+        return;
+      }
+
+      closeEditor();
     }
   };
 
@@ -525,17 +531,12 @@ const EditBox: Component<{
   };
 
   const closeEditor = () => {
-    if (props.replyToNote) {
-      clearEditor();
-      return;
-    }
-
     if (message().trim().length > 0) {
       setConfirmEditorClose(true);
       return;
     }
 
-    saveNoteDraft(account?.publicKey, '');
+    saveNoteDraft(account?.publicKey, '', props.replyToNote?.post.noteId);
     clearEditor();
   };
 
@@ -547,7 +548,7 @@ const EditBox: Component<{
   };
 
   const persistNote = (note: string) => {
-    saveNoteDraft(account?.publicKey, note);
+    saveNoteDraft(account?.publicKey, note, props.replyToNote?.post.noteId);
     clearEditor();
   };
 

@@ -13,6 +13,7 @@ const Modal: Component<{
 }> = (props) => {
 
   const onKey = (e: KeyboardEvent) => {
+    e.stopPropagation();
     if (e.code === 'Escape') {
       props.onClose && props.onClose(e);
       return;
@@ -21,10 +22,10 @@ const Modal: Component<{
 
   createEffect(() => {
     if (props.open) {
-      window.addEventListener('keydown', onKey);
+      window.addEventListener('keyup', onKey);
     }
     else {
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('keyup', onKey);
     }
   });
 

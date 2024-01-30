@@ -22,6 +22,7 @@ const EmojiPickPopover: Component<{
   const [showPreset, setShowPreset] = createSignal(true);
 
   const onKey = (e: KeyboardEvent) => {
+    e.stopPropagation();
     if (e.code === 'Escape') {
       props.onClose(e);
       return;
@@ -59,13 +60,13 @@ const EmojiPickPopover: Component<{
       setEmojiSearchTerm(() => defaultTerm);
       setFocusInput(() => true);
       setFocusInput(() => false);
-      window.addEventListener('keydown', onKey);
+      window.addEventListener('keyup', onKey);
       window.addEventListener('click', onClickOutside);
     }, 10);
   });
 
   onCleanup(() => {
-    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('keyup', onKey);
     window.removeEventListener('click', onClickOutside);
   });
 
