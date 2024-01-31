@@ -294,6 +294,7 @@ const EditBox: Component<{
       return false;
     }
 
+
     if (!isMentioning() && e.key === '@') {
       mentionCursorPosition = getCaretCoordinates(textArea, textArea.selectionStart);
 
@@ -434,14 +435,14 @@ const EditBox: Component<{
   onMount(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.addEventListener('input', onExpandableTextareaInput);
-    editWrap?.addEventListener('keyup', onKeyDown);
+    editWrap?.addEventListener('keydown', onKeyDown);
     // editWrap?.addEventListener('drop', onDrop, false);
   });
 
   onCleanup(() => {
     // @ts-expect-error TODO: fix types here
     editWrap?.removeEventListener('input', onExpandableTextareaInput);
-    editWrap?.removeEventListener('keyup', onKeyDown);
+    editWrap?.removeEventListener('keydown', onKeyDown);
     // editWrap?.removeEventListener('drop', onDrop, false);
   });
 
