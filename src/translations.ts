@@ -1936,7 +1936,7 @@ export const upload = {
   },
   fileTooBig: {
     id: 'upload.fileTooBig',
-    defaultMessage: 'File too big, Upload limit is 100MB.',
+    defaultMessage: 'File too big. Upload limit is 100MB.',
     description: 'Faces emoji group title',
   },
 };
