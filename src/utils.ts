@@ -96,3 +96,14 @@ export const getScreenCordinates = (obj: any) =>  {
 }
 
 export const timeNow = () => Math.floor((new Date()).getTime() / 1000);
+
+export const sha256 = async (file: File) => {
+  const obj = await file.arrayBuffer();
+  return crypto.subtle.digest('SHA-256', obj).then((hashBuffer) => {
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((bytes) => bytes.toString(16).padStart(2, '0'))
+      .join('');
+    return hashHex;
+  });
+}

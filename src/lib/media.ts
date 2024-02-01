@@ -1,4 +1,5 @@
 import { Kind } from "../constants";
+import { messages } from "../translations";
 import { sendMessage } from "../uploadSocket";
 import { signEvent } from "./nostrAPI";
 
@@ -95,11 +96,7 @@ export const uploadMediaChunk = async (
       socket.dispatchEvent(e);
     } else {
       console.log('NO SOCKET')
-      sendMessage(JSON.stringify([
-        "REQ",
-        subid,
-        {cache: ["upload_chunk", { event_from_user: signedNote }]},
-      ]));
+      sendMessage(message);
     }
 
 
@@ -115,6 +112,7 @@ export const uploadMediaCancel = async (
   uploader: string | undefined,
   subid: string,
   uploadId: string,
+  socket: WebSocket | undefined,
 ) => {
   if (!uploader) {
     return false;
@@ -132,11 +130,18 @@ export const uploadMediaCancel = async (
   try {
     const signedNote = await signEvent(event);
 
-    sendMessage(JSON.stringify([
+    const message = JSON.stringify([
       "REQ",
       subid,
-      {cache: ["upload_cancel", { event_from_user: signedNote }]},
-    ]));
+      {cache: ["upload_chunk", { event_from_user: signedNote }]},
+    ])
+
+    if (socket) {
+      socket.send(message);
+    } else {
+      console.log('NO SOCKET')
+      sendMessage(message);
+    }
 
     return true;
   } catch (reason) {
@@ -151,6 +156,7 @@ export const uploadMediaConfirm = async (
   uploadId: string,
   fileLength: number,
   sha256: string,
+  socket: WebSocket | undefined,
 ) => {
   if (!uploader) {
     return false;
@@ -170,11 +176,18 @@ export const uploadMediaConfirm = async (
   try {
     const signedNote = await signEvent(event);
 
-    sendMessage(JSON.stringify([
+    const message = JSON.stringify([
       "REQ",
       subid,
       {cache: ["upload_complete", { event_from_user: signedNote }]},
-    ]));
+    ]);
+
+    if (socket) {
+      socket.send(message);
+    } else {
+      console.log('NO SOCKET')
+      sendMessage(message);
+    }
 
     return true;
   } catch (reason) {

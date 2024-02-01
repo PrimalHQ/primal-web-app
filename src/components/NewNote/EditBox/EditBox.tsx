@@ -45,6 +45,7 @@ import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
 import { readNoteDraft, readUploadTime, saveNoteDraft, saveUploadTime } from "../../../lib/localStore";
 import { Progress } from "@kobalte/core";
+import Uploader from "../../Uploader/Uploader";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -99,72 +100,11 @@ const EditBox: Component<{
 
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
-  const MB = 1024 * 1024;
-  const maxParallelChunks = 5;
-  let chunkLimit = maxParallelChunks;
-
-  type FileSize = 'small' | 'medium' | 'large' | 'huge' | 'final';
-
-  type UploadState = {
-    isUploading: boolean,
-    progress: number,
-    id?: string,
-    file?: File,
-    offset: number,
-    chunkSize: number,
-    chunkMap: number[],
-    uploadedChunks: number,
-    chunkIndex: number,
-    fileSize: FileSize,
-  }
-
-  const [uploadState, setUploadState] = createStore<UploadState>({
-    isUploading: false,
-    progress: 0,
-    offset: 0,
-    chunkSize: MB,
-    chunkMap: [],
-    uploadedChunks: 0,
-    chunkIndex: 0,
-    fileSize: 'small',
-  });
+  const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
   const location = useLocation();
 
   let currentPath = location.pathname;
-
-  let sockets: WebSocket[] = [];
-
-  createEffect(() => {
-    if (props.open) {
-      for (let i=0; i < maxParallelChunks; i++) {
-        const socket = new WebSocket(uploadServer);
-        sockets.push(socket);
-      }
-    }
-    else {
-      sockets.forEach(s => s.close());
-      sockets = [];
-    }
-  });
-
-  const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
-    const listener = (event: MessageEvent) => {
-      const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-      const [type, subscriptionId, content] = message;
-
-      if (subId === subscriptionId) {
-        cb(type, subscriptionId, content);
-      }
-
-    };
-
-    socket.addEventListener('message', listener);
-
-    return () => {
-      socket.removeEventListener('message', listener);
-    };
-  };
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -223,9 +163,10 @@ const EditBox: Component<{
       return false;
     }
 
-    if (uploadState.isUploading) {
+    if (fileToUpload()) {
       return;
     }
+
     const previousChar = textArea.value[textArea.selectionStart - 1];
 
     const mentionSeparators = ['Enter', 'Space', 'Comma', 'Tab'];
@@ -461,7 +402,8 @@ const EditBox: Component<{
     let file = draggedData?.files[0];
 
 
-    file && isSupportedFileType(file) && uploadFile(file);
+    console.log('DROP')
+    file && isSupportedFileType(file) && setFileToUpload(file);
 
   };
 
@@ -492,7 +434,8 @@ const EditBox: Component<{
     if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
       e.preventDefault();
       const file = e.clipboardData.files[0];
-      file && isSupportedFileType(file) && uploadFile(file);
+      console.log('PASTE')
+      file && isSupportedFileType(file) && setFileToUpload(file);
       return false;
     }
   }
@@ -585,26 +528,12 @@ const EditBox: Component<{
   };
 
   const resetUpload = () => {
-    setUploadState(reconcile({
-      isUploading: false,
-      file: undefined,
-      id: undefined,
-      progress: 0,
-      offset: 0,
-      chunkSize: MB,
-      chunkMap: [],
-      uploadedChunks: 0,
-      chunkIndex: 0,
-      fileSize: 'small',
-    }));
-
     if (fileUpload) {
       fileUpload.value = '';
     }
 
-    uploadChunkAttempts = [];
-
-    console.log('UPLOAD RESET: ', {...uploadState})
+    console.log('RESET')
+    setFileToUpload(undefined);
   };
 
   const clearEditor = () => {
@@ -616,10 +545,6 @@ const EditBox: Component<{
     setEmojiInput(false);
     setEmojiQuery('')
     setEmojiResults(() => []);
-
-    if (uploadState.isUploading) {
-      uploadMediaCancel(account?.publicKey, `up_c_${uploadState.id}`, uploadState.id || '');
-    }
 
     resetUpload();
 
@@ -651,7 +576,7 @@ const EditBox: Component<{
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postNote = async () => {
-    if (!account || !account.hasPublicKey() || uploadState.isUploading || isInputting()) {
+    if (!account || !account.hasPublicKey() || fileToUpload() || isInputting()) {
       return;
     }
 
@@ -1073,7 +998,7 @@ const EditBox: Component<{
   const [isInputting, setIsInputting] = createSignal(false);
 
   const onInput = (e: InputEvent) => {
-    if (uploadState.isUploading) {
+    if (fileToUpload()) {
       e.preventDefault();
       return false;
     }
@@ -1246,238 +1171,10 @@ const EditBox: Component<{
 
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
+    console.log('SELECT')
     // @ts-ignore fileUpload.value assignment
-    file && isSupportedFileType(file) && uploadFile(file);
+    file && isSupportedFileType(file) && setFileToUpload(file);
 
-  }
-
-
-  const sha256 = async (file: File) => {
-    const obj = await file.arrayBuffer();
-    return crypto.subtle.digest('SHA-256', obj).then((hashBuffer) => {
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray
-        .map((bytes) => bytes.toString(16).padStart(2, '0'))
-        .join('');
-      return hashHex;
-    });
-  }
-
-  createEffect(() => {
-    if (uploadState.isUploading) {
-      uploadChunk(uploadState.chunkIndex);
-    }
-  })
-
-  let times: number[] = [];
-  let subIdComplete = 'up_comp_';
-
-  const maxChunkAttempts = 5;
-  let uploadChunkAttempts: number[] = [];
-
-  let initUploadTime = readUploadTime(account?.publicKey);
-
-  const failUpload = () => {
-    toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-      file: uploadState.file?.name,
-    }));
-
-    resetUpload();
-  };
-
-  const uploadChunk = (index: number) => {
-    const { file, chunkSize, id, chunkMap } = uploadState;
-
-    const offset = chunkMap[index];
-
-    if (!file || !id) return;
-
-    const reader = new FileReader();
-
-    const nextOffset = offset + chunkSize;
-
-    let chunk = file.slice(offset, nextOffset);
-
-    reader.onload = (e) => {
-      if (!e.target?.result) {
-        return;
-      }
-
-      const subid = `up_${index}_${uploadChunkAttempts[index]}_${id}`;
-
-      const data = e.target?.result as string;
-
-      const soc = sockets[index % maxParallelChunks];
-
-      const unsub = subTo(soc, subid, async (type, subId, content) => {
-
-        if (type === 'NOTICE') {
-          unsub();
-          if (uploadChunkAttempts[index] < 1) {
-            failUpload();
-            return;
-          }
-
-          uploadChunkAttempts[index]--;
-          uploadChunk(index);
-          return;
-        }
-
-        if (type === 'EOSE') {
-          unsub();
-
-          times[index] = Date.now() - startTimes[index];
-          console.log('UPLOADED: ', uploadState.uploadedChunks, times[index])
-
-          if (!uploadState.isUploading) return;
-
-          setUploadState('uploadedChunks', n => n+1);
-
-          const len = chunkMap.length;
-
-          const progress = Math.floor(uploadState.uploadedChunks * Math.floor(100 / uploadState.chunkMap.length)) - 1;
-          console.log('PROGRESS: ', progress, uploadState.uploadedChunks)
-          setUploadState('progress', () => progress);
-
-          if (uploadState.uploadedChunks < len && uploadState.chunkIndex < len - 1) {
-            setUploadState('chunkIndex', i => i+1);
-            return;
-          }
-
-          if (uploadState.uploadedChunks === len) {
-
-            console.log('UPLOADED LAST', times, (times.reduce((acc, t) => acc + t, 0) / times.length));
-
-            const sha = await sha256(file);
-
-            uploadMediaConfirm(account?.publicKey, subIdComplete, uploadState.id || '', file.size, sha);
-
-
-            setTimeout(() => {
-              resetUpload();
-            }, 1_000);
-
-            return;
-          }
-
-        }
-      });
-
-      const rate = initUploadTime[uploadState.fileSize];
-      progressFill?.style.setProperty('--progress-rate', `${rate + rate / 4}ms`);
-
-      let fsize = file.size;
-
-      console.log('UPLOADING ', index, fsize)
-      uploadMediaChunk(account?.publicKey, subid, id, data, offset, fsize, soc, index);
-    }
-
-    reader.readAsDataURL(chunk);
-
-  };
-
-  let totalStart = 0;
-  let totalEnd = 0;
-
-  const uploadFile = (file: File) => {
-    if (file.size >= MB * 100) {
-      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
-      return;
-    }
-
-    let chunkSize = MB;
-    let fileSize: FileSize = 'huge';
-
-    if (file.size < MB / 2) {
-      chunkSize = file.size;
-      fileSize = 'small';
-    }
-    else if (file.size < MB) {
-      chunkSize = Math.ceil(MB / 4);
-      fileSize = 'medium';
-    }
-    else if (file.size < 12 * MB) {
-      chunkSize = Math.ceil(MB / 2);
-      fileSize = 'large';
-    }
-
-    let sum = 0;
-
-    let chunkMap: number[] = [];
-
-    while (sum < file.size) {
-      if (sum >= file.size) break;
-
-      chunkMap.push(sum);
-      sum += chunkSize;
-    }
-
-    console.log('FILE SIZE: ', fileSize)
-
-    setUploadState(() => ({
-      isUploading: true,
-      file,
-      id: uuidv4(),
-      progress: 0,
-      offset: 0,
-      chunkSize,
-      chunkMap,
-      chunkIndex: 0,
-      fileSize,
-    }))
-
-    subIdComplete = `up_comp_${uploadState.id}`;
-
-    const unsubComplete = uploadSub(subIdComplete, (type, subId, content) => {
-      if (type === 'NOTICE') {
-        unsubComplete();
-        failUpload();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
-
-        if (content.kind === Kind.Uploaded) {
-          const up = content as NostrMediaUploaded;
-
-          totalEnd = Date.now();
-          const average = (totalEnd - totalStart) / uploadState.uploadedChunks;
-
-          saveUploadTime(account?.publicKey, { [uploadState.fileSize]: average });
-
-          console.log('TOTAL TIME: ', uploadState.progress, totalEnd - totalStart, average);
-
-          progressFill?.style.setProperty('--progress-rate', `${100}ms`);
-          setTimeout(() => {
-            setUploadState('progress', () => 100);
-          }, 10)
-
-          insertAtCursor(`${up.content} `);
-          return;
-        }
-      }
-
-      if (type === 'EOSE') {
-        unsubComplete();
-        return;
-      }
-
-    });
-
-    uploadChunkAttempts = Array(chunkMap.length).fill(maxChunkAttempts);
-
-    console.log('UPLOAD ATTEMPTS: ', uploadChunkAttempts)
-
-    chunkLimit = Math.min(maxParallelChunks, chunkMap.length - 2);
-
-    totalStart = Date.now();
-
-    for (let i=0;i < chunkLimit; i++) {
-      setUploadState('chunkIndex', () => i);
-    }
   }
 
   const [isPickingEmoji, setIsPickingEmoji] = createSignal(false);
@@ -1540,7 +1237,7 @@ const EditBox: Component<{
             onInput={onInput}
             ref={textArea}
             onPaste={onPaste}
-            readOnly={uploadState.isUploading}
+            readOnly={fileToUpload() !== undefined}
           >
           </textarea>
           <div
@@ -1557,36 +1254,31 @@ const EditBox: Component<{
             ref={textPreview}
             innerHTML={parsedMessage()}
           ></div>
-          <Show when={uploadState.id}>
-            <Progress.Root value={uploadState.progress} class={styles.uploadProgress}>
-              <div class={styles.progressLabelContainer}>
-                <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
-              </div>
-              <div class={styles.progressTrackContainer}>
-                <Progress.Track class={styles.progressTrack}>
-                  <Progress.Fill
-                    ref={progressFill}
-                    class={`${styles.progressFill} ${styles[uploadState.fileSize]}`}
-                  />
-                </Progress.Track>
-
-                <ButtonGhost
-                  onClick={() => {
-                    uploadMediaCancel(account?.publicKey, `up_c_${uploadState.id}`, uploadState.id || '');
-                    resetUpload();
-                  }}
-                  disabled={uploadState.progress > 100}
-                >
-                  <Show
-                    when={(uploadState.progress < 100)}
-                    fallback={<div class={styles.iconCheck}></div>}
-                  >
-                    <div class={styles.iconClose}></div>
-                  </Show>
-                </ButtonGhost>
-              </div>
-            </Progress.Root>
-          </Show>
+          <Uploader
+            publicKey={account?.publicKey}
+            openSockets={props.open}
+            file={fileToUpload()}
+            onFail={() => {
+              toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                file: fileToUpload()?.name,
+              }));
+              resetUpload();
+            }}
+            onRefuse={(reason: string) => {
+              if (reason === 'file_too_big') {
+                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+              }
+              resetUpload();
+            }}
+            onCancel={() => {
+              resetUpload();
+            }}
+            onSuccsess={(url:string) => {
+              console.log('SUCCESS')
+              insertAtCursor(`${url} `);
+              resetUpload();
+            }}
+          />
         </div>
       </div>
 
@@ -1695,7 +1387,7 @@ const EditBox: Component<{
         <div class={styles.editorDescision}>
           <ButtonPrimary
             onClick={postNote}
-            disabled={isPostingInProgress() || uploadState.isUploading || message().trim().length === 0}
+            disabled={isPostingInProgress() || fileToUpload() || message().trim().length === 0}
           >
             {intl.formatMessage(tActions.notePostNew)}
           </ButtonPrimary>
