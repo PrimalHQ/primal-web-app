@@ -136,7 +136,7 @@ const Search: Component<{
         />
       </form>
 
-      <Show when={isFocused()}>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
         <Show
           when={!props.hideDefault}
         >
@@ -159,31 +159,31 @@ const Search: Component<{
             />
           </Show>
         </Show>
+      </div>
 
-        <div class={styles.searchSuggestions}>
-          <Show when={search?.isFetchingUsers && query().length > 0}>
-            <div class={styles.loadingOverlay}>
-              <div>
-                <Loader />
-              </div>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
+        <Show when={search?.isFetchingUsers && query().length > 0}>
+          <div class={styles.loadingOverlay}>
+            <div>
+              <Loader />
             </div>
-          </Show>
+          </div>
+        </Show>
 
-          <For each={search?.users}>
-            {(user) => (
-              <SearchOption
-                href={props.noLinks ? undefined : `/p/${user.npub}`}
-                title={userName(user)}
-                description={nip05Verification(user)}
-                icon={<Avatar user={user} size="vvs" />}
-                statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-                statLabel={intl.formatMessage(t.followers)}
-                onClick={() => selectUser(user)}
-              />
-            )}
-          </For>
-        </div>
-      </Show>
+        <For each={search?.users}>
+          {(user) => (
+            <SearchOption
+              href={props.noLinks ? undefined : `/p/${user.npub}`}
+              title={userName(user)}
+              description={nip05Verification(user)}
+              icon={<Avatar user={user} size="vvs" />}
+              statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+              statLabel={intl.formatMessage(t.followers)}
+              onClick={() => selectUser(user)}
+            />
+          )}
+        </For>
+      </div>
     </div>
   )
 }

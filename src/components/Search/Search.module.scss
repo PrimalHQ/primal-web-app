@@ -83,6 +83,12 @@
 .searchSuggestions {
   margin-top: 8px;
   width: 316px;
+  visibility: visible;
+
+  &.hidden {
+    visibility: hidden;
+    height: 0;
+  }
 }
 
 .loadingOverlay {
