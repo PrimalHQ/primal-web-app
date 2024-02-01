@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
 import Loader from '../components/Loader/Loader';
@@ -19,6 +19,7 @@ import {
   account as tAccount,
   settings as tSettings,
   toast as tToast,
+  upload as tUpload,
 } from '../translations';
 import { NostrMediaUploaded, NostrRelays, NostrUserContent, PrimalUser, UserCategory } from '../types/primal';
 
@@ -40,6 +41,7 @@ import { arrayMerge } from '../utils';
 import { stringStyleToObject } from '@solid-primitives/props';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
+import Uploader from '../components/Uploader/Uploader';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -58,14 +60,24 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
   const [isBannerCached, setIsBannerCached] = createSignal(false);
   const [isMoreVisible, setIsMoreVisible] = createSignal(false);
-  const [isUploadingAvatar, setIsUploadingAvatar] = createSignal(false);
-  const [isUploadingBanner, setIsUploadingBanner] = createSignal(false);
 
   const [avatarPreview, setAvatarPreview] = createSignal<string>();
   const [bannerPreview, setBannerPreview] = createSignal<string>();
 
   const [accountName, setAccountName] = createSignal('');
   const [isNameValid, setIsNameValid] = createSignal<boolean>(false);
+
+  const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
+  const [uploadTarget, setUploadTarget] = createSignal<'picture' | 'banner' | 'none'>('none');
+  const [openSockets, setOpenSockets] = createSignal(false);
+
+  createEffect(() => {
+    setOpenSockets(() => currentStep() === 'name');
+  });
+
+  onCleanup(() => {
+    setOpenSockets(false);
+  });
 
   const flagBannerForWarning = () => {
     const dev = localStorage.getItem('devMode') === 'true';
@@ -129,6 +141,19 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     setIsNameValid(usernameRegex.test(value))
   };
 
+  const resetUpload = () => {
+    if (fileUploadAvatar) {
+      fileUploadAvatar.value = '';
+    }
+
+    if (fileUploadBanner) {
+      fileUploadBanner.value = '';
+    }
+
+    setFileToUpload(undefined);
+    setUploadTarget('none');
+  };
+
   const onUpload = (target: 'picture' | 'banner', fileUpload: HTMLInputElement | undefined) => {
 
     if (!fileUpload) {
@@ -137,71 +162,10 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
-    // @ts-ignore fileUpload.value assignment
-    file && uploadFile(file, target, () => fileUpload.value = null);
-
-  }
-
-  const uploadFile = (file: File, target: 'picture' | 'banner', callback?: () => void) => {
-    target === 'banner' && setIsUploadingBanner(true);
-    target === 'picture' && setIsUploadingAvatar(true);
-
-    const reader = new FileReader();
-
-    reader.onload = (e) => {
-      if (!e.target?.result) {
-        return;
-      }
-
-      const subid = `upload_${APP_ID}`;
-
-      const data = e.target?.result as string;
-
-      const unsub = uploadSub(subid, (type, subId, content) => {
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
-
-          if (content.kind === Kind.Uploaded) {
-            const uploaded = content as NostrMediaUploaded;
-
-            if (target === 'picture') {
-              setAvatarPreview(uploaded.content);
-              return
-            }
-
-            if (target === 'banner') {
-              setBannerPreview(uploaded.content);
-              return
-            }
-
-            return;
-          }
-        }
-
-        if (type === 'NOTICE') {
-          target === 'banner' && setIsUploadingBanner(false);
-          target === 'picture' && setIsUploadingAvatar(false);
-          unsub();
-          return;
-        }
-
-        if (type === 'EOSE') {
-          target === 'banner' && setIsUploadingBanner(false);
-          target === 'picture' && setIsUploadingAvatar(false);
-          unsub();
-          return;
-        }
-      });
-
-      uploadMedia(createdAccount.pubkey, subid, data);
+    if (file) {
+      setUploadTarget(target);
+      setFileToUpload(file);
     }
-
-    reader.readAsDataURL(file);
-
-    callback && callback();
   }
 
   const onSubmit = async (e: SubmitEvent) => {
@@ -464,8 +428,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
               </Match>
             </Switch>
             <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
-              <Show when={isUploadingBanner()}>
-                <div class={styles.uploadingOverlay}><Loader /></div>
+              <Show when={fileToUpload() !== undefined}>
+                <div class={styles.uploadingOverlay}></div>
               </Show>
               <Show
                 when={banner()}
@@ -489,8 +453,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
             <div class={styles.userImage}>
               <div class={styles.avatar}>
-                <Show when={isUploadingAvatar()}>
-                  <div class={styles.uploadingOverlay}><Loader /></div>
+                <Show when={fileToUpload() !== undefined}>
+                  <div class={styles.uploadingOverlay}></div>
                 </Show>
                 <label for="upload-avatar">
                   <div class={styles.desktopAvatar}>
@@ -517,32 +481,70 @@ const CreateAccount: Component = () => {  const intl = useIntl();
               }
             >
               <div class={styles.uploadActions}>
-                <div class={styles.uploadButton}>
-                  <input
-                    id="upload-avatar"
-                    type="file"
-                    onChange={() => onUpload('picture', fileUploadAvatar)}
-                    ref={fileUploadAvatar}
-                    hidden={true}
-                    accept="image/*"
-                  />
-                  <label for="upload-avatar">
-                  {intl.formatMessage(tSettings.profile.uploadAvatar)}
-                  </label>
-                </div>
+                <div class={styles.uploader}>
+                  <Uploader
+                    hideLabel={true}
+                    publicKey={account?.publicKey}
+                    openSockets={openSockets()}
+                    file={fileToUpload()}
+                    onFail={() => {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                        file: fileToUpload()?.name,
+                      }));
+                      resetUpload();
+                    }}
+                    onRefuse={(reason: string) => {
+                      if (reason === 'file_too_big') {
+                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+                      }
+                      resetUpload();
+                    }}
+                    onCancel={() => {
+                      resetUpload();
+                    }}
+                    onSuccsess={(url:string) => {
+                      console.log('SUCCESS')
 
-                <div class={styles.uploadButton}>
-                  <input
-                    id="upload-banner"
-                    type="file"
-                    onchange={() => onUpload('banner', fileUploadBanner)}
-                    ref={fileUploadBanner}
-                    hidden={true}
-                    accept="image/*"
+                      if (uploadTarget() === 'picture') {
+                        setAvatarPreview(url);
+                      }
+
+                      if (uploadTarget() === 'banner') {
+                        setBannerPreview(url);
+                      }
+
+                      resetUpload();
+                    }}
                   />
-                  <label for="upload-banner">
-                  {intl.formatMessage(tSettings.profile.uploadBanner)}
-                  </label>
+                </div>
+                <div>
+                  <div class={styles.uploadButton}>
+                    <input
+                      id="upload-avatar"
+                      type="file"
+                      onChange={() => onUpload('picture', fileUploadAvatar)}
+                      ref={fileUploadAvatar}
+                      hidden={true}
+                      accept="image/*"
+                    />
+                    <label for="upload-avatar">
+                    {intl.formatMessage(tSettings.profile.uploadAvatar)}
+                    </label>
+                  </div>
+
+                  <div class={styles.uploadButton}>
+                    <input
+                      id="upload-banner"
+                      type="file"
+                      onchange={() => onUpload('banner', fileUploadBanner)}
+                      ref={fileUploadBanner}
+                      hidden={true}
+                      accept="image/*"
+                    />
+                    <label for="upload-banner">
+                    {intl.formatMessage(tSettings.profile.uploadBanner)}
+                    </label>
+                  </div>
                 </div>
               </div>
             </Show>

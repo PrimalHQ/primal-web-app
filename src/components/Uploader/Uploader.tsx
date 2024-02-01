@@ -1,4 +1,4 @@
-import { Component, createEffect, JSXElement, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, onCleanup, Show } from 'solid-js';
 import { Progress, TextField } from '@kobalte/core';
 
 import styles from './Uploader.module.scss';
@@ -35,6 +35,7 @@ type UploadState = {
 const Uploader: Component<{
   publicKey?: string,
   openSockets?: boolean,
+  hideLabel?: boolean,
   file: File | undefined,
   onFail?: (reason: string) => void,
   onRefuse?: (reason: string) => void,
@@ -86,9 +87,13 @@ const Uploader: Component<{
     else {
       sockets.forEach(s => s.close());
       sockets = [];
-      // resetUpload();
     }
   });
+
+  onCleanup(() => {
+    sockets.forEach(s => s.close());
+    sockets = [];
+  })
 
   createEffect(() => {
     if (uploadState.isUploading && uploadState.chunkIndex >= 0) {
@@ -350,9 +355,11 @@ const Uploader: Component<{
   return (
     <Show when={uploadState.id}>
       <Progress.Root value={uploadState.progress} class={styles.uploadProgress}>
-        <div class={styles.progressLabelContainer}>
-          <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
-        </div>
+        <Show when={!props.hideLabel}>
+          <div class={styles.progressLabelContainer}>
+            <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
+          </div>
+        </Show>
         <div class={styles.progressTrackContainer}>
           <Progress.Track class={styles.progressTrack}>
             <Progress.Fill

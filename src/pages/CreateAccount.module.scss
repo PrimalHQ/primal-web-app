@@ -141,7 +141,20 @@
 
 .uploadActions {
   display: flex;
-  justify-content: flex-end;
+  // justify-content: flex-end;
+  align-items: flex-end;
+  flex-direction: column;
+
+  >div {
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+  }
+
+  .uploader {
+    width: 420px;
+    height: 20px;
+  }
 
   .separator {
     width: 1px;
@@ -163,7 +176,7 @@
     height: 32px;
     padding: 0;
     padding-top: 4px;
-    margin-block: 28px;
+    margin-block: 8px;
     margin-inline: 10px;
     font-size: 16px;
     font-weight: 400;

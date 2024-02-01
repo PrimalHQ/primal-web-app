@@ -1254,31 +1254,33 @@ const EditBox: Component<{
             ref={textPreview}
             innerHTML={parsedMessage()}
           ></div>
-          <Uploader
-            publicKey={account?.publicKey}
-            openSockets={props.open}
-            file={fileToUpload()}
-            onFail={() => {
-              toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                file: fileToUpload()?.name,
-              }));
-              resetUpload();
-            }}
-            onRefuse={(reason: string) => {
-              if (reason === 'file_too_big') {
-                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
-              }
-              resetUpload();
-            }}
-            onCancel={() => {
-              resetUpload();
-            }}
-            onSuccsess={(url:string) => {
-              console.log('SUCCESS')
-              insertAtCursor(`${url} `);
-              resetUpload();
-            }}
-          />
+          <div class={styles.uploader}>
+            <Uploader
+              publicKey={account?.publicKey}
+              openSockets={props.open}
+              file={fileToUpload()}
+              onFail={() => {
+                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                  file: fileToUpload()?.name,
+                }));
+                resetUpload();
+              }}
+              onRefuse={(reason: string) => {
+                if (reason === 'file_too_big') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+                }
+                resetUpload();
+              }}
+              onCancel={() => {
+                resetUpload();
+              }}
+              onSuccsess={(url:string) => {
+                console.log('SUCCESS')
+                insertAtCursor(`${url} `);
+                resetUpload();
+              }}
+            />
+          </div>
         </div>
       </div>
 

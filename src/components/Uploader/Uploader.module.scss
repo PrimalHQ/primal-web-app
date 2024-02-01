@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 484px;
+  width: 100%;
 
   .progressLabelContainer {
     display: flex;
@@ -43,7 +43,7 @@
     }
   }
   .progressTrack {
-    width: 460px;
+    width: calc(100% - 24px);
     height: 2px;
     background-color: var(--background-input);
     border-radius: 1px;
