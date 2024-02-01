@@ -503,8 +503,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
                       resetUpload();
                     }}
                     onSuccsess={(url:string) => {
-                      console.log('SUCCESS')
-
                       if (uploadTarget() === 'picture') {
                         setAvatarPreview(url);
                       }

@@ -55,8 +55,9 @@ const Uploader: Component<{
   });
 
   let sockets: WebSocket[] = [];
+  let uploadsInProgress: number[] = [];
 
-  let uploadChunkAttempts: number[] = [];
+  let uploadChunkAttempts: number[] = Array(maxParallelChunks).fill(-1);
 
   let initUploadTime = readUploadTime(props.publicKey);
 
@@ -67,6 +68,8 @@ const Uploader: Component<{
   let subIdComplete = 'up_comp_';
 
   let progressFill: HTMLDivElement | undefined;
+
+  let shouldCloseSockets = false;
 
   createEffect(() => {
     if (props.file !== undefined) {
@@ -79,16 +82,42 @@ const Uploader: Component<{
 
   createEffect(() => {
     if (props.openSockets) {
+      shouldCloseSockets = false;
       for (let i=0; i < maxParallelChunks; i++) {
         const socket = new WebSocket(uploadServer);
+
+        socket.addEventListener('close', () => {
+          if (shouldCloseSockets) return;
+
+          const newSocket = new WebSocket(uploadServer);
+
+          sockets[i] = newSocket;
+
+          const chunkIndex = uploadsInProgress[i];
+          console.log('REOPEN SOCKET: ', i, chunkIndex);
+          if (chunkIndex > 0) {
+            uploadChunk(chunkIndex);
+          }
+        });
+
         sockets.push(socket);
       }
     }
     else {
+      shouldCloseSockets = true;
       sockets.forEach(s => s.close());
       sockets = [];
     }
   });
+
+  createEffect(() => {
+    if (props.file) {
+      setTimeout(() => {
+        const s = sockets[2];
+        s.close();
+      }, 500);
+    }
+  })
 
   onCleanup(() => {
     sockets.forEach(s => s.close());
@@ -97,7 +126,6 @@ const Uploader: Component<{
 
   createEffect(() => {
     if (uploadState.isUploading && uploadState.chunkIndex >= 0) {
-      console.log('EFFECT: ', uploadState.chunkIndex)
       uploadChunk(uploadState.chunkIndex);
     }
   });
@@ -140,8 +168,6 @@ const Uploader: Component<{
     }));
 
     uploadChunkAttempts = [];
-
-    console.log('UPLOAD RESET: ', {...uploadState})
   };
 
   const failUpload = () => {
@@ -172,8 +198,6 @@ const Uploader: Component<{
 
           saveUploadTime(props.publicKey, { [uploadState.fileSize]: average });
 
-          console.log('TOTAL TIME: ', uploadState.progress, totalEnd - totalStart, average);
-
           progressFill?.style.setProperty('--progress-rate', `${100}ms`);
 
           setTimeout(() => {
@@ -190,7 +214,6 @@ const Uploader: Component<{
       }
 
       if (type === 'EOSE') {
-        console.log('UPLOADED COMPLETE EOSE');
         unsubComplete();
         return;
       }
@@ -204,7 +227,6 @@ const Uploader: Component<{
 
 
   const uploadChunk = (index: number) => {
-    console.log('START UPLOAD: ', index);
     const { file, chunkSize, id, chunkMap } = uploadState;
 
     const offset = chunkMap[index];
@@ -226,6 +248,8 @@ const Uploader: Component<{
 
       const data = e.target?.result as string;
 
+      const socIndex = index % maxParallelChunks;
+
       const soc = sockets[index % maxParallelChunks];
 
       const unsub = subTo(soc, subid, (type, subId, content) => {
@@ -237,6 +261,7 @@ const Uploader: Component<{
             return;
           }
 
+          uploadsInProgress[socIndex] = -1;
           uploadChunkAttempts[index]--;
           uploadChunk(index);
           return;
@@ -244,6 +269,7 @@ const Uploader: Component<{
 
         if (type === 'EOSE') {
           unsub();
+          uploadsInProgress[socIndex] = -1;
 
           times[index] = Date.now() - startTimes[index];
 
@@ -251,20 +277,16 @@ const Uploader: Component<{
 
           setUploadState('uploadedChunks', n => n+1);
 
-          console.log('UPLOADED: ', uploadState.chunkIndex,  uploadState.uploadedChunks)
-
           const len = chunkMap.length;
 
           const progress = Math.floor(uploadState.uploadedChunks * Math.floor(100 / uploadState.chunkMap.length)) - 1;
-          console.log('PROGRESS: ', progress, uploadState.uploadedChunks, uploadState.chunkIndex)
+
           setUploadState('progress', () => progress);
 
           if (uploadState.uploadedChunks < len && uploadState.chunkIndex < len - 1) {
             setUploadState('chunkIndex', i => i+1);
             return;
           }
-
-          console.log('UP: ', uploadState.uploadedChunks, len)
 
           if (uploadState.uploadedChunks === len) {
             onUploadCompleted(soc, file);
@@ -279,7 +301,8 @@ const Uploader: Component<{
 
       let fsize = file.size;
 
-      console.log('UPLOADING ', index, fsize)
+      uploadsInProgress[socIndex] = index;
+
       uploadMediaChunk(props.publicKey, subid, id, data, offset, fsize, soc, index);
     }
 
@@ -321,8 +344,6 @@ const Uploader: Component<{
       sum += chunkSize;
     }
 
-    console.log('FILE SIZE: ', fileSize)
-
     setUploadState(() => ({
       isUploading: true,
       file,
@@ -338,8 +359,6 @@ const Uploader: Component<{
     subIdComplete = `up_comp_${uploadState.id}`;
 
     uploadChunkAttempts = Array(chunkMap.length).fill(maxChunkAttempts);
-
-    console.log('UPLOAD ATTEMPTS: ', uploadChunkAttempts)
 
     chunkLimit = Math.min(maxParallelChunks, chunkMap.length - 2);
 

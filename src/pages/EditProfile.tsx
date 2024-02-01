@@ -318,8 +318,6 @@ const EditProfile: Component = () => {
                 resetUpload();
               }}
               onSuccsess={(url:string) => {
-                console.log('SUCCESS')
-
                 if (uploadTarget() === 'picture') {
                   setAvatarPreview(url);
                 }

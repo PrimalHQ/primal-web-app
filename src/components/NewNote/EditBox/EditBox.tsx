@@ -1275,7 +1275,6 @@ const EditBox: Component<{
                 resetUpload();
               }}
               onSuccsess={(url:string) => {
-                console.log('SUCCESS')
                 insertAtCursor(`${url} `);
                 resetUpload();
               }}
