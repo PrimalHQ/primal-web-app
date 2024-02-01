@@ -1,19 +1,16 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { APP_ID } from '../App';
 import Avatar from '../components/Avatar/Avatar';
-import Loader from '../components/Loader/Loader';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useToastContext } from '../components/Toaster/Toaster';
-import { usernameRegex, Kind, suggestedUsersToFollow } from '../constants';
+import { usernameRegex, Kind } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMediaContext } from '../contexts/MediaContext';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { uploadMedia } from '../lib/media';
 import { getProfileContactList, getSuggestions, getUserProfiles, sendProfile } from '../lib/profile';
-import { subscribeTo as uploadSub } from "../uploadSocket";
 import {
   actions as tActions,
   account as tAccount,
@@ -21,24 +18,19 @@ import {
   toast as tToast,
   upload as tUpload,
 } from '../translations';
-import { NostrMediaUploaded, NostrRelays, NostrUserContent, PrimalUser, UserCategory } from '../types/primal';
+import { NostrRelays, NostrUserContent, PrimalUser } from '../types/primal';
 
 import styles from './CreateAccount.module.scss';
 import { createStore, reconcile } from 'solid-js/store';
 import { generateKeys, setTempNsec } from '../lib/PrimalNostr';
-import { hexToNpub, hexToNsec } from '../lib/keys';
+import { hexToNsec } from '../lib/keys';
 import { storeSec } from '../lib/localStore';
-import { getPreConfiguredRelays } from '../lib/relays';
 import CreatePinModal from '../components/CreatePinModal/CreatePinModal';
 import { useSearchContext } from '../contexts/SearchContext';
-import ButtonFollow from '../components/Buttons/ButtonFlip';
-import ButtonTertiary from '../components/Buttons/ButtonTertiary';
 import { sendContacts } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
 import { subscribeTo } from '../sockets';
-import { arrayMerge } from '../utils';
-import { stringStyleToObject } from '@solid-primitives/props';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
 import Uploader from '../components/Uploader/Uploader';

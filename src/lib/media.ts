@@ -1,6 +1,4 @@
 import { Kind } from "../constants";
-import { messages } from "../translations";
-import { sendMessage } from "../uploadSocket";
 import { signEvent } from "./nostrAPI";
 
 export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) => {
@@ -19,38 +17,6 @@ export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) =
 }
 
 export let startTimes: number[] = [];
-
-export const uploadMedia = async (
-  uploader: string | undefined,
-  subid: string,
-  content: string,
-) => {
-  if (!uploader) {
-    return false;
-  }
-
-  const event = {
-    content,
-    kind: Kind.Upload,
-    tags: [['p', uploader]],
-    created_at: Math.floor((new Date()).getTime() / 1000),
-  };
-
-  try {
-    const signedNote = await signEvent(event);
-
-    sendMessage(JSON.stringify([
-      "REQ",
-      subid,
-      {cache: ["upload", { event_from_user: signedNote }]},
-    ]));
-
-    return true;
-  } catch (reason) {
-    console.error('Failed to upload: ', reason);
-    return false;
-  }
-};
 
 export const uploadMediaChunk = async (
   uploader: string | undefined,
@@ -95,8 +61,7 @@ export const uploadMediaChunk = async (
       socket.send(message);
       socket.dispatchEvent(e);
     } else {
-      console.log('NO SOCKET')
-      sendMessage(message);
+      throw('no_socket');
     }
 
 
@@ -139,13 +104,12 @@ export const uploadMediaCancel = async (
     if (socket) {
       socket.send(message);
     } else {
-      console.log('NO SOCKET')
-      sendMessage(message);
+      throw('no_socket');
     }
 
     return true;
   } catch (reason) {
-    console.error('Failed to upload: ', reason);
+    console.error('Failed to cancel upload: ', reason);
     return false;
   }
 };
@@ -185,13 +149,12 @@ export const uploadMediaConfirm = async (
     if (socket) {
       socket.send(message);
     } else {
-      console.log('NO SOCKET')
-      sendMessage(message);
+      throw('no_socket');
     }
 
     return true;
   } catch (reason) {
-    console.error('Failed to upload: ', reason);
+    console.error('Failed to complete upload: ', reason);
     return false;
   }
 };

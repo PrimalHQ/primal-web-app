@@ -1,5 +1,5 @@
-import { Component, createEffect, JSXElement, onCleanup, Show } from 'solid-js';
-import { Progress, TextField } from '@kobalte/core';
+import { Component, createEffect, onCleanup, Show } from 'solid-js';
+import { Progress } from '@kobalte/core';
 
 import styles from './Uploader.module.scss';
 import { uploadServer } from '../../uploadSocket';
@@ -9,7 +9,6 @@ import { readUploadTime, saveUploadTime } from '../../lib/localStore';
 import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from '../../lib/media';
 import { sha256, uuidv4 } from '../../utils';
 import { Kind } from '../../constants';
-import { account } from '../../translations';
 import ButtonGhost from '../Buttons/ButtonGhost';
 
 const MB = 1024 * 1024;
@@ -94,7 +93,6 @@ const Uploader: Component<{
           sockets[i] = newSocket;
 
           const chunkIndex = uploadsInProgress[i];
-          console.log('REOPEN SOCKET: ', i, chunkIndex);
           if (chunkIndex > 0) {
             uploadChunk(chunkIndex);
           }
@@ -109,15 +107,6 @@ const Uploader: Component<{
       sockets = [];
     }
   });
-
-  createEffect(() => {
-    if (props.file) {
-      setTimeout(() => {
-        const s = sockets[2];
-        s.close();
-      }, 500);
-    }
-  })
 
   onCleanup(() => {
     sockets.forEach(s => s.close());

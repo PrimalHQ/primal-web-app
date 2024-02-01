@@ -1,8 +1,6 @@
 import { Component, onCleanup, onMount } from 'solid-js';
 import { AccountProvider } from './contexts/AccountContext';
 import { connect, disconnect } from './sockets';
-import { connect as uploadConnect, disconnect as uploadDisconnet } from './uploadSocket';
-import styles from './App.module.scss';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
 import { ExploreProvider } from './contexts/ExploreContext';
@@ -23,12 +21,10 @@ const App: Component = () => {
 
   onMount(() => {
     connect();
-    uploadConnect();
   });
 
   onCleanup(() => {
     disconnect();
-    uploadDisconnet();
   })
 
   return (

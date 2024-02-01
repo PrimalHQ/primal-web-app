@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import { createStore, reconcile, unwrap } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
@@ -11,10 +11,9 @@ import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
-import { subscribeTo as uploadSub, uploadServer } from "../../../uploadSocket";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUploaded, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -24,9 +23,7 @@ import { useToastContext } from "../../Toaster/Toaster";
 import styles from './EditBox.module.scss';
 import emojiSearch from '@jukben/emoji-search';
 import { getCaretCoordinates } from "../../../lib/textArea";
-import { startTimes, uploadMedia, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from "../../../lib/media";
 import { APP_ID } from "../../../App";
-import Loader from "../../Loader/Loader";
 import {
   toast as tToast,
   feedback as tFeedback,
@@ -43,8 +40,7 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
-import { readNoteDraft, readUploadTime, saveNoteDraft, saveUploadTime } from "../../../lib/localStore";
-import { Progress } from "@kobalte/core";
+import { readNoteDraft, saveNoteDraft } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
