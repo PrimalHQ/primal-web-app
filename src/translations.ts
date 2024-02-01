@@ -738,7 +738,7 @@ export const note = {
     },
     description: {
       id: 'note.saveNoteDraft.description',
-      defaultMessage: 'Do you whish to save this note to continue editing it later?',
+      defaultMessage: 'Do you wish to save this note to continue editing it later?',
       description: 'Description of the confirmation when the note is canceled',
     },
     optionYes: {
