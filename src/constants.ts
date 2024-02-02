@@ -300,8 +300,8 @@ export const iosVersion = '1.1.10';
 export const appStoreLink = 'https://apps.apple.com/us/app/primal/id1673134518';
 
 // Android
-export const andRD = (new Date('01/24/2024')).getTime();
-export const andVersion = '0.90.2';
+export const andRD = (new Date('02/02/2024')).getTime();
+export const andVersion = '0.91.2';
 export const playstoreLink = 'https://play.google.com/store/apps/details?id=net.primal.android';
 export const apkLink = `https://github.com/PrimalHQ/primal-android-app/releases/tag/${andVersion}`;
 
