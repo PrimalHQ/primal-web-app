@@ -487,7 +487,7 @@ const EditBox: Component<{
       position = isEmptyMessage ? 0 : position + quote.length + 1;
 
       textArea.value = newMsg;
-      // account.actions.quoteNote(undefined);
+      account?.actions.quoteNote(undefined);
 
       onExpandableTextareaInput(new InputEvent('input'));
 
@@ -499,19 +499,36 @@ const EditBox: Component<{
 
   createEffect(() => {
     if (props.open) {
-      if (account?.quotedNote) {
-        addQuote(account.quotedNote);
-        return;
-      }
       const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
 
-      setMessage(draft);
-      if (textArea)
-      textArea.value = draft;
+      setMessage((msg) => {
+        if (msg.length > 0) return msg;
+        const newMsg = `${msg}${draft}`;
+
+        if (textArea) {
+          textArea.value = newMsg;
+          textArea.dispatchEvent(new Event('input', { bubbles: true }));
+          textArea.focus();
+        }
+
+        return newMsg;
+      });
+
+      if (account?.quotedNote) {
+        addQuote(account.quotedNote);
+      }
+
     } else {
-      account?.actions.quoteNote(undefined)
+      account?.actions.quoteNote(undefined);
     }
   })
+
+  createEffect(() => {
+    if (message().length === 0) return;
+
+    // save draft just in case there is an unintended interuption
+    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.post.noteId);
+  });
 
   const onEscape = (e: KeyboardEvent) => {
     if (isConfirmEditorClose()) return;
@@ -1004,10 +1021,7 @@ const EditBox: Component<{
     }
 
     if (textArea) {
-      textArea && setMessage(textArea.value);
-
-      // save draft just in case there is an unintended interuption
-      saveNoteDraft(account?.publicKey, textArea?.value, props.replyToNote?.post.noteId);
+      setMessage(textArea.value);
     }
 
 
