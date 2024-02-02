@@ -1223,7 +1223,7 @@ const EditBox: Component<{
 
   const determineOrient = () => {
     const coor = getScreenCordinates(emojiPicker);
-    const height = 226;
+    const height = 326;
     return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
   }
 
