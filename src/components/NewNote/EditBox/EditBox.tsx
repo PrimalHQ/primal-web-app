@@ -664,6 +664,7 @@ const EditBox: Component<{
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note });
               setIsPostingInProgress(false);
+              saveNoteDraft(account.publicKey, '', props.replyToNote?.post.id)
               clearEditor();
             }
             unsub();
