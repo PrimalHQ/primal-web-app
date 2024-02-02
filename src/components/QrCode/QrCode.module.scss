@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  .frame {
+    width: 280px;
+    height: 280px;
+    border-radius: 24px;
+    overflow: hidden;
+  }
+}

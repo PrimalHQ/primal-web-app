@@ -10,6 +10,7 @@ const ButtonCopy: Component<{
   disabled?: boolean,
   label?: string,
   labelBeforeIcon?: boolean,
+  light?: boolean,
 }> = (props) => {
 
   const [copying, setCopying] = createSignal(false);
@@ -24,7 +25,7 @@ const ButtonCopy: Component<{
   return (
     <Button.Root
       id={props.id}
-      class={styles.copy}
+      class={`${styles.copy} ${props.light ? styles.light : ''}`}
       onClick={doCopy}
       disabled={props.disabled}
     >
@@ -34,9 +35,9 @@ const ButtonCopy: Component<{
 
       <Show
         when={copying()}
-        fallback={<div class={styles.copyIcon}></div>}
+        fallback={<div class={`${styles.copyIcon} ${props.labelBeforeIcon ? styles.right : styles.left}`}></div>}
       >
-        <div class={styles.checkIcon}></div>
+        <div class={`${styles.checkIcon} ${props.labelBeforeIcon ? styles.right : styles.left}`}></div>
       </Show>
 
       <Show when={!props.labelBeforeIcon}>

@@ -170,6 +170,16 @@
   mask: url(../assets/icons/feed_zap.svg) no-repeat 0px / 20px;
 }
 
+.qrIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 20px;
+  mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 20px;
+}
+
 .contextIcon {
   width: 20px;
   height: 20px;

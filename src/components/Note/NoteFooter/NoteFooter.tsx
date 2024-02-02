@@ -437,6 +437,15 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
           setHideZapIcon(false);
           setZapped(props.note.post.noteActions.zapped);
         }}
+        onCancel={(zapOption: ZapOption) => {
+          setZappedAmount(() => -(zapOption.amount || 0));
+          setZappedNow(true);
+          setIsCustomZap(false);
+          setIsZapping(false);
+          setShowZapAnim(false);
+          setHideZapIcon(false);
+          setZapped(props.note.post.noteActions.zapped);
+        }}
       />
 
     </div>

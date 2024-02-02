@@ -25,7 +25,7 @@ import { shortDate } from '../lib/dates';
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
-import { MenuItem, PrimalUser, VanityProfiles } from '../types/primal';
+import { MenuItem, PrimalUser, VanityProfiles, ZapOption } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
@@ -43,6 +43,9 @@ import VerificationCheck from '../components/VerificationCheck/VerificationCheck
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
+import CustomZap from '../components/CustomZap/CustomZap';
+import Modal from '../components/Modal/Modal';
+import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 
 const Profile: Component = () => {
 
@@ -61,6 +64,8 @@ const Profile: Component = () => {
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
+  const [isCustomZap, setIsCustomZap] = createSignal(false);
+  const [openQr, setOpenQr] = createSignal(false);
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: '#central_header',
@@ -537,14 +542,46 @@ const Profile: Component = () => {
                 hidden={!showContext()}
               />
             </div>
+              <ButtonSecondary
+                onClick={() => setOpenQr(true)}
+                shrink={true}
+              >
+                <div class={styles.qrIcon}></div>
+              </ButtonSecondary>
+
+            <ProfileQrCodeModal
+              open={openQr()}
+              onClose={() => setOpenQr(false)}
+              profile={profile?.userProfile}
+            />
 
             <Show when={!isCurrentUser()}>
               <ButtonSecondary
-                onClick={onNotImplemented}
+                onClick={() => setIsCustomZap(true)}
                 shrink={true}
               >
                 <div class={styles.zapIcon}></div>
               </ButtonSecondary>
+
+              <CustomZap
+                open={isCustomZap()}
+                profile={profile?.userProfile}
+                onConfirm={(zapOption: ZapOption) => {
+                  setIsCustomZap(false);
+                }}
+                onSuccess={(zapOption: ZapOption) => {
+                  setIsCustomZap(false);
+                  toaster?.sendSuccess("Profile successfully zapped")
+                }}
+                onFail={(zapOption: ZapOption) => {
+                  setIsCustomZap(false);
+                  toaster?.sendWarning("Zaping failed")
+                }}
+                onCancel={(zapOption: ZapOption) => {
+                  setIsCustomZap(false);
+                  toaster?.sendWarning("Zaping canceled")
+                }}
+              />
             </Show>
 
             <Show when={account?.publicKey}>

@@ -33,6 +33,7 @@
     "medium-zoom": "1.0.8",
     "nostr-tools": "1.15.0",
     "photoswipe": "5.4.3",
+    "qr-code-styling": "^1.6.0-rc.1",
     "sass": "1.67.0",
     "solid-js": "1.7.11"
   }

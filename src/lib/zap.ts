@@ -43,6 +43,44 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
   }
 }
 
+export const zapProfile = async (profile: PrimalUser, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+  if (!sender || !profile) {
+    return false;
+  }
+
+  const callback = await getZapEndpoint(profile);
+
+  if (!callback) {
+    return false;
+  }
+
+  const sats = Math.round(amount * 1000);
+
+  const zapReq = nip57.makeZapRequest({
+    profile: profile.pubkey,
+    amount: sats,
+    comment,
+    relays: relays.map(r => r.url)
+  });
+
+  try {
+    const signedEvent = await signEvent(zapReq);
+
+    const event = encodeURI(JSON.stringify(signedEvent));
+
+    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const pr = r2.pr;
+
+    await enableWebLn();
+    await sendPayment(pr);
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
+    return false;
+  }
+}
+
 export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  => {
   try {
     let lnurl: string = ''

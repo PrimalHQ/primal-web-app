@@ -4,10 +4,10 @@ import { defaultZap, defaultZapOptions } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { zapNote } from '../../lib/zap';
+import { zapNote, zapProfile } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalNote, ZapOption } from '../../types/primal';
+import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
@@ -19,10 +19,12 @@ import styles from './CustomZap.module.scss';
 const CustomZap: Component<{
   id?: string,
   open?: boolean,
-  note: PrimalNote,
+  note?: PrimalNote,
+  profile?: PrimalUser,
   onConfirm: (zapOption?: ZapOption) => void,
   onSuccess: (zapOption?: ZapOption) => void,
-  onFail: (zapOption?: ZapOption) => void
+  onFail: (zapOption?: ZapOption) => void,
+  onCancel: (zapOption?: ZapOption) => void
 }> = (props) => {
 
   const toast = useToastContext();
@@ -89,13 +91,27 @@ const CustomZap: Component<{
   const submit = async () => {
     if (account?.hasPublicKey()) {
       props.onConfirm(selectedValue());
-      const success = await zapNote(
-        props.note,
-        account.publicKey,
-        selectedValue().amount || 0,
-        comment(),
-        account.relays,
-      );
+
+      let success = false;
+
+      if (props.note) {
+        success = await zapNote(
+          props.note,
+          account.publicKey,
+          selectedValue().amount || 0,
+          comment(),
+          account.relays,
+        );
+      }
+      else if (props.profile) {
+        success = await zapProfile(
+          props.profile,
+          account.publicKey,
+          selectedValue().amount || 0,
+          comment(),
+          account.relays,
+        );
+      }
 
       if (success) {
         props.onSuccess(selectedValue());
@@ -111,7 +127,7 @@ const CustomZap: Component<{
   };
 
   return (
-    <Modal open={props.open} onClose={() => props.onFail({ amount: 0, message: '' })}>
+    <Modal open={props.open} onClose={() => props.onCancel({ amount: 0, message: '' })}>
       <div id={props.id} class={styles.customZap}>
         <div class={styles.header}>
           <div class={styles.title}>
@@ -119,13 +135,13 @@ const CustomZap: Component<{
               {intl.formatMessage(tActions.zap)}
             </div>
           </div>
-          <button class={styles.close} onClick={() => props.onFail({ amount: 0, message: '' })}>
+          <button class={styles.close} onClick={() => props.onCancel({ amount: 0, message: '' })}>
           </button>
         </div>
 
         <div class={styles.description}>
           {intl.formatMessage(zapCustomOption,{
-            user: userName(props.note.user),
+            user: userName(props.note?.user || props.profile),
           })}
 
           <span class={styles.amount}>
