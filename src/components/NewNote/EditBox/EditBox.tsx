@@ -472,38 +472,44 @@ const EditBox: Component<{
     }, 500);
   })
 
-  createEffect(() => {
-    const quote = account?.quotedNote;
-    if (!textArea || !quote) return;
-
-    let position = textArea.selectionStart;
-
-    const isEmptyMessage = message().length === 0;
-
+  const addQuote = (quote: string | undefined) => {
     setMessage((msg) => {
-      if (isEmptyMessage) return `\r\n\r\n${quote} `;
+      if (!textArea || !quote) return msg;
+      let position = textArea.selectionStart;
 
-      return msg.slice(0, position) + quote + ' ' + msg.slice(position, msg.length);
+      const isEmptyMessage = msg.length === 0;
+
+      const newMsg = isEmptyMessage ?
+        `\r\n\r\n${quote} ` :
+        msg.slice(0, position) + quote + ' ' + msg.slice(position, msg.length);
+
+
+      position = isEmptyMessage ? 0 : position + quote.length + 1;
+
+      textArea.value = newMsg;
+      // account.actions.quoteNote(undefined);
+
+      onExpandableTextareaInput(new InputEvent('input'));
+
+      textArea?.focus();
+      textArea.selectionEnd = position;
+      return newMsg;
     });
-
-    position = isEmptyMessage ? 0 : position + quote.length + 1;
-
-    textArea.value = message();
-    account.actions.quoteNote(undefined);
-
-    onExpandableTextareaInput(new InputEvent('input'));
-
-    textArea.focus();
-    textArea.selectionEnd = position;
-  });
+  };
 
   createEffect(() => {
     if (props.open) {
+      if (account?.quotedNote) {
+        addQuote(account.quotedNote);
+        return;
+      }
       const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
 
       setMessage(draft);
       if (textArea)
       textArea.value = draft;
+    } else {
+      account?.actions.quoteNote(undefined)
     }
   })
 
