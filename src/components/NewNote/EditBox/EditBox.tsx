@@ -578,7 +578,7 @@ const EditBox: Component<{
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postNote = async () => {
-    if (!account || !account.hasPublicKey() || fileToUpload() || isInputting()) {
+    if (!account || !account.hasPublicKey() || fileToUpload()) {
       return;
     }
 
@@ -997,19 +997,20 @@ const EditBox: Component<{
     return content;
   };
 
-  const [isInputting, setIsInputting] = createSignal(false);
-
   const onInput = (e: InputEvent) => {
     if (fileToUpload()) {
       e.preventDefault();
       return false;
     }
-    setIsInputting(true);
 
-    // debounce(() => {
-      setIsInputting(false);
-      textArea && setMessage(textArea.value)
-    // }, 500)
+    if (textArea) {
+      textArea && setMessage(textArea.value);
+
+      // save draft just in case there is an unintended interuption
+      saveNoteDraft(account?.publicKey, textArea?.value, props.replyToNote?.post.noteId);
+    }
+
+
   };
 
   let delayForMedia = 0;
