@@ -12,7 +12,6 @@
     grid-area: content;
     display: flex;
     flex-direction: column;
-    margin-top: 12px;
     margin-left: 2px;
     cursor: text;
 
@@ -22,9 +21,9 @@
       grid-area: message;
       color: var(--text-primary);
       word-break: break-word;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 400;
-      line-height: 20px;
+      line-height: 24px;
       width: 100%;
       margin-bottom: 17px;
 

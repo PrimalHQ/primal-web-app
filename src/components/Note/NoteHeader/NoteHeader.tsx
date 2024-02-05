@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
-import { date } from '../../../lib/dates';
+import { date, longDate, shortDate } from '../../../lib/dates';
 import { nip05Verification, truncateNpub, userName } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
@@ -20,7 +20,12 @@ import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
 
-const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?: string }> = (props) => {
+const NoteHeader: Component<{
+  note: PrimalNote,
+  openCustomZap?: () => void,
+  id?: string,
+  primary?: boolean,
+}> = (props) => {
 
   const intl = useIntl();
   const toaster = useToastContext();
@@ -211,7 +216,7 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
         <div class={styles.postInfo}>
           <div class={styles.userInfo}>
 
-            <span class={styles.userName}>
+            <span class={`${styles.userName} ${props.primary ? styles.primary : ''}`}>
               {authorName()}
             </span>
 
@@ -224,7 +229,9 @@ const NoteHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?:
               class={styles.time}
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
-              {date(props.note.post?.created_at).label}
+              {props.primary ?
+                longDate(props.note.post?.created_at) :
+                date(props.note.post?.created_at).label}
             </span>
           </div>
           <Show

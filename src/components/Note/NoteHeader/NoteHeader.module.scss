@@ -57,6 +57,10 @@
         max-width: 460px;
         color: var(--text-primary);
         margin-right: 2px;
+
+        &.primary {
+          font-weight: 700;
+        }
       }
       .time{
         margin: 0px;

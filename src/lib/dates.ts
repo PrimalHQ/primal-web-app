@@ -8,6 +8,16 @@ export const shortDate = (timestamp: number | undefined) => {
   return dtf.format(date);
 };
 
+export const longDate = (timestamp: number | undefined) => {
+  if (!timestamp || timestamp < 0) {
+    return '';
+  }
+  const date = new Date(timestamp * 1000);
+  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeStyle: 'short'});
+
+  return dtf.format(date);
+};
+
 export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short', since?: number) => {
   const today = since ?? Math.floor((new Date()).getTime() / 1000);
   const date = new Date(postTimestamp * 1000);
