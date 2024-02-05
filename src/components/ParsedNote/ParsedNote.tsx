@@ -193,8 +193,11 @@ const ParsedNote: Component<{
 
   const updateContent = (contentArray: NoteContent[], type: string, token: string, meta?: Record<string, any>) => {
     if (contentArray.length > 0 && contentArray[contentArray.length -1].type === type) {
+
       setContent(content.length -1, 'tokens' , (els) => [...els, token]);
+
       meta && setContent(content.length -1, 'meta' , () => ({ ...meta }));
+
       return;
     }
 
@@ -206,11 +209,12 @@ const ParsedNote: Component<{
   const parseToken = (token: string) => {
     if (token === '__LB__') {
       lastSignificantContent !== 'image' && updateContent(content, 'linebreak', token);
+      lastSignificantContent = 'LB';
       return;
     }
 
     if (token === '__SP__') {
-      lastSignificantContent !== 'image' && updateContent(content, 'text', ' ');
+      !['image', 'LB'].includes(lastSignificantContent) && updateContent(content, 'text', ' ');
       return;
     }
 
@@ -370,8 +374,12 @@ const ParsedNote: Component<{
   const renderLinebreak = (item: NoteContent) => {
     if (isNoteTooLong()) return;
 
-    // Allow only one consecutive linebreak
-    return <br />
+    // Allow max consecutive linebreak
+    const len = Math.min(2, item.tokens.length);
+
+    const lineBreaks = Array(len).fill(<br/>)
+
+    return <For each={lineBreaks}>{_ => <br/>}</For>
   };
 
   const renderText = (item: NoteContent) => {
