@@ -27,6 +27,15 @@
   display: none;
 }
 
+.downloadsContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  border-top: 1px solid var(--devider);
+  padding-top: 20px;
+}
+
 .promoHolder {
   position: relative;
   display: flex;
@@ -34,9 +43,7 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 24px;
-
-  border-block: 1px solid var(--devider);
-  padding: 16px;
+  width: 300px;
 
   >video {
     width: 100%;
@@ -46,32 +53,33 @@
 
 .linkHolder {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding-top: 36px;
-  max-width: 598px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding-top: 12px;
 
   >div {
     display: flex;
+    width: 243px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 290px;
+    padding: 20px 28px;
+    border-radius: 12px;
+    background-color: var(--background-input);
   }
 
   .appStore {
-    width: 308px;
-    background-color: var(--background-card);
     border-radius: 8px;
 
 
     .desktopCTA {
       color: var(--text-primary);
       text-align: center;
-      font-size: 18px;
-      font-weight: 400;
+      font-size: 20px;
+      font-weight: 600;
       line-height: 20px;
-      margin-bottom: 9px;
     }
 
     .buidDetails {
@@ -81,7 +89,7 @@
       color: var(--text-tertiary-2);
       font-size: 14px;
       font-weight: 400;
-      line-height: 18px;
+      line-height: 14px;
 
       >div:first-child {
         display: flex;
@@ -105,8 +113,6 @@
   }
 
   .playStore {
-    width: 308px;
-    background-color: var(--background-card);
     border-radius: 8px;
     .playstoreLink {
       margin-top: 16px;
@@ -122,10 +128,9 @@
     .desktopCTA {
       color: var(--text-primary);
       text-align: center;
-      font-size: 18px;
-      font-weight: 400;
+      font-size: 20px;
+      font-weight: 600;
       line-height: 20px;
-      margin-bottom: 9px;
     }
 
     .buidDetails {
@@ -135,7 +140,7 @@
       color: var(--text-tertiary-2);
       font-size: 14px;
       font-weight: 400;
-      line-height: 18px;
+      line-height: 14px;
 
       >div:first-child {
         display: flex;
@@ -202,6 +207,11 @@
 
   .callToAction {
     display: none;
+  }
+
+  .downloadsContent {
+    flex-direction: column;
+    align-items: center;
   }
 
   .linkHolder {

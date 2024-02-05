@@ -9,6 +9,8 @@ import playstoreImg from '../assets/images/playstore_download.svg';
 import gitHubLight from '../assets/icons/github_light.svg';
 import gitHubDark from '../assets/icons/github.svg';
 
+import primalDownloads from '../assets/images/primal_downloads.png';
+
 import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
@@ -97,80 +99,66 @@ const Downloads: Component = () => {
 
       <PageCaption title={intl.formatMessage(t.title)} />
 
-      <div class={styles.promoHolder}>
-        <video
-          controls={true}
-          muted={true}
-          autoplay={true}
-          playsinline={true}
-          poster='/public/primal_mobile_poster.png'
-          src='https://primal.b-cdn.net/media-cache?s=o&a=1&u=https%3A%2F%2Fmedia.primal.net%2Fuploads%2F9%2Fd6%2F91%2F9d691046b2b73d13e48ed08bf4b3fd64560bac40e5e6a1e4f65fd7d40cfcedee.mp4'
-        />
-      </div>
+      <div class={styles.downloadsContent}>
 
-      <div class={styles.linkHolder}>
-        <div class={styles.appStore}>
-          <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionIOSTitle)}</div>
-
-          <div class={styles.callToActionIOS}>
-            <div class={styles.ctaTitle}>
-              {intl.formatMessage(t.callToActionIOSTitle)}
-            </div>
-          </div>
-
-          <div class={styles.buidDetails}>
-            <div>
-              <div>{intl.formatMessage(t.released)}:</div>
-              <div>{intl.formatMessage(t.build)}:</div>
-            </div>
-            <div>
-              <div>{displayDate(iosRD).toLowerCase()}</div>
-              <div>{iosVersion}</div>
-            </div>
-          </div>
-
-          <a
-            href={appStoreLink}
-            target='_blank'
-          >
-            <img src={appstoreImg} />
-          </a>
+        <div class={styles.promoHolder}>
+          <img src={primalDownloads} />
         </div>
-        <div class={styles.playStore}>
-          <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionAndroidTitle)}</div>
 
-          <div class={styles.callToActionAndroid}>
-            <div class={styles.ctaTitle}>
-              {intl.formatMessage(t.callToActionAndroidTitle)}
+        <div class={styles.linkHolder}>
+          <div class={styles.appStore}>
+            <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionIOSTitle)}</div>
+
+            <div class={styles.callToActionIOS}>
+              <div class={styles.ctaTitle}>
+                {intl.formatMessage(t.callToActionIOSTitle)}
+              </div>
             </div>
+
+            <div class={styles.buidDetails}>
+              <div>
+                {displayDate(iosRD).toLowerCase()} | Build {iosVersion}
+              </div>
+            </div>
+
+            <a
+              href={appStoreLink}
+              target='_blank'
+            >
+              <img src={appstoreImg} />
+            </a>
           </div>
+          <div class={styles.playStore}>
+            <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionAndroidTitle)}</div>
 
-          <div class={styles.buidDetails}>
-            <div>
-              <div>{intl.formatMessage(t.released)}:</div>
-              <div>{intl.formatMessage(t.build)}:</div>
+            <div class={styles.callToActionAndroid}>
+              <div class={styles.ctaTitle}>
+                {intl.formatMessage(t.callToActionAndroidTitle)}
+              </div>
             </div>
-            <div>
-              <div>{displayDate(andRD).toLowerCase()}</div>
-              <div>{andVersion}</div>
+
+            <div class={styles.buidDetails}>
+              <div>
+                {displayDate(andRD).toLowerCase()} | Build {andVersion}
+              </div>
             </div>
+
+            <a
+              href={playstoreLink}
+              target='_blank'
+              class={styles.playstoreLink}
+            >
+              <img src={playstoreImg} />
+            </a>
+
+            <a
+              href={apkLink}
+              target='_blank'
+              class={styles.apkLink}
+            >
+              {intl.formatMessage(t.getApk)}
+            </a>
           </div>
-
-          <a
-            href={playstoreLink}
-            target='_blank'
-            class={styles.playstoreLink}
-          >
-            <img src={playstoreImg} />
-          </a>
-
-          <a
-            href={apkLink}
-            target='_blank'
-            class={styles.apkLink}
-          >
-            {intl.formatMessage(t.getApk)}
-          </a>
         </div>
       </div>
     </div>
