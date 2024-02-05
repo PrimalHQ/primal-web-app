@@ -12,7 +12,7 @@ import {
 } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
 import { hexToNpub } from '../lib/keys';
-import { nip05Verification, truncateNpub, userName } from '../stores/profile';
+import { authorName, nip05Verification, truncateNpub, userName } from '../stores/profile';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useProfileContext } from '../contexts/ProfileContext';
@@ -25,26 +25,23 @@ import { shortDate } from '../lib/dates';
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
-import { MenuItem, PrimalUser, VanityProfiles, ZapOption } from '../types/primal';
+import { MenuItem, VanityProfiles, ZapOption } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
 import { useMediaContext } from '../contexts/MediaContext';
-import { profile as t, actions as tActions, toast as tToast, feedProfile } from '../translations';
+import { profile as t, actions as tActions, toast as tToast, feedProfile, toastZapProfile } from '../translations';
 import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import { isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
-import ButtonCopy from '../components/Buttons/ButtonCopy';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
-import { createStore } from 'solid-js/store';
 import CustomZap from '../components/CustomZap/CustomZap';
-import Modal from '../components/Modal/Modal';
 import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 
 const Profile: Component = () => {
@@ -507,192 +504,184 @@ const Profile: Component = () => {
         <Search />
       </Wormhole>
 
+      <div id="central_header" class={styles.fullHeader}>
+        <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
+          <Show
+            when={profile?.userProfile?.banner}
+            fallback={<div class={styles.bannerPlaceholder}></div>}
+          >
+            <NoteImage class="profile_image" src={banner()} onError={imgError} plainBorder={true} />
+          </Show>
+        </div>
 
-        <div id="central_header" class={styles.fullHeader}>
-          <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
-            <Show
-              when={profile?.userProfile?.banner}
-              fallback={<div class={styles.bannerPlaceholder}></div>}
+        <div class={styles.userImage}>
+          <div class={styles.avatar}>
+            <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
+              <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
+            </div>
+          </div>
+        </div>
+
+        <div class={styles.profileActions}>
+          <div class={styles.contextArea}>
+            <ButtonSecondary
+              onClick={openContextMenu}
+              shrink={true}
             >
-              <NoteImage class="profile_image" src={banner()} onError={imgError} plainBorder={true} />
-            </Show>
-          </div>
-
-          <div class={styles.userImage}>
-            <div class={styles.avatar}>
-              <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
-                <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
-              </div>
-            </div>
-          </div>
-
-          <div class={styles.profileActions}>
-            <div class={styles.contextArea}>
-              <ButtonSecondary
-                onClick={openContextMenu}
-                shrink={true}
-              >
-                <div class={styles.contextIcon}></div>
-              </ButtonSecondary>
-              <PrimalMenu
-                id={'profile_context'}
-                items={profileContext()}
-                position="profile"
-                reverse={true}
-                hidden={!showContext()}
-              />
-            </div>
-              <ButtonSecondary
-                onClick={() => setOpenQr(true)}
-                shrink={true}
-              >
-                <div class={styles.qrIcon}></div>
-              </ButtonSecondary>
-
-            <ProfileQrCodeModal
-              open={openQr()}
-              onClose={() => setOpenQr(false)}
-              profile={profile?.userProfile}
+              <div class={styles.contextIcon}></div>
+            </ButtonSecondary>
+            <PrimalMenu
+              id={'profile_context'}
+              items={profileContext()}
+              position="profile"
+              reverse={true}
+              hidden={!showContext()}
             />
-
-            <Show when={!isCurrentUser()}>
-              <ButtonSecondary
-                onClick={() => setIsCustomZap(true)}
-                shrink={true}
-              >
-                <div class={styles.zapIcon}></div>
-              </ButtonSecondary>
-
-              <CustomZap
-                open={isCustomZap()}
-                profile={profile?.userProfile}
-                onConfirm={(zapOption: ZapOption) => {
-                  setIsCustomZap(false);
-                }}
-                onSuccess={(zapOption: ZapOption) => {
-                  setIsCustomZap(false);
-                  toaster?.sendSuccess("Profile successfully zapped")
-                }}
-                onFail={(zapOption: ZapOption) => {
-                  setIsCustomZap(false);
-                  toaster?.sendWarning("Zaping failed")
-                }}
-                onCancel={(zapOption: ZapOption) => {
-                  setIsCustomZap(false);
-                  toaster?.sendWarning("Zaping canceled")
-                }}
-              />
-            </Show>
-
-            <Show when={account?.publicKey}>
-              <ButtonSecondary
-                onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-                shrink={true}
-              >
-                <div class={styles.messageIcon}></div>
-              </ButtonSecondary>
-            </Show>
-
-            <FollowButton person={profile?.userProfile} large={true} />
-
-            <Show when={isCurrentUser()}>
-              <div class={styles.editProfileButton}>
-                <ButtonSecondary
-                  onClick={() => navigate('/settings/profile')}
-                  title={intl.formatMessage(tActions.editProfile)}
-                >
-                  <div>{intl.formatMessage(tActions.editProfile)}</div>
-                </ButtonSecondary>
-              </div>
-            </Show>
           </div>
-
-          <div class={styles.profileVerification}>
-            <Show
-              when={isProfileLoaded()}
+            <ButtonSecondary
+              onClick={() => setOpenQr(true)}
+              shrink={true}
             >
-              <div class={styles.basicInfo}>
-                <div class={styles.name}>
-                  {profileName()}
-                  <Show when={profile?.userProfile?.nip05 && verification()}>
-                    <VerificationCheck user={profile?.userProfile} large={true} />
-                  </Show>
-                  <Show when={isFollowingYou()}>
-                    <div class={styles.followsBadge}>
-                      {intl.formatMessage(t.followsYou)}
-                    </div>
-                  </Show>
+              <div class={styles.qrIcon}></div>
+            </ButtonSecondary>
 
-                </div>
+          <ProfileQrCodeModal
+            open={openQr()}
+            onClose={() => setOpenQr(false)}
+            profile={profile?.userProfile}
+          />
 
-                <Show when={profile?.userStats.time_joined}>
-                  <div class={styles.joined}>
-                    {intl.formatMessage(
-                      t.jointDate,
-                      {
-                        date: shortDate(profile?.userStats.time_joined),
-                      },
-                    )}
-                  </div>
-                </Show>
-              </div>
+          <Show when={!isCurrentUser()}>
+            <ButtonSecondary
+              onClick={() => setIsCustomZap(true)}
+              shrink={true}
+            >
+              <div class={styles.zapIcon}></div>
+            </ButtonSecondary>
 
-              <div class={styles.verificationInfo}>
-                <Show when={profile?.userProfile?.nip05}>
-                  <div class={styles.verified}>
-                    <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                  </div>
-                </Show>
-                <div class={styles.publicKey}>
-                  <ButtonCopy
-                    copyValue={profile?.userProfile?.npub || profileNpub()}
-                    labelBeforeIcon={true}
-                    label={truncateNpub(profile?.userProfile?.npub || profileNpub())}
-                  />
-                </div>
-              </div>
-
-            </Show>
-          </div>
-
-          <Show when={renderProfileAbout().length > 0}>
-            <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
-            </div>
+            <CustomZap
+              open={isCustomZap()}
+              profile={profile?.userProfile}
+              onConfirm={(zapOption: ZapOption) => {
+                setIsCustomZap(false);
+              }}
+              onSuccess={(zapOption: ZapOption) => {
+                setIsCustomZap(false);
+                toaster?.sendSuccess(intl.formatMessage(toastZapProfile, {
+                  name: authorName(profile?.userProfile)
+                }))
+              }}
+              onFail={(zapOption: ZapOption) => {
+                setIsCustomZap(false);
+              }}
+              onCancel={(zapOption: ZapOption) => {
+                setIsCustomZap(false);
+              }}
+            />
           </Show>
 
+          <Show when={account?.publicKey}>
+            <ButtonSecondary
+              onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+              shrink={true}
+            >
+              <div class={styles.messageIcon}></div>
+            </ButtonSecondary>
+          </Show>
 
-          <Show when={profile?.userProfile?.website}>
-            <div class={styles.profileLinks}>
-              <div class={styles.website}>
-                  <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                    {sanitize(profile?.userProfile?.website || '')}
-                  </a>
-              </div>
+          <FollowButton person={profile?.userProfile} large={true} />
+
+          <Show when={isCurrentUser()}>
+            <div class={styles.editProfileButton}>
+              <ButtonSecondary
+                onClick={() => navigate('/settings/profile')}
+                title={intl.formatMessage(tActions.editProfile)}
+              >
+                <div>{intl.formatMessage(tActions.editProfile)}</div>
+              </ButtonSecondary>
             </div>
           </Show>
         </div>
 
-        <ProfileTabs profile={profile?.userProfile}/>
+        <div class={styles.profileVerification}>
+          <Show
+            when={isProfileLoaded()}
+          >
+            <div class={styles.basicInfo}>
+              <div class={styles.name}>
+                {profileName()}
+                <Show when={profile?.userProfile?.nip05 && verification()}>
+                  <VerificationCheck user={profile?.userProfile} large={true} />
+                </Show>
+                <Show when={isFollowingYou()}>
+                  <div class={styles.followsBadge}>
+                    {intl.formatMessage(t.followsYou)}
+                  </div>
+                </Show>
 
-        <ConfirmModal
-          open={confirmReportUser()}
-          description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
-          onConfirm={() => {
-            doReportUser();
-            setConfirmReportUser(false);
-          }}
-          onAbort={() => setConfirmReportUser(false)}
-        />
+              </div>
 
-        <ConfirmModal
-          open={confirmMuteUser()}
-          description={intl.formatMessage(tActions.muteUserConfirm, { name: userName(profile?.userProfile) })}
-          onConfirm={() => {
-            doMuteUser();
-            setConfirmMuteUser(false);
-          }}
-          onAbort={() => setConfirmMuteUser(false)}
-        />
+              <Show when={profile?.userStats.time_joined}>
+                <div class={styles.joined}>
+                  {intl.formatMessage(
+                    t.jointDate,
+                    {
+                      date: shortDate(profile?.userStats.time_joined),
+                    },
+                  )}
+                </div>
+              </Show>
+            </div>
+
+            <div class={styles.verificationInfo}>
+              <Show when={profile?.userProfile?.nip05}>
+                <div class={styles.verified}>
+                  <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                </div>
+              </Show>
+            </div>
+
+          </Show>
+        </div>
+
+        <Show when={renderProfileAbout().length > 0}>
+          <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
+          </div>
+        </Show>
+
+
+        <Show when={profile?.userProfile?.website}>
+          <div class={styles.profileLinks}>
+            <div class={styles.website}>
+                <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                  {sanitize(profile?.userProfile?.website || '')}
+                </a>
+            </div>
+          </div>
+        </Show>
+      </div>
+
+      <ProfileTabs profile={profile?.userProfile}/>
+
+      <ConfirmModal
+        open={confirmReportUser()}
+        description={intl.formatMessage(tActions.reportUserConfirm, { name: userName(profile?.userProfile) })}
+        onConfirm={() => {
+          doReportUser();
+          setConfirmReportUser(false);
+        }}
+        onAbort={() => setConfirmReportUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteUser()}
+        description={intl.formatMessage(tActions.muteUserConfirm, { name: userName(profile?.userProfile) })}
+        onConfirm={() => {
+          doMuteUser();
+          setConfirmMuteUser(false);
+        }}
+        onAbort={() => setConfirmMuteUser(false)}
+      />
     </>
   )
 }

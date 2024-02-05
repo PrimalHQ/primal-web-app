@@ -1748,6 +1748,13 @@ export const toastZapFail = {
   description: 'Toast message indicating failed zap',
 };
 
+
+export const toastZapProfile = {
+  id: 'toast.zapProfile',
+  defaultMessage: '{name} zapped successfully',
+  description: 'Toast message indicating successful zap',
+};
+
 export const thread = {
   sidebar: {
     id: 'thread.sidebar.title',

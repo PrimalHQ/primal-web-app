@@ -31,18 +31,18 @@ const QrCode: Component<{ data: string }> = (props) => {
       imageOptions: {
         hideBackgroundDots: true,
         imageSize:0.2,
-        margin:0,
+        margin: 4,
       },
       dotsOptions:{
-        type: "square",
+        type: "rounded",
         color: 'black',
       },
       cornersSquareOptions: {
-        type: "square",
+        type: 'extra-rounded' ,
         color: 'black',
       },
       cornersDotOptions: {
-        type: "square",
+        type: 'square',
         color: 'black',
       },
       backgroundOptions: {
