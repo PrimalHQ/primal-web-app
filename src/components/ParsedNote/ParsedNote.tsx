@@ -473,6 +473,8 @@ const ParsedNote: Component<{
           klass += ' redBorder';
         }
 
+        klass += ' embeddedContent';
+
         setWordsDisplayed(w => w + shortMentionInWords);
 
         const video = <video
@@ -504,7 +506,7 @@ const ParsedNote: Component<{
         const youtubeId = isYouTube(token) && RegExp.$1;
 
         return <iframe
-          class="w-max"
+          class="w-max embeddedContent"
           src={`https://www.youtube.com/embed/${youtubeId}`}
           title="YouTube video player"
           // @ts-ignore no property
@@ -527,6 +529,7 @@ const ParsedNote: Component<{
         const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
         return <iframe
+          class="embeddedContent"
           style="borderRadius: 12"
           src={convertedUrl}
           width="100%"
@@ -552,6 +555,7 @@ const ParsedNote: Component<{
         const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
 
         return <iframe
+          class="embeddedContent"
           src={`https://player.twitch.tv/${args}`}
           // @ts-ignore no property
           className="w-max"
@@ -570,7 +574,7 @@ const ParsedNote: Component<{
 
         const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
 
-        return <div>
+        return <div class="embeddedContent">
           <iframe
             title="SoundCloud player"
             width="100%"
@@ -592,6 +596,7 @@ const ParsedNote: Component<{
         setWordsDisplayed(w => w + shortMentionInWords);
 
         return <iframe
+          class="embeddedContent"
           width="100%"
           height="166"
           // @ts-ignore no property
@@ -614,6 +619,7 @@ const ParsedNote: Component<{
         const isSongLink = /\?i=\d+$/.test(convertedUrl);
 
         return <iframe
+          class="embeddedContent"
           allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
           // @ts-ignore no property
           frameBorder="0"
@@ -636,6 +642,7 @@ const ParsedNote: Component<{
         const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
         return <iframe
+          class="embeddedContent"
           style="borderRadius: 12"
           src={convertedUrl}
           width="100%"

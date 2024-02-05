@@ -34,7 +34,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     if (props.includeEmbeds) {
       return (
         <div
-          class={styles.mentionedNote}
+          class={`${styles.mentionedNote} embeddedContent`}
           data-event={props.note.post.id}
           data-event-bech32={noteId()}
         >
@@ -46,7 +46,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     return (
       <A
         href={`/e/${noteId()}`}
-        class={styles.mentionedNote}
+        class={`${styles.mentionedNote} embeddedContent`}
         onClick={() => navToThread()}
         data-event={props.note.post.id}
         data-event-bech32={noteId()}

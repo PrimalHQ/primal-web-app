@@ -46,6 +46,7 @@
 
   --border-radius-small: 8px;
   --border-radius-big: 12px;
+  --border-radius-large: 16px;
 
   --central-content-width: 600px;
 
@@ -183,13 +184,21 @@ a {
   overflow: hidden;
 }
 
+.embeddedContent {
+  margin-block: 12px !important;
+  display: block !important;
+  border-radius: var(--border-radius-large) !important;
+  overflow: hidden !important;
+}
+
 .imageGrid {
+  margin-block: 12px !important;
   display: grid;
 
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-auto-rows: 125px;
-  border-radius: 8px;
-  overflow: hidden;
+  border-radius: var(--border-radius-large) !important;
+  overflow: hidden !important;
   grid-gap: 2px;
 
   img {
@@ -284,7 +293,7 @@ a {
 
 .roundedImage {
   img {
-    border-radius: var(--border-radius-small);
+    border-radius: var(--border-radius-large);
   }
 }
 

@@ -42,6 +42,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
       k += ` ${styles.bordered}`;
     }
 
+    k += " embeddedContent";
+
     return k;
   };
 
