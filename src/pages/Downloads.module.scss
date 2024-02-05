@@ -203,6 +203,63 @@
   }
 }
 
+.downloadsExtra {
+  display: none;
+}
+
+@media only screen and (max-width: 1087px) {
+  .downloadsExtra {
+    display: block;
+    width: 100%;
+    padding-left: 42px;
+    margin-bottom: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--subtile-devider);
+
+    .title {
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 20px;
+      text-transform: capitalize;
+      margin-bottom: 20px;
+    }
+
+    .list {
+      >div {
+        display: flex;
+        align-items: center;
+
+        .githubIcon {
+          width: 24px;
+          height: 24px;
+          display: inline-block;
+          margin-right: 9px;
+          background-image: url( '../assets/icons/github.svg');
+          background-size: contain;
+        }
+
+        .githubIconLight {
+          width: 24px;
+          height: 24px;
+          display: inline-block;
+          margin-right: 9px;
+          background-image: url( '../assets/icons/github_light.svg');
+          background-size: contain;
+        }
+
+
+        >a {
+          color: var(--text-secondary-2);
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 40px;
+        }
+      }
+    }
+  }
+}
+
 @media only screen and (max-width: 720px) {
 
   .callToAction {
@@ -214,12 +271,19 @@
     align-items: center;
   }
 
+  .promoHolder {
+    margin-bottom: 0;
+  }
+
   .linkHolder {
-    margin-top: 20px;
+    margin-top: 0;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    padding-inline: 28px;
 
     >div {
+      width: 100%;
       .desktopCTA {
         display: none;
       }
@@ -231,7 +295,6 @@
           height: 63px;
         }
       }
-
       width: 100%;
       margin-bottom: 20px;
     }
@@ -254,7 +317,7 @@
 
     .playStore {
       margin-top: 4px;
-      margin-bottom: 250px;
+      margin-bottom: 24px;
       flex-direction: column;
       align-items: center;
       .callToActionAndroid {
@@ -266,5 +329,9 @@
         }
       }
     }
+  }
+
+  .downloadsExtra {
+    margin-bottom: 80px;
   }
 }

@@ -161,6 +161,49 @@ const Downloads: Component = () => {
           </div>
         </div>
       </div>
+
+      <div class={styles.downloadsExtra}>
+
+        <div class={styles.title}>
+          {intl.formatMessage(t.links.title)}
+        </div>
+        <div class={styles.list}>
+          <ExternalLink
+            darkIcon={gitHubLight}
+            lightIcon={gitHubDark}
+            label={intl.formatMessage(t.links.webApp)}
+            href='https://github.com/PrimalHQ/primal-web-app'
+          />
+
+          <ExternalLink
+            darkIcon={gitHubLight}
+            lightIcon={gitHubDark}
+            label={intl.formatMessage(t.links.iosApp)}
+            href='https://github.com/PrimalHQ/primal-ios-app'
+          />
+
+          <ExternalLink
+            darkIcon={gitHubLight}
+            lightIcon={gitHubDark}
+            label={intl.formatMessage(t.links.andApp)}
+            href='https://github.com/PrimalHQ/primal-android-app'
+          />
+
+          <ExternalLink
+            darkIcon={gitHubLight}
+            lightIcon={gitHubDark}
+            label={intl.formatMessage(t.links.cachingService)}
+            href='https://github.com/PrimalHQ/primal-caching-service'
+          />
+
+          <ExternalLink
+            darkIcon={gitHubLight}
+            lightIcon={gitHubDark}
+            label={intl.formatMessage(t.links.primalServer)}
+            href='https://github.com/PrimalHQ/primal-server'
+          />
+        </div>
+      </div>
     </div>
   );
 }
