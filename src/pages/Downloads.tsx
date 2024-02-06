@@ -117,7 +117,7 @@ const Downloads: Component = () => {
 
             <div class={styles.buidDetails}>
               <div>
-                {displayDate(iosRD).toLowerCase()} | Build {iosVersion}
+                {displayDate(iosRD).toLowerCase()} | {intl.formatMessage(t.build)} {iosVersion}
               </div>
             </div>
 
@@ -139,7 +139,7 @@ const Downloads: Component = () => {
 
             <div class={styles.buidDetails}>
               <div>
-                {displayDate(andRD).toLowerCase()} | Build {andVersion}
+                {displayDate(andRD).toLowerCase()} | {intl.formatMessage(t.build)} {andVersion}
               </div>
             </div>
 

@@ -422,7 +422,7 @@ export const downloads = {
   },
   build: {
     id: 'downloads.build',
-    defaultMessage: 'build',
+    defaultMessage: 'Build',
     description: 'Build label',
   },
   released: {
