@@ -189,6 +189,19 @@ const ParsedNote: Component<{
     meta?: Record<string, any>,
   };
 
+  const removeLinebreaks = () => {
+    if (lastSignificantContent === 'LB') {
+      const lastIndex = content.length - 1;
+      const lastGroup = content[lastIndex];
+
+      setContent(lastIndex, () => ({
+        type: lastGroup.type,
+        tokens: [],
+        meta: lastGroup.meta,
+      }));
+    }
+  };
+
   const [content, setContent] = createStore<NoteContent[]>([]);
 
   const updateContent = (contentArray: NoteContent[], type: string, token: string, meta?: Record<string, any>) => {
@@ -248,66 +261,77 @@ const ParsedNote: Component<{
 
       if (!props.ignoreMedia) {
         if (isImage(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'image';
           updateContent(content, 'image', token);
           return;
         }
 
         if (isMp4Video(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/mp4'});
           return;
         }
 
         if (isOggVideo(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/ogg'});
           return;
         }
 
         if (isWebmVideo(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
           return;
         }
 
         if (isYouTube(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'youtube';
           updateContent(content, 'youtube', token);
           return;
         }
 
         if (isSpotify(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'spotify';
           updateContent(content, 'spotify', token);
           return;
         }
 
         if (isTwitch(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'twitch';
           updateContent(content, 'twitch', token);
           return;
         }
 
         if (isMixCloud(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'mixcloud';
           updateContent(content, 'mixcloud', token);
           return;
         }
 
         if (isSoundCloud(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'soundcloud';
           updateContent(content, 'soundcloud', token);
           return;
         }
 
         if (isAppleMusic(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'applemusic';
           updateContent(content, 'applemusic', token);
           return;
         }
 
         if (isWavelake(token)) {
+          removeLinebreaks();
           lastSignificantContent = 'wavelake';
           updateContent(content, 'wavelake', token);
           return;
@@ -320,24 +344,14 @@ const ParsedNote: Component<{
         return;
       }
 
+      removeLinebreaks();
       lastSignificantContent = 'link';
       updateContent(content, 'link', token);
       return;
     }
 
     if (isNoteMention(token)) {
-      if (lastSignificantContent === 'LB') {
-        const lastIndex = content.length - 1;
-        const lastGroup = content[lastIndex];
-
-
-        setContent(lastIndex, () => ({
-          type: lastGroup.type,
-          tokens: lastGroup.tokens.slice(0, Math.min(1, lastGroup.tokens.length)),
-          meta: lastGroup.meta,
-        }));
-
-      }
+      removeLinebreaks();
       lastSignificantContent = 'notemention';
       updateContent(content, 'notemention', token);
       return;
