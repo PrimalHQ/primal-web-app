@@ -11,6 +11,7 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: center;
   }
 
   .avatar {
@@ -30,12 +31,13 @@
     display: flex;
     flex-direction: column;
     font-size: 16px;
-    line-height: 18px;
+    line-height: 17px;
     font-weight: 400;
     height: 48px;
     align-items: flex-start;
-    justify-content: center;
-    gap: 4px;
+    justify-content: space-around;
+    gap: 2px;
+    // padding-bottom: 4px;
 
     .verification {
       max-width: 470px;
@@ -47,10 +49,8 @@
     .userInfo {
       display: flex;
       justify-content: flex-start;
-      overflow: hidden;
-      display: flex;
       align-items: center;
-      justify-content: flex-start;
+      overflow: hidden;
       .userName {
         text-overflow: ellipsis;
         white-space: nowrap;
