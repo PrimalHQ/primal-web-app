@@ -29,7 +29,7 @@
   .postInfo {
     display: flex;
     flex-direction: column;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 16px;
     font-weight: 400;
     height: 48px;
@@ -60,7 +60,6 @@
 
         &.primary {
           font-weight: 700;
-          font-size: 16px;
         }
       }
       .time{
