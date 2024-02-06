@@ -55,11 +55,11 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
       target="_blank"
     >
       <Show when={image()}>
-          <img
-            class={styles.previewImage}
-            src={image()?.media_url}
-            style={`width: 100%; height: ${height()}`}
-          />
+        <img
+          class={styles.previewImage}
+          src={image()?.media_url}
+          style={`width: 100%; height: ${height()}`}
+        />
       </Show>
 
       <div class={styles.previewInfo}>
