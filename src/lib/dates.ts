@@ -13,7 +13,7 @@ export const longDate = (timestamp: number | undefined) => {
     return '';
   }
   const date = new Date(timestamp * 1000);
-  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeStyle: 'short'});
+  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short'});
 
   return dtf.format(date);
 };
