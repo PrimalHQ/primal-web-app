@@ -30,7 +30,7 @@
     width: 100%;
 
     .repostedBy {
-      padding-bottom: 4px;
+      padding-bottom: 8px;
       display: flex;
       >span {
         >a {
@@ -124,17 +124,17 @@
     max-width: 226px;
     color: var(--text-primary);
 
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
-    line-height: 14px;
+    line-height: 16px;
   }
   .time{
     display: flex;
     margin-left: 2px;
     min-width: fit-content;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
-    line-height: 14px;
+    line-height: 16px;
     color: var(--text-tertiary);
 
     .ellipsisIcon {
@@ -152,9 +152,9 @@
     overflow: hidden;
     color: var(--text-tertiary);
 
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
-    line-height: 14px;
+    line-height: 16px;
   }
 }
 
@@ -167,7 +167,7 @@
 }
 
 .repostedBy {
-  padding-bottom: 4px;
+  padding-bottom: 8px;
   display: flex;
   >span {
     >a {
