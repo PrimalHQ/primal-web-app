@@ -326,6 +326,18 @@ const ParsedNote: Component<{
     }
 
     if (isNoteMention(token)) {
+      if (lastSignificantContent === 'LB') {
+        const lastIndex = content.length - 1;
+        const lastGroup = content[lastIndex];
+
+
+        setContent(lastIndex, () => ({
+          type: lastGroup.type,
+          tokens: lastGroup.tokens.slice(0, Math.min(1, lastGroup.tokens.length)),
+          meta: lastGroup.meta,
+        }));
+
+      }
       lastSignificantContent = 'notemention';
       updateContent(content, 'notemention', token);
       return;
