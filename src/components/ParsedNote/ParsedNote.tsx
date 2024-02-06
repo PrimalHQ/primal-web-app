@@ -39,7 +39,7 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import { linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
@@ -218,18 +218,27 @@ const ParsedNote: Component<{
   }
 
   let lastSignificantContent = 'text';
+  let isAfterEmbed = false;
 
   const parseToken = (token: string) => {
     if (token === '__LB__') {
-      lastSignificantContent !== 'image' && updateContent(content, 'linebreak', token);
+      if (isAfterEmbed) {
+        return;
+      }
+
+      updateContent(content, 'linebreak', token);
       lastSignificantContent = 'LB';
       return;
     }
 
     if (token === '__SP__') {
-      !['image', 'LB'].includes(lastSignificantContent) && updateContent(content, 'text', ' ');
+      if (!['image', 'video', 'link', 'LB'].includes(lastSignificantContent)) {
+        updateContent(content, 'text', ' ');
+      }
       return;
     }
+
+    isAfterEmbed = false;
 
     if (isInterpunction(token)) {
       lastSignificantContent = 'text';
@@ -260,78 +269,70 @@ const ParsedNote: Component<{
       }
 
       if (!props.ignoreMedia) {
+        removeLinebreaks();
+        isAfterEmbed = true;
+
         if (isImage(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'image';
           updateContent(content, 'image', token);
           return;
         }
 
         if (isMp4Video(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/mp4'});
           return;
         }
 
         if (isOggVideo(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/ogg'});
           return;
         }
 
         if (isWebmVideo(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
           return;
         }
 
         if (isYouTube(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'youtube';
           updateContent(content, 'youtube', token);
           return;
         }
 
         if (isSpotify(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'spotify';
           updateContent(content, 'spotify', token);
           return;
         }
 
         if (isTwitch(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'twitch';
           updateContent(content, 'twitch', token);
           return;
         }
 
         if (isMixCloud(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'mixcloud';
           updateContent(content, 'mixcloud', token);
           return;
         }
 
         if (isSoundCloud(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'soundcloud';
           updateContent(content, 'soundcloud', token);
           return;
         }
 
         if (isAppleMusic(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'applemusic';
           updateContent(content, 'applemusic', token);
           return;
         }
 
         if (isWavelake(token)) {
-          removeLinebreaks();
           lastSignificantContent = 'wavelake';
           updateContent(content, 'wavelake', token);
           return;
@@ -345,7 +346,9 @@ const ParsedNote: Component<{
       }
 
       removeLinebreaks();
+      isAfterEmbed = true;
       lastSignificantContent = 'link';
+
       updateContent(content, 'link', token);
       return;
     }
@@ -353,6 +356,7 @@ const ParsedNote: Component<{
     if (isNoteMention(token)) {
       removeLinebreaks();
       lastSignificantContent = 'notemention';
+      isAfterEmbed = true;
       updateContent(content, 'notemention', token);
       return;
     }
