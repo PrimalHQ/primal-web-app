@@ -20,6 +20,8 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
   const threadContext = useThreadContext();
   const intl = useIntl();
 
+  let noteContent: HTMLDivElement | undefined;
+
   const noteId = () => nip19.noteEncode(props.note.post.id);
 
   const navToThread = () => {
@@ -94,12 +96,13 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
           </span>
         </span>
       </div>
-      <div class={styles.noteContent}>
+      <div class={styles.noteContent} ref={noteContent}>
         <ParsedNote
           note={props.note}
           ignoreMentionedNotes={true}
           shorten={true}
           isEmbeded={true}
+          width={noteContent?.getBoundingClientRect().width}
         />
       </div>
     </>
