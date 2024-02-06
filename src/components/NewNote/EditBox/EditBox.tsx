@@ -623,9 +623,9 @@ const EditBox: Component<{
 
     if (account) {
       let tags = referencesToTags(messageToSend);
+      const rep = props.replyToNote;
 
-      if (props.replyToNote) {
-        const rep = props.replyToNote;
+      if (rep) {
         const rootTag = rep.post.tags.find(t => t[0] === 'e' && t[3] === 'root');
 
         // If the note has a root tag, that meens it is not a root note itself
@@ -664,7 +664,7 @@ const EditBox: Component<{
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note });
               setIsPostingInProgress(false);
-              saveNoteDraft(account.publicKey, '', props.replyToNote?.post.id)
+              saveNoteDraft(account.publicKey, '', rep?.post.noteId)
               clearEditor();
             }
             unsub();
