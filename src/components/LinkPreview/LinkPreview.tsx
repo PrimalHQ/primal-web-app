@@ -4,7 +4,7 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './LinkPreview.module.scss';
 
-const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> = (props) => {
+const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, isLast?: boolean }> = (props) => {
 
   const media = useMediaContext();
 
@@ -43,6 +43,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean }> 
     }
 
     k += " embeddedContent";
+
+    k += props.isLast ? ' noBottomMargin' : '';
 
     return k;
   };

@@ -254,6 +254,7 @@ export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
 export const tagMentionRegex = /\#\[([0-9]*)\]/;
 export const noteRegex = /nostr:((note|nevent)1\w+)\b/g;
+export const noteRegexLocal = /nostr:((note|nevent)1\w+)\b/;
 export const profileRegex = /nostr:((npub|nprofile)1\w+)\b/;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 

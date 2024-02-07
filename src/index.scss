@@ -191,9 +191,19 @@ a {
   overflow: hidden !important;
 }
 
+.embeddedNote {
+  margin-block: 12px !important;
+  border-radius: var(--border-radius-big) !important;
+  overflow: hidden !important;
+}
+
 .noteimage {
   margin-block: 12px !important;
   display: block !important;
+}
+
+.noBottomMargin {
+  margin-bottom: 0px !important;
 }
 
 .imageGrid {

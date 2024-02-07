@@ -399,6 +399,17 @@ const ParsedNote: Component<{
 
       parseToken(token);
     }
+
+    // Check if the last media is the last meaningfull content in the note
+    // And if so, make it the actual last content
+    // @ts-ignore
+    const lastMediaIndex = content.findLastIndex(c => c.type !== 'text');
+
+    const lastContent = content[content.length - 1];
+
+    if (lastMediaIndex === content.length - 2 && lastContent.type === 'text' && lastContent.tokens.every(t => [' ', ''].includes(t))) {
+      setContent((cont) => cont.slice(0, cont.length - 1));
+    }
   };
 
   const renderLinebreak = (item: NoteContent) => {
@@ -430,10 +441,14 @@ const ParsedNote: Component<{
     return <>{text}</>;
   };
 
-  const renderImage = (item: NoteContent) => {
+  const renderImage = (item: NoteContent, index?: number) => {
 
     const groupCount = item.tokens.length;
     const imageGroup = generatePrivateKey();
+
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
 
     if (groupCount === 1) {
       if (isNoteTooLong()) return;
@@ -446,7 +461,7 @@ const ParsedNote: Component<{
       setWordsDisplayed(w => w + 100);
 
       return <NoteImage
-        class={`noteimage image_${props.note.post.noteId}`}
+        class={`noteimage image_${props.note.post.noteId} ${lastClass}`}
         src={url}
         isDev={dev}
         media={image}
@@ -488,7 +503,11 @@ const ParsedNote: Component<{
     </div>
   }
 
-  const renderVideo = (item: NoteContent) => {
+  const renderVideo = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>{
       (token) => {
         if (isNoteTooLong()) return;
@@ -512,6 +531,7 @@ const ParsedNote: Component<{
         }
 
         klass += ' embeddedContent';
+        klass += ` ${lastClass}`;
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
@@ -533,7 +553,10 @@ const ParsedNote: Component<{
     }</For>;
   }
 
-  const renderYouTube = (item: NoteContent) => {
+  const renderYouTube = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
 
     return <For each={item.tokens}>
       {(token) => {
@@ -544,7 +567,7 @@ const ParsedNote: Component<{
         const youtubeId = isYouTube(token) && RegExp.$1;
 
         return <iframe
-          class="w-max embeddedContent"
+          class={`w-max embeddedContent ${lastClass}`}
           src={`https://www.youtube.com/embed/${youtubeId}`}
           title="YouTube video player"
           // @ts-ignore no property
@@ -557,7 +580,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderSpotify = (item: NoteContent) => {
+  const renderSpotify = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -567,7 +594,7 @@ const ParsedNote: Component<{
         const convertedUrl = token.replace(/\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/, "/embed/$1/$2");
 
         return <iframe
-          class="embeddedContent"
+          class={`embeddedContent ${lastClass}`}
           style="borderRadius: 12"
           src={convertedUrl}
           width="100%"
@@ -581,7 +608,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderTwitch = (item: NoteContent) => {
+  const renderTwitch = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -593,7 +624,7 @@ const ParsedNote: Component<{
         const args = `?channel=${channel}&parent=${window.location.hostname}&muted=true`;
 
         return <iframe
-          class="embeddedContent"
+          class={`embeddedContent ${lastClass}`}
           src={`https://player.twitch.tv/${args}`}
           // @ts-ignore no property
           className="w-max"
@@ -603,7 +634,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderMixCloud = (item: NoteContent) => {
+  const renderMixCloud = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -612,7 +647,7 @@ const ParsedNote: Component<{
 
         const feedPath = (isMixCloud(token) && RegExp.$1) + "%2F" + (isMixCloud(token) && RegExp.$2);
 
-        return <div class="embeddedContent">
+        return <div class={`embeddedContent ${lastClass}`}>
           <iframe
             title="SoundCloud player"
             width="100%"
@@ -626,7 +661,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderSoundCloud = (item: NoteContent) => {
+  const renderSoundCloud = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -634,7 +673,7 @@ const ParsedNote: Component<{
         setWordsDisplayed(w => w + shortMentionInWords);
 
         return <iframe
-          class="embeddedContent"
+          class={`embeddedContent ${lastClass}`}
           width="100%"
           height="166"
           // @ts-ignore no property
@@ -646,7 +685,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderAppleMusic = (item: NoteContent) => {
+  const renderAppleMusic = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -657,7 +700,7 @@ const ParsedNote: Component<{
         const isSongLink = /\?i=\d+$/.test(convertedUrl);
 
         return <iframe
-          class="embeddedContent"
+          class={`embeddedContent ${lastClass}`}
           allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
           // @ts-ignore no property
           frameBorder="0"
@@ -670,7 +713,11 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderWavelake = (item: NoteContent) => {
+  const renderWavelake = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -680,7 +727,7 @@ const ParsedNote: Component<{
         const convertedUrl = token.replace(/(?:player\.|www\.)?wavlake\.com/, "embed.wavlake.com");
 
         return <iframe
-          class="embeddedContent"
+          class={`embeddedContent ${lastClass}`}
           style="borderRadius: 12"
           src={convertedUrl}
           width="100%"
@@ -693,7 +740,7 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderLinks = (item: NoteContent) => {
+  const renderLinks = (item: NoteContent, index?: number) => {
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -710,7 +757,11 @@ const ParsedNote: Component<{
 
         if (hasMinimalPreviewData) {
           setWordsDisplayed(w => w + shortMentionInWords);
-          return <LinkPreview preview={preview} bordered={props.isEmbeded} />;
+          return <LinkPreview
+            preview={preview}
+            bordered={props.isEmbeded}
+            isLast={index === content.length-1}
+          />;
         }
 
         setWordsDisplayed(w => w + 1);
@@ -719,7 +770,7 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderNoteMention = (item: NoteContent) => {
+  const renderNoteMention = (item: NoteContent, index?: number) => {
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -765,6 +816,7 @@ const ParsedNote: Component<{
                 <EmbeddedNote
                   note={ment}
                   mentionedUsers={props.note.mentionedUsers || {}}
+                  isLast={index === content.length-1}
                 />
               </div>;
             }
@@ -965,9 +1017,9 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderContent = (item: NoteContent) => {
+  const renderContent = (item: NoteContent, index: number) => {
 
-    const renderers: Record<string, (item: NoteContent) => JSXElement> = {
+    const renderers: Record<string, (item: NoteContent, index?: number) => JSXElement> = {
       linebreak: renderLinebreak,
       text: renderText,
       image: renderImage,
@@ -988,7 +1040,7 @@ const ParsedNote: Component<{
     }
 
     return renderers[item.type] ?
-      renderers[item.type](item) :
+      renderers[item.type](item, index) :
       <></>;
   };
 
@@ -999,7 +1051,7 @@ const ParsedNote: Component<{
   return (
     <div ref={thisNote} id={id()} class={styles.parsedNote} >
       <For each={content}>
-        {(item) => renderContent(item)}
+        {(item, index) => renderContent(item, index())}
       </For>
       <Show when={isNoteTooLong()}>
         <span class={styles.more}>

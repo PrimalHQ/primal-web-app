@@ -15,7 +15,7 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
 
-const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>, includeEmbeds?: boolean}> = (props) => {
+const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>, includeEmbeds?: boolean, isLast?: boolean}> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -36,7 +36,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     if (props.includeEmbeds) {
       return (
         <div
-          class={`${styles.mentionedNote} embeddedContent`}
+          class={`${styles.mentionedNote} embeddedNote ${props.isLast ? 'noBottomMargin' : ''}`}
           data-event={props.note.post.id}
           data-event-bech32={noteId()}
         >
@@ -48,7 +48,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     return (
       <A
         href={`/e/${noteId()}`}
-        class={`${styles.mentionedNote} embeddedContent`}
+        class={`${styles.mentionedNote} embeddedNote ${props.isLast ? 'noBottomMargin' : ''}`}
         onClick={() => navToThread()}
         data-event={props.note.post.id}
         data-event-bech32={noteId()}
