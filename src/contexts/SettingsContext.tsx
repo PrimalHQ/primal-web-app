@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZap, defaultZapOptions, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -36,6 +36,12 @@ import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
+import { getMobileReleases } from "../lib/releases";
+
+export type MobileReleases = {
+  ios: { date: string, version: string },
+  android: { date: string, version: string },
+}
 
 export type SettingsContextStore = {
   locale: string,
@@ -50,6 +56,7 @@ export type SettingsContextStore = {
   notificationSettings: Record<string, boolean>,
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
+  mobileReleases: MobileReleases,
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -66,6 +73,7 @@ export type SettingsContextStore = {
     restoreDefaultFeeds: () => void,
     setApplyContentModeration: (flag: boolean) => void,
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
+    refreshMobileReleases: () => void,
   }
 }
 
@@ -82,6 +90,10 @@ export const initialData = {
   notificationSettings: { ...defaultNotificationSettings },
   applyContentModeration: true,
   contentModeration: [...defaultContentModeration],
+  mobileReleases: {
+    ios: { date: `${iosRD}`, version: iosVersion },
+    android: { date: `${andRD}`, version: andVersion },
+  },
 };
 
 
@@ -496,6 +508,24 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     pubkey && getSettings(pubkey, subid);
   }
 
+  const refreshMobileReleases = () => {
+    const subid = `mobile_releases_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, async (type, subId, content) => {
+
+      if (type === 'EVENT') {
+        const releases = JSON.parse(content?.content || '{}') as MobileReleases;
+        updateStore('mobileReleases', () => ({ ...releases }));
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+      }
+    });
+
+    getMobileReleases(subid);
+  };
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -521,6 +551,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // when waiting for pubkey (like when reloading a page).
     const storedTheme = localStorage.getItem('theme');
     setThemeByName(storedTheme, true);
+    refreshMobileReleases();
   });
 
 
@@ -629,6 +660,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       updateNotificationSettings,
       setApplyContentModeration,
       modifyContentModeration,
+      refreshMobileReleases,
     },
   });
 

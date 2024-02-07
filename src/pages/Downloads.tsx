@@ -15,22 +15,32 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { andVersion, andRD, iosVersion, iosRD, today, appStoreLink, playstoreLink, apkLink } from '../constants';
+import { appStoreLink, playstoreLink, apkLink } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 const Downloads: Component = () => {
 
   const intl = useIntl();
+  const settings = useSettingsContext();
+
+  const iosRD = () => stringToDate(settings?.mobileReleases.ios.date || '0');
+  const iosVersion = () => settings?.mobileReleases.ios.version || '0';
+
+  const andRD = () => stringToDate(settings?.mobileReleases.android.date || '0');
+  const andVersion = () => settings?.mobileReleases.android.version || '0';
+
+  const today = () => (new Date()).getTime();
 
   onMount(() => {
-    if (today > iosRD) {
-      localStorage.setItem('iosDownload', iosVersion);
+    if (today() > iosRD()) {
+      localStorage.setItem('iosDownload', iosVersion());
     }
 
-    if (today > andRD) {
-      localStorage.setItem('andDownload', andVersion);
+    if (today() > andRD()) {
+      localStorage.setItem('andDownload', andVersion());
     }
   });
 
@@ -40,6 +50,10 @@ const Downloads: Component = () => {
     return new Intl.DateTimeFormat("en-US", {
       year: 'numeric', month: 'short', day: 'numeric',
     }).format(date);
+  }
+
+  const stringToDate = (dateString: string) => {
+    return (new Date(dateString)).getTime();
   }
 
   return (
@@ -117,7 +131,7 @@ const Downloads: Component = () => {
 
             <div class={styles.buidDetails}>
               <div>
-                {displayDate(iosRD).toLowerCase()} | {intl.formatMessage(t.build)} {iosVersion}
+                {displayDate(iosRD()).toLowerCase()} | {intl.formatMessage(t.build)} {iosVersion()}
               </div>
             </div>
 
@@ -139,7 +153,7 @@ const Downloads: Component = () => {
 
             <div class={styles.buidDetails}>
               <div>
-                {displayDate(andRD).toLowerCase()} | {intl.formatMessage(t.build)} {andVersion}
+                {displayDate(andRD()).toLowerCase()} | {intl.formatMessage(t.build)} {andVersion()}
               </div>
             </div>
 

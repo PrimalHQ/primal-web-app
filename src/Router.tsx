@@ -1,5 +1,5 @@
-import { Component, createResource, lazy } from 'solid-js';
-import { Routes, Route, Navigate, RouteDataFuncArgs } from "@solidjs/router";
+import { Component, createEffect, createResource, lazy } from 'solid-js';
+import { Routes, Route, Navigate, RouteDataFuncArgs, useLocation } from "@solidjs/router";
 
 import { PrimalWindow } from './types/primal';
 import { fetchKnownProfiles } from './lib/profile';
@@ -60,6 +60,7 @@ const Router: Component = () => {
   const media = useMediaContext();
   const notifications = useNotificationsContext();
   const search = useSearchContext();
+  const locations = useLocation();
 
   if (isDev) {
     primalWindow.primal = {
@@ -87,6 +88,12 @@ const Router: Component = () => {
     const [profiles] = createResource(params.vanityName, fetchKnownProfiles)
     return profiles;
   }
+
+  createEffect(() => {
+    if (locations.pathname) {
+      settings?.actions.refreshMobileReleases();
+    }
+  });
 
   return (
     <>

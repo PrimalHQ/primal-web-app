@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { andVersion, andRD, iosVersion, iosRD, Kind, today } from "../constants";
+import { andRD, andVersion, iosRD, iosVersion, Kind } from "../constants";
 import {
   createContext,
   createEffect,
@@ -22,6 +22,7 @@ import { APP_ID } from "../App";
 import { getLastSeen, subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
 import { useAccountContext } from "./AccountContext";
 import { timeNow } from "../utils";
+import { useSettingsContext } from "./SettingsContext";
 
 export type NotificationsContextStore = {
   notificationCount: number,
@@ -47,8 +48,11 @@ export const NotificationsContext = createContext<NotificationsContextStore>();
 export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
+  const settings = useSettingsContext();
 
   const subid = `notif_stats_${APP_ID}`;
+
+  const today = () => (new Date()).getTime();
 
 // ACTIONS --------------------------------------
 
@@ -65,13 +69,16 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     const iosDownload = localStorage.getItem('iosDownload');
     const andDownload = localStorage.getItem('andDownload');
 
+    const ios = settings?.mobileReleases.ios || { date: iosRD, version: iosVersion};
+    const and = settings?.mobileReleases.android || { date: andRD, version: andVersion};
+
     let count = 0;
 
-    if (iosDownload !== iosVersion && today > iosRD) {
+    if (iosDownload !== ios.version && today() > (new Date(ios.date)).getTime()) {
       count++;
     }
 
-    if (andDownload !== andVersion && today > andRD) {
+    if (andDownload !== and.version && today() > (new Date(and.date)).getTime()) {
       count++;
     }
 

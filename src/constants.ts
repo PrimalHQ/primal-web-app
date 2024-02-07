@@ -126,6 +126,7 @@ export enum Kind  {
   MediaInfo = 10_000_119,
   Upload = 10_000_120,
   Uploaded = 10_000_121,
+  Releases = 10_000_124,
   ImportResponse = 10_000_127,
   LinkMetadata = 10_000_128,
   FilteringReason = 10_000_131,
