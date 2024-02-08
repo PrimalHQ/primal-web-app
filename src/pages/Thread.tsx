@@ -115,7 +115,7 @@ const Thread: Component = () => {
     if (!pn) return;
 
     setTimeout(() => {
-      const threadHeader = 72;
+      const threadHeader = 80;
       const iOSBanner = 54;
 
       const rect = pn.getBoundingClientRect();
