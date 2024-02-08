@@ -32,6 +32,7 @@ const EditProfile = lazy(() => import('./pages/EditProfile'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Mutelist = lazy(() => import('./pages/Mutelist'));
 const CreateAccount = lazy(() => import('./pages/CreateAccount'));
+const Premium = lazy(() => import('./pages/Premium/Premium'));
 
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Account = lazy(() => import('./pages/Settings/Account'));
@@ -153,6 +154,7 @@ const Router: Component = () => {
             <Route path="/" component={AdvancedSearch} />
             <Route path="/:query" component={AdvancedSearchResults} />
           </Route>
+          <Route path="/premium/:step?" component={Premium} />
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} data={getKnownProfiles} />

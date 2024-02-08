@@ -1,0 +1,24 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 182px;
+    height: 182px;
+    border-radius: 50%;
+
+    color: var(--text-primary);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 52px;
+
+    >img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}

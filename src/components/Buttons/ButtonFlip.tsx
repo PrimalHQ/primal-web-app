@@ -13,6 +13,7 @@ const ButtonFollow: Component<{
   disabled?: boolean,
   light?: boolean,
   type?: 'button' | 'submit' | 'reset' | undefined,
+  dark?: boolean,
 }> = (props) => {
   const klass = () => {
     let k = props.when ? styles.flipActive : styles.flipInactive;
@@ -20,9 +21,12 @@ const ButtonFollow: Component<{
     if (props.light) {
       k += ` ${styles.light}`;
     }
+    k += props.dark ? ` ${styles.dark}` : '';
 
     return k;
   }
+
+  const fallback = () => props.fallback || props.children
 
   return (
     <Button
@@ -35,7 +39,7 @@ const ButtonFollow: Component<{
       <span>
         <Show
           when={props.when}
-          fallback={props.fallback}
+          fallback={fallback()}
         >
           {props.children}
         </Show>

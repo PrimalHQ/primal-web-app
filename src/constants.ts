@@ -425,3 +425,9 @@ export const emptyInvoice: LnbcInvoice = {
 };
 
 export const supportedBookmarkTypes = ['a', 'e'];
+
+export const floatingPoints: Record<string,number> = {
+  sats: 0,
+  USD: 2,
+  _: 2,
+};

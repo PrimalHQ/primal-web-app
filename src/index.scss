@@ -60,7 +60,12 @@
   --dark-back: #000000;
 
   --warning-color: #FA3C3C;
+  --warning-color-2: #FF5834;
   --success-color: #66E205;
+  --success-color-2: #2CA85E;
+  --success-color-3: #0E8A40;
+
+  --premium-orange: #FA3C3C;
 
   --left-col-w: 184px;
   --center-col-w: 640px;
@@ -164,6 +169,8 @@ body::after{
     url(./assets/icons/close.svg)
     url(./assets/icons/caret.svg)
     url(./assets/icons/check.svg)
+    url(./assets/icons/purple_check.svg)
+    url(./assets/icons/purple_ostrich.svg)
     url(./assets/icons/lightning_white.svg);
 }
 
@@ -734,18 +741,18 @@ button:focus {
     opacity: 0;
   }
 }
-.slide-down-fade-enter {
-  // .animated
-  // {
-  //   transform: translateY(10px);
-  // }
-  $elements: 10;
-  @for $i from 0 to $elements {
-    .animated:nth-child(#{$i + 1}) {
-      // transform: translateY(-10px - 2px*$i);
-    }
-  }
-}
+// .slide-down-fade-enter {
+//   // .animated
+//   // {
+//   //   transform: translateY(10px);
+//   // }
+//   $elements: 10;
+//   @for $i from 0 to $elements {
+//     .animated:nth-child(#{$i + 1}) {
+//       // transform: translateY(-10px - 2px*$i);
+//     }
+//   }
+// }
 
 .slide-down-fade-exit-active {
   transition: opacity 0.1s;

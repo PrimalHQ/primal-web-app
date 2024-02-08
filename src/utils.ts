@@ -1,3 +1,5 @@
+import { format } from 'd3-format';
+
 let debounceTimer: number = 0;
 
 export const debounce = (callback: TimerHandler, time: number) => {
@@ -136,3 +138,47 @@ export const getRandomIntegers = (start: number, end: number, qty: number) => {
 }
 
 export const isDev = () => localStorage.getItem('devMode') === 'true';
+
+export const formatAmount = (amount: string, precision = 3) => {
+
+  const value = parseFloat(amount);
+  const min = Math.pow(10, precision > 2 ? -1*(precision - 2) : -1*precision);
+  const max = Math.pow(10, precision);
+
+  if (value === 0) {
+    return `0`;
+  }
+
+  if (value > min && value < max) {
+    return Intl.NumberFormat('en').format(parseFloat(amount))
+  }
+
+  const p = format(`.${precision}s`);
+
+  return p(value);
+
+};
+
+export const formatStorage = (bytes: number) => {
+
+  if (bytes < 1) {
+    return '0'
+  }
+
+  let pow = 1;
+
+  const units = ['', 'bytes', 'KB', 'MB', 'GB', 'TB']
+
+  for(let i=1; i < 6; i++) {
+    if (bytes < Math.pow(1024, i)) {
+      pow = i;
+      break;
+    }
+  }
+
+  const amount = Math.round(bytes / Math.pow(1024, pow-1));
+
+  const formatedAmount = new Intl.NumberFormat('en-US').format(amount)
+
+  return `${formatedAmount} ${units[pow]}`;
+};

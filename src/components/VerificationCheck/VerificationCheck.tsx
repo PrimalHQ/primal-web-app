@@ -53,7 +53,6 @@ const VerificationCheck: Component<{
               <span class={styles.verifiedIcon} />
             }
           >
-            <span class={styles.whiteCheck} />
             <span class={styles.verifiedIconPrimal} />
           </Show>
         </div>
@@ -66,7 +65,6 @@ const VerificationCheck: Component<{
               <span class={styles.verifiedIcon} />
             }
           >
-            <span class={styles.whiteCheckL} />
             <span class={styles.verifiedIconPrimal} />
           </Show>
         </div>

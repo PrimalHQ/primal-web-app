@@ -2372,5 +2372,142 @@ export const reactionsModal = {
       defaultMessage: 'Quotes ({count})',
       description: 'Quotes tab label in reactions modal',
     },
+  },
+};
+
+export const premium = {
+  actions: {
+    start: {
+      id: 'pages.premium.actions.start',
+      defaultMessage: 'Find Primal Name',
+      description: 'Find primal name action on the premium page',
+    },
+    back: {
+      id: 'pages.premium.actions.back',
+      defaultMessage: 'Back',
+      description: 'To the previous step on the premium page',
+    },
+    next: {
+      id: 'pages.premium.actions.next',
+      defaultMessage: 'Next',
+      description: 'To the next step on the premium page',
+    },
+    subscribe: {
+      id: 'pages.premium.actions.subscribe',
+      defaultMessage: 'Subscribe',
+      description: 'Subscribe action on the premium page',
+    },
+    done: {
+      id: 'pages.premium.actions.done',
+      defaultMessage: 'Done',
+      description: 'Done action on the premium page',
+    },
+    rename: {
+      id: 'pages.premium.actions.rename',
+      defaultMessage: 'Rename',
+      description: 'To the rename step on the premium page',
+    },
+    changeName: {
+      id: 'pages.premium.actions.changeName',
+      defaultMessage: 'Change Your Primal Name',
+      description: 'Change Primal name action on the premium page',
+    },
+    extendPlan: {
+      id: 'pages.premium.actions.extendPlan',
+      defaultMessage: 'Extend Your Subscription',
+      description: 'Extend your subscription action on the premium page',
+    },
+    renewPlan: {
+      id: 'pages.premium.actions.renewPlan',
+      defaultMessage: 'Renew Your Subscription',
+      description: 'Extend your subscription action on the premium page',
+    },
+  },
+  title: {
+    general: {
+      id: 'pages.premium.title',
+      defaultMessage: 'Primal Premium',
+      description: 'Title of the premium page',
+    },
+    name: {
+      id: 'pages.premium.name',
+      defaultMessage: 'Choose a primal name',
+      description: 'Title of the premium find name page',
+    },
+    subscription: {
+      id: 'pages.premium.subscription',
+      defaultMessage: 'Congrats!',
+      description: 'Title of the premium subscription page',
+    },
+    subscriptionSubtitle: {
+      id: 'pages.premium.subscriptionSubtitle',
+      defaultMessage: 'Your Primal Name is available',
+      description: 'Subtitle of the premium subscription page',
+    },
+    rename: {
+      id: 'pages.premium.rename',
+      defaultMessage: 'Change your primal name',
+      description: 'Title of the premium rename page',
+    },
+  },
+  subOptions: {
+    prices: {
+      m7: {
+        id: 'pages.premium.subOption.m7',
+        defaultMessage: '$7/month',
+        description: '$7 per month',
+      },
+      m6: {
+        id: 'pages.premium.subOption.m6',
+        defaultMessage: '$6/month',
+        description: '$6 per month',
+      },
+    },
+    durations: {
+      m3: {
+        id: 'pages.premium.duration.m3',
+        defaultMessage: '3 months',
+        description: '3 month duration',
+      },
+      m12: {
+        id: 'pages.premium.duration.m12',
+        defaultMessage: '12 months',
+        description: '12 month duration',
+      },
+    },
+    success: {
+      caption: {
+        id: 'pages.premium.success.caption',
+        defaultMessage: 'Success!',
+        description: 'Payment success caption',
+      },
+      m3: {
+        id: 'pages.premium.success.m3',
+        defaultMessage: 'You subscribed to Primal Premium for 3 months.',
+        description: 'Payment success description for 3 month plan',
+      },
+      m12: {
+        id: 'pages.premium.success.m12',
+        defaultMessage: 'You subscribed to Primal Premium for 12 months.',
+        description: 'Payment success description for 12 month plan',
+      },
+    }
+  },
+  errors: {
+    nameTooShort: {
+      id: 'pages.premium.error.nameTooShort',
+      defaultMessage: 'Name needs to be at least 3 characters long',
+      description: 'Name is too short error',
+    },
+    nameUnavailable: {
+      id: 'pages.premium.error.nameUnavailable',
+      defaultMessage: 'Sorry, that name is currently unavailable',
+      description: 'Name is unavailable error',
+    },
+    nameNotChanged: {
+      id: 'pages.premium.error.nameNotChanged',
+      defaultMessage: 'Failed to change name',
+      description: 'Name is unavailable error',
+    },
   }
 };
