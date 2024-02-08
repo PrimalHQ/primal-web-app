@@ -66,7 +66,11 @@ const Note: Component<{ note: PrimalNote, id?: string, parent?: boolean, shorten
           <NoteReplyToHeader note={props.note} />
 
           <div class={styles.message}>
-            <ParsedNote note={props.note} shorten={props.shorten} />
+            <ParsedNote
+              note={props.note}
+              shorten={props.shorten}
+              width={Math.min(528, window.innerWidth - 72)}
+            />
           </div>
 
           <NoteFooter note={props.note} />
