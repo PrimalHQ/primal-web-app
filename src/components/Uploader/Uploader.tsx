@@ -156,7 +156,7 @@ const Uploader: Component<{
       fileSize: 'small',
     }));
 
-    uploadChunkAttempts = [];
+    uploadChunkAttempts = Array(maxParallelChunks).fill(maxChunkAttempts);
   };
 
   const failUpload = () => {
