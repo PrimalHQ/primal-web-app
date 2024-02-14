@@ -7,7 +7,6 @@ import {
   createContext,
   createEffect,
   onCleanup,
-  onMount,
   useContext
 } from "solid-js";
 import {
@@ -25,7 +24,6 @@ import {
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
-  NostrRelay,
   NostrRelays,
   NostrStatsContent,
   NostrUserContent,
@@ -39,20 +37,19 @@ import {
 import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
+  extractRelayConfigFromTags,
   getProfileContactList,
   getProfileFollowerList,
   getProfileScoredNotes,
   getProfileZapList,
+  getRelays,
   getUserProfileInfo,
-  getUserProfiles,
   isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
 import { setLinkPreviews } from "../lib/notes";
 import { subscribeTo } from "../sockets";
 import { parseBolt11 } from "../utils";
-import { convertToUser } from "../stores/profile";
-import { sortBreakpoints } from "@solid-primitives/media";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 
 export type UserStats = {
@@ -103,6 +100,7 @@ export type ProfileContextStore = {
   isFetchingContacts: boolean,
   isFetchingFollowers: boolean,
   isFetchingZaps: boolean,
+  isFetchingRelays: boolean,
   profileStats: Record<string, number>,
   relays: NostrRelays,
   profileHistory: {
@@ -128,6 +126,7 @@ export type ProfileContextStore = {
     checkForNewNotes: (pubkey: string | undefined) => void,
     fetchContactList: (pubkey: string | undefined, extended?: boolean) => void,
     fetchFollowerList: (pubkey: string | undefined) => void,
+    fetchRelayList: (pubkey: string | undefined) => void,
     clearContacts: () => void,
     removeContact: (pubkey: string) => void,
     addContact: (pubkey: string, source: PrimalUser[]) => void,
@@ -179,6 +178,7 @@ export const initialData = {
   followers: [],
   isFetchingFollowers: false,
   relays: {},
+  isFetchingRelays: false,
   sidebar: {
     messages: [],
     users: {},
@@ -365,9 +365,29 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
           updateStore('profileStats', () => ({ ...stats }));
           return;
         }
+      }
+    });
 
-        if (content?.kind === Kind.Contacts) {
-          const relays = JSON.parse(content.content) as NostrRelays;
+    getProfileContactList(pubkey, subIdContacts, extended);
+  };
+
+
+  const fetchRelayList = (pubkey: string | undefined) => {
+    if (!pubkey) return;
+
+    const subIdRelays = `profile_relays_${APP_ID}`;
+
+    const unsubContacts = subscribeTo(subIdRelays, (type, _, content) => {
+
+      if (type === 'EOSE') {
+        updateStore('isFetchingRelays', () => false);
+        unsubContacts();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.UserRelays) {
+          const relays = extractRelayConfigFromTags(content.tags);
 
           updateStore('relays', reconcile(relays));
           return;
@@ -375,9 +395,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       }
     });
 
-    updateStore('isFetchingContacts', () => true);
+    updateStore('isFetchingRelays', () => true);
 
-    getProfileContactList(pubkey, subIdContacts, extended);
+    getRelays(pubkey, subIdRelays);
   };
 
   const fetchFollowerList = (pubkey: string | undefined) => {
@@ -1201,6 +1221,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       checkForNewNotes,
       fetchContactList,
       fetchFollowerList,
+      fetchRelayList,
       clearContacts,
       addContact,
       removeContact,

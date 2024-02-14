@@ -456,12 +456,13 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
 }
 
 
-export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string) => {
+export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {
 
   const unsub = subscribeTo(subId, (type) => {
 
     if (type === 'EOSE') {
       unsub();
+      then && then();
     }
   });
 

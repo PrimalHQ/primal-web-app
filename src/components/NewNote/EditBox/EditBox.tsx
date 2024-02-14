@@ -397,8 +397,6 @@ const EditBox: Component<{
     let draggedData = e.dataTransfer;
     let file = draggedData?.files[0];
 
-
-    console.log('DROP')
     file && isSupportedFileType(file) && setFileToUpload(file);
 
   };
@@ -430,7 +428,7 @@ const EditBox: Component<{
     if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
       e.preventDefault();
       const file = e.clipboardData.files[0];
-      console.log('PASTE')
+
       file && isSupportedFileType(file) && setFileToUpload(file);
       return false;
     }
@@ -551,7 +549,6 @@ const EditBox: Component<{
       fileUpload.value = '';
     }
 
-    console.log('RESET')
     setFileToUpload(undefined);
   };
 
@@ -1189,7 +1186,6 @@ const EditBox: Component<{
 
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
-    console.log('SELECT')
     // @ts-ignore fileUpload.value assignment
     file && isSupportedFileType(file) && setFileToUpload(file);
 

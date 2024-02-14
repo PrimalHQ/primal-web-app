@@ -193,6 +193,13 @@ export type NostrSuggestedUsers = {
   created_at?: number,
 };
 
+export type PrimalUserRelays = {
+  kind: Kind.UserRelays,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -219,7 +226,8 @@ export type NostrEventContent =
   NostrFilteringReason |
   NostrUserFollwerCounts |
   NostrUserZaps |
-  NostrSuggestedUsers;
+  NostrSuggestedUsers |
+  PrimalUserRelays;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -629,3 +637,10 @@ export type ZapOption = {
   amount?: number,
   message?: string,
 };
+
+export type ContactsData = {
+  content: string,
+  created_at: number,
+  tags: string[][],
+  following: string[],
+}

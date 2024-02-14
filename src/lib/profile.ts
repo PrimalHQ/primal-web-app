@@ -1,5 +1,6 @@
 // @ts-ignore Bad types in nostr-tools
 import { Relay, Event, nip05, nip19 } from "nostr-tools";
+import { unwrap } from "solid-js/store";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
@@ -335,4 +336,60 @@ export const getSuggestions = async (subid: string) => {
     subid,
     {cache: ["get_suggested_users"]},
   ]));
+};
+
+
+export const getRelays = async (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_user_relays", { pubkey }]},
+  ]));
+};
+
+
+export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays) => {
+  const tags = Object.entries(relaySettings).reduce<string[][]>((acc, [url, config]) => {
+    if (config.read && config.write) {
+      return [ ...acc, ['r', url]];
+    }
+
+    if (!config.read && !config.write) {
+      return acc;
+    }
+
+    const permission = config.read ? 'read' : 'write';
+
+    return [ ...acc, ['r', url, permission]];
+  }, []);
+
+  const event = {
+    content: '',
+    kind: Kind.RelayList,
+    tags: [...tags],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+};
+
+export const extractRelayConfigFromTags = (tags: string[][]) => {
+  return tags.reduce((acc, tag) => {
+    if (tag[0] !== 'r') return acc;
+
+    let config = { write: true, read: true };
+
+    if (tag[2] === 'write') {
+      config.read = false;
+    }
+
+    if (tag[2] === 'read') {
+      config.write = false;
+    }
+
+    return { ...acc, [tag[1]]: config };
+
+  }, {});
 };

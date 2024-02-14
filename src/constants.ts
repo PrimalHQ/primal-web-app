@@ -104,6 +104,7 @@ export enum Kind  {
   Zap = 9735,
 
   MuteList = 10_000,
+  RelayList = 10_002,
   CategorizedPeople = 30_000,
 
   Settings = 30_078,
@@ -133,6 +134,7 @@ export enum Kind  {
   UserFollowerCounts = 10_000_133,
   SuggestedUsersByCategory = 10_000_134,
   UploadChunk = 10_000_135,
+  UserRelays=10_000_139,
 }
 
 export const relayConnectingTimeout = 1000;

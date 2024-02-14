@@ -8,6 +8,7 @@ import {
   useContext
 } from "solid-js";
 import {
+  ContactsData,
   EmojiOption,
   Filterlist,
   NostrContactsContent,
@@ -25,7 +26,7 @@ import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../li
 // @ts-ignore Bad types in nostr-tools
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList } from "../lib/profile";
+import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags } from "../lib/profile";
 import { clearSec, getStorage, getStoredProfile, readEmojiHistory, readSecFromStorage, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
@@ -53,6 +54,7 @@ export type AccountContextStore = {
   quotedNote: string | undefined,
   connectToPrimaryRelays: boolean,
   contactsTags: string[][],
+  contactsContent: string,
   mutelists: Filterlist[],
   mutelistSince: number,
   allowlist: string[],
@@ -109,6 +111,7 @@ const initialData = {
   quotedNote: undefined,
   connectToPrimaryRelays: true,
   contactsTags: [],
+  contactsContent: '',
   mutelists: [],
   mutelistSince: 0,
   allowlist: [],
@@ -387,35 +390,25 @@ export function AccountProvider(props: { children: JSXElement }) {
     // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
 
-    const unsub = subscribeTo(`before_add_relay_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(`before_add_relay_${APP_ID}`, (type, subId, content) => {
+      if (type === 'EVENT') {
+        const relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
+
+        const relays = { ...store.relaySettings, ...relayInfo };
+
+        setRelaySettings(relays, true);
+      }
+
       if (type === 'EOSE') {
 
-        const relayInfo = JSON.stringify(store.relaySettings);
-        const date = Math.floor((new Date()).getTime() / 1000);
-        const existingTags = unwrap(store.contactsTags);
-        const following = [...store.following];
-
-        const { success } = await sendContacts(existingTags, date, relayInfo, store.relays, store.relaySettings);
-
-        if (success) {
-          updateStore('followingSince', () => date);
-          saveFollowing(store.publicKey, following, date);
-        }
+        sendRelays(store.relays, store.relaySettings);
 
         unsub();
         return;
       }
-
-      if (content &&
-        content.kind === Kind.Contacts &&
-        content.created_at &&
-        content.created_at > store.followingSince
-      ) {
-        updateContacts(content);
-      }
     });
 
-    getProfileContactList(store.publicKey, `before_add_relay_${APP_ID}`);
+    getRelays(store.publicKey, `before_add_relay_${APP_ID}`);
   };
 
   const removeRelay = (url: string) => {
@@ -438,54 +431,63 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     saveRelaySettings(store.publicKey, store.relaySettings);
 
-    const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, async (type, subId, content) => {
+    const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, (type, subId, content) => {
+      if (type === 'EVENT') {
+        let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
+
+        delete relayInfo[url];
+
+        const relays = { ...store.relaySettings, ...relayInfo };
+
+        setRelaySettings(relays, true);
+      }
+
       if (type === 'EOSE') {
 
-        const relayInfo = JSON.stringify(store.relaySettings);
-        const date = Math.floor((new Date()).getTime() / 1000);
-        const existingTags = unwrap(store.contactsTags);
-        const following = [...store.following];
-
-        const { success } = await sendContacts(existingTags, date, relayInfo, store.relays, store.relaySettings);
-
-        if (success) {
-          updateStore('followingSince', () => date);
-          saveFollowing(store.publicKey, following, date);
-        }
+        sendRelays(store.relays, store.relaySettings);
 
         unsub();
         return;
       }
-
-      if (content &&
-        content.kind === Kind.Contacts &&
-        content.created_at &&
-        content.created_at > store.followingSince
-      ) {
-        updateContacts(content);
-      }
     });
 
-    getProfileContactList(store.publicKey, `before_remove_relay_${APP_ID}`);
+    getRelays(store.publicKey, `before_remove_relay_${APP_ID}`);
   };
 
   const updateContacts = (content: NostrContactsContent) => {
 
     const followingSince = content.created_at;
     const tags = content.tags;
+    const relayInfo = content.content;
 
     const contacts = tags.reduce((acc, t) => {
       return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
     }, []);
 
-    const relaySettings = JSON.parse(content.content || '{}');
+    // const relaySettings = JSON.parse(content.content || '{}');
 
-    setRelaySettings(relaySettings, true);
+    // setRelaySettings(relaySettings, true);
 
     updateStore('following', () => contacts);
     updateStore('followingSince', () => followingSince || 0);
     updateStore('contactsTags', () => [...tags]);
+    updateStore('contactsContent', () => relayInfo);
+
     saveFollowing(store.publicKey, contacts, followingSince || 0);
+  };
+
+  const extractContacts = (content: NostrContactsContent) => {
+
+    const following = content.tags.reduce((acc, t) => {
+      return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
+    }, []);
+
+    return {
+      following,
+      created_at: content.created_at || 0,
+      tags: content.tags,
+      content: content.content,
+    };
   };
 
   const updateMuted = (content: NostrMutedContent) => {
@@ -525,25 +527,37 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
+    let contactData: ContactsData = {
+      content: '',
+      created_at: 0,
+      tags: [],
+      following: [],
+    };
+
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
 
         if (!store.following.includes(pubkey)) {
-          const relayInfo = JSON.stringify(store.relaySettings);
+
+          const relayInfo = contactData.content;
           const date = Math.floor((new Date()).getTime() / 1000);
-          const existingTags = unwrap(store.contactsTags);
-          const following = [...store.following, pubkey];
+          const existingTags = contactData.tags;
+          const following = [...contactData.following, pubkey];
 
           const tags = [ ...existingTags, ['p', pubkey]];
 
-          const { success } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+          const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
 
-          if (success) {
+          if (success && event) {
             updateStore('following', () => following);
             updateStore('followingSince', () => date);
             updateStore('contactsTags', () => [...tags]);
+            updateStore('contactsContent', () => relayInfo);
             saveFollowing(store.publicKey, following, date);
-            cb && cb(false, pubkey);
+
+            triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
+              cb && cb(false, pubkey);
+            });
           }
         }
 
@@ -555,9 +569,10 @@ export function AccountProvider(props: { children: JSXElement }) {
       if (content &&
         content.kind === Kind.Contacts &&
         content.created_at &&
-        content.created_at > store.followingSince
+        content.created_at >= store.followingSince
       ) {
-        updateContacts(content);
+        contactData = extractContacts(content);
+        // updateContacts(content);
       }
     });
 
@@ -572,24 +587,36 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
+    let contactData: ContactsData = {
+      content: '',
+      created_at: 0,
+      tags: [],
+      following: [],
+    };
+
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
         if (store.following.includes(pubkey)) {
-          const relayInfo = JSON.stringify(store.relaySettings);
+
+          const relayInfo = contactData.content;
           const date = Math.floor((new Date()).getTime() / 1000);
-          const existingTags = unwrap(store.contactsTags);
-          const following = store.following.filter(f => f !== pubkey);
+          const existingTags = contactData.tags;
+          const following = contactData.following.filter(f => f !== pubkey);
 
           const tags = existingTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-          const { success } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+          const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
 
-          if (success) {
+          if (success && event) {
             updateStore('following', () => following);
             updateStore('followingSince', () => date);
             updateStore('contactsTags', () => [...tags]);
+            updateStore('contactsContent', () => relayInfo);
             saveFollowing(store.publicKey, following, date);
-            cb && cb(true, pubkey);
+
+            triggerImportEvents([event], `import_unfollow_contacts_${APP_ID}`, () => {
+              cb && cb(true, pubkey);
+            });
           }
         }
 
@@ -601,9 +628,10 @@ export function AccountProvider(props: { children: JSXElement }) {
       if (content &&
         content.kind === Kind.Contacts &&
         content.created_at &&
-        content.created_at > store.followingSince
+        content.created_at >= store.followingSince
       ) {
-        updateContacts(content);
+        contactData = extractContacts(content);
+        // updateContacts(content);
       }
     });
 
@@ -1109,6 +1137,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
+      getRelays(store.publicKey, `user_relays_${APP_ID}`);
 
       updateStore('emojiHistory', () => readEmojiHistory(store.publicKey))
     }
@@ -1224,6 +1253,15 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         updateContacts(content);
+      }
+      return;
+    }
+
+    if (subId === `user_relays_${APP_ID}`) {
+      if (content && content.kind === Kind.UserRelays) {
+        const relays = extractRelayConfigFromTags(content.tags);
+
+        setRelaySettings(relays, true);
       }
       return;
     }

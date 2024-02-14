@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core";
 import { A } from "@solidjs/router";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import { profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
@@ -89,7 +89,7 @@ const ProfileTabs: Component<{
       return bFollowers >= aFollowers ? 1 : -1;
     });
 
-    setContacts((cs) => [ ...cs, ...(cts.slice(contactsOffset(), contactsOffset() + profileContactListPage))]);
+    setContacts(() => [ ...(cts.slice(0, contactsOffset() + profileContactListPage))]);
 
   });
 
@@ -143,7 +143,7 @@ const ProfileTabs: Component<{
         profile?.zaps.length === 0 && profile?.actions.fetchZapList(props.profile.pubkey);
         break;
       case 'relays':
-        profile?.contacts.length === 0 && profile?.actions.fetchContactList(props.profile.pubkey, false);
+        Object.keys(profile?.relays || {}).length === 0 && profile?.actions.fetchRelayList(props.profile.pubkey);
         break;
     }
   };
@@ -477,20 +477,40 @@ const ProfileTabs: Component<{
 
         <Tabs.Content class={styles.tabContent} value="relays">
           <div class={styles.profileRelays}>
-            <For each={Object.keys(profile?.relays || {})}>
-              {relayUrl => (
-                <div class={styles.profileRelay}>
-                  <div class={styles.relayIcon}></div>
-                  <div class={styles.relayUrl}>
-                    {relayUrl}
-                  </div>
-                  <ButtonCopy
-                    copyValue={relayUrl}
-                    label={intl.formatMessage(tActions.copy)}
-                  />
+            <Show
+              when={!profile?.isFetchingRelays}
+              fallback={
+                <div style="margin-top: 40px;">
+                  <Loader />
                 </div>
-              )}
-            </For>
+              }
+            >
+              <For
+                each={Object.keys(profile?.relays || {})}
+
+                fallback={
+                  <div class={styles.mutedProfile}>
+                    {intl.formatMessage(
+                      t.noRelays,
+                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    )}
+                  </div>
+                }
+              >
+                {relayUrl => (
+                  <div class={styles.profileRelay}>
+                    <div class={styles.relayIcon}></div>
+                    <div class={styles.relayUrl}>
+                      {relayUrl}
+                    </div>
+                    <ButtonCopy
+                      copyValue={relayUrl}
+                      label={intl.formatMessage(tActions.copy)}
+                    />
+                  </div>
+                )}
+              </For>
+            </Show>
           </div>
         </Tabs.Content>
       </Tabs.Root>

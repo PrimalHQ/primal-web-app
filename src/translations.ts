@@ -1152,6 +1152,11 @@ export const profile = {
     defaultMessage: 'No one zapped {name}',
     description: 'Label indicating that the profile has no zaps',
   },
+  noRelays: {
+    id: 'profile.noRelays',
+    defaultMessage: '{name} is on no relays',
+    description: 'Label indicating that the profile has no relays',
+  },
 };
 
 export const search = {

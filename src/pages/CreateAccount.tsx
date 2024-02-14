@@ -10,7 +10,7 @@ import { usernameRegex, Kind } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMediaContext } from '../contexts/MediaContext';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { getProfileContactList, getSuggestions, getUserProfiles, sendProfile } from '../lib/profile';
+import { getProfileContactList, getRelays, getSuggestions, getUserProfiles, sendProfile, sendRelays } from '../lib/profile';
 import {
   actions as tActions,
   account as tAccount,
@@ -27,7 +27,7 @@ import { hexToNsec } from '../lib/keys';
 import { storeSec } from '../lib/localStore';
 import CreatePinModal from '../components/CreatePinModal/CreatePinModal';
 import { useSearchContext } from '../contexts/SearchContext';
-import { sendContacts } from '../lib/notes';
+import { sendContacts, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
 import { subscribeTo } from '../sockets';
@@ -180,7 +180,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       return false;
     }
 
-    let relaySettings = account.defaultRelays.reduce((acc, r) => ({ ...acc, [r]: { write: true, read: true }}), {});
+    let relaySettings = account.defaultRelays.reduce<NostrRelays>((acc, r) => ({ ...acc, [r]: { write: true, read: true }}), {});
 
     let metadata: Record<string, string> = {};
 
@@ -211,13 +211,22 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
       const tags = followed.map(pk => ['p', pk]);
-      const relayInfo = JSON.stringify(relaySettings);
       const date = Math.floor((new Date()).getTime() / 1000);
 
-      const { success: succ } = await sendContacts(tags, date, relayInfo, account.relays, relaySettings);
+      const sendResult = await sendContacts(tags, date, '', account.relays, relaySettings);
 
-      if (succ) {
-        getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
+      if (sendResult.success && sendResult.note) {
+        triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
+          getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
+        });
+      }
+
+      const relayResult = await sendRelays(account.relays, relaySettings);
+
+      if (relayResult.success && relayResult.note) {
+        triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {
+          getRelays(account?.publicKey, `user_relays_${APP_ID}`);
+        });
       }
 
       form.reset();
