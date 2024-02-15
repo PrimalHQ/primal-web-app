@@ -4,6 +4,11 @@ import { ScopeDescriptor } from "./types/primal";
 
 
 export const account = {
+  alreadyHaveAccount: {
+    id: 'account.alreadyHaveAccount',
+    defaultMessage: 'Already have a Nostr account?',
+    description: 'Already have a Nostr accountlabel',
+  },
   prominentNostriches: {
     id: 'actions.prominentNostriches',
     defaultMessage: 'Prominent Nostriches',
@@ -1605,7 +1610,7 @@ export const settings = {
     lud16: {
       label: {
         id: 'pages.settings.profile.lud16.label',
-        defaultMessage: 'Lightning Address',
+        defaultMessage: 'Bitcoin Lightning Address',
         description: 'Label for lud16 input on edit profile page',
       },
       placeholder : {
@@ -1617,7 +1622,7 @@ export const settings = {
     nip05: {
       label: {
         id: 'pages.settings.profile.nip05.label',
-        defaultMessage: 'Verified Nostr Id (Nip-05)',
+        defaultMessage: 'Verified Nostr Address (NIP-05)',
         description: 'Label for nip-05 input on edit profile page',
       },
       placeholder : {
@@ -1821,37 +1826,37 @@ export const toast = {
   },
   noteNostrLinkCoppied: {
     id: 'toast.noteNostrLinkCoppied',
-    defaultMessage: 'Note\'s nostr link copied',
+    defaultMessage: 'Note nostr link copied',
     description: 'Confirmation message that the note\'s link has been copied',
   },
   notePrimalLinkCoppied: {
     id: 'toast.notePrimalLinkCoppied',
-    defaultMessage: 'Note\'s link copied',
+    defaultMessage: 'Note link copied',
     description: 'Confirmation message that the note\'s link has been copied',
   },
   notePrimalTextCoppied: {
     id: 'toast.notePrimalTextCoppied',
-    defaultMessage: 'Note\'s text copied',
+    defaultMessage: 'Note text copied',
     description: 'Confirmation message that the note\'s text has been copied',
   },
   noteIdCoppied: {
     id: 'toast.noteIdCoppied',
-    defaultMessage: 'Note\'s id copied',
+    defaultMessage: 'Note id copied',
     description: 'Confirmation message that the note\'s id has been copied',
   },
   noteRawDataCoppied: {
     id: 'toast.noteRawDataCoppied',
-    defaultMessage: 'Note\'s raw data copied',
+    defaultMessage: 'Note raw data copied',
     description: 'Confirmation message that the note\'s raw data has been copied',
   },
   noteAuthorNpubCoppied: {
     id: 'toast.noteAuthorNpubCoppied',
-    defaultMessage: 'Note\'s author npub copied',
+    defaultMessage: 'Note author npub copied',
     description: 'Confirmation message that the note\'s author npub has been copied',
   },
   profileNpubCoppied: {
     id: 'toast.noteAuthorNpubCoppied',
-    defaultMessage: 'User\'s npub copied',
+    defaultMessage: 'User npub copied',
     description: 'Confirmation message that the user\'s npub has been copied',
   },
   noteBroadcastSuccess: {

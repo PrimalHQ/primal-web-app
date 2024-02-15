@@ -53,7 +53,7 @@ const CreateAccountModal: Component<{
           </ButtonPrimary>
         </div>
         <div class={styles.alternative}>
-          Already have Nostr a account?&nbsp;
+        {intl.formatMessage(t.alreadyHaveAccount)}&nbsp;
           <ButtonLink onClick={props.onLogin}>
             {intl.formatMessage(tActions.loginNow)}
           </ButtonLink>

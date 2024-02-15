@@ -656,7 +656,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             <input
               name='lud16'
               type='text'
-              placeholder={intl.formatMessage(tSettings.profile.lud16.placeholder)}
             />
 
             <div class={styles.inputLabel}>
@@ -665,7 +664,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             <input
               name='nip05'
               type='text'
-              placeholder={intl.formatMessage(tSettings.profile.nip05.placeholder)}
             />
           </div>
 
