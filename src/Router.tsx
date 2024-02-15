@@ -40,6 +40,8 @@ const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
+const Landing = lazy(() => import('./pages/Landing'));
+const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 
 const Terms = lazy(() => import('./pages/Terms'));
 const Support = lazy(() => import('./pages/Support'));
@@ -98,6 +100,8 @@ const Router: Component = () => {
   return (
     <>
       <Routes>
+        <Route path="/landing" component={Landing} />
+        <Route path="/app-download-qr" component={AppDownloadQr} />
         <Route path="/terms" component={Terms} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >

@@ -1,0 +1,308 @@
+.landingPage {
+  background-color: white;
+  color: black;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .landingContent {
+    width: 1050px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 80px;
+
+    .mobileBranding {
+      display: none;
+    }
+
+    .landingVideo {
+      width: 576px;
+      display: flex;
+      justify-content: center;
+      video {
+        width: 100%;
+        min-height: 734px;
+      }
+    }
+
+    .landingInfo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      .branding {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        margin-bottom: 82px;
+        width: 371px;
+      }
+
+      .text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .tagline {
+          color: #000;
+          font-family: Nacelle;
+          font-size: 32.5px;
+          font-style: normal;
+          font-weight: 700;
+          line-height: 24px;
+          letter-spacing: -0.65px;
+          margin-bottom: 10px;
+          width: 371px;
+        }
+
+        .description {
+          color: #000;
+          text-align: justify;
+          font-family: Nacelle;
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 140%;
+          width: 371px;
+          margin-bottom: 30px;
+        }
+      }
+
+
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 388px;
+
+        .appLinks {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+
+          img {
+            width: 156px;
+            height: auto;
+          }
+
+          .linkToWeb {
+            img {
+              display: block;
+            }
+            p {
+              display: none;
+              color: #CA077C;
+              text-align: center;
+              font-family: Nacelle;
+              font-size: 18px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: 18px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .landingTestemonials {
+    border-top: 1px solid #E5E5E5;
+    width: 1050px;
+    height: 210px;
+    display: grid;
+    grid-template-columns: 230px 260px 200px 220px;
+    justify-content: space-between;
+
+    margin-bottom: 48px;
+    padding-top: 20px;
+
+    .testemonial {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+
+      width: 100%;
+      height: 100%;
+
+      >img {
+        height: 36px;
+      }
+
+      p {
+        color: #111;
+        font-family: Nacelle;
+        font-size: 18px;
+        font-style: italic;
+        font-weight: 400;
+        line-height: 24px;
+
+        &:before {
+          content: '';
+          width: 20px;
+          height: 16px;
+          display: inline-block;
+          background-color: blue;
+          mask-image: url(../assets/icons/quote_open.svg);
+          mask-repeat: no-repeat;
+          -webkit-mask-image: url(../assets/icons/quote_open.svg);
+          -webkit-mask-repeat: no-repeat;
+          -webkit-mask-size: contain;
+          margin-right: 4px;
+        }
+
+        &:after  {
+          content: '';
+          width: 20px;
+          height: 16px;
+          display: inline-block;
+          background-color: white;
+          mask-image: url(../assets/icons/quote_close.svg);
+          mask-repeat: no-repeat;
+          -webkit-mask-image: url(../assets/icons/quote_close.svg);
+          -webkit-mask-repeat: no-repeat;
+          -webkit-mask-size: contain;
+          margin-left: 4px;
+        }
+
+        &.cyan {
+          &:before, &:after {
+            background-color: #4BBEB7;
+          }
+        }
+
+        &.pink {
+          &:before, &:after {
+            background-color: #E01E93;
+          }
+        }
+
+        &.orange {
+          &:before, &:after {
+            background-color: #FB7735;
+          }
+        }
+
+        &.blue {
+          &:before, &:after {
+            background-color: #6E96B9;
+          }
+        }
+      }
+
+    }
+
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .landingPage {
+    .landingContent {
+      margin-top: 20px;
+      width: 100vw;
+      flex-direction: column;
+
+      .mobileBranding {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        margin-block: 20px;
+        width: 100vw;
+        >img {
+          height: 32px
+        }
+      }
+
+      .landingVideo {
+        width: 100%;
+        video {
+          width: 88%;
+          min-height: 437px;
+        }
+      }
+
+      .landingInfo {
+        flex-direction: column-reverse;
+        .branding {
+          display: none;
+        }
+
+        .text {
+          .tagline {
+            color: #000;
+            text-align: center;
+            font-family: Nacelle;
+            font-size: 24px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: 24px;
+            padding-inline: 46px;
+            text-align: center;
+          }
+          .description {
+            color: #000;
+            text-align: center;
+            font-family: Nacelle;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+            padding-inline: 46px;
+          }
+        }
+
+        .actions {
+          justify-content: center;
+          .qrCode {
+            display: none;
+          }
+
+
+          .appLinks {
+            img {
+              width: auto;
+              height: 58px;
+            }
+            .linkToWeb {
+              margin-top: 20px;
+              margin-bottom: 40px;
+              img {
+                display: none;
+              }
+              p {
+                display: inline;
+              }
+            }
+          }
+        }
+      }
+    }
+    .landingTestemonials {
+      width: 100%;
+      height: auto;
+      padding-top: 26px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 33px;
+      padding-inline: 46px;
+
+      .testemonial {
+        width: 100%;
+      }
+    }
+  }
+
+}

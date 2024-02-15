@@ -1957,3 +1957,16 @@ export const upload = {
     description: 'Faces emoji group title',
   },
 };
+
+export const landing = {
+  tagline: {
+    id: 'landing.tagline',
+    defaultMessage: 'The Social Bitcoin Wallet',
+    description: 'Landing page tagline',
+  },
+  description: {
+    id: 'landing.description',
+    defaultMessage: 'Bitcoin gains superpowers when fused with Nostr. Open protocols for money and speech are going to change everything. Join the revolution.',
+    description: 'Landing page description',
+  },
+};
