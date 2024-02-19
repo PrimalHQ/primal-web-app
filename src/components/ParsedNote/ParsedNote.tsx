@@ -358,7 +358,7 @@ const ParsedNote: Component<{
       }
 
       removeLinebreaks();
-      isAfterEmbed = true;
+      isAfterEmbed = false;
       lastSignificantContent = 'link';
 
       updateContent(content, 'link', token);
