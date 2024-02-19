@@ -1031,7 +1031,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         user.npub = hexToNpub(content.pubkey);
         user.created_at = content.created_at;
 
-        updateStore('userProfile', () => user);
+        updateStore('userProfile', () => ({ ...user }));
         addProfileToHistory(user);
         return;
       }
