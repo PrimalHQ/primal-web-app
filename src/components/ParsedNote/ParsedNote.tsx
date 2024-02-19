@@ -173,10 +173,22 @@ const ParsedNote: Component<{
     return props.shorten && wordsDisplayed() > shortNoteWords;
   };
 
+  const noteContent = () => {
+    const content = props.note.post.content;
+    const charLimit = 7 * shortNoteWords;
+
+    if (!props.shorten || content.length < charLimit) return content;
+
+    // Find the first word break after the char limit so we don't do a word cut-off
+    const nextWordBreak = content.slice(charLimit).search(/\s|\n|\r/);
+
+    return content.slice(0, charLimit + nextWordBreak);
+  };
+
   const parseContent = () => {
     const content = props.ignoreLinebreaks ?
-      props.note.post.content.replace(/\s+/g, ' __SP__ ') :
-      props.note.post.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+      noteContent().replace(/\s+/g, ' __SP__ ') :
+      noteContent().replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
 
     const tokens = content.split(/[\s]+/);
 
@@ -1054,7 +1066,7 @@ const ParsedNote: Component<{
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
-      <Show when={isNoteTooLong()}>
+      <Show when={isNoteTooLong() || noteContent().length < props.note.post.content.length}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
