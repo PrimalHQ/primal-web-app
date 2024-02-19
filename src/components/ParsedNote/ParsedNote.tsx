@@ -501,7 +501,7 @@ const ParsedNote: Component<{
           }
 
           return <NoteImage
-            class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()}`}
+            class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()+1}`}
             src={url}
             isDev={dev}
             media={image}
