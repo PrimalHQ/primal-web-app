@@ -1,16 +1,53 @@
 .terms {
   background-color: black;
-  color: white;
+  color: #bfbfbf;
   max-width: 840px;
   min-width: 600px;
   margin-inline: auto;
   min-height: 100vh;
   padding-inline: 20px;
-  padding-bottom: 20px;
+  padding-block: 20px;
+  font-size: 16px;
 
-  h1, h2, p {
+  section {
+    margin-inline: 0px;
+    margin-block: 12px;
+    section {
+      margin-inline: 24px 0px;
+      margin-block: 12px;
+      h3 {
+        color: white;
+        margin: 0;
+        font-weight: 700;
+        display: inline;
+        font-size: 16px;
+
+        &::after {
+          content: " ";
+        }
+      }
+    }
+  }
+
+  h1, h2 {
     color: white;
     margin: 0;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  h2 {
+    font-size: 26px;
+  }
+
+  p {
+    color: #bfbfbf;
+    font-size: 16px;
+    margin-inline: 0;
+    margin-block: 12px;
   }
 }
 
@@ -19,5 +56,12 @@
     min-width: unset;
     max-width: unset;
     width: 100%;
+
+    section {
+      margin-inline: 0;
+      section {
+        margin-inline: 0;
+      }
+    }
   }
 }
