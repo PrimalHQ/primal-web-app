@@ -27,7 +27,7 @@ const Privacy: Component = () => {
         </h2>
 
         <p>
-          Primal doesn’t monetize your personal information. We don’t generate revenue via advertising, we don’t monetize user attention, and we don’t sell personal information we collect from our users. Primal’s policy is to maximize user privacy by collecting only the minimum amount of personal information in order to provide quality Services to our users, and as required to be compliant with the relevant laws.
+          Primal doesn’t monetize your personal information. We don’t generate revenue via advertising, we don’t monetize user attention, and we don’t sell personal information we collect from our users. Primal’s policy is to maximize user privacy by collecting only the minimum amount of personal information required to provide quality Services to our users and be compliant with the relevant laws.
         </p>
       </section>
 
