@@ -166,7 +166,7 @@ const Downloads: Component = () => {
             </a>
 
             <a
-              href={apkLink}
+              href={`https://github.com/PrimalHQ/primal-android-app/releases/tag/${andVersion()}`}
               target='_blank'
               class={styles.apkLink}
             >
