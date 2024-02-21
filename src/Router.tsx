@@ -44,6 +44,7 @@ const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 
 const Terms = lazy(() => import('./pages/Terms'));
+const Privacy = lazy(() => import('./pages/Privacy'));
 const Support = lazy(() => import('./pages/Support'));
 
 const primalWindow = window as PrimalWindow;
@@ -103,6 +104,7 @@ const Router: Component = () => {
         <Route path="/landing" component={Landing} />
         <Route path="/app-download-qr" component={AppDownloadQr} />
         <Route path="/terms" component={Terms} />
+        <Route path="/privacy" component={Privacy} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >
           <Route path="/" element={<Navigate href="/home" />} />
