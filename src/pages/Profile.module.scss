@@ -251,12 +251,26 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      max-width: 60%;
 
-      color: var(--text-primary);
-      font-size: 20px;
-      line-height: 20px;
-      font-weight: 700;
-      height: 26px;
+      .text {
+        color: var(--text-primary);
+        font-size: 20px;
+        line-height: 20px;
+        font-weight: 700;
+        height: 26px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .followsBadge {
+        min-width: 80px;
+      }
+
+      .vc {
+        width: 20px;
+      }
     }
 
     .joined {

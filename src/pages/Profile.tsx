@@ -609,9 +609,13 @@ const Profile: Component = () => {
           >
             <div class={styles.basicInfo}>
               <div class={styles.name}>
-                {profileName()}
+                <div class={styles.text}>
+                  {profileName()}
+                </div>
                 <Show when={profile?.userProfile?.nip05 && verification()}>
-                  <VerificationCheck user={profile?.userProfile} large={true} />
+                  <div class={styles.vc}>
+                    <VerificationCheck user={profile?.userProfile} large={true} />
+                  </div>
                 </Show>
                 <Show when={isFollowingYou()}>
                   <div class={styles.followsBadge}>
