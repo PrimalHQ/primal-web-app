@@ -3,7 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -814,7 +814,7 @@ const EditBox: Component<{
     let refs = [];
     let match;
 
-    while((match = profileRegex.exec(text)) !== null) {
+    while((match = profileRegexG.exec(text)) !== null) {
       refs.push(match[1]);
     }
 
