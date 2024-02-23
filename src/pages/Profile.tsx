@@ -416,7 +416,7 @@ const Profile: Component = () => {
   };
 
   const copyProfileLink = () => {
-    navigator.clipboard.writeText(`${window.location.href}`);
+    navigator.clipboard.writeText(`${window.location.host}/p/${hexToNpub(getHex())}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
