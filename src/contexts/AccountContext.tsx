@@ -1332,7 +1332,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     <AccountContext.Provider value={store}>
       {props.children}
       <EnterPinModal
-        open={!window.location.pathname.startsWith('/landing') && store.showPin.length > 0}
+        open={store.showPin.length > 0}
         valueToDecrypt={store.showPin}
         onSuccess={(sec: string) => {
           setSec(sec);

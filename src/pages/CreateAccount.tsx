@@ -337,7 +337,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     setTempNsec(undefined);
     setCreatedAccount(reconcile({}));
     onAbort();
-    navigate('/');
+    navigate('/home');
   }
 
   const onAbort = () => {
@@ -348,7 +348,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     account?.actions.setSec(undefined);
     setTempNsec(undefined);
     setCreatedAccount(reconcile({}));
-    navigate('/');
+    navigate('/home');
   }
 
   const [followed, setFollowed] = createStore<string[]>([])

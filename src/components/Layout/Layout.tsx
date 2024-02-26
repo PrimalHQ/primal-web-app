@@ -15,6 +15,7 @@ import { useProfileContext } from '../../contexts/ProfileContext';
 import Branding from '../Branding/Branding';
 import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
 import ZapAnimation from '../ZapAnimation/ZapAnimation';
+import Landing from '../../pages/Landing';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -78,72 +79,80 @@ const Layout: Component = () => {
   }
 
   return (
-    <>
-      <div class={styles.preload}>
-        <div class="reply_icon"></div>
-        <div class="reply_icon_fill"></div>
-        <div class="repost_icon"></div>
-        <div class="repost_icon_fill"></div>
-        <div class="zap_icon"></div>
-        <div class="zap_icon_fill"></div>
-        <div class="like_icon"></div>
-        <div class="like_icon_fill"></div>
-        <ZapAnimation src={zapMD} />
-      </div>
-      <div id="modal" class={styles.modal}></div>
-      <BannerIOS />
-      <div id="container" ref={container} class={isIOS() ? styles.containerIOS : styles.container}>
-        <div class={styles.leftColumn}>
-          <div>
-            <div id="branding_holder" class={styles.leftHeader}>
-              <Branding isHome={isHome()} />
-            </div>
-
-            <div class={styles.leftContent}>
-              <NavMenu />
-              <Show when={location.pathname === '/new'}>
-                <div class={styles.overlay}></div>
-              </Show>
-            </div>
-
-            <div class={styles.leftFooter}>
-              <Show when={location.pathname !== '/new'}>
-                <ProfileWidget />
-              </Show>
-            </div>
-          </div>
+    <Show
+      when={location.pathname !== '/'}
+      fallback={<>
+        <div id="modal" class={styles.modal}></div>
+        <Outlet />
+      </>}
+    >
+      <>
+        <div class={styles.preload}>
+          <div class="reply_icon"></div>
+          <div class="reply_icon_fill"></div>
+          <div class="repost_icon"></div>
+          <div class="repost_icon_fill"></div>
+          <div class="zap_icon"></div>
+          <div class="zap_icon_fill"></div>
+          <div class="like_icon"></div>
+          <div class="like_icon_fill"></div>
+          <ZapAnimation src={zapMD} />
         </div>
-
-
-        <div class={styles.centerColumn}>
-          <Show when={account?.isKeyLookupDone}>
-            <div class={styles.centerContent}>
-              <div id="new_note_input" class={styles.headerFloater}>
-                <NewNote onSuccess={onNewNotePosted}/>
+        <div id="modal" class={styles.modal}></div>
+        <BannerIOS />
+        <div id="container" ref={container} class={isIOS() ? styles.containerIOS : styles.container}>
+          <div class={styles.leftColumn}>
+            <div>
+              <div id="branding_holder" class={styles.leftHeader}>
+                <Branding isHome={isHome()} />
               </div>
 
-              <div>
-                <Outlet />
+              <div class={styles.leftContent}>
+                <NavMenu />
+                <Show when={location.pathname === '/new'}>
+                  <div class={styles.overlay}></div>
+                </Show>
               </div>
-            </div>
-          </Show>
-        </div>
 
-
-        <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') ? styles.messagesColumn : ''}`}>
-          <div>
-            <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
-              <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
-              </div>
-            </div>
-            <div class={styles.rightContent}>
-              <div id="right_sidebar">
+              <div class={styles.leftFooter}>
+                <Show when={location.pathname !== '/new'}>
+                  <ProfileWidget />
+                </Show>
               </div>
             </div>
           </div>
+
+
+          <div class={styles.centerColumn}>
+            <Show when={account?.isKeyLookupDone}>
+              <div class={styles.centerContent}>
+                <div id="new_note_input" class={styles.headerFloater}>
+                  <NewNote onSuccess={onNewNotePosted}/>
+                </div>
+
+                <div>
+                  <Outlet />
+                </div>
+              </div>
+            </Show>
+          </div>
+
+
+          <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') ? styles.messagesColumn : ''}`}>
+            <div>
+              <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
+                <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
+                </div>
+              </div>
+              <div class={styles.rightContent}>
+                <div id="right_sidebar">
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </>
+      </>
+    </Show>
   )
 }
 

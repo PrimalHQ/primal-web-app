@@ -16,7 +16,7 @@ const Branding: Component<{ small?: boolean, isHome?: boolean }> = (props) => {
       return;
     }
 
-    navigate('/');
+    navigate('/home');
   }
 
   return (

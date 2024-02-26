@@ -86,7 +86,7 @@ const Landing: Component = () => {
               </Show>
               <A href="/home" class={styles.linkToWeb}>
                 <img src={primalWeb} />
-                <p>Continue in browser</p>
+                <p>{intl.formatMessage(t.browserOption)}</p>
               </A>
             </div>
           </div>

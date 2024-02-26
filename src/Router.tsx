@@ -101,13 +101,12 @@ const Router: Component = () => {
   return (
     <>
       <Routes>
-        <Route path="/landing" component={Landing} />
         <Route path="/app-download-qr" component={AppDownloadQr} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >
-          <Route path="/" element={<Navigate href="/home" />} />
+          <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />
           <Route path="/thread/:postId" component={Thread} />
           <Route path="/e/:postId" component={Thread} />

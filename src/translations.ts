@@ -1966,7 +1966,12 @@ export const landing = {
   },
   description: {
     id: 'landing.description',
-    defaultMessage: 'Bitcoin gains superpowers when fused with Nostr. Open protocols for money and speech are going to change everything. Join the revolution.',
+    defaultMessage: 'Open protocols for money and speech are going to change everything. Join the revolution.',
     description: 'Landing page description',
+  },
+  browserOption: {
+    id: 'landing.browserOption',
+    defaultMessage: 'Continue in browser',
+    description: 'Landing page browser option',
   },
 };

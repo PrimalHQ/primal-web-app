@@ -14,8 +14,9 @@
   .landingContent {
     width: 1050px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    gap: 28px;
     margin-top: 80px;
 
     .mobileBranding {
@@ -120,7 +121,7 @@
     border-top: 1px solid #E5E5E5;
     width: 1050px;
     height: 210px;
-    display: grid;
+    display: none;
     grid-template-columns: 230px 260px 200px 220px;
     justify-content: space-between;
 
@@ -206,7 +207,7 @@
   }
 }
 
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 1050px) {
   .landingPage {
     .landingContent {
       margin-top: 20px;
@@ -293,7 +294,7 @@
       width: 100%;
       height: auto;
       padding-top: 26px;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 33px;

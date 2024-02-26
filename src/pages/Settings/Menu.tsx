@@ -75,7 +75,7 @@ const Menu: Component = () => {
         <div class={styles.webVersion}>
           <ButtonPrimary onClick={() => {
             account?.actions.logout();
-            navigate('/');
+            navigate('/home');
           }}>
             {intl.formatMessage(tActions.logout)}
           </ButtonPrimary>
