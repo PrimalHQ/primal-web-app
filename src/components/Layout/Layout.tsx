@@ -78,6 +78,14 @@ const Layout: Component = () => {
     }
   }
 
+  createEffect(() => {
+    if (location.pathname === '/' || account?.isKeyLookupDone) return;
+
+    setTimeout(() => {
+      account?.actions.checkNostrKey();
+    }, 1000);
+  });
+
   return (
     <Show
       when={location.pathname !== '/'}

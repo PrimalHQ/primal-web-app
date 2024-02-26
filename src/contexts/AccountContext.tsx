@@ -90,6 +90,7 @@ export type AccountContextStore = {
     logout: () => void,
     showGetStarted: () => void,
     saveEmoji: (emoji: EmojiOption) => void,
+    checkNostrKey: () => void,
   },
 }
 
@@ -1105,14 +1106,12 @@ export function AccountProvider(props: { children: JSXElement }) {
     saveEmojiHistory(store.publicKey, store.emojiHistory);
   };
 
-// EFFECTS --------------------------------------
+  const checkNostrKey = () => {
+    updateStore('isKeyLookupDone', false);
+    fetchNostrKey();
+  };
 
-  onMount(() => {
-    setTimeout(() => {
-      updateStore('isKeyLookupDone', false);
-      fetchNostrKey();
-    }, 1000);
-  });
+// EFFECTS --------------------------------------
 
   createEffect(() => {
     const pubkey = store.publicKey;
@@ -1325,6 +1324,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     logout,
     showGetStarted,
     saveEmoji,
+    checkNostrKey,
   },
 });
 
