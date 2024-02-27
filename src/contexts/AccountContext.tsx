@@ -159,7 +159,9 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       const pubkey = nostrGetPubkey(decoded.data);
 
-      setPublicKey(pubkey);
+      if (pubkey !== store.publicKey) {
+        setPublicKey(pubkey);
+      }
 
       // Read profile from storage
       const storedUser = getStoredProfile(pubkey);
@@ -302,6 +304,12 @@ export function AccountProvider(props: { children: JSXElement }) {
     const win = window as NostrWindow;
     const nostr = win.nostr;
 
+    const storedKey = localStorage.getItem('pubkey');
+
+    if (storedKey) {
+      setPublicKey(storedKey);
+    }
+
     if (nostr === undefined) {
       console.log('Nostr extension not found');
       // Try again after one second if extensionAttempts are not exceeded
@@ -336,7 +344,9 @@ export function AccountProvider(props: { children: JSXElement }) {
         setTimeout(fetchNostrKey, 250);
       }
       else {
-        setPublicKey(key);
+        if (key !== storedKey) {
+          setPublicKey(key);
+        }
 
         // Read profile from storage
         const storedUser = getStoredProfile(key);
