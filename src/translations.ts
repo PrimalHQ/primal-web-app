@@ -1949,12 +1949,17 @@ export const upload = {
   fail: {
     id: 'upload.fail',
     defaultMessage: 'Failed to upload file {file}',
-    description: 'Faces emoji group title',
+    description: 'Error feedback when upload fails',
   },
-  fileTooBig: {
-    id: 'upload.fileTooBig',
+  fileTooBigRegular: {
+    id: 'upload.fileTooBigRegular',
     defaultMessage: 'File too big. Upload limit is 100MB.',
-    description: 'Faces emoji group title',
+    description: 'Error feedback when file is too big for regular users',
+  },
+  fileTooBigPremium: {
+    id: 'upload.fileTooBigPremium',
+    defaultMessage: 'File too big. Upload limit is 1GB.',
+    description: 'Error feedback when file is too big for premiumUsers',
   },
 };
 

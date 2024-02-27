@@ -495,8 +495,11 @@ const CreateAccount: Component = () => {  const intl = useIntl();
                       resetUpload();
                     }}
                     onRefuse={(reason: string) => {
-                      if (reason === 'file_too_big') {
-                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+                      if (reason === 'file_too_big_100') {
+                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                      }
+                      if (reason === 'file_too_big_1024') {
+                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
                       }
                       resetUpload();
                     }}

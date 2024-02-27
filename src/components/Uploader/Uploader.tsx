@@ -1,4 +1,4 @@
-import { Component, createEffect, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { Progress } from '@kobalte/core';
 
 import styles from './Uploader.module.scss';
@@ -8,8 +8,9 @@ import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUpl
 import { readUploadTime, saveUploadTime } from '../../lib/localStore';
 import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from '../../lib/media';
 import { sha256, uuidv4 } from '../../utils';
-import { Kind } from '../../constants';
+import { Kind, uploadLimit } from '../../constants';
 import ButtonGhost from '../Buttons/ButtonGhost';
+import { isAccountVerified } from '../../lib/profile';
 
 const MB = 1024 * 1024;
 const maxParallelChunks = 5;
@@ -29,10 +30,12 @@ type UploadState = {
   uploadedChunks: number,
   chunkIndex: number,
   fileSize: FileSize,
+  uploadLimit: number,
 }
 
 const Uploader: Component<{
   publicKey?: string,
+  nip05?: string,
   openSockets?: boolean,
   hideLabel?: boolean,
   file: File | undefined,
@@ -51,6 +54,7 @@ const Uploader: Component<{
     uploadedChunks: 0,
     chunkIndex: -1,
     fileSize: 'small',
+    uploadLimit: uploadLimit.regular,
   });
 
   let sockets: WebSocket[] = [];
@@ -108,16 +112,37 @@ const Uploader: Component<{
     }
   });
 
+  createEffect(() => {
+    calcUploadLimit(props.nip05);
+  });
+
   onCleanup(() => {
     sockets.forEach(s => s.close());
     sockets = [];
-  })
+  });
 
   createEffect(() => {
     if (uploadState.isUploading && uploadState.chunkIndex >= 0) {
       uploadChunk(uploadState.chunkIndex);
     }
   });
+
+  const calcUploadLimit = (nip05: string | undefined) => {
+
+    if (!nip05) {
+      setUploadState('uploadLimit',  () => uploadLimit.regular);
+      return;
+    }
+
+    isAccountVerified(nip05).then(profile => {
+      if (profile && profile.pubkey === props.publicKey && nip05.endsWith && nip05.endsWith('primal.net')) {
+        setUploadState('uploadLimit', () => uploadLimit.premium);
+        return;
+      }
+
+      setUploadState('uploadLimit', () => uploadLimit.regular);
+    });
+  };
 
   const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
     const listener = (event: MessageEvent) => {
@@ -143,7 +168,7 @@ const Uploader: Component<{
       uploadMediaCancel(props.publicKey, `up_c_${uploadState.id}`, uploadState.id || '', soc);
     }
 
-    setUploadState(reconcile({
+    setUploadState(() => ({
       isUploading: false,
       file: undefined,
       id: undefined,
@@ -210,8 +235,6 @@ const Uploader: Component<{
     });
 
     uploadMediaConfirm(props.publicKey, subIdComplete, uploadState.id || '', file.size, sha, soc);
-
-
   }
 
 
@@ -268,7 +291,7 @@ const Uploader: Component<{
 
           const len = chunkMap.length;
 
-          const progress = Math.floor(uploadState.uploadedChunks * Math.floor(100 / uploadState.chunkMap.length)) - 1;
+          const progress = Math.ceil(100 * uploadState.uploadedChunks / uploadState.chunkMap.length) - 1;
 
           setUploadState('progress', () => progress);
 
@@ -300,9 +323,10 @@ const Uploader: Component<{
   };
 
   const uploadFile = (file: File) => {
-    if (file.size >= MB * 100) {
+    if (file.size >= MB * uploadState.uploadLimit) {
+      console.log('REFUSE: ', uploadState.uploadLimit)
+      props.onRefuse && props.onRefuse(`file_too_big_${uploadState.uploadLimit}`);
       resetUpload(true);
-      props.onRefuse && props.onRefuse('file_too_big');
       return;
     }
 

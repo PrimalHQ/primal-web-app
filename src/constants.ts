@@ -378,3 +378,8 @@ export const suggestedUsersToFollow = [
 
 // Messages separated by more than this will not be grouped in the same thread
 export const threadLenghtInMs = 900;
+
+export const uploadLimit = {
+  regular: 100,
+  premium: 1024,
+}

@@ -294,6 +294,7 @@ const EditProfile: Component = () => {
             <Uploader
               hideLabel={true}
               publicKey={account?.publicKey}
+              nip05={account?.activeUser?.nip05}
               openSockets={openSockets()}
               file={fileToUpload()}
               onFail={() => {
@@ -303,8 +304,11 @@ const EditProfile: Component = () => {
                 resetUpload();
               }}
               onRefuse={(reason: string) => {
-                if (reason === 'file_too_big') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBig));
+                if (reason === 'file_too_big_100') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                }
+                if (reason === 'file_too_big_1024') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
                 }
                 resetUpload();
               }}
