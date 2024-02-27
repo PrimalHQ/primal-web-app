@@ -136,6 +136,46 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   let connectedRelaysCopy: Relay[] = [];
 
+  onMount(() => {
+    setInterval(() => {
+      checkNostrChange();
+    }, 1_000);
+  });
+
+  const checkNostrChange = async () => {
+    if (location.pathname === '/') return;
+
+    const win = window as NostrWindow;
+    const nostr = win.nostr;
+
+    if (!nostr) return;
+
+    const storedKey = localStorage.getItem('pubkey');
+
+    try {
+      const key = await getPublicKey();
+
+      if (key === storedKey) return;
+
+      setPublicKey(key);
+
+      // Read profile from storage
+      const storedUser = getStoredProfile(key);
+
+      if (storedUser) {
+        // If it exists, set it as active user
+        updateStore('activeUser', () => ({...storedUser}));
+      }
+
+      // Fetch it anyway, maybe there is an update
+      getUserProfiles([key], `user_profile_${APP_ID}`);
+    } catch (e: any) {
+      setPublicKey(undefined);
+      localStorage.removeItem('pubkey');
+      console.log('error fetching public key: ', e);
+    }
+  };
+
   const showGetStarted = () => {
     updateStore('showGettingStarted', () => true);
   }
