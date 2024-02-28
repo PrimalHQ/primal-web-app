@@ -157,6 +157,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       if (key === storedKey) return;
 
+      updateStore('isKeyLookupDone', () => false);
+
       setPublicKey(key);
 
       // Read profile from storage
@@ -219,7 +221,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   const setPublicKey = (pubkey: string | undefined) => {
     updateStore('publicKey', () => pubkey);
     pubkey ? localStorage.setItem('pubkey', pubkey) : localStorage.removeItem('pubkey');
-    updateStore('isKeyLookupDone', true);
+    updateStore('isKeyLookupDone', () => true);
   };
 
   const hasPublicKey: () => boolean = () => {
@@ -1157,7 +1159,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const checkNostrKey = () => {
-    updateStore('isKeyLookupDone', false);
+    updateStore('isKeyLookupDone', () => false);
     fetchNostrKey();
   };
 

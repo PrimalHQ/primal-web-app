@@ -456,14 +456,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
             const feedLatest = {
               name: feedLatestLabel,
-              hex: publicKey,
-              npub: hexToNpub(publicKey),
+              hex: account?.publicKey,
+              npub: hexToNpub(account?.publicKey),
             };
 
             const feedLatestWithReplies = {
               name: feedLatestWithRepliesLabel,
-              hex: publicKey,
-              npub: hexToNpub(publicKey),
+              hex: account?.publicKey,
+              npub: hexToNpub(account?.publicKey),
               includeReplies: true,
             };
 
@@ -560,7 +560,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const feedLatestLabel = intl.formatMessage(t.feedLatest);
   const feedLatestWithRepliesLabel = intl.formatMessage(t.feedLatestWithReplies);
 
-  let publicKey: string | undefined;
+  // let publicKey: string | undefined;
 
   // Initial setup for a user with a public key
   createEffect(() => {
@@ -569,9 +569,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (publicKey) return;
-
-    publicKey = account?.publicKey;
+    const publicKey = account?.publicKey;
 
     const initFeeds = initAvailableFeeds(publicKey);
 

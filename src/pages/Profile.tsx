@@ -665,7 +665,7 @@ const Profile: Component = () => {
         </Show>
       </div>
 
-      <ProfileTabs profile={profile?.userProfile}/>
+      <ProfileTabs />
 
       <ConfirmModal
         open={confirmReportUser()}

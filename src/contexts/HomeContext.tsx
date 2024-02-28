@@ -626,11 +626,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  let keyIsDone = false;
-
   createEffect(() => {
-    if (account?.isKeyLookupDone && !keyIsDone && settings?.defaultFeed) {
-      keyIsDone = true;
+    if (account?.isKeyLookupDone && settings?.defaultFeed) {
       selectFeed(settings?.defaultFeed);
     }
   });
