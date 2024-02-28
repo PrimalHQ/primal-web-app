@@ -53,8 +53,15 @@ const Avatar: Component<{
 
   const imgError = (event: any) => {
     const image = event.target;
+
+    let src = props.user?.picture || props.src;
+
+    if (image.src === src) {
+      src = defaultAvatar;
+    }
+
     image.onerror = "";
-    image.src = defaultAvatar;
+    image.src = src;
     return true;
   }
 
@@ -87,8 +94,9 @@ const Avatar: Component<{
 
     const src = props.user?.picture || props.src;
 
+
     if (!src) {
-      return defaultAvatar;
+      return '';
     }
 
     const url = media?.actions.getMediaUrl(src, size, true);
@@ -137,6 +145,7 @@ const Avatar: Component<{
               class={props.zoomable ? 'profile_image' : ''}
               media={imageMedia()}
               src={imageSrc()}
+              altSrc={props.user?.picture || props.src}
               onError={imgError}
             />
           </Show>

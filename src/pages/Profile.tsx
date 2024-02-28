@@ -170,6 +170,14 @@ const Profile: Component = () => {
   };
 
   const imgError = (event: any) => {
+    const image = event.target;
+
+    if (image.src !== profile?.userProfile?.banner) {
+      image.onerror = "";
+      image.src = profile?.userProfile?.banner;
+      return true;
+    }
+
     const banner = document.getElementById('profile_banner');
 
     if (banner) {
@@ -198,7 +206,7 @@ const Profile: Component = () => {
   const [isBannerCached, setisBannerCached] = createSignal(false);
 
   const banner = () => {
-    const src= profile?.userProfile?.banner;
+    const src = profile?.userProfile?.banner;
     const url = media?.actions.getMediaUrl(src, 'm', true);
 
     setisBannerCached(!!url);
@@ -510,7 +518,13 @@ const Profile: Component = () => {
             when={profile?.userProfile?.banner}
             fallback={<div class={styles.bannerPlaceholder}></div>}
           >
-            <NoteImage class="profile_image" src={banner()} onError={imgError} plainBorder={true} />
+            <NoteImage
+              class="profile_image"
+              src={banner()}
+              altSrc={profile?.userProfile?.banner}
+              onError={imgError}
+              plainBorder={true}
+            />
           </Show>
         </div>
 

@@ -12,6 +12,7 @@ const NoteImage: Component<{
   media?: MediaVariant,
   width?: number,
   src?: string,
+  altSrc?: string,
   isDev?: boolean,
   onError?: JSX.EventHandlerUnion<HTMLImageElement, Event>,
   onImageLoaded?: (url: string | undefined) => void,
@@ -25,9 +26,27 @@ const NoteImage: Component<{
 
   const [isImageLoaded, setIsImageLoaded] = createSignal(false);
 
-  const src = () => props.media?.media_url || props.src;
+  const [src, setSrc] = createSignal<string | undefined>();
+
+  // const src = () => props.media?.media_url || props.src;
 
   const isCached = () => !props.isDev || props.media;
+
+  const onError = (event: any) => {
+    const image = event.target;
+
+    if (image.src === props.altSrc || !props.altSrc) {
+      // @ts-ignore
+      props.onError(event);
+      return true;
+    }
+
+    setSrc(() => props.altSrc || '');
+
+    image.onerror = "";
+    image.src = src();
+    return true;
+  };
 
   const ratio = () => {
     const img = props.media;
@@ -88,12 +107,17 @@ const NoteImage: Component<{
       setIsImageLoaded(true);
     }
 
+    setSrc(() => props.media?.media_url || props.src);
+  });
+
+  createEffect(() => {
     // Virtually load an image, to be able to get it's dimensions to zoom it properly
     imgVirtual = new Image();
     imgVirtual.src = src() || '';
     imgVirtual.onload = () => {
       setIsImageLoaded(true);
-    }
+    };
+    imgVirtual.onerror = onError;
   });
 
   createEffect(() => {
@@ -118,7 +142,7 @@ const NoteImage: Component<{
           ref={imgActual}
           src={src()}
           class={klass()}
-          onerror={props.onError}
+          onerror={onError}
           width={willBeTooBig() ? undefined : `${props.width || 524}px`}
         />
       </a>
