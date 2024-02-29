@@ -1,4 +1,4 @@
-import { createStore, reconcile } from "solid-js/store";
+import { createStore, reconcile, unwrap } from "solid-js/store";
 import { Kind, threadLenghtInMs } from "../constants";
 import {
   createContext,
@@ -15,6 +15,8 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
+  DirectMessage,
+  DirectMessageThread,
   FeedPage,
   NostrEOSE,
   NostrEvent,
@@ -28,6 +30,7 @@ import {
   NoteActions,
   PrimalNote,
   PrimalUser,
+  SenderMessageCount,
   UserRelation,
 } from "../types/primal";
 import { APP_ID } from "../App";
@@ -40,27 +43,11 @@ import { nip19 } from "nostr-tools";
 import { convertToNotes } from "../stores/note";
 import { sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";
+import { loadMsgContacts, saveMsgContacts } from "../lib/localStore";
 
-
-type DirectMessage = {
-  id: string,
-  sender: string,
-  content: string,
-  created_at: number,
-};
-
-type DirectMessageThread = {
-  author: string,
-  messages: DirectMessage[],
-};
-
-type SenderMessageCount = {
-  cnt: number,
-  latest_at: number,
-  latest_event_id: string,
-}
 
 export type MessagesContextStore = {
+  activePubkey: string | undefined,
   messageCount: number,
   messageCountPerSender: Record<string, SenderMessageCount>,
   hasMessagesInDifferentTab: boolean,
@@ -93,6 +80,7 @@ export type MessagesContextStore = {
 }
 
 export const initialData = {
+  activePubkey: undefined,
   messageCount: 0,
   messageCountPerSender: {},
   hasMessagesInDifferentTab: false,
@@ -138,8 +126,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const changeSenderRelation = (relation: UserRelation) => {
     updateStore('senderRelation', () => relation);
     // @ts-ignore
-    updateStore('senders', () => undefined );
-    updateStore('senders', () => ({}));
+    updateStore('senders', reconcile({}));
     updateStore('hasMessagesInDifferentTab' , () => false);
     getMessagesPerSender(true);
   };
@@ -156,6 +143,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const getMessagesPerSender = (changeSender?: boolean) => {
     if (account?.isKeyLookupDone && account.hasPublicKey()) {
       changeSender && updateStore('selectedSender', () => null);
+
+      updateStore('activePubkey', () => account.publicKey)
+      // @ts-ignore
+      const contacts = loadMsgContacts(account?.publicKey);
+
+      updateStore('senders', reconcile({ ...contacts.profiles[store.senderRelation]}));
+      updateStore('messageCountPerSender', () => ({ ...contacts.counts }));
+
       // @ts-ignore
       getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
     }
@@ -226,6 +221,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('encryptedMessages', () => []);
     updateStore('conversation', () => []);
     updateStore('messages', () => []);
+    updateStore('senders', reconcile({}));
   };
 
   const getConversationWithSender = (sender: string | null, until = 0) => {
@@ -639,8 +635,10 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EOSE') {
-        const keys = Object.keys(store.messageCountPerSender);
+        const keys = Object.keys(store.senders);
         const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
+
+        saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
 
         if (store.messageCount > cnt) {
           updateStore('hasMessagesInDifferentTab', () => true);
@@ -650,8 +648,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           const key = store.addSender.pubkey;
           const user = { ...store.addSender }
 
-
-
           updateStore('senders', () => ({ [key]: user }));
           updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
           selectSender(store.addSender.pubkey);
@@ -660,6 +656,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         }
 
         const senders = orderedSenders();
+
         if (!store.selectedSender) {
           selectSender(senders[0].npub);
         }

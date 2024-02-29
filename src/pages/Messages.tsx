@@ -222,10 +222,10 @@ const Messages: Component = () => {
     senders.length > 0 && navigate(`/messages/${senders[0].npub}`);
   });
 
-  onMount(() => {
+  createEffect(() => {
     const count = messages?.messageCount || 0;
 
-    if (account?.isKeyLookupDone && account.hasPublicKey() && count === 0) {
+    if (account?.isKeyLookupDone && account.hasPublicKey() && count === 0 && messages?.activePubkey !== account.publicKey) {
       messages?.actions.getMessagesPerSender();
     }
   });
@@ -236,7 +236,7 @@ const Messages: Component = () => {
     if (count > 0) {
       messages?.actions.getMessagesPerSender();
     }
-  })
+  });
 
   createEffect(() => {
     if (messages?.isConversationLoaded) {

@@ -1,5 +1,5 @@
 import { UserStats } from "../contexts/ProfileContext";
-import { EmojiOption, NostrRelays, PrimalFeed, PrimalUser, SelectionOption } from "../types/primal";
+import { EmojiOption, NostrRelays, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -16,6 +16,10 @@ export type LocalStore = {
   recomended: {
     profiles: PrimalUser[],
     stats: Record<string, UserStats>,
+  },
+  msgContacts: {
+    profiles: Record<UserRelation, Record<string, PrimalUser>>,
+    counts: Record<string, SenderMessageCount>,
   },
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
@@ -47,6 +51,7 @@ export const emptyStorage = {
   relaySettings: {},
   likes: [],
   feeds: [],
+  msgContacts: { profiles: { other: {}, follows: {}, any: {} }, counts: {} },
   theme: 'sunset',
   homeSidebarSelection: undefined,
   userProfile: undefined,
@@ -335,4 +340,29 @@ export const setStoredProfile = (profile: PrimalUser) => {
   store.userProfile = {...profile};
 
   setStorage(profile.pubkey, store);
+};
+
+
+export const saveMsgContacts = (pubkey: string | undefined, contacts: Record<string, PrimalUser>, counts: Record<string, SenderMessageCount>, context: UserRelation) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  if (!store.msgContacts) {
+    store.msgContacts = { profiles: { follows: {}, other: {}, any: {} }, counts: {} };
+  }
+
+  store.msgContacts.profiles[context] = { ...contacts };
+  store.msgContacts.counts = { ...counts };
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadMsgContacts = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.msgContacts || { profiles: {}, counts: {} };
 };

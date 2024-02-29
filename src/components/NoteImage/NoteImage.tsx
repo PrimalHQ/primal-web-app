@@ -1,7 +1,5 @@
-import { Component, createEffect, createMemo, createSignal, JSX, onCleanup, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSX,  onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
-import mediumZoom from "medium-zoom";
-import type { Zoom } from 'medium-zoom';
 // @ts-ignore Bad types in nostr-tools
 import { generatePrivateKey } from "nostr-tools";
 import { MediaVariant } from "../../types/primal";

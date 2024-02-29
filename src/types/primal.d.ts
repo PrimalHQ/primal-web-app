@@ -555,6 +555,25 @@ export type SortedNotifications = Record<number, PrimalNotification[]>;
 
 export type UserRelation = 'follows' | 'other' | 'any';
 
+
+export type DirectMessage = {
+  id: string,
+  sender: string,
+  content: string,
+  created_at: number,
+};
+
+export type DirectMessageThread = {
+  author: string,
+  messages: DirectMessage[],
+};
+
+export type SenderMessageCount = {
+  cnt: number,
+  latest_at: number,
+  latest_event_id: string,
+}
+
 export type EmojiOption = {
   keywords: string[],
   char?: string,
