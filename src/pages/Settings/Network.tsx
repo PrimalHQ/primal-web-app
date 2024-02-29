@@ -24,6 +24,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
+import { logError } from '../../lib/logger';
 
 
 const Network: Component = () => {
@@ -132,7 +133,7 @@ const Network: Component = () => {
       account?.actions.addRelay(value);
       setInvalidCustomRelay(false);
     } catch (e) {
-      console.log('invalid url ', e);
+      logError('invalid relay input ', e);
       setInvalidCustomRelay(true);
     }
   }
@@ -152,7 +153,7 @@ const Network: Component = () => {
       account?.actions.changeCachingService(url.href);
       setInvalidCachingService(false);
     } catch (e) {
-      console.log('invalid url', e);
+      logError('invalid caching service input', e);
       setInvalidCachingService(true);
     }
   }

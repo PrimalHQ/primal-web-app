@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import { logError, logInfo } from "./lib/logger";
 import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
@@ -33,7 +34,7 @@ const onClose = () => {
 }
 
 const onError = (error: Event) => {
-  console.log("ws error: ", error);
+  logError("ws error: ", error);
 };
 
 export let cacheServer = '';
@@ -45,7 +46,7 @@ export const connect = () => {
       import.meta.env.PRIMAL_CACHE_URL;
 
     setSocket(new WebSocket(cacheServer));
-    console.log('CACHE SOCKET: ', socket());
+    logInfo('CACHE SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);

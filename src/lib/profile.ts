@@ -6,6 +6,7 @@ import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
 import { Filterlist, NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
 import { getStorage } from "./localStore";
+import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
 import { sendEvent } from "./notes";
 
@@ -195,7 +196,7 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
     });
 
   } catch (e) {
-    console.log('Failed sending note: ', e);
+    logError('Failed sending note: ', e);
   }
 };
 
@@ -206,7 +207,7 @@ export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles>
 
     return await content.json();
   } catch (e) {
-    console.log('Failed to fetch known users: ', e);
+    logError('Failed to fetch known users: ', e);
 
     return { ...minKnownProfiles };
   }
@@ -220,7 +221,7 @@ export const isAccountVerified: (domain: string | undefined) => Promise<nip19.Pr
 
     return profile || null;
   } catch (e) {
-    console.log('Failed to nip05 verify user: ', e);
+    logError('Failed to nip05 verify user: ', e);
 
     return null;
   }

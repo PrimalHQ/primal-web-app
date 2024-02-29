@@ -1,4 +1,5 @@
 import { hexToNpub } from "../lib/keys";
+import { logError } from "../lib/logger";
 import { NostrUserContent, PrimalUser } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
@@ -22,7 +23,7 @@ export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: Nost
   try {
     userMeta = JSON.parse(user.content || '{}');
   } catch (e) {
-    console.log('Error in user meta JSON: ', e);
+    logError('Error in user meta JSON: ', e);
     userMeta = {};
   }
 

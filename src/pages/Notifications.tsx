@@ -27,6 +27,7 @@ import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { timeNow } from '../utils';
+import { logError } from '../lib/logger';
 
 
 
@@ -127,7 +128,7 @@ const Notifications: Component = () => {
         }
 
         if (type === 'NOTICE') {
-          console.log('Error setting notifications lats seen');
+          logError('Error setting notifications lats seen');
           unsub();
           return;
         }

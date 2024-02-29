@@ -3,22 +3,9 @@ import { relayInit, Relay } from "nostr-tools";
 import { relayConnectingTimeout } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrRelays } from "../types/primal";
-
-const attemptLimit = 6;
+import { logError, logInfo } from "./logger";
 
 let reconnAttempts: Record<string, number> = {};
-
-const attemptDelay = (attempt: number) => {
-  return 100 + attempt * 500;
-}
-
-const logError = (relay: Relay, e: any, timedOut?: boolean) => {
-  const message = timedOut ?
-  'timed-out connecting to relay: ' :
-  'error connecting to relay: ';
-
-  console.log(message, relay.url, e);
-};
 
 export const closeRelays = async (relays: Relay[], success = () => {}, fail = () => {}) => {
   try {
@@ -46,7 +33,7 @@ export const connectToRelay: ConnectToRelay =
     }, timeout);
 
     relay.on('connect', () => {
-      console.log('CONNECTED ', relay.url);
+      logInfo('Connected to relay ', relay.url);
       clearTimeout(tOut);
       if (!reconnAttempts[relay.url]) {
         reconnAttempts[relay.url] = 0
@@ -55,14 +42,14 @@ export const connectToRelay: ConnectToRelay =
     })
 
     relay.on('disconnect', () => {
-      console.log('DISCONNECTED ', relay.url);
+      logInfo('Disconnected from relay ', relay.url);
       clearTimeout(tOut);
       relay.close();
       onFail(relay, 'disconnect');
     })
 
     relay.on('error', () => {
-      console.log('ERROR CONNECTING ', relay.url);
+      logError('Error connecting to relay ', relay.url);
       clearTimeout(tOut);
       relay.close();
       onFail(relay, 'failed connection');
@@ -71,7 +58,7 @@ export const connectToRelay: ConnectToRelay =
     try {
       relay.connect();
     } catch (e) {
-      console.log('CAUGHT ERROR ', e)
+      logError('Failed to initiate connection to relay ', e)
     }
   };
 
@@ -88,7 +75,7 @@ export const connectRelays = async (
     const relay = relays[i];
 
     if (relay.status === WebSocket.CLOSED) {
-      console.log('CONNECTING TO: ', relay.url);
+      logInfo('Connecting to relay: ', relay.url);
       connectToRelay(relay, relayConnectingTimeout, onConnect, onFail)
     }
   }

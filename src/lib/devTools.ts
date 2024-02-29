@@ -1,5 +1,6 @@
 import { onMount, onCleanup } from "solid-js";
 import { ComponentLog, PrimalWindow } from "../types/primal";
+import { logWarning } from "./logger";
 
 const hook = (type: 'onPrimalComponentMount' | 'onPrimalComponentCleanup', data: ComponentLog) => {
   const fn = (window as PrimalWindow)[type];
@@ -24,9 +25,9 @@ export const hookForDev = (fn: Function) => {
     })
 
     try {
-        props.id = domId;
+      props.id = domId;
     } catch (ex) {
-        console.log(ex);
+      logWarning('Error setting hook id:', ex);
     }
 
     return fn(props);

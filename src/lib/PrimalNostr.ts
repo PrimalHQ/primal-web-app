@@ -5,6 +5,7 @@ import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
 import { pinEncodeIVSeparator, pinEncodePrefix } from '../constants';
 import { createSignal } from 'solid-js';
+import { logError } from './logger';
 
 
 export const [currentPin, setCurrentPin] = createSignal('');
@@ -41,7 +42,7 @@ export const encryptWithPin = async (pin: string, text: string) => {
 
     return `${pinEncodePrefix}${ctb64}${pinEncodeIVSeparator}${ivb64}`
   } catch(e) {
-    console.log('Failed to encrypt with PIN: ', e);
+    logError('Failed to encrypt with PIN: ', e);
     return '';
   }
 };
@@ -74,7 +75,7 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
     let text = utf8Decoder.decode(plaintext)
     return text
   } catch(e) {
-    console.log('Failed to decrypt with PIN: ', e);
+    logError('Failed to decrypt with PIN: ', e);
     return '';
   }
 };

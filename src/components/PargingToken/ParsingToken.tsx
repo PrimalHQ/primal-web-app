@@ -57,6 +57,7 @@ import { subscribeTo } from '../../sockets';
 import { convertToNotes } from '../../stores/note';
 import { account } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { logError } from '../../lib/logger';
 
 
 export type Token = {
@@ -138,7 +139,7 @@ const ParsingToken: Component<{
       getUserProfileInfo(hex, account?.publicKey, subId);
     }
     catch (e) {
-      console.log('Failed to fetch mentioned user info: ', e);
+      logError('Failed to fetch mentioned user info: ', e);
     }
   }
 
@@ -223,7 +224,7 @@ const ParsingToken: Component<{
       getEvents(account?.publicKey, [hex], subId, true);
     }
     catch (e) {
-      console.log('Failed to fetch mentioned user info: ', e);
+      logError('Failed to fetch mentioned user info: ', e);
     }
   }
 
@@ -441,7 +442,7 @@ const ParsingToken: Component<{
       }
 
     } catch (e) {
-      console.log('Failed to render note mention: ', e)
+      logError('Failed to render note mention: ', e)
       return <span class="error">{token}</span>;
     }
   }
@@ -482,7 +483,7 @@ const ParsingToken: Component<{
       }
 
     } catch (e) {
-      console.log('Failed to parse user mention: ', e)
+      logError('Failed to parse user mention: ', e)
       return <span class="error">{token}</span>;
     }
   }

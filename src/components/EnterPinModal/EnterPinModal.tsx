@@ -13,6 +13,7 @@ import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import TextInput from '../TextInput/TextInput';
 import { decryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
+import { logError } from '../../lib/logger';
 
 const EnterPinModal: Component<{
   id?: string,
@@ -54,7 +55,7 @@ const EnterPinModal: Component<{
       // Execute callback
       props.onSuccess && props.onSuccess(enc);
     } catch(e) {
-      console.log('Failed to decode nsec: ', e);
+      logError('Failed to decode nsec: ', e);
       toast?.sendWarning('PIN is incorrect');
     }
 

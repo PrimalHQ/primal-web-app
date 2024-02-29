@@ -42,6 +42,7 @@ import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
 import { readNoteDraft, saveNoteDraft } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
+import { logError } from "../../../lib/logger";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -986,7 +987,7 @@ const EditBox: Component<{
         // @ts-ignore
         return link.outerHTML || url;
       } catch (e) {
-        console.log('ERROR: ', e);
+        logError('Bad Note reference: ', e);
         return `<span class="${styles.error}">${url}</span>`;
       }
 

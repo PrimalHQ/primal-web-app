@@ -324,7 +324,6 @@ const Uploader: Component<{
 
   const uploadFile = (file: File) => {
     if (file.size >= MB * uploadState.uploadLimit) {
-      console.log('REFUSE: ', uploadState.uploadLimit)
       props.onRefuse && props.onRefuse(`file_too_big_${uploadState.uploadLimit}`);
       resetUpload(true);
       return;

@@ -34,6 +34,7 @@ import { generateKeys } from "../lib/PrimalNostr";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
 import CreateAccountModal from "../components/CreateAccountModal/CreateAccountModal";
 import LoginModal from "../components/LoginModal/LoginModal";
+import { logError, logInfo, logWarning } from "../lib/logger";
 
 export type AccountContextStore = {
   likes: string[],
@@ -174,7 +175,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     } catch (e: any) {
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
-      console.log('error fetching public key: ', e);
+      logError('error fetching public key: ', e);
     }
   };
 
@@ -311,7 +312,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     };
 
     const onFail = (failedRelay: Relay, reasons: any) => {
-      console.log('Connection failed to relay ', failedRelay.url, ' because: ', reasons);
+      logWarning('Connection failed to relay ', failedRelay.url, ' because: ', reasons);
 
       // connection is unstable, clear reliability timeout
       relayReliability[failedRelay.url] && clearTimeout(relayReliability[failedRelay.url]);
@@ -328,12 +329,12 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         // Reconnect with a progressive delay
         setTimeout(() => {
-          console.log('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
+          logInfo('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
           connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail);
         }, relayConnectingTimeout * relayAtempts[failedRelay.url]);
         return;
       }
-      console.log('Reached atempt limit ', failedRelay.url)
+      logWarning('Reached atempt limit ', failedRelay.url)
     };
 
     connectRelays(relaysToConnect, onConnect, onFail);
@@ -353,11 +354,11 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     if (nostr === undefined) {
-      console.log('Nostr extension not found');
+      logError('Nostr extension not found');
       // Try again after one second if extensionAttempts are not exceeded
       if (extensionAttempt < 4) {
         extensionAttempt += 1;
-        console.log('ATTEMPT: ', extensionAttempt)
+        logInfo('Nostr extension retry attempt: ', extensionAttempt)
         setTimeout(fetchNostrKey, 250);
         return;
       }
@@ -404,7 +405,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     } catch (e: any) {
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
-      console.log('error fetching public key: ', e);
+      logError('error fetching public key: ', e);
     }
   }
 

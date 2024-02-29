@@ -2,6 +2,7 @@ import { bech32 } from "@scure/base";
 // @ts-ignore Bad types in nostr-tools
 import { nip57, Relay, utils } from "nostr-tools";
 import { PrimalNote, PrimalUser } from "../types/primal";
+import { logError } from "./logger";
 import { enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 
 export const zapNote = async (note: PrimalNote, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
@@ -106,7 +107,7 @@ export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  
       return body.callback;
     }
   } catch (err) {
-    console.log('Error zapping: ', err);
+    logError('Error zapping: ', err);
     return null;
     /*-*/
   }

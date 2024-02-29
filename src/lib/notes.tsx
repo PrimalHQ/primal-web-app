@@ -5,6 +5,7 @@ import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
+import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
 
@@ -45,7 +46,7 @@ export const addLinkPreviews = async (url: string) => {
     return { url, description: data.description, title: data.title, images: [data.image], favicons: [data.icon_url] };
 
   } catch (e) {
-    console.log('Failed to get preview for: ', url);
+    logWarning('Failed to get preview for: ', url);
     return { url };
   }
 };
@@ -353,7 +354,7 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
 
     responses.push(new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        console.log(`Publishing post to ${relay.url} has timed out`);
+        logError(`Publishing post to ${relay.url} has timed out`);
         reasons.push('timeout');
         reject('timeout');
       }, 8_000);
@@ -361,23 +362,23 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
       try {
         let pub = relay.publish(event);
 
-        console.log('publishing to relay: ', relay)
+        logInfo('publishing to relay: ', relay)
 
         pub.on('ok', () => {
-          console.log(`${relay.url} has accepted our event`);
+          logInfo(`${relay.url} has accepted our event`);
           clearTimeout(timeout);
           resolve('success');
         });
 
         pub.on('failed', (reason: any) => {
-          console.log(`failed to publish to ${relay.url}: ${reason}`)
+          logError(`failed to publish to ${relay.url}: ${reason}`)
           clearTimeout(timeout);
           reasons.push(reason);
           reject('failed');
         });
 
       } catch (e) {
-        console.log('Failed publishing note: ', e);
+        logError('Failed publishing note: ', e);
         clearTimeout(timeout);
         reasons.push(`${e}`);
         reject(e);
@@ -391,7 +392,7 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
     return { success: true, note: event } as SendNoteResult;
   }
   catch (e) {
-    console.log('ERROR BRAODCASTING POST: ', e);
+    logError('Error broadcasting note: ', e);
     return { success: false, reasons, note: event} as SendNoteResult;
   }
 };
@@ -403,7 +404,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     signedNote = await signEvent(event);
     if (!signedNote) throw('event_not_signed');
   } catch (reason) {
-    console.error('Failed to send event: ', reason);
+    logError('Failed to send event: ', reason);
     return { success: false , reasons: [reason]} as SendNoteResult;
   }
 
@@ -421,22 +422,22 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
 
     responses.push(new Promise<string>(async (resolve, reject) => {
       const timeout = setTimeout(() => {
-        console.log(`Publishing post to ${relay.url} has timed out`);
+        logError(`Publishing note to ${relay.url} has timed out`);
         reasons.push('timeout');
         reject('timeout');
       }, 8_000);
 
       try {
-        console.log('publishing to relay: ', relay)
+        logInfo('publishing to relay: ', relay)
 
-        let pub = await relay.publish(signedNote);
+        await relay.publish(signedNote);
 
-        console.log(`${relay.url} has accepted our event`);
+        logInfo(`${relay.url} has accepted our event`);
         clearTimeout(timeout);
         resolve('success');
 
       } catch (e) {
-        console.log(`Failed publishing note to ${relay.url}: `, e);
+        logError(`Failed publishing note to ${relay.url}: `, e);
         clearTimeout(timeout);
         reasons.push(`${e}`);
         reject(e);
@@ -450,7 +451,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     return { success: true, note: signedNote } as SendNoteResult;
   }
   catch (e) {
-    console.log('ERROR PUBLISHING POST: ', e);
+    logError('Failed to publish the note: ', e);
     return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
 }
