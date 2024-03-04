@@ -142,12 +142,12 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  createEffect(() => {
-    if (!account?.sec) {
-      unsubscribeToNotificationStats(subid);
-      updateStore('notificationCount', () => 0);
-    }
-  });
+  // createEffect(() => {
+  //   if (!account?.sec) {
+      // unsubscribeToNotificationStats(subid);
+  //     updateStore('notificationCount', () => 0);
+  //   }
+  // });
 
 
   createEffect(() => {
