@@ -45,6 +45,8 @@ const Downloads: Component = () => {
   });
 
   const displayDate = (dateValue: number) => {
+    if (isNaN(dateValue)) return '';
+
     const date = new Date(dateValue);
 
     return new Intl.DateTimeFormat("en-US", {
