@@ -1,15 +1,21 @@
-import { Component, onCleanup, onMount, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
 
 import primalWhite from '../../assets/icons/primal_white.svg';
 import openWhite from '../../assets/icons/open_white.svg';
 import styles from './BannerIOS.module.scss';
 import { hookForDev } from '../../lib/devTools';
+import { useSearchParams } from '@solidjs/router';
 
 export const isIOS = () => {
   return /(iPad|iPhone|iPod)/.test(navigator.userAgent);
 };
 
 const BannerIOS: Component< { id?: string } > = (props) => {
+  const [queryParams, setQueryParams] = useSearchParams();
+
+  const showBanner = () => {
+    return queryParams.mobilebanner !== 'false';
+  };
 
   const linkToiOS = () => {
     const appstoreFail = 'https://apps.apple.com/us/app/primal/id1673134518';
@@ -24,13 +30,13 @@ const BannerIOS: Component< { id?: string } > = (props) => {
         window.location.href = appstoreFail;
       } , 2_000);
     } else {
-        // Launch the website
-        window.location.href = appstoreFail;
+      // Launch the website
+      window.location.href = appstoreFail;
     }
   };
 
   return (
-    <Show when={isIOS()}>
+    <Show when={isIOS() && showBanner()}>
       <button class={styles.iosBanner} onClick={linkToiOS}>
         <div>
           <img src={primalWhite} />

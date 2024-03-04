@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 
 
 import styles from './Layout.module.scss';
 
-import { Outlet, useLocation, useParams } from '@solidjs/router';
+import { Outlet, useLocation, useParams, useSearchParams } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
@@ -28,6 +28,12 @@ const Layout: Component = () => {
   const params = useParams();
 
   let container: HTMLDivElement | undefined;
+
+  const [queryParams, setQueryParams] = useSearchParams();
+
+  const showBanner = () => {
+    return queryParams.mobilebanner !== 'false';
+  };
 
   createEffect(() => {
     const newNote = document.getElementById('new_note_input');
@@ -106,7 +112,7 @@ const Layout: Component = () => {
         </div>
         <div id="modal" class={styles.modal}></div>
         <BannerIOS />
-        <div id="container" ref={container} class={isIOS() ? styles.containerIOS : styles.container}>
+        <div id="container" ref={container} class={isIOS() && showBanner() ? styles.containerIOS : styles.container}>
           <div class={styles.leftColumn}>
             <div>
               <div id="branding_holder" class={styles.leftHeader}>
