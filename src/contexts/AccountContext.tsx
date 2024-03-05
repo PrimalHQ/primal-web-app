@@ -186,6 +186,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   const logout = () => {
     updateStore('sec', () => undefined);
     updateStore('publicKey', () => undefined);
+    localStorage.removeItem('pubkey');
     clearSec();
   };
 

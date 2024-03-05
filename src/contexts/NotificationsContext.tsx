@@ -50,19 +50,25 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
   const settings = useSettingsContext();
 
-  const subid = `notif_stats_${APP_ID}`;
-
   const today = () => (new Date()).getTime();
+
+  let notifSubscribed = '|';
+
+  const notfiStatsSubId = () => `notif_stats_${notifSubscribed}_${APP_ID}`;
 
 // ACTIONS --------------------------------------
 
   const subToNotificationStats = () => {
-    if (!account?.hasPublicKey()) {
-      return;
+
+    if (notifSubscribed !== account?.publicKey) {
+      unsubscribeToNotificationStats(notfiStatsSubId());
+      notifSubscribed = '';
     }
 
-    // @ts-ignore
-    subscribeToNotificationStats(account?.publicKey, subid);
+    if (!account?.publicKey) return;
+
+    notifSubscribed = account.publicKey;
+    subscribeToNotificationStats(account.publicKey, notfiStatsSubId());
   }
 
   const calculateDownloadCount = () => {
@@ -95,7 +101,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === subid) {
+    if (subId === notfiStatsSubId()) {
       if (content?.kind === Kind.NotificationStats) {
         const sum = Object.keys(content).reduce((acc, key) => {
           if (key === 'pubkey' || key == 'kind') {
@@ -128,8 +134,10 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (isConnected() && account?.hasPublicKey()) {
+    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey()) {
       subToNotificationStats();
+    } else {
+      unsubscribeToNotificationStats(notfiStatsSubId());
     }
   });
 
@@ -141,13 +149,6 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
       );
     }
   });
-
-  // createEffect(() => {
-  //   if (!account?.sec) {
-      // unsubscribeToNotificationStats(subid);
-  //     updateStore('notificationCount', () => 0);
-  //   }
-  // });
 
 
   createEffect(() => {

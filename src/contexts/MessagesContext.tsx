@@ -111,7 +111,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
 
-  const subidMsgCount = `msg_stats_${APP_ID}`;
+  let msgSubscribed = '|';
+
+  const subidMsgCount = () => `msg_stats_${msgSubscribed}_${APP_ID}`;
   const subidMsgCountPerSender = `msg_count_p_s_ ${APP_ID}`;
   const subidResetMsgCount = `msg_reset_ ${APP_ID}`;
   const subidResetMsgCounts = `msg_mark_as_read_${APP_ID}`;
@@ -132,12 +134,16 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const subToMessagesStats = () => {
-    if (!account?.hasPublicKey()) {
-      return;
+
+    if (msgSubscribed !== account?.publicKey) {
+      unsubscribeToMessagesStats(subidMsgCount());
+      msgSubscribed = '';
     }
 
-    // @ts-ignore
-    subscribeToMessagesStats(account?.publicKey, subidMsgCount);
+    if (!account?.publicKey) return;
+
+    msgSubscribed = account.publicKey;
+    subscribeToMessagesStats(account.publicKey, subidMsgCount());
   }
 
   const getMessagesPerSender = (changeSender?: boolean) => {
@@ -594,7 +600,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === subidMsgCount) {
+    if (subId === subidMsgCount()) {
       if (content?.kind === Kind.MessageStats) {
         const count = parseInt(content.cnt);
 
@@ -784,6 +790,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   createEffect(() => {
     if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey()) {
       subToMessagesStats();
+    } else {
+      unsubscribeToMessagesStats(subidMsgCount())
     }
   });
 
@@ -793,17 +801,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         socket(),
         { message: onMessage, close: onSocketClose },
       );
-    }
-  });
-
-  let isSecSet = false
-
-  createEffect(() => {
-    if (!account?.sec && !isSecSet) {
-      isSecSet = true;
-      unsubscribeToMessagesStats(subidMsgCount);
-      updateStore('messageCount', () => 0);
-      updateStore('messageCountPerSender', reconcile({}));
     }
   });
 
