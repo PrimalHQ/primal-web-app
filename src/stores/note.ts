@@ -1,6 +1,7 @@
 import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
+import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
 import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
@@ -173,7 +174,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
     try {
       userMeta = JSON.parse(user?.content || '{}');
     } catch (e) {
-      console.log('Error in user meta JSON: ', e);
+      logError('Error in user meta JSON: ', e);
       userMeta = {};
     }
 
