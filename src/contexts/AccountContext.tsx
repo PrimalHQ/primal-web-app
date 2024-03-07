@@ -35,6 +35,9 @@ import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
 import CreateAccountModal from "../components/CreateAccountModal/CreateAccountModal";
 import LoginModal from "../components/LoginModal/LoginModal";
 import { logError, logInfo, logWarning } from "../lib/logger";
+import { useToastContext } from "../components/Toaster/Toaster";
+import { useIntl } from "@cookbook/solid-intl";
+import { account as tAccount } from "../translations";
 
 export type AccountContextStore = {
   likes: string[],
@@ -128,6 +131,9 @@ const initialData = {
 export const AccountContext = createContext<AccountContextStore>();
 
 export function AccountProvider(props: { children: JSXElement }) {
+
+  const toast = useToastContext();
+  const intl = useIntl();
 
   let relayAtempts: Record<string, number> = {};
   const relayAtemptLimit = 10;
@@ -582,6 +588,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
+    let contactsReceived = false;
+
     let contactData: ContactsData = {
       content: '',
       created_at: 0,
@@ -591,8 +599,14 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
+        if (!contactsReceived) {
+          toast?.sendWarning(intl.formatMessage(tAccount.followFailed))
+          updateStore('followInProgress', () => '');
+          unsub();
+          return;
+        }
 
-        if (!store.following.includes(pubkey)) {
+        if (!contactData.following.includes(pubkey)) {
 
           const relayInfo = contactData.content;
           const date = Math.floor((new Date()).getTime() / 1000);
@@ -621,13 +635,14 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
 
-      if (content &&
-        content.kind === Kind.Contacts &&
-        content.created_at &&
-        content.created_at >= store.followingSince
-      ) {
-        contactData = extractContacts(content);
-        // updateContacts(content);
+      if (type === 'EVENT') {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        contactsReceived = true;
+
+        if (content.created_at && content.created_at >= store.followingSince) {
+          contactData = extractContacts(content);
+        }
       }
     });
 
@@ -642,6 +657,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
+    let contactsReceived = false;
+
     let contactData: ContactsData = {
       content: '',
       created_at: 0,
@@ -651,7 +668,14 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
-        if (store.following.includes(pubkey)) {
+        if (!contactsReceived) {
+          toast?.sendWarning(intl.formatMessage(tAccount.unfollowFailed))
+          updateStore('followInProgress', () => '');
+          unsub();
+          return;
+        }
+
+        if (contactData.following.includes(pubkey)) {
 
           const relayInfo = contactData.content;
           const date = Math.floor((new Date()).getTime() / 1000);
@@ -680,13 +704,14 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
 
-      if (content &&
-        content.kind === Kind.Contacts &&
-        content.created_at &&
-        content.created_at >= store.followingSince
-      ) {
-        contactData = extractContacts(content);
-        // updateContacts(content);
+      if (type === 'EVENT') {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        contactsReceived = true;
+
+        if (content.created_at && content.created_at >= store.followingSince) {
+          contactData = extractContacts(content);
+        }
       }
     });
 

@@ -34,6 +34,16 @@ export const account = {
     defaultMessage: 'unfollow all',
     description: 'Unfollow all button label',
   },
+  followFailed: {
+    id: 'account.followFailed',
+    defaultMessage: 'Failed to complete the follow possibly due to a network error. Please try again.',
+    description: 'Feedback to user that the follow action has failed',
+  },
+  unfollowFailed: {
+    id: 'account.unfollowFailed',
+    defaultMessage: 'Failed to complete the unfollow possibly due to a network error. Please try again.',
+    description: 'Feedback to user that the unfollow action has failed',
+  },
   needToLogin: {
     id: 'account.needToLogin',
     defaultMessage: 'You need to be signed in to perform this action',
