@@ -612,12 +612,14 @@ const EditBox: Component<{
 
     const messageToSend = value.replace(editMentionRegex, (url) => {
 
-      const [_, name] = url.split('\`');
+      const [anythingBefore, mention] = url.split('@');
+
+      const [_, name] = mention.split('\`');
       const user = userRefs[name];
 
       // @ts-ignore
-      return ` nostr:${user.npub}`;
-    })
+      return `${anythingBefore} nostr:${user.npub}`;
+    });
 
     if (account) {
       let tags = referencesToTags(messageToSend);
