@@ -30,6 +30,8 @@ const FollowButton: Component<{
 
   const onFollow = (e: MouseEvent) => {
     e.preventDefault();
+    if (account?.followInProgress !== '') return;
+
     if (!account || !account.hasPublicKey() || !props.person) {
       account?.actions.showGetStarted();
       // toast?.sendWarning(intl.formatMessage(t.needToLogin))
@@ -52,7 +54,7 @@ const FollowButton: Component<{
       <div id={props.id} class={klass()}>
         <ButtonFlip
           onClick={onFollow}
-          disabled={account?.followInProgress === props.person?.pubkey}
+          disabled={account?.followInProgress !== ''}
           when={isFollowed()}
           fallback={intl.formatMessage(t.follow)}
         >
