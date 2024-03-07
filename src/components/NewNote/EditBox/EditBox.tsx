@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import { createStore, unwrap } from "solid-js/store";
+import { createStore, reconcile, unwrap } from "solid-js/store";
 import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
@@ -40,7 +40,7 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
-import { readNoteDraft, saveNoteDraft } from "../../../lib/localStore";
+import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
 
@@ -499,6 +499,9 @@ const EditBox: Component<{
   createEffect(() => {
     if (props.open) {
       const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
+      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.post.noteId);
+
+      setUserRefs(reconcile(draftUserRefs));
 
       setMessage((msg) => {
         if (msg.length > 0) return msg;
@@ -527,6 +530,7 @@ const EditBox: Component<{
 
     // save draft just in case there is an unintended interuption
     saveNoteDraft(account?.publicKey, message(), props.replyToNote?.post.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
   });
 
   const onEscape = (e: KeyboardEvent) => {
@@ -575,6 +579,7 @@ const EditBox: Component<{
     }
 
     saveNoteDraft(account?.publicKey, '', props.replyToNote?.post.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.post.noteId);
     clearEditor();
   };
 
@@ -587,6 +592,7 @@ const EditBox: Component<{
 
   const persistNote = (note: string) => {
     saveNoteDraft(account?.publicKey, note, props.replyToNote?.post.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
     clearEditor();
   };
 

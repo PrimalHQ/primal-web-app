@@ -23,6 +23,7 @@ export type LocalStore = {
   },
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
+  noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
   uploadTime: Record<string, number>,
 };
 
@@ -58,6 +59,7 @@ export const emptyStorage = {
   recomended: { profiles: [], stats: {} },
   emojiHistory: [],
   noteDraft: {},
+  noteDraftUserRefs: {},
   uploadTime: defaultUploadTime,
 }
 
@@ -259,6 +261,40 @@ export const readNoteDraft = (pubkey: string | undefined, replyTo?: string) => {
   const key = replyTo || 'root';
 
   return store.noteDraft[key] || '';
+}
+
+export const saveNoteDraftUserRefs = (pubkey: string | undefined, refs: Record<string, PrimalUser>, replyTo?: string) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  const key = replyTo || 'root';
+
+  if (!store.noteDraftUserRefs || typeof store.noteDraftUserRefs === 'string') {
+    store.noteDraftUserRefs = {};
+  }
+
+  store.noteDraftUserRefs[key] = refs;
+
+  setStorage(pubkey, store);
+}
+
+export const readNoteDraftUserRefs = (pubkey: string | undefined, replyTo?: string) => {
+  if (!pubkey) {
+    return {};
+  }
+
+  const store = getStorage(pubkey);
+
+  if (!store.noteDraftUserRefs || typeof store.noteDraftUserRefs === 'string') {
+    store.noteDraftUserRefs = {};
+  }
+
+  const key = replyTo || 'root';
+
+  return store.noteDraftUserRefs[key] || {};
 }
 
 export const saveUploadTime = (pubkey: string | undefined, uploadTime: Record<string, number>) => {
