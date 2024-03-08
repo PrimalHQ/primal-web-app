@@ -22,6 +22,8 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import Uploader from '../components/Uploader/Uploader';
+import { triggerImportEvents } from '../lib/notes';
+import { APP_ID } from '../App';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -222,9 +224,10 @@ const EditProfile: Component = () => {
 
     const oldProfile = profile?.userProfile || {};
 
-    const { success } = await sendProfile({ ...oldProfile, ...metadata}, account.relays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account.relays, account.relaySettings);
 
     if (success) {
+      note && triggerImportEvents([note], `import_profile_${APP_ID}`);
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
       return false;
     }
