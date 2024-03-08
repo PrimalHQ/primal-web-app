@@ -3,14 +3,14 @@ import { Progress } from '@kobalte/core';
 
 import styles from './Uploader.module.scss';
 import { uploadServer } from '../../uploadSocket';
-import { createStore, reconcile } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUploaded } from '../../types/primal';
 import { readUploadTime, saveUploadTime } from '../../lib/localStore';
 import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from '../../lib/media';
 import { sha256, uuidv4 } from '../../utils';
 import { Kind, uploadLimit } from '../../constants';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { isAccountVerified } from '../../lib/profile';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const MB = 1024 * 1024;
 const maxParallelChunks = 5;
@@ -44,6 +44,7 @@ const Uploader: Component<{
   onCancel?: () => void,
   onSuccsess?: (url: string) => void,
 }> = (props) => {
+  const account = useAccountContext();
 
   const [uploadState, setUploadState] = createStore<UploadState>({
     isUploading: false,
@@ -113,7 +114,7 @@ const Uploader: Component<{
   });
 
   createEffect(() => {
-    calcUploadLimit(props.nip05);
+    calcUploadLimit(account?.membershipStatus.tier);
   });
 
   onCleanup(() => {
@@ -127,21 +128,14 @@ const Uploader: Component<{
     }
   });
 
-  const calcUploadLimit = (nip05: string | undefined) => {
+  const calcUploadLimit = (membershipTier: string | undefined) => {
 
-    if (!nip05) {
-      setUploadState('uploadLimit',  () => uploadLimit.regular);
+    if (membershipTier === 'premium') {
+      setUploadState('uploadLimit', () => uploadLimit.premium);
       return;
     }
 
-    isAccountVerified(nip05).then(profile => {
-      if (profile && profile.pubkey === props.publicKey && nip05.endsWith && nip05.endsWith('primal.net')) {
-        setUploadState('uploadLimit', () => uploadLimit.premium);
-        return;
-      }
-
-      setUploadState('uploadLimit', () => uploadLimit.regular);
-    });
+    setUploadState('uploadLimit',  () => uploadLimit.regular);
   };
 
   const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {

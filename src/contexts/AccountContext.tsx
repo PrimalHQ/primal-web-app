@@ -17,11 +17,12 @@ import {
   NostrMutedContent,
   NostrRelays,
   NostrWindow,
+  MembershipStatus,
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset } from "../sockets";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
@@ -38,6 +39,7 @@ import { logError, logInfo, logWarning } from "../lib/logger";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
 import { account as tAccount } from "../translations";
+import { getMembershipStatus } from "../lib/membership";
 
 export type AccountContextStore = {
   likes: string[],
@@ -68,6 +70,7 @@ export type AccountContextStore = {
   showGettingStarted: boolean,
   showLogin: boolean,
   emojiHistory: EmojiOption[],
+  membershipStatus: MembershipStatus,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -126,6 +129,7 @@ const initialData = {
   showGettingStarted: false,
   showLogin: false,
   emojiHistory: [],
+  membershipStatus: {},
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -142,6 +146,8 @@ export function AccountProvider(props: { children: JSXElement }) {
   let relayReliability: Record<string, number> = {};
 
   let connectedRelaysCopy: Relay[] = [];
+
+  let membershipSocket: WebSocket | undefined;
 
   onMount(() => {
     setInterval(() => {
@@ -183,6 +189,49 @@ export function AccountProvider(props: { children: JSXElement }) {
       localStorage.removeItem('pubkey');
       logError('error fetching public key: ', e);
     }
+  };
+
+  const openMembershipSocket = (onOpen: () => void) => {
+    membershipSocket = new WebSocket('wss://wallet.primal.net/v1');
+
+    membershipSocket.addEventListener('close', () => {
+      console.log('PREMIUM SOCKET CLOSED');
+    });
+
+    membershipSocket.addEventListener('open', () => {
+      console.log('PREMIUM SOCKET OPENED');
+      onOpen();
+    });
+  }
+
+  const checkMembershipStatus = () => {
+    openMembershipSocket(() => {
+      if (!membershipSocket || membershipSocket.readyState !== WebSocket.OPEN) return;
+
+      const subId = `ps_${APP_ID}`;
+
+      let gotEvent = false;
+
+      const unsub = subTo(membershipSocket, subId, (type, _, content) => {
+        if (type === 'EVENT') {
+          const status: MembershipStatus = JSON.parse(content?.content || '{}');
+
+          gotEvent = true;
+          updateStore('membershipStatus', () => ({ ...status }));
+        }
+
+        if (type === 'EOSE') {
+          unsub();
+          membershipSocket?.close();
+
+          if (!gotEvent) {
+            updateStore('membershipStatus', () => ({ tier: 'none' }));
+          }
+        }
+      });
+
+      getMembershipStatus(store.publicKey, subId, membershipSocket);
+    });
   };
 
   const showGetStarted = () => {
@@ -227,8 +276,17 @@ export function AccountProvider(props: { children: JSXElement }) {
   }
 
   const setPublicKey = (pubkey: string | undefined) => {
-    updateStore('publicKey', () => pubkey);
-    pubkey ? localStorage.setItem('pubkey', pubkey) : localStorage.removeItem('pubkey');
+
+    if(pubkey && pubkey.length > 0) {
+      updateStore('publicKey', () => pubkey);
+      localStorage.setItem('pubkey', pubkey);
+      checkMembershipStatus();
+    }
+    else {
+      updateStore('publicKey', () => undefined);
+      localStorage.removeItem('pubkey');
+    }
+
     updateStore('isKeyLookupDone', () => true);
   };
 

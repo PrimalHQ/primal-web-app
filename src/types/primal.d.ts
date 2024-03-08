@@ -663,3 +663,15 @@ export type ContactsData = {
   tags: string[][],
   following: string[],
 }
+
+export type MembershipStatus = {
+  pubkey?: string,
+  tier?: string,
+  name?: string,
+  rename?: string,
+  nostr_address?: string,
+  lightning_address?: string,
+  primal_vip_profile?: string,
+  used_storage?: number,
+  expires_on?: number,
+};
