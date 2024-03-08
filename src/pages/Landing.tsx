@@ -17,15 +17,24 @@ import primalName from '../assets/icons/primal.svg';
 
 
 import { appStoreLink, playstoreLink } from '../constants';
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { useIntl } from '@cookbook/solid-intl';
 import { landing as t } from '../translations';
 import { isAndroid, isIOS } from '@kobalte/utils';
 
 const Landing: Component = () => {
   const intl = useIntl();
+  const navigate = useNavigate();
+
+  const hasUserInfo = () => {
+    return localStorage.getItem('pubkey');
+  };
 
   onMount(()=> {
+    if (hasUserInfo()) {
+      navigate('/home');
+      return;
+    }
     const html = document.querySelector('html');
 
     // @ts-ignore
