@@ -31,7 +31,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
     inactivityCounter = setTimeout(() => {
       updateStore('isInactive', () => true)
-    }, 30 * 60_000);
+    }, 3 * 60_000);
   };
 
 // EFFECTS --------------------------------------
@@ -43,10 +43,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
   onCleanup(() => {
     document.removeEventListener('mousemove', monitorActivity);
   });
-
-  createEffect(() => {
-    console.log('INACTIVE: ', store.isInactive)
-  })
 
 // STORES ---------------------------------------
 
