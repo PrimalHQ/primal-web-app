@@ -13,6 +13,7 @@ import { NotificationsProvider } from './contexts/NotificationsContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { MessagesProvider } from './contexts/MessagesContext';
 import { MediaProvider } from './contexts/MediaContext';
+import { AppProvider } from './contexts/AppContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -25,34 +26,36 @@ const App: Component = () => {
 
   onCleanup(() => {
     disconnect();
-  })
+  });
 
   return (
-    <TranslatorProvider>
-      <Toaster>
-        <MediaProvider>
-          <AccountProvider>
-            <SearchProvider>
-              <SettingsProvider>
-                <ProfileProvider>
-                  <MessagesProvider>
-                    <NotificationsProvider>
-                      <HomeProvider>
-                        <ExploreProvider>
-                          <ThreadProvider>
-                            <Router />
-                          </ThreadProvider>
-                        </ExploreProvider>
-                      </HomeProvider>
-                    </NotificationsProvider>
-                  </MessagesProvider>
-                </ProfileProvider>
-              </SettingsProvider>
-            </SearchProvider>
-          </AccountProvider>
-        </MediaProvider>
-      </Toaster>
-    </TranslatorProvider>
+    <AppProvider>
+      <TranslatorProvider>
+        <Toaster>
+          <MediaProvider>
+            <AccountProvider>
+              <SearchProvider>
+                <SettingsProvider>
+                  <ProfileProvider>
+                    <MessagesProvider>
+                      <NotificationsProvider>
+                        <HomeProvider>
+                          <ExploreProvider>
+                            <ThreadProvider>
+                              <Router />
+                            </ThreadProvider>
+                          </ExploreProvider>
+                        </HomeProvider>
+                      </NotificationsProvider>
+                    </MessagesProvider>
+                  </ProfileProvider>
+                </SettingsProvider>
+              </SearchProvider>
+            </AccountProvider>
+          </MediaProvider>
+        </Toaster>
+      </TranslatorProvider>
+    </AppProvider>
   );
 };
 

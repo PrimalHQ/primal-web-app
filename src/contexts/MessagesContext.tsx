@@ -44,6 +44,7 @@ import { convertToNotes } from "../stores/note";
 import { sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";
 import { loadMsgContacts, saveMsgContacts } from "../lib/localStore";
+import { useAppContext } from "./AppContext";
 
 
 export type MessagesContextStore = {
@@ -110,6 +111,7 @@ export const MessagesContext = createContext<MessagesContextStore>();
 export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
+  const app = useAppContext();
 
   let msgSubscribed = '|';
 
@@ -788,7 +790,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey()) {
+    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
       subToMessagesStats();
     } else {
       unsubscribeToMessagesStats(subidMsgCount())

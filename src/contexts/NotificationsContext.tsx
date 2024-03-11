@@ -23,6 +23,7 @@ import { getLastSeen, subscribeToNotificationStats, unsubscribeToNotificationSta
 import { useAccountContext } from "./AccountContext";
 import { timeNow } from "../utils";
 import { useSettingsContext } from "./SettingsContext";
+import { useAppContext } from "./AppContext";
 
 export type NotificationsContextStore = {
   notificationCount: number,
@@ -49,6 +50,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
   const settings = useSettingsContext();
+  const app = useAppContext();
 
   const today = () => (new Date()).getTime();
 
@@ -134,7 +136,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey()) {
+    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
       subToNotificationStats();
     } else {
       unsubscribeToNotificationStats(notfiStatsSubId());

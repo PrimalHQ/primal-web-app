@@ -31,6 +31,7 @@ import { feedNewPosts, placeholders, branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { useAppContext } from '../contexts/AppContext';
 
 
 const Home: Component = () => {
@@ -38,6 +39,7 @@ const Home: Component = () => {
   const context = useHomeContext();
   const account = useAccountContext();
   const intl = useIntl();
+  const app = useAppContext();
 
   const isPageLoading = () => context?.isFetching;
 
@@ -57,6 +59,11 @@ const Home: Component = () => {
   });
 
   createEffect(() => {
+    if ((context?.future.notes.length || 0) > 99 || app?.isInactive) {
+      clearInterval(checkNewNotesTimer);
+      return;
+    }
+
     const hex = context?.selectedFeed?.hex;
 
     if (checkNewNotesTimer) {
@@ -66,12 +73,11 @@ const Home: Component = () => {
       setNewPostAuthors(() => []);
     }
 
-    const timeout = 25_000 + Math.random() * 10_000;
+    const timeout = 10_000; //25_000 + Math.random() * 10_000;
 
     checkNewNotesTimer = setInterval(() => {
       context?.actions.checkForNewNotes(hex);
     }, timeout);
-
   });
 
   createEffect(() => {
@@ -104,10 +110,6 @@ const Home: Component = () => {
   });
 
   const loadNewContent = () => {
-    if (newNotesCount() > 100) {
-      location.reload();
-      return;
-    }
     context?.actions.loadFutureContent();
     scrollWindowTo(0, true);
     setHasNewPosts(false);
