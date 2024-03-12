@@ -4,6 +4,7 @@ import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
+import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
 import { getScoredUsers, searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
@@ -378,6 +379,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const selectFeed = (feed: PrimalFeed | undefined) => {
     if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
       currentFeed = { ...feed };
+      saveStoredFeed(account?.publicKey, currentFeed);
+
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
@@ -665,7 +668,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   createEffect(() => {
     if (account?.isKeyLookupDone && settings?.defaultFeed) {
-      selectFeed(settings?.defaultFeed);
+      const storedFeed = fetchStoredFeed(account.publicKey);
+      selectFeed(storedFeed || settings?.defaultFeed);
     }
   });
 

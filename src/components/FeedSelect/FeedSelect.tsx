@@ -1,19 +1,23 @@
 import { Component } from 'solid-js';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
+import { fetchStoredFeed } from '../../lib/localStore';
 import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
 
 const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
 
+  const account = useAccountContext();
   const home = useHomeContext();
   const settings = useSettingsContext();
 
   const findFeed = (hex: string, includeReplies: string) => {
     const ir = includeReplies === 'undefined' ? undefined :
       includeReplies === 'true';
+
     return settings?.availableFeeds.find(f => {
       const isHex = f.hex === hex;
       const isOpt = typeof ir === typeof f.includeReplies ?
@@ -74,7 +78,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
   };
 
   const initialValue = () => {
-    const selected = home?.selectedFeed;
+    const selected = home?.selectedFeed || fetchStoredFeed(account?.publicKey);
 
     if (!selected) {
       return {

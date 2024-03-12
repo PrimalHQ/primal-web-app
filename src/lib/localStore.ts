@@ -25,6 +25,7 @@ export type LocalStore = {
   noteDraft: Record<string, string>,
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
   uploadTime: Record<string, number>,
+  selectedFeed: PrimalFeed | undefined,
 };
 
 export type UploadTime = {
@@ -43,7 +44,7 @@ export const defaultUploadTime: UploadTime = {
   final: 100,
 };
 
-export const emptyStorage = {
+export const emptyStorage: LocalStore = {
   following: [],
   followingSince: 0,
   muted: [],
@@ -61,6 +62,7 @@ export const emptyStorage = {
   noteDraft: {},
   noteDraftUserRefs: {},
   uploadTime: defaultUploadTime,
+  selectedFeed: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -401,4 +403,23 @@ export const loadMsgContacts = (pubkey: string) => {
   const store = getStorage(pubkey)
 
   return store.msgContacts || { profiles: {}, counts: {} };
+};
+
+
+export const fetchStoredFeed = (pubkey: string | undefined) => {
+  if (!pubkey) return undefined;
+
+  const store = getStorage(pubkey)
+
+  return store.selectedFeed;
+};
+
+export const saveStoredFeed = (pubkey: string | undefined, feed: PrimalFeed) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.selectedFeed = { ...feed };
+
+  setStorage(pubkey, store);
 };
