@@ -337,7 +337,6 @@ export function AccountProvider(props: { children: JSXElement }) {
     const defaultRelays = getPreConfiguredRelays();
 
     return { ...relaySettings, ...defaultRelays };
-
   };
 
   const setConnectToPrimaryRelays = (flag: boolean) => {
@@ -505,6 +504,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     const relay: NostrRelays = { [url]: { write: true, read: true }};
 
     setRelaySettings(relay);
+    connectToRelays(relay)
 
     // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
@@ -1259,7 +1259,18 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const storage = getStorage(pubkey);
 
+    let relaySettings = { ...storage.relaySettings };
     updateStore('relaySettings', () => ({ ...storage.relaySettings }));
+    if (Object.keys(relaySettings).length > 0) {
+      connectToRelays(relaySettings);
+      return;
+    }
+
+    if (store.isKeyLookupDone && store.publicKey) {
+      relaySettings = { ...getStorage(store.publicKey).relaySettings };
+      connectToRelays(relaySettings);
+      return;
+    }
   });
 
   createEffect(() => {
@@ -1311,21 +1322,6 @@ export function AccountProvider(props: { children: JSXElement }) {
         socket(),
         { message: onMessage, close: onSocketClose },
       );
-    }
-  });
-
-  createEffect(() => {
-    let relaySettings = { ...store.relaySettings };
-
-    if (Object.keys(relaySettings).length > 0) {
-      connectToRelays(relaySettings);
-      return;
-    }
-
-    if (store.isKeyLookupDone && store.publicKey) {
-      relaySettings = { ...getStorage(store.publicKey).relaySettings };
-      connectToRelays(relaySettings);
-      return;
     }
   });
 
