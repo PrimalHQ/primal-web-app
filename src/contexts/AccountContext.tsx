@@ -20,6 +20,7 @@ import {
   MembershipStatus,
   PrimalNote,
   PrimalUser,
+  NostrEventContent,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
@@ -40,6 +41,7 @@ import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
 import { account as tAccount } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
+import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 
 export type AccountContextStore = {
   likes: string[],
@@ -639,6 +641,45 @@ export function AccountProvider(props: { children: JSXElement }) {
     saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
   };
 
+  type FollowData = {
+    tags: string[][],
+    date: number,
+    relayInfo: string,
+    openDialog: boolean,
+    following: string[],
+  }
+
+  const [followData, setFollowData] = createStore<FollowData>({
+    tags: [],
+    date: 0,
+    relayInfo: '',
+    openDialog: false,
+    following: [],
+  });
+
+  const resolveContacts = async (
+    pubkey: string,
+    following: string[],
+    date: number,
+    tags: string[][],
+    relayInfo: string,
+    cb?: (remove: boolean, pubkey: string) => void,
+  ) => {
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+
+    if (success && event) {
+      updateStore('following', () => following);
+      updateStore('followingSince', () => date);
+      updateStore('contactsTags', () => [...tags]);
+      updateStore('contactsContent', () => relayInfo);
+      saveFollowing(store.publicKey, following, date);
+
+      triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
+        cb && cb(false, pubkey);
+      });
+    }
+  };
+
   const addFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
     if (!store.publicKey || store.following.includes(pubkey)) {
       return;
@@ -654,6 +695,8 @@ export function AccountProvider(props: { children: JSXElement }) {
       tags: [],
       following: [],
     };
+
+    let rawContacts: NostrEventContent[] = [];
 
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -673,18 +716,20 @@ export function AccountProvider(props: { children: JSXElement }) {
 
           const tags = [ ...existingTags, ['p', pubkey]];
 
-          const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+          if (following.length < 2 || tags.length < 2) {
+            logWarning('FOLLOW ISSUE: ', `before_follow_${APP_ID}`);
+            logWarning('FOLLOW CONTENT: ', rawContacts);
 
-          if (success && event) {
-            updateStore('following', () => following);
-            updateStore('followingSince', () => date);
-            updateStore('contactsTags', () => [...tags]);
-            updateStore('contactsContent', () => relayInfo);
-            saveFollowing(store.publicKey, following, date);
-
-            triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
-              cb && cb(false, pubkey);
-            });
+            setFollowData(() => ({
+              openDialog: true,
+              date,
+              tags,
+              relayInfo,
+              following,
+            }));
+          }
+          else {
+            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
 
@@ -696,6 +741,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       if (type === 'EVENT') {
         if (!content || content.kind !== Kind.Contacts) return;
 
+        rawContacts.push(content)
         contactsReceived = true;
 
         if (content.created_at && content.created_at >= store.followingSince) {
@@ -724,6 +770,8 @@ export function AccountProvider(props: { children: JSXElement }) {
       following: [],
     };
 
+    let rawContacts: NostrEventContent[] = [];
+
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
         if (!contactsReceived) {
@@ -742,18 +790,20 @@ export function AccountProvider(props: { children: JSXElement }) {
 
           const tags = existingTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-          const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+          if (following.length < 2 || tags.length < 2) {
+            logWarning('FOLLOW ISSUE: ', `before_unfollow_${APP_ID}`);
+            logWarning('FOLLOW CONTENT: ', rawContacts);
 
-          if (success && event) {
-            updateStore('following', () => following);
-            updateStore('followingSince', () => date);
-            updateStore('contactsTags', () => [...tags]);
-            updateStore('contactsContent', () => relayInfo);
-            saveFollowing(store.publicKey, following, date);
-
-            triggerImportEvents([event], `import_unfollow_contacts_${APP_ID}`, () => {
-              cb && cb(true, pubkey);
-            });
+            setFollowData(() => ({
+              openDialog: true,
+              date,
+              tags,
+              relayInfo,
+              following,
+            }));
+          }
+          else {
+            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
 
@@ -765,6 +815,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       if (type === 'EVENT') {
         if (!content || content.kind !== Kind.Contacts) return;
 
+        rawContacts.push(content)
         contactsReceived = true;
 
         if (content.created_at && content.created_at >= store.followingSince) {
@@ -1260,7 +1311,9 @@ export function AccountProvider(props: { children: JSXElement }) {
     const storage = getStorage(pubkey);
 
     let relaySettings = { ...storage.relaySettings };
+
     updateStore('relaySettings', () => ({ ...storage.relaySettings }));
+
     if (Object.keys(relaySettings).length > 0) {
       connectToRelays(relaySettings);
       return;
@@ -1484,6 +1537,35 @@ const [store, updateStore] = createStore<AccountContextStore>({
       <LoginModal
         open={store.showLogin}
         onAbort={() => updateStore('showLogin', () => false)}
+      />
+      <ConfirmModal
+        open={followData.openDialog}
+        title="This action may result in an error"
+        description={'If you continue, you will end up following just one nostr account. Are you sure you want to continue?'}
+        confirmLabel="Yes, continue"
+        abortLablel="Abort"
+        onConfirm={async () => {
+          if (store.publicKey) {
+            const data = unwrap(followData)
+            await resolveContacts(store.publicKey, data.following, data.date, data.tags, data.relayInfo);
+          }
+          setFollowData(() => ({
+            tags: [],
+            date: 0,
+            relayInfo: '',
+            openDialog: false,
+            following: [],
+          }));
+        }}
+        onAbort={() => {
+          setFollowData(() => ({
+            tags: [],
+            date: 0,
+            relayInfo: '',
+            openDialog: false,
+            following: [],
+          }));
+        }}
       />
     </AccountContext.Provider>
   );
