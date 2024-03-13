@@ -110,7 +110,7 @@ const Home: Component = () => {
   });
 
   const loadNewContent = () => {
-    if (newNotesCount() > 100) {
+    if (newNotesCount() > 100 || app?.appState === 'waking') {
       location.reload();
       return;
     }
