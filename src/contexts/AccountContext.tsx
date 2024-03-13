@@ -195,11 +195,11 @@ export function AccountProvider(props: { children: JSXElement }) {
     membershipSocket = new WebSocket('wss://wallet.primal.net/v1');
 
     membershipSocket.addEventListener('close', () => {
-      console.log('PREMIUM SOCKET CLOSED');
+      logInfo('MEMBERSHIP SOCKET CLOSED');
     });
 
     membershipSocket.addEventListener('open', () => {
-      console.log('PREMIUM SOCKET OPENED');
+      logInfo('MEMBERSHIP SOCKET OPENED');
       onOpen();
     });
   }
