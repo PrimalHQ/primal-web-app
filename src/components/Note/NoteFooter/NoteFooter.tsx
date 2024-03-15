@@ -19,6 +19,8 @@ import { hookForDev } from '../../../lib/devTools';
 import NoteContextMenu from '../NoteContextMenu';
 import { getScreenCordinates } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
+import ReactionsModal from '../../ReactionsModal/ReactionsModal';
+import { useAppContext } from '../../../contexts/AppContext';
 
 const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> = (props) => {
 
@@ -26,6 +28,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   const toast = useToastContext();
   const intl = useIntl();
   const settings = useSettingsContext();
+  const app = useAppContext();
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -37,6 +40,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   const [likes, setLikes] = createSignal(props.note.post.likes);
   const [reposts, setReposts] = createSignal(props.note.post.reposts);
   const [replies, setReplies] = createSignal(props.note.post.replies);
+  const [zapCount, setZapCount] = createSignal(props.note.post.zaps);
   const [zaps, setZaps] = createSignal(props.note.post.satszapped);
 
   const [isRepostMenuVisible, setIsRepostMenuVisible] = createSignal(false);
@@ -313,6 +317,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   createEffect(() => {
 
     if (zappedNow()) {
+      setZapCount(c => c + 1);
       setZaps((z) => z + zappedAmount());
       setZapped(true);
       setZappedNow(false);
@@ -407,6 +412,14 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
           openCustomZap={() => {
             setIsCustomZap(true);
           }}
+          openReactions={() => {
+            app?.actions.openReactionModal(props.note.post.id, {
+              likes: likes(),
+              zaps: zapCount(),
+              reposts: reposts(),
+              quotes: 0,
+            });
+          }}
         />
       </div>
 
@@ -447,7 +460,6 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
           setZapped(props.note.post.noteActions.zapped);
         }}
       />
-
     </div>
   )
 }

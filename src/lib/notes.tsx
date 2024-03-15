@@ -456,7 +456,6 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   }
 }
 
-
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {
 
   const unsub = subscribeTo(subId, (type) => {
@@ -468,4 +467,13 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
   });
 
   importEvents(events, subId);
+};
+
+
+export const getEventReactions = (eventId: string, kind: number, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["event_actions", { event_id: eventId, kind, limit: 100 }]},
+  ]));
 };

@@ -16,6 +16,8 @@ import Branding from '../Branding/Branding';
 import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
 import ZapAnimation from '../ZapAnimation/ZapAnimation';
 import Landing from '../../pages/Landing';
+import ReactionsModal from '../ReactionsModal/ReactionsModal';
+import { useAppContext } from '../../contexts/AppContext';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -26,6 +28,7 @@ const Layout: Component = () => {
   const profile = useProfileContext();
   const location = useLocation();
   const params = useParams();
+  const app = useAppContext();
 
   let container: HTMLDivElement | undefined;
 
@@ -145,6 +148,12 @@ const Layout: Component = () => {
                 <div>
                   <Outlet />
                 </div>
+
+                <ReactionsModal
+                  noteId={app?.showReactionsModal}
+                  stats={app?.reactionStats}
+                  onClose={() => app?.actions.closeReactionModal()}
+                />
               </div>
             </Show>
           </div>

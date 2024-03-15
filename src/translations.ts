@@ -360,6 +360,11 @@ export const actions = {
     },
   },
   noteContext: {
+    reactions: {
+      id: 'actions.noteContext.reactions',
+      defaultMessage: 'Reactions',
+      description: 'Label for note reactions from context menu',
+    },
     zap: {
       id: 'actions.noteContext.zapNote',
       defaultMessage: 'Custom Zap',
@@ -419,6 +424,11 @@ export const actions = {
   zap: {
     id: 'actions.zap',
     defaultMessage: 'Zap',
+    description: 'Label for zap',
+  },
+  reactions: {
+    id: 'actions.reactions',
+    defaultMessage: 'Reactions ({count})',
     description: 'Label for zap',
   },
 };

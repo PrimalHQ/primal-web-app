@@ -8,14 +8,34 @@ import {
   useContext
 } from "solid-js";
 
+export type ReactionStats = {
+  likes: number,
+  zaps: number,
+  reposts: number,
+  quotes: number,
+};
+
 export type AppContextStore = {
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
+  showReactionsModal: string | undefined,
+  reactionStats: ReactionStats,
+  actions: {
+    openReactionModal: (noteId: string, stats: ReactionStats) => void,
+    closeReactionModal: () => void,
+  },
 }
 
-const initialData: AppContextStore = {
+const initialData: Omit<AppContextStore, 'actions'> = {
   isInactive: false,
   appState: 'woke',
+  showReactionsModal: undefined,
+  reactionStats: {
+    likes: 0,
+    zaps: 0,
+    reposts: 0,
+    quotes: 0,
+  },
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -34,6 +54,21 @@ export const AppProvider = (props: { children: JSXElement }) => {
     inactivityCounter = setTimeout(() => {
       updateStore('isInactive', () => true)
     }, 3 * 60_000);
+  };
+
+  const openReactionModal = (noteId: string, stats: ReactionStats) => {
+    updateStore('reactionStats', () => ({ ...stats }));
+    updateStore('showReactionsModal', () => noteId);
+  };
+
+  const closeReactionModal = () => {
+    updateStore('reactionStats', () => ({
+      likes: 0,
+      zaps: 0,
+      reposts: 0,
+      quotes: 0,
+    }));
+    updateStore('showReactionsModal', () => undefined);
   };
 
 // EFFECTS --------------------------------------
@@ -73,6 +108,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const [store, updateStore] = createStore<AppContextStore>({
     ...initialData,
+    actions: {
+      openReactionModal,
+      closeReactionModal,
+    }
   });
 
   return (

@@ -26,6 +26,7 @@ import { getScreenCordinates } from '../../utils';
 const NoteContextMenu: Component<{
   note: PrimalNote,
   openCustomZap?: () => void;
+  openReactions?: () => void,
   id?: string,
 }> = (props) => {
   const account = useAccountContext();
@@ -124,6 +125,14 @@ const NoteContextMenu: Component<{
 
   const noteContextForEveryone: MenuItem[] = [
     {
+      label: intl.formatMessage(tActions.noteContext.reactions),
+      action: () => {
+        props.openReactions && props.openReactions();
+        setContext(false);
+      },
+      icon: 'heart',
+    },
+    {
       label: intl.formatMessage(tActions.noteContext.zap),
       action: () => {
         props.openCustomZap && props.openCustomZap();
@@ -192,7 +201,7 @@ const NoteContextMenu: Component<{
 
   const determineOrient = () => {
     const coor = getScreenCordinates(context);
-    const height = 380;
+    const height = 440;
     return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
   }
 
