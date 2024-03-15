@@ -3,28 +3,21 @@ import { Tabs } from '@kobalte/core';
 import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { style } from 'solid-js/web';
 import { APP_ID } from '../../App';
-import { defaultZapOptions, Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { Kind } from '../../constants';
 import { ReactionStats } from '../../contexts/AppContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
 import { getEventReactions } from '../../lib/notes';
 import { truncateNumber } from '../../lib/notifications';
-import { zapNote, zapProfile } from '../../lib/zap';
 import { subscribeTo } from '../../sockets';
 import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
+import { actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import { parseBolt11 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Loader from '../Loader/Loader';
 import Modal from '../Modal/Modal';
-import TextInput from '../TextInput/TextInput';
-import { useToastContext } from '../Toaster/Toaster';
+import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReactionsModal.module.scss';
@@ -44,18 +37,22 @@ const ReactionsModal: Component<{
   const [zapList, setZapList] = createStore<any[]>([]);
   const [repostList, setRepostList] = createStore<any[]>([]);
 
-  const [isFetching, setIsFetching] = createSignal(false)
+  const [isFetching, setIsFetching] = createSignal(false);
+
+  let loadedLikes = 0;
+  let loadedZaps = 0;
+  let loadedReposts = 0;
 
   createEffect(() => {
     switch (selectedTab()) {
       case 'likes':
-        getLikes();
+        loadedLikes === 0 && getLikes();
         break;
       case 'zaps':
-        getZaps();
+        loadedZaps === 0 && getZaps();
         break;
       case 'reposts':
-        getReposts();
+        loadedReposts === 0 && getReposts();
         break;
     }
   });
@@ -69,7 +66,7 @@ const ReactionsModal: Component<{
     }
   });
 
-  const getLikes = () => {
+  const getLikes = (offset = 0) => {
     if (!props.noteId) return;
 
     const subId = `nr_l_${props.noteId}_${APP_ID}`;
@@ -78,7 +75,8 @@ const ReactionsModal: Component<{
 
     const unsub = subscribeTo(subId, (type,_, content) => {
       if (type === 'EOSE') {
-        setLikeList(() => [...users]);
+        setLikeList((likes) => [ ...likes, ...users ]);
+        loadedLikes = likeList.length;
         setIsFetching(() => false);
         unsub();
       }
@@ -102,10 +100,10 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventReactions(props.noteId, Kind.Reaction, subId);
+    getEventReactions(props.noteId, Kind.Reaction, subId, offset);
   };
 
-  const getZaps = () => {
+  const getZaps = (offset = 0) => {
     if (!props.noteId) return;
 
     const subId = `nr_z_${props.noteId}_${APP_ID}`;
@@ -120,7 +118,8 @@ const ReactionsModal: Component<{
           sender: users[zap.pubkey],
         })));
 
-        setZapList(() => [ ...zapData ]);
+        setZapList((zapItems) => [ ...zapItems, ...zapData ]);
+        loadedZaps = zapList.length;
         setIsFetching(() => false);
         unsub();
       }
@@ -174,10 +173,10 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventReactions(props.noteId, Kind.Zap, subId);
+    getEventReactions(props.noteId, Kind.Zap, subId, offset);
   };
 
-  const getReposts = () => {
+  const getReposts = (offset = 0) => {
     if (!props.noteId) return;
 
     const subId = `nr_r_${props.noteId}_${APP_ID}`;
@@ -186,7 +185,8 @@ const ReactionsModal: Component<{
 
     const unsub = subscribeTo(subId, (type,_, content) => {
       if (type === 'EOSE') {
-        setRepostList(() => [...users]);
+        setRepostList((reposts) => [...reposts, ...users]);
+        loadedReposts = repostList.length;
         setIsFetching(() => false);
         unsub();
       }
@@ -210,7 +210,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventReactions(props.noteId, Kind.Repost, subId);
+    getEventReactions(props.noteId, Kind.Repost, subId, offset);
   };
 
   const totalCount = () => props.stats.likes + props.stats.quotes + props.stats.reposts + props.stats.zaps;
@@ -259,93 +259,144 @@ const ReactionsModal: Component<{
             </Tabs.List>
 
             <Tabs.Content class={styles.tabContent} value={'likes'}>
-              <Show
-                when={!isFetching()}
-                fallback={<Loader />}
+              <For
+                each={likeList}
+                fallback={
+                  <Show when={!isFetching()}>
+                    {intl.formatMessage(tPlaceholders.noLikeDetails)}
+                  </Show>
+                }
               >
-                <For
-                  each={likeList}
-                >
-                  {admirer =>
-                    <A
-                      href={`/p/${admirer.npub}`}
-                      class={styles.likeItem}
-                      onClick={props.onClose}
-                    >
-                      <div class={styles.likeIcon}></div>
-                      <Avatar src={admirer.picture} size="vs" />
-                      <div class={styles.userName}>
-                        <div class={styles.name}>
-                          {userName(admirer)}
-                        </div>
-                        <VerificationCheck user={admirer} />
+                {admirer =>
+                  <A
+                    href={`/p/${admirer.npub}`}
+                    class={styles.likeItem}
+                    onClick={props.onClose}
+                  >
+                    <div class={styles.likeIcon}></div>
+                    <Avatar src={admirer.picture} size="vs" />
+                    <div class={styles.userName}>
+                      <div class={styles.name}>
+                        {userName(admirer)}
                       </div>
-                    </A>
-                  }
-                </For>
+                      <VerificationCheck user={admirer} />
+                    </div>
+                  </A>
+                }
+              </For>
+
+              <Show when={likeList.length < props.stats.likes}>
+                <Paginator
+                  loadNextPage={() => {
+                    const len = likeList.length;
+                    if (len === 0) return;
+                    getLikes(len);
+                  }}
+                  isSmall={true}
+                />
+              </Show>
+
+              <Show
+                when={isFetching()}
+              >
+                <Loader />
               </Show>
             </Tabs.Content>
 
             <Tabs.Content class={styles.tabContent} value={'zaps'}>
-              <Show
-                when={!isFetching()}
-                fallback={<Loader />}
+              <For
+                each={zapList}
+                fallback={
+                  <Show when={!isFetching()}>
+                    {intl.formatMessage(tPlaceholders.noZapDetails)}
+                  </Show>
+                }
               >
-                <For
-                  each={zapList}
-                >
-                  {zap =>
-                    <A
-                      href={`/p/${zap.npub}`}
-                      class={styles.zapItem}
-                      onClick={props.onClose}
-                    >
-                      <div class={styles.zapAmount}>
-                        <div class={styles.zapIcon}></div>
-                        <div class={styles.amount}>{truncateNumber(zap.amount)}</div>
-                      </div>
-                      <Avatar src={zap.sender?.picture} size="vs" />
-                      <div class={styles.zapInfo}>
-                        <div class={styles.userName}>
-                          <div class={styles.name}>
-                            {userName(zap.sender)}
-                          </div>
-                          <VerificationCheck user={zap} />
+                {zap =>
+                  <A
+                    href={`/p/${zap.npub}`}
+                    class={styles.zapItem}
+                    onClick={props.onClose}
+                  >
+                    <div class={styles.zapAmount}>
+                      <div class={styles.zapIcon}></div>
+                      <div class={styles.amount}>{truncateNumber(zap.amount)}</div>
+                    </div>
+                    <Avatar src={zap.sender?.picture} size="vs" />
+                    <div class={styles.zapInfo}>
+                      <div class={styles.userName}>
+                        <div class={styles.name}>
+                          {userName(zap.sender)}
                         </div>
-                        <div class={styles.zapMessage}>
-                          {zap.message}
-                        </div>
+                        <VerificationCheck user={zap} />
                       </div>
-                    </A>
-                  }
-                </For>
+                      <div class={styles.zapMessage}>
+                        {zap.message}
+                      </div>
+                    </div>
+                  </A>
+                }
+              </For>
+
+              <Show when={zapList.length < props.stats.zaps}>
+                <Paginator
+                  loadNextPage={() => {
+                    const len = zapList.length;
+                    if (len === 0) return;
+                    getZaps(len);
+                  }}
+                  isSmall={true}
+                />
+              </Show>
+
+              <Show
+                when={isFetching()}
+              >
+                <Loader />
               </Show>
             </Tabs.Content>
             <Tabs.Content class={styles.tabContent} value={'reposts'}>
-              <Show
-                when={!isFetching()}
-                fallback={<Loader />}
+              <For
+                each={repostList}
+                fallback={
+                  <Show when={!isFetching()}>
+                    {intl.formatMessage(tPlaceholders.noRepostDetails)}
+                  </Show>
+                }
               >
-                <For
-                  each={repostList}
-                >
-                  {reposter =>
-                    <A
-                      href={`/p/${reposter.npub}`}
-                      class={styles.repostItem}
-                      onClick={props.onClose}
-                    >
-                      <div class={styles.repostIcon}></div>
-                      <Avatar src={reposter.picture} size="vs" />
-                      <div class={styles.userName}>
-                        <div class={styles.name}>
-                          {userName(reposter)}
-                        </div>
-                        <VerificationCheck user={reposter} />
+                {reposter =>
+                  <A
+                    href={`/p/${reposter.npub}`}
+                    class={styles.repostItem}
+                    onClick={props.onClose}
+                  >
+                    <div class={styles.repostIcon}></div>
+                    <Avatar src={reposter.picture} size="vs" />
+                    <div class={styles.userName}>
+                      <div class={styles.name}>
+                        {userName(reposter)}
                       </div>
-                    </A>
-                  }
-                </For>
+                      <VerificationCheck user={reposter} />
+                    </div>
+                  </A>
+                }
+              </For>
+
+              <Show when={repostList.length < props.stats.reposts}>
+                <Paginator
+                  loadNextPage={() => {
+                    const len = repostList.length;
+                    if (len === 0) return;
+                    getReposts(len);
+                  }}
+                  isSmall={true}
+                />
+              </Show>
+
+              <Show
+                when={isFetching()}
+              >
+                <Loader />
               </Show>
             </Tabs.Content>
             <Tabs.Content class={styles.tabContent} value={'quotes'}>

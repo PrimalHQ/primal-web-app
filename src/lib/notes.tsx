@@ -470,10 +470,10 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
 };
 
 
-export const getEventReactions = (eventId: string, kind: number, subid: string) => {
+export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_actions", { event_id: eventId, kind, limit: 100 }]},
+    {cache: ["event_actions", { event_id: eventId, kind, limit: 20, offset }]},
   ]));
 };

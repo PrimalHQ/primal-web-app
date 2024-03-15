@@ -982,6 +982,21 @@ export const notifications = {
 };
 
 export const placeholders = {
+  noLikeDetails: {
+    id: 'placeholders.noLikeDetails',
+    defaultMessage: 'No details for likes found',
+    description: 'Placeholder when there are no like details in reactions modal',
+  },
+  noZapDetails: {
+    id: 'placeholders.noZapDetails',
+    defaultMessage: 'No details for zaps found',
+    description: 'Placeholder when there are no zap details in reactions modal',
+  },
+  noRepostDetails: {
+    id: 'placeholders.noRepostDetails',
+    defaultMessage: 'No details for reposts found',
+    description: 'Placeholder when there are no repost details in reactions modal',
+  },
   addComment: {
     id: 'placeholders.addComment',
     defaultMessage: 'Add a comment...',
