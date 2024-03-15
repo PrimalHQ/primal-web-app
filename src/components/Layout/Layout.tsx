@@ -18,6 +18,7 @@ import ZapAnimation from '../ZapAnimation/ZapAnimation';
 import Landing from '../../pages/Landing';
 import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
+import CustomZap from '../CustomZap/CustomZap';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -153,6 +154,16 @@ const Layout: Component = () => {
                   noteId={app?.showReactionsModal}
                   stats={app?.reactionStats}
                   onClose={() => app?.actions.closeReactionModal()}
+                />
+
+                <CustomZap
+                  open={app?.showCustomZapModal}
+                  note={app?.customZap?.note}
+                  profile={app?.customZap?.profile}
+                  onConfirm={app?.customZap?.onConfirm}
+                  onSuccess={app?.customZap?.onSuccess}
+                  onFail={app?.customZap?.onFail}
+                  onCancel={app?.customZap?.onCancel}
                 />
               </div>
             </Show>

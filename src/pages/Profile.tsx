@@ -41,8 +41,8 @@ import VerificationCheck from '../components/VerificationCheck/VerificationCheck
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
-import CustomZap from '../components/CustomZap/CustomZap';
 import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
+import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 
 const Profile: Component = () => {
 
@@ -51,6 +51,8 @@ const Profile: Component = () => {
   const profile = useProfileContext();
   const account = useAccountContext();
   const media = useMediaContext();
+  const app = useAppContext();
+
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -61,7 +63,6 @@ const Profile: Component = () => {
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
-  const [isCustomZap, setIsCustomZap] = createSignal(false);
   const [openQr, setOpenQr] = createSignal(false);
 
   const lightbox = new PhotoSwipeLightbox({
@@ -491,6 +492,25 @@ const Profile: Component = () => {
     return !profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex();
   };
 
+  const customZapInfo: () => CustomZapInfo = () => ({
+    profile: profile?.userProfile,
+    onConfirm: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+    },
+    onSuccess: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      toaster?.sendSuccess(intl.formatMessage(toastZapProfile, {
+        name: authorName(profile?.userProfile)
+      }))
+    },
+    onFail: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+    },
+    onCancel: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+    },
+  });
+
   return (
     <>
       <PageTitle title={
@@ -567,31 +587,11 @@ const Profile: Component = () => {
 
           <Show when={!isCurrentUser()}>
             <ButtonSecondary
-              onClick={() => setIsCustomZap(true)}
+              onClick={() => app?.actions.openCustomZapModal(customZapInfo())}
               shrink={true}
             >
               <div class={styles.zapIcon}></div>
             </ButtonSecondary>
-
-            <CustomZap
-              open={isCustomZap()}
-              profile={profile?.userProfile}
-              onConfirm={(zapOption: ZapOption) => {
-                setIsCustomZap(false);
-              }}
-              onSuccess={(zapOption: ZapOption) => {
-                setIsCustomZap(false);
-                toaster?.sendSuccess(intl.formatMessage(toastZapProfile, {
-                  name: authorName(profile?.userProfile)
-                }))
-              }}
-              onFail={(zapOption: ZapOption) => {
-                setIsCustomZap(false);
-              }}
-              onCancel={(zapOption: ZapOption) => {
-                setIsCustomZap(false);
-              }}
-            />
           </Show>
 
           <Show when={account?.publicKey}>

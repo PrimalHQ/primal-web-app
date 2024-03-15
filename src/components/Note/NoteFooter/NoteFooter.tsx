@@ -20,7 +20,7 @@ import NoteContextMenu from '../NoteContextMenu';
 import { getScreenCordinates } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import ReactionsModal from '../../ReactionsModal/ReactionsModal';
-import { useAppContext } from '../../../contexts/AppContext';
+import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 
 const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> = (props) => {
 
@@ -158,8 +158,44 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   };
 
   let quickZapDelay = 0;
-  const [isCustomZap, setIsCustomZap] = createSignal(false);
   const [isZapping, setIsZapping] = createSignal(false);
+
+  const customZapInfo: CustomZapInfo = {
+    note: props.note,
+    onConfirm: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      setZappedAmount(() => zapOption.amount || 0);
+      setZappedNow(true);
+      setZapped(true);
+      animateZap();
+    },
+    onSuccess: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      setIsZapping(false);
+      setZappedNow(false);
+      setShowZapAnim(false);
+      setHideZapIcon(false);
+      setZapped(true);
+    },
+    onFail: (zapOption: ZapOption) => {
+      setZappedAmount(() => -(zapOption.amount || 0));
+      setZappedNow(true);
+      app?.actions.closeCustomZapModal();
+      setIsZapping(false);
+      setShowZapAnim(false);
+      setHideZapIcon(false);
+      setZapped(props.note.post.noteActions.zapped);
+    },
+    onCancel: (zapOption: ZapOption) => {
+      setZappedAmount(() => -(zapOption.amount || 0));
+      setZappedNow(true);
+      app?.actions.closeCustomZapModal();
+      setIsZapping(false);
+      setShowZapAnim(false);
+      setHideZapIcon(false);
+      setZapped(props.note.post.noteActions.zapped);
+    },
+  };
 
   const startZap = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
@@ -187,7 +223,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
     }
 
     quickZapDelay = setTimeout(() => {
-      setIsCustomZap(true);
+      app?.actions.openCustomZapModal(customZapInfo);
       setIsZapping(true);
     }, 500);
   };
@@ -207,7 +243,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
       return;
     }
 
-    if (!isCustomZap()) {
+    if (app?.customZap === undefined) {
       doQuickZap();
     }
   };
@@ -410,7 +446,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
         <NoteContextMenu
           note={props.note}
           openCustomZap={() => {
-            setIsCustomZap(true);
+            app?.actions.openCustomZapModal(customZapInfo);
           }}
           openReactions={() => {
             app?.actions.openReactionModal(props.note.post.id, {
@@ -422,44 +458,6 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
           }}
         />
       </div>
-
-      <CustomZap
-        open={isCustomZap()}
-        note={props.note}
-        onConfirm={(zapOption: ZapOption) => {
-          setIsCustomZap(false);
-          setZappedAmount(() => zapOption.amount || 0);
-          setZappedNow(true);
-          setZapped(true);
-          animateZap();
-        }}
-        onSuccess={(zapOption: ZapOption) => {
-          setIsCustomZap(false);
-          setIsZapping(false);
-          setZappedNow(false);
-          setShowZapAnim(false);
-          setHideZapIcon(false);
-          setZapped(true);
-        }}
-        onFail={(zapOption: ZapOption) => {
-          setZappedAmount(() => -(zapOption.amount || 0));
-          setZappedNow(true);
-          setIsCustomZap(false);
-          setIsZapping(false);
-          setShowZapAnim(false);
-          setHideZapIcon(false);
-          setZapped(props.note.post.noteActions.zapped);
-        }}
-        onCancel={(zapOption: ZapOption) => {
-          setZappedAmount(() => -(zapOption.amount || 0));
-          setZappedNow(true);
-          setIsCustomZap(false);
-          setIsZapping(false);
-          setShowZapAnim(false);
-          setHideZapIcon(false);
-          setZapped(props.note.post.noteActions.zapped);
-        }}
-      />
     </div>
   )
 }

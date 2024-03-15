@@ -1,4 +1,4 @@
-import { createStore } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
 import {
   createContext,
   createEffect,
@@ -7,6 +7,7 @@ import {
   onMount,
   useContext
 } from "solid-js";
+import { PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 
 export type ReactionStats = {
   likes: number,
@@ -15,14 +16,27 @@ export type ReactionStats = {
   quotes: number,
 };
 
+export type CustomZapInfo = {
+  profile?: PrimalUser,
+  note?: PrimalNote,
+  onConfirm: (zapOption: ZapOption) => void,
+  onSuccess: (zapOption: ZapOption) => void,
+  onFail: (zapOption: ZapOption) => void,
+  onCancel: (zapOption: ZapOption) => void,
+};
+
 export type AppContextStore = {
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
   showReactionsModal: string | undefined,
   reactionStats: ReactionStats,
+  showCustomZapModal: boolean,
+  customZap: CustomZapInfo | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
+    openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
+    closeCustomZapModal: () => void,
   },
 }
 
@@ -36,6 +50,8 @@ const initialData: Omit<AppContextStore, 'actions'> = {
     reposts: 0,
     quotes: 0,
   },
+  showCustomZapModal: false,
+  customZap: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -69,6 +85,15 @@ export const AppProvider = (props: { children: JSXElement }) => {
       quotes: 0,
     }));
     updateStore('showReactionsModal', () => undefined);
+  };
+
+  const openCustomZapModal = (customZapInfo: CustomZapInfo) => {
+    updateStore('customZap', reconcile({ ...customZapInfo }));
+    updateStore('showCustomZapModal', () => true);
+  };
+
+  const closeCustomZapModal = () => {
+    updateStore('showCustomZapModal', () => false);
   };
 
 // EFFECTS --------------------------------------
@@ -111,6 +136,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
     actions: {
       openReactionModal,
       closeReactionModal,
+      openCustomZapModal,
+      closeCustomZapModal,
     }
   });
 
