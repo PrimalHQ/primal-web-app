@@ -39,7 +39,7 @@ import LoginModal from "../components/LoginModal/LoginModal";
 import { logError, logInfo, logWarning } from "../lib/logger";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
-import { account as tAccount } from "../translations";
+import { account as tAccount, followWarning, forgotPin } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 
@@ -69,6 +69,7 @@ export type AccountContextStore = {
   allowlistSince: number,
   sec: string | undefined,
   showPin: string,
+  showForgot: boolean,
   showGettingStarted: boolean,
   showLogin: boolean,
   emojiHistory: EmojiOption[],
@@ -128,6 +129,7 @@ const initialData = {
   allowlistSince: 0,
   sec: undefined,
   showPin: '',
+  showForgot: false,
   showGettingStarted: false,
   showLogin: false,
   emojiHistory: [],
@@ -1525,6 +1527,10 @@ const [store, updateStore] = createStore<AccountContextStore>({
           updateStore('showPin', () => '');
         }}
         onAbort={() => updateStore('showPin', () => '')}
+        onForgot={() => {
+          updateStore('showPin', () => '');
+          updateStore('showForgot', () => true);
+        }}
       />
       <CreateAccountModal
         open={store.showGettingStarted}
@@ -1540,10 +1546,10 @@ const [store, updateStore] = createStore<AccountContextStore>({
       />
       <ConfirmModal
         open={followData.openDialog}
-        title="This action may result in an error"
-        description={'If you continue, you will end up following just one nostr account. Are you sure you want to continue?'}
-        confirmLabel="Yes, continue"
-        abortLablel="Abort"
+        title={intl.formatMessage(followWarning.title)}
+        description={intl.formatMessage(followWarning.description)}
+        confirmLabel={intl.formatMessage(followWarning.confirm)}
+        abortLablel={intl.formatMessage(followWarning.abort)}
         onConfirm={async () => {
           if (store.publicKey) {
             const data = unwrap(followData)
@@ -1565,6 +1571,20 @@ const [store, updateStore] = createStore<AccountContextStore>({
             openDialog: false,
             following: [],
           }));
+        }}
+      />
+      <ConfirmModal
+        open={store.showForgot}
+        title={intl.formatMessage(forgotPin.title)}
+        description={intl.formatMessage(forgotPin.description)}
+        confirmLabel={intl.formatMessage(forgotPin.confirm)}
+        abortLablel={intl.formatMessage(forgotPin.abort)}
+        onConfirm={async () => {
+          logout();
+          updateStore('showForgot', () => false);
+        }}
+        onAbort={() => {
+          updateStore('showForgot', () => false);
         }}
       />
     </AccountContext.Provider>

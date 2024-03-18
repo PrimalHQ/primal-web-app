@@ -182,6 +182,11 @@ export const actions = {
     defaultMessage: 'Get Started',
     description: 'Get Started action, button label',
   },
+  forgotPin: {
+    id: 'actions.forgotPin',
+    defaultMessage: 'I forgot my PIN',
+    description: 'Forgot PIN action, button label',
+  },
   cancel: {
     id: 'actions.cancel',
     defaultMessage: 'Cancel',
@@ -2018,5 +2023,51 @@ export const landing = {
     id: 'landing.browserOption',
     defaultMessage: 'Continue in browser',
     description: 'Landing page browser option',
+  },
+};
+
+export const forgotPin = {
+  title: {
+    id: 'forgotPin.title',
+    defaultMessage: 'This action will erase you key',
+    description: 'Forgot pin modal title',
+  },
+  description: {
+    id: 'forgotPin.description',
+    defaultMessage: 'You will still be able to browse Nostr through Primal but you will not be able to take any actions (post notes, likes,...) until you re-login with your private key. Are you sure you wish to continue?',
+    description: 'Explanation of what happens when pin is erased',
+  },
+  confirm: {
+    id: 'forgotPin.confirm',
+    defaultMessage: 'Yes, continue',
+    description: 'Confirm forgot pin action',
+  },
+  abort: {
+    id: 'forgotPin.abort',
+    defaultMessage: 'Cancel',
+    description: 'Abort forgot pin action',
+  },
+};
+
+export const followWarning = {
+  title: {
+    id: 'followWarning.title',
+    defaultMessage: 'This action may result in an error',
+    description: 'Follow error modal title',
+  },
+  description: {
+    id: 'followWarning.description',
+    defaultMessage: 'If you continue, you will end up following just one nostr account. Are you sure you want to continue?',
+    description: 'Explanation of what happens when follow erro occurs',
+  },
+  confirm: {
+    id: 'followWarning.confirm',
+    defaultMessage: 'Yes, continue',
+    description: 'Confirm forgot pin action',
+  },
+  abort: {
+    id: 'followWarning.abort',
+    defaultMessage: 'Abort',
+    description: 'Abort forgot pin action',
   },
 };
