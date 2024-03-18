@@ -109,12 +109,17 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showCustomZapModal', () => false);
   };
 
-  const openContextMenu = (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => {
+  const openContextMenu = (
+    note: PrimalNote,
+    position: DOMRect | undefined,
+    openCustomZap: () => void,
+    openReactions: () => void,
+  ) => {
     updateStore('noteContextMenuInfo', reconcile({
       note,
       position,
-      openCustomZapModal,
-      openReactionModal,
+      openCustomZap,
+      openReactions,
     }))
     updateStore('showNoteContextMenu', () => true);
   };

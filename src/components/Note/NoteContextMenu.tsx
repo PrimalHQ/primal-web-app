@@ -45,8 +45,6 @@ const NoteContextMenu: Component<{
   const position = () => {
     return props.data?.position;
   };
-  const openCustomZap = props.data?.openCustomZap || (() => {});
-  const openReactions = props.data?.openReactions || (() => {});
 
   createEffect(() => {
     if(!context) return;
@@ -163,7 +161,7 @@ const NoteContextMenu: Component<{
     {
       label: intl.formatMessage(tActions.noteContext.reactions),
       action: () => {
-        openReactions();
+        props.data?.openReactions && props.data?.openReactions();
         props.onClose()
       },
       icon: 'heart',
@@ -171,7 +169,7 @@ const NoteContextMenu: Component<{
     {
       label: intl.formatMessage(tActions.noteContext.zap),
       action: () => {
-        openCustomZap();
+        props.data?.openCustomZap && props.data?.openCustomZap();
         props.onClose()
       },
       icon: 'feed_zap',
