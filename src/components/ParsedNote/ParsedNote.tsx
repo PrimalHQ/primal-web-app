@@ -40,7 +40,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
-import { linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -991,7 +991,7 @@ const ParsedNote: Component<{
         let [_, term] = token.split('#');
         let end = '';
 
-        let match = specialCharsRegex.exec(term);
+        let match = hashtagCharsRegex.exec(term);
 
         if (match) {
           const i = match.index;
