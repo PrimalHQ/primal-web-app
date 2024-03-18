@@ -64,6 +64,7 @@ type HomeContextStore = {
     loadFutureContent: () => void,
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
+    getFirstPage: () => void,
   }
 }
 
@@ -387,6 +388,14 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   };
 
+  const getFirstPage = () => {
+    const feed = store.selectedFeed;
+    if (!feed?.hex) return;
+
+    clearNotes();
+    fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+  };
+
   const updatePage = (content: NostrEventContent, scope?: 'future') => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
@@ -698,6 +707,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       loadFutureContent,
       doSidebarSearch,
       updateSidebarQuery,
+      getFirstPage,
     },
   });
 
