@@ -63,6 +63,10 @@ const ReactionsModal: Component<{
       setZapList(() => []);
       setRepostList(() => []);
       setSelectedTab(() => 'likes');
+
+      loadedLikes = 0;
+      loadedZaps = 0;
+      loadedReposts = 0;
     }
   });
 
