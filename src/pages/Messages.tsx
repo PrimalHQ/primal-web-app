@@ -195,13 +195,9 @@ const Messages: Component = () => {
       npubToHex(params.sender) :
       params.sender;
 
-    const url = currentUrl.startsWith('npub') ?
-      npubToHex(currentUrl) :
-      currentUrl;
-
     if(currentUrl !== sender) {
       currentUrl = sender;
-      messages?.actions.selectSender(sender);
+      selectSender(sender);
     }
   });
 
@@ -622,6 +618,7 @@ const Messages: Component = () => {
     newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
     messages?.actions.clearAllMessages();
     messages?.actions.selectSender();
+    messages?.actions.clearReceiver();
   });
 
   const sendMessage = async () => {

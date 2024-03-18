@@ -77,6 +77,7 @@ export type MessagesContextStore = {
     getNextConversationPage: () => void,
     addUserReference: (user: PrimalUser) => void,
     clearAllMessages: () => void,
+    clearReceiver: () => void,
   }
 }
 
@@ -230,6 +231,11 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     updateStore('conversation', () => []);
     updateStore('messages', () => []);
     updateStore('senders', reconcile({}));
+  };
+
+  const clearReceiver = () => {
+    updateStore('activePubkey', () => undefined);
+    currentSender = '';
   };
 
   const getConversationWithSender = (sender: string | null, until = 0) => {
@@ -891,6 +897,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       getNextConversationPage,
       addUserReference,
       clearAllMessages,
+      clearReceiver,
     },
   });
 
