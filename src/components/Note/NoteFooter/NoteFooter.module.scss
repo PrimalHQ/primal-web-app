@@ -9,6 +9,38 @@
   align-items: center;
 }
 
+.contextButton {
+  width: 48px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  outline: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .contextIcon {
+    width: 16px;
+    height: 14px;
+    background-color: var(--text-secondary-2);
+    -webkit-mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+    mask: url(../../../assets/icons/context.svg) no-repeat 0 / 100%;
+  }
+
+  &:hover {
+    .contextIcon {
+      background-color: var(--text-primary);
+    }
+  }
+}
+
 .footer {
   display: grid;
   grid-template-columns: 128px 128px 128px 128px 16px;

@@ -405,6 +405,11 @@ export const actions = {
       defaultMessage: 'Mute user',
       description: 'Label for muting user from context menu',
     },
+    unmuteAuthor: {
+      id: 'actions.noteContext.unmuteAuthor',
+      defaultMessage: 'Unmute user',
+      description: 'Label for unmuting user from context menu',
+    },
     reportAuthor: {
       id: 'actions.noteContext.reportAuthor',
       defaultMessage: 'Report user',

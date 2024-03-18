@@ -19,6 +19,7 @@ import Landing from '../../pages/Landing';
 import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
 import CustomZap from '../CustomZap/CustomZap';
+import NoteContextMenu from '../Note/NoteContextMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -183,6 +184,11 @@ const Layout: Component = () => {
             </div>
           </div>
         </div>
+        <NoteContextMenu
+          open={app?.showNoteContextMenu}
+          onClose={app?.actions.closeContextMenu}
+          data={app?.noteContextMenuInfo}
+        />
       </>
     </Show>
   )

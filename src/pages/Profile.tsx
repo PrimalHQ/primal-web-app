@@ -121,6 +121,7 @@ const Profile: Component = () => {
     profile?.actions.clearReplies();
     profile?.actions.clearContacts();
     profile?.actions.clearZaps();
+    profile?.actions.clearFilterReason();
   }
 
   let keyIsDone = false
@@ -416,7 +417,6 @@ const Profile: Component = () => {
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
   };
 
-
   const addToAllowlist = async () => {
     const pk = getHex();
     if (pk) {
@@ -679,7 +679,7 @@ const Profile: Component = () => {
         </Show>
       </div>
 
-      <ProfileTabs />
+      <ProfileTabs setProfile={setProfile} />
 
       <ConfirmModal
         open={confirmReportUser()}

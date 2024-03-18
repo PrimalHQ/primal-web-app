@@ -25,6 +25,13 @@ export type CustomZapInfo = {
   onCancel: (zapOption: ZapOption) => void,
 };
 
+export type NoteContextMenuInfo = {
+  note: PrimalNote,
+  position: DOMRect | undefined,
+  openCustomZap?: () => void,
+  openReactions?: () => void,
+};
+
 export type AppContextStore = {
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
@@ -32,11 +39,15 @@ export type AppContextStore = {
   reactionStats: ReactionStats,
   showCustomZapModal: boolean,
   customZap: CustomZapInfo | undefined,
+  showNoteContextMenu: boolean,
+  noteContextMenuInfo: NoteContextMenuInfo | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
+    openContextMenu: (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    closeContextMenu: () => void,
   },
 }
 
@@ -52,6 +63,8 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   },
   showCustomZapModal: false,
   customZap: undefined,
+  showNoteContextMenu: false,
+  noteContextMenuInfo: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -96,6 +109,20 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showCustomZapModal', () => false);
   };
 
+  const openContextMenu = (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => {
+    updateStore('noteContextMenuInfo', reconcile({
+      note,
+      position,
+      openCustomZapModal,
+      openReactionModal,
+    }))
+    updateStore('showNoteContextMenu', () => true);
+  };
+
+  const closeContextMenu = () => {
+    updateStore('showNoteContextMenu', () => false);
+  };
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
@@ -138,6 +165,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
       closeReactionModal,
       openCustomZapModal,
       closeCustomZapModal,
+      openContextMenu,
+      closeContextMenu,
     }
   });
 

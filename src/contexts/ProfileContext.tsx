@@ -128,6 +128,7 @@ export type ProfileContextStore = {
     fetchFollowerList: (pubkey: string | undefined) => void,
     fetchRelayList: (pubkey: string | undefined) => void,
     clearContacts: () => void,
+    clearFilterReason: () => void,
     removeContact: (pubkey: string) => void,
     addContact: (pubkey: string, source: PrimalUser[]) => void,
     fetchZapList: (pubkey: string | undefined) => void,
@@ -512,6 +513,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     // @ts-ignore
     updateStore('profileStats', () => undefined);
     updateStore('profileStats', () => ({}));
+  };
+
+  const clearFilterReason = () => {
+    updateStore('filterReason', () => null);
   };
 
   const fetchNextPage = () => {
@@ -1018,6 +1023,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
         if (reason?.action === 'block') {
           updateStore('filterReason', () => ({ ...reason }));
+        } else {
+          updateStore('filterReason', () => null);
         }
       }
 
@@ -1229,6 +1236,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       fetchNextZapsPage,
       clearZaps,
       resetProfile,
+      clearFilterReason,
     },
   });
 

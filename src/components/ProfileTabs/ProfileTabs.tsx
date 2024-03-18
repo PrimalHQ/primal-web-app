@@ -32,6 +32,8 @@ const ProfileTabs: Component<{
   const profile = useProfileContext();
   const account = useAccountContext();
 
+  const [currentTab, setCurrentTab] = createSignal<string>('notes');
+
   const addToAllowlist = async () => {
     const pk = profile?.profileKey;
     if (pk) {
@@ -58,7 +60,10 @@ const ProfileTabs: Component<{
       return;
     }
 
-    account.actions.removeFromMuteList(pk);
+    account.actions.removeFromMuteList(pk, () => {
+      props.setProfile && props.setProfile(pk);
+      onChangeValue(currentTab());
+    });
   };
 
   const onContactAction = (remove: boolean, pubkey: string) => {
@@ -124,6 +129,8 @@ const ProfileTabs: Component<{
 
   const onChangeValue = (value: string) => {
     if (!profile) return;
+
+    setCurrentTab(() => value);
 
     switch(value) {
       case 'notes':

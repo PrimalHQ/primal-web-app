@@ -22,11 +22,13 @@ import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { broadcastEvent } from '../../lib/notes';
 import { getScreenCordinates } from '../../utils';
+import { NoteContextMenuInfo } from '../../contexts/AppContext';
+import ConfirmModal from '../ConfirmModal/ConfirmModal';
 
 const NoteContextMenu: Component<{
-  note: PrimalNote,
-  openCustomZap?: () => void;
-  openReactions?: () => void,
+  data: NoteContextMenuInfo,
+  open: boolean,
+  onClose: () => void,
   id?: string,
 }> = (props) => {
   const account = useAccountContext();
@@ -37,62 +39,95 @@ const NoteContextMenu: Component<{
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
 
-  const openContextMenu = (e: MouseEvent) => {
-    e.preventDefault();
-    setContext(true);
+  const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
+
+  const note = () => props.data?.note;
+  const position = () => {
+    return props.data?.position;
   };
+  const openCustomZap = props.data?.openCustomZap || (() => {});
+  const openReactions = props.data?.openReactions || (() => {});
+
+  createEffect(() => {
+    if(!context) return;
+
+    if (!props.open) {
+      context.setAttribute('style',`top: -1024px; left: -1034px;`);
+    }
+
+    const docRect = document.documentElement.getBoundingClientRect();
+    const pos = {
+      top: (Math.floor(position()?.top || 0) - docRect.top),
+      left: (Math.floor(position()?.left || 0)),
+    }
+
+    context.setAttribute('style',`top: ${pos.top + 12}px; left: ${pos.left + 12}px;`);
+
+    const height = 440;
+    const orient = Math.floor(position()?.bottom || 0) + height < window.innerHeight ? 'down' : 'up';
+
+    setOrientation(() => orient);
+  });
+
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(props.note.post.pubkey);
+    account?.actions.addToMuteList(note()?.post.pubkey);
+    props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(props.note.post.pubkey);
+    account?.actions.removeFromMuteList(note()?.post.pubkey);
+    props.onClose();
   };
 
   const doReportUser = () => {
-    reportUser(props.note.user.pubkey, `report_user_${APP_ID}`, props.note.user);
-    setContext(false);
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(props.note.user)}));
+    reportUser(note()?.user.pubkey, `report_user_${APP_ID}`, note()?.user);
+    props.onClose();
+    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
   const copyNoteLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/e/${props.note.post.noteId}`);
-    setContext(false);
+    if (!props.data) return;
+    navigator.clipboard.writeText(`${window.location.origin}/e/${note().post.noteId}`);
+    props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
 
   const copyNoteText = () => {
-    navigator.clipboard.writeText(`${props.note.post.content}`);
-    setContext(false);
+    if (!props.data) return;
+    navigator.clipboard.writeText(`${note().post.content}`);
+    props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };
 
   const copyNoteId = () => {
-    navigator.clipboard.writeText(`${props.note.post.noteId}`);
-    setContext(false);
+    if (!props.data) return;
+    navigator.clipboard.writeText(`${note().post.noteId}`);
+    props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
 
   const copyRawData = () => {
-    navigator.clipboard.writeText(`${JSON.stringify(props.note.msg)}`);
-    setContext(false);
+    if (!props.data) return;
+    navigator.clipboard.writeText(`${JSON.stringify(note().msg)}`);
+    props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteRawDataCoppied));
   };
 
   const copyUserNpub = () => {
-    navigator.clipboard.writeText(`${props.note.user.npub}`);
-    setContext(false);
+    if (!props.data) return;
+    navigator.clipboard.writeText(`${note().user.npub}`);
+    props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
   const broadcastNote = async () => {
-    if (!account) {
+    if (!account || !props.data) {
       return;
     }
 
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
-    setContext(false);
+    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
+    props.onClose()
 
     if (success) {
       toaster?.sendSuccess(intl.formatMessage(tToast.noteBroadcastSuccess));
@@ -103,14 +138,15 @@ const NoteContextMenu: Component<{
 
   const onClickOutside = (e: MouseEvent) => {
     if (
-      !document?.getElementById(`note_context_${props.note.post.id}`)?.contains(e.target as Node)
+      !props.data ||
+      !document?.getElementById(`note_context_${note().post.id}`)?.contains(e.target as Node)
     ) {
-      setContext(false);
+      props.onClose()
     }
   }
 
   createEffect(() => {
-    if (showContext()) {
+    if (props.open) {
       document.addEventListener('click', onClickOutside);
     }
     else {
@@ -119,24 +155,24 @@ const NoteContextMenu: Component<{
   });
 
   const isVerifiedByPrimal = () => {
-    return !!props.note.user.nip05 &&
-      props.note.user.nip05.endsWith('primal.net');
+    return props.data && !!note().user.nip05 &&
+      note().user.nip05.endsWith('primal.net');
   }
 
   const noteContextForEveryone: MenuItem[] = [
     {
       label: intl.formatMessage(tActions.noteContext.reactions),
       action: () => {
-        props.openReactions && props.openReactions();
-        setContext(false);
+        openReactions();
+        props.onClose()
       },
       icon: 'heart',
     },
     {
       label: intl.formatMessage(tActions.noteContext.zap),
       action: () => {
-        props.openCustomZap && props.openCustomZap();
-        setContext(false);
+        openCustomZap();
+        props.onClose()
       },
       icon: 'feed_zap',
     },
@@ -172,53 +208,65 @@ const NoteContextMenu: Component<{
     },
   ];
 
-  const noteContextForOtherPeople: MenuItem[] = [
-    {
-      label: intl.formatMessage(tActions.noteContext.muteAuthor),
-      action: () => {
-        setConfirmMuteUser(true);
-        setContext(false);
-      },
-      icon: 'mute_user',
-      warning: true,
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.reportAuthor),
-      action: () => {
-        setConfirmReportUser(true);
-        setContext(false);
-      },
-      icon: 'report',
-      warning: true,
-    },
-  ];
+  const noteContextForOtherPeople: () => MenuItem[] = () => {
+    const isMuted = account?.muted.includes(note()?.user.pubkey);
 
-  const noteContext = account?.publicKey !== props.note.post.pubkey ?
-      [ ...noteContextForEveryone, ...noteContextForOtherPeople] :
+    return [
+      {
+        label: isMuted ?  intl.formatMessage(tActions.noteContext.unmuteAuthor) : intl.formatMessage(tActions.noteContext.muteAuthor),
+        action: () => {
+          isMuted ? doUnmuteUser() : setConfirmMuteUser(true);
+          props.onClose()
+        },
+        icon: 'mute_user',
+        warning: true,
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.reportAuthor),
+        action: () => {
+          setConfirmReportUser(true);
+          props.onClose()
+        },
+        icon: 'report',
+        warning: true,
+      },
+    ];
+  };
+
+  const noteContext = () => account?.publicKey !== note()?.post.pubkey ?
+      [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
       noteContextForEveryone;
 
   let context: HTMLDivElement | undefined;
 
-  const determineOrient = () => {
-    const coor = getScreenCordinates(context);
-    const height = 440;
-    return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
-  }
-
   return (
     <div class={styles.contextMenu} ref={context}>
-      <button
-        class={styles.contextButton}
-        onClick={openContextMenu}
-      >
-        <div class={styles.contextIcon} ></div>
-      </button>
+      <ConfirmModal
+        open={confirmReportUser()}
+        description={intl.formatMessage(tActions.reportUserConfirm, { name: authorName(note()?.user) })}
+        onConfirm={() => {
+          doReportUser();
+          setConfirmReportUser(false);
+        }}
+        onAbort={() => setConfirmReportUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteUser()}
+        description={intl.formatMessage(tActions.muteUserConfirm, { name: authorName(note()?.user) })}
+        onConfirm={() => {
+          doMuteUser();
+          setConfirmMuteUser(false);
+        }}
+        onAbort={() => setConfirmMuteUser(false)}
+      />
+
       <PrimalMenu
-        id={`note_context_${props.note.post.id}`}
-        items={noteContext}
-        hidden={!showContext()}
+        id={`note_context_${note()?.post.id}`}
+        items={noteContext()}
+        hidden={!props.open}
         position="note_footer"
-        orientation={determineOrient()}
+        orientation={orientation()}
       />
     </div>
   )

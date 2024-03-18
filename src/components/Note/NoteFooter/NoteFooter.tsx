@@ -46,6 +46,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   const [isRepostMenuVisible, setIsRepostMenuVisible] = createSignal(false);
 
   let footerDiv: HTMLDivElement | undefined;
+  let noteContextMenu: HTMLDivElement | undefined;
 
   const repostMenuItems: MenuItem[] = [
     {
@@ -374,7 +375,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
   }
 
   return (
-    <div id={props.id} class={`${styles.footer} ${props.wide ? styles.wide : ''}`} ref={footerDiv}>
+    <div id={props.id} class={`${styles.footer} ${props.wide ? styles.wide : ''}`} ref={footerDiv} onClick={(e) => {e.preventDefault();}}>
 
       <Show when={showZapAnim()}>
         <ZapAnimation
@@ -442,21 +443,32 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
         </div>
       </button>
 
-      <div class={styles.context}>
-        <NoteContextMenu
-          note={props.note}
-          openCustomZap={() => {
-            app?.actions.openCustomZapModal(customZapInfo);
+      <div ref={noteContextMenu} class={styles.context}>
+        <button
+          class={styles.contextButton}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            app?.actions.openContextMenu(
+              props.note,
+              noteContextMenu?.getBoundingClientRect(),
+              () => {
+                app?.actions.openCustomZapModal(customZapInfo);
+              },
+              () => {
+                app?.actions.openReactionModal(props.note.post.id, {
+                  likes: likes(),
+                  zaps: zapCount(),
+                  reposts: reposts(),
+                  quotes: 0,
+                });
+              }
+            );
           }}
-          openReactions={() => {
-            app?.actions.openReactionModal(props.note.post.id, {
-              likes: likes(),
-              zaps: zapCount(),
-              reposts: reposts(),
-              quotes: 0,
-            });
-          }}
-        />
+        >
+          <div class={styles.contextIcon} ></div>
+        </button>
       </div>
     </div>
   )
