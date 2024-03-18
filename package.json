@@ -1,6 +1,6 @@
 {
   "name": "primal-web-app",
-  "version": "0.102.16",
+  "version": "0.102.17",
   "description": "",
   "scripts": {
     "start": "vite",
