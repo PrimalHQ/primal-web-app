@@ -9,7 +9,7 @@ import { ReactionStats } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
 import { getEventReactions } from '../../lib/notes';
-import { truncateNumber } from '../../lib/notifications';
+import { truncateNumber, truncateNumber2 } from '../../lib/notifications';
 import { subscribeTo } from '../../sockets';
 import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders } from '../../translations';
@@ -119,6 +119,7 @@ const ReactionsModal: Component<{
       if (type === 'EOSE') {
         const zapData = zaps.map((zap => ({
           ...zap,
+          amount: parseInt(zap.amount || '0'),
           sender: users[zap.pubkey],
         })));
 
@@ -324,7 +325,7 @@ const ReactionsModal: Component<{
                   >
                     <div class={styles.zapAmount}>
                       <div class={styles.zapIcon}></div>
-                      <div class={styles.amount}>{truncateNumber(zap.amount)}</div>
+                      <div class={styles.amount}>{zap.amount < 100_000 ? zap.amount.toLocaleString() : truncateNumber2(zap.amount)}</div>
                     </div>
                     <Avatar src={zap.sender?.picture} size="vs" />
                     <div class={styles.zapInfo}>

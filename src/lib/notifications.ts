@@ -148,3 +148,29 @@ export const truncateNumber = (amount: number, from?: 1 | 2 | 3 | 4) => {
 
   return `1T+`;
 };
+
+
+export const truncateNumber2 = (amount: number, from?: 1 | 2 | 3 | 4) => {
+  const t = 1_000;
+  const s = from || 1;
+
+  const l = Math.pow(t, s);
+
+  if (amount < l) {
+    return amount.toLocaleString();
+  }
+
+  if (amount < Math.pow(t, 2)) {
+    return `${(amount / t).toFixed(1)}K`;
+  }
+
+  if (amount < Math.pow(t, 3)) {
+    return `${(amount / Math.pow(t, 2)).toFixed(1)}M`
+  }
+
+  if (amount < Math.pow(t, 4)) {
+    return `${(amount / Math.pow(t, 3)).toFixed(1)}B`
+  }
+
+  return `1T+`;
+};
