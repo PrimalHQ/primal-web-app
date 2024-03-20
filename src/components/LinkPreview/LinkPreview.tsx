@@ -49,6 +49,13 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
     return k;
   };
 
+  const onError = (event: any) => {
+    const image = event.target;
+    image.onerror = '';
+    image.src = props.preview.images[0];
+    return true;
+  };
+
   return (
     <a
       id={props.id}
@@ -61,6 +68,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
           class={styles.previewImage}
           src={image()?.media_url}
           style={`width: 100%; height: ${height()}`}
+          onerror={onError}
         />
       </Show>
 
