@@ -195,7 +195,7 @@ const NoteContextMenu: Component<{
       icon: 'copy_raw_data',
     },
     {
-      label: intl.formatMessage(tActions.noteContext.breadcast),
+      label: intl.formatMessage(tActions.noteContext.broadcast),
       action: broadcastNote,
       icon: 'broadcast',
     },

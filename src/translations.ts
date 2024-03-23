@@ -400,8 +400,8 @@ export const actions = {
       defaultMessage: 'Copy user public key',
       description: 'Label for copy note author\'s pubkey from context menu',
     },
-    breadcast: {
-      id: 'actions.noteContext.breadcast',
+    broadcast: {
+      id: 'actions.noteContext.broadcast',
       defaultMessage: 'Broadcast note',
       description: 'Label for note broadcast from context menu',
     },
