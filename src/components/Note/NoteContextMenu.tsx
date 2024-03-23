@@ -208,8 +208,17 @@ const NoteContextMenu: Component<{
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
     const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isFollowed = account?.following.includes(note()?.post.pubkey);
 
     return [
+      {
+        label: isFollowed? intl.formatMessage(tActions.noteContext.unFollowAuthor): intl.formatMessage(tActions.noteContext.followAuthor),
+        action: () => {
+          isFollowed? account?.actions.removeFollow(note()?.post.pubkey) : account?.actions.addFollow(note()?.post.pubkey);
+          props.onClose()
+        },
+        icon: 'default_avatar',
+      },
       {
         label: isMuted ?  intl.formatMessage(tActions.noteContext.unmuteAuthor) : intl.formatMessage(tActions.noteContext.muteAuthor),
         action: () => {
@@ -258,7 +267,6 @@ const NoteContextMenu: Component<{
         }}
         onAbort={() => setConfirmMuteUser(false)}
       />
-
       <PrimalMenu
         id={`note_context_${note()?.post.id}`}
         items={noteContext()}

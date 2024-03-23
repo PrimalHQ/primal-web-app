@@ -405,6 +405,16 @@ export const actions = {
       defaultMessage: 'Broadcast note',
       description: 'Label for note broadcast from context menu',
     },
+    followAuthor: {
+      id: 'actions.noteContext.follow',
+      defaultMessage: 'Follow',
+      description: 'Label for follow user from context menu',
+    },
+    unFollowAuthor: {
+      id: 'actions.noteContext.unfollow',
+      defaultMessage: 'Unfollow',
+      description: 'Label for unfollow user from context menu',
+    },
     muteAuthor: {
       id: 'actions.noteContext.muteAuthor',
       defaultMessage: 'Mute user',
