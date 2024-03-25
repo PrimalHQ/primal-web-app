@@ -194,8 +194,8 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'who_reposted_it',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'who_replied_to_it',
 
-  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_in',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_in',
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_by',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_by',
 
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'who_zapped_it',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'who_liked_it',
