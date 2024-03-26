@@ -59,7 +59,10 @@ const ProfileContact: Component<{
             </div>
           </div>
         </Show>
-        <Show when={account?.publicKey !== props.profile?.pubkey}>
+        <Show
+          when={account?.publicKey !== props.profile?.pubkey || !account?.following.includes(props.profile?.pubkey || '')}
+          fallback={<div class={styles.placeholderDiv}></div>}
+        >
           <FollowButton person={props.profile} postAction={props.postAction} />
         </Show>
       </div>

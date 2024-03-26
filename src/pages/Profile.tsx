@@ -603,7 +603,7 @@ const Profile: Component = () => {
             </ButtonSecondary>
           </Show>
 
-          <Show when={account?.publicKey !== profile?.profileKey}>
+          <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
             <FollowButton person={profile?.userProfile} large={true} />
           </Show>
 

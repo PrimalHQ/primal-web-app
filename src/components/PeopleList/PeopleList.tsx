@@ -47,7 +47,7 @@ const PeopleList: Component<{ people: PrimalUser[], label: string, id?: string }
                     {truncateNpub(person?.npub)}
                   </div>
                 </div>
-                <Show when={account?.publicKey !== person.pubkey}>
+                <Show when={account?.publicKey !== person.pubkey || !account?.following.includes(person.pubkey)}>
                   <FollowButton person={person} />
                 </Show>
               </A>
