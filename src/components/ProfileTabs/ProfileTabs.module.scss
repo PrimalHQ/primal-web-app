@@ -145,7 +145,7 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 14px;
-      width: min(560px, 100%);
+      max-width: 460px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -268,5 +268,11 @@
     &[data-key=zaps], &[data-key=relays] {
       display: none;
     }
+  }
+  .zapInfo {
+    max-width: 86%;
+  }
+  .zapMessage {
+    max-width: 80% !important;
   }
 }

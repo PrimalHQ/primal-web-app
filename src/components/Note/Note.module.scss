@@ -92,6 +92,12 @@
         .label {
           color: var(--text-primary);
         }
+        a {
+          max-width: 440px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
         .author {
           display: inline-block;
           color: var(--accent-links);
