@@ -797,9 +797,9 @@ const ParsedNote: Component<{
 
     const preview = {
       url,
-      description: mention.post.content.slice(0, 100),
-      images: [mention.user.picture],
-      title: authorName(mention.user),
+      description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
+      images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
+      title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
     }
 
     return <LinkPreview

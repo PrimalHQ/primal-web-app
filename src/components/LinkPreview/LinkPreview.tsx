@@ -63,10 +63,10 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       class={klass()}
       target="_blank"
     >
-      <Show when={image()}>
+      <Show when={image() || props.preview.images[0]}>
         <img
           class={styles.previewImage}
-          src={image()?.media_url}
+          src={image()?.media_url || props.preview.images[0]}
           style={`width: 100%; height: ${height()}`}
           onerror={onError}
         />

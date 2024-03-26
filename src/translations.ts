@@ -995,7 +995,7 @@ export const placeholders = {
   missingNote: {
     firstLine: {
       id: 'placeholders.missingNote.firstLine',
-      defaultMessage: 'Oups! We can\'t seem to find this note.',
+      defaultMessage: 'We can\'t seem to find this note.',
       description: 'Placeholder when the note is missing',
     },
     secondLine: {
