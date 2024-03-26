@@ -992,6 +992,18 @@ export const notifications = {
 };
 
 export const placeholders = {
+  missingNote: {
+    firstLine: {
+      id: 'placeholders.missingNote.firstLine',
+      defaultMessage: 'Oups! We can\'t seem to find this note.',
+      description: 'Placeholder when the note is missing',
+    },
+    secondLine: {
+      id: 'placeholders.missingNote.secondLine',
+      defaultMessage: 'It may have been deleted by the author.',
+      description: 'Placeholder when the note is missing',
+    },
+  },
   noLikeDetails: {
     id: 'placeholders.noLikeDetails',
     defaultMessage: 'No details for likes found',

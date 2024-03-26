@@ -36,6 +36,21 @@
   background-color: var(--background-card);
 }
 
+.missingNote {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  p {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 34px;
+    padding-inline: 20px;
+    margin: 2px;
+    color: var(--text-secondary);
+  }
+}
+
 @media only screen and (max-width: 720px) {
   .border {
     height: 36px;

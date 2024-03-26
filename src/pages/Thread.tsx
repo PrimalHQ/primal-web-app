@@ -16,7 +16,7 @@ import { sortByRecency } from '../stores/note';
 import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
-import { thread as t } from '../translations';
+import { placeholders as tPlaceholders, thread as t } from '../translations';
 import { userName } from '../stores/profile';
 import PageTitle from '../components/PageTitle/PageTitle';
 import NavHeader from '../components/NavHeader/NavHeader';
@@ -181,31 +181,42 @@ const Thread: Component = () => {
               }
             </For>
           </div>
-        </Show>
 
-        <Show when={primaryNote()}>
-          <div id="primary_note">
-            <NotePrimary
-              note={primaryNote() as PrimalNote}
-            />
-            <Show when={account?.hasPublicKey()}>
-              <ReplyToNote
+          <Show
+            when={primaryNote()}
+            fallback={
+              <div class={styles.missingNote}>
+                <p>
+                  {intl.formatMessage(tPlaceholders.missingNote.firstLine)}
+                </p>
+                <p>
+                  {intl.formatMessage(tPlaceholders.missingNote.secondLine)}
+                </p>
+              </div>
+          }>
+            <div id="primary_note">
+              <NotePrimary
                 note={primaryNote() as PrimalNote}
-                onNotePosted={onNotePosted}
               />
-            </Show>
+              <Show when={account?.hasPublicKey()}>
+                <ReplyToNote
+                  note={primaryNote() as PrimalNote}
+                  onNotePosted={onNotePosted}
+                />
+              </Show>
+            </div>
+          </Show>
+
+          <div class={styles.repliesHolder} ref={repliesHolder}>
+            <For each={replyNotes()}>
+              {note =>
+                <div>
+                  <Note note={note} shorten={true} />
+                </div>
+              }
+            </For>
           </div>
         </Show>
-
-        <div class={styles.repliesHolder} ref={repliesHolder}>
-          <For each={replyNotes()}>
-            {note =>
-              <div>
-                <Note note={note} shorten={true} />
-              </div>
-            }
-          </For>
-        </div>
       </Show>
     </div>
   )
