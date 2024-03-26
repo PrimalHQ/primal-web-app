@@ -7,7 +7,7 @@ import { Kind } from "../constants";
 
 
 export type NostrNoteContent = {
-  kind: Kind.Text | Kind.Repost,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm,
   content: string,
   id: string,
   created_at?: number,
@@ -418,6 +418,7 @@ export type PrimalNoteData = {
   tags: string[][],
   content: string,
   sig: string,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm,
   likes: number,
   mentions: number,
   reposts: number,

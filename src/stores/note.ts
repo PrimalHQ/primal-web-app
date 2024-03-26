@@ -43,6 +43,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       created_at: message.created_at || 0,
       tags: message.tags,
       content: sanitize(message.content),
+      kind: message.kind,
       sig: message.sig,
       likes: stat?.likes || 0,
       mentions: stat?.mentions || 0,
@@ -239,7 +240,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
 
         mentionedNotes[id] = {
           // @ts-ignore TODO: Investigate this typing
-          post: { ...m },
+          post: { ...m, noteId: nip19.noteEncode(m.id) },
           user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
           mentionedUsers,
         };
@@ -286,6 +287,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         created_at: msg.created_at || 0,
         tags: msg.tags,
         content: sanitize(msg.content),
+        kind: msg.kind,
         sig: msg.sig,
         likes: stat?.likes || 0,
         mentions: stat?.mentions || 0,

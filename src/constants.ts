@@ -101,7 +101,9 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
-  Zap = 9735,
+  LongForm = 30_023,
+
+  Zap = 9_735,
 
   MuteList = 10_000,
   RelayList = 10_002,

@@ -21,7 +21,7 @@ import {
   isWebmVideo,
   isYouTube,
 } from '../../lib/notes';
-import { truncateNpub, userName } from '../../stores/profile';
+import { authorName, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
   Component, createSignal, For, JSXElement, onMount, Show,
@@ -40,7 +40,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
-import { hashtagCharsRegex, linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, Kind, linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -783,6 +783,32 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderLongFormMention = (mention: PrimalNote | undefined, index?: number) => {
+    if(!mention) return <></>;
+
+    const url = `https://highlighter.com/${mention.user.npub}/${mention.post.noteId}`
+
+    if (props.noPreviews) {
+      return renderLinks({
+        type: 'link',
+        tokens: [`https://highlighter.com/${mention.user.npub}/${mention.post.noteId}`],
+      });
+    }
+
+    const preview = {
+      url,
+      description: mention.post.content.slice(0, 100),
+      images: [mention.user.picture],
+      title: authorName(mention.user),
+    }
+
+    return <LinkPreview
+      preview={preview}
+      bordered={props.isEmbeded}
+      isLast={index === content.length-1}
+    />;
+  };
+
   const renderNoteMention = (item: NoteContent, index?: number) => {
     return <For each={item.tokens}>
       {(token) => {
@@ -825,13 +851,19 @@ const ParsedNote: Component<{
             if (ment) {
               setWordsDisplayed(w => w + shortMentionInWords);
 
-              link = <div>
-                <EmbeddedNote
-                  note={ment}
-                  mentionedUsers={props.note.mentionedUsers || {}}
-                  isLast={index === content.length-1}
-                />
-              </div>;
+              if (ment.post.kind === Kind.LongForm) {
+                link = renderLongFormMention(ment, index)
+              }
+              else {
+                link = <div>
+                  <EmbeddedNote
+                    note={ment}
+                    mentionedUsers={props.note.mentionedUsers || {}}
+                    isLast={index === content.length-1}
+                  />
+                </div>;
+              }
+
             }
           }
 
