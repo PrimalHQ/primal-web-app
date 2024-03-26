@@ -1,5 +1,5 @@
-// @ts-ignore Bad types in nostr-tools
 import { A } from "@solidjs/router";
+// @ts-ignore Bad types in nostr-tools
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";

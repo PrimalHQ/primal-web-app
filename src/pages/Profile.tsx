@@ -1,4 +1,4 @@
-import { RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
+import { A, RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
 import {
   Component,
@@ -19,7 +19,7 @@ import { useProfileContext } from '../contexts/ProfileContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
-import { urlify, sanitize, linkifyNostrProfileLink, linkifyNostrNoteLink } from '../lib/notes';
+import { sanitize } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
@@ -43,6 +43,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
 import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
+import ProfileAbout from '../components/ProfileAbout/ProfileAbout';
 
 const Profile: Component = () => {
 
@@ -436,18 +437,6 @@ const Profile: Component = () => {
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
-  const [renderProfileAbout, setRenderProfileAbout] = createSignal('');
-
-  const getProfileAbout = (about: string) => {
-    const a = linkifyNostrNoteLink(linkifyNostrProfileLink(urlify(sanitize(about), () => '', false, false, true)));
-
-    setRenderProfileAbout(a)
-  };
-
-  createEffect(() => {
-    getProfileAbout(profile?.userProfile?.about || '');
-  });
-
   createEffect(() => {
     if (showContext()) {
       document.addEventListener('click', onClickOutside);
@@ -664,10 +653,7 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <Show when={renderProfileAbout().length > 0}>
-          <div class={styles.profileAbout} innerHTML={renderProfileAbout()}>
-          </div>
-        </Show>
+        <ProfileAbout about={profile?.userProfile?.about} />
 
 
         <Show when={profile?.userProfile?.website}>

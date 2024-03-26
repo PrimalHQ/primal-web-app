@@ -48,6 +48,11 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox';
 
 const groupGridLimit = 7;
 
+export type NoteContent = {
+  type: string,
+  tokens: string[],
+  meta?: Record<string, any>,
+};
 
 export const groupGalleryImages = (noteHolder: HTMLDivElement | undefined) => {
 
@@ -194,12 +199,6 @@ const ParsedNote: Component<{
 
     setTokens(() => [...tokens]);
   }
-
-  type NoteContent = {
-    type: string,
-    tokens: string[],
-    meta?: Record<string, any>,
-  };
 
   const removeLinebreaks = () => {
     if (lastSignificantContent === 'LB') {
