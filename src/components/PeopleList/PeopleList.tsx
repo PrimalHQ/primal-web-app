@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
@@ -10,6 +11,8 @@ import styles from './PeopleList.module.scss';
 
 
 const PeopleList: Component<{ people: PrimalUser[], label: string, id?: string }> = (props) => {
+  const account = useAccountContext();
+
   const people = () => props.people;
 
   return (
@@ -44,7 +47,9 @@ const PeopleList: Component<{ people: PrimalUser[], label: string, id?: string }
                     {truncateNpub(person?.npub)}
                   </div>
                 </div>
-                <FollowButton person={person} />
+                <Show when={account?.publicKey !== person.pubkey}>
+                  <FollowButton person={person} />
+                </Show>
               </A>
           }
         </For>

@@ -14,6 +14,7 @@ import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
 import { A } from '@solidjs/router';
 import { humanizeNumber } from '../../lib/stats';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 
 const ProfileContact: Component<{
@@ -24,6 +25,7 @@ const ProfileContact: Component<{
 }> = (props) => {
 
   const intl = useIntl();
+  const account = useAccountContext();
 
   return (
     <div id={props.id} class={styles.profileContact}>
@@ -57,7 +59,9 @@ const ProfileContact: Component<{
             </div>
           </div>
         </Show>
-        <FollowButton person={props.profile} postAction={props.postAction} />
+        <Show when={account?.publicKey !== props.profile?.pubkey}>
+          <FollowButton person={props.profile} postAction={props.postAction} />
+        </Show>
       </div>
     </div>
   );

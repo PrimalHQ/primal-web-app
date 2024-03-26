@@ -757,7 +757,11 @@ export function AccountProvider(props: { children: JSXElement }) {
   }
 
   const removeFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
-    if (!store.publicKey || !store.following.includes(pubkey)) {
+    if (
+      !store.publicKey ||
+      !store.following.includes(pubkey) ||
+      store.publicKey === pubkey
+    ) {
       return;
     }
 

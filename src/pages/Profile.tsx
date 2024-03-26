@@ -603,7 +603,9 @@ const Profile: Component = () => {
             </ButtonSecondary>
           </Show>
 
-          <FollowButton person={profile?.userProfile} large={true} />
+          <Show when={account?.publicKey !== profile?.profileKey}>
+            <FollowButton person={profile?.userProfile} large={true} />
+          </Show>
 
           <Show when={isCurrentUser()}>
             <div class={styles.editProfileButton}>

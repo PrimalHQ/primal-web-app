@@ -210,14 +210,19 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
-      const tags = followed.map(pk => ['p', pk]);
+      let tags = followed.map(pk => ['p', pk]);
       const date = Math.floor((new Date()).getTime() / 1000);
+
+      if (pubkey) {
+        // Follow himself
+        tags.push(['p', pubkey]);
+      }
 
       const sendResult = await sendContacts(tags, date, '', account.relays, relaySettings);
 
       if (sendResult.success && sendResult.note) {
         triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
-          getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
+          getProfileContactList(pubkey, `user_contacts_${APP_ID}`);
         });
       }
 
@@ -225,7 +230,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {
-          getRelays(account?.publicKey, `user_relays_${APP_ID}`);
+          getRelays(pubkey, `user_relays_${APP_ID}`);
         });
       }
 
