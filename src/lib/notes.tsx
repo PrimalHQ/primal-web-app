@@ -1,8 +1,9 @@
 // @ts-ignore Bad types in nostr-tools
+import { A } from "@solidjs/router";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
+import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { logError, logInfo, logWarning } from "./logger";
@@ -74,6 +75,33 @@ export const isAppleMusic = (url: string) => appleMusicRegex.test(url);
 export const isNostrNests = (url: string) => nostrNestsRegex.test(url);
 export const isWavelake = (url: string) => wavlakeRegex.test(url);
 
+
+export const linkifyNostrProfileLink = (text: string) => {
+
+  return text.replace(profileRegexG, (url) => {
+    if (isUserMention(url)) {
+      const npub = url.split('nostr:')[1];
+      // @ts-ignore
+      return (<span><A href={`/p/${npub}`}>{npub}</A></span>)?.innerHTML || url;
+    }
+
+    return url;
+
+  });
+}
+export const linkifyNostrNoteLink = (text: string) => {
+
+  return text.replace(noteRegex, (url) => {
+    if (isNoteMention(url)) {
+      const noteId = url.split('nostr:')[1];
+      // @ts-ignore
+      return (<span><A href={`/e/${noteId}`}>{noteId}</A></span>)?.innerHTML || url;
+    }
+
+    return url;
+
+  });
+}
 
 export const urlify = (
   text: string,

@@ -19,7 +19,7 @@ import { useProfileContext } from '../contexts/ProfileContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
-import { urlify, sanitize } from '../lib/notes';
+import { urlify, sanitize, linkifyNostrProfileLink, linkifyNostrNoteLink } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
@@ -439,7 +439,7 @@ const Profile: Component = () => {
   const [renderProfileAbout, setRenderProfileAbout] = createSignal('');
 
   const getProfileAbout = (about: string) => {
-    const a = urlify(sanitize(about), () => '', false, false, true);
+    const a = linkifyNostrNoteLink(linkifyNostrProfileLink(urlify(sanitize(about), () => '', false, false, true)));
 
     setRenderProfileAbout(a)
   };
