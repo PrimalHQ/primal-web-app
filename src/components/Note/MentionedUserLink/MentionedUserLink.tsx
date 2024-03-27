@@ -10,6 +10,7 @@ import styles from  "./MentionedUserLink.module.scss";
 
 const MentionedUserLink: Component<{
   user: PrimalUser,
+  npub?: string,
   openInNewTab?: boolean,
   id?: string,
 }> = (props) => {
@@ -39,7 +40,7 @@ const MentionedUserLink: Component<{
     return <A
         id={props.id}
         class={styles.userMention}
-        href={`/p/${props.user.npub}`}
+        href={`/p/${props.user.npub || props.npub}`}
       >
         {p.children}
       </A>;

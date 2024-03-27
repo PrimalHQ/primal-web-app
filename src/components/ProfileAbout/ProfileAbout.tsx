@@ -1,7 +1,7 @@
 import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { Component, createEffect, For, JSXElement, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { Component, createEffect, For, JSXElement, onCleanup, Show } from 'solid-js';
+import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind } from '../../constants';
 import { hexToNpub, npubToHex } from '../../lib/keys';
@@ -179,8 +179,8 @@ const ProfileAbout: Component<{about: string | undefined }> = (props) => {
           const label = user ? userName(user) : truncateNpub(npub);
 
           return !user ?
-              <><A href={path}>@{label}</A>{end}</> :
-              <>{MentionedUserLink({ user })}{end}</>;
+            <><A href={path}>@{label}</A>{end}</> :
+            <>{MentionedUserLink({ user, npub })}{end}</>;
         } catch (e) {
           return <span class={styles.error}> {token}</span>;
         }
@@ -260,17 +260,17 @@ const ProfileAbout: Component<{about: string | undefined }> = (props) => {
     });
 
     getUserProfiles(userMentions, subId);
-
-    // const a = linkifyNostrNoteLink(linkifyNostrProfileLink(urlify(sanitize(about), () => '', false, false, true)));
-
-    // setRenderProfileAbout(a)
   };
 
   createEffect(() => {
     if (props.about && props.about.length > 0) {
+      setAboutContent([]);
+      setAboutTokens([]);
+      setUsersMentionedInAbout(reconcile({}));
       parseForMentions(props.about);
     }
   });
+
   return (
     <Show when={aboutContent.length > 0}>
       <div class={styles.profileAbout}>
