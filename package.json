@@ -30,6 +30,7 @@
     "@thisbeyond/solid-select": "^0.13.0",
     "@types/dompurify": "3.0.2",
     "dompurify": "3.0.5",
+    "light-bolt11-decoder": "^3.1.1",
     "medium-zoom": "1.0.8",
     "nostr-tools": "1.15.0",
     "photoswipe": "5.4.3",

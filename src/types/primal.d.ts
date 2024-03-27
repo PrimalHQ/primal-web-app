@@ -676,3 +676,30 @@ export type MembershipStatus = {
   used_storage?: number,
   expires_on?: number,
 };
+
+export type LncbSectionNetwork = {
+  name: 'lightning_network',
+  letters: 'ln',
+};
+
+export type LnbcSection = {
+  name: string,
+  letters: string,
+  tag?: string,
+  value?: any
+};
+
+export type LnbcRouteHint = {
+  pubkey: string,
+  short_channel_id: string,
+  fee_base_msat: number,
+  fee_proportional_millionths: number,
+  cltv_expiry_delta: number,
+}
+
+export type LnbcInvoice = {
+  paymentRequest: string,
+  sections: LnbcSection[],
+  expiry: number,
+  route_hints: LnbcRouteHint[],
+};

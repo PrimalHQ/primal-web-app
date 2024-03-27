@@ -380,9 +380,9 @@ const ProfileTabs: Component<{
             <Show
               when={!profile?.isFetchingFollowers}
               fallback={
-                  <div style="margin-top: 40px;">
-                    <Loader />
-                  </div>
+                <div style="margin-top: 40px;">
+                  <Loader />
+                </div>
               }
             >
               <For

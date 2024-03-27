@@ -7,6 +7,7 @@ import {
   isHashtag,
   isImage,
   isInterpunction,
+  isLnbc,
   isMixCloud,
   isMp4Video,
   isNoteMention,
@@ -45,6 +46,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import Lnbc from '../Lnbc/Lnbc';
 
 const groupGridLimit = 7;
 
@@ -393,6 +395,12 @@ const ParsedNote: Component<{
     if (isCustomEmoji(token)) {
       lastSignificantContent = 'emoji';
       updateContent(content, 'emoji', token);
+      return;
+    }
+
+    if (isLnbc(token)) {
+      lastSignificantContent = 'lnbc';
+      updateContent(content, 'lnbc', token);
       return;
     }
 
@@ -1061,6 +1069,18 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderLnbc = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 100);
+
+        return <Lnbc lnbc={token} />
+      }}
+    </For>
+  }
+
   const renderContent = (item: NoteContent, index: number) => {
 
     const renderers: Record<string, (item: NoteContent, index?: number) => JSXElement> = {
@@ -1081,6 +1101,7 @@ const ParsedNote: Component<{
       tagmention: renderTagMention,
       hashtag: renderHashtag,
       emoji: renderEmoji,
+      lnbc: renderLnbc,
     }
 
     return renderers[item.type] ?

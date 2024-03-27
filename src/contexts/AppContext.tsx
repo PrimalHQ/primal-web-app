@@ -32,6 +32,21 @@ export type NoteContextMenuInfo = {
   openReactions?: () => void,
 };
 
+export type ConfirmInfo = {
+  title: string,
+  description: string,
+  confirmLabel?: string,
+  abortLabel?: string,
+  onConfirm?: () => void,
+  onAbort?: () => void,
+};
+
+export type LnbcInfo = {
+  invoice: string,
+  onPay?: () => void,
+  onCancel?: () => void,
+};
+
 export type AppContextStore = {
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
@@ -41,6 +56,10 @@ export type AppContextStore = {
   customZap: CustomZapInfo | undefined,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showLnInvoiceModal: boolean,
+  lnbc: LnbcInfo | undefined,
+  showConfirmModal: boolean,
+  confirmInfo: ConfirmInfo | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -48,6 +67,10 @@ export type AppContextStore = {
     closeCustomZapModal: () => void,
     openContextMenu: (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
     closeContextMenu: () => void,
+    openLnbcModal: (lnbc: string, onPay: () => void) => void,
+    closeLnbcModal: () => void,
+    openConfirmModal: (confirmInfo: ConfirmInfo) => void,
+    closeConfirmModal: () => void,
   },
 }
 
@@ -65,6 +88,10 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   customZap: undefined,
   showNoteContextMenu: false,
   noteContextMenuInfo: undefined,
+  showLnInvoiceModal: false,
+  lnbc: undefined,
+  showConfirmModal: false,
+  confirmInfo: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -124,6 +151,30 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showNoteContextMenu', () => true);
   };
 
+  const openLnbcModal = (lnbc: string, onPay: () => void) => {
+    updateStore('showLnInvoiceModal', () => true);
+    updateStore('lnbc', () => ({
+      invoice: lnbc,
+      onPay,
+      onCancel: () => updateStore('showLnInvoiceModal', () => false),
+    }))
+  };
+
+  const closeLnbcModal = () => {
+    updateStore('showLnInvoiceModal', () => false);
+    updateStore('lnbc', () => undefined);
+  };
+
+  const openConfirmModal = (confirmInfo: ConfirmInfo) => {
+    updateStore('showConfirmModal', () => true);
+    updateStore('confirmInfo', () => ({...confirmInfo }));
+  };
+
+  const closeConfirmModal = () => {
+    updateStore('showConfirmModal', () => false);
+    updateStore('confirmInfo', () => undefined);
+  };
+
   const closeContextMenu = () => {
     updateStore('showNoteContextMenu', () => false);
   };
@@ -172,6 +223,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
       closeCustomZapModal,
       openContextMenu,
       closeContextMenu,
+      openLnbcModal,
+      closeLnbcModal,
+      openConfirmModal,
+      closeConfirmModal,
     }
   });
 

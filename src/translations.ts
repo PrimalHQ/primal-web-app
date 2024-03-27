@@ -2083,3 +2083,49 @@ export const followWarning = {
     description: 'Abort forgot pin action',
   },
 };
+
+export const lnInvoice = {
+  pay: {
+    id: 'lnInvoice.pay',
+    defaultMessage: 'Pay',
+    description: 'Pay invoice action',
+  },
+  title: {
+    id: 'lnInvoice.title',
+    defaultMessage: 'Lightning Invoice',
+    description: 'Lightning Invoice title',
+  },
+  expired: {
+    id: 'lnInvoice.expired',
+    defaultMessage: 'Expired: {date} ago',
+    description: 'Expired time',
+  },
+  expires: {
+    id: 'lnInvoice.expires',
+    defaultMessage: 'Expires: in {date}',
+    description: 'Expires time',
+  },
+  confirm: {
+    title: {
+      id: 'lnInvoice.confirm.title',
+      defaultMessage: 'Are you sure?',
+      description: 'Lightning invoice pay confirmation',
+    },
+    description: {
+      id: 'lnInvoice.confirm.description',
+      defaultMessage: 'Pay {amount}',
+      description: 'Lightning Invoice confirm description',
+    },
+    confirmLabel: {
+      id: 'lnInvoice.confirm.confirmLabel',
+      defaultMessage: 'Yes, pay',
+      description: 'Lightning Invoice confirm button label',
+    },
+    abortLabel: {
+      id: 'lnInvoice.confirm.abortLabel',
+      defaultMessage: 'Cancel',
+      description: 'Lightning Invoice confirm button label',
+    },
+  },
+
+};

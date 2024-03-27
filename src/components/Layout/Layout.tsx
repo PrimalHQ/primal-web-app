@@ -20,6 +20,8 @@ import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
 import CustomZap from '../CustomZap/CustomZap';
 import NoteContextMenu from '../Note/NoteContextMenu';
+import LnQrCodeModal from '../LnQrCodeModal/LnQrCodeModal';
+import ConfirmModal from '../ConfirmModal/ConfirmModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -165,6 +167,23 @@ const Layout: Component = () => {
                   onSuccess={app?.customZap?.onSuccess}
                   onFail={app?.customZap?.onFail}
                   onCancel={app?.customZap?.onCancel}
+                />
+
+                <LnQrCodeModal
+                  open={app?.showLnInvoiceModal}
+                  lnbc={app?.lnbc?.invoice || ''}
+                  onPay={app?.lnbc?.onPay}
+                  onClose={app?.lnbc?.onCancel}
+                />
+
+                <ConfirmModal
+                  open={app?.showConfirmModal}
+                  title={app?.confirmInfo?.title}
+                  description={app?.confirmInfo?.description}
+                  confirmLabel={app?.confirmInfo?.confirmLabel}
+                  abortLabel={app?.confirmInfo?.abortLabel}
+                  onConfirm={app?.confirmInfo?.onConfirm}
+                  onAbort={app?.confirmInfo?.onAbort}
                 />
               </div>
             </Show>

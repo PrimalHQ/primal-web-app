@@ -9,17 +9,14 @@ import { useIntl } from '@cookbook/solid-intl';
 
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
-import CustomZap from '../../CustomZap/CustomZap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
-import NoteContextMenu from '../NoteContextMenu';
 import { getScreenCordinates } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
-import ReactionsModal from '../../ReactionsModal/ReactionsModal';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 
 const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> = (props) => {

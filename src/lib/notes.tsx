@@ -3,7 +3,7 @@ import { A } from "@solidjs/router";
 import { Relay } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
+import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
 import { logError, logInfo, logWarning } from "./logger";
@@ -60,6 +60,7 @@ export const isNoteMention = (url: string) => noteRegexLocal.test(url);
 export const isUserMention = (url: string) => profileRegex.test(url);
 export const isInterpunction = (url: string) => interpunctionRegex.test(url);
 export const isCustomEmoji = (url: string) => emojiRegex.test(url);
+export const isLnbc = (url: string) => lnRegex.test(url);
 
 export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif', '.format=png'].some(x => url.includes(x));
 export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));

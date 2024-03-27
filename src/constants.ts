@@ -1,4 +1,4 @@
-import { ContentModeration, FeedPage, } from "./types/primal";
+import { ContentModeration, FeedPage, LnbcInvoice, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
 
@@ -137,6 +137,8 @@ export enum Kind  {
   SuggestedUsersByCategory = 10_000_134,
   UploadChunk = 10_000_135,
   UserRelays=10_000_139,
+
+  WALLET_OPERATION = 10_000_300,
 }
 
 export const relayConnectingTimeout = 1000;
@@ -253,6 +255,7 @@ export const urlRegexG = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]
 export const urlExtractRegex = /https?:\/\/\S+\.[^()]+(?:\([^)]*\))*/;
 export const interpunctionRegex = /^(\.|,|;|\?|\!)$/;
 export const emojiRegex = /(?:\s|^)\:\w+\:/;
+export const lnRegex = /lnbc[a-zA-Z0-9]*/;
 
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
@@ -386,3 +389,10 @@ export const uploadLimit = {
   regular: 100,
   premium: 1024,
 }
+
+export const emptyInvoice: LnbcInvoice = {
+  paymentRequest: '',
+  sections: [],
+  expiry: 0,
+  route_hints: [],
+};
