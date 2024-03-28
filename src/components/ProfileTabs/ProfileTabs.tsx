@@ -276,9 +276,12 @@ const ProfileTabs: Component<{
                     <Note note={note} shorten={true} />
                   )}
                 </For>
-                <Paginator loadNextPage={() => {
-                  profile?.actions.fetchNextPage();
-                }}/>
+                <Paginator
+                  loadNextPage={() => {
+                    profile?.actions.fetchNextPage();
+                  }}
+                  isSmall={true}
+                />
               </Match>
             </Switch>
           </div>
@@ -329,9 +332,12 @@ const ProfileTabs: Component<{
                     <Note note={reply} shorten={true} />
                   )}
                 </For>
-                <Paginator loadNextPage={() => {
-                  profile?.actions.fetchNextRepliesPage();
-                }}/>
+                <Paginator
+                  loadNextPage={() => {
+                    profile?.actions.fetchNextRepliesPage();
+                  }}
+                  isSmall={true}
+                />
               </Match>
             </Switch>
           </div>
@@ -364,7 +370,7 @@ const ProfileTabs: Component<{
                     />
                   </div>}
               </For>
-              <Paginator loadNextPage={loadMoreFollows}/>
+              <Paginator loadNextPage={loadMoreFollows} isSmall={true} />
             </Show>
           </div>
         </Tabs.Content>
@@ -400,7 +406,7 @@ const ProfileTabs: Component<{
                   </div>
                 }
               </For>
-              <Paginator loadNextPage={loadMoreFollowers}/>
+              <Paginator loadNextPage={loadMoreFollowers} isSmall={true} />
             </Show>
           </div>
         </Tabs.Content>
@@ -475,7 +481,7 @@ const ProfileTabs: Component<{
                   </A>
                 }
               </For>
-              <Paginator loadNextPage={profile?.actions.fetchNextZapsPage}/>
+              <Paginator loadNextPage={profile?.actions.fetchNextZapsPage} isSmall={true} />
             </Show>
           </div>
         </Tabs.Content>
