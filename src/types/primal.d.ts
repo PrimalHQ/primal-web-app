@@ -200,6 +200,13 @@ export type PrimalUserRelays = {
   tags: string[][],
 };
 
+export type NostrBookmarks = {
+  kind: Kind.Bookmarks,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -227,7 +234,8 @@ export type NostrEventContent =
   NostrUserFollwerCounts |
   NostrUserZaps |
   NostrSuggestedUsers |
-  PrimalUserRelays;
+  PrimalUserRelays |
+  NostrBookmarks;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -702,4 +710,10 @@ export type LnbcInvoice = {
   sections: LnbcSection[],
   expiry: number,
   route_hints: LnbcRouteHint[],
+};
+
+export type PageRange = {
+  since: number,
+  until: number,
+  order_by: string,
 };

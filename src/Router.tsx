@@ -20,6 +20,7 @@ const Layout = lazy(() => import('./components/Layout/Layout'));
 const Explore = lazy(() => import('./pages/Explore'));
 const Thread = lazy(() => import('./pages/Thread'));
 const Messages = lazy(() => import('./pages/Messages'));
+const Bookmarks = lazy(() => import('./pages/Bookmarks'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Downloads = lazy(() => import('./pages/Downloads'));
 const Settings = lazy(() => import('./pages/Settings/Settings'));
@@ -126,6 +127,7 @@ const Router: Component = () => {
             <Route path="/network" component={Network} />
             <Route path="/filters" component={Moderation} />
           </Route>
+          <Route path="/bookmarks" component={Bookmarks}/>
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />

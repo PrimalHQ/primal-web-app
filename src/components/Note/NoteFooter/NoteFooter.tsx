@@ -9,6 +9,7 @@ import { useIntl } from '@cookbook/solid-intl';
 
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
+import CustomZap from '../../CustomZap/CustomZap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md.json';
@@ -42,8 +43,16 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
 
   const [isRepostMenuVisible, setIsRepostMenuVisible] = createSignal(false);
 
+  const [showZapAnim, setShowZapAnim] = createSignal(false);
+  const [hideZapIcon, setHideZapIcon] = createSignal(false);
+  const [zappedNow, setZappedNow] = createSignal(false);
+  const [zappedAmount, setZappedAmount] = createSignal(0);
+  const [isZapping, setIsZapping] = createSignal(false);
+
+  let quickZapDelay = 0;
   let footerDiv: HTMLDivElement | undefined;
   let noteContextMenu: HTMLDivElement | undefined;
+  let repostMenu: HTMLDivElement | undefined;
 
   const repostMenuItems: MenuItem[] = [
     {
@@ -57,6 +66,7 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
       icon: 'quote',
     },
   ];
+
 
   const onClickOutside = (e: MouseEvent) => {
     if (
@@ -155,44 +165,49 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
     }
   };
 
-  let quickZapDelay = 0;
-  const [isZapping, setIsZapping] = createSignal(false);
+  const onConfirmZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    setZappedAmount(() => zapOption.amount || 0);
+    setZappedNow(true);
+    setZapped(true);
+    animateZap();
+  };
+
+  const onSuccessZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    setIsZapping(false);
+    setZappedNow(false);
+    setShowZapAnim(false);
+    setHideZapIcon(false);
+    setZapped(true);
+  };
+
+  const onFailZap = (zapOption: ZapOption) => {
+    setZappedAmount(() => -(zapOption.amount || 0));
+    setZappedNow(true);
+    app?.actions.closeCustomZapModal();
+    setIsZapping(false);
+    setShowZapAnim(false);
+    setHideZapIcon(false);
+    setZapped(props.note.post.noteActions.zapped);
+  };
+
+  const onCancelZap = (zapOption: ZapOption) => {
+    setZappedAmount(() => -(zapOption.amount || 0));
+    setZappedNow(true);
+    app?.actions.closeCustomZapModal();
+    setIsZapping(false);
+    setShowZapAnim(false);
+    setHideZapIcon(false);
+    setZapped(props.note.post.noteActions.zapped);
+  };
 
   const customZapInfo: CustomZapInfo = {
     note: props.note,
-    onConfirm: (zapOption: ZapOption) => {
-      app?.actions.closeCustomZapModal();
-      setZappedAmount(() => zapOption.amount || 0);
-      setZappedNow(true);
-      setZapped(true);
-      animateZap();
-    },
-    onSuccess: (zapOption: ZapOption) => {
-      app?.actions.closeCustomZapModal();
-      setIsZapping(false);
-      setZappedNow(false);
-      setShowZapAnim(false);
-      setHideZapIcon(false);
-      setZapped(true);
-    },
-    onFail: (zapOption: ZapOption) => {
-      setZappedAmount(() => -(zapOption.amount || 0));
-      setZappedNow(true);
-      app?.actions.closeCustomZapModal();
-      setIsZapping(false);
-      setShowZapAnim(false);
-      setHideZapIcon(false);
-      setZapped(props.note.post.noteActions.zapped);
-    },
-    onCancel: (zapOption: ZapOption) => {
-      setZappedAmount(() => -(zapOption.amount || 0));
-      setZappedNow(true);
-      app?.actions.closeCustomZapModal();
-      setIsZapping(false);
-      setShowZapAnim(false);
-      setHideZapIcon(false);
-      setZapped(props.note.post.noteActions.zapped);
-    },
+    onConfirm: onConfirmZap,
+    onSuccess: onSuccessZap,
+    onFail: onFailZap,
+    onCancel: onCancelZap,
   };
 
   const startZap = (e: MouseEvent | TouchEvent) => {
@@ -245,9 +260,6 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
       doQuickZap();
     }
   };
-
-  const [zappedNow, setZappedNow] = createSignal(false);
-  const [zappedAmount, setZappedAmount] = createSignal(0);
 
   const animateZap = () => {
     setShowZapAnim(true);
@@ -358,12 +370,6 @@ const NoteFooter: Component<{ note: PrimalNote, wide?: boolean, id?: string }> =
     }
 
   });
-
-  const [showZapAnim, setShowZapAnim] = createSignal(false);
-  const [hideZapIcon, setHideZapIcon] = createSignal(false);
-
-
-  let repostMenu: HTMLDivElement | undefined;
 
   const determineOrient = () => {
     const coor = getScreenCordinates(repostMenu);

@@ -73,6 +73,11 @@
   -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
   mask: url(../../assets/icons/help.svg) no-repeat center;
 }
+.bookmarkIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+}
 
 .active {
   display: flex;

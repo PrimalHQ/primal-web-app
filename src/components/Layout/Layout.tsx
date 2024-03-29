@@ -7,7 +7,6 @@ import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
-import zapSM from '../../assets/lottie/zap_sm.json';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
@@ -15,7 +14,6 @@ import { useProfileContext } from '../../contexts/ProfileContext';
 import Branding from '../Branding/Branding';
 import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
 import ZapAnimation from '../ZapAnimation/ZapAnimation';
-import Landing from '../../pages/Landing';
 import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
 import CustomZap from '../CustomZap/CustomZap';
@@ -92,7 +90,7 @@ const Layout: Component = () => {
   }
 
   createEffect(() => {
-    if (location.pathname === '/' || account?.isKeyLookupDone) return;
+    if (location.pathname === '/') return;
 
     account?.actions.checkNostrKey();
   });

@@ -13,6 +13,7 @@ export type LocalStore = {
   theme: string,
   homeSidebarSelection: SelectionOption | undefined,
   userProfile: PrimalUser | undefined,
+  bookmarks: string[],
   recomended: {
     profiles: PrimalUser[],
     stats: Record<string, UserStats>,
@@ -63,6 +64,7 @@ export const emptyStorage: LocalStore = {
   noteDraftUserRefs: {},
   uploadTime: defaultUploadTime,
   selectedFeed: undefined,
+  bookmarks: [],
 }
 
 export const storageName = (pubkey?: string) => {
@@ -422,4 +424,22 @@ export const saveStoredFeed = (pubkey: string | undefined, feed: PrimalFeed) => 
   store.selectedFeed = { ...feed };
 
   setStorage(pubkey, store);
+};
+
+export const saveBookmarks = (pubkey: string | undefined, bookmarks: string[]) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.bookmarks = [ ...bookmarks ];
+
+  setStorage(pubkey, store);
+};
+
+export const readBookmarks = (pubkey: string | undefined) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey)
+
+  return store.bookmarks || [];
 };

@@ -376,6 +376,27 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays) =>
   return await sendEvent(event, relays, relaySettings);
 };
 
+export const sendBookmarks = async (tags: string[][], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content,
+    kind: Kind.Bookmarks,
+    tags: [...tags],
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+};
+
+export const getBookmarks = async (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_bookmarks", { pubkey }]},
+  ]));
+};
+
 export const extractRelayConfigFromTags = (tags: string[][]) => {
   return tags.reduce((acc, tag) => {
     if (tag[0] !== 'r') return acc;

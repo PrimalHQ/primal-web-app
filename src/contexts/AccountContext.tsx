@@ -28,11 +28,10 @@ import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../li
 // @ts-ignore Bad types in nostr-tools
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
 import { APP_ID } from "../App";
-import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readEmojiHistory, readSecFromStorage, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
+import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
+import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
-import { generateKeys } from "../lib/PrimalNostr";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
 import CreateAccountModal from "../components/CreateAccountModal/CreateAccountModal";
 import LoginModal from "../components/LoginModal/LoginModal";
@@ -42,6 +41,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { account as tAccount, followWarning, forgotPin } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
+
 
 export type AccountContextStore = {
   likes: string[],
@@ -74,6 +74,7 @@ export type AccountContextStore = {
   showLogin: boolean,
   emojiHistory: EmojiOption[],
   membershipStatus: MembershipStatus,
+  bookmarks: string[],
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -101,6 +102,8 @@ export type AccountContextStore = {
     showGetStarted: () => void,
     saveEmoji: (emoji: EmojiOption) => void,
     checkNostrKey: () => void,
+    fetchBookmarks: () => void,
+    updateBookmarks: (bookmarks: string[]) => void,
   },
 }
 
@@ -134,6 +137,7 @@ const initialData = {
   showLogin: false,
   emojiHistory: [],
   membershipStatus: {},
+  bookmarks: [],
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -285,6 +289,10 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('publicKey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
       checkMembershipStatus();
+
+      const bks = readBookmarks(pubkey);
+      updateStore('bookmarks', () => [...bks]);
+      fetchBookmarks();
     }
     else {
       updateStore('publicKey', () => undefined);
@@ -1301,8 +1309,17 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const checkNostrKey = () => {
+    if (store.publicKey) return;
     updateStore('isKeyLookupDone', () => false);
     fetchNostrKey();
+  };
+
+  const fetchBookmarks = () => {
+    getBookmarks(store.publicKey, `user_bookmarks_${APP_ID}`);
+  }
+
+  const updateBookmarks = (bookmarks: string[]) => {
+    updateStore('bookmarks', () => [...bookmarks]);
   };
 
 // EFFECTS --------------------------------------
@@ -1483,6 +1500,29 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
     }
 
+    if (subId === `user_bookmarks_${APP_ID}`) {
+      if (type === 'EVENT' && content && content.kind === Kind.Bookmarks) {
+        if (!content.created_at || content.created_at < store.followingSince) {
+          return;
+        }
+
+        const notes = content.tags.reduce((acc, t) => {
+          if (t[0] === 'e') {
+            return [...acc, t[1]];
+          }
+          return [...acc];
+        }, []);
+
+        updateStore('bookmarks', () => [...notes]);
+      }
+
+      return;
+    }
+
+    if (type === 'EOSE') {
+      saveBookmarks(store.publicKey, store.bookmarks);
+    }
+
   };
 
 // STORES ---------------------------------------
@@ -1517,6 +1557,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     showGetStarted,
     saveEmoji,
     checkNostrKey,
+    fetchBookmarks,
+    updateBookmarks,
   },
 });
 

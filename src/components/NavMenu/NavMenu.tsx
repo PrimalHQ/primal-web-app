@@ -39,6 +39,11 @@ const NavMenu: Component< { id?: string } > = (props) => {
       bubble: () => messages?.messageCount || 0,
     },
     {
+      to: '/bookmarks',
+      label: intl.formatMessage(t.bookmarks),
+      icon: 'bookmarkIcon',
+    },
+    {
       to: '/notifications',
       label: intl.formatMessage(t.notifications),
       icon: 'notificationsIcon',

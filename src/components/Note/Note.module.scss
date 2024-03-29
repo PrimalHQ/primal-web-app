@@ -1,4 +1,5 @@
 .note {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -257,4 +258,10 @@
     width: 100%;
   }
 
+}
+
+.upRightFloater {
+  position: absolute;
+  top: 4px;
+  right: 4px;
 }

@@ -714,6 +714,11 @@ export const navBar = {
     defaultMessage: 'Messages',
     description: 'Label for the nav bar item link to Messages page',
   },
+  bookmarks: {
+    id: 'navbar.bookmarks',
+    defaultMessage: 'Bookmarks',
+    description: 'Label for the nav bar item link to Bookmarks page',
+  },
   notifications: {
     id: 'navbar.notifications',
     defaultMessage: 'Notifications',
@@ -2070,7 +2075,7 @@ export const followWarning = {
   description: {
     id: 'followWarning.description',
     defaultMessage: 'If you continue, you will end up following just one nostr account. Are you sure you want to continue?',
-    description: 'Explanation of what happens when follow erro occurs',
+    description: 'Explanation of what happens when follow error occurs',
   },
   confirm: {
     id: 'followWarning.confirm',
@@ -2083,6 +2088,61 @@ export const followWarning = {
     description: 'Abort forgot pin action',
   },
 };
+
+export const bookmarks = {
+  pageTitle: {
+    id: 'bookmarks.pageTitle',
+    defaultMessage: 'Bookmarks',
+    description: 'Bookmarks page title',
+  },
+  noBookmarks: {
+    id: 'bookmarks.noBookmarks',
+    defaultMessage: 'You don\'t have any bookmarks',
+    description: 'No bookmarks caption',
+  },
+  confirm: {
+    title: {
+      id: 'bookmarks.confirm.title',
+      defaultMessage: 'Saving First Bookmark',
+      description: 'Follow error modal title',
+    },
+    description: {
+      id: 'bookmarks.confirm.description',
+      defaultMessage: 'You are about to save your first public bookmark. These bookmarks can be seen by other nostr users. Do you wish to continue?',
+      description: 'Explanation of what happens when bookmark error occurs',
+    },
+    confirm: {
+      id: 'bookmarks.confirm.confirm',
+      defaultMessage: 'Save Bookmark',
+      description: 'Confirm forgot pin action',
+    },
+    abort: {
+      id: 'bookmarks.confirm.abort',
+      defaultMessage: 'Cancel',
+      description: 'Abort forgot pin action',
+    },
+    titleZero: {
+      id: 'bookmarks.confirm.title',
+      defaultMessage: 'Removing Last Bookmark',
+      description: 'Follow error modal title',
+    },
+    descriptionZero: {
+      id: 'bookmarks.confirm.description',
+      defaultMessage: 'You are about to remove your last public bookmark. Do you wish to continue?',
+      description: 'Explanation of what happens when bookmark error occurs',
+    },
+    confirmZero: {
+      id: 'bookmarks.confirm.confirm',
+      defaultMessage: 'Remove Bookmark',
+      description: 'Confirm forgot pin action',
+    },
+    abortZero: {
+      id: 'bookmarks.confirm.abort',
+      defaultMessage: 'Cancel',
+      description: 'Abort forgot pin action',
+    },
+  }
+}
 
 export const lnInvoice = {
   pay: {

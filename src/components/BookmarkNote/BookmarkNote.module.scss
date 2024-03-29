@@ -1,0 +1,27 @@
+.bookmark {
+  .emptyBookmark {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin: 0px 0px;
+    background-color: var(--text-tertiary);
+    -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 16px;
+    mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 16px;
+  }
+
+  .fullBookmark {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin: 0px 0px;
+    background-color: var(--active-bookmarked);
+    -webkit-mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 16px;
+    mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 16px;
+  }
+
+  &:hover {
+    .emptyBookmark {
+      background-color: var(--active-bookmarked);
+    }
+  }
+}

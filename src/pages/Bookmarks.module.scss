@@ -1,0 +1,26 @@
+.bookmarkFeed {
+  border-top: 1px solid var(--devider);
+  padding-top: 20px;
+  margin-bottom: 48px;
+}
+
+.loader {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 64px;
+  margin-top: 20px;
+}
+
+.noBookmarks {
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--text-secondary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
