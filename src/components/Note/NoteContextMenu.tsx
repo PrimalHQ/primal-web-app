@@ -51,6 +51,7 @@ const NoteContextMenu: Component<{
 
     if (!props.open) {
       context.setAttribute('style',`top: -1024px; left: -1034px;`);
+      return;
     }
 
     const docRect = document.documentElement.getBoundingClientRect();

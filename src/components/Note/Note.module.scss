@@ -234,11 +234,156 @@
   font-weight: bold;
 }
 
-
 .verificationFailed {
   display: inline-block;
   width: 4px;
   height: 4px;
+}
+
+.notePrimary {
+  position: relative;
+  background-color: var(--background-card);
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  padding-top: 0;
+  border-radius: 0;
+  border: none;
+
+  .content {
+    grid-area: content;
+    display: flex;
+    flex-direction: column;
+    margin-left: 2px;
+    margin-top: 2px;
+    cursor: text;
+
+
+    .message {
+      position: relative;
+      grid-area: message;
+      color: var(--text-primary);
+      word-break: break-word;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 24px;
+      width: 100%;
+      margin-bottom: 12px;
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .messageFade {
+        position: absolute;
+        z-index: 1;
+        top: 610px;
+        left: 0;
+        pointer-events: none;
+        background-image: var(--fade-note-vertical);
+        width: 100%;
+        height: 40px;
+      }
+
+    }
+  }
+}
+
+.noteNotificationLink {
+  text-decoration: none;
+  color: unset;
+  margin: 0px;
+  padding: 0px;
+  // background: var(--brand-gradient-vertical);
+  background-color: var(--background-card);
+  border-radius: 6px;
+  display: block;
+  transition: 0.2s padding;
+  margin-top: 6px;
+
+  .noteNotifications {
+    background-color: var(--background-site);
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "content";
+    padding: 0px;
+    border-radius: 4px;
+    transition: 0.2s border-radius ease-out;
+
+    .content {
+      grid-area: content;
+      display: flex;
+      flex-direction: column;
+
+
+      .message {
+        grid-area: message;
+        color: var(--text-primary);
+        word-break: break-word;
+        font-size: 16px;
+        line-height: 24px;
+        width: 100%;
+
+        a:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .footer {
+        margin-top: 12px;
+      }
+    }
+  }
+
+  // &:hover {
+  //   padding-left: 4px;
+  //   transition: 0.2s padding;
+  //   border-radius: 4px;
+  //   >div {
+  //     border-radius: 0px 4px 4px 0px;
+  //     transition: 0.2s border-radius ease-out;
+  //   }
+  // }
+}
+
+.context {
+  background: none;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  .contextButton {
+    width: 42px;
+    height: 32px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+
+    .contextIcon {
+      width: 16px;
+      height: 14px;
+      background-color: var(--text-secondary-2);
+      -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+    }
+
+    &:hover {
+      .contextIcon {
+        background-color: var(--text-primary);
+      }
+    }
+  }
 }
 
 @media only screen and (max-width: 720px) {
@@ -258,6 +403,24 @@
     width: 100%;
   }
 
+  .notePrimary {
+    width: 100vw;
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-right: 12px;
+    .content {
+      margin-left: 0px;
+    }
+  }
+
+  .noteNotificationLink {
+    .noteNotifications {
+      grid-template-columns: 1fr;
+      margin-left: 0px;
+      margin-right: 0px;
+      padding-right: 0px;
+    }
+  }
 }
 
 .upRightFloater {

@@ -72,7 +72,14 @@ export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | un
     return;
   }
 
-  let payload = { pubkey, limit, notes } ;
+  let payload: {
+    pubkey: string,
+    limit: number,
+    notes: 'authored' | 'replies' | 'bookmarks',
+    user_pubkey?: string,
+    until?: number,
+    offset?: number,
+  } = { pubkey, limit, notes } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;

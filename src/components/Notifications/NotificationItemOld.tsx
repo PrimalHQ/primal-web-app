@@ -33,6 +33,7 @@ import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import { truncateNumber } from '../../lib/notifications';
 import { notificationsOld as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import Note from '../Note/Note';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -148,9 +149,10 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
         >
           <div class={styles.reference}>
             <Show when={note()}>
-              <NotificationNote
+              <Note
                 // @ts-ignore
                 note={note()}
+                noteType="notification"
               />
             </Show>
           </div>

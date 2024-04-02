@@ -43,12 +43,12 @@
 
 .footer {
   display: grid;
-  grid-template-columns: 128px 128px 128px 128px 16px;
+  grid-template-columns: 125px 125px 125px 125px 28px;
   position: relative;
   width: 100%;
 
   &.wide {
-    grid-template-columns: 140px 140px 140px 138px 16px;
+    grid-template-columns: 137px 137px 137px 135px 28px;
   }
 
   .context {
