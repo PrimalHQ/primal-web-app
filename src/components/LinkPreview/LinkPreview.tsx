@@ -1,8 +1,10 @@
-import { Component, createMemo, Show } from 'solid-js';
+import { Component, createMemo, createSignal, Show } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './LinkPreview.module.scss';
+
+const errorCountLimit = 3;
 
 const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, isLast?: boolean }> = (props) => {
 
@@ -49,7 +51,11 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
     return k;
   };
 
+  const [errorCount, setErrorCount] = createSignal(0);
+
   const onError = (event: any) => {
+    if (errorCount() > errorCountLimit) return;
+    setErrorCount(v => v + 1);
     const image = event.target;
     image.onerror = '';
     image.src = props.preview.images[0];
@@ -63,7 +69,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       class={klass()}
       target="_blank"
     >
-      <Show when={image() || props.preview.images[0]}>
+      <Show when={errorCount() < errorCountLimit && (image() || props.preview.images[0])}>
         <img
           class={styles.previewImage}
           src={image()?.media_url || props.preview.images[0]}
