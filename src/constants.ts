@@ -138,6 +138,7 @@ export enum Kind  {
   SuggestedUsersByCategory = 10_000_134,
   UploadChunk = 10_000_135,
   UserRelays=10_000_139,
+  RelayHint=10_000_141,
 
   WALLET_OPERATION = 10_000_300,
 }

@@ -207,6 +207,13 @@ export type NostrBookmarks = {
   tags: string[][],
 };
 
+export type NostrRelayHint = {
+  kind: Kind.RelayHint,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -235,7 +242,8 @@ export type NostrEventContent =
   NostrUserZaps |
   NostrSuggestedUsers |
   PrimalUserRelays |
-  NostrBookmarks;
+  NostrBookmarks |
+  NostrRelayHint;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -293,6 +301,7 @@ export type FeedPage = {
   postStats: NostrPostStats,
   mentions?: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
+  relayHints?: Record<string, string>,
   since?: number,
   until?: number,
 };
@@ -437,6 +446,7 @@ export type PrimalNoteData = {
   satszapped: number,
   noteId: string,
   noteActions: NoteActions,
+  relayHints?: Record<string, string>,
 }
 
 export type PrimalNote = {

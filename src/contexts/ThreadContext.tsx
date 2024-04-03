@@ -206,6 +206,11 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
+
+    if (content.kind === Kind.RelayHint) {
+      const hints = JSON.parse(content.content);
+      updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
+    }
   };
 
   const savePage = (page: FeedPage) => {

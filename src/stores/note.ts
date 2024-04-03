@@ -1,3 +1,4 @@
+import { propTraps } from "@solid-primitives/props";
 import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
@@ -55,6 +56,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       satszapped: stat?.satszapped || 0,
       noteId: nip19.noteEncode(message.id),
       noteActions: (page.noteActions && page.noteActions[message.id]) || noActions,
+      relayHints: page.relayHints,
     },
   }
 };
@@ -299,6 +301,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
         satszapped: stat?.satszapped || 0,
         noteId: nip19.noteEncode(msg.id),
         noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions,
+        relayHints: page.relayHints,
       },
       repost,
       msg,

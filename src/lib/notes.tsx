@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 // @ts-ignore Bad types in nostr-tools
-import { Relay } from "nostr-tools";
+import { Relay, relayInit } from "nostr-tools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
@@ -440,7 +440,21 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   let responses = [];
   let reasons: string[] = [];
 
+  // Relay hints fromm `e` tags
+  const hintRelayUrls = event.tags.reduce((acc, t) => {
+    if (
+      t[0] === 'e' &&
+      t[2].length > 0 &&
+      !relays.find(r => r.url === t[2])
+    ) {
+      return [ ...acc, t[2] ];
+    }
+
+    return [...acc];
+  }, []);
+
   for (let i = 0;i < relays.length;i++) {
+
     const relay = relays[i];
 
     const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
@@ -472,6 +486,30 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
         reject(e);
       }
     }));
+  }
+
+  for (let i = 0;i < hintRelayUrls.length;i++) {
+    const url = hintRelayUrls[i];
+
+    new Promise<string>(async (resolve, reject) => {
+      const relay = relayInit(url);
+      await relay.connect();
+
+      try {
+        logInfo('publishing to relay: ', relay)
+
+        await relay.publish(signedNote);
+
+        logInfo(`${relay.url} has accepted our event`);
+        resolve('success');
+
+      } catch (e) {
+        logError(`Failed publishing note to ${relay.url}: `, e);
+        reject('success');
+      }
+
+      relay.close();
+    });
   }
 
   try {
