@@ -247,22 +247,27 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    height: 30px;
 
     .name {
       display: flex;
       align-items: center;
       justify-content: flex-start;
       max-width: 60%;
+      height: 100%;
 
       .text {
         color: var(--text-primary);
         font-size: 20px;
-        line-height: 20px;
+        line-height: 1;
         font-weight: 700;
-        height: 26px;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        vertical-align: baseline;
+        height: 20px;
       }
 
       .followsBadge {
@@ -271,6 +276,7 @@
 
       .vc {
         width: 20px;
+        height: 20px;
       }
     }
 
