@@ -26,8 +26,6 @@ const NoteImage: Component<{
 
   const [src, setSrc] = createSignal<string | undefined>();
 
-  // const src = () => props.media?.media_url || props.src;
-
   const isCached = () => !props.isDev || props.media;
 
   const onError = (event: any) => {
@@ -35,7 +33,7 @@ const NoteImage: Component<{
 
     if (image.src === props.altSrc || !props.altSrc) {
       // @ts-ignore
-      props.onError(event);
+      props.onError && props.onError(event);
       return true;
     }
 
