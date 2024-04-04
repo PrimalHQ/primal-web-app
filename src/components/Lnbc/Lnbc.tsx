@@ -16,7 +16,7 @@ import { sendMessage, subTo } from '../../lib/sockets';
 import { APP_ID } from '../../App';
 import { signEvent } from '../../lib/nostrAPI';
 import Loader from '../Loader/Loader';
-import { logError, logInfo } from '../../lib/logger';
+import { logError, logInfo, logWarning } from '../../lib/logger';
 import { useToastContext } from '../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 import { lnInvoice } from '../../translations';
@@ -35,9 +35,13 @@ const Lnbc: Component< { id?: string, lnbc: string } > = (props) => {
   const [paymentInProgress, setPaymentInProgress] = createSignal(false);
 
   createEffect(() => {
-    const dec: LnbcInvoice = decode(props.lnbc);
-    setInvoice(reconcile({...emptyInvoice}))
-    setInvoice(() => ({ ...dec }));
+    try {
+      const dec: LnbcInvoice = decode(props.lnbc);
+      setInvoice(reconcile({...emptyInvoice}))
+      setInvoice(() => ({ ...dec }));
+    } catch (e) {
+      logError('Failed to decode lightining unvoice: ', e);
+    }
   });
 
   createEffect(() => {
