@@ -388,7 +388,7 @@ type NoteStore = {
   reposts: Record<string, string> | undefined,
 }
 
-export const referencesToTags = (value: string) => {
+export const referencesToTags = (value: string, relayHints: Record<string, string>) => {
   const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
   const regexMention =
     /\bnostr:((note|npub|nevent|nprofile)1\w+)\b|#\[(\d+)\]/g;
@@ -422,7 +422,7 @@ export const referencesToTags = (value: string) => {
     }
 
     if (decoded.type === 'note') {
-      tags.push(['e', decoded.data, '', 'mention']);
+      tags.push(['e', decoded.data, relayHints ? relayHints[decoded.data] : '', 'mention']);
       return;
     }
 

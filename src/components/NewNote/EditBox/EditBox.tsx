@@ -13,7 +13,7 @@ import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrRelayHint, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -98,6 +98,8 @@ const EditBox: Component<{
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
+
+  const [relayHints, setRelayHints] = createStore<Record<string, string>>({});
 
   const location = useLocation();
 
@@ -474,7 +476,7 @@ const EditBox: Component<{
   const addQuote = (quote: string | undefined) => {
     setMessage((msg) => {
       if (!textArea || !quote) return msg;
-      let position = textArea.selectionStart;
+      let position = textArea.selectionStart + 2;
 
       const isEmptyMessage = msg.length === 0;
 
@@ -494,6 +496,7 @@ const EditBox: Component<{
       textArea.selectionEnd = position;
       return newMsg;
     });
+
   };
 
   createEffect(() => {
@@ -628,7 +631,7 @@ const EditBox: Component<{
     });
 
     if (account) {
-      let tags = referencesToTags(messageToSend);
+      let tags = referencesToTags(messageToSend, relayHints);
       const rep = props.replyToNote;
 
       if (rep) {
@@ -961,6 +964,11 @@ const EditBox: Component<{
             );
             return;
           }
+
+          if (content.kind === Kind.RelayHint) {
+            const hints = JSON.parse(content.content) as Record<string, string>;
+            setRelayHints(() => ({ ...hints }))
+          }
         }
       });
 
@@ -1006,7 +1014,6 @@ const EditBox: Component<{
     });
 
     setParsedMessage(parsed);
-
   };
 
 
