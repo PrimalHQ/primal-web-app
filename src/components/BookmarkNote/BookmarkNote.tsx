@@ -28,24 +28,27 @@ const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
     setIsBookmarked(() => account?.bookmarks.includes(props.note.post.id) || false);
   })
 
-  const updateBookmarks = async (bookmarks: string[]) => {
+  const updateBookmarks = async (bookmarkTags: string[][]) => {
     if (!account) return;
-    const tags = bookmarks.map(b => ['e', b]);
+
+    const bookmarks = bookmarkTags.reduce((acc, t) =>
+      t[0] === 'e' ? [...acc, t[1]] : [...acc]
+    , []);
+
     const date = Math.floor((new Date()).getTime() / 1000);
 
     account.actions.updateBookmarks(bookmarks)
     saveBookmarks(account.publicKey, bookmarks);
-    const { success, note} = await sendBookmarks([...tags], date, '', account?.relays, account?.relaySettings);
+    const { success, note} = await sendBookmarks([...bookmarkTags], date, '', account?.relays, account?.relaySettings);
 
     if (success && note) {
       triggerImportEvents([note], `bookmark_import_${APP_ID}`)
     }
-
   };
 
-  const addBookmark = async (bookmarks: string[]) => {
-    if (account && !bookmarks.includes(props.note.post.id)) {
-      const bookmarksToAdd = [...bookmarks, props.note.post.id];
+  const addBookmark = async (bookmarkTags: string[][]) => {
+    if (account && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
+      const bookmarksToAdd = [...bookmarkTags, ['e', props.note.post.id]];
 
       if (bookmarksToAdd.length < 2) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);
@@ -69,9 +72,9 @@ const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
     }
   }
 
-  const removeBookmark = async (bookmarks: string[]) => {
-    if (account && bookmarks.includes(props.note.post.id)) {
-      const bookmarksToAdd = bookmarks.filter(b => b !== props.note.post.id);
+  const removeBookmark = async (bookmarks: string[][]) => {
+    if (account && bookmarks.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
+      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.post.id);
 
       if (bookmarksToAdd.length < 1) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);
@@ -101,7 +104,7 @@ const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
       return;
     }
 
-    let bookmarks: string[] = []
+    let bookmarks: string[][] = []
 
     const unsub = subscribeTo(`before_bookmark_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
@@ -122,12 +125,7 @@ const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
       if (type === 'EVENT') {
         if (!content || content.kind !== Kind.Bookmarks) return;
 
-        bookmarks = content.tags.reduce((acc, t) => {
-          if (t[0] === 'e') {
-            return [...acc, t[1]];
-          }
-          return [...acc];
-        }, []);
+        bookmarks = content.tags;
       }
     });
 
