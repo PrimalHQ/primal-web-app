@@ -55,7 +55,7 @@ export const emptyStorage: LocalStore = {
   likes: [],
   feeds: [],
   msgContacts: { profiles: { other: {}, follows: {}, any: {} }, counts: {} },
-  theme: 'sunset',
+  theme: 'sunrise',
   homeSidebarSelection: undefined,
   userProfile: undefined,
   recomended: { profiles: [], stats: {} },
