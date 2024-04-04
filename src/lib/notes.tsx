@@ -445,6 +445,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   const hintRelayUrls = event.tags.reduce((acc, t) => {
     if (
       t[0] === 'e' &&
+      t[2] &&
       t[2].length > 0 &&
       !relays.find(r => r.url === t[2])
     ) {
