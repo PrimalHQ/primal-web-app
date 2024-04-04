@@ -5,6 +5,7 @@ import { defaultZap, defaultZapOptions } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
+import { hexToNpub } from '../../lib/keys';
 import { truncateNumber } from '../../lib/notifications';
 import { zapNote, zapProfile } from '../../lib/zap';
 import { authorName, nip05Verification, truncateNpub, userName } from '../../stores/profile';
@@ -37,11 +38,11 @@ const ProfileQrCodeModal: Component<{
   const profileData = () => Object.entries({
     pubkey: {
       title: 'Public key',
-      data: props.profile.npub || props.profile.pubkey,
+      data: `nostr:${props.profile.npub || hexToNpub(props.profile.pubkey)}`,
     },
     lnAddress: {
       title: 'Lightning address',
-      data: props.profile.lud16 || props.profile.lud06,
+      data: `lightning:${props.profile.lud16 || props.profile.lud06}`,
     }
   });
 
