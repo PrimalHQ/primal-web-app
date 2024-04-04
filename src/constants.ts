@@ -258,6 +258,7 @@ export const urlExtractRegex = /https?:\/\/\S+\.[^()]+(?:\([^)]*\))*/;
 export const interpunctionRegex = /^(\.|,|;|\?|\!)$/;
 export const emojiRegex = /(?:\s|^)\:\w+\:/;
 export const lnRegex = /lnbc[a-zA-Z0-9]*/;
+export const lnUnifiedRegex = /bitcoin:[a-zA-Z0-9]*(\?.*)lightning=([a-zA-Z0-9]*)(&.*|$)/;
 
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;

@@ -16,6 +16,7 @@ import {
   isSpotify,
   isTagMention,
   isTwitch,
+  isUnitifedLnAddress,
   isUrl,
   isUserMention,
   isWavelake,
@@ -41,7 +42,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
-import { hashtagCharsRegex, Kind, linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -395,6 +396,20 @@ const ParsedNote: Component<{
     if (isCustomEmoji(token)) {
       lastSignificantContent = 'emoji';
       updateContent(content, 'emoji', token);
+      return;
+    }
+
+    if (isUnitifedLnAddress(token)) {
+      lastSignificantContent = 'lnbc';
+
+      const match = token.match(lnUnifiedRegex);
+
+      let lnbcToken = match?.find(m => m.startsWith('lnbc'));
+
+      lnbcToken ?
+        updateContent(content, 'lnbc', lnbcToken) :
+        updateContent(content, 'text', token);
+
       return;
     }
 
