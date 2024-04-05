@@ -30,20 +30,17 @@ const ProfileQrCodeModal: Component<{
   onClose?: () => void,
 }> = (props) => {
 
-  const toast = useToastContext();
-  const account = useAccountContext();
-  const intl = useIntl();
-  const settings = useSettingsContext();
-
   const profileData = () => Object.entries({
     pubkey: {
       title: 'Public key',
       data: `nostr:${props.profile.npub || hexToNpub(props.profile.pubkey)}`,
+      dataLabel: props.profile.npub || hexToNpub(props.profile.pubkey),
       type: 'nostr',
     },
     lnAddress: {
       title: 'Lightning address',
       data: `lightning:${props.profile.lud16 || props.profile.lud06}`,
+      dataLabel: props.profile.lud16 || props.profile.lud06,
       type: 'lightning',
     }
   });
@@ -120,9 +117,9 @@ const ProfileQrCodeModal: Component<{
                   <div class={styles.value}>
                     <ButtonCopy
                       light={true}
-                      copyValue={info.data}
+                      copyValue={info.dataLabel}
                       labelBeforeIcon={true}
-                      label={truncateNpub(info.data)}
+                      label={truncateNpub(info.dataLabel)}
                     />
                   </div>
                 </div>

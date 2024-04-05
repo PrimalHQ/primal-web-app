@@ -18,7 +18,7 @@
     .userInfo {
       display: flex;
       justify-content: flex-start;
-      align-items: flex-start;
+      align-items: flex-end;
 
       .avatar {
         display: flex;
@@ -30,8 +30,8 @@
         display: flex;
         flex-direction: column;
         margin-left: 8px;
-        justify-content: center;
-        height: 44px;
+        justify-content: space-between;
+        height: 40px;
 
         .name {
           display: flex;
