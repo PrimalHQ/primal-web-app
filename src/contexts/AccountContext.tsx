@@ -38,7 +38,7 @@ import LoginModal from "../components/LoginModal/LoginModal";
 import { logError, logInfo, logWarning } from "../lib/logger";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
-import { account as tAccount, followWarning, forgotPin } from "../translations";
+import { account as tAccount, followWarning, forgotPin, settings } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 
@@ -104,6 +104,7 @@ export type AccountContextStore = {
     checkNostrKey: () => void,
     fetchBookmarks: () => void,
     updateBookmarks: (bookmarks: string[]) => void,
+    resetRelays: (relays: Relay[]) => void,
   },
 }
 
@@ -306,8 +307,14 @@ export function AccountProvider(props: { children: JSXElement }) {
     return !!store.publicKey;
   };
 
-  const setRelaySettings = (settings: NostrRelays, replace?: boolean) => {
+  const resetRelays = (relays: Relay[]) => {
+    const settings = relays.reduce((acc, r) => ({ ...acc, [r.url]: { write: true, read: true }}), {});
 
+    setRelaySettings({ ...settings }, true);
+    connectToRelays({ ...settings }, true);
+  };
+
+  const setRelaySettings = (settings: NostrRelays, replace?: boolean) => {
     if (replace) {
       for (let url in store.relaySettings) {
         if (settings[url]) {
@@ -324,7 +331,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       updateStore('relaySettings', () => ({...settings}));
       saveRelaySettings(store.publicKey, settings);
-      return;
+      return true;
     }
 
     const rs = store.relaySettings;
@@ -338,11 +345,12 @@ export function AccountProvider(props: { children: JSXElement }) {
     }, rs);
 
     if (Object.keys(toSave).length === 0) {
-      return;
+      return true;
     }
 
     updateStore('relaySettings', () => ({ ...toSave }));
-    saveRelaySettings(store.publicKey, toSave)
+    saveRelaySettings(store.publicKey, toSave);
+    return true;
   }
 
   const attachDefaultRelays = (relaySettings: NostrRelays) => {
@@ -355,7 +363,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('connectToPrimaryRelays', () => flag);
   }
 
-  const connectToRelays = (relaySettings: NostrRelays) => {
+  const connectToRelays = (relaySettings: NostrRelays, sendRelayList?: boolean) => {
 
     if (Object.keys(relaySettings).length === 0) {
       getDefaultRelays(`default_relays_${APP_ID}`);
@@ -375,6 +383,10 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     const onConnect = (connectedRelay: Relay) => {
+      if (sendRelayList) {
+        sendRelays([connectedRelay], relaySettings);
+      }
+
       if (store.relays.find(r => r.url === connectedRelay.url)) {
         return;
       }
@@ -1559,6 +1571,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     checkNostrKey,
     fetchBookmarks,
     updateBookmarks,
+    resetRelays,
   },
 });
 

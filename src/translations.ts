@@ -137,6 +137,11 @@ export const pin = {
 };
 
 export const actions = {
+  resetRelays: {
+    id: 'actions.resetRelays',
+    defaultMessage: 'Reset relays',
+    description: 'Reset relays label',
+  },
   seeMore: {
     id: 'actions.seeMore',
     defaultMessage: 'see more',
@@ -1047,6 +1052,11 @@ export const placeholders = {
   cachingPoolHelp: {
     id: 'placeholders.cachingPoolHelp',
     defaultMessage: 'Client will randomly connect to one of the caching services in this pool. This helps with fail-over if some of the services are down. You can add or remove services. If you wish to always connect to exatly one caching service, you should leave only one entry in this pool.',
+    description: 'text for caching pool help bubble',
+  },
+  resetRelaysHelp: {
+    id: 'placeholders.resetRelaysHelp',
+    defaultMessage: 'This action will disconnect you from any relays you are currently connected to and connect you to a set of recomended relays. THIS CHANGE WILL BE PROPAGETED TO THE NOSTR NETWOK NOSTR.',
     description: 'text for caching pool help bubble',
   },
   comingSoon: {

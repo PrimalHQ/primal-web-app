@@ -19,6 +19,14 @@
   }
 }
 
+.resetRelays {
+  margin-top: 12px;
+  padding-inline: 20px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
 .bigCaption {
   color: var(--text-primary);
   font-size: 20px;

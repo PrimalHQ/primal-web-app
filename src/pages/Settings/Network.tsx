@@ -20,7 +20,6 @@ import { createStore } from 'solid-js/store';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
@@ -138,6 +137,10 @@ const Network: Component = () => {
     }
   }
 
+  const resetRelays = () => {
+    account?.actions.resetRelays(recomendedRelays);
+  }
+
   const onCachingServiceInput = () => {
     if (!cachingServiceInput || cachingServiceInput.value === '') {
       return;
@@ -235,27 +238,14 @@ const Network: Component = () => {
         />
       </Show>
 
-      <Show when={otherRelays().length > 0}>
-        <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
-          {intl.formatMessage(t.network.recomended)}
-        </div>
-
-        <For each={otherRelays()}>
-          {url => (
-            <button class={styles.relayItem} onClick={() => onAddRelay(url)}>
-              <div class={styles.relayEntry}>
-                <div class={styles.addIcon}></div>
-                <div class={styles.webIcon}></div>
-                <span>
-                  {url}
-                </span>
-              </div>
-              <div class={styles.add}>{intl.formatMessage(tActions.addRelay)}</div>
-            </button>
-          )}
-        </For>
-
-      </Show>
+      <div class={styles.resetRelays}>
+        <ButtonLink onClick={resetRelays}>
+          {intl.formatMessage(tActions.resetRelays)}
+        </ButtonLink>
+        <HelpTip>
+          <span>{intl.formatMessage(tPlaceholders.resetRelaysHelp)}</span>
+        </HelpTip>
+      </div>
 
       <div class={styles.settingsContentBorderless}>
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
