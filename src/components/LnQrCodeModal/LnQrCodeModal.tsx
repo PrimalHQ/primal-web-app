@@ -61,7 +61,7 @@ const LnQrCodeModal: Component<{
 
         <div class={styles.body}>
           <div class={styles.qrCode}>
-            <QrCode data={props.lnbc || ''} />
+            <QrCode data={props.lnbc || ''} type="lightning"/>
           </div>
 
           <div class={styles.description}>{description()}</div>

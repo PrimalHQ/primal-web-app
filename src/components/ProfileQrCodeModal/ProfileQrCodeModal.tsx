@@ -39,10 +39,12 @@ const ProfileQrCodeModal: Component<{
     pubkey: {
       title: 'Public key',
       data: `nostr:${props.profile.npub || hexToNpub(props.profile.pubkey)}`,
+      type: 'nostr',
     },
     lnAddress: {
       title: 'Lightning address',
       data: `lightning:${props.profile.lud16 || props.profile.lud06}`,
+      type: 'lightning',
     }
   });
 
@@ -98,7 +100,7 @@ const ProfileQrCodeModal: Component<{
               {([key, info]) =>
                 <Show when={info.data}>
                   <Tabs.Content class={styles.tabContent} value={key}>
-                    <QrCode data={info.data} />
+                    <QrCode data={info.data} type={info.type} />
                   </Tabs.Content>
                 </Show>
               }
