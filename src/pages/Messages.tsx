@@ -1,11 +1,11 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { nip19 } from 'nostr-tools';
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useMessagesContext } from '../contexts/MessagesContext';
 import { nip05Verification, truncateNpub, userName } from '../stores/profile';
-import { PrimalNote, PrimalUser } from '../types/primal';
+import { DirectMessage, DirectMessageThread, PrimalNote, PrimalUser } from '../types/primal';
 import { date } from '../lib/dates';
 
 import styles from './Messages.module.scss';
@@ -20,7 +20,7 @@ import SearchOption from '../components/Search/SearchOption';
 import { debounce, isVisibleInContainer, uuidv4 } from '../utils';
 import { useSearchContext } from '../contexts/SearchContext';
 import { createStore } from 'solid-js/store';
-import { editMentionRegex, emojiSearchLimit } from '../constants';
+import { editMentionRegex, emojiSearchLimit, linebreakRegex } from '../constants';
 import Search from '../components/Search/Search';
 import { useProfileContext } from '../contexts/ProfileContext';
 import Paginator from '../components/Paginator/Paginator';
@@ -35,6 +35,7 @@ import {
 import PageCaption from '../components/PageCaption/PageCaption';
 import { useMediaContext } from '../contexts/MediaContext';
 import PageTitle from '../components/PageTitle/PageTitle';
+import Lnbc from '../components/Lnbc/Lnbc';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -294,6 +295,7 @@ const Messages: Component = () => {
     if (!messages) {
       return message;
     }
+
     return parseNoteLinks(
       parseNpubLinks(
         highlightHashtags(
@@ -831,6 +833,13 @@ const Messages: Component = () => {
     newMessageInput.dispatchEvent(e);
   };
 
+  const msgHasInvoice = (msg: DirectMessage) => {
+    const r =/(\s+|\r\n|\r|\n|^)lnbc[a-zA-Z0-9]+/;
+    const test = r.test(msg.content);
+
+    return test
+  };
+
   createEffect(() => {
     if (account?.hasPublicKey()) {
       profile?.actions.setProfileKey(account.publicKey)
@@ -883,6 +892,75 @@ const Messages: Component = () => {
   const onInput = () => {
     newMessageInput && setMessage(newMessageInput.value)
   }
+
+  const renderMessage = (msg: DirectMessage, thread: DirectMessageThread) => {
+    if (!msgHasInvoice(msg)) {
+      return (
+        <div
+          class={styles.message}
+          data-event-id={msg.id}
+          title={date(msg.created_at || 0).date.toLocaleString()}
+          innerHTML={parseMessage(msg.content)}
+        ></div>
+      );
+    };
+
+    let sections: string[] = [];
+
+    let content = msg.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+
+    let tokens: string[] = content.split(/[\s]+/);
+
+    let sectionIndex = 0;
+    tokens.forEach((t) => {
+      if (t.startsWith('lnbc')) {
+        if (sections[sectionIndex]) sectionIndex++;
+
+        sections[sectionIndex] = t;
+
+        sectionIndex++;
+      }
+      else {
+        let c = t;
+        const prev = sections[sectionIndex] || '';
+
+        if (t === '__SP__') {
+          c = prev.length === 0 ? '' : ' ';
+        }
+
+        if (t === '__LB__') {
+          c = prev.length === 0 ? '' : '\r';
+        }
+
+        sections[sectionIndex] = prev + c;
+      }
+    });
+
+    return (
+      <For each={sections.reverse()}>
+        {section => (
+          <Switch fallback={
+            <div
+              class={styles.message}
+              data-event-id={msg.id}
+              title={date(msg.created_at || 0).date.toLocaleString()}
+              innerHTML={parseMessage(section)}
+            ></div>
+          }>
+            <Match when={section.startsWith('lnbc')}>
+              <div
+                class={styles.messageLn}
+                data-event-id={msg.id}
+                title={date(msg.created_at || 0).date.toLocaleString()}
+              >
+                <Lnbc lnbc={section} noBack={true} alternative={!isSelectedSender(thread.author)} />
+              </div>
+            </Match>
+          </Switch>
+        )}
+      </For>
+    );
+  };
 
   return (
     <div>
@@ -1064,14 +1142,7 @@ const Messages: Component = () => {
                         </A>
                         <div class={styles.threadMessages}>
                           <For each={thread.messages}>
-                            {(msg) => (
-                              <div
-                                class={styles.message}
-                                data-event-id={msg.id}
-                                title={date(msg.created_at || 0).date.toLocaleString()}
-                                innerHTML={parseMessage(msg.content)}
-                              ></div>
-                            )}
+                            {msg => renderMessage(msg, thread)}
                           </For>
                         </div>
                         <Show when={thread.messages[0]}>
@@ -1091,14 +1162,7 @@ const Messages: Component = () => {
                       </A>
                       <div class={styles.threadMessages}>
                         <For each={thread.messages}>
-                          {(msg) => (
-                            <div
-                              class={styles.message}
-                              data-event-id={msg.id}
-                              title={date(msg.created_at || 0).date.toLocaleString()}
-                              innerHTML={parseMessage(msg.content)}
-                            ></div>
-                          )}
+                          {msg => renderMessage(msg, thread)}
                         </For>
                       </div>
                       <Show when={thread.messages[0]}>

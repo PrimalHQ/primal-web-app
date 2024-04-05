@@ -22,7 +22,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { lnInvoice } from '../../translations';
 
 
-const Lnbc: Component< { id?: string, lnbc: string } > = (props) => {
+const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBack?: boolean } > = (props) => {
 
   const app = useAppContext();
   const toast = useToastContext();
@@ -151,8 +151,17 @@ const Lnbc: Component< { id?: string, lnbc: string } > = (props) => {
     }
   };
 
+  const klass = () => {
+    let k = props.alternative ? styles.lnbcAlter : styles.lnbc;
+    if (props.noBack) {
+      k += ` ${styles.noBack}`
+    }
+
+    return k;
+  }
+
   return (
-    <div id={props.id} class={styles.lnbc}>
+    <div id={props.id} class={klass()}>
       <Show when={paymentInProgress()}>
         <div class={styles.paymentOverlay}>
           <Loader />

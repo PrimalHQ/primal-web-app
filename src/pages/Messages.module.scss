@@ -26,7 +26,7 @@
     align-items: flex-start;
     max-width: calc(100% - 48px);
 
-    .message {
+    .message, .messageLn {
       @include messageContent();
 
       @if $align-end {
@@ -46,12 +46,18 @@
       background-color: var(--subtile-devider);
     }
   }
+  .messageLn {
+    display: flex;
+    width: calc(500px + 12px - 40px) !important;
+  }
+
   .threadTime {
     color: var(--text-tertiary-2);
     font-weight: 400;
     font-size: 12px;
     line-height: 16px;
   }
+
 }
 
 .messagesContent {
@@ -258,7 +264,7 @@
       .myThread {
         @include thread(true);
         .threadMessages {
-          .message {
+          .message, .messageLn {
             color: var(--text-primary-button);
             background-color: var(--accent);
             border-radius: 12px 0px 0px 12px;
@@ -279,7 +285,7 @@
       .theirThread {
         @include thread(false);
         .threadMessages {
-          .message {
+          .message, .messageLn {
             background-color: var(--background-input);
             border-radius: 0px 12px 12px 0px;
             &:last-child {
