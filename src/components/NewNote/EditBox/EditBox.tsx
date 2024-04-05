@@ -1063,7 +1063,7 @@ const EditBox: Component<{
 
   createEffect(() => {
     if (query().length === 0) {
-      search?.actions.getRecomendedUsers();
+      search?.actions.getRecomendedUsers(profile?.profileHistory.profiles || []);
       return;
     }
 
