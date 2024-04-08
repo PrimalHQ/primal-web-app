@@ -71,7 +71,7 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
     `${humanizeNumber(parseInt(invoice.sections.find(s => s.name === 'amount')?.value ||'0') / 1_000)} sats`;
 
   const description = () =>
-    invoice.sections.find(s => s.name === 'description')?.value;
+    decodeURI(invoice.sections.find(s => s.name === 'description')?.value);
 
   const confirmPayment = () => app?.actions.openConfirmModal({
     title: intl.formatMessage(lnInvoice.confirm.title),

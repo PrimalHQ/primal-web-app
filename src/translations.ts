@@ -1056,7 +1056,7 @@ export const placeholders = {
   },
   resetRelaysHelp: {
     id: 'placeholders.resetRelaysHelp',
-    defaultMessage: 'This action will disconnect you from any relays you are currently connected to and connect you to a set of recomended relays. THIS CHANGE WILL BE PROPAGETED TO THE NOSTR NETWOK NOSTR.',
+    defaultMessage: 'This action will disconnect you from any relays you are currently connected to and connect you to a set of recomended relays.',
     description: 'text for caching pool help bubble',
   },
   comingSoon: {

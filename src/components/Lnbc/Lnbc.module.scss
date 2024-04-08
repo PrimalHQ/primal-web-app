@@ -154,6 +154,14 @@
   &.noBack {
     background-color: unset;
   }
+
+  .lnIcon {
+    width: 20px;
+    height: 20px;
+    background-image: url('../../assets/icons/lightning.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
 }
 
 .lnbcAlter {
@@ -314,12 +322,12 @@
   &.noBack {
     background-color: unset;
   }
-}
 
-.lnIcon {
-  width: 20px;
-  height: 20px;
-  background-image: url('../../assets/icons/lightning.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
+  .lnIcon {
+    width: 20px;
+    height: 20px;
+    background-image: url('../../assets/icons/lightning_white.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
 }

@@ -276,8 +276,13 @@
               text-decoration: underline !important;
             }
           }
+
+          .messageLn {
+            padding: 0 12px !important;
+          }
         }
         + .myThread {
+          padding: 0 12px !important;
           margin-bottom: 20px;
         }
       }
@@ -291,6 +296,10 @@
             &:last-child {
               border-radius: 12px 12px 12px 0px;
             }
+          }
+
+          .messageLn {
+            padding: 0 !important;
           }
         }
         + .theirThread {
