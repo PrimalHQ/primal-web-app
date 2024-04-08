@@ -22,7 +22,13 @@ import { useIntl } from '@cookbook/solid-intl';
 import { lnInvoice } from '../../translations';
 
 
-const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBack?: boolean } > = (props) => {
+const Lnbc: Component< {
+  id?: string,
+  lnbc: string,
+  alternative?: boolean,
+  noBack?: boolean,
+  inactive?: boolean,
+} > = (props) => {
 
   const app = useAppContext();
   const toast = useToastContext();
@@ -86,6 +92,8 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
   });
 
   const payInvoice = () => {
+    if (props.inactive) return;
+
     setPaymentInProgress(() => true);
     const walletSocket = new WebSocket('wss://wallet.primal.net/v1');
 
@@ -106,6 +114,8 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
   };
 
   const sendPayment = async (socket: WebSocket, then?: (success: boolean) => void) => {
+    if (props.inactive) return;
+
     const subId = `sp_${APP_ID}`;
 
     let success = true;
@@ -181,6 +191,8 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
             <ButtonGhost
               onClick={(e: MouseEvent) => {
                 e.preventDefault();
+                if (props.inactive) return;
+
                 app?.actions.openLnbcModal(props.lnbc, () => {
                   app.actions.closeLnbcModal();
                   confirmPayment();
@@ -199,6 +211,8 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
             <ButtonGhost
               onClick={(e: MouseEvent) => {
                 e.preventDefault()
+                if (props.inactive) return;
+
                 navigator.clipboard.writeText(props.lnbc);
                 setInvoiceCopied(() => true);
               }}
@@ -229,7 +243,7 @@ const Lnbc: Component< { id?: string, lnbc: string, alternative?: boolean, noBac
           <div class={styles.payAction}>
             <ButtonPrimary onClick={(e: MouseEvent) => {
               e.preventDefault();
-              confirmPayment();
+              !props.inactive && confirmPayment();
             }}>
               {intl.formatMessage(lnInvoice.pay)}
             </ButtonPrimary>

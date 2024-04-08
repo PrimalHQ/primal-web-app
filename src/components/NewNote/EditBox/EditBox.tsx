@@ -1,9 +1,9 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -43,6 +43,7 @@ import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal"
 import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
+import Lnbc from "../../Lnbc/Lnbc";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -105,6 +106,21 @@ const EditBox: Component<{
 
   let currentPath = location.pathname;
 
+
+  const noteHasInvoice = (text: string) => {
+    const r =/(\s+|\r\n|\r|\n|^)lnbc[a-zA-Z0-9]+/;
+    const test = r.test(text);
+
+    return test
+  };
+
+  const noteHasCashu = (text: string) => {
+    const r =/(\s+|\r\n|\r|\n|^)cashuA[a-zA-Z0-9]+/;
+    const test = r.test(text);
+
+    return test
+  };
+
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
     elm.value = ''
@@ -156,6 +172,74 @@ const EditBox: Component<{
       emojiPositionOptions();
     }
   });
+
+
+  const renderMessage = () => {
+    const text = parsedMessage();
+
+    if (!noteHasInvoice(text)) {
+      return (
+        <div
+          class={styles.editor}
+          ref={textPreview}
+          innerHTML={text}
+        ></div>
+      );
+    };
+
+    let sections: string[] = [];
+
+    let content = text.replace(linebreakRegex, ' __LB__ ').replaceAll('<br>', ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+
+    let tokens: string[] = content.split(/[\s]+/);
+
+    let sectionIndex = 0;
+
+    tokens.forEach((t) => {
+      if (t.startsWith('lnbc')) {
+        if (sections[sectionIndex]) sectionIndex++;
+
+        sections[sectionIndex] = t;
+
+        sectionIndex++;
+      }
+      else {
+        let c = t;
+        const prev = sections[sectionIndex] || '';
+
+        if (t === '__SP__') {
+          c = prev.length === 0 ? '' : ' ';
+        }
+
+        if (t === '__LB__') {
+          c = prev.length === 0 ? '' : ' <br/>';
+        }
+
+        sections[sectionIndex] = prev + c;
+      }
+    });
+
+    return (
+      <div
+        class={styles.editor}
+        ref={textPreview}
+      >
+        <For each={sections}>
+          {section => (
+            <Switch fallback={
+              <div
+                innerHTML={section}
+              ></div>
+            }>
+              <Match when={section.startsWith('lnbc')}>
+                <Lnbc lnbc={section} inactive={true} />
+              </Match>
+            </Switch>
+          )}
+        </For>
+      </div>
+    );
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (!textArea) {
@@ -1283,11 +1367,7 @@ const EditBox: Component<{
           class={styles.editorScroll}
           id={`${prefix()}new_note_text_preview`}
         >
-          <div
-            class={styles.editor}
-            ref={textPreview}
-            innerHTML={parsedMessage()}
-          ></div>
+          {renderMessage()}
           <div class={styles.uploader}>
             <Uploader
               publicKey={account?.publicKey}
