@@ -36,6 +36,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import { useMediaContext } from '../contexts/MediaContext';
 import PageTitle from '../components/PageTitle/PageTitle';
 import Lnbc from '../components/Lnbc/Lnbc';
+import Cashu from '../components/Cashu/Cashu';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -840,6 +841,13 @@ const Messages: Component = () => {
     return test
   };
 
+  const msgHasCashu = (msg: DirectMessage) => {
+    const r =/(\s+|\r\n|\r|\n|^)cashuA[a-zA-Z0-9]+/;
+    const test = r.test(msg.content);
+
+    return test
+  };
+
   createEffect(() => {
     if (account?.hasPublicKey()) {
       profile?.actions.setProfileKey(account.publicKey)
@@ -894,7 +902,7 @@ const Messages: Component = () => {
   }
 
   const renderMessage = (msg: DirectMessage, thread: DirectMessageThread) => {
-    if (!msgHasInvoice(msg)) {
+    if (!msgHasInvoice(msg) && !msgHasCashu(msg)) {
       return (
         <div
           class={styles.message}
@@ -913,7 +921,7 @@ const Messages: Component = () => {
 
     let sectionIndex = 0;
     tokens.forEach((t) => {
-      if (t.startsWith('lnbc')) {
+      if (t.startsWith('lnbc') || t.startsWith('cashuA')) {
         if (sections[sectionIndex]) sectionIndex++;
 
         sections[sectionIndex] = t;
@@ -954,6 +962,15 @@ const Messages: Component = () => {
                 title={date(msg.created_at || 0).date.toLocaleString()}
               >
                 <Lnbc lnbc={section} noBack={true} alternative={!isSelectedSender(thread.author)} />
+              </div>
+            </Match>
+            <Match when={section.startsWith('cashuA')}>
+              <div
+                class={styles.messageLn}
+                data-event-id={msg.id}
+                title={date(msg.created_at || 0).date.toLocaleString()}
+              >
+                <Cashu token={section} noBack={true} alternative={!isSelectedSender(thread.author)} />
               </div>
             </Match>
           </Switch>

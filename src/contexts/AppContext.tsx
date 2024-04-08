@@ -8,6 +8,8 @@ import {
   useContext
 } from "solid-js";
 import { PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import { CashuMint } from "@cashu/cashu-ts";
+
 
 export type ReactionStats = {
   likes: number,
@@ -41,7 +43,7 @@ export type ConfirmInfo = {
   onAbort?: () => void,
 };
 
-export type LnbcInfo = {
+export type InvoiceInfo = {
   invoice: string,
   onPay?: () => void,
   onCancel?: () => void,
@@ -57,9 +59,12 @@ export type AppContextStore = {
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
   showLnInvoiceModal: boolean,
-  lnbc: LnbcInfo | undefined,
+  lnbc: InvoiceInfo | undefined,
+  showCashuInvoiceModal: boolean,
+  cashu: InvoiceInfo | undefined,
   showConfirmModal: boolean,
   confirmInfo: ConfirmInfo | undefined,
+  cashuMints: Map<string, CashuMint>,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -69,8 +74,11 @@ export type AppContextStore = {
     closeContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
     closeLnbcModal: () => void,
+    openCashuModal: (cashu: string, onPay: () => void) => void,
+    closeCashuModal: () => void,
     openConfirmModal: (confirmInfo: ConfirmInfo) => void,
     closeConfirmModal: () => void,
+    getCashuMint: (url: string) => CashuMint | undefined,
   },
 }
 
@@ -90,8 +98,11 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   noteContextMenuInfo: undefined,
   showLnInvoiceModal: false,
   lnbc: undefined,
+  showCashuInvoiceModal: false,
+  cashu: undefined,
   showConfirmModal: false,
   confirmInfo: undefined,
+  cashuMints: new Map(),
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -165,6 +176,21 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('lnbc', () => undefined);
   };
 
+
+  const openCashuModal = (cashu: string, onPay: () => void) => {
+    updateStore('showCashuInvoiceModal', () => true);
+    updateStore('cashu', () => ({
+      invoice: cashu,
+      onPay,
+      onCancel: () => updateStore('showCashuInvoiceModal', () => false),
+    }))
+  };
+
+  const closeCashuModal = () => {
+    updateStore('showCashuInvoiceModal', () => false);
+    updateStore('cashu', () => undefined);
+  };
+
   const openConfirmModal = (confirmInfo: ConfirmInfo) => {
     updateStore('showConfirmModal', () => true);
     updateStore('confirmInfo', () => ({...confirmInfo }));
@@ -177,6 +203,15 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const closeContextMenu = () => {
     updateStore('showNoteContextMenu', () => false);
+  };
+
+  const getCashuMint = (url: string) => {
+    const formatted = new URL(url).toString();
+    if (!store.cashuMints.has(formatted)) {
+      const mint = new CashuMint(formatted);
+      store.cashuMints.set(formatted, mint);
+    }
+    return store.cashuMints.get(formatted);
   };
 
 // EFFECTS --------------------------------------
@@ -227,6 +262,9 @@ export const AppProvider = (props: { children: JSXElement }) => {
       closeLnbcModal,
       openConfirmModal,
       closeConfirmModal,
+      openCashuModal,
+      closeCashuModal,
+      getCashuMint,
     }
   });
 

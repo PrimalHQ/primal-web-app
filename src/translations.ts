@@ -2199,3 +2199,54 @@ export const lnInvoice = {
   },
 
 };
+
+export const cashuInvoice = {
+  redeem: {
+    id: 'cashuInvoice.redeem',
+    defaultMessage: 'Reedem',
+    description: 'Reedem ecash action',
+  },
+  pending: {
+    id: 'cashuInvoice.pending',
+    defaultMessage: 'Pending',
+    description: 'Pending ecash',
+  },
+  spent: {
+    id: 'cashuInvoice.spent',
+    defaultMessage: 'Spent',
+    description: 'Spent ecash',
+  },
+  title: {
+    id: 'cashuInvoice.title',
+    defaultMessage: 'Cashu Ecash',
+    description: 'Cashu Ecash title',
+  },
+  mint: {
+    id: 'cashuInvoice.mint',
+    defaultMessage: 'Mint: {url}',
+    description: 'Mint url',
+  },
+  confirm: {
+    title: {
+      id: 'cashuInvoice.confirm.title',
+      defaultMessage: 'Are you sure?',
+      description: 'Cashu invoice pay confirmation',
+    },
+    description: {
+      id: 'cashuInvoice.confirm.description',
+      defaultMessage: 'Redeem {amount}',
+      description: 'Cashu Invoice confirm description',
+    },
+    confirmLabel: {
+      id: 'cashuInvoice.confirm.confirmLabel',
+      defaultMessage: 'Yes, redeem',
+      description: 'Cashu Invoice confirm button label',
+    },
+    abortLabel: {
+      id: 'cashuInvoice.confirm.abortLabel',
+      defaultMessage: 'Cancel',
+      description: 'Cashu Invoice confirm button label',
+    },
+  },
+
+};

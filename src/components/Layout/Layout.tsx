@@ -20,6 +20,7 @@ import CustomZap from '../CustomZap/CustomZap';
 import NoteContextMenu from '../Note/NoteContextMenu';
 import LnQrCodeModal from '../LnQrCodeModal/LnQrCodeModal';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
+import CashuQrCodeModal from '../CashuQrCodeModal/CashuQrCodeModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -172,6 +173,13 @@ const Layout: Component = () => {
                   lnbc={app?.lnbc?.invoice || ''}
                   onPay={app?.lnbc?.onPay}
                   onClose={app?.lnbc?.onCancel}
+                />
+
+                <CashuQrCodeModal
+                  open={app?.showCashuInvoiceModal}
+                  cashu={app?.cashu?.invoice || ''}
+                  onPay={app?.cashu?.onPay}
+                  onClose={app?.cashu?.onCancel}
                 />
 
                 <ConfirmModal

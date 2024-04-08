@@ -21,6 +21,7 @@
     "vite-plugin-solid": "^2.5.0"
   },
   "dependencies": {
+    "@cashu/cashu-ts": "0.9.0",
     "@cookbook/solid-intl": "0.1.2",
     "@jukben/emoji-search": "3.0.0",
     "@kobalte/core": "0.11.0",
