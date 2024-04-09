@@ -54,7 +54,7 @@ const CashuQrCodeModal: Component<{
 
         <div class={styles.body}>
           <div class={styles.qrCode}>
-            <QrCode data={props.cashu || ''} type="lightning"/>
+            <QrCode data={props.cashu || ''} type="cashu"/>
           </div>
 
           <div class={styles.description}>{description()}</div>

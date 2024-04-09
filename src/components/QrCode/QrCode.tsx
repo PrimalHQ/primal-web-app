@@ -15,11 +15,12 @@ const QrCode: Component<{ data: string, type?: string }> = (props) => {
   const qrType = () => {
     const t = props.type && qrTypes.includes(props.type) ?
       props.type :
-      'nostr';
+      'none';
 
-    const qrImages: Record<string, string> = {
+    const qrImages: Record<string, string | undefined> = {
       nostr: qrNostrich,
       lightning: qrLightning,
+      none: undefined,
     }
 
     return qrImages[t];
