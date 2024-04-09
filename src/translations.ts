@@ -1234,6 +1234,19 @@ export const profile = {
     defaultMessage: '{name} is on no relays',
     description: 'Label indicating that the profile has no relays',
   },
+  qrModal: {
+    pubkey: {
+      id: 'profile.qrModal.pubkey',
+      defaultMessage: 'Public key',
+      description: 'Public key tab title in profile qr code modal',
+    },
+    ln: {
+      id: 'profile.qrModal.ln',
+      defaultMessage: 'Lightning address',
+      description: 'Lightning address tab title in profile qr code modal',
+    },
+
+  }
 };
 
 export const search = {

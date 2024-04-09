@@ -1,24 +1,15 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { defaultZap, defaultZapOptions } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { Component, For, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { truncateNumber } from '../../lib/notifications';
-import { zapNote, zapProfile } from '../../lib/zap';
-import { authorName, nip05Verification, truncateNpub, userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
-import { debounce } from '../../utils';
+import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
+import { profile as tProfile } from '../../translations';
+import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import ButtonCopy from '../Buttons/ButtonCopy';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
 import QrCode from '../QrCode/QrCode';
-import TextInput from '../TextInput/TextInput';
-import { useToastContext } from '../Toaster/Toaster';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ProfileQrCodeModal.module.scss';
@@ -30,18 +21,22 @@ const ProfileQrCodeModal: Component<{
   onClose?: () => void,
 }> = (props) => {
 
+  const intl = useIntl();
+
   const profileData = () => Object.entries({
     pubkey: {
-      title: 'Public key',
+      title: intl.formatMessage(tProfile.qrModal.pubkey),
       data: `nostr:${props.profile.npub || hexToNpub(props.profile.pubkey)}`,
-      dataLabel: props.profile.npub || hexToNpub(props.profile.pubkey),
+      dataLabel: props.profile.npub || hexToNpub(props.profile.pubkey) || '',
       type: 'nostr',
+      test: props.profile.npub || hexToNpub(props.profile.pubkey),
     },
     lnAddress: {
-      title: 'Lightning address',
+      title: intl.formatMessage(tProfile.qrModal.ln),
       data: `lightning:${props.profile.lud16 || props.profile.lud06}`,
-      dataLabel: props.profile.lud16 || props.profile.lud06,
+      dataLabel: props.profile.lud16 || props.profile.lud06 || '',
       type: 'lightning',
+      test: props.profile.lud16 || props.profile.lud06,
     }
   });
 
@@ -82,7 +77,7 @@ const ProfileQrCodeModal: Component<{
             <Tabs.List class={styles.tabs}>
               <For each={profileData()}>
                 {([key, info]) =>
-                  <Show when={info.data}>
+                  <Show when={info.test}>
                     <Tabs.Trigger class={styles.tab} value={key} >
                     {info.title}
                     </Tabs.Trigger>
@@ -95,7 +90,7 @@ const ProfileQrCodeModal: Component<{
 
             <For each={profileData()}>
               {([key, info]) =>
-                <Show when={info.data}>
+                <Show when={info.test}>
                   <Tabs.Content class={styles.tabContent} value={key}>
                     <QrCode data={info.data} type={info.type} />
                   </Tabs.Content>
@@ -109,7 +104,7 @@ const ProfileQrCodeModal: Component<{
 
           <For each={profileData()}>
             {([key, info]) =>
-              <Show when={info.data}>
+              <Show when={info.test}>
                 <div class={styles.keyEntry}>
                   <div class={styles.label}>
                     {info.title}:
