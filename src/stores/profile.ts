@@ -68,10 +68,10 @@ export const userName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
-  const name = user.name ||
-    user.display_name ||
+  const name = user.display_name ||
     user.displayName ||
-    user.npub;
+    user.name ||
+    truncateNpub(user.npub);
 
   return name ?
     name :
@@ -85,7 +85,7 @@ export const authorName = (user: PrimalUser | undefined) => {
   const name = user.display_name ||
     user.displayName ||
     user.name ||
-    user.npub;
+    truncateNpub(user.npub);
 
   return name ?
     name :
