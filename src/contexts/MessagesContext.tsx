@@ -1,6 +1,7 @@
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { Kind, threadLenghtInMs } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
@@ -36,14 +37,14 @@ import {
 import { APP_ID } from "../App";
 import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
-import { convertToUser } from "../stores/profile";
+import { convertToUser, emptyUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "nostr-tools";
 import { convertToNotes } from "../stores/note";
 import { sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";
-import { loadMsgContacts, saveMsgContacts } from "../lib/localStore";
+import { loadDmCoversations, loadMsgContacts, saveDmConversations, saveMsgContacts } from "../lib/localStore";
 import { useAppContext } from "./AppContext";
 
 
@@ -155,10 +156,39 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
       updateStore('activePubkey', () => account.publicKey)
       // @ts-ignore
-      const contacts = loadMsgContacts(account?.publicKey);
+      // const contacts = loadMsgContacts(account?.publicKey);
 
-      updateStore('senders', reconcile({ ...contacts.profiles[store.senderRelation]}));
-      updateStore('messageCountPerSender', () => ({ ...contacts.counts }));
+      const contacts = loadDmCoversations(account?.publicKey);
+
+      const ids = Object.keys(contacts.profiles);
+
+      let senders: Record<string, PrimalUser> = {};
+      let counts: Record<string, SenderMessageCount> = {};
+
+      const tests = {
+        follows: (id: string) => account?.following.includes(id),
+        other: (id: string) => !account?.following.includes(id),
+        any: () => true,
+      };
+
+      for (let i =0; i<ids.length; i++) {
+        const id = ids[i];
+
+        if (tests[store.senderRelation](id)) {
+          senders[id] = ({ ...contacts.profiles[id] });
+          counts[id] = ({ ...contacts.counts[id] });
+        }
+      }
+
+      batch(() => {
+        // @ts-ignore
+        updateStore('senders', () => undefined);
+        // @ts-ignore
+        updateStore('messageCountPerSender', () => undefined);
+
+        updateStore('senders', () => ({ ...senders}));
+        updateStore('messageCountPerSender', () => ({ ...counts }));
+      })
 
       // @ts-ignore
       getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
@@ -574,7 +604,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
 
   const orderedSenders = () => {
-    const senders = store.senders;
+    const senders: Record<string, PrimalUser> = store.senders;
 
     if (!senders) {
       return [];
@@ -625,14 +655,19 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         if (content?.kind === Kind.MesagePerSenderStats) {
           const senderCount = JSON.parse(content.content);
 
+          const senders = Object.keys(senderCount).reduce((acc, pk) => {
+            return { ...acc, [pk]: emptyUser(pk)};
+          }, {});
+
           updateStore('messageCountPerSender', () => ({ ...senderCount }));
+          updateStore('senders', () => ({...senders}));
           updateMessageTimings();
         }
 
         if (content?.kind === Kind.Metadata) {
-          if (store.senders[content.pubkey]) {
-            return;
-          }
+          // if (store.senders[content.pubkey]) {
+          //   return;
+          // }
 
           const isFollowing = account?.following.includes(content.pubkey);
 
@@ -644,7 +679,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
 
           const user = convertToUser(content);
-          updateStore('senders', () => ({ [user.pubkey]: { ...user } }));
+          updateStore('senders', user.pubkey, () => ({ ...user }));
         }
       }
 
@@ -652,7 +687,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         const keys = Object.keys(store.senders);
         const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
 
-        saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
+        // saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
+        saveDmConversations(store.activePubkey, store.senders, store.messageCountPerSender);
 
         if (store.messageCount > cnt) {
           updateStore('hasMessagesInDifferentTab', () => true);

@@ -22,6 +22,10 @@ export type LocalStore = {
     profiles: Record<UserRelation, Record<string, PrimalUser>>,
     counts: Record<string, SenderMessageCount>,
   },
+  dmConversations: {
+    profiles: Record<string, PrimalUser>,
+    counts: Record<string, SenderMessageCount>,
+  },
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
@@ -55,6 +59,7 @@ export const emptyStorage: LocalStore = {
   likes: [],
   feeds: [],
   msgContacts: { profiles: { other: {}, follows: {}, any: {} }, counts: {} },
+  dmConversations: { profiles: {}, counts: {} },
   theme: 'sunrise',
   homeSidebarSelection: undefined,
   userProfile: undefined,
@@ -400,11 +405,34 @@ export const saveMsgContacts = (pubkey: string | undefined, contacts: Record<str
   setStorage(pubkey, store);
 }
 
-
 export const loadMsgContacts = (pubkey: string) => {
   const store = getStorage(pubkey)
 
   return store.msgContacts || { profiles: {}, counts: {} };
+};
+
+
+export const saveDmConversations = (pubkey: string | undefined, contacts: Record<string, PrimalUser>, counts: Record<string, SenderMessageCount>) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  if (!store.dmConversations) {
+    store.dmConversations = { profiles: {}, counts: {} };
+  }
+
+  store.dmConversations.profiles = { ...contacts };
+  store.dmConversations.counts = { ...counts };
+
+  setStorage(pubkey, store);
+}
+
+export const loadDmCoversations = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmConversations || { profiles: {}, counts: {} };
 };
 
 
