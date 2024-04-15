@@ -633,6 +633,9 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
+  let emptyUsers: string[] = [];
+  let fetchedSenders: Record<string, PrimalUser> = {};
+
   const onMessage = (event: MessageEvent) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
@@ -655,19 +658,17 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         if (content?.kind === Kind.MesagePerSenderStats) {
           const senderCount = JSON.parse(content.content);
 
-          const senders = Object.keys(senderCount).reduce((acc, pk) => {
-            return { ...acc, [pk]: emptyUser(pk)};
-          }, {});
+          emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
+            if (store.senders[pk]) return [ ...acc ];
+
+            return [ ...acc, pk];
+          }, []);
 
           updateStore('messageCountPerSender', () => ({ ...senderCount }));
-          updateStore('senders', () => ({...senders}));
           updateMessageTimings();
         }
 
         if (content?.kind === Kind.Metadata) {
-          // if (store.senders[content.pubkey]) {
-          //   return;
-          // }
 
           const isFollowing = account?.following.includes(content.pubkey);
 
@@ -677,15 +678,38 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
             return;
           }
 
-
           const user = convertToUser(content);
-          updateStore('senders', user.pubkey, () => ({ ...user }));
+          fetchedSenders[user.pubkey] = { ...user };
+          // updateStore('senders', user.pubkey, () => ({ ...user }));
         }
       }
 
       if (type === 'EOSE') {
         const keys = Object.keys(store.senders);
         const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
+
+        let sendersToAdd: Record<string, PrimalUser> = {};
+
+        const pks = Object.keys(fetchedSenders)
+
+        for (let i=0; i < pks.length; i++) {
+          const pk = pks[i];
+
+          if (store.senders[pk]) continue;
+
+          sendersToAdd[pk] = fetchedSenders[pk];
+        }
+
+        for (let i=0; i < emptyUsers.length; i++) {
+          const pk = emptyUsers[i];
+          if (store.senders[pk] || sendersToAdd[pk]) continue;
+
+          sendersToAdd[pk] = emptyUser(pk);
+        }
+
+        updateStore('senders', () => ({ ...sendersToAdd }));
+
+        fetchedSenders = {};
 
         // saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
         saveDmConversations(store.activePubkey, store.senders, store.messageCountPerSender);
