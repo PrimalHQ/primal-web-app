@@ -1,7 +1,9 @@
 import { A } from '@solidjs/router';
 import { hexToNpub } from '../../lib/keys';
 import {
+  addLinkPreviews,
   getLinkPreview,
+  isAddrMention,
   isAppleMusic,
   isCustomEmoji,
   isHashtag,
@@ -26,7 +28,7 @@ import {
 import { authorName, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, onMount, Show,
+  Component, createResource, createSignal, For, JSXElement, onMount, Show, Suspense,
 } from 'solid-js';
 import {
   PrimalNote,
@@ -378,6 +380,12 @@ const ParsedNote: Component<{
     if (isUserMention(token)) {
       lastSignificantContent = 'usermention';
       updateContent(content, 'usermention', token);
+      return;
+    }
+
+    if (isAddrMention(token)) {
+      lastSignificantContent = 'comunity';
+      updateContent(content, 'comunity', token);
       return;
     }
 
@@ -805,6 +813,37 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderComunityMention = (item: NoteContent, index?: number) => {
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        let [_, id] = token.split(':');
+
+        if (!id) {
+          return <>{token}</>;
+        }
+
+        let end = '';
+
+        let match = specialCharsRegex.exec(id);
+
+        if (match) {
+          const i = match.index;
+          end = id.slice(i);
+          id = id.slice(0, i);
+        }
+
+        setWordsDisplayed(w => w + 1);
+
+        const url = `https://highlighter.com/a/${id}`;
+
+        return <a href={url} target="_blank" >{token}</a>;
+      }}
+    </For>
+  }
+
   const renderLongFormMention = (mention: PrimalNote | undefined, index?: number) => {
     if(!mention) return <></>;
 
@@ -1113,6 +1152,7 @@ const ParsedNote: Component<{
       link: renderLinks,
       notemention: renderNoteMention,
       usermention: renderUserMention,
+      comunity: renderComunityMention,
       tagmention: renderTagMention,
       hashtag: renderHashtag,
       emoji: renderEmoji,
