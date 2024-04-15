@@ -414,15 +414,21 @@ const ParsedNote: Component<{
 
       let lnbcToken = match?.find(m => m.startsWith('lnbc'));
 
-      lnbcToken ?
-        updateContent(content, 'lnbc', lnbcToken) :
+      if (lnbcToken) {
+        removeLinebreaks();
+        updateContent(content, 'lnbc', lnbcToken);
+      }
+      else {
         updateContent(content, 'text', token);
+      }
 
       return;
     }
 
     if (isLnbc(token)) {
       lastSignificantContent = 'lnbc';
+
+      removeLinebreaks();
       updateContent(content, 'lnbc', token);
       return;
     }
