@@ -423,8 +423,8 @@ export const saveDmConversations = (pubkey: string | undefined, contacts: Record
     store.dmConversations = { profiles: {}, counts: {} };
   }
 
-  store.dmConversations.profiles = { ...contacts };
-  store.dmConversations.counts = { ...counts };
+  store.dmConversations.profiles = { ...store.dmConversations.profiles, ...contacts };
+  store.dmConversations.counts = { ...store.dmConversations.counts, ...counts };
 
   setStorage(pubkey, store);
 }

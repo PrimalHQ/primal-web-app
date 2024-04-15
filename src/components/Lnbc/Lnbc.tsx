@@ -74,10 +74,10 @@ const Lnbc: Component< {
   }
 
   const amount = () =>
-    `${humanizeNumber(parseInt(invoice.sections.find(s => s.name === 'amount')?.value ||'0') / 1_000)} sats`;
+    `${humanizeNumber(parseInt(invoice.sections.find(s => s.name === 'amount')?.value || '0') / 1_000)} sats`;
 
   const description = () =>
-    decodeURI(invoice.sections.find(s => s.name === 'description')?.value);
+    decodeURI(invoice.sections.find(s => s.name === 'description')?.value) || '';
 
   const confirmPayment = () => app?.actions.openConfirmModal({
     title: intl.formatMessage(lnInvoice.confirm.title),

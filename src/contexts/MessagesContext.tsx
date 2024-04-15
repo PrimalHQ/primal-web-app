@@ -182,13 +182,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
       batch(() => {
         // @ts-ignore
-        updateStore('senders', () => undefined);
+        // updateStore('senders', () => undefined);
         // @ts-ignore
-        updateStore('messageCountPerSender', () => undefined);
+        // updateStore('messageCountPerSender', () => undefined);
 
         updateStore('senders', () => ({ ...senders}));
         updateStore('messageCountPerSender', () => ({ ...counts }));
       })
+
 
       // @ts-ignore
       getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
