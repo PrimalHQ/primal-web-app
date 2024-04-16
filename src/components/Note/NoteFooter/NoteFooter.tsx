@@ -30,6 +30,7 @@ const NoteFooter: Component<{
   state: NoteFooterState,
   updateState: SetStoreFunction<NoteFooterState>,
   customZapInfo: CustomZapInfo,
+  large?: boolean,
 }> = (props) => {
 
   const account = useAccountContext();
@@ -321,6 +322,7 @@ const NoteFooter: Component<{
         highlighted={props.state.replied}
         label={props.state.replies === 0 ? '' : truncateNumber(props.state.replies, 2)}
         title={props.state.replies.toLocaleString()}
+        large={props.large}
       />
 
       <NoteFooterActionButton
@@ -335,6 +337,7 @@ const NoteFooter: Component<{
         label={props.state.satsZapped === 0 ? '' : truncateNumber(props.state.satsZapped, 2)}
         hidden={props.state.hideZapIcon}
         title={props.state.satsZapped.toLocaleString()}
+        large={props.large}
       />
 
       <NoteFooterActionButton
@@ -344,6 +347,7 @@ const NoteFooter: Component<{
         highlighted={props.state.liked}
         label={props.state.likes === 0 ? '' : truncateNumber(props.state.likes, 2)}
         title={props.state.likes.toLocaleString()}
+        large={props.large}
       />
 
       <button
@@ -357,7 +361,7 @@ const NoteFooter: Component<{
           ref={repostMenu}
         >
           <div
-            class={styles.icon}
+            class={`${styles.icon} ${props.large ? styles.large : ''}`}
             style={'visibility: visible'}
           ></div>
           <div class={styles.statNumber}>
@@ -373,7 +377,10 @@ const NoteFooter: Component<{
         </div>
       </button>
 
-      <BookmarkNote note={props.note} />
+      <BookmarkNote
+        note={props.note}
+        large={props.large}
+      />
 
     </div>
   )

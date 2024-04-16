@@ -7,6 +7,11 @@
     background-color: var(--text-tertiary);
     -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 16px;
     mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 16px;
+
+    &.large {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   .fullBookmark {
@@ -17,6 +22,11 @@
     background-color: var(--active-bookmarked);
     -webkit-mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 16px;
     mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 16px;
+
+    &.large {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   &:hover {

@@ -245,8 +245,9 @@
   background-color: var(--background-card);
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding-inline: 12px;
   padding-top: 0;
+  padding-bottom: 12px;
   border-radius: 0;
   border: none;
 
@@ -285,6 +286,29 @@
         height: 40px;
       }
 
+    }
+
+    .time {
+      padding-block: 20px;
+      border-bottom: 1px solid var(--devider);
+      margin-bottom: 16px;
+      color: var(--text-tertiary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 16px;
+
+      .reactSummary {
+        &::before {
+          content: ' · ';
+        }
+
+        .number {
+          color: var(--text-primary);
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 16px;
+        }
+      }
     }
   }
 }

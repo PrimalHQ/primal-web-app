@@ -222,17 +222,7 @@ const NoteHeader: Component<{
 
             <VerificationCheck
               user={props.note.user}
-              fallback={<div class={styles.ellipsisIcon}></div>}
             />
-
-            <span
-              class={styles.time}
-              title={date(props.note.post?.created_at).date.toLocaleString()}
-            >
-              {props.primary ?
-                longDate(props.note.post?.created_at) :
-                date(props.note.post?.created_at).label}
-            </span>
           </div>
           <Show
             when={props.note.user?.nip05}

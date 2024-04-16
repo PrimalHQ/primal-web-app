@@ -23,6 +23,7 @@ const NoteFooterActionButton: Component<{
   label: string | number,
   hidden?: boolean,
   title?: string,
+  large?: boolean,
 }> = (props) => {
 
   return (
@@ -36,9 +37,9 @@ const NoteFooterActionButton: Component<{
       onTouchEnd={props.onTouchEnd ?? (() => {})}
       disabled={props.disabled}
     >
-      <div class={`${buttonTypeClasses[props.type]}`}>
+      <div class={`${buttonTypeClasses[props.type]} ${props.large ? styles.large : ''}`}>
         <div
-          class={styles.icon}
+          class={`${styles.icon} ${props.large ? styles.large : ''}`}
           style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
         ></div>
         <div class={styles.statNumber}>{props.label || ''}</div>

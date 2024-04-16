@@ -16,7 +16,7 @@ import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
 import { importEvents, triggerImportEvents } from '../../lib/notes';
 
-const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
+const BookmarkNote: Component<{ note: PrimalNote, large?: boolean }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
@@ -147,10 +147,10 @@ const BookmarkNote: Component<{ note: PrimalNote }> = (props) => {
       <Show
         when={isBookmarked()}
         fallback={
-          <div class={styles.emptyBookmark}></div>
+          <div class={`${styles.emptyBookmark} ${props.large ? styles.large : ''}`}></div>
         }
         >
-          <div class={styles.fullBookmark}></div>
+          <div class={`${styles.fullBookmark} ${props.large ? styles.large : ''}`}></div>
       </Show>
     </ButtonGhost>
     </div>

@@ -3,9 +3,7 @@ import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useNavigate, useParams } from '@solidjs/router';
 import { PrimalNote, SendNoteResult } from '../types/primal';
-import NotePrimary from '../components/Note/NotePrimary/NotePrimary';
 import PeopleList from '../components/PeopleList/PeopleList';
-import PageNav from '../components/PageNav/PageNav';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
 import { nip19 } from 'nostr-tools';
@@ -13,7 +11,6 @@ import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
 import { sortByRecency } from '../stores/note';
-import { scrollWindowTo } from '../lib/scroll';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { placeholders as tPlaceholders, thread as t } from '../translations';

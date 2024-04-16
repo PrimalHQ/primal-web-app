@@ -16,6 +16,7 @@ import NoteHeader from './NoteHeader/NoteHeader';
 import { createStore } from 'solid-js/store';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
+import { date, longDate, veryLongDate } from '../../lib/dates';
 
 export type NoteFooterState = {
   likes: number,
@@ -146,6 +147,12 @@ const Note: Component<{
     );
   }
 
+  const reactionSum = () => {
+    const { likes, zaps, reposts } = props.note.post;
+
+    return (likes || 0) + (zaps || 0) + (reposts || 0);
+  };
+
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
@@ -200,12 +207,25 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
+            <div
+              class={styles.time}
+              title={date(props.note.post?.created_at).date.toLocaleString()}
+            >
+              <span>
+                {veryLongDate(props.note.post?.created_at).replace('at', '·')}
+              </span>
+              <span class={styles.reactSummary}>
+                <span class={styles.number}>{reactionSum()}</span> Reactions
+              </span>
+            </div>
+
             <NoteFooter
               note={props.note}
               state={footerState}
               updateState={updateFooterState}
               customZapInfo={customZapInfo}
               wide={true}
+              large={true}
             />
           </div>
         </div>

@@ -2,11 +2,23 @@
   width: 16px;
   height: 16px;
   background-color: var(--text-tertiary-2);
+
+  &.large {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @mixin typeDiv {
   display: flex;
   align-items: center;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+
+  &.large {
+    font-size: 16px;
+  }
 }
 
 .contextButton {
@@ -59,9 +71,6 @@
   }
 
   .stat {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 16px;
     align-items: center;
     margin: 0px;
     padding: 0px;
