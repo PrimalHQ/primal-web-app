@@ -160,6 +160,7 @@ const Thread: Component = () => {
 
       <Wormhole to='right_sidebar'>
         <PeopleList
+          note={primaryNote()}
           people={people()}
           label={intl.formatMessage(t.sidebar)}
         />

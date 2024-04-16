@@ -90,8 +90,6 @@ const Cashu: Component< { id?: string, token: string, alternative?: boolean, noB
       lnurl,
     )}&autopay=yes`;
 
-    console.log('Redeem: ', url);
-
     window.open(url, 'blank_');
   };
 

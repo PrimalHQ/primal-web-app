@@ -5,7 +5,7 @@
   width: 100%;
   height: 44px;
   z-index: 5;
-  padding-bottom: 22px;
+  padding-block: 22px;
   display:flex;
   flex-direction: row;
   align-items: center;
@@ -23,6 +23,13 @@
       margin-left: 6px;
     }
   }
+}
+
+.authorSection {
+  // position: -webkit-sticky;
+  // position: sticky;
+  // top: 0px;
+  // padding-top: 44px;
 }
 
 .trendingSection {
@@ -46,6 +53,25 @@
 
 .heading {
   @include heading();
+}
+
+@mixin followButton {
+  grid-area: follow;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  button {
+    width: 72px;
+    height: 28px;
+    background: var(--brand-gradient);
+    border-radius: 6px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    margin: 0px;
+  }
+
 }
 
 .peopleList {
@@ -79,9 +105,9 @@
 
     .name {
       color: var(--text-primary);
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 16px;
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
@@ -117,6 +143,22 @@
       overflow: hidden;
     }
 
+    .about {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      color: var(--text-tertiary-2);
+
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 3;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      -moz-box-orient: vertical;
+      -ms-box-orient: vertical;
+      text-overflow: ellipsis;
+    }
+
     &:hover {
       .message, .name, .time {
         color: var(--text-primary);
@@ -125,25 +167,6 @@
 
       cursor: pointer;
     }
-  }
-
-  @mixin followButton {
-    grid-area: follow;
-    align-items: center;
-    display: flex;
-    align-items: center;
-    button {
-      width: 72px;
-      height: 28px;
-      background: var(--brand-gradient);
-      border-radius: 6px;
-      padding: 0px;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 16px;
-      margin: 0px;
-    }
-
   }
 
   .follow {
@@ -165,6 +188,126 @@
       text-decoration: underline;
       color: var(--text-primary);
     }
+  }
+}
+
+
+.mentionedPerson {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  gap: 8px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--devider);
+
+  text-decoration: none;
+
+
+  .header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .content {
+      grid-area: content;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      flex-grow: 1;
+
+      .name {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 16px;
+        max-width: 168px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .verification {
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 16px;
+        color: var(--text-tertiary-2);
+        max-width: 168px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .verifiedName {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 700;
+        color: var(--text-tertiary-2);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .npub {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 400;
+        color: var(--text-tertiary-2);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+
+    .follow {
+      @include followButton;
+    }
+
+    .unfollow {
+      @include followButton;
+      button {
+        background-color: var(--background-card);
+        background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                      var(--brand-gradient) border-box;
+        border: 1px solid transparent;
+      }
+    }
+
+    &:hover {
+      .name {
+        text-decoration: underline;
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  .about {
+    width: 300px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    color: var(--text-tertiary-2);
+
+    overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    -ms-box-orient: vertical;
+    text-overflow: ellipsis;
+  }
+
+  &:hover {
+
+    .content {
+      .name {
+        color: var(--text-primary);
+        text-decoration: underline;
+      }
+    }
+
+    cursor: pointer;
   }
 }
 
