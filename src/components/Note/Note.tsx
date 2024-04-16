@@ -129,6 +129,15 @@ const Note: Component<{
     onCancel: onCancelZap,
   };
 
+  const openReationModal = () =>  {
+    app?.actions.openReactionModal(props.note.post.id, {
+      likes: footerState.likes,
+      zaps: footerState.zapCount,
+      reposts: footerState.reposts,
+      quotes: 0,
+    });
+  };
+
   const onContextMenuTrigger = () => {
     app?.actions.openContextMenu(
       props.note,
@@ -136,14 +145,7 @@ const Note: Component<{
       () => {
         app?.actions.openCustomZapModal(customZapInfo);
       },
-      () => {
-        app?.actions.openReactionModal(props.note.post.id, {
-          likes: footerState.likes,
-          zaps: footerState.zapCount,
-          reposts: footerState.reposts,
-          quotes: 0,
-        });
-      }
+      openReationModal,
     );
   }
 
@@ -214,9 +216,12 @@ const Note: Component<{
               <span>
                 {veryLongDate(props.note.post?.created_at).replace('at', '·')}
               </span>
-              <span class={styles.reactSummary}>
+              <button
+                class={styles.reactSummary}
+                onClick={openReationModal}
+              >
                 <span class={styles.number}>{reactionSum()}</span> Reactions
-              </span>
+              </button>
             </div>
 
             <NoteFooter

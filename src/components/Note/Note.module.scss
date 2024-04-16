@@ -302,11 +302,29 @@
           content: ' · ';
         }
 
+        background: none;
+        margin: 0;
+        padding: 0;
+        margin-left: 4px;
+        display: inline-block;
+        width: fit-content;
+        outline: none;
+        border: none;
+
+        color: var(--text-tertiary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 16px;
+
         .number {
           color: var(--text-primary);
           font-size: 16px;
           font-weight: 600;
           line-height: 16px;
+        }
+
+        &:hover {
+          color: var(--text-primary);
         }
       }
     }
