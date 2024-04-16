@@ -11,7 +11,7 @@ import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "xxs" | "xss" | "xs" | "vvs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
+  size?: "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -26,6 +26,7 @@ const Avatar: Component<{
   const selectedSize = props.size || 'sm';
 
   const avatarClass = {
+    micro: styles.microAvatar,
     xxs: styles.xxsAvatar,
     xss: styles.xssAvatar,
     xs: styles.xsAvatar,
@@ -39,6 +40,7 @@ const Avatar: Component<{
   };
 
   const missingClass = {
+    micro: styles.microAvatar,
     xxs: styles.xxsMissing,
     xss: styles.xssMissing,
     xs: styles.xsMissing,
@@ -77,6 +79,7 @@ const Avatar: Component<{
     let size: MediaSize = 'm';
 
     switch (selectedSize) {
+      case 'micro':
       case 'xxs':
       case 'xss':
       case 'xs':

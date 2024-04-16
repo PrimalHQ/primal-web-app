@@ -40,6 +40,15 @@ import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
 import { setLinkPreviews } from "../lib/notes";
 
+export type TopZap = {
+  amount_sats: number,
+  created_at: number,
+  event_id: string,
+  receiver: string,
+  sender: string,
+  zap_receipt_id: string,
+}
+
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
   noteId: string;
@@ -49,6 +58,7 @@ export type ThreadContextStore = {
   page: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
+  topZaps: Record<string, TopZap[]>,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -78,6 +88,7 @@ export const initialData = {
   },
   reposts: {},
   lastNote: undefined,
+  topZaps: {},
 };
 
 
@@ -210,6 +221,22 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.RelayHint) {
       const hints = JSON.parse(content.content);
       updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
+    }
+
+    if (content.kind === Kind.EventZapInfo) {
+      const zapInfo = JSON.parse(content.content) as TopZap;
+
+
+      if (store.topZaps[zapInfo.event_id] === undefined) {
+        updateStore('topZaps', () => ({ [zapInfo.event_id]: [{ ...zapInfo }]}));
+        return;
+      }
+
+      if (store.topZaps[zapInfo.event_id].find(i => i.zap_receipt_id === zapInfo.zap_receipt_id)) {
+        return;
+      }
+
+      updateStore('topZaps', zapInfo.event_id, (zs) => [ ...zs, { ...zapInfo }]);
     }
   };
 

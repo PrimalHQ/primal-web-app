@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
@@ -42,6 +42,12 @@ const ReactionsModal: Component<{
   let loadedLikes = 0;
   let loadedZaps = 0;
   let loadedReposts = 0;
+
+  createEffect(() => {
+    if (props.noteId && props.stats.openOn) {
+      setSelectedTab(props.stats.openOn)
+    }
+  });
 
   createEffect(() => {
     switch (selectedTab()) {

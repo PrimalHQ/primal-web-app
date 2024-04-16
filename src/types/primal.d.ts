@@ -214,6 +214,13 @@ export type NostrRelayHint = {
   tags: string[][],
 };
 
+export type NostrZapInfo = {
+  kind: Kind.EventZapInfo,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -243,7 +250,8 @@ export type NostrEventContent =
   NostrSuggestedUsers |
   PrimalUserRelays |
   NostrBookmarks |
-  NostrRelayHint;
+  NostrRelayHint |
+  NostrZapInfo;
 
 export type NostrEvent = [
   type: "EVENT",

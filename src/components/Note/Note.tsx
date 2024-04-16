@@ -1,11 +1,11 @@
 import { A } from '@solidjs/router';
-import { batch, Component, Match, Show, Switch } from 'solid-js';
+import { batch, Component, For, Match, Show, Switch } from 'solid-js';
 import { PrimalNote, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
-import { useThreadContext } from '../../contexts/ThreadContext';
+import { TopZap, useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
 import Avatar from '../Avatar/Avatar';
@@ -13,10 +13,11 @@ import NoteAuthorInfo from './NoteAuthorInfo';
 import NoteRepostHeader from './NoteRepostHeader';
 import NoteReplyToHeader from './NoteReplyToHeader';
 import NoteHeader from './NoteHeader/NoteHeader';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, longDate, veryLongDate } from '../../lib/dates';
+import { hexToNpub } from '../../lib/keys';
 
 export type NoteFooterState = {
   likes: number,
@@ -129,12 +130,13 @@ const Note: Component<{
     onCancel: onCancelZap,
   };
 
-  const openReationModal = () =>  {
+  const openReactionModal = (openOn = 'likes') =>  {
     app?.actions.openReactionModal(props.note.post.id, {
       likes: footerState.likes,
       zaps: footerState.zapCount,
       reposts: footerState.reposts,
       quotes: 0,
+      openOn,
     });
   };
 
@@ -145,7 +147,7 @@ const Note: Component<{
       () => {
         app?.actions.openCustomZapModal(customZapInfo);
       },
-      openReationModal,
+      openReactionModal,
     );
   }
 
@@ -154,6 +156,16 @@ const Note: Component<{
 
     return (likes || 0) + (zaps || 0) + (reposts || 0);
   };
+
+  const firstZap = () => (threadContext?.topZaps[props.note.post.id] || [])[0];
+
+  const topZaps = () => {
+    return (threadContext?.topZaps[props.note.post.id] || []).slice(1, 8);
+  }
+
+  const zapSender = (zap: TopZap) => {
+    return threadContext?.users.find(u => u.pubkey === zap.sender);
+  }
 
   return (
     <Switch>
@@ -209,6 +221,43 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
+            <div class={styles.zapHighlights}>
+              <Show when={firstZap()}>
+                <A class={styles.firstZap} href={`/p/${hexToNpub(firstZap().sender)}`}>
+                  <Avatar user={zapSender(firstZap())} size="micro" />
+                  <div class={styles.amount}>
+                    {firstZap().amount_sats.toLocaleString()}
+                  </div>
+                  <div class={styles.description}>
+                  </div>
+                </A>
+              </Show>
+              <div class={styles.topZaps}>
+                <div class={styles.zapList}>
+                  <For each={topZaps()}>
+                    {zap => (
+                      <A class={styles.topZap} href={`/p/${hexToNpub(zap.sender)}`}>
+                        <Avatar user={zapSender(zap)} size="micro" />
+                        <div class={styles.amount}>
+                          {zap.amount_sats.toLocaleString()}
+                        </div>
+                      </A>
+                    )}
+                  </For>
+                </div>
+
+                <Show when={topZaps().length > 0}>
+                  <button
+                    class={styles.moreZaps}
+                    onClick={() => openReactionModal('zaps')}
+                  >
+                    <div class={styles.contextIcon}></div>
+                  </button>
+                </Show>
+              </div>
+            </div>
+
+
             <div
               class={styles.time}
               title={date(props.note.post?.created_at).date.toLocaleString()}
@@ -218,7 +267,7 @@ const Note: Component<{
               </span>
               <button
                 class={styles.reactSummary}
-                onClick={openReationModal}
+                onClick={() => openReactionModal()}
               >
                 <span class={styles.number}>{reactionSum()}</span> Reactions
               </button>

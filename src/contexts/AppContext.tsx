@@ -16,6 +16,7 @@ export type ReactionStats = {
   zaps: number,
   reposts: number,
   quotes: number,
+  openOn: string,
 };
 
 export type CustomZapInfo = {
@@ -91,6 +92,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
     zaps: 0,
     reposts: 0,
     quotes: 0,
+    openOn: 'likes',
   },
   showCustomZapModal: false,
   customZap: undefined,

@@ -133,6 +133,7 @@ export enum Kind  {
   Releases = 10_000_124,
   ImportResponse = 10_000_127,
   LinkMetadata = 10_000_128,
+  EventZapInfo = 10_000_129,
   FilteringReason = 10_000_131,
   UserFollowerCounts = 10_000_133,
   SuggestedUsersByCategory = 10_000_134,
