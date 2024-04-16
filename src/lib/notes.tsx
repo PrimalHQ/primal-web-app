@@ -547,3 +547,12 @@ export const getEventReactions = (eventId: string, kind: number, subid: string, 
     {cache: ["event_actions", { event_id: eventId, kind, limit: 20, offset }]},
   ]));
 };
+
+
+export const getEventZaps = (eventId: string, subid: string, limit: number,  offset = 0) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["event_zaps_by_satszapped", { event_id: eventId, limit, offset }]},
+  ]));
+};

@@ -8,7 +8,7 @@ import { Kind } from '../../constants';
 import { ReactionStats } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventReactions } from '../../lib/notes';
+import { getEventReactions, getEventZaps } from '../../lib/notes';
 import { truncateNumber, truncateNumber2 } from '../../lib/notifications';
 import { subscribeTo } from '../../sockets';
 import { userName } from '../../stores/profile';
@@ -178,7 +178,8 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventReactions(props.noteId, Kind.Zap, subId, offset);
+    getEventZaps(props.noteId, subId, 20, offset);
+    // getEventReactions(props.noteId, Kind.Zap, subId, offset);
   };
 
   const getReposts = (offset = 0) => {
