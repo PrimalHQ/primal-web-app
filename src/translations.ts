@@ -444,7 +444,7 @@ export const actions = {
   reactions: {
     id: 'actions.reactions',
     defaultMessage: 'Reactions ({count})',
-    description: 'Label for zap',
+    description: 'Label for reactions',
   },
 };
 
@@ -2262,4 +2262,29 @@ export const cashuInvoice = {
     },
   },
 
+};
+
+export const reactionsModal = {
+  tabs: {
+    likes: {
+      id: 'reactionsModal.tabs.likes',
+      defaultMessage: 'Likes {count}',
+      description: 'Likes tab label in reactions modal',
+    },
+    zaps: {
+      id: 'reactionsModal.tabs.zaps',
+      defaultMessage: 'Zaps {count}',
+      description: 'Zaps tab label in reactions modal',
+    },
+    reposts: {
+      id: 'reactionsModal.tabs.reposts',
+      defaultMessage: 'Reposts {count}',
+      description: 'Reposts tab label in reactions modal',
+    },
+    quotes: {
+      id: 'reactionsModal.tabs.quotes',
+      defaultMessage: 'Quotes {count}',
+      description: 'Quotes tab label in reactions modal',
+    },
+  }
 };

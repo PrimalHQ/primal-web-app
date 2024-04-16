@@ -12,7 +12,7 @@ import { getEventReactions } from '../../lib/notes';
 import { truncateNumber, truncateNumber2 } from '../../lib/notifications';
 import { subscribeTo } from '../../sockets';
 import { userName } from '../../stores/profile';
-import { actions as tActions, placeholders as tPlaceholders } from '../../translations';
+import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
 import { parseBolt11 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
@@ -241,22 +241,22 @@ const ReactionsModal: Component<{
             <Tabs.List class={styles.tabs}>
               <Show when={props.stats.likes > 0}>
                 <Tabs.Trigger class={styles.tab} value={'likes'} >
-                  Likes ({props.stats.likes})
+                 {intl.formatMessage(reactionsModal.tabs.likes, { count: props.stats.likes })}
                 </Tabs.Trigger>
               </Show>
               <Show when={props.stats.zaps > 0}>
                 <Tabs.Trigger class={styles.tab} value={'zaps'} >
-                  Zaps ({props.stats.zaps})
+                 {intl.formatMessage(reactionsModal.tabs.zaps, { count: props.stats.zaps })}
                 </Tabs.Trigger>
               </Show>
               <Show when={props.stats.reposts > 0}>
                 <Tabs.Trigger class={styles.tab} value={'reposts'} >
-                  Reposts ({props.stats.reposts})
+                 {intl.formatMessage(reactionsModal.tabs.reposts, { count: props.stats.reposts })}
                 </Tabs.Trigger>
               </Show>
               <Show when={props.stats.quotes > 0}>
                 <Tabs.Trigger class={styles.tab} value={'quotes'} >
-                  Quotes ({props.stats.quotes})
+                 {intl.formatMessage(reactionsModal.tabs.quotes, { count: props.stats.quotes })}
                 </Tabs.Trigger>
               </Show>
 
@@ -319,7 +319,7 @@ const ReactionsModal: Component<{
               >
                 {zap =>
                   <A
-                    href={`/p/${zap.npub}`}
+                    href={`/p/${hexToNpub(zap.pubkey)}`}
                     class={styles.zapItem}
                     onClick={props.onClose}
                   >
