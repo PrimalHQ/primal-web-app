@@ -90,7 +90,14 @@ const Thread: Component = () => {
     ) || [];
   };
 
-  const people = () => threadContext?.users || [];
+  const people = () => {
+    const authors = (threadContext?.notes || []).map(n => n.user);
+    const mentions = Object.values(primaryNote()?.mentionedUsers || {}).
+      filter((u) => !authors.find(a => u.pubkey === a.pubkey));
+
+    return [ ...authors, ...mentions ];
+  };
+
   const isFetching = () => threadContext?.isFetching;
 
   createEffect(() => {

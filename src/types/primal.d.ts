@@ -218,7 +218,7 @@ export type NostrZapInfo = {
   kind: Kind.EventZapInfo,
   content: string,
   created_at?: number,
-  tags: string[][],
+  tags?: string[][],
 };
 
 export type NostrEventContent =

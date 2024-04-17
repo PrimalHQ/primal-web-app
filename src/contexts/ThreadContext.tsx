@@ -226,7 +226,6 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.EventZapInfo) {
       const zapInfo = JSON.parse(content.content) as TopZap;
 
-
       if (store.topZaps[zapInfo.event_id] === undefined) {
         updateStore('topZaps', () => ({ [zapInfo.event_id]: [{ ...zapInfo }]}));
         return;
