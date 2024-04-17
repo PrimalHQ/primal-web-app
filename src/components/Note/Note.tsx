@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { batch, Component, For, Match, Show, Switch } from 'solid-js';
+import { batch, Component, createMemo, For, Match, Show, Switch } from 'solid-js';
 import { PrimalNote, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
@@ -18,6 +18,7 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, longDate, veryLongDate } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
+import { zapCustomOption } from '../../translations';
 
 export type NoteFooterState = {
   likes: number,
@@ -157,14 +158,31 @@ const Note: Component<{
     return (likes || 0) + (zaps || 0) + (reposts || 0);
   };
 
-  const firstZap = () => (threadContext?.topZaps[props.note.post.id] || [])[0];
+  const firstZap = createMemo(() => (threadContext?.topZaps[props.note.post.id] || [])[0]);
 
-  const topZaps = () => {
-    return (threadContext?.topZaps[props.note.post.id] || []).slice(1, 8);
-  }
+  const topZaps = createMemo(() => {
+    // return (threadContext?.topZaps[props.note.post.id] || []).slice(1);
+    const zaps = (threadContext?.topZaps[props.note.post.id] || []).slice(1);
+
+    let limit = 0;
+    let digits = 0;
+
+    for (let i=0; i< zaps.length; i++) {
+      const amount = zaps[i].amount || 0;
+      const length = Math.log(amount) * Math.LOG10E + 1 | 0;
+
+      digits += length;
+
+      if (digits > 25 || limit > 6) break;
+
+      limit++;
+    }
+
+    return zaps.slice(0, limit);
+  })
 
   const zapSender = (zap: TopZap) => {
-    return threadContext?.users.find(u => u.pubkey === zap.sender);
+    return threadContext?.users.find(u => u.pubkey === zap.pubkey);
   }
 
   return (
@@ -223,25 +241,32 @@ const Note: Component<{
 
             <div class={styles.zapHighlights}>
               <Show when={firstZap()}>
-                <A class={styles.firstZap} href={`/p/${hexToNpub(firstZap().sender)}`}>
+                <button
+                  class={styles.firstZap}
+                  onClick={() => openReactionModal('zaps')}
+                >
                   <Avatar user={zapSender(firstZap())} size="micro" />
                   <div class={styles.amount}>
-                    {firstZap().amount_sats.toLocaleString()}
+                    {firstZap().amount.toLocaleString()}
                   </div>
                   <div class={styles.description}>
+                    {firstZap().message}
                   </div>
-                </A>
+                </button>
               </Show>
               <div class={styles.topZaps}>
                 <div class={styles.zapList}>
                   <For each={topZaps()}>
                     {zap => (
-                      <A class={styles.topZap} href={`/p/${hexToNpub(zap.sender)}`}>
+                      <button
+                        class={styles.topZap}
+                        onClick={() => openReactionModal('zaps')}
+                      >
                         <Avatar user={zapSender(zap)} size="micro" />
                         <div class={styles.amount}>
-                          {zap.amount_sats.toLocaleString()}
+                          {zap.amount.toLocaleString()}
                         </div>
-                      </A>
+                      </button>
                     )}
                   </For>
                 </div>

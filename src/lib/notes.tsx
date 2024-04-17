@@ -6,6 +6,7 @@ import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
+import { npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
@@ -541,18 +542,33 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
 
 
 export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
+  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_actions", { event_id: eventId, kind, limit: 20, offset }]},
+    {cache: ["event_actions", { event_id, kind, limit: 20, offset }]},
   ]));
 };
 
+export const getEventQuotes = (eventId: string, subid: string, offset = 0) => {
+  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
 
-export const getEventZaps = (eventId: string, subid: string, limit: number,  offset = 0) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_zaps_by_satszapped", { event_id: eventId, limit, offset }]},
+    {cache: ["note_mentions", { event_id, limit: 20, offset }]},
+  ]));
+};
+
+export const getEventZaps = (eventId: string, user_pubkey: string | undefined, subid: string, limit: number,  offset = 0) => {
+  if (!user_pubkey) return;
+
+  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["event_zaps_by_satszapped", { event_id, user_pubkey, limit, offset }]},
   ]));
 };

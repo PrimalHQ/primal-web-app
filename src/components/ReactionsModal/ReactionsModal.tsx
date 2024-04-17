@@ -5,11 +5,12 @@ import { Component, createEffect, createSignal, For, onMount, Show } from 'solid
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { ReactionStats } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventReactions, getEventZaps } from '../../lib/notes';
-import { truncateNumber, truncateNumber2 } from '../../lib/notifications';
+import { getEventQuotes, getEventReactions, getEventZaps } from '../../lib/notes';
+import { truncateNumber2 } from '../../lib/notifications';
 import { subscribeTo } from '../../sockets';
 import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
@@ -30,18 +31,21 @@ const ReactionsModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
+  const account = useAccountContext();
 
   const [selectedTab, setSelectedTab] = createSignal('likes');
 
   const [likeList, setLikeList] = createStore<any[]>([]);
   const [zapList, setZapList] = createStore<any[]>([]);
   const [repostList, setRepostList] = createStore<any[]>([]);
+  // const [quotesList, setQuotesList] = createStore<any[]>([]);
 
   const [isFetching, setIsFetching] = createSignal(false);
 
   let loadedLikes = 0;
   let loadedZaps = 0;
   let loadedReposts = 0;
+  // let loadedQuotes = 0;
 
   createEffect(() => {
     if (props.noteId && props.stats.openOn) {
@@ -60,6 +64,9 @@ const ReactionsModal: Component<{
       case 'reposts':
         loadedReposts === 0 && getReposts();
         break;
+      // case 'quotes':
+      //   loadedQuotes === 0 && getQuotes();
+      //   break;
     }
   });
 
@@ -184,7 +191,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventZaps(props.noteId, subId, 20, offset);
+    getEventZaps(props.noteId, account?.publicKey, subId, 20, offset);
     // getEventReactions(props.noteId, Kind.Zap, subId, offset);
   };
 
@@ -224,6 +231,43 @@ const ReactionsModal: Component<{
     setIsFetching(() => true);
     getEventReactions(props.noteId, Kind.Repost, subId, offset);
   };
+
+  // const getQuotes = (offset = 0) => {
+  //   if (!props.noteId) return;
+
+  //   const subId = `nr_q_${props.noteId}_${APP_ID}`;
+
+  //   const users: any[] = [];
+
+  //   const unsub = subscribeTo(subId, (type,_, content) => {
+  //     if (type === 'EOSE') {
+  //       setQuotesList((reposts) => [...reposts, ...users]);
+  //       loadedQuotes = quotesList.length;
+  //       setIsFetching(() => false);
+  //       unsub();
+  //     }
+
+  //     if (type === 'EVENT') {
+  //       if (content?.kind === Kind.Metadata) {
+  //         let user = JSON.parse(content.content);
+
+  //         if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+  //           user.displayName = user.display_name;
+  //         }
+  //         user.pubkey = content.pubkey;
+  //         user.npub = hexToNpub(content.pubkey);
+  //         user.created_at = content.created_at;
+
+  //         users.push(user);
+
+  //         return;
+  //       }
+  //     }
+  //   });
+
+  //   setIsFetching(() => true);
+  //   getEventQuotes(props.noteId, subId, offset);
+  // };
 
   const totalCount = () => props.stats.likes + props.stats.quotes + props.stats.reposts + props.stats.zaps;
 

@@ -339,12 +339,17 @@
         display: flex;
         align-items: center;
         gap: 8px;
+        padding-left: 2px;
         padding-right: 10px;
+        padding-block: 2px;
+        margin: 0;
         border-radius: 12px;
         background: var(--devider);
         width: fit-content;
         max-width: 100%;
         text-decoration: none;
+        border: none;
+        outline: none;
 
         .amount {
           color: var(--text-primary);
@@ -395,11 +400,16 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            padding-left: 2px;
             padding-right: 10px;
+            padding-block: 2px;
+            margin: 0;
             border-radius: 12px;
             background: var(--devider);
             width: fit-content;
             text-decoration: none;
+            border: none;
+            outline: none;
 
             .amount {
               color: var(--text-primary);

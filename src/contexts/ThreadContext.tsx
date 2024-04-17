@@ -38,15 +38,15 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
-import { setLinkPreviews } from "../lib/notes";
+import { getEventZaps, setLinkPreviews } from "../lib/notes";
+import { parseBolt11 } from "../utils";
 
 export type TopZap = {
-  amount_sats: number,
-  created_at: number,
-  event_id: string,
-  receiver: string,
-  sender: string,
-  zap_receipt_id: string,
+  id: string,
+  amount: number,
+  pubkey: string,
+  message: string,
+  eventId: string,
 }
 
 export type ThreadContextStore = {
@@ -112,6 +112,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     clearNotes();
     updateStore('noteId', noteId)
     getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
+    getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
     updateStore('isFetching', () => true);
   }
 
@@ -223,19 +224,50 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
     }
 
-    if (content.kind === Kind.EventZapInfo) {
-      const zapInfo = JSON.parse(content.content) as TopZap;
 
-      if (store.topZaps[zapInfo.event_id] === undefined) {
-        updateStore('topZaps', () => ({ [zapInfo.event_id]: [{ ...zapInfo }]}));
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      if (store.topZaps[eventId] === undefined) {
+        updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
         return;
       }
 
-      if (store.topZaps[zapInfo.event_id].find(i => i.zap_receipt_id === zapInfo.zap_receipt_id)) {
+      if (store.topZaps[eventId].find(i => i.id === zap.id)) {
         return;
       }
 
-      updateStore('topZaps', zapInfo.event_id, (zs) => [ ...zs, { ...zapInfo }]);
+      updateStore('topZaps', eventId, (zs) => [ ...zs, { ...zap }]);
+
+      return;
     }
   };
 
@@ -296,6 +328,17 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
           updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
         }
 
+        return;
+      }
+    }
+
+    if (subId === `thread_zapps_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content);
         return;
       }
     }
