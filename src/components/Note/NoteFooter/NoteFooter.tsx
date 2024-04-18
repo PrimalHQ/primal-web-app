@@ -377,10 +377,12 @@ const NoteFooter: Component<{
         </div>
       </button>
 
-      <BookmarkNote
-        note={props.note}
-        large={props.large}
-      />
+      <div class={styles.bookmarkFoot}>
+        <BookmarkNote
+          note={props.note}
+          large={props.large}
+        />
+      </div>
 
     </div>
   )

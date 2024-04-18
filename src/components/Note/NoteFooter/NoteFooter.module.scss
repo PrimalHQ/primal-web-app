@@ -55,12 +55,12 @@
 
 .footer {
   display: grid;
-  grid-template-columns: 125px 125px 125px 125px 28px;
+  grid-template-columns: 125px 125px 125px 125px auto;
   position: relative;
   width: 100%;
 
   &.wide {
-    grid-template-columns: 137px 137px 137px 135px 28px;
+    grid-template-columns: 137px 137px 137px 135px auto;
   }
 
   .context {
@@ -170,6 +170,11 @@
       color: var(--text-tertiary-2);
       padding-left: 7px;
     }
+  }
+
+  .bookmarkFoot {
+    display: flex;
+    justify-content: flex-end;
   }
 }
 

@@ -491,7 +491,7 @@
       grid-area: content;
       display: flex;
       flex-direction: column;
-
+      padding-right: 20px;
 
       .message {
         grid-area: message;
@@ -508,6 +508,7 @@
 
       .footer {
         margin-top: 12px;
+        margin-right: 0 !important;
       }
     }
   }

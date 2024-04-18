@@ -135,24 +135,24 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean }> = (props) =
 
   return (
     <div class={styles.bookmark}>
-    <ButtonGhost
-      onClick={(e: MouseEvent) => {
-        e.preventDefault();
+      <ButtonGhost
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
 
-        doBookmark(isBookmarked());
+          doBookmark(isBookmarked());
 
-      }}
-      disabled={bookmarkInProgress()}
-    >
-      <Show
-        when={isBookmarked()}
-        fallback={
-          <div class={`${styles.emptyBookmark} ${props.large ? styles.large : ''}`}></div>
-        }
-        >
-          <div class={`${styles.fullBookmark} ${props.large ? styles.large : ''}`}></div>
-      </Show>
-    </ButtonGhost>
+        }}
+        disabled={bookmarkInProgress()}
+      >
+        <Show
+          when={isBookmarked()}
+          fallback={
+            <div class={`${styles.emptyBookmark} ${props.large ? styles.large : ''}`}></div>
+          }
+          >
+            <div class={`${styles.fullBookmark} ${props.large ? styles.large : ''}`}></div>
+        </Show>
+      </ButtonGhost>
     </div>
   )
 }
