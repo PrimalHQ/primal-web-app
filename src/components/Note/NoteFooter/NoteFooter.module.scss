@@ -111,8 +111,8 @@
       @include typeDiv;
       .icon {
         @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
-        mask: url(../../../assets/icons/feed_zap.svg) no-repeat 0 / 100%;
+        -webkit-mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat 0 / 100%;
       }
     }
 
@@ -123,8 +123,8 @@
         }
         .icon {
           background-color: var(--active-zap);
-          -webkit-mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
-          mask: url(../../../assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
+          -webkit-mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
+          mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
         }
       }
 
@@ -179,10 +179,11 @@
 }
 
 .largeZapLottie {
-  width: 341px;
-  height: 95px;
+  width: 405px;
+  height: 54px;
   position: absolute;
   z-index: 20;
+  // background-color: red;
 }
 
 .mediumZapLottie {
@@ -191,7 +192,6 @@
   position: absolute;
   z-index: 20;
 }
-
 
 @media only screen and (max-width: 720px) {
   .footer {

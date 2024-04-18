@@ -11,7 +11,7 @@ import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
-import zapMD from '../../../assets/lottie/zap_md.json';
+import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
@@ -219,8 +219,13 @@ const NoteFooter: Component<{
         return;
       }
 
-      const newLeft = props.wide ? 33 : 21;
-      const newTop = props.wide ? -29 : -29;
+      let newLeft = props.wide ? 31 : 19;
+      let newTop = props.wide ? -30 : -30;
+
+      if (props.large) {
+        newLeft = 11;
+        newTop = -9;
+      }
 
       medZapAnimation.style.left = `${newLeft}px`;
       medZapAnimation.style.top = `${newTop}px`;
