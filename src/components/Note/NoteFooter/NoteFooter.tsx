@@ -219,8 +219,8 @@ const NoteFooter: Component<{
         return;
       }
 
-      const newLeft = props.wide ? 36 : 24;
-      const newTop = props.wide ? -28 : -28;
+      const newLeft = props.wide ? 33 : 21;
+      const newTop = props.wide ? -29 : -29;
 
       medZapAnimation.style.left = `${newLeft}px`;
       medZapAnimation.style.top = `${newTop}px`;
@@ -310,7 +310,7 @@ const NoteFooter: Component<{
         <ZapAnimation
           id={`note-med-zap-${props.note.post.id}`}
           src={zapMD}
-          class={styles.mediumZapLottie}
+          class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
           ref={medZapAnimation}
         />
       </Show>
