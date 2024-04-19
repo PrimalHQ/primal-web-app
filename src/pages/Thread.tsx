@@ -167,6 +167,7 @@ const Thread: Component = () => {
           note={primaryNote()}
           people={people()}
           label={intl.formatMessage(t.sidebar)}
+          mentionLabel={intl.formatMessage(t.sidebarMentions)}
         />
       </Wormhole>
 

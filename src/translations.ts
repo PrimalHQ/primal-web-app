@@ -1852,8 +1852,13 @@ export const toastZapProfile = {
 
 export const thread = {
   sidebar: {
-    id: 'thread.sidebar.title',
-    defaultMessage: 'People in this thread',
+    id: 'thread.sidebar',
+    defaultMessage: 'Replies to this Note',
+    description: 'Title of the Thread page sidebar',
+  },
+  sidebarMentions: {
+    id: 'thread.sidebarMentions',
+    defaultMessage: 'People in this Note',
     description: 'Title of the Thread page sidebar',
   },
   pageTitle: {

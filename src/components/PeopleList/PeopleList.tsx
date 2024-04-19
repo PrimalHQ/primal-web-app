@@ -14,7 +14,8 @@ import Repliers from './Repliers';
 
 const PeopleList: Component<{
   people: PrimalUser[],
-  label: string,
+  label?: string,
+  mentionLabel?: string,
   id?: string,
   note?: PrimalNote,
 }> = (props) => {
@@ -41,14 +42,14 @@ const PeopleList: Component<{
           <MentionedPeople
             mentioned={mentioned()}
             author={author()}
-            label="People in this Note"
+            label={props.mentionLabel || ''}
           />
         </Show>
 
         <Show when={repliers().length > 0}>
           <Repliers
             people={repliers()}
-            label={props.label}
+            label={props.label || ''}
           />
         </Show>
       </div>
