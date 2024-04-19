@@ -13,6 +13,7 @@ import styles from './PeopleList.module.scss';
 const MentionedPerson: Component<{
   person: PrimalUser,
   id?: string,
+  noAbout?: boolean,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -44,9 +45,11 @@ const MentionedPerson: Component<{
         </Show>
       </div>
 
-      <div class={styles.about}>
-        {props.person.about || ''}
-      </div>
+      <Show when={!props.noAbout}>
+        <div class={styles.about}>
+          {props.person.about || ''}
+        </div>
+      </Show>
     </A>
   );
 }

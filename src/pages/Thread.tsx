@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, For, onCleanup, onMount, Show } fr
 import Note from '../components/Note/Note';
 import styles from './Thread.module.scss';
 import { useNavigate, useParams } from '@solidjs/router';
-import { PrimalNote, SendNoteResult } from '../types/primal';
+import { PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
@@ -19,6 +19,7 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import NavHeader from '../components/NavHeader/NavHeader';
 import Loader from '../components/Loader/Loader';
 import { isIOS } from '../components/BannerIOS/BannerIOS';
+import { unwrap } from 'solid-js/store';
 
 
 const Thread: Component = () => {
@@ -91,7 +92,9 @@ const Thread: Component = () => {
   };
 
   const people = () => {
-    const authors = (threadContext?.notes || []).map(n => n.user);
+    const authors = (threadContext?.notes || []).
+      reduce<PrimalUser[]>((acc, n) => acc.find(u => u.pubkey === n.user.pubkey) ? [...acc] : [ ...acc, { ...n.user }], []);
+
     const mentions = Object.values(primaryNote()?.mentionedUsers || {}).
       filter((u) => !authors.find(a => u.pubkey === a.pubkey));
 

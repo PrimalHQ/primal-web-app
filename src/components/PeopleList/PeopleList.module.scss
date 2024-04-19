@@ -76,23 +76,21 @@
 
 .peopleList {
   margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: 52px 148px 72px;
-  grid-template-rows: 1fr;
-  grid-template-areas: "avatar content follow";
-  grid-column-gap: 14px;
+  display: flex;
+  gap: 8px;
   text-decoration: none;
   align-items: center;
+  width: 300px;
 
   .avatar {
     grid-area: avatar;
     display: grid;
     justify-items: center;
-    height: 52px;
+    height: 44px;
 
     .avatarImg {
-      width: 52px;
-      height: 52px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
     }
   }
@@ -101,13 +99,16 @@
     grid-area: content;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
+    gap: 4px;
+    flex-grow: 1;
 
     .name {
       color: var(--text-primary);
       font-size: 16px;
       font-weight: 700;
       line-height: 16px;
+      max-width: 168px;
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
