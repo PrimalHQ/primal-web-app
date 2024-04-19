@@ -122,7 +122,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
