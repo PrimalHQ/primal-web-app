@@ -234,6 +234,7 @@ const NoteFooter: Component<{
         batch(() => {
           props.updateState('showZapAnim', () => false);
           props.updateState('hideZapIcon', () => false);
+          props.updateState('zapped', () => true);
         });
         medZapAnimation?.removeEventListener('complete', onAnimDone);
       }
@@ -258,23 +259,38 @@ const NoteFooter: Component<{
       return;
     }
 
+    const amount = settings?.defaultZap.amount || 10;
+    const message = settings?.defaultZap.message || '';
+    const emoji = settings?.defaultZap.emoji;
+
     batch(() => {
-      props.updateState('zappedAmount', () => settings?.defaultZap.amount || 0);
-      props.updateState('zappedNow', () => true);
+      props.updateState('isZapping', () => true);
       props.updateState('showZapAnim', () => true);
+      props.updateState('satsZapped', (z) => z + amount);
     });
-    const success = await zapNote(props.note, account.publicKey, settings?.defaultZap.amount || 10, settings?.defaultZap.message || '', account.relays);
+
+    const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
 
     props.updateState('isZapping', () => false);
 
     if (success) {
+      props.customZapInfo.onSuccess({
+        emoji,
+        amount,
+        message,
+      });
       return;
     }
 
     batch(() => {
-      props.updateState('zappedAmount', () => -(settings?.defaultZap.amount || 0));
-      props.updateState('zappedNow', () => true);
+      props.updateState('zappedAmount', () => -amount);
       props.updateState('zapped', () => props.note.post.noteActions.zapped);
+    });
+
+    props.customZapInfo.onFail({
+      emoji,
+      amount,
+      message,
     });
   }
 
@@ -284,17 +300,6 @@ const NoteFooter: Component<{
     reply: styles.replyType,
     repost: styles.repostType,
   };
-
-  createEffect(() => {
-    if (props.state.zappedNow) {
-      batch(() => {
-        props.updateState('zapCount', (z) => z + 1);
-        props.updateState('satsZapped', (z) => z + props.state.zappedAmount);
-        props.updateState('zapped', () => true);
-      });
-      props.updateState('zappedNow', () => false);
-    }
-  });
 
   createEffect(() => {
     if (props.state.showZapAnim) {

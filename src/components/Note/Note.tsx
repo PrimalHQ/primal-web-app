@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createMemo, For, Match, Show, Switch } from 'solid-js';
+import { batch, Component, createEffect, createMemo, For, Match, Show, Switch } from 'solid-js';
 import { PrimalNote, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
@@ -82,7 +82,7 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     batch(() => {
       updateFooterState('zappedAmount', () => zapOption.amount || 0);
-      updateFooterState('zappedNow', () => true);
+      // updateFooterState('zappedNow', () => true);
       updateFooterState('zapped', () => true);
       updateFooterState('showZapAnim', () => true)
     });
@@ -91,8 +91,10 @@ const Note: Component<{
   const onSuccessZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
     batch(() => {
+      updateFooterState('zapCount', (z) => z + 1);
+      // updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
       updateFooterState('isZapping', () => false);
-      updateFooterState('zappedNow', () => false);
+      // updateFooterState('zappedNow', () => false);
       updateFooterState('showZapAnim', () => false);
       updateFooterState('hideZapIcon', () => false);
       updateFooterState('zapped', () => true);
@@ -103,8 +105,9 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     batch(() => {
       updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
+      updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
       updateFooterState('isZapping', () => false);
-      updateFooterState('zappedNow', () => true);
+      // updateFooterState('zappedNow', () => true);
       updateFooterState('showZapAnim', () => false);
       updateFooterState('hideZapIcon', () => false);
       updateFooterState('zapped', () => props.note.post.noteActions.zapped);
@@ -115,8 +118,9 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     batch(() => {
       updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
+      updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
       updateFooterState('isZapping', () => false);
-      updateFooterState('zappedNow', () => true);
+      // updateFooterState('zappedNow', () => true);
       updateFooterState('showZapAnim', () => false);
       updateFooterState('hideZapIcon', () => false);
       updateFooterState('zapped', () => props.note.post.noteActions.zapped);
@@ -153,9 +157,9 @@ const Note: Component<{
   }
 
   const reactionSum = () => {
-    const { likes, zaps, reposts } = props.note.post;
+    const { likes, zapCount, reposts } = footerState;
 
-    return (likes || 0) + (zaps || 0) + (reposts || 0);
+    return (likes || 0) + (zapCount || 0) + (reposts || 0);
   };
 
   const firstZap = createMemo(() => (threadContext?.topZaps[props.note.post.id] || [])[0]);
