@@ -82,6 +82,7 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     batch(() => {
       updateFooterState('zappedAmount', () => zapOption.amount || 0);
+      updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
       // updateFooterState('zappedNow', () => true);
       updateFooterState('zapped', () => true);
       updateFooterState('showZapAnim', () => true)
@@ -90,6 +91,7 @@ const Note: Component<{
 
   const onSuccessZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
     batch(() => {
       updateFooterState('zapCount', (z) => z + 1);
       // updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
@@ -103,6 +105,7 @@ const Note: Component<{
 
   const onFailZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
     batch(() => {
       updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
       updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
@@ -116,6 +119,7 @@ const Note: Component<{
 
   const onCancelZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
     batch(() => {
       updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
       updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
@@ -127,13 +131,13 @@ const Note: Component<{
     });
   };
 
-  const customZapInfo: CustomZapInfo = {
+  const customZapInfo: () => CustomZapInfo = () => ({
     note: props.note,
     onConfirm: onConfirmZap,
     onSuccess: onSuccessZap,
     onFail: onFailZap,
     onCancel: onCancelZap,
-  };
+  });
 
   const openReactionModal = (openOn = 'likes') =>  {
     app?.actions.openReactionModal(props.note.post.id, {
@@ -150,7 +154,7 @@ const Note: Component<{
       props.note,
       noteContextMenu?.getBoundingClientRect(),
       () => {
-        app?.actions.openCustomZapModal(customZapInfo);
+        app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
     );
@@ -211,7 +215,7 @@ const Note: Component<{
                   note={props.note}
                   state={footerState}
                   updateState={updateFooterState}
-                  customZapInfo={customZapInfo}
+                  customZapInfo={customZapInfo()}
                 />
               </div>
             </div>
@@ -306,7 +310,7 @@ const Note: Component<{
               note={props.note}
               state={footerState}
               updateState={updateFooterState}
-              customZapInfo={customZapInfo}
+              customZapInfo={customZapInfo()}
               wide={true}
               large={true}
             />
@@ -369,7 +373,7 @@ const Note: Component<{
                 note={props.note}
                 state={footerState}
                 updateState={updateFooterState}
-                customZapInfo={customZapInfo}
+                customZapInfo={customZapInfo()}
               />
             </div>
           </div>

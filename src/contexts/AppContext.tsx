@@ -71,6 +71,7 @@ export type AppContextStore = {
     closeReactionModal: () => void,
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
+    resetCustomZap: () => void,
     openContextMenu: (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
     closeContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
@@ -141,12 +142,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const openCustomZapModal = (customZapInfo: CustomZapInfo) => {
-    updateStore('customZap', reconcile({ ...customZapInfo }));
+    updateStore('customZap', () => ({ ...customZapInfo }));
     updateStore('showCustomZapModal', () => true);
   };
 
   const closeCustomZapModal = () => {
     updateStore('showCustomZapModal', () => false);
+  };
+
+  const resetCustomZap = () => {
+    updateStore('customZap', () => undefined);
   };
 
   const openContextMenu = (
@@ -258,6 +263,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
       closeReactionModal,
       openCustomZapModal,
       closeCustomZapModal,
+      resetCustomZap,
       openContextMenu,
       closeContextMenu,
       openLnbcModal,
