@@ -68,6 +68,7 @@ export type ThreadContextStore = {
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
     setPrimaryNote: (context: PrimalNote | undefined) => void,
+    fetchTopZaps: (noteId: string) => void,
   }
 }
 
@@ -112,7 +113,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     clearNotes();
     updateStore('noteId', noteId)
     getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
-    getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
+    fetchTopZaps(noteId);
     updateStore('isFetching', () => true);
   }
 
@@ -256,16 +257,20 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
         eventId,
       };
 
-      if (store.topZaps[eventId] === undefined) {
+      const oldZaps = store.topZaps[eventId];
+
+      if (oldZaps === undefined) {
         updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
         return;
       }
 
-      if (store.topZaps[eventId].find(i => i.id === zap.id)) {
+      if (oldZaps.find(i => i.id === zap.id)) {
         return;
       }
 
-      updateStore('topZaps', eventId, (zs) => [ ...zs, { ...zap }]);
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('topZaps', eventId, () => [ ...newZaps ]);
 
       return;
     }
@@ -281,6 +286,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
   const setPrimaryNote = (context: PrimalNote | undefined) => {
     updateStore('primaryNote', () => ({ ...context }));
+  };
+
+  const fetchTopZaps = (noteId: string) => {
+    getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -410,6 +419,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       updatePage,
       savePage,
       setPrimaryNote,
+      fetchTopZaps,
     },
   });
 

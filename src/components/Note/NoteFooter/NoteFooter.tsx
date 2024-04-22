@@ -1,6 +1,6 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
 import { MenuItem, PrimalNote } from '../../../types/primal';
-import { sendRepost } from '../../../lib/notes';
+import { sendRepost, triggerImportEvents } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
@@ -22,6 +22,7 @@ import NoteFooterActionButton from './NoteFooterActionButton';
 import { NoteFooterState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
+import { APP_ID } from '../../../App';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -278,18 +279,16 @@ const NoteFooter: Component<{
       props.updateState('isZapping', () => false);
 
       if (success) {
-        props.customZapInfo.onSuccess({
-          emoji,
-          amount,
-          message,
-        });
+        setTimeout(() => {
+          props.customZapInfo.onSuccess({
+            emoji,
+            amount,
+            message,
+          });
+        }, 2_000);
+
         return;
       }
-
-      batch(() => {
-        props.updateState('zappedAmount', () => -amount);
-        props.updateState('zapped', () => props.note.post.noteActions.zapped);
-      });
 
       props.customZapInfo.onFail({
         emoji,

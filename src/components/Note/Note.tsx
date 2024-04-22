@@ -103,6 +103,7 @@ const Note: Component<{
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => true);
     });
+    threadContext?.actions.fetchTopZaps(props.note.post.id);
   };
 
   const onFailZap = (zapOption: ZapOption) => {
@@ -168,7 +169,7 @@ const Note: Component<{
     return (likes || 0) + (zapCount || 0) + (reposts || 0);
   };
 
-  const topZaps = createMemo( () => threadContext?.topZaps[props.note.post.id] || []);
+  const topZaps = () => threadContext?.topZaps[props.note.post.id] || [];
 
   const firstZap = createMemo(() => topZaps()[0]);
 
