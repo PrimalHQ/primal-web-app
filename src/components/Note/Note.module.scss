@@ -335,6 +335,12 @@
       gap: 8px;
       align-items: flex-start;
 
+      &.onlyFew {
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+      }
+
       .firstZap {
         display: flex;
         align-items: center;

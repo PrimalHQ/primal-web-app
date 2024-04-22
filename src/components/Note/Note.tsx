@@ -35,6 +35,7 @@ export type NoteFooterState = {
   isZapping: boolean,
   showZapAnim: boolean,
   hideZapIcon: boolean,
+  moreZapsAvailable: boolean,
   isRepostMenuVisible: boolean,
 };
 
@@ -58,7 +59,7 @@ const Note: Component<{
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const [footerState, updateFooterState] = createStore({
+  const [reactionsState, updateReactionsState] = createStore<NoteFooterState>({
     likes: props.note.post.likes,
     liked: props.note.post.noteActions.liked,
     reposts: props.note.post.reposts,
@@ -73,6 +74,7 @@ const Note: Component<{
     isZapping: false,
     showZapAnim: false,
     hideZapIcon: false,
+    moreZapsAvailable: false,
     isRepostMenuVisible: false,
   });
 
@@ -81,11 +83,11 @@ const Note: Component<{
   const onConfirmZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
     batch(() => {
-      updateFooterState('zappedAmount', () => zapOption.amount || 0);
-      updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
+      updateReactionsState('zappedAmount', () => zapOption.amount || 0);
+      updateReactionsState('satsZapped', (z) => z + (zapOption.amount || 0));
       // updateFooterState('zappedNow', () => true);
-      updateFooterState('zapped', () => true);
-      updateFooterState('showZapAnim', () => true)
+      updateReactionsState('zapped', () => true);
+      updateReactionsState('showZapAnim', () => true)
     });
   };
 
@@ -93,13 +95,13 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
     batch(() => {
-      updateFooterState('zapCount', (z) => z + 1);
+      updateReactionsState('zapCount', (z) => z + 1);
       // updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
-      updateFooterState('isZapping', () => false);
+      updateReactionsState('isZapping', () => false);
       // updateFooterState('zappedNow', () => false);
-      updateFooterState('showZapAnim', () => false);
-      updateFooterState('hideZapIcon', () => false);
-      updateFooterState('zapped', () => true);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => true);
     });
   };
 
@@ -107,13 +109,13 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
     batch(() => {
-      updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
-      updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
-      updateFooterState('isZapping', () => false);
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
       // updateFooterState('zappedNow', () => true);
-      updateFooterState('showZapAnim', () => false);
-      updateFooterState('hideZapIcon', () => false);
-      updateFooterState('zapped', () => props.note.post.noteActions.zapped);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
   };
 
@@ -121,13 +123,13 @@ const Note: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
     batch(() => {
-      updateFooterState('zappedAmount', () => -(zapOption.amount || 0));
-      updateFooterState('satsZapped', (z) => z - (zapOption.amount || 0));
-      updateFooterState('isZapping', () => false);
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
       // updateFooterState('zappedNow', () => true);
-      updateFooterState('showZapAnim', () => false);
-      updateFooterState('hideZapIcon', () => false);
-      updateFooterState('zapped', () => props.note.post.noteActions.zapped);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
   };
 
@@ -141,9 +143,9 @@ const Note: Component<{
 
   const openReactionModal = (openOn = 'likes') =>  {
     app?.actions.openReactionModal(props.note.post.id, {
-      likes: footerState.likes,
-      zaps: footerState.zapCount,
-      reposts: footerState.reposts,
+      likes: reactionsState.likes,
+      zaps: reactionsState.zapCount,
+      reposts: reactionsState.reposts,
       quotes: 0,
       openOn,
     });
@@ -161,16 +163,17 @@ const Note: Component<{
   }
 
   const reactionSum = () => {
-    const { likes, zapCount, reposts } = footerState;
+    const { likes, zapCount, reposts } = reactionsState;
 
     return (likes || 0) + (zapCount || 0) + (reposts || 0);
   };
 
-  const firstZap = createMemo(() => (threadContext?.topZaps[props.note.post.id] || [])[0]);
+  const topZaps = createMemo( () => threadContext?.topZaps[props.note.post.id] || []);
 
-  const topZaps = createMemo(() => {
-    // return (threadContext?.topZaps[props.note.post.id] || []).slice(1);
-    const zaps = (threadContext?.topZaps[props.note.post.id] || []).slice(1);
+  const firstZap = createMemo(() => topZaps()[0]);
+
+  const restZaps = createMemo(() => {
+    const zaps = topZaps().slice(1);
 
     let limit = 0;
     let digits = 0;
@@ -186,7 +189,16 @@ const Note: Component<{
       limit++;
     }
 
-    return zaps.slice(0, limit);
+    const rest = zaps.slice(0, limit);
+
+    if (rest.length < reactionsState.zapCount - 1) {
+      updateReactionsState('moreZapsAvailable', () => true);
+    }
+    else {
+      updateReactionsState('moreZapsAvailable', () => false);
+    }
+
+    return rest;
   })
 
   const zapSender = (zap: TopZap) => {
@@ -213,8 +225,8 @@ const Note: Component<{
               <div class={styles.footer}>
                 <NoteFooter
                   note={props.note}
-                  state={footerState}
-                  updateState={updateFooterState}
+                  state={reactionsState}
+                  updateState={updateReactionsState}
                   customZapInfo={customZapInfo()}
                 />
               </div>
@@ -247,7 +259,7 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
-            <div class={styles.zapHighlights}>
+            <div class={`${styles.zapHighlights} ${topZaps().length < 4 ? styles.onlyFew : ''}`}>
               <Show when={firstZap()}>
                 <button
                   class={styles.firstZap}
@@ -264,7 +276,7 @@ const Note: Component<{
               </Show>
               <div class={styles.topZaps}>
                 <div class={styles.zapList}>
-                  <For each={topZaps()}>
+                  <For each={restZaps()}>
                     {zap => (
                       <button
                         class={styles.topZap}
@@ -279,7 +291,7 @@ const Note: Component<{
                   </For>
                 </div>
 
-                <Show when={topZaps().length > 0}>
+                <Show when={reactionsState.moreZapsAvailable}>
                   <button
                     class={styles.moreZaps}
                     onClick={() => openReactionModal('zaps')}
@@ -308,8 +320,8 @@ const Note: Component<{
 
             <NoteFooter
               note={props.note}
-              state={footerState}
-              updateState={updateFooterState}
+              state={reactionsState}
+              updateState={updateReactionsState}
               customZapInfo={customZapInfo()}
               wide={true}
               large={true}
@@ -371,8 +383,8 @@ const Note: Component<{
 
               <NoteFooter
                 note={props.note}
-                state={footerState}
-                updateState={updateFooterState}
+                state={reactionsState}
+                updateState={updateReactionsState}
                 customZapInfo={customZapInfo()}
               />
             </div>
