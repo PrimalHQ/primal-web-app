@@ -1853,7 +1853,7 @@ export const toastZapProfile = {
 export const thread = {
   sidebar: {
     id: 'thread.sidebar',
-    defaultMessage: 'Replies to this Note',
+    defaultMessage: 'Replying to this Note',
     description: 'Title of the Thread page sidebar',
   },
   sidebarMentions: {
@@ -2273,22 +2273,22 @@ export const reactionsModal = {
   tabs: {
     likes: {
       id: 'reactionsModal.tabs.likes',
-      defaultMessage: 'Likes {count}',
+      defaultMessage: 'Likes ({count})',
       description: 'Likes tab label in reactions modal',
     },
     zaps: {
       id: 'reactionsModal.tabs.zaps',
-      defaultMessage: 'Zaps {count}',
+      defaultMessage: 'Zaps ({count})',
       description: 'Zaps tab label in reactions modal',
     },
     reposts: {
       id: 'reactionsModal.tabs.reposts',
-      defaultMessage: 'Reposts {count}',
+      defaultMessage: 'Reposts ({count})',
       description: 'Reposts tab label in reactions modal',
     },
     quotes: {
       id: 'reactionsModal.tabs.quotes',
-      defaultMessage: 'Quotes {count}',
+      defaultMessage: 'Quotes ({count})',
       description: 'Quotes tab label in reactions modal',
     },
   }
