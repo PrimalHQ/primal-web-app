@@ -488,15 +488,18 @@ const Profile: Component = () => {
     },
     onSuccess: (zapOption: ZapOption) => {
       app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
       toaster?.sendSuccess(intl.formatMessage(toastZapProfile, {
         name: authorName(profile?.userProfile)
       }))
     },
     onFail: (zapOption: ZapOption) => {
       app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
     },
     onCancel: (zapOption: ZapOption) => {
       app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
     },
   });
 

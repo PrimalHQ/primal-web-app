@@ -23,6 +23,8 @@ import { NoteFooterState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 
+export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
+
 const NoteFooter: Component<{
   note: PrimalNote,
   wide?: boolean,
@@ -269,29 +271,33 @@ const NoteFooter: Component<{
       props.updateState('satsZapped', (z) => z + amount);
     });
 
-    const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
 
-    props.updateState('isZapping', () => false);
+    setTimeout(async () => {
+      const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
 
-    if (success) {
-      props.customZapInfo.onSuccess({
+      props.updateState('isZapping', () => false);
+
+      if (success) {
+        props.customZapInfo.onSuccess({
+          emoji,
+          amount,
+          message,
+        });
+        return;
+      }
+
+      batch(() => {
+        props.updateState('zappedAmount', () => -amount);
+        props.updateState('zapped', () => props.note.post.noteActions.zapped);
+      });
+
+      props.customZapInfo.onFail({
         emoji,
         amount,
         message,
       });
-      return;
-    }
+    }, lottieDuration());
 
-    batch(() => {
-      props.updateState('zappedAmount', () => -amount);
-      props.updateState('zapped', () => props.note.post.noteActions.zapped);
-    });
-
-    props.customZapInfo.onFail({
-      emoji,
-      amount,
-      message,
-    });
   }
 
   const buttonTypeClasses: Record<string, string> = {

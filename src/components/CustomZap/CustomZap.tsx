@@ -11,6 +11,7 @@ import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
+import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
 import TextInput from '../TextInput/TextInput';
 import { useToastContext } from '../Toaster/Toaster';
 
@@ -92,38 +93,49 @@ const CustomZap: Component<{
     if (account?.hasPublicKey()) {
       props.onConfirm(selectedValue());
 
-      let success = false;
+      const note = props.note;
 
-      if (props.note) {
-        success = await zapNote(
-          props.note,
-          account.publicKey,
-          selectedValue().amount || 0,
-          comment(),
-          account.relays,
-        );
+      if (note) {
+        setTimeout(async () => {
+          const success = await zapNote(
+            note,
+            account.publicKey,
+            selectedValue().amount || 0,
+            comment(),
+            account.relays,
+          );
+
+          handleZap(success);
+        }, lottieDuration());
+        return;
       }
-      else if (props.profile) {
-        success = await zapProfile(
+
+      if (props.profile) {
+        const success = await zapProfile(
           props.profile,
           account.publicKey,
           selectedValue().amount || 0,
           comment(),
           account.relays,
         );
-      }
 
-      if (success) {
-        props.onSuccess(selectedValue());
+        handleZap(success);
         return;
       }
-
-      toast?.sendWarning(
-        intl.formatMessage(toastZapFail),
-      );
-
-      props.onFail(selectedValue())
     }
+  };
+
+  const handleZap = (success = false) => {
+    if (success) {
+      props.onSuccess(selectedValue());
+      return;
+    }
+
+    toast?.sendWarning(
+      intl.formatMessage(toastZapFail),
+    );
+
+    props.onFail(selectedValue());
   };
 
   return (
