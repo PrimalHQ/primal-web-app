@@ -279,13 +279,11 @@ const NoteFooter: Component<{
       props.updateState('isZapping', () => false);
 
       if (success) {
-        setTimeout(() => {
-          props.customZapInfo.onSuccess({
-            emoji,
-            amount,
-            message,
-          });
-        }, 2_000);
+        props.customZapInfo.onSuccess({
+          emoji,
+          amount,
+          message,
+        });
 
         return;
       }

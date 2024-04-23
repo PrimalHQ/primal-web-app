@@ -18,7 +18,9 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, longDate, veryLongDate } from '../../lib/dates';
 import { hexToNpub } from '../../lib/keys';
-import { zapCustomOption } from '../../translations';
+import { thread, zapCustomOption } from '../../translations';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { uuidv4 } from '../../utils';
 
 export type NoteFooterState = {
   likes: number,
@@ -37,6 +39,7 @@ export type NoteFooterState = {
   hideZapIcon: boolean,
   moreZapsAvailable: boolean,
   isRepostMenuVisible: boolean,
+  topZaps: TopZap[],
 };
 
 const Note: Component<{
@@ -49,6 +52,7 @@ const Note: Component<{
 
   const threadContext = useThreadContext();
   const app = useAppContext();
+  const account = useAccountContext();
   const intl = useIntl();
 
   const noteType = () => props.noteType || 'feed';
@@ -76,6 +80,7 @@ const Note: Component<{
     hideZapIcon: false,
     moreZapsAvailable: false,
     isRepostMenuVisible: false,
+    topZaps: [],
   });
 
   let noteContextMenu: HTMLDivElement | undefined;
@@ -94,6 +99,27 @@ const Note: Component<{
   const onSuccessZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    const oldZaps = [ ...reactionsState.topZaps ];
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: props.note.post.id,
+      id: uuidv4() as string,
+    };
+
+    if (!threadContext?.users.find((u) => u.pubkey === pubkey)) {
+      threadContext?.actions.fetchUsers([pubkey])
+    }
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
+
     batch(() => {
       updateReactionsState('zapCount', (z) => z + 1);
       // updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
@@ -102,8 +128,8 @@ const Note: Component<{
       updateReactionsState('showZapAnim', () => false);
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => true);
+      updateReactionsState('topZaps', () => [...zaps]);
     });
-    threadContext?.actions.fetchTopZaps(props.note.post.id);
   };
 
   const onFailZap = (zapOption: ZapOption) => {
@@ -169,12 +195,10 @@ const Note: Component<{
     return (likes || 0) + (zapCount || 0) + (reposts || 0);
   };
 
-  const topZaps = () => threadContext?.topZaps[props.note.post.id] || [];
-
-  const firstZap = createMemo(() => topZaps()[0]);
+  const firstZap = createMemo(() => reactionsState.topZaps[0]);
 
   const restZaps = createMemo(() => {
-    const zaps = topZaps().slice(1);
+    const zaps = reactionsState.topZaps.slice(1);
 
     let limit = 0;
     let digits = 0;
@@ -200,11 +224,15 @@ const Note: Component<{
     }
 
     return rest;
-  })
+  });
 
   const zapSender = (zap: TopZap) => {
     return threadContext?.users.find(u => u.pubkey === zap.pubkey);
-  }
+  };
+
+  createEffect(() => {
+    updateReactionsState('topZaps', () =>  [ ...(threadContext?.topZaps[props.note.post.id] || []) ]);
+  });
 
   return (
     <Switch>
@@ -260,7 +288,7 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
-            <div class={`${styles.zapHighlights} ${topZaps().length < 4 ? styles.onlyFew : ''}`}>
+            <div class={`${styles.zapHighlights} ${reactionsState.topZaps.length < 4 ? styles.onlyFew : ''}`}>
               <Show when={firstZap()}>
                 <button
                   class={styles.firstZap}

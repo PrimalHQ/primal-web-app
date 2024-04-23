@@ -40,6 +40,7 @@ import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
 import { getEventZaps, setLinkPreviews } from "../lib/notes";
 import { parseBolt11 } from "../utils";
+import { getUserProfiles } from "../lib/profile";
 
 export type TopZap = {
   id: string,
@@ -69,6 +70,7 @@ export type ThreadContextStore = {
     savePage: (page: FeedPage) => void,
     setPrimaryNote: (context: PrimalNote | undefined) => void,
     fetchTopZaps: (noteId: string) => void,
+    fetchUsers: (pubkeys: string[]) => void,
   }
 }
 
@@ -292,6 +294,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
   };
 
+  const fetchUsers = (pubkeys: string[]) => {
+    getUserProfiles(pubkeys, `thread_pk_${APP_ID}`);
+  };
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -342,6 +348,17 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     }
 
     if (subId === `thread_zapps_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
+    }
+
+    if (subId === `thread_pk_${APP_ID}`) {
       if (type === 'EOSE') {
         savePage(store.page);
       }
@@ -420,6 +437,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       savePage,
       setPrimaryNote,
       fetchTopZaps,
+      fetchUsers,
     },
   });
 

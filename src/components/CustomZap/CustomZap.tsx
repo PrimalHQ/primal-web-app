@@ -130,9 +130,7 @@ const CustomZap: Component<{
 
   const handleZap = (success = false) => {
     if (success) {
-      setTimeout(() => {
-        props.onSuccess(selectedValue());
-      }, 2_000)
+      props.onSuccess(selectedValue());
       return;
     }
 
