@@ -34,7 +34,6 @@ const CustomZap: Component<{
   const settings = useSettingsContext();
 
   const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || defaultZapOptions[0]);
-  const [comment, setComment] = createSignal(defaultZapOptions[0].message || '');
 
   createEffect(() => {
     setSelectedValue(settings?.availableZapOptions[0] || defaultZapOptions[0])
@@ -49,11 +48,15 @@ const CustomZap: Component<{
     const amount = parseInt(value.replaceAll(',', ''));
 
     if (isNaN(amount)) {
-      setSelectedValue(() => ({ amount: 0 }))
+      setSelectedValue((v) => ({ ...v, amount: 0 }))
     };
 
-    setSelectedValue(()=> ({ amount }));
+    setSelectedValue((v)=> ({ ...v, amount }));
   };
+
+  const updateComment = (message: string) => {
+    setSelectedValue((v) => ({ ...v, message }))
+  }
 
   const truncateNumber = (amount: number) => {
     const t = 1000;
@@ -101,7 +104,7 @@ const CustomZap: Component<{
             note,
             account.publicKey,
             selectedValue().amount || 0,
-            comment(),
+            selectedValue().message,
             account.relays,
           );
 
@@ -115,7 +118,7 @@ const CustomZap: Component<{
           props.profile,
           account.publicKey,
           selectedValue().amount || 0,
-          comment(),
+          selectedValue().message,
           account.relays,
         );
 
@@ -170,8 +173,7 @@ const CustomZap: Component<{
               <button
                 class={`${styles.zapOption} ${isSelected(value) ? styles.selected : ''}`}
                 onClick={() => {
-                  setComment(value.message || '')
-                  setSelectedValue(value);
+                  setSelectedValue(() => ({...value}));
                 }}
               >
                 <div>
@@ -204,9 +206,9 @@ const CustomZap: Component<{
 
         <TextInput
           type="text"
-          value={comment()}
+          value={selectedValue().message || ''}
           placeholder={intl.formatMessage(tPlaceholders.addComment)}
-          onChange={setComment}
+          onChange={updateComment}
           noExtraSpace={true}
         />
 
