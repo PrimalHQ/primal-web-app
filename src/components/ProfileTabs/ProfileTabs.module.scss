@@ -72,6 +72,7 @@
   line-height: 20px;
   color: var(--text-secondary);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 40px;
@@ -79,7 +80,7 @@
   line-break: anywhere;
 
   button {
-    margin: 0;
+    margin: 8px;
     padding: 0;
     margin-left: 8px;
     background: none;
@@ -90,6 +91,10 @@
     color: var(--accent-2);
     width: auto;
     height: auto;
+
+    &:hover {
+      color: var(--text-primary);
+    }
   }
 }
 
