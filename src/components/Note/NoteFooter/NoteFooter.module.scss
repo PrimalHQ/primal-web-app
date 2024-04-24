@@ -1,11 +1,11 @@
 @mixin statIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background-color: var(--text-tertiary-2);
 
   &.large {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 }
 

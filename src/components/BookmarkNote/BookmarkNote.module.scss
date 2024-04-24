@@ -1,37 +1,39 @@
 .bookmark {
   .emptyBookmark {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     display: inline-block;
     margin: 0px 0px;
     background-color: var(--text-tertiary);
-    -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
-    mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+    -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / auto 100%;
+    mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / auto 100%;
 
     &.large {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
   }
 
   .fullBookmark {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     display: inline-block;
     margin: 0px 0px;
     background-color: var(--active-bookmarked);
-    -webkit-mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 100%;
-    mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / 100%;
+    -webkit-mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / auto 100%;
+    mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / auto 100%;
 
     &.large {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
   }
 
   &:hover {
     .emptyBookmark {
       background-color: var(--active-bookmarked);
+      -webkit-mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / auto 100%;
+      mask: url(../../assets/icons/bookmark_filled.svg) no-repeat 0 / auto 100%;
     }
   }
 }

@@ -75,8 +75,8 @@
 }
 .bookmarkIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
-  mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / 100%;
+  -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / auto 100%;
+  mask: url(../../assets/icons/bookmark_empty.svg) no-repeat center 0 / auto 100%;
 }
 
 .active {
