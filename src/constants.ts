@@ -318,7 +318,7 @@ export const defaultZap = { "amount": 42, "message": "Onward 🫡" };
 export const defaultZapOptions = [
   { emoji: '👍', amount: 21, message: 'Great post 👍' },
   { emoji: '🚀', amount: 420, message: 'Let\'s go 🚀' },
-  { emoji: '☕', amount: 1_000, message: 'Coffie on me ☕' },
+  { emoji: '☕', amount: 1_000, message: 'Coffee on me ☕' },
   { emoji: '🍻', amount: 5_000, message: 'Cheers 🍻' },
   { emoji: '🍷', amount: 10_000, message: 'Party time 🍷' },
   { emoji: '👑', amount: 100_000, message: 'Generational wealth 👑' },
