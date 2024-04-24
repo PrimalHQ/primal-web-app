@@ -19,7 +19,7 @@ import { getScreenCordinates } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
-import { NoteFooterState } from '../Note';
+import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import { APP_ID } from '../../../App';
@@ -30,8 +30,8 @@ const NoteFooter: Component<{
   note: PrimalNote,
   wide?: boolean,
   id?: string,
-  state: NoteFooterState,
-  updateState: SetStoreFunction<NoteFooterState>,
+  state: NoteReactionsState,
+  updateState: SetStoreFunction<NoteReactionsState>,
   customZapInfo: CustomZapInfo,
   large?: boolean,
 }> = (props) => {

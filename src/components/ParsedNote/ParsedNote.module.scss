@@ -103,3 +103,17 @@
     margin-left: 2px;
   }
 }
+
+.reactionNote {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  font-weight: 700;
+  margin-block: 4px;
+  padding-inline: 12px;
+
+  border: 1px solid var(--subtile-devider);
+  border-radius: var(--border-radius-small);
+}

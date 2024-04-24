@@ -22,7 +22,7 @@ import { thread, zapCustomOption } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 
-export type NoteFooterState = {
+export type NoteReactionsState = {
   likes: number,
   liked: boolean,
   reposts: number,
@@ -40,6 +40,7 @@ export type NoteFooterState = {
   moreZapsAvailable: boolean,
   isRepostMenuVisible: boolean,
   topZaps: TopZap[],
+  quoteCount: number,
 };
 
 const Note: Component<{
@@ -47,7 +48,9 @@ const Note: Component<{
   id?: string,
   parent?: boolean,
   shorten?: boolean,
-  noteType?: 'feed' | 'primary' | 'notification'
+  noteType?: 'feed' | 'primary' | 'notification' | 'reaction'
+  onClick?: () => void,
+  quoteCount?: number,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -55,15 +58,22 @@ const Note: Component<{
   const account = useAccountContext();
   const intl = useIntl();
 
+  createEffect(() => {
+    if (props.quoteCount) {
+      updateReactionsState('quoteCount', () => props.quoteCount || 0);
+    }
+  })
+
   const noteType = () => props.noteType || 'feed';
 
   const repost = () => props.note.repost;
 
   const navToThread = (note: PrimalNote) => {
+    props.onClick && props.onClick();
     threadContext?.actions.setPrimaryNote(note);
   };
 
-  const [reactionsState, updateReactionsState] = createStore<NoteFooterState>({
+  const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
     likes: props.note.post.likes,
     liked: props.note.post.noteActions.liked,
     reposts: props.note.post.reposts,
@@ -81,6 +91,7 @@ const Note: Component<{
     moreZapsAvailable: false,
     isRepostMenuVisible: false,
     topZaps: [],
+    quoteCount: props.quoteCount || 0,
   });
 
   let noteContextMenu: HTMLDivElement | undefined;
@@ -173,7 +184,7 @@ const Note: Component<{
       likes: reactionsState.likes,
       zaps: reactionsState.zapCount,
       reposts: reactionsState.reposts,
-      quotes: 0,
+      quotes: reactionsState.quoteCount,
       openOn,
     });
   };
@@ -190,9 +201,9 @@ const Note: Component<{
   }
 
   const reactionSum = () => {
-    const { likes, zapCount, reposts } = reactionsState;
+    const { likes, zapCount, reposts, quoteCount } = reactionsState;
 
-    return (likes || 0) + (zapCount || 0) + (reposts || 0);
+    return (likes || 0) + (zapCount || 0) + (reposts || 0) + (quoteCount || 0);
   };
 
   const firstZap = createMemo(() => reactionsState.topZaps[0]);
@@ -416,6 +427,50 @@ const Note: Component<{
                 updateState={updateReactionsState}
                 customZapInfo={customZapInfo()}
               />
+            </div>
+          </div>
+        </A>
+      </Match>
+
+      <Match when={noteType() === 'reaction'}>
+        <A
+          id={props.id}
+          class={`${styles.note} ${styles.reactionNote}`}
+          href={`/e/${props.note?.post.noteId}`}
+          onClick={() => navToThread(props.note)}
+          data-event={props.note.post.id}
+          data-event-bech32={props.note.post.noteId}
+          draggable={false}
+        >
+          <div class={styles.content}>
+            <div class={styles.leftSide}>
+              <A href={`/p/${props.note.user.npub}`}>
+                <Avatar user={props.note.user} size="vs" />
+              </A>
+              <Show
+                when={props.parent}
+              >
+                <div class={styles.ancestorLine}></div>
+              </Show>
+            </div>
+
+            <div class={styles.rightSide}>
+              <NoteAuthorInfo
+                author={props.note.user}
+                time={props.note.post.created_at}
+              />
+
+              <NoteReplyToHeader note={props.note} />
+
+              <div class={styles.message}>
+                <ParsedNote
+                  note={props.note}
+                  shorten={props.shorten}
+                  width={Math.min(528, window.innerWidth - 72)}
+                  noLightbox={true}
+                  altEmbeds={true}
+                />
+              </div>
             </div>
           </div>
         </A>

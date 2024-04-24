@@ -572,3 +572,14 @@ export const getEventZaps = (eventId: string, user_pubkey: string | undefined, s
     {cache: ["event_zaps_by_satszapped", { event_id, user_pubkey, limit, offset }]},
   ]));
 };
+
+
+export const getEventQuoteStats = (eventId: string, subid: string) => {
+  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["note_mentions_count", { event_id }]},
+  ]));
+};

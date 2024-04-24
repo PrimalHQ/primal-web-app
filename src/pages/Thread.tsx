@@ -207,6 +207,7 @@ const Thread: Component = () => {
               <Note
                 note={primaryNote() as PrimalNote}
                 noteType="primary"
+                quoteCount={threadContext?.quoteCount}
               />
               <Show when={account?.hasPublicKey()}>
                 <ReplyToNote

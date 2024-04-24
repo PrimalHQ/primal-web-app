@@ -38,7 +38,7 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
-import { getEventZaps, setLinkPreviews } from "../lib/notes";
+import { getEventQuoteStats, getEventZaps, setLinkPreviews } from "../lib/notes";
 import { parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
 
@@ -60,6 +60,7 @@ export type ThreadContextStore = {
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
   topZaps: Record<string, TopZap[]>,
+  quoteCount: number,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -92,6 +93,7 @@ export const initialData = {
   reposts: {},
   lastNote: undefined,
   topZaps: {},
+  quoteCount: 0,
 };
 
 
@@ -116,6 +118,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     updateStore('noteId', noteId)
     getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
     fetchTopZaps(noteId);
+    fetchNoteQuoteStats(noteId);
     updateStore('isFetching', () => true);
   }
 
@@ -276,6 +279,12 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
       return;
     }
+
+    if (content.kind === Kind.NoteQuoteStats) {
+      const quoteStats = JSON.parse(content.content);
+
+      updateStore('quoteCount', () => quoteStats.count || 0);
+    }
   };
 
   const savePage = (page: FeedPage) => {
@@ -297,6 +306,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const fetchUsers = (pubkeys: string[]) => {
     getUserProfiles(pubkeys, `thread_pk_${APP_ID}`);
   };
+
+  const fetchNoteQuoteStats = (noteId: string) => {
+    getEventQuoteStats(noteId, `thread_quote_stats_${APP_ID}`)
+  }
 
 // SOCKET HANDLERS ------------------------------
 
@@ -359,6 +372,17 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     }
 
     if (subId === `thread_pk_${APP_ID}`) {
+      if (type === 'EOSE') {
+        savePage(store.page);
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
+    }
+
+    if (subId === `thread_quote_stats_${APP_ID}`) {
       if (type === 'EOSE') {
         savePage(store.page);
       }

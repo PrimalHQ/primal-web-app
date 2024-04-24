@@ -308,6 +308,8 @@ export const convertToNotes: ConvertToNotes = (page) => {
       mentionedNotes,
       mentionedUsers,
       replyTo: replyTo && replyTo[1],
+      tags: msg.tags,
+      id: msg.id,
     };
   });
 }

@@ -221,6 +221,13 @@ export type NostrZapInfo = {
   tags?: string[][],
 };
 
+export type NostrQuoteStatsInfo = {
+  kind: Kind.NoteQuoteStats,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -251,7 +258,8 @@ export type NostrEventContent =
   PrimalUserRelays |
   NostrBookmarks |
   NostrRelayHint |
-  NostrZapInfo;
+  NostrZapInfo |
+  NostrQuoteStatsInfo;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -465,6 +473,8 @@ export type PrimalNote = {
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
   replyTo?: string,
+  id: string,
+  tags: string[][],
 };
 
 export type PrimalFeed = {

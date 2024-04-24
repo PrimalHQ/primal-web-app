@@ -1014,6 +1014,11 @@ export const placeholders = {
       description: 'Placeholder when the note is missing',
     },
   },
+  noReactionDetails: {
+    id: 'placeholders.noReactionDetails',
+    defaultMessage: 'No details for rections found',
+    description: 'Placeholder when there are no reaction details in reactions modal',
+  },
   noLikeDetails: {
     id: 'placeholders.noLikeDetails',
     defaultMessage: 'No details for likes found',
@@ -1028,6 +1033,11 @@ export const placeholders = {
     id: 'placeholders.noRepostDetails',
     defaultMessage: 'No details for reposts found',
     description: 'Placeholder when there are no repost details in reactions modal',
+  },
+  noQuoteDetails: {
+    id: 'placeholders.noQuoteDetails',
+    defaultMessage: 'No details for quotes found',
+    description: 'Placeholder when there are no quote details in reactions modal',
   },
   addComment: {
     id: 'placeholders.addComment',

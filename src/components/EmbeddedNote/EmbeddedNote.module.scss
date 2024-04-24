@@ -17,6 +17,10 @@
     text-decoration: none !important;
   }
 
+  &.altBack {
+    background-color: var(--background-sheet);
+  }
+
   .mentionedNoteHeader {
     display: flex;
     justify-content: flex-start;

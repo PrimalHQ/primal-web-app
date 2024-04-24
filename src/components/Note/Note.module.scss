@@ -23,6 +23,11 @@
     border: none;
   }
 
+  &.reactionNote {
+    background: none;
+    border-bottom: 1px solid var(--subtile-devider);
+  }
+
   .header {
     position: relative;
     display: flex;

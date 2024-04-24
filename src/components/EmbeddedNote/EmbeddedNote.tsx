@@ -15,7 +15,13 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
 
-const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string, PrimalUser>, includeEmbeds?: boolean, isLast?: boolean}> = (props) => {
+const EmbeddedNote: Component<{
+  note: PrimalNote,
+  mentionedUsers?: Record<string, PrimalUser>,
+  includeEmbeds?: boolean,
+  isLast?: boolean,
+  alternativeBackground?: boolean,
+}> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
@@ -32,11 +38,20 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     return trimVerification(props.note.user?.nip05);
   });
 
+  const klass = () => {
+    let k = styles.mentionedNote;
+    k += ' embeddedNote';
+    if (props.isLast) k+= ' noBottomMargin';
+    if (props.alternativeBackground) k+= ` ${styles.altBack}`;
+
+    return k;
+  }
+
   const wrapper = (children: JSXElement) => {
     if (props.includeEmbeds) {
       return (
         <div
-          class={`${styles.mentionedNote} embeddedNote ${props.isLast ? 'noBottomMargin' : ''}`}
+          class={klass()}
           data-event={props.note.post.id}
           data-event-bech32={noteId()}
         >
@@ -48,7 +63,7 @@ const EmbeddedNote: Component<{ note: PrimalNote, mentionedUsers?: Record<string
     return (
       <A
         href={`/e/${noteId()}`}
-        class={`${styles.mentionedNote} embeddedNote ${props.isLast ? 'noBottomMargin' : ''}`}
+        class={klass()}
         onClick={() => navToThread()}
         data-event={props.note.post.id}
         data-event-bech32={noteId()}

@@ -140,6 +140,7 @@ export enum Kind  {
   UploadChunk = 10_000_135,
   UserRelays=10_000_139,
   RelayHint=10_000_141,
+  NoteQuoteStats=10_000_143,
 
   WALLET_OPERATION = 10_000_300,
 }

@@ -7,7 +7,7 @@
 
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 16px;
 
   .header {
     display: flex;
@@ -73,7 +73,7 @@
     .tab {
       position: relative;
       display: inline-block;
-      padding-inline: 14px;
+      padding-inline: 12px;
       padding-block: 2px;
       border: none;
       background: none;
@@ -107,13 +107,14 @@
       height: 440px;
       overflow-x: hidden;
       overflow-y: scroll;
+      padding-right: 8px;
       @keyframes fadeIn {
         from {
-            opacity:0;
+          opacity:0;
         }
 
         to {
-            opacity:1;
+          opacity:1;
         }
 
       }

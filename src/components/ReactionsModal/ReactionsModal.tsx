@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
@@ -9,19 +9,24 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { ReactionStats } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventQuotes, getEventReactions, getEventZaps } from '../../lib/notes';
+import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, setLinkPreviews } from '../../lib/notes';
 import { truncateNumber2 } from '../../lib/notifications';
+import { updateStore } from '../../services/StoreService';
 import { subscribeTo } from '../../sockets';
+import { convertToNotes } from '../../stores/note';
 import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser } from '../../types/primal';
 import { parseBolt11 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
 import Modal from '../Modal/Modal';
+import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReactionsModal.module.scss';
+
 
 const ReactionsModal: Component<{
   id?: string,
@@ -38,18 +43,33 @@ const ReactionsModal: Component<{
   const [likeList, setLikeList] = createStore<any[]>([]);
   const [zapList, setZapList] = createStore<any[]>([]);
   const [repostList, setRepostList] = createStore<any[]>([]);
-  // const [quotesList, setQuotesList] = createStore<any[]>([]);
+  const [quotesList, setQuotesList] = createStore<PrimalNote[]>([]);
+  const [quoteCount, setQuoteCount] = createSignal(0);
 
   const [isFetching, setIsFetching] = createSignal(false);
 
   let loadedLikes = 0;
   let loadedZaps = 0;
   let loadedReposts = 0;
-  // let loadedQuotes = 0;
+  let loadedQuotes = 0;
+
+  createEffect(() => {
+    const count = quoteCount();
+
+    if (count === 0 && props.stats.quotes > 0) {
+      setQuoteCount(props.stats.quotes);
+    }
+  })
 
   createEffect(() => {
     if (props.noteId && props.stats.openOn) {
-      setSelectedTab(props.stats.openOn)
+      setSelectedTab(props.stats.openOn);
+    }
+  });
+
+  createEffect(() => {
+    if (props.noteId) {
+      getQuoteCount();
     }
   });
 
@@ -64,9 +84,9 @@ const ReactionsModal: Component<{
       case 'reposts':
         loadedReposts === 0 && getReposts();
         break;
-      // case 'quotes':
-      //   loadedQuotes === 0 && getQuotes();
-      //   break;
+      case 'quotes':
+        loadedQuotes === 0 && getQuotes();
+        break;
     }
   });
 
@@ -76,10 +96,13 @@ const ReactionsModal: Component<{
       setZapList(() => []);
       setRepostList(() => []);
       setSelectedTab(() => 'likes');
+      setQuotesList(() => []);
+      setQuoteCount(() => 0);
 
       loadedLikes = 0;
       loadedZaps = 0;
       loadedReposts = 0;
+      loadedQuotes = 0;
     }
   });
 
@@ -203,6 +226,7 @@ const ReactionsModal: Component<{
     const users: any[] = [];
 
     const unsub = subscribeTo(subId, (type,_, content) => {
+
       if (type === 'EOSE') {
         setRepostList((reposts) => [...reposts, ...users]);
         loadedReposts = repostList.length;
@@ -232,44 +256,128 @@ const ReactionsModal: Component<{
     getEventReactions(props.noteId, Kind.Repost, subId, offset);
   };
 
-  // const getQuotes = (offset = 0) => {
-  //   if (!props.noteId) return;
+  const getQuotes = (offset = 0) => {
+    if (!props.noteId) return;
 
-  //   const subId = `nr_q_${props.noteId}_${APP_ID}`;
+    const subId = `nr_q_${props.noteId}_${APP_ID}`;
 
-  //   const users: any[] = [];
+    let page: FeedPage = {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    };
 
-  //   const unsub = subscribeTo(subId, (type,_, content) => {
-  //     if (type === 'EOSE') {
-  //       setQuotesList((reposts) => [...reposts, ...users]);
-  //       loadedQuotes = quotesList.length;
-  //       setIsFetching(() => false);
-  //       unsub();
-  //     }
+    const unsub = subscribeTo(subId, (type,_, content) => {
+      if (type === 'EOSE') {
+        const pageNotes = convertToNotes(page);
 
-  //     if (type === 'EVENT') {
-  //       if (content?.kind === Kind.Metadata) {
-  //         let user = JSON.parse(content.content);
+        setQuotesList((notes) => [...notes, ...pageNotes]);
+        loadedQuotes = quotesList.length;
+        setIsFetching(() => false);
+        unsub();
+      }
 
-  //         if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
-  //           user.displayName = user.display_name;
-  //         }
-  //         user.pubkey = content.pubkey;
-  //         user.npub = hexToNpub(content.pubkey);
-  //         user.created_at = content.created_at;
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
 
-  //         users.push(user);
+          page.users[user.pubkey] = { ...user };
 
-  //         return;
-  //       }
-  //     }
-  //   });
+          return;
+        }
+        if (content?.kind === Kind.Text) {
+          const message = content as NostrNoteContent;
 
-  //   setIsFetching(() => true);
-  //   getEventQuotes(props.noteId, subId, offset);
-  // };
+          if (page.messages.find(m => m.id === message.id)) {
+            return;
+          }
 
-  const totalCount = () => props.stats.likes + props.stats.quotes + props.stats.reposts + props.stats.zaps;
+          page.messages.push(message);
+          return;
+        }
+
+        if (content?.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          page.postStats[stat.event_id] = { ...stat };
+          return;
+        }
+
+        if (content?.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          if (!page.mentions) {
+            page.mentions = {};
+          }
+
+          page.mentions[mention.id] = { ...mention };
+          return;
+        }
+
+        if (content?.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          page.noteActions[noteActions.event_id] = { ...noteActions };
+
+          return;
+        }
+
+        if (content?.kind === Kind.LinkMetadata) {
+          const metadata = JSON.parse(content.content);
+
+          const data = metadata.resources[0];
+          if (!data) {
+            return;
+          }
+
+          const preview = {
+            url: data.url,
+            title: data.md_title,
+            description: data.md_description,
+            mediaType: data.mimetype,
+            contentType: data.mimetype,
+            images: [data.md_image],
+            favicons: [data.icon_url],
+          };
+
+          setLinkPreviews(() => ({ [data.url]: preview }));
+          return;
+        }
+      }
+    });
+
+    setIsFetching(() => true);
+    getEventQuotes(props.noteId, subId, offset);
+  };
+
+  const getQuoteCount = () => {
+    if (!props.noteId) return;
+
+    const subId = `nr_qc_${props.noteId}_${APP_ID}`;
+
+    const unsub = subscribeTo(subId, (type,_, content) => {
+      if (type === 'EOSE') {
+        unsub();
+      }
+
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.NoteQuoteStats) {
+          const quoteStats = JSON.parse(content.content);
+
+          setQuoteCount(() => quoteStats.count || 0);
+        }
+      }
+    });
+
+    getEventQuoteStats(props.noteId, subId);
+  }
+
+  const totalCount = () => props.stats.likes + (quoteCount() || props.stats.quotes || 0) + props.stats.reposts + props.stats.zaps;
 
   return (
     <Modal
@@ -286,6 +394,12 @@ const ReactionsModal: Component<{
           <button class={styles.close} onClick={props.onClose}>
           </button>
         </div>
+
+        <Switch>
+          <Match when={!isFetching && totalCount() === 0}>
+            {intl.formatMessage(tPlaceholders.noReactionDetails)}
+          </Match>
+        </Switch>
 
         <div class={styles.description}>
           <Tabs.Root value={selectedTab()} onChange={setSelectedTab}>
@@ -305,9 +419,9 @@ const ReactionsModal: Component<{
                  {intl.formatMessage(reactionsModal.tabs.reposts, { count: props.stats.reposts })}
                 </Tabs.Trigger>
               </Show>
-              <Show when={props.stats.quotes > 0}>
+              <Show when={quoteCount() > 0}>
                 <Tabs.Trigger class={styles.tab} value={'quotes'} >
-                 {intl.formatMessage(reactionsModal.tabs.quotes, { count: props.stats.quotes })}
+                 {intl.formatMessage(reactionsModal.tabs.quotes, { count: quoteCount() })}
                 </Tabs.Trigger>
               </Show>
 
@@ -319,7 +433,12 @@ const ReactionsModal: Component<{
                 each={likeList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noLikeDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noLikeDetails)}
+                    </Show>
                   </Show>
                 }
               >
@@ -364,7 +483,12 @@ const ReactionsModal: Component<{
                 each={zapList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noZapDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noZapDetails)}
+                    </Show>
                   </Show>
                 }
               >
@@ -416,7 +540,12 @@ const ReactionsModal: Component<{
                 each={repostList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noRepostDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noRepostDetails)}
+                    </Show>
                   </Show>
                 }
               >
@@ -456,7 +585,36 @@ const ReactionsModal: Component<{
               </Show>
             </Tabs.Content>
             <Tabs.Content class={styles.tabContent} value={'quotes'}>
-              All the quotes
+              <For
+                each={quotesList}
+                fallback={
+                  <Show when={!isFetching()}>
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noQuoteDetails)}
+                    </Show>
+                  </Show>
+                }
+              >
+                {quote => (
+                  <Note
+                    note={quote}
+                    shorten={true}
+                    noteType="reaction"
+                    onClick={props.onClose}
+                  />
+                )}
+              </For>
+              <Paginator
+                loadNextPage={() => {
+                  const len = quotesList.length;
+                  if (len === 0) return;
+                  getQuotes(len);
+                }}
+                isSmall={true}
+              />
             </Tabs.Content>
           </Tabs.Root>
         </div>

@@ -144,6 +144,8 @@ const ParsedNote: Component<{
   shorten?: boolean,
   isEmbeded?: boolean,
   width?: number,
+  noLightbox?: boolean,
+  altEmbeds?: boolean,
 }> = (props) => {
 
   const intl = useIntl();
@@ -172,6 +174,8 @@ const ParsedNote: Component<{
   });
 
   onMount(() => {
+    if (props.noLightbox) return;
+
     lightbox.init();
   });
 
@@ -927,6 +931,7 @@ const ParsedNote: Component<{
                     note={ment}
                     mentionedUsers={props.note.mentionedUsers || {}}
                     isLast={index === content.length-1}
+                    alternativeBackground={props.altEmbeds}
                   />
                 </div>;
               }

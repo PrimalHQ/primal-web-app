@@ -132,6 +132,7 @@ const NoteImage: Component<{
         data-pswp-height={zoomH()}
         data-image-group={props.imageGroup}
         data-cropped={true}
+        target="_blank"
       >
         <img
           id={imgId}
