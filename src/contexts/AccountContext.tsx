@@ -439,6 +439,14 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     if (storedKey) {
       setPublicKey(storedKey);
+
+      // Read profile from storage
+      const storedUser = getStoredProfile(storedKey);
+
+      if (storedUser) {
+        // If it exists, set it as active user
+        updateStore('activeUser', () => ({...storedUser}));
+      }
     }
 
     if (nostr === undefined) {
@@ -477,14 +485,14 @@ export function AccountProvider(props: { children: JSXElement }) {
       else {
         if (key !== storedKey) {
           setPublicKey(key);
-        }
 
-        // Read profile from storage
-        const storedUser = getStoredProfile(key);
+          // Read profile from storage
+          const storedUser = getStoredProfile(key);
 
-        if (storedUser) {
-          // If it exists, set it as active user
-          updateStore('activeUser', () => ({...storedUser}));
+          if (storedUser) {
+            // If it exists, set it as active user
+            updateStore('activeUser', () => ({...storedUser}));
+          }
         }
 
         // Fetch it anyway, maybe there is an update
