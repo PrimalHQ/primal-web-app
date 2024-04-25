@@ -222,11 +222,11 @@ const NoteFooter: Component<{
         return;
       }
 
-      let newLeft = props.wide ? 31 : 19;
-      let newTop = props.wide ? -30 : -30;
+      let newLeft = props.wide ? 15 : 13;
+      let newTop = props.wide ? -6 : -6;
 
       if (props.large) {
-        newLeft = 11;
+        newLeft = 2;
         newTop = -9;
       }
 
