@@ -290,7 +290,10 @@ const ReactionsModal: Component<{
         if (content?.kind === Kind.Text) {
           const message = content as NostrNoteContent;
 
-          if (page.messages.find(m => m.id === message.id)) {
+          const isAlreadyInPage = page.messages.find(m => m.id === message.id);
+          const isAlreadyInTheList = quotesList.find(n => n.id === message.id);
+
+          if (isAlreadyInPage || isAlreadyInTheList) {
             return;
           }
 
@@ -465,7 +468,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = likeList.length;
                     if (len === 0) return;
-                    getLikes(len);
+                    getLikes(len+1);
                   }}
                   isSmall={true}
                 />
@@ -523,7 +526,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = zapList.length;
                     if (len === 0) return;
-                    getZaps(len);
+                    getZaps(len+1);
                   }}
                   isSmall={true}
                 />
@@ -572,7 +575,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = repostList.length;
                     if (len === 0) return;
-                    getReposts(len);
+                    getReposts(len+1);
                   }}
                   isSmall={true}
                 />
@@ -611,7 +614,7 @@ const ReactionsModal: Component<{
                 loadNextPage={() => {
                   const len = quotesList.length;
                   if (len === 0) return;
-                  getQuotes(len);
+                  getQuotes(len+1);
                 }}
                 isSmall={true}
               />
