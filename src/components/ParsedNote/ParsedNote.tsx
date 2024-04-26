@@ -209,7 +209,7 @@ const ParsedNote: Component<{
     setTokens(() => [...tokens]);
   }
 
-  const removeLinebreaks = () => {
+  const removeLinebreaks = (type: string) => {
     if (lastSignificantContent === 'LB') {
       const lastIndex = content.length - 1;
       const lastGroup = content[lastIndex];
@@ -217,7 +217,11 @@ const ParsedNote: Component<{
       setContent(lastIndex, () => ({
         type: lastGroup.type,
         tokens: [],
-        meta: lastGroup.meta,
+        meta: {
+          ...lastGroup.meta,
+          removedBy: type,
+          removedTokens: [...lastGroup.tokens],
+        },
       }));
     }
   };
@@ -242,6 +246,7 @@ const ParsedNote: Component<{
 
   let lastSignificantContent = 'text';
   let isAfterEmbed = false;
+  let totalLinks = 0;
 
   const parseToken = (token: string) => {
     if (token === '__LB__') {
@@ -293,7 +298,7 @@ const ParsedNote: Component<{
 
       if (!props.ignoreMedia) {
         if (isImage(token)) {
-          removeLinebreaks();
+          removeLinebreaks('image');
           isAfterEmbed = true;
           lastSignificantContent = 'image';
           updateContent(content, 'image', token);
@@ -301,7 +306,7 @@ const ParsedNote: Component<{
         }
 
         if (isMp4Video(token)) {
-          removeLinebreaks();
+          removeLinebreaks('video');
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/mp4'});
@@ -309,7 +314,7 @@ const ParsedNote: Component<{
         }
 
         if (isOggVideo(token)) {
-          removeLinebreaks();
+          removeLinebreaks('video');
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/ogg'});
@@ -317,7 +322,7 @@ const ParsedNote: Component<{
         }
 
         if (isWebmVideo(token)) {
-          removeLinebreaks();
+          removeLinebreaks('video');
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
@@ -325,7 +330,7 @@ const ParsedNote: Component<{
         }
 
         if (isYouTube(token)) {
-          removeLinebreaks();
+          removeLinebreaks('youtube');
           isAfterEmbed = true;
           lastSignificantContent = 'youtube';
           updateContent(content, 'youtube', token);
@@ -333,7 +338,7 @@ const ParsedNote: Component<{
         }
 
         if (isSpotify(token)) {
-          removeLinebreaks();
+          removeLinebreaks('spotify');
           isAfterEmbed = true;
           lastSignificantContent = 'spotify';
           updateContent(content, 'spotify', token);
@@ -341,7 +346,7 @@ const ParsedNote: Component<{
         }
 
         if (isTwitch(token)) {
-          removeLinebreaks();
+          removeLinebreaks('twitch');
           isAfterEmbed = true;
           lastSignificantContent = 'twitch';
           updateContent(content, 'twitch', token);
@@ -349,7 +354,7 @@ const ParsedNote: Component<{
         }
 
         if (isMixCloud(token)) {
-          removeLinebreaks();
+          removeLinebreaks('mixcloud');
           isAfterEmbed = true;
           lastSignificantContent = 'mixcloud';
           updateContent(content, 'mixcloud', token);
@@ -357,7 +362,7 @@ const ParsedNote: Component<{
         }
 
         if (isSoundCloud(token)) {
-          removeLinebreaks();
+          removeLinebreaks('soundcloud');
           isAfterEmbed = true;
           lastSignificantContent = 'soundcloud';
           updateContent(content, 'soundcloud', token);
@@ -365,7 +370,7 @@ const ParsedNote: Component<{
         }
 
         if (isAppleMusic(token)) {
-          removeLinebreaks();
+          removeLinebreaks('applemusic');
           isAfterEmbed = true;
           lastSignificantContent = 'applemusic';
           updateContent(content, 'applemusic', token);
@@ -373,7 +378,7 @@ const ParsedNote: Component<{
         }
 
         if (isWavelake(token)) {
-          removeLinebreaks();
+          removeLinebreaks('wavelake');
           isAfterEmbed = true;
           lastSignificantContent = 'wavelake';
           updateContent(content, 'wavelake', token);
@@ -398,7 +403,7 @@ const ParsedNote: Component<{
         );
 
       if (hasMinimalPreviewData) {
-        removeLinebreaks();
+        removeLinebreaks('link');
         updateContent(content, 'link', token, { preview });
       } else {
         updateContent(content, 'link', token);
@@ -406,11 +411,12 @@ const ParsedNote: Component<{
 
       lastSignificantContent = 'link';
       isAfterEmbed = false;
+      totalLinks++;
       return;
     }
 
     if (isNoteMention(token)) {
-      removeLinebreaks();
+      removeLinebreaks('notemention');
       lastSignificantContent = 'notemention';
       isAfterEmbed = true;
       updateContent(content, 'notemention', token);
@@ -455,7 +461,7 @@ const ParsedNote: Component<{
       let lnbcToken = match?.find(m => m.startsWith('lnbc'));
 
       if (lnbcToken) {
-        removeLinebreaks();
+        removeLinebreaks('lnbc');
         updateContent(content, 'lnbc', lnbcToken);
       }
       else {
@@ -468,7 +474,7 @@ const ParsedNote: Component<{
     if (isLnbc(token)) {
       lastSignificantContent = 'lnbc';
 
-      removeLinebreaks();
+      removeLinebreaks('lnbc');
       updateContent(content, 'lnbc', token);
       return;
     }
@@ -503,8 +509,12 @@ const ParsedNote: Component<{
   const renderLinebreak = (item: NoteContent) => {
     if (isNoteTooLong()) return;
 
+    let tokens = item.meta?.removedBy === 'link' && totalLinks > 1 ?
+      (item.meta?.removedTokens || []) :
+      item.tokens;
+
     // Allow max consecutive linebreak
-    const len = Math.min(2, item.tokens.length);
+    const len = Math.min(2, tokens.length);
 
     const lineBreaks = Array(len).fill(<br/>)
 
@@ -834,7 +844,7 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        if (item.meta && item.meta.preview) {
+        if (item.meta && item.meta.preview && totalLinks < 2) {
           setWordsDisplayed(w => w + shortMentionInWords);
           return (
             <LinkPreview
