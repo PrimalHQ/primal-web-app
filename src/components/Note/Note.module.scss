@@ -616,3 +616,83 @@
   top: 4px;
   right: 4px;
 }
+
+@keyframes shimmer {
+  to {
+     background-position-x: 0%
+  }
+}
+
+.topZapsLoading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+
+  &.onlyFew {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .firstZap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 120px;
+    height: 26px;
+    margin: 0;
+    border-radius: 12px;
+    // background: var(--devider);
+    text-decoration: none;
+    border: none;
+    outline: none;
+    background: linear-gradient(-45deg, var(--devider) 35%, #333333 50%, var(--devider) 65%);
+    background-size: 300%;
+    background-position-x: 100%;
+    animation: shimmer 0.6s infinite linear;
+  }
+
+  .topZaps {
+    display: flex;
+    align-self: center;
+    gap: 6px;
+    width: 100%;
+
+    .zapList {
+      display: flex;
+      align-self: center;
+      gap: 6px;
+      max-width: calc(100% - 30px);
+      overflow-x: scroll;
+      overflow-y: hidden;
+
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      &::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      /* Hide scrollbar for IE, Edge and Firefox */
+      -ms-overflow-style: none !important;  /* IE and Edge */
+      scrollbar-width: none !important;  /* Firefox */
+
+      .topZap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        border-radius: 12px;
+        // background: var(--devider);
+        width: 70px;
+        height: 26px;
+        text-decoration: none;
+        border: none;
+        outline: none;
+        background: linear-gradient(-45deg, var(--devider) 35%, #333333 50%, var(--devider) 65%);
+        background-size: 300%;
+        background-position-x: 100%;
+        animation: shimmer 0.6s infinite linear;
+      }
+    }
+  }
+}

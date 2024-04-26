@@ -18,13 +18,19 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
 
   const sats = Math.round(amount * 1000);
 
-  const zapReq = nip57.makeZapRequest({
+  let payload = {
     profile: note.post.pubkey,
     event: note.msg.id,
     amount: sats,
-    comment,
     relays: relays.map(r => r.url)
-  });
+  };
+
+  if (comment.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+
+  const zapReq = nip57.makeZapRequest(payload);
 
   try {
     const signedEvent = await signEvent(zapReq);
@@ -57,12 +63,17 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
 
   const sats = Math.round(amount * 1000);
 
-  const zapReq = nip57.makeZapRequest({
+  let payload = {
     profile: profile.pubkey,
     amount: sats,
-    comment,
     relays: relays.map(r => r.url)
-  });
+  };
+
+  if (comment.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+  const zapReq = nip57.makeZapRequest(payload);
 
   try {
     const signedEvent = await signEvent(zapReq);

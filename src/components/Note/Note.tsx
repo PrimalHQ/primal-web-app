@@ -299,49 +299,66 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
-            <div class={`${styles.zapHighlights} ${reactionsState.topZaps.length < 4 ? styles.onlyFew : ''}`}>
-              <Show when={firstZap()}>
-                <button
-                  class={styles.firstZap}
-                  onClick={() => openReactionModal('zaps')}
-                >
-                  <Avatar user={zapSender(firstZap())} size="micro" />
-                  <div class={styles.amount}>
-                    {firstZap().amount.toLocaleString()}
+            <Show
+              when={!threadContext?.isFetchingTopZaps}
+              fallback={
+                <div class={styles.topZapsLoading}>
+                  <div class={styles.firstZap}></div>
+                  <div class={styles.topZaps}>
+                    <div class={styles.zapList}>
+                      <div class={styles.topZap}></div>
+                      <div class={styles.topZap}></div>
+                      <div class={styles.topZap}></div>
+                      <div class={styles.topZap}></div>
+                      <div class={styles.topZap}></div>
+                    </div>
                   </div>
-                  <div class={styles.description}>
-                    {firstZap().message}
-                  </div>
-                </button>
-              </Show>
-              <div class={styles.topZaps}>
-                <div class={styles.zapList}>
-                  <For each={restZaps()}>
-                    {zap => (
-                      <button
-                        class={styles.topZap}
-                        onClick={() => openReactionModal('zaps')}
-                      >
-                        <Avatar user={zapSender(zap)} size="micro" />
-                        <div class={styles.amount}>
-                          {zap.amount.toLocaleString()}
-                        </div>
-                      </button>
-                    )}
-                  </For>
                 </div>
-
-                <Show when={reactionsState.moreZapsAvailable}>
+              }
+            >
+              <div class={`${styles.zapHighlights} ${reactionsState.topZaps.length < 4 ? styles.onlyFew : ''}`}>
+                <Show when={firstZap()}>
                   <button
-                    class={styles.moreZaps}
+                    class={styles.firstZap}
                     onClick={() => openReactionModal('zaps')}
                   >
-                    <div class={styles.contextIcon}></div>
+                    <Avatar user={zapSender(firstZap())} size="micro" />
+                    <div class={styles.amount}>
+                      {firstZap().amount.toLocaleString()}
+                    </div>
+                    <div class={styles.description}>
+                      {firstZap().message}
+                    </div>
                   </button>
                 </Show>
-              </div>
-            </div>
+                <div class={styles.topZaps}>
+                  <div class={styles.zapList}>
+                    <For each={restZaps()}>
+                      {zap => (
+                        <button
+                          class={styles.topZap}
+                          onClick={() => openReactionModal('zaps')}
+                        >
+                          <Avatar user={zapSender(zap)} size="micro" />
+                          <div class={styles.amount}>
+                            {zap.amount.toLocaleString()}
+                          </div>
+                        </button>
+                      )}
+                    </For>
+                  </div>
 
+                  <Show when={reactionsState.moreZapsAvailable}>
+                    <button
+                      class={styles.moreZaps}
+                      onClick={() => openReactionModal('zaps')}
+                    >
+                      <div class={styles.contextIcon}></div>
+                    </button>
+                  </Show>
+                </div>
+              </div>
+            </Show>
 
             <div
               class={styles.time}

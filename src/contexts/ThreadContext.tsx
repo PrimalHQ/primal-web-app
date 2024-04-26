@@ -56,6 +56,7 @@ export type ThreadContextStore = {
   notes: PrimalNote[],
   users: PrimalUser[],
   isFetching: boolean,
+  isFetchingTopZaps: boolean,
   page: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
@@ -83,6 +84,7 @@ export const initialData = {
   users: [],
   replyNotes: [],
   isFetching: false,
+  isFetchingTopZaps: false,
   page: {
     messages: [],
     users: {},
@@ -300,6 +302,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchTopZaps = (noteId: string) => {
+    updateStore('isFetchingTopZaps', () => true);
     getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
   };
 
@@ -363,6 +366,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     if (subId === `thread_zapps_${APP_ID}`) {
       if (type === 'EOSE') {
         savePage(store.page);
+        updateStore('isFetchingTopZaps', () => false);
       }
 
       if (type === 'EVENT') {
