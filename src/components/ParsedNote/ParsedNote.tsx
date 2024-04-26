@@ -225,16 +225,19 @@ const ParsedNote: Component<{
   const [content, setContent] = createStore<NoteContent[]>([]);
 
   const updateContent = (contentArray: NoteContent[], type: string, token: string, meta?: Record<string, any>) => {
-    if (contentArray.length > 0 && contentArray[contentArray.length -1].type === type) {
+    const len = contentArray.length;
+    const index = contentArray.length -1
 
-      setContent(content.length -1, 'tokens' , (els) => [...els, token]);
+    if (len > 0 && contentArray[len -1].type === type) {
 
-      meta && setContent(content.length -1, 'meta' , () => ({ ...meta }));
+      setContent(index, 'tokens' , (els) => [...els, token]);
+
+      meta && setContent(index, 'meta' , () => ({ ...meta }));
 
       return;
     }
 
-    setContent(content.length, () => ({ type, tokens: [token], meta }));
+    setContent(len, () => ({ type, tokens: [token], meta }));
   }
 
   let lastSignificantContent = 'text';
@@ -252,7 +255,7 @@ const ParsedNote: Component<{
     }
 
     if (token === '__SP__') {
-      if (!['image', 'video', 'link', 'LB'].includes(lastSignificantContent)) {
+      if (!['image', 'video', 'LB'].includes(lastSignificantContent)) {
         updateContent(content, 'text', ' ');
       }
       return;
@@ -289,70 +292,89 @@ const ParsedNote: Component<{
       }
 
       if (!props.ignoreMedia) {
-        removeLinebreaks();
-        isAfterEmbed = true;
-
         if (isImage(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'image';
           updateContent(content, 'image', token);
           return;
         }
 
         if (isMp4Video(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/mp4'});
           return;
         }
 
         if (isOggVideo(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/ogg'});
           return;
         }
 
         if (isWebmVideo(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
           return;
         }
 
         if (isYouTube(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'youtube';
           updateContent(content, 'youtube', token);
           return;
         }
 
         if (isSpotify(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'spotify';
           updateContent(content, 'spotify', token);
           return;
         }
 
         if (isTwitch(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'twitch';
           updateContent(content, 'twitch', token);
           return;
         }
 
         if (isMixCloud(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'mixcloud';
           updateContent(content, 'mixcloud', token);
           return;
         }
 
         if (isSoundCloud(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'soundcloud';
           updateContent(content, 'soundcloud', token);
           return;
         }
 
         if (isAppleMusic(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'applemusic';
           updateContent(content, 'applemusic', token);
           return;
         }
 
         if (isWavelake(token)) {
+          removeLinebreaks();
+          isAfterEmbed = true;
           lastSignificantContent = 'wavelake';
           updateContent(content, 'wavelake', token);
           return;
@@ -365,11 +387,25 @@ const ParsedNote: Component<{
         return;
       }
 
-      removeLinebreaks();
-      isAfterEmbed = false;
-      lastSignificantContent = 'link';
+      const preview = getLinkPreview(token);
 
-      updateContent(content, 'link', token);
+      const hasMinimalPreviewData = !props.noPreviews &&
+        preview &&
+        preview.url &&
+        ((!!preview.description && preview.description.length > 0) ||
+          !preview.images?.some((x:any) => x === '') ||
+          !!preview.title
+        );
+
+      if (hasMinimalPreviewData) {
+        removeLinebreaks();
+        updateContent(content, 'link', token, { preview });
+      } else {
+        updateContent(content, 'link', token);
+      }
+
+      lastSignificantContent = 'link';
+      isAfterEmbed = false;
       return;
     }
 
@@ -798,27 +834,23 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        const preview = getLinkPreview(token);
-
-        const hasMinimalPreviewData = !props.noPreviews &&
-          preview &&
-          preview.url &&
-          ((!!preview.description && preview.description.length > 0) ||
-            !preview.images?.some((x:any) => x === '') ||
-            !!preview.title
-          );
-
-        if (hasMinimalPreviewData) {
+        if (item.meta && item.meta.preview) {
           setWordsDisplayed(w => w + shortMentionInWords);
-          return <LinkPreview
-            preview={preview}
-            bordered={props.isEmbeded}
-            isLast={index === content.length-1}
-          />;
+          return (
+            <LinkPreview
+              preview={item.meta.preview}
+              bordered={props.isEmbeded}
+              isLast={index === content.length-1}
+            />
+          );
         }
 
         setWordsDisplayed(w => w + 1);
-        return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
+        return (
+          <span data-url={token}>
+            <a link href={token} target="_blank" >{token}</a>
+          </span>
+        );
       }}
     </For>
   };
@@ -1147,6 +1179,7 @@ const ParsedNote: Component<{
   }
 
   const renderContent = (item: NoteContent, index: number) => {
+
 
     const renderers: Record<string, (item: NoteContent, index?: number) => JSXElement> = {
       linebreak: renderLinebreak,
