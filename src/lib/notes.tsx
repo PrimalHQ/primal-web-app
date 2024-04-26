@@ -562,14 +562,23 @@ export const getEventQuotes = (eventId: string, subid: string, offset = 0) => {
 };
 
 export const getEventZaps = (eventId: string, user_pubkey: string | undefined, subid: string, limit: number,  offset = 0) => {
-  if (!user_pubkey) return;
-
   const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+
+  let payload = {
+    event_id,
+    limit,
+    offset
+  };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_zaps_by_satszapped", { event_id, user_pubkey, limit, offset }]},
+    {cache: ["event_zaps_by_satszapped", { ...payload }]},
   ]));
 };
 
