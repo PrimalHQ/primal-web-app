@@ -141,9 +141,30 @@ const CustomZap: Component<{
     props.onFail(selectedValue());
   };
 
+  let md = false;
+
   return (
-    <Modal open={props.open} onClose={() => props.onCancel({ amount: 0, message: '' })}>
-      <div id={props.id} class={styles.customZap}>
+    <Modal
+      open={props.open}
+      onClose={() => {
+        if (md) {
+          md = false;
+        }
+        else {
+          props.onCancel({ amount: 0, message: '' });
+        }
+      }}
+    >
+      <div
+        id={props.id}
+        class={styles.customZap}
+        onMouseUp={() => md = false}
+        onMouseDown={() => md = true}
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
         <div class={styles.header}>
           <div class={styles.title}>
             <div class={styles.caption}>
