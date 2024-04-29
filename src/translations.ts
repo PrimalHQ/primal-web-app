@@ -788,17 +788,17 @@ export const note = {
     },
     optionYes: {
       id: 'note.saveNoteDraft.yes',
-      defaultMessage: 'Yes',
+      defaultMessage: 'Save',
       description: 'Confirm saving not as draft',
     },
     optionNo: {
       id: 'note.saveNoteDraft.no',
-      defaultMessage: 'No',
+      defaultMessage: 'Discard',
       description: 'Decline saving not as draft',
     },
     optionCancel: {
       id: 'note.saveNoteDraft.cancel',
-      defaultMessage: 'Continue editing now',
+      defaultMessage: 'Continue Editing',
       description: 'Continue editing the note',
     },
   },
