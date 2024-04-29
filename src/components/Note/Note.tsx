@@ -21,6 +21,7 @@ import { hexToNpub } from '../../lib/keys';
 import { thread, zapCustomOption } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
+import NoteTopZaps from './NoteTopZaps';
 
 export type NoteReactionsState = {
   likes: number,
@@ -206,41 +207,6 @@ const Note: Component<{
     return (likes || 0) + (zapCount || 0) + (reposts || 0) + (quoteCount || 0);
   };
 
-  const firstZap = createMemo(() => reactionsState.topZaps[0]);
-
-  const restZaps = createMemo(() => {
-    const zaps = reactionsState.topZaps.slice(1);
-
-    let limit = 0;
-    let digits = 0;
-
-    for (let i=0; i< zaps.length; i++) {
-      const amount = zaps[i].amount || 0;
-      const length = Math.log(amount) * Math.LOG10E + 1 | 0;
-
-      digits += length;
-
-      if (digits > 25 || limit > 6) break;
-
-      limit++;
-    }
-
-    const rest = zaps.slice(0, limit);
-
-    if (rest.length < reactionsState.zapCount - 1) {
-      updateReactionsState('moreZapsAvailable', () => true);
-    }
-    else {
-      updateReactionsState('moreZapsAvailable', () => false);
-    }
-
-    return rest;
-  });
-
-  const zapSender = (zap: TopZap) => {
-    return threadContext?.users.find(u => u.pubkey === zap.pubkey);
-  };
-
   createEffect(() => {
     updateReactionsState('topZaps', () =>  [ ...(threadContext?.topZaps[props.note.post.id] || []) ]);
   });
@@ -299,66 +265,11 @@ const Note: Component<{
               <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
             </div>
 
-            <Show
-              when={!threadContext?.isFetchingTopZaps}
-              fallback={
-                <div class={styles.topZapsLoading}>
-                  <div class={styles.firstZap}></div>
-                  <div class={styles.topZaps}>
-                    <div class={styles.zapList}>
-                      <div class={styles.topZap}></div>
-                      <div class={styles.topZap}></div>
-                      <div class={styles.topZap}></div>
-                      <div class={styles.topZap}></div>
-                      <div class={styles.topZap}></div>
-                    </div>
-                  </div>
-                </div>
-              }
-            >
-              <div class={`${styles.zapHighlights} ${reactionsState.topZaps.length < 4 ? styles.onlyFew : ''}`}>
-                <Show when={firstZap()}>
-                  <button
-                    class={styles.firstZap}
-                    onClick={() => openReactionModal('zaps')}
-                  >
-                    <Avatar user={zapSender(firstZap())} size="micro" />
-                    <div class={styles.amount}>
-                      {firstZap().amount.toLocaleString()}
-                    </div>
-                    <div class={styles.description}>
-                      {firstZap().message}
-                    </div>
-                  </button>
-                </Show>
-                <div class={styles.topZaps}>
-                  <div class={styles.zapList}>
-                    <For each={restZaps()}>
-                      {zap => (
-                        <button
-                          class={styles.topZap}
-                          onClick={() => openReactionModal('zaps')}
-                        >
-                          <Avatar user={zapSender(zap)} size="micro" />
-                          <div class={styles.amount}>
-                            {zap.amount.toLocaleString()}
-                          </div>
-                        </button>
-                      )}
-                    </For>
-                  </div>
-
-                  <Show when={reactionsState.moreZapsAvailable}>
-                    <button
-                      class={styles.moreZaps}
-                      onClick={() => openReactionModal('zaps')}
-                    >
-                      <div class={styles.contextIcon}></div>
-                    </button>
-                  </Show>
-                </div>
-              </div>
-            </Show>
+            <NoteTopZaps
+              topZaps={reactionsState.topZaps}
+              zapCount={reactionsState.zapCount}
+              action={() => openReactionModal('zaps')}
+            />
 
             <div
               class={styles.time}

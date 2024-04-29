@@ -336,14 +336,19 @@
 
     .zapHighlights {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
       align-items: flex-start;
 
       &.onlyFew {
         flex-direction: row;
         align-items: center;
         gap: 6px;
+      }
+
+      .break {
+        flex-basis: 100%;
+        height: 0;
       }
 
       .firstZap {
@@ -381,93 +386,6 @@
 
         &:hover {
           background: var(--subtile-devider);
-        }
-      }
-
-      .topZaps {
-        display: flex;
-        align-self: center;
-        gap: 6px;
-        width: 100%;
-
-        .zapList {
-          display: flex;
-          align-self: center;
-          gap: 6px;
-          max-width: calc(100% - 30px);
-          overflow-x: scroll;
-          overflow-y: hidden;
-
-          /* Hide scrollbar for Chrome, Safari and Opera */
-          &::-webkit-scrollbar {
-            display: none !important;
-          }
-
-          /* Hide scrollbar for IE, Edge and Firefox */
-          -ms-overflow-style: none !important;  /* IE and Edge */
-          scrollbar-width: none !important;  /* Firefox */
-
-          .topZap {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding-left: 2px;
-            padding-right: 10px;
-            padding-block: 2px;
-            margin: 0;
-            border-radius: 12px;
-            background: var(--devider);
-            width: fit-content;
-            text-decoration: none;
-            border: none;
-            outline: none;
-
-            .amount {
-              color: var(--text-primary);
-              font-size: 14px;
-              font-weight: 600;
-              line-height: 14px;
-            }
-
-            .description {
-              color: var(--text-secondary-2);
-              font-size: 14px;
-              font-weight: 400;
-              line-height: 14px;
-            }
-
-            &:hover {
-              background: var(--subtile-devider);
-            }
-          }
-        }
-
-        .moreZaps {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          background: var(--devider);
-          width: 26px;
-          height: 26px;
-          padding: 0;
-          margin: 0;
-          border: none;
-          outline: none;
-
-          .contextIcon {
-            width: 16px;
-            height: 14px;
-            background-color: var(--text-secondary-2);
-            -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-            mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-          }
-
-          &:hover {
-            .contextIcon {
-              background-color: var(--text-primary);
-            }
-          }
         }
       }
     }
