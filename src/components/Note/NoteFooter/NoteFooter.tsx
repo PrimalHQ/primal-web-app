@@ -1,5 +1,5 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
-import { MenuItem, PrimalNote } from '../../../types/primal';
+import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { sendRepost, triggerImportEvents } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
@@ -22,7 +22,6 @@ import NoteFooterActionButton from './NoteFooterActionButton';
 import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
-import { APP_ID } from '../../../App';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -34,6 +33,7 @@ const NoteFooter: Component<{
   updateState: SetStoreFunction<NoteReactionsState>,
   customZapInfo: CustomZapInfo,
   large?: boolean,
+  onZapAnim?: (zapOption: ZapOption) => void,
 }> = (props) => {
 
   const account = useAccountContext();
@@ -268,10 +268,12 @@ const NoteFooter: Component<{
 
     batch(() => {
       props.updateState('isZapping', () => true);
-      props.updateState('showZapAnim', () => true);
       props.updateState('satsZapped', (z) => z + amount);
+      props.updateState('showZapAnim', () => true);
     });
 
+    console.log('QUICK ZAP: ', props.onZapAnim)
+    props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
       const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);

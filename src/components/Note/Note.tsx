@@ -97,6 +97,8 @@ const Note: Component<{
 
   let noteContextMenu: HTMLDivElement | undefined;
 
+  let latestTopZap: string = '';
+
   const onConfirmZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
     batch(() => {
@@ -106,6 +108,40 @@ const Note: Component<{
       updateReactionsState('zapped', () => true);
       updateReactionsState('showZapAnim', () => true)
     });
+
+    addTopZap(zapOption)
+  };
+
+  const addTopZap = (zapOption: ZapOption) => {
+    console.log('AADD')
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    const oldZaps = [ ...reactionsState.topZaps ];
+
+    latestTopZap = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: props.note.post.id,
+      id: latestTopZap,
+    };
+
+    if (!threadContext?.users.find((u) => u.pubkey === pubkey)) {
+      threadContext?.actions.fetchUsers([pubkey])
+    }
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
+    updateReactionsState('topZaps', () => [...zaps]);
+  };
+
+  const removeTopZap = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZaps.filter(z => z.id !== latestTopZap);
+    updateReactionsState('topZaps', () => [...zaps]);
   };
 
   const onSuccessZap = (zapOption: ZapOption) => {
@@ -116,21 +152,21 @@ const Note: Component<{
 
     if (!pubkey) return;
 
-    const oldZaps = [ ...reactionsState.topZaps ];
+    // const oldZaps = [ ...reactionsState.topZaps ];
 
-    const newZap = {
-      amount: zapOption.amount || 0,
-      message: zapOption.message || '',
-      pubkey,
-      eventId: props.note.post.id,
-      id: uuidv4() as string,
-    };
+    // const newZap = {
+    //   amount: zapOption.amount || 0,
+    //   message: zapOption.message || '',
+    //   pubkey,
+    //   eventId: props.note.post.id,
+    //   id: uuidv4() as string,
+    // };
 
-    if (!threadContext?.users.find((u) => u.pubkey === pubkey)) {
-      threadContext?.actions.fetchUsers([pubkey])
-    }
+    // if (!threadContext?.users.find((u) => u.pubkey === pubkey)) {
+    //   threadContext?.actions.fetchUsers([pubkey])
+    // }
 
-    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
+    // const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
 
     batch(() => {
       updateReactionsState('zapCount', (z) => z + 1);
@@ -140,7 +176,7 @@ const Note: Component<{
       updateReactionsState('showZapAnim', () => false);
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => true);
-      updateReactionsState('topZaps', () => [...zaps]);
+      // updateReactionsState('topZaps', () => [...zaps]);
     });
   };
 
@@ -156,6 +192,8 @@ const Note: Component<{
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
+
+    removeTopZap(zapOption);
   };
 
   const onCancelZap = (zapOption: ZapOption) => {
@@ -170,6 +208,8 @@ const Note: Component<{
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
+
+    removeTopZap(zapOption);
   };
 
   const customZapInfo: () => CustomZapInfo = () => ({
@@ -293,6 +333,7 @@ const Note: Component<{
               customZapInfo={customZapInfo()}
               wide={true}
               large={true}
+              onZapAnim={addTopZap}
             />
           </div>
         </div>

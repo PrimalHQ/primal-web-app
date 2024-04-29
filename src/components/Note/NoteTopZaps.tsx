@@ -2,6 +2,7 @@ import { Component, createMemo, createSignal, For, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
 import { TopZap, useThreadContext } from "../../contexts/ThreadContext";
 import Avatar from "../Avatar/Avatar";
+import { TransitionGroup } from 'solid-transition-group';
 import styles from  "./Note.module.scss";
 
 const NoteTopZaps: Component<{
@@ -62,39 +63,45 @@ const NoteTopZaps: Component<{
     }
   >
     <div class={`${styles.zapHighlights}`}>
-      <For each={topZaps()}>
-        {(zap, index) => (
-          <>
-            <button
-              class={styles.firstZap}
-              onClick={() => props.action()}
-            >
-              <Avatar user={zapSender(zap)} size="micro" />
-              <div class={styles.amount}>
-                {zap.amount.toLocaleString()}
-              </div>
-              <Show when={index() === 0}>
-                <div class={styles.description}>
-                  {zap.message}
+      <TransitionGroup
+        name="top-zaps"
+        enterClass={styles.topZapEnterTransition}
+        exitClass={styles.topZapExitTransition}
+      >
+        <For each={topZaps()}>
+          {(zap, index) => (
+            <>
+              <button
+                class={`${styles.topZap}`}
+                onClick={() => props.action()}
+              >
+                <Avatar user={zapSender(zap)} size="micro" />
+                <div class={styles.amount}>
+                  {zap.amount.toLocaleString()}
                 </div>
+                <Show when={index() === 0}>
+                  <div class={styles.description}>
+                    {zap.message}
+                  </div>
+                </Show>
+              </button>
+
+              <Show when={index() === 0 && props.topZaps.length > 3}>
+                <div class={styles.break}></div>
               </Show>
-            </button>
+            </>
+          )}
+        </For>
 
-            <Show when={index() === 0 && props.topZaps.length > 3}>
-              <div class={styles.break}></div>
-            </Show>
-          </>
-        )}
-      </For>
-
-      <Show when={hasMoreZaps()}>
-        <button
-          class={styles.moreZaps}
-          onClick={() => props.action()}
-        >
-          <div class={styles.contextIcon}></div>
-        </button>
-      </Show>
+        <Show when={hasMoreZaps()}>
+          <button
+            class={styles.moreZaps}
+            onClick={() => props.action()}
+          >
+            <div class={styles.contextIcon}></div>
+          </button>
+        </Show>
+      </TransitionGroup>
     </div>
   </Show>
   );

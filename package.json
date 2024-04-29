@@ -37,6 +37,7 @@
     "photoswipe": "5.4.3",
     "qr-code-styling": "^1.6.0-rc.1",
     "sass": "1.67.0",
-    "solid-js": "1.7.11"
+    "solid-js": "1.7.11",
+    "solid-transition-group": "0.2.3"
   }
 }
