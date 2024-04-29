@@ -158,11 +158,11 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   let membershipSocket: WebSocket | undefined;
 
-  onMount(() => {
-    setInterval(() => {
-      checkNostrChange();
-    }, 1_000);
-  });
+  // onMount(() => {
+  //   setInterval(() => {
+  //     checkNostrChange();
+  //   }, 1_000);
+  // });
 
   const checkNostrChange = async () => {
     if (location.pathname === '/') return;
