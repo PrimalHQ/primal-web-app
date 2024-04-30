@@ -74,6 +74,7 @@ const NoteTopZaps: Component<{
               <button
                 class={`${styles.topZap}`}
                 onClick={() => props.action()}
+                style={`z-index: ${12 - index()};`}
               >
                 <Avatar user={zapSender(zap)} size="micro" />
                 <div class={styles.amount}>

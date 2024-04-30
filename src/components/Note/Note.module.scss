@@ -352,6 +352,7 @@
       }
 
       .topZap {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -430,7 +431,7 @@
 
 .topZapExitTransition {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(3px);
 }
 
 .noteNotificationLink {
