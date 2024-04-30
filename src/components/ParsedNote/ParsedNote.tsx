@@ -1,8 +1,9 @@
 import { A } from '@solidjs/router';
-import { hexToNpub } from '../../lib/keys';
+import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   addLinkPreviews,
   getLinkPreview,
+  getParametrizedEvent,
   isAddrMention,
   isAppleMusic,
   isCustomEmoji,
@@ -50,6 +51,8 @@ import { actions } from '../../translations';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
+import { subscribeTo } from '../../sockets';
+import { APP_ID } from '../../App';
 
 const groupGridLimit = 7;
 
@@ -887,11 +890,33 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
-        setWordsDisplayed(w => w + 1);
+        const unknownMention = (nid: string) => {
+          setWordsDisplayed(w => w + 1);
 
-        const url = `https://highlighter.com/a/${id}`;
+          const url = `https://highlighter.com/a/${nid}`;
 
-        return <a href={url} target="_blank" >{token}</a>;
+          return <a href={url} target="_blank" >{token}</a>;
+        }
+
+        const decoded = decodeIdentifier(id);
+        const mentionedNotes = props.note.mentionedNotes;
+
+        if (decoded.type !== 'naddr' || !mentionedNotes) {
+          return unknownMention(id);
+        }
+
+        const mention = Object.values(mentionedNotes).find(m =>
+          m.post.pubkey === decoded.data.pubkey &&
+          m.post.kind === decoded.data.kind &&
+          m.post.tags.find(t => t[0] === 'd' && t[1] === decoded.data.identifier)
+        );
+
+        if (!mention) {
+          return unknownMention(id);
+        }
+
+        return renderLongFormMention(mention, index);
+
       }}
     </For>
   }

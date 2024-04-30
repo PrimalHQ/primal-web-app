@@ -111,8 +111,6 @@ const Note: Component<{
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    console.log('AADD')
-
     const pubkey = account?.publicKey;
 
     if (!pubkey) return;

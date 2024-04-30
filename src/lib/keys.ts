@@ -1,4 +1,5 @@
 import { nip19 } from "nostr-tools"
+import { logWarning } from "./logger";
 
 export const hexToNpub = (hex: string | undefined): string =>  {
 
@@ -31,5 +32,18 @@ export const npubToHex = (npub: string | undefined): string =>  {
   } catch (e) {
     console.error('nip19 decode error');
     return '';
+  }
+}
+
+export const decodeIdentifier = (id: string) => {
+  try {
+    return nip19.decode(id);
+  }
+  catch (e) {
+    logWarning('Failed to decode identifier: ', e);
+    return {
+      type: 'error',
+      data: id,
+    }
   }
 }

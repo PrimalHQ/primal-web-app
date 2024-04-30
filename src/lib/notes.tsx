@@ -592,3 +592,12 @@ export const getEventQuoteStats = (eventId: string, subid: string) => {
     {cache: ["note_mentions_count", { event_id }]},
   ]));
 };
+
+
+export const getParametrizedEvent = (pubkey: string, identifier: string, kind: number, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["parametrized_replaceable_event", { pubkey, kind, identifier, extended_response: true }]},
+  ]));
+};

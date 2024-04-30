@@ -272,7 +272,6 @@ const NoteFooter: Component<{
       props.updateState('showZapAnim', () => true);
     });
 
-    console.log('QUICK ZAP: ', props.onZapAnim)
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
