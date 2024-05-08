@@ -1,4 +1,4 @@
-import { Component, createMemo, createSignal, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 

@@ -3,17 +3,17 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "nostr-tools";
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrRelayHint, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -44,6 +44,8 @@ import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserR
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
 import Lnbc from "../../Lnbc/Lnbc";
+import { decodeIdentifier, hexToNpub } from "../../../lib/keys";
+import LinkPreview from "../../LinkPreview/LinkPreview";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -910,6 +912,104 @@ const EditBox: Component<{
 
   };
 
+  const [addrRefs, setAddrRef] = createStore<Record<string, any>>({});
+
+  const parseNaddr = (text: string) => {
+    let refs = [];
+    let match;
+
+    while((match = addrRegexG.exec(text)) !== null) {
+      refs.push(match[1]);
+    }
+
+    refs.forEach(id => {
+      if (noteRefs[id]) {
+        setTimeout(() => {
+          subNaddrRef(id);
+        }, 0);
+        return;
+      }
+
+      const addr = decodeIdentifier(id);
+
+      if (addr.type !== 'naddr') {
+        return;
+      }
+
+      const { pubkey, kind, identifier } = addr.data;
+
+      const subId = `naddr_${id}_${APP_ID}`;
+
+      // setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
+
+      const unsub = subscribeTo(subId, (type, subId, content) =>{
+        if (type === 'EOSE') {
+          subNaddrRef(id);
+          unsub();
+          return;
+        }
+
+        if (type === 'EVENT') {
+          if (!content) {
+            return;
+          }
+
+          if(content.kind === Kind.LongForm) {
+            const url = `https://highlighter.com/${hexToNpub(pubkey)}/${identifier}`;
+
+            const preview = {
+              url,
+              description: (content.tags.find(t => t[0] === 'summary') || [])[1] || content.content.slice(0, 100),
+              images: [(content.tags.find(t => t[0] === 'image') || [])[1] || ''],
+              title: (content.tags.find(t => t[0] === 'title') || [])[1] || '',
+            }
+
+            setAddrRef(id, () => ({ ...preview }));
+          }
+        }
+      });
+
+      getParametrizedEvent(pubkey, identifier, kind, subId);
+      // getEvents(account?.publicKey, [hex], `nn_${id}`, true);
+
+    });
+
+  };
+
+  const subNaddrRef = (noteId: string) => {
+
+
+    const parsed = parsedMessage().replace(addrRegex, (url) => {
+      const [_, id] = url.split(':');
+
+      if (!id || id !== noteId) {
+        return url;
+      }
+      try {
+        const preview = addrRefs[id];
+
+        const link = preview ?
+          <div>
+            <LinkPreview
+              preview={preview}
+              bordered={true}
+              isLast={false}
+            />
+          </div> :
+          <span class="linkish">{url}</span>;
+
+        // @ts-ignore
+        return link.outerHTML || url;
+      } catch (e) {
+        logError('Bad Note reference: ', e);
+        return `<span class="${styles.error}">${url}</span>`;
+      }
+
+    });
+
+    setParsedMessage(parsed);
+  };
+
   const parseNpubLinks = (text: string) => {
     let refs = [];
     let match;
@@ -969,7 +1069,7 @@ const EditBox: Component<{
 
     });
 
-  }
+  };
 
   const parseNoteLinks = (text: string) => {
     let refs = [];
@@ -1110,6 +1210,7 @@ const EditBox: Component<{
       )
     );
 
+    parseNaddr(content);
     parseNpubLinks(content);
     parseNoteLinks(content);
 
