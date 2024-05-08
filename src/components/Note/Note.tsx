@@ -1,11 +1,11 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createEffect, Match, Show, Switch } from 'solid-js';
-import { PrimalNote, ZapOption } from '../../types/primal';
+import { batch, Component, createEffect, Match, onMount, Show, Switch } from 'solid-js';
+import { PrimalNote, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
-import { TopZap, useThreadContext } from '../../contexts/ThreadContext';
+import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
 import Avatar from '../Avatar/Avatar';
@@ -20,6 +20,7 @@ import { date, veryLongDate } from '../../lib/dates';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
+import NoteTopZapsCompact from './NoteTopZapsCompact';
 
 export type NoteReactionsState = {
   likes: number,
@@ -39,6 +40,7 @@ export type NoteReactionsState = {
   moreZapsAvailable: boolean,
   isRepostMenuVisible: boolean,
   topZaps: TopZap[],
+  topZapsFeed: TopZap[],
   quoteCount: number,
 };
 
@@ -90,24 +92,56 @@ const Note: Component<{
     moreZapsAvailable: false,
     isRepostMenuVisible: false,
     topZaps: [],
+    topZapsFeed: [],
     quoteCount: props.quoteCount || 0,
   });
 
   let noteContextMenu: HTMLDivElement | undefined;
 
   let latestTopZap: string = '';
+  let latestTopZapFeed: string = '';
 
   const onConfirmZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
     batch(() => {
       updateReactionsState('zappedAmount', () => zapOption.amount || 0);
       updateReactionsState('satsZapped', (z) => z + (zapOption.amount || 0));
-      // updateFooterState('zappedNow', () => true);
       updateReactionsState('zapped', () => true);
       updateReactionsState('showZapAnim', () => true)
     });
 
-    addTopZap(zapOption)
+    addTopZap(zapOption);
+    addTopZapFeed(zapOption)
+  };
+
+  onMount(() => {
+    updateReactionsState('topZapsFeed', () => [ ...(props.note.topZaps || [])]);
+  })
+
+  const addTopZapFeed = (zapOption: ZapOption) => {
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    const oldZaps = [ ...reactionsState.topZapsFeed ];
+
+    latestTopZapFeed = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: props.note.post.id,
+      id: latestTopZapFeed,
+    };
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount).slice(0, 4);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
+  }
+
+  const removeTopZapFeed = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZapsFeed.filter(z => z.id !== latestTopZapFeed);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
   };
 
   const addTopZap = (zapOption: ZapOption) => {
@@ -148,31 +182,12 @@ const Note: Component<{
 
     if (!pubkey) return;
 
-    // const oldZaps = [ ...reactionsState.topZaps ];
-
-    // const newZap = {
-    //   amount: zapOption.amount || 0,
-    //   message: zapOption.message || '',
-    //   pubkey,
-    //   eventId: props.note.post.id,
-    //   id: uuidv4() as string,
-    // };
-
-    // if (!threadContext?.users.find((u) => u.pubkey === pubkey)) {
-    //   threadContext?.actions.fetchUsers([pubkey])
-    // }
-
-    // const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
-
     batch(() => {
       updateReactionsState('zapCount', (z) => z + 1);
-      // updateFooterState('satsZapped', (z) => z + (zapOption.amount || 0));
       updateReactionsState('isZapping', () => false);
-      // updateFooterState('zappedNow', () => false);
       updateReactionsState('showZapAnim', () => false);
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => true);
-      // updateReactionsState('topZaps', () => [...zaps]);
     });
   };
 
@@ -183,13 +198,13 @@ const Note: Component<{
       updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
       updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
       updateReactionsState('isZapping', () => false);
-      // updateFooterState('zappedNow', () => true);
       updateReactionsState('showZapAnim', () => false);
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
 
     removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
   };
 
   const onCancelZap = (zapOption: ZapOption) => {
@@ -199,13 +214,13 @@ const Note: Component<{
       updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
       updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
       updateReactionsState('isZapping', () => false);
-      // updateFooterState('zappedNow', () => true);
       updateReactionsState('showZapAnim', () => false);
       updateReactionsState('hideZapIcon', () => false);
       updateReactionsState('zapped', () => props.note.post.noteActions.zapped);
     });
 
     removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
   };
 
   const customZapInfo: () => CustomZapInfo = () => ({
@@ -386,11 +401,19 @@ const Note: Component<{
                 />
               </div>
 
+              <NoteTopZapsCompact
+                note={props.note}
+                action={() => openReactionModal('zaps')}
+                topZaps={reactionsState.topZapsFeed}
+                topZapLimit={4}
+              />
+
               <NoteFooter
                 note={props.note}
                 state={reactionsState}
                 updateState={updateReactionsState}
                 customZapInfo={customZapInfo()}
+                onZapAnim={addTopZapFeed}
               />
             </div>
           </div>

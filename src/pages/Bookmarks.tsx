@@ -14,7 +14,8 @@ import { setLinkPreviews } from '../lib/notes';
 import { subscribeTo } from '../sockets';
 import { convertToNotes, parseEmptyReposts } from '../stores/note';
 import { bookmarks as tBookmarks } from '../translations';
-import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange } from '../types/primal';
+import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap } from '../types/primal';
+import { parseBolt11 } from '../utils';
 import styles from './Bookmarks.module.scss';
 
 export type BookmarkStore = {
@@ -36,6 +37,7 @@ const emptyStore: BookmarkStore = {
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   notes: [],
   noteIds: [],
@@ -211,10 +213,59 @@ const Bookmarks: Component = () => {
       setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = convertToNotes(page);
+    const newPosts = convertToNotes(page, page.topZaps);
 
     saveNotes(newPosts);
   };

@@ -32,6 +32,7 @@ import {
   PrimalNote,
   PrimalUser,
   PrimalZap,
+  TopZap,
   VanityProfiles,
 } from "../types/primal";
 import { APP_ID } from "../App";
@@ -162,8 +163,8 @@ export const initialData = {
   isFetchingReplies: false,
   isProfileFollowing: false,
   isFetchingZaps: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
-  repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
+  repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
   zaps: [],
   zappers: {},
@@ -185,6 +186,7 @@ export const initialData = {
     users: {},
     postStats: {},
     notes: [],
+    topZaps: {},
     noteActions: {},
   },
   future: {
@@ -197,6 +199,7 @@ export const initialData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
     repliesPage: {
       messages: [],
@@ -204,6 +207,7 @@ export const initialData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
   },
   profileHistory: {
@@ -574,6 +578,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         postStats: {},
         mentions: {},
         noteActions: {},
+        topZaps: {},
       },
       repliesPage: {
         messages: [],
@@ -581,6 +586,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         postStats: {},
         mentions: {},
         noteActions: {},
+        topZaps: {},
       },
     }))
   }
@@ -727,10 +733,79 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      if (scope) {
+        const oldZaps = store[scope].page.topZaps[eventId];
+
+        if (oldZaps === undefined) {
+          updateStore(scope, 'page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+          return;
+        }
+
+        if (oldZaps.find(i => i.id === zap.id)) {
+          return;
+        }
+
+        const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+        updateStore(scope, 'page', 'topZaps', eventId, () => [ ...newZaps ]);
+        return;
+      }
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
+
   };
 
   const savePage = (page: FeedPage, scope?: 'future') => {
-    const newPosts = sortByRecency(convertToNotes(page));
+    const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps;
+    const newPosts = sortByRecency(convertToNotes(page, topZaps));
 
     saveNotes(newPosts, scope);
   };
@@ -843,6 +918,73 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       };
 
       setLinkPreviews(() => ({ [data.url]: preview }));
+      return;
+    }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      if (scope) {
+        const oldZaps = store[scope].repliesPage.topZaps[eventId];
+
+        if (oldZaps === undefined) {
+          updateStore(scope, 'repliesPage', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+          return;
+        }
+
+        if (oldZaps.find(i => i.id === zap.id)) {
+          return;
+        }
+
+        const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+        updateStore(scope, 'repliesPage', 'topZaps', eventId, () => [ ...newZaps ]);
+        return;
+      }
+
+      const oldZaps = store.repliesPage.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('repliesPage', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('repliesPage', 'topZaps', eventId, () => [ ...newZaps ]);
+
       return;
     }
   };

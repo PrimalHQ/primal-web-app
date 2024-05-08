@@ -34,8 +34,10 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalNote,
+  TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
+import { parseBolt11 } from "../utils";
 
 export type ExploreContextStore = {
   notes: PrimalNote[],
@@ -85,6 +87,7 @@ export const initialExploreData = {
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
@@ -227,12 +230,61 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       );
       return;
     }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
   };
 
   const savePage = (page: FeedPage) => {
     const sort = sortingPlan(store.timeframe);
 
-    const newPosts = sort(convertToNotes(page));
+    const newPosts = sort(convertToNotes(page, page.topZaps));
 
     saveNotes(newPosts);
   };

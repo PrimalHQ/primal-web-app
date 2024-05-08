@@ -1,9 +1,10 @@
 import { Component, createMemo, createSignal, For, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
-import { TopZap, useThreadContext } from "../../contexts/ThreadContext";
+import { useThreadContext } from "../../contexts/ThreadContext";
 import Avatar from "../Avatar/Avatar";
 import { TransitionGroup } from 'solid-transition-group';
 import styles from  "./Note.module.scss";
+import { TopZap } from "../../types/primal";
 
 const NoteTopZaps: Component<{
   topZaps: TopZap[],

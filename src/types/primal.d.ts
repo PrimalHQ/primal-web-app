@@ -5,6 +5,13 @@ import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 import { Kind } from "../constants";
 
+export type TopZap = {
+  id: string,
+  amount: number,
+  pubkey: string,
+  message: string,
+  eventId: string,
+}
 
 export type NostrNoteContent = {
   kind: Kind.Text | Kind.Repost | Kind.LongForm,
@@ -318,6 +325,7 @@ export type FeedPage = {
   mentions?: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
   relayHints?: Record<string, string>,
+  topZaps: Record<string, TopZap[]>,
   since?: number,
   until?: number,
 };
@@ -475,6 +483,7 @@ export type PrimalNote = {
   replyTo?: string,
   id: string,
   tags: string[][],
+  topZaps: TopZap[],
 };
 
 export type PrimalFeed = {

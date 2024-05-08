@@ -4,7 +4,7 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -156,9 +156,9 @@ const parseKind6 = (message: NostrNoteContent) => {
 //   }, []);
 // };
 
-type ConvertToNotes = (page: FeedPage | undefined) => PrimalNote[];
+type ConvertToNotes = (page: FeedPage | undefined, topZaps?: Record<string, TopZap[]>) => PrimalNote[];
 
-export const convertToNotes: ConvertToNotes = (page) => {
+export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
   if (page === undefined) {
     return [];
@@ -182,7 +182,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
     }
 
     const mentionIds = Object.keys(mentions) //message.tags.reduce((acc, t) => t[0] === 'e' ? [...acc, t[1]] : acc, []);
-    const userMentionIds = msg.tags?.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+    let userMentionIds = msg.tags?.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
 
     const repost = message.kind === Kind.Repost ? getRepostInfo(page, message) : undefined;
 
@@ -221,8 +221,21 @@ export const convertToNotes: ConvertToNotes = (page) => {
       }
     }
 
+    let tz: TopZap[] = [];
+
+    if (topZaps && topZaps[msg.id]) {
+      tz = topZaps[msg.id] || [];
+
+      for(let i=0; i<tz.length; i++) {
+        if (userMentionIds.includes(tz[i].pubkey)) continue;
+
+        userMentionIds.push(tz[i].pubkey);
+      }
+    }
+
     let mentionedNotes: Record<string, PrimalNote> = {};
     let mentionedUsers: Record<string, PrimalUser> = {};
+
 
     if (mentionIds.length > 0) {
       for (let i = 0;i<mentionIds.length;i++) {
@@ -310,6 +323,7 @@ export const convertToNotes: ConvertToNotes = (page) => {
       replyTo: replyTo && replyTo[1],
       tags: msg.tags,
       id: msg.id,
+      topZaps: [ ...tz ],
     };
   });
 }

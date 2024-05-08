@@ -35,20 +35,13 @@ import {
   NoteActions,
   PrimalNote,
   PrimalUser,
+  TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
 import { getEventQuoteStats, getEventZaps, setLinkPreviews } from "../lib/notes";
 import { parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
-
-export type TopZap = {
-  id: string,
-  amount: number,
-  pubkey: string,
-  message: string,
-  eventId: string,
-}
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
@@ -91,6 +84,7 @@ export const initialData = {
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
@@ -232,7 +226,6 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
     }
 
-
     if (content?.kind === Kind.Zap) {
       const zapTag = content.tags.find(t => t[0] === 'description');
 
@@ -282,6 +275,39 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    // if (content.kind === Kind.EventZapInfo) {
+    //   const zapInfo = JSON.parse(content.content)
+
+    //   const eventId = zapInfo.event_id || 'UNKNOWN';
+
+    //   if (eventId === 'UNKNOWN') return;
+
+    //   const zap: TopZap = {
+    //     id: zapInfo.zap_receipt_id,
+    //     amount: parseInt(zapInfo.amount_sats || '0'),
+    //     pubkey: zapInfo.sender,
+    //     message: zapInfo.content,
+    //     eventId,
+    //   };
+
+    //   const oldZaps = store.topZaps[eventId];
+
+    //   if (oldZaps === undefined) {
+    //     updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
+    //     return;
+    //   }
+
+    //   if (oldZaps.find(i => i.id === zap.id)) {
+    //     return;
+    //   }
+
+    //   const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+    //   updateStore('topZaps', eventId, () => [ ...newZaps ]);
+
+    //   return;
+    // }
+
     if (content.kind === Kind.NoteQuoteStats) {
       const quoteStats = JSON.parse(content.content);
 
@@ -290,7 +316,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = sortByRecency(convertToNotes(page));
+    const newPosts = sortByRecency(convertToNotes(page, store.topZaps));
     const users = Object.values(page.users).map(convertToUser);
 
     updateStore('users', () => [ ...users ]);

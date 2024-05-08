@@ -24,7 +24,9 @@ import {
   PrimalFeed,
   PrimalNote,
   SelectionOption,
+  TopZap,
 } from "../types/primal";
+import { parseBolt11 } from "../utils";
 import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
 
@@ -79,6 +81,7 @@ const initialHomeData = {
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
@@ -92,6 +95,7 @@ const initialHomeData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
     scope: '',
     timeframe: '',
@@ -105,10 +109,11 @@ const initialHomeData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
     isFetching: false,
     query: undefined,
-  }
+  },
 };
 
 export const HomeContext = createContext<HomeContextStore>();
@@ -210,6 +215,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         postStats: {},
         mentions: {},
         noteActions: {},
+        topZaps: {},
       },
       scope: '',
       timeframe: '',
@@ -532,14 +538,115 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      if (scope) {
+        const oldZaps = store[scope].page.topZaps[eventId];
+
+        if (oldZaps === undefined) {
+          updateStore(scope, 'page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+          return;
+        }
+
+        if (oldZaps.find(i => i.id === zap.id)) {
+          return;
+        }
+
+        const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+        updateStore(scope, 'page', 'topZaps', eventId, () => [ ...newZaps ]);
+        return;
+      }
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
+
+    // if (content.kind === Kind.EventZapInfo) {
+    //   const zapInfo = JSON.parse(content.content)
+
+    //   const eventId = zapInfo.event_id || 'UNKNOWN';
+
+    //   if (eventId === 'UNKNOWN') return;
+
+    //   const zap: TopZap = {
+    //     id: zapInfo.zap_receipt_id,
+    //     amount: parseInt(zapInfo.amount_sats || '0'),
+    //     pubkey: zapInfo.sender,
+    //     message: zapInfo.content,
+    //     eventId,
+    //   };
+
+    //   const oldZaps = store.topZaps[eventId];
+
+    //   if (oldZaps === undefined) {
+    //     updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
+    //     return;
+    //   }
+
+    //   if (oldZaps.find(i => i.id === zap.id)) {
+    //     return;
+    //   }
+
+    //   const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+    //   updateStore('topZaps', eventId, () => [ ...newZaps ]);
+
+    //   return;
+    // }
   };
 
   const savePage = (page: FeedPage, scope?: 'future') => {
     const topic = (store.selectedFeed?.hex || '').split(';');
     const sortingFunction = sortingPlan(topic[1]);
 
+    const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps
 
-    const newPosts = sortingFunction(convertToNotes(page));
+    const newPosts = sortingFunction(convertToNotes(page, topZaps));
 
     saveNotes(newPosts, scope);
   };
