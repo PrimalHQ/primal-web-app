@@ -68,10 +68,13 @@ export const userName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
+
+  const npub = user.npub || hexToNpub(user.pubkey) || '';
+
   const name = user.display_name ||
     user.displayName ||
     user.name ||
-    truncateNpub(user.npub);
+    truncateNpub(npub);
 
   return name ?
     name :
@@ -82,10 +85,12 @@ export const authorName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
+  const npub = user.npub || hexToNpub(user.pubkey) || '';
+
   const name = user.display_name ||
     user.displayName ||
     user.name ||
-    truncateNpub(user.npub);
+    truncateNpub(npub);
 
   return name ?
     name :

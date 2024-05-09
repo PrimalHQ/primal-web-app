@@ -43,6 +43,7 @@ const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
+const Longform = lazy(() => import('./pages/Longform'));
 
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
@@ -111,6 +112,7 @@ const Router: Component = () => {
           <Route path="/home" component={Home} />
           <Route path="/thread/:postId" component={Thread} />
           <Route path="/e/:postId" component={Thread} />
+          <Route path="/l/:naddr" component={Longform} />
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />

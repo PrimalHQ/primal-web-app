@@ -38,6 +38,7 @@
     "qr-code-styling": "^1.6.0-rc.1",
     "sass": "1.67.0",
     "solid-js": "1.7.11",
+    "solid-markdown": "^2.0.1",
     "solid-transition-group": "0.2.3"
   }
 }
