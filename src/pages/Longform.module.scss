@@ -65,6 +65,14 @@
     a {
       color: var(--accent-links);
     }
+
+    pre, code, mark {
+      background-color: var(--background-input);
+    }
+
+    ins {
+      color: var(--warning-bright);
+    }
   }
 
   .tags {
