@@ -629,6 +629,17 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   const extractContacts = (content: NostrContactsContent) => {
 
+    if (content.created_at && content.created_at < store.followingSince) {
+      const storage = getStorage(store.publicKey);
+
+      return {
+        following: storage.following,
+        created_at: storage.followingSince || 0,
+        tags: store.contactsTags,
+        content: store.contactsContent,
+      };
+    }
+
     const following = content.tags.reduce((acc, t) => {
       return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
     }, []);
@@ -717,7 +728,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
-    let contactsReceived = false;
+    // let contactsReceived = false;
 
     let contactData: ContactsData = {
       content: '',
@@ -730,12 +741,23 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
-        if (!contactsReceived) {
-          toast?.sendWarning(intl.formatMessage(tAccount.followFailed))
-          updateStore('followInProgress', () => '');
-          unsub();
-          return;
-        }
+        updateStore('followInProgress', () => '');
+        unsub();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        rawContacts.push(content);
+
+        logInfo('FOLLOW DATE CONTENT: ', content.created_at);
+        logInfo('FOLLOW DATE STORE: ', store.followingSince);
+        logInfo('FOLLOW DATE DIFF: ', (content.created_at || 0) - store.followingSince);
+
+        contactData = extractContacts(content);
+
+        logWarning('FOLLOW DATA PRE CHANGE: ', contactData);
 
         if (!contactData.following.includes(pubkey)) {
 
@@ -749,6 +771,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (following.length < 2 || tags.length < 2) {
             logWarning('FOLLOW ISSUE: ', `before_follow_${APP_ID}`);
             logWarning('FOLLOW CONTENT: ', rawContacts);
+            logWarning('FOLLOW DATA: ', contactData);
 
             setFollowData(() => ({
               openDialog: true,
@@ -761,21 +784,6 @@ export function AccountProvider(props: { children: JSXElement }) {
           else {
             await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
-        }
-
-        updateStore('followInProgress', () => '');
-        unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content || content.kind !== Kind.Contacts) return;
-
-        rawContacts.push(content)
-        contactsReceived = true;
-
-        if (content.created_at && content.created_at >= store.followingSince) {
-          contactData = extractContacts(content);
         }
       }
     });
@@ -795,8 +803,6 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
-    let contactsReceived = false;
-
     let contactData: ContactsData = {
       content: '',
       created_at: 0,
@@ -808,12 +814,23 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
       if (type === 'EOSE') {
-        if (!contactsReceived) {
-          toast?.sendWarning(intl.formatMessage(tAccount.unfollowFailed))
-          updateStore('followInProgress', () => '');
-          unsub();
-          return;
-        }
+        updateStore('followInProgress', () => '');
+        unsub();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        rawContacts.push(content);
+
+        logInfo('FOLLOW DATE CONTENT: ', content.created_at);
+        logInfo('FOLLOW DATE STORE: ', store.followingSince);
+        logInfo('FOLLOW DATE DIFF: ', (content.created_at || 0) - store.followingSince);
+
+        contactData = extractContacts(content);
+
+        logWarning('FOLLOW DATA PRE CHANGE: ', contactData);
 
         if (contactData.following.includes(pubkey)) {
 
@@ -827,6 +844,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (following.length < 2 || tags.length < 2) {
             logWarning('FOLLOW ISSUE: ', `before_unfollow_${APP_ID}`);
             logWarning('FOLLOW CONTENT: ', rawContacts);
+            logWarning('FOLLOW DATA: ', contactData);
 
             setFollowData(() => ({
               openDialog: true,
@@ -839,21 +857,6 @@ export function AccountProvider(props: { children: JSXElement }) {
           else {
             await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
-        }
-
-        updateStore('followInProgress', () => '');
-        unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content || content.kind !== Kind.Contacts) return;
-
-        rawContacts.push(content)
-        contactsReceived = true;
-
-        if (content.created_at && content.created_at >= store.followingSince) {
-          contactData = extractContacts(content);
         }
       }
     });
