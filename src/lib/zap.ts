@@ -35,7 +35,7 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURI(JSON.stringify(signedEvent));
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
@@ -78,7 +78,7 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURI(JSON.stringify(signedEvent));
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;

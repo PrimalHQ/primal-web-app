@@ -42,7 +42,7 @@ export const addLinkPreviews = async (url: string) => {
   try {
     const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
 
-    const preview = await fetch(`${origin}/link-preview?u=${encodeURI(url)}`);
+    const preview = await fetch(`${origin}/link-preview?u=${encodeURIComponent(url)}`);
     const data = await preview.json();
 
     return { url, description: data.description, title: data.title, images: [data.image], favicons: [data.icon_url] };
