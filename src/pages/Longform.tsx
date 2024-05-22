@@ -32,6 +32,7 @@ import mdCont from 'markdown-it-container';
 import mdAbbr from 'markdown-it-abbr';
 
 import { rehype } from 'rehype';
+import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
 
 export type LongFormData = {
   title: string,
@@ -60,6 +61,12 @@ const test = `
 #### h4 Heading
 ##### h5 Heading
 ###### h6 Heading
+
+## Mentions
+
+nostr:npub19f2765hdx8u9lz777w7azed2wsn9mqkf2gvn67mkldx8dnxvggcsmhe9da
+
+nostr:note1tv033d7y088x8e90n5ut8htlsyy4yuwsw2fpgywq62w8xf0qcv8q8xvvhg
 
 
 ## Horizontal Rules
@@ -489,11 +496,13 @@ const Longform: Component = () => {
 
           <img class={styles.image} src={note.image} />
 
-          <div class={styles.content} innerHTML={inner()}>
-            {/* <SolidMarkdown
+          <PrimalMarkdown content={test} readonly={true} />
+
+          {/* <div class={styles.content} innerHTML={inner()}>
+             <SolidMarkdown
               children={note.content || ''}
-            /> */}
-          </div>
+            />
+          </div> */}
         </Show>
       </div>
     </>);
