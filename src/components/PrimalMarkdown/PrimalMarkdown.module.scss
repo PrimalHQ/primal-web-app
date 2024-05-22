@@ -14,12 +14,20 @@
     }
 
     p, li {
-      font-size: 18px;
-      font-weight: 500;
+      font-family: Lora;
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
     }
 
     a {
       color: var(--accent-links);
+      font-family: Lora;
+      font-size: 15px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
     }
 
     pre, code, mark {

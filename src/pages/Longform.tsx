@@ -12,7 +12,7 @@ import { SolidMarkdown } from "solid-markdown";
 
 import styles from './Longform.module.scss';
 import Loader from "../components/Loader/Loader";
-import { NostrUserContent, PrimalUser } from "../types/primal";
+import { NostrUserContent, PrimalUser, TopZap } from "../types/primal";
 import { getUserProfileInfo } from "../lib/profile";
 import { convertToUser, userName } from "../stores/profile";
 import Avatar from "../components/Avatar/Avatar";
@@ -20,19 +20,14 @@ import { shortDate } from "../lib/dates";
 
 import hljs from 'highlight.js'
 
-import markdownit from 'markdown-it';
-import mdSub from 'markdown-it-sub';
-import mdSup from 'markdown-it-sup';
-import mdMark from 'markdown-it-mark';
-import mdIns from 'markdown-it-ins';
 import mdFoot from 'markdown-it-footnote';
 import { full as mdEmoji } from 'markdown-it-emoji';
-import mdDef from 'markdown-it-deflist';
-import mdCont from 'markdown-it-container';
-import mdAbbr from 'markdown-it-abbr';
 
-import { rehype } from 'rehype';
 import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
+import NoteTopZaps from "../components/Note/NoteTopZaps";
+import { parseBolt11 } from "../utils";
+import { NoteReactionsState } from "../components/Note/Note";
+import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
 
 export type LongFormData = {
   title: string,
@@ -42,6 +37,7 @@ export type LongFormData = {
   published: number,
   content: string,
   author: string,
+  topZaps: TopZap[],
 };
 
 const emptyLongNote = {
@@ -52,6 +48,7 @@ const emptyLongNote = {
   published: 0,
   content: '',
   author: '',
+  topZaps: [],
 }
 
 const test = `
@@ -303,28 +300,27 @@ const Longform: Component = () => {
   // @ts-ignore
   const [author, setAuthor] = createStore<PrimalUser>();
 
-  const md = markdownit({
-    linkify: true,
-    typographer: true,
-    highlight: function (str, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try {
-          return hljs.highlight(str, { language: lang }).value;
-        } catch (__) {}
-      }
-
-      return ''; // use external default escaping
-    }
-  })
-    .use(mdAbbr)
-    .use(mdCont)
-    .use(mdDef)
-    .use(mdEmoji)
-    .use(mdFoot)
-    .use(mdIns)
-    .use(mdMark)
-    .use(mdSub)
-    .use(mdSup);
+  const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
+    likes: 0,
+    liked: false,
+    reposts: 0,
+    reposted: false,
+    replies: 0,
+    replied: false,
+    zapCount: 0,
+    satsZapped: 0,
+    zapped: false,
+    zappedAmount: 0,
+    zappedNow: false,
+    isZapping: false,
+    showZapAnim: false,
+    hideZapIcon: false,
+    moreZapsAvailable: false,
+    isRepostMenuVisible: false,
+    topZaps: [],
+    topZapsFeed: [],
+    quoteCount: 0,
+  });
 
   createEffect(() => {
     if (!pubkey()) {
@@ -371,6 +367,7 @@ const Longform: Component = () => {
         published: (new Date()).getTime() / 1_000,
         content: test,
         author: account?.publicKey,
+        topZaps: [],
       }));
 
       setPubkey(() => note.author);
@@ -408,6 +405,7 @@ const Longform: Component = () => {
               published: content.created_at || 0,
               content: content.content,
               author: content.pubkey,
+              topZaps: [],
             }
 
             content.tags.forEach(tag => {
@@ -440,21 +438,62 @@ const Longform: Component = () => {
 
             setNote(() => ({...n}));
           }
+
+
+        if (content?.kind === Kind.Zap) {
+          const zapTag = content.tags.find(t => t[0] === 'description');
+
+          if (!zapTag) return;
+
+          const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+          let amount = '0';
+
+          let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+          if (bolt11Tag) {
+            try {
+              amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+            } catch (e) {
+              const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+              amount = amountTag ? amountTag[1] : '0';
+            }
+          }
+
+          const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+          const zap: TopZap = {
+            id: zapInfo.id,
+            amount: parseInt(amount || '0'),
+            pubkey: zapInfo.pubkey,
+            message: zapInfo.content,
+            eventId,
+          };
+
+          const oldZaps = note.topZaps;
+
+          if (oldZaps === undefined) {
+            setNote('topZaps', () => [{ ...zap }]);
+            return;
+          }
+
+          if (oldZaps.find(i => i.id === zap.id)) {
+            return;
+          }
+
+          const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+          setNote('topZaps', () => [ ...newZaps ]);
+
+          return;
+        }
         }
       });
 
       getParametrizedEvent(pubkey, identifier, kind, subId);
     }
   })
-
-  const inner = () => {
-    const marked = md.render(note.content || '');
-    // const tree = await rehype().process(marked)
-
-    // console.log('TREE: ', tree)
-
-    return marked;
-  }
 
   return (
     <>
@@ -484,6 +523,8 @@ const Longform: Component = () => {
             {note.summary}
           </div>
 
+          <img class={styles.image} src={note.image} />
+
           <div class={styles.tags}>
             <For each={note.tags}>
               {tag => (
@@ -494,9 +535,13 @@ const Longform: Component = () => {
             </For>
           </div>
 
-          <img class={styles.image} src={note.image} />
+          <NoteTopZaps
+            topZaps={note.topZaps}
+            zapCount={reactionsState.zapCount}
+            action={() => {}}
+          />
 
-          <PrimalMarkdown content={test} readonly={true} />
+          <PrimalMarkdown content={note.content || ''} readonly={true} />
 
           {/* <div class={styles.content} innerHTML={inner()}>
              <SolidMarkdown

@@ -111,7 +111,6 @@ const account = useAccountContext();
     if (id.startsWith('npub1')) {
 
       fetchUserInfo(id);
-      renderMention
       return (
         <Show
           when={userMentions[id] !== undefined}
