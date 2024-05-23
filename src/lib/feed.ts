@@ -152,6 +152,23 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   ]));
 }
 
+export const getArticleThread = (user_pubkey: string | undefined, pubkey: string, identifier: string, kind: number, subid: string, until = 0, limit = 100) => {
+
+
+  let payload:  { user_pubkey?: string, limit: number, pubkey: string, kind: number, identifier: string, until?: number } =
+    { pubkey, identifier, kind , limit } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_thread_view", payload]},
+  ]));
+}
+
 export const getFutureExploreFeed = (
   user_pubkey: string | undefined,
   subid: string,

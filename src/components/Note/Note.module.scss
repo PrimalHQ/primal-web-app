@@ -334,96 +334,96 @@
       }
     }
 
-    .zapHighlights {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: flex-start;
-
-      &.onlyFew {
-        flex-direction: row;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .break {
-        flex-basis: 100%;
-        height: 0;
-      }
-
-      .topZap {
-        position: relative;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding-left: 2px;
-        padding-right: 10px;
-        padding-block: 2px;
-        margin: 0;
-        border-radius: 12px;
-        background: var(--devider);
-        width: fit-content;
-        max-width: 100%;
-        text-decoration: none;
-        border: none;
-        outline: none;
-
-        .amount {
-          color: var(--text-primary);
-          font-size: 14px;
-          font-weight: 600;
-          line-height: 14px;
-        }
-
-        .description {
-          color: var(--text-secondary-2);
-          font-size: 14px;
-          font-weight: 400;
-          line-height: 18px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        &:hover {
-          background: var(--subtile-devider);
-        }
-
-        transition: all 0.6s;
-      }
-
-      .moreZaps {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: var(--devider);
-        width: 26px;
-        height: 26px;
-        padding: 0;
-        margin: 0;
-        border: none;
-        outline: none;
-
-        .contextIcon {
-          width: 16px;
-          height: 14px;
-          background-color: var(--text-secondary-2);
-          -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-          mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
-        }
-
-        &:hover {
-          .contextIcon {
-            background-color: var(--text-primary);
-          }
-        }
-      }
-    }
-
   }
 }
 
+
+.zapHighlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+
+  &.onlyFew {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .topZap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 2px;
+    padding-right: 10px;
+    padding-block: 2px;
+    margin: 0;
+    border-radius: 12px;
+    background: var(--devider);
+    width: fit-content;
+    max-width: 100%;
+    text-decoration: none;
+    border: none;
+    outline: none;
+
+    .amount {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 14px;
+    }
+
+    .description {
+      color: var(--text-secondary-2);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 18px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    &:hover {
+      background: var(--subtile-devider);
+    }
+
+    transition: all 0.6s;
+  }
+
+  .moreZaps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--devider);
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+
+    .contextIcon {
+      width: 16px;
+      height: 14px;
+      background-color: var(--text-secondary-2);
+      -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
+    }
+
+    &:hover {
+      .contextIcon {
+        background-color: var(--text-primary);
+      }
+    }
+  }
+}
 
 .zapHighlightsCompact {
   display: flex;

@@ -47,22 +47,22 @@ const NoteTopZaps: Component<{
   return (
 
     <Show
-    when={!threadContext?.isFetchingTopZaps}
-    fallback={
-      <div class={styles.topZapsLoading}>
-        <div class={styles.firstZap}></div>
-        <div class={styles.topZaps}>
-          <div class={styles.zapList}>
-            <div class={styles.topZap}></div>
-            <div class={styles.topZap}></div>
-            <div class={styles.topZap}></div>
-            <div class={styles.topZap}></div>
-            <div class={styles.topZap}></div>
+      when={!threadContext?.isFetchingTopZaps}
+      fallback={
+        <div class={styles.topZapsLoading}>
+          <div class={styles.firstZap}></div>
+          <div class={styles.topZaps}>
+            <div class={styles.zapList}>
+              <div class={styles.topZap}></div>
+              <div class={styles.topZap}></div>
+              <div class={styles.topZap}></div>
+              <div class={styles.topZap}></div>
+              <div class={styles.topZap}></div>
+            </div>
           </div>
         </div>
-      </div>
-    }
-  >
+      }
+    >
     <div class={`${styles.zapHighlights}`}>
       <TransitionGroup
         name="top-zaps"

@@ -28,6 +28,7 @@ import NoteTopZaps from "../components/Note/NoteTopZaps";
 import { parseBolt11 } from "../utils";
 import { NoteReactionsState } from "../components/Note/Note";
 import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
+import { getArticleThread, getThread } from "../lib/feed";
 
 export type LongFormData = {
   title: string,
@@ -288,7 +289,7 @@ It converts "HTML", but keep intact partial entries like "xxxHTMLyyy" and so on.
 
 `;
 
-const Longform: Component = () => {
+const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
   const params = useParams();
   const intl = useIntl();
@@ -299,6 +300,8 @@ const Longform: Component = () => {
 
   // @ts-ignore
   const [author, setAuthor] = createStore<PrimalUser>();
+
+  const naddr = () => props.naddr;
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
     likes: 0,
@@ -327,8 +330,7 @@ const Longform: Component = () => {
       return;
     }
 
-    const naddr = params.naddr;
-    const subId = `author_${naddr}_${APP_ID}`;
+    const subId = `author_${naddr()}_${APP_ID}`;
 
     const unsub = subscribeTo(subId, (type, subId, content) =>{
       if (type === 'EOSE') {
@@ -355,9 +357,7 @@ const Longform: Component = () => {
   });
 
   createEffect(() => {
-    const naddr = params.naddr;
-
-    if (naddr === 'test') {
+    if (naddr() === 'test') {
 
       setNote(() => ({
         title: 'Test Long-Form Note',
@@ -375,12 +375,12 @@ const Longform: Component = () => {
       return;
     }
 
-    if (typeof naddr === 'string' && naddr.startsWith('naddr')) {
-      const decoded = decodeIdentifier(naddr);
+    if (typeof naddr() === 'string' && naddr().startsWith('naddr')) {
+      const decoded = decodeIdentifier(naddr());
 
       const { pubkey, identifier, kind } = decoded.data;
 
-      const subId = `naddr_${naddr}_${APP_ID}`;
+      const subId = `naddr_${naddr()}_${APP_ID}`;
 
       const unsub = subscribeTo(subId, (type, subId, content) =>{
         if (type === 'EOSE') {
@@ -405,7 +405,7 @@ const Longform: Component = () => {
               published: content.created_at || 0,
               content: content.content,
               author: content.pubkey,
-              topZaps: [],
+              topZaps: note.topZaps || [],
             }
 
             content.tags.forEach(tag => {
@@ -473,8 +473,8 @@ const Longform: Component = () => {
 
           const oldZaps = note.topZaps;
 
-          if (oldZaps === undefined) {
-            setNote('topZaps', () => [{ ...zap }]);
+          if (!oldZaps || oldZaps.length === 0) {
+            setNote((n) => ({ ...n, topZaps: [{ ...zap }]}));
             return;
           }
 
@@ -484,14 +484,15 @@ const Longform: Component = () => {
 
           const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
 
-          setNote('topZaps', () => [ ...newZaps ]);
+          setNote((n) => ({ ...n, topZaps: [...newZaps]}));
 
           return;
         }
         }
       });
 
-      getParametrizedEvent(pubkey, identifier, kind, subId);
+      // getThread(account?.publicKey, naddr, subId)
+      getArticleThread(account?.publicKey, pubkey, identifier, kind, subId);
     }
   })
 
@@ -519,20 +520,13 @@ const Longform: Component = () => {
             {note.title}
           </div>
 
-          <div class={styles.summary}>
-            {note.summary}
-          </div>
-
           <img class={styles.image} src={note.image} />
 
-          <div class={styles.tags}>
-            <For each={note.tags}>
-              {tag => (
-                <div class={styles.tag}>
-                  {tag}
-                </div>
-              )}
-            </For>
+          <div class={styles.summary}>
+            <div class={styles.border}></div>
+            <div class={styles.text}>
+              {note.summary}
+            </div>
           </div>
 
           <NoteTopZaps
@@ -543,6 +537,15 @@ const Longform: Component = () => {
 
           <PrimalMarkdown content={note.content || ''} readonly={true} />
 
+          <div class={styles.tags}>
+            <For each={note.tags}>
+              {tag => (
+                <div class={styles.tag}>
+                  {tag}
+                </div>
+              )}
+            </For>
+          </div>
           {/* <div class={styles.content} innerHTML={inner()}>
              <SolidMarkdown
               children={note.content || ''}
