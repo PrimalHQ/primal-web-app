@@ -723,19 +723,28 @@ const EditBox: Component<{
       if (rep) {
         let rootTag = rep.post.tags.find(t => t[0] === 'e' && t[3] === 'root');
 
+        const rHints = (rep.post.relayHints && rep.post.relayHints[rep.post.id]) ?
+          rep.post.relayHints[rep.post.id] :
+          '';
+
         // If the note has a root tag, that meens it is not a root note itself
         // So we need to copy the `root` tag and add a `reply` tag
         if (rootTag) {
           const tagWithHint = rootTag.map((v, i) => i === 2 ?
-            (rep.post.relayHints && rep.post.relayHints[rep.post.id]) || '' :
+            rHints :
             v,
           );
           tags.push([...tagWithHint]);
-          tags.push(['e', rep.post.id, (rep.post.relayHints && rep.post.relayHints[rep.post.id]) || '', 'reply']);
+          tags.push(['e', rep.post.id, rHints, 'reply']);
         }
         // Otherwise, add the note as the root tag for this reply
         else {
-          tags.push(['e', rep.post.id, (rep.post.relayHints && rep.post.relayHints[rep.post.id]) || '', 'root']);
+          tags.push([
+            'e',
+            rep.post.id,
+            rHints,
+            'root',
+          ]);
         }
 
         // Copy all `p` tags from the note we are repling to

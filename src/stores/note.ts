@@ -432,18 +432,18 @@ export const referencesToTags = (value: string, relayHints: Record<string, strin
     }
 
     if (decoded.type === 'nprofile') {
-      const relay = decoded.data.relays ? decoded.data.relays[0] : '';
+      const relay = decoded.data.relays ? (decoded.data.relays[0] || '') : '';
       tags.push(['p', decoded.data.pubkey, relay, 'mention']);
       return;
     }
 
     if (decoded.type === 'note') {
-      tags.push(['e', decoded.data, relayHints ? relayHints[decoded.data] : '', 'mention']);
+      tags.push(['e', decoded.data, relayHints ? (relayHints[decoded.data] || '') : '', 'mention']);
       return;
     }
 
     if (decoded.type === 'nevent') {
-      const relay = decoded.data.relays ? decoded.data.relays[0] : '';
+      const relay = decoded.data.relays ? (decoded.data.relays[0] || '') : '';
       tags.push(['e', decoded.data.id, relay, 'mention']);
       return;
     }
