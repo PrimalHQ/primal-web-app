@@ -708,7 +708,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
           sendersToAdd[pk] = emptyUser(pk);
         }
 
-        updateStore('senders', () => ({ ...sendersToAdd }));
+        updateStore('senders', () => ({ ...fetchedSenders, ...sendersToAdd }));
 
         fetchedSenders = {};
 
