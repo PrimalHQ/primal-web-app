@@ -39,44 +39,96 @@
 
 .homeIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
-  mask: url(../../assets/icons/home.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/home.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/home.svg) no-repeat center;
 }
-
+.readsIcon {
+  @include iconNav;
+  -webkit-mask: url(../../assets/icons/nav/long.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/long.svg) no-repeat center;
+}
 .exploreIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/search.svg) no-repeat center;
-  mask: url(../../assets/icons/search.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/search.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/search.svg) no-repeat center;
 }
 .messagesIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
-  mask: url(../../assets/icons/messages.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/messages.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/messages.svg) no-repeat center;
 }
 .notificationsIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
-  mask: url(../../assets/icons/notifications.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/notifications.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/notifications.svg) no-repeat center;
 }
 .downloadIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
-  mask: url(../../assets/icons/download.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/downloads.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/downloads.svg) no-repeat center;
 }
 .settingsIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
-  mask: url(../../assets/icons/settings.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/settings.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/settings.svg) no-repeat center;
 }
 .helpIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
-  mask: url(../../assets/icons/help.svg) no-repeat center;
+  -webkit-mask: url(../../assets/icons/nav/help.svg) no-repeat center;
+  mask: url(../../assets/icons/nav/help.svg) no-repeat center;
 }
 .bookmarkIcon {
   @include iconNav;
-  -webkit-mask: url(../../assets/icons/bookmark_empty.svg) no-repeat 0 / auto 100%;
-  mask: url(../../assets/icons/bookmark_empty.svg) no-repeat center 0 / auto 100%;
+  -webkit-mask: url(../../assets/icons/nav/bookmarks.svg) no-repeat 0 / auto 100%;
+  mask: url(../../assets/icons/nav/bookmarks.svg) no-repeat center 0 / auto 100%;
+}
+
+&:hover, a.active {
+  .homeIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/home_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/home_selected.svg) no-repeat center;
+  }
+  .readsIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/long_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/long_selected.svg) no-repeat center;
+  }
+  .exploreIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/search_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/search_selected.svg) no-repeat center;
+  }
+  .messagesIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/messages_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/messages_selected.svg) no-repeat center;
+  }
+  .notificationsIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/notifications_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/notifications_selected.svg) no-repeat center;
+  }
+  .downloadIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/downloads_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/downloads_selected.svg) no-repeat center;
+  }
+  .settingsIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/settings_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/settings_selected.svg) no-repeat center;
+  }
+  .helpIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/help_selected.svg) no-repeat center;
+    mask: url(../../assets/icons/nav/help_selected.svg) no-repeat center;
+  }
+  .bookmarkIcon {
+    background-color: var(--text-primary);
+    -webkit-mask: url(../../assets/icons/nav/bookmarks_selected.svg) no-repeat 0 / auto 100%;
+    mask: url(../../assets/icons/nav/bookmarks_selected.svg) no-repeat center 0 / auto 100%;
+  }
 }
 
 .active {

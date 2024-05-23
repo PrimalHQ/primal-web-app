@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { logError, logInfo } from "./lib/logger";
-import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow } from "./types/primal";
+import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow, NostrNotice } from "./types/primal";
 
 export const [socket, setSocket] = createSignal<WebSocket>();
 
@@ -140,5 +140,41 @@ export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventTyp
 
   return () => {
     socket.removeEventListener('message', listener);
+  };
+};
+
+
+export const subsTo = (
+  subId: string,
+  handlers?: {
+    onEvent?: (subId: string, content: NostrEventContent) => void,
+    onNotice?: (subId: string, reason: string) => void,
+    onEose?: (subId: string) => void,
+  },
+) => {
+  const listener = (event: MessageEvent) => {
+    const message: NostrEvent | NostrEOSE | NostrNotice = JSON.parse(event.data);
+    const [type, subscriptionId] = message;
+
+    if (handlers && subId === subscriptionId) {
+      if (type === 'EVENT') {
+        handlers.onEvent && handlers.onEvent(subscriptionId, message[2]);
+      }
+
+      if (type === 'EOSE') {
+        handlers.onEose && handlers.onEose(subscriptionId);
+      }
+
+      if (type === 'NOTICE') {
+        handlers.onNotice && handlers.onNotice(subscriptionId, message[2])
+      }
+    }
+
+  };
+
+  socket()?.addEventListener('message', listener);
+
+  return () => {
+    socket()?.removeEventListener('message', listener);
   };
 };

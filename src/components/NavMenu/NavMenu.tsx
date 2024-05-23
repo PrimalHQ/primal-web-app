@@ -28,6 +28,11 @@ const NavMenu: Component< { id?: string } > = (props) => {
       icon: 'homeIcon',
     },
     {
+      to: '/reads',
+      label: intl.formatMessage(t.reads),
+      icon: 'readsIcon',
+    },
+    {
       to: '/explore',
       label: intl.formatMessage(t.explore),
       icon: 'exploreIcon',

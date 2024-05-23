@@ -126,6 +126,27 @@ a {
   border: 2px solid red;
 }
 
+body::after{
+  position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
+  content:
+    url(./assets/icons/nav/bookmarks.svg)
+    url(./assets/icons/nav/bookmarks_selected.svg)
+    url(./assets/icons/nav/home.svg)
+    url(./assets/icons/nav/home_selected.svg)
+    url(./assets/icons/nav/search.svg)
+    url(./assets/icons/nav/search_selected.svg)
+    url(./assets/icons/nav/messages.svg)
+    url(./assets/icons/nav/messages_selected.svg)
+    url(./assets/icons/nav/notifications.svg)
+    url(./assets/icons/nav/notifications_selected.svg)
+    url(./assets/icons/nav/downloads.svg)
+    url(./assets/icons/nav/downloads_selected.svg)
+    url(./assets/icons/nav/settings.svg)
+    url(./assets/icons/nav/settings_selected.svg)
+    url(./assets/icons/nav/long.svg)
+    url(./assets/icons/nav/long_selected.svg);
+}
+
 .reply_icon {
   -webkit-mask: url(./assets/icons/feed_reply.svg) no-repeat 0 / 100%;
   mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;

@@ -46,6 +46,26 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
+export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, offset=0) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const start = until === 0 ? 'since' : 'until';
+
+  let payload = { limit, [start]: until, pubkey, offset };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
+  ]));
+}
+
 export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string, extendResponse?: boolean) => {
 
   let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =

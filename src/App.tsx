@@ -14,6 +14,7 @@ import { SearchProvider } from './contexts/SearchContext';
 import { MessagesProvider } from './contexts/MessagesContext';
 import { MediaProvider } from './contexts/MediaContext';
 import { AppProvider } from './contexts/AppContext';
+import { ReadsProvider } from './contexts/ReadsContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -39,13 +40,15 @@ const App: Component = () => {
                   <ProfileProvider>
                     <MessagesProvider>
                       <NotificationsProvider>
-                        <HomeProvider>
-                          <ExploreProvider>
-                            <ThreadProvider>
-                              <Router />
-                            </ThreadProvider>
-                          </ExploreProvider>
-                        </HomeProvider>
+                        <ReadsProvider>
+                          <HomeProvider>
+                            <ExploreProvider>
+                              <ThreadProvider>
+                                <Router />
+                              </ThreadProvider>
+                            </ExploreProvider>
+                          </HomeProvider>
+                        </ReadsProvider>
                       </NotificationsProvider>
                     </MessagesProvider>
                   </ProfileProvider>

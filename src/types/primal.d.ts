@@ -279,6 +279,12 @@ export type NostrEOSE = [
   subkey: string,
 ];
 
+export type NostrNotice = [
+  type: "NOTICE",
+  subkey: string,
+  reason: string,
+];
+
 export type NoteActions = {
   event_id: string,
   liked: boolean,
@@ -483,6 +489,17 @@ export type PrimalNote = {
   replyTo?: string,
   id: string,
   tags: string[][],
+  topZaps: TopZap[],
+};
+
+export type PrimalArticle = {
+  title: string,
+  summary: string,
+  image: string,
+  tags: string[],
+  published: number,
+  content: string,
+  author: PrimalUser,
   topZaps: TopZap[],
 };
 

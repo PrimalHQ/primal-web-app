@@ -16,6 +16,7 @@ import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
 
 const Home = lazy(() => import('./pages/Home'));
+const Reads = lazy(() => import('./pages/Reads'));
 const Layout = lazy(() => import('./components/Layout/Layout'));
 const Explore = lazy(() => import('./pages/Explore'));
 const Thread = lazy(() => import('./pages/Thread'));
@@ -109,6 +110,7 @@ const Router: Component = () => {
         <Route path="/" component={Layout} >
           <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />
+          <Route path="/reads" component={Reads} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />

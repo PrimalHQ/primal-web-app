@@ -709,6 +709,11 @@ export const navBar = {
     defaultMessage: 'Home',
     description: 'Label for the nav bar item link to Home page',
   },
+  reads: {
+    id: 'navbar.reads',
+    defaultMessage: 'Reads',
+    description: 'Label for the nav bar item link to Reads page',
+  },
   explore: {
     id: 'navbar.explore',
     defaultMessage: 'Explore',
@@ -2124,6 +2129,14 @@ export const followWarning = {
     id: 'followWarning.abort',
     defaultMessage: 'Abort',
     description: 'Abort forgot pin action',
+  },
+};
+
+export const reads = {
+  pageTitle: {
+    id: 'reads.pageTitle',
+    defaultMessage: 'Reads',
+    description: 'Reads page title',
   },
 };
 
