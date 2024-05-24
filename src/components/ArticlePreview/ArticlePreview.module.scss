@@ -1,0 +1,117 @@
+.article {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: unset;
+  width: 100%;
+  margin-top: 20px;
+  padding-inline: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--devider);
+
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+
+    .userInfo {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 4px;
+
+      .userName {
+        color: var(--text-secondary);
+        font-family: Nacelle;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 14px;
+      }
+
+      .nip05 {
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 14px;
+      }
+    }
+
+    .time {
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 14px;
+    }
+  }
+
+  .body {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .text {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      flex-grow: 1;
+
+      .content {
+        .title {
+          color: var(--text-primary);
+          font-size: 20px;
+          font-weight: 700;
+          line-height: 28px;
+        }
+
+        .summary {
+          color: var(--text-primary);
+          font-family: Lora;
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 22px;
+        }
+      }
+
+      .tags {
+        width: 100%;
+
+        .tag {
+          display: inline-block;
+          color: var(--text-secondary);
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 12px;
+          background-color: var(--background-input);
+          padding: 6px 10px;
+          border-radius: 12px;
+          width: fit-content;
+          margin: 4px;
+        }
+        .estimate {
+          display: inline-block;
+          color: var(--text-secondary);
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 12px;
+        }
+      }
+    }
+
+    .image {
+      min-width: 164px;
+      img {
+        width: 164px;
+        object-fit: scale-down;
+      }
+    }
+
+  }
+
+  .zaps {
+    margin-bottom: 16px;
+  }
+
+}

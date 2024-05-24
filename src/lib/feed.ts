@@ -46,14 +46,14 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
-export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, offset=0) => {
+export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
   if (!pubkey) {
     return;
   }
 
   const start = until === 0 ? 'since' : 'until';
 
-  let payload = { limit, [start]: until, pubkey, offset };
+  let payload = { limit, [start]: until, pubkey };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
@@ -65,6 +65,25 @@ export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string 
     {cache: ["long_form_content_feed", payload]},
   ]));
 }
+
+export const getFutureArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload: { since: number, pubkey: string, user_pubkey?: string, limit: number } =
+    { since, pubkey, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
+  ]));
+};
 
 export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string, extendResponse?: boolean) => {
 

@@ -4,7 +4,7 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap, PrimalArticle } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -88,6 +88,33 @@ export const isRepostInCollection = (collection: NostrNoteContent[], repost: Nos
   return false;
 
 };
+export const isLFRepostInCollection = (collection: NostrNoteContent[], repost: NostrNoteContent) => {
+
+  const otherTags = collection.reduce((acc: string[][], m) => {
+    if (m.kind !== Kind.Repost) return acc;
+
+    const t = m.tags.find(t => t[0] === 'e');
+
+    if (!t) return acc;
+
+    return [...acc, t];
+  }, []);
+
+  if (repost.kind === Kind.Repost) {
+    const tag = repost.tags.find(t => t[0] === 'e');
+
+    return tag && !!otherTags.find(t => t[1] === tag[1]);
+  }
+
+  if (repost.kind === Kind.LongForm) {
+    const id = repost.id;
+
+    return !!otherTags.find(t => t[1] === id);
+  }
+
+  return false;
+
+};
 
 export const isInTags = (tags: string[][], tagName: string, value: string) => {
   return !!tags.find(tag => tag[0] === tagName && tag[1] === value);
@@ -114,6 +141,22 @@ const parseKind6 = (message: NostrNoteContent) => {
   } catch (e) {
     return {
       kind: 1,
+      content: '',
+      id: message.id,
+      created_at: message.created_at,
+      pubkey: message.pubkey,
+      sig: message.sig,
+      tags: message.tags,
+    }
+  }
+};
+
+const parseLFKind6 = (message: NostrNoteContent) => {
+  try {
+    return JSON.parse(message.content);
+  } catch (e) {
+    return {
+      kind: Kind.LongForm,
       content: '',
       id: message.id,
       created_at: message.created_at,
@@ -325,6 +368,125 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       id: msg.id,
       topZaps: [ ...tz ],
     };
+  });
+}
+
+
+type ConvertToArticles = (page: FeedPage | undefined, topZaps?: Record<string, TopZap[]>) => PrimalArticle[];
+
+export const convertToArticles: ConvertToArticles = (page, topZaps) => {
+
+  if (page === undefined) {
+    return [];
+  }
+
+  const mentions = page.mentions || {};
+
+  return  page.messages.map((message) => {
+
+    const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
+
+    const pubkey = msg.pubkey;
+    const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
+    const kind = msg.kind;
+
+    const user = page?.users[msg.pubkey];
+
+    const mentionIds = Object.keys(mentions)
+    let userMentionIds = msg.tags?.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+
+    let tz: TopZap[] = [];
+
+    if (topZaps && topZaps[msg.id]) {
+      tz = topZaps[msg.id] || [];
+
+      for(let i=0; i<tz.length; i++) {
+        if (userMentionIds.includes(tz[i].pubkey)) continue;
+
+        userMentionIds.push(tz[i].pubkey);
+      }
+    }
+
+    let mentionedNotes: Record<string, PrimalNote> = {};
+    let mentionedUsers: Record<string, PrimalUser> = {};
+
+
+    if (mentionIds.length > 0) {
+      for (let i = 0;i<mentionIds.length;i++) {
+        const id = mentionIds[i];
+        const m = mentions && mentions[id];
+
+        if (!m) {
+          continue;
+        }
+
+        for (let i = 0;i<m.tags.length;i++) {
+          const t = m.tags[i];
+          if (t[0] === 'p') {
+            mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
+          }
+        }
+
+        mentionedNotes[id] = {
+          // @ts-ignore TODO: Investigate this typing
+          post: { ...m, noteId: nip19.noteEncode(m.id) },
+          user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+          mentionedUsers,
+        };
+      }
+    }
+
+    if (userMentionIds && userMentionIds.length > 0) {
+      for (let i = 0;i<userMentionIds.length;i++) {
+        const id = userMentionIds[i];
+        const m = page.users && page.users[id];
+
+        mentionedUsers[id] = convertToUser(m || emptyUser(id));
+      }
+    }
+
+    const wordCount = page.wordCount ? page.wordCount[message.id] || 0 : 0;
+
+    let article: PrimalArticle = {
+      id: msg.id,
+      title: '',
+      summary: '',
+      image: '',
+      tags: [],
+      published: msg.created_at || 0,
+      content: msg.content,
+      author: convertToUser(user),
+      topZaps: [...tz],
+      naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
+      msg,
+      mentionedNotes,
+      mentionedUsers,
+      wordCount,
+    };
+
+    msg.tags.forEach(tag => {
+      switch (tag[0]) {
+        case 't':
+          article.tags.push(tag[1]);
+          break;
+        case 'title':
+          article.title = tag[1];
+          break;
+        case 'summary':
+          article.summary = tag[1];
+          break;
+        case 'image':
+          article.image = tag[1];
+          break;
+        case 'published':
+          article.published = parseInt(tag[1]);
+          break;
+        default:
+          break;
+      }
+    });
+
+    return article;
   });
 }
 

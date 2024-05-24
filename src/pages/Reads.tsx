@@ -27,39 +27,158 @@ import { PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
-import { reads as tReads, branding } from '../translations';
+import { feedNewPosts, placeholders, branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
-import PageCaption from '../components/PageCaption/PageCaption';
 import { useReadsContext } from '../contexts/ReadsContext';
-import { Kind } from '../constants';
+import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 
 
-const Reads: Component = () => {
+const Home: Component = () => {
 
+  const context = useReadsContext();
+  const account = useAccountContext();
   const intl = useIntl();
-  const reads = useReadsContext();
+  const app = useAppContext();
+
+  const isPageLoading = () => context?.isFetching;
+
+  let checkNewNotesTimer: number = 0;
+
+  const [hasNewPosts, setHasNewPosts] = createSignal(false);
+  const [newNotesCount, setNewNotesCount] = createSignal(0);
+  const [newPostAuthors, setNewPostAuthors] = createStore<PrimalUser[]>([]);
+
+
+  const newPostCount = () => newNotesCount() < 100 ? newNotesCount() : 100;
+
 
   onMount(() => {
-    reads?.actions.fetchPage(0, Kind.LongForm);
+    setIsHome(true);
+    scrollWindowTo(context?.scrollTop);
   });
+
+  createEffect(() => {
+    if ((context?.future.notes.length || 0) > 99 || app?.isInactive) {
+      clearInterval(checkNewNotesTimer);
+      return;
+    }
+
+    const hex = context?.selectedFeed?.hex;
+
+    if (checkNewNotesTimer) {
+      clearInterval(checkNewNotesTimer);
+      setHasNewPosts(false);
+      setNewNotesCount(0);
+      setNewPostAuthors(() => []);
+    }
+
+    const timeout = 25_000 + Math.random() * 10_000;
+
+    checkNewNotesTimer = setInterval(() => {
+      context?.actions.checkForNewNotes(hex);
+    }, timeout);
+  });
+
+  createEffect(() => {
+    const count = context?.future.notes.length || 0;
+    if (count === 0) {
+      return
+    }
+
+    if (!hasNewPosts()) {
+      setHasNewPosts(true);
+    }
+
+    if (newPostAuthors.length < 3) {
+      const users = context?.future.notes.map(note => note.author) || [];
+
+      const uniqueUsers = users.reduce<PrimalUser[]>((acc, user) => {
+        const isDuplicate = acc.find(u => u && u.pubkey === user.pubkey);
+        return isDuplicate ?  acc : [ ...acc, user ];
+      }, []).slice(0, 3);
+
+      setNewPostAuthors(() => [...uniqueUsers]);
+    }
+
+    setNewNotesCount(count);
+  });
+
+  onCleanup(()=> {
+    clearInterval(checkNewNotesTimer);
+    setIsHome(false);
+  });
+
+  const loadNewContent = () => {
+    if (newNotesCount() > 100 || app?.appState === 'waking') {
+      context?.actions.getFirstPage();
+      return;
+    }
+
+    context?.actions.loadFutureContent();
+    scrollWindowTo(0, true);
+    setHasNewPosts(false);
+    setNewNotesCount(0);
+    setNewPostAuthors(() => []);
+  }
 
   return (
     <div class={styles.homeContent}>
       <PageTitle title={intl.formatMessage(branding)} />
-
-      <PageCaption title={intl.formatMessage(tReads.pageTitle)} />
-
       <Wormhole
         to="search_section"
       >
         <Search />
       </Wormhole>
 
+      <div class={styles.normalCentralHeader}>
+        <HomeHeader
+          hasNewPosts={hasNewPosts}
+          loadNewContent={loadNewContent}
+          newPostCount={newPostCount}
+          newPostAuthors={newPostAuthors}
+        />
+      </div>
+
+      <div class={styles.phoneCentralHeader}>
+        <HomeHeaderPhone />
+      </div>
+
+      <StickySidebar>
+        <HomeSidebar />
+      </StickySidebar>
+
+      <Show
+        when={context?.notes && context.notes.length > 0}
+      >
+        <div class={styles.feed}>
+          <For each={context?.notes} >
+            {note => <ArticlePreview article={note} />}
+          </For>
+        </div>
+      </Show>
+
+      <Switch>
+        <Match
+          when={!isPageLoading() && context?.notes && context?.notes.length === 0}
+        >
+          <div class={styles.noContent}>
+            <Loader />
+          </div>
+        </Match>
+        <Match
+          when={isPageLoading()}
+        >
+          <div class={styles.noContent}>
+            <Loader />
+          </div>
+        </Match>
+      </Switch>
+      <Paginator loadNextPage={context?.actions.fetchNextPage}/>
     </div>
   )
 }
 
-export default Reads;
+export default Home;

@@ -235,6 +235,13 @@ export type NostrQuoteStatsInfo = {
   tags?: string[][],
 };
 
+export type NostrWordCount = {
+  kind: Kind.WordCount,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -266,7 +273,8 @@ export type NostrEventContent =
   NostrBookmarks |
   NostrRelayHint |
   NostrZapInfo |
-  NostrQuoteStatsInfo;
+  NostrQuoteStatsInfo |
+  NostrWordCount;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -334,6 +342,7 @@ export type FeedPage = {
   topZaps: Record<string, TopZap[]>,
   since?: number,
   until?: number,
+  wordCount?: Record<string, number>,
 };
 
 export type TrendingNotesStore = {
@@ -492,6 +501,7 @@ export type PrimalNote = {
   topZaps: TopZap[],
 };
 
+
 export type PrimalArticle = {
   title: string,
   summary: string,
@@ -501,6 +511,14 @@ export type PrimalArticle = {
   content: string,
   author: PrimalUser,
   topZaps: TopZap[],
+  repost?: PrimalRepost,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedUsers?: Record<string, PrimalUser>,
+  replyTo?: string,
+  id: string,
+  naddr: string,
+  msg: NostrNoteContent,
+  wordCount: number,
 };
 
 export type PrimalFeed = {

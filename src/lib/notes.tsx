@@ -5,7 +5,7 @@ import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
-import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
+import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalNote, SendNoteResult } from "../types/primal";
 import { npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
@@ -330,6 +330,20 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySetting
     tags: [
       ['e', note.post.id],
       ['p', note.user.pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings);
+}
+
+export const sendArticleRepost = async (note: PrimalArticle, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: JSON.stringify(note.msg),
+    kind: Kind.Repost,
+    tags: [
+      ['e', note.id],
+      ['p', note.author.pubkey],
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };

@@ -142,6 +142,7 @@ export enum Kind  {
   UserRelays=10_000_139,
   RelayHint=10_000_141,
   NoteQuoteStats=10_000_143,
+  WordCount=10_000_144,
 
   WALLET_OPERATION = 10_000_300,
 }

@@ -50,7 +50,6 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
     const updatePage = (content: NostrEventContent) => {
       if (content.kind === Kind.Metadata) {
         const user = content as NostrUserContent;
-        console.log('USER: ', user);
 
         page.users[user.pubkey] = { ...user };
 

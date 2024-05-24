@@ -605,39 +605,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
       return;
     }
-
-    // if (content.kind === Kind.EventZapInfo) {
-    //   const zapInfo = JSON.parse(content.content)
-
-    //   const eventId = zapInfo.event_id || 'UNKNOWN';
-
-    //   if (eventId === 'UNKNOWN') return;
-
-    //   const zap: TopZap = {
-    //     id: zapInfo.zap_receipt_id,
-    //     amount: parseInt(zapInfo.amount_sats || '0'),
-    //     pubkey: zapInfo.sender,
-    //     message: zapInfo.content,
-    //     eventId,
-    //   };
-
-    //   const oldZaps = store.topZaps[eventId];
-
-    //   if (oldZaps === undefined) {
-    //     updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
-    //     return;
-    //   }
-
-    //   if (oldZaps.find(i => i.id === zap.id)) {
-    //     return;
-    //   }
-
-    //   const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-    //   updateStore('topZaps', eventId, () => [ ...newZaps ]);
-
-    //   return;
-    // }
   };
 
   const savePage = (page: FeedPage, scope?: 'future') => {
