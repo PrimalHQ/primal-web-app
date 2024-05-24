@@ -55,7 +55,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (selected?.hex && option.value) {
       const t = option.value.split('_');
 
-      const isHex = encodeURIComponent(selected.hex) == t[0];
+      const isHex = encodeURI(selected.hex) == t[0];
       const isOpt = t[1] === 'undefined' ?
         selected.includeReplies === undefined :
         selected.includeReplies?.toString() === t[1];
@@ -73,7 +73,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
 
     return settings.availableFeeds.map(feed => ({
       label: feed.name,
-      value: `${encodeURIComponent(feed.hex || '')}_${feed.includeReplies}`,
+      value: `${encodeURI(feed.hex || '')}_${feed.includeReplies}`,
     }));
   };
 
@@ -94,7 +94,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (feed) {
       const [scope, timeframe] = feed.hex?.split(';') || [];
 
-      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${encodeURIComponent(feed.hex || '')}_${feed.includeReplies}`;
+      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${encodeURI(feed.hex || '')}_${feed.includeReplies}`;
 
       return {
         label: feed.name,
@@ -107,7 +107,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (!home?.selectedFeed)
       return initialValue();
 
-    const value = `${encodeURIComponent(home.selectedFeed.hex || '')}_${home.selectedFeed.includeReplies}`;
+    const value = `${encodeURI(home.selectedFeed.hex || '')}_${home.selectedFeed.includeReplies}`;
 
     return {
       label: home.selectedFeed.name,
