@@ -308,13 +308,13 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
 
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
-export const sendLike = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendLike = async (note: PrimalNote | PrimalArticle, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
     tags: [
-      ['e', note.post.id],
-      ['p', note.post.pubkey],
+      ['e', note.id],
+      ['p', note.pubkey],
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };

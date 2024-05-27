@@ -366,6 +366,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       replyTo: replyTo && replyTo[1],
       tags: msg.tags,
       id: msg.id,
+      pubkey: msg.pubkey,
       topZaps: [ ...tz ],
     };
   });
@@ -391,6 +392,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
     const kind = msg.kind;
 
     const user = page?.users[msg.pubkey];
+    const stat = page?.postStats[msg.id];
 
     const mentionIds = Object.keys(mentions)
     let userMentionIds = msg.tags?.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
@@ -447,8 +449,18 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
     const wordCount = page.wordCount ? page.wordCount[message.id] || 0 : 0;
 
+
+    const noActions = {
+      event_id: msg.id,
+      liked: false,
+      replied: false,
+      reposted: false,
+      zapped: false,
+    };
+
     let article: PrimalArticle = {
       id: msg.id,
+      pubkey: msg.pubkey,
       title: '',
       summary: '',
       image: '',
@@ -462,6 +474,15 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       mentionedNotes,
       mentionedUsers,
       wordCount,
+      noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions,
+      likes: stat?.likes || 0,
+      mentions: stat?.mentions || 0,
+      reposts: stat?.reposts || 0,
+      replies: stat?.replies || 0,
+      zaps: stat?.zaps || 0,
+      score: stat?.score || 0,
+      score24h: stat?.score24h || 0,
+      satszapped: stat?.satszapped || 0,
     };
 
     msg.tags.forEach(tag => {

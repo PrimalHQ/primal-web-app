@@ -1,7 +1,7 @@
 import { bech32 } from "@scure/base";
 // @ts-ignore Bad types in nostr-tools
 import { nip57, Relay, utils } from "nostr-tools";
-import { PrimalNote, PrimalUser } from "../types/primal";
+import { PrimalArticle, PrimalNote, PrimalUser } from "../types/primal";
 import { logError } from "./logger";
 import { enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 
@@ -20,6 +20,51 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
 
   let payload = {
     profile: note.post.pubkey,
+    event: note.msg.id,
+    amount: sats,
+    relays: relays.map(r => r.url)
+  };
+
+  if (comment.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+
+  const zapReq = nip57.makeZapRequest(payload);
+
+  try {
+    const signedEvent = await signEvent(zapReq);
+
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
+
+    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const pr = r2.pr;
+
+    await enableWebLn();
+    await sendPayment(pr);
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
+    return false;
+  }
+}
+
+export const zapArticle = async (note: PrimalArticle, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+  if (!sender) {
+    return false;
+  }
+
+  const callback = await getZapEndpoint(note.author);
+
+  if (!callback) {
+    return false;
+  }
+
+  const sats = Math.round(amount * 1000);
+
+  let payload = {
+    profile: note.pubkey,
     event: note.msg.id,
     amount: sats,
     relays: relays.map(r => r.url)

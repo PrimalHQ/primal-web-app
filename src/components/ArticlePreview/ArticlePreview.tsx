@@ -1,11 +1,15 @@
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, JSXElement, Show } from 'solid-js';
+import { batch, Component, createEffect, For, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
+import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
-import { PrimalArticle } from '../../types/primal';
+import { PrimalArticle, ZapOption } from '../../types/primal';
+import { uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
@@ -21,17 +25,20 @@ const ArticlePreview: Component<{
   article: PrimalArticle,
 }> = (props) => {
 
+  const app = useAppContext();
+  const account = useAccountContext();
+  const thread = useThreadContext();
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
-    likes: 0,
-    liked: false,
-    reposts: 0,
-    reposted: false,
-    replies: 0,
-    replied: false,
-    zapCount: 0,
-    satsZapped: 0,
-    zapped: false,
+    likes: props.article.likes,
+    liked: props.article.noteActions.liked,
+    reposts: props.article.reposts,
+    reposted: props.article.noteActions.reposted,
+    replies: props.article.replies,
+    replied: props.article.noteActions.replied,
+    zapCount: props.article.zaps,
+    satsZapped: props.article.satszapped,
+    zapped: props.article.noteActions.zapped,
     zappedAmount: 0,
     zappedNow: false,
     isZapping: false,
@@ -42,6 +49,136 @@ const ArticlePreview: Component<{
     topZaps: [],
     topZapsFeed: [],
     quoteCount: 0,
+  });
+
+  let latestTopZap: string = '';
+  let latestTopZapFeed: string = '';
+
+  const onConfirmZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => zapOption.amount || 0);
+      updateReactionsState('satsZapped', (z) => z + (zapOption.amount || 0));
+      updateReactionsState('zapped', () => true);
+      updateReactionsState('showZapAnim', () => true)
+    });
+
+    addTopZap(zapOption);
+    addTopZapFeed(zapOption)
+  };
+
+  const onSuccessZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    batch(() => {
+      updateReactionsState('zapCount', (z) => z + 1);
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => true);
+    });
+  };
+
+  const onFailZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => props.article.noteActions.zapped);
+    });
+
+    removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
+  };
+
+  const onCancelZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => props.article.noteActions.zapped);
+    });
+
+    removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
+  };
+
+  const addTopZap = (zapOption: ZapOption) => {
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    const oldZaps = [ ...reactionsState.topZaps ];
+
+    latestTopZap = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: props.article.id,
+      id: latestTopZap,
+    };
+
+    if (!thread?.users.find((u) => u.pubkey === pubkey)) {
+      thread?.actions.fetchUsers([pubkey])
+    }
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
+    updateReactionsState('topZaps', () => [...zaps]);
+  };
+
+  const removeTopZap = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZaps.filter(z => z.id !== latestTopZap);
+    updateReactionsState('topZaps', () => [...zaps]);
+  };
+
+
+  const addTopZapFeed = (zapOption: ZapOption) => {
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    const oldZaps = [ ...reactionsState.topZapsFeed ];
+
+    latestTopZapFeed = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: props.article.id,
+      id: latestTopZapFeed,
+    };
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount).slice(0, 4);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
+  }
+
+  const removeTopZapFeed = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZapsFeed.filter(z => z.id !== latestTopZapFeed);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
+  };
+
+  const customZapInfo: () => CustomZapInfo = () => ({
+    note: props.article,
+    onConfirm: onConfirmZap,
+    onSuccess: onSuccessZap,
+    onFail: onFailZap,
+    onCancel: onCancelZap,
   });
 
   return (
@@ -101,13 +238,8 @@ const ArticlePreview: Component<{
           note={props.article}
           state={reactionsState}
           updateState={updateReactionsState}
-          customZapInfo={{
-            note: props.article,
-            onConfirm: () => {},
-            onSuccess: () => {},
-            onFail: () => {},
-            onCancel: () => {},
-          }}
+          customZapInfo={customZapInfo()}
+          onZapAnim={addTopZapFeed}
         />
       </div>
 

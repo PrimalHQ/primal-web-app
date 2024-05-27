@@ -489,6 +489,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.NoteStats) {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
+      console.log('READS STATS: ', stat)
 
       if (scope) {
         updateStore(scope, 'page', 'postStats',
@@ -523,6 +524,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       const noteActionContent = content as NostrNoteActionsContent;
       const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
 
+      console.log('READS ACTIONS: ', content)
       if (scope) {
         updateStore(scope, 'page', 'noteActions',
         (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })

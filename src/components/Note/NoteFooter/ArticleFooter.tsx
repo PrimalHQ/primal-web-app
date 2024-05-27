@@ -8,7 +8,7 @@ import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
 import { truncateNumber } from '../../../lib/notifications';
-import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
+import { canUserReceiveZaps, zapArticle, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md_2.json';
@@ -135,167 +135,167 @@ const ArticleFooter: Component<{
   const doReply = () => {};
 
   const doLike = async (e: MouseEvent) => {
-    // e.preventDefault();
-    // e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-    // if (!account) {
-    //   return;
-    // }
+    if (!account) {
+      return;
+    }
 
-    // if (!account.hasPublicKey()) {
-    //   account.actions.showGetStarted();
-    //   return;
-    // }
+    if (!account.hasPublicKey()) {
+      account.actions.showGetStarted();
+      return;
+    }
 
-    // if (account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(t.noRelaysConnected),
+      );
+      return;
+    }
 
-    // const success = await account.actions.addLike(props.note);
+    const success = await account.actions.addLike(props.note);
 
-    // if (success) {
-    //   batch(() => {
-    //     props.updateState('likes', (l) => l + 1);
-    //     props.updateState('liked', () => true);
-    //   });
-    // }
+    if (success) {
+      batch(() => {
+        props.updateState('likes', (l) => l + 1);
+        props.updateState('liked', () => true);
+      });
+    }
   };
 
   const startZap = (e: MouseEvent | TouchEvent) => {
-    // e.preventDefault();
-    // e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-    // if (!account?.hasPublicKey()) {
-    //   account?.actions.showGetStarted();
-    //   props.updateState('isZapping', () => false);
-    //   return;
-    // }
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      props.updateState('isZapping', () => false);
+      return;
+    }
 
-    // if (account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
+    if (account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(t.noRelaysConnected),
+      );
+      return;
+    }
 
-    // if (!canUserReceiveZaps(props.note.user)) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.zapUnavailable),
-    //   );
-    //   props.updateState('isZapping', () => false);
-    //   return;
-    // }
+    if (!canUserReceiveZaps(props.note.author)) {
+      toast?.sendWarning(
+        intl.formatMessage(t.zapUnavailable),
+      );
+      props.updateState('isZapping', () => false);
+      return;
+    }
 
-    // quickZapDelay = setTimeout(() => {
-    //   app?.actions.openCustomZapModal(props.customZapInfo);
-    //   props.updateState('isZapping', () => true);
-    // }, 500);
+    quickZapDelay = setTimeout(() => {
+      app?.actions.openCustomZapModal(props.customZapInfo);
+      props.updateState('isZapping', () => true);
+    }, 500);
   };
 
   const commitZap = (e: MouseEvent | TouchEvent) => {
-    // e.preventDefault();
-    // e.stopPropagation();
+    e.preventDefault();
+    e.stopPropagation();
 
-    // clearTimeout(quickZapDelay);
+    clearTimeout(quickZapDelay);
 
-    // if (!account?.hasPublicKey()) {
-    //   account?.actions.showGetStarted();
-    //   return;
-    // }
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
 
-    // if (account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
-    //   return;
-    // }
+    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.author)) {
+      return;
+    }
 
-    // if (app?.customZap === undefined) {
-    //   doQuickZap();
-    // }
+    if (app?.customZap === undefined) {
+      doQuickZap();
+    }
   };
 
   const animateZap = () => {
-    // setTimeout(() => {
-    //   props.updateState('hideZapIcon', () => true);
+    setTimeout(() => {
+      props.updateState('hideZapIcon', () => true);
 
-    //   if (!medZapAnimation) {
-    //     return;
-    //   }
+      if (!medZapAnimation) {
+        return;
+      }
 
-    //   let newLeft = props.wide ? 15 : 13;
-    //   let newTop = props.wide ? -6 : -6;
+      let newLeft = props.wide ? 15 : 13;
+      let newTop = props.wide ? -6 : -6;
 
-    //   if (props.large) {
-    //     newLeft = 2;
-    //     newTop = -9;
-    //   }
+      if (props.large) {
+        newLeft = 2;
+        newTop = -9;
+      }
 
-    //   medZapAnimation.style.left = `${newLeft}px`;
-    //   medZapAnimation.style.top = `${newTop}px`;
+      medZapAnimation.style.left = `${newLeft}px`;
+      medZapAnimation.style.top = `${newTop}px`;
 
-    //   const onAnimDone = () => {
-    //     batch(() => {
-    //       props.updateState('showZapAnim', () => false);
-    //       props.updateState('hideZapIcon', () => false);
-    //       props.updateState('zapped', () => true);
-    //     });
-    //     medZapAnimation?.removeEventListener('complete', onAnimDone);
-    //   }
+      const onAnimDone = () => {
+        batch(() => {
+          props.updateState('showZapAnim', () => false);
+          props.updateState('hideZapIcon', () => false);
+          props.updateState('zapped', () => true);
+        });
+        medZapAnimation?.removeEventListener('complete', onAnimDone);
+      }
 
-    //   medZapAnimation.addEventListener('complete', onAnimDone);
+      medZapAnimation.addEventListener('complete', onAnimDone);
 
-    //   try {
-    //     // @ts-ignore
-    //     medZapAnimation.seek(0);
-    //     // @ts-ignore
-    //     medZapAnimation.play();
-    //   } catch (e) {
-    //     console.warn('Failed to animte zap:', e);
-    //     onAnimDone();
-    //   }
-    // }, 10);
+      try {
+        // @ts-ignore
+        medZapAnimation.seek(0);
+        // @ts-ignore
+        medZapAnimation.play();
+      } catch (e) {
+        console.warn('Failed to animte zap:', e);
+        onAnimDone();
+      }
+    }, 10);
   };
 
   const doQuickZap = async () => {
-    // if (!account?.hasPublicKey()) {
-    //   account?.actions.showGetStarted();
-    //   return;
-    // }
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
 
-    // const amount = settings?.defaultZap.amount || 10;
-    // const message = settings?.defaultZap.message || '';
-    // const emoji = settings?.defaultZap.emoji;
+    const amount = settings?.defaultZap.amount || 10;
+    const message = settings?.defaultZap.message || '';
+    const emoji = settings?.defaultZap.emoji;
 
-    // batch(() => {
-    //   props.updateState('isZapping', () => true);
-    //   props.updateState('satsZapped', (z) => z + amount);
-    //   props.updateState('showZapAnim', () => true);
-    // });
+    batch(() => {
+      props.updateState('isZapping', () => true);
+      props.updateState('satsZapped', (z) => z + amount);
+      props.updateState('showZapAnim', () => true);
+    });
 
-    // props.onZapAnim && props.onZapAnim({ amount, message, emoji })
+    props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
-    // setTimeout(async () => {
-    //   const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
+    setTimeout(async () => {
+      const success = await zapArticle(props.note, account.publicKey, amount, message, account.relays);
 
-    //   props.updateState('isZapping', () => false);
+      props.updateState('isZapping', () => false);
 
-    //   if (success) {
-    //     props.customZapInfo.onSuccess({
-    //       emoji,
-    //       amount,
-    //       message,
-    //     });
+      if (success) {
+        props.customZapInfo.onSuccess({
+          emoji,
+          amount,
+          message,
+        });
 
-    //     return;
-    //   }
+        return;
+      }
 
-    //   props.customZapInfo.onFail({
-    //     emoji,
-    //     amount,
-    //     message,
-    //   });
-    // }, lottieDuration());
+      props.customZapInfo.onFail({
+        emoji,
+        amount,
+        message,
+      });
+    }, lottieDuration());
 
   }
 

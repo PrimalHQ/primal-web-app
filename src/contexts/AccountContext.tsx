@@ -21,6 +21,7 @@ import {
   PrimalNote,
   PrimalUser,
   NostrEventContent,
+  PrimalArticle,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
@@ -79,7 +80,7 @@ export type AccountContextStore = {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
     setActiveUser: (user: PrimalUser) => void,
-    addLike: (note: PrimalNote) => Promise<boolean>,
+    addLike: (note: PrimalNote | PrimalArticle) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
@@ -517,15 +518,15 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('showNewNoteForm', () => false);
   };
 
-  const addLike = async (note: PrimalNote) => {
-    if (store.likes.includes(note.post.id)) {
+  const addLike = async (note: PrimalNote | PrimalArticle) => {
+    if (store.likes.includes(note.id)) {
       return false;
     }
 
     const { success } = await sendLike(note, store.relays, store.relaySettings);
 
     if (success) {
-      updateStore('likes', (likes) => [ ...likes, note.post.id]);
+      updateStore('likes', (likes) => [ ...likes, note.id]);
       saveLikes(store.publicKey, store.likes);
     }
 

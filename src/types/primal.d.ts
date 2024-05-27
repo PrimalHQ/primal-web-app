@@ -497,6 +497,7 @@ export type PrimalNote = {
   mentionedUsers?: Record<string, PrimalUser>,
   replyTo?: string,
   id: string,
+  pubkey: string,
   tags: string[][],
   topZaps: TopZap[],
 };
@@ -516,9 +517,19 @@ export type PrimalArticle = {
   mentionedUsers?: Record<string, PrimalUser>,
   replyTo?: string,
   id: string,
+  pubkey: string,
   naddr: string,
   msg: NostrNoteContent,
   wordCount: number,
+  noteActions: NoteActions,
+  likes: number,
+  mentions: number,
+  reposts: number,
+  replies: number,
+  zaps: number,
+  score: number,
+  score24h: number,
+  satszapped: number,
 };
 
 export type PrimalFeed = {

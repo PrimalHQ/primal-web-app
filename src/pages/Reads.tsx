@@ -27,13 +27,14 @@ import { PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
-import { feedNewPosts, placeholders, branding } from '../translations';
+import { reads, branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
 import { useReadsContext } from '../contexts/ReadsContext';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 
 const Home: Component = () => {
@@ -133,18 +134,7 @@ const Home: Component = () => {
         <Search />
       </Wormhole>
 
-      <div class={styles.normalCentralHeader}>
-        <HomeHeader
-          hasNewPosts={hasNewPosts}
-          loadNewContent={loadNewContent}
-          newPostCount={newPostCount}
-          newPostAuthors={newPostAuthors}
-        />
-      </div>
-
-      <div class={styles.phoneCentralHeader}>
-        <HomeHeaderPhone />
-      </div>
+      <PageCaption title={intl.formatMessage(reads.pageTitle)} />
 
       <StickySidebar>
         <HomeSidebar />
