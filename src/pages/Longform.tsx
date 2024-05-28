@@ -357,7 +357,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   });
 
   createEffect(() => {
-    if (naddr() === 'test') {
+    if (naddr() === 'naddr1_test') {
 
       setNote(() => ({
         title: 'Test Long-Form Note',
