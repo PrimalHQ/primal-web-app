@@ -117,8 +117,9 @@
   outline: none;
   width: 100%;
 
-  padding-block: 10px;
-  padding-inline: 14px;
+  padding-top: 18px;
+  padding-bottom: 12px;
+  padding-inline: 20px;
   border-bottom: 1px solid var(--devider);
   z-index: var(--z-index-header);
 
@@ -156,7 +157,6 @@
   padding-block: 21px;
   padding-inline: 12px;
   border: none;
-  border-bottom: 1px solid var(--devider);
   border-radius: 0;
   justify-content: flex-start;
 
