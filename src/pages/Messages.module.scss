@@ -3,7 +3,7 @@
   padding-inline: 16px;
   margin-bottom: 8px;
   width: fit-content;
-  max-width: calc(600px + 12px - 40px);
+  max-width: calc(var(--center-col-w) + 12px - 40px);
 }
 
 @mixin thread($align-end) {
@@ -62,9 +62,8 @@
 
 .messagesContent {
   position: relative;
-
   display: flex;
-  width: calc(var(--left-col-w) + var(--right-col-w) + 424px);
+  width: fit-content;
 
   .senders {
     width: 334px;
@@ -249,6 +248,7 @@
     height: calc(100vh - var(--header-height));
     display: flex;
     flex-direction: column-reverse;
+    width: 662px;
 
     .messages {
       width: 100%;
@@ -322,7 +322,7 @@
       .textAreaBorder {
         padding: 1px;
         border-radius: 8px;
-        width: 538px;
+        width: 576px;
         height: 40px;
         box-sizing: border-box;
 
@@ -338,7 +338,7 @@
           margin: 0;
           padding-inline: 16px;
           padding-block: 8px;
-          width: 536px;
+          width: 100%;
           max-height: none;
 
           &:focus {

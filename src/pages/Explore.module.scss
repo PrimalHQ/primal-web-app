@@ -11,14 +11,14 @@
 .exploreHeader {
   display: flex;
   flex-direction: column;
-  width: 600px;
+  width: var(--center-col-w);
   margin-left: -16px;
 
   .exploreCaption {
     display: flex;
     align-items: center;
     padding-left: 16px;
-    width: 600px;
+    width: var(--center-col-w);
     height: 84px;
     border-bottom: 1px solid var(--devider);
   }
@@ -28,7 +28,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    width: 600px;
+    width: var(--center-col-w);
     height: 41px;
     background: none;
     border-bottom: 1px solid var(--devider);

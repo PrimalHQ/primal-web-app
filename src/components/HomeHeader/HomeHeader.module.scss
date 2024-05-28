@@ -140,7 +140,7 @@
 }
 
 .feedPlaceholder {
-  width: 600px;
+  width: var(--center-col-w);
   height: 20px;
   background-color: red;
 }

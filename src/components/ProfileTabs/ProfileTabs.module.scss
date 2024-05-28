@@ -110,7 +110,7 @@
   border-bottom: 1px solid var(--background-input);
   padding-block: 12px;
   padding-inline: 20px;
-  width: min(600px, 100%);
+  width: min(ver(--center-col-w), 100%);
   text-decoration: none;
 
   .zapInfo {
