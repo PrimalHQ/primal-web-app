@@ -49,7 +49,7 @@ const Note: Component<{
   id?: string,
   parent?: boolean,
   shorten?: boolean,
-  noteType?: 'feed' | 'primary' | 'notification' | 'reaction'
+  noteType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread'
   onClick?: () => void,
   quoteCount?: number,
 }> = (props) => {
@@ -313,7 +313,7 @@ const Note: Component<{
           <div class={styles.content}>
 
             <div class={styles.message}>
-              <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
+              <ParsedNote note={props.note} width={Math.min(640, window.innerWidth)} />
             </div>
 
             <NoteTopZaps
@@ -351,10 +351,70 @@ const Note: Component<{
       </Match>
 
       <Match when={noteType() === 'feed'}>
-
         <A
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
+          href={`/e/${props.note?.post.noteId}`}
+          onClick={() => navToThread(props.note)}
+          data-event={props.note.post.id}
+          data-event-bech32={props.note.post.noteId}
+          draggable={false}
+        >
+          <div class={styles.header}>
+            <Show when={repost()}>
+              <NoteRepostHeader note={props.note} />
+            </Show>
+          </div>
+          <div class={styles.userHeader}>
+            <A href={`/p/${props.note.user.npub}`}>
+              <Avatar user={props.note.user} size="vs" />
+            </A>
+
+            <NoteAuthorInfo
+              author={props.note.user}
+              time={props.note.post.created_at}
+            />
+
+            <div class={styles.upRightFloater}>
+              <NoteContextTrigger
+                ref={noteContextMenu}
+                onClick={onContextMenuTrigger}
+              />
+            </div>
+          </div>
+
+          <NoteReplyToHeader note={props.note} />
+
+          <div class={styles.message}>
+            <ParsedNote
+              note={props.note}
+              shorten={props.shorten}
+              width={Math.min(640, window.innerWidth - 72)}
+            />
+          </div>
+
+          <NoteTopZapsCompact
+            note={props.note}
+            action={() => openReactionModal('zaps')}
+            topZaps={reactionsState.topZapsFeed}
+            topZapLimit={4}
+          />
+
+          <NoteFooter
+            note={props.note}
+            state={reactionsState}
+            updateState={updateReactionsState}
+            customZapInfo={customZapInfo()}
+            onZapAnim={addTopZapFeed}
+            wide={true}
+          />
+        </A>
+      </Match>
+
+      <Match when={noteType() === 'thread'}>
+        <A
+          id={props.id}
+          class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}
           href={`/e/${props.note?.post.noteId}`}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}

@@ -2,6 +2,117 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  margin: 0px;
+
+  text-decoration: none;
+  color: unset;
+  background-color: var(--background-site);
+  border: none;
+  border-bottom: 1px solid var(--devider);
+  border-radius: 0;
+
+  -webkit-user-select: text;
+  -moz-select: text;
+  -ms-select: text;
+  user-select: text;
+
+  width: 100%;
+
+  &.parent {
+    border: none;
+  }
+
+  &.reactionNote {
+    background: none;
+    border-bottom: 1px solid var(--subtile-devider);
+  }
+
+  .userHeader {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .repostedBy {
+      padding-bottom: 8px;
+      display: flex;
+      >span {
+        >a {
+          margin-inline: 5px;
+          color: var(--text-tertiary);
+          text-decoration: none;
+        }
+        color: var(--text-tertiary);
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: 400;
+        >span {
+          text-transform: lowercase;
+        }
+      }
+    }
+  }
+
+  .message {
+    color: var(--text-primary);
+    word-break: break-word;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .replyingTo {
+    display: flex;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 6px;
+    max-width: 518px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    .label {
+      color: var(--text-primary);
+    }
+    a {
+      max-width: 440px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .author {
+      display: inline-block;
+      color: var(--accent-links);
+      text-decoration: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.noteThread {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   padding: 12px;
   margin: 0px;
 

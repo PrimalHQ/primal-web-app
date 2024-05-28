@@ -187,7 +187,12 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
             <For each={parentNotes()}>
               {note =>
                 <div>
-                  <Note note={note} parent={true} shorten={true} />
+                  <Note
+                    note={note}
+                    parent={true}
+                    shorten={true}
+                    noteType="thread"
+                  />
                 </div>
               }
             </For>
@@ -224,7 +229,11 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
             <For each={replyNotes()}>
               {note =>
                 <div>
-                  <Note note={note} shorten={true} />
+                  <Note
+                    note={note}
+                    shorten={true}
+                    noteType="thread"
+                  />
                 </div>
               }
             </For>
