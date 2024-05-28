@@ -68,12 +68,6 @@ const NavMenu: Component< { id?: string } > = (props) => {
       hiddenOnSmallScreens: true,
       bubble: () => account?.sec ? 1 : 0,
     },
-    {
-      to: '/help',
-      label: intl.formatMessage(t.help),
-      icon: 'helpIcon',
-      hiddenOnSmallScreens: true,
-    },
   ];
 
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;

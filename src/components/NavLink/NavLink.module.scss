@@ -1,7 +1,9 @@
-@mixin iconNav {
+@mixin iconNav($url, $color) {
   width: 24px;
   height: 24px;
-  background-color: var(--text-secondary);
+  background-color: $color;
+  -webkit-mask: $url no-repeat center;
+  mask: $url no-repeat center;
 }
 
 .navLink {
@@ -13,14 +15,29 @@
   border-radius: 0px;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  width: 158px;
+
+
 
   a {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+
+    >div {
+      background-color: var(--text-secondary);
+    }
+
     .label {
-      margin-left: 16px;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 20px;
       display: flex;
+      color: var(--text-secondary);
+      background: none;
+      font-size: 18px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
     }
 
     &:focus {
@@ -28,137 +45,71 @@
     }
   }
 
-  p {
-    display: inline;
-    text-transform: uppercase;
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: 800;
-  }
-}
-
-.homeIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/home.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/home.svg) no-repeat center;
-}
-.readsIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/long.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/long.svg) no-repeat center;
-}
-.exploreIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/search.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/search.svg) no-repeat center;
-}
-.messagesIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/messages.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/messages.svg) no-repeat center;
-}
-.notificationsIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/notifications.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/notifications.svg) no-repeat center;
-}
-.downloadIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/downloads.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/downloads.svg) no-repeat center;
-}
-.settingsIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/settings.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/settings.svg) no-repeat center;
-}
-.helpIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/help.svg) no-repeat center;
-  mask: url(../../assets/icons/nav/help.svg) no-repeat center;
-}
-.bookmarkIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/nav/bookmarks.svg) no-repeat 0 / auto 100%;
-  mask: url(../../assets/icons/nav/bookmarks.svg) no-repeat center 0 / auto 100%;
-}
-
-&:hover, a.active {
   .homeIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/home_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/home_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/home.svg), var(--text-secondary));
   }
   .readsIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/long_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/long_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/long.svg), var(--text-secondary));
   }
   .exploreIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/search_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/search_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/search.svg), var(--text-secondary));
   }
   .messagesIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/messages_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/messages_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/messages.svg), var(--text-secondary));
   }
   .notificationsIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/notifications_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/notifications_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/notifications.svg), var(--text-secondary));
   }
   .downloadIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/downloads_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/downloads_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/downloads.svg), var(--text-secondary));
   }
   .settingsIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/settings_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/settings_selected.svg) no-repeat center;
-  }
-  .helpIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/help_selected.svg) no-repeat center;
-    mask: url(../../assets/icons/nav/help_selected.svg) no-repeat center;
+    @include iconNav(url(../../assets/icons/nav/settings.svg), var(--text-secondary));
   }
   .bookmarkIcon {
-    background-color: var(--text-primary);
-    -webkit-mask: url(../../assets/icons/nav/bookmarks_selected.svg) no-repeat 0 / auto 100%;
-    mask: url(../../assets/icons/nav/bookmarks_selected.svg) no-repeat center 0 / auto 100%;
-  }
-}
-
-.active {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  background: none;
-
-  >div {
-    background-color: var(--text-primary);
+    @include iconNav(url(../../assets/icons/nav/bookmarks.svg), var(--text-secondary));
   }
 
-  .label {
-    color: var(--text-primary);
-    background: none;
+
+  &:hover, a.active {
+    .label {
+      color: var(--text-primary);
+      background: none;
+      // font-weight: 600;
+    }
+
+    .homeIcon {
+      @include iconNav(url(../../assets/icons/nav/home_selected.svg), var(--text-primary));
+    }
+    .readsIcon {
+      @include iconNav(url(../../assets/icons/nav/long_selected.svg), var(--text-primary));
+    }
+    .exploreIcon {
+      @include iconNav(url(../../assets/icons/nav/search_selected.svg), var(--text-primary));
+    }
+    .messagesIcon {
+      @include iconNav(url(../../assets/icons/nav/messages_selected.svg), var(--text-primary));
+    }
+    .notificationsIcon {
+      @include iconNav(url(../../assets/icons/nav/notifications_selected.svg), var(--text-primary));
+    }
+    .downloadIcon {
+      @include iconNav(url(../../assets/icons/nav/downloads_selected.svg), var(--text-primary));
+    }
+    .settingsIcon {
+      @include iconNav(url(../../assets/icons/nav/settings_selected.svg), var(--text-primary));
+    }
+    .bookmarkIcon {
+      @include iconNav(url(../../assets/icons/nav/bookmarks_selected.svg), var(--text-primary));
+    }
   }
-}
 
-.inactive {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-
-  >div {
-    background-color: var(--text-secondary);
-  }
-
-  .label {
-    color: var(--text-secondary);
-    background: none;
+  a.active {
+    .label {
+      color: var(--text-primary);
+      background: none;
+      font-weight: 600;
+    }
   }
 }
 
