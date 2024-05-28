@@ -14,15 +14,14 @@ import { nip19 } from 'nostr-tools';
 import { storeSec } from '../../lib/localStore';
 
 const LoginModal: Component<{
-  id?: string,
-  open?: boolean,
-  onAbort?: () => void,
+  id?: string;
+  open?: boolean;
+  onAbort?: () => void;
 }> = (props) => {
-
   const intl = useIntl();
   const account = useAccountContext();
 
-  const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login')
+  const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login');
   const [enteredKey, setEnteredKey] = createSignal('');
 
   let loginInput: HTMLInputElement | undefined;
@@ -39,13 +38,13 @@ const LoginModal: Component<{
   const onStoreSec = (sec: string | undefined) => {
     storeSec(sec);
     onAbort();
-  }
+  };
 
   const onAbort = () => {
     setStep(() => 'login');
     setEnteredKey('');
     props.onAbort && props.onAbort();
-  }
+  };
 
   const isValidNsec: () => boolean = () => {
     const key = enteredKey();
@@ -58,8 +57,8 @@ const LoginModal: Component<{
       try {
         const decoded = nip19.decode(key);
 
-        return decoded.type === 'nsec' && decoded.data;
-      } catch(e) {
+        return Boolean(decoded.type === 'nsec' && decoded.data);
+      } catch (e) {
         return false;
       }
     }
@@ -73,8 +72,10 @@ const LoginModal: Component<{
     }
   });
 
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === 'Enter' && isValidNsec()) {
+  const onSubmit = (e: Event) => {
+    e.preventDefault();
+
+    if (isValidNsec()) {
       onLogin();
     }
   };
@@ -83,13 +84,11 @@ const LoginModal: Component<{
     <Switch>
       <Match when={step() === 'login'}>
         <Modal open={props.open} onClose={onAbort}>
-          <div id={props.id} class={styles.modal}>
+          <form id={props.id} class={styles.modal} onSubmit={onSubmit}>
             <button class={styles.xClose} onClick={onAbort}>
               <div class={styles.iconClose}></div>
             </button>
-            <div class={styles.title}>
-              {intl.formatMessage(tLogin.title)}
-            </div>
+            <div class={styles.title}>{intl.formatMessage(tLogin.title)}</div>
             <div class={styles.description}>
               {intl.formatMessage(tLogin.description)}
             </div>
@@ -98,21 +97,24 @@ const LoginModal: Component<{
                 ref={loginInput}
                 type="password"
                 value={enteredKey()}
-                onKeyUp={onKeyUp}
                 onChange={setEnteredKey}
-                validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                validationState={
+                  enteredKey().length === 0 || isValidNsec()
+                    ? 'valid'
+                    : 'invalid'
+                }
                 errorMessage={intl.formatMessage(tLogin.invalidNsec)}
               />
             </div>
             <div class={styles.actions}>
               <ButtonPrimary
-                onClick={onLogin}
+                type="submit"
                 disabled={enteredKey().length === 0 || !isValidNsec()}
               >
                 {intl.formatMessage(tActions.login)}
               </ButtonPrimary>
             </div>
-          </div>
+          </form>
         </Modal>
       </Match>
 
@@ -128,6 +130,6 @@ const LoginModal: Component<{
       </Match>
     </Switch>
   );
-}
+};
 
 export default hookForDev(LoginModal);
