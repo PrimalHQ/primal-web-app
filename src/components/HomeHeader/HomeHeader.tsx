@@ -119,7 +119,7 @@ const HomeHeader: Component< {
         <Show
           when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}
         >
-          <FeedSelect />
+          <FeedSelect big={true} />
         </Show>
 
         <Show

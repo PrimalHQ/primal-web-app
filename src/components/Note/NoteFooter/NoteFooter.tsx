@@ -27,7 +27,7 @@ export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
 const NoteFooter: Component<{
   note: PrimalNote,
-  wide?: boolean,
+  size?: 'wide' | 'normal' | 'short',
   id?: string,
   state: NoteReactionsState,
   updateState: SetStoreFunction<NoteReactionsState>,
@@ -48,6 +48,8 @@ const NoteFooter: Component<{
   let footerDiv: HTMLDivElement | undefined;
   let repostMenu: HTMLDivElement | undefined;
 
+  const size = () => props.size || 'normal';
+
   const repostMenuItems: MenuItem[] = [
     {
       action: () => doRepost(),
@@ -60,6 +62,7 @@ const NoteFooter: Component<{
       icon: 'quote',
     },
   ];
+
 
   const onClickOutside = (e: MouseEvent) => {
     if (
@@ -222,8 +225,8 @@ const NoteFooter: Component<{
         return;
       }
 
-      let newLeft = props.wide ? 15 : 13;
-      let newTop = props.wide ? -6 : -6;
+      let newLeft = size() === 'wide' ? 15 : 13;
+      let newTop = size() === 'wide' ? -6 : -6;
 
       if (props.large) {
         newLeft = 2;
@@ -318,7 +321,12 @@ const NoteFooter: Component<{
   }
 
   return (
-    <div id={props.id} class={`${styles.footer} ${props.wide ? styles.wide : ''}`} ref={footerDiv} onClick={(e) => {e.preventDefault();}}>
+    <div
+      id={props.id}
+      class={`${styles.footer} ${styles[size()]}`}
+      ref={footerDiv}
+      onClick={(e) => e.preventDefault() }
+    >
 
       <Show when={props.state.showZapAnim}>
         <ZapAnimation
@@ -395,6 +403,7 @@ const NoteFooter: Component<{
         <BookmarkNote
           note={props.note}
           large={props.large}
+          right={true}
         />
       </div>
 

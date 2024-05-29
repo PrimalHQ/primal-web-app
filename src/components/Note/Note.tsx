@@ -285,6 +285,7 @@ const Note: Component<{
                   state={reactionsState}
                   updateState={updateReactionsState}
                   customZapInfo={customZapInfo()}
+                  size="short"
                 />
               </div>
             </div>
@@ -301,7 +302,9 @@ const Note: Component<{
         >
           <div class={styles.border}></div>
 
-          <NoteHeader note={props.note} primary={true} />
+          <div class={styles.header}>
+            <NoteHeader note={props.note} primary={true} />
+          </div>
 
           <div class={styles.upRightFloater}>
             <NoteContextTrigger
@@ -313,14 +316,20 @@ const Note: Component<{
           <div class={styles.content}>
 
             <div class={styles.message}>
-              <ParsedNote note={props.note} width={Math.min(640, window.innerWidth)} />
+              <ParsedNote
+                note={props.note}
+                width={Math.min(640, window.innerWidth)}
+                margins={12}
+              />
             </div>
 
-            <NoteTopZaps
-              topZaps={reactionsState.topZaps}
-              zapCount={reactionsState.zapCount}
-              action={() => openReactionModal('zaps')}
-            />
+            <div class={styles.topZaps}>
+              <NoteTopZaps
+                topZaps={reactionsState.topZaps}
+                zapCount={reactionsState.zapCount}
+                action={() => openReactionModal('zaps')}
+              />
+            </div>
 
             <div
               class={styles.time}
@@ -337,15 +346,17 @@ const Note: Component<{
               </button>
             </div>
 
-            <NoteFooter
-              note={props.note}
-              state={reactionsState}
-              updateState={updateReactionsState}
-              customZapInfo={customZapInfo()}
-              wide={true}
-              large={true}
-              onZapAnim={addTopZap}
-            />
+            <div class={styles.footer}>
+              <NoteFooter
+                note={props.note}
+                state={reactionsState}
+                updateState={updateReactionsState}
+                customZapInfo={customZapInfo()}
+                size="wide"
+                large={true}
+                onZapAnim={addTopZap}
+              />
+            </div>
           </div>
         </div>
       </Match>
@@ -390,6 +401,7 @@ const Note: Component<{
               note={props.note}
               shorten={props.shorten}
               width={Math.min(640, window.innerWidth - 72)}
+              margins={20}
             />
           </div>
 
@@ -406,7 +418,6 @@ const Note: Component<{
             updateState={updateReactionsState}
             customZapInfo={customZapInfo()}
             onZapAnim={addTopZapFeed}
-            wide={true}
           />
         </A>
       </Match>
@@ -457,7 +468,8 @@ const Note: Component<{
                 <ParsedNote
                   note={props.note}
                   shorten={props.shorten}
-                  width={Math.min(528, window.innerWidth - 72)}
+                  width={Math.min(566, window.innerWidth - 72)}
+                  margins={1}
                 />
               </div>
 
@@ -468,13 +480,16 @@ const Note: Component<{
                 topZapLimit={4}
               />
 
-              <NoteFooter
-                note={props.note}
-                state={reactionsState}
-                updateState={updateReactionsState}
-                customZapInfo={customZapInfo()}
-                onZapAnim={addTopZapFeed}
-              />
+              <div class={styles.footer}>
+                <NoteFooter
+                  note={props.note}
+                  state={reactionsState}
+                  updateState={updateReactionsState}
+                  customZapInfo={customZapInfo()}
+                  onZapAnim={addTopZapFeed}
+                  size="short"
+                />
+              </div>
             </div>
           </div>
         </A>
@@ -515,6 +530,7 @@ const Note: Component<{
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(528, window.innerWidth - 72)}
+                  margins={12}
                   noLightbox={true}
                   altEmbeds={true}
                 />

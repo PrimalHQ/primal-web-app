@@ -8,7 +8,7 @@ import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
 
-const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
+const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
@@ -123,6 +123,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
       value={selectedValue()}
       isSelected={isSelected}
       isPhone={props.isPhone}
+      big={props.big}
     />
   );
 }

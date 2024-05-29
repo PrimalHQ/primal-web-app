@@ -118,6 +118,7 @@ const EmbeddedNote: Component<{
           shorten={true}
           isEmbeded={true}
           width={noteContent?.getBoundingClientRect().width}
+          margins={2}
         />
       </div>
     </>

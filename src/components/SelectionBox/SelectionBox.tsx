@@ -18,6 +18,7 @@ const SelectionBox: Component<{
   options: SelectionOption[],
   onChange: (option: any) => void,
   initialValue?: string | SelectionOption,
+  big?: boolean,
   value?: string | SelectionOption,
   id?: string,
 }> = (props) => {
@@ -55,12 +56,12 @@ const SelectionBox: Component<{
       onChange={props.onChange}
       gutter={8}
     >
-      <Select.Trigger class={styles.trigger}>
+      <Select.Trigger class={props.big ? styles.triggerBig : styles.trigger}>
         <Select.Value<SelectionOption>>
           {state => state.selectedOption()?.label || ''}
         </Select.Value>
         <Select.Icon>
-          <div class={styles.selectionIcon}></div>
+          <div class={props.big ? styles.selectionIconBig : styles.selectionIcon}></div>
         </Select.Icon>
       </Select.Trigger>
       <Select.Content>

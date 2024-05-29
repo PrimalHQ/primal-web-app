@@ -147,6 +147,7 @@ const ParsedNote: Component<{
   shorten?: boolean,
   isEmbeded?: boolean,
   width?: number,
+  margins?: number,
   noLightbox?: boolean,
   altEmbeds?: boolean,
 }> = (props) => {
@@ -619,9 +620,10 @@ const ParsedNote: Component<{
         let w: number | undefined = undefined;
 
         if (mVideo) {
+          const margins = props.margins || 20
           const ratio = mVideo.w / mVideo.h;
-          h = (noteWidth() / ratio);
-          w = h > 680 ? 680 * ratio : noteWidth();
+          h = ((noteWidth() - 2*margins) / ratio);
+          w = h > 680 ? 680 * ratio : noteWidth() - 2*margins;
           h = h > 680 ? 680 : h;
         }
 

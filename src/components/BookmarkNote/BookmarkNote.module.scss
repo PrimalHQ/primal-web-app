@@ -37,3 +37,14 @@
     }
   }
 }
+
+.right {
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 6px !important;
+  padding-right: 0px !important;
+
+  &.rightL {
+    width: 22px !important;
+  }
+}

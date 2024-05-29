@@ -16,7 +16,7 @@ import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
 import { importEvents, triggerImportEvents } from '../../lib/notes';
 
-const BookmarkNote: Component<{ note: PrimalNote, large?: boolean }> = (props) => {
+const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boolean }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
@@ -136,6 +136,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean }> = (props) =
   return (
     <div class={styles.bookmark}>
       <ButtonGhost
+        class={`${props.right ? styles.right : ''} ${props.large ? styles.rightL : ''}`}
         onClick={(e: MouseEvent) => {
           e.preventDefault();
 

@@ -9,6 +9,32 @@
 }
 
 .selectionIcon {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-inline: 4px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/caret.svg) no-repeat 0 0/ 10px 10px;
+  mask: url(../../assets/icons/caret.svg) no-repeat 0 0/ 10px 10px;
+}
+
+.selectionBox {
+  position: relative;
+}
+
+.trigger {
+  background-color: var(--background-site);
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+
+.selectionIconBig {
   width: 14px;
   height: 14px;
   display: inline-block;
@@ -18,11 +44,7 @@
   mask: url(../../assets/icons/caret.svg) no-repeat 0 / 14px;
 }
 
-.selectionBox {
-  position: relative;
-}
-
-.trigger {
+.triggerBig {
   background-color: var(--background-site);
   margin: 0;
   padding: 0;

@@ -55,12 +55,34 @@
 
 .footer {
   display: grid;
-  grid-template-columns: 125px 125px 125px 125px auto;
+  grid-template-columns: 145px 145px 145px 145px auto;
   position: relative;
   width: 100%;
 
+  .bookmarkFoot {
+    display: flex;
+    justify-content: flex-end;
+    max-width: 20px;
+  }
+
   &.wide {
-    grid-template-columns: 137px 137px 137px 135px auto;
+    grid-template-columns: 148px 148px 148px 148px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
+  &.short {
+    grid-template-columns: 126px 126px 126px 126px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
   }
 
   .context {
@@ -172,10 +194,6 @@
     }
   }
 
-  .bookmarkFoot {
-    display: flex;
-    justify-content: flex-end;
-  }
 }
 
 .largeZapLottie {
