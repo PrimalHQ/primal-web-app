@@ -276,7 +276,10 @@ const Note: Component<{
           <div class={styles.noteNotifications}>
             <div class={styles.content}>
               <div class={styles.message}>
-                <ParsedNote note={props.note} shorten={true} />
+                <ParsedNote
+                  note={props.note}
+                  shorten={true}
+                />
               </div>
 
               <div class={styles.footer}>
