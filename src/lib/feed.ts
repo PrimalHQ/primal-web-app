@@ -27,9 +27,9 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
     return;
   }
 
-  const start = until === 0 ? 'since' : 'until';
+  const time = until === 0 ? Math.ceil((new Date()).getTime()/1_000 ): until;
 
-  let payload = { limit, [start]: until, pubkey };
+  let payload = { limit, until: time, pubkey };
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
