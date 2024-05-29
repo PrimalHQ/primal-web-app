@@ -129,15 +129,6 @@ Ordered
 3. Integer molestie lorem at massa
 
 
-1. You can use sequential numbers...
-1. ...or keep all the numbers as \`1.\`
-
-Start numbering with offset:
-
-57. foo
-1. bar
-
-
 ## Code
 
 Inline \`code\`
@@ -195,31 +186,16 @@ Autoconverted link https://github.com/nodeca/pica (enable linkify to see)
 ## Images
 
 ![Minion](https://octodex.github.com/images/minion.png)
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg "The Stormtroopocat")
+![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg "The Stormtroopocat")[^image]
 
 Like links, Images also have a footnote style syntax
 
-![Alt text][id]
+With a reference later in the document defining the URL location, like this:
 
-With a reference later in the document defining the URL location:
-
-[id]: https://octodex.github.com/images/dojocat.jpg  "The Dojocat"
+[^image]: https://octodex.github.com/images/dojocat.jpg  "The Dojocat"
 
 
-## Plugins
-
-The killer feature of \`markdown-it\` is very effective support of
-[syntax plugins](https://www.npmjs.org/browse/keyword/markdown-it-plugin).
-
-
-### [Emojies](https://github.com/markdown-it/markdown-it-emoji)
-
-> Classic markup: :wink: :cry: :laughing: :yum:
->
-> Shortcuts (emoticons): :-) :-( 8-) ;)
-
-see [how to change output](https://github.com/markdown-it/markdown-it-emoji#change-output) with twemoji.
-
+## Optionals (should we support them?)
 
 ### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
 
@@ -242,8 +218,6 @@ there is some ++Inserted text++ here
 Footnote 1 link[^first].
 
 Footnote 2 link[^second].
-
-Inline footnote^[Text of inline footnote] definition.
 
 Duplicated footnote reference[^second].
 
@@ -268,24 +242,6 @@ Term 2 with *inline markup*
         { some code, part of Definition 2 }
 
     Third paragraph of definition 2.
-
-_Compact style:_
-
-Term 1
-  ~ Definition 1
-
-Term 2
-  ~ Definition 2a
-  ~ Definition 2b
-
-
-### [Abbreviations](https://github.com/markdown-it/markdown-it-abbr)
-
-This is HTML abbreviation example.
-
-It converts "HTML", but keep intact partial entries like "xxxHTMLyyy" and so on.
-
-*[HTML]: Hyper Text Markup Language
 
 `;
 

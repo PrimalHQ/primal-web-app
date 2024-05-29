@@ -9,33 +9,209 @@
   .editor {
     margin-block: 8px;
 
-    * {
+    p {
       color: var(--text-primary);
+      font-family: Lora;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 24px;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
 
-    p, li {
+    h1 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 40px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 36px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 32px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    h4 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 30px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    h5 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 28px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    h6 {
+      color: var(--text-primary);
+      font-family: Nacelle;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 26px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    hr {
+      border-top:1px solid var(--subtile-devider);
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      margin-left: 0px;
+      padding-left: 14px;
+      margin-bottom: 20px;
+
+      li {
+        &::marker {
+          content: '•';
+        }
+        padding-left: 8px;
+        color: var(--text-primary);
+        font-family: Lora;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        margin-top: 0;
+        margin-bottom: 12px;
+
+        ul {
+          padding-left: 30px;
+        }
+      }
+    }
+
+    ol {
+      margin-left: 0px;
+      padding-left: 24px;
+      margin-bottom: 20px;
+
+      li {
+        padding-left: 8px;
+        color: var(--text-primary);
+        font-family: Lora;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        margin-top: 0;
+        margin-bottom: 12px;
+
+        ol {
+          padding-left: 40px;
+        }
+      }
+    }
+
+
+    dl {
+      margin-left: 0px;
+      padding-left: 14px;
+      margin-bottom: 20px;
+
+      dt {
+        color: var(--text-primary);
+        font-family: Lora;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+      }
+
+      dd {
+        padding-left: 8px;
+        color: var(--text-primary);
+        font-family: Lora;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
+        margin-top: 0;
+        margin-bottom: 12px;
+
+        dl {
+          padding-left: 30px;
+        }
+      }
+    }
+
+    img {
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    img + sup {
+      display: block;
+      margin-top: -6px;
+    }
+
+
+    blockquote {
+      color: var(--text-primary);
       font-family: Lora;
-      font-size: 15px;
-      font-style: normal;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 22px;
+      line-height: 24px;
+      padding-left: 12px;
+      margin-top: 0;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--text-tertiary);
     }
 
     a {
       color: var(--accent-links);
       font-family: Lora;
-      font-size: 15px;
-      font-style: normal;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 22px;
+      line-height: 24px;
     }
 
     pre, code, mark {
       background-color: var(--background-input);
     }
 
+    code {
+      color: var(--text-primary);
+      font-family: "Fira Mono";
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 24px;
+    }
+
     ins {
       color: var(--warning-bright);
+    }
+
+    del {
+      color: inherit;
     }
   }
 }
