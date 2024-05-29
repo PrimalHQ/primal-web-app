@@ -48,7 +48,7 @@ const NoteFooter: Component<{
   let footerDiv: HTMLDivElement | undefined;
   let repostMenu: HTMLDivElement | undefined;
 
-  const size = () => props.size || 'normal';
+  const size = () => props.size ?? 'normal';
 
   const repostMenuItems: MenuItem[] = [
     {
@@ -225,12 +225,17 @@ const NoteFooter: Component<{
         return;
       }
 
-      let newLeft = size() === 'wide' ? 15 : 13;
-      let newTop = size() === 'wide' ? -6 : -6;
+      let newLeft = 33;
+      let newTop = -6;
 
-      if (props.large) {
-        newLeft = 2;
-        newTop = -9;
+      if (size() === 'wide' && props.large) {
+        newLeft = 14;
+        newTop = -10;
+      }
+
+      if (size() === 'short') {
+        newLeft = 14;
+        newTop = -6;
       }
 
       medZapAnimation.style.left = `${newLeft}px`;
