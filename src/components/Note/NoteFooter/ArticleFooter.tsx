@@ -181,7 +181,7 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (!canUserReceiveZaps(props.note.author)) {
+    if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
         intl.formatMessage(t.zapUnavailable),
       );
@@ -206,7 +206,7 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.author)) {
+    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
       return;
     }
 

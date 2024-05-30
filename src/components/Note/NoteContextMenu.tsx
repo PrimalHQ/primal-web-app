@@ -60,12 +60,12 @@ const NoteContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.post.pubkey);
+    account?.actions.addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.post.pubkey);
+    account?.actions.removeFromMuteList(note()?.pubkey);
     props.onClose();
   };
 
@@ -77,21 +77,21 @@ const NoteContextMenu: Component<{
 
   const copyNoteLink = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${window.location.origin}/e/${note().post.noteId}`);
+    navigator.clipboard.writeText(`${window.location.origin}/e/${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
 
   const copyNoteText = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().post.content}`);
+    navigator.clipboard.writeText(`${note().content}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };
 
   const copyNoteId = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().post.noteId}`);
+    navigator.clipboard.writeText(`${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
@@ -128,7 +128,7 @@ const NoteContextMenu: Component<{
   const onClickOutside = (e: MouseEvent) => {
     if (
       !props.data ||
-      !document?.getElementById(`note_context_${note().post.id}`)?.contains(e.target as Node)
+      !document?.getElementById(`note_context_${note().id}`)?.contains(e.target as Node)
     ) {
       props.onClose()
     }
@@ -222,7 +222,7 @@ const NoteContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.post.pubkey ?
+  const noteContext = () => account?.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
       noteContextForEveryone;
 
@@ -251,7 +251,7 @@ const NoteContextMenu: Component<{
       />
 
       <PrimalMenu
-        id={`note_context_${note()?.post.id}`}
+        id={`note_context_${note()?.id}`}
         items={noteContext()}
         hidden={!props.open}
         position="note_footer"

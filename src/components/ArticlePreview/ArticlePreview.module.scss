@@ -1,4 +1,5 @@
 .article {
+  position: relative;
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -114,4 +115,10 @@
     margin-bottom: 16px;
   }
 
+}
+
+.upRightFloater {
+  position: absolute;
+  top: -6px;
+  right: 8px;
 }

@@ -12,6 +12,7 @@ import { PrimalArticle, ZapOption } from '../../types/primal';
 import { uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
+import NoteContextTrigger from '../Note/NoteContextTrigger';
 import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
 import NoteFooter from '../Note/NoteFooter/NoteFooter';
 import NoteTopZaps from '../Note/NoteTopZaps';
@@ -53,6 +54,7 @@ const ArticlePreview: Component<{
 
   let latestTopZap: string = '';
   let latestTopZapFeed: string = '';
+  let articleContextMenu: HTMLDivElement | undefined;
 
   const onConfirmZap = (zapOption: ZapOption) => {
     app?.actions.closeCustomZapModal();
@@ -181,19 +183,48 @@ const ArticlePreview: Component<{
     onCancel: onCancelZap,
   });
 
+  const openReactionModal = (openOn = 'likes') =>  {
+    app?.actions.openReactionModal(props.article.id, {
+      likes: reactionsState.likes,
+      zaps: reactionsState.zapCount,
+      reposts: reactionsState.reposts,
+      quotes: reactionsState.quoteCount,
+      openOn,
+    });
+  };
+
+  const onContextMenuTrigger = () => {
+    app?.actions.openContextMenu(
+      props.article,
+      articleContextMenu?.getBoundingClientRect(),
+      () => {
+        app?.actions.openCustomZapModal(customZapInfo());
+      },
+      openReactionModal,
+    );
+  }
+
   return (
     <A class={styles.article} href={`/e/${props.article.naddr}`}>
+      <div class={styles.upRightFloater}>
+        <NoteContextTrigger
+          ref={articleContextMenu}
+          onClick={onContextMenuTrigger}
+        />
+      </div>
+
       <div class={styles.header}>
         <div class={styles.userInfo}>
-          <Avatar user={props.article.author} size="micro"/>
-          <div class={styles.userName}>{userName(props.article.author)}</div>
-          <VerificationCheck  user={props.article.author} />
-          <div class={styles.nip05}>{props.article.author.nip05 || ''}</div>
+          <Avatar user={props.article.user} size="micro"/>
+          <div class={styles.userName}>{userName(props.article.user)}</div>
+          <VerificationCheck  user={props.article.user} />
+          <div class={styles.nip05}>{props.article.user.nip05 || ''}</div>
         </div>
         <div class={styles.time}>
           {shortDate(props.article.published)}
         </div>
       </div>
+
       <div class={styles.body}>
         <div class={styles.text}>
           <div class={styles.content}>

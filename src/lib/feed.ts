@@ -32,6 +32,7 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   let payload = { limit, until: time, pubkey };
 
   if (user_pubkey) {
+    // @ts-ignore dynamic property
     payload.user_pubkey = user_pubkey;
   }
   if (include_replies) {

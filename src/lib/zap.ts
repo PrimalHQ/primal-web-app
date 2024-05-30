@@ -19,8 +19,8 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: note.post.pubkey,
-    event: note.msg.id,
+    profile: note.pubkey,
+    event: note.id,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -55,7 +55,7 @@ export const zapArticle = async (note: PrimalArticle, sender: string | undefined
     return false;
   }
 
-  const callback = await getZapEndpoint(note.author);
+  const callback = await getZapEndpoint(note.user);
 
   if (!callback) {
     return false;

@@ -94,7 +94,7 @@ const Home: Component = () => {
     }
 
     if (newPostAuthors.length < 3) {
-      const users = context?.future.notes.map(note => note.author) || [];
+      const users = context?.future.notes.map(note => note.user) || [];
 
       const uniqueUsers = users.reduce<PrimalUser[]>((acc, user) => {
         const isDuplicate = acc.find(u => u && u.pubkey === user.pubkey);

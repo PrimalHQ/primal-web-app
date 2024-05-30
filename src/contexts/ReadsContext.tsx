@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind } from "../constants";
+import { Kind, minKnownProfiles } from "../constants";
 import { getArticlesFeed, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
@@ -307,7 +307,8 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
-    const [scope, timeframe] = topic.split(';');
+    const t = account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+    const [scope, timeframe] = t.split(';');
 
     updateStore('isFetching', true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
@@ -329,7 +330,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    getArticlesFeed(account?.publicKey, topic, `reads_feed_${subId}`, until, 20);
+    getArticlesFeed(account?.publicKey, t, `reads_feed_${subId}`, until, 20);
   };
 
   const clearNotes = () => {

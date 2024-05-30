@@ -498,8 +498,10 @@ export type PrimalNote = {
   replyTo?: string,
   id: string,
   pubkey: string,
+  noteId: string,
   tags: string[][],
   topZaps: TopZap[],
+  content: string,
 };
 
 
@@ -510,7 +512,7 @@ export type PrimalArticle = {
   tags: string[],
   published: number,
   content: string,
-  author: PrimalUser,
+  user: PrimalUser,
   topZaps: TopZap[],
   repost?: PrimalRepost,
   mentionedNotes?: Record<string, PrimalNote>,
@@ -519,6 +521,7 @@ export type PrimalArticle = {
   id: string,
   pubkey: string,
   naddr: string,
+  noteId: string,
   msg: NostrNoteContent,
   wordCount: number,
   noteActions: NoteActions,

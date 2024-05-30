@@ -366,8 +366,10 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       replyTo: replyTo && replyTo[1],
       tags: msg.tags,
       id: msg.id,
+      noteId: nip19.noteEncode(msg.id),
       pubkey: msg.pubkey,
       topZaps: [ ...tz ],
+      content: sanitize(msg.content),
     };
   });
 }
@@ -466,10 +468,11 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       image: '',
       tags: [],
       published: msg.created_at || 0,
-      content: msg.content,
-      author: convertToUser(user),
+      content: sanitize(msg.content),
+      user: convertToUser(user),
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
+      noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
       msg,
       mentionedNotes,
       mentionedUsers,

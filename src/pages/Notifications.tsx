@@ -83,7 +83,14 @@ const Notifications: Component = () => {
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
     users: [],
-    page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+    },
     reposts: {},
   })
 
@@ -91,7 +98,15 @@ const Notifications: Component = () => {
     notes: [],
     users: {},
     userStats: {},
-    page: { messages: [], users: {}, postStats: {}, notifications: [], mentions: {}, noteActions: {} },
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      notifications: [],
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+    },
     reposts: {},
     notifications: [],
   })

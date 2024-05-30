@@ -29,7 +29,7 @@ export type CustomZapInfo = {
 };
 
 export type NoteContextMenuInfo = {
-  note: PrimalNote,
+  note: PrimalNote | PrimalArticle,
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
@@ -72,7 +72,7 @@ export type AppContextStore = {
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
     resetCustomZap: () => void,
-    openContextMenu: (note: PrimalNote, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    openContextMenu: (note: PrimalNote | PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
     closeContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
     closeLnbcModal: () => void,
@@ -155,7 +155,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const openContextMenu = (
-    note: PrimalNote,
+    note: PrimalNote | PrimalArticle,
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
