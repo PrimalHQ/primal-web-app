@@ -49,11 +49,14 @@ const ArticlePreview: Component<{
             </div>
           </div>
         </div>
-        <Show when={props.article.image.length > 0}>
-          <div class={styles.image}>
+        <div class={styles.image}>
+          <Show
+            when={props.article.image}
+            fallback={<div class={styles.placeholderImage}></div>}
+          >
             <img src={props.article.image} />
-          </div>
-        </Show>
+          </Show>
+        </div>
       </div>
     </A>
   );

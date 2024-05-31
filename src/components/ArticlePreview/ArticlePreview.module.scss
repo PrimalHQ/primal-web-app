@@ -106,9 +106,20 @@
 
     .image {
       min-width: 164px;
+      height: fit-content;
+      border: 1px solid var(--devider);
+      border-radius: 4px;
+      overflow: hidden;
       img {
         width: 164px;
         object-fit: scale-down;
+      }
+
+      .placeholderImage {
+        width: 164px;
+        height: 118px;
+        background-image: var(--reads-placeholder-image);
+        background-size: contain;
       }
     }
 
@@ -162,9 +173,20 @@
     }
     .image {
       min-width: 100px;
+      height: fit-content;
+      border: 1px solid var(--devider);
+      border-radius: 4px;
+      overflow: hidden;
       img {
         width: 100px;
         object-fit: scale-down;
+      }
+
+      .placeholderImage {
+        width: 100px;
+        height: 70px;
+        background-image: var(--reads-placeholder-image);
+        background-size: contain;
       }
     }
   }

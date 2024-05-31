@@ -69,6 +69,10 @@
 .readsSidebar {
   .section {
     margin-bottom: 28px;
+
+    >a:last-child {
+      border-bottom: none;
+    }
   }
 
   .topic {

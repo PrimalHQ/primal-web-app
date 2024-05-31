@@ -249,7 +249,12 @@ const ArticlePreview: Component<{
           </div>
         </div>
         <div class={styles.image}>
-          <img src={props.article.image} />
+          <Show
+            when={props.article.image}
+            fallback={<div class={styles.placeholderImage}></div>}
+          >
+            <img src={props.article.image} />
+          </Show>
         </div>
       </div>
 
