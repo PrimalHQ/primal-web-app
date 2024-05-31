@@ -27,7 +27,7 @@ import { APP_ID } from '../../App';
 import { getUserProfileInfo } from '../../lib/profile';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { Kind } from '../../constants';
-import { PrimalNote, PrimalUser } from '../../types/primal';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import { convertToUser, userName } from '../../stores/profile';
 import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
@@ -35,11 +35,14 @@ import { nip19 } from 'nostr-tools';
 import { fetchNotes } from '../../handleNotes';
 import { logError } from '../../lib/logger';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
+import NoteImage from '../NoteImage/NoteImage';
+import PhotoSwipeLightbox from 'photoswipe/lightbox';
 
 const PrimalMarkdown: Component<{
   id?: string,
   content?: string,
   readonly?:  boolean,
+  noteId: string,
 }> = (props) => {
 const account = useAccountContext();
 
@@ -48,6 +51,24 @@ const account = useAccountContext();
 
   const [userMentions, setUserMentions] = createStore<Record<string, PrimalUser>>({});
   const [noteMentions, setNoteMentions] = createStore<Record<string, PrimalNote>>({});
+
+  const id = () => {
+    return `note_${props.noteId}`;
+  }
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: `#${id()}`,
+    children: `a.image_${props.noteId}`,
+    showHideAnimationType: 'zoom',
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 2,
+    maxZoomLevel: 3,
+    pswpModule: () => import('photoswipe')
+  });
+
+  onMount(() => {
+    lightbox.init();
+  });
 
   const fetchUserInfo = (npub: string) => {
     const pubkey = npubToHex(npub);
@@ -97,6 +118,20 @@ const account = useAccountContext();
     return regex.test(content)
   }
 
+  const isImg = (el: Element) => {
+    // @ts-ignore
+    return el.firstChild?.tagName === 'IMG';
+  }
+
+  const renderImage = (el: Element) => {
+    const img = el.firstChild as HTMLImageElement;
+
+    return <NoteImage
+      class={`noteimage image_${props.noteId}`}
+      src={img.src}
+    />
+  }
+
   const renderMention = (el: Element) => {
     const regex = /nostr:([A-z0-9]+)/;
 
@@ -108,7 +143,7 @@ const account = useAccountContext();
 
     const [nostr, id] = match;
 
-    if (id.startsWith('npub1')) {
+    if (id.startsWith('npub')) {
 
       fetchUserInfo(id);
       return (
@@ -121,7 +156,7 @@ const account = useAccountContext();
       );
     }
 
-    if (id.startsWith('note1')) {
+    if (id.startsWith('note')) {
       fetchNoteInfo(id);
       return (
         <Show
@@ -199,12 +234,15 @@ const account = useAccountContext();
 
       <div ref={ref} class={styles.editor} style="display: none;" />
 
-      <div class={styles.editor}>
+      <div id={id()} class={styles.editor}>
         <For each={htmlArray()}>
           {el => (
             <Switch fallback={<>{el}</>}>
               <Match when={isMention(el)}>
                 {renderMention(el)}
+              </Match>
+              <Match when={isImg(el)}>
+                {renderImage(el)}
               </Match>
             </Switch>
           )}
