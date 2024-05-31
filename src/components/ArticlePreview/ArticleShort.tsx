@@ -44,6 +44,9 @@ const ArticlePreview: Component<{
             <div class={styles.title}>
               {props.article.title}
             </div>
+            <div class={styles.estimate}>
+              {Math.ceil(props.article.wordCount / 238)} minutes
+            </div>
           </div>
         </div>
         <Show when={props.article.image.length > 0}>

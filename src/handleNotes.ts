@@ -196,6 +196,7 @@ export const fetchArticles = (pubkey: string | undefined, noteIds: string[], sub
       topZaps: {},
       since: 0,
       until: 0,
+      wordCount: {},
     }
 
     const events = noteIds.reduce<EventCoordinate[]>((acc, id) => {
@@ -231,7 +232,6 @@ export const fetchArticles = (pubkey: string | undefined, noteIds: string[], sub
     });
 
     getParametrizedEvents(events, subId);
-    // getEvents(pubkey, [...noteIds], subId, true);
 
     const updatePage = (content: NostrEventContent) => {
       if (content.kind === Kind.Metadata) {
@@ -358,6 +358,17 @@ export const fetchArticles = (pubkey: string | undefined, noteIds: string[], sub
         return;
       }
 
+      if (content.kind === Kind.WordCount) {
+        const count = JSON.parse(content.content) as { event_id: string, words: number };
+
+        if (!page.wordCount) {
+          page.wordCount = {};
+        }
+
+        page.wordCount[count.event_id] = count.words
+        return;
+      }
+
       if (content.kind === Kind.NoteQuoteStats) {
         const quoteStats = JSON.parse(content.content);
 
@@ -384,6 +395,7 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
       topZaps: {},
       since: 0,
       until: 0,
+      wordCount: {},
     }
 
     let primaryArticle: PrimalArticle | undefined;
