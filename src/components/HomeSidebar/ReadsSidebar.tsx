@@ -22,6 +22,7 @@ import { getArticleThread, getReadsTopics } from '../../lib/feed';
 import { fetchArticles } from '../../handleNotes';
 import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
+import ArticleShort from '../ArticlePreview/ArticleShort';
 
 const sidebarOptions = [
   {
@@ -121,29 +122,11 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         randomIndices.add(randomIndex);
       }
 
-      const reads = [ ...randomIndices ].map(i => rec[i])
-      getPEvents(reads)
-      // getRecomendedArticles(reads)
+      const reads = [ ...randomIndices ].map(i => rec[i]);
+
+      getRecomendedArticles(reads)
     }
-  })
-
-  const getPEvents = (ids: string[]) => {
-    const events = ids.reduce<EventCoordinate[]>((acc, id) => {
-      const d = decodeIdentifier(id);
-
-      if (!d.data || d.type !== 'naddr') return acc;
-
-      const { pubkey, identifier, kind } = d.data;
-
-      return [
-        ...acc,
-        { identifier, pubkey, kind },
-      ]
-
-    }, []);
-
-    getParametrizedEvents(events, `reads_pe_${APP_ID}`);
-  }
+  });
 
   const getRecomendedArticles = async (ids: string[]) => {
     if (!account?.publicKey) return;
@@ -155,8 +138,6 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     const articles = await fetchArticles(account.publicKey, ids,subId);
 
     setIsFetching(() => false);
-
-    console.log('ARTICLES: ', articles);
 
     setTopPicks(() => [...articles]);
   };
@@ -174,9 +155,11 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
             <Loader />
           }
         >
-          <For each={topPicks}>
-            {(note) => <div>{note.title}</div>}
-          </For>
+          <div class={styles.section}>
+            <For each={topPicks}>
+              {(note) => <ArticleShort article={note} />}
+            </For>
+          </div>
         </Show>
 
 
@@ -190,9 +173,11 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
             <Loader />
           }
         >
-          <For each={topics}>
-            {(topic) => <div class={styles.topic}>{topic}</div>}
-          </For>
+          <div class={styles.section}>
+            <For each={topics}>
+              {(topic) => <div class={styles.topic}>{topic}</div>}
+            </For>
+          </div>
         </Show>
 
       </Show>

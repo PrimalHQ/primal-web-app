@@ -60,10 +60,17 @@
 .headingPicks {
   @include heading();
   text-transform: capitalize;
+  height: fit-content;
+  margin-bottom: 12px;
+  padding-bottom: 0px;
 }
 
 
 .readsSidebar {
+  .section {
+    margin-bottom: 28px;
+  }
+
   .topic {
     display: inline-block;
     background-color: var(--background-input);

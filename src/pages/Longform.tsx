@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { useParams } from "@solidjs/router";
-import { Component, createEffect, createSignal, For, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
@@ -312,7 +312,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     getUserProfileInfo(pubkey(), account?.publicKey, subId);
   });
 
-  createEffect(() => {
+  onMount(() => {
     if (naddr() === 'naddr1_test') {
 
       setNote(() => ({

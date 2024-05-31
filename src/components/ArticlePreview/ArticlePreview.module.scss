@@ -1,4 +1,4 @@
-.article {
+.article, .articleShort {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -44,6 +44,10 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 14px;
+
+      &::before {
+        content: '• ';
+      }
     }
   }
 
@@ -121,4 +125,42 @@
   position: absolute;
   top: -6px;
   right: 8px;
+}
+
+.articleShort {
+  padding: 0;
+  .header {
+    .userInfo {
+      .userName {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: normal;
+      }
+    }
+
+    .time {
+      font-size: 15px;
+      font-weight: 400;
+      line-height: normal;
+    }
+  }
+  .body {
+    .text {
+      .content {
+        .title {
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 24px;
+        }
+      }
+    }
+    .image {
+      min-width: 100px;
+      img {
+        width: 100px;
+        object-fit: scale-down;
+      }
+    }
+  }
+
 }
