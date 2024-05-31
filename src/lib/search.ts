@@ -75,3 +75,11 @@ export const getScoredUsers = (user_pubkey: string | undefined, selector: string
     {cache: ['scored', { user_pubkey, selector }]},
   ]));
 };
+
+export const getRecomendedArticleIds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['get_recommended_reads']},
+  ]));
+};

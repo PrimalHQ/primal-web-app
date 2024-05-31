@@ -35,6 +35,7 @@ import { useAppContext } from '../contexts/AppContext';
 import { useReadsContext } from '../contexts/ReadsContext';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import PageCaption from '../components/PageCaption/PageCaption';
+import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 
 
 const Home: Component = () => {
@@ -125,6 +126,10 @@ const Home: Component = () => {
     setNewPostAuthors(() => []);
   }
 
+  onMount(() => {
+    context?.actions.doSidebarSearch('')
+  })
+
   return (
     <div class={styles.homeContent}>
       <PageTitle title={intl.formatMessage(branding)} />
@@ -137,7 +142,7 @@ const Home: Component = () => {
       <PageCaption title={intl.formatMessage(reads.pageTitle)} />
 
       <StickySidebar>
-        <HomeSidebar />
+        <ReadsSidebar />
       </StickySidebar>
 
       <Show

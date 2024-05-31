@@ -5,7 +5,7 @@ import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
-import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalNote, SendNoteResult } from "../types/primal";
+import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalNote, SendNoteResult } from "../types/primal";
 import { npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
@@ -343,7 +343,7 @@ export const sendArticleRepost = async (note: PrimalArticle, relays: Relay[], re
     kind: Kind.Repost,
     tags: [
       ['e', note.id],
-      ['p', note.author.pubkey],
+      ['p', note.pubkey],
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
@@ -613,5 +613,14 @@ export const getParametrizedEvent = (pubkey: string, identifier: string, kind: n
     "REQ",
     subid,
     {cache: ["parametrized_replaceable_event", { pubkey, kind, identifier, extended_response: true }]},
+  ]));
+};
+
+
+export const getParametrizedEvents = (events: EventCoordinate[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["parametrized_replaceable_events", { events, extended_response: true }]},
   ]));
 };

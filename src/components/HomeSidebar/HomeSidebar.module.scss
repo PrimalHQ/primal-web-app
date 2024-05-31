@@ -56,3 +56,23 @@
   margin-top: 34px;
   z-index: 10px;
 }
+
+.headingPicks {
+  @include heading();
+  text-transform: capitalize;
+}
+
+
+.readsSidebar {
+  .topic {
+    display: inline-block;
+    background-color: var(--background-input);
+    padding: 6px 10px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    margin-right: 8px;
+  }
+}

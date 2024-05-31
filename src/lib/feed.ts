@@ -321,3 +321,13 @@ export const getMostZapped4h = (
     ]},
   ]));
 };
+
+export const getReadsTopics = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_reads_topics"]},
+  ]));
+};

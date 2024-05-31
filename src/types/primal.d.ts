@@ -803,3 +803,5 @@ export type PageRange = {
   until: number,
   order_by: string,
 };
+
+export type EventCoordinate = { pubkey: string, identifier: string, kind: number };

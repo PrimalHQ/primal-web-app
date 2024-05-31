@@ -491,7 +491,10 @@ const Longform: Component< { naddr: string } > = (props) => {
             action={() => {}}
           />
 
-          <PrimalMarkdown content={note.content || ''} readonly={true} />
+          <PrimalMarkdown
+            noteId={props.naddr}
+            content={note.content || ''}
+            readonly={true} />
 
           <div class={styles.tags}>
             <For each={note.tags}>

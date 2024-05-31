@@ -6,7 +6,7 @@ import { Kind, minKnownProfiles } from "../constants";
 import { getArticlesFeed, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
-import { getScoredUsers, searchContent } from "../lib/search";
+import { getRecomendedArticleIds, getScoredUsers, searchContent } from "../lib/search";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan, isInTags, isRepostInCollection, convertToArticles, isLFRepostInCollection } from "../stores/note";
 import {
@@ -41,6 +41,7 @@ type ReadsContextStore = {
   lastNote: PrimalArticle | undefined,
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
+  recomendedReads: string[],
   future: {
     notes: PrimalArticle[],
     page: FeedPage,
@@ -119,6 +120,7 @@ const initialHomeData = {
     isFetching: false,
     query: undefined,
   },
+  recomendedReads: [],
 };
 
 export const ReadsContext = createContext<ReadsContextStore>();
@@ -201,13 +203,13 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const doSidebarSearch = (query: string) => {
-    const subid = `reads_sidebar_${APP_ID}`;
+    const subid = `reads_recomended_${APP_ID}`;
 
     updateStore('sidebar', 'isFetching', () => true);
     updateStore('sidebar', 'notes', () => []);
-    updateStore('sidebar', 'page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+    updateStore('sidebar', 'page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} });
 
-    getScoredUsers(account?.publicKey, query, 10, subid);
+    getRecomendedArticleIds(subid);
   }
 
   const clearFuture = () => {
@@ -646,6 +648,27 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subId, content] = message;
+
+    if (subId === `reads_recomended_${APP_ID}`) {
+      if (type === 'EOSE') {
+        // saveSidebarPage(store.sidebar.page);
+        return;
+      }
+
+      if (!content) {
+        return;
+      }
+
+
+      if (type === 'EVENT') {
+        const recomended = JSON.parse(content?.content || '{}');
+        const ids = recomended.reads.reduce((acc: string[], r: string[]) => r[0] ? [ ...acc, r[0] ] : acc, []);
+
+        updateStore('recomendedReads', () => [ ...ids ])
+
+        return;
+      }
+    }
 
     if (subId === `reads_sidebar_${APP_ID}`) {
       if (type === 'EOSE') {
