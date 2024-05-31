@@ -29,6 +29,8 @@ import { parseBolt11 } from "../utils";
 import { NoteReactionsState } from "../components/Note/Note";
 import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
 import { getArticleThread, getThread } from "../lib/feed";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
+import NoteImage from "../components/NoteImage/NoteImage";
 
 export type LongFormData = {
   title: string,
@@ -281,6 +283,21 @@ const Longform: Component< { naddr: string } > = (props) => {
     quoteCount: 0,
   });
 
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: `#read_${naddr()}`,
+    children: `a.hero_image_${naddr()}`,
+    showHideAnimationType: 'zoom',
+    initialZoomLevel: 'fit',
+    secondaryZoomLevel: 2,
+    maxZoomLevel: 3,
+    pswpModule: () => import('photoswipe')
+  });
+
+  onMount(() => {
+    lightbox.init();
+  });
+
   createEffect(() => {
     if (!pubkey()) {
       return;
@@ -467,7 +484,7 @@ const Longform: Component< { naddr: string } > = (props) => {
           {shortDate(note.published)}
         </div>
       </div>
-      <div class={styles.longform}>
+      <div id={`read_${naddr()}`} class={styles.longform}>
         <Show
           when={note.content.length > 0}
           fallback={<Loader />}
@@ -476,7 +493,11 @@ const Longform: Component< { naddr: string } > = (props) => {
             {note.title}
           </div>
 
-          <img class={styles.image} src={note.image} />
+          <NoteImage
+            class={`${styles.image} hero_image_${naddr()}`}
+            src={note.image}
+            width={640}
+          />
 
           <div class={styles.summary}>
             <div class={styles.border}></div>
