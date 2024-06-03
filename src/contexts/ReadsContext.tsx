@@ -309,7 +309,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
-    const t = topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+    const t = topic === 'none' ? '' : topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
     const [scope, timeframe] = t.split(';');
 
     updateStore('isFetching', true);
@@ -398,7 +398,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
-      fetchNotes(feed.hex === 'none' ? '' : feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
     }
   };
 
