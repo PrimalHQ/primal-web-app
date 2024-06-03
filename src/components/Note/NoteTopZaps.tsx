@@ -4,13 +4,14 @@ import { useThreadContext } from "../../contexts/ThreadContext";
 import Avatar from "../Avatar/Avatar";
 import { TransitionGroup } from 'solid-transition-group';
 import styles from  "./Note.module.scss";
-import { TopZap } from "../../types/primal";
+import { PrimalUser, TopZap } from "../../types/primal";
 
 const NoteTopZaps: Component<{
   topZaps: TopZap[],
   zapCount: number,
   action: () => void,
   id?: string,
+  users?: PrimalUser[]
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -42,7 +43,7 @@ const NoteTopZaps: Component<{
   }
 
   const zapSender = (zap: TopZap) => {
-    return threadContext?.users.find(u => u.pubkey === zap.pubkey);
+    return (props.users || threadContext?.users || []).find(u => u.pubkey === zap.pubkey);
   };
   return (
 

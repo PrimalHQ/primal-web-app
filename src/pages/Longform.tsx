@@ -1,20 +1,20 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { useParams } from "@solidjs/router";
-import { Component, createEffect, createSignal, For, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
-import { getParametrizedEvent } from "../lib/notes";
+import { getParametrizedEvent, setLinkPreviews } from "../lib/notes";
 import { subscribeTo } from "../sockets";
 import { SolidMarkdown } from "solid-markdown";
 
 import styles from './Longform.module.scss';
 import Loader from "../components/Loader/Loader";
-import { NostrUserContent, PrimalUser, TopZap } from "../types/primal";
+import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser, TopZap } from "../types/primal";
 import { getUserProfileInfo } from "../lib/profile";
-import { convertToUser, userName } from "../stores/profile";
+import { convertToUser, nip05Verification, userName } from "../stores/profile";
 import Avatar from "../components/Avatar/Avatar";
 import { shortDate } from "../lib/dates";
 
@@ -26,11 +26,19 @@ import { full as mdEmoji } from 'markdown-it-emoji';
 import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
 import NoteTopZaps from "../components/Note/NoteTopZaps";
 import { parseBolt11 } from "../utils";
-import { NoteReactionsState } from "../components/Note/Note";
+import Note, { NoteReactionsState } from "../components/Note/Note";
 import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
 import { getArticleThread, getThread } from "../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../components/NoteImage/NoteImage";
+import { nip19 } from "nostr-tools";
+import { saveNotes } from "../services/StoreService";
+import { sortByRecency, convertToNotes } from "../stores/note";
+import { tableNodeTypes } from "@milkdown/prose/tables";
+import VerificationCheck from "../components/VerificationCheck/VerificationCheck";
+import BookmarkArticle from "../components/BookmarkNote/BookmarkArticle";
+import NoteContextTrigger from "../components/Note/NoteContextTrigger";
+import { useAppContext } from "../contexts/AppContext";
 
 export type LongFormData = {
   title: string,
@@ -41,9 +49,19 @@ export type LongFormData = {
   content: string,
   author: string,
   topZaps: TopZap[],
+  id: string,
+  client: string,
 };
 
-const emptyLongNote = {
+export type LongformThreadStore = {
+  page: FeedPage,
+  replies: PrimalNote[],
+  users: PrimalUser[],
+  isFetching: boolean,
+  lastReply: PrimalNote | undefined,
+}
+
+const emptyArticle = {
   title: '',
   summary: '',
   image: '',
@@ -52,6 +70,24 @@ const emptyLongNote = {
   content: '',
   author: '',
   topZaps: [],
+  id: '',
+  client: '',
+};
+
+const emptyStore: LongformThreadStore = {
+  replies: [],
+  page: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+    topZaps: {},
+    wordCount: {},
+  },
+  users: [],
+  isFetching: false,
+  lastReply: undefined,
 }
 
 const test = `
@@ -249,10 +285,12 @@ Term 2 with *inline markup*
 
 const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
+  const app = useAppContext();
   const params = useParams();
   const intl = useIntl();
 
-  const [note, setNote] = createStore<LongFormData>({...emptyLongNote});
+  const [article, setArticle] = createStore<LongFormData>({...emptyArticle});
+  const [store, updateStore] = createStore<LongformThreadStore>({ ...emptyStore })
 
   const [pubkey, setPubkey] = createSignal<string>('');
 
@@ -260,6 +298,8 @@ const Longform: Component< { naddr: string } > = (props) => {
   const [author, setAuthor] = createStore<PrimalUser>();
 
   const naddr = () => props.naddr;
+
+  let articleContextMenu: HTMLDivElement | undefined;
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
     likes: 0,
@@ -296,178 +336,278 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   onMount(() => {
     lightbox.init();
+    clearArticle();
+    fetchArticle();
   });
 
-  createEffect(() => {
-    if (!pubkey()) {
-      return;
-    }
+  const clearArticle = () => {
+    setArticle(() => ({ ...emptyArticle }));
+    updateStore(() => ({ ...emptyStore }));
+  };
 
-    const subId = `author_${naddr()}_${APP_ID}`;
+  const fetchArticle = () => {
+    const decoded = decodeIdentifier(naddr());
+
+    const { pubkey, identifier, kind } = decoded.data;
+
+    if (kind !== Kind.LongForm) return;
+
+    const subId = `naddr_${naddr()}_${APP_ID}`;
 
     const unsub = subscribeTo(subId, (type, subId, content) =>{
       if (type === 'EOSE') {
         unsub();
+        savePage(store.page);
         return;
       }
 
       if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
-
-        if(content.kind === Kind.Metadata) {
-          const userContent = content as NostrUserContent;
-
-          const user = convertToUser(userContent);
-
-          setAuthor(() => ({ ...user }));
-        }
+        content && updatePage(content);
       }
-    })
+    });
 
-    getUserProfileInfo(pubkey(), account?.publicKey, subId);
-  });
+    updateStore('isFetching', () => true);
 
-  onMount(() => {
-    if (naddr() === 'naddr1_test') {
+    updateStore('page', () => ({
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+      wordCount: {},
+    }));
 
-      setNote(() => ({
-        title: 'Test Long-Form Note',
-        summary: 'This is a markdown test to show all elements of the markdown',
-        image: '',
-        tags: ['test', 'markdown', 'demo'],
-        published: (new Date()).getTime() / 1_000,
-        content: test,
-        author: account?.publicKey,
-        topZaps: [],
-      }));
+    getArticleThread(account?.publicKey, pubkey, identifier, kind, subId);
+  }
 
-      setPubkey(() => note.author);
+
+
+  const updatePage = (content: NostrEventContent) => {
+    if (content.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      updateStore('page', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      );
 
       return;
     }
 
-    if (typeof naddr() === 'string' && naddr().startsWith('naddr')) {
-      const decoded = decodeIdentifier(naddr());
+    if (content.kind === Kind.LongForm) {
 
-      const { pubkey, identifier, kind } = decoded.data;
+      let n: LongFormData = {
+        title: '',
+        summary: '',
+        image: '',
+        tags: [],
+        published: content.created_at || 0,
+        content: content.content,
+        author: content.pubkey,
+        topZaps: [],
+        id: content.id,
+        client: '',
+      }
 
-      const subId = `naddr_${naddr()}_${APP_ID}`;
-
-      const unsub = subscribeTo(subId, (type, subId, content) =>{
-        if (type === 'EOSE') {
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
-
-          if(content.kind === Kind.LongForm) {
-
-            setPubkey(() => content.pubkey);
-
-            let n: LongFormData = {
-              title: '',
-              summary: '',
-              image: '',
-              tags: [],
-              published: content.created_at || 0,
-              content: content.content,
-              author: content.pubkey,
-              topZaps: note.topZaps || [],
-            }
-
-            content.tags.forEach(tag => {
-              switch (tag[0]) {
-                case 't':
-                  n.tags.push(tag[1]);
-                  break;
-                case 'title':
-                  n.title = tag[1];
-                  break;
-                case 'summary':
-                  n.summary = tag[1];
-                  break;
-                case 'image':
-                  n.image = tag[1];
-                  break;
-                case 'published':
-                  n.published = parseInt(tag[1]);
-                  break;
-                case 'content':
-                  n.content = tag[1];
-                  break;
-                case 'author':
-                  n.author = tag[1];
-                  break;
-                default:
-                  break;
-              }
-            });
-
-            setNote(() => ({...n}));
-          }
-
-
-        if (content?.kind === Kind.Zap) {
-          const zapTag = content.tags.find(t => t[0] === 'description');
-
-          if (!zapTag) return;
-
-          const zapInfo = JSON.parse(zapTag[1] || '{}');
-
-          let amount = '0';
-
-          let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
-
-          if (bolt11Tag) {
-            try {
-              amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
-            } catch (e) {
-              const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
-
-              amount = amountTag ? amountTag[1] : '0';
-            }
-          }
-
-          const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
-
-          const zap: TopZap = {
-            id: zapInfo.id,
-            amount: parseInt(amount || '0'),
-            pubkey: zapInfo.pubkey,
-            message: zapInfo.content,
-            eventId,
-          };
-
-          const oldZaps = note.topZaps;
-
-          if (!oldZaps || oldZaps.length === 0) {
-            setNote((n) => ({ ...n, topZaps: [{ ...zap }]}));
-            return;
-          }
-
-          if (oldZaps.find(i => i.id === zap.id)) {
-            return;
-          }
-
-          const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-          setNote((n) => ({ ...n, topZaps: [...newZaps]}));
-
-          return;
-        }
+      content.tags.forEach(tag => {
+        switch (tag[0]) {
+          case 't':
+            n.tags.push(tag[1]);
+            break;
+          case 'title':
+            n.title = tag[1];
+            break;
+          case 'summary':
+            n.summary = tag[1];
+            break;
+          case 'image':
+            n.image = tag[1];
+            break;
+          case 'published':
+            n.published = parseInt(tag[1]);
+            break;
+          case 'content':
+            n.content = tag[1];
+            break;
+          case 'author':
+            n.author = tag[1];
+            break;
+          case 'client':
+            n.client = tag[1];
+            break;
+          default:
+            break;
         }
       });
 
-      // getThread(account?.publicKey, naddr, subId)
-      getArticleThread(account?.publicKey, pubkey, identifier, kind, subId);
+      setArticle(n);
+      return;
     }
-  })
+
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
+        updateStore('page', 'messages',
+          (msgs) => [ ...msgs, { ...message }]
+        );
+      }
+
+      return;
+    }
+
+    if (content.kind === Kind.NoteStats) {
+      const statistic = content as NostrStatsContent;
+      const stat = JSON.parse(statistic.content);
+
+      updateStore('page', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('page', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.LinkMetadata) {
+      const metadata = JSON.parse(content.content);
+
+      const data = metadata.resources[0];
+      if (!data) {
+        return;
+      }
+
+      const preview = {
+        url: data.url,
+        title: data.md_title,
+        description: data.md_description,
+        mediaType: data.mimetype,
+        contentType: data.mimetype,
+        images: [data.md_image],
+        favicons: [data.icon_url],
+      };
+
+      setLinkPreviews(() => ({ [data.url]: preview }));
+      return;
+    }
+
+    if (content.kind === Kind.RelayHint) {
+      const hints = JSON.parse(content.content);
+      updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
+    }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      if (article.id === zap.eventId && !article.topZaps.find(i => i.id === zap.id)) {
+        const newZaps = [ ...article.topZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+        setArticle('topZaps', (zaps) => [ ...newZaps ]);
+      }
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
+  };
+
+  const savePage = (page: FeedPage) => {
+    const newPosts = sortByRecency(convertToNotes(page, page.topZaps));
+    const users = Object.values(page.users).map(convertToUser);
+
+    updateStore('users', () => [ ...users ]);
+
+    saveNotes(newPosts);
+
+    const a = users.find(u => u.pubkey === article.author);
+
+    if (a) {
+      setAuthor(() => ({ ...a }));
+    }
+  };
+
+  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
+    updateStore('replies', (notes) => [ ...notes, ...newNotes ]);
+    updateStore('isFetching', () => false);
+  };
+
+  const openReactionModal = (openOn = 'likes') =>  {
+    app?.actions.openReactionModal(article.id, {
+      likes: reactionsState.likes,
+      zaps: reactionsState.zapCount,
+      reposts: reactionsState.reposts,
+      quotes: reactionsState.quoteCount,
+      openOn,
+    });
+  };
+
+  const onContextMenuTrigger = () => {
+    // app?.actions.openContextMenu(
+    //   article,
+    //   articleContextMenu?.getBoundingClientRect(),
+    //   () => {
+    //     app?.actions.openCustomZapModal(customZapInfo());
+    //   },
+    //   openReactionModal,
+    // );
+  }
 
   return (
     <>
@@ -475,50 +615,78 @@ const Longform: Component< { naddr: string } > = (props) => {
         <div class={styles.author}>
           <Show when={author}>
             <Avatar user={author} size="xs" />
-            <div class={styles.userName}>
-              {userName(author)}
+            <div class={styles.userInfo}>
+              <div class={styles.userName}>
+                {userName(author)}
+                <VerificationCheck user={author} />
+              </div>
+              <Show when={author.nip05}>
+                <div class={styles.nip05}>
+                  {nip05Verification(author)}
+                </div>
+              </Show>
             </div>
           </Show>
         </div>
-        <div class={styles.time}>
-          {shortDate(note.published)}
+      </div>
+
+      <div class={styles.topBar}>
+        <div class={styles.left}>
+          <div class={styles.time}>
+            {shortDate(article.published)}
+          </div>
+          <Show when={article.client.length > 0}>
+            <div class={styles.client}>
+              via {article.client}
+            </div>
+          </Show>
+        </div>
+
+        <div class={styles.right}>
+          <BookmarkArticle article={article} />
+          <NoteContextTrigger
+            ref={articleContextMenu}
+            onClick={onContextMenuTrigger}
+          />
         </div>
       </div>
+
       <div id={`read_${naddr()}`} class={styles.longform}>
         <Show
-          when={note.content.length > 0}
+          when={article.content.length > 0}
           fallback={<Loader />}
         >
           <div class={styles.title}>
-            {note.title}
+            {article.title}
           </div>
 
           <NoteImage
             class={`${styles.image} hero_image_${naddr()}`}
-            src={note.image}
+            src={article.image}
             width={640}
           />
 
           <div class={styles.summary}>
             <div class={styles.border}></div>
             <div class={styles.text}>
-              {note.summary}
+              {article.summary}
             </div>
           </div>
 
           <NoteTopZaps
-            topZaps={note.topZaps}
+            topZaps={article.topZaps}
             zapCount={reactionsState.zapCount}
+            users={store.users}
             action={() => {}}
           />
 
           <PrimalMarkdown
             noteId={props.naddr}
-            content={note.content || ''}
+            content={article.content || ''}
             readonly={true} />
 
           <div class={styles.tags}>
-            <For each={note.tags}>
+            <For each={article.tags}>
               {tag => (
                 <div class={styles.tag}>
                   {tag}
@@ -532,6 +700,11 @@ const Longform: Component< { naddr: string } > = (props) => {
             />
           </div> */}
         </Show>
+      </div>
+      <div>
+        <For each={store.replies}>
+          {reply => <Note note={reply} />}
+        </For>
       </div>
     </>);
 }
