@@ -309,7 +309,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
-    const t = account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+    const t = topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
     const [scope, timeframe] = t.split(';');
 
     updateStore('isFetching', true);
@@ -394,11 +394,11 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const selectFeed = (feed: PrimalFeed | undefined) => {
     if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
       currentFeed = { ...feed };
-      saveStoredFeed(account?.publicKey, currentFeed);
+      // saveStoredFeed(account?.publicKey, currentFeed);
 
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
-      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+      fetchNotes(feed.hex === 'none' ? '' : feed.hex , `${APP_ID}`, 0, feed.includeReplies);
     }
   };
 
@@ -795,9 +795,9 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && settings?.defaultFeed) {
-      const storedFeed = fetchStoredFeed(account.publicKey);
-      selectFeed(storedFeed || settings?.defaultFeed);
+    if (account?.isKeyLookupDone && account.publicKey) {
+
+      selectFeed({ hex: account.publicKey, name: 'My Reads'});
     }
   });
 

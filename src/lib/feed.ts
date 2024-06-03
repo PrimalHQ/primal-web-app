@@ -48,13 +48,17 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
 }
 
 export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
-  if (!pubkey) {
-    return;
-  }
+  // if (!pubkey) {
+  //   return;
+  // }
 
   const start = until === 0 ? 'since' : 'until';
 
-  let payload = { limit, [start]: until, pubkey };
+  let payload = { limit, [start]: until };
+
+  if (pubkey && pubkey?.length > 0) {
+    payload.pubkey = pubkey;
+  }
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;

@@ -469,7 +469,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       tags: [],
       published: msg.created_at || 0,
       content: sanitize(msg.content),
-      user: convertToUser(user),
+      user: user ? convertToUser(user) : emptyUser(msg.pubkey),
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
       noteId: nip19.naddrEncode({ identifier, pubkey, kind }),

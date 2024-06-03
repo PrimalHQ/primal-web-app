@@ -36,6 +36,8 @@ import { useReadsContext } from '../contexts/ReadsContext';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import PageCaption from '../components/PageCaption/PageCaption';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
+import ReedSelect from '../components/FeedSelect/ReedSelect';
+import ReadsHeader from '../components/HomeHeader/ReadsHeader';
 
 
 const Home: Component = () => {
@@ -139,7 +141,14 @@ const Home: Component = () => {
         <Search />
       </Wormhole>
 
-      <PageCaption title={intl.formatMessage(reads.pageTitle)} />
+      <PageCaption title={intl.formatMessage(reads.pageTitle)}>
+        <ReadsHeader
+          hasNewPosts={() => {}}
+          loadNewContent={() => {}}
+          newPostCount={() => {}}
+          newPostAuthors={[]}
+        />
+      </PageCaption>
 
       <StickySidebar>
         <ReadsSidebar />
