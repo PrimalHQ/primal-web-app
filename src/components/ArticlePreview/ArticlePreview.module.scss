@@ -66,13 +66,13 @@
       .content {
         .title {
           color: var(--text-primary);
-          font-size: 20px;
-          font-weight: 700;
-          line-height: 28px;
+          font-size: 24px;
+          font-weight: 800;
+          line-height: 32px;
         }
 
         .summary {
-          color: var(--text-primary);
+          color: var(--text-secondary);
           font-size: 15px;
           font-weight: 400;
           line-height: 22px;
@@ -92,7 +92,8 @@
           padding: 6px 10px;
           border-radius: 12px;
           width: fit-content;
-          margin: 4px;
+          margin-block: 4px;
+          margin-right: 6px;
         }
         .estimate {
           display: inline-block;
@@ -108,7 +109,7 @@
       min-width: 164px;
       height: fit-content;
       border: 1px solid var(--devider);
-      border-radius: 4px;
+      border-radius: 8px;
       overflow: hidden;
       img {
         width: 164px;
@@ -159,7 +160,7 @@
       .content {
         .title {
           font-size: 16px;
-          font-weight: 700;
+          font-weight: 800;
           line-height: 24px;
         }
 
@@ -175,7 +176,7 @@
       min-width: 100px;
       height: fit-content;
       border: 1px solid var(--devider);
-      border-radius: 4px;
+      border-radius: 8px;
       overflow: hidden;
       img {
         width: 100px;
