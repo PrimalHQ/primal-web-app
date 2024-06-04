@@ -505,6 +505,9 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
         case 'published':
           article.published = parseInt(tag[1]);
           break;
+        case 'client':
+          article.client = tag[1];
+          break;
         default:
           break;
       }

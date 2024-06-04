@@ -57,10 +57,12 @@ export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string 
   let payload = { limit, [start]: until };
 
   if (pubkey && pubkey?.length > 0) {
+    // @ts-ignore
     payload.pubkey = pubkey;
   }
 
   if (user_pubkey) {
+    // @ts-ignore
     payload.user_pubkey = user_pubkey;
   }
 
@@ -137,6 +139,34 @@ export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | un
     "REQ",
     subid,
     {cache: ["feed", payload]},
+  ]));
+}
+export const getUserArticleFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies' | 'bookmarks', until = 0, limit = 20, offset = 0) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload: {
+    pubkey: string,
+    limit: number,
+    notes: 'authored' | 'replies' | 'bookmarks',
+    user_pubkey?: string,
+    until?: number,
+    offset?: number,
+  } = { pubkey, limit, notes } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (until > 0) payload.until = until;
+
+  if (offset > 0) payload.offset = offset;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
   ]));
 }
 

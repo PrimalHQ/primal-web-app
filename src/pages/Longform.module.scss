@@ -45,6 +45,7 @@
     justify-content: flex-start;
     align-items: center;
     gap: 4px;
+    max-width: 80%;
 
     .time {
       color: var(--text-tertiary);
@@ -59,6 +60,10 @@
       color: var(--text-tertiary);
       font-size: 14px;
       font-weight: 700;
+      max-width: 80%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -74,7 +79,7 @@
   flex-direction: column;
   gap: 20px;
   position: relative;
-  margin-bottom: 48px;
+  margin-bottom: 22px;
   margin-inline: 20px;
 
   .title {
@@ -145,7 +150,8 @@
       padding: 6px 10px;
       border-radius: 12px;
       width: fit-content;
-      margin: 4px;
+      margin-block: 4px;
+      margin-right: 6px;
     }
   }
 }

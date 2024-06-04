@@ -59,7 +59,17 @@
 
 .headingPicks {
   @include heading();
+  font-weight: 600;
   text-transform: capitalize;
+  height: fit-content;
+  margin-bottom: 12px;
+  padding-bottom: 0px;
+}
+
+.headingReads {
+  @include heading();
+  font-weight: 600;
+  text-transform: none;
   height: fit-content;
   margin-bottom: 12px;
   padding-bottom: 0px;
@@ -72,6 +82,59 @@
 
     >a:last-child {
       border-bottom: none;
+    }
+  }
+
+  .topic {
+    display: inline-block;
+    background-color: var(--background-input);
+    padding: 6px 10px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    margin-right: 8px;
+  }
+}
+
+.articleSidebar {
+  .section {
+    margin-bottom: 28px;
+    max-height: 526px;
+    overflow-y: scroll;
+
+    >a:last-child {
+      border-bottom: none;
+    }
+
+    .totalZaps {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+
+      .totalZapsIcon {
+        display: inline-block;
+        width: 18px;
+        height: 32px;
+        background: var(--active-zap);
+        -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0px 0 / 19px 32px;
+        mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0px 0 / 19px 32px;
+      }
+
+      .amount {
+        color: var(--text-primary);
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 32px;
+      }
+
+      .unit {
+        color: var(--text-primary);
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 32px;
+      }
     }
   }
 

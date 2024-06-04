@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { useParams } from "@solidjs/router";
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { batch, Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
@@ -12,8 +12,8 @@ import { SolidMarkdown } from "solid-markdown";
 
 import styles from './Longform.module.scss';
 import Loader from "../components/Loader/Loader";
-import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser, TopZap } from "../types/primal";
-import { getUserProfileInfo } from "../lib/profile";
+import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, ZapOption } from "../types/primal";
+import { getUserProfileInfo, getUserProfiles } from "../lib/profile";
 import { convertToUser, nip05Verification, userName } from "../stores/profile";
 import Avatar from "../components/Avatar/Avatar";
 import { shortDate } from "../lib/dates";
@@ -25,7 +25,7 @@ import { full as mdEmoji } from 'markdown-it-emoji';
 
 import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
 import NoteTopZaps from "../components/Note/NoteTopZaps";
-import { parseBolt11 } from "../utils";
+import { parseBolt11, uuidv4 } from "../utils";
 import Note, { NoteReactionsState } from "../components/Note/Note";
 import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
 import { getArticleThread, getThread } from "../lib/feed";
@@ -33,12 +33,19 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../components/NoteImage/NoteImage";
 import { nip19 } from "nostr-tools";
 import { saveNotes } from "../services/StoreService";
-import { sortByRecency, convertToNotes } from "../stores/note";
+import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
 import { tableNodeTypes } from "@milkdown/prose/tables";
 import VerificationCheck from "../components/VerificationCheck/VerificationCheck";
 import BookmarkArticle from "../components/BookmarkNote/BookmarkArticle";
 import NoteContextTrigger from "../components/Note/NoteContextTrigger";
-import { useAppContext } from "../contexts/AppContext";
+import { CustomZapInfo, useAppContext } from "../contexts/AppContext";
+import ArticleFooter from "../components/Note/NoteFooter/ArticleFooter";
+import { thread } from "../translations";
+import { useThreadContext } from "../contexts/ThreadContext";
+import Wormhole from "../components/Wormhole/Wormhole";
+import Search from "../components/Search/Search";
+import ArticleSidebar from "../components/HomeSidebar/ArticleSidebar";
+import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
 
 export type LongFormData = {
   title: string,
@@ -54,6 +61,7 @@ export type LongFormData = {
 };
 
 export type LongformThreadStore = {
+  article: PrimalArticle | undefined,
   page: FeedPage,
   replies: PrimalNote[],
   users: PrimalUser[],
@@ -75,6 +83,7 @@ const emptyArticle = {
 };
 
 const emptyStore: LongformThreadStore = {
+  article: undefined,
   replies: [],
   page: {
     messages: [],
@@ -286,19 +295,22 @@ Term 2 with *inline markup*
 const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
+  const thread = useThreadContext();
   const params = useParams();
   const intl = useIntl();
 
-  const [article, setArticle] = createStore<LongFormData>({...emptyArticle});
+  // const [article, setArticle] = createStore<LongFormData>({...emptyArticle});
   const [store, updateStore] = createStore<LongformThreadStore>({ ...emptyStore })
 
-  const [pubkey, setPubkey] = createSignal<string>('');
+  // const [pubkey, setPubkey] = createSignal<string>('');
 
   // @ts-ignore
   const [author, setAuthor] = createStore<PrimalUser>();
 
   const naddr = () => props.naddr;
 
+  let latestTopZap: string = '';
+  let latestTopZapFeed: string = '';
   let articleContextMenu: HTMLDivElement | undefined;
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
@@ -340,8 +352,149 @@ const Longform: Component< { naddr: string } > = (props) => {
     fetchArticle();
   });
 
+  const onConfirmZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => zapOption.amount || 0);
+      updateReactionsState('satsZapped', (z) => z + (zapOption.amount || 0));
+      updateReactionsState('zapped', () => true);
+      updateReactionsState('showZapAnim', () => true)
+    });
+
+    addTopZap(zapOption);
+    addTopZapFeed(zapOption)
+  };
+
+  const onSuccessZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    batch(() => {
+      updateReactionsState('zapCount', (z) => z + 1);
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => true);
+    });
+  };
+
+  const onFailZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => store.article ? store.article.noteActions.zapped : false);
+    });
+
+    removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
+  };
+
+  const onCancelZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => store.article ? store.article.noteActions.zapped : false);
+    });
+
+    removeTopZap(zapOption);
+    removeTopZapFeed(zapOption);
+  };
+
+  const addTopZap = (zapOption: ZapOption) => {
+    const pubkey = account?.publicKey;
+
+    if (!pubkey || !store.article) return;
+
+    const oldZaps = [ ...reactionsState.topZaps ];
+
+    latestTopZap = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: store.article.id,
+      id: latestTopZap,
+    };
+
+    if (!store.users.find((u) => u.pubkey === pubkey)) {
+      const subId = `article_pk_${APP_ID}`;
+
+      const unsub = subscribeTo(subId, (type, _, content) =>{
+        if (type === 'EOSE') {
+          unsub();
+          savePage(store.page);
+          return;
+        }
+
+        if (type === 'EVENT') {
+          content && updatePage(content);
+        }
+      });
+
+      getUserProfiles([pubkey], subId);
+    }
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount);
+    updateReactionsState('topZaps', () => [...zaps]);
+  };
+
+  const removeTopZap = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZaps.filter(z => z.id !== latestTopZap);
+    updateReactionsState('topZaps', () => [...zaps]);
+  };
+
+
+  const addTopZapFeed = (zapOption: ZapOption) => {
+    const pubkey = account?.publicKey;
+
+    if (!pubkey || !store.article) return;
+
+    const oldZaps = [ ...reactionsState.topZapsFeed ];
+
+    latestTopZapFeed = uuidv4() as string;
+
+    const newZap = {
+      amount: zapOption.amount || 0,
+      message: zapOption.message || '',
+      pubkey,
+      eventId: store.article.id,
+      id: latestTopZapFeed,
+    };
+
+    const zaps = [ ...oldZaps, { ...newZap }].sort((a, b) => b.amount - a.amount).slice(0, 4);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
+  }
+
+  const removeTopZapFeed = (zapOption: ZapOption) => {
+    const zaps = reactionsState.topZapsFeed.filter(z => z.id !== latestTopZapFeed);
+    updateReactionsState('topZapsFeed', () => [...zaps]);
+  };
+
+  const customZapInfo: () => CustomZapInfo = () => ({
+    note: store.article,
+    onConfirm: onConfirmZap,
+    onSuccess: onSuccessZap,
+    onFail: onFailZap,
+    onCancel: onCancelZap,
+  });
+
   const clearArticle = () => {
-    setArticle(() => ({ ...emptyArticle }));
+    // setArticle(() => ({ ...emptyArticle }));
     updateStore(() => ({ ...emptyStore }));
   };
 
@@ -394,57 +547,57 @@ const Longform: Component< { naddr: string } > = (props) => {
       return;
     }
 
-    if (content.kind === Kind.LongForm) {
+    // if (content.kind === Kind.LongForm) {
 
-      let n: LongFormData = {
-        title: '',
-        summary: '',
-        image: '',
-        tags: [],
-        published: content.created_at || 0,
-        content: content.content,
-        author: content.pubkey,
-        topZaps: [],
-        id: content.id,
-        client: '',
-      }
+    //   let n: LongFormData = {
+    //     title: '',
+    //     summary: '',
+    //     image: '',
+    //     tags: [],
+    //     published: content.created_at || 0,
+    //     content: content.content,
+    //     author: content.pubkey,
+    //     topZaps: [],
+    //     id: content.id,
+    //     client: '',
+    //   }
 
-      content.tags.forEach(tag => {
-        switch (tag[0]) {
-          case 't':
-            n.tags.push(tag[1]);
-            break;
-          case 'title':
-            n.title = tag[1];
-            break;
-          case 'summary':
-            n.summary = tag[1];
-            break;
-          case 'image':
-            n.image = tag[1];
-            break;
-          case 'published':
-            n.published = parseInt(tag[1]);
-            break;
-          case 'content':
-            n.content = tag[1];
-            break;
-          case 'author':
-            n.author = tag[1];
-            break;
-          case 'client':
-            n.client = tag[1];
-            break;
-          default:
-            break;
-        }
-      });
+    //   content.tags.forEach(tag => {
+    //     switch (tag[0]) {
+    //       case 't':
+    //         n.tags.push(tag[1]);
+    //         break;
+    //       case 'title':
+    //         n.title = tag[1];
+    //         break;
+    //       case 'summary':
+    //         n.summary = tag[1];
+    //         break;
+    //       case 'image':
+    //         n.image = tag[1];
+    //         break;
+    //       case 'published':
+    //         n.published = parseInt(tag[1]);
+    //         break;
+    //       case 'content':
+    //         n.content = tag[1];
+    //         break;
+    //       case 'author':
+    //         n.author = tag[1];
+    //         break;
+    //       case 'client':
+    //         n.client = tag[1];
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //   });
 
-      setArticle(n);
-      return;
-    }
+    //   setArticle(n);
+    //   return;
+    // }
 
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
@@ -544,10 +697,10 @@ const Longform: Component< { naddr: string } > = (props) => {
         eventId,
       };
 
-      if (article.id === zap.eventId && !article.topZaps.find(i => i.id === zap.id)) {
-        const newZaps = [ ...article.topZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-        setArticle('topZaps', (zaps) => [ ...newZaps ]);
-      }
+      // if (article.id === zap.eventId && !article.topZaps.find(i => i.id === zap.id)) {
+      //   const newZaps = [ ...article.topZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+      //   setArticle('topZaps', (zaps) => [ ...newZaps ]);
+      // }
 
       const oldZaps = store.page.topZaps[eventId];
 
@@ -569,27 +722,40 @@ const Longform: Component< { naddr: string } > = (props) => {
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = sortByRecency(convertToNotes(page, page.topZaps));
+    const pageWithNotes = {
+      ...page,
+      messages: page.messages.filter(m => m.kind === Kind.Text)
+    }
     const users = Object.values(page.users).map(convertToUser);
+
+    const replies = sortByRecency(convertToNotes(pageWithNotes, pageWithNotes.topZaps));
+    const articles = convertToArticles(page, page.topZaps);
+
+    const article = articles.find(a => a.noteId === naddr());
 
     updateStore('users', () => [ ...users ]);
 
-    saveNotes(newPosts);
+    updateStore('replies', (notes) => [ ...notes, ...replies ]);
 
-    const a = users.find(u => u.pubkey === article.author);
+    updateStore('article', () => ({ ...article }));
 
-    if (a) {
-      setAuthor(() => ({ ...a }));
-    }
-  };
-
-  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
-    updateStore('replies', (notes) => [ ...notes, ...newNotes ]);
     updateStore('isFetching', () => false);
+    // saveNotes(replies);
+
+    // const a = users.find(u => u.pubkey === article.author);
+
+    // if (a) {
+    //   setAuthor(() => ({ ...a }));
+    // }
   };
+
+  // const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
+  // };
 
   const openReactionModal = (openOn = 'likes') =>  {
-    app?.actions.openReactionModal(article.id, {
+    if (!store.article) return;
+
+    app?.actions.openReactionModal(store.article.id, {
       likes: reactionsState.likes,
       zaps: reactionsState.zapCount,
       reposts: reactionsState.reposts,
@@ -599,18 +765,31 @@ const Longform: Component< { naddr: string } > = (props) => {
   };
 
   const onContextMenuTrigger = () => {
-    // app?.actions.openContextMenu(
-    //   article,
-    //   articleContextMenu?.getBoundingClientRect(),
-    //   () => {
-    //     app?.actions.openCustomZapModal(customZapInfo());
-    //   },
-    //   openReactionModal,
-    // );
+    if (!store.article) return;
+
+    app?.actions.openContextMenu(
+      store.article,
+      articleContextMenu?.getBoundingClientRect(),
+      () => {
+        app?.actions.openCustomZapModal(customZapInfo());
+      },
+      openReactionModal,
+    );
   }
 
   return (
     <>
+      <Wormhole
+        to="search_section"
+      >
+        <Search />
+      </Wormhole>
+      <Wormhole to='right_sidebar'>
+        <ArticleSidebar
+          user={store.article?.user}
+          article={store.article}
+        />
+      </Wormhole>
       <div class={styles.header}>
         <div class={styles.author}>
           <Show when={author}>
@@ -633,17 +812,17 @@ const Longform: Component< { naddr: string } > = (props) => {
       <div class={styles.topBar}>
         <div class={styles.left}>
           <div class={styles.time}>
-            {shortDate(article.published)}
+            {shortDate(store.article?.published)}
           </div>
-          <Show when={article.client.length > 0}>
+          <Show when={store.article?.client}>
             <div class={styles.client}>
-              via {article.client}
+              via {store.article?.client}
             </div>
           </Show>
         </div>
 
         <div class={styles.right}>
-          <BookmarkArticle article={article} />
+          <BookmarkArticle note={store.article} />
           <NoteContextTrigger
             ref={articleContextMenu}
             onClick={onContextMenuTrigger}
@@ -653,28 +832,28 @@ const Longform: Component< { naddr: string } > = (props) => {
 
       <div id={`read_${naddr()}`} class={styles.longform}>
         <Show
-          when={article.content.length > 0}
+          when={store.article}
           fallback={<Loader />}
         >
           <div class={styles.title}>
-            {article.title}
+            {store.article?.title}
           </div>
 
           <NoteImage
             class={`${styles.image} hero_image_${naddr()}`}
-            src={article.image}
+            src={store.article?.image}
             width={640}
           />
 
           <div class={styles.summary}>
             <div class={styles.border}></div>
             <div class={styles.text}>
-              {article.summary}
+              {store.article?.summary}
             </div>
           </div>
 
           <NoteTopZaps
-            topZaps={article.topZaps}
+            topZaps={store.article?.topZaps}
             zapCount={reactionsState.zapCount}
             users={store.users}
             action={() => {}}
@@ -682,11 +861,11 @@ const Longform: Component< { naddr: string } > = (props) => {
 
           <PrimalMarkdown
             noteId={props.naddr}
-            content={article.content || ''}
+            content={store.article?.content || ''}
             readonly={true} />
 
           <div class={styles.tags}>
-            <For each={article.tags}>
+            <For each={store.article?.tags}>
               {tag => (
                 <div class={styles.tag}>
                   {tag}
@@ -699,8 +878,26 @@ const Longform: Component< { naddr: string } > = (props) => {
               children={note.content || ''}
             />
           </div> */}
+
+          <div class={styles.footer}>
+            <ArticleFooter
+              note={store.article}
+              state={reactionsState}
+              updateState={updateReactionsState}
+              customZapInfo={customZapInfo()}
+              onZapAnim={addTopZapFeed}
+            />
+          </div>
         </Show>
       </div>
+
+      <Show when={store.article}>
+        <ReplyToNote
+          note={store.article}
+          onNotePosted={() => {}}
+        />
+      </Show>
+
       <div>
         <For each={store.replies}>
           {reply => <Note note={reply} />}

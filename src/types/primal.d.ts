@@ -533,6 +533,7 @@ export type PrimalArticle = {
   score: number,
   score24h: number,
   satszapped: number,
+  client?: string,
 };
 
 export type PrimalFeed = {

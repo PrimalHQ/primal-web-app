@@ -28,7 +28,7 @@ export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
 const ArticleFooter: Component<{
   note: PrimalArticle,
-  wide?: boolean,
+  size?: 'wide' | 'normal' | 'short',
   id?: string,
   state: NoteReactionsState,
   updateState: SetStoreFunction<NoteReactionsState>,
@@ -48,6 +48,8 @@ const ArticleFooter: Component<{
   let quickZapDelay = 0;
   let footerDiv: HTMLDivElement | undefined;
   let repostMenu: HTMLDivElement | undefined;
+
+  const size = () => props.size ?? 'normal';
 
   const repostMenuItems: MenuItem[] = [
     {
@@ -223,12 +225,17 @@ const ArticleFooter: Component<{
         return;
       }
 
-      let newLeft = props.wide ? 15 : 13;
-      let newTop = props.wide ? -6 : -6;
+      let newLeft = 33;
+      let newTop = -6;
 
-      if (props.large) {
-        newLeft = 2;
-        newTop = -9;
+      if (size() === 'wide' && props.large) {
+        newLeft = 14;
+        newTop = -10;
+      }
+
+      if (size() === 'short') {
+        newLeft = 14;
+        newTop = -6;
       }
 
       medZapAnimation.style.left = `${newLeft}px`;
@@ -319,7 +326,12 @@ const ArticleFooter: Component<{
   }
 
   return (
-    <div id={props.id} class={`${styles.footer} ${props.wide ? styles.wide : ''}`} ref={footerDiv} onClick={(e) => {e.preventDefault();}}>
+    <div
+      id={props.id}
+      class={`${styles.footer} ${styles[size()]}`}
+      ref={footerDiv}
+      onClick={(e) => {e.preventDefault();}}
+    >
 
       <Show when={props.state.showZapAnim}>
         <ZapAnimation
