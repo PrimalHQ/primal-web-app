@@ -67,21 +67,25 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
           </div>
         </div>
 
-        <div class={styles.headingReads}>
-          More Reads from {userName(props.article.user)}
-        </div>
-
         <Show
           when={!isFetchingArticles()}
           fallback={
             <Loader />
           }
         >
-          <div class={styles.section}>
-            <For each={recomended}>
-              {(note) => <ArticleShort article={note} />}
-            </For>
-          </div>
+          <Show
+            when={recomended.length > 0}
+          >
+            <div class={styles.headingReads}>
+              More Reads from {userName(props.article.user)}
+            </div>
+
+            <div class={styles.section}>
+              <For each={recomended}>
+                {(note) => <ArticleShort article={note} />}
+              </For>
+            </div>
+          </Show>
         </Show>
 
       </Show>

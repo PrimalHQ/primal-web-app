@@ -792,16 +792,16 @@ const Longform: Component< { naddr: string } > = (props) => {
       </Wormhole>
       <div class={styles.header}>
         <div class={styles.author}>
-          <Show when={author}>
-            <Avatar user={author} size="xs" />
+          <Show when={store.article?.user}>
+            <Avatar user={store.article?.user} size="xs" />
             <div class={styles.userInfo}>
               <div class={styles.userName}>
-                {userName(author)}
-                <VerificationCheck user={author} />
+                {userName(store.article?.user)}
+                <VerificationCheck user={store.article?.user} />
               </div>
-              <Show when={author.nip05}>
+              <Show when={store.article?.user.nip05}>
                 <div class={styles.nip05}>
-                  {nip05Verification(author)}
+                  {nip05Verification(store.article?.user)}
                 </div>
               </Show>
             </div>
@@ -839,11 +839,13 @@ const Longform: Component< { naddr: string } > = (props) => {
             {store.article?.title}
           </div>
 
-          <NoteImage
-            class={`${styles.image} hero_image_${naddr()}`}
-            src={store.article?.image}
-            width={640}
-          />
+          <Show when={(store.article?.image || '').length > 0}>
+            <NoteImage
+              class={`${styles.image} hero_image_${naddr()}`}
+              src={store.article?.image}
+              width={640}
+            />
+          </Show>
 
           <div class={styles.summary}>
             <div class={styles.border}></div>
@@ -862,7 +864,8 @@ const Longform: Component< { naddr: string } > = (props) => {
           <PrimalMarkdown
             noteId={props.naddr}
             content={store.article?.content || ''}
-            readonly={true} />
+            readonly={true}
+          />
 
           <div class={styles.tags}>
             <For each={store.article?.tags}>
