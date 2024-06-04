@@ -25,7 +25,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle, large?: boolean }> = (pr
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
 
   createEffect(() => {
-    setIsBookmarked(() => account?.bookmarks.includes(props.note.id) || false);
+    setIsBookmarked(() => account?.bookmarks.includes(props.note?.id) || false);
   })
 
   const updateBookmarks = async (bookmarkTags: string[][]) => {
