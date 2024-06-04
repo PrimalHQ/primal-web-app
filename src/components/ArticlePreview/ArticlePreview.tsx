@@ -236,16 +236,21 @@ const ArticlePreview: Component<{
             </div>
           </div>
           <div class={styles.tags}>
-            <For each={props.article.tags}>
+            <div class={styles.estimate}>
+              {Math.ceil(props.article.wordCount / 238)} minute read
+            </div>
+            <For each={props.article.tags.slice(0, 3)}>
               {tag => (
                 <div class={styles.tag}>
                   {tag}
                 </div>
               )}
             </For>
-            <div class={styles.estimate}>
-              {Math.ceil(props.article.wordCount / 238)} minute read
-            </div>
+            <Show when={props.article.tags.length > 3}>
+              <div class={styles.tag}>
+                + {props.article.tags.length - 3}
+              </div>
+            </Show>
           </div>
         </div>
         <div class={styles.image}>

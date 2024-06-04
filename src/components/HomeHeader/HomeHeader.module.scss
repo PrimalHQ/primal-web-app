@@ -123,6 +123,13 @@
   border-bottom: 1px solid var(--devider);
   z-index: var(--z-index-header);
 
+  &.readsFeed {
+    position: relative;
+    border-bottom: none;
+    padding-inline: 0;
+    z-index: var(--z-index-header);
+  }
+
 
   .newContentItem {
     color: var(--accent-links);

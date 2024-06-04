@@ -4,6 +4,13 @@
   min-height: 100vh;
 }
 
+.readsFeed {
+  position: relative;
+  border: none;
+  min-height: 100vh;
+  border-top: 1px solid var(--devider);
+}
+
 .paginate {
   color: var(--text-tertiary-2);
   position: absolute;

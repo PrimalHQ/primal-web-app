@@ -154,33 +154,35 @@ const Home: Component = () => {
         <ReadsSidebar />
       </StickySidebar>
 
-      <Show
-        when={context?.notes && context.notes.length > 0}
-      >
-        <div class={styles.feed}>
-          <For each={context?.notes} >
-            {note => <ArticlePreview article={note} />}
-          </For>
-        </div>
-      </Show>
+      <div class={styles.readsFeed}>
+        <Show
+          when={context?.notes && context.notes.length > 0}
+        >
+          <div class={styles.feed}>
+            <For each={context?.notes} >
+              {note => <ArticlePreview article={note} />}
+            </For>
+          </div>
+        </Show>
 
-      <Switch>
-        <Match
-          when={!isPageLoading() && context?.notes && context?.notes.length === 0}
-        >
-          <div class={styles.noContent}>
-            <Loader />
-          </div>
-        </Match>
-        <Match
-          when={isPageLoading()}
-        >
-          <div class={styles.noContent}>
-            <Loader />
-          </div>
-        </Match>
-      </Switch>
-      <Paginator loadNextPage={context?.actions.fetchNextPage}/>
+        <Switch>
+          <Match
+            when={!isPageLoading() && context?.notes && context?.notes.length === 0}
+          >
+            <div class={styles.noContent}>
+              <Loader />
+            </div>
+          </Match>
+          <Match
+            when={isPageLoading()}
+          >
+            <div class={styles.noContent}>
+              <Loader />
+            </div>
+          </Match>
+        </Switch>
+        <Paginator loadNextPage={context?.actions.fetchNextPage}/>
+      </div>
     </div>
   )
 }

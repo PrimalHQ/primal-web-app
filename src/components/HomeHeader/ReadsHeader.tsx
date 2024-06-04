@@ -26,8 +26,8 @@ const ReadsHeader: Component< {
 } > = (props) => {
 
   return (
-    <div id={props.id} class={styles.fullHeader}>
-      <div class={styles.bigFeedSelect}>
+    <div id={props.id}>
+      <div class={`${styles.bigFeedSelect} ${styles.readsFeed}`}>
         <ReedSelect big={true} />
       </div>
     </div>

@@ -69,13 +69,25 @@
           font-size: 24px;
           font-weight: 800;
           line-height: 32px;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          line-clamp: 3;
+          -webkit-box-orient: vertical;
         }
 
         .summary {
-          color: var(--text-secondary);
+          color: var(--brand-text);
           font-size: 15px;
           font-weight: 400;
           line-height: 22px;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 5;
+          line-clamp: 5;
+          -webkit-box-orient: vertical;
         }
       }
 
@@ -93,26 +105,35 @@
           border-radius: 12px;
           width: fit-content;
           margin-block: 4px;
-          margin-right: 6px;
+          margin-inline: 3px;
         }
         .estimate {
           display: inline-block;
           color: var(--text-secondary);
           font-size: 12px;
-          font-weight: 400;
+          font-weight: 600;
           line-height: 12px;
+          padding: 6px 10px;
+          border: 1px solid var(--subtile-devider );
+          border-radius: 12px;
+          margin-right: 3px;
         }
       }
     }
 
     .image {
       min-width: 164px;
+      min-height: 70px;
+      max-height: 240px;
       height: fit-content;
       border: 1px solid var(--devider);
       border-radius: 8px;
       overflow: hidden;
+      text-align: center;
+
       img {
-        width: 164px;
+        max-width: 162px;
+        max-height: 238px;
         object-fit: scale-down;
       }
 
