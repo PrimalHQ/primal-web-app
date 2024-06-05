@@ -20,7 +20,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getArticleThread, getReadsTopics, getUserArticleFeed } from '../../lib/feed';
-import { fetchArticles, fetchRecomendedArticles } from '../../handleNotes';
+import { fetchArticles, fetchUserArticles } from '../../handleNotes';
 import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
@@ -40,7 +40,7 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
 
     setIsFetchingArticles(() => true);
 
-    const articles = await fetchRecomendedArticles(account?.publicKey, props.user.pubkey, 'authored', subId);
+    const articles = await fetchUserArticles(account?.publicKey, props.user.pubkey, 'authored', subId);
     setRecomended(() => [...articles.filter(a => a.id !== props.article.id)]);
 
     setIsFetchingArticles(() => false);

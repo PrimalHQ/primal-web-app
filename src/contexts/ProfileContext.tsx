@@ -29,6 +29,7 @@ import {
   NostrUserContent,
   NostrUserZaps,
   NoteActions,
+  PrimalArticle,
   PrimalNote,
   PrimalUser,
   PrimalZap,
@@ -52,6 +53,7 @@ import { setLinkPreviews } from "../lib/notes";
 import { subscribeTo } from "../sockets";
 import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
+import { fetchUserArticles } from "../handleNotes";
 
 export type UserStats = {
   pubkey: string,
@@ -63,6 +65,7 @@ export type UserStats = {
   total_zap_count: number,
   total_satszapped: number,
   relay_count: number,
+  long_form_note_count?: number,
 };
 
 export type ProfileContextStore = {
@@ -71,6 +74,7 @@ export type ProfileContextStore = {
   userStats: UserStats,
   fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
+  articles: PrimalArticle[],
   notes: PrimalNote[],
   replies: PrimalNote[],
   zaps: PrimalZap[],
@@ -91,6 +95,7 @@ export type ProfileContextStore = {
   repliesPage: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
+  lastArticle: PrimalArticle | undefined,
   lastReply: PrimalNote | undefined,
   following: string[],
   sidebar: FeedPage & { notes: PrimalNote[] },
@@ -118,6 +123,9 @@ export type ProfileContextStore = {
     fetchNextRepliesPage: () => void,
     fetchNotes: (noteId: string | undefined, until?: number) => void,
     fetchNextPage: () => void,
+    fetchArticles: (noteId: string | undefined, until?: number) => void,
+    fetchNextArticlesPage: () => void,
+    clearArticles: () => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
     updateRepliesPage: (content: NostrEventContent) => void,
@@ -156,6 +164,7 @@ export const initialData = {
   userStats: { ...emptyStats },
   fetchedUserStats: false,
   knownProfiles: { names: {} },
+  articles: [],
   notes: [],
   replies: [],
   isFetching: false,
@@ -170,6 +179,7 @@ export const initialData = {
   zappers: {},
   zapListOffset: 0,
   lastNote: undefined,
+  lastArticle: undefined,
   lastReply: undefined,
   lastZap: undefined,
   following: [],
@@ -465,6 +475,20 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetchingReplies', () => false);
   };
 
+  const fetchArticles = async (pubkey: string | undefined, until = 0, limit = 20) => {
+    if (!pubkey) {
+      return;
+    }
+
+    updateStore('isFetching', () => true);
+    let articles = await fetchUserArticles(account?.publicKey, pubkey, 'authored', `profile_articles_${APP_ID}`, until, limit);
+
+    articles = articles.filter(a => a.id !== store.lastArticle?.id);
+
+    updateStore('articles', (arts) => [ ...arts, ...articles]);
+    updateStore('isFetching', () => false);
+  }
+
   const fetchNotes = (pubkey: string | undefined, until = 0, limit = 20) => {
     if (!pubkey) {
       return;
@@ -497,6 +521,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       notes: [],
       noteActions: {},
     }));
+  };
+
+  const clearArticles = () => {
+    updateStore('articles', () => []);
+    updateStore('lastArticle', () => undefined);
   };
 
   const clearReplies = () => {
@@ -542,6 +571,33 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if (until > 0 && store.profileKey) {
       fetchNotes(store.profileKey, until);
+    }
+  };
+
+  const fetchNextArticlesPage = () => {
+    const lastArticle = store.articles[store.articles.length - 1];
+
+    console.log('Articles: Next page: ', lastArticle);
+
+    if (!lastArticle) {
+      return;
+    }
+
+    updateStore('lastArticle', () => ({ ...lastArticle }));
+
+    const criteria = paginationPlan('latest');
+
+    const noteData: Record<string, any> =  lastArticle.repost ?
+      lastArticle.repost.note :
+      lastArticle.msg;
+
+    const until = noteData[criteria];
+
+    console.log('Articles: Next page: until: ', until);
+
+    if (until > 0 && store.profileKey) {
+      console.log('Articles: Next page: call: ', until);
+      fetchArticles(store.profileKey, until);
     }
   };
 
@@ -1357,6 +1413,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearNotes,
       fetchNotes,
       fetchNextPage,
+      fetchArticles,
+      fetchNextArticlesPage,
+      clearArticles,
       updatePage,
       savePage,
       saveReplies,

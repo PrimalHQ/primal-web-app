@@ -1193,6 +1193,11 @@ export const profile = {
       defaultMessage: 'Total',
       description: 'Label for total sats profile stat',
     },
+    articles: {
+      id: 'profile.stats.articles',
+      defaultMessage: 'Reads',
+      description: 'Label for reads profile stat',
+    },
     notes: {
       id: 'profile.stats.notes',
       defaultMessage: 'Notes',

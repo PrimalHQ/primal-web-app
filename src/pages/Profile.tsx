@@ -118,6 +118,7 @@ const Profile: Component = () => {
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
 
+    profile?.actions.clearArticles();
     profile?.actions.clearNotes();
     profile?.actions.clearReplies();
     profile?.actions.clearContacts();

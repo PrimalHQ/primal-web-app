@@ -13,6 +13,7 @@ import { store } from "../../services/StoreService";
 import { userName } from "../../stores/profile";
 import { profile as t, actions as tActions } from "../../translations";
 import { PrimalUser } from "../../types/primal";
+import ArticlePreview from "../ArticlePreview/ArticlePreview";
 import Avatar from "../Avatar/Avatar";
 import ButtonCopy from "../Buttons/ButtonCopy";
 import Loader from "../Loader/Loader";
@@ -133,6 +134,9 @@ const ProfileTabs: Component<{
     setCurrentTab(() => value);
 
     switch(value) {
+      case 'articles':
+        profile.articles.length === 0 && profile.actions.fetchArticles(profile.profileKey);
+        break;
       case 'notes':
         profile.notes.length === 0 && profile.actions.fetchNotes(profile.profileKey);
         break;
@@ -161,6 +165,18 @@ const ProfileTabs: Component<{
     >
       <Tabs.Root onChange={onChangeValue}>
         <Tabs.List class={styles.profileTabs}>
+          <Show when={(profile?.userStats.long_form_note_count || 0) > 0}>
+            <Tabs.Trigger class={styles.profileTab} value="articles">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.articles)}
+                </div>
+              </div>
+            </Tabs.Trigger>
+          </Show>
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
@@ -230,6 +246,62 @@ const ProfileTabs: Component<{
 
           <Tabs.Indicator class={styles.profileTabIndicator} />
         </Tabs.List>
+
+        <Tabs.Content class={styles.tabContent} value="articles">
+          <div class={styles.profileNotes}>
+            <Switch
+              fallback={
+                <div class={styles.loader}>
+                  <Loader />
+                </div>
+            }>
+              <Match when={isMuted(profile?.profileKey)}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(
+                    t.isMuted,
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                  )}
+                  <button
+                    onClick={unMuteProfile}
+                  >
+                    {intl.formatMessage(tActions.unmute)}
+                  </button>
+                </div>
+              </Match>
+              <Match when={isFiltered()}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(t.isFiltered)}
+                  <button
+                    onClick={addToAllowlist}
+                  >
+                    {intl.formatMessage(tActions.addToAllowlist)}
+                  </button>
+                </div>
+              </Match>
+              <Match when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(
+                    t.noNotes,
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                  )}
+                </div>
+              </Match>
+              <Match when={profile && profile.articles.length > 0}>
+                <For each={profile?.articles}>
+                  {article => (
+                    <ArticlePreview article={article} />
+                  )}
+                </For>
+                <Paginator
+                  loadNextPage={() => {
+                    profile?.actions.fetchNextArticlesPage();
+                  }}
+                  isSmall={true}
+                />
+              </Match>
+            </Switch>
+          </div>
+        </Tabs.Content>
 
         <Tabs.Content class={styles.tabContent} value="notes">
           <div class={styles.profileNotes}>

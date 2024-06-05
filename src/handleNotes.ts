@@ -557,7 +557,7 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
 };
 
 
-export const fetchRecomendedArticles = (userPubkey: string | undefined, pubkey: string | undefined, type: 'authored' | 'replies' | 'bookmarks', subId: string) => {
+export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string | undefined, type: 'authored' | 'replies' | 'bookmarks', subId: string, until = 0, limit = 10) => {
   return new Promise<PrimalArticle[]>((resolve, reject) => {
     if (!pubkey) reject('Missing pubkey');
 
@@ -592,7 +592,7 @@ export const fetchRecomendedArticles = (userPubkey: string | undefined, pubkey: 
       }
     });
 
-    getUserArticleFeed(userPubkey, pubkey, subId, type);
+    getUserArticleFeed(userPubkey, pubkey, subId, type, until, limit);
 
     const updatePage = (content: NostrEventContent) => {
       if (content.kind === Kind.Metadata) {
