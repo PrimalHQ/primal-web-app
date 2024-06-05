@@ -5,6 +5,10 @@
   padding: 20px;
   border-bottom:  1px solid var(--devider);
 
+  a {
+    text-decoration: none;
+  }
+
   .author {
     display: flex;
     justify-content: flex-start;

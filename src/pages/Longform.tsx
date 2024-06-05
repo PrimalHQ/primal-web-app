@@ -1,5 +1,5 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { useParams } from "@solidjs/router";
+import { A, useParams } from "@solidjs/router";
 import { batch, Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
@@ -804,22 +804,25 @@ const Longform: Component< { naddr: string } > = (props) => {
         />
       </Wormhole>
       <div class={styles.header}>
-        <div class={styles.author}>
-          <Show when={store.article?.user}>
-            <Avatar user={store.article?.user} size="xs" />
-            <div class={styles.userInfo}>
-              <div class={styles.userName}>
-                {userName(store.article?.user)}
-                <VerificationCheck user={store.article?.user} />
-              </div>
-              <Show when={store.article?.user.nip05}>
-                <div class={styles.nip05}>
-                  {nip05Verification(store.article?.user)}
+        <A href={`/p/${store.article?.user.npub}`}>
+          <div class={styles.author}>
+            <Show when={store.article?.user}>
+                <Avatar user={store.article?.user} size="xs" />
+
+                <div class={styles.userInfo}>
+                  <div class={styles.userName}>
+                    {userName(store.article?.user)}
+                    <VerificationCheck user={store.article?.user} />
+                  </div>
+                  <Show when={store.article?.user.nip05}>
+                    <div class={styles.nip05}>
+                      {nip05Verification(store.article?.user)}
+                    </div>
+                  </Show>
                 </div>
-              </Show>
-            </div>
-          </Show>
-        </div>
+            </Show>
+          </div>
+        </A>
       </div>
 
       <div class={styles.topBar}>
