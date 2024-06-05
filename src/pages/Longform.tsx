@@ -12,7 +12,7 @@ import { SolidMarkdown } from "solid-markdown";
 
 import styles from './Longform.module.scss';
 import Loader from "../components/Loader/Loader";
-import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, ZapOption } from "../types/primal";
+import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult, TopZap, ZapOption } from "../types/primal";
 import { getUserProfileInfo, getUserProfiles } from "../lib/profile";
 import { convertToUser, nip05Verification, userName } from "../stores/profile";
 import Avatar from "../components/Avatar/Avatar";
@@ -46,6 +46,8 @@ import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
 import ArticleSidebar from "../components/HomeSidebar/ArticleSidebar";
 import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
+import { sanitize } from "dompurify";
+import { fetchNotes } from "../handleNotes";
 
 export type LongFormData = {
   title: string,
@@ -777,6 +779,17 @@ const Longform: Component< { naddr: string } > = (props) => {
     );
   }
 
+
+  const onReplyPosted = async (result: SendNoteResult) => {
+    const { success, note } = result;
+
+    if (!success || !note || !account) return;
+
+    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
+
+    updateStore('replies', (reps) => [ ...replies, ...reps]);
+  };
+
   return (
     <>
       <Wormhole
@@ -897,7 +910,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       <Show when={store.article}>
         <ReplyToNote
           note={store.article}
-          onNotePosted={() => {}}
+          onNotePosted={onReplyPosted}
         />
       </Show>
 

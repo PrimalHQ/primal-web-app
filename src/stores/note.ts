@@ -370,6 +370,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       pubkey: msg.pubkey,
       topZaps: [ ...tz ],
       content: sanitize(msg.content),
+      relayHints: page.relayHints,
     };
   });
 }
@@ -486,6 +487,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       score: stat?.score || 0,
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
+      relayHints: page.relayHints,
     };
 
     msg.tags.forEach(tag => {

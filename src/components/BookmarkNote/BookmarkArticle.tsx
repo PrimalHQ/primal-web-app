@@ -16,7 +16,7 @@ import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
 import { importEvents, triggerImportEvents } from '../../lib/notes';
 
-const BookmarkArticle: Component<{ note: PrimalArticle, large?: boolean }> = (props) => {
+const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: boolean }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
@@ -24,8 +24,13 @@ const BookmarkArticle: Component<{ note: PrimalArticle, large?: boolean }> = (pr
   const [isBookmarked, setIsBookmarked] = createSignal(false);
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
 
+
   createEffect(() => {
-    setIsBookmarked(() => account?.bookmarks.includes(props.note?.id) || false);
+    const note = props.note;
+
+    if (note) {
+      setIsBookmarked(() => account?.bookmarks.includes(note.id) || false);
+    }
   })
 
   const updateBookmarks = async (bookmarkTags: string[][]) => {
@@ -47,7 +52,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle, large?: boolean }> = (pr
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
-    if (account && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.id)) {
+    if (account && props.note && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note?.id)) {
       const bookmarksToAdd = [...bookmarkTags, ['e', props.note.id]];
 
       if (bookmarksToAdd.length < 2) {
@@ -73,8 +78,8 @@ const BookmarkArticle: Component<{ note: PrimalArticle, large?: boolean }> = (pr
   }
 
   const removeBookmark = async (bookmarks: string[][]) => {
-    if (account && bookmarks.find(b => b[0] === 'e' && b[1] === props.note.id)) {
-      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.id);
+    if (account && bookmarks.find(b => b[0] === 'e' && b[1] === props.note?.id)) {
+      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note?.id);
 
       if (bookmarksToAdd.length < 1) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);

@@ -502,6 +502,7 @@ export type PrimalNote = {
   tags: string[][],
   topZaps: TopZap[],
   content: string,
+  relayHints?: Record<string, string>,
 };
 
 
@@ -534,6 +535,7 @@ export type PrimalArticle = {
   score24h: number,
   satszapped: number,
   client?: string,
+  relayHints?: Record<string, string>,
 };
 
 export type PrimalFeed = {

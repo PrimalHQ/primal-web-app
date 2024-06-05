@@ -13,7 +13,7 @@ import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
 import { convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -52,7 +52,7 @@ type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 const EditBox: Component<{
   id?: string,
-  replyToNote?: PrimalNote,
+  replyToNote?: PrimalNote | PrimalArticle,
   onClose?: () => void,
   onSuccess?: (note: SendNoteResult) => void,
   open?: boolean,
@@ -587,8 +587,8 @@ const EditBox: Component<{
 
   createEffect(() => {
     if (props.open) {
-      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
-      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.post.noteId);
+      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.noteId);
+      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.noteId);
 
       setUserRefs(reconcile(draftUserRefs));
 
@@ -618,8 +618,8 @@ const EditBox: Component<{
     if (message().length === 0) return;
 
     // save draft just in case there is an unintended interuption
-    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
   });
 
   const onEscape = (e: KeyboardEvent) => {
@@ -667,8 +667,8 @@ const EditBox: Component<{
       return;
     }
 
-    saveNoteDraft(account?.publicKey, '', props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, '', props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.noteId);
     clearEditor();
   };
 
@@ -680,8 +680,8 @@ const EditBox: Component<{
   };
 
   const persistNote = (note: string) => {
-    saveNoteDraft(account?.publicKey, note, props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, note, props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
     clearEditor();
   };
 
@@ -721,10 +721,10 @@ const EditBox: Component<{
       const rep = props.replyToNote;
 
       if (rep) {
-        let rootTag = rep.post.tags.find(t => t[0] === 'e' && t[3] === 'root');
+        let rootTag = rep.msg.tags.find(t => t[0] === 'e' && t[3] === 'root');
 
-        const rHints = (rep.post.relayHints && rep.post.relayHints[rep.post.id]) ?
-          rep.post.relayHints[rep.post.id] :
+        const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?
+          rep.relayHints[rep.id] :
           '';
 
         // If the note has a root tag, that meens it is not a root note itself
@@ -735,26 +735,26 @@ const EditBox: Component<{
             v,
           );
           tags.push([...tagWithHint]);
-          tags.push(['e', rep.post.id, rHints, 'reply']);
+          tags.push(['e', rep.id, rHints, 'reply']);
         }
         // Otherwise, add the note as the root tag for this reply
         else {
           tags.push([
             'e',
-            rep.post.id,
+            rep.id,
             rHints,
             'root',
           ]);
         }
 
         // Copy all `p` tags from the note we are repling to
-        const repPeople = rep.post.tags.filter(t => t[0] === 'p');
+        const repPeople = rep.msg.tags.filter(t => t[0] === 'p');
 
         tags = [...tags, ...(unwrap(repPeople))];
 
         // If the author of the note is missing, add them
-        if (!tags.find(t => t[0] === 'p' && t[1] === rep.post.pubkey)) {
-          tags.push(['p', rep.post.pubkey]);
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.pubkey)) {
+          tags.push(['p', rep.pubkey]);
         }
       }
 
@@ -772,7 +772,7 @@ const EditBox: Component<{
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note });
               setIsPostingInProgress(false);
-              saveNoteDraft(account.publicKey, '', rep?.post.noteId)
+              saveNoteDraft(account.publicKey, '', rep?.noteId)
               clearEditor();
             }
             unsub();
@@ -1046,7 +1046,7 @@ const EditBox: Component<{
 
         //   // setNoteRefs((refs) => ({
         //   //   ...refs,
-        //   //   [newNote.post.noteId]: newNote
+        //   //   [newNote.noteId]: newNote
         //   // }));
 
           subUserRef(hex);
@@ -1107,10 +1107,10 @@ const EditBox: Component<{
 
           setNoteRefs((refs) => ({
             ...refs,
-            [newNote.post.noteId]: newNote
+            [newNote.noteId]: newNote
           }));
 
-          subNoteRef(newNote.post.noteId);
+          subNoteRef(newNote.noteId);
 
           unsub();
           return;
