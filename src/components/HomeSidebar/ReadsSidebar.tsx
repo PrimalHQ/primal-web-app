@@ -18,11 +18,12 @@ import { useReadsContext } from '../../contexts/ReadsContext';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
-import { getArticleThread, getReadsTopics } from '../../lib/feed';
+import { getArticleThread, getFeaturedAuthors, getReadsTopics } from '../../lib/feed';
 import { fetchArticles } from '../../handleNotes';
 import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
+import AuthorSubscribe from '../AuthorSubscribe/AuthorSubscribe';
 
 const sidebarOptions = [
   {
@@ -73,11 +74,11 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
   const [topPicks, setTopPicks] = createStore<PrimalArticle[]>([]);
   const [topics, setTopics] = createStore<string[]>([]);
+  const [featuredAuthor, setFeautredAuthor] = createSignal<string>();
 
   const [isFetching, setIsFetching] = createSignal(false);
   const [isFetchingTopics, setIsFetchingTopics] = createSignal(false);
-
-
+  const [isFetchingAuthors, setIsFetchingAuthors] = createSignal(false);
 
   const [got, setGot] = createSignal(false);
 
@@ -99,13 +100,38 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     getReadsTopics(subId);
   }
 
+  const getFeaturedAuthor = () => {
+    const subId = `reads_fa_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const authors = JSON.parse(content.content || '[]') as string[];
+
+        // const author = '1d22e00c32fcf2eb60c094f89f5cfa3ccd38a1b317dccda9b296fa6f50e00d0e';
+        // setFeautredAuthor(() => author);
+
+        // const author = 'a8eb6e07bf408713b0979f337a3cd978f622e0d41709f3b74b48fff43dbfcd2b';
+        // setFeautredAuthor(() => author);
+
+        setFeautredAuthor(() => authors[Math.floor(Math.random() * authors.length)]);
+      },
+      onEose: () => {
+        setIsFetchingAuthors(() => false);
+        unsub();
+      }
+    })
+    setIsFetchingAuthors(() => true);
+    getFeaturedAuthors(subId);
+  }
+
   onMount(() => {
     if (account?.isKeyLookupDone && reads?.recomendedReads.length === 0) {
       reads.actions.doSidebarSearch('');
     }
 
     if (account?.isKeyLookupDone) {
-      getTopics()
+      getTopics();
+      getFeaturedAuthor();
     }
   });
 
@@ -146,7 +172,21 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     <div id={props.id} class={styles.readsSidebar}>
       <Show when={account?.isKeyLookupDone}>
         <div class={styles.headingPicks}>
-          Top Picks
+          Featured Author
+        </div>
+
+        <Show
+          when={!isFetchingAuthors()}
+          fallback={
+            <Loader />
+          }
+        >
+          <AuthorSubscribe pubkey={featuredAuthor()} />
+        </Show>
+
+
+        <div class={styles.headingPicks}>
+          Featured Reads
         </div>
 
         <Show

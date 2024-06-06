@@ -102,16 +102,19 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
-  LongForm = 30_023,
-
+  Subscribe = 7_001,
+  Unsubscribe = 7_002,
   Zap = 9_735,
 
   MuteList = 10_000,
   RelayList = 10_002,
   Bookmarks = 10_003,
-  CategorizedPeople = 30_000,
+  TierList = 17_000,
 
+  CategorizedPeople = 30_000,
+  LongForm = 30_023,
   Settings = 30_078,
+  Tier = 37_001,
 
   ACK = 10_000_098,
   NoteStats = 10_000_100,
@@ -143,6 +146,7 @@ export enum Kind  {
   RelayHint=10_000_141,
   NoteQuoteStats=10_000_143,
   WordCount=10_000_144,
+  FeaturedAuthors=10_000_148,
 
   WALLET_OPERATION = 10_000_300,
 }

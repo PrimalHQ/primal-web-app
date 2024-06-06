@@ -365,3 +365,27 @@ export const getReadsTopics = (
     {cache: ["get_reads_topics"]},
   ]));
 };
+
+
+export const getFeaturedAuthors = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_featured_authors"]},
+  ]));
+};
+
+export const getAuthorSubscriptionTiers = (
+  pubkey: string | undefined,
+  subid: string,
+) => {
+  if (!pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["creator_paid_tiers", { pubkey }]},
+  ]));
+};

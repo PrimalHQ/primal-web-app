@@ -1,13 +1,15 @@
 import { nip19 } from "nostr-tools";
 import { Kind } from "./constants";
 import { getEvents, getUserArticleFeed } from "./lib/feed";
-import { decodeIdentifier } from "./lib/keys";
+import { decodeIdentifier, hexToNpub } from "./lib/keys";
 import { getParametrizedEvents, setLinkPreviews } from "./lib/notes";
+import { getUserProfileInfo } from "./lib/profile";
 import { updateStore, store } from "./services/StoreService";
 import { subscribeTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
+import { convertToUser } from "./stores/profile";
 import { account } from "./translations";
-import { EventCoordinate, FeedPage, NostrEventContent, NostrEventType, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, TopZap } from "./types/primal";
+import { EventCoordinate, FeedPage, NostrEventContent, NostrEventType, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap } from "./types/primal";
 import { parseBolt11 } from "./utils";
 
 export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {
@@ -740,3 +742,43 @@ export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string
     };
   });
 };
+
+export const fetchUserProfile = (userPubkey: string | undefined, pubkey: string | undefined, subId: string) => {
+  return new Promise<PrimalUser>((resolve, reject) => {
+    if (!pubkey) reject('Missing pubkey');
+
+    let user: PrimalUser | undefined;
+
+    const unsub = subscribeTo(subId, (type, _, content) => {
+
+      if (type === 'EOSE') {
+        unsub();
+        user ? resolve(user) : reject('user not found');
+        return;
+      }
+
+      if (type === 'EVENT') {
+        if (!content) return;
+        updatePage(content);
+      }
+    });
+
+    getUserProfileInfo(pubkey, userPubkey, subId);
+
+    const updatePage = (content: NostrEventContent) => {
+      if (content?.kind === Kind.Metadata) {
+        let userData = JSON.parse(content.content);
+
+        if (!userData.displayName || typeof userData.displayName === 'string' && userData.displayName.trim().length === 0) {
+          userData.displayName = userData.display_name;
+        }
+        userData.pubkey = content.pubkey;
+        userData.npub = hexToNpub(content.pubkey);
+        userData.created_at = content.created_at;
+
+        user = { ...userData };
+        return;
+      }
+    };
+  });
+}

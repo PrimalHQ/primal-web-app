@@ -242,6 +242,37 @@ export type NostrWordCount = {
   tags?: string[][],
 };
 
+export type NostrTierList = {
+  kind: Kind.TierList,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+};
+
+export type NostrTier = {
+  kind: Kind.Tier,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrSubscribe = {
+  kind: Kind.Subscribe,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrUnsubscribe = {
+  kind: Kind.Unsubscribe,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -274,6 +305,10 @@ export type NostrEventContent =
   NostrRelayHint |
   NostrZapInfo |
   NostrQuoteStatsInfo |
+  NostrTierList |
+  NostrTier |
+  NostrSubscribe |
+  NostrUnsubscribe |
   NostrWordCount;
 
 export type NostrEvent = [

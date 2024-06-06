@@ -66,6 +66,7 @@ export type AppContextStore = {
   showConfirmModal: boolean,
   confirmInfo: ConfirmInfo | undefined,
   cashuMints: Map<string, CashuMint>,
+  subscribeToAuthor: PrimalUser | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -81,6 +82,8 @@ export type AppContextStore = {
     openConfirmModal: (confirmInfo: ConfirmInfo) => void,
     closeConfirmModal: () => void,
     getCashuMint: (url: string) => CashuMint | undefined,
+    openAuthorSubscribeModal: (author: PrimalUser | undefined) => void,
+    closeAuthorSubscribeModal: () => void,
   },
 }
 
@@ -106,6 +109,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   showConfirmModal: false,
   confirmInfo: undefined,
   cashuMints: new Map(),
+  subscribeToAuthor: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -221,6 +225,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
     return store.cashuMints.get(formatted);
   };
 
+
+  const openAuthorSubscribeModal = (author: PrimalUser | undefined) => {
+    console.log('OPEN: ', author)
+    author && updateStore('subscribeToAuthor', () => ({ ...author }));
+  };
+
+  const closeAuthorSubscribeModal = () => {
+    updateStore('subscribeToAuthor', () => undefined);
+  };
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
@@ -273,6 +287,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
       openCashuModal,
       closeCashuModal,
       getCashuMint,
+      openAuthorSubscribeModal,
+      closeAuthorSubscribeModal,
     }
   });
 

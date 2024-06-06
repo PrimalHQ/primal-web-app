@@ -1,0 +1,64 @@
+.authorSubscribeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-radius: 8px;
+  background: var(--background-header-input);
+  width: 268px;
+  padding: 16px;
+
+  .userInfo {
+    display: flex;
+    gap: 8px;
+
+    .userData {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+
+      .userName {
+        display: flex;
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 18px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .nip05 {
+        color: var(--text-tertiary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .userPitch {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    >button {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 16px;
+      padding-inline: 16px;
+    }
+  }
+}

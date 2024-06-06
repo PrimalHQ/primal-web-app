@@ -21,6 +21,7 @@ import NoteContextMenu from '../Note/NoteContextMenu';
 import LnQrCodeModal from '../LnQrCodeModal/LnQrCodeModal';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import CashuQrCodeModal from '../CashuQrCodeModal/CashuQrCodeModal';
+import SubscribeToAuthorModal from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -190,6 +191,12 @@ const Layout: Component = () => {
                   abortLabel={app?.confirmInfo?.abortLabel}
                   onConfirm={app?.confirmInfo?.onConfirm}
                   onAbort={app?.confirmInfo?.onAbort}
+                />
+
+                <SubscribeToAuthorModal
+                  author={app?.subscribeToAuthor}
+                  onClose={app?.actions.closeAuthorSubscribeModal}
+                  onSubscribe={() => {}}
                 />
               </div>
             </Show>
