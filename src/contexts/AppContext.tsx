@@ -9,6 +9,9 @@ import {
 } from "solid-js";
 import { PrimalArticle, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
+import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { Kind } from "../constants";
+import { sendEvent } from "../lib/notes";
 
 
 export type ReactionStats = {
@@ -67,6 +70,7 @@ export type AppContextStore = {
   confirmInfo: ConfirmInfo | undefined,
   cashuMints: Map<string, CashuMint>,
   subscribeToAuthor: PrimalUser | undefined,
+  subscribeToTier: (tier: Tier) => void,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -82,7 +86,7 @@ export type AppContextStore = {
     openConfirmModal: (confirmInfo: ConfirmInfo) => void,
     closeConfirmModal: () => void,
     getCashuMint: (url: string) => CashuMint | undefined,
-    openAuthorSubscribeModal: (author: PrimalUser | undefined) => void,
+    openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier) => void) => void,
     closeAuthorSubscribeModal: () => void,
   },
 }
@@ -110,6 +114,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   confirmInfo: undefined,
   cashuMints: new Map(),
   subscribeToAuthor: undefined,
+  subscribeToTier: () => {},
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -225,10 +230,11 @@ export const AppProvider = (props: { children: JSXElement }) => {
     return store.cashuMints.get(formatted);
   };
 
+  const openAuthorSubscribeModal = (author: PrimalUser | undefined, subscribeTo: (tier: Tier) => void) => {
+    if (!author) return;
 
-  const openAuthorSubscribeModal = (author: PrimalUser | undefined) => {
-    console.log('OPEN: ', author)
-    author && updateStore('subscribeToAuthor', () => ({ ...author }));
+    updateStore('subscribeToAuthor', () => ({ ...author }));
+    updateStore('subscribeToTier', () => subscribeTo);
   };
 
   const closeAuthorSubscribeModal = () => {

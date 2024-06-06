@@ -196,7 +196,7 @@ const Layout: Component = () => {
                 <SubscribeToAuthorModal
                   author={app?.subscribeToAuthor}
                   onClose={app?.actions.closeAuthorSubscribeModal}
-                  onSubscribe={() => {}}
+                  onSubscribe={app?.subscribeToTier}
                 />
               </div>
             </Show>

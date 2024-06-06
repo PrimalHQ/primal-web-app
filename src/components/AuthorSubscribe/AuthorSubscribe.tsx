@@ -3,12 +3,15 @@ import { batch, Component, createEffect, createSignal, For, JSXElement, onMount,
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import { APP_ID } from '../../App';
+import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { fetchUserProfile } from '../../handleNotes';
 import { date, shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
+import { sendEvent } from '../../lib/notes';
+import { zapSubscription } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
 import { uuidv4 } from '../../utils';
@@ -22,6 +25,7 @@ import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
 import NoteFooter from '../Note/NoteFooter/NoteFooter';
 import NoteTopZaps from '../Note/NoteTopZaps';
 import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
+import { Tier } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './AuthorSubscribe.module.scss';
@@ -55,8 +59,34 @@ const AuthoreSubscribe: Component<{
     getAuthorData();
   });
 
+  const doSubscription = async (tier: Tier) => {
+    const a = author();
+
+    if (!a || !account) return;
+
+    const subEvent = {
+      kind: Kind.Subscribe,
+      content: '',
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+      tags: [
+        ['p', a.pubkey],
+        ['e', tier.id],
+        ['amount', tier.costs[0].amount, tier.costs[0].unit, tier.costs[0].duration],
+        ['event', JSON.stringify(tier.event)],
+        // Copy any zap splits
+        ...(tier.event.tags?.filter(t => t[0] === 'zap') || []),
+      ],
+    }
+
+    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
+
+    if (success && note) {
+      await zapSubscription(note, a, account.publicKey, account.relays);
+    }
+  }
+
   const openSubscribe = () => {
-    app?.actions.openAuthorSubscribeModal(author());
+    app?.actions.openAuthorSubscribeModal(author(), doSubscription);
   };
 
   return (
@@ -82,7 +112,10 @@ const AuthoreSubscribe: Component<{
             {author()?.about || ''}
           </div>
           <div class={styles.actions}>
-            <ButtonSecondary onClick={() => navigate(`/p/${author()?.npub}`)}>
+            <ButtonSecondary
+              light={true}
+              onClick={() => navigate(`/p/${author()?.npub}`)}
+            >
               view profile
             </ButtonSecondary>
 

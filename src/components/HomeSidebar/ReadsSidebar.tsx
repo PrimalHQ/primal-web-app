@@ -113,6 +113,9 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         // const author = 'a8eb6e07bf408713b0979f337a3cd978f622e0d41709f3b74b48fff43dbfcd2b';
         // setFeautredAuthor(() => author);
 
+        // const author = '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079';
+        // setFeautredAuthor(() => author);
+
         setFeautredAuthor(() => authors[Math.floor(Math.random() * authors.length)]);
       },
       onEose: () => {
@@ -181,7 +184,9 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
             <Loader />
           }
         >
-          <AuthorSubscribe pubkey={featuredAuthor()} />
+          <div class={styles.section}>
+            <AuthorSubscribe pubkey={featuredAuthor()} />
+          </div>
         </Show>
 
 

@@ -1,7 +1,9 @@
 import { bech32 } from "@scure/base";
 // @ts-ignore Bad types in nostr-tools
 import { nip57, Relay, utils } from "nostr-tools";
-import { PrimalArticle, PrimalNote, PrimalUser } from "../types/primal";
+import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { Kind } from "../constants";
+import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from "../types/primal";
 import { logError } from "./logger";
 import { enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 
@@ -118,6 +120,62 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
     // @ts-ignore
     payload.comment = comment;
   }
+  const zapReq = nip57.makeZapRequest(payload);
+
+  try {
+    const signedEvent = await signEvent(zapReq);
+
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
+
+    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const pr = r2.pr;
+
+    await enableWebLn();
+    await sendPayment(pr);
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
+    return false;
+  }
+}
+
+export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient: PrimalUser, sender: string | undefined, relays: Relay[]) => {
+  if (!sender || !recipient) {
+    return false;
+  }
+
+  const callback = await getZapEndpoint(recipient);
+
+  if (!callback) {
+    return false;
+  }
+
+  const costTag = subEvent.tags.find(t => t [0] === 'amount');
+  if (!costTag) return false;
+
+  let sats = 0;
+
+  if (costTag[2] === 'sats') {
+    sats = parseInt(costTag[1]) * 1_000;
+  }
+
+  if (costTag[2] === 'msat') {
+    sats = parseInt(costTag[1]);
+  }
+
+  let payload = {
+    profile: recipient.pubkey,
+    event: subEvent.id,
+    amount: sats,
+    relays: relays.map(r => r.url)
+  };
+
+  if (subEvent.content.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+
   const zapReq = nip57.makeZapRequest(payload);
 
   try {

@@ -44,7 +44,7 @@ const SubscribeToAuthorModal: Component<{
   id?: string,
   author: PrimalUser | undefined,
   onClose: () => void,
-  onSubscribe: () => void,
+  onSubscribe: (tier: Tier) => void,
 }> = (props) => {
 
   const [store, updateStore] = createStore<TierStore>({
@@ -106,6 +106,15 @@ const SubscribeToAuthorModal: Component<{
   }
 
   const isSelectedTier = (tier: Tier) => tier.id === store.selectedTier?.id;
+
+
+  // const costForTier = (tier: Tier) => {
+  //   const costs = tier.costs.filter(c => payUnits.includes(c.unit));
+
+  //   costs.reduce((acc, c) => {
+  //     return
+  //   }, [])
+  // }
 
   return (
     <Modal open={props.author !== undefined} onClose={props.onClose}>
@@ -176,7 +185,9 @@ const SubscribeToAuthorModal: Component<{
           </div>
 
           <div class={styles.payAction}>
-            <ButtonPrimary onClick={props.onSubscribe}>
+            <ButtonPrimary
+              onClick={() => store.selectedTier && props.onSubscribe(store.selectedTier)}
+            >
               subscribe
             </ButtonPrimary>
           </div>

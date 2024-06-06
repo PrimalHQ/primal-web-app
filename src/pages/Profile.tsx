@@ -19,13 +19,13 @@ import { useProfileContext } from '../contexts/ProfileContext';
 import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
-import { sanitize } from '../lib/notes';
+import { sanitize, sendEvent } from '../lib/notes';
 import { shortDate } from '../lib/dates';
 
 import styles from './Profile.module.scss';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import ProfileSidebar from '../components/ProfileSidebar/ProfileSidebar';
-import { MenuItem, VanityProfiles, ZapOption } from '../types/primal';
+import { MenuItem, PrimalUser, VanityProfiles, ZapOption } from '../types/primal';
 import PageTitle from '../components/PageTitle/PageTitle';
 import FollowButton from '../components/FollowButton/FollowButton';
 import Search from '../components/Search/Search';
@@ -44,6 +44,13 @@ import NoteImage from '../components/NoteImage/NoteImage';
 import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import ProfileAbout from '../components/ProfileAbout/ProfileAbout';
+import ButtonPrimary from '../components/Buttons/ButtonPrimary';
+import { Tier } from '../components/SubscribeToAuthorModal/SubscribeToAuthorModal';
+import { Kind } from '../constants';
+import { getAuthorSubscriptionTiers } from '../lib/feed';
+import { zapSubscription } from '../lib/zap';
+import { updateStore, store } from '../services/StoreService';
+import { subsTo } from '../sockets';
 
 const Profile: Component = () => {
 
@@ -65,6 +72,8 @@ const Profile: Component = () => {
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [openQr, setOpenQr] = createSignal(false);
+
+  const [hasTiers, setHasTiers] = createSignal(false);
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: '#central_header',
@@ -124,6 +133,7 @@ const Profile: Component = () => {
     profile?.actions.clearContacts();
     profile?.actions.clearZaps();
     profile?.actions.clearFilterReason();
+    setHasTiers(() => false);
   }
 
   let keyIsDone = false
@@ -504,6 +514,69 @@ const Profile: Component = () => {
     },
   });
 
+
+
+  createEffect(() => {
+    if (profile?.userProfile) {
+      getTiers(profile.userProfile);
+    }
+  });
+
+  const getTiers = (author: PrimalUser) => {
+    if (!author) return;
+
+    const subId = `article_tiers_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === Kind.TierList) {
+          return;
+        }
+
+        if (content.kind === Kind.Tier) {
+          setHasTiers(() => true);
+
+          return;
+        }
+      },
+      onEose: () => {
+        unsub();
+      },
+    })
+
+    getAuthorSubscriptionTiers(author.pubkey, subId)
+  }
+
+  const doSubscription = async (tier: Tier) => {
+    const a = profile?.userProfile;
+
+    if (!a || !account) return;
+
+    const subEvent = {
+      kind: Kind.Subscribe,
+      content: '',
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+      tags: [
+        ['p', a.pubkey],
+        ['e', tier.id],
+        ['amount', tier.costs[0].amount, tier.costs[0].unit, tier.costs[0].duration],
+        ['event', JSON.stringify(tier.event)],
+        // Copy any zap splits
+        ...(tier.event.tags?.filter(t => t[0] === 'zap') || []),
+      ],
+    }
+
+    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
+
+    if (success && note) {
+      await zapSubscription(note, a, account.publicKey, account.relays);
+    }
+  }
+
+  const openSubscribe = () => {
+    app?.actions.openAuthorSubscribeModal(profile?.userProfile, doSubscription);
+  };
+
   return (
     <>
       <PageTitle title={
@@ -598,6 +671,14 @@ const Profile: Component = () => {
 
           <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
             <FollowButton person={profile?.userProfile} large={true} />
+          </Show>
+
+          <Show when={hasTiers()}>
+            <ButtonPrimary
+              onClick={openSubscribe}
+            >
+              subscribe
+            </ButtonPrimary>
           </Show>
 
           <Show when={isCurrentUser()}>

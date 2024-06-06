@@ -4,7 +4,7 @@
   gap: 8px;
   border-radius: 8px;
   background: var(--background-header-input);
-  width: 268px;
+  width: 300px;
   padding: 16px;
 
   .userInfo {
@@ -49,8 +49,9 @@
 
   .actions {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+    gap: 6px;
 
     >button {
       color: var(--text-primary);
