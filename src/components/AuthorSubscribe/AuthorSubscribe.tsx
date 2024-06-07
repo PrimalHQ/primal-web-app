@@ -19,13 +19,7 @@ import Avatar from '../Avatar/Avatar';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Loader from '../Loader/Loader';
-import { NoteReactionsState } from '../Note/Note';
-import NoteContextTrigger from '../Note/NoteContextTrigger';
-import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteFooter from '../Note/NoteFooter/NoteFooter';
-import NoteTopZaps from '../Note/NoteTopZaps';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
-import { Tier } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
+import { Tier, TierCost } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './AuthorSubscribe.module.scss';
@@ -59,10 +53,10 @@ const AuthoreSubscribe: Component<{
     getAuthorData();
   });
 
-  const doSubscription = async (tier: Tier) => {
+  const doSubscription = async (tier: Tier, cost: TierCost) => {
     const a = author();
 
-    if (!a || !account) return;
+    if (!a || !account || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -71,7 +65,7 @@ const AuthoreSubscribe: Component<{
       tags: [
         ['p', a.pubkey],
         ['e', tier.id],
-        ['amount', tier.costs[0].amount, tier.costs[0].unit, tier.costs[0].duration],
+        ['amount', cost.amount, cost.unit, cost.cadence],
         ['event', JSON.stringify(tier.event)],
         // Copy any zap splits
         ...(tier.event.tags?.filter(t => t[0] === 'zap') || []),

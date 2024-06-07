@@ -1,18 +1,12 @@
 import { useIntl } from '@cookbook/solid-intl';
-// @ts-ignore
-import { decode } from 'light-bolt11-decoder';
+
 import { Component, createEffect, For, Show } from 'solid-js';
-import { createStore, reconcile } from 'solid-js/store';
-import { emptyInvoice, Kind } from '../../constants';
-import { date, dateFuture } from '../../lib/dates';
+import { createStore } from 'solid-js/store';
+import { Kind } from '../../constants';
 import { hookForDev } from '../../lib/devTools';
-import { humanizeNumber } from '../../lib/stats';
-import { cashuInvoice } from '../../translations';
-import { LnbcInvoice, NostrTier, PrimalUser } from '../../types/primal';
+import { NostrTier, PrimalUser } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
-import QrCode from '../QrCode/QrCode';
-import { getDecodedToken, Token } from "@cashu/cashu-ts";
 
 import styles from './SubscribeToAuthorModal.module.scss';
 import { userName } from '../../stores/profile';
@@ -22,13 +16,22 @@ import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getAuthorSubscriptionTiers } from '../../lib/feed';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import { Select } from '@kobalte/core';
+
+export type TierCost = {
+  amount: string,
+  unit: string,
+  cadence: string,
+  id: string,
+}
 
 export type Tier = {
   title: string,
   content: string,
   id: string,
   perks: string[],
-  costs: { amount: string, unit: string, duration: string}[],
+  costs: TierCost[],
+  activeCost: TierCost | undefined,
   client: string,
   event: NostrTier,
 };
@@ -36,20 +39,22 @@ export type Tier = {
 export type TierStore = {
   tiers: Tier[],
   selectedTier: Tier | undefined,
+  selectedCost: TierCost | undefined,
 }
 
-export const payUnits = ['sats', 'msats', ''];
+export const payUnits = ['sats', 'msat', ''];
 
 const SubscribeToAuthorModal: Component<{
   id?: string,
   author: PrimalUser | undefined,
   onClose: () => void,
-  onSubscribe: (tier: Tier) => void,
+  onSubscribe: (tier: Tier, cost: TierCost) => void,
 }> = (props) => {
 
   const [store, updateStore] = createStore<TierStore>({
     tiers: [],
     selectedTier: undefined,
+    selectedCost: undefined,
   })
 
   createEffect(() => {
@@ -76,14 +81,23 @@ const SubscribeToAuthorModal: Component<{
         if (content.kind === Kind.Tier) {
           const t = content as NostrTier;
 
+          const costs = t.tags?.filter((t: string[]) => t[0] === 'amount').map((t: string[]) => (
+            {
+              amount: t[1],
+              unit: t[2],
+              cadence: t[3],
+              id: `${t[1]}_${t[2]}_${t[3]}`
+            })) || [];
+
           const tier = {
             title: (t.tags?.find((t: string[]) => t[0] === 'title') || [])[1] || t.content || '',
             id: t.id || '',
             content: t.content || '',
             perks: t.tags?.filter((t: string[]) => t[0] === 'perk').map((t: string[]) => t[1]) || [],
-            costs: t.tags?.filter((t: string[]) => t[0] === 'amount').map((t: string[]) => ({ amount: t[1], unit: t[2], duration: t[3]})) || [],
+            costs,
             client: (t.tags?.find((t: string[]) => t[0] === 'client') || [])[1] || t.content || '',
             event: t,
+            activeCost: costs[0],
           }
 
           tiers.push(tier)
@@ -94,7 +108,9 @@ const SubscribeToAuthorModal: Component<{
       onEose: () => {
         unsub();
         updateStore('tiers', () => [...tiers]);
-        updateStore('selectedTier', () => ( tiers.length > 0 ? { ...tiers[0]} : undefined))
+        const tier: Tier | undefined = tiers.length > 0 ? Object.assign(tiers[0]) : undefined;
+        updateStore('selectedTier', () => ({ ...tier }));
+        updateStore('selectedCost', () => ({ ...tier?.activeCost }))
       },
     })
 
@@ -102,19 +118,22 @@ const SubscribeToAuthorModal: Component<{
   }
 
   const selectTier = (tier: Tier) => {
-    updateStore('selectedTier', () => ({ ...tier }));
+    if (tier.id !== store.selectedTier?.id) {
+      updateStore('selectedTier', () => ({ ...tier }));
+      updateStore('selectedCost', (sc) => ({ ...costOptions(tier)[0] }) );
+    }
   }
 
   const isSelectedTier = (tier: Tier) => tier.id === store.selectedTier?.id;
 
 
-  // const costForTier = (tier: Tier) => {
-  //   const costs = tier.costs.filter(c => payUnits.includes(c.unit));
+  const costOptions = (tier: Tier) => {
+    return tier.costs.filter(cost => payUnits.includes(cost.unit));
+  }
 
-  //   costs.reduce((acc, c) => {
-  //     return
-  //   }, [])
-  // }
+  const displayCost = (cost: TierCost | undefined) => {
+    return `${cost?.unit === 'msat' ? Math.ceil(parseInt(cost?.amount || '0') / 1_000) : cost?.amount} sats`;
+  };
 
   return (
     <Modal open={props.author !== undefined} onClose={props.onClose}>
@@ -139,20 +158,74 @@ const SubscribeToAuthorModal: Component<{
         <div class={styles.body}>
           <div class={styles.tiers}>
             <For each={store.tiers}>
-              {tier => (
+              {(tier) => (
                 <button
                   class={`${styles.tier} ${isSelectedTier(tier) ? styles.selected : ''}`}
                   onClick={() => selectTier(tier)}
                 >
                   <div class={styles.title}>{tier.title}</div>
-                  <div class={styles.cost}>
-                    <div class={styles.amount}>
-                      {tier.costs[0].amount} {tier.costs[0].unit}
-                    </div>
-                    <div class={styles.duration}>
-                      {tier.costs[0].duration}
-                    </div>
-                  </div>
+
+                  <Show
+                    when={costOptions(tier).length > 1 && store.selectedTier?.id === tier.id}
+                    fallback={<div class={styles.cost}>
+                      <div class={styles.amount}>
+                        {displayCost(costOptions(tier)[0])}
+                      </div>
+                      <div class={styles.duration}>
+                        {costOptions(tier)[0].cadence}
+                      </div>
+                    </div>}
+                  >
+                    <Select.Root
+                      class={styles.selectCosts}
+                      options={costOptions(tier)}
+                      optionValue="id"
+                      value={store.selectedCost}
+                      onChange={(cost) => {
+                        // updateStore('tiers', index(), 'activeCost', () => ({ ...cost }));
+                        // updateStore('selectedTier', 'activeCost', () => ({ ...cost }));
+                        updateStore('selectedCost', () => ({ ...cost }));
+                      }}
+                      itemComponent={props => (
+                        <Select.Item item={props.item} class={styles.cost}>
+                          <div class={styles.amount}>
+                            {displayCost(props.item.rawValue)}
+                          </div>
+                          <div class={styles.duration}>
+                            {props.item.rawValue.cadence}
+                          </div>
+                        </Select.Item>
+                      )}
+                    >
+                      <Select.Trigger class={styles.selectTrigger}>
+                        <Select.Value class={styles.selectValue}>
+                          {state => {
+                            const cost = state.selectedOption() as TierCost;
+
+                            return (
+                              <div class={styles.cost}>
+                                <div class={styles.amount}>
+                                  {displayCost(cost)}
+                                </div>
+                                <div class={styles.duration}>
+                                  <div>{cost?.cadence}</div>
+                                  <div class={styles.chevIcon}></div>
+                                </div>
+                              </div>
+                            )
+
+                          }}
+                        </Select.Value>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Content class={styles.selectContent}>
+                          <Select.Listbox class={styles.selectListbox} />
+                        </Select.Content>
+                      </Select.Portal>
+                    </Select.Root>
+
+                  </Show>
+
                   <div class={styles.content}>
                     {tier.content}
                   </div>
@@ -186,7 +259,7 @@ const SubscribeToAuthorModal: Component<{
 
           <div class={styles.payAction}>
             <ButtonPrimary
-              onClick={() => store.selectedTier && props.onSubscribe(store.selectedTier)}
+              onClick={() => store.selectedTier && store.selectedCost && props.onSubscribe(store.selectedTier, store.selectedCost)}
             >
               subscribe
             </ButtonPrimary>

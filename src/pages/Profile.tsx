@@ -45,7 +45,7 @@ import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeMo
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import ProfileAbout from '../components/ProfileAbout/ProfileAbout';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
-import { Tier } from '../components/SubscribeToAuthorModal/SubscribeToAuthorModal';
+import { Tier, TierCost } from '../components/SubscribeToAuthorModal/SubscribeToAuthorModal';
 import { Kind } from '../constants';
 import { getAuthorSubscriptionTiers } from '../lib/feed';
 import { zapSubscription } from '../lib/zap';
@@ -544,13 +544,13 @@ const Profile: Component = () => {
       },
     })
 
-    getAuthorSubscriptionTiers(author.pubkey, subId)
+    getAuthorSubscriptionTiers(author.pubkey, subId);
   }
 
-  const doSubscription = async (tier: Tier) => {
+  const doSubscription = async (tier: Tier, cost: TierCost) => {
     const a = profile?.userProfile;
 
-    if (!a || !account) return;
+    if (!a || !account || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -559,7 +559,7 @@ const Profile: Component = () => {
       tags: [
         ['p', a.pubkey],
         ['e', tier.id],
-        ['amount', tier.costs[0].amount, tier.costs[0].unit, tier.costs[0].duration],
+        ['amount', cost.amount, cost.unit, cost.cadence],
         ['event', JSON.stringify(tier.event)],
         // Copy any zap splits
         ...(tier.event.tags?.filter(t => t[0] === 'zap') || []),

@@ -103,27 +103,6 @@
           line-height: 20px;
         }
 
-        .cost {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          width: 100%;
-
-          .amount {
-            color: var(--text-primary);
-            font-size: 20px;
-            font-weight: 600;
-            line-height: 20px;
-          }
-
-          .duration {
-            color: var(--text-secondary);
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 16px;
-          }
-        }
-
         .content {
           display: flex;
           border-top: 1px solid var(--subtile-devider);
@@ -218,4 +197,79 @@
   background: var(--sidebar-section-icon-gradient);
   -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
   mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+}
+
+.selectCosts {
+}
+
+.selectTrigger {
+  background-color: var(--background-input);
+  width: 360px;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+
+  .selectValue {
+    .cost {
+      .duration {
+        display: flex;
+        gap: 6px;
+        .chevIcon {
+          width: 6px;
+          height: 16px;
+          background-color: var(--text-tertiary);
+          -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat 0 / 100%;
+          mask: url(../../assets/icons/chevron_right.svg) no-repeat 0 / 100%;
+          rotate: 90deg;
+        }
+      }
+    }
+  }
+}
+
+
+.selectContent {
+  background-color: var(--background-sheet);
+  z-index: 9999;
+  width: 390px;
+
+  .selectListbox {
+    border: 1px solid var(--subtile-devider);
+    border-radius: 8px;
+    background-color: var(--background-sheet);
+    padding: 0;
+
+    .cost {
+      border-radius: 8px;
+      padding-block: 12px;
+      padding-inline: 12px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: var(--background-input);
+      }
+    }
+  }
+}
+
+.cost {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .amount {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .duration {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 16px;
+  }
 }

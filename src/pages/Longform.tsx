@@ -48,7 +48,7 @@ import ArticleSidebar from "../components/HomeSidebar/ArticleSidebar";
 import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
 import { sanitize } from "dompurify";
 import { fetchNotes } from "../handleNotes";
-import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import ButtonPrimary from "../components/Buttons/ButtonPrimary";
 import { zapSubscription } from "../lib/zap";
 
@@ -359,7 +359,6 @@ const Longform: Component< { naddr: string } > = (props) => {
     fetchArticle();
   });
 
-
   createEffect(() => {
     if (store.article?.user) {
       getTiers(store.article.user);
@@ -391,10 +390,10 @@ const Longform: Component< { naddr: string } > = (props) => {
     getAuthorSubscriptionTiers(author.pubkey, subId)
   }
 
-  const doSubscription = async (tier: Tier) => {
+  const doSubscription = async (tier: Tier, cost: TierCost) => {
     const a = store.article?.user;
 
-    if (!a || !account) return;
+    if (!a || !account || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -403,7 +402,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       tags: [
         ['p', a.pubkey],
         ['e', tier.id],
-        ['amount', tier.costs[0].amount, tier.costs[0].unit, tier.costs[0].duration],
+        ['amount', cost.amount, cost.unit, cost.cadence],
         ['event', JSON.stringify(tier.event)],
         // Copy any zap splits
         ...(tier.event.tags?.filter(t => t[0] === 'zap') || []),

@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { PrimalArticle, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
-import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { Kind } from "../constants";
 import { sendEvent } from "../lib/notes";
 
@@ -86,7 +86,7 @@ export type AppContextStore = {
     openConfirmModal: (confirmInfo: ConfirmInfo) => void,
     closeConfirmModal: () => void,
     getCashuMint: (url: string) => CashuMint | undefined,
-    openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier) => void) => void,
+    openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => void,
     closeAuthorSubscribeModal: () => void,
   },
 }
@@ -230,7 +230,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     return store.cashuMints.get(formatted);
   };
 
-  const openAuthorSubscribeModal = (author: PrimalUser | undefined, subscribeTo: (tier: Tier) => void) => {
+  const openAuthorSubscribeModal = (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => {
     if (!author) return;
 
     updateStore('subscribeToAuthor', () => ({ ...author }));
