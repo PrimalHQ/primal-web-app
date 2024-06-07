@@ -1,6 +1,7 @@
 .subscribeToAuthor {
   position: fixed;
   min-width: 472px;
+  min-height: 344px;
   color: var(--text-primary);
   background-color: var(--background-input);
   border-radius: 8px;
@@ -79,6 +80,7 @@
     .tiers {
       display: flex;
       gap: 12px;
+      min-height: 220px;
 
       .tier {
         display: flex;
@@ -272,4 +274,17 @@
     font-weight: 400;
     line-height: 16px;
   }
+}
+
+.noTiers {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 16px;
+
+  text-transform: uppercase;
 }

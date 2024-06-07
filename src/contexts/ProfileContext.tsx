@@ -577,8 +577,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const fetchNextArticlesPage = () => {
     const lastArticle = store.articles[store.articles.length - 1];
 
-    console.log('Articles: Next page: ', lastArticle);
-
     if (!lastArticle) {
       return;
     }
@@ -593,10 +591,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const until = noteData[criteria];
 
-    console.log('Articles: Next page: until: ', until);
-
     if (until > 0 && store.profileKey) {
-      console.log('Articles: Next page: call: ', until);
       fetchArticles(store.profileKey, until);
     }
   };

@@ -119,6 +119,9 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         // const author = 'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52';
         // setFeautredAuthor(() => author);
 
+        // const author = '3f770d65d3a764a9c5cb503ae123e62ec7598ad035d836e2a810f3877a745b24';
+        // setFeautredAuthor(() => author);
+
         setFeautredAuthor(() => authors[Math.floor(Math.random() * authors.length)]);
       },
       onEose: () => {

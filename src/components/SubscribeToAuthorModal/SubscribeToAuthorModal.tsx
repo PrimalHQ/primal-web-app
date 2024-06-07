@@ -17,6 +17,7 @@ import { subsTo } from '../../sockets';
 import { getAuthorSubscriptionTiers } from '../../lib/feed';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { Select } from '@kobalte/core';
+import Loader from '../Loader/Loader';
 
 export type TierCost = {
   amount: string,
@@ -40,6 +41,7 @@ export type TierStore = {
   tiers: Tier[],
   selectedTier: Tier | undefined,
   selectedCost: TierCost | undefined,
+  isFetchingTiers: boolean,
 }
 
 export const payUnits = ['sats', 'msat', ''];
@@ -55,6 +57,7 @@ const SubscribeToAuthorModal: Component<{
     tiers: [],
     selectedTier: undefined,
     selectedCost: undefined,
+    isFetchingTiers: false,
   })
 
   createEffect(() => {
@@ -107,13 +110,15 @@ const SubscribeToAuthorModal: Component<{
       },
       onEose: () => {
         unsub();
+        updateStore('isFetchingTiers', () => false);
         updateStore('tiers', () => [...tiers]);
         const tier: Tier | undefined = tiers.length > 0 ? Object.assign(tiers[0]) : undefined;
-        updateStore('selectedTier', () => ({ ...tier }));
-        updateStore('selectedCost', () => ({ ...tier?.activeCost }))
+        updateStore('selectedTier', () => tier ? ({ ...tier }) : undefined);
+        updateStore('selectedCost', () => tier ? ({ ...tier?.costs[0] }) : undefined);
       },
     })
 
+    updateStore('isFetchingTiers', () => true);
     getAuthorSubscriptionTiers(author.pubkey, subId)
   }
 
@@ -157,92 +162,104 @@ const SubscribeToAuthorModal: Component<{
 
         <div class={styles.body}>
           <div class={styles.tiers}>
-            <For each={store.tiers}>
-              {(tier) => (
-                <button
-                  class={`${styles.tier} ${isSelectedTier(tier) ? styles.selected : ''}`}
-                  onClick={() => selectTier(tier)}
-                >
-                  <div class={styles.title}>{tier.title}</div>
-
-                  <Show
-                    when={costOptions(tier).length > 1 && store.selectedTier?.id === tier.id}
-                    fallback={<div class={styles.cost}>
-                      <div class={styles.amount}>
-                        {displayCost(costOptions(tier)[0])}
-                      </div>
-                      <div class={styles.duration}>
-                        {costOptions(tier)[0].cadence}
-                      </div>
-                    </div>}
+            <Show
+              when={!store.isFetchingTiers}
+              fallback={<div><Loader/></div>}
+            >
+              <For
+                each={store.tiers}
+                fallback={
+                  <div class={styles.noTiers}>
+                    No compatible tiers found
+                  </div>
+                }
+              >
+                {(tier) => (
+                  <button
+                    class={`${styles.tier} ${isSelectedTier(tier) ? styles.selected : ''}`}
+                    onClick={() => selectTier(tier)}
                   >
-                    <Select.Root
-                      class={styles.selectCosts}
-                      options={costOptions(tier)}
-                      optionValue="id"
-                      value={store.selectedCost}
-                      onChange={(cost) => {
-                        // updateStore('tiers', index(), 'activeCost', () => ({ ...cost }));
-                        // updateStore('selectedTier', 'activeCost', () => ({ ...cost }));
-                        updateStore('selectedCost', () => ({ ...cost }));
-                      }}
-                      itemComponent={props => (
-                        <Select.Item item={props.item} class={styles.cost}>
-                          <div class={styles.amount}>
-                            {displayCost(props.item.rawValue)}
-                          </div>
-                          <div class={styles.duration}>
-                            {props.item.rawValue.cadence}
-                          </div>
-                        </Select.Item>
-                      )}
-                    >
-                      <Select.Trigger class={styles.selectTrigger}>
-                        <Select.Value class={styles.selectValue}>
-                          {state => {
-                            const cost = state.selectedOption() as TierCost;
+                    <div class={styles.title}>{tier.title}</div>
 
-                            return (
-                              <div class={styles.cost}>
-                                <div class={styles.amount}>
-                                  {displayCost(cost)}
-                                </div>
-                                <div class={styles.duration}>
-                                  <div>{cost?.cadence}</div>
-                                  <div class={styles.chevIcon}></div>
-                                </div>
-                              </div>
-                            )
-
-                          }}
-                        </Select.Value>
-                      </Select.Trigger>
-                      <Select.Portal>
-                        <Select.Content class={styles.selectContent}>
-                          <Select.Listbox class={styles.selectListbox} />
-                        </Select.Content>
-                      </Select.Portal>
-                    </Select.Root>
-
-                  </Show>
-
-                  <div class={styles.content}>
-                    {tier.content}
-                  </div>
-                  <div class={styles.perks}>
-                    <For each={tier.perks}>
-                      {perk => (
-                        <div class={styles.perk}>
-                          <div class={styles.checkIcon}></div>
-                          <div class={styles.text}>{perk}</div>
+                    <Show
+                      when={costOptions(tier).length > 1 && store.selectedTier?.id === tier.id}
+                      fallback={<div class={styles.cost}>
+                        <div class={styles.amount}>
+                          {displayCost(costOptions(tier)[0])}
                         </div>
-                      )}
-                    </For>
-                  </div>
+                        <div class={styles.duration}>
+                          {costOptions(tier)[0].cadence}
+                        </div>
+                      </div>}
+                    >
+                      <Select.Root
+                        class={styles.selectCosts}
+                        options={costOptions(tier)}
+                        optionValue="id"
+                        value={store.selectedCost}
+                        onChange={(cost) => {
+                          // updateStore('tiers', index(), 'activeCost', () => ({ ...cost }));
+                          // updateStore('selectedTier', 'activeCost', () => ({ ...cost }));
+                          updateStore('selectedCost', () => ({ ...cost }));
+                        }}
+                        itemComponent={props => (
+                          <Select.Item item={props.item} class={styles.cost}>
+                            <div class={styles.amount}>
+                              {displayCost(props.item.rawValue)}
+                            </div>
+                            <div class={styles.duration}>
+                              {props.item.rawValue.cadence}
+                            </div>
+                          </Select.Item>
+                        )}
+                      >
+                        <Select.Trigger class={styles.selectTrigger}>
+                          <Select.Value class={styles.selectValue}>
+                            {state => {
+                              const cost = state.selectedOption() as TierCost;
 
-                </button>
-              )}
-            </For>
+                              return (
+                                <div class={styles.cost}>
+                                  <div class={styles.amount}>
+                                    {displayCost(cost)}
+                                  </div>
+                                  <div class={styles.duration}>
+                                    <div>{cost?.cadence}</div>
+                                    <div class={styles.chevIcon}></div>
+                                  </div>
+                                </div>
+                              )
+
+                            }}
+                          </Select.Value>
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content class={styles.selectContent}>
+                            <Select.Listbox class={styles.selectListbox} />
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
+
+                    </Show>
+
+                    <div class={styles.content}>
+                      {tier.content}
+                    </div>
+                    <div class={styles.perks}>
+                      <For each={tier.perks}>
+                        {perk => (
+                          <div class={styles.perk}>
+                            <div class={styles.checkIcon}></div>
+                            <div class={styles.text}>{perk}</div>
+                          </div>
+                        )}
+                      </For>
+                    </div>
+
+                  </button>
+                )}
+              </For>
+            </Show>
 
           </div>
         </div>
@@ -257,13 +274,15 @@ const SubscribeToAuthorModal: Component<{
             </ButtonSecondary>
           </div>
 
-          <div class={styles.payAction}>
-            <ButtonPrimary
-              onClick={() => store.selectedTier && store.selectedCost && props.onSubscribe(store.selectedTier, store.selectedCost)}
-            >
-              subscribe
-            </ButtonPrimary>
-          </div>
+          <Show when={store.selectedTier}>
+            <div class={styles.payAction}>
+              <ButtonPrimary
+                onClick={() => store.selectedTier && store.selectedCost && props.onSubscribe(store.selectedTier, store.selectedCost)}
+              >
+                subscribe
+              </ButtonPrimary>
+            </div>
+          </Show>
         </div>
       </div>
     </Modal>
