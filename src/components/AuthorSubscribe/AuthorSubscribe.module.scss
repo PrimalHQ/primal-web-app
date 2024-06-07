@@ -1,7 +1,7 @@
 .authorSubscribeCard {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
   border-radius: 8px;
   background: var(--background-header-input);
   width: 300px;
@@ -14,6 +14,7 @@
     .userData {
       display: flex;
       flex-direction: column;
+      justify-content: center;
       gap: 4px;
       overflow: hidden;
 
@@ -49,9 +50,9 @@
 
   .actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 
     >button {
       color: var(--text-primary);
@@ -60,6 +61,7 @@
       font-weight: 600;
       line-height: 16px;
       padding-inline: 16px;
+      width: 100%;
     }
   }
 }

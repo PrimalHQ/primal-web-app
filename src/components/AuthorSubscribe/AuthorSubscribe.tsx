@@ -91,7 +91,7 @@ const AuthoreSubscribe: Component<{
       >
         <div class={styles.authorSubscribeCard}>
           <div class={styles.userInfo}>
-            <Avatar user={author()} />
+            <Avatar user={author()} size="ml" />
             <div class={styles.userData}>
               <div class={styles.userName}>
                 {userName(author())}

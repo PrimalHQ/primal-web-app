@@ -164,6 +164,21 @@
   }
 }
 
+.mlAvatar {
+  @include avatar;
+  width: 60px;
+  height: 60px;
+
+  .missingBack {
+    width: 60px;
+    height: 60px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+  }
+}
+
 .largeAvatar {
   @include avatar;
   width: 72px;
@@ -287,6 +302,13 @@
   @include missing;
   width: 48px;
   height: 48px;
+  font-size: 16px;
+}
+
+.mlMissing {
+  @include missing;
+  width: 60px;
+  height: 60px;
   font-size: 16px;
 }
 
