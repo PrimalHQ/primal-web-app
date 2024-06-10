@@ -251,7 +251,7 @@ const SubscribeToAuthorModal: Component<{
           </button>
         </div>
 
-        <div class={styles.body}>
+        <div class={styles.modalBody}>
           <div class={styles.tiers}>
             <Show
               when={!store.isFetchingTiers}
@@ -270,7 +270,7 @@ const SubscribeToAuthorModal: Component<{
                     class={`${styles.tier} ${isSelectedTier(tier) ? styles.selected : ''}`}
                     onClick={() => selectTier(tier)}
                   >
-                    <div class={styles.title}>{tier.title}</div>
+                    <div class={styles.tierTitle}>{tier.title}</div>
 
                     <Show
                       when={costOptions(tier).length > 1 && store.selectedTier?.id === tier.id}

@@ -76,7 +76,7 @@
     }
   }
 
-  .body {
+  .modalBody {
     .tiers {
       display: flex;
       gap: 12px;
@@ -94,11 +94,7 @@
         padding: 16px;
         width: 400px;
 
-        &.selected {
-          border: 1px solid var(--accent);
-        }
-
-        .title: {
+        .tierTitle {
           color: var(--text-primary);
           font-size: 20px;
           font-weight: 600;
@@ -156,6 +152,10 @@
               }
             }
           }
+        }
+
+        &.selected {
+          border: 1px solid var(--accent);
         }
       }
     }
