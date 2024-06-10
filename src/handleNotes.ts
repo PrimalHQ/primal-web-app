@@ -184,9 +184,8 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
   });
 };
 
-export const fetchArticles = (pubkey: string | undefined, noteIds: string[], subId: string) => {
+export const fetchArticles = (noteIds: string[], subId: string) => {
   return new Promise<PrimalArticle[]>((resolve, reject) => {
-    if (!pubkey) reject('Missing pubkey');
 
     let page: FeedPage = {
       users: {},

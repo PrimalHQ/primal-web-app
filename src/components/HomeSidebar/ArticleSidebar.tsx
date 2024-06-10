@@ -20,7 +20,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getArticleThread, getReadsTopics, getUserArticleFeed } from '../../lib/feed';
-import { fetchArticles, fetchUserArticles } from '../../handleNotes';
+import { fetchUserArticles } from '../../handleNotes';
 import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';

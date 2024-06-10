@@ -65,24 +65,34 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   }
 
   const options:() => SelectionOption[] = () => {
-    return [
-      {
-        label: 'My Reads',
-        value: account?.publicKey || '',
-      },
+    let opts = [];
+
+    if (account?.publicKey) {
+      opts.push(
+        {
+          label: 'My Reads',
+          value: account?.publicKey || '',
+        }
+      );
+    }
+
+    opts.push(
       {
         label: 'All Reads',
         value: 'none',
-      },
+      }
+    );
 
-    ]
+    return [ ...opts ];
   };
 
   const initialValue = () => {
     const selected = reeds?.selectedFeed;
 
     if (!selected) {
-      return options()[0];
+      const feed = options()[0];
+      selectFeed(feed);
+      return feed;
     }
 
     return {

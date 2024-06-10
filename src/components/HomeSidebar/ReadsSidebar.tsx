@@ -164,13 +164,13 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   });
 
   const getRecomendedArticles = async (ids: string[]) => {
-    if (!account?.publicKey) return;
+    // if (!account?.publicKey) return;
 
     const subId = `reads_picks_${APP_ID}`;
 
     setIsFetching(() => true);
 
-    const articles = await fetchArticles(account.publicKey, ids,subId);
+    const articles = await fetchArticles(ids,subId);
 
     setIsFetching(() => false);
 
@@ -180,21 +180,22 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   return (
     <div id={props.id} class={styles.readsSidebar}>
       <Show when={account?.isKeyLookupDone}>
-        <div class={styles.headingPicks}>
-          Featured Author
-        </div>
-
-        <Show
-          when={!isFetchingAuthors()}
-          fallback={
-            <Loader />
-          }
-        >
-          <div class={styles.section}>
-            <AuthorSubscribe pubkey={featuredAuthor()} />
+        <Show when={account?.publicKey}>
+          <div class={styles.headingPicks}>
+            Featured Author
           </div>
-        </Show>
 
+          <Show
+            when={!isFetchingAuthors()}
+            fallback={
+              <Loader />
+            }
+          >
+            <div class={styles.section}>
+              <AuthorSubscribe pubkey={featuredAuthor()} />
+            </div>
+          </Show>
+        </Show>
 
         <div class={styles.headingPicks}>
           Featured Reads
