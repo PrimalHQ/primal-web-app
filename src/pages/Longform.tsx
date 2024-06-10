@@ -390,7 +390,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     getAuthorSubscriptionTiers(author.pubkey, subId)
   }
 
-  const doSubscription = async (tier: Tier, cost: TierCost) => {
+  const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = store.article?.user;
 
     if (!a || !account || !cost) return;
@@ -412,8 +412,32 @@ const Longform: Component< { naddr: string } > = (props) => {
     const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
 
     if (success && note) {
-      await zapSubscription(note, a, account.publicKey, account.relays);
+      const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
+
+      if (!isZapped) {
+        unsubscribe(note.id);
+      }
     }
+  }
+
+  const unsubscribe = async (eventId: string) => {
+    const a = store.article?.user;
+
+    if (!a || !account) return;
+
+    const unsubEvent = {
+      kind: Kind.Unsubscribe,
+      content: '',
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+
+      tags: [
+        ['p', a.pubkey],
+        ['e', eventId],
+      ],
+    };
+
+    await sendEvent(unsubEvent, account.relays, account.relaySettings);
+
   }
 
   const openSubscribe = () => {
@@ -601,8 +625,6 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     getArticleThread(account?.publicKey, pubkey, identifier, kind, subId);
   }
-
-
 
   const updatePage = (content: NostrEventContent) => {
     if (content.kind === Kind.Metadata) {

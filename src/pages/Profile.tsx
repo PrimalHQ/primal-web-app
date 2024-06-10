@@ -547,7 +547,7 @@ const Profile: Component = () => {
     getAuthorSubscriptionTiers(author.pubkey, subId);
   }
 
-  const doSubscription = async (tier: Tier, cost: TierCost) => {
+  const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = profile?.userProfile;
 
     if (!a || !account || !cost) return;
@@ -569,9 +569,34 @@ const Profile: Component = () => {
     const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
 
     if (success && note) {
-      await zapSubscription(note, a, account.publicKey, account.relays);
+      const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
+
+      if (!isZapped) {
+        unsubscribe(note.id);
+      }
     }
   }
+
+  const unsubscribe = async (eventId: string) => {
+    const a = profile?.userProfile;;
+
+    if (!a || !account) return;
+
+    const unsubEvent = {
+      kind: Kind.Unsubscribe,
+      content: '',
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+
+      tags: [
+        ['p', a.pubkey],
+        ['e', eventId],
+      ],
+    };
+
+    await sendEvent(unsubEvent, account.relays, account.relaySettings);
+
+  }
+
 
   const openSubscribe = () => {
     app?.actions.openAuthorSubscribeModal(profile?.userProfile, doSubscription);
