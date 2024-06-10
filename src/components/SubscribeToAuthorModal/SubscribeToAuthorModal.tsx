@@ -13,11 +13,17 @@ import { userName } from '../../stores/profile';
 import Avatar from '../Avatar/Avatar';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { APP_ID } from '../../App';
-import { subsTo } from '../../sockets';
+import { subsTo, subTo } from '../../sockets';
 import { getAuthorSubscriptionTiers } from '../../lib/feed';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { Select } from '@kobalte/core';
 import Loader from '../Loader/Loader';
+import { logInfo } from '../../lib/logger';
+import { getExchangeRate, getMembershipStatus } from '../../lib/membership';
+import { useAccountContext } from '../../contexts/AccountContext';
+
+
+export const satsInBTC = 100_000_000;
 
 export type TierCost = {
   amount: string,
@@ -42,23 +48,29 @@ export type TierStore = {
   selectedTier: Tier | undefined,
   selectedCost: TierCost | undefined,
   isFetchingTiers: boolean,
+  exchangeRate: Record<string, Record<string, number>>,
 }
 
-export const payUnits = ['sats', 'msat', ''];
+export const payUnits = ['sats', 'sat', 'msat', 'msats', 'USD', 'usd', ''];
 
 const SubscribeToAuthorModal: Component<{
   id?: string,
   author: PrimalUser | undefined,
   onClose: () => void,
-  onSubscribe: (tier: Tier, cost: TierCost) => void,
+  onSubscribe: (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => void,
 }> = (props) => {
+
+  const account = useAccountContext();
 
   const [store, updateStore] = createStore<TierStore>({
     tiers: [],
     selectedTier: undefined,
     selectedCost: undefined,
     isFetchingTiers: false,
-  })
+    exchangeRate: {},
+  });
+
+  let walletSocket: WebSocket | undefined;
 
   createEffect(() => {
     const author = props.author;
@@ -67,6 +79,55 @@ const SubscribeToAuthorModal: Component<{
       getTiers(author);
     }
   });
+
+  createEffect(() => {
+    if (props.author && (!walletSocket || walletSocket.readyState === WebSocket.CLOSED)) {
+      openWalletSocket(() => {
+        if (!walletSocket || walletSocket.readyState !== WebSocket.OPEN) return;
+
+        const subId = `er_${APP_ID}`;
+
+        const unsub = subTo(walletSocket, subId, (type, _, content) => {
+          if (type === 'EVENT') {
+            const response: { rate: string } = JSON.parse(content?.content || '{ "rate": 1 }');
+
+            const BTCForTarget = parseFloat(response.rate) || 1;
+
+            const satsToTarget = BTCForTarget / satsInBTC;
+            const targetToBTC = 1 / BTCForTarget;
+            const targetToSats = 1 / satsToTarget;
+
+            updateStore('exchangeRate', () => ({
+              USD: {
+                sats: targetToSats,
+                BTC: targetToBTC,
+                USD: 1,
+              },
+              sats: {
+                sats: 1,
+                USD: satsToTarget,
+                BTC: 1 / satsInBTC,
+              },
+              BTC: {
+                sats: satsInBTC,
+                USD: BTCForTarget,
+                BTC: 1,
+              }
+            }));
+          }
+
+          if (type === 'EOSE') {
+            unsub();
+            walletSocket?.close();
+          }
+        });
+
+        getExchangeRate(account?.publicKey, subId, "USD", walletSocket);
+      });
+    } else {
+      walletSocket?.close();
+    }
+  })
 
   const getTiers = (author: PrimalUser) => {
     if (!author) return;
@@ -84,7 +145,7 @@ const SubscribeToAuthorModal: Component<{
         if (content.kind === Kind.Tier) {
           const t = content as NostrTier;
 
-          const costs = t.tags?.filter((t: string[]) => t[0] === 'amount').map((t: string[]) => (
+          let costs = t.tags?.filter((t: string[]) => t[0] === 'amount').map((t: string[]) => (
             {
               amount: t[1],
               unit: t[2],
@@ -137,8 +198,38 @@ const SubscribeToAuthorModal: Component<{
   }
 
   const displayCost = (cost: TierCost | undefined) => {
-    return `${cost?.unit === 'msat' ? Math.ceil(parseInt(cost?.amount || '0') / 1_000) : cost?.amount} sats`;
+    let text = '';
+
+    switch(cost?.unit) {
+      case 'msat':
+      case 'msats':
+      case '':
+        text = `${Math.ceil(parseInt(cost?.amount || '0') / 1_000)} sats`;
+        break;
+      case 'sats':
+      case 'sat':
+        text = `${cost.amount} sats`;
+        break;
+      case 'USD':
+      case 'usd':
+        text = `${cost.amount} USD`;
+    }
+
+    return text;
   };
+
+  const openWalletSocket = (onOpen: () => void) => {
+    walletSocket = new WebSocket('wss://wallet.primal.net/v1');
+
+    walletSocket.addEventListener('close', () => {
+      logInfo('WALLET SOCKET CLOSED');
+    });
+
+    walletSocket.addEventListener('open', () => {
+      logInfo('WALLET SOCKET OPENED');
+      onOpen();
+    });
+  }
 
   return (
     <Modal open={props.author !== undefined} onClose={props.onClose}>
@@ -277,7 +368,7 @@ const SubscribeToAuthorModal: Component<{
           <Show when={store.selectedTier}>
             <div class={styles.payAction}>
               <ButtonPrimary
-                onClick={() => store.selectedTier && store.selectedCost && props.onSubscribe(store.selectedTier, store.selectedCost)}
+                onClick={() => store.selectedTier && store.selectedCost && props.onSubscribe(store.selectedTier, store.selectedCost, store.exchangeRate)}
               >
                 subscribe
               </ButtonPrimary>

@@ -140,7 +140,7 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
   }
 }
 
-export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient: PrimalUser, sender: string | undefined, relays: Relay[]) => {
+export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient: PrimalUser, sender: string | undefined, relays: Relay[], exchangeRate?: Record<string, Record<string, number>>) => {
   if (!sender || !recipient) {
     return false;
   }
@@ -162,6 +162,11 @@ export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient
 
   if (costTag[2] === 'msat') {
     sats = parseInt(costTag[1]);
+  }
+
+  if (costTag[2] === 'USD' && exchangeRate && exchangeRate['USD']) {
+    let usd = parseFloat(costTag[1]);
+    sats = Math.ceil(exchangeRate['USD'].sats * usd * 1_000);
   }
 
   let payload = {
