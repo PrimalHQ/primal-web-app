@@ -25,10 +25,12 @@ import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
 import { userName } from '../../stores/profile';
+import { useIntl } from '@cookbook/solid-intl';
 
 
 const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: PrimalArticle }  > = (props) => {
 
+  const intl = useIntl();
   const account = useAccountContext();
 
   const [recomended, setRecomended] = createStore<PrimalArticle[]>([]);
@@ -55,17 +57,19 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
   return (
     <div id={props.id} class={styles.articleSidebar}>
       <Show when={account?.isKeyLookupDone && props.article}>
-        <div class={styles.headingPicks}>
-          Total zaps
-        </div>
-
-        <div class={styles.section}>
-          <div class={styles.totalZaps}>
-            <span class={styles.totalZapsIcon} />
-            <span class={styles.amount}>26,450</span>
-            <span class={styles.unit}>sats</span>
+        <Show when={props.article.satszapped > 0}>
+          <div class={styles.headingPicks}>
+            Total zaps
           </div>
-        </div>
+
+          <div class={styles.section}>
+            <div class={styles.totalZaps}>
+              <span class={styles.totalZapsIcon} />
+              <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
+              <span class={styles.unit}>sats</span>
+            </div>
+          </div>
+        </Show>
 
         <Show
           when={!isFetchingArticles()}
