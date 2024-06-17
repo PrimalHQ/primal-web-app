@@ -10,7 +10,7 @@
   grid-template-rows: 32px 1fr;
   grid-row-gap: 8px;
   text-decoration: none;
-  color: unset;
+  color: var(--text-primary);
   line-height: 20px;
 
   &:hover {

@@ -21,14 +21,14 @@ import  styles from './PrimalMarkdown.module.scss';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { Ctx } from '@milkdown/ctx';
-import { npubToHex } from '../../lib/keys';
+import { decodeIdentifier, npubToHex } from '../../lib/keys';
 import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { getUserProfileInfo } from '../../lib/profile';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { Kind } from '../../constants';
 import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
-import { convertToUser, userName } from '../../stores/profile';
+import { authorName, convertToUser, userName } from '../../stores/profile';
 import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
 import { nip19 } from 'nostr-tools';
@@ -37,20 +37,22 @@ import { logError } from '../../lib/logger';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import NoteImage from '../NoteImage/NoteImage';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import { template } from 'solid-js/web';
+import ArticlePreview from '../ArticlePreview/ArticlePreview';
+import LinkPreview from '../LinkPreview/LinkPreview';
+import ArticleLinkPreview from '../LinkPreview/ArticleLinkPreview';
 
 const PrimalMarkdown: Component<{
   id?: string,
   content?: string,
   readonly?:  boolean,
   noteId: string,
+  article: PrimalArticle | undefined,
 }> = (props) => {
 const account = useAccountContext();
 
   let ref: HTMLDivElement | undefined;
   let editor: Editor;
-
-  const [userMentions, setUserMentions] = createStore<Record<string, PrimalUser>>({});
-  const [noteMentions, setNoteMentions] = createStore<Record<string, PrimalNote>>({});
 
   const id = () => {
     return `note_${props.noteId}`;
@@ -69,47 +71,6 @@ const account = useAccountContext();
   onMount(() => {
     lightbox.init();
   });
-
-  const fetchUserInfo = (npub: string) => {
-    const pubkey = npubToHex(npub);
-
-    const subId = `lf_fui_${APP_ID}`;
-
-    let user: PrimalUser;
-
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EOSE') {
-        unsub();
-        setUserMentions(() => ({ [user.npub]: { ...user }}))
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (content?.kind === Kind.Metadata) {
-          user = convertToUser(content);
-        }
-      }
-    });
-
-    getUserProfileInfo(pubkey, account?.publicKey, subId);
-  }
-
-  const fetchNoteInfo = async (npub: string) => {
-    const noteId = nip19.decode(npub).data;
-
-    const subId = `lf_fni_${APP_ID}`;
-
-    try {
-      const notes = await fetchNotes(account?.publicKey, [noteId], subId);
-
-      if (notes.length > 0) {
-        const note = notes[0];
-        setNoteMentions(() => ({ [note.post.noteId]: { ...note } }))
-      }
-    } catch (e) {
-      logError('Failed to fetch notes: ', e);
-    }
-  }
 
   const isMention = (el: Element) => {
     const regex = /nostr:([A-z0-9]+)/;
@@ -141,34 +102,63 @@ const account = useAccountContext();
 
     if (match === null || match.length < 2) return el;
 
-    const [nostr, id] = match;
+    const [nostr, npub] = match;
 
-    if (id.startsWith('npub')) {
+    if (npub.startsWith('npub')) {
 
-      fetchUserInfo(id);
+      const other = content.split(nostr);
+
+      const id = npubToHex(npub);
+
+      return (
+        <p>
+          <span innerHTML={other[0] || ''}></span>
+          <Show
+            when={!props.article?.mentionedUsers || props.article.mentionedUsers[id] !== undefined}
+            fallback={<A href={`/p/${npub}`}>{nostr}</A>}
+          >
+            <A href={`/p/${npub}`}>@{userName(props.article?.mentionedUsers ? props.article.mentionedUsers[id] : undefined)}</A>
+          </Show>
+          <span innerHTML={other[1] || ''}></span>
+        </p>
+      );
+    }
+
+    if (npub.startsWith('note')) {
+      const id = npubToHex(npub);
       return (
         <Show
-          when={userMentions[id] !== undefined}
-          fallback={<A href={`/p/${id}`}>{nostr}</A>}
+          when={!props.article?.mentionedNotes || props.article.mentionedNotes[id] !== undefined}
+          fallback={<A href={`/e/${npub}`}>{nostr}</A>}
         >
-          <A href={`/p/${id}`}>@{userName(userMentions[id])}</A>
+          <div class={styles.embeddedNote}>
+            <EmbeddedNote
+              class={styles.embeddedNote}
+              note={props.article?.mentionedNotes && props.article.mentionedNotes[id]}
+              mentionedUsers={props.article?.mentionedNotes && props.article.mentionedNotes[id].mentionedUsers || {}}
+            />
+          </div>
         </Show>
       );
     }
 
-    if (id.startsWith('note')) {
-      fetchNoteInfo(id);
-      return (
-        <Show
-          when={noteMentions[id] !== undefined}
-          fallback={<A href={`/e/${id}`}>{nostr}</A>}
-        >
-          <EmbeddedNote
-            note={noteMentions[id]}
-            mentionedUsers={noteMentions[id].mentionedUsers || {}}
-          />
-        </Show>
-      );
+    if (npub.startsWith('naddr')) {
+      const mention = props.article?.mentionedNotes && props.article.mentionedNotes[npub];
+
+      if (!mention) return el;
+
+      const preview = {
+        url: `/e/${npub}`,
+        description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
+        images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
+        title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
+      }
+
+      console.log('MENTION: ', mention)
+      return <ArticleLinkPreview
+        preview={preview}
+        bordered={true}
+      />;
     }
 
     return el;

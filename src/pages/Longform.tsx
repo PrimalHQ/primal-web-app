@@ -713,8 +713,18 @@ const Longform: Component< { naddr: string } > = (props) => {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
 
+      let id = mention.id;
+
+      if (mention.kind === Kind.LongForm) {
+        id = nip19.naddrEncode({
+          identifier: (mention.tags.find((t: string[]) => t[0] === 'd') || [])[1],
+          pubkey: mention.pubkey,
+          kind: mention.kind,
+        });
+      }
+
       updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+        (mentions) => ({ ...mentions, [id]: { ...mention } })
       );
       return;
     }
@@ -977,6 +987,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             noteId={props.naddr}
             content={store.article?.content || ''}
             readonly={true}
+            article={store.article}
           />
 
           <div class={styles.tags}>

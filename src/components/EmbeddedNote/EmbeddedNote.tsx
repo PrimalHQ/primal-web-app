@@ -16,11 +16,12 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './EmbeddedNote.module.scss';
 
 const EmbeddedNote: Component<{
-  note: PrimalNote,
+  note: PrimalNote | undefined,
   mentionedUsers?: Record<string, PrimalUser>,
   includeEmbeds?: boolean,
   isLast?: boolean,
   alternativeBackground?: boolean,
+  class?: string,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -28,21 +29,22 @@ const EmbeddedNote: Component<{
 
   let noteContent: HTMLDivElement | undefined;
 
-  const noteId = () => nip19.noteEncode(props.note.post.id);
+  const noteId = () => nip19.noteEncode(props.note?.post.id);
 
   const navToThread = () => {
     threadContext?.actions.setPrimaryNote(props.note);
   };
 
   const verification = createMemo(() => {
-    return trimVerification(props.note.user?.nip05);
+    return trimVerification(props.note?.user?.nip05);
   });
 
   const klass = () => {
     let k = styles.mentionedNote;
     k += ' embeddedNote';
-    if (props.isLast) k+= ' noBottomMargin';
-    if (props.alternativeBackground) k+= ` ${styles.altBack}`;
+    if (props.isLast) k += ' noBottomMargin';
+    if (props.alternativeBackground) k += ` ${styles.altBack}`;
+    if (props.class) k += ` ${props.class}`;
 
     return k;
   }
@@ -52,7 +54,7 @@ const EmbeddedNote: Component<{
       return (
         <div
           class={klass()}
-          data-event={props.note.post.id}
+          data-event={props.note?.post.id}
           data-event-bech32={noteId()}
         >
           {children}
@@ -65,7 +67,7 @@ const EmbeddedNote: Component<{
         href={`/e/${noteId()}`}
         class={klass()}
         onClick={() => navToThread()}
-        data-event={props.note.post.id}
+        data-event={props.note?.post.id}
         data-event-bech32={noteId()}
       >
         {children}
@@ -77,37 +79,37 @@ const EmbeddedNote: Component<{
     <>
       <div class={styles.mentionedNoteHeader}>
         <Avatar
-          user={props.note.user}
+          user={props.note?.user}
           size="xxs"
         />
         <span class={styles.postInfo}>
           <span class={styles.userInfo}>
             <Show
-              when={props.note.user.nip05}
+              when={props.note?.user.nip05}
               fallback={
                 <span class={styles.userName}>
-                  {userName(props.note.user)}
+                  {userName(props.note?.user)}
                 </span>
               }
             >
               <span class={styles.userName}>
                 {verification()[0]}
               </span>
-              <VerificationCheck user={props.note.user} />
+              <VerificationCheck user={props.note?.user} />
               <span
                 class={styles.verifiedBy}
-                title={props.note.user.nip05}
+                title={props.note?.user.nip05}
               >
-                {nip05Verification(props.note.user)}
+                {nip05Verification(props.note?.user)}
               </span>
             </Show>
           </span>
 
           <span
             class={styles.time}
-            title={date(props.note.post.created_at || 0).date.toLocaleString()}
+            title={date(props.note?.post.created_at || 0).date.toLocaleString()}
           >
-            {date(props.note.post.created_at || 0).label}
+            {date(props.note?.post.created_at || 0).label}
           </span>
         </span>
       </div>

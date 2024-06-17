@@ -31,15 +31,15 @@ const ArticlePreview: Component<{
   const thread = useThreadContext();
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
-    likes: props.article.likes,
-    liked: props.article.noteActions.liked,
-    reposts: props.article.reposts,
-    reposted: props.article.noteActions.reposted,
-    replies: props.article.replies,
-    replied: props.article.noteActions.replied,
-    zapCount: props.article.zaps,
-    satsZapped: props.article.satszapped,
-    zapped: props.article.noteActions.zapped,
+    likes: props.article.likes || 0,
+    liked: props.article.noteActions?.liked || false,
+    reposts: props.article.reposts || 0,
+    reposted: props.article.noteActions?.reposted || false,
+    replies: props.article.replies || 0,
+    replied: props.article.noteActions?.replied || false,
+    zapCount: props.article.zaps || 0,
+    satsZapped: props.article.satszapped || 0,
+    zapped: props.article.noteActions?.zapped || false,
     zappedAmount: 0,
     zappedNow: false,
     isZapping: false,
@@ -218,7 +218,7 @@ const ArticlePreview: Component<{
           <Avatar user={props.article.user} size="micro"/>
           <div class={styles.userName}>{userName(props.article.user)}</div>
           <VerificationCheck  user={props.article.user} />
-          <div class={styles.nip05}>{props.article.user.nip05 || ''}</div>
+          <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
         </div>
         <div class={styles.time}>
           {shortDate(props.article.published)}
@@ -239,14 +239,14 @@ const ArticlePreview: Component<{
             <div class={styles.estimate}>
               {Math.ceil(props.article.wordCount / 238)} minute read
             </div>
-            <For each={props.article.tags.slice(0, 3)}>
+            <For each={props.article.tags?.slice(0, 3)}>
               {tag => (
                 <A href={`/reads/${tag}`} class={styles.tag}>
                   {tag}
                 </A>
               )}
             </For>
-            <Show when={props.article.tags.length > 3}>
+            <Show when={props.article.tags?.length && props.article.tags.length > 3}>
               <div class={styles.tag}>
                 + {props.article.tags.length - 3}
               </div>
@@ -263,7 +263,7 @@ const ArticlePreview: Component<{
         </div>
       </div>
 
-      <Show when={props.article.topZaps.length > 0}>
+      <Show when={props.article.topZaps?.length > 0}>
         <div class={styles.zaps}>
           <NoteTopZapsCompact
             note={props.article}
