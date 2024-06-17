@@ -47,7 +47,7 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
-export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20) => {
+export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, topic?: string) => {
   // if (!pubkey) {
   //   return;
   // }
@@ -64,6 +64,11 @@ export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string 
   if (user_pubkey) {
     // @ts-ignore
     payload.user_pubkey = user_pubkey;
+  }
+
+  if (topic) {
+    // @ts-ignore
+    payload.topic = topic;
   }
 
   sendMessage(JSON.stringify([

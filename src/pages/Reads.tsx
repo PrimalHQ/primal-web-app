@@ -38,6 +38,9 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 import ReedSelect from '../components/FeedSelect/ReedSelect';
 import ReadsHeader from '../components/HomeHeader/ReadsHeader';
+import { Link, useParams } from '@solidjs/router';
+import { APP_ID } from '../App';
+import ButtonGhost from '../components/Buttons/ButtonGhost';
 
 
 const Home: Component = () => {
@@ -46,6 +49,7 @@ const Home: Component = () => {
   const account = useAccountContext();
   const intl = useIntl();
   const app = useAppContext();
+  const params = useParams();
 
   const isPageLoading = () => context?.isFetching;
 
@@ -130,7 +134,21 @@ const Home: Component = () => {
 
   onMount(() => {
     context?.actions.doSidebarSearch('')
-  })
+  });
+
+  createEffect(() => {
+    if (account?.isKeyLookupDone && account.publicKey) {
+      context?.actions.clearNotes();
+
+      if (params.topic) {
+        context?.actions.fetchNotes(`filter;${decodeURIComponent(params.topic)}`, APP_ID);
+        return;
+      }
+
+      context?.actions.resetSelectedFeed();
+      context?.actions.selectFeed({ hex: account.publicKey, name: 'My Reads'});
+    }
+  });
 
   return (
     <div class={styles.homeContent}>
@@ -142,12 +160,29 @@ const Home: Component = () => {
       </Wormhole>
 
       <PageCaption title={intl.formatMessage(reads.pageTitle)}>
-        <ReadsHeader
-          hasNewPosts={() => {}}
-          loadNewContent={() => {}}
-          newPostCount={() => {}}
-          newPostAuthors={[]}
-        />
+        <Show
+          when={params.topic}
+          fallback={
+            <ReadsHeader
+              hasNewPosts={() => {}}
+              loadNewContent={() => {}}
+              newPostCount={() => {}}
+              newPostAuthors={[]}
+            />
+          }
+        >
+          <div class={styles.readsTopicHeader}>
+            <Link
+              class={styles.backToReads}
+              href={'/reads'}
+            >
+              Reads:
+            </Link>
+            <span>
+              &nbsp;{decodeURIComponent(params.topic)}
+            </span>
+          </div>
+        </Show>
       </PageCaption>
 
       <StickySidebar>
@@ -181,7 +216,7 @@ const Home: Component = () => {
             </div>
           </Match>
         </Switch>
-        <Paginator loadNextPage={context?.actions.fetchNextPage}/>
+        <Paginator loadNextPage={() => context?.actions.fetchNextPage(params.topic)}/>
       </div>
     </div>
   )

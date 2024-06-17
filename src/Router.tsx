@@ -110,7 +110,7 @@ const Router: Component = () => {
         <Route path="/" component={Layout} >
           <Route path="/" component={Landing} />
           <Route path="/home" component={Home} />
-          <Route path="/reads" component={Reads} />
+          <Route path="/reads/:topic?" component={Reads} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />

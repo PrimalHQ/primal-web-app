@@ -241,9 +241,9 @@ const ArticlePreview: Component<{
             </div>
             <For each={props.article.tags.slice(0, 3)}>
               {tag => (
-                <div class={styles.tag}>
+                <A href={`/reads/${tag}`} class={styles.tag}>
                   {tag}
-                </div>
+                </A>
               )}
             </For>
             <Show when={props.article.tags.length > 3}>

@@ -60,7 +60,7 @@ type ReadsContextStore = {
     saveNotes: (newNotes: PrimalArticle[]) => void,
     clearNotes: () => void,
     fetchNotes: (topic: string, subId: string, until?: number) => void,
-    fetchNextPage: () => void,
+    fetchNextPage: (topic?: string) => void,
     selectFeed: (feed: PrimalFeed | undefined) => void,
     updateScrollTop: (top: number) => void,
     updatePage: (content: NostrEventContent) => void,
@@ -70,6 +70,7 @@ type ReadsContextStore = {
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
     getFirstPage: () => void,
+    resetSelectedFeed: () => void;
   }
 }
 
@@ -309,6 +310,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
+
     const t = topic === 'none' ? '' : topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
     const [scope, timeframe] = t.split(';');
 
@@ -316,6 +318,11 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
     if (scope && timeframe) {
+
+      if (scope === 'filter') {
+        getArticlesFeed(account?.publicKey, undefined, `reads_feed_${subId}`, until, 20, timeframe);
+        return;
+      }
 
       if (scope === 'search') {
         searchContent(account?.publicKey, `reads_feed_${subId}`, decodeURI(timeframe));
@@ -345,7 +352,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNextPage = () => {
+  const fetchNextPage = (mainTopic?: string) => {
     if (store.isFetching) {
       return;
     }
@@ -357,7 +364,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const topic = store.selectedFeed?.hex;
+    const topic = mainTopic ? `filter;${mainTopic}` : store.selectedFeed?.hex;
     const includeReplies = store.selectedFeed?.includeReplies;
 
     if (!topic) {
@@ -391,7 +398,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
   let currentFeed: PrimalFeed | undefined;
 
-  const selectFeed = (feed: PrimalFeed | undefined) => {
+  const selectFeed = (feed: PrimalFeed | undefined, force?: boolean) => {
     if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
       currentFeed = { ...feed };
       // saveStoredFeed(account?.publicKey, currentFeed);
@@ -400,6 +407,11 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       clearNotes();
       fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
     }
+  };
+
+  const resetSelectedFeed = () => {
+    currentFeed = undefined;
+    updateStore('selectedFeed', () => undefined);
   };
 
   const getFirstPage = () => {
@@ -792,13 +804,6 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  createEffect(() => {
-    if (account?.isKeyLookupDone && account.publicKey) {
-
-      selectFeed({ hex: account.publicKey, name: 'My Reads'});
-    }
-  });
-
   onCleanup(() => {
     removeSocketListeners(
       socket(),
@@ -817,6 +822,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       fetchNotes,
       fetchNextPage,
       selectFeed,
+      resetSelectedFeed,
       updateScrollTop,
       updatePage,
       savePage,

@@ -70,6 +70,21 @@
   }
 }
 
+.backIcon {
+  display: inline-block;
+  border: none;
+  box-shadow: none;
+  background-color: unset;
+  margin: 0px;
+  padding: 0px;
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/back.svg) no-repeat center;
+  mask: url(../assets/icons/back.svg) no-repeat center;
+}
+
+
 @media only screen and (max-width: 1300px) {
   .newContentNotification {
     left: calc(calc(100vw - 1032px) / 2 + 48px + 32px);

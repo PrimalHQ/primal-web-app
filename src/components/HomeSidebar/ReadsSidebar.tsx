@@ -24,6 +24,7 @@ import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
 import AuthorSubscribe from '../AuthorSubscribe/AuthorSubscribe';
+import { A } from '@solidjs/router';
 
 const sidebarOptions = [
   {
@@ -227,7 +228,7 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         >
           <div class={styles.section}>
             <For each={topics}>
-              {(topic) => <div class={styles.topic}>{topic}</div>}
+              {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
             </For>
           </div>
         </Show>

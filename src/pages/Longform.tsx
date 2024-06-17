@@ -982,9 +982,9 @@ const Longform: Component< { naddr: string } > = (props) => {
           <div class={styles.tags}>
             <For each={store.article?.tags}>
               {tag => (
-                <div class={styles.tag}>
+                <A href={`/reads/${tag}`} class={styles.tag}>
                   {tag}
-                </div>
+                </A>
               )}
             </For>
           </div>
