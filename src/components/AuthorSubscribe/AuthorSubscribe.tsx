@@ -117,7 +117,7 @@ const AuthoreSubscribe: Component<{
         fallback={<Loader />}
       >
         <div class={styles.authorSubscribeCard}>
-          <div class={styles.userInfo}>
+          <A href={`/p/${author()?.npub}`} class={styles.userInfo}>
             <Avatar user={author()} size="ml" />
             <div class={styles.userData}>
               <div class={styles.userName}>
@@ -128,7 +128,7 @@ const AuthoreSubscribe: Component<{
                 {author()?.nip05}
               </div>
             </div>
-          </div>
+          </A>
           <div class={styles.userPitch}>
             {author()?.about || ''}
           </div>
