@@ -715,17 +715,21 @@ const Longform: Component< { naddr: string } > = (props) => {
 
       let id = mention.id;
 
+      updateStore('page', 'mentions',
+        (mentions) => ({ ...mentions, [id]: { ...mention } })
+      );
+
       if (mention.kind === Kind.LongForm) {
         id = nip19.naddrEncode({
           identifier: (mention.tags.find((t: string[]) => t[0] === 'd') || [])[1],
           pubkey: mention.pubkey,
           kind: mention.kind,
         });
-      }
 
-      updateStore('page', 'mentions',
+        updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [id]: { ...mention } })
       );
+      }
       return;
     }
 
