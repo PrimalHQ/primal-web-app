@@ -75,7 +75,6 @@
   padding-bottom: 0px;
 }
 
-
 .readsSidebar {
   margin-left: -8px;
 
@@ -105,6 +104,14 @@
     margin-bottom: 28px;
     max-height: 526px;
     overflow-y: scroll;
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 
     >a:last-child {
       border-bottom: none;
