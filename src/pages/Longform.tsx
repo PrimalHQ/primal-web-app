@@ -51,6 +51,7 @@ import { fetchNotes } from "../handleNotes";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import ButtonPrimary from "../components/Buttons/ButtonPrimary";
 import { zapSubscription } from "../lib/zap";
+import Paginator from "../components/Paginator/Paginator";
 
 export type LongFormData = {
   title: string,
@@ -106,199 +107,6 @@ const emptyStore: LongformThreadStore = {
   hasTiers: false,
 }
 
-const test = `
-# h1 Heading 8-)
-## h2 Heading
-### h3 Heading
-#### h4 Heading
-##### h5 Heading
-###### h6 Heading
-
-## Mentions
-
-nostr:npub19f2765hdx8u9lz777w7azed2wsn9mqkf2gvn67mkldx8dnxvggcsmhe9da
-
-nostr:note1tv033d7y088x8e90n5ut8htlsyy4yuwsw2fpgywq62w8xf0qcv8q8xvvhg
-
-
-## Horizontal Rules
-
-___
-
----
-
-***
-
-
-## Typographic replacements
-
-Enable typographer option to see result.
-
-(c) (C) (r) (R) (tm) (TM) (p) (P) +-
-
-test.. test... test..... test?..... test!....
-
-!!!!!! ???? ,,  -- ---
-
-"Smartypants, double quotes" and 'single quotes'
-
-
-## Emphasis
-
-**This is bold text**
-
-__This is bold text__
-
-*This is italic text*
-
-_This is italic text_
-
-~~Strikethrough~~
-
-
-## Blockquotes
-
-
-> Blockquotes can also be nested...
->> ...by using additional greater-than signs right next to each other...
-> > > ...or with spaces between arrows.
-
-
-## Lists
-
-Unordered
-
-+ Create a list by starting a line with \`+\`, \`-\`, or \`*\`
-+ Sub-lists are made by indenting 2 spaces:
-  - Marker character change forces new list start:
-    * Ac tristique libero volutpat at
-    + Facilisis in pretium nisl aliquet
-    - Nulla volutpat aliquam velit
-+ Very easy!
-
-Ordered
-
-1. Lorem ipsum dolor sit amet
-2. Consectetur adipiscing elit
-3. Integer molestie lorem at massa
-
-
-## Code
-
-Inline \`code\`
-
-Indented code
-
-    // Some comments
-    line 1 of code
-    line 2 of code
-    line 3 of code
-
-
-Block code "fences"
-
-\`\`\`
-Sample text here...
-\`\`\`
-
-Syntax highlighting
-
-\`\`\` js
-var foo = function (bar) {
-  return bar++;
-};
-
-console.log(foo(5));
-\`\`\`
-
-## Tables
-
-| Option | Description |
-| ------ | ----------- |
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
-
-Right aligned columns
-
-| Option | Description |
-| ------:| -----------:|
-| data   | path to data files to supply the data that will be passed into templates. |
-| engine | engine to be used for processing templates. Handlebars is the default. |
-| ext    | extension to be used for dest files. |
-
-
-## Links
-
-[link text](http://dev.nodeca.com)
-
-[link with title](http://nodeca.github.io/pica/demo/ "title text!")
-
-Autoconverted link https://github.com/nodeca/pica (enable linkify to see)
-
-
-## Images
-
-![Minion](https://octodex.github.com/images/minion.png)
-![Stormtroopocat](https://octodex.github.com/images/stormtroopocat.jpg "The Stormtroopocat")[^image]
-
-Like links, Images also have a footnote style syntax
-
-With a reference later in the document defining the URL location, like this:
-
-[^image]: https://octodex.github.com/images/dojocat.jpg  "The Dojocat"
-
-
-## Optionals (should we support them?)
-
-### [Subscript](https://github.com/markdown-it/markdown-it-sub) / [Superscript](https://github.com/markdown-it/markdown-it-sup)
-
-- 19^th^
-- H~2~O
-
-
-### [\<ins>](https://github.com/markdown-it/markdown-it-ins)
-
-there is some ++Inserted text++ here
-
-
-### [\<mark>](https://github.com/markdown-it/markdown-it-mark)
-
-==Marked text==
-
-
-### [Footnotes](https://github.com/markdown-it/markdown-it-footnote)
-
-Footnote 1 link[^first].
-
-Footnote 2 link[^second].
-
-Duplicated footnote reference[^second].
-
-[^first]: Footnote **can have markup**
-
-    and multiple paragraphs.
-
-[^second]: Footnote text.
-
-
-### [Definition lists](https://github.com/markdown-it/markdown-it-deflist)
-
-Term 1
-
-:   Definition 1
-with lazy continuation.
-
-Term 2 with *inline markup*
-
-:   Definition 2
-
-        { some code, part of Definition 2 }
-
-    Third paragraph of definition 2.
-
-`;
-
 const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
@@ -320,15 +128,31 @@ const Longform: Component< { naddr: string } > = (props) => {
   let latestTopZapFeed: string = '';
   let articleContextMenu: HTMLDivElement | undefined;
 
+  createEffect(() => {
+    const article = store.article;
+
+    if (!article) return;
+
+    const {
+      likes,
+      reposts,
+      replies,
+      zaps,
+      satszapped,
+    } = article;
+
+    updateReactionsState(() => ({ likes, reposts, replies, zapCount: zaps, satsZapped: satszapped }));
+  })
+
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
-    likes: 0,
+    likes: store.article?.likes || 0,
     liked: false,
-    reposts: 0,
+    reposts: store.article?.reposts || 0,
     reposted: false,
-    replies: 0,
+    replies: store.article?.replies || 0,
     replied: false,
-    zapCount: 0,
-    satsZapped: 0,
+    zapCount: store.article?.zaps || 0,
+    satsZapped: store.article?.satszapped || 0,
     zapped: false,
     zappedAmount: 0,
     zappedNow: false,
@@ -844,6 +668,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     updateStore('article', () => ({ ...article }));
 
     updateStore('isFetching', () => false);
+
     // saveNotes(replies);
 
     // const a = users.find(u => u.pubkey === article.author);
