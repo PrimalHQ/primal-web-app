@@ -98,70 +98,85 @@ const account = useAccountContext();
 
     const content = el.innerHTML;
 
-    const match = content.match(regex);
+    const tokens = content.split(regex);
 
-    if (match === null || match.length < 2) return el;
+    let items: any[] = [];
 
-    const [nostr, npub] = match;
+    for(let i=0; i<tokens.length; i++) {
+      const token = tokens[i];
 
-    if (npub.startsWith('npub')) {
 
-      const other = content.split(nostr);
+      if (token.startsWith('npub')) {
+        const id = npubToHex(token);
+        const user = (props.article?.mentionedUsers || {})[id];
 
-      const id = npubToHex(npub);
-
-      return (
-        <p>
-          <span innerHTML={other[0] || ''}></span>
+        items.push(
           <Show
-            when={!props.article?.mentionedUsers || props.article.mentionedUsers[id] !== undefined}
-            fallback={<A href={`/p/${npub}`}>{nostr}</A>}
+            when={user}
+            fallback={<A href={`/p/${token}`}>nostr:{token}</A>}
           >
-            <A href={`/p/${npub}`}>@{userName(props.article?.mentionedUsers ? props.article.mentionedUsers[id] : undefined)}</A>
+            <A href={`/p/${token}`}>@{userName(user)}</A>
           </Show>
-          <span innerHTML={other[1] || ''}></span>
-        </p>
-      );
-    }
+        );
 
-    if (npub.startsWith('note')) {
-      const id = npubToHex(npub);
-      return (
-        <Show
-          when={!props.article?.mentionedNotes || props.article.mentionedNotes[id] !== undefined}
-          fallback={<A href={`/e/${npub}`}>{nostr}</A>}
-        >
-          <div class={styles.embeddedNote}>
-            <EmbeddedNote
-              class={styles.embeddedNote}
-              note={props.article?.mentionedNotes && props.article.mentionedNotes[id]}
-              mentionedUsers={props.article?.mentionedNotes && props.article.mentionedNotes[id].mentionedUsers || {}}
-            />
-          </div>
-        </Show>
-      );
-    }
-
-    if (npub.startsWith('naddr')) {
-      const mention = props.article?.mentionedNotes && props.article.mentionedNotes[npub];
-
-      if (!mention) return el;
-
-      const preview = {
-        url: `/e/${npub}`,
-        description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
-        images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
-        title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
+        continue;
       }
 
-      console.log('MENTION: ', mention)
-      return <ArticleLinkPreview
-        preview={preview}
-        bordered={true}
-      />;
+      if (token.startsWith('note')) {
+        const id = npubToHex(token);
+        const note = (props.article?.mentionedNotes || {})[id];
+
+        items.push(
+          <Show
+            when={note}
+            fallback={<A href={`/e/${token}`}>nostr:{token}</A>}
+          >
+            <div class={styles.embeddedNote}>
+              <EmbeddedNote
+                class={styles.embeddedNote}
+                note={note}
+                mentionedUsers={note.mentionedUsers}
+              />
+            </div>
+          </Show>
+        );
+
+        continue;
+      }
+
+      if (token.startsWith('naddr')) {
+        const mention = props.article?.mentionedNotes && props.article.mentionedNotes[token];
+
+        if (!mention) {
+          items.push(<>nostr:{token}</>)
+          continue;
+        };
+
+        const preview = {
+          url: `/e/${token}`,
+          description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
+          images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
+          title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
+        }
+
+        items.push(
+          <ArticleLinkPreview
+            preview={preview}
+            bordered={true}
+          />
+        );
+
+        continue;
+      }
+
+      const elem = document.createElement("span");
+      elem.innerHTML = token;
+
+      items.push(<>{elem}</>);
     }
 
-    return el;
+    return <p><For each={items}>{item => <>{item}</>}</For></p>;
+
   };
 
 
