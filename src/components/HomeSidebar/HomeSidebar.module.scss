@@ -102,7 +102,7 @@
 .articleSidebar {
   .section {
     margin-bottom: 28px;
-    max-height: 526px;
+    max-height: calc(100vh - 240px);
     overflow-y: scroll;
 
     /* Hide scrollbar for Chrome, Safari and Opera */
