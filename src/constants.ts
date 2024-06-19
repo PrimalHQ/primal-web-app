@@ -409,3 +409,5 @@ export const emptyInvoice: LnbcInvoice = {
   expiry: 0,
   route_hints: [],
 };
+
+export const supportedBookmarkTypes = ['a', 'e'];

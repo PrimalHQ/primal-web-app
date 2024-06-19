@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 import { APP_ID } from '../../App';
-import { Kind } from '../../constants';
+import { Kind, supportedBookmarkTypes } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { getUserFeed } from '../../lib/feed';
@@ -24,12 +24,12 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
   const [isBookmarked, setIsBookmarked] = createSignal(false);
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
 
-
   createEffect(() => {
     const note = props.note;
 
     if (note) {
-      setIsBookmarked(() => account?.bookmarks.includes(note.id) || false);
+      const coor = `${note.msg.kind}:${note.pubkey}:${(note.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
+      setIsBookmarked(() => account?.bookmarks.includes(coor) || false);
     }
   })
 
@@ -37,7 +37,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     if (!account) return;
 
     const bookmarks = bookmarkTags.reduce((acc, t) =>
-      t[0] === 'e' ? [...acc, t[1]] : [...acc]
+      supportedBookmarkTypes.includes(t[0]) ? [...acc, t[1]] : [...acc]
     , []);
 
     const date = Math.floor((new Date()).getTime() / 1000);
@@ -52,8 +52,12 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
-    if (account && props.note && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note?.id)) {
-      const bookmarksToAdd = [...bookmarkTags, ['e', props.note.id]];
+    if (!account || !props.note) return;
+
+    const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
+
+    if (!bookmarkTags.find(b => b[0] === aTag[0] && b[1] === aTag[1])) {
+      const bookmarksToAdd = [...bookmarkTags, [ ...aTag ]];
 
       if (bookmarksToAdd.length < 2) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);
@@ -78,8 +82,12 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
   }
 
   const removeBookmark = async (bookmarks: string[][]) => {
-    if (account && bookmarks.find(b => b[0] === 'e' && b[1] === props.note?.id)) {
-      const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note?.id);
+    if (!account || !props.note) return;
+
+    const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
+
+    if (bookmarks.find(b => b[0] === aTag[0] && b[1] === aTag[1])) {
+      const bookmarksToAdd = bookmarks.filter(b => b[0] !== aTag[0] || b[1] !== aTag[1]);
 
       if (bookmarksToAdd.length < 1) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);

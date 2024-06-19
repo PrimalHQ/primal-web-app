@@ -23,7 +23,7 @@ import {
   NostrEventContent,
   PrimalArticle,
 } from '../types/primal';
-import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
+import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 // @ts-ignore Bad types in nostr-tools
@@ -1531,7 +1531,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         const notes = content.tags.reduce((acc, t) => {
-          if (t[0] === 'e') {
+          if (supportedBookmarkTypes.includes(t[0])) {
             return [...acc, t[1]];
           }
           return [...acc];
