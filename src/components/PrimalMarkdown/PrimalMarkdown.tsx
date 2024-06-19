@@ -90,6 +90,7 @@ const account = useAccountContext();
     return <NoteImage
       class={`noteimage image_${props.noteId}`}
       src={img.src}
+      width={640}
     />
   }
 

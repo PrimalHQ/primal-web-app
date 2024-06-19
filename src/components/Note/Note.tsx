@@ -52,6 +52,7 @@ const Note: Component<{
   noteType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread'
   onClick?: () => void,
   quoteCount?: number,
+  size?: 'xwide' | 'wide' | 'normal' | 'short',
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -262,6 +263,8 @@ const Note: Component<{
     updateReactionsState('topZaps', () =>  [ ...(threadContext?.topZaps[props.note.post.id] || []) ]);
   });
 
+  const size = () => props.size ?? 'normal';
+
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
@@ -421,6 +424,7 @@ const Note: Component<{
             updateState={updateReactionsState}
             customZapInfo={customZapInfo()}
             onZapAnim={addTopZapFeed}
+            size={size()}
           />
         </A>
       </Match>

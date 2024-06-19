@@ -97,6 +97,14 @@ const Layout: Component = () => {
     account?.actions.checkNostrKey();
   });
 
+  const containerClass = () => {
+    if (isIOS() && showBanner()) return styles.containerIOS;
+
+    if (location.pathname.startsWith('/e/naddr')) return styles.containerLF;
+
+    return styles.container;
+  }
+
   return (
     <Show
       when={location.pathname !== '/'}
@@ -119,7 +127,7 @@ const Layout: Component = () => {
         </div>
         <div id="modal" class={styles.modal}></div>
         <BannerIOS />
-        <div id="container" ref={container} class={isIOS() && showBanner() ? styles.containerIOS : styles.container}>
+        <div id="container" ref={container} class={containerClass()}>
           <div class={styles.leftColumn}>
             <div>
               <div id="branding_holder" class={styles.leftHeader}>

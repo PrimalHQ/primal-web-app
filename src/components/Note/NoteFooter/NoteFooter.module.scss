@@ -65,6 +65,16 @@
     max-width: 20px;
   }
 
+  &.xwide {
+    grid-template-columns: 153px 153px 153px 153px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
   &.wide {
     grid-template-columns: 148px 148px 148px 148px auto;
 

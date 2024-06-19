@@ -842,6 +842,7 @@ const Longform: Component< { naddr: string } > = (props) => {
               updateState={updateReactionsState}
               customZapInfo={customZapInfo()}
               onZapAnim={addTopZapFeed}
+              size="xwide"
             />
           </div>
         </Show>
@@ -856,7 +857,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
       <div>
         <For each={store.replies}>
-          {reply => <Note note={reply} />}
+          {reply => <Note note={reply} noteType='feed' size="xwide" />}
         </For>
       </div>
     </>);

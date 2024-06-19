@@ -28,7 +28,7 @@ export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
 const ArticleFooter: Component<{
   note: PrimalArticle,
-  size?: 'wide' | 'normal' | 'short',
+  size?: 'xwide' | 'wide' | 'normal' | 'short',
   id?: string,
   state: NoteReactionsState,
   updateState: SetStoreFunction<NoteReactionsState>,
@@ -228,6 +228,11 @@ const ArticleFooter: Component<{
       let newLeft = 33;
       let newTop = -6;
 
+      if (size() === 'xwide') {
+        newLeft = 46;
+        newTop = -7;
+      }
+
       if (size() === 'wide' && props.large) {
         newLeft = 14;
         newTop = -10;
@@ -237,6 +242,8 @@ const ArticleFooter: Component<{
         newLeft = 14;
         newTop = -6;
       }
+
+      console.log('SIZE: ', newLeft);
 
       medZapAnimation.style.left = `${newLeft}px`;
       medZapAnimation.style.top = `${newTop}px`;
