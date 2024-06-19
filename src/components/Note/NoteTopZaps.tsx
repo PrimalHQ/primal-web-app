@@ -11,7 +11,8 @@ const NoteTopZaps: Component<{
   zapCount: number,
   action: () => void,
   id?: string,
-  users?: PrimalUser[]
+  users?: PrimalUser[],
+  doZap?: () => void,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -45,8 +46,8 @@ const NoteTopZaps: Component<{
   const zapSender = (zap: TopZap) => {
     return (props.users || threadContext?.users || []).find(u => u.pubkey === zap.pubkey);
   };
-  return (
 
+  return (
     <Show
       when={!threadContext?.isFetchingTopZaps}
       fallback={
@@ -64,49 +65,59 @@ const NoteTopZaps: Component<{
         </div>
       }
     >
-    <div class={`${styles.zapHighlights}`}>
-      <TransitionGroup
-        name="top-zaps"
-        enterClass={styles.topZapEnterTransition}
-        exitClass={styles.topZapExitTransition}
-      >
-        <For each={topZaps()}>
-          {(zap, index) => (
-            <>
-              <button
-                class={`${styles.topZap}`}
-                onClick={() => props.action()}
-                style={`z-index: ${12 - index()};`}
-              >
-                <Avatar user={zapSender(zap)} size="micro" />
-                <div class={styles.amount}>
-                  {zap.amount.toLocaleString()}
-                </div>
-                <Show when={index() === 0}>
-                  <div class={styles.description}>
-                    {zap.message}
+      <div class={`${styles.zapHighlights}`}>
+        <TransitionGroup
+          name="top-zaps"
+          enterClass={styles.topZapEnterTransition}
+          exitClass={styles.topZapExitTransition}
+        >
+          <For each={topZaps()}>
+            {(zap, index) => (
+              <>
+                <button
+                  class={`${styles.topZap}`}
+                  onClick={() => props.action()}
+                  style={`z-index: ${12 - index()};`}
+                >
+                  <Avatar user={zapSender(zap)} size="micro" />
+                  <div class={styles.amount}>
+                    {zap.amount.toLocaleString()}
                   </div>
+                  <Show when={index() === 0}>
+                    <div class={styles.description}>
+                      {zap.message}
+                    </div>
+                  </Show>
+                </button>
+
+                <Show when={index() === 0 && props.topZaps.length > 3}>
+                  <div class={styles.break}></div>
                 </Show>
-              </button>
+              </>
+            )}
+          </For>
 
-              <Show when={index() === 0 && props.topZaps.length > 3}>
-                <div class={styles.break}></div>
-              </Show>
-            </>
-          )}
-        </For>
+          <Show when={hasMoreZaps()}>
+            <button
+              class={styles.moreZaps}
+              onClick={() => props.action()}
+            >
+              <div class={styles.contextIcon}></div>
+            </button>
+          </Show>
 
-        <Show when={hasMoreZaps()}>
-          <button
-            class={styles.moreZaps}
-            onClick={() => props.action()}
-          >
-            <div class={styles.contextIcon}></div>
-          </button>
-        </Show>
-      </TransitionGroup>
-    </div>
-  </Show>
+          <Show when={props.doZap}>
+            <button
+              class={styles.doZaps}
+              onClick={props.doZap}
+            >
+              <div class={styles.zapIcon}></div>
+              <div class={styles.zapText}>Zap</div>
+            </button>
+          </Show>
+        </TransitionGroup>
+      </div>
+    </Show>
   );
 }
 

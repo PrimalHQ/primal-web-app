@@ -547,6 +547,44 @@
       }
     }
   }
+
+  .doZaps {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    padding-inline: 10px;
+    padding-block: 2px;
+    margin: 0;
+    border-radius: 12px;
+    background: var(--text-primary);
+    width: fit-content;
+    min-height: 26px;
+    max-width: 100%;
+    text-decoration: none;
+    border: none;
+    outline: none;
+
+    .zapIcon {
+      width: 12px;
+      height: 12px;
+      background-color: var(--devider);
+      -webkit-mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0 / 100%;
+    }
+
+    .zapText {
+      color:  var(--devider);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 12px;
+    }
+
+    &:hover {
+      background-color: var(--text-secondary);
+    }
+  }
 }
 
 .zapHighlightsCompact {

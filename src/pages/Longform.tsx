@@ -809,7 +809,8 @@ const Longform: Component< { naddr: string } > = (props) => {
             topZaps={store.article?.topZaps}
             zapCount={reactionsState.zapCount}
             users={store.users}
-            action={() => {}}
+            action={() => openReactionModal('zaps')}
+            doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
           />
 
           <PrimalMarkdown
