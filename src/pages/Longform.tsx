@@ -734,7 +734,7 @@ const Longform: Component< { naddr: string } > = (props) => {
         <A href={`/p/${store.article?.user.npub}`}>
           <div class={styles.author}>
             <Show when={store.article?.user}>
-                <Avatar user={store.article?.user} size="xs" />
+                <Avatar user={store.article?.user} size="sm" />
 
                 <div class={styles.userInfo}>
                   <div class={styles.userName}>

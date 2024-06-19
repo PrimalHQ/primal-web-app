@@ -553,7 +553,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     padding-inline: 10px;
     padding-block: 2px;
     margin: 0;
@@ -567,11 +567,11 @@
     outline: none;
 
     .zapIcon {
-      width: 12px;
+      width: 10px;
       height: 12px;
       background-color: var(--devider);
-      -webkit-mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0 / 100%;
-      mask: url(../../assets/icons/zaps_filled.svg) no-repeat 0 / 100%;
+      -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
     }
 
     .zapText {
