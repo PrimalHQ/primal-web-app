@@ -1,4 +1,4 @@
-import { Component, onMount } from 'solid-js';
+import { Component, onMount, Resource } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Search from '../components/Search/Search';
@@ -15,43 +15,68 @@ import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { appStoreLink, playstoreLink, apkLink } from '../constants';
+import { appStoreLink, playstoreLink, apkLink, Kind } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { useParams } from '@solidjs/router';
+import { RouteDataFuncArgs, useParams, useRouteData } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
 import { nip19 } from 'nostr-tools';
 import Longform from './Longform';
+import { VanityProfiles } from '../types/primal';
+import { logError } from '../lib/logger';
 
 const EventPage: Component = () => {
 
   const params = useParams();
 
+  const routeData = useRouteData<(opts: RouteDataFuncArgs) => Resource<VanityProfiles>>();
+
   const render = () => {
-    const { id } = params;
+    const { id, identifier } = params;
 
-    if (!id) return <NotFound />;
+    if (!id && !identifier) return <NotFound />;
 
-    if (id.startsWith('naddr1')) {
-      return <Longform naddr={id} />
-    }
+    if (id) {
+      if (id.startsWith('naddr1')) {
+        return <Longform naddr={id} />
+      }
 
-    if (id.startsWith('note1')) {
-      return <NoteThread noteId={id} />
-    }
+      if (id.startsWith('note1')) {
+        return <NoteThread noteId={id} />
+      }
 
-    if (id.startsWith('nevent1')) {
-      const noteId =  nip19.noteEncode(nip19.decode(id).data.id);
+      if (id.startsWith('nevent1')) {
+        const noteId =  nip19.noteEncode(nip19.decode(id).data.id);
+
+        return <NoteThread noteId={noteId} />
+      }
+
+      const noteId = nip19.noteEncode(id);
 
       return <NoteThread noteId={noteId} />
     }
 
-    const noteId = nip19.noteEncode(id);
+    if (identifier) {
+      const name = params.vanityName.toLowerCase();
 
-    return <NoteThread noteId={noteId} />
+      if (!name) return <NotFound />;
+
+      const pubkey = routeData()?.names[name];
+      const kind = Kind.LongForm;
+
+      try {
+        const naddr = nip19.naddrEncode({ pubkey, kind, identifier });
+        return <Longform naddr={naddr} />
+      } catch (e) {
+        logError('Error encoding naddr: ', e);
+        return <NotFound />;
+      }
+
+    }
+
   };
 
   return <>{render()}</>;

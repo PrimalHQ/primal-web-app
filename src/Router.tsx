@@ -139,7 +139,10 @@ const Router: Component = () => {
           <Route path="/mutelist/:npub" component={Mutelist} />
           <Route path="/new" component={CreateAccount} />
           <Route path="/404" component={NotFound} />
-          <Route path="/:vanityName" component={Profile} data={getKnownProfiles} />
+          <Route path="/:vanityName">
+            <Route path="/" component={Profile} data={getKnownProfiles} />
+            <Route path="/:identifier" component={Thread} data={getKnownProfiles} />
+          </Route>
         </Route>
       </Routes>
     </>
