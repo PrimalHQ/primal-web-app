@@ -170,10 +170,10 @@ const Home: Component = () => {
           when={params.topic}
           fallback={
             <ReadsHeader
-              hasNewPosts={() => {}}
-              loadNewContent={() => {}}
-              newPostCount={() => {}}
-              newPostAuthors={[]}
+              hasNewPosts={hasNewPosts}
+              loadNewContent={loadNewContent}
+              newPostCount={newPostCount}
+              newPostAuthors={newPostAuthors}
             />
           }
         >

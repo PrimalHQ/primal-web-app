@@ -27,6 +27,8 @@ const ReadsHeader: Component< {
 } > = (props) => {
 
   const reads = useReadsContext();
+  const account = useAccountContext();
+  const intl = useIntl();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
 
@@ -68,11 +70,61 @@ const ReadsHeader: Component< {
   onCleanup(() => {
     window.removeEventListener('scroll', onScroll);
   });
+
   return (
     <div id={props.id}>
       <div class={`${styles.bigFeedSelect} ${styles.readsFeed}`}>
         <ReedSelect big={true} />
+
+        <Show
+          when={props.hasNewPosts()}
+        >
+          <button
+            class={styles.newContentItem}
+            onClick={props.loadNewContent}
+          >
+            <div class={styles.counter}>
+              {intl.formatMessage(
+                feedNewPosts,
+                {
+                  number: props.newPostCount() >= 99 ? 99 : props.newPostCount(),
+                },
+              )}
+            </div>
+          </button>
+        </Show>
       </div>
+
+      <Show
+        when={props.hasNewPosts() && !account?.showNewNoteForm && !((reads?.scrollTop || 0) < 85)}
+      >
+        <div class={styles.newArticleContentNotification}>
+          <button
+            onClick={props.loadNewContent}
+          >
+            <div class={styles.avatars}>
+              <For each={props.newPostAuthors}>
+                {(user) => (
+                  <div
+                    class={styles.avatar}
+                    title={userName(user)}
+                  >
+                    <Avatar user={user} size="xss" />
+                  </div>
+                )}
+              </For>
+            </div>
+            <div class={styles.counter}>
+              {intl.formatMessage(
+                feedNewPosts,
+                {
+                  number: props.newPostCount(),
+                },
+              )}
+            </div>
+          </button>
+        </div>
+      </Show>
     </div>
   );
 }
