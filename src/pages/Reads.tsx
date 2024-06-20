@@ -64,7 +64,7 @@ const Home: Component = () => {
 
 
   onMount(() => {
-    setIsHome(true);
+    // setIsHome(true);
     scrollWindowTo(context?.scrollTop);
   });
 
@@ -138,14 +138,14 @@ const Home: Component = () => {
 
   createEffect(() => {
     if (account?.isKeyLookupDone && account.publicKey) {
-      context?.actions.clearNotes();
 
       if (params.topic) {
+        context?.actions.clearNotes();
         context?.actions.fetchNotes(`filter;${decodeURIComponent(params.topic)}`, APP_ID);
         return;
       }
 
-      context?.actions.resetSelectedFeed();
+      // context?.actions.resetSelectedFeed();
       context?.actions.selectFeed({ hex: account.publicKey, name: 'My Reads'});
     }
   });
@@ -175,6 +175,7 @@ const Home: Component = () => {
             <Link
               class={styles.backToReads}
               href={'/reads'}
+              onClick={() => context?.actions.resetSelectedFeed()}
             >
               Reads:
             </Link>

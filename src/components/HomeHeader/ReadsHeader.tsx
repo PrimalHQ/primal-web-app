@@ -16,6 +16,7 @@ import LoginModal from '../LoginModal/LoginModal';
 import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import ReedSelect from '../FeedSelect/ReedSelect';
+import { useReadsContext } from '../../contexts/ReadsContext';
 
 const ReadsHeader: Component< {
   id?: string,
@@ -25,6 +26,48 @@ const ReadsHeader: Component< {
   newPostAuthors: PrimalUser[],
 } > = (props) => {
 
+  const reads = useReadsContext();
+
+  let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+
+  const onScroll = () => {
+    const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+    // const smallHeader = document.getElementById('small_header');
+    const border = document.getElementById('small_bottom_border');
+
+    reads?.actions.updateScrollTop(scrollTop);
+
+    const isScrollingDown = scrollTop > lastScrollTop;
+    lastScrollTop = scrollTop;
+
+    if (scrollTop < 2) {
+      if (border) {
+        border.style.display = 'none';
+      }
+      return;
+    }
+
+    if (lastScrollTop < 2) {
+      return;
+    }
+
+    if (border) {
+      border.style.display = 'flex';
+    }
+
+    if (!isScrollingDown) {
+      return;
+    }
+
+  }
+
+  onMount(() => {
+    window.addEventListener('scroll', onScroll);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('scroll', onScroll);
+  });
   return (
     <div id={props.id}>
       <div class={`${styles.bigFeedSelect} ${styles.readsFeed}`}>
