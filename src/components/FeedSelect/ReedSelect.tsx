@@ -42,6 +42,10 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       name: option.label,
     };
 
+    const selected = reeds?.selectedFeed;
+
+    if (selected && selected.hex === feed.hex) return;
+
     reeds?.actions.clearNotes();
     reeds?.actions.selectFeed(feed);
   };

@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createEffect, For, JSXElement, Show } from 'solid-js';
+import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -24,6 +24,8 @@ import styles from './ArticlePreview.module.scss';
 const ArticlePreview: Component<{
   id?: string,
   article: PrimalArticle,
+  height?: number,
+  onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
 }> = (props) => {
 
   const app = useAppContext();
@@ -204,8 +206,19 @@ const ArticlePreview: Component<{
     );
   }
 
+  let articlePreview: HTMLAnchorElement | undefined;
+
+  const onImageLoaded = () => {
+    props.onRender && props.onRender(props.article, articlePreview);
+  };
+
   return (
-    <A class={styles.article} href={`/e/${props.article.naddr}`}>
+    <A
+      ref={articlePreview}
+      class={styles.article}
+      href={`/e/${props.article.naddr}`}
+      style={props.height ? `height: ${props.height}px` : ''}
+    >
       <div class={styles.upRightFloater}>
         <NoteContextTrigger
           ref={articleContextMenu}
@@ -258,7 +271,7 @@ const ArticlePreview: Component<{
             when={props.article.image}
             fallback={<div class={styles.placeholderImage}></div>}
           >
-            <img src={props.article.image} />
+            <img src={props.article.image} onload={onImageLoaded} />
           </Show>
         </div>
       </div>

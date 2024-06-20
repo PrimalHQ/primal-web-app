@@ -56,6 +56,7 @@ type ReadsContextStore = {
     isFetching: boolean,
     query: SelectionOption | undefined,
   },
+  articleHeights: Record<string, number>,
   actions: {
     saveNotes: (newNotes: PrimalArticle[]) => void,
     clearNotes: () => void,
@@ -70,7 +71,8 @@ type ReadsContextStore = {
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
     getFirstPage: () => void,
-    resetSelectedFeed: () => void;
+    resetSelectedFeed: () => void,
+    setArticleHeight: (id: string, height: number) => void,
   }
 }
 
@@ -122,6 +124,7 @@ const initialHomeData = {
     query: undefined,
   },
   recomendedReads: [],
+  articleHeights: {},
 };
 
 export const ReadsContext = createContext<ReadsContextStore>();
@@ -652,6 +655,10 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     saveNotes(newPosts, scope);
   };
 
+  const setArticleHeight = (id: string, height: number) => {
+    updateStore('articleHeights', id, () => height);
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -831,6 +838,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       doSidebarSearch,
       updateSidebarQuery,
       getFirstPage,
+      setArticleHeight,
     },
   });
 

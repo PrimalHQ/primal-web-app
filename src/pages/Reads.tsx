@@ -23,7 +23,7 @@ import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useHomeContext } from '../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { createStore } from 'solid-js/store';
-import { PrimalUser } from '../types/primal';
+import { PrimalArticle, PrimalUser } from '../types/primal';
 import Avatar from '../components/Avatar/Avatar';
 import { userName } from '../stores/profile';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -145,10 +145,16 @@ const Home: Component = () => {
         return;
       }
 
+      const selected = context?.selectedFeed || { hex: account.publicKey, name: 'My Reads'};
+
       // context?.actions.resetSelectedFeed();
-      context?.actions.selectFeed({ hex: account.publicKey, name: 'My Reads'});
+      context?.actions.selectFeed({ ...selected });
     }
   });
+
+  const onArticleRendered = (article: PrimalArticle, el: HTMLAnchorElement | undefined) => {
+    context?.actions.setArticleHeight(article.naddr, el?.getBoundingClientRect().height || 0);
+  };
 
   return (
     <div class={styles.homeContent}>
@@ -196,7 +202,13 @@ const Home: Component = () => {
         >
           <div class={styles.feed}>
             <For each={context?.notes} >
-              {note => <ArticlePreview article={note} />}
+              {note => (
+                <ArticlePreview
+                  article={note}
+                  height={context?.articleHeights[note.naddr]}
+                  onRender={onArticleRendered}
+                />
+              )}
             </For>
           </div>
         </Show>
