@@ -6,7 +6,7 @@ import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subscribeTo } from "../sockets";
 import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalNote, SendNoteResult } from "../types/primal";
-import { npubToHex } from "./keys";
+import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
@@ -556,33 +556,119 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
 
 
 export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
-  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
+
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
+
+  let payload = {
+    kind,
+    limit: 20,
+    offset,
+  };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_actions", { event_id, kind, limit: 20, offset }]},
+    {cache: ["event_actions", { ...payload }]},
   ]));
 };
 
-export const getEventQuotes = (eventId: string, subid: string, offset = 0) => {
-  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+export const getEventQuotes = (eventId: string, subid: string, offset = 0, user_pubkey?: string | undefined) => {
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
 
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
+
+  let payload = {
+    imit: 20,
+    offset,
+  };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["note_mentions", { event_id, limit: 20, offset }]},
+    {cache: ["note_mentions", { ...payload }]},
   ]));
 };
 
 export const getEventZaps = (eventId: string, user_pubkey: string | undefined, subid: string, limit: number,  offset = 0) => {
-  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
+
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
 
   let payload = {
-    event_id,
     limit,
     offset
   };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
 
   if (user_pubkey) {
     // @ts-ignore

@@ -684,7 +684,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   const openReactionModal = (openOn = 'likes') =>  {
     if (!store.article) return;
 
-    app?.actions.openReactionModal(store.article.id, {
+    app?.actions.openReactionModal(store.article.naddr, {
       likes: reactionsState.likes,
       zaps: reactionsState.zapCount,
       reposts: reactionsState.reposts,

@@ -186,7 +186,7 @@ const ArticlePreview: Component<{
   });
 
   const openReactionModal = (openOn = 'likes') =>  {
-    app?.actions.openReactionModal(props.article.id, {
+    app?.actions.openReactionModal(props.article.naddr, {
       likes: reactionsState.likes,
       zaps: reactionsState.zapCount,
       reposts: reactionsState.reposts,

@@ -267,6 +267,7 @@ const ReactionsModal: Component<{
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     };
 
     const unsub = subscribeTo(subId, (type,_, content) => {
@@ -355,7 +356,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventQuotes(props.noteId, subId, offset);
+    getEventQuotes(props.noteId, subId, offset, account?.publicKey);
   };
 
   const getQuoteCount = () => {
