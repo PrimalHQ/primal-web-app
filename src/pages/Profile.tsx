@@ -133,6 +133,7 @@ const Profile: Component = () => {
     profile?.actions.clearContacts();
     profile?.actions.clearZaps();
     profile?.actions.clearFilterReason();
+    profile?.actions.clearGallery();
     setHasTiers(() => false);
   }
 

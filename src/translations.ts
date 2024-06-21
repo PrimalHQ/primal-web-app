@@ -1168,6 +1168,11 @@ export const profile = {
     description: 'Label indicating when the profile joined Nostr (oldest event)',
   },
   stats: {
+    gallery: {
+      id: 'profile.gallery',
+      defaultMessage: 'Gallery',
+      description: 'Label for gallery profile stat',
+    },
     follow: {
       id: 'profile.followStats',
       defaultMessage: 'Following',

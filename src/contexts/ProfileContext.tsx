@@ -53,7 +53,7 @@ import { setLinkPreviews } from "../lib/notes";
 import { subscribeTo } from "../sockets";
 import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
-import { fetchUserArticles } from "../handleNotes";
+import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 
 export type UserStats = {
   pubkey: string,
@@ -78,6 +78,7 @@ export type ProfileContextStore = {
   notes: PrimalNote[],
   replies: PrimalNote[],
   zaps: PrimalZap[],
+  gallery: PrimalNote[],
   zapListOffset: number,
   lastZap: PrimalZap | undefined,
   future: {
@@ -91,12 +92,14 @@ export type ProfileContextStore = {
   isFetching: boolean,
   isProfileFetched: boolean,
   isFetchingReplies: boolean,
+  isFetchingGallery: boolean,
   page: FeedPage,
   repliesPage: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
   lastArticle: PrimalArticle | undefined,
   lastReply: PrimalNote | undefined,
+  lastGallery: PrimalNote | undefined,
   following: string[],
   sidebar: FeedPage & { notes: PrimalNote[] },
   filterReason: { action: 'block' | 'allow', pubkey?: string, group?: string } | null,
@@ -126,6 +129,9 @@ export type ProfileContextStore = {
     fetchArticles: (noteId: string | undefined, until?: number) => void,
     fetchNextArticlesPage: () => void,
     clearArticles: () => void,
+    fetchGallery: (noteId: string | undefined, until?: number) => void,
+    fetchNextGalleryPage: () => void,
+    clearGallery: () => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
     updateRepliesPage: (content: NostrEventContent) => void,
@@ -167,11 +173,13 @@ export const initialData = {
   articles: [],
   notes: [],
   replies: [],
+  gallery: [],
   isFetching: false,
   isProfileFetched: false,
   isFetchingReplies: false,
   isProfileFollowing: false,
   isFetchingZaps: false,
+  isFetchingGallery: false,
   page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
@@ -182,6 +190,7 @@ export const initialData = {
   lastArticle: undefined,
   lastReply: undefined,
   lastZap: undefined,
+  lastGallery: undefined,
   following: [],
   filterReason: null,
   contacts: [],
@@ -508,6 +517,45 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {} }));
     getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', until, limit);
   }
+
+  const fetchGallery = async (pubkey: string | undefined, until = 0, limit = 20) => {
+    if (!pubkey) {
+      return;
+    }
+
+    updateStore('isFetchingGallery', () => true);
+    let gallery = await fetchUserGallery(account?.publicKey, pubkey, 'user_media_thumbnails', `profile_gallery_${APP_ID}`, until, limit);
+
+    updateStore('gallery', (arts) => [ ...arts, ...gallery]);
+    updateStore('isFetchingGallery', () => false);
+  }
+
+  const fetchNextGalleryPage = () => {
+    const lastNote = store.gallery[store.gallery.length - 1];
+
+    if (!lastNote) {
+      return;
+    }
+
+    updateStore('lastGallery', () => ({ ...lastNote }));
+
+    const criteria = paginationPlan('latest');
+
+    const noteData: Record<string, any> =  lastNote.repost ?
+      lastNote.repost.note :
+      lastNote.post;
+
+    const until = noteData[criteria];
+
+    if (until > 0 && store.profileKey) {
+      fetchGallery(store.profileKey, until);
+    }
+  };
+
+  const clearGallery = () => {
+    updateStore('gallery', () => []);
+    updateStore('lastGallery', () => undefined);
+  };
 
   const clearNotes = () => {
     updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
@@ -1411,6 +1459,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       fetchArticles,
       fetchNextArticlesPage,
       clearArticles,
+      fetchGallery,
+      fetchNextGalleryPage,
+      clearGallery,
       updatePage,
       savePage,
       saveReplies,

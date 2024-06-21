@@ -278,6 +278,8 @@ export const profileRegexG = /nostr:((npub|nprofile)1\w+)\b/g;
 export const addrRegex = /nostr:((naddr)1\w+)\b/;
 export const addrRegexG = /nostr:((naddr)1\w+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
+export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
+export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
 
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;

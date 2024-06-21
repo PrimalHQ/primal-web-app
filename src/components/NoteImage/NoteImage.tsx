@@ -16,6 +16,7 @@ const NoteImage: Component<{
   onImageLoaded?: (url: string | undefined) => void,
   shortHeight?: boolean,
   plainBorder?: boolean,
+  caption?: string,
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -142,6 +143,7 @@ const NoteImage: Component<{
           onerror={onError}
           width={willBeTooBig() ? undefined : `${props.width || 524}px`}
         />
+        <div class="pswp-caption-content">{props.caption}</div>
       </a>
     </Show>
   );

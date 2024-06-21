@@ -62,6 +62,7 @@
     "medium-zoom": "1.0.8",
     "nostr-tools": "1.15.0",
     "photoswipe": "5.4.3",
+    "photoswipe-dynamic-caption-plugin": "^1.2.7",
     "qr-code-styling": "^1.6.0-rc.1",
     "remark-directive": "^3.0.0",
     "sass": "1.67.0",

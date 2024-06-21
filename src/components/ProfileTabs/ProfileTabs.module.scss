@@ -48,8 +48,8 @@
   align-items: center;
   .statNumber {
     font-weight: 400;
-    font-size: 24px;
-    line-height: 24px;
+    font-size: 20px;
+    line-height: 20px;
     color: var(--text-primary);
   }
 
@@ -280,4 +280,26 @@
   .zapMessage {
     max-width: 80% !important;
   }
+}
+
+// .galleryGrid {
+//   display: grid;
+//   grid-template-columns: 210px 210px 210px;
+//   grid-column-gap: 5px;
+// }
+
+.galleryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 640px;
+
+  .galleryColumn {
+    flex: 33%;
+    max-width: 33%;
+    padding: 0 4px;
+  }
+
+  // >div {
+  //   flex-grow: 1;
+  // }
 }

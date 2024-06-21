@@ -1,10 +1,12 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core";
 import { A } from "@solidjs/router";
+import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import { profileContactListPage } from "../../constants";
+import { imageRegex, imageRegexG, profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
+import { useMediaContext } from "../../contexts/MediaContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
 import { date } from "../../lib/dates";
 import { hookForDev } from "../../lib/devTools";
@@ -18,10 +20,14 @@ import Avatar from "../Avatar/Avatar";
 import ButtonCopy from "../Buttons/ButtonCopy";
 import Loader from "../Loader/Loader";
 import Note from "../Note/Note";
+import NoteImage from "../NoteImage/NoteImage";
 import Paginator from "../Paginator/Paginator";
 import ProfileContact from "../ProfileContact/ProfileContact";
+// @ts-ignore Bad types in nostr-tools
+import { generatePrivateKey } from 'nostr-tools';
 
 import styles from  "./ProfileTabs.module.scss";
+import NoteGallery from "../Note/NoteGallery";
 
 
 const ProfileTabs: Component<{
@@ -32,6 +38,7 @@ const ProfileTabs: Component<{
   const intl = useIntl();
   const profile = useProfileContext();
   const account = useAccountContext();
+  const media = useMediaContext();
 
   const [currentTab, setCurrentTab] = createSignal<string>('notes');
 
@@ -143,6 +150,9 @@ const ProfileTabs: Component<{
       case 'replies':
         profile.replies.length === 0 && profile.actions.fetchReplies(profile.profileKey);
         break;
+      case 'gallery':
+        profile.gallery.length === 0 && profile.actions.fetchGallery(profile.profileKey);
+        break;
       case 'follows':
         profile.contacts.length === 0 && profile.actions.fetchContactList(profile.profileKey);
         break;
@@ -156,6 +166,13 @@ const ProfileTabs: Component<{
         Object.keys(profile.relays || {}).length === 0 && profile.actions.fetchRelayList(profile.profileKey);
         break;
     }
+  };
+
+  const galleryImages = () => {
+    return profile?.gallery.filter(note => {
+      const test = (imageRegex).test(note.content);
+      return test;
+    });
   };
 
   return (
@@ -177,6 +194,7 @@ const ProfileTabs: Component<{
               </div>
             </Tabs.Trigger>
           </Show>
+
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
@@ -195,6 +213,14 @@ const ProfileTabs: Component<{
               </div>
               <div class={styles.statName}>
                 {intl.formatMessage(t.stats.replies)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
+          <Tabs.Trigger class={styles.profileTab} value="gallery">
+            <div class={styles.stat}>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.gallery)}
               </div>
             </div>
           </Tabs.Trigger>
@@ -409,6 +435,85 @@ const ProfileTabs: Component<{
                     profile?.actions.fetchNextRepliesPage();
                   }}
                   isSmall={true}
+                />
+              </Match>
+            </Switch>
+          </div>
+        </Tabs.Content>
+
+        <Tabs.Content class={styles.tabContent} value="gallery">
+          <div class={styles.profileNotes}>
+            <Switch
+              fallback={
+                <div style="margin-top: 40px;">
+                  <Loader />
+                </div>
+            }>
+              <Match when={isMuted(profile?.profileKey)}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(
+                    t.isMuted,
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                  )}
+                  <button
+                    onClick={unMuteProfile}
+                  >
+                    {intl.formatMessage(tActions.unmute)}
+                  </button>
+                </div>
+              </Match>
+              <Match when={isFiltered()}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(t.isFiltered)}
+                  <button
+                    onClick={addToAllowlist}
+                  >
+                    {intl.formatMessage(tActions.addToAllowlist)}
+                  </button>
+                </div>
+              </Match>
+              <Match when={profile && profile.gallery.length === 0 && !profile.isFetchingGallery}>
+                <div class={styles.mutedProfile}>
+                  {intl.formatMessage(
+                    t.noReplies,
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                  )}
+                </div>
+              </Match>
+              <Match when={profile && profile.gallery.length > 0}>
+                <div class={styles.galleryGrid}>
+                  <div class={styles.galleryColumn}>
+                    <For each={galleryImages()}>
+                      {(note, index) => (
+                        <Show when={index()%3 === 1}>
+                          <NoteGallery note={note} />
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                  <div class={styles.galleryColumn}>
+                    <For each={galleryImages()}>
+                      {(note, index) => (
+                        <Show when={index()%3 === 2}>
+                          <NoteGallery note={note} />
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                  <div class={styles.galleryColumn}>
+                    <For each={galleryImages()}>
+                      {(note, index) => (
+                        <Show when={index()%3 === 0}>
+                          <NoteGallery note={note} />
+                        </Show>
+                      )}
+                    </For>
+                  </div>
+                </div>
+                <Paginator
+                  loadNextPage={() => {
+                    profile?.actions.fetchNextGalleryPage();
+                  }}
                 />
               </Match>
             </Switch>
