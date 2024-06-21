@@ -232,7 +232,7 @@ const EmbeddedNote: Component<{
         <NoteFooter
           note={props.note}
           state={reactionsState}
-          size="short"
+          size="compact"
           updateState={updateReactionsState}
           customZapInfo={customZapInfo()}
         />
