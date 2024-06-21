@@ -53,6 +53,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
 import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
+import { logError } from '../../lib/logger';
 
 const groupGridLimit = 7;
 
@@ -1009,6 +1010,7 @@ const ParsedNote: Component<{
           }
 
         } catch (e) {
+          logError('ERROR rendering note mention', e);
           setWordsDisplayed(w => w + 1);
           link = <span class={styles.error}>{token}</span>;
         }

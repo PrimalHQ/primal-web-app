@@ -30,8 +30,8 @@ const NoteFooter: Component<{
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   id?: string,
   state: NoteReactionsState,
-  updateState: SetStoreFunction<NoteReactionsState>,
-  customZapInfo: CustomZapInfo,
+  updateState?: SetStoreFunction<NoteReactionsState>,
+  customZapInfo?: CustomZapInfo,
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
 }> = (props) => {
@@ -66,7 +66,8 @@ const NoteFooter: Component<{
 
   const onClickOutside = (e: MouseEvent) => {
     if (
-      !document?.getElementById(`repost_menu_${props.note.post.id}`)?.contains(e.target as Node)
+      !document?.getElementById(`repost_menu_${props.note.post.id}`)?.contains(e.target as Node) &&
+      props.updateState
     ) {
       props.updateState('isRepostMenuVisible', () => false);
     }
@@ -83,7 +84,7 @@ const NoteFooter: Component<{
 
   const showRepostMenu = (e: MouseEvent) => {
     e.preventDefault();
-    props.updateState('isRepostMenuVisible', () => true);
+    props.updateState && props.updateState('isRepostMenuVisible', () => true);
   };
 
   const doQuote = () => {
@@ -91,7 +92,7 @@ const NoteFooter: Component<{
       account?.actions.showGetStarted();
       return;
     }
-    props.updateState('isRepostMenuVisible', () => false);
+    props.updateState && props.updateState('isRepostMenuVisible', () => false);
     account?.actions?.quoteNote(`nostr:${props.note.post.noteId}`);
     account?.actions?.showNewNoteForm();
   };
@@ -113,14 +114,14 @@ const NoteFooter: Component<{
       return;
     }
 
-    props.updateState('isRepostMenuVisible', () => false);
+    props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
     const { success } = await sendRepost(props.note, account.relays, account.relaySettings);
 
     if (success) {
       batch(() => {
-        props.updateState('reposts', (r) => r + 1);
-        props.updateState('reposted', () => true);
+        props.updateState && props.updateState('reposts', (r) => r + 1);
+        props.updateState && props.updateState('reposted', () => true);
       });
 
       toast?.sendSuccess(
@@ -160,8 +161,8 @@ const NoteFooter: Component<{
 
     if (success) {
       batch(() => {
-        props.updateState('likes', (l) => l + 1);
-        props.updateState('liked', () => true);
+        props.updateState && props.updateState('likes', (l) => l + 1);
+        props.updateState && props.updateState('liked', () => true);
       });
     }
   };
@@ -172,7 +173,7 @@ const NoteFooter: Component<{
 
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted();
-      props.updateState('isZapping', () => false);
+      props.updateState && props.updateState('isZapping', () => false);
       return;
     }
 
@@ -187,13 +188,13 @@ const NoteFooter: Component<{
       toast?.sendWarning(
         intl.formatMessage(t.zapUnavailable),
       );
-      props.updateState('isZapping', () => false);
+      props.updateState && props.updateState('isZapping', () => false);
       return;
     }
 
     quickZapDelay = setTimeout(() => {
-      app?.actions.openCustomZapModal(props.customZapInfo);
-      props.updateState('isZapping', () => true);
+      props.customZapInfo && app?.actions.openCustomZapModal(props.customZapInfo);
+      props.updateState && props.updateState('isZapping', () => true);
     }, 500);
   };
 
@@ -219,7 +220,7 @@ const NoteFooter: Component<{
 
   const animateZap = () => {
     setTimeout(() => {
-      props.updateState('hideZapIcon', () => true);
+      props.updateState && props.updateState('hideZapIcon', () => true);
 
       if (!medZapAnimation) {
         return;
@@ -248,9 +249,9 @@ const NoteFooter: Component<{
 
       const onAnimDone = () => {
         batch(() => {
-          props.updateState('showZapAnim', () => false);
-          props.updateState('hideZapIcon', () => false);
-          props.updateState('zapped', () => true);
+          props.updateState && props.updateState('showZapAnim', () => false);
+          props.updateState && props.updateState('hideZapIcon', () => false);
+          props.updateState && props.updateState('zapped', () => true);
         });
         medZapAnimation?.removeEventListener('complete', onAnimDone);
       }
@@ -280,9 +281,9 @@ const NoteFooter: Component<{
     const emoji = settings?.defaultZap.emoji;
 
     batch(() => {
-      props.updateState('isZapping', () => true);
-      props.updateState('satsZapped', (z) => z + amount);
-      props.updateState('showZapAnim', () => true);
+      props.updateState && props.updateState('isZapping', () => true);
+      props.updateState && props.updateState('satsZapped', (z) => z + amount);
+      props.updateState && props.updateState('showZapAnim', () => true);
     });
 
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
@@ -290,10 +291,10 @@ const NoteFooter: Component<{
     setTimeout(async () => {
       const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
 
-      props.updateState('isZapping', () => false);
+      props.updateState && props.updateState('isZapping', () => false);
 
       if (success) {
-        props.customZapInfo.onSuccess({
+        props.customZapInfo &&props.customZapInfo.onSuccess({
           emoji,
           amount,
           message,
@@ -302,7 +303,7 @@ const NoteFooter: Component<{
         return;
       }
 
-      props.customZapInfo.onFail({
+      props.customZapInfo && props.customZapInfo.onFail({
         emoji,
         amount,
         message,

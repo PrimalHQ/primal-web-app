@@ -282,7 +282,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
     if (mentionIds.length > 0) {
       for (let i = 0;i<mentionIds.length;i++) {
-        const id = mentionIds[i];
+        let id = mentionIds[i];
         const m = mentions && mentions[id];
 
         if (!m) {
@@ -296,11 +296,36 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
           }
         }
 
+        const mentionStat = page.postStats[id];
+
+        const noteActions = (page.noteActions && page.noteActions[id]) ?? {
+          event_id: id,
+          liked: false,
+          replied: false,
+          reposted: false,
+          zapped: false,
+        };
+
         mentionedNotes[id] = {
           // @ts-ignore TODO: Investigate this typing
-          post: { ...m, noteId: nip19.noteEncode(m.id) },
+          post: {
+            ...m,
+            noteId: nip19.noteEncode(m.id),
+            likes: mentionStat?.likes || 0,
+            mentions: mentionStat?.mentions || 0,
+            reposts: mentionStat?.reposts || 0,
+            replies: mentionStat?.replies || 0,
+            zaps: mentionStat?.zaps || 0,
+            score: mentionStat?.score || 0,
+            score24h: mentionStat?.score24h || 0,
+            satszapped: mentionStat?.satszapped || 0,
+            noteActions,
+          },
           user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
           mentionedUsers,
+          pubkey: m.pubkey,
+          id: m.id,
+          noteId: nip19.noteEncode(m.id),
         };
       }
     }

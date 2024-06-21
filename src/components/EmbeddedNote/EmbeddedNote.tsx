@@ -1,15 +1,20 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { Component, createMemo, JSXElement, Show } from 'solid-js';
+import { batch, Component, createMemo, JSXElement, Show } from 'solid-js';
+import { createStore } from 'solid-js/store';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { trimVerification } from '../../lib/profile';
 import { nip05Verification, userName } from '../../stores/profile';
 import { note as t } from '../../translations';
-import { PrimalNote, PrimalUser } from '../../types/primal';
+import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
+import { NoteReactionsState } from '../Note/Note';
+import NoteFooter from '../Note/NoteFooter/NoteFooter';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
@@ -26,8 +31,32 @@ const EmbeddedNote: Component<{
 
   const threadContext = useThreadContext();
   const intl = useIntl();
+  const app = useAppContext();
+  const account = useAccountContext();
 
   let noteContent: HTMLDivElement | undefined;
+
+  const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
+    likes: props.note?.post.likes || 0,
+    liked: props.note?.post.noteActions?.liked || false,
+    reposts: props.note?.post.reposts || 0,
+    reposted: props.note?.post.noteActions?.reposted || false,
+    replies: props.note?.post.replies || 0,
+    replied: props.note?.post.noteActions?.replied || false,
+    zapCount: props.note?.post.zaps || 0,
+    satsZapped: props.note?.post.satszapped || 0,
+    zapped: props.note?.post.noteActions?.zapped || false,
+    zappedAmount: 0,
+    zappedNow: false,
+    isZapping: false,
+    showZapAnim: false,
+    hideZapIcon: false,
+    moreZapsAvailable: false,
+    isRepostMenuVisible: false,
+    topZaps: [],
+    topZapsFeed: [],
+    quoteCount: 0,
+  });
 
   const noteId = () => nip19.noteEncode(props.note?.post.id);
 
@@ -75,6 +104,82 @@ const EmbeddedNote: Component<{
     );
   };
 
+  const onConfirmZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => zapOption.amount || 0);
+      updateReactionsState('satsZapped', (z) => z + (zapOption.amount || 0));
+      updateReactionsState('zapped', () => true);
+      updateReactionsState('showZapAnim', () => true)
+    });
+
+    // addTopZap(zapOption);
+    // addTopZapFeed(zapOption)
+  };
+
+  const onSuccessZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    batch(() => {
+      updateReactionsState('zapCount', (z) => z + 1);
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => true);
+    });
+  };
+
+  const onFailZap = (zapOption: ZapOption) => {
+    const note = props.note;
+    if (!note) return;
+
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => note.post.noteActions.zapped);
+    });
+
+    // removeTopZap(zapOption);
+    // removeTopZapFeed(zapOption);
+  };
+
+  const onCancelZap = (zapOption: ZapOption) => {
+    const note = props.note;
+    if (!note) return;
+
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      updateReactionsState('zappedAmount', () => -(zapOption.amount || 0));
+      updateReactionsState('satsZapped', (z) => z - (zapOption.amount || 0));
+      updateReactionsState('isZapping', () => false);
+      updateReactionsState('showZapAnim', () => false);
+      updateReactionsState('hideZapIcon', () => false);
+      updateReactionsState('zapped', () => note.post.noteActions.zapped);
+    });
+
+    // removeTopZap(zapOption);
+    // removeTopZapFeed(zapOption);
+  };
+
+  const customZapInfo: () => CustomZapInfo = () => ({
+    note: props.note,
+    onConfirm: onConfirmZap,
+    onSuccess: onSuccessZap,
+    onFail: onFailZap,
+    onCancel: onCancelZap,
+  });
+
   return wrapper(
     <>
       <div class={styles.mentionedNoteHeader}>
@@ -121,6 +226,15 @@ const EmbeddedNote: Component<{
           isEmbeded={true}
           width={noteContent?.getBoundingClientRect().width}
           margins={2}
+        />
+      </div>
+      <div class={styles.footer}>
+        <NoteFooter
+          note={props.note}
+          state={reactionsState}
+          size="short"
+          updateState={updateReactionsState}
+          customZapInfo={customZapInfo()}
         />
       </div>
     </>

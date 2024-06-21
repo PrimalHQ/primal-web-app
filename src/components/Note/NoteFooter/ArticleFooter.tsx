@@ -243,8 +243,6 @@ const ArticleFooter: Component<{
         newTop = -6;
       }
 
-      console.log('SIZE: ', newLeft);
-
       medZapAnimation.style.left = `${newLeft}px`;
       medZapAnimation.style.top = `${newTop}px`;
 
