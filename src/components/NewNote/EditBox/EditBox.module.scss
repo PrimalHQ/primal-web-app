@@ -359,3 +359,25 @@ textarea::-webkit-scrollbar{
 .uploader {
   width: 484px;
 }
+
+.toggle {
+  background: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  border: none;
+  outline: none;
+
+  .off {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: 400;
+  }
+  .on {
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 14px;
+    font-weight: 700;
+  }
+}

@@ -351,13 +351,94 @@ export const sendArticleRepost = async (note: PrimalArticle, relays: Relay[], re
   return await sendEvent(event, relays, relaySettings);
 }
 
-export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
+export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+  let signedNote: NostrRelaySignedEvent | undefined;
+
+  try {
+    signedNote = await signEvent(event);
+    if (!signedNote) throw('event_not_signed');
+  } catch (reason) {
+    logError('Failed to send event: ', reason);
+    return { success: false , reasons: [reason]} as SendNoteResult;
+  }
+
+  // Relay hints from `e` tags
+  const hintRelayUrls = event.tags.reduce((acc, t) => {
+    if (
+      t[0] === 'e' &&
+      t[2] &&
+      t[2].length > 0 &&
+      !relays.find(r => r.url === t[2])
+    ) {
+      return [ ...acc, t[2] ];
+    }
+
+    return [...acc];
+  }, []);
+
+  let userRelays: Relay[] = relaySettings ?
+    relays.filter((relay) => (relaySettings[relay.url] || { read: true, write: true }).write) :
+    [...relays];
+
+  const publishRelays = new Set<string>([ ...userRelays.map(r => r.url), ...hintRelayUrls]);
+
+  const promise = new Promise<boolean>((resolve, reject) => {
+    if (!signedNote) {
+      reject("Note not signed");
+      return;
+    }
+
+    const subId = `publish_note_${signedNote.id}`;
+
+    const unsub = subscribeTo(subId, (type, _, content) => {
+      if (type === "NOTICE") {
+        unsub();
+        reject("Failed to publish note");
+        return;
+      }
+
+      if (type === "EVENT") {
+        unsub();
+        resolve(true);
+        return;
+      }
+
+      if (type === "EOSE") {
+        unsub();
+        reject('No publish confirmation')
+        return;
+      }
+    })
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      `publish_note_${signedNote.id}`,
+      { cache: ["broadcast_events", { events: [signedNote], relays: Array.from(publishRelays) }]}
+    ]));
+  });
+
+  try {
+    await Promise.race([promise]);
+
+    return { success: true, note: signedNote } as SendNoteResult;
+  }
+  catch (e) {
+    logError('Failed to publish the note: ', e);
+    return { success: false, reasons: [e], note: signedNote} as SendNoteResult;
+  }
+}
+
+export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays, shouldProxy = false) => {
   const event = {
     content: text,
     kind: Kind.Text,
     tags,
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
+
+  if (shouldProxy) {
+    return await proxyEvent(event, relays, relaySettings);
+  }
 
   return await sendEvent(event, relays, relaySettings);
 }

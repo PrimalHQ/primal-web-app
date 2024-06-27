@@ -46,6 +46,7 @@ import { logError } from "../../../lib/logger";
 import Lnbc from "../../Lnbc/Lnbc";
 import { decodeIdentifier, hexToNpub } from "../../../lib/keys";
 import LinkPreview from "../../LinkPreview/LinkPreview";
+import { ToggleButton } from "@kobalte/core";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -103,6 +104,8 @@ const EditBox: Component<{
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
   const [relayHints, setRelayHints] = createStore<Record<string, string>>({});
+
+  const [proxyNote, setProxyNote] = createSignal(false);
 
   const location = useLocation();
 
@@ -760,7 +763,7 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
-      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
+      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings, proxyNote());
 
       if (success) {
 
@@ -1615,6 +1618,13 @@ const EditBox: Component<{
           </div>
         </div>
         <div class={styles.editorDescision}>
+          <ToggleButton.Root class={styles.toggle} pressed={proxyNote()} onChange={setProxyNote}>
+            {state => (
+              <Show when={state.pressed()} fallback={<div class={styles.off}>Relay publish</div>}>
+                <div class={styles.on}>Proxy publish</div>
+              </Show>
+            )}
+          </ToggleButton.Root>
           <ButtonPrimary
             onClick={postNote}
             disabled={isPostingInProgress() || fileToUpload() || message().trim().length === 0}
