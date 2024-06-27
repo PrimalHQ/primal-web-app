@@ -1191,6 +1191,7 @@ const EditBox: Component<{
                   note={note}
                   mentionedUsers={note.mentionedUsers || {}}
                   includeEmbeds={true}
+                  hideFooter={true}
                 />
               </Router>
             </TranslatorProvider>

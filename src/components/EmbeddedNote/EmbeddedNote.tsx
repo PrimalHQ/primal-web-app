@@ -27,6 +27,8 @@ const EmbeddedNote: Component<{
   isLast?: boolean,
   alternativeBackground?: boolean,
   class?: string,
+  footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
+  hideFooter?: boolean,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -229,13 +231,15 @@ const EmbeddedNote: Component<{
         />
       </div>
       <div class={styles.footer}>
-        <NoteFooter
-          note={props.note}
-          state={reactionsState}
-          size="compact"
-          updateState={updateReactionsState}
-          customZapInfo={customZapInfo()}
-        />
+        <Show when={!props.hideFooter}>
+          <NoteFooter
+            note={props.note}
+            state={reactionsState}
+            size={props.footerSize || 'compact'}
+            updateState={updateReactionsState}
+            customZapInfo={customZapInfo()}
+          />
+        </Show>
       </div>
     </>
   );
