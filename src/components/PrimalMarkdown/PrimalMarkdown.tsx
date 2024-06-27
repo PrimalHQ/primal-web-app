@@ -48,8 +48,9 @@ const PrimalMarkdown: Component<{
   readonly?:  boolean,
   noteId: string,
   article: PrimalArticle | undefined,
+  highlights?: any[],
 }> = (props) => {
-const account = useAccountContext();
+  const account = useAccountContext();
 
   let ref: HTMLDivElement | undefined;
   let editor: Editor;
@@ -207,6 +208,24 @@ const account = useAccountContext();
       insert(props.content || '')(editor.ctx);
 
       setHTML(getHTML()(editor.ctx));
+  });
+
+  createEffect(() => {
+
+    if (!props.highlights) return;
+    if (!editor) return;
+
+    const htmlContent = getHTML()(editor.ctx);
+
+    let parsedContent = ''
+
+    if (props.highlights) {
+      parsedContent = props.highlights.reduce((acc, hl) => {
+        return acc.replace(hl, `<em>${hl}</em>`);
+      }, htmlContent);
+    }
+
+    setHTML(parsedContent);
   });
 
   onCleanup(() => {

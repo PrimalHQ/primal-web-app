@@ -6,7 +6,7 @@ import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
-import { getParametrizedEvent, sendEvent, setLinkPreviews } from "../lib/notes";
+import { getHighlights, getParametrizedEvent, sendEvent, setLinkPreviews } from "../lib/notes";
 import { subscribeTo, subsTo } from "../sockets";
 import { SolidMarkdown } from "solid-markdown";
 
@@ -74,6 +74,7 @@ export type LongformThreadStore = {
   isFetching: boolean,
   lastReply: PrimalNote | undefined,
   hasTiers: boolean,
+  highlights: any[],
 }
 
 const emptyArticle = {
@@ -101,6 +102,7 @@ const emptyStore: LongformThreadStore = {
     topZaps: {},
     wordCount: {},
   },
+  highlights: [],
   users: [],
   isFetching: false,
   lastReply: undefined,
@@ -181,6 +183,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     lightbox.init();
     clearArticle();
     fetchArticle();
+    fetchHighlights();
   });
 
   createEffect(() => {
@@ -717,6 +720,30 @@ const Longform: Component< { naddr: string } > = (props) => {
     updateStore('replies', (reps) => [ ...replies, ...reps]);
   };
 
+  const fetchHighlights = () => {
+    const decoded = decodeIdentifier(naddr());
+
+    const { pubkey, identifier, kind } = decoded.data;
+
+    if (kind !== Kind.LongForm) return;
+
+    const subId = `lf_highlights_${naddr()}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === Kind.Highlight) {
+          console.log('HIGHLIGHT: ', content);
+          updateStore('highlights', store.highlights.length, () => content.content);
+        }
+      },
+      onEose: () => {
+        unsub();
+      }
+    });
+
+    getHighlights(pubkey, identifier, kind, subId, account?.publicKey);
+  }
+
   return (
     <>
       <Wormhole
@@ -818,6 +845,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             content={store.article?.content || ''}
             readonly={true}
             article={store.article}
+            highlights={store.highlights}
           />
 
           <div class={styles.tags}>

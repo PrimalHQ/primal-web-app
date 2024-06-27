@@ -710,3 +710,12 @@ export const getParametrizedEvents = (events: EventCoordinate[], subid: string) 
     {cache: ["parametrized_replaceable_events", { events, extended_response: true }]},
   ]));
 };
+
+
+export const getHighlights = (pubkey: string, identifier: string, kind: number, subid: string, user_pubkey: string | undefined) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_highlights", { pubkey, identifier, kind, user_pubkey }]},
+  ]));
+};

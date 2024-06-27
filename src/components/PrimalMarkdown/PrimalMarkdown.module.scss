@@ -196,6 +196,12 @@
       background-color: var(--background-input);
     }
 
+    em {
+      background-color: var(--highlight);
+      color: var(--text-primary);
+      padding-block: 4px;
+    }
+
     code {
       color: var(--brand-text);
       font-family: "Fira Mono", monospace;

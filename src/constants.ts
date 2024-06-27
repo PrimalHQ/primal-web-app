@@ -104,6 +104,7 @@ export enum Kind  {
 
   Subscribe = 7_001,
   Unsubscribe = 7_002,
+  Highlight = 9_802,
   Zap = 9_735,
 
   MuteList = 10_000,
