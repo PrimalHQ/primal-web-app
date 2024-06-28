@@ -567,7 +567,7 @@ const Profile: Component = () => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
+    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
@@ -594,7 +594,7 @@ const Profile: Component = () => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.relays, account.relaySettings);
+    await sendEvent(unsubEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
   }
 

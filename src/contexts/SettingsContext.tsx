@@ -75,6 +75,7 @@ export type SettingsContextStore = {
     setApplyContentModeration: (flag: boolean) => void,
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
     refreshMobileReleases: () => void,
+    setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
   }
 }
 
@@ -107,6 +108,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
+
+  const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
+    account?.actions.setProxyThroughPrimal(shouldProxy);
+    !temp && saveSettings();
+  }
 
   const setDefaultZapAmount = (option: ZapOption, temp?: boolean) => {
     updateStore('defaultZap', () => option);
@@ -312,6 +318,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       notifications: store.notificationSettings,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
+      proxyThroughPrimal: account?.proxyThroughPrimal || false,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -402,6 +409,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             notifications,
             applyContentModeration,
             contentModeration,
+            proxyThroughPrimal,
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
@@ -485,6 +493,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
             setAvailableFeeds(fs, true);
           }
+
+          account?.actions.setProxyThroughPrimal(proxyThroughPrimal);
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -660,6 +670,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setApplyContentModeration,
       modifyContentModeration,
       refreshMobileReleases,
+      setProxyThroughPrimal,
     },
   });
 

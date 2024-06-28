@@ -38,7 +38,12 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
       <For each={connectedRelays()}>
         {relay => (
           <div class={styles.relayEntry}>
-            <div class={styles.connected}></div>
+            <Show
+              when={!account?.proxyThroughPrimal}
+              fallback={<div class={styles.suspended}></div>}
+            >
+              <div class={styles.connected}></div>
+            </Show>
             <span class={styles.relayUrl} title={relay.url}>
               {relay.url}
             </span>
@@ -48,7 +53,12 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
       <For each={disconnectedRelays()}>
         {relay => (
           <div class={styles.relayEntry}>
-            <div class={styles.disconnected}></div>
+            <Show
+              when={!account?.proxyThroughPrimal}
+              fallback={<div class={styles.suspended}></div>}
+            >
+              <div class={styles.disconnected}></div>
+            </Show>
             <span class={styles.relayUrl} title={relay.url}>
               {relay.url}
             </span>

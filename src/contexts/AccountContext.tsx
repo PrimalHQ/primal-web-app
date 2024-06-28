@@ -76,6 +76,7 @@ export type AccountContextStore = {
   emojiHistory: EmojiOption[],
   membershipStatus: MembershipStatus,
   bookmarks: string[],
+  proxyThroughPrimal: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -106,6 +107,7 @@ export type AccountContextStore = {
     fetchBookmarks: () => void,
     updateBookmarks: (bookmarks: string[]) => void,
     resetRelays: (relays: Relay[]) => void,
+    setProxyThroughPrimal: (shouldProxy: boolean) => void,
   },
 }
 
@@ -140,6 +142,7 @@ const initialData = {
   emojiHistory: [],
   membershipStatus: {},
   bookmarks: [],
+  proxyThroughPrimal: false,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -164,6 +167,10 @@ export function AccountProvider(props: { children: JSXElement }) {
   //     checkNostrChange();
   //   }, 1_000);
   // });
+
+  const setProxyThroughPrimal = (shouldProxy: boolean) => {
+    updateStore('proxyThroughPrimal', () => shouldProxy);
+  }
 
   const checkNostrChange = async () => {
     if (location.pathname === '/') return;
@@ -385,7 +392,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const onConnect = (connectedRelay: Relay) => {
       if (sendRelayList) {
-        sendRelays([connectedRelay], relaySettings);
+        sendRelays([connectedRelay], relaySettings, store.proxyThroughPrimal);
       }
 
       if (store.relays.find(r => r.url === connectedRelay.url)) {
@@ -523,7 +530,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       return false;
     }
 
-    const { success } = await sendLike(note, store.relays, store.relaySettings);
+    const { success } = await sendLike(note, store.proxyThroughPrimal, store.relays, store.relaySettings);
 
     if (success) {
       updateStore('likes', (likes) => [ ...likes, note.id]);
@@ -553,7 +560,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       if (type === 'EOSE') {
 
-        sendRelays(store.relays, store.relaySettings);
+        sendRelays(store.relays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
         return;
@@ -596,7 +603,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       if (type === 'EOSE') {
 
-        sendRelays(store.relays, store.relaySettings);
+        sendRelays(store.relays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
         return;
@@ -707,7 +714,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     relayInfo: string,
     cb?: (remove: boolean, pubkey: string) => void,
   ) => {
-    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.proxyThroughPrimal, store.relays, store.relaySettings);
 
     if (success && event) {
       updateStore('following', () => following);
@@ -882,7 +889,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...store.muted, pubkey];
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -920,7 +927,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = store.muted.filter(m => m !== pubkey);
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -975,7 +982,6 @@ export function AccountProvider(props: { children: JSXElement }) {
       // Reset connection attempts
       relayAtempts[url] = 0;
     }
-
   };
 
   const updateFilterlists = (mutelists: NostrMutedContent) => {
@@ -1079,7 +1085,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('mutelists', (mls) => [ ...mls, { pubkey, content: true, trending: true } ]);
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
@@ -1120,7 +1126,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('mutelists', () => [ ...modified ]);
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
@@ -1164,7 +1170,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           () => ({ content, trending }),
         );
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
@@ -1248,7 +1254,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('allowlist', store.allowlist.length, () => pubkey);
 
-        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
@@ -1291,7 +1297,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('allowlist', () => [...newList]);
 
-        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.proxyThroughPrimal, store.relays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
@@ -1584,6 +1590,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     fetchBookmarks,
     updateBookmarks,
     resetRelays,
+    setProxyThroughPrimal,
   },
 });
 

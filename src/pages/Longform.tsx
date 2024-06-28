@@ -52,6 +52,7 @@ import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeTo
 import ButtonPrimary from "../components/Buttons/ButtonPrimary";
 import { zapSubscription } from "../lib/zap";
 import Paginator from "../components/Paginator/Paginator";
+import { useSettingsContext } from "../contexts/SettingsContext";
 
 export type LongFormData = {
   title: string,
@@ -112,7 +113,7 @@ const emptyStore: LongformThreadStore = {
 const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
-  const thread = useThreadContext();
+  const settings = useSettingsContext();
   const params = useParams();
   const intl = useIntl();
 
@@ -236,7 +237,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
+    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
@@ -263,7 +264,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.relays, account.relaySettings);
+    await sendEvent(unsubEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
   }
 
@@ -731,8 +732,10 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
+        // @ts-ignore
         if (content.kind === Kind.Highlight) {
           console.log('HIGHLIGHT: ', content);
+          // @ts-ignore
           updateStore('highlights', store.highlights.length, () => content.content);
         }
       },

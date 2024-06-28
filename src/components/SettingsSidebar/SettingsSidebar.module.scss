@@ -55,6 +55,14 @@
     margin-right: 8px;
   }
 
+  .suspended {
+    background-color: var(--text-secondary);
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    margin-right: 8px;
+  }
+
   .relayUrl {
     max-width: 274px;
     text-overflow: ellipsis;

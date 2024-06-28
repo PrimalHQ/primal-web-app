@@ -12,7 +12,7 @@ import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions, note as tNote } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import CustomZap from '../../CustomZap/CustomZap';
-import { broadcastEvent, sendNote } from '../../../lib/notes';
+import { broadcastEvent } from '../../../lib/notes';
 import { useAccountContext } from '../../../contexts/AccountContext';
 import { reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
@@ -102,7 +102,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
       return;
     }
 
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
+    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.relays, account.relaySettings);
     setContext(false);
 
     if (success) {

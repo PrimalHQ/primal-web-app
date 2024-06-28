@@ -116,7 +116,7 @@ const NoteFooter: Component<{
 
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(props.note, account.relays, account.relaySettings);
+    const { success } = await sendRepost(props.note, account.proxyThroughPrimal, account.relays, account.relaySettings);
 
     if (success) {
       batch(() => {

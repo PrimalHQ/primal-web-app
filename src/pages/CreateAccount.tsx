@@ -34,6 +34,7 @@ import { subscribeTo } from '../sockets';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
 import Uploader from '../components/Uploader/Uploader';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -43,6 +44,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const account = useAccountContext();
   const search = useSearchContext();
   const toast = useToastContext();
+  const settings = useSettingsContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -202,7 +204,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       }
     });
 
-    const { success } = await sendProfile({ ...metadata }, account.relays, relaySettings);
+    const { success } = await sendProfile({ ...metadata }, account?.proxyThroughPrimal || false, account.relays, relaySettings);
 
     if (success) {
       await (new Promise((res) => setTimeout(() => res(true), 100)));
@@ -218,7 +220,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         tags.push(['p', pubkey]);
       }
 
-      const sendResult = await sendContacts(tags, date, '', account.relays, relaySettings);
+      const sendResult = await sendContacts(tags, date, '', account.proxyThroughPrimal, account.relays, relaySettings);
 
       if (sendResult.success && sendResult.note) {
         triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
@@ -226,7 +228,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         });
       }
 
-      const relayResult = await sendRelays(account.relays, relaySettings);
+      const relayResult = await sendRelays(account.relays, relaySettings, account.proxyThroughPrimal);
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {

@@ -6,6 +6,7 @@ import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { fetchUserProfile } from '../../handleNotes';
 import { date, shortDate } from '../../lib/dates';
@@ -31,6 +32,7 @@ const AuthoreSubscribe: Component<{
   const account = useAccountContext();
   const app = useAppContext();
   const navigate = useNavigate();
+  const settings = useSettingsContext();
 
   const [isFetching, setIsFetching] = createSignal(false);
   const [author, setAuthor] = createSignal<PrimalUser>();
@@ -75,7 +77,7 @@ const AuthoreSubscribe: Component<{
     }
 
 
-    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings);
+    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
@@ -102,7 +104,7 @@ const AuthoreSubscribe: Component<{
       ],
     };
 
-    await sendEvent(unsubEvent, account.relays, account.relaySettings);
+    await sendEvent(unsubEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
 
   }
 

@@ -46,6 +46,7 @@ import { sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";
 import { loadDmCoversations, loadMsgContacts, saveDmConversations, saveMsgContacts } from "../lib/localStore";
 import { useAppContext } from "./AppContext";
+import { useSettingsContext } from "./SettingsContext";
 
 
 export type MessagesContextStore = {
@@ -104,6 +105,7 @@ export const initialData = {
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
 };
 
@@ -114,6 +116,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
   const app = useAppContext();
+  const settings = useSettingsContext();
 
   let msgSubscribed = '|';
 
@@ -559,7 +562,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         created_at: Math.floor((new Date).getTime() / 1000),
       };
 
-      const { success } = await sendEvent(event, account?.relays, account?.relaySettings);
+      const { success } = await sendEvent(event, account?.relays, account?.relaySettings, account?.proxyThroughPrimal || false);
 
       if (success) {
         const msg = { ...message, content: sanitize(message.content) };

@@ -1,6 +1,6 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
 import { MenuItem, PrimalArticle, PrimalNote, ZapOption } from '../../../types/primal';
-import { sendArticleRepost, sendRepost, triggerImportEvents } from '../../../lib/notes';
+import { sendArticleRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
@@ -115,7 +115,7 @@ const ArticleFooter: Component<{
 
     props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendArticleRepost(props.note, account.relays, account.relaySettings);
+    const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.relays, account.relaySettings);
 
     if (success) {
       batch(() => {

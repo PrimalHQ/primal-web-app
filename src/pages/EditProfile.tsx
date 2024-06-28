@@ -24,6 +24,7 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import Uploader from '../components/Uploader/Uploader';
 import { triggerImportEvents } from '../lib/notes';
 import { APP_ID } from '../App';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -35,6 +36,7 @@ const EditProfile: Component = () => {
   const media = useMediaContext();
   const account = useAccountContext();
   const toast = useToastContext();
+  const settings = useSettingsContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -224,7 +226,7 @@ const EditProfile: Component = () => {
 
     const oldProfile = profile?.userProfile || {};
 
-    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account.relays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.relays, account.relaySettings);
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`);

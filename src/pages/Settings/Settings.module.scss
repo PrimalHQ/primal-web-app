@@ -416,6 +416,10 @@
   margin: 0;
   background: none;
 
+  &.extended {
+    margin-inline: -20px;
+  }
+
   .relayEntry {
     display: flex;
     justify-content: flex-start;
@@ -441,6 +445,15 @@
       border-radius: 2px;
       margin-right: 8px;
     }
+
+    .suspended {
+      background-color: var(--text-secondary);
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      margin-right: 8px;
+    }
+
 
     .relayUrl {
       max-width: 450px;

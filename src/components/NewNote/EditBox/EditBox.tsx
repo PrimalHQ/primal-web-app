@@ -47,6 +47,7 @@ import Lnbc from "../../Lnbc/Lnbc";
 import { decodeIdentifier, hexToNpub } from "../../../lib/keys";
 import LinkPreview from "../../LinkPreview/LinkPreview";
 import { ToggleButton } from "@kobalte/core";
+import { useSettingsContext } from "../../../contexts/SettingsContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -69,6 +70,7 @@ const EditBox: Component<{
   const account = useAccountContext();
   const toast = useToastContext();
   const profile = useProfileContext();
+  const settings = useSettingsContext();
 
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
@@ -104,8 +106,6 @@ const EditBox: Component<{
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
   const [relayHints, setRelayHints] = createStore<Record<string, string>>({});
-
-  const [proxyNote, setProxyNote] = createSignal(false);
 
   const location = useLocation();
 
@@ -763,7 +763,7 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
-      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings, proxyNote());
+      const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.relays, tags, account.relaySettings);
 
       if (success) {
 
@@ -1618,13 +1618,6 @@ const EditBox: Component<{
           </div>
         </div>
         <div class={styles.editorDescision}>
-          <ToggleButton.Root class={styles.toggle} pressed={proxyNote()} onChange={setProxyNote}>
-            {state => (
-              <Show when={state.pressed()} fallback={<div class={styles.off}>Relay publish</div>}>
-                <div class={styles.on}>Proxy publish</div>
-              </Show>
-            )}
-          </ToggleButton.Root>
           <ButtonPrimary
             onClick={postNote}
             disabled={isPostingInProgress() || fileToUpload() || message().trim().length === 0}

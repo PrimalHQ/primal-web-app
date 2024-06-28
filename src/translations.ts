@@ -1540,6 +1540,16 @@ export const settings = {
       defaultMessage: 'Connect to a different caching service',
       description: 'Title of the alternative caching service section of the Network settings sub-page',
     },
+    proxyEvents: {
+      id: 'settings.filters.proxyEvents',
+      defaultMessage: 'Use Enhanced Privacy',
+      description: 'Caption for option to proy event publishing through Primal',
+    },
+    proxyDescription: {
+      id: 'settings.filters.proxyDescription',
+      defaultMessage: 'When enabled, your IP address will be visible to the caching service, but not to relays. Your content will be published to your specified relays using the caching service as a proxy. ',
+      description: 'Description of the proxy events settings sub-page',
+    },
   },
   relays: {
     id: 'settings.relays',

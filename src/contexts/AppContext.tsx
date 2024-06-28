@@ -10,8 +10,6 @@ import {
 import { PrimalArticle, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import { Kind } from "../constants";
-import { sendEvent } from "../lib/notes";
 
 
 export type ReactionStats = {

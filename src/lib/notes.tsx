@@ -308,7 +308,7 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
 
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
-export const sendLike = async (note: PrimalNote | PrimalArticle, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendLike = async (note: PrimalNote | PrimalArticle, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
@@ -319,11 +319,11 @@ export const sendLike = async (note: PrimalNote | PrimalArticle, relays: Relay[]
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 
 }
 
-export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendRepost = async (note: PrimalNote, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -334,10 +334,10 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySetting
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
-export const sendArticleRepost = async (note: PrimalArticle, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendArticleRepost = async (note: PrimalArticle, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -348,7 +348,7 @@ export const sendArticleRepost = async (note: PrimalArticle, relays: Relay[], re
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
 export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
@@ -428,7 +428,7 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
   }
 }
 
-export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays, shouldProxy = false) => {
+export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const event = {
     content: text,
     kind: Kind.Text,
@@ -436,14 +436,10 @@ export const sendNote = async (text: string, relays: Relay[], tags: string[][], 
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  if (shouldProxy) {
-    return await proxyEvent(event, relays, relaySettings);
-  }
-
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
-export const sendContacts = async (tags: string[][], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendContacts = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.Contacts,
@@ -451,10 +447,10 @@ export const sendContacts = async (tags: string[][], date: number, content: stri
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const sendMuteList = async (muteList: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendMuteList = async (muteList: string[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.MuteList,
@@ -462,10 +458,14 @@ export const sendMuteList = async (muteList: string[], date: number, content: st
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+export const broadcastEvent = async (event: NostrRelaySignedEvent, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+
+  if (shouldProxy) {
+    return await proxyEvent(event, relays, relaySettings);
+  }
 
   let responses = [];
   let reasons: string[] = [];
@@ -524,7 +524,12 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
   }
 };
 
-export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings: NostrRelays | undefined, shouldProxy: boolean) => {
+
+  if (shouldProxy) {
+    return await proxyEvent(event, relays, relaySettings);
+  }
+
   let signedNote: NostrRelaySignedEvent | undefined;
 
   try {
