@@ -734,7 +734,6 @@ const Longform: Component< { naddr: string } > = (props) => {
       onEvent: (_, content) => {
         // @ts-ignore
         if (content.kind === Kind.Highlight) {
-          console.log('HIGHLIGHT: ', content);
           // @ts-ignore
           updateStore('highlights', store.highlights.length, () => content.content);
         }

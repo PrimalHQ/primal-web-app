@@ -817,7 +817,7 @@ export const fetchUserGallery = (userPubkey: string | undefined, pubkey: string 
       }
     });
 
-    getUserFeed(userPubkey, pubkey, subId, type, until, limit);
+    getUserFeed(userPubkey, pubkey, subId, type, undefined, until, limit);
 
     const updatePage = (content: NostrEventContent) => {
 

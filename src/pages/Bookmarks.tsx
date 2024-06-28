@@ -1,7 +1,11 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, For, on, onCleanup, onMount, Show, untrack } from 'solid-js';
+import { useNavigate, useParams } from '@solidjs/router';
+import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
+import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
+import BookmarksHeader from '../components/HomeHeader/BookmarksHeader';
+import ReadsHeader from '../components/HomeHeader/ReadsHeader';
 import Loader from '../components/Loader/Loader';
 import Note from '../components/Note/Note';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -12,21 +16,22 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents, getUserFeed } from '../lib/feed';
 import { setLinkPreviews } from '../lib/notes';
 import { subscribeTo } from '../sockets';
-import { convertToNotes, parseEmptyReposts } from '../stores/note';
+import { convertToArticles, convertToNotes, parseEmptyReposts } from '../stores/note';
 import { bookmarks as tBookmarks } from '../translations';
-import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap } from '../types/primal';
+import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap, PrimalArticle } from '../types/primal';
 import { parseBolt11 } from '../utils';
 import styles from './Bookmarks.module.scss';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
   page: FeedPage,
-  notes: PrimalNote[],
+  notes: (PrimalNote | PrimalArticle)[],
   noteIds: string[],
   offset: number,
   pageRange: PageRange,
   reposts: Record<string, string> | undefined,
   firstLoad: boolean,
+  kind: string,
 }
 
 const emptyStore: BookmarkStore = {
@@ -49,6 +54,7 @@ const emptyStore: BookmarkStore = {
   reposts: {},
   offset: 0,
   firstLoad: true,
+  kind: 'notes',
 };
 
 let since: number = 0;
@@ -71,6 +77,8 @@ const Bookmarks: Component = () => {
   onCleanup(() => {
     updateStore(() => ({ ...emptyStore }));
   });
+
+  const kind = () => store.kind || 'notes';
 
   const fetchBookmarks = (pubkey: string | undefined, until = 0) => {
     if (store.fetchingInProgress || !pubkey) return;
@@ -101,8 +109,10 @@ const Bookmarks: Component = () => {
       }
     });
 
+    const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
+
     updateStore('fetchingInProgress', () => true);
-    getUserFeed(pubkey, pubkey, subId, 'bookmarks', until, pageSize, store.offset);
+    getUserFeed(pubkey, pubkey, subId, 'bookmarks', k, until, pageSize, store.offset);
   }
 
   const fetchNextPage = () => since > 0 && fetchBookmarks(account?.publicKey, since);
@@ -143,7 +153,7 @@ const Bookmarks: Component = () => {
       return;
     }
 
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       updateStore('page', 'messages',
@@ -265,9 +275,19 @@ const Bookmarks: Component = () => {
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = convertToNotes(page, page.topZaps);
+    if (kind() === 'notes') {
+      const newPosts = convertToNotes(page, page.topZaps);
 
-    saveNotes(newPosts);
+      saveNotes(newPosts);
+      return;
+    }
+
+    if (kind() === 'reads') {
+      const newPosts = convertToArticles(page, page.topZaps);
+
+      saveArticles(newPosts);
+      return;
+    }
   };
 
   const saveNotes = (newNotes: PrimalNote[]) => {
@@ -292,11 +312,57 @@ const Bookmarks: Component = () => {
     updateStore('fetchingInProgress', () => false);
   };
 
+
+  const saveArticles = (newNotes: PrimalArticle[]) => {
+    console.log('BOOKMARKS: ', newNotes)
+    const notesToAdd = newNotes.filter(n => !store.noteIds.includes(n.id));
+
+    const lastTimestamp = store.pageRange.since;
+    const offset = notesToAdd.reduce<number>((acc, n) => n.published === lastTimestamp ? acc+1 : acc, 0);
+
+    const ids = notesToAdd.map(m => m.id)
+
+    ids.length > 0 && updateStore('noteIds', () => [...ids]);
+
+    updateStore('offset', () => offset);
+    updateStore('notes', (notes) => [ ...notes, ...notesToAdd ]);
+    updateStore('page', () => ({
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+    }));
+    updateStore('fetchingInProgress', () => false);
+  };
+
+  const onChangeKind = (newKind: string) => {
+    updateStore(() => ({ ...emptyStore }));
+    updateStore('kind', () => newKind);
+    fetchBookmarks(account?.publicKey);
+  }
+
   return (
     <>
       <PageTitle title={intl.formatMessage(tBookmarks.pageTitle)} />
 
-      <PageCaption title={intl.formatMessage(tBookmarks.pageTitle)} />
+      <PageCaption title={intl.formatMessage(tBookmarks.pageTitle)}>
+        <Show
+          when={kind()}
+          fallback={
+            <div class={styles.readsTopicHeader}>
+              <span>
+                Bookmarks
+              </span>
+            </div>
+          }
+        >
+          <BookmarksHeader
+            kind={kind()}
+            onSelect={onChangeKind}
+          />
+        </Show>
+      </PageCaption>
 
       <div class={styles.bookmarkFeed}>
 
@@ -306,21 +372,33 @@ const Bookmarks: Component = () => {
           </div>
         </Show>
 
-          <For each={store.notes}>
-            {(note) =>
-              <Note note={note} />
-            }
-          </For>
+        <Switch>
+          <Match when={kind() === 'notes'}>
+            <For each={store.notes}>
+              {(note) =>
+                <Note note={note} />
+              }
+            </For>
+          </Match>
 
-          <Paginator loadNextPage={fetchNextPage} />
+          <Match when={kind() === 'reads'}>
+            <For each={store.notes}>
+              {(note) =>
+                <ArticlePreview article={note} />
+              }
+            </For>
+          </Match>
+        </Switch>
 
-          <Show
-            when={store.fetchingInProgress}
-          >
-            <div class={styles.loader}>
-              {<Loader/>}
-            </div>
-          </Show>
+        <Paginator loadNextPage={fetchNextPage} />
+
+        <Show
+          when={store.fetchingInProgress}
+        >
+          <div class={styles.loader}>
+            {<Loader/>}
+          </div>
+        </Show>
       </div>
     </>
   );

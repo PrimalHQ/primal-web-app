@@ -505,7 +505,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetching', () => true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    getUserFeed(account?.publicKey, pubkey, `profile_feed_${APP_ID}`, 'authored', until, limit);
+    getUserFeed(account?.publicKey, pubkey, `profile_feed_${APP_ID}`, 'authored', undefined, until, limit);
   }
 
   const fetchReplies = (pubkey: string | undefined, until = 0, limit = 20) => {
@@ -515,7 +515,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetchingReplies', () => true);
     updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {} }));
-    getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', until, limit);
+    getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', undefined, until, limit);
   }
 
   const fetchGallery = async (pubkey: string | undefined, until = 0, limit = 20) => {

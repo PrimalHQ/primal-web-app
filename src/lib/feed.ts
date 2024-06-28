@@ -118,7 +118,7 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
 
 };
 
-export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies' | 'bookmarks' | 'user_media_thumbnails', until = 0, limit = 20, offset = 0) => {
+export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies' | 'bookmarks' | 'user_media_thumbnails', kind: number | undefined, until = 0, limit = 20, offset = 0) => {
   if (!pubkey) {
     return;
   }
@@ -130,10 +130,15 @@ export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | un
     user_pubkey?: string,
     until?: number,
     offset?: number,
+    kinds?: number[],
   } = { pubkey, limit, notes } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
+  }
+
+  if (kind) {
+    payload.kinds = [kind];
   }
 
   if (until > 0) payload.until = until;

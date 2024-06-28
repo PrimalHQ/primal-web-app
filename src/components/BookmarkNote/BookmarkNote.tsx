@@ -4,7 +4,6 @@ import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
-import { getUserFeed } from '../../lib/feed';
 import { logWarning } from '../../lib/logger';
 import { getBookmarks, sendBookmarks } from '../../lib/profile';
 import { subscribeTo } from '../../sockets';

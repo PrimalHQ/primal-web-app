@@ -4,7 +4,6 @@ import { APP_ID } from '../../App';
 import { Kind, supportedBookmarkTypes } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
-import { getUserFeed } from '../../lib/feed';
 import { logWarning } from '../../lib/logger';
 import { getBookmarks, sendBookmarks } from '../../lib/profile';
 import { subscribeTo } from '../../sockets';
@@ -29,6 +28,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
 
     if (note) {
       const coor = `${note.msg.kind}:${note.pubkey}:${(note.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
+
       setIsBookmarked(() => account?.bookmarks.includes(coor) || false);
     }
   })

@@ -129,7 +129,7 @@ const Router: Component = () => {
             <Route path="/network" component={Network} />
             <Route path="/filters" component={Moderation} />
           </Route>
-          <Route path="/bookmarks" component={Bookmarks}/>
+          <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />
