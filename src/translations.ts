@@ -1061,7 +1061,7 @@ export const placeholders = {
   },
   cachingPoolHelp: {
     id: 'placeholders.cachingPoolHelp',
-    defaultMessage: 'Client will randomly connect to one of the caching services in this pool. This helps with fail-over if some of the services are down. You can add or remove services. If you wish to always connect to exatly one caching service, you should leave only one entry in this pool.',
+    defaultMessage: 'Client will randomly connect to one of the caching services in this pool. This helps with fail-over if some of the services are down. You can add or remove services. If you wish to always connect to exactly one caching service, you should leave only one entry in this pool.',
     description: 'text for caching pool help bubble',
   },
   resetRelaysHelp: {
