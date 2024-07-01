@@ -760,9 +760,9 @@ const Longform: Component< { naddr: string } > = (props) => {
         />
       </Wormhole>
       <div class={styles.header}>
+        <Show when={store.article?.user}>
         <A href={`/p/${store.article?.user.npub}`}>
           <div class={styles.author}>
-            <Show when={store.article?.user}>
                 <Avatar user={store.article?.user} size="sm" />
 
                 <div class={styles.userInfo}>
@@ -776,9 +776,9 @@ const Longform: Component< { naddr: string } > = (props) => {
                     </div>
                   </Show>
                 </div>
-            </Show>
           </div>
         </A>
+        </Show>
 
         <Show when={store.hasTiers}>
           <ButtonPrimary

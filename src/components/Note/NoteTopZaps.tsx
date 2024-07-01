@@ -20,7 +20,7 @@ const NoteTopZaps: Component<{
   const [hasMoreZaps, setHasMoreZaps] = createSignal(false);
 
   const topZaps = () => {
-    const zaps = [...props.topZaps];
+    const zaps = [...(props.topZaps || [])];
 
     let limit = 0;
     let digits = 0;

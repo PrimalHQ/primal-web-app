@@ -314,7 +314,6 @@ const Bookmarks: Component = () => {
 
 
   const saveArticles = (newNotes: PrimalArticle[]) => {
-    console.log('BOOKMARKS: ', newNotes)
     const notesToAdd = newNotes.filter(n => !store.noteIds.includes(n.id));
 
     const lastTimestamp = store.pageRange.since;
