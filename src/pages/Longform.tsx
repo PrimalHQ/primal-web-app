@@ -237,10 +237,10 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
 
     if (success && note) {
-      const isZapped = await zapSubscription(note, a, account.publicKey, account.relays, exchangeRate);
+      const isZapped = await zapSubscription(note, a, account.publicKey, account.activeRelays, exchangeRate);
 
       if (!isZapped) {
         unsubscribe(note.id);
@@ -264,7 +264,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.relays, account.relaySettings, account?.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
 
   }
 

@@ -116,7 +116,7 @@ const NoteFooter: Component<{
 
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(props.note, account.proxyThroughPrimal, account.relays, account.relaySettings);
+    const { success } = await sendRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
 
     if (success) {
       batch(() => {
@@ -294,7 +294,7 @@ const NoteFooter: Component<{
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
-      const success = await zapNote(props.note, account.publicKey, amount, message, account.relays);
+      const success = await zapNote(props.note, account.publicKey, amount, message, account.activeRelays);
 
       props.updateState && props.updateState('isZapping', () => false);
 

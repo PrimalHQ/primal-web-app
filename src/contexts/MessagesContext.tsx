@@ -562,7 +562,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         created_at: Math.floor((new Date).getTime() / 1000),
       };
 
-      const { success } = await sendEvent(event, account?.relays, account?.relaySettings, account?.proxyThroughPrimal || false);
+      const { success } = await sendEvent(event, account.activeRelays, account?.relaySettings, account?.proxyThroughPrimal || false);
 
       if (success) {
         const msg = { ...message, content: sanitize(message.content) };

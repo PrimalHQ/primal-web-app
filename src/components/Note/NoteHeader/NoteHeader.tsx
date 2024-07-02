@@ -98,7 +98,7 @@ const NoteHeader: Component<{
       return;
     }
 
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.relays, account.relaySettings);
+    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
     setContext(false);
 
     if (success) {

@@ -115,7 +115,7 @@ const NoteContextMenu: Component<{
       return;
     }
 
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.relays, account.relaySettings);
+    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
     props.onClose()
 
     if (success) {

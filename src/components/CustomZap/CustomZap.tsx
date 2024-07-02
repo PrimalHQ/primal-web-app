@@ -105,7 +105,7 @@ const CustomZap: Component<{
             account.publicKey,
             selectedValue().amount || 0,
             selectedValue().message,
-            account.relays,
+            account.activeRelays,
           );
 
           handleZap(success);
@@ -119,7 +119,7 @@ const CustomZap: Component<{
           account.publicKey,
           selectedValue().amount || 0,
           selectedValue().message,
-          account.relays,
+          account.activeRelays,
         );
 
         handleZap(success);

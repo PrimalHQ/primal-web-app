@@ -226,7 +226,7 @@ const EditProfile: Component = () => {
 
     const oldProfile = profile?.userProfile || {};
 
-    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.relays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.activeRelays, account.relaySettings);
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`);

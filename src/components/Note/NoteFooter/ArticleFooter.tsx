@@ -108,7 +108,7 @@ const ArticleFooter: Component<{
 
     props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.relays, account.relaySettings);
+    const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
 
     if (success) {
       batch(() => {
@@ -274,7 +274,7 @@ const ArticleFooter: Component<{
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
-      const success = await zapArticle(props.note, account.publicKey, amount, message, account.relays);
+      const success = await zapArticle(props.note, account.publicKey, amount, message, account.activeRelays);
 
       props.updateState('isZapping', () => false);
 

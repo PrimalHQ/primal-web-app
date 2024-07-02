@@ -55,8 +55,8 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
             >
               <div class={styles.disconnected}></div>
             </Show>
-            <span class={styles.relayUrl} title={relayUrl}>
-              {relayUrl}
+            <span class={styles.relayUrl} title={`${relayUrl}`}>
+              {`${relayUrl}`}
             </span>
           </div>
         )}

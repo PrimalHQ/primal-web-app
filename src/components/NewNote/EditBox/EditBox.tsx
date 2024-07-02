@@ -763,7 +763,7 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
-      const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.relays, tags, account.relaySettings);
+      const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
 
       if (success) {
 
