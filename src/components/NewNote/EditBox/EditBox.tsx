@@ -695,7 +695,7 @@ const EditBox: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(tToast.noRelaysConnected),
       );

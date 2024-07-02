@@ -107,7 +107,7 @@ const NoteFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
       );
@@ -150,7 +150,7 @@ const NoteFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
       );
@@ -177,7 +177,7 @@ const NoteFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
       );
@@ -209,7 +209,7 @@ const NoteFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
+    if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
       return;
     }
 

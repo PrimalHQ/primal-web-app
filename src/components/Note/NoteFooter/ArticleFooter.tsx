@@ -106,13 +106,6 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
-
     props.updateState('isRepostMenuVisible', () => false);
 
     const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.relays, account.relaySettings);
@@ -149,13 +142,6 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
-
     const success = await account.actions.addLike(props.note);
 
     if (success) {
@@ -176,7 +162,7 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
       );
@@ -208,7 +194,7 @@ const ArticleFooter: Component<{
       return;
     }
 
-    if (account.relays.length === 0 || !canUserReceiveZaps(props.note.user)) {
+    if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
       return;
     }
 

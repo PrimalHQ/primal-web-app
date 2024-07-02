@@ -387,7 +387,7 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
       return;
     }
 
-    const subId = `publish_note_${signedNote.id}`;
+    const subId = `publish_event_${signedNote.id}`;
 
     const unsub = subscribeTo(subId, (type, _, content) => {
       if (type === "NOTICE") {
@@ -411,7 +411,7 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
 
     sendMessage(JSON.stringify([
       "REQ",
-      `publish_note_${signedNote.id}`,
+      subId,
       { cache: ["broadcast_events", { events: [signedNote], relays: Array.from(publishRelays) }]}
     ]));
   });
