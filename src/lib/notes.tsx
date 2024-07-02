@@ -435,8 +435,6 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  console.log('RELAYS: ', relays.map(r => [r.url, r.status]), shouldProxy)
-
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 

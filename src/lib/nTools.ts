@@ -1,23 +1,25 @@
-// @ts-nocheck
+import {
+  finalizeEvent,
+  generateSecretKey as generatePrivateKey,
+  getPublicKey,
+  verifyEvent
+} from 'nostr-tools';
+
+import { AbstractRelay as Relay } from 'nostr-tools/abstract-relay';
+import { Relay as RelayFactory } from 'nostr-tools';
+
 import {
   nip04,
   nip05,
   nip19,
   nip57,
   utils,
-  generatePrivateKey,
-  Relay as ntRelay,
-  relayInit,
-  getPublicKey,
-  getSignature,
-  getEventHash,
-  validateEvent,
-  verifySignature,
-  Event as NtEvent,
 } from "nostr-tools";
 
-type Event = NtEvent;
-type Relay = ntRelay;
+const relayInit = (url: string) => {
+  const relay = new RelayFactory(url);
+  return relay;
+}
 
 export {
   nip04,
@@ -27,11 +29,9 @@ export {
   utils,
   generatePrivateKey,
   Relay,
+  RelayFactory,
   relayInit,
   getPublicKey,
-  getSignature,
-  getEventHash,
-  validateEvent,
-  verifySignature,
-  Event,
+  verifyEvent,
+  finalizeEvent,
 }

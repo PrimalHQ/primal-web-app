@@ -22,42 +22,52 @@ type ConnectToRelay = (
   timeout: number,
   onConnect: (relay: Relay) => void,
   onFail: (relay: Relay, reasons: any) => void,
+  tryReconnecting: boolean,
 ) => void;
 
 export const connectToRelay: ConnectToRelay =
-  (relay, timeout, onConnect, onFail) => {
-    const tOut = setTimeout(() => {
-      relay.close();
-      onFail(relay, 'timeout');
-    }, timeout);
+  async (relay, timeout, onConnect, onFail, tryReconnecting) => {
+    // const tOut = setTimeout(() => {
+    //   relay.close();
+    //   onFail(relay, 'timeout');
+    // }, timeout);
 
-    relay.on('connect', () => {
-      logInfo('Connected to relay ', relay.url);
-      clearTimeout(tOut);
-      if (!reconnAttempts[relay.url]) {
-        reconnAttempts[relay.url] = 0
-      }
-      onConnect(relay);
-    })
+    // relay.on('connect', () => {
+    //   logInfo('Connected to relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   if (!reconnAttempts[relay.url]) {
+    //     reconnAttempts[relay.url] = 0
+    //   }
+    //   onConnect(relay);
+    // })
 
-    relay.on('disconnect', () => {
-      logInfo('Disconnected from relay ', relay.url);
-      clearTimeout(tOut);
-      relay.close();
-      onFail(relay, 'disconnect');
-    })
+    // relay.on('disconnect', () => {
+    //   logInfo('Disconnected from relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   relay.close();
+    //   onFail(relay, 'disconnect');
+    // })
 
-    relay.on('error', () => {
-      logError('Error connecting to relay ', relay.url);
-      clearTimeout(tOut);
-      relay.close();
-      onFail(relay, 'failed connection');
-    })
+    // relay.on('error', () => {
+    //   logError('Error connecting to relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   relay.close();
+    //   onFail(relay, 'failed connection');
+    // })
+
+    relay.onclose = () => {
+      console.log('Relay connection closed: ', relay);
+      onFail(relay, tryReconnecting ? 'disconnect' : 'close');
+    }
 
     try {
-      relay.connect();
+      logInfo('Connecting relay: ', relay);
+      await relay.connect();
+      logInfo('Connected to relay: ', relay);
+      onConnect(relay);
     } catch (e) {
       logError('Failed to initiate connection to relay ', e)
+      onFail(relay, 'failed connection');
     }
   };
 
@@ -65,17 +75,19 @@ export const connectRelays = async (
   relaySettings: NostrRelays,
   onConnect: (relay: Relay) => void,
   onFail: (relay: Relay, reasons: any) => void,
+  tryReconnecting = true,
 ) => {
 
   const urls = Object.keys(relaySettings);
   const relays: Relay[] = urls.map(relayInit);
 
+
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
 
-    if (relay.status === WebSocket.CLOSED) {
+    if (!relay.ws || relay.ws.readyState === WebSocket.CLOSED) {
       logInfo('Connecting to relay: ', relay.url);
-      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail)
+      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail, tryReconnecting)
     }
   }
 };

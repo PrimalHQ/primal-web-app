@@ -1,4 +1,4 @@
-import { Relay, Event, nip05, nip19 } from "../lib/nTools";
+import { Relay, nip05, nip19 } from "../lib/nTools";
 import { unwrap } from "solid-js/store";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
@@ -172,26 +172,31 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 
     relays.forEach(relay => {
 
-      const sub = relay.sub([
+      // if (!relay.subscribe) return;
+
+
+      const sub = relay.subscribe(
+        [
+          {
+            kinds: [Kind.Reaction],
+            authors: [pubkey],
+          },
+        ],
         {
-          kinds: [Kind.Reaction],
-          authors: [pubkey],
+          onevent(event: any) {
+            const e = event.tags.find((t: string[]) => t[0] === 'e');
+
+            e && e[1] && likes.add(e[1]);
+          },
+          oneose() {
+            const likeArray = Array.from(likes);
+
+            callback(likeArray);
+
+            sub.close();
+          },
         },
-      ]);
-
-      sub.on('event', (event: Event) => {
-        const e = event.tags.find((t: string[]) => t[0] === 'e');
-
-        e && e[1] && likes.add(e[1]);
-      })
-
-      sub.on('eose', () => {
-        const likeArray = Array.from(likes);
-
-        callback(likeArray);
-
-        sub.unsub();
-      })
+      );
     });
 
   } catch (e) {

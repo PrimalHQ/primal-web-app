@@ -44,6 +44,7 @@ const Network: Component = () => {
     let settingsRelays = [];
 
     for (let url in (account?.relaySettings || {})) {
+
       settingsRelays.push(relayInit(url))
     }
 
@@ -76,7 +77,8 @@ const Network: Component = () => {
 
   const isConnected = (url: string) => {
     const relay: Relay | undefined = account?.relays.find(r => r.url === url);
-    return relay && relay.status === WebSocket.OPEN;
+
+    return relay && relay.ws && relay.ws.readyState === WebSocket.OPEN;
   };
 
   const isPrimalRelayInUserSettings = () => {

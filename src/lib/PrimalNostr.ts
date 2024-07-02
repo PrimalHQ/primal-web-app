@@ -1,4 +1,4 @@
-import { generatePrivateKey, getPublicKey, nip04, getSignature, getEventHash, validateEvent, verifySignature, nip19 } from '../lib/nTools';
+import { generatePrivateKey, getPublicKey, nip04, nip19, finalizeEvent, verifyEvent } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
@@ -127,19 +127,23 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     const sec = await getSec();
     if (!sec) throw('sign-no-nsec');
 
-    const pubkey: string = await gPk();
+    // const pubkey: string = await gPk();
 
-    let evt = { ...event, pubkey };
+    let evt = finalizeEvent({ ...event }, sec);
 
-    // @ts-ignore
-    evt.id = getEventHash(evt);
-    // @ts-ignore
-    evt.sig = getSignature(evt, sec);
+    const isVerified = verifyEvent(evt);
 
-    const isValid = validateEvent(evt);
-    const isVerified = verifySignature(evt);
+    // let evt = { ...event, pubkey };
 
-    if (!isValid) throw('event-not-valid');
+    // // @ts-ignore
+    // evt.id = getEventHash(evt);
+    // // @ts-ignore
+    // evt.sig = getSignature(evt, sec);
+
+    // const isValid = validateEvent(evt);
+    // const isVerified = verifySignature(evt);
+
+    // if (!isValid) throw('event-not-valid');
     if (!isVerified) throw('event-sig-not-verified');
 
     return evt as NostrRelaySignedEvent;

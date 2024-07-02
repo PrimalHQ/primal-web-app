@@ -60,7 +60,7 @@
     "markdown-it-sub": "^2.0.0",
     "markdown-it-sup": "^2.0.0",
     "medium-zoom": "1.0.8",
-    "nostr-tools": "1.15.0",
+    "nostr-tools": "2.7.0",
     "photoswipe": "5.4.3",
     "photoswipe-dynamic-caption-plugin": "^1.2.7",
     "qr-code-styling": "^1.6.0-rc.1",

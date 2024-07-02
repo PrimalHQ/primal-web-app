@@ -47,6 +47,7 @@ export type AccountContextStore = {
   likes: string[],
   defaultRelays: string[],
   relays: Relay[],
+  suspendedRelays: Relay[],
   relaySettings: NostrRelays,
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
@@ -76,6 +77,7 @@ export type AccountContextStore = {
   membershipStatus: MembershipStatus,
   bookmarks: string[],
   proxyThroughPrimal: boolean,
+  proxySettingSet: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -114,6 +116,7 @@ const initialData = {
   likes: [],
   defaultRelays: [],
   relays: [],
+  suspendedRelays: [],
   relaySettings: {},
   publicKey: undefined,
   activeUser: undefined,
@@ -142,6 +145,7 @@ const initialData = {
   membershipStatus: {},
   bookmarks: [],
   proxyThroughPrimal: false,
+  proxySettingSet: false,
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -169,6 +173,36 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   const setProxyThroughPrimal = (shouldProxy: boolean) => {
     updateStore('proxyThroughPrimal', () => shouldProxy);
+
+    if (!store.proxySettingSet) {
+      updateStore('proxySettingSet', () => true);
+    }
+
+    if (shouldProxy) {
+      updateStore('suspendedRelays', () => store.relays);
+
+      for (let i=0; i<store.relays.length; i++) {
+        const relay = store.relays[i];
+        relay.close();
+
+      }
+
+      updateStore('relays', () => []);
+    }
+    else if (store.suspendedRelays.length > 0) {
+      const relaysToAdd = store.suspendedRelays.filter(r => !store.relays.find(sr => sr.url === r.url))
+
+      const relaysToConnect = store.suspendedRelays.reduce((acc, r) => {
+        return {
+          ...acc,
+          [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
+        };
+      }, {})
+
+      connectToRelays(relaysToConnect);
+
+      updateStore('suspendedRelays', () => []);
+    }
   }
 
   const checkNostrChange = async () => {
@@ -332,7 +366,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         if (relay) {
           relay.close();
-          updateStore('relays', () => store.relays.filter(r => r.url !== url));
+          const filtered = store.relays.filter(r => r.url !== url);
+          updateStore('relays', () => filtered);
         }
       }
 
@@ -372,6 +407,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   const connectToRelays = (relaySettings: NostrRelays, sendRelayList?: boolean) => {
 
+    if (!store.proxySettingSet || store.proxyThroughPrimal) return;
+
     if (Object.keys(relaySettings).length === 0) {
       getDefaultRelays(`default_relays_${APP_ID}`);
       return;
@@ -403,7 +440,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         relayAtempts[connectedRelay.url] = 0;
       }, 3 * relayConnectingTimeout)
 
-      updateStore('relays', (rs) => [ ...rs, { ...connectedRelay } ]);
+      updateStore('relays', (rs) => [ ...rs, connectedRelay ]);
     };
 
     const onFail = (failedRelay: Relay, reasons: any) => {
@@ -419,13 +456,15 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
 
+      if (reasons === 'close') return;
+
       if ((relayAtempts[failedRelay.url] || 0) < relayAtemptLimit) {
         relayAtempts[failedRelay.url] = (relayAtempts[failedRelay.url] || 0) + 1;
 
         // Reconnect with a progressive delay
         setTimeout(() => {
           logInfo('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
-          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail);
+          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail, true);
         }, relayConnectingTimeout * relayAtempts[failedRelay.url]);
         return;
       }
@@ -575,7 +614,8 @@ export function AccountProvider(props: { children: JSXElement }) {
     // if relay is connected, close it and remove it from the list of open relays
     if (relay) {
       relay.close();
-      updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+      const filtered = store.relays.filter(r => r.url !== url);
+      updateStore('relays', () => filtered);
     }
 
     // Add relay to the list of explicitly closed relays
@@ -972,7 +1012,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       if (relay) {
         relay.close();
-        updateStore('relays', () => store.relays.filter(r => r.url !== url));
+        const filtered = store.relays.filter(r => r.url !== url);
+        updateStore('relays', () => filtered);
       }
 
       // Add relay to the list of explicitly closed relays
@@ -1413,12 +1454,12 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   createEffect(() => {
     connectedRelaysCopy = [...store.relays];
-    if (store.publicKey && store.relays.length > 0) {
-      getLikes(store.publicKey, store.relays, (likes: string[]) => {
-        updateStore('likes', () => [...likes]);
-        saveLikes(store.publicKey, likes);
-      });
-    }
+    if (!store.publicKey || store.relays.length === 0 || !store.proxySettingSet || store.proxyThroughPrimal) return;
+
+    getLikes(store.publicKey, store.relays, (likes: string[]) => {
+      updateStore('likes', () => [...likes]);
+      saveLikes(store.publicKey, likes);
+    });
   });
 
   createEffect(() => {
@@ -1443,9 +1484,11 @@ export function AccountProvider(props: { children: JSXElement }) {
         const url = rels[i];
         const relay = store.relays.find(r => r.url === url);
 
+
         if (relay) {
           relay.close();
-          updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+          const filtered = store.relays.filter(r => r.url !== url);
+          updateStore('relays', () => filtered);
         }
       }
     }
