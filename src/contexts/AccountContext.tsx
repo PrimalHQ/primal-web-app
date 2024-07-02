@@ -195,6 +195,16 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
       }
 
+      const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+      for (let i=0; i<priorityRelays.length; i++) {
+        const pr = priorityRelays[i];
+
+        if (!store.suspendedRelays.find(r => r.url === pr)) {
+          updateStore('suspendedRelays', store.suspendedRelays.length, () => relayInit(pr));
+        }
+      }
+
       updateStore('relays', () => []);
       updateStore('activeRelays', () => [...store.suspendedRelays]);
     }
