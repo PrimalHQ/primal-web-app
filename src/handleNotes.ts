@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "./lib/nTools";
 import { Kind } from "./constants";
 import { getEvents, getUserArticleFeed, getUserFeed } from "./lib/feed";
 import { decodeIdentifier, hexToNpub } from "./lib/keys";

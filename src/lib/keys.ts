@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools"
+import { nip19 } from "../lib/nTools";
 import { logWarning } from "./logger";
 
 export const hexToNpub = (hex: string | undefined): string =>  {

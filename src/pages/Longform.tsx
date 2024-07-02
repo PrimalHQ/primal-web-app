@@ -31,7 +31,7 @@ import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
 import { getArticleThread, getAuthorSubscriptionTiers, getThread } from "../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../components/NoteImage/NoteImage";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { saveNotes } from "../services/StoreService";
 import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
 import { tableNodeTypes } from "@milkdown/prose/tables";

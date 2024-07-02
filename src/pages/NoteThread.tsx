@@ -6,7 +6,7 @@ import { PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../lib/nTools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';

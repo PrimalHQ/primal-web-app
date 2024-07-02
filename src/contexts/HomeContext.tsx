@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";

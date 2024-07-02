@@ -1,5 +1,5 @@
 import { A, RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../lib/nTools';
 import {
   Component,
   createEffect,

@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey, getPublicKey, nip04, getSignature, getEventHash, validateEvent, verifySignature, nip19 } from 'nostr-tools';
+import { generatePrivateKey, getPublicKey, nip04, getSignature, getEventHash, validateEvent, verifySignature, nip19 } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';

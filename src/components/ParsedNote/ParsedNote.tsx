@@ -36,8 +36,7 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-// @ts-ignore Bad types in nostr-tools
-import { nip19, generatePrivateKey } from 'nostr-tools';
+import { nip19, generatePrivateKey } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';

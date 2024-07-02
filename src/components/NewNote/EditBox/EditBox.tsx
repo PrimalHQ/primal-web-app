@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../../../lib/nTools";
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG } from "../../../constants";

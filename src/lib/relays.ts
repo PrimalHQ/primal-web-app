@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { relayInit, Relay } from "nostr-tools";
+import { relayInit, Relay } from "../lib/nTools";
 import { relayConnectingTimeout } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrRelays } from "../types/primal";

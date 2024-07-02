@@ -40,7 +40,7 @@ import { useAccountContext } from "./AccountContext";
 import { convertToUser, emptyUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { convertToNotes } from "../stores/note";
 import { sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";

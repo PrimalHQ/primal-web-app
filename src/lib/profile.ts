@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { Relay, Event, nip05, nip19 } from "nostr-tools";
+import { Relay, Event, nip05, nip19 } from "../lib/nTools";
 import { unwrap } from "solid-js/store";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";

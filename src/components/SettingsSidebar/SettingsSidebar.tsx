@@ -3,8 +3,7 @@ import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { settings as t } from '../../translations';
 
-// @ts-ignore Bad types in nostr-tools
-import { Relay, relayInit } from "nostr-tools";
+import { Relay, relayInit } from "../../lib/nTools";
 
 import styles from './SettingsSidebar.module.scss';
 import { cacheServer, isConnected, socket } from '../../sockets';

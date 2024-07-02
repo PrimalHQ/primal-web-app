@@ -1,6 +1,6 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { day, hour } from "../constants";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {

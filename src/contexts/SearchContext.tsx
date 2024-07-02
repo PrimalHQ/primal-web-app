@@ -23,7 +23,7 @@ import { searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes } from "../stores/note";
 import { subscribeTo } from "../sockets";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
 
@@ -73,7 +73,7 @@ const initialData = {
   notes: [],
   isFetchingUsers: false,
   isFetchingContent: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
   mentionedNotes: {},
   filteringReasons: [],

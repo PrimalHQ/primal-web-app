@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../lib/nTools';
 import { Component, createEffect, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Avatar from '../components/Avatar/Avatar';
 import { useAccountContext } from '../contexts/AccountContext';

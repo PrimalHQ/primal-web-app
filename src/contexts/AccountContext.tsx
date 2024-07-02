@@ -26,8 +26,7 @@ import {
 import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
+import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "../lib/nTools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
 import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";

@@ -23,7 +23,7 @@ import { useSettingsContext } from '../contexts/SettingsContext';
 import { RouteDataFuncArgs, useParams, useRouteData } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../lib/nTools';
 import Longform from './Longform';
 import { VanityProfiles } from '../types/primal';
 import { logError } from '../lib/logger';

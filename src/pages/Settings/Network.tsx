@@ -1,6 +1,5 @@
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
-// @ts-ignore Bad types in nostr-tools
-import { Relay, relayInit } from "nostr-tools";
+import { Relay, relayInit } from "../../lib/nTools";
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -312,6 +311,7 @@ const Network: Component = () => {
                   {relay.url}
                 </span>
               </div>
+
               <div class={styles.remove}>
                 {intl.formatMessage(tActions.removeRelay)}
               </div>

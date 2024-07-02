@@ -1,5 +1,5 @@
 import { propTraps } from "@solid-primitives/props";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";

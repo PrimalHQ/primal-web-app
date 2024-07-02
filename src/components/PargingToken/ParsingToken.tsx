@@ -40,7 +40,7 @@ import {
   UserReference,
 } from '../../types/primal';
 
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';

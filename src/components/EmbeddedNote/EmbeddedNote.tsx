@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 import { batch, Component, createMemo, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useAccountContext } from '../../contexts/AccountContext';

@@ -31,7 +31,7 @@ import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import { authorName, convertToUser, userName } from '../../stores/profile';
 import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 import { fetchNotes } from '../../handleNotes';
 import { logError } from '../../lib/logger';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';

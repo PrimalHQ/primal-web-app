@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal } from 'solid-js';
 import Modal from '../Modal/Modal';
 import { useToastContext } from '../Toaster/Toaster';
 
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 
 
 import { pin as tPin, actions as tActions } from '../../translations';

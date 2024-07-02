@@ -1,6 +1,5 @@
 import { bech32 } from "@scure/base";
-// @ts-ignore Bad types in nostr-tools
-import { nip57, Relay, utils } from "nostr-tools";
+import { nip57, Relay, utils } from "../lib/nTools";
 import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { Kind } from "../constants";
 import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from "../types/primal";

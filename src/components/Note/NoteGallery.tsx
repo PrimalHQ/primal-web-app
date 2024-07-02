@@ -12,8 +12,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import PhotoSwipeDynamicCaption from 'photoswipe-dynamic-caption-plugin';
 
 import NoteImage from '../NoteImage/NoteImage';
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey } from 'nostr-tools';
+import { generatePrivateKey } from '../../lib/nTools';
 import { imageRegexG } from '../../constants';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';

@@ -10,7 +10,7 @@ import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import CreatePinModal from '../CreatePinModal/CreatePinModal';
 import TextInput from '../TextInput/TextInput';
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 import { storeSec } from '../../lib/localStore';
 
 const LoginModal: Component<{

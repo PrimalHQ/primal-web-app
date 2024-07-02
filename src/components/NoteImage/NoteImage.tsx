@@ -1,7 +1,6 @@
 import { Component, createEffect, createSignal, JSX,  onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey } from "nostr-tools";
+import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
 
 const NoteImage: Component<{

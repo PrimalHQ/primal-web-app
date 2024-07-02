@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getThread } from "../lib/feed";
 import {

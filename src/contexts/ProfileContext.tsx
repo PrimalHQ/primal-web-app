@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
 import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
 import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";

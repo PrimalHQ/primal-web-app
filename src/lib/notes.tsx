@@ -1,6 +1,5 @@
 import { A } from "@solidjs/router";
-// @ts-ignore Bad types in nostr-tools
-import { Relay, relayInit } from "nostr-tools";
+import { Relay, relayInit } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
@@ -436,6 +435,8 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
+  console.log('RELAYS: ', relays.map(r => [r.url, r.status]), shouldProxy)
+
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
@@ -575,7 +576,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
       }, 8_000);
 
       try {
-        logInfo('publishing to relay: ', relay)
+        logInfo('publishing to relay: ', relay, signedNote)
 
         await relay.publish(signedNote);
 

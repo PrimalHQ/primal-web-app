@@ -23,8 +23,6 @@ import Note from "../Note/Note";
 import NoteImage from "../NoteImage/NoteImage";
 import Paginator from "../Paginator/Paginator";
 import ProfileContact from "../ProfileContact/ProfileContact";
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey } from 'nostr-tools';
 
 import styles from  "./ProfileTabs.module.scss";
 import NoteGallery from "../Note/NoteGallery";
