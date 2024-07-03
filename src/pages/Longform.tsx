@@ -663,7 +663,17 @@ const Longform: Component< { naddr: string } > = (props) => {
     const replies = sortByRecency(convertToNotes(pageWithNotes, pageWithNotes.topZaps));
     const articles = convertToArticles(page, page.topZaps);
 
-    const article = articles.find(a => a.noteId === naddr());
+    const article = articles.find(a => {
+      if (a.noteId === naddr()) return true;
+
+      const decode1 = decodeIdentifier(naddr());
+      const decode2 = decodeIdentifier(a.naddr);
+
+      const a1 = `${decode1.data.kind}_${decode1.data.pubkey}_${decode1.data.identifier}`;
+      const a2 = `${decode2.data.kind}_${decode2.data.pubkey}_${decode2.data.identifier}`;
+
+      return a1 === a2;
+    });
 
     updateStore('users', () => [ ...users ]);
 
