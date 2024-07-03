@@ -87,7 +87,7 @@ export const connectRelays = async (
 
     if (!relay.ws || relay.ws.readyState === WebSocket.CLOSED) {
       logInfo('Connecting to relay: ', relay.url);
-      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail, tryReconnecting)
+      await connectToRelay(relay, relayConnectingTimeout, onConnect, onFail, tryReconnecting)
     }
   }
 };

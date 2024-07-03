@@ -173,7 +173,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   //   }, 1_000);
   // });
 
-  const setProxyThroughPrimal = (shouldProxy: boolean) => {
+  const setProxyThroughPrimal = async (shouldProxy: boolean) => {
     updateStore('proxyThroughPrimal', () => shouldProxy);
 
     if (!store.proxySettingSet) {
@@ -208,17 +208,17 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('relays', () => []);
       updateStore('activeRelays', () => [...store.suspendedRelays]);
     }
-    else if (store.suspendedRelays.length > 0) {
-      const relaysToAdd = store.suspendedRelays.filter(r => !store.relays.find(sr => sr.url === r.url))
+    else {
+      const relaysToConnect = store.suspendedRelays.length > 0 ?
+        store.suspendedRelays.reduce((acc, r) => {
+          return {
+            ...acc,
+            [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
+          };
+        }, {}) :
+        store.relaySettings;
 
-      const relaysToConnect = store.suspendedRelays.reduce((acc, r) => {
-        return {
-          ...acc,
-          [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
-        };
-      }, {})
-
-      connectToRelays(relaysToConnect);
+      await connectToRelays(relaysToConnect);
 
       updateStore('suspendedRelays', () => []);
       updateStore('activeRelays', () => store.relays);
@@ -425,7 +425,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('connectToPrimaryRelays', () => flag);
   }
 
-  const connectToRelays = (relaySettings: NostrRelays, sendRelayList?: boolean) => {
+  const connectToRelays = async (relaySettings: NostrRelays, sendRelayList?: boolean) => {
 
     if (!store.proxySettingSet || store.proxyThroughPrimal) return;
 
@@ -491,7 +491,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       logWarning('Reached atempt limit ', failedRelay.url)
     };
 
-    connectRelays(relaysToConnect, onConnect, onFail);
+    await connectRelays(relaysToConnect, onConnect, onFail);
 
   };
 
