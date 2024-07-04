@@ -49,6 +49,11 @@ const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Support = lazy(() => import('./pages/Support'));
 
+const Feeds = lazy(() => import('./pages/FeedsTest'));
+const Feed = lazy(() => import('./pages/FeedQueryTest'));
+const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
+const AdvancedSearchResults = lazy(() => import('./pages/AdvancedSearchResults'));
+
 const primalWindow = window as PrimalWindow;
 
 const isDev = localStorage.getItem('devMode') === 'true';
@@ -138,6 +143,14 @@ const Router: Component = () => {
           <Route path="/rest" component={Explore} />
           <Route path="/mutelist/:npub" component={Mutelist} />
           <Route path="/new" component={CreateAccount} />
+          <Route path="/feeds">
+            <Route path="/" component={Feeds} />
+            <Route path="/:query" component={Feed} />
+          </Route>
+          <Route path="/asearch">
+            <Route path="/" component={AdvancedSearch} />
+            <Route path="/:query" component={AdvancedSearchResults} />
+          </Route>
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} data={getKnownProfiles} />

@@ -83,3 +83,35 @@ export const getRecomendedArticleIds = (subid: string) => {
     {cache: ['get_recommended_reads']},
   ]));
 };
+
+export const getAdvancedFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['get_advanced_feeds']},
+  ]));
+};
+
+export const getFeedItems = (subid: string, specification: any, user_pubkey: string | undefined, limit = 20, until = 0, offset = 0) => {
+  let payload = {
+    specification,
+    limit,
+  };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  // @ts-ignore
+  if (until > 0) payload.until = until;
+
+  // @ts-ignore
+  if (offset > 0) payload.offset = offset;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['advanced_feed', payload]},
+  ]));
+};
