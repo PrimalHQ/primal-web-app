@@ -46,6 +46,7 @@
     "@types/markdown-it-container": "^2.0.10",
     "@types/markdown-it-emoji": "^3.0.1",
     "@types/markdown-it-footnote": "^3.0.4",
+    "dayjs": "^1.11.11",
     "dompurify": "3.0.5",
     "highlight.js": "^11.9.0",
     "light-bolt11-decoder": "^3.1.1",
