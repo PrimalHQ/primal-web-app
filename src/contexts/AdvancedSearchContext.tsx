@@ -23,7 +23,7 @@ import { getUserProfiles } from "../lib/profile";
 import { advancedSearchContent, searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
-import { subscribeTo } from "../sockets";
+import { subscribeTo, subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
@@ -54,6 +54,7 @@ export type AdvancedSearchContextStore = {
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
   filteringReasons: string[],
+  errors: string[],
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
@@ -79,6 +80,7 @@ const initialData = {
   reposts: {},
   mentionedNotes: {},
   filteringReasons: [],
+  errors: [],
 };
 
 export const AdvancedSearchContext = createContext<AdvancedSearchContextStore>();
@@ -409,29 +411,23 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
   const findContent = (query: string, until = 0, kind = 1) => {
     const subid = `advanced_search_content_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        updatePage(content);
+      },
+      onNotice: (_, reason) => {
+        updateStore('errors', store.errors.length, () => reason);
+      },
+      onEose: (_) => {
         savePage(store.page, kind);
         unsub();
-        return;
       }
-
-      if (!content) {
-        return;
-      }
-
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-
     });
 
     updateStore('isFetchingContent', () => true);
     updateStore('notes', () => []);
     updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+    updateStore('errors', () => []);
 
     advancedSearchContent(account?.publicKey, subid, query, 20, 0);
   }

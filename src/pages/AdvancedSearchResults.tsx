@@ -72,6 +72,10 @@ const AdvancedSearchResults: Component = () => {
           <Match when={!search?.isFetchingContent && search?.notes.length === 0}>
             <div class={styles.noResults}>
               No results found
+
+              <For each={search?.errors}>
+                {error => <div class={styles.error}>{error}</div>}
+              </For>
             </div>
           </Match>
           <Match when={kind() === Kind.LongForm}>

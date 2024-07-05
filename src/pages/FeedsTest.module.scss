@@ -83,6 +83,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 12px;
+  margin-bottom: 12px;
 
   .caption {
     margin-top: 12px;
@@ -199,6 +200,15 @@
   width: 100%;
   text-transform: uppercase;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-top: 24px;
+
+  .error {
+    color: var(--warning-bright);
+    font-size: 14px;
+    line-height: 26px;
+    margin-top: 24px;
+  }
 }

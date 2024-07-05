@@ -157,7 +157,7 @@ const AdvancedSearch: Component = () => {
       `duration:${state.duration} ` :
       '';
 
-    setState('command', () => `${includes}${excludes}${hashtags}${froms}${tos}${mentions}${followings}${since}${sentiment}${kind}${orient}${duration}`.trim());
+    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${mentions}${followings}${since}${sentiment}${orient}${duration}`.trim());
 
   })
 
@@ -233,6 +233,52 @@ const AdvancedSearch: Component = () => {
     setState('orientation', () => orient);
   };
 
+  const onCommandChange = (v: string) => {
+    setState('command', () => v);
+    parseCommand();
+  }
+
+  const parseCommand = () => {
+    // const tokens = state.command.split(/\s+/);
+    // const parsed = { ...state };
+
+    // for (let i = 0; i<tokens.length; i++) {
+    //   const token = tokens[i];
+
+    //   if (token.startsWith('-')) {
+    //     parsed.excludes += `,${token.substring(1)}`
+    //   }
+
+    //   if (token.startsWith('#')){
+    //     parsed.hashtags += `,${token.substring(1)}`
+    //   }
+
+    //   if (token.startsWith('from:')){
+    //     // find the user and add him
+    //     // parsed.postedBy += `${token.substring(5)}`
+    //   }
+
+    //   if (token.startsWith('to:')){
+    //     // find the user and add him
+    //     // parsed.replingTo += `${token.substring(3)}`
+    //   }
+
+    //   if (token.startsWith('@')){
+    //     // find the user and add him
+    //     // parsed.userMentions += `${token.substring(1)}`
+    //   }
+
+    //   if (token.startsWith('following:')){
+    //     // find the user and add him
+    //     // parsed.following += `${token.substring(10)}`
+    //   }
+    // }
+    // console.log('TOKENS: ', parsed)
+
+    // setState(() => ({ ...parsed }));
+
+  };
+
   return (
     <>
       <PageTitle title="Advanced Search" />
@@ -244,7 +290,7 @@ const AdvancedSearch: Component = () => {
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
-      <TextField.Root class={styles.searchCommand} value={state.command}>
+      <TextField.Root class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
         <TextField.Label>Search Command</TextField.Label>
         <TextField.TextArea autoResize={true}/>
       </TextField.Root>
@@ -254,29 +300,38 @@ const AdvancedSearch: Component = () => {
         <div class={styles.section}>
 
         <form onSubmit={onSubmit}>
-          <TextInput
-            name="include"
-            type="text"
-            value={state.includes}
-            placeholder="include these words..."
-            onChange={(v) => setState('includes', () => v)}
-          />
+          <div class={styles.searchRow}>
+            <TextInput
+              name="include"
+              type="text"
+              value={state.includes}
+              placeholder="include these words..."
+              onChange={(v) => setState('includes', () => v)}
+              noExtraSpace={true}
+            />
+          </div>
 
-          <TextInput
-            name="exclude"
-            type="text"
-            value={state.excludes}
-            placeholder="exclude these words..."
-            onChange={(v) => setState('excludes', () => v)}
-          />
+          <div class={styles.searchRow}>
+            <TextInput
+              name="exclude"
+              type="text"
+              value={state.excludes}
+              placeholder="exclude these words..."
+              onChange={(v) => setState('excludes', () => v)}
+              noExtraSpace={true}
+            />
+          </div>
 
-          <TextInput
-            name="hashtags"
-            type="text"
-            value={state.hashtags}
-            placeholder="include hashtags..."
-            onChange={(v) => setState('hashtags', () => v)}
-          />
+          <div class={styles.searchRow}>
+            <TextInput
+              name="hashtags"
+              type="text"
+              value={state.hashtags}
+              placeholder="include hashtags..."
+              onChange={(v) => setState('hashtags', () => v)}
+              noExtraSpace={true}
+            />
+          </div>
 
           <div class={styles.searchRow}>
             <div class={styles.caption}>
