@@ -209,7 +209,9 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
   const mentions = page.mentions || {};
 
-  return  page.messages.map((message) => {
+  const pageMessages = page.messages.filter(m => [Kind.Text, Kind.Repost].includes(m.kind));
+
+  return  pageMessages.map((message) => {
     const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
 
     const user = page?.users[msg.pubkey];
@@ -410,8 +412,9 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
   }
 
   const mentions = page.mentions || {};
+  const pageMessages = page.messages.filter(m => [Kind.LongForm, Kind.Repost].includes(m.kind));
 
-  return  page.messages.map((message) => {
+  return  pageMessages.map((message) => {
 
     const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
 

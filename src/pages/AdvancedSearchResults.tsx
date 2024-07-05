@@ -1,6 +1,6 @@
 import { paragraphSchema } from '@milkdown/preset-commonmark';
 import { A, useLocation, useParams, useRouteData } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
+import { Component, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 import Loader from '../components/Loader/Loader';
@@ -14,14 +14,30 @@ import { search } from '../translations';
 import SearchComponent from '../components/Search/Search';
 import styles from './FeedsTest.module.scss';
 import { SearchState } from './AdvancedSearch';
+import { useSearchContext } from '../contexts/SearchContext';
+import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
+import { Kind } from '../constants';
+import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 
 
 const AdvancedSearchResults: Component = () => {
-  const location = useLocation();
   const params = useParams()
+  const search = useAdvancedSearchContext();
 
 
-  const data = () => decodeURIComponent(params.query);
+  const queryString = () => decodeURIComponent(params.query);
+
+  const kind = () => {
+    const isRead = queryString().search(/kind:(\s)?30023\s/) >= 0;
+
+    if (isRead) return Kind.LongForm;
+
+    return 1;
+  }
+
+  onMount(() => {
+    search?.actions.findContent(queryString(), kind());
+  })
 
 
   return (
@@ -41,13 +57,23 @@ const AdvancedSearchResults: Component = () => {
 
       <div class={styles.section}>
         <div class={styles.summary}>
-          {data()}
+          {queryString()}
         </div>
       </div>
 
 
       <div class={styles.list}>
-        Results
+        <Switch fallback={
+          <For each={search?.notes} >
+            {note => <Note note={note} shorten={true} />}
+          </For>
+        }>
+          <Match when={kind() === Kind.LongForm}>
+            <For each={search?.notes} >
+              {article => <ArticlePreview article={article} />}
+            </For>
+          </Match>
+        </Switch>
       </div>
     </>
   )

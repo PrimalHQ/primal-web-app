@@ -13,15 +13,16 @@ import {
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
+  PrimalArticle,
   PrimalNote,
   PrimalUser,
 } from '../types/primal';
 import { Kind } from "../constants";
 import { APP_ID } from "../App";
 import { getUserProfiles } from "../lib/profile";
-import { searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
+import { advancedSearchContent, searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
-import { sortByRecency, convertToNotes } from "../stores/note";
+import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
 import { subscribeTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
@@ -40,13 +41,13 @@ const recomendedUsers = [
   'fa984bd7dbb282f07e16e7ae87b26a2a7b9b90b7246a44771f0cf5ae58018f52', // pablo
 ];
 
-export type SearchContextStore = {
+export type AdvancedSearchContextStore = {
   contentQuery: string,
   users: PrimalUser[],
   scores: Record<string, number>,
   contentUsers: PrimalUser[],
   contentScores: Record<string, number>,
-  notes: PrimalNote[],
+  notes: PrimalNote[] | PrimalArticle[],
   isFetchingUsers: boolean,
   isFetchingContent: boolean,
   page: FeedPage,
@@ -57,7 +58,7 @@ export type SearchContextStore = {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
     findContentUsers: (query: string, pubkey?: string) => void,
-    findContent: (query: string) => void,
+    findContent: (query: string, kind?: number) => void,
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
@@ -79,9 +80,9 @@ const initialData = {
   filteringReasons: [],
 };
 
-export const SearchContext = createContext<SearchContextStore>();
+export const AdvancedSearchContext = createContext<AdvancedSearchContextStore>();
 
-export function SearchProvider(props: { children: JSX.Element }) {
+export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
   const account = useAccountContext();
 
@@ -297,7 +298,8 @@ export function SearchProvider(props: { children: JSX.Element }) {
     searchUsers(pubkey, subid, query);
   }
 
-  const saveNotes = (newNotes: PrimalNote[]) => {
+  const saveNotes = (newNotes: PrimalNote[] | PrimalArticle[]) => {
+    // @ts-ignore
     updateStore('notes', () => [ ...newNotes ]);
     updateStore('isFetchingContent', () => false);
   };
@@ -354,19 +356,28 @@ export function SearchProvider(props: { children: JSX.Element }) {
     }
   };
 
-  const savePage = (page: FeedPage) => {
-    const newPosts = convertToNotes(page);
+  const savePage = (page: FeedPage, kind = 1) => {
+    console.log('ADVANCED SAVE: ', kind)
+    const newPosts = (kind === Kind.LongForm) ? convertToArticles(page) : convertToNotes(page);
 
     saveNotes(newPosts);
   };
 
-  const findContent = (query: string) => {
-    const subid = `search_content_${APP_ID}`;
+  // const fetchContentNextPage = (query: string, kind = 1) => {
+  //   if (kind === Kind.LongForm) {
+  //     const lastNoteDate = store.notes[store.notes.length - 1].msg.created_at
+
+  //   }
+  // };
+
+  const findContent = (query: string, until = 0, kind = 1) => {
+    const subid = `advanced_search_content_${APP_ID}`;
 
     const unsub = subscribeTo(subid, (type, _, content) => {
 
       if (type === 'EOSE') {
-        savePage(store.page);
+        console.log('ADVANCED: ', query, kind);
+        savePage(store.page, kind);
         unsub();
         return;
       }
@@ -385,8 +396,10 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
     updateStore('isFetchingContent', () => true);
     updateStore('notes', () => []);
-    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} })
-    searchContent(account?.publicKey, subid, query);
+    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+
+    console.log('ADVANCED 1')
+    advancedSearchContent(account?.publicKey, subid, query, 20, 0);
   }
 
   const setContentQuery = (query: string) => {
@@ -441,7 +454,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
 // STORES ---------------------------------------
 
-const [store, updateStore] = createStore<SearchContextStore>({
+const [store, updateStore] = createStore<AdvancedSearchContextStore>({
   ...initialData,
   actions: {
     findUsers,
@@ -455,10 +468,10 @@ const [store, updateStore] = createStore<SearchContextStore>({
 });
 
   return (
-    <SearchContext.Provider value={store}>
+    <AdvancedSearchContext.Provider value={store}>
       {props.children}
-    </SearchContext.Provider>
+    </AdvancedSearchContext.Provider>
   );
 }
 
-export function useSearchContext() { return useContext(SearchContext); }
+export function useAdvancedSearchContext() { return useContext(AdvancedSearchContext); }

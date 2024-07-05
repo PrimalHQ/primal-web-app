@@ -40,6 +40,26 @@ export const searchContent = (user_pubkey: string | undefined, subid: string, qu
   ]));
 }
 
+export const advancedSearchContent = (user_pubkey: string | undefined, subid: string, query: string, limit = 20, until: 0) => {
+  let payload = { specification: ["advanced_search", {query: cleanQuery(query)}], limit };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["advanced_feed", payload]},
+  ]));
+}
+
 export const searchFutureContent = (subid: string, query: string, since:number, limit = 100) => {
 
   let payload: SearchPayload = { query: cleanQuery(query), limit, since };

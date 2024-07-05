@@ -15,6 +15,7 @@ import { MessagesProvider } from './contexts/MessagesContext';
 import { MediaProvider } from './contexts/MediaContext';
 import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
+import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
 
 
 export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
@@ -36,23 +37,25 @@ const App: Component = () => {
           <MediaProvider>
             <AccountProvider>
               <SearchProvider>
-                <SettingsProvider>
-                  <ProfileProvider>
-                    <MessagesProvider>
-                      <NotificationsProvider>
-                        <ReadsProvider>
-                          <HomeProvider>
-                            <ExploreProvider>
-                              <ThreadProvider>
-                                <Router />
-                              </ThreadProvider>
-                            </ExploreProvider>
-                          </HomeProvider>
-                        </ReadsProvider>
-                      </NotificationsProvider>
-                    </MessagesProvider>
-                  </ProfileProvider>
-                </SettingsProvider>
+                <AdvancedSearchProvider>
+                  <SettingsProvider>
+                    <ProfileProvider>
+                      <MessagesProvider>
+                        <NotificationsProvider>
+                          <ReadsProvider>
+                            <HomeProvider>
+                              <ExploreProvider>
+                                <ThreadProvider>
+                                  <Router />
+                                </ThreadProvider>
+                              </ExploreProvider>
+                            </HomeProvider>
+                          </ReadsProvider>
+                        </NotificationsProvider>
+                      </MessagesProvider>
+                    </ProfileProvider>
+                  </SettingsProvider>
+                </AdvancedSearchProvider>
               </SearchProvider>
             </AccountProvider>
           </MediaProvider>
