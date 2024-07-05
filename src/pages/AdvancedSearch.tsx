@@ -1,5 +1,5 @@
 import { Select, TextField } from '@kobalte/core';
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
@@ -104,6 +104,8 @@ const orientations = ['Any', 'Vertical', 'Horizontal'];
 
 const AdvancedSearch: Component = () => {
 
+  const navigate = useNavigate();
+
   const [state, setState] = createStore<SearchState>({
     includes: '',
     excludes: '',
@@ -123,7 +125,8 @@ const AdvancedSearch: Component = () => {
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
     // Do search
-    console.log('STATE: ', { ...state });
+    // console.log('STATE: ', { ...state });
+    // navigate('/asearch/results', { replace: true, state });
   }
 
   createEffect(() => {
@@ -442,7 +445,7 @@ const AdvancedSearch: Component = () => {
           </Show>
 
           <div class={styles.submitButton}>
-            <ButtonPrimary type="submit">Search</ButtonPrimary>
+            <A class={styles.primaryButton} href="/asearch/results" state={state}>Search</A>
           </div>
         </form>
         </div>

@@ -149,7 +149,7 @@ const Router: Component = () => {
           </Route>
           <Route path="/asearch">
             <Route path="/" component={AdvancedSearch} />
-            <Route path="/:query" component={AdvancedSearchResults} />
+            <Route path="/results" component={AdvancedSearchResults} />
           </Route>
           <Route path="/404" component={NotFound} />
           <Route path="/:vanityName">
