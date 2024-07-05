@@ -360,7 +360,6 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
   };
 
   const savePage = (page: FeedPage, kind = 1) => {
-    console.log('ADVANCED SAVE: ', kind)
     const newPosts = (kind === Kind.LongForm) ? convertToArticles(page) : convertToNotes(page);
 
     saveNotes(newPosts);

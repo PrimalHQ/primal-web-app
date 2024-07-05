@@ -208,7 +208,32 @@
   .error {
     color: var(--warning-bright);
     font-size: 14px;
-    line-height: 26px;
+    line-height: 16px;
     margin-top: 24px;
   }
+}
+
+.datepickerInput {
+  background-color: var(--background-header-input);
+  color: var(--text-secondary);
+  border-radius: 18px;
+  border: none;
+  outline: none;
+  padding: 4px 12px !important;
+  height: fit-content;
+  width: 250px !important;
+
+  &::placeholder {
+    color: var(--text-tertiary);
+    font-size: 16px;
+    line-height: 18px;
+    font-weight: 400;
+  }
+}
+
+.rightFloat {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }

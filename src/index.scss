@@ -491,3 +491,52 @@ button:focus {
   top: auto !important;
   left: 0 !important;
 }
+
+@import '@rnwonder/solid-date-picker/dist/style.css';
+
+.date-picker-wrapper {
+  background-color: var(--background-input);
+  color: var(--text-secondary);
+}
+
+.date-picker-top {
+  button {
+    width: fit-content;
+    color: var(--text-primary);
+    background: none;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+  }
+}
+
+.date-picker-day-number-area {
+  button {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+
+    &[data-day-hover="true"] {
+      background-color: var(--subtile-devider);
+    }
+    &[data-day-number-range-start-or-end="true"] {
+      background-color: var(--text-tertiary-2);
+    }
+    &[data-day-number-range-between="true"] {
+      background-color: var(--subtile-devider);
+    }
+
+    &:disabled {
+      color: var(--text-tertiary-2);
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import { Select, TextField } from '@kobalte/core';
 import { A, useNavigate } from '@solidjs/router';
-import { Component, createEffect, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
 import Avatar from '../components/Avatar/Avatar';
@@ -17,6 +17,10 @@ import { PrimalUser } from '../types/primal';
 import AdvancedSearchSelectBox from './AdvancedSearchSelect';
 import styles from './FeedsTest.module.scss';
 import dayjs from 'dayjs';
+import objectSupport from 'dayjs/plugin/objectSupport';
+import DatePicker, { PickerValue } from "@rnwonder/solid-date-picker";
+import utils from "@rnwonder/solid-date-picker/utilities";
+import { sinkListItemCommand } from '@milkdown/preset-commonmark';
 
 export type SearchState = {
   includes: string,
@@ -27,6 +31,7 @@ export type SearchState = {
   userMentions: PrimalUser[],
   following: PrimalUser[],
   timeframe: string,
+  customTimeframe: { since: string, until: string },
   sentiment: string,
   kind: string,
   orientation: string,
@@ -38,7 +43,7 @@ const orientationKinds = ['Video', 'Images'];
 const durationKinds = ['Video', 'Sound', 'Reads'];
 
 
-const timeframes: Record<string, () => string> = {
+const timeframes: Record<string, (s?: any) => string> = {
   'Anytime': () => '',
 
   'past hour': () => {
@@ -76,7 +81,13 @@ const timeframes: Record<string, () => string> = {
     return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
   },
 
-  'custom': () =>'',
+  'custom': (stateTimeframe: { since: string, until: string}) => {
+    if (stateTimeframe.since.length === 0 && stateTimeframe.until.length === 0) {
+      return '';
+    }
+
+    return `since:${stateTimeframe.since} until:${stateTimeframe.until}`;
+  },
 };
 
 const sentiments: Record<string, () => string> = {
@@ -103,8 +114,6 @@ const orientations = ['Any', 'Vertical', 'Horizontal'];
 
 const AdvancedSearch: Component = () => {
 
-  const navigate = useNavigate();
-
   const [state, setState] = createStore<SearchState>({
     includes: '',
     excludes: '',
@@ -114,6 +123,7 @@ const AdvancedSearch: Component = () => {
     userMentions: [],
     following: [],
     timeframe: 'Anytime',
+    customTimeframe: { since: '', until: ''},
     sentiment: 'Neutral',
     kind: 'Notes',
     orientation: 'Any',
@@ -121,12 +131,19 @@ const AdvancedSearch: Component = () => {
     command: '',
   });
 
+  onMount(() => {
+    dayjs.extend(objectSupport);
+  });
+
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
-    // Do search
-    // console.log('STATE: ', { ...state });
-    // navigate('/asearch/results', { replace: true, state });
   }
+
+  createEffect(() => {
+    if (state.timeframe !== 'custom') {
+      setState('customTimeframe', () => ({ since: '', until: '' }));
+    }
+  });
 
   createEffect(() => {
     const includes = state.includes.length === 0 ? '' : state.includes.split(',').map(x => x.trim()).reduce((acc, x) => `${acc}${x} `, '');
@@ -140,7 +157,14 @@ const AdvancedSearch: Component = () => {
     const mentions = state.userMentions.reduce((acc, u) => acc + '@' + u.npub + ' ', '');;
     const followings = state.following.reduce((acc, u) => acc + 'following:' + u.npub + ' ', '');
 
-    const since = `${timeframes[state.timeframe]()} `;
+    let since = '';
+
+    if (state.timeframe === 'custom') {
+      since = timeframes['custom'](state.customTimeframe);
+    }
+    else {
+      since = `${timeframes[state.timeframe]()} `;
+    }
 
     const sentiment = `${sentiments[state.sentiment]()} `;
 
@@ -443,6 +467,40 @@ const AdvancedSearch: Component = () => {
               onChange={setTimeframe}
             />
           </div>
+
+          <Show when={state.timeframe === 'custom'}>
+            <div class={styles.rightFloat}>
+              <DatePicker
+                type="range"
+                onChange={(data) => {
+                  if (data.type !== 'range') return;
+
+                  if (data.startDate && data.endDate) {
+                    // @ts-ignore
+                    const sd = dayjs({ year: data.startDate.year || 0, month: data.startDate.month || 0, day: data.startDate.day });
+                    // @ts-ignore
+                    const ed = dayjs({ year: data.endDate.year || 0, month: data.endDate.month || 0, day: data.endDate.day });
+
+                    setState('customTimeframe', () => ({
+                      since: sd.format('YYYY-MM-DD'),
+                      until: ed.format('YYYY-MM-DD'),
+                    }));
+                  }
+                }}
+                maxDate={utils().getToday()}
+                renderInput={({ value, showDate }) => (
+                  <input
+                    readOnly
+                    placeholder="Select a date range"
+                    value={value().label}
+                    class={styles.datepickerInput}
+                    onClick={showDate}
+                  />
+                )}
+                shouldCloseOnSelect
+              />
+            </div>
+          </Show>
 
           <div class={styles.searchRow}>
             <div class={styles.caption}>

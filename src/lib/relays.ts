@@ -56,7 +56,7 @@ export const connectToRelay: ConnectToRelay =
     // })
 
     relay.onclose = () => {
-      console.log('Relay connection closed: ', relay);
+      logInfo('Relay connection closed: ', relay);
       onFail(relay, tryReconnecting ? 'disconnect' : 'close');
     }
 

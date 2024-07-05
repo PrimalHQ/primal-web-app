@@ -89,8 +89,6 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     if (bookmarks.find(b => b[0] === aTag[0] && b[1] === aTag[1])) {
       const bookmarksToAdd = bookmarks.filter(b => b[0] !== aTag[0] || b[1] !== aTag[1]);
 
-          console.log('REMOVING: ', aTag, bookmarksToAdd);
-
       if (bookmarksToAdd.length < 1) {
         logWarning('BOOKMARK ISSUE: ', `before_bookmark_${APP_ID}`);
 
