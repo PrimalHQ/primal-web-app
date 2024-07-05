@@ -189,3 +189,16 @@
   width: 100%;
   min-height: 36px;
 }
+
+.noResults {
+  color: var(--text-secondary);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 20px;
+  margin-bottom: 18px;
+  width: 100%;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

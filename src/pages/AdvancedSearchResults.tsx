@@ -18,6 +18,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
 import { Kind } from '../constants';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
+import Paginator from '../components/Paginator/Paginator';
 
 
 const AdvancedSearchResults: Component = () => {
@@ -68,13 +69,22 @@ const AdvancedSearchResults: Component = () => {
             {note => <Note note={note} shorten={true} />}
           </For>
         }>
+          <Match when={!search?.isFetchingContent && search?.notes.length === 0}>
+            <div class={styles.noResults}>
+              No results found
+            </div>
+          </Match>
           <Match when={kind() === Kind.LongForm}>
             <For each={search?.notes} >
               {article => <ArticlePreview article={article} />}
             </For>
           </Match>
         </Switch>
+
+        <Show when={search?.isFetchingContent}><Loader /></Show>
       </div>
+
+      <Paginator loadNextPage={() => search?.actions.fetchContentNextPage(queryString(), kind())} />
     </>
   )
 }

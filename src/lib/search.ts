@@ -40,7 +40,7 @@ export const searchContent = (user_pubkey: string | undefined, subid: string, qu
   ]));
 }
 
-export const advancedSearchContent = (user_pubkey: string | undefined, subid: string, query: string, limit = 20, until: 0) => {
+export const advancedSearchContent = (user_pubkey: string | undefined, subid: string, query: string, limit = 20, until = 0, offset = 0) => {
   let payload = { specification: ["advanced_search", {query: cleanQuery(query)}], limit };
 
   if (user_pubkey) {
@@ -51,6 +51,11 @@ export const advancedSearchContent = (user_pubkey: string | undefined, subid: st
   if (until > 0) {
     // @ts-ignore
     payload.until = until;
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    payload.offset = offset;
   }
 
   sendMessage(JSON.stringify([

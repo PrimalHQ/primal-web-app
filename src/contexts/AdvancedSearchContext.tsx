@@ -59,6 +59,7 @@ export type AdvancedSearchContextStore = {
     findUserByNupub: (npub: string) => void,
     findContentUsers: (query: string, pubkey?: string) => void,
     findContent: (query: string, kind?: number) => void,
+    fetchContentNextPage: (query: string, kind?: number) => void,
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
@@ -300,7 +301,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
   const saveNotes = (newNotes: PrimalNote[] | PrimalArticle[]) => {
     // @ts-ignore
-    updateStore('notes', () => [ ...newNotes ]);
+    updateStore('notes', (ns) => [...ns, ...newNotes ]);
     updateStore('isFetchingContent', () => false);
   };
 
@@ -363,12 +364,47 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     saveNotes(newPosts);
   };
 
-  // const fetchContentNextPage = (query: string, kind = 1) => {
-  //   if (kind === Kind.LongForm) {
-  //     const lastNoteDate = store.notes[store.notes.length - 1].msg.created_at
+  const fetchContentNextPage = (query: string, kind = 1) => {
+    const lastNote = store.notes[store.notes.length - 1];
+    let until = 0;
+    let offset = 0;
 
-  //   }
-  // };
+    if (kind === Kind.LongForm) {
+      until = (lastNote as PrimalArticle).published || 0;
+      offset = (store.notes as PrimalArticle[]).filter(n => n.published === until).length;
+    } else {
+      until = (lastNote as PrimalNote).msg.created_at || 0;
+      offset = (store.notes as PrimalNote[]).filter(n => n.msg.created_at === until).length;
+    }
+
+
+    const subid = `advanced_search_content_np_${APP_ID}`;
+
+    const unsub = subscribeTo(subid, (type, _, content) => {
+
+      if (type === 'EOSE') {
+        savePage(store.page, kind);
+        unsub();
+        return;
+      }
+
+      if (!content) {
+        return;
+      }
+
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
+
+    });
+
+    updateStore('isFetchingContent', () => true);
+    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
+
+    advancedSearchContent(account?.publicKey, subid, query, 20, until, offset);
+  };
 
   const findContent = (query: string, until = 0, kind = 1) => {
     const subid = `advanced_search_content_${APP_ID}`;
@@ -376,7 +412,6 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     const unsub = subscribeTo(subid, (type, _, content) => {
 
       if (type === 'EOSE') {
-        console.log('ADVANCED: ', query, kind);
         savePage(store.page, kind);
         unsub();
         return;
@@ -398,7 +433,6 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     updateStore('notes', () => []);
     updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
 
-    console.log('ADVANCED 1')
     advancedSearchContent(account?.publicKey, subid, query, 20, 0);
   }
 
@@ -460,6 +494,7 @@ const [store, updateStore] = createStore<AdvancedSearchContextStore>({
     findUsers,
     findUserByNupub,
     findContent,
+    fetchContentNextPage,
     findContentUsers,
     setContentQuery,
     getRecomendedUsers,
