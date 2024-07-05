@@ -87,7 +87,6 @@ const sentiments: Record<string, () => string> = {
 };
 
 const kinds: Record<string, () => string> = {
-  'All': () => '',
   'Notes': () => 'kind:1',
   'Replies': () => 'kind:1 filter:replies',
   'Reads': () => 'kind:30023',
@@ -116,7 +115,7 @@ const AdvancedSearch: Component = () => {
     following: [],
     timeframe: 'Anytime',
     sentiment: 'Neutral',
-    kind: 'All',
+    kind: 'Notes',
     orientation: 'Any',
     duration: '',
     command: '',
