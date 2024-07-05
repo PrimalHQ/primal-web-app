@@ -445,7 +445,7 @@ const AdvancedSearch: Component = () => {
           </Show>
 
           <div class={styles.submitButton}>
-            <A class={styles.primaryButton} href="/asearch/results" state={state}>Search</A>
+            <A class={styles.primaryButton} href={`/asearch/${encodeURIComponent(state.command)}`}>Search</A>
           </div>
         </form>
         </div>

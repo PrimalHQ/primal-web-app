@@ -18,9 +18,10 @@ import { SearchState } from './AdvancedSearch';
 
 const AdvancedSearchResults: Component = () => {
   const location = useLocation();
+  const params = useParams()
 
 
-  const data = () => location.state as SearchState;
+  const data = () => decodeURIComponent(params.query);
 
 
   return (
@@ -40,7 +41,7 @@ const AdvancedSearchResults: Component = () => {
 
       <div class={styles.section}>
         <div class={styles.summary}>
-          {data().command}
+          {data()}
         </div>
       </div>
 
