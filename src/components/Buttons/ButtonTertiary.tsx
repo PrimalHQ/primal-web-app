@@ -1,4 +1,4 @@
-import { Button } from '@kobalte/core';
+import { Button } from '@kobalte/core/button';
 import { Component, JSXElement } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
@@ -12,14 +12,14 @@ const ButtonTertiary: Component<{
   disabled?: boolean,
 }> = (props) => {
   return (
-    <Button.Root
+    <Button
       id={props.id}
       class={styles.tertiary}
       onClick={props.onClick}
       disabled={props.disabled}
     >
       {props.children}
-    </Button.Root>
+    </Button>
   )
 }
 

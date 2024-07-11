@@ -1,5 +1,5 @@
 import { Component, JSXElement, Show } from 'solid-js';
-import { TextField } from '@kobalte/core';
+import { TextField } from '@kobalte/core/text-field';
 
 import styles from './TextInput.module.scss';
 
@@ -23,7 +23,7 @@ const TextInput: Component<{
 
   return (
     <div class={`${styles.container} ${props.noExtraSpace ? styles.noExtra : ''}`}>
-      <TextField.Root
+      <TextField
         class={styles.root}
         value={props.value}
         onChange={props.onChange}
@@ -61,7 +61,7 @@ const TextInput: Component<{
         <TextField.ErrorMessage class={styles.errorMessage}>
           {props.errorMessage}
         </TextField.ErrorMessage>
-      </TextField.Root>
+      </TextField>
     </div>
   );
 }

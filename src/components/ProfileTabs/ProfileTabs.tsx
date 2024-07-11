@@ -1,5 +1,5 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Tabs } from "@kobalte/core";
+import { Tabs } from "@kobalte/core/tabs";
 import { A } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
@@ -178,7 +178,7 @@ const ProfileTabs: Component<{
       when={profile && profile.fetchedUserStats}
       fallback={<div class={styles.profileTabsPlaceholder}></div>}
     >
-      <Tabs.Root onChange={onChangeValue}>
+      <Tabs onChange={onChangeValue}>
         <Tabs.List class={styles.profileTabs}>
           <Show when={(profile?.userStats.long_form_note_count || 0) > 0}>
             <Tabs.Trigger class={styles.profileTab} value="articles">
@@ -700,7 +700,7 @@ const ProfileTabs: Component<{
             </Show>
           </div>
         </Tabs.Content>
-      </Tabs.Root>
+      </Tabs>
     </Show>
   );
 }

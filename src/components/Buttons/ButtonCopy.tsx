@@ -1,6 +1,6 @@
 import { Component, createSignal, JSXElement, Match, Show, Switch } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { Button } from "@kobalte/core";
+import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
 
@@ -23,7 +23,7 @@ const ButtonCopy: Component<{
   }
 
   return (
-    <Button.Root
+    <Button
       id={props.id}
       class={`${styles.copy} ${props.light ? styles.light : ''}`}
       onClick={doCopy}
@@ -43,7 +43,7 @@ const ButtonCopy: Component<{
       <Show when={!props.labelBeforeIcon}>
         <div>{props.label}</div>
       </Show>
-    </Button.Root>
+    </Button>
   )
 }
 

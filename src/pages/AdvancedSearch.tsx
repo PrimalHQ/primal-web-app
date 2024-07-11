@@ -1,6 +1,6 @@
-import { Select, TextField } from '@kobalte/core';
-import { A, useNavigate } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { TextField } from '@kobalte/core/text-field';
+import { A } from '@solidjs/router';
+import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
 import Avatar from '../components/Avatar/Avatar';
@@ -20,7 +20,6 @@ import dayjs from 'dayjs';
 import objectSupport from 'dayjs/plugin/objectSupport';
 import DatePicker, { PickerValue } from "@rnwonder/solid-date-picker";
 import utils from "@rnwonder/solid-date-picker/utilities";
-import { sinkListItemCommand } from '@milkdown/preset-commonmark';
 
 export type SearchState = {
   includes: string,
@@ -314,10 +313,10 @@ const AdvancedSearch: Component = () => {
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
-      <TextField.Root class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
+      <TextField class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
         <TextField.Label>Search Command</TextField.Label>
         <TextField.TextArea autoResize={true}/>
-      </TextField.Root>
+      </TextField>
       </StickySidebar>
 
       <div class={styles.page}>

@@ -16,7 +16,7 @@ import { APP_ID } from '../../App';
 import { subsTo, subTo } from '../../sockets';
 import { getAuthorSubscriptionTiers } from '../../lib/feed';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import { Select } from '@kobalte/core';
+import { Select } from '@kobalte/core/select';
 import Loader from '../Loader/Loader';
 import { logInfo } from '../../lib/logger';
 import { getExchangeRate, getMembershipStatus } from '../../lib/membership';
@@ -283,7 +283,7 @@ const SubscribeToAuthorModal: Component<{
                         </div>
                       </div>}
                     >
-                      <Select.Root
+                      <Select
                         class={styles.selectCosts}
                         options={costOptions(tier)}
                         optionValue="id"
@@ -329,7 +329,7 @@ const SubscribeToAuthorModal: Component<{
                             <Select.Listbox class={styles.selectListbox} />
                           </Select.Content>
                         </Select.Portal>
-                      </Select.Root>
+                      </Select>
 
                     </Show>
 

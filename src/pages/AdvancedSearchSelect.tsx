@@ -1,4 +1,4 @@
-import { Select, TextField } from '@kobalte/core';
+import { Select } from '@kobalte/core/select';
 import { A } from '@solidjs/router';
 import { Component, createEffect, For, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -25,7 +25,7 @@ const AdvancedSearchSelectBox: Component<{
 
 
   return (
-    <Select.Root
+    <Select
       class={styles.selectBox}
       value={props.value}
       options={props.options}
@@ -49,7 +49,7 @@ const AdvancedSearchSelectBox: Component<{
           <Select.Listbox class={styles.selectContent} />
         </Select.Content>
       </Select.Portal>
-    </Select.Root>
+    </Select>
   );
 }
 

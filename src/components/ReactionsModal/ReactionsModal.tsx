@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Tabs } from '@kobalte/core';
+import { Tabs } from '@kobalte/core/tabs';
 import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -406,7 +406,7 @@ const ReactionsModal: Component<{
         </Switch>
 
         <div class={styles.description}>
-          <Tabs.Root value={selectedTab()} onChange={setSelectedTab}>
+          <Tabs value={selectedTab()} onChange={setSelectedTab}>
             <Tabs.List class={styles.tabs}>
               <Show when={props.stats.likes > 0}>
                 <Tabs.Trigger class={styles.tab} value={'likes'} >
@@ -620,7 +620,7 @@ const ReactionsModal: Component<{
                 isSmall={true}
               />
             </Tabs.Content>
-          </Tabs.Root>
+          </Tabs>
         </div>
       </div>
     </Modal>

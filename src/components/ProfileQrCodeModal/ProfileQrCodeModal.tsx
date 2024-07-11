@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Tabs } from '@kobalte/core';
+import { Tabs } from '@kobalte/core/tabs';
 import { Component, For, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
@@ -73,7 +73,7 @@ const ProfileQrCodeModal: Component<{
         </div>
 
         <div class={styles.qrCode}>
-          <Tabs.Root>
+          <Tabs>
             <Tabs.List class={styles.tabs}>
               <For each={profileData()}>
                 {([key, info]) =>
@@ -97,7 +97,7 @@ const ProfileQrCodeModal: Component<{
                 </Show>
               }
             </For>
-          </Tabs.Root>
+          </Tabs>
         </div>
 
         <div class={styles.keys}>

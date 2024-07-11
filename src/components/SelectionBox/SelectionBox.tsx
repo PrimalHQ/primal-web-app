@@ -1,5 +1,5 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Select } from "@kobalte/core";
+import { Select } from "@kobalte/core/select";
 
 // Import default styles. (All examples use this via a global import)
 import "@thisbeyond/solid-select/style.css";
@@ -43,7 +43,7 @@ const SelectionBox: Component<{
   }
 
   return (
-    <Select.Root
+    <Select
       id={props.id}
       class={styles.selectionBox}
       options={props.options}
@@ -67,7 +67,7 @@ const SelectionBox: Component<{
       <Select.Content>
         <Select.Listbox class={styles.listbox}/>
       </Select.Content>
-    </Select.Root>
+    </Select>
   );
 }
 

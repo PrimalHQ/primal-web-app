@@ -21,7 +21,7 @@ import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
-import { Tabs } from "@kobalte/core";
+import { Tabs } from "@kobalte/core/tabs";
 
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -1121,7 +1121,7 @@ const Notifications: Component = () => {
         />
       </StickySidebar>
 
-      <Tabs.Root
+      <Tabs
         value={notificationGroup()}
         onChange={(group: string) => {
           resetNotifContent();
@@ -1238,7 +1238,7 @@ const Notifications: Component = () => {
           }
         </For>
 
-      </Tabs.Root>
+      </Tabs>
     </div>
   );
 }

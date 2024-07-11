@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
-import { Progress } from '@kobalte/core';
+import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
 import { uploadServer } from '../../uploadSocket';
@@ -379,7 +379,7 @@ const Uploader: Component<{
 
   return (
     <Show when={uploadState.id}>
-      <Progress.Root value={uploadState.progress} class={styles.uploadProgress}>
+      <Progress value={uploadState.progress} class={styles.uploadProgress}>
         <Show when={!props.hideLabel}>
           <div class={styles.progressLabelContainer}>
             <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
@@ -408,7 +408,7 @@ const Uploader: Component<{
             </Show>
           </ButtonGhost>
         </div>
-      </Progress.Root>
+      </Progress>
     </Show>
   );
 }
