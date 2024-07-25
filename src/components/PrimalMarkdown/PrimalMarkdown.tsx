@@ -41,6 +41,35 @@ import { template } from 'solid-js/web';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import ArticleLinkPreview from '../LinkPreview/ArticleLinkPreview';
+import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
+import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
+
+export type Coord = {
+  x: number;
+  y: number;
+};
+
+// atStart: if true, returns coord of the beginning of the selection,
+//          if false, returns coord of the end of the selection
+function getSelectionCoords(atStart: boolean): Coord | null {
+  const sel = window.getSelection();
+
+  // check if selection exists
+  if (!sel?.rangeCount) return null;
+
+  // get range
+  let range = sel.getRangeAt(0).cloneRange();
+  if (!range.getClientRects) return null;
+
+  // get client rect
+  range.collapse(atStart);
+  let rects = range.getClientRects();
+  if (rects.length <= 0) return null;
+
+  // return coord
+  let rect = rects[0];
+  return { x: rect.x, y: rect.y };
+}
 
 const PrimalMarkdown: Component<{
   id?: string,
@@ -49,11 +78,16 @@ const PrimalMarkdown: Component<{
   noteId: string,
   article: PrimalArticle | undefined,
   highlights?: any[],
+  onHighlightCreated?: (highlight: any) => void,
+  onHighlightRemoved?: (id: string) => void,
 }> = (props) => {
   const account = useAccountContext();
 
   let ref: HTMLDivElement | undefined;
-  let editor: Editor;
+  let viewer: HTMLDivElement | undefined;
+  // let editor1: Editor;
+
+  const [editor, setEditor] = createSignal<Editor>();
 
   const id = () => {
     return `note_${props.noteId}`;
@@ -73,6 +107,25 @@ const PrimalMarkdown: Component<{
     lightbox.init();
   });
 
+  const isHighlight = (el: Element) => {
+    let ret = false;
+    for (let i=0; i<el.children.length; i++) {
+      const child = el.children.item(i);
+
+      if (child?.tagName === 'EM' && child.attributes.getNamedItem('data-highlight')) {
+        ret = true;
+        break;
+      }
+    }
+
+    return ret;
+  }
+
+  const isImg = (el: Element) => {
+    // @ts-ignore
+    return el.firstChild?.tagName === 'IMG';
+  }
+
   const isMention = (el: Element) => {
     const regex = /nostr:([A-z0-9]+)/;
     const content = el.innerHTML;
@@ -80,9 +133,100 @@ const PrimalMarkdown: Component<{
     return regex.test(content)
   }
 
-  const isImg = (el: Element) => {
+  const [highlightMenu, setHighlightMenu] = createSignal<any>();
+  const [highlightText, setHighlightText] = createSignal<string>('');
+  const [highlightContext, setHighlightContext] = createSignal<string>('');
+  const [highlightMenuPosition, setHighlightMenuPosition] = createSignal<Coord>();
+
+  const showHighlightMenu = (id: string) => {
+    if (highlightMenu() && id === highlightMenu().id) return;
+
+    const hl = props.highlights?.find(h => h.id === id);
+
+    if (hl) {
+      const el = document.querySelector(`em[data-highlight="${hl.id}"]`);
+
+      // @ts-ignore
+      const x = el?.offsetLeft || 0;
+
+      // @ts-ignore
+      const y = el?.offsetTop || 0;
+
+      setHighlightMenuPosition(() => ({ x, y }));
+      setHighlightText(() => hl.content);
+      setHighlightContext(() => (hl.tags.find((t: string[]) => t[0] === 'context')) || [])[1];
+      setHighlightMenu(() => hl);
+    }
+  };
+
+  const hideContextMenu = (id: string) => {
+    if (highlightMenu() && id === highlightMenu().id) {
+      setHighlightMenu(() => undefined);
+    }
+  };
+
+  const onMouseUp = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
     // @ts-ignore
-    return el.firstChild?.tagName === 'IMG';
+    const isHighlightMenuOption = e.target?.parentElement.getAttribute('data-highlight-menu-option') !== null;
+
+    if (isHighlightMenuOption) return;
+
+    // @ts-ignore
+    const selection = document.getSelection();
+    document.querySelector('em[data-highlight-selected')?.removeAttribute('data-highlight-selected');
+
+    if (selection?.toString().length === 0) {
+      setHighlightMenu(() => undefined);
+      return;
+    }
+
+
+    // @ts-ignore
+    setHighlightText(() => selection?.toString());
+    setHighlightContext(() => selection?.anchorNode?.parentElement?.innerText || '')
+    // @ts-ignore
+    showNewHighlightMenu('NEW_HIGHLIGHT');
+  };
+
+  const showNewHighlightMenu = (text: string) => {
+    const coord = getSelectionCoords(true);
+
+    const r = viewer?.getBoundingClientRect();
+    const xOff = r?.left || 0;
+    const yOff = r?.top || 0;
+
+    coord && setHighlightMenuPosition(() => ({ x: coord.x - xOff, y: coord.y - yOff}));
+    setHighlightMenu(() => text);
+  };
+
+  const renderHighlight = (el: Element) => {
+    for (let i=0; i<el.children.length; i++) {
+      const child = el.children.item(i);
+
+      if (child?.tagName === 'EM' && child.attributes.getNamedItem('data-highlight')) {
+        const id = child.attributes.getNamedItem('data-highlight')?.value;
+
+        const highlight = props.highlights?.find(h => h.id === id);
+
+        if (highlight) {
+          child.replaceWith(
+            // @ts-ignore
+            <ArticleHighlight
+              highlight={props.highlights?.find(h => h.id === id)}
+              onShowMenu={showHighlightMenu}
+              onHideMenu={hideContextMenu}
+            />
+          );
+        }
+      }
+    }
+
+    return <>{el}</>
+
+
   }
 
   const renderImage = (el: Element) => {
@@ -185,7 +329,7 @@ const PrimalMarkdown: Component<{
   const [html, setHTML] = createSignal<string>();
 
   onMount(async () => {
-    editor = await Editor.make()
+    const e = await Editor.make()
       .config((ctx) => {
           ctx.set(rootCtx, ref);
 
@@ -205,23 +349,38 @@ const PrimalMarkdown: Component<{
       // .use(mention)
       .create();
 
-      insert(props.content || '')(editor.ctx);
+    setEditor
 
-      setHTML(getHTML()(editor.ctx));
+    insert(props.content || '')(e.ctx);
+
+    setHTML(getHTML()(e.ctx));
+
+    setEditor(() => e);
+
+    document.addEventListener('mouseup', onMouseUp);
   });
 
+  onCleanup(() => {
+    document.removeEventListener('mouseup', onMouseUp);
+  })
+
   createEffect(() => {
+    const e = editor();
 
     if (!props.highlights) return;
-    if (!editor) return;
+    if (!e) return;
 
-    const htmlContent = getHTML()(editor.ctx);
+    const htmlContent = getHTML()(e.ctx);
 
     let parsedContent = ''
 
     if (props.highlights) {
       parsedContent = props.highlights.reduce((acc, hl) => {
-        return acc.replace(hl, `<em>${hl}</em>`);
+        const context = (hl.tags.find((t: string[]) => t[0] == 'context') || ['', ''])[1];
+
+        const newContext = context.replace(hl.content, `<em data-highlight="${hl.id}">${hl.content}</em>`);
+
+        return acc.replace(context, newContext);
       }, htmlContent);
     }
 
@@ -229,7 +388,7 @@ const PrimalMarkdown: Component<{
   });
 
   onCleanup(() => {
-    editor.destroy();
+    editor()?.destroy();
   });
 
   const htmlArray = () => {
@@ -239,11 +398,12 @@ const PrimalMarkdown: Component<{
     return [ ...el.children ];
   }
 
-  const undo = () => editor?.action(callCommand(redoCommand.key));
-  const redo = () => editor?.action(callCommand(redoCommand.key));
-  const bold = () => editor?.action(callCommand(toggleStrongCommand.key));
-  const italic = () => editor?.action(callCommand(toggleEmphasisCommand.key));
-  const table = () => editor?.action(callCommand(insertTableCommand.key));
+  const undo = () => editor()?.action(callCommand(redoCommand.key));
+  const redo = () => editor()?.action(callCommand(redoCommand.key));
+  const bold = () => editor()?.action(callCommand(toggleStrongCommand.key));
+  const italic = () => editor()?.action(callCommand(toggleEmphasisCommand.key));
+  const table = () => editor()?.action(callCommand(insertTableCommand.key));
+
 
   return (
     <div class={styles.primalMarkdown}>
@@ -259,10 +419,25 @@ const PrimalMarkdown: Component<{
 
       <div ref={ref} class={styles.editor} style="display: none;" />
 
-      <div id={id()} class={styles.editor}>
+      <div id={id()} ref={viewer} class={styles.editor}>
+        <Show when={highlightMenu()}>
+          <ArticleHighlightActionMenu
+            highlight={highlightMenu()}
+            position={highlightMenuPosition()}
+            text={highlightText()}
+            context={highlightContext()}
+            article={props.article}
+            onCreate={props.onHighlightCreated}
+            onRemove={props.onHighlightRemoved}
+          />
+        </Show>
+
         <For each={htmlArray()}>
           {el => (
             <Switch fallback={<>{el}</>}>
+              <Match when={isHighlight(el)}>
+                {renderHighlight(el)}
+              </Match>
               <Match when={isMention(el)}>
                 {renderMention(el)}
               </Match>

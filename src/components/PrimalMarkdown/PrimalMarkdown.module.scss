@@ -7,6 +7,7 @@
   }
 
   .editor {
+    position: relative;
     margin-block: 8px;
 
     p {
@@ -15,7 +16,7 @@
       font-weight: 400;
       line-height: 28px;
       margin-top: 0;
-      margin-bottom: 20px;
+      margin-bottom: 28px;
     }
 
     span {
@@ -200,6 +201,24 @@
       background-color: var(--highlight);
       color: var(--text-primary);
       padding-block: 4px;
+    }
+
+    em[data-highlight] {
+      background-color: var(--highlight);
+      color: var(--text-heading);
+      font-size: var(--p-font-size);
+      font-weight: var(--p-font-weight);
+      line-height: var(--p-line-height);
+      text-decoration: none;
+    }
+
+    em[data-highlight][data-highlight-selected] {
+      background-color: var(--highlight-selected);
+      color: var(--text-heading);
+      font-size: var(--p-font-size);
+      font-weight: var(--p-font-weight);
+      line-height: var(--p-line-height);
+      text-decoration: none;
     }
 
     code {

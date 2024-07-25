@@ -745,7 +745,7 @@ const Longform: Component< { naddr: string } > = (props) => {
         // @ts-ignore
         if (content.kind === Kind.Highlight) {
           // @ts-ignore
-          updateStore('highlights', store.highlights.length, () => content.content);
+          updateStore('highlights', store.highlights.length, () => content);
         }
       },
       onEose: () => {
@@ -858,6 +858,12 @@ const Longform: Component< { naddr: string } > = (props) => {
             readonly={true}
             article={store.article}
             highlights={store.highlights}
+            onHighlightCreated={(hl: any) => {
+              updateStore('highlights', store.highlights.length, () => ({...hl}));
+            }}
+            onHighlightRemoved={(id: string) => {
+              updateStore('highlights', (hs) => hs.filter(h => h.id !== id));
+            }}
           />
 
           <div class={styles.tags}>
