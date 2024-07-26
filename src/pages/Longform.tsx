@@ -53,6 +53,7 @@ import ButtonPrimary from "../components/Buttons/ButtonPrimary";
 import { zapSubscription } from "../lib/zap";
 import Paginator from "../components/Paginator/Paginator";
 import { useSettingsContext } from "../contexts/SettingsContext";
+import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
 
 export type LongFormData = {
   title: string,
@@ -76,6 +77,9 @@ export type LongformThreadStore = {
   lastReply: PrimalNote | undefined,
   hasTiers: boolean,
   highlights: any[],
+  selectedHighlight: any,
+  heightlightReplies: PrimalNote[],
+  heighlightsPage: FeedPage,
 }
 
 const emptyArticle = {
@@ -103,11 +107,22 @@ const emptyStore: LongformThreadStore = {
     topZaps: {},
     wordCount: {},
   },
-  highlights: [],
   users: [],
   isFetching: false,
   lastReply: undefined,
   hasTiers: false,
+  highlights: [],
+  heighlightsPage: {
+    messages: [],
+    users: {},
+    postStats: {},
+    mentions: {},
+    noteActions: {},
+    topZaps: {},
+    wordCount: {},
+  },
+  heightlightReplies: [],
+  selectedHighlight: undefined,
 }
 
 const Longform: Component< { naddr: string } > = (props) => {
@@ -747,14 +762,173 @@ const Longform: Component< { naddr: string } > = (props) => {
           // @ts-ignore
           updateStore('highlights', store.highlights.length, () => content);
         }
+
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          updateStore('heighlightsPage', 'users',
+            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+          );
+
+          return;
+        }
+
+        if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
+            updateStore('heighlightsPage', 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+          }
+
+          return;
+        }
+
+        if (content.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          updateStore('heighlightsPage', 'postStats',
+            (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+          );
+          return;
+        }
+
+        if (content.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          let id = mention.id;
+
+          updateStore('heighlightsPage', 'mentions',
+            (mentions) => ({ ...mentions, [id]: { ...mention } })
+          );
+
+          if (mention.kind === Kind.LongForm) {
+            id = nip19.naddrEncode({
+              identifier: (mention.tags.find((t: string[]) => t[0] === 'd') || [])[1],
+              pubkey: mention.pubkey,
+              kind: mention.kind,
+            });
+
+            updateStore('heighlightsPage', 'mentions',
+            (mentions) => ({ ...mentions, [id]: { ...mention } })
+          );
+          }
+          return;
+        }
+
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          updateStore('heighlightsPage', 'noteActions',
+            (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+          );
+          return;
+        }
+
+        if (content.kind === Kind.LinkMetadata) {
+          const metadata = JSON.parse(content.content);
+
+          const data = metadata.resources[0];
+          if (!data) {
+            return;
+          }
+
+          const preview = {
+            url: data.url,
+            title: data.md_title,
+            description: data.md_description,
+            mediaType: data.mimetype,
+            contentType: data.mimetype,
+            images: [data.md_image],
+            favicons: [data.icon_url],
+          };
+
+          setLinkPreviews(() => ({ [data.url]: preview }));
+          return;
+        }
+
+        if (content.kind === Kind.RelayHint) {
+          const hints = JSON.parse(content.content);
+          updateStore('heighlightsPage', 'relayHints', (rh) => ({ ...rh, ...hints }));
+        }
+
+        if (content?.kind === Kind.Zap) {
+          const zapTag = content.tags.find(t => t[0] === 'description');
+
+          if (!zapTag) return;
+
+          const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+          let amount = '0';
+
+          let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+          if (bolt11Tag) {
+            try {
+              amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+            } catch (e) {
+              const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+              amount = amountTag ? amountTag[1] : '0';
+            }
+          }
+
+          const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+          const zap: TopZap = {
+            id: zapInfo.id,
+            amount: parseInt(amount || '0'),
+            pubkey: zapInfo.pubkey,
+            message: zapInfo.content,
+            eventId,
+          };
+
+          const oldZaps = store.page.topZaps[eventId];
+
+          if (oldZaps === undefined) {
+            updateStore('heighlightsPage', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+            return;
+          }
+
+          if (oldZaps.find(i => i.id === zap.id)) {
+            return;
+          }
+
+          const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+          updateStore('heighlightsPage', 'topZaps', eventId, () => [ ...newZaps ]);
+
+          return;
+        }
       },
       onEose: () => {
         unsub();
+        saveHighlightsPage(store.heighlightsPage)
       }
     });
 
     getHighlights(pubkey, identifier, kind, subId, account?.publicKey);
   }
+
+
+  const saveHighlightsPage = (page: FeedPage) => {
+
+    const users = Object.values(page.users).map(convertToUser);
+
+    const replies = sortByRecency(convertToNotes(page, page.topZaps));
+
+    const knownUsers = store.users.map(u => u.pubkey);
+    const newUsers = users.filter(u => !knownUsers.includes(u.pubkey));
+    updateStore('users', (usrs) => [ ...usrs, ...newUsers ]);
+
+    updateStore('heightlightReplies', (rpls) => [ ...rpls, ...replies ]);
+
+  };
 
   return (
     <>
@@ -768,24 +942,29 @@ const Longform: Component< { naddr: string } > = (props) => {
           user={store.article?.user}
           article={store.article}
         />
+        <ArticleHighlightComments
+          highlight={store.selectedHighlight}
+          comments={store.heightlightReplies}
+          author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
+        />
       </Wormhole>
       <div class={styles.header}>
         <Show when={store.article?.user}>
         <A href={`/p/${store.article?.user.npub}`}>
           <div class={styles.author}>
-                <Avatar user={store.article?.user} size="sm" />
+            <Avatar user={store.article?.user} size="sm" />
 
-                <div class={styles.userInfo}>
-                  <div class={styles.userName}>
-                    {userName(store.article?.user)}
-                    <VerificationCheck user={store.article?.user} />
-                  </div>
-                  <Show when={store.article?.user.nip05}>
-                    <div class={styles.nip05}>
-                      {nip05Verification(store.article?.user)}
-                    </div>
-                  </Show>
+            <div class={styles.userInfo}>
+              <div class={styles.userName}>
+                {userName(store.article?.user)}
+                <VerificationCheck user={store.article?.user} />
+              </div>
+              <Show when={store.article?.user.nip05}>
+                <div class={styles.nip05}>
+                  {nip05Verification(store.article?.user)}
                 </div>
+              </Show>
+            </div>
           </div>
         </A>
         </Show>
@@ -858,6 +1037,13 @@ const Longform: Component< { naddr: string } > = (props) => {
             readonly={true}
             article={store.article}
             highlights={store.highlights}
+            onHighlightSelected={(hl: any) => {
+              if (!hl) {
+                updateStore('selectedHighlight', () => undefined);
+                return;
+              }
+              updateStore('selectedHighlight', () => ({...hl}));
+            }}
             onHighlightCreated={(hl: any) => {
               updateStore('highlights', store.highlights.length, () => ({...hl}));
             }}

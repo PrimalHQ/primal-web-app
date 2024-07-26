@@ -78,6 +78,7 @@ const PrimalMarkdown: Component<{
   noteId: string,
   article: PrimalArticle | undefined,
   highlights?: any[],
+  onHighlightSelected?: (highlight: any) => void,
   onHighlightCreated?: (highlight: any) => void,
   onHighlightRemoved?: (id: string) => void,
 }> = (props) => {
@@ -156,12 +157,14 @@ const PrimalMarkdown: Component<{
       setHighlightText(() => hl.content);
       setHighlightContext(() => (hl.tags.find((t: string[]) => t[0] === 'context')) || [])[1];
       setHighlightMenu(() => hl);
+      props.onHighlightSelected && props.onHighlightSelected(hl);
     }
   };
 
   const hideContextMenu = (id: string) => {
     if (highlightMenu() && id === highlightMenu().id) {
       setHighlightMenu(() => undefined);
+      props.onHighlightSelected && props.onHighlightSelected(undefined);
     }
   };
 
@@ -180,6 +183,7 @@ const PrimalMarkdown: Component<{
 
     if (selection?.toString().length === 0) {
       setHighlightMenu(() => undefined);
+      props.onHighlightSelected && props.onHighlightSelected(undefined);
       return;
     }
 
