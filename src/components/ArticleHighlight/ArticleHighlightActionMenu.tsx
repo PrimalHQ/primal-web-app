@@ -39,6 +39,7 @@ const ArticleHighlightActionMenu: Component<{
   article: PrimalArticle,
   onCreate?: (event: NostrRelaySignedEvent) => void,
   onRemove?: (id: string) => void,
+  onComment?: (id: string) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -100,6 +101,10 @@ const ArticleHighlightActionMenu: Component<{
     }
   }
 
+  const onComment = () => {
+    props.onComment && props.onComment(props.highlight.id);
+  }
+
   const onCopy = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -140,6 +145,7 @@ const ArticleHighlightActionMenu: Component<{
       </button>
       <button
         data-highlight-menu-option="comment"
+        onClick={onComment}
       >
         <div class={styles.iconHighlightComment}></div>
         <div class={styles.iconCaption}>Comment</div>

@@ -198,27 +198,21 @@
     }
 
     em {
-      background-color: var(--highlight);
-      color: var(--text-primary);
+      background-color: var(--text-secondary);
+      color: var(--background-input);
       padding-block: 4px;
     }
 
     em[data-highlight] {
       background-color: var(--highlight);
-      color: var(--text-heading);
-      font-size: var(--p-font-size);
-      font-weight: var(--p-font-weight);
-      line-height: var(--p-line-height);
+      color: var(--text-highlight);
       text-decoration: none;
       cursor: pointer;
     }
 
     em[data-highlight][data-highlight-selected] {
       background-color: var(--highlight-selected);
-      color: var(--text-heading);
-      font-size: var(--p-font-size);
-      font-weight: var(--p-font-weight);
-      line-height: var(--p-line-height);
+      color: var(--text-highlight);
       text-decoration: none;
       cursor: pointer;
     }

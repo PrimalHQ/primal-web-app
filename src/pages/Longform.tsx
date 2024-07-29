@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { A, useParams } from "@solidjs/router";
-import { batch, Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { batch, Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
@@ -54,6 +54,7 @@ import { zapSubscription } from "../lib/zap";
 import Paginator from "../components/Paginator/Paginator";
 import { useSettingsContext } from "../contexts/SettingsContext";
 import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
+import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
 
 export type LongFormData = {
   title: string,
@@ -80,6 +81,7 @@ export type LongformThreadStore = {
   selectedHighlight: any,
   heightlightReplies: PrimalNote[],
   heighlightsPage: FeedPage,
+  replyToHighlight: any,
 }
 
 const emptyArticle = {
@@ -123,6 +125,7 @@ const emptyStore: LongformThreadStore = {
   },
   heightlightReplies: [],
   selectedHighlight: undefined,
+  replyToHighlight: undefined,
 }
 
 const Longform: Component< { naddr: string } > = (props) => {
@@ -735,7 +738,6 @@ const Longform: Component< { naddr: string } > = (props) => {
     );
   }
 
-
   const onReplyPosted = async (result: SendNoteResult) => {
     const { success, note } = result;
 
@@ -744,6 +746,18 @@ const Longform: Component< { naddr: string } > = (props) => {
     const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
 
     updateStore('replies', (reps) => [ ...replies, ...reps]);
+  };
+
+  const onHighlightPosted = async (result: SendNoteResult) => {
+    const { success, note } = result;
+
+    if (!success || !note || !account) return;
+
+    updateStore('replyToHighlight', () => undefined);
+
+    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
+
+    updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
   };
 
   const fetchHighlights = () => {
@@ -930,6 +944,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   };
 
+
   return (
     <>
       <Wormhole
@@ -1050,6 +1065,14 @@ const Longform: Component< { naddr: string } > = (props) => {
             onHighlightRemoved={(id: string) => {
               updateStore('highlights', (hs) => hs.filter(h => h.id !== id));
             }}
+            onHighlightReply={() => {
+              updateStore('replyToHighlight', () => ({ ...store.selectedHighlight }));
+              setTimeout(() => {
+                const trigger = document.querySelector(`#trigger_reply_${store.selectedHighlight.id}`) as HTMLButtonElement;
+
+                trigger.click();
+              }, 10);
+            }}
           />
 
           <div class={styles.tags}>
@@ -1080,12 +1103,25 @@ const Longform: Component< { naddr: string } > = (props) => {
         </Show>
       </div>
 
-      <Show when={store.article}>
-        <ReplyToNote
-          note={store.article}
-          onNotePosted={onReplyPosted}
-        />
-      </Show>
+      <Switch>
+        <Match when={store.replyToHighlight}>
+          <ReplyToHighlight
+            id={`reply_${store.replyToHighlight.id}`}
+            highlight={store.replyToHighlight}
+            author={store.users.find(u => u.pubkey === store.replyToHighlight.pubkey)}
+            onNotePosted={onHighlightPosted}
+            onCancel={() => {
+              updateStore('replyToHighlight', () => undefined);
+            }}
+          />
+        </Match>
+        <Match when={store.article}>
+          <ReplyToNote
+            note={store.article}
+            onNotePosted={onReplyPosted}
+          />
+        </Match>
+      </Switch>
 
       <div>
         <For each={store.replies}>

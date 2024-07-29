@@ -38,11 +38,7 @@ const ArticleHighlightComments: Component<{
 }> = (props) => {
   const account = useAccountContext();
 
-  const comms = () => props.comments.filter(c => c.replyTo === props.highlight.id)
-
-  createEffect(() => {
-    console.log('HIGHLIGHT: ', props.highlight)
-  })
+  const comms = () => props.comments.filter(c => c.replyTo === props.highlight.id);
 
   return (
     <Show when={props.highlight !== undefined}>
@@ -64,11 +60,11 @@ const ArticleHighlightComments: Component<{
           {comment => (
             <div class={styles.highlightComment}>
               <div class={styles.commentAuthor}>
-                <Avatar user={props.author} size="xxs" />
-                <div class={styles.name}>{userName(props.author)}</div>
-                <VerificationCheck user={props.author} />
+                <Avatar user={comment.user} size="xxs" />
+                <div class={styles.name}>{userName(comment.user)}</div>
+                <VerificationCheck user={comment.user} />
                 <div>commented:</div>
-                <div class={styles.time}>{date(props.highlight.created_at).label}</div>
+                <div class={styles.time}>{date(comment.msg.created_at || 0).label}</div>
               </div>
               <div class={styles.commentContent}>
                 {comment.content}

@@ -381,3 +381,11 @@ textarea::-webkit-scrollbar{
     font-weight: 700;
   }
 }
+
+.context {
+  background-color: var(--highlight);
+  color: var(--text-highlight);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 28px;
+}

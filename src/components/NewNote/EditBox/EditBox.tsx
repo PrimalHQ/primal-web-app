@@ -59,6 +59,7 @@ const EditBox: Component<{
   onSuccess?: (note: SendNoteResult) => void,
   open?: boolean,
   idPrefix?: string,
+  context?: string,
 } > = (props) => {
 
   const intl = useIntl();
@@ -1472,6 +1473,11 @@ const EditBox: Component<{
             readOnly={fileToUpload() !== undefined}
           >
           </textarea>
+          <Show when={props.context}>
+            <div class={styles.context}>
+              {props.context}
+            </div>
+          </Show>
           <div
             class={styles.previewCaption}>
             {intl.formatMessage(tNote.newPreview)}

@@ -81,6 +81,7 @@ const PrimalMarkdown: Component<{
   onHighlightSelected?: (highlight: any) => void,
   onHighlightCreated?: (highlight: any) => void,
   onHighlightRemoved?: (id: string) => void,
+  onHighlightReply?: () => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -433,6 +434,7 @@ const PrimalMarkdown: Component<{
             article={props.article}
             onCreate={props.onHighlightCreated}
             onRemove={props.onHighlightRemoved}
+            onComment={props.onHighlightReply}
           />
         </Show>
 
