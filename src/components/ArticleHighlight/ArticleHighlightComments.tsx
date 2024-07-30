@@ -38,7 +38,9 @@ const ArticleHighlightComments: Component<{
 }> = (props) => {
   const account = useAccountContext();
 
-  const comms = () => props.comments.filter(c => c.replyTo === props.highlight.id);
+  const comms = () => {
+    console.log('COMMS: ', props.comments.map(c => c.noteId));
+    return props.comments.filter(c => c.replyTo === props.highlight.id);}
 
   return (
     <Show when={props.highlight !== undefined}>

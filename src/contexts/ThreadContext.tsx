@@ -55,6 +55,7 @@ export type ThreadContextStore = {
   lastNote: PrimalNote | undefined,
   topZaps: Record<string, TopZap[]>,
   quoteCount: number,
+  highlights: any[],
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -90,6 +91,7 @@ export const initialData = {
   lastNote: undefined,
   topZaps: {},
   quoteCount: 0,
+  highlights: [],
 };
 
 

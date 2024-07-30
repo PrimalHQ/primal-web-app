@@ -1100,6 +1100,7 @@ const EditBox: Component<{
         return;
       }
 
+      const event = nip19.decode(id);
       const eventId = nip19.decode(id).data as string | nip19.EventPointer;
       const hex = typeof eventId === 'string' ? eventId : eventId.id;
 

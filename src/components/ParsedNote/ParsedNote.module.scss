@@ -117,3 +117,10 @@
   border: 1px solid var(--subtile-devider);
   border-radius: var(--border-radius-small);
 }
+
+.mentionedHighlight {
+  width: fit-content;
+  background-color: var(--highlight);
+  color: var(--text-highlight);
+  text-decoration: none;
+}

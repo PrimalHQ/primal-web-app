@@ -974,6 +974,7 @@ const ParsedNote: Component<{
 
         try {
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+          const kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
           const noteId = nip19.noteEncode(hex);
 
@@ -983,29 +984,40 @@ const ParsedNote: Component<{
             link = <span class='linkish'>@{token}</span>;
           }
 
-          if (!props.noLinks) {
-            const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+          if (kind === Kind.Text) {
+            if (!props.noLinks) {
+              const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
 
-            link = <A href={path}>{token}</A>;
+              link = <A href={path}>{token}</A>;
 
-            if (ment) {
-              setWordsDisplayed(w => w + shortMentionInWords);
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
 
-              if (ment.post.kind === Kind.LongForm) {
-                link = renderLongFormMention(ment, index)
+                if (ment.post.kind === Kind.LongForm) {
+                  link = renderLongFormMention(ment, index)
+                }
+                else {
+                  link = <div>
+                    <EmbeddedNote
+                      note={ment}
+                      mentionedUsers={props.note.mentionedUsers || {}}
+                      isLast={index === content.length-1}
+                      alternativeBackground={props.altEmbeds}
+                    />
+                  </div>;
+                }
+
               }
-              else {
-                link = <div>
-                  <EmbeddedNote
-                    note={ment}
-                    mentionedUsers={props.note.mentionedUsers || {}}
-                    isLast={index === content.length-1}
-                    alternativeBackground={props.altEmbeds}
-                  />
-                </div>;
-              }
-
             }
+
+          }
+
+          if (kind === Kind.Highlight) {
+            const ment = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
+            link = <div class={styles.mentionedHighlight}>
+              {ment.event.content}
+            </div>
+            console.log('RENDER HIGHLIGHT: ', token)
           }
 
         } catch (e) {

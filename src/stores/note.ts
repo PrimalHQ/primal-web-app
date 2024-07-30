@@ -280,6 +280,8 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
     let mentionedNotes: Record<string, PrimalNote> = {};
     let mentionedUsers: Record<string, PrimalUser> = {};
+    let mentionedHighlights: Record<string, any> = {};
+    let mentionedArticles: Record<string, PrimalArticle> = {};
 
 
     if (mentionIds.length > 0) {
@@ -298,37 +300,48 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
           }
         }
 
-        const mentionStat = page.postStats[id];
+        if ([Kind.Text, Kind.LongForm].includes(m.kind)) {
 
-        const noteActions = (page.noteActions && page.noteActions[id]) ?? {
-          event_id: id,
-          liked: false,
-          replied: false,
-          reposted: false,
-          zapped: false,
-        };
+          const mentionStat = page.postStats[id];
 
-        mentionedNotes[id] = {
-          // @ts-ignore TODO: Investigate this typing
-          post: {
-            ...m,
+          const noteActions = (page.noteActions && page.noteActions[id]) ?? {
+            event_id: id,
+            liked: false,
+            replied: false,
+            reposted: false,
+            zapped: false,
+          };
+
+          mentionedNotes[id] = {
+            // @ts-ignore TODO: Investigate this typing
+            post: {
+              ...m,
+              noteId: nip19.noteEncode(m.id),
+              likes: mentionStat?.likes || 0,
+              mentions: mentionStat?.mentions || 0,
+              reposts: mentionStat?.reposts || 0,
+              replies: mentionStat?.replies || 0,
+              zaps: mentionStat?.zaps || 0,
+              score: mentionStat?.score || 0,
+              score24h: mentionStat?.score24h || 0,
+              satszapped: mentionStat?.satszapped || 0,
+              noteActions,
+            },
+            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            mentionedUsers,
+            pubkey: m.pubkey,
+            id: m.id,
             noteId: nip19.noteEncode(m.id),
-            likes: mentionStat?.likes || 0,
-            mentions: mentionStat?.mentions || 0,
-            reposts: mentionStat?.reposts || 0,
-            replies: mentionStat?.replies || 0,
-            zaps: mentionStat?.zaps || 0,
-            score: mentionStat?.score || 0,
-            score24h: mentionStat?.score24h || 0,
-            satszapped: mentionStat?.satszapped || 0,
-            noteActions,
-          },
-          user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
-          mentionedUsers,
-          pubkey: m.pubkey,
-          id: m.id,
-          noteId: nip19.noteEncode(m.id),
-        };
+          };
+        }
+
+        if ([Kind.Highlight].includes(m.kind)) {
+          mentionedHighlights[id] = {
+            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            event: { ...m },
+          }
+        }
+
       }
     }
 
@@ -390,6 +403,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       msg,
       mentionedNotes,
       mentionedUsers,
+      mentionedHighlights,
       replyTo: replyTo && replyTo[1],
       tags: msg.tags,
       id: msg.id,

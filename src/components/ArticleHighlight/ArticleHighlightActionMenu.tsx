@@ -1,4 +1,5 @@
 import { A } from '@solidjs/router';
+import { nip19 } from 'nostr-tools';
 import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
@@ -105,6 +106,23 @@ const ArticleHighlightActionMenu: Component<{
     props.onComment && props.onComment(props.highlight.id);
   }
 
+  const onQuote = () => {
+    if (!account || !account?.hasPublicKey()) {
+      return;
+    }
+
+    const highlightEvent = nip19.neventEncode({
+      id: props.highlight.id,
+      relays: account.activeRelays.map(r => r.url),
+      author: props.highlight.pubkey,
+      kind: Kind.Highlight,
+    });
+
+    account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
+    account?.actions?.showNewNoteForm();
+
+  }
+
   const onCopy = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -139,6 +157,7 @@ const ArticleHighlightActionMenu: Component<{
       </Show>
       <button
         data-highlight-menu-option="quote"
+        onClick={onQuote}
       >
         <div class={styles.iconHighlightQuote}></div>
         <div class={styles.iconCaption}>Quote</div>

@@ -272,6 +272,15 @@ export type NostrUnsubscribe = {
   tags?: string[][],
 };
 
+export type NostrHighlight = {
+  kind: Kind.Highlight,
+  pubkey: string,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -308,7 +317,8 @@ export type NostrEventContent =
   NostrTier |
   NostrSubscribe |
   NostrUnsubscribe |
-  NostrWordCount;
+  NostrWordCount |
+  NostrHighlight;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -529,6 +539,8 @@ export type PrimalNote = {
   msg: NostrNoteContent,
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
+  mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedHighlights?: Record<string, any>,
   replyTo?: string,
   id: string,
   pubkey: string,
