@@ -6,8 +6,10 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { fetchStoredFeed } from '../../lib/localStore';
 import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
+import { sha256 } from '../../utils';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
+import SelectionBox2 from '../SelectionBox/SelectionBox2';
 
 const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
@@ -29,22 +31,19 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     });
   };
 
+  const genId = (v: string) => Object.values(JSON.parse(v)).join('_')
+
   const selectFeed = (option: FeedOption) => {
-
-    const [hex, includeReplies] = option.value?.split('_') || [];
-    // const selector = document.getElementById('defocus');
-
-    // selector?.focus();
-    // selector?.blur();
+    if (!option) return;
 
     const feed = {
-      hex: option.value,
+      spec: option.value || '',
       name: option.label,
     };
 
     const selected = reeds?.selectedFeed;
 
-    if (selected && selected.hex === feed.hex) return;
+    if (selected && selected.spec === feed.spec) return;
 
     reeds?.actions.clearNotes();
     reeds?.actions.selectFeed(feed);
@@ -53,41 +52,48 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   const isSelected = (option: FeedOption) => {
     const selected = reeds?.selectedFeed;
 
+    return selected && selected.spec === option.value;
 
-    if (selected?.hex && option.value) {
-      const t = option.value.split('_');
 
-      const isHex = encodeURI(selected.hex) == t[0];
-      const isOpt = t[1] === 'undefined' ?
-        selected.includeReplies === undefined :
-        selected.includeReplies?.toString() === t[1];
+    // if (selected?.hex && option.value) {
+    //   const t = option.value.split('_');
 
-      return isHex && isOpt;
-    }
+    //   const isHex = encodeURI(selected.hex) == t[0];
+    //   const isOpt = t[1] === 'undefined' ?
+    //     selected.includeReplies === undefined :
+    //     selected.includeReplies?.toString() === t[1];
 
-    return false;
+    //   return isHex && isOpt;
+    // }
+
+    // return false;
   }
 
   const options:() => SelectionOption[] = () => {
-    let opts = [];
+    return settings?.articleFeeds.map(f => ({
+      label: f.name,
+      value: f.spec,
+      id: genId(f.spec),
+    })) || [];
+    // let opts = [];
 
-    if (account?.publicKey) {
-      opts.push(
-        {
-          label: 'My Reads',
-          value: account?.publicKey || '',
-        }
-      );
-    }
+    // if (account?.publicKey) {
+    //   opts.push(
+    //     {
+    //       label: 'My Reads',
+    //       value: account?.publicKey || '',
+    //     }
+    //   );
+    // }
 
-    opts.push(
-      {
-        label: 'All Reads',
-        value: 'none',
-      }
-    );
+    // opts.push(
+    //   {
+    //     label: 'All Reads',
+    //     value: 'none',
+    //   }
+    // );
 
-    return [ ...opts ];
+    // return [ ...opts ];
   };
 
   const initialValue = () => {
@@ -101,7 +107,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
 
     return {
       label: selected.name,
-      value: selected.hex || '',
+      value: selected.spec || '',
+      id: genId(selected.spec),
     }
   }
 
@@ -109,16 +116,15 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     if (!reeds?.selectedFeed)
       return initialValue();
 
-    const value = `${encodeURI(reeds.selectedFeed.hex || '')}`;
-
     return {
       label: reeds.selectedFeed.name,
-      value,
+      value: reeds.selectedFeed.spec,
+      id: genId(reeds.selectedFeed.spec),
     };
   };
 
   return (
-    <SelectionBox
+    <SelectionBox2
       options={options()}
       onChange={selectFeed}
       initialValue={initialValue()}

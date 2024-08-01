@@ -152,7 +152,6 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const updatePage = (content: NostrEventContent) => {if (content.kind === Kind.WordCount) {
     const count = JSON.parse(content.content) as { event_id: string, words: number };
 
-    console.log('WORD COUNT: ', count);
 
     updateStore('page', 'wordCount',
       () => ({ [count.event_id]: count.words })

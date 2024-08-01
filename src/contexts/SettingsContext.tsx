@@ -13,11 +13,13 @@ import {
   refreshSocketListeners,
   removeSocketListeners,
   socket,
-  subscribeTo
+  subscribeTo,
+  subsTo
 } from "../sockets";
 import {
   ContentModeration,
   ContextChildren,
+  PrimalArticleFeed,
   PrimalFeed,
   PrimalTheme,
   ZapOption,
@@ -38,6 +40,7 @@ import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
+import { getDefaultArticleFeeds } from "../lib/feed";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -49,6 +52,7 @@ export type SettingsContextStore = {
   theme: string,
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
+  articleFeeds: PrimalArticleFeed[],
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
   availableZapOptions: ZapOption[],
@@ -76,6 +80,7 @@ export type SettingsContextStore = {
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
     refreshMobileReleases: () => void,
     setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
+    getArticleFeeds: () => void,
   }
 }
 
@@ -84,6 +89,7 @@ export const initialData = {
   theme: 'sunrise',
   themes,
   availableFeeds: [],
+  articleFeeds: [],
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
@@ -537,6 +543,23 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getMobileReleases(subid);
   };
 
+  const getArticleFeeds = () => {
+    const subId = `article_feeds_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const feeds = JSON.parse(content.content || '[]');
+
+        updateStore('articleFeeds', () => [...feeds]);
+      },
+      onEose: () => {
+        unsub();
+      },
+    });
+
+    getDefaultArticleFeeds(subId);
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -623,6 +646,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && f.includeReplies === feedLatest.includeReplies)) {
         addAvailableFeed(feedLatest, true, false);
       }
+
+      getArticleFeeds();
     });
   });
 
@@ -671,6 +696,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       modifyContentModeration,
       refreshMobileReleases,
       setProxyThroughPrimal,
+      getArticleFeeds,
     },
   });
 

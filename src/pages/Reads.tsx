@@ -74,7 +74,7 @@ const Home: Component = () => {
       return;
     }
 
-    const hex = context?.selectedFeed?.hex;
+    const hex = context?.selectedFeed?.spec;
 
     if (checkNewNotesTimer) {
       clearInterval(checkNewNotesTimer);
@@ -141,14 +141,16 @@ const Home: Component = () => {
 
       if (params.topic) {
         context?.actions.clearNotes();
-        context?.actions.fetchNotes(`filter;${decodeURIComponent(params.topic)}`, APP_ID);
+        context?.actions.fetchNotes(decodeURIComponent(params.topic), APP_ID);
         return;
       }
 
-      const selected = context?.selectedFeed || { hex: account.publicKey, name: 'My Reads'};
+      const selected = context?.selectedFeed;;
 
       // context?.actions.resetSelectedFeed();
-      context?.actions.selectFeed({ ...selected });
+      if (selected) {
+        context?.actions.selectFeed({ ...selected });
+      }
     }
   });
 

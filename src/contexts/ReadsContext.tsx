@@ -2,7 +2,7 @@ import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind, minKnownProfiles } from "../constants";
-import { getArticlesFeed, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
+import { getArticlesFeed, getArticlesFeed2, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
 import { getRecomendedArticleIds, getScoredUsers, searchContent } from "../lib/search";
@@ -21,6 +21,7 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalArticle,
+  PrimalArticleFeed,
   PrimalFeed,
   PrimalUser,
   SelectionOption,
@@ -35,7 +36,7 @@ type ReadsContextStore = {
   notes: PrimalArticle[],
   isFetching: boolean,
   scrollTop: number,
-  selectedFeed: PrimalFeed | undefined,
+  selectedFeed: PrimalArticleFeed | undefined,
   page: FeedPage,
   lastNote: PrimalArticle | undefined,
   reposts: Record<string, string> | undefined,
@@ -61,7 +62,7 @@ type ReadsContextStore = {
     clearNotes: () => void,
     fetchNotes: (topic: string, subId: string, until?: number) => void,
     fetchNextPage: (topic?: string) => void,
-    selectFeed: (feed: PrimalFeed | undefined) => void,
+    selectFeed: (feed: PrimalArticleFeed | undefined) => void,
     updateScrollTop: (top: number) => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
@@ -311,37 +312,37 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
+  const fetchNotes = (spec: string, subId: string, until = 0, includeReplies?: boolean) => {
 
-    const t = topic === 'none' ? '' : topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
-    const [scope, timeframe] = t.split(';');
+    // const t = topic === 'none' ? '' : topic;//account?.publicKey || '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
+    // const [scope, timeframe] = t.split(';');
 
-    updateStore('isFetching', true);
+    updateStore('isFetching' , true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
-    if (scope && timeframe) {
+    // if (scope && timeframe) {
 
-      if (scope === 'filter') {
-        getArticlesFeed(account?.publicKey, undefined, `reads_feed_${subId}`, until, 20, timeframe);
-        return;
-      }
+    //   if (scope === 'filter') {
+    //     getArticlesFeed(account?.publicKey, undefined, `reads_feed_${subId}`, until, 20, timeframe);
+    //     return;
+    //   }
 
-      if (scope === 'search') {
-        searchContent(account?.publicKey, `reads_feed_${subId}`, decodeURI(timeframe));
-        return;
-      }
+    //   if (scope === 'search') {
+    //     searchContent(account?.publicKey, `reads_feed_${subId}`, decodeURI(timeframe));
+    //     return;
+    //   }
 
-      getExploreFeed(
-        account?.publicKey,
-        `reads_feed_${subId}`,
-        scope,
-        timeframe,
-        until,
-      );
-      return;
-    }
+    //   getExploreFeed(
+    //     account?.publicKey,
+    //     `reads_feed_${subId}`,
+    //     scope,
+    //     timeframe,
+    //     until,
+    //   );
+    //   return;
+    // }
 
-    getArticlesFeed(account?.publicKey, t, `reads_feed_${subId}`, until, 20);
+    getArticlesFeed2(account?.publicKey, spec, `reads_feed_${subId}`, until, 20);
   };
 
   const clearNotes = () => {
@@ -366,20 +367,22 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const topic = mainTopic ? `filter;${mainTopic}` : store.selectedFeed?.hex;
-    const includeReplies = store.selectedFeed?.includeReplies;
+    const spec = mainTopic || store.selectedFeed?.spec || '';
 
-    if (!topic) {
-      return;
-    }
+    // const topic = mainTopic ? `filter;${mainTopic}` : store.selectedFeed?.hex;
+    // const includeReplies = store.selectedFeed?.includeReplies;
 
-    const [scope, timeframe] = topic.split(';');
+    // if (!topic) {
+    //   return;
+    // }
 
-    if (scope === 'search') {
-      return;
-    }
+    // const [scope, timeframe] = topic.split(';');
 
-    const pagCriteria = timeframe || 'latest';
+    // if (scope === 'search') {
+    //   return;
+    // }
+
+    // const pagCriteria = timeframe || 'latest';
 
     const criteria = 'published'; //paginationPlan(pagCriteria);
 
@@ -390,7 +393,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     const until = noteData[criteria];
 
     if (until > 0) {
-      fetchNotes(topic, `${APP_ID}`, until, includeReplies);
+      fetchNotes(spec, `${APP_ID}`, until);
     }
   };
 
@@ -398,16 +401,15 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => top);
   };
 
-  let currentFeed: PrimalFeed | undefined;
+  let currentFeed: PrimalArticleFeed | undefined;
 
-  const selectFeed = (feed: PrimalFeed | undefined, force?: boolean) => {
-    if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
+  const selectFeed = (feed: PrimalArticleFeed | undefined, force?: boolean) => {
+    if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
       // saveStoredFeed(account?.publicKey, currentFeed);
-
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
-      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+      fetchNotes(feed.spec , `${APP_ID}`, 0);
     }
   };
 
@@ -418,10 +420,10 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
   const getFirstPage = () => {
     const feed = store.selectedFeed;
-    if (!feed?.hex) return;
+    if (!feed?.spec) return;
 
     clearNotes();
-    fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+    fetchNotes(feed.spec , `${APP_ID}`, 0);
   };
 
   const updatePage = (content: NostrEventContent, scope?: 'future') => {
@@ -457,7 +459,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if ([Kind.LongForm, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.Repost, Kind.LongFormShell].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       const isRepost = message.kind === Kind.Repost;
@@ -644,7 +646,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage, scope?: 'future') => {
-    const topic = (store.selectedFeed?.hex || '').split(';');
+    // const topic = (store.selectedFeed?.spec || '').split(';');
     // const sortingFunction = sortingPlan(topic[1]);
 
     const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps

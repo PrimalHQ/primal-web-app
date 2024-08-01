@@ -47,6 +47,25 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
+export const getArticlesFeed2 = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20) => {
+
+
+  const start = until === 0 ? 'since' : 'until';
+
+  let payload = { spec, limit, [start]: until };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["reads_feed_directive", payload]},
+  ]));
+}
+
 export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, topic?: string) => {
   // if (!pubkey) {
   //   return;
@@ -399,3 +418,12 @@ export const getAuthorSubscriptionTiers = (
     {cache: ["creator_paid_tiers", { pubkey }]},
   ]));
 };
+
+
+export const getDefaultArticleFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_reads_feeds"]},
+  ]));
+}

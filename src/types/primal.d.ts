@@ -591,6 +591,11 @@ export type PrimalFeed = {
   includeReplies?: boolean,
 };
 
+export type PrimalArticleFeed = {
+  name: string,
+  spec: string,
+};
+
 export type PrimalScopeFeed = {
   name: string,
   scope?: string,
@@ -791,6 +796,7 @@ export type SelectionOption = {
   value: string,
   disabled?: boolean,
   separator?: boolean,
+  id?: string,
 }
 
 export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions' | 'reposts';

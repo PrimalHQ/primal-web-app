@@ -39,7 +39,6 @@ const ArticleHighlightComments: Component<{
   const account = useAccountContext();
 
   const comms = () => {
-    console.log('COMMS: ', props.comments.map(c => c.noteId));
     return props.comments.filter(c => c.replyTo === props.highlight.id);}
 
   return (

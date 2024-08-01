@@ -217,8 +217,6 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
-    console.log('PAGE: ', page)
-
     let userMeta: any = {};
 
     try {
@@ -348,12 +346,10 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             zapped: false,
           };
 
-
           const identifier = (m.tags.find(t => t[0] === 'd') || [])[1];
           const pubkey = m.pubkey;
           const kind = Kind.LongForm;
 
-          console.log('MENTION: ', {...m})
           const wordCount = page.wordCount ? page.wordCount[m.id] || 0 : 0;
 
           let article: PrimalArticle = {
@@ -505,7 +501,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
   }
 
   const mentions = page.mentions || {};
-  const pageMessages = page.messages.filter(m => [Kind.LongForm, Kind.Repost].includes(m.kind));
+  const pageMessages = page.messages.filter(m => [Kind.LongForm, Kind.Repost, Kind.LongFormShell].includes(m.kind));
 
   return  pageMessages.map((message) => {
 
@@ -615,7 +611,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       image: '',
       tags: [],
       published: msg.created_at || 0,
-      content: sanitize(msg.content),
+      content: sanitize(msg.content || ''),
       user: user ? convertToUser(user) : emptyUser(msg.pubkey),
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),

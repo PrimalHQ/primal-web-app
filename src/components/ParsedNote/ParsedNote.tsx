@@ -912,7 +912,6 @@ const ParsedNote: Component<{
 
         const mention = mentionedArticles[id];
 
-          // console.log('MENTION: ', id, { ...mentionedArticles})
         if (!mention) {
           return unknownMention(id);
         }
@@ -977,6 +976,7 @@ const ParsedNote: Component<{
                 setWordsDisplayed(w => w + shortMentionInWords);
 
                 if (ment.post.kind === Kind.LongForm) {
+                  // @ts-ignore
                   link = renderLongFormMention(ment, index)
                 }
                 else {
