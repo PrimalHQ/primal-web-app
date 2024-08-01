@@ -509,7 +509,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
     const pubkey = msg.pubkey;
     const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
-    const kind = msg.kind;
+    const kind = Kind.LongForm;
 
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
@@ -616,7 +616,10 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
       noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
-      msg,
+      msg: {
+        ...msg,
+        kind,
+      },
       mentionedNotes,
       mentionedUsers,
       wordCount,
