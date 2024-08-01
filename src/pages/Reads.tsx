@@ -74,7 +74,7 @@ const Home: Component = () => {
       return;
     }
 
-    const hex = context?.selectedFeed?.spec;
+    const spec = context?.selectedFeed?.spec || '';
 
     if (checkNewNotesTimer) {
       clearInterval(checkNewNotesTimer);
@@ -86,7 +86,7 @@ const Home: Component = () => {
     const timeout = 25_000 + Math.random() * 10_000;
 
     checkNewNotesTimer = setInterval(() => {
-      context?.actions.checkForNewNotes(hex);
+      context?.actions.checkForNewNotes(spec);
     }, timeout);
   });
 

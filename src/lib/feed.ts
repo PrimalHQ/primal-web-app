@@ -116,6 +116,22 @@ export const getFutureArticlesFeed = (user_pubkey: string | undefined, pubkey: s
   ]));
 };
 
+export const getFutureArticlesFeed2 = (user_pubkey: string | undefined, spec: string, subid: string, since: number) => {
+
+  let payload: { since: number, spec: string, user_pubkey?: string, limit: number } =
+    { since, spec, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["reads_feed_directive", payload]},
+  ]));
+};
+
 export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string, extendResponse?: boolean) => {
 
   let payload:  {event_ids: string[], user_pubkey?: string, extended_response?: boolean } =

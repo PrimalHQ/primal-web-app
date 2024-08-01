@@ -2,7 +2,7 @@ import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind, minKnownProfiles } from "../constants";
-import { getArticlesFeed, getArticlesFeed2, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
+import { getArticlesFeed, getArticlesFeed2, getEvents, getExploreFeed, getFeed, getFutureArticlesFeed, getFutureArticlesFeed2, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
 import { getRecomendedArticleIds, getScoredUsers, searchContent } from "../lib/search";
@@ -66,7 +66,7 @@ type ReadsContextStore = {
     updateScrollTop: (top: number) => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
-    checkForNewNotes: (topic: string | undefined) => void,
+    checkForNewNotes: (spec: string) => void,
     loadFutureContent: () => void,
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
@@ -243,22 +243,10 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
-  const checkForNewNotes = (topic: string | undefined) => {
-
-    if (!topic) {
-      return;
-    }
+  const checkForNewNotes = (spec: string) => {
 
     if (store.future.notes.length > 100) {
       return;
-    }
-
-    const [scope, timeframe] = topic.split(';');
-
-    if (scope !== store.future.scope || timeframe !== store.future.timeframe) {
-      clearFuture();
-      updateStore('future', 'scope', () => scope);
-      updateStore('future', 'timeframe', () => timeframe);
     }
 
     let since = 0;
@@ -285,22 +273,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       noteActions: {},
     }))
 
-    if (scope && timeframe) {
-      if (timeframe !== 'latest') {
-        return;
-      }
-
-      getFutureExploreFeed(
-        account?.publicKey,
-        `reads_future_${APP_ID}`,
-        scope,
-        timeframe,
-        since,
-      );
-      return;
-    }
-
-    getFutureArticlesFeed(account?.publicKey, topic, `reads_future_${APP_ID}`, since);
+    getFutureArticlesFeed2(account?.publicKey, spec, `reads_future_${APP_ID}`, since);
   }
 
   const loadFutureContent = () => {
@@ -463,32 +436,6 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       const message = content as NostrNoteContent;
 
       const isRepost = message.kind === Kind.Repost;
-
-      if (scope) {
-        const isFirstNote = message.kind === Kind.LongForm ?
-          store.notes[0]?.id === message.id :
-          store.notes[0]?.repost?.note.noteId === message.id;
-
-        const scopeNotes = store[scope].notes;
-
-        const isaAlreadyIn = message.kind === Kind.Text &&
-          scopeNotes &&
-          scopeNotes.find(n => n.id === message.id);
-
-        let isAlreadyReposted = isLFRepostInCollection(store[scope].page.messages, message);
-
-        // const isAlreadyFetched = message.kind === Kind.Text ?
-        //   store.future.notes[0]?.post?.noteId === messageId :
-        //   store.future.notes[0]?.repost?.note.noteId === messageId;
-
-        if (isFirstNote || isaAlreadyIn || isAlreadyReposted) return;
-
-        updateStore(scope, 'page', 'messages',
-          (msgs) => [ ...msgs, { ...message }]
-        );
-
-        return;
-      }
 
       const isLastNote = message.kind === Kind.LongForm ?
         store.lastNote?.id === message.id :
