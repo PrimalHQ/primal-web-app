@@ -32,6 +32,7 @@ import {
   Component, createResource, createSignal, For, JSXElement, onMount, Show, Suspense,
 } from 'solid-js';
 import {
+  PrimalArticle,
   PrimalNote,
 } from '../../types/primal';
 
@@ -53,6 +54,7 @@ import Lnbc from '../Lnbc/Lnbc';
 import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { logError } from '../../lib/logger';
+import ArticlePreview from '../ArticlePreview/ArticlePreview';
 
 const groupGridLimit = 7;
 
@@ -901,18 +903,16 @@ const ParsedNote: Component<{
         }
 
         const decoded = decodeIdentifier(id);
-        const mentionedNotes = props.note.mentionedNotes;
+        const mentionedArticles = props.note.mentionedArticles;
 
-        if (decoded.type !== 'naddr' || !mentionedNotes) {
+        if (decoded.type !== 'naddr' || !mentionedArticles) {
           return unknownMention(id);
         }
 
-        const mention = Object.values(mentionedNotes).find(m =>
-          m.post.pubkey === decoded.data.pubkey &&
-          m.post.kind === decoded.data.kind &&
-          m.post.tags.find(t => t[0] === 'd' && t[1] === decoded.data.identifier)
-        );
 
+        const mention = mentionedArticles[id];
+
+          // console.log('MENTION: ', id, { ...mentionedArticles})
         if (!mention) {
           return unknownMention(id);
         }
@@ -923,30 +923,13 @@ const ParsedNote: Component<{
     </For>
   }
 
-  const renderLongFormMention = (mention: PrimalNote | undefined, index?: number) => {
+  const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
     if(!mention) return <></>;
 
-    const url = `https://highlighter.com/${mention.user.npub}/${mention.post.noteId}`
-
-    if (props.noPreviews) {
-      return renderLinks({
-        type: 'link',
-        tokens: [`https://highlighter.com/${mention.user.npub}/${mention.post.noteId}`],
-      });
-    }
-
-    const preview = {
-      url,
-      description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
-      images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
-      title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
-    }
-
-    return <LinkPreview
-      preview={preview}
-      bordered={props.isEmbeded}
-      isLast={index === content.length-1}
-    />;
+    return (
+      <div class={styles.articlePreview}>
+        <ArticlePreview article={mention} />
+      </div>);
   };
 
   const renderNoteMention = (item: NoteContent, index?: number) => {
@@ -1009,15 +992,18 @@ const ParsedNote: Component<{
 
               }
             }
+          }
 
+          if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
+            console.log('MENTION LONGFORM')
+            link = '__MENTION__'
           }
 
           if (kind === Kind.Highlight) {
             const ment = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
             link = <div class={styles.mentionedHighlight}>
               {ment.event.content}
-            </div>
-            console.log('RENDER HIGHLIGHT: ', token)
+            </div>;
           }
 
         } catch (e) {

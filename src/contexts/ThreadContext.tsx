@@ -149,7 +149,17 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const updatePage = (content: NostrEventContent) => {
+  const updatePage = (content: NostrEventContent) => {if (content.kind === Kind.WordCount) {
+    const count = JSON.parse(content.content) as { event_id: string, words: number };
+
+    console.log('WORD COUNT: ', count);
+
+    updateStore('page', 'wordCount',
+      () => ({ [count.event_id]: count.words })
+    );
+    return;
+  }
+
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
@@ -184,6 +194,15 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Mentions) {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
+
+      if (mention.kind === Kind.LongFormShell) {
+        const naddr = `${mention.kind}:${mention.pubkey}:${(mention.tags.find((t: string[]) => t[0] === 'd') || [])[1]}`;
+
+        updateStore('page', 'mentions',
+          (mentions) => ({ ...mentions, [naddr]: { ...mention } })
+        );
+        return;
+      }
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })

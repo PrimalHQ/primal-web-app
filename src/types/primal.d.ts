@@ -13,7 +13,7 @@ export type TopZap = {
 }
 
 export type NostrNoteContent = {
-  kind: Kind.Text | Kind.Repost | Kind.LongForm,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
   content: string,
   id: string,
   created_at?: number,
@@ -518,7 +518,7 @@ export type PrimalNoteData = {
   tags: string[][],
   content: string,
   sig: string,
-  kind: Kind.Text | Kind.Repost | Kind.LongForm,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
   likes: number,
   mentions: number,
   reposts: number,

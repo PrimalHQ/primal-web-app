@@ -150,6 +150,8 @@ export enum Kind  {
   FeaturedAuthors=10_000_148,
 
   WALLET_OPERATION = 10_000_300,
+
+  LongFormShell = 10_030_023;
 }
 
 export const relayConnectingTimeout = 1000;
