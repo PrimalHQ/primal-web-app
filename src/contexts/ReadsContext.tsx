@@ -437,7 +437,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
       const isRepost = message.kind === Kind.Repost;
 
-      const isLastNote = message.kind === Kind.LongForm ?
+      const isLastNote = [Kind.LongForm, Kind.LongFormShell].includes(message.kind) ?
         store.lastNote?.id === message.id :
         store.lastNote?.repost?.note.noteId === message.id;
 
