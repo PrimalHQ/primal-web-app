@@ -1,7 +1,7 @@
 import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
 import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
-import { convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
+import { convertToArticles, convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
   createContext,
@@ -83,6 +83,7 @@ export type ProfileContextStore = {
   lastZap: PrimalZap | undefined,
   future: {
     notes: PrimalNote[],
+    articles: PrimalArticle[],
     page: FeedPage,
     replies: PrimalNote[],
     repliesPage: FeedPage,
@@ -210,6 +211,7 @@ export const initialData = {
   },
   future: {
     notes: [],
+    articles: [],
     replies: [],
     reposts: {},
     page: {
@@ -474,6 +476,16 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
+  const saveArticles = (newNotes: PrimalArticle[], scope?: 'future') => {
+    if (scope) {
+      updateStore(scope, 'articles', (notes) => [ ...notes, ...newNotes ]);
+      loadFutureContent();
+      return;
+    }
+    updateStore('articles', (notes) => [ ...notes, ...newNotes ]);
+    updateStore('isFetching', () => false);
+  };
+
   const saveReplies = (newNotes: PrimalNote[], scope?: 'future') => {
     if (scope) {
       updateStore(scope, 'replies', (notes) => [ ...notes, ...newNotes ]);
@@ -489,6 +501,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     updateStore('isFetching', () => true);
     let articles = await fetchUserArticles(account?.publicKey, pubkey, 'authored', `profile_articles_${APP_ID}`, until, limit);
 
@@ -631,15 +644,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastArticle', () => ({ ...lastArticle }));
 
-    const criteria = paginationPlan('latest');
+    const until = parseInt((lastArticle.msg.tags.find(t => t[0] === 'published_at') || [])[1] || '0');
 
-    const noteData: Record<string, any> =  lastArticle.repost ?
-      lastArticle.repost.note :
-      lastArticle.msg;
-
-    const until = noteData[criteria];
-
-    if (until > 0 && store.profileKey) {
+    if (!isNaN(until) && until > 0 && store.profileKey) {
       fetchArticles(store.profileKey, until);
     }
   };
@@ -737,6 +744,30 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('page', 'users',
         () => ({ [user.pubkey]: { ...user } })
       );
+      return;
+    }
+
+    if ([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+      const messageId = nip19.naddrEncode({ kind: Kind.LongForm, pubkey: message.pubkey, identifier: (message.tags.find(t => t[0] === 'd') || [])[1]});
+
+      if (scope) {
+        const isFirstNote = store.articles[0]?.noteId === messageId;
+
+          if (!isFirstNote) {
+            updateStore(scope, 'page', 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+          }
+        return;
+      }
+
+      const isLastNote = store.lastArticle?.noteId === messageId;
+
+      if (!isLastNote) {
+        updateStore('page', 'messages', messages => [ ...messages, message]);
+      }
+
       return;
     }
 
@@ -907,6 +938,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     const newPosts = sortByRecency(convertToNotes(page, topZaps));
 
     saveNotes(newPosts, scope);
+  };
+
+  const saveArticlesPage = (page: FeedPage, scope?: 'future') => {
+    const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps;
+    const newPosts = convertToArticles(page, topZaps);
+
+    saveArticles(newPosts, scope);
   };
 
 
@@ -1217,6 +1255,28 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
 
     const [type, subId, content] = message;
+
+    if (subId === `profile_articles_${APP_ID}`) {
+      if (type === 'EOSE') {
+        const reposts = parseEmptyReposts(store.page);
+        const ids = Object.keys(reposts);
+
+        if (ids.length === 0) {
+          saveArticlesPage(store.page);
+          return;
+        }
+
+        updateStore('reposts', () => reposts);
+
+        getEvents(account?.publicKey, ids, `profile_reposts_${APP_ID}`);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updatePage(content);
+        return;
+      }
+    }
 
     if (subId === `profile_feed_${APP_ID}`) {
       if (type === 'EOSE') {

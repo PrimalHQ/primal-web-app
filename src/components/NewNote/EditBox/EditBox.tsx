@@ -1195,7 +1195,6 @@ const EditBox: Component<{
           }
 
           if (content.kind === Kind.Highlight) {
-            console.log('HIGHLIGHT: ', content);
             setHighlightRefs(id, () => ({ ...content }));
             return;
           }
@@ -1256,7 +1255,6 @@ const EditBox: Component<{
         let note = noteRefs[id];
 
         if (!note) {
-          console.log('HIGHLIGHTS 2: ', id, highlightRefs)
           note = highlightRefs[id];
 
           const link = note ?
