@@ -11,7 +11,7 @@ import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
 import { subscribeTo } from "../../../sockets";
-import { convertToNotes, referencesToTags } from "../../../stores/note";
+import { convertToArticles, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
@@ -48,6 +48,9 @@ import { decodeIdentifier, hexToNpub } from "../../../lib/keys";
 import LinkPreview from "../../LinkPreview/LinkPreview";
 import { ToggleButton } from "@kobalte/core";
 import { useSettingsContext } from "../../../contexts/SettingsContext";
+import ArticlePreview from "../../ArticlePreview/ArticlePreview";
+import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
+import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -97,10 +100,13 @@ const EditBox: Component<{
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
+  const [articleRefs, setArticleRefs] = createStore<Record<string, PrimalArticle>>({});
+  const [highlightRefs, setHighlightRefs] = createStore<Record<string, any>>({});
 
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
+  const [referencedArticles, setReferencedArticles] = createStore<Record<string, FeedPage>>();
 
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
@@ -936,7 +942,7 @@ const EditBox: Component<{
     }
 
     refs.forEach(id => {
-      if (noteRefs[id]) {
+      if (articleRefs[id]) {
         setTimeout(() => {
           subNaddrRef(id);
         }, 0);
@@ -953,32 +959,89 @@ const EditBox: Component<{
 
       const subId = `naddr_${id}_${APP_ID}`;
 
-      // setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
+      setReferencedArticles(id, { messages: [], users: {}, postStats: {}, mentions: {} })
 
       const unsub = subscribeTo(subId, (type, subId, content) =>{
         if (type === 'EOSE') {
-          subNaddrRef(id);
+          const newNote = convertToArticles(referencedArticles[id])[0];
+
+          setArticleRefs((refs) => ({
+            ...refs,
+            [newNote.noteId]: newNote
+          }));
+
+          subNaddrRef(newNote.noteId);
+
           unsub();
           return;
         }
+
+        // if (type === 'EOSE') {
+        //   subNaddrRef(id);
+        //   unsub();
+        //   return;
+        // }
 
         if (type === 'EVENT') {
           if (!content) {
             return;
           }
 
-          if(content.kind === Kind.LongForm) {
-            const url = `https://highlighter.com/${hexToNpub(pubkey)}/${identifier}`;
 
-            const preview = {
-              url,
-              description: (content.tags.find(t => t[0] === 'summary') || [])[1] || content.content.slice(0, 100),
-              images: [(content.tags.find(t => t[0] === 'image') || [])[1] || ''],
-              title: (content.tags.find(t => t[0] === 'title') || [])[1] || '',
-            }
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-            setAddrRef(id, () => ({ ...preview }));
+            setReferencedArticles(id, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+            return;
           }
+
+          if ([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
+            const message = content as NostrNoteContent;
+
+            setReferencedArticles(id, 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+
+            return;
+          }
+
+          if (content.kind === Kind.NoteStats) {
+            const statistic = content as NostrStatsContent;
+            const stat = JSON.parse(statistic.content);
+
+            setReferencedArticles(id, 'postStats',
+              (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+            );
+            return;
+          }
+
+          if (content.kind === Kind.Mentions) {
+            const mentionContent = content as NostrMentionContent;
+            const mention = JSON.parse(mentionContent.content);
+
+            setReferencedArticles(id, 'mentions',
+              (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+            );
+            return;
+          }
+
+          if (content.kind === Kind.RelayHint) {
+            const hints = JSON.parse(content.content) as Record<string, string>;
+            setRelayHints(() => ({ ...hints }))
+          }
+
+          // if([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
+          //   const url = `https://highlighter.com/${hexToNpub(pubkey)}/${identifier}`;
+
+          //   const preview = {
+          //     url,
+          //     description: (content.tags.find(t => t[0] === 'summary') || [])[1] || content.content.slice(0, 100),
+          //     images: [(content.tags.find(t => t[0] === 'image') || [])[1] || ''],
+          //     title: (content.tags.find(t => t[0] === 'title') || [])[1] || '',
+          //   }
+
+          //   setAddrRef(id, () => ({ ...preview }));
+          // }
         }
       });
 
@@ -999,17 +1062,9 @@ const EditBox: Component<{
         return url;
       }
       try {
-        const preview = addrRefs[id];
+        const article = articleRefs[id];
 
-        const link = preview ?
-          <div>
-            <LinkPreview
-              preview={preview}
-              bordered={true}
-              isLast={false}
-            />
-          </div> :
-          <span class="linkish">{url}</span>;
+        const link = <div><SimpleArticlePreview article={article} noLink={true} /></div>;
 
         // @ts-ignore
         return link.outerHTML || url;
@@ -1110,12 +1165,18 @@ const EditBox: Component<{
         if (type === 'EOSE') {
           const newNote = convertToNotes(referencedNotes[subId])[0];
 
-          setNoteRefs((refs) => ({
-            ...refs,
-            [newNote.noteId]: newNote
-          }));
+          if (newNote) {
+            setNoteRefs((refs) => ({
+              ...refs,
+              [newNote.noteId]: newNote
+            }));
 
-          subNoteRef(newNote.noteId);
+            subNoteRef(newNote.noteId);
+          } else {
+            subNoteRef(id);
+          }
+
+
 
           unsub();
           return;
@@ -1130,6 +1191,12 @@ const EditBox: Component<{
             const user = content as NostrUserContent;
 
             setReferencedNotes(subId, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+            return;
+          }
+
+          if (content.kind === Kind.Highlight) {
+            console.log('HIGHLIGHT: ', content);
+            setHighlightRefs(id, () => ({ ...content }));
             return;
           }
 
@@ -1186,7 +1253,21 @@ const EditBox: Component<{
         return url;
       }
       try {
-        const note = noteRefs[id]
+        let note = noteRefs[id];
+
+        if (!note) {
+          console.log('HIGHLIGHTS 2: ', id, highlightRefs)
+          note = highlightRefs[id];
+
+          const link = note ?
+            <div>
+              <ArticleHighlight highlight={note} />
+            </div> : <span class="linkish">{url}</span>;
+
+          // @ts-ignore
+          return link.outerHTML || url;
+        }
+
 
         const link = note ?
           <div>

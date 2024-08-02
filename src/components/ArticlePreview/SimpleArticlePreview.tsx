@@ -21,12 +21,11 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticlePreview.module.scss';
 
-const ArticlePreview: Component<{
+const SimpleArticlePreview: Component<{
   id?: string,
   article: PrimalArticle,
   height?: number,
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
-  hideFooter?: boolean,
 }> = (props) => {
 
   const app = useAppContext();
@@ -207,17 +206,16 @@ const ArticlePreview: Component<{
     );
   }
 
-  let articlePreview: HTMLAnchorElement | undefined;
+  let articlePreview: HTMLDivElement | undefined;
 
   const onImageLoaded = () => {
-    props.onRender && props.onRender(props.article, articlePreview);
+    // props.onRender && props.onRender(props.article, articlePreview);
   };
 
   return (
-    <A
+    <div
       ref={articlePreview}
       class={styles.article}
-      href={`/e/${props.article.naddr}`}
       style={props.height ? `height: ${props.height}px` : ''}
     >
       <div class={styles.upRightFloater}>
@@ -255,9 +253,9 @@ const ArticlePreview: Component<{
             </div>
             <For each={props.article.tags?.slice(0, 3)}>
               {tag => (
-                <A href={`/reads/${tag}`} class={styles.tag}>
+                <div class={styles.tag}>
                   {tag}
-                </A>
+                </div>
               )}
             </For>
             <Show when={props.article.tags?.length && props.article.tags.length > 3}>
@@ -284,7 +282,7 @@ const ArticlePreview: Component<{
         </div>
       </div>
 
-      <Show when={props.article.topZaps?.length > 0}>
+      {/* <Show when={props.article.topZaps?.length > 0}>
         <div class={styles.zaps}>
           <NoteTopZapsCompact
             note={props.article}
@@ -295,20 +293,18 @@ const ArticlePreview: Component<{
         </div>
       </Show>
 
-      <Show when={!props.hideFooter}>
-        <div class={styles.footer}>
-          <ArticleFooter
-            note={props.article}
-            state={reactionsState}
-            updateState={updateReactionsState}
-            customZapInfo={customZapInfo()}
-            onZapAnim={addTopZapFeed}
-          />
-        </div>
-      </Show>
+      <div class={styles.footer}>
+        <ArticleFooter
+          note={props.article}
+          state={reactionsState}
+          updateState={updateReactionsState}
+          customZapInfo={customZapInfo()}
+          onZapAnim={addTopZapFeed}
+        />
+      </div> */}
 
-    </A>
+    </div>
   );
 }
 
-export default hookForDev(ArticlePreview);
+export default hookForDev(SimpleArticlePreview);

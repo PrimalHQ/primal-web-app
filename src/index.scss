@@ -540,3 +540,9 @@ button:focus {
     }
   }
 }
+
+.article_highlight {
+  background-color: var(--highlight);
+  color: var(--text-highlight);
+  font-style: normal;
+}
