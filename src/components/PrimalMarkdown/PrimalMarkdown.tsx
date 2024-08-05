@@ -43,6 +43,7 @@ import LinkPreview from '../LinkPreview/LinkPreview';
 import ArticleLinkPreview from '../LinkPreview/ArticleLinkPreview';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
+import { useToastContext } from '../Toaster/Toaster';
 
 export type Coord = {
   x: number;
@@ -84,6 +85,7 @@ const PrimalMarkdown: Component<{
   onHighlightReply?: () => void,
 }> = (props) => {
   const account = useAccountContext();
+  const toast = useToastContext();
 
   let ref: HTMLDivElement | undefined;
   let viewer: HTMLDivElement | undefined;
@@ -437,12 +439,14 @@ const PrimalMarkdown: Component<{
               props.onHighlightCreated && props.onHighlightCreated(id);
             }}
             onRemove={(id: string) => {
+              toast?.sendSuccess('Highlight removed');
               hideContextMenu(id);
               props.onHighlightRemoved && props.onHighlightRemoved(id);
             }}
             onComment={props.onHighlightReply}
             onCopy={(id: string) => {
-              hideContextMenu(id)
+              toast?.sendSuccess('Highlight copied');
+              hideContextMenu(id);
             }}
           />
         </Show>

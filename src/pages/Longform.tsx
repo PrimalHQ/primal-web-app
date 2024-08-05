@@ -762,6 +762,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     const hl = document.querySelector(`em[data-highlight="${store.selectedHighlight.id}"]`);
 
     if (hl) {
+      // @ts-ignore
       const top = hl.offsetTop;
       window.scrollTo({ top, behavior: 'smooth' });
       // hl.scrollIntoView({ block: 'start', behavior: 'smooth' });
