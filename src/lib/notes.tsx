@@ -318,6 +318,12 @@ export const sendLike = async (note: PrimalNote | PrimalArticle, shouldProxy: bo
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
+  // @ts-ignore
+  if (note.coordinate) {
+    // @ts-ignore
+    event.tags.push(['a', note.coordinate]);
+  }
+
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 
 }
@@ -342,6 +348,7 @@ export const sendArticleRepost = async (note: PrimalArticle, shouldProxy: boolea
     kind: Kind.Repost,
     tags: [
       ['e', note.id],
+      ['a', note.coordinate],
       ['p', note.pubkey],
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),

@@ -365,6 +365,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             topZaps: [...tz],
             naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
             noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
+            coordinate: `${kind}:${pubkey}:${identifier}`,
             msg: m,
             mentionedNotes,
             mentionedUsers,
@@ -616,6 +617,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
       noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
+      coordinate: `${kind}:${pubkey}:${identifier}`,
       msg: {
         ...msg,
         kind,

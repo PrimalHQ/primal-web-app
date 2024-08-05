@@ -569,6 +569,7 @@ export type PrimalArticle = {
   pubkey: string,
   naddr: string,
   noteId: string,
+  coordinate: string,
   msg: NostrNoteContent,
   wordCount: number,
   noteActions: NoteActions,
