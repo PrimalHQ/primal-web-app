@@ -441,7 +441,9 @@ const PrimalMarkdown: Component<{
               props.onHighlightRemoved && props.onHighlightRemoved(id);
             }}
             onComment={props.onHighlightReply}
-            onCopy={(id: string) => hideContextMenu(id)}
+            onCopy={(id: string) => {
+              hideContextMenu(id)
+            }}
           />
         </Show>
 

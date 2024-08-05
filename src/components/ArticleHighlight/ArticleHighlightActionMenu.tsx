@@ -121,6 +121,7 @@ const ArticleHighlightActionMenu: Component<{
 
     account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
     account?.actions?.showNewNoteForm();
+    props.onCopy && props.onCopy(props.highlight.id);
 
   }
 

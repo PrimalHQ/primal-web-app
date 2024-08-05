@@ -758,6 +758,14 @@ const Longform: Component< { naddr: string } > = (props) => {
     const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
 
     updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
+
+    const hl = document.querySelector(`em[data-highlight="${store.selectedHighlight.id}"]`);
+
+    if (hl) {
+      const top = hl.offsetTop;
+      window.scrollTo({ top, behavior: 'smooth' });
+      // hl.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
   };
 
   const fetchHighlights = () => {
