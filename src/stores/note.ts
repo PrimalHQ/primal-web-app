@@ -610,7 +610,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       summary: '',
       image: '',
       tags: [],
-      published: msg.created_at || 0,
+      published: parseInt((msg.tags.find(t => t[0] === 'published_at') || [])[1] || `${msg.created_at}` || '0'),
       content: sanitize(msg.content || ''),
       user: user ? convertToUser(user) : emptyUser(msg.pubkey),
       topZaps: [...tz],
