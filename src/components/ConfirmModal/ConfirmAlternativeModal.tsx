@@ -1,14 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { zapNote } from '../../lib/zap';
-import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
-import { PrimalNote } from '../../types/primal';
-import { debounce } from '../../utils';
+import { Component, Show } from 'solid-js';
 import Modal from '../Modal/Modal';
-import { useToastContext } from '../Toaster/Toaster';
 
 import { confirmDefaults as t } from '../../translations';
 

@@ -62,6 +62,8 @@ export const zapArticle = async (note: PrimalArticle, sender: string | undefined
     return false;
   }
 
+  const a = `${Kind.LongForm}:${note.pubkey}:${(note.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
+
   const sats = Math.round(amount * 1000);
 
   let payload = {
@@ -77,6 +79,10 @@ export const zapArticle = async (note: PrimalArticle, sender: string | undefined
   }
 
   const zapReq = nip57.makeZapRequest(payload);
+
+  if (!zapReq.tags.find((t: string[]) => t[0] === 'a' && t[1] === a)) {
+    zapReq.tags.push(['a', a]);
+  }
 
   try {
     const signedEvent = await signEvent(zapReq);

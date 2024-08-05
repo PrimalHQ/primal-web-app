@@ -1,10 +1,10 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { defaultZap, defaultZapOptions } from '../../constants';
+import { defaultZap, defaultZapOptions, Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { zapNote, zapProfile } from '../../lib/zap';
+import { zapArticle, zapNote, zapProfile } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
 import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
@@ -100,7 +100,14 @@ const CustomZap: Component<{
 
       if (note) {
         setTimeout(async () => {
-          const success = await zapNote(
+
+          const zappers: Record<string, Function> = {
+            [Kind.Text]: zapNote,
+            [Kind.LongForm]: zapArticle,
+            [Kind.LongFormShell]: zapArticle,
+          }
+
+          const success = await zappers[note.msg.kind](
             note,
             account.publicKey,
             selectedValue().amount || 0,
