@@ -96,6 +96,7 @@
   overflow-y: scroll;
   background-color: var(--background-input);
   border-radius: 0 8px 8px 0;
+  z-index: var(--z-index-lifted);
 
   &::-webkit-scrollbar {
     width: 0px;

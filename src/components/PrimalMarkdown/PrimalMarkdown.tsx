@@ -172,8 +172,8 @@ const PrimalMarkdown: Component<{
   };
 
   const onMouseUp = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    // e.preventDefault();
+    // e.stopPropagation();
 
     // @ts-ignore
     const isHighlightMenuOption = e.target?.parentElement.getAttribute('data-highlight-menu-option') !== null;
