@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import { Kind } from '../../constants';
@@ -41,6 +41,7 @@ const ArticleHighlightActionMenu: Component<{
   onCreate?: (event: NostrRelaySignedEvent) => void,
   onRemove?: (id: string) => void,
   onComment?: (id: string) => void,
+  onCopy?: (id: string) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -128,6 +129,8 @@ const ArticleHighlightActionMenu: Component<{
     e.stopPropagation();
 
     navigator.clipboard.writeText(props.text);
+
+    props.onCopy && props.onCopy(props.highlight.id);
   }
 
   return (
@@ -135,9 +138,18 @@ const ArticleHighlightActionMenu: Component<{
       class={styles.articleActionMenu}
       style={`top: ${topP()}px; left: ${leftP()}px;`}
     >
-      <Show
-        when={props.highlight === 'NEW_HIGHLIGHT'}
-        fallback={
+      <Switch>
+        <Match when={props.highlight === 'NEW_HIGHLIGHT'}>
+          <button
+            data-highlight-menu-option="highlight"
+            onClick={onNewHighlight}
+          >
+            <div class={styles.iconHighlight}></div>
+            <div class={styles.iconCaption}>Highlight</div>
+          </button>
+        </Match>
+
+        <Match when={props.highlight.pubkey === account?.publicKey}>
           <button
             data-highlight-menu-option="remove"
             onClick={onRemoveHighlight}
@@ -145,16 +157,8 @@ const ArticleHighlightActionMenu: Component<{
             <div class={styles.iconHighlightRemove}></div>
             <div class={styles.iconCaption}>Remove</div>
           </button>
-        }
-      >
-        <button
-          data-highlight-menu-option="highlight"
-          onClick={onNewHighlight}
-        >
-          <div class={styles.iconHighlight}></div>
-          <div class={styles.iconCaption}>Highlight</div>
-        </button>
-      </Show>
+        </Match>
+      </Switch>
       <button
         data-highlight-menu-option="quote"
         onClick={onQuote}

@@ -198,13 +198,17 @@
     }
 
     em {
-      background-color: var(--text-secondary);
-      color: var(--background-input);
-      padding-block: 4px;
+      background: none;
+      font-weight: 400;
+      font-style: italic;
+      padding-top: 3px;
+      padding-bottom: 2px;
     }
 
     em[data-highlight] {
       background-color: var(--highlight);
+      font-weight: 400;
+      font-style: normal;
       color: var(--text-highlight);
       text-decoration: none;
       cursor: pointer;

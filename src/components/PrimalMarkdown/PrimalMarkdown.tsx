@@ -362,11 +362,11 @@ const PrimalMarkdown: Component<{
 
     setEditor(() => e);
 
-    document.addEventListener('mouseup', onMouseUp);
+    viewer?.addEventListener('mouseup', onMouseUp);
   });
 
   onCleanup(() => {
-    document.removeEventListener('mouseup', onMouseUp);
+    viewer?.removeEventListener('mouseup', onMouseUp);
   })
 
   createEffect(() => {
@@ -432,9 +432,16 @@ const PrimalMarkdown: Component<{
             text={highlightText()}
             context={highlightContext()}
             article={props.article}
-            onCreate={props.onHighlightCreated}
-            onRemove={props.onHighlightRemoved}
+            onCreate={(id: string) => {
+              hideContextMenu(id);
+              props.onHighlightCreated && props.onHighlightCreated(id);
+            }}
+            onRemove={(id: string) => {
+              hideContextMenu(id);
+              props.onHighlightRemoved && props.onHighlightRemoved(id);
+            }}
             onComment={props.onHighlightReply}
+            onCopy={(id: string) => hideContextMenu(id)}
           />
         </Show>
 

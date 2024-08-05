@@ -83,18 +83,19 @@
   margin: 0px 0px;
   background-color: var(--text-primary);
   -webkit-mask: url(../../assets/icons/highlight_copy.svg) no-repeat 0/100%;
-  mask: url(../../assets/icons/highlight_copy.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/copy.svg) no-repeat 0/100%;
 }
 
 .articleHighlightComments {
   position: absolute;
-  bottom: 0;
+  bottom: 20px;
   left: 0;
   padding: 0;
   width: 308px;
   max-height: calc(100% - 200px);
   overflow-y: scroll;
   background-color: var(--background-input);
+  border-radius: 0 8px 8px 0;
 
   &::-webkit-scrollbar {
     width: 0px;
@@ -107,13 +108,11 @@
     padding: 12px 20px;
     gap: 6px;
     width: 100%;
-    border-bottom: 1px solid var(--subtile-devider);
 
     .author {
       display: flex;
       align-items: center;
       gap: 8px;
-
 
       .iconHighlight {
         margin: 4px;
@@ -137,7 +136,11 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    border-bottom: 1px solid var(--subtile-devider);
+    border-top: 1px solid var(--subtile-devider);
+
+    &:first-child {
+      border-top: none;
+    }
 
     .commentAuthor {
       display: flex;
