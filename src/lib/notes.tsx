@@ -24,7 +24,7 @@ export const setStoredLikes = (likes: string[]) => {
 };
 
 export const sanitize = (html: string) => {
-  return html.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  return html ? html.replaceAll('<', '&lt;').replaceAll('>', '&gt;') : '';
 };
 
 export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
