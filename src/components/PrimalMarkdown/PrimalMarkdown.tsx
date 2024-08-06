@@ -83,6 +83,7 @@ const PrimalMarkdown: Component<{
   onHighlightCreated?: (highlight: any) => void,
   onHighlightRemoved?: (id: string) => void,
   onHighlightReply?: () => void,
+  onHighlightDeselected?: () => void,
 }> = (props) => {
   const account = useAccountContext();
   const toast = useToastContext();
@@ -447,6 +448,11 @@ const PrimalMarkdown: Component<{
             onCopy={(id: string) => {
               toast?.sendSuccess('Highlight copied');
               hideContextMenu(id);
+              props.onHighlightDeselected && props.onHighlightDeselected();
+            }}
+            onQuote={(id: string) => {
+              hideContextMenu(id);
+              props.onHighlightDeselected && props.onHighlightDeselected();
             }}
           />
         </Show>

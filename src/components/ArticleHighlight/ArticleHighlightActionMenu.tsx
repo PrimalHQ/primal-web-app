@@ -42,6 +42,7 @@ const ArticleHighlightActionMenu: Component<{
   onRemove?: (id: string) => void,
   onComment?: (id: string) => void,
   onCopy?: (id: string) => void,
+  onQuote?: (id: string) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -121,7 +122,7 @@ const ArticleHighlightActionMenu: Component<{
 
     account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
     account?.actions?.showNewNoteForm();
-    props.onCopy && props.onCopy(props.highlight.id);
+    props.onQuote && props.onQuote(props.highlight.id);
 
   }
 
@@ -143,7 +144,7 @@ const ArticleHighlightActionMenu: Component<{
         <Match when={props.highlight === 'NEW_HIGHLIGHT'}>
           <button
             data-highlight-menu-option="highlight"
-            onClick={onNewHighlight}
+            onMouseDown={onNewHighlight}
           >
             <div class={styles.iconHighlight}></div>
             <div class={styles.iconCaption}>Highlight</div>
@@ -153,7 +154,7 @@ const ArticleHighlightActionMenu: Component<{
         <Match when={props.highlight.pubkey === account?.publicKey}>
           <button
             data-highlight-menu-option="remove"
-            onClick={onRemoveHighlight}
+            onMouseDown={onRemoveHighlight}
           >
             <div class={styles.iconHighlightRemove}></div>
             <div class={styles.iconCaption}>Remove</div>
@@ -162,20 +163,20 @@ const ArticleHighlightActionMenu: Component<{
       </Switch>
       <button
         data-highlight-menu-option="quote"
-        onClick={onQuote}
+        onMouseDown={onQuote}
       >
         <div class={styles.iconHighlightQuote}></div>
         <div class={styles.iconCaption}>Quote</div>
       </button>
       <button
         data-highlight-menu-option="comment"
-        onClick={onComment}
+        onMouseDown={onComment}
       >
         <div class={styles.iconHighlightComment}></div>
         <div class={styles.iconCaption}>Comment</div>
       </button>
       <button
-        onClick={onCopy}
+        onMouseDown={onCopy}
         data-highlight-menu-option="copy"
       >
         <div class={styles.iconHighlightCopy}></div>
