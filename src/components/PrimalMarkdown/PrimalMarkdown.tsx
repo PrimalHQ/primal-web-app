@@ -26,10 +26,10 @@ import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { getUserProfileInfo } from '../../lib/profile';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { Kind } from '../../constants';
+import { eventRegexLocal, Kind, mdImageRegex, noteRegex, profileRegex, profileRegexG } from '../../constants';
 import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import { authorName, convertToUser, userName } from '../../stores/profile';
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
 import { nip19 } from '../../lib/nTools';
 import { fetchNotes } from '../../handleNotes';
@@ -44,11 +44,22 @@ import ArticleLinkPreview from '../LinkPreview/ArticleLinkPreview';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
 import { useToastContext } from '../Toaster/Toaster';
+import MarkdownSlice from './MarkdownSlice';
 
 export type Coord = {
   x: number;
   y: number;
 };
+
+export type ArticleTokenType = 'md' | 'event' | 'image' | 'user';
+
+export type ArticleToken = {
+  type: ArticleTokenType,
+  index: number,
+  length: number,
+  value: string,
+}
+
 
 // atStart: if true, returns coord of the beginning of the selection,
 //          if false, returns coord of the end of the selection
@@ -87,12 +98,15 @@ const PrimalMarkdown: Component<{
 }> = (props) => {
   const account = useAccountContext();
   const toast = useToastContext();
+  const navigate = useNavigate();
 
   let ref: HTMLDivElement | undefined;
   let viewer: HTMLDivElement | undefined;
   // let editor1: Editor;
 
   const [editor, setEditor] = createSignal<Editor>();
+
+  const [contentTokens, setContentTokens] = createStore<ArticleToken[]>([]);
 
   const id = () => {
     return `note_${props.noteId}`;
@@ -237,53 +251,140 @@ const PrimalMarkdown: Component<{
 
   }
 
-  const renderImage = (el: Element) => {
-    const img = el.firstChild as HTMLImageElement;
+  const [html, setHTML] = createSignal<string>();
 
-    return <NoteImage
-      class={`noteimage image_${props.noteId}`}
-      src={img.src}
-      width={640}
-    />
+
+  const regexIndexOf = (text: string, regex: RegExp, startpos: number) => {
+    var indexOf = text.substring(startpos || 0).search(regex);
+    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
   }
 
-  const renderMention = (el: Element) => {
-    const regex = /nostr:([A-z0-9]+)/;
+  const tokenizeByRegex = (content: string, regex: RegExp, type: ArticleTokenType, indexOffset = 0) => {
+    let index = 0;
+    let tokens: ArticleToken[] = [];
 
-    const content = el.innerHTML;
+    while (index >= 0) {
+      const contentIndex = regexIndexOf(content, regex, index);
+      let length = 1;
 
-    const tokens = content.split(regex);
+      if (contentIndex < 0) {
+        if (index > 0 ) {
+          tokens.push({
+            index: index + indexOffset,
+            value: content.substring(index),
+            length: content.length,
+            type: 'md',
+          });
+          break;
+        }
 
-    let items: any[] = [];
+        tokens.push({
+          index: indexOffset,
+          value: content,
+          length: content.length,
+          type: 'md',
+        });
+        break;
+      }
 
-    for(let i=0; i<tokens.length; i++) {
-      const token = tokens[i];
+      if (contentIndex > 0) {
+        const value = content.substring(index, contentIndex);
 
+        tokens.push({
+          index: index + indexOffset,
+          value,
+          length: value.length,
+          type: 'md',
+        });
+      }
 
-      if (token.startsWith('npub')) {
-        const id = npubToHex(token);
-        const user = (props.article?.mentionedUsers || {})[id];
+      const value = content.slice(contentIndex).match(regex);
 
-        items.push(
-          <Show
-            when={user}
-            fallback={<A href={`/p/${token}`}>nostr:{token}</A>}
-          >
-            <A href={`/p/${token}`}>@{userName(user)}</A>
-          </Show>
-        );
+      if (value && value.length > 0) {
+        length = value[0].length;
 
+        tokens.push({
+          index: contentIndex + indexOffset,
+          value: value[0],
+          length,
+          type,
+        })
+      }
+
+      index = contentIndex + length;
+    }
+
+    return tokens;
+  }
+
+  const parseTokens = (allTokens: ArticleToken[], regex: RegExp, type: ArticleTokenType, defaultType: ArticleTokenType) => {
+
+    let tokens: ArticleToken[] = [];
+
+    for (let i = 0; i<allTokens.length; i++) {
+      const token = allTokens[i];
+
+      // All tkoens that do not have this default value are considered parsed
+      if (token.type !== defaultType) {
+        tokens.push({ ...token });
         continue;
       }
 
-      if (token.startsWith('note')) {
-        const id = npubToHex(token);
+      const parsedTokens = tokenizeByRegex(token.value, regex, type, token.index);
+
+      tokens.push(...parsedTokens);
+    }
+
+    return tokens;
+  };
+
+  const tokenizeContent = (content: string) => {
+    let tokens: ArticleToken[] = [{
+      value: content,
+      index: 0,
+      length: content.length,
+      type: 'md',
+    }];
+
+    // Parse event refereces
+    tokens = parseTokens(tokens, eventRegexLocal, 'event', 'md');
+
+    // Parse images
+    tokens = parseTokens(tokens, mdImageRegex, 'image', 'md');
+
+    return tokens;
+
+  }
+
+  const renderToken = (token: ArticleToken) => {
+    if (token.type === 'md') {
+      const prepped = token.value.replace(profileRegexG, (r: string) => {
+
+        const [_, npub] = r.split(':');
+
+        const id = npubToHex(npub);
+
+        const user = props.article?.mentionedUsers && props.article.mentionedUsers[id];
+
+        const name = user ? userName(user) : r;
+
+        return `[@${name}]("${r}")`;
+      })
+
+      return <MarkdownSlice content={prepped} />
+    }
+
+    if (token.type === 'event') {
+      const [_, noteId] = token.value.split(':');
+
+      if (noteId.startsWith('note')) {
+        const id = npubToHex(noteId);
         const note = (props.article?.mentionedNotes || {})[id];
 
-        items.push(
+        return (
           <Show
             when={note}
-            fallback={<A href={`/e/${token}`}>nostr:{token}</A>}
+            fallback={<A href={`/e/${noteId}`}>nostr:{noteId}</A>}
           >
             <div class={styles.embeddedNote}>
               <EmbeddedNote
@@ -294,109 +395,126 @@ const PrimalMarkdown: Component<{
             </div>
           </Show>
         );
-
-        continue;
       }
 
-      if (token.startsWith('naddr')) {
-        const mention = props.article?.mentionedNotes && props.article.mentionedNotes[token];
+      if (noteId.startsWith('naddr')) {
+
+        const mention = props.article?.mentionedArticles && props.article.mentionedArticles[noteId];
 
         if (!mention) {
-          items.push(<>nostr:{token}</>)
-          continue;
+          return <>nostr:{noteId}</>;
         };
 
-        const preview = {
-          url: `/e/${token}`,
-          description: (mention.post.tags.find(t => t[0] === 'summary') || [])[1] || mention.post.content.slice(0, 100),
-          images: [(mention.post.tags.find(t => t[0] === 'image') || [])[1] || mention.user.picture],
-          title: (mention.post.tags.find(t => t[0] === 'title') || [])[1] || authorName(mention.user),
-        }
-
-        items.push(
-          <ArticleLinkPreview
-            preview={preview}
+        return (
+          <ArticlePreview
+            article={mention}
             bordered={true}
+            hideFooter={true}
           />
         );
+      }
+    }
 
-        continue;
+    if (token.type === 'image') {
+      let src = '';
+      let alt = '';
+
+      if (token.value.startsWith('![')) {
+        let urlMatches = token.value.match(/\((.*?)\)/);
+        let altMatches = token.value.match(/\[(.*?)\]/);
+
+        src = urlMatches ? urlMatches[1] : '';
+        alt = altMatches ? altMatches[1] : '';
       }
 
-      const elem = document.createElement("span");
-      elem.innerHTML = token;
+      if (token.value.startsWith('http')) {
+        src = token.value;
+      }
 
-      items.push(<>{elem}</>);
+      return (
+        <NoteImage
+          class={`noteimage image_${props.noteId}`}
+          src={src}
+          width={640}
+        />
+      );
     }
 
-    return <p><For each={items}>{item => <>{item}</>}</For></p>;
-
+    return <></>;
   };
 
-
-  const [html, setHTML] = createSignal<string>();
-
   onMount(async () => {
-    const e = await Editor.make()
-      .config((ctx) => {
-          ctx.set(rootCtx, ref);
+    // const e = await Editor.make()
+    //   .config((ctx) => {
+    //       ctx.set(rootCtx, ref);
 
-          ctx.update(editorViewOptionsCtx, prev => ({
-            ...prev,
-            editable: () => !Boolean(props.readonly),
-          }))
-      })
-      .use(commonmark)
-      .use(gfm)
-      // .use(emoji)
-      .use(history)
-      // .use(userMention)
-      // .use(copilotPlugin)
-      // .use(noteMention)
-      // .use(slash)
-      // .use(mention)
-      .create();
+    //       ctx.update(editorViewOptionsCtx, prev => ({
+    //         ...prev,
+    //         editable: () => !Boolean(props.readonly),
+    //       }))
+    //   })
+    //   .use(commonmark)
+    //   .use(gfm)
+    //   // .use(emoji)
+    //   .use(history)
+    //   // .use(userMention)
+    //   // .use(copilotPlugin)
+    //   // .use(noteMention)
+    //   // .use(slash)
+    //   // .use(mention)
+    //   .create();
 
-    setEditor
+    // setEditor(() => e);
 
-    insert(props.content || '')(e.ctx);
+    const tokens = tokenizeContent(props.content || '');
 
-    setHTML(getHTML()(e.ctx));
+    setContentTokens(() => [...tokens]);
 
-    setEditor(() => e);
+    viewer?.addEventListener('mousedown', onMouseDown)
 
-    viewer?.addEventListener('mouseup', onMouseUp);
+    // insert(props.content || '')(e.ctx);
+
+    // setHTML(getHTML()(e.ctx));
+
+
+    // viewer?.addEventListener('mouseup', onMouseUp);
   });
 
   onCleanup(() => {
-    viewer?.removeEventListener('mouseup', onMouseUp);
-  })
+    // viewer?.removeEventListener('mouseup', onMouseUp);
+  });
+
+  const onMouseDown = (e: MouseEvent) => {
+    if (e.target && e.target.tagName === 'a') {
+      console.log('LINK')
+    }
+  };
 
   createEffect(() => {
-    const e = editor();
+    // const e = editor();
 
-    if (!props.highlights) return;
-    if (!e) return;
+    // if (!props.highlights) return;
+    // if (!e) return;
 
-    const htmlContent = getHTML()(e.ctx);
+    // const htmlContent = getHTML()(e.ctx);
 
-    let parsedContent = ''
+    // let parsedContent = ''
 
-    if (props.highlights) {
-      parsedContent = props.highlights.reduce((acc, hl) => {
-        const context = (hl.tags.find((t: string[]) => t[0] == 'context') || ['', ''])[1];
+    // if (props.highlights) {
+    //   parsedContent = props.highlights.reduce((acc, hl) => {
+    //     const context = (hl.tags.find((t: string[]) => t[0] == 'context') || ['', ''])[1];
 
-        const newContext = context.replace(hl.content, `<em data-highlight="${hl.id}">${hl.content}</em>`);
+    //     const newContext = context.replace(hl.content, `<em data-highlight="${hl.id}">${hl.content}</em>`);
 
-        return acc.replace(context, newContext);
-      }, htmlContent);
-    }
+    //     return acc.replace(context, newContext);
+    //   }, htmlContent);
+    // }
 
-    setHTML(parsedContent);
+    // setHTML(parsedContent);
   });
 
   onCleanup(() => {
-    editor()?.destroy();
+    // editor()?.destroy();
   });
 
   const htmlArray = () => {
@@ -457,7 +575,11 @@ const PrimalMarkdown: Component<{
           />
         </Show>
 
-        <For each={htmlArray()}>
+        <For each={contentTokens}>
+          {renderToken}
+        </For>
+
+        {/* <For each={htmlArray()}>
           {el => (
             <Switch fallback={<>{el}</>}>
               <Match when={isHighlight(el)}>
@@ -471,7 +593,7 @@ const PrimalMarkdown: Component<{
               </Match>
             </Switch>
           )}
-        </For>
+        </For> */}
       </div>
 
       {/* <ButtonPrimary
