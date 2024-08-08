@@ -62,7 +62,7 @@ export const getArticlesFeed2 = (user_pubkey: string | undefined, spec: string, 
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["reads_feed_directive", payload]},
+    {cache: ["mega_feed_directive", payload]},
   ]));
 }
 
@@ -128,7 +128,7 @@ export const getFutureArticlesFeed2 = (user_pubkey: string | undefined, spec: st
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["reads_feed_directive", payload]},
+    {cache: ["mega_feed_directive", payload]},
   ]));
 };
 
