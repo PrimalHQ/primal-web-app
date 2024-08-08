@@ -503,7 +503,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     updateStore('isFetching', () => true);
-    let articles = await fetchUserArticles(account?.publicKey, pubkey, 'authored', `profile_articles_${APP_ID}`, until, limit);
+    let articles = await fetchUserArticles(account?.publicKey, pubkey, 'authored', `profile_articles_1_${APP_ID}`, until, limit);
 
     articles = articles.filter(a => a.id !== store.lastArticle?.id);
 
