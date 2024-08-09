@@ -1073,6 +1073,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             }}
             onHighlightCreated={(hl: any) => {
               updateStore('highlights', store.highlights.length, () => ({...hl}));
+              updateStore('selectedHighlight', () => undefined);
             }}
             onHighlightRemoved={(id: string) => {
               updateStore('highlights', (hs) => hs.filter(h => h.id !== id));

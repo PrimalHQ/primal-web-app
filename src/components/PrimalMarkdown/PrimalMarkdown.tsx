@@ -163,7 +163,7 @@ const PrimalMarkdown: Component<{
     const hl = props.highlights?.find(h => h.id === id);
 
     if (hl) {
-      const el = document.querySelector(`em[data-highlight="${hl.id}"]`);
+      const el = document.querySelector(`a[data-highlight="${hl.id}"]`);
 
       // @ts-ignore
       const x = el?.offsetLeft || 0;
@@ -179,11 +179,11 @@ const PrimalMarkdown: Component<{
     }
   };
 
-  const hideContextMenu = (id: string) => {
-    if (highlightMenu() && id === highlightMenu().id) {
+  const hideHighlightMenu = (id: string) => {
+    // if (highlightMenu() && id === highlightMenu().id) {
       setHighlightMenu(() => undefined);
       props.onHighlightSelected && props.onHighlightSelected(undefined);
-    }
+    // }
   };
 
   const onMouseUp = (e: MouseEvent) => {
@@ -197,7 +197,7 @@ const PrimalMarkdown: Component<{
 
     // @ts-ignore
     const selection = document.getSelection();
-    document.querySelector('em[data-highlight-selected')?.removeAttribute('data-highlight-selected');
+    document.querySelector('a[data-highlight-selected')?.removeAttribute('data-highlight-selected');
 
     if (selection?.toString().length === 0) {
       setHighlightMenu(() => undefined);
@@ -223,33 +223,6 @@ const PrimalMarkdown: Component<{
     coord && setHighlightMenuPosition(() => ({ x: coord.x - xOff, y: coord.y - yOff}));
     setHighlightMenu(() => text);
   };
-
-  const renderHighlight = (el: Element) => {
-    for (let i=0; i<el.children.length; i++) {
-      const child = el.children.item(i);
-
-      if (child?.tagName === 'EM' && child.attributes.getNamedItem('data-highlight')) {
-        const id = child.attributes.getNamedItem('data-highlight')?.value;
-
-        const highlight = props.highlights?.find(h => h.id === id);
-
-        if (highlight) {
-          child.replaceWith(
-            // @ts-ignore
-            <ArticleHighlight
-              highlight={props.highlights?.find(h => h.id === id)}
-              onShowMenu={showHighlightMenu}
-              onHideMenu={hideContextMenu}
-            />
-          );
-        }
-      }
-    }
-
-    return <>{el}</>
-
-
-  }
 
   const [html, setHTML] = createSignal<string>();
 
@@ -368,10 +341,14 @@ const PrimalMarkdown: Component<{
 
         const name = user ? userName(user) : r;
 
-        return `[@${name}]("${r}")`;
+        return `[@${name}](${r} "${npub}")`;
       })
 
-      return <MarkdownSlice content={prepped} />
+      return <MarkdownSlice
+        content={prepped}
+        original={token.value}
+        highlights={props.highlights || []}
+      />
     }
 
     if (token.type === 'event') {
@@ -444,85 +421,48 @@ const PrimalMarkdown: Component<{
   };
 
   onMount(async () => {
-    // const e = await Editor.make()
-    //   .config((ctx) => {
-    //       ctx.set(rootCtx, ref);
-
-    //       ctx.update(editorViewOptionsCtx, prev => ({
-    //         ...prev,
-    //         editable: () => !Boolean(props.readonly),
-    //       }))
-    //   })
-    //   .use(commonmark)
-    //   .use(gfm)
-    //   // .use(emoji)
-    //   .use(history)
-    //   // .use(userMention)
-    //   // .use(copilotPlugin)
-    //   // .use(noteMention)
-    //   // .use(slash)
-    //   // .use(mention)
-    //   .create();
-
-    // setEditor(() => e);
 
     const tokens = tokenizeContent(props.content || '');
 
     setContentTokens(() => [...tokens]);
 
-    viewer?.addEventListener('mousedown', onMouseDown)
-
-    // insert(props.content || '')(e.ctx);
-
-    // setHTML(getHTML()(e.ctx));
-
-
-    // viewer?.addEventListener('mouseup', onMouseUp);
+    viewer?.addEventListener('click', onMouseClick)
+    viewer?.addEventListener('mouseup', onMouseUp);
   });
 
   onCleanup(() => {
-    // viewer?.removeEventListener('mouseup', onMouseUp);
+    viewer?.removeEventListener('mouseup', onMouseUp);
+    viewer?.removeEventListener('click', onMouseClick)
   });
 
-  const onMouseDown = (e: MouseEvent) => {
-    if (e.target && e.target.tagName === 'a') {
-      console.log('LINK')
+  const onMouseClick= (e: MouseEvent) => {
+    e.preventDefault();
+    const el = e.target as HTMLElement;
+
+    if (el.tagName === 'A') {
+      const href = el.getAttribute('href') || '';
+
+      if (href.startsWith('nostr:')) {
+        const [__, id] = href?.split(':');
+
+        if (id.startsWith('npub')) {
+          navigate(`/p/${id}`);
+          return false;
+        }
+      }
+
+      if (href.startsWith('hl:')) {
+        const [__, id] = href?.split(':');
+
+        showHighlightMenu(id);
+        el.setAttribute('data-highlight-selected', 'true');
+
+        return false;
+      }
+
+      return true;
     }
   };
-
-  createEffect(() => {
-    // const e = editor();
-
-    // if (!props.highlights) return;
-    // if (!e) return;
-
-    // const htmlContent = getHTML()(e.ctx);
-
-    // let parsedContent = ''
-
-    // if (props.highlights) {
-    //   parsedContent = props.highlights.reduce((acc, hl) => {
-    //     const context = (hl.tags.find((t: string[]) => t[0] == 'context') || ['', ''])[1];
-
-    //     const newContext = context.replace(hl.content, `<em data-highlight="${hl.id}">${hl.content}</em>`);
-
-    //     return acc.replace(context, newContext);
-    //   }, htmlContent);
-    // }
-
-    // setHTML(parsedContent);
-  });
-
-  onCleanup(() => {
-    // editor()?.destroy();
-  });
-
-  const htmlArray = () => {
-    const el = document.createElement('div');
-    el.innerHTML = html() || '';
-
-    return [ ...el.children ];
-  }
 
   const undo = () => editor()?.action(callCommand(redoCommand.key));
   const redo = () => editor()?.action(callCommand(redoCommand.key));
@@ -554,22 +494,22 @@ const PrimalMarkdown: Component<{
             context={highlightContext()}
             article={props.article}
             onCreate={(id: string) => {
-              hideContextMenu(id);
+              hideHighlightMenu(id);
               props.onHighlightCreated && props.onHighlightCreated(id);
             }}
             onRemove={(id: string) => {
               toast?.sendSuccess('Highlight removed');
-              hideContextMenu(id);
+              hideHighlightMenu(id);
               props.onHighlightRemoved && props.onHighlightRemoved(id);
             }}
             onComment={props.onHighlightReply}
             onCopy={(id: string) => {
               toast?.sendSuccess('Highlight copied');
-              hideContextMenu(id);
+              hideHighlightMenu(id);
               props.onHighlightDeselected && props.onHighlightDeselected();
             }}
             onQuote={(id: string) => {
-              hideContextMenu(id);
+              hideHighlightMenu(id);
               props.onHighlightDeselected && props.onHighlightDeselected();
             }}
           />
