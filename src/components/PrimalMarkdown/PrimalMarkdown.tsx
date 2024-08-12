@@ -506,7 +506,10 @@ const PrimalMarkdown: Component<{
               hideHighlightMenu(id);
               props.onHighlightRemoved && props.onHighlightRemoved(id);
             }}
-            onComment={props.onHighlightReply}
+            onComment={(hl: any) => {
+              hideHighlightMenu(hl.id);
+              props.onHighlightReply && props.onHighlightReply(hl)
+            }}
             onCopy={(id: string) => {
               if (!id) {
                 toast?.sendSuccess('Text copied');

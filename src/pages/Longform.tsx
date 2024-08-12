@@ -484,56 +484,6 @@ const Longform: Component< { naddr: string } > = (props) => {
       return;
     }
 
-    // if (content.kind === Kind.LongForm) {
-
-    //   let n: LongFormData = {
-    //     title: '',
-    //     summary: '',
-    //     image: '',
-    //     tags: [],
-    //     published: content.created_at || 0,
-    //     content: content.content,
-    //     author: content.pubkey,
-    //     topZaps: [],
-    //     id: content.id,
-    //     client: '',
-    //   }
-
-    //   content.tags.forEach(tag => {
-    //     switch (tag[0]) {
-    //       case 't':
-    //         n.tags.push(tag[1]);
-    //         break;
-    //       case 'title':
-    //         n.title = tag[1];
-    //         break;
-    //       case 'summary':
-    //         n.summary = tag[1];
-    //         break;
-    //       case 'image':
-    //         n.image = tag[1];
-    //         break;
-    //       case 'published':
-    //         n.published = parseInt(tag[1]);
-    //         break;
-    //       case 'content':
-    //         n.content = tag[1];
-    //         break;
-    //       case 'author':
-    //         n.author = tag[1];
-    //         break;
-    //       case 'client':
-    //         n.client = tag[1];
-    //         break;
-    //       default:
-    //         break;
-    //     }
-    //   });
-
-    //   setArticle(n);
-    //   return;
-    // }
-
     if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
@@ -754,13 +704,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     if (!success || !note || !account) return;
 
-    updateStore('replyToHighlight', () => undefined);
-
-    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
-
-    updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
-
-    const hl = document.querySelector(`em[data-highlight="${store.selectedHighlight.id}"]`);
+    const hl = document.querySelector(`a[data-highlight="${store.replyToHighlight.id}"]`);
 
     if (hl) {
       // @ts-ignore
@@ -768,6 +712,12 @@ const Longform: Component< { naddr: string } > = (props) => {
       window.scrollTo({ top, behavior: 'smooth' });
       // hl.scrollIntoView({ block: 'start', behavior: 'smooth' });
     }
+
+    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
+
+    updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
+
+    updateStore('replyToHighlight', () => undefined);
   };
 
   const fetchHighlights = () => {
@@ -1091,6 +1041,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                 const trigger = document.querySelector(`#trigger_reply_${hl.id}`) as HTMLButtonElement;
 
                 trigger.click();
+                updateStore('selectedHighlight', () => undefined);
               }, 10);
             }}
             onHighlightQuoted={(hl: any) => {
