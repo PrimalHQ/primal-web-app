@@ -241,6 +241,47 @@ const ArticlePreview: Component<{
     props.onRender && props.onRender(props.article, articlePreview);
   };
 
+  const countLines = (el: Element) => {
+
+    // @ts-ignore
+    var divHeight = el.offsetHeight
+
+    // @ts-ignore
+    var lineHeight = el.computedStyleMap().get('line-height').value;
+
+    var lines = divHeight / lineHeight;
+
+    return lines;
+  }
+
+  const [contentStyle, setContentStyle] = createSignal('T3');
+
+  createEffect(() => {
+    const t = props.article.title;
+    const s = props.article.summary;
+
+    const tt = articlePreview?.querySelector(`.${styles.title}`);
+    const ss = articlePreview?.querySelector(`.${styles.summary}`);
+
+    if (!tt || !ss) return;
+
+    const titleLines = countLines(tt);
+    const summaryLines = countLines(ss);
+
+    if (titleLines === 1) setContentStyle('T1');
+
+    if (titleLines === 2) setContentStyle('T2');
+
+    if (titleLines === 3) setContentStyle('T3');
+  });
+
+  const conetntStyles = () => {
+    if (contentStyle() === 'T1') return styles.t1;
+    if (contentStyle() === 'T2') return styles.t2;
+
+    return ''
+  }
+
   return (
     <A
       ref={articlePreview}
@@ -269,7 +310,7 @@ const ArticlePreview: Component<{
 
       <div class={styles.body}>
         <div class={styles.text}>
-          <div class={styles.content}>
+          <div class={`${styles.content} ${conetntStyles()}`}>
             <div class={styles.title}>
               {props.article.title}
             </div>
