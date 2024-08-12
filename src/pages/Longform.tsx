@@ -704,14 +704,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     if (!success || !note || !account) return;
 
-    const hl = document.querySelector(`a[data-highlight="${store.replyToHighlight.id}"]`);
-
-    if (hl) {
-      // @ts-ignore
-      const top = hl.offsetTop;
-      window.scrollTo({ top, behavior: 'smooth' });
-      // hl.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    }
+    scrollToHighlight(store.replyToHighlight.id);
 
     const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
 
@@ -719,6 +712,16 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     updateStore('replyToHighlight', () => undefined);
   };
+
+  const scrollToHighlight = (id: string) => {
+    const hl = document.querySelector(`a[data-highlight="${id}"]`);
+
+    if (hl) {
+      // @ts-ignore
+      const top = hl.offsetTop;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+  }
 
   const fetchHighlights = () => {
     const decoded = decodeIdentifier(naddr());
@@ -1091,6 +1094,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             author={store.users.find(u => u.pubkey === store.replyToHighlight.pubkey)}
             onNotePosted={onHighlightPosted}
             onCancel={() => {
+              scrollToHighlight(store.replyToHighlight.id);
               updateStore('replyToHighlight', () => undefined);
             }}
           />
