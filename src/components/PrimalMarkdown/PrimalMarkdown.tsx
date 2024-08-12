@@ -508,7 +508,12 @@ const PrimalMarkdown: Component<{
             }}
             onComment={props.onHighlightReply}
             onCopy={(id: string) => {
-              toast?.sendSuccess('Text copied');
+              if (!id) {
+                toast?.sendSuccess('Text copied');
+              } else {
+                toast?.sendSuccess('Highlight copied');
+              }
+
               hideHighlightMenu(id);
               props.onHighlightDeselected && props.onHighlightDeselected();
             }}

@@ -153,6 +153,12 @@ const ArticleHighlightActionMenu: Component<{
     e.preventDefault();
     e.stopPropagation();
 
+    if (document.getSelection()?.empty) {  // Chrome
+      document.getSelection()?.empty();
+    } else if (document.getSelection()?.removeAllRanges) {  // Firefox
+      document.getSelection()?.removeAllRanges();
+    }
+
     navigator.clipboard.writeText(props.text);
 
     props.onCopy && props.onCopy(props.highlight.id);
