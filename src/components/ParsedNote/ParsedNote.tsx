@@ -975,7 +975,7 @@ const ParsedNote: Component<{
               if (ment) {
                 setWordsDisplayed(w => w + shortMentionInWords);
 
-                if (ment.post.kind === Kind.LongForm) {
+                if ([Kind.LongForm, Kind.LongFormShell].includes(ment.post.kind)) {
                   // @ts-ignore
                   link = renderLongFormMention(ment, index)
                 }

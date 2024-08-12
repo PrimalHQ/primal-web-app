@@ -318,7 +318,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
       return;
     }
 
-    if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       updateStore('page', 'messages',
@@ -360,7 +360,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
   };
 
   const savePage = (page: FeedPage, kind = 1) => {
-    const newPosts = (kind === Kind.LongForm) ? convertToArticles(page) : convertToNotes(page);
+    const newPosts = ([Kind.LongForm, Kind.LongFormShell].includes(kind)) ? convertToArticles(page) : convertToNotes(page);
 
     saveNotes(newPosts);
   };
@@ -370,8 +370,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     let until = 0;
     let offset = 0;
 
-    if (kind === Kind.LongForm) {
-      until = (lastNote as PrimalArticle).published || 0;
+    if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
+      until = (lastNote as PrimalArticle)?.published || 0;
       offset = (store.notes as PrimalArticle[]).filter(n => n.published === until).length;
     } else {
       until = (lastNote as PrimalNote).msg.created_at || 0;

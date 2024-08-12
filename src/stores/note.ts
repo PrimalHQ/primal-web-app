@@ -106,7 +106,7 @@ export const isLFRepostInCollection = (collection: NostrNoteContent[], repost: N
     return tag && !!otherTags.find(t => t[1] === tag[1]);
   }
 
-  if (repost.kind === Kind.LongForm) {
+  if ([Kind.LongForm, Kind.LongFormShell].includes(repost.kind)) {
     const id = repost.id;
 
     return !!otherTags.find(t => t[1] === id);

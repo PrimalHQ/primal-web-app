@@ -153,7 +153,7 @@ const Bookmarks: Component = () => {
       return;
     }
 
-    if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       updateStore('page', 'messages',

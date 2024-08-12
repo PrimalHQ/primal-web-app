@@ -1,6 +1,6 @@
 import { paragraphSchema } from '@milkdown/preset-commonmark';
 import { A, useLocation, useParams, useRouteData } from '@solidjs/router';
-import { Component, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 import Loader from '../components/Loader/Loader';
@@ -31,7 +31,7 @@ const AdvancedSearchResults: Component = () => {
   const kind = () => {
     const isRead = queryString().search(/kind:(\s)?30023\s/) >= 0;
 
-    if (isRead) return Kind.LongForm;
+    if (isRead) return Kind.LongFormShell;
 
     return 1;
   }
@@ -78,7 +78,7 @@ const AdvancedSearchResults: Component = () => {
               </For>
             </div>
           </Match>
-          <Match when={kind() === Kind.LongForm}>
+          <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
             <For each={search?.notes} >
               {article => <ArticlePreview article={article} />}
             </For>

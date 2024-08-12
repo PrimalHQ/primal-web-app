@@ -442,7 +442,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     const { pubkey, identifier, kind } = decoded.data;
 
-    if (kind !== Kind.LongForm) return;
+    if (![Kind.LongForm, Kind.LongFormShell].includes(kind)) return;
 
     const subId = `naddr_${naddr()}_${APP_ID}`;
 
@@ -534,7 +534,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     //   return;
     // }
 
-    if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
@@ -566,7 +566,7 @@ const Longform: Component< { naddr: string } > = (props) => {
         (mentions) => ({ ...mentions, [id]: { ...mention } })
       );
 
-      if (mention.kind === Kind.LongForm) {
+      if ([Kind.LongForm, Kind.LongFormShell].includes(mention.kind)) {
         id = nip19.naddrEncode({
           identifier: (mention.tags.find((t: string[]) => t[0] === 'd') || [])[1],
           pubkey: mention.pubkey,
@@ -775,7 +775,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     const { pubkey, identifier, kind } = decoded.data;
 
-    if (kind !== Kind.LongForm) return;
+    if (![Kind.LongForm, Kind.LongFormShell].includes(kind)) return;
 
     const subId = `lf_highlights_${naddr()}`;
 
@@ -798,7 +798,7 @@ const Longform: Component< { naddr: string } > = (props) => {
           return;
         }
 
-        if ([Kind.LongForm, Kind.Text, Kind.Repost].includes(content.kind)) {
+        if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
           const message = content as NostrNoteContent;
 
           if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
@@ -830,7 +830,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             (mentions) => ({ ...mentions, [id]: { ...mention } })
           );
 
-          if (mention.kind === Kind.LongForm) {
+          if ([Kind.LongForm, Kind.LongFormShell].includes(mention.kind)) {
             id = nip19.naddrEncode({
               identifier: (mention.tags.find((t: string[]) => t[0] === 'd') || [])[1],
               pubkey: mention.pubkey,

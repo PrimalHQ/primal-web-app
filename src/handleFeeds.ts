@@ -229,7 +229,7 @@ export const fetchArticlesFeed = (pubkey: string | undefined, specification: any
         return;
       }
 
-      if ([Kind.LongForm, Kind.Repost].includes(content.kind)) {
+      if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
         if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
@@ -416,7 +416,7 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
         return;
       }
 
-      if ([Kind.LongForm, Kind.Repost].includes(content.kind)) {
+      if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
         if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
@@ -590,7 +590,7 @@ export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string
         return;
       }
 
-      if ([Kind.LongForm, Kind.Repost].includes(content.kind)) {
+      if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
         if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
