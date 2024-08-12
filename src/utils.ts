@@ -107,3 +107,13 @@ export const sha256 = async (file: File) => {
     return hashHex;
   });
 }
+
+export const convertHtmlEntityToAngleBrackets = (fieldText: string) => {
+  const htmlEntities = /&(lt|gt);/
+  const isHtmlEntityUsed = htmlEntities.test(fieldText)
+  if (isHtmlEntityUsed) {
+    return fieldText.replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  } else {
+    return fieldText
+  }
+}

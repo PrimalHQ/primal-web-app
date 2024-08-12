@@ -45,6 +45,7 @@ import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
 import { useToastContext } from '../Toaster/Toaster';
 import MarkdownSlice from './MarkdownSlice';
+import { convertHtmlEntityToAngleBrackets } from '../../utils';
 
 export type Coord = {
   x: number;
@@ -331,7 +332,9 @@ const PrimalMarkdown: Component<{
 
   const renderToken = (token: ArticleToken) => {
     if (token.type === 'md') {
-      const prepped = token.value.replace(profileRegexG, (r: string) => {
+      const orig = convertHtmlEntityToAngleBrackets(token.value);
+
+      const prepped = orig.replace(profileRegexG, (r: string) => {
 
         const [_, npub] = r.split(':');
 
@@ -346,7 +349,7 @@ const PrimalMarkdown: Component<{
 
       return <MarkdownSlice
         content={prepped}
-        original={token.value}
+        original={orig}
         highlights={props.highlights || []}
       />
     }
