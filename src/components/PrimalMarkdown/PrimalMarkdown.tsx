@@ -188,10 +188,15 @@ const PrimalMarkdown: Component<{
     // }
   };
 
-  const onMouseUp = (e: MouseEvent) => {
-    // e.preventDefault();
-    // e.stopPropagation();
+  const getParents = (el: any) => {
+    for (var parents = []; el; el = el.parentNode) {
+      parents.push(el);
+    }
 
+    return parents;
+  };
+
+  const onMouseUp = (e: MouseEvent) => {
     // @ts-ignore
     const isHighlightMenuOption = e.target?.parentElement.getAttribute('data-highlight-menu-option') !== null;
 
@@ -201,12 +206,13 @@ const PrimalMarkdown: Component<{
     const selection = document.getSelection();
     document.querySelector('a[data-highlight-selected')?.removeAttribute('data-highlight-selected');
 
-    if (selection?.toString().length === 0) {
+    const parents = getParents(e.target);
+
+    if (selection?.toString().length === 0 || !parents.find(parent => parent.className === styles.editor)) {
       setHighlightMenu(() => undefined);
       props.onHighlightSelected && props.onHighlightSelected(undefined);
       return;
     }
-
 
     // @ts-ignore
     setHighlightText(() => selection?.toString());
@@ -431,12 +437,12 @@ const PrimalMarkdown: Component<{
     setContentTokens(() => [...tokens]);
 
     viewer?.addEventListener('click', onMouseClick)
-    viewer?.addEventListener('mouseup', onMouseUp);
+    document?.addEventListener('mouseup', onMouseUp);
   });
 
   onCleanup(() => {
-    viewer?.removeEventListener('mouseup', onMouseUp);
-    viewer?.removeEventListener('click', onMouseClick)
+    document?.removeEventListener('mouseup', onMouseUp);
+    viewer?.removeEventListener('click', onMouseClick);
   });
 
   const onMouseClick= (e: MouseEvent) => {
