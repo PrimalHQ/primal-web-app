@@ -55,6 +55,7 @@ import Paginator from "../components/Paginator/Paginator";
 import { useSettingsContext } from "../contexts/SettingsContext";
 import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
 import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
+import { logWarning } from "../lib/logger";
 
 export type LongFormData = {
   title: string,
@@ -1078,13 +1079,28 @@ const Longform: Component< { naddr: string } > = (props) => {
             onHighlightRemoved={(id: string) => {
               updateStore('highlights', (hs) => hs.filter(h => h.id !== id));
             }}
-            onHighlightReply={() => {
-              updateStore('replyToHighlight', () => ({ ...store.selectedHighlight }));
+            onHighlightReply={(hl: any) => {
+              const highlight = store.highlights.find(h => h.id === hl.id);
+
+              if (!highlight) {
+                updateStore('highlights', store.highlights.length, () => ({...hl}));
+              }
+
+              updateStore('replyToHighlight', () => ({ ...hl }));
               setTimeout(() => {
-                const trigger = document.querySelector(`#trigger_reply_${store.selectedHighlight.id}`) as HTMLButtonElement;
+                const trigger = document.querySelector(`#trigger_reply_${hl.id}`) as HTMLButtonElement;
 
                 trigger.click();
               }, 10);
+            }}
+            onHighlightQuoted={(hl: any) => {
+              const highlight = store.highlights.find(h => h.id === hl.id);
+
+              if (!highlight) {
+                updateStore('highlights', store.highlights.length, () => ({...hl}));
+              }
+
+              updateStore('selectedHighlight', () => undefined);
             }}
           />
 

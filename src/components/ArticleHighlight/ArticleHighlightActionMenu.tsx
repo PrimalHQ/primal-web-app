@@ -40,9 +40,9 @@ const ArticleHighlightActionMenu: Component<{
   article: PrimalArticle,
   onCreate?: (event: NostrRelaySignedEvent) => void,
   onRemove?: (id: string) => void,
-  onComment?: (id: string) => void,
+  onComment?: (event: NostrRelaySignedEvent) => void,
   onCopy?: (id: string) => void,
-  onQuote?: (id: string) => void,
+  onQuote?: (event: NostrRelaySignedEvent) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -67,9 +67,9 @@ const ArticleHighlightActionMenu: Component<{
     return offset;
   };
 
-  const onNewHighlight = async (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const onNewHighlight = async (e: MouseEvent | undefined, then = props.onCreate) => {
+    e && e.preventDefault();
+    e && e.stopPropagation();
 
     if (!account) return;
 
@@ -83,8 +83,8 @@ const ArticleHighlightActionMenu: Component<{
       account.relaySettings,
     );
 
-    if (success && note && props.onCreate) {
-      props.onCreate(note)
+    if (success && note && then) {
+      then(note)
     }
   }
 
@@ -105,11 +105,34 @@ const ArticleHighlightActionMenu: Component<{
   }
 
   const onComment = () => {
-    props.onComment && props.onComment(props.highlight.id);
+    if (props.highlight === 'NEW_HIGHLIGHT') {
+      onNewHighlight(undefined, (note: NostrRelaySignedEvent) => {
+        props.onComment && props.onComment(note);
+      });
+      return;
+    }
+    props.onComment && props.onComment(props.highlight);
   }
 
   const onQuote = () => {
     if (!account || !account?.hasPublicKey()) {
+      return;
+    }
+
+    if (props.highlight === 'NEW_HIGHLIGHT') {
+      onNewHighlight(undefined, (note: NostrRelaySignedEvent) => {
+        const highlightEvent = nip19.neventEncode({
+          id: note.id,
+          relays: account.activeRelays.map(r => r.url),
+          author: note.pubkey,
+          kind: Kind.Highlight,
+        });
+
+        account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
+        account?.actions?.showNewNoteForm();
+        props.onQuote && props.onQuote(note);
+
+      });
       return;
     }
 
@@ -122,7 +145,7 @@ const ArticleHighlightActionMenu: Component<{
 
     account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
     account?.actions?.showNewNoteForm();
-    props.onQuote && props.onQuote(props.highlight.id);
+    props.onQuote && props.onQuote(props.highlight);
 
   }
 

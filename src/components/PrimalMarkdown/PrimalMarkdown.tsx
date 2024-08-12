@@ -27,7 +27,7 @@ import { APP_ID } from '../../App';
 import { getUserProfileInfo } from '../../lib/profile';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { eventRegexLocal, Kind, mdImageRegex, noteRegex, profileRegex, profileRegexG } from '../../constants';
-import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
+import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import { authorName, convertToUser, userName } from '../../stores/profile';
 import { A, useNavigate } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
@@ -93,8 +93,9 @@ const PrimalMarkdown: Component<{
   highlights?: any[],
   onHighlightSelected?: (highlight: any) => void,
   onHighlightCreated?: (highlight: any) => void,
+  onHighlightQuoted?: (highlight: any) => void,
   onHighlightRemoved?: (id: string) => void,
-  onHighlightReply?: () => void,
+  onHighlightReply?: (id: string) => void,
   onHighlightDeselected?: () => void,
 }> = (props) => {
   const account = useAccountContext();
@@ -507,13 +508,13 @@ const PrimalMarkdown: Component<{
             }}
             onComment={props.onHighlightReply}
             onCopy={(id: string) => {
-              toast?.sendSuccess('Highlight copied');
+              toast?.sendSuccess('Text copied');
               hideHighlightMenu(id);
               props.onHighlightDeselected && props.onHighlightDeselected();
             }}
-            onQuote={(id: string) => {
-              hideHighlightMenu(id);
-              props.onHighlightDeselected && props.onHighlightDeselected();
+            onQuote={(hl: NostrRelaySignedEvent) => {
+              hideHighlightMenu(hl.id);
+              props.onHighlightQuoted && props.onHighlightQuoted(hl);
             }}
           />
         </Show>
