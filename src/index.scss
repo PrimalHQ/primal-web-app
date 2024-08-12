@@ -340,7 +340,7 @@ body::after{
 
 .roundedImage {
   img {
-    border-radius: var(--border-radius-large);
+    border-radius: var(--border-radius-large) !important;
   }
 }
 

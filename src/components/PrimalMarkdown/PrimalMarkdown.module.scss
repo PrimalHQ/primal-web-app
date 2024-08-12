@@ -17,7 +17,7 @@
       font-weight: 400;
       line-height: 28px;
       margin-top: 0;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
     }
 
     span {
@@ -93,26 +93,29 @@
       margin-bottom: 20px;
 
       li {
-        &::marker {
-          content: '•';
-        }
-        padding-left: 8px;
+        list-style-type: disc;
+        padding-left: 0px;
         color: var(--brand-text);
         font-size: 16px;
         font-weight: 400;
         line-height: 28px;
         margin-top: 0;
         margin-bottom: 12px;
+        margin-left: 8px;
 
         ul {
           padding-left: 30px;
+        }
+
+        p{
+          margin-bottom: 12px;
         }
       }
     }
 
     ol {
       margin-left: 0px;
-      padding-left: 24px;
+      padding-left: 14px;
       margin-bottom: 20px;
 
       li {
@@ -123,9 +126,14 @@
         line-height: 28px;
         margin-top: 0;
         margin-bottom: 12px;
+        margin-left: 8px;
 
         ol {
           padding-left: 40px;
+        }
+
+        p{
+          margin-bottom: 12px;
         }
       }
     }
