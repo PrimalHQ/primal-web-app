@@ -98,7 +98,7 @@ const NoteImage: Component<{
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
   onMount(() => {
-    // if we have media info, shortcut image dimenzion calc
+    // if we have media info, shortcut image dimension calc
     if (props.media) {
       setIsImageLoaded(true);
     }

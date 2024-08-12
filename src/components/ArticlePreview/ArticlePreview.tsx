@@ -1,9 +1,10 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
+import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
@@ -21,6 +22,8 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticlePreview.module.scss';
 
+const isDev = localStorage.getItem('devMode') === 'true';
+
 const ArticlePreview: Component<{
   id?: string,
   article: PrimalArticle,
@@ -32,6 +35,7 @@ const ArticlePreview: Component<{
   const app = useAppContext();
   const account = useAccountContext();
   const thread = useThreadContext();
+  const media = useMediaContext();
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
     likes: props.article.likes || 0,
@@ -209,6 +213,30 @@ const ArticlePreview: Component<{
 
   let articlePreview: HTMLAnchorElement | undefined;
 
+  const [missingCacheImage, setMissingChacheImage] = createSignal(false);
+
+  const articleImage = () => {
+    const url = props.article.image;
+    setMissingChacheImage(() => false);
+
+    let m = media?.actions.getMediaUrl(url, 's');
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'm');
+    }
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'o');
+    }
+
+    if (!m) {
+      m = url;
+      setMissingChacheImage(() => true);
+    }
+
+    return m;
+  }
+
   const onImageLoaded = () => {
     props.onRender && props.onRender(props.article, articlePreview);
   };
@@ -279,7 +307,11 @@ const ArticlePreview: Component<{
               </Show>
             }
           >
-            <img src={props.article.image} onload={onImageLoaded} />
+            <img
+              src={articleImage()}
+              onload={onImageLoaded}
+              class={isDev && missingCacheImage() ? 'redBorder' : ''}
+            />
           </Show>
         </div>
       </div>
