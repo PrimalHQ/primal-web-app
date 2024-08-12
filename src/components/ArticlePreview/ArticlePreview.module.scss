@@ -123,23 +123,27 @@
     }
 
     .image {
-      min-width: 164px;
-      max-height: 240px;
-      height: fit-content;
+      min-width: 175px;
+      min-height: 125px;
+      max-width: 175px;
+      max-height: 125px;
       border: 1px solid var(--devider);
       border-radius: 8px;
       overflow: hidden;
       text-align: center;
 
       img {
-        max-width: 162px;
-        max-height: 238px;
-        object-fit: scale-down;
+        max-width: none;
+        min-width: 173px;
+        min-height: 123px;
+        max-width: 173px;
+        max-height: 123px;
+        object-fit: cover;
       }
 
       .placeholderImage {
-        width: 164px;
-        height: 118px;
+        width: 175px;
+        height: 125px;
         background-image: var(--reads-placeholder-image);
         background-size: contain;
       }
