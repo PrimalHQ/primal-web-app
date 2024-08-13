@@ -169,7 +169,6 @@
     img {
       margin-top: 0;
       margin-bottom: 20px;
-      border-radius: 4px;
       overflow: hidden;
     }
 
@@ -288,4 +287,10 @@
       }
     }
   }
+}
+
+.articlePreview {
+  background-color: var(--background-input);
+  border-radius: var(--border-radius-big);
+  padding-top: 1px;
 }

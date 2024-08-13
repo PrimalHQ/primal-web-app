@@ -393,11 +393,13 @@ const PrimalMarkdown: Component<{
         };
 
         return (
-          <ArticlePreview
-            article={mention}
-            bordered={true}
-            hideFooter={true}
-          />
+          <div class={styles.articlePreview}>
+            <ArticlePreview
+              article={mention}
+              bordered={true}
+              hideFooter={true}
+            />
+          </div>
         );
       }
     }
