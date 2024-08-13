@@ -1,5 +1,5 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
 import { Kind } from '../../constants';
@@ -39,13 +39,46 @@ const ArticleHighlightComments: Component<{
   const account = useAccountContext();
 
   const comms = () => {
-    return props.comments.filter(c => c.replyTo === props.highlight.id);}
+    return props.comments.filter(c => c.replyTo === props.highlight.id);
+  }
+
+  const [top, setTop] = createSignal(-1);
+  const [height, setHeight] = createSignal(-1);
+
+  createEffect(() => {
+    const h = props.highlight;
+
+    if (!h) return;
+
+    const hDiv = document.querySelector(`a[data-highlight="${h.id}"]`);
+
+    if (!hDiv) return;
+
+
+    setTop(() => hDiv.getBoundingClientRect().top);
+    setHeight(() => window.innerHeight - hDiv.getBoundingClientRect().top - 20);
+  });
+
+  const style = () => {
+    let ret = '';
+
+    if (top() >= 0) {
+      ret += `top: ${top()}px; `
+    }
+    if (height() >= 0) {
+      ret += `max-height: ${height()}px;`
+    }
+
+    return ret;
+
+  }
 
   return (
     <Show when={props.highlight !== undefined}>
       <div
         class={styles.articleHighlightComments}
         data-highlight={props.highlight.id}
+        style={style()}
       >
         <div class={styles.header}>
           <div class={styles.author}>

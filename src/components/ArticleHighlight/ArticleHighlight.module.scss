@@ -88,11 +88,11 @@
 
 .articleHighlightComments {
   position: absolute;
-  bottom: 20px;
+  // bottom: 20px;
   left: 0;
   padding: 0;
   width: 308px;
-  max-height: calc(100% - 200px);
+  // max-height: calc(100% - 200px);
   overflow-y: scroll;
   background-color: var(--background-input);
   border-radius: 0 8px 8px 0;
