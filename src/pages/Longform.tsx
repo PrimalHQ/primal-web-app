@@ -1025,9 +1025,13 @@ const Longform: Component< { naddr: string } > = (props) => {
             onHighlightDeselected={() => {
               updateStore('selectedHighlight', () => undefined);
             }}
-            onHighlightCreated={(hl: any) => {
+            onHighlightCreated={(hl: any, replaceId?: string) => {
               updateStore('highlights', store.highlights.length, () => ({...hl}));
               updateStore('selectedHighlight', () => undefined);
+
+              if (replaceId && store.highlights.find(h => h.id === replaceId)) {
+                updateStore('highlights', (hs) => hs.filter(h => h.id !== replaceId));
+              }
             }}
             onHighlightRemoved={(id: string) => {
               updateStore('highlights', (hs) => hs.filter(h => h.id !== id));

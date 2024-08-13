@@ -10,8 +10,9 @@ import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { removeHighlight, sendHighlight } from '../../lib/highlights';
+import { generatePrivateKey } from '../../lib/nTools';
 import { userName } from '../../stores/profile';
-import { NostrRelaySignedEvent, PrimalArticle, ZapOption } from '../../types/primal';
+import { NostrRelaySignedEvent, PrimalArticle, SendNoteResult, ZapOption } from '../../types/primal';
 import { uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
@@ -38,7 +39,7 @@ const ArticleHighlightActionMenu: Component<{
   text: string,
   context: string,
   article: PrimalArticle,
-  onCreate?: (event: NostrRelaySignedEvent) => void,
+  onCreate?: (event: NostrRelaySignedEvent, replaceId?: string) => void,
   onRemove?: (id: string) => void,
   onComment?: (event: NostrRelaySignedEvent) => void,
   onCopy?: (id: string) => void,
@@ -67,13 +68,10 @@ const ArticleHighlightActionMenu: Component<{
     return offset;
   };
 
-  const onNewHighlight = async (e: MouseEvent | undefined, then = props.onCreate) => {
-    e && e.preventDefault();
-    e && e.stopPropagation();
+  const createHighlight = async () => {
+    if (!account) return { success: false, reasons: ['Author missing'] };
 
-    if (!account) return;
-
-    const { success, note } = await sendHighlight(
+    return await sendHighlight(
       props.text,
       props.context,
       props.article.pubkey,
@@ -82,9 +80,40 @@ const ArticleHighlightActionMenu: Component<{
       account.activeRelays,
       account.relaySettings,
     );
+  };
 
-    if (success && note && then) {
-      then(note)
+  const onNewHighlight = async (e: MouseEvent | undefined, then = props.onCreate) => {
+    e && e.preventDefault();
+    e && e.stopPropagation();
+
+    if (!account) return;
+
+    const naddr = `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
+
+    const highlight = {
+      id: generatePrivateKey(),
+      kind: Kind.Highlight,
+      content: props.text,
+      tags: [
+        ['p', props.article.pubkey],
+        ['a', naddr],
+        ['context', props.context],
+      ],
+      created_at: (new Date()).getTime() / 1_000,
+      sig: 'UNSIGNED',
+      pubkey: props.article.pubkey,
+    };
+
+    then && then(highlight);
+
+    const { success, note } = await createHighlight();
+
+    if (success && note) {
+      then && then(note, highlight.id)
+    }
+
+    if (!success) {
+      props.onRemove && props.onRemove(props.highlight.id);
     }
   }
 
@@ -93,57 +122,63 @@ const ArticleHighlightActionMenu: Component<{
 
     if (props.highlight.pubkey !== account.publicKey) return;
 
+    const highlight = { ...props.highlight };
+
+    props.onRemove && props.onRemove(props.highlight.id);
+
     const { success } = await removeHighlight(
       props.highlight.id,
       account.proxyThroughPrimal,
       account.activeRelays, account?.relaySettings
     );
 
-    if (success && props.onRemove) {
-      props.onRemove(props.highlight.id)
+    if (!success) {
+      props.onCreate && props.onCreate(highlight)
     }
   }
 
-  const onComment = () => {
+  const onComment = async () => {
     if (props.highlight === 'NEW_HIGHLIGHT') {
-      onNewHighlight(undefined, (note: NostrRelaySignedEvent) => {
-        props.onComment && props.onComment(note);
-      });
+      const { success, note } = await createHighlight();
+      success && note && props.onComment &&-props.onComment(note);
       return;
     }
     props.onComment && props.onComment(props.highlight);
   }
 
-  const onQuote = () => {
+  const onQuote = async () => {
     if (!account || !account?.hasPublicKey()) {
       return;
     }
 
     if (props.highlight === 'NEW_HIGHLIGHT') {
-      onNewHighlight(undefined, (note: NostrRelaySignedEvent) => {
-        const highlightEvent = nip19.neventEncode({
-          id: note.id,
-          relays: account.activeRelays.map(r => r.url),
-          author: note.pubkey,
-          kind: Kind.Highlight,
-        });
 
-        account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
-        account?.actions?.showNewNoteForm();
-        props.onQuote && props.onQuote(note);
+      const { success, note } = await createHighlight();
 
+      if (!success || !note) return;
+
+      const highlightId = nip19.neventEncode({
+        id: note.id,
+        relays: account.activeRelays.map(r => r.url),
+        author: note.pubkey,
+        kind: Kind.Highlight,
       });
+
+      account?.actions?.quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
+      account?.actions?.showNewNoteForm();
+      props.onQuote && props.onQuote(note);
+
       return;
     }
 
-    const highlightEvent = nip19.neventEncode({
+    const highlightId = nip19.neventEncode({
       id: props.highlight.id,
       relays: account.activeRelays.map(r => r.url),
       author: props.highlight.pubkey,
       kind: Kind.Highlight,
     });
 
-    account?.actions?.quoteNote(`nostr:${highlightEvent} nostr:${props.article.naddr}`);
+    account?.actions?.quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
     account?.actions?.showNewNoteForm();
     props.onQuote && props.onQuote(props.highlight);
 

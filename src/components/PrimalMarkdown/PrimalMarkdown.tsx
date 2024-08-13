@@ -92,7 +92,7 @@ const PrimalMarkdown: Component<{
   article: PrimalArticle | undefined,
   highlights?: any[],
   onHighlightSelected?: (highlight: any) => void,
-  onHighlightCreated?: (highlight: any) => void,
+  onHighlightCreated?: (highlight: any, replaceId?: string) => void,
   onHighlightQuoted?: (highlight: any) => void,
   onHighlightRemoved?: (id: string) => void,
   onHighlightReply?: (id: string) => void,
@@ -503,9 +503,9 @@ const PrimalMarkdown: Component<{
             text={highlightText()}
             context={highlightContext()}
             article={props.article}
-            onCreate={(id: string) => {
-              hideHighlightMenu(id);
-              props.onHighlightCreated && props.onHighlightCreated(id);
+            onCreate={(hl: NostrRelaySignedEvent, replaceId?: string) => {
+              hideHighlightMenu(hl.id);
+              props.onHighlightCreated && props.onHighlightCreated(hl, replaceId);
             }}
             onRemove={(id: string) => {
               toast?.sendSuccess('Highlight removed');
