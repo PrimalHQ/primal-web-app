@@ -121,8 +121,13 @@ export const convertHtmlEntityToAngleBrackets = (fieldText: string) => {
 export const getRandomIntegers = (start: number, end: number, qty: number) => {
 
   let ret = new Set<number>();
+  let limit = qty;
 
-  while (ret.size < qty) {
+  if (qty > end) {
+    limit = end
+  }
+
+  while (ret.size < limit) {
     const rand = start + Math.floor(Math.random() * end);
     ret.add(rand);
   }
