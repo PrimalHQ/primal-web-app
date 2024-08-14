@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useReadsContext } from '../../contexts/ReadsContext';
@@ -132,15 +132,17 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   };
 
   return (
-    <SelectionBox2
-      options={options()}
-      onChange={selectFeed}
-      initialValue={initialValue()}
-      value={selectedValue()}
-      isSelected={isSelected}
-      isPhone={props.isPhone}
-      big={props.big}
-    />
+    <Show when={options().length > 0}>
+      <SelectionBox2
+        options={options()}
+        onChange={selectFeed}
+        initialValue={initialValue()}
+        value={selectedValue()}
+        isSelected={isSelected}
+        isPhone={props.isPhone}
+        big={props.big}
+      />
+    </Show>
   );
 }
 

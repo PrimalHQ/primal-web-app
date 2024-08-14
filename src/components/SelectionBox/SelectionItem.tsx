@@ -28,9 +28,11 @@ const SelectionItem: Component<SelectBaseItemComponentProps<any>> = (props) => {
           <div class={styles.label}>
             {props.item.rawValue.label}
           </div>
-          <div class={styles.description}>
-            {props.item.rawValue.description || ''}
-          </div>
+          <Show when={props.item.rawValue.description && props.item.rawValue.description.length > 0}>
+            <div class={styles.description}>
+              {props.item.rawValue.description || ''}
+            </div>
+          </Show>
         </Select.ItemLabel>
       </Show>
     </Select.Item>
