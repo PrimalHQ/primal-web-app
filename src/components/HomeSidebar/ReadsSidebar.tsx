@@ -19,7 +19,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getArticleThread, getFeaturedAuthors, getReadsTopics } from '../../lib/feed';
-import { fetchArticles } from '../../handleNotes';
+import { fetchArticles, fetchUserProfile } from '../../handleNotes';
 import { getParametrizedEvent, getParametrizedEvents } from '../../lib/notes';
 import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
@@ -107,6 +107,9 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   }
 
   const getFeaturedAuthor = () => {
+    if (!reads) return;
+    if (reads.featuredAuthor) return;
+
     const subId = `reads_fa_${APP_ID}`;
 
     const unsub = subsTo(subId, {
@@ -139,6 +142,20 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     getFeaturedAuthors(subId);
   }
 
+  const getAuthorData = async (pubkey: string) => {
+    if (!account?.publicKey || !pubkey) return;
+
+    const subId = `reads_fpi_${APP_ID}`;
+
+    setIsFetching(() => true);
+
+    const profile = await fetchUserProfile(account.publicKey, pubkey, subId);
+
+    setIsFetching(() => false);
+
+    reads?.actions.setFeaturedAuthor(profile);
+  };
+
   onMount(() => {
     if (account?.isKeyLookupDone && reads?.recomendedReads.length === 0) {
       reads.actions.doSidebarSearch('');
@@ -148,6 +165,14 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
       getTopics();
       getFeaturedAuthor();
     }
+  });
+
+  createEffect(() => {
+    if (!reads) return;
+    const pubkey = featuredAuthor();
+    if (!pubkey) return;
+
+    getAuthorData(pubkey);
   });
 
 
@@ -188,7 +213,7 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
           </div>
 
           <div class={styles.section}>
-            <AuthorSubscribe pubkey={featuredAuthor()} />
+            <AuthorSubscribe author={reads?.featuredAuthor} />
           </div>
         </Show>
 

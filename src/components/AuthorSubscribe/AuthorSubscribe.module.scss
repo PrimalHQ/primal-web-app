@@ -91,18 +91,25 @@
   background-color: var(--background-header-input);
   text-decoration: none;
 
-  .image {
-    width: 80px;
-    height: 100%;
-    object-fit: cover;
+  .imageHolder {
+    display: block;
+    width: 80px !important;
+    height: 108px;
+    padding: 0;
+
+    .image {
+      width: 80px;
+      height: 108px;
+      object-fit: cover;
+    }
   }
+
 
   .userInfo {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
-    width: 100%;
     height: 100%;
     padding-block: 12px;
     margin-right: 8px;

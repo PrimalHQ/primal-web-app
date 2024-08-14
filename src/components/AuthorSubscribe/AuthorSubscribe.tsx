@@ -28,36 +28,36 @@ import styles from './AuthorSubscribe.module.scss';
 
 const AuthoreSubscribe: Component<{
   id?: string,
-  pubkey: string,
+  author: PrimalUser | undefined,
 }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
   const navigate = useNavigate();
   const settings = useSettingsContext();
 
-  const [isFetching, setIsFetching] = createSignal(false);
-  const [author, setAuthor] = createSignal<PrimalUser>();
+  // const [isFetching, setIsFetching] = createSignal(false);
+  // const [author, setAuthor] = createSignal<PrimalUser>();
 
-  const getAuthorData = async (pubkey: string) => {
-    if (!account?.publicKey || !pubkey) return;
+  // const getAuthorData = async (pubkey: string) => {
+  //   if (!account?.publicKey || !pubkey) return;
 
-    const subId = `reads_fpi_${APP_ID}`;
+  //   const subId = `reads_fpi_${APP_ID}`;
 
-    setIsFetching(() => true);
+  //   setIsFetching(() => true);
 
-    const profile = await fetchUserProfile(account.publicKey, pubkey, subId);
+  //   const profile = await fetchUserProfile(account.publicKey, pubkey, subId);
 
-    setIsFetching(() => false);
+  //   setIsFetching(() => false);
 
-    setAuthor(() => ({ ...profile }));
-  };
+  //   setAuthor(() => ({ ...profile }));
+  // };
 
-  createEffect(() => {
-    getAuthorData(props.pubkey);
-  });
+  // createEffect(() => {
+  //   getAuthorData(props.pubkey);
+  // });
 
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
-    const a = author();
+    const a = props.author;
 
     if (!a || !account || !cost) return;
 
@@ -90,7 +90,7 @@ const AuthoreSubscribe: Component<{
   }
 
   const unsubscribe = async (eventId: string) => {
-    const a = author();
+    const a = props.author;
 
     if (!a || !account) return;
 
@@ -110,32 +110,34 @@ const AuthoreSubscribe: Component<{
   }
 
   const openSubscribe = () => {
-    app?.actions.openAuthorSubscribeModal(author(), doSubscription);
+    app?.actions.openAuthorSubscribeModal(props.author, doSubscription);
   };
 
   return (
-    <A href={`/p/${author()?.npub}`} class={styles.authorFeaturCard}>
-      <Show when={author()?.picture}>
-        <img class={styles.image} src={author()?.picture} />
+    <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
+      <Show when={props.author?.picture}>
+        <div class={styles.imageHolder}>
+          <img class={styles.image} src={props.author?.picture} />
+        </div>
       </Show>
       <div class={styles.userInfo}>
         <div class={styles.userBasicData}>
           <div class={styles.userName}>
-            {userName(author())}
-            <VerificationCheck user={author()} />
+            {userName(props.author)}
+            <VerificationCheck user={props.author} />
           </div>
           <div class={styles.nip05}>
-            {author()?.nip05}
+            {props.author?.nip05}
           </div>
         </div>
         <div class={styles.userAdditionalData}>
           <div class={styles.userAbout}>
-            {author()?.about}
+            {props.author?.about}
           </div>
-          <Show when={author()?.userStats?.followers_count}>
+          <Show when={props.author?.userStats?.followers_count}>
             <div class={styles.userStats}>
               <div class={styles.number}>
-                {humanizeNumber(author()?.userStats?.followers_count || 0)}
+                {humanizeNumber(props.author?.userStats?.followers_count || 0)}
               </div>
               <div class={styles.unit}>
                 followers
