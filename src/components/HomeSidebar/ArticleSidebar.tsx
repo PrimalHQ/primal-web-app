@@ -88,7 +88,7 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
 
             <div class={styles.section}>
               <For each={recomended}>
-                {(note) => <ArticleShort article={note} />}
+                {(note) => <ArticleShort article={note} short={true}/>}
               </For>
             </div>
           </Show>

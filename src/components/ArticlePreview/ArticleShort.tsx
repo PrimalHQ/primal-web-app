@@ -27,6 +27,7 @@ const isDev = localStorage.getItem('devMode') === 'true';
 const ArticlePreview: Component<{
   id?: string,
   article: PrimalArticle,
+  short?: boolean,
 }> = (props) => {
   const media = useMediaContext();
 
@@ -70,7 +71,7 @@ const ArticlePreview: Component<{
       </div>
 
       <div class={styles.body}>
-        <div class={styles.text}>
+        <div class={`${styles.text} ${props.short ? styles.short : ''}`}>
           <div class={styles.title}>
             {props.article.title}
           </div>

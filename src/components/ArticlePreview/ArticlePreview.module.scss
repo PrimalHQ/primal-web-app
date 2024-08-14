@@ -259,6 +259,14 @@
         font-weight: 400;
         line-height: 24px;
       }
+
+      &.short {
+        width: 146px;
+
+        .title {
+          width: 146px;
+        }
+      }
     }
     .image {
       min-width: 100px;
