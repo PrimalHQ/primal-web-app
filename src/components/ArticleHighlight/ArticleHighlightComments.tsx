@@ -45,18 +45,28 @@ const ArticleHighlightComments: Component<{
   const [top, setTop] = createSignal(-1);
   const [height, setHeight] = createSignal(-1);
 
+  let commentRef: HTMLDivElement | undefined;
+
   createEffect(() => {
     const h = props.highlight;
 
-    if (!h) return;
+    if (!h || !commentRef) return;
 
     const hDiv = document.querySelector(`a[data-highlight="${h.id}"]`);
 
     if (!hDiv) return;
 
+    const hTop = hDiv.getBoundingClientRect().top;
+    const maxH = window.innerHeight - 104;
+    const minT = 84;
 
-    setTop(() => hDiv.getBoundingClientRect().top);
-    setHeight(() => window.innerHeight - hDiv.getBoundingClientRect().top - 20);
+    const cH = commentRef.offsetHeight || 78;
+    const actualH = Math.min(maxH, cH);
+    const actualT = cH >= maxH ? minT :
+      Math.max(hTop - actualH/2, minT);
+
+    setTop(() => actualT);
+    setHeight(() => actualH);
   });
 
   const style = () => {
@@ -65,9 +75,8 @@ const ArticleHighlightComments: Component<{
     if (top() >= 0) {
       ret += `top: ${top()}px; `
     }
-    if (height() >= 0) {
-      ret += `max-height: ${height()}px;`
-    }
+
+    ret += `max-height: ${window.innerHeight - 104}px;`
 
     return ret;
 
@@ -79,6 +88,7 @@ const ArticleHighlightComments: Component<{
         class={styles.articleHighlightComments}
         data-highlight={props.highlight.id}
         style={style()}
+        ref={commentRef}
       >
         <div class={styles.header}>
           <div class={styles.author}>
