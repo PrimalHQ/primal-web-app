@@ -9,7 +9,7 @@ import { subscribeTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
 import { convertToUser } from "./stores/profile";
 import { account } from "./translations";
-import { EventCoordinate, FeedPage, NostrEventContent, NostrEventType, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap } from "./types/primal";
+import { EventCoordinate, FeedPage, NostrEventContent, NostrEventType, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
 import { parseBolt11 } from "./utils";
 
 export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {
@@ -747,12 +747,22 @@ export const fetchUserProfile = (userPubkey: string | undefined, pubkey: string 
     if (!pubkey) reject('Missing pubkey');
 
     let user: PrimalUser | undefined;
+    let userStats: UserStats | undefined;
 
     const unsub = subscribeTo(subId, (type, _, content) => {
 
       if (type === 'EOSE') {
         unsub();
-        user ? resolve(user) : reject('user not found');
+        if (!user) {
+          reject('user not found')
+          return;
+        };
+
+        if (userStats) {
+          user.userStats = userStats;
+        }
+
+        resolve(user);
         return;
       }
 
@@ -777,6 +787,12 @@ export const fetchUserProfile = (userPubkey: string | undefined, pubkey: string 
 
         user = { ...userData };
         return;
+      }
+
+      if (content.kind === Kind.UserStats) {
+        let stats = JSON.parse(content.content) as UserStats;
+
+        userStats = { ...stats };
       }
     };
   });

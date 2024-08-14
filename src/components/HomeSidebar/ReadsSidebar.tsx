@@ -25,6 +25,7 @@ import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
 import AuthorSubscribe from '../AuthorSubscribe/AuthorSubscribe';
 import { A } from '@solidjs/router';
+import { getRandomIntegers } from '../../utils';
 
 const sidebarOptions = [
   {
@@ -151,12 +152,7 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
     if (rec.length > 0 && !got()) {
       setGot(() => true);
-      let randomIndices = new Set<number>();
-
-      while (randomIndices.size < 3) {
-        const randomIndex = Math.floor(Math.random() * rec.length);
-        randomIndices.add(randomIndex);
-      }
+      let randomIndices = getRandomIntegers(0, rec.length, 3);
 
       const reads = [ ...randomIndices ].map(i => rec[i]);
 

@@ -34,6 +34,7 @@ import {
   PrimalUser,
   PrimalZap,
   TopZap,
+  UserStats,
   VanityProfiles,
 } from "../types/primal";
 import { APP_ID } from "../App";
@@ -55,18 +56,6 @@ import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 
-export type UserStats = {
-  pubkey: string,
-  follows_count: number,
-  followers_count: number,
-  note_count: number,
-  reply_count: number,
-  time_joined: number,
-  total_zap_count: number,
-  total_satszapped: number,
-  relay_count: number,
-  long_form_note_count?: number,
-};
 
 export type ProfileContextStore = {
   profileKey: string | undefined,

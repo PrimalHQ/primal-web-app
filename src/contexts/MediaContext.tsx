@@ -91,6 +91,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
     const [type, _, content] = message;
 
+
     if (type === 'EVENT') {
       if (content.kind === Kind.MediaInfo) {
         const mediaInfo: MediaEvent = JSON.parse(content.content);

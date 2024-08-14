@@ -493,6 +493,19 @@ export type NostrMessage = [
   },
 ];
 
+export type UserStats = {
+  pubkey: string,
+  follows_count: number,
+  followers_count: number,
+  note_count: number,
+  reply_count: number,
+  time_joined: number,
+  total_zap_count: number,
+  total_satszapped: number,
+  relay_count: number,
+  long_form_note_count?: number,
+};
+
 export type PrimalUser = {
   id: string,
   pubkey: string,
@@ -509,6 +522,7 @@ export type PrimalUser = {
   lud16: string,
   website: string,
   tags: string[][],
+  userStats?: UserStats,
 };
 
 export type PrimalNoteData = {

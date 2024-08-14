@@ -12,6 +12,7 @@ import { fetchUserProfile } from '../../handleNotes';
 import { date, shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { sendEvent } from '../../lib/notes';
+import { humanizeNumber } from '../../lib/stats';
 import { zapSubscription } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
@@ -113,7 +114,41 @@ const AuthoreSubscribe: Component<{
   };
 
   return (
-    <div class={styles.featuredAuthor}>
+    <A href={`/p/${author()?.npub}`} class={styles.authorFeaturCard}>
+      <Show when={author()?.picture}>
+        <img class={styles.image} src={author()?.picture} />
+      </Show>
+      <div class={styles.userInfo}>
+        <div class={styles.userBasicData}>
+          <div class={styles.userName}>
+            {userName(author())}
+            <VerificationCheck user={author()} />
+          </div>
+          <div class={styles.nip05}>
+            {author()?.nip05}
+          </div>
+        </div>
+        <div class={styles.userAdditionalData}>
+          <div class={styles.userAbout}>
+            {author()?.about}
+          </div>
+          <Show when={author()?.userStats?.followers_count}>
+            <div class={styles.userStats}>
+              <div class={styles.number}>
+                {humanizeNumber(author()?.userStats?.followers_count || 0)}
+              </div>
+              <div class={styles.unit}>
+                followers
+              </div>
+            </div>
+          </Show>
+        </div>
+      </div>
+    </A>
+  );
+
+  return (
+    <A href={`/p/${author()?.npub}`} class={styles.featuredAuthor}>
       <Show
         when={!isFetching()}
         fallback={<Loader />}
@@ -134,21 +169,9 @@ const AuthoreSubscribe: Component<{
           <div class={styles.userPitch}>
             {author()?.about || ''}
           </div>
-          <div class={styles.actions}>
-            <ButtonSecondary
-              light={true}
-              onClick={() => navigate(`/p/${author()?.npub}`)}
-            >
-              view profile
-            </ButtonSecondary>
-
-            <ButtonPrimary onClick={openSubscribe}>
-              subscribe
-            </ButtonPrimary>
-          </div>
         </div>
       </Show>
-    </div>
+    </A>
   );
 }
 

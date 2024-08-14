@@ -26,6 +26,7 @@ import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
 import { userName } from '../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
+import { getRandomIntegers } from '../../utils';
 
 
 const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: PrimalArticle }  > = (props) => {
@@ -43,7 +44,11 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
     setIsFetchingArticles(() => true);
 
     const articles = await fetchUserArticles(account?.publicKey, props.user.pubkey, 'authored', subId);
-    setRecomended(() => [...articles.filter(a => a.id !== props.article.id)]);
+
+    const recs = articles.filter(a => a.id !== props.article.id);
+    const indicies = getRandomIntegers(0, recs.length, 3);
+
+    setRecomended(() => indicies.map(i => recs[i]));
 
     setIsFetchingArticles(() => false);
   }

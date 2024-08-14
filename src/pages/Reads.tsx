@@ -132,10 +132,6 @@ const Home: Component = () => {
     setNewPostAuthors(() => []);
   }
 
-  onMount(() => {
-    context?.actions.doSidebarSearch('')
-  });
-
   createEffect(() => {
     if (account?.isKeyLookupDone && account.publicKey) {
 
