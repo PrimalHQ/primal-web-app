@@ -216,14 +216,12 @@ const Home: Component = () => {
             when={!isPageLoading() && context?.notes && context?.notes.length === 0}
           >
             <div class={styles.noContent}>
-              <Loader />
             </div>
           </Match>
           <Match
             when={isPageLoading()}
           >
             <div class={styles.noContent}>
-              <Loader />
             </div>
           </Match>
         </Switch>

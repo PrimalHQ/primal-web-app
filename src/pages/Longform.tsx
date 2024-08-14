@@ -980,7 +980,6 @@ const Longform: Component< { naddr: string } > = (props) => {
       <div id={`read_${naddr()}`} class={styles.longform}>
         <Show
           when={store.article}
-          fallback={<Loader />}
         >
           <div class={styles.title}>
             {store.article?.title}

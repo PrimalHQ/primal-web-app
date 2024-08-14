@@ -78,9 +78,6 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
 
         <Show
           when={!isFetchingArticles()}
-          fallback={
-            <Loader />
-          }
         >
           <Show
             when={recomended.length > 0}

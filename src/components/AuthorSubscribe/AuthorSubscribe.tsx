@@ -146,33 +146,6 @@ const AuthoreSubscribe: Component<{
       </div>
     </A>
   );
-
-  return (
-    <A href={`/p/${author()?.npub}`} class={styles.featuredAuthor}>
-      <Show
-        when={!isFetching()}
-        fallback={<Loader />}
-      >
-        <div class={styles.authorSubscribeCard}>
-          <A href={`/p/${author()?.npub}`} class={styles.userInfo}>
-            <Avatar user={author()} size="ml" />
-            <div class={styles.userData}>
-              <div class={styles.userName}>
-                {userName(author())}
-                <VerificationCheck user={author()} />
-              </div>
-              <div class={styles.nip05}>
-                {author()?.nip05}
-              </div>
-            </div>
-          </A>
-          <div class={styles.userPitch}>
-            {author()?.about || ''}
-          </div>
-        </div>
-      </Show>
-    </A>
-  );
 }
 
 export default hookForDev(AuthoreSubscribe);

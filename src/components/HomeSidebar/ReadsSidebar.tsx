@@ -184,9 +184,6 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
           <Show
             when={!isFetchingAuthors()}
-            fallback={
-              <Loader />
-            }
           >
             <div class={styles.section}>
               <AuthorSubscribe pubkey={featuredAuthor()} />
@@ -200,9 +197,6 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
         <Show
           when={!isFetching()}
-          fallback={
-            <Loader />
-          }
         >
           <div class={styles.section}>
             <For each={topPicks}>
@@ -218,9 +212,6 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
         <Show
           when={!isFetchingTopics()}
-          fallback={
-            <Loader />
-          }
         >
           <div class={styles.section}>
             <For each={topics}>
