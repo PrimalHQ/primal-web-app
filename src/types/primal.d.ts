@@ -611,6 +611,8 @@ export type PrimalFeed = {
 export type PrimalArticleFeed = {
   name: string,
   spec: string,
+  description: string,
+  default: boolean,
 };
 
 export type PrimalScopeFeed = {
@@ -646,6 +648,8 @@ export type PrimalLegend = {
 export type FeedOption = {
   label: string,
   value: string | undefined,
+  description?: string,
+  deafault?: boolean,
 };
 
 export type PrimalRepost = {
@@ -811,6 +815,8 @@ export type UserCategory = {
 export type SelectionOption = {
   label: string,
   value: string,
+  description?: string,
+  default?: boolean,
   disabled?: boolean,
   separator?: boolean,
   id?: string,

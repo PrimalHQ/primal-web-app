@@ -96,6 +96,20 @@
     width: 32px;
     height: 20px;
   }
+
+  .label {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 16px;
+  }
+
+  .description {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+  }
 }
 
 .separator {

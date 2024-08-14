@@ -24,7 +24,14 @@ const SelectionItem: Component<SelectBaseItemComponentProps<any>> = (props) => {
             <div class={styles.checkIcon} />
           </Select.ItemIndicator>
         </div>
-        <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+        <Select.ItemLabel>
+          <div class={styles.label}>
+            {props.item.rawValue.label}
+          </div>
+          <div class={styles.description}>
+            {props.item.rawValue.description || ''}
+          </div>
+        </Select.ItemLabel>
       </Show>
     </Select.Item>
   );

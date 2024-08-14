@@ -310,6 +310,15 @@
 
 }
 
+.readsHeader {
+  position: fixed;
+  background: var(--background-site);
+  top: 0;
+  padding-top: 10px;
+  height: 84px;
+  z-index: 200;
+}
+
 @media only screen and (max-width: 720px) {
   .fullHeader {
     width: 100%;

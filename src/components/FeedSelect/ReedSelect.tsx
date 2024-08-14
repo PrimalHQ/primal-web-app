@@ -39,6 +39,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     const feed = {
       spec: option.value || '',
       name: option.label,
+      description: option.description || '',
+      default: option.deafault || false,
     };
 
     const selected = reeds?.selectedFeed;
@@ -73,6 +75,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     return settings?.articleFeeds.map(f => ({
       label: f.name,
       value: f.spec,
+      description: f.description,
+      default: f.default,
       id: genId(f.spec),
     })) || [];
     // let opts = [];
@@ -108,6 +112,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     return {
       label: selected.name,
       value: selected.spec || '',
+      description: selected.description,
+      default: selected.default,
       id: genId(selected.spec),
     }
   }
@@ -119,6 +125,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     return {
       label: reeds.selectedFeed.name,
       value: reeds.selectedFeed.spec,
+      description: reeds.selectedFeed.description,
+      default: reeds.selectedFeed.default,
       id: genId(reeds.selectedFeed.spec),
     };
   };
