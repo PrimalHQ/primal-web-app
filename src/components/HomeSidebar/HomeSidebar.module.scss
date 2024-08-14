@@ -78,12 +78,20 @@
 .readsSidebar {
   margin-left: -8px;
 
-  .section {
+  .section, .sectionTopPicks, .sectionTopics {
     margin-bottom: 28px;
 
     >a:last-child {
       border-bottom: none;
     }
+  }
+
+  .sectionTopPicks {
+    min-height: 356px !important;
+  }
+
+  .sectionTopics {
+    min-height: 150px;
   }
 
   .topic {
@@ -146,14 +154,6 @@
         line-height: 32px;
       }
     }
-  }
-
-  .sectionTopPicks {
-    height: 356px;
-  }
-
-  .sectionTopics {
-    min-height: 150px;
   }
 
   .topic {
