@@ -38,22 +38,22 @@ const AuthoreSubscribe: Component<{
   const [isFetching, setIsFetching] = createSignal(false);
   const [author, setAuthor] = createSignal<PrimalUser>();
 
-  const getAuthorData = async () => {
-    if (!account?.publicKey) return;
+  const getAuthorData = async (pubkey: string) => {
+    if (!account?.publicKey || !pubkey) return;
 
     const subId = `reads_fpi_${APP_ID}`;
 
     setIsFetching(() => true);
 
-    const profile = await fetchUserProfile(account.publicKey, props.pubkey, subId);
+    const profile = await fetchUserProfile(account.publicKey, pubkey, subId);
 
     setIsFetching(() => false);
 
     setAuthor(() => ({ ...profile }));
   };
 
-  onMount(() => {
-    getAuthorData();
+  createEffect(() => {
+    getAuthorData(props.pubkey);
   });
 
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {

@@ -74,8 +74,8 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const reads= useReadsContext();
 
-  const [topPicks, setTopPicks] = createStore<PrimalArticle[]>([]);
-  const [topics, setTopics] = createStore<string[]>([]);
+  // const [topPicks, setTopPicks] = createStore<PrimalArticle[]>([]);
+  // const [topics, setTopics] = createStore<string[]>([]);
   const [featuredAuthor, setFeautredAuthor] = createSignal<string>();
 
   const [isFetching, setIsFetching] = createSignal(false);
@@ -85,13 +85,17 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   const [got, setGot] = createSignal(false);
 
   const getTopics = () => {
+    if (!reads) return;
+    if (reads.topics.length > 0) return;
+
     const subId = `reads_topics_${APP_ID}`;
+
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         const topics = JSON.parse(content.content || '[]') as string[];
 
-        setTopics(() => [...topics]);
+        reads?.actions.setTopics(topics);
       },
       onEose: () => {
         setIsFetchingTopics(() => false);
@@ -161,7 +165,8 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   });
 
   const getRecomendedArticles = async (ids: string[]) => {
-    // if (!account?.publicKey) return;
+    if (!reads) return;
+    if (reads.topPicks.length > 0) return;
 
     const subId = `reads_picks_${APP_ID}`;
 
@@ -171,7 +176,7 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
     setIsFetching(() => false);
 
-    setTopPicks(() => [...articles]);
+    reads.actions.setTopPicks(articles);
   };
 
   return (
@@ -182,43 +187,31 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
             Featured Author
           </div>
 
-          <Show
-            when={!isFetchingAuthors()}
-          >
-            <div class={styles.section}>
-              <AuthorSubscribe pubkey={featuredAuthor()} />
-            </div>
-          </Show>
+          <div class={styles.section}>
+            <AuthorSubscribe pubkey={featuredAuthor()} />
+          </div>
         </Show>
 
         <div class={styles.headingPicks}>
           Featured Reads
         </div>
 
-        <Show
-          when={!isFetching()}
-        >
-          <div class={styles.section}>
-            <For each={topPicks}>
-              {(note) => <ArticleShort article={note} />}
-            </For>
-          </div>
-        </Show>
+        <div class={styles.sectionTopPicks}>
+          <For each={reads?.topPicks}>
+            {(note) => <ArticleShort article={note} />}
+          </For>
+        </div>
 
 
         <div class={styles.headingPicks}>
           Topics
         </div>
 
-        <Show
-          when={!isFetchingTopics()}
-        >
-          <div class={styles.section}>
-            <For each={topics}>
-              {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
-            </For>
-          </div>
-        </Show>
+        <div class={styles.sectionTopics}>
+          <For each={reads?.topics}>
+            {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
+          </For>
+        </div>
 
       </Show>
     </div>

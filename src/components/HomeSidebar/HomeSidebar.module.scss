@@ -100,7 +100,7 @@
 }
 
 .articleSidebar {
-  .section {
+  .section, .sectionTopPicks, .sectionTopics {
     margin-bottom: 28px;
     max-height: calc(100vh - 240px);
     overflow-y: scroll;
@@ -146,6 +146,14 @@
         line-height: 32px;
       }
     }
+  }
+
+  .sectionTopPicks {
+    height: 356px;
+  }
+
+  .sectionTopics {
+    min-height: 150px;
   }
 
   .topic {

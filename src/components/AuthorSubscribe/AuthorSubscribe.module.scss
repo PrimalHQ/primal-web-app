@@ -72,6 +72,12 @@
   }
 }
 
+.authorPlaceholder {
+  width: 300px;
+  height: 108px;
+  border-radius: var(--border-radius-small);
+  background-color: var(--background-header-input);
+}
 
 .authorFeaturCard {
   width: 300px;

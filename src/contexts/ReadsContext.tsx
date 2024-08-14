@@ -57,6 +57,9 @@ type ReadsContextStore = {
     query: SelectionOption | undefined,
   },
   articleHeights: Record<string, number>,
+  topPicks: PrimalArticle[],
+  topics: string[],
+  featuredAuthor: PrimalUser | undefined,
   actions: {
     saveNotes: (newNotes: PrimalArticle[]) => void,
     clearNotes: () => void,
@@ -73,6 +76,9 @@ type ReadsContextStore = {
     getFirstPage: () => void,
     resetSelectedFeed: () => void,
     setArticleHeight: (id: string, height: number) => void,
+    setTopPicks: (picks: PrimalArticle[]) => void,
+    setTopics: (topicks: string[]) => void,
+    setFeaturedAuthor: (author: PrimalUser) => void,
   }
 }
 
@@ -125,6 +131,9 @@ const initialHomeData = {
   },
   recomendedReads: [],
   articleHeights: {},
+  topPicks: [],
+  topics: [],
+  featuredAuthor: undefined,
 };
 
 export const ReadsContext = createContext<ReadsContextStore>();
@@ -135,6 +144,18 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const setTopPicks = (picks: PrimalArticle[]) => {
+    updateStore('topPicks', () => [ ...picks ]);
+  };
+
+  const setTopics = (topics: string[]) => {
+    updateStore('topics', () => [ ...topics ]);
+  };
+
+  const setFeaturedAuthor = (author: PrimalUser) => {
+    updateStore('featuredAuthor', () => ({ ...author }) );
+  };
 
   const updateSidebarQuery = (selection: SelectionOption) => {
     updateStore('sidebar', 'query', () => ({ ...selection }));
@@ -787,6 +808,9 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       updateSidebarQuery,
       getFirstPage,
       setArticleHeight,
+      setTopPicks,
+      setTopics,
+      setFeaturedAuthor,
     },
   });
 
