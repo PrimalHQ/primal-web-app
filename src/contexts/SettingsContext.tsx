@@ -390,7 +390,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     });
 
-    getDefaultSettings(subid)
+    getDefaultSettings(subid);
+    getArticleFeeds();
   };
 
   const loadSettings = (pubkey: string | undefined, then?: () => void) => {

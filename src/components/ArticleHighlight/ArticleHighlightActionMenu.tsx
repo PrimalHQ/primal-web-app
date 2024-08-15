@@ -256,7 +256,7 @@ const ArticleHighlightActionMenu: Component<{
       style={`top: ${topP()}px; left: ${leftP()}px;`}
     >
       <Switch>
-        <Match when={props.highlight === 'NEW_HIGHLIGHT'}>
+        <Match when={account?.publicKey && props.highlight === 'NEW_HIGHLIGHT'}>
           <button
             data-highlight-menu-option="highlight"
             onMouseDown={onNewHighlight}
@@ -266,7 +266,7 @@ const ArticleHighlightActionMenu: Component<{
           </button>
         </Match>
 
-        <Match when={props.highlight.pubkey === account?.publicKey}>
+        <Match when={account?.publicKey && props.highlight.pubkey === account?.publicKey}>
           <button
             data-highlight-menu-option="remove"
             onMouseDown={onRemoveHighlight}
@@ -276,20 +276,22 @@ const ArticleHighlightActionMenu: Component<{
           </button>
         </Match>
       </Switch>
-      <button
-        data-highlight-menu-option="quote"
-        onMouseDown={onQuote}
-      >
-        <div class={styles.iconHighlightQuote}></div>
-        <div class={styles.iconCaption}>Quote</div>
-      </button>
-      <button
-        data-highlight-menu-option="comment"
-        onMouseDown={onComment}
-      >
-        <div class={styles.iconHighlightComment}></div>
-        <div class={styles.iconCaption}>Comment</div>
-      </button>
+      <Show when={account?.publicKey}>
+        <button
+          data-highlight-menu-option="quote"
+          onMouseDown={onQuote}
+        >
+          <div class={styles.iconHighlightQuote}></div>
+          <div class={styles.iconCaption}>Quote</div>
+        </button>
+        <button
+          data-highlight-menu-option="comment"
+          onMouseDown={onComment}
+        >
+          <div class={styles.iconHighlightComment}></div>
+          <div class={styles.iconCaption}>Comment</div>
+        </button>
+      </Show>
       <button
         onMouseDown={onCopy}
         data-highlight-menu-option="copy"

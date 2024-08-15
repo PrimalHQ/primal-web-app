@@ -336,7 +336,9 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     //   return;
     // }
 
-    getArticlesFeed2(account?.publicKey, spec, `reads_feed_${subId}`, until, 20);
+    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+
+    getArticlesFeed2(pubkey, spec, `reads_feed_${subId}`, until, 20);
   };
 
   const clearNotes = () => {
