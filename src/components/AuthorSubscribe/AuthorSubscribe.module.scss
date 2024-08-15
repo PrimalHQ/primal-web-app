@@ -74,17 +74,17 @@
 
 .authorPlaceholder {
   width: 300px;
-  height: 108px;
+  height: 120px;
   border-radius: var(--border-radius-small);
   background-color: var(--background-header-input);
 }
 
 .authorFeaturCard {
   width: 300px;
-  height: 108px;
+  height: 120px;
   border-radius: var(--border-radius-small);
   display: flex;
-  gap: 16px;
+  gap: 14px;
   justify-content: flex-start;
   align-items: center;
   overflow: hidden;
@@ -93,13 +93,13 @@
 
   .imageHolder {
     display: block;
-    width: 80px !important;
-    height: 108px;
+    width: 92px !important;
+    height: 120px;
     padding: 0;
 
     .image {
-      width: 80px;
-      height: 108px;
+      width: 92px;
+      height: 120px;
       object-fit: cover;
     }
   }
@@ -108,12 +108,13 @@
   .userInfo {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: flex-start;
     height: 100%;
     padding-block: 12px;
-    margin-right: 8px;
+    margin-right: 12px;
     overflow: hidden;
+    gap: 2px;
 
     .userBasicData {
       display: flex;
@@ -126,12 +127,11 @@
         display: flex;
         color: var(--text-primary);
         font-size: 18px;
-
         font-weight: 600;
         line-height: 18px;
         text-overflow: ellipsis;
         white-space: nowrap;
-        max-width: 170px;
+        max-width: 152px;
       }
       .nip05 {
         overflow: hidden;
@@ -141,7 +141,7 @@
         font-size: 14px;
         font-weight: 400;
         line-height: 16px;
-        max-width: 200px;
+        max-width: 182px;
       }
     }
 
@@ -153,20 +153,30 @@
       gap: 2px;
 
       .userAbout {
-        overflow: hidden;
         color: var(--text-primary);
-        text-overflow: ellipsis;
-        white-space: nowrap;
         font-size: 14px;
         font-weight: 400;
         line-height: 16px;
-        max-width: 200px;
+        max-width: 182px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+
+        &.extended {
+          -webkit-line-clamp: 3;
+          line-clamp: 3;
+        }
       }
 
       .userStats {
         display: flex;
-        gap: 8px;
-        max-width: 200px;
+        gap: 2px;
+        max-width: 182px;
 
         .number {
           color: var(--text-tertiary);
@@ -181,7 +191,6 @@
           font-size: 14px;
           font-weight: 400;
           line-height: 16px;
-          margin-left: 2px;
         }
       }
     }

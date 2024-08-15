@@ -134,12 +134,14 @@ const AuthorSubscribe: Component<{
                 {userName(props.author)}
                 <VerificationCheck user={props.author} />
               </div>
-              <div class={styles.nip05}>
-                {nip05Verification(props.author)}
-              </div>
+              <Show when={props.author?.nip05}>
+                <div class={styles.nip05}>
+                  {nip05Verification(props.author)}
+                </div>
+              </Show>
             </div>
             <div class={styles.userAdditionalData}>
-              <div class={styles.userAbout}>
+              <div class={`${styles.userAbout} ${!props.author?.nip05 ? styles.extended : ''}`}>
                 {props.author?.about}
               </div>
               <Show when={props.author?.userStats?.followers_count}>
