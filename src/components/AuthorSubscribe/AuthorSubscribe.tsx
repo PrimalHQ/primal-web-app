@@ -14,7 +14,7 @@ import { hookForDev } from '../../lib/devTools';
 import { sendEvent } from '../../lib/notes';
 import { humanizeNumber } from '../../lib/stats';
 import { zapSubscription } from '../../lib/zap';
-import { userName } from '../../stores/profile';
+import { nip05Verification, userName } from '../../stores/profile';
 import { PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
 import { isDev, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
@@ -135,7 +135,7 @@ const AuthorSubscribe: Component<{
                 <VerificationCheck user={props.author} />
               </div>
               <div class={styles.nip05}>
-                {props.author?.nip05}
+                {nip05Verification(props.author)}
               </div>
             </div>
             <div class={styles.userAdditionalData}>
