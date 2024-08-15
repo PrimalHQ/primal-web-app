@@ -555,7 +555,7 @@ button:focus {
 
 .slide-fade-enter-active,
 .slide-fade-exit-active {
-  >div
+  .animated
   {
     transition: opacity 0.6s, transform 0.6s;
     transition-delay: 0.1s * 1;
@@ -570,20 +570,20 @@ button:focus {
 }
 .slide-fade-enter,
 .slide-fade-exit-to {
-  >div
+  .animated
   {
     transform: translateY(-10px);
     opacity: 0;
   }
 }
 .slide-fade-enter {
-  // >div
+  // .animated
   // {
   //   transform: translateY(10px);
   // }
   $elements: 10;
   @for $i from 0 to $elements {
-    >div:nth-child(#{$i + 1}) {
+    .animated:nth-child(#{$i + 1}) {
       transform: translateY(10px + 2px*$i);
     }
   }

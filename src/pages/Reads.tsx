@@ -216,14 +216,13 @@ const Home: Component = () => {
                 <For each={new Array(5)}>
                   {() => <ArticlePreviewSkeleton />}
                 </For>
-
               </div>
             }
           >
             <div class={styles.feed}>
               <For each={context?.notes} >
-                {(note, index) => (
-                  <div>
+                {(note) => (
+                  <div class="animated">
                     <ArticlePreview
                       article={note}
                       height={context?.articleHeights[note.naddr]}
