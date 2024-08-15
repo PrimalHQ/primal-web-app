@@ -223,7 +223,7 @@ const Home: Component = () => {
             <div class={styles.feed}>
               <For each={context?.notes} >
                 {(note, index) => (
-                  <div data-animation-offset={`${index()}`}>
+                  <div>
                     <ArticlePreview
                       article={note}
                       height={context?.articleHeights[note.naddr]}

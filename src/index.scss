@@ -561,6 +561,13 @@ button:focus {
     transition-delay: 0.1s * 1;
   }
 }
+
+.slide-fade-exit-active, .none-exit-active {
+  >div
+  {
+    display: none;
+  }
+}
 .slide-fade-enter,
 .slide-fade-exit-to {
   >div

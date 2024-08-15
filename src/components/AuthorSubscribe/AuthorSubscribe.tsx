@@ -1,7 +1,7 @@
 import { A, useNavigate } from '@solidjs/router';
 import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
+import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -16,7 +16,7 @@ import { humanizeNumber } from '../../lib/stats';
 import { zapSubscription } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { isDev, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
@@ -114,45 +114,49 @@ const AuthorSubscribe: Component<{
     app?.actions.openAuthorSubscribeModal(props.author, doSubscription);
   };
 
+  const shouldAnimate = () => isDev() && localStorage.getItem('animate') === 'true'
+
   return (
-    <Show
-      when={props.author}
-      fallback={<AuthorSubscribeSkeleton />}
-    >
-      <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
-        <Show when={props.author?.picture}>
-          <div class={styles.imageHolder}>
-            <img class={styles.image} src={props.author?.picture} />
-          </div>
-        </Show>
-        <div class={styles.userInfo}>
-          <div class={styles.userBasicData}>
-            <div class={styles.userName}>
-              {userName(props.author)}
-              <VerificationCheck user={props.author} />
+    <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+      <Show
+        when={props.author}
+        fallback={<div><AuthorSubscribeSkeleton /></div>}
+      >
+        <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
+          <Show when={props.author?.picture}>
+            <div class={styles.imageHolder}>
+              <img class={styles.image} src={props.author?.picture} />
             </div>
-            <div class={styles.nip05}>
-              {props.author?.nip05}
-            </div>
-          </div>
-          <div class={styles.userAdditionalData}>
-            <div class={styles.userAbout}>
-              {props.author?.about}
-            </div>
-            <Show when={props.author?.userStats?.followers_count}>
-              <div class={styles.userStats}>
-                <div class={styles.number}>
-                  {humanizeNumber(props.author?.userStats?.followers_count || 0)}
-                </div>
-                <div class={styles.unit}>
-                  followers
-                </div>
+          </Show>
+          <div class={styles.userInfo}>
+            <div class={styles.userBasicData}>
+              <div class={styles.userName}>
+                {userName(props.author)}
+                <VerificationCheck user={props.author} />
               </div>
-            </Show>
+              <div class={styles.nip05}>
+                {props.author?.nip05}
+              </div>
+            </div>
+            <div class={styles.userAdditionalData}>
+              <div class={styles.userAbout}>
+                {props.author?.about}
+              </div>
+              <Show when={props.author?.userStats?.followers_count}>
+                <div class={styles.userStats}>
+                  <div class={styles.number}>
+                    {humanizeNumber(props.author?.userStats?.followers_count || 0)}
+                  </div>
+                  <div class={styles.unit}>
+                    followers
+                  </div>
+                </div>
+              </Show>
+            </div>
           </div>
-        </div>
-      </A>
-    </Show>
+        </A>
+      </Show>
+    </Transition>
   );
 }
 

@@ -25,9 +25,10 @@ import { decodeIdentifier } from '../../lib/keys';
 import ArticleShort from '../ArticlePreview/ArticleShort';
 import AuthorSubscribe from '../AuthorSubscribe/AuthorSubscribe';
 import { A } from '@solidjs/router';
-import { getRandomIntegers } from '../../utils';
+import { getRandomIntegers, isDev } from '../../utils';
 import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 import ReadsFeaturedTopicsSkeleton from '../Skeleton/ReadsFeaturedTopicsSkeleton';
+import { Transition } from 'solid-transition-group';
 
 const sidebarOptions = [
   {
@@ -206,6 +207,8 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     reads.actions.setTopPicks(articles);
   };
 
+  const shouldAnimate = () => isDev() && localStorage.getItem('animate') === 'true';
+
   return (
     <div id={props.id} class={styles.readsSidebar}>
       <Show when={account?.isKeyLookupDone}>
@@ -224,15 +227,33 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         </div>
 
         <div class={styles.sectionTopPicks}>
-          <For each={reads?.topPicks}
+
+        <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+          <Show
+            when={reads && reads.topPicks.length > 0}
             fallback={
-              <For each={Array(3)}>
-                { () => <ArticlePreviewSidebarSkeleton />}
-              </For>
+              <Show when={!reads || reads.topPicks.length === 0}>
+                <div>
+                  <For each={Array(3)}>
+                    {() => <ArticlePreviewSidebarSkeleton />}
+                  </For>
+                </div>
+              </Show>
             }
           >
-            {(note) => <ArticleShort article={note} />}
-          </For>
+            <div>
+              <For
+                each={reads?.topPicks}
+              >
+                {(note) =>
+                    <div>
+                      <ArticleShort article={note} />
+                    </div>
+                  }
+              </For>
+            </div>
+          </Show>
+        </Transition>
         </div>
 
 
@@ -241,12 +262,26 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         </div>
 
         <div class={styles.sectionTopics}>
-          <For
-            each={reads?.topics}
-            fallback={<ReadsFeaturedTopicsSkeleton />}
-          >
-            {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
-          </For>
+          <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+            <Show
+              when={reads && reads.topics.length > 0}
+              fallback={
+                <Show when={!reads || reads.topics.length === 0}>
+                  <div>
+                    <ReadsFeaturedTopicsSkeleton />
+                  </div>
+                </Show>
+              }
+            >
+              <div>
+                <For
+                  each={reads?.topics}
+                >
+                  {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
+                </For>
+              </div>
+            </Show>
+          </Transition>
         </div>
 
       </Show>
