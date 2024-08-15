@@ -157,6 +157,7 @@ const PrimalMarkdown: Component<{
   const [highlightMenu, setHighlightMenu] = createSignal<any>();
   const [highlightText, setHighlightText] = createSignal<string>('');
   const [highlightContext, setHighlightContext] = createSignal<string>('');
+  const [highlightSelection, setHighlightSelection] = createSignal<Selection>();
   const [highlightMenuPosition, setHighlightMenuPosition] = createSignal<Coord>();
 
   const showHighlightMenu = (id: string) => {
@@ -208,15 +209,16 @@ const PrimalMarkdown: Component<{
 
     const parents = getParents(e.target);
 
-    if (selection?.toString().length === 0 || !parents.find(parent => parent.className === styles.editor)) {
+    if (!selection || selection.toString().length === 0 || !parents.find(parent => parent.className === styles.editor)) {
       setHighlightMenu(() => undefined);
       props.onHighlightSelected && props.onHighlightSelected(undefined);
       return;
     }
 
+    setHighlightSelection(() => selection);
     // @ts-ignore
     setHighlightText(() => selection?.toString());
-    setHighlightContext(() => selection?.anchorNode?.parentElement?.innerText || '')
+    setHighlightContext(() => selection?.anchorNode?.parentElement?.innerText || '');
     // @ts-ignore
     showNewHighlightMenu('NEW_HIGHLIGHT');
   };
@@ -357,6 +359,7 @@ const PrimalMarkdown: Component<{
       return <MarkdownSlice
         content={prepped}
         original={orig}
+        article={props.article}
         highlights={props.highlights || []}
       />
     }
@@ -504,6 +507,7 @@ const PrimalMarkdown: Component<{
             position={highlightMenuPosition()}
             text={highlightText()}
             context={highlightContext()}
+            selection={highlightSelection()}
             article={props.article}
             onCreate={(hl: NostrRelaySignedEvent, replaceId?: string) => {
               hideHighlightMenu(hl.id);
@@ -535,9 +539,11 @@ const PrimalMarkdown: Component<{
           />
         </Show>
 
-        <For each={contentTokens}>
-          {renderToken}
-        </For>
+        <Show when={props.article}>
+          <For each={contentTokens}>
+            {renderToken}
+          </For>
+        </Show>
 
         {/* <For each={htmlArray()}>
           {el => (

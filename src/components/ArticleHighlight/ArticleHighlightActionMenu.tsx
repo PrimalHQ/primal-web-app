@@ -38,6 +38,7 @@ const ArticleHighlightActionMenu: Component<{
   position: Coord | null,
   text: string,
   context: string,
+  selection?: Selection,
   article: PrimalArticle,
   onCreate?: (event: NostrRelaySignedEvent, replaceId?: string) => void,
   onRemove?: (id: string) => void,
@@ -68,12 +69,59 @@ const ArticleHighlightActionMenu: Component<{
     return offset;
   };
 
-  const createHighlight = async () => {
+  const generateContentAndContext: (selection?: Selection) => { content: string, context: string} = (selection) => {
+    let content = props.text;
+    let context = props.context;
+
+    if (selection) {
+      const el = selection.getRangeAt(0).cloneContents();
+
+      for (let i = 0; i<el.childNodes.length;i++) {
+        const node = el.childNodes[i];
+
+        if (node && node.nodeName === 'A') {
+          const href = (node as HTMLAnchorElement).getAttribute('href');
+
+          if (href?.startsWith('nostr:')) {
+            let textNode = document.createTextNode(href)
+            node.replaceWith(textNode)
+          }
+        }
+      }
+
+      content = el.textContent || content;
+
+      const elPar = selection.anchorNode?.parentNode?.cloneNode(true);
+
+      if (elPar) {
+        for (let i = 0; i<elPar.childNodes.length;i++) {
+          const node = elPar.childNodes[i];
+
+          if (node && node.nodeName === 'A') {
+            const href = (node as HTMLAnchorElement).getAttribute('href');
+
+            if (href?.startsWith('nostr:')) {
+              let textNode = document.createTextNode(href)
+              node.replaceWith(textNode)
+            }
+          }
+        }
+
+        context = elPar.textContent || context;
+      }
+    }
+
+    return { content, context };
+  }
+
+  const createHighlight = async (content?: string, context?: string, selection?: Selection) => {
     if (!account) return { success: false, reasons: ['Author missing'] };
 
+    const generated = generateContentAndContext(selection);
+
     return await sendHighlight(
-      props.text,
-      props.context,
+      content || generated.content,
+      context || generated.context,
       props.article.pubkey,
       `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`,
       account.proxyThroughPrimal,
@@ -90,14 +138,17 @@ const ArticleHighlightActionMenu: Component<{
 
     const naddr = `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
 
+    const { content, context } = generateContentAndContext(props.selection);
+
     const highlight = {
       id: generatePrivateKey(),
       kind: Kind.Highlight,
-      content: props.text,
+      context,
+      content,
       tags: [
         ['p', props.article.pubkey],
         ['a', naddr],
-        ['context', props.context],
+        ['context', context],
       ],
       created_at: (new Date()).getTime() / 1_000,
       sig: 'UNSIGNED',
@@ -106,7 +157,7 @@ const ArticleHighlightActionMenu: Component<{
 
     then && then(highlight);
 
-    const { success, note } = await createHighlight();
+    const { success, note } = await createHighlight(content, context, props.selection);
 
     if (success && note) {
       then && then(note, highlight.id)
@@ -127,7 +178,7 @@ const ArticleHighlightActionMenu: Component<{
     props.onRemove && props.onRemove(props.highlight.id);
 
     const { success } = await removeHighlight(
-      props.highlight.id,
+      highlight.id,
       account.proxyThroughPrimal,
       account.activeRelays, account?.relaySettings
     );

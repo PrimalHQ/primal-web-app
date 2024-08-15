@@ -14,12 +14,17 @@ import {
 import { callCommand, getMarkdown, replaceAll, insert, getHTML, outline } from '@milkdown/utils';
 import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
 import { userMention } from './plugins/userMention';
+import { profileRegex } from '../../constants';
+import { PrimalArticle } from '../../types/primal';
+import { userName } from '../../stores/profile';
+import { npubToHex } from '../../lib/keys';
 
 
 const MarkdownSlice: Component<{
   content: string,
   original: string,
   highlights: any[],
+  article?: PrimalArticle,
 }> = (props) => {
 
   const [editor, setEditor] = createSignal<Editor>();
@@ -118,7 +123,26 @@ const MarkdownSlice: Component<{
       });
 
       parsedContent = found.reduce((acc, f) => {
-        return acc.replace(f.hl.content, `<a href="hl:${f.hl.id}" data-highlight="${f.hl.id}">${f.hl.content}</a>`)
+        let highlightContent: string = `${f.hl.content || ''}`;
+        const match = highlightContent.match(profileRegex);
+        let contentWithMention = highlightContent;
+
+        if (match && props.article) {
+          const user = props.article.mentionedUsers && props.article.mentionedUsers[npubToHex(match[1])];
+
+          if (user) {
+            highlightContent = highlightContent.replaceAll(match[0], `<a href="${match[0]}" title="${match[1]}">@${userName(user)}</a>`);
+            contentWithMention = highlightContent.replaceAll(`<a href="${match[0]}" title="${match[1]}">@${userName(user)}</a>`, `@${userName(user)}`);
+          }
+
+        const r1 = acc.replace(highlightContent, `${contentWithMention}`);
+
+        return r1.replace(contentWithMention, `<a href="hl:${f.hl.id}" data-highlight="${f.hl.id}">${contentWithMention}</a>`);
+
+        }
+
+        return acc.replace(highlightContent, `<a href="hl:${f.hl.id}" data-highlight="${f.hl.id}">${highlightContent}</a>`)
+
       }, parsedContent);
 
       // parsedContent = props.highlights.reduce((acc, hl) => {
