@@ -330,3 +330,18 @@
     width: 100%;
   }
 }
+
+.toggleAnimation {
+  position: absolute;
+  width:fit-content;
+  height: fit-content;
+  padding: 8px;
+  top: 10px;
+  right: 120px;
+  background-color: var(--background-sheet);
+  border-radius: 8px;
+  color: var(--text-primary);
+  z-index: 200;
+  border: none;
+  outline: none;
+}

@@ -42,6 +42,9 @@ import { Link, useParams } from '@solidjs/router';
 import { APP_ID } from '../App';
 import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
+import { Transition } from 'solid-transition-group';
+import { ToggleButton } from '@kobalte/core/toggle-button';
+import { isDev } from '../utils';
 
 
 const Home: Component = () => {
@@ -60,9 +63,14 @@ const Home: Component = () => {
   const [newNotesCount, setNewNotesCount] = createSignal(0);
   const [newPostAuthors, setNewPostAuthors] = createStore<PrimalUser[]>([]);
 
+  const [shouldAnimate, setShouldAnimate] = createSignal(isDev() ? localStorage.getItem('animate') === 'true' || false : false);
 
   const newPostCount = () => newNotesCount() < 100 ? newNotesCount() : 100;
 
+  const toggleAnimation = (pressed: boolean) => {
+    setShouldAnimate(() => pressed);
+    localStorage.setItem('animate', `${shouldAnimate()}`);
+  }
 
   onMount(() => {
     // setIsHome(true);
@@ -168,12 +176,16 @@ const Home: Component = () => {
         <Show
           when={params.topic}
           fallback={
-            <ReadsHeader
-              hasNewPosts={hasNewPosts}
-              loadNewContent={loadNewContent}
-              newPostCount={newPostCount}
-              newPostAuthors={newPostAuthors}
-            />
+            <div>
+              <ReadsHeader
+                hasNewPosts={hasNewPosts}
+                loadNewContent={loadNewContent}
+                newPostCount={newPostCount}
+                newPostAuthors={newPostAuthors}
+                onToggle={toggleAnimation}
+                isPressed={shouldAnimate()}
+              />
+            </div>
           }
         >
           <div class={styles.readsTopicHeader}>
@@ -196,27 +208,33 @@ const Home: Component = () => {
       </StickySidebar>
 
       <div class={styles.readsFeed}>
-        <Show
-          when={context?.notes && context.notes.length > 0}
-          fallback={
-            <For each={new Array(10)}>
-              {() => <ArticlePreviewSkeleton />}
-            </For>
+        <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+          <Show
+            when={context?.notes && context.notes.length > 0}
+            fallback={
+              <div>
+                <For each={new Array(5)}>
+                  {() => <ArticlePreviewSkeleton />}
+                </For>
 
-          }
-        >
-          <div class={styles.feed}>
-            <For each={context?.notes} >
-              {note => (
-                <ArticlePreview
-                  article={note}
-                  height={context?.articleHeights[note.naddr]}
-                  onRender={onArticleRendered}
-                />
-              )}
-            </For>
-          </div>
-        </Show>
+              </div>
+            }
+          >
+            <div class={styles.feed}>
+              <For each={context?.notes} >
+                {(note, index) => (
+                  <div data-animation-offset={`${index()}`}>
+                    <ArticlePreview
+                      article={note}
+                      height={context?.articleHeights[note.naddr]}
+                      onRender={onArticleRendered}
+                    />
+                  </div>
+                )}
+              </For>
+            </div>
+          </Show>
+        </Transition>
 
         <Switch>
           <Match

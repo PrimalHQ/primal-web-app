@@ -551,3 +551,33 @@ button:focus {
   color: var(--text-highlight);
   font-style: normal;
 }
+
+
+.slide-fade-enter-active,
+.slide-fade-exit-active {
+  >div
+  {
+    transition: opacity 0.6s, transform 0.6s;
+    transition-delay: 0.1s * 1;
+  }
+}
+.slide-fade-enter,
+.slide-fade-exit-to {
+  >div
+  {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+.slide-fade-enter {
+  // >div
+  // {
+  //   transform: translateY(10px);
+  // }
+  $elements: 10;
+  @for $i from 0 to $elements {
+    >div:nth-child(#{$i + 1}) {
+      transform: translateY(10px + 2px*$i);
+    }
+  }
+}

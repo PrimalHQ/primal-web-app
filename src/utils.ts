@@ -134,3 +134,5 @@ export const getRandomIntegers = (start: number, end: number, qty: number) => {
 
   return [...ret];
 }
+
+export const isDev = () => localStorage.getItem('devMode') === 'true';

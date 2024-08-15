@@ -17,6 +17,8 @@ import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import ReedSelect from '../FeedSelect/ReedSelect';
 import { useReadsContext } from '../../contexts/ReadsContext';
+import { ToggleButton } from '@kobalte/core/toggle-button';
+import { isDev } from '../../utils';
 
 const ReadsHeader: Component< {
   id?: string,
@@ -24,6 +26,9 @@ const ReadsHeader: Component< {
   loadNewContent: () => void,
   newPostCount: () => number,
   newPostAuthors: PrimalUser[],
+  onToggle: (pressed: boolean) => void,
+  isPressed: boolean,
+
 } > = (props) => {
 
   const reads = useReadsContext();
@@ -94,6 +99,19 @@ const ReadsHeader: Component< {
           </button>
         </Show>
       </div>
+
+      <Show when={isDev()}>
+        <ToggleButton
+          class={styles.toggleAnimation}
+          pressed={props.isPressed} onChange={props.onToggle}
+        >
+          {state => (
+            <Show when={state.pressed()} fallback={<div>still</div>}>
+              <div>anim</div>
+            </Show>
+          )}
+        </ToggleButton>
+      </Show>
 
       <Show
         when={props.hasNewPosts() && !account?.showNewNoteForm && !((reads?.scrollTop || 0) < 85)}
