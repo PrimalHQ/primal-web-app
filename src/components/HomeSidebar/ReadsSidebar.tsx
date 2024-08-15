@@ -29,6 +29,7 @@ import { getRandomIntegers, isDev } from '../../utils';
 import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 import ReadsFeaturedTopicsSkeleton from '../Skeleton/ReadsFeaturedTopicsSkeleton';
 import { Transition } from 'solid-transition-group';
+import { minKnownProfiles } from '../../constants';
 
 const sidebarOptions = [
   {
@@ -146,13 +147,14 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   }
 
   const getAuthorData = async (pubkey: string) => {
-    if (!account?.publicKey || !pubkey) return;
+    const userNpub = account?.publicKey || minKnownProfiles.names['primal'];
+    if (!userNpub || !pubkey) return;
 
     const subId = `reads_fpi_${APP_ID}`;
 
     setIsFetching(() => true);
 
-    const profile = await fetchUserProfile(account.publicKey, pubkey, subId);
+    const profile = await fetchUserProfile(userNpub, pubkey, subId);
 
     setIsFetching(() => false);
 
@@ -212,15 +214,13 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   return (
     <div id={props.id} class={styles.readsSidebar}>
       <Show when={account?.isKeyLookupDone}>
-        <Show when={account?.publicKey}>
-          <div class={styles.headingPicks}>
-            Featured Author
-          </div>
+        <div class={styles.headingPicks}>
+          Featured Author
+        </div>
 
-          <div class={styles.section}>
-            <AuthorSubscribe author={reads?.featuredAuthor} />
-          </div>
-        </Show>
+        <div class={styles.section}>
+          <AuthorSubscribe author={reads?.featuredAuthor} />
+        </div>
 
         <div class={styles.headingPicks}>
           Featured Reads
