@@ -152,6 +152,11 @@ export const actions = {
     defaultMessage: 'New Note',
     description: 'New note action label',
   },
+  newArticle: {
+    id: 'actions.newArticle',
+    defaultMessage: 'New Article',
+    description: 'New article action label',
+  },
   createPin: {
     id: 'actions.createPin',
     defaultMessage: 'Set PIN',

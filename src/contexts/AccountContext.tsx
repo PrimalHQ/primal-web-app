@@ -1689,7 +1689,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
         title={intl.formatMessage(followWarning.title)}
         description={intl.formatMessage(followWarning.description)}
         confirmLabel={intl.formatMessage(followWarning.confirm)}
-        abortLablel={intl.formatMessage(followWarning.abort)}
+        abortLabel={intl.formatMessage(followWarning.abort)}
         onConfirm={async () => {
           if (store.publicKey) {
             const data = unwrap(followData)
@@ -1718,7 +1718,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
         title={intl.formatMessage(forgotPin.title)}
         description={intl.formatMessage(forgotPin.description)}
         confirmLabel={intl.formatMessage(forgotPin.confirm)}
-        abortLablel={intl.formatMessage(forgotPin.abort)}
+        abortLabel={intl.formatMessage(forgotPin.abort)}
         onConfirm={async () => {
           logout();
           updateStore('showForgot', () => false);

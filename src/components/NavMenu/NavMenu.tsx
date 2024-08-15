@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useLocation } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
+import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useMessagesContext } from '../../contexts/MessagesContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
@@ -12,6 +12,7 @@ import styles from './NavMenu.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useMediaContext } from '../../contexts/MediaContext';
+import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
@@ -20,6 +21,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const intl = useIntl();
   const loc = useLocation();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const links = [
     {
@@ -72,6 +74,19 @@ const NavMenu: Component< { id?: string } > = (props) => {
 
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
 
+  const noReadsConfirm: ConfirmInfo = {
+    title: "Coming Soon",
+    description: "Primal does not have article creation capabilities yet. We recommend Highlighter to content creators. Would you like to try it?",
+    confirmLabel: "Yes, go to Highlighter",
+    abortLabel: "No Thanks",
+    onConfirm: () => {
+      window.open('https://highlighter.com', '_blank')?.focus();
+    },
+    onAbort: () => {
+      app?.actions.closeConfirmModal();
+    },
+  };
+
   return (
     <div id={props.id} class={styles.navMenu}>
       <nav class={styles.sideNav}>
@@ -90,24 +105,49 @@ const NavMenu: Component< { id?: string } > = (props) => {
       </nav>
       <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
         <div class={styles.callToAction}>
-          <Show
-            when={isBigScreen()}
+          <Switch
             fallback={
-              <ButtonPrimary
-                id={props.id}
-                onClick={account?.actions?.showNewNoteForm}
+              <Show
+                when={isBigScreen()}
+                fallback={
+                  <ButtonPrimary
+                    id={props.id}
+                    onClick={account?.actions?.showNewNoteForm}
+                  >
+                    <div class={styles.postIcon}></div>
+                  </ButtonPrimary>
+                }
               >
-                <div class={styles.postIcon}></div>
-              </ButtonPrimary>
+                <ButtonPrimary
+                  id={props.id}
+                  onClick={account?.actions?.showNewNoteForm}
+                >
+                  {intl.formatMessage(tActions.newNote)}
+                </ButtonPrimary>
+              </Show>
             }
           >
-            <ButtonPrimary
-              id={props.id}
-              onClick={account?.actions?.showNewNoteForm}
-            >
-              {intl.formatMessage(tActions.newNote)}
-            </ButtonPrimary>
-          </Show>
+            <Match when={loc.pathname.startsWith('/reads') || loc.pathname.startsWith('/e/naddr')}>
+              <Show
+                when={isBigScreen()}
+                fallback={
+                  <ButtonPrimary
+                    id={props.id}
+                    onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                  >
+                    <div class={styles.postIcon}></div>
+                  </ButtonPrimary>
+                }
+              >
+                <ButtonPrimary
+                  id={props.id}
+                  onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                >
+                  {intl.formatMessage(tActions.newArticle)}
+                </ButtonPrimary>
+              </Show>
+            </Match>
+          </Switch>
         </div>
       </Show>
 

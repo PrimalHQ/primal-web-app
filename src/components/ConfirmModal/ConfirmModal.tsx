@@ -15,7 +15,7 @@ const ConfirmModal: Component<{
   title?: string,
   description?: string,
   confirmLabel?: string,
-  abortLablel?: string
+  abortLabel?: string
   onConfirm?: () => void,
   onAbort?: () => void,
 }> = (props) => {
@@ -45,7 +45,7 @@ const ConfirmModal: Component<{
               onClick={props.onAbort}
               light={true}
             >
-              {props.abortLablel || intl.formatMessage(t.abort)}
+              {props.abortLabel || intl.formatMessage(t.abort)}
             </ButtonSecondary>
           </Show>
         </div>
