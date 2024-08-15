@@ -146,7 +146,7 @@ const Home: Component = () => {
 
       if (params.topic) {
         context?.actions.clearNotes();
-        context?.actions.fetchNotes(`{\"id\":\"feed-reads\",\"topic\":\"${decodeURIComponent(params.topic)}\"}`, APP_ID);
+        context?.actions.fetchNotes(`{\"kind\":\"reads\",\"topic\":\"${decodeURIComponent(params.topic)}\"}`, APP_ID);
         return;
       }
 
