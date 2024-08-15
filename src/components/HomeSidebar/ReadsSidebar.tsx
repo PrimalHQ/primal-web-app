@@ -26,6 +26,8 @@ import ArticleShort from '../ArticlePreview/ArticleShort';
 import AuthorSubscribe from '../AuthorSubscribe/AuthorSubscribe';
 import { A } from '@solidjs/router';
 import { getRandomIntegers } from '../../utils';
+import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
+import ReadsFeaturedTopicsSkeleton from '../Skeleton/ReadsFeaturedTopicsSkeleton';
 
 const sidebarOptions = [
   {
@@ -222,7 +224,13 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         </div>
 
         <div class={styles.sectionTopPicks}>
-          <For each={reads?.topPicks}>
+          <For each={reads?.topPicks}
+            fallback={
+              <For each={Array(3)}>
+                { () => <ArticlePreviewSidebarSkeleton />}
+              </For>
+            }
+          >
             {(note) => <ArticleShort article={note} />}
           </For>
         </div>
@@ -233,7 +241,10 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         </div>
 
         <div class={styles.sectionTopics}>
-          <For each={reads?.topics}>
+          <For
+            each={reads?.topics}
+            fallback={<ReadsFeaturedTopicsSkeleton />}
+          >
             {(topic) => <A href={`/reads/${topic}`} class={styles.topic}>{topic}</A>}
           </For>
         </div>

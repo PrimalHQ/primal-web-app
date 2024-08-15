@@ -1,0 +1,178 @@
+@keyframes skeleton-fade {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.articlePreviewSkeleton {
+  width: 640px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+
+  border-bottom: 1px solid var(--devider);
+
+  animation: skeleton-fade 1500ms linear infinite;
+
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: var(--devider);
+    }
+
+    .userInfo {
+      width: 158px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+    }
+  }
+
+  .body {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+
+    .text {
+      width: 405px;
+      height: 125px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+
+    .image {
+      width: 175px;
+      height: 125px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+
+  .topZaps {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .zaps {
+      width: 160px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+    }
+  }
+
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .stat {
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background-color: var(--devider);
+    }
+  }
+}
+
+.articlePreviewSidebarSkeleton {
+  width: 300px;
+  height: 120px;
+  padding-block: 12px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 4px;
+
+  border-bottom: 1px solid var(--devider);
+
+  animation: skeleton-fade 1500ms linear infinite;
+
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+
+    .avatar {
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background-color: var(--devider);
+    }
+
+    .userInfo {
+      width: 158px;
+      height: 12px;
+      border-radius: 6px;
+      background-color: var(--devider);
+    }
+  }
+
+  .body {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+
+    .text {
+      width: 190px;
+      height: 72px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+
+    .image {
+      width: 100px;
+      height: 72px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+}
+
+.authorSubscribeSkeleton {
+  display: block;
+  border-radius: 8px;
+  background: var(--devider);
+  width: 300px;
+  height: 108px;
+  padding: 16px;
+
+  animation: skeleton-fade 1500ms linear infinite;
+}
+
+.readsFeaturedTopicsSkeleton {
+  display: grid;
+  width: 100%;
+  height: fit-content;
+  grid-template-columns: 69px 69px 69px 69px;
+  grid-gap: 8px;
+  animation: skeleton-fade 1500ms linear infinite;
+
+  .topic {
+    width: 69px;
+    height: 24px;
+    border-radius: 12px;
+    background: var(--devider);
+  }
+}

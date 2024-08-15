@@ -41,6 +41,7 @@ import ReadsHeader from '../components/HomeHeader/ReadsHeader';
 import { Link, useParams } from '@solidjs/router';
 import { APP_ID } from '../App';
 import ButtonGhost from '../components/Buttons/ButtonGhost';
+import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
 
 
 const Home: Component = () => {
@@ -197,6 +198,12 @@ const Home: Component = () => {
       <div class={styles.readsFeed}>
         <Show
           when={context?.notes && context.notes.length > 0}
+          fallback={
+            <For each={new Array(10)}>
+              {() => <ArticlePreviewSkeleton />}
+            </For>
+
+          }
         >
           <div class={styles.feed}>
             <For each={context?.notes} >

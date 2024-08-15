@@ -21,12 +21,13 @@ import Avatar from '../Avatar/Avatar';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Loader from '../Loader/Loader';
+import AuthorSubscribeSkeleton from '../Skeleton/AuthorSubscribeSkeleton';
 import { Tier, TierCost } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './AuthorSubscribe.module.scss';
 
-const AuthoreSubscribe: Component<{
+const AuthorSubscribe: Component<{
   id?: string,
   author: PrimalUser | undefined,
 }> = (props) => {
@@ -114,40 +115,45 @@ const AuthoreSubscribe: Component<{
   };
 
   return (
-    <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
-      <Show when={props.author?.picture}>
-        <div class={styles.imageHolder}>
-          <img class={styles.image} src={props.author?.picture} />
-        </div>
-      </Show>
-      <div class={styles.userInfo}>
-        <div class={styles.userBasicData}>
-          <div class={styles.userName}>
-            {userName(props.author)}
-            <VerificationCheck user={props.author} />
+    <Show
+      when={props.author}
+      fallback={<AuthorSubscribeSkeleton />}
+    >
+      <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
+        <Show when={props.author?.picture}>
+          <div class={styles.imageHolder}>
+            <img class={styles.image} src={props.author?.picture} />
           </div>
-          <div class={styles.nip05}>
-            {props.author?.nip05}
-          </div>
-        </div>
-        <div class={styles.userAdditionalData}>
-          <div class={styles.userAbout}>
-            {props.author?.about}
-          </div>
-          <Show when={props.author?.userStats?.followers_count}>
-            <div class={styles.userStats}>
-              <div class={styles.number}>
-                {humanizeNumber(props.author?.userStats?.followers_count || 0)}
-              </div>
-              <div class={styles.unit}>
-                followers
-              </div>
+        </Show>
+        <div class={styles.userInfo}>
+          <div class={styles.userBasicData}>
+            <div class={styles.userName}>
+              {userName(props.author)}
+              <VerificationCheck user={props.author} />
             </div>
-          </Show>
+            <div class={styles.nip05}>
+              {props.author?.nip05}
+            </div>
+          </div>
+          <div class={styles.userAdditionalData}>
+            <div class={styles.userAbout}>
+              {props.author?.about}
+            </div>
+            <Show when={props.author?.userStats?.followers_count}>
+              <div class={styles.userStats}>
+                <div class={styles.number}>
+                  {humanizeNumber(props.author?.userStats?.followers_count || 0)}
+                </div>
+                <div class={styles.unit}>
+                  followers
+                </div>
+              </div>
+            </Show>
+          </div>
         </div>
-      </div>
-    </A>
+      </A>
+    </Show>
   );
 }
 
-export default hookForDev(AuthoreSubscribe);
+export default hookForDev(AuthorSubscribe);
