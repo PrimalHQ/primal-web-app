@@ -21,7 +21,7 @@ import  styles from './PrimalMarkdown.module.scss';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { Ctx } from '@milkdown/ctx';
-import { decodeIdentifier, npubToHex } from '../../lib/keys';
+import { decodeIdentifier, hexToNpub, npubToHex } from '../../lib/keys';
 import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { getUserProfileInfo } from '../../lib/profile';
@@ -460,10 +460,52 @@ const PrimalMarkdown: Component<{
       if (href.startsWith('nostr:')) {
         const [__, id] = href?.split(':');
 
-        if (id.startsWith('npub')) {
-          navigate(`/p/${id}`);
-          return false;
+        if (
+          !id.startsWith('npub') &&
+          !id.startsWith('note') &&
+          !id.startsWith('nevent') &&
+          !id.startsWith('naddr') &&
+          !id.startsWith('nprofile')
+        ) return false;
+
+        const decode = nip19.decode(id);
+
+        switch (decode.type) {
+          case 'npub':
+            navigate(`/p/${id}`);
+            break;
+          case 'note':
+            navigate(`/e/${id}`);
+            break;
+          case 'nprofile':
+            const npub = hexToNpub(decode.data.pubkey);
+            navigate(`/p/${npub}`);
+            break;
+          case 'nevent':
+            if ([Kind.Text].includes(decode.data.kind)) {
+              const nId = nip19.noteEncode(decode.data.id);
+              navigate(`/e/${nId}`);
+            }
+
+            if ([Kind.LongForm].includes(decode.data.kind)) {
+              // TODO HANDLE THIS CASE
+            }
+
+            if ([Kind.Metadata].includes(decode.data.kind)) {
+              const nId = hexToNpub(decode.data.id);
+              navigate(`/p/${nId}`);
+            }
+            break;
+          case 'naddr':
+            if ([Kind.Text, Kind.LongForm].includes(decode.data.kind)) {
+              navigate(`/e/${id}`);
+            }
+            break;
+          default:
+            break;
         }
+
+        return false;
       }
 
       if (href.startsWith('hl:')) {
