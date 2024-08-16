@@ -512,6 +512,8 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
     const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
     const kind = Kind.LongForm;
 
+    const naddr = nip19.naddrEncode({ identifier, pubkey, kind });
+
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
 
@@ -520,8 +522,8 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
     let tz: TopZap[] = [];
 
-    if (topZaps && topZaps[msg.id]) {
-      tz = topZaps[msg.id] || [];
+    if (topZaps && (topZaps[naddr] || topZaps[msg.id])) {
+      tz = topZaps[naddr] || topZaps[msg.id] || [];
 
       for(let i=0; i<tz.length; i++) {
         if (userMentionIds.includes(tz[i].pubkey)) continue;

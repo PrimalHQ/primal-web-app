@@ -595,7 +595,15 @@ const Longform: Component< { naddr: string } > = (props) => {
         }
       }
 
-      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+      const coorTag = zapInfo.tags.find((t: string[]) => t[0] === 'a');
+
+      let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1]
+
+      if (coorTag) {
+        const coor = coorTag[1];
+        const [kind, pubkey, identifier] = coor.split(':');
+        eventId = nip19.naddrEncode({ kind, pubkey, identifier})
+      }
 
       const zap: TopZap = {
         id: zapInfo.id,
