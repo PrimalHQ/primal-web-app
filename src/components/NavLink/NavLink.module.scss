@@ -8,7 +8,7 @@
 
 .navLink {
   position: relative;
-  margin: 0px 0px 36px 0px;
+  margin: 0px 0px 24px 0px;
   padding: 0px;
   background: none;
   border: none;
@@ -17,6 +17,10 @@
   justify-content: flex-start;
   align-items: center;
   width: 138px;
+
+  &:last-child {
+    margin-bottom: 36px;
+  }
 
   a {
     display: flex;

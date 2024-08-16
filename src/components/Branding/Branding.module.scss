@@ -9,6 +9,14 @@
     height: 35px;
   }
 
+  .logoBig {
+    background-image: var(--logo-big);
+    background-size: contain;
+    margin-right: 10px;
+    width: 124px;
+    height: 36px;
+  }
+
   span {
     // margin-right: 12px;
     font-family: "Roboto Black";
@@ -26,6 +34,14 @@
     background-size: contain;
     margin-right: 0px;
     width: 36px;
+    height: 36px;
+  }
+
+  .logoBig {
+    background-image: var(--logo-big);
+    background-size: contain;
+    margin-right: 0px;
+    width: 124px;
     height: 36px;
   }
 }
