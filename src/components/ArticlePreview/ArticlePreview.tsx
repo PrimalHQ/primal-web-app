@@ -237,6 +237,28 @@ const ArticlePreview: Component<{
     return m;
   }
 
+  const authorAvatar = () => {
+    const url = props.article.user.picture;
+    setMissingChacheImage(() => false);
+
+    let m = media?.actions.getMediaUrl(url, 's');
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'm');
+    }
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'o');
+    }
+
+    if (!m) {
+      m = url;
+      setMissingChacheImage(() => true);
+    }
+
+    return m;
+  }
+
   const onImageLoaded = () => {
     props.onRender && props.onRender(props.article, articlePreview);
   };
@@ -341,7 +363,7 @@ const ArticlePreview: Component<{
             when={props.article.image}
             fallback={
               <Show
-                when={props.article.user.picture}
+                when={authorAvatar()}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
                 <img src={props.article.user.picture} onload={onImageLoaded} />

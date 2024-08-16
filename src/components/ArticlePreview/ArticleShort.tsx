@@ -54,6 +54,27 @@ const ArticlePreview: Component<{
 
     return m;
   }
+  const authorAvatar = () => {
+    const url = props.article.user.picture;
+    setMissingChacheImage(() => false);
+
+    let m = media?.actions.getMediaUrl(url, 's');
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'm');
+    }
+
+    if (!m) {
+      m = media?.actions.getMediaUrl(url, 'o');
+    }
+
+    if (!m) {
+      m = url;
+      setMissingChacheImage(() => true);
+    }
+
+    return m;
+  }
 
   return (
     <A
@@ -82,7 +103,12 @@ const ArticlePreview: Component<{
         <div class={styles.image}>
           <Show
             when={props.article.image}
-            fallback={<div class={styles.placeholderImage}></div>}
+            fallback={
+              <img
+                src={authorAvatar()}
+                class={isDev && missingCacheImage() ? 'redBorder' : ''}
+              />
+            }
           >
             <img
               src={articleImage()}
