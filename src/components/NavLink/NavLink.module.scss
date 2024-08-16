@@ -1,14 +1,14 @@
 @mixin iconNav($url, $color) {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background-color: $color;
-  -webkit-mask: $url no-repeat center;
-  mask: $url no-repeat center;
+  -webkit-mask: $url no-repeat 0/100%;
+  mask: $url no-repeat 0/100%;
 }
 
 .navLink {
   position: relative;
-  margin: 0px 0px 36px 0px;
+  margin: 0px 0px 24px 0px;
   padding: 0px;
   background: none;
   border: none;
@@ -16,13 +16,13 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 158px;
+  width: 138px;
 
   a {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
 
     >div {
       background-color: var(--text-secondary);
@@ -32,10 +32,9 @@
       display: flex;
       color: var(--text-secondary);
       background: none;
-      font-size: 18px;
-      font-style: normal;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 24px;
+      line-height: 20px;
     }
 
     &:focus {
@@ -106,7 +105,7 @@
     .label {
       color: var(--text-primary);
       background: none;
-      font-weight: 600;
+      font-weight: 400;
     }
   }
 }
