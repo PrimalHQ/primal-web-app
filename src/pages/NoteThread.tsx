@@ -24,7 +24,6 @@ import { unwrap } from 'solid-js/store';
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
   const account = useAccountContext();
-  const params = useParams();
   const intl = useIntl();
   const navigate = useNavigate();
 
