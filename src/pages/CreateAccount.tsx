@@ -204,7 +204,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       }
     });
 
-    const { success } = await sendProfile({ ...metadata }, account?.proxyThroughPrimal || false, account.activeRelays, relaySettings);
+    const { success } = await sendProfile({ ...metadata }, account?.proxyThroughPrimal || false, account.relays, relaySettings);
 
     if (success) {
       await (new Promise((res) => setTimeout(() => res(true), 100)));
