@@ -137,3 +137,14 @@
     margin: 0;
   }
 }
+
+.shortNote {
+  overflow: hidden;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -ms-box-orient: vertical;
+  text-overflow: ellipsis;
+}

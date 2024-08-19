@@ -1249,7 +1249,7 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div ref={thisNote} id={id()} class={styles.parsedNote} >
+    <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.shorten ? styles.shortNote : ''}`} >
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
