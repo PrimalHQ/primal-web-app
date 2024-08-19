@@ -183,9 +183,9 @@ const ArticleHighlightActionMenu: Component<{
       account.activeRelays, account?.relaySettings
     );
 
-    if (!success) {
-      props.onCreate && props.onCreate(highlight)
-    }
+    // if (!success) {
+    //   props.onCreate && props.onCreate(highlight)
+    // }
   }
 
   const onComment = async () => {
