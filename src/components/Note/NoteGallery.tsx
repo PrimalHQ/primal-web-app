@@ -27,7 +27,7 @@ const NoteGallery: Component<{
   const id = generatePrivateKey();
 
   const lightbox = new PhotoSwipeLightbox({
-    gallery: `#galleryimage_${id}`,
+    gallery: `#galleryimage_${props.note.id}`,
     children: `a.image_${props.note.post.noteId}`,
     showHideAnimationType: 'zoom',
     initialZoomLevel: 'fit',
@@ -68,7 +68,7 @@ const NoteGallery: Component<{
   });
 
   return (
-    <div id={`galleryimage_${id}`} data-note={props.note.id} data-url={store.url}>
+    <div id={`galleryimage_${props.note.id}`} data-note={props.note.id} data-url={store.url}>
       <NoteImage
         class={`noteimage image_${props.note.post.noteId} cell_${1}`}
         src={store.url}
