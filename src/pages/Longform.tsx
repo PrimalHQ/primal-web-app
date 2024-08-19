@@ -57,6 +57,7 @@ import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHigh
 import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
 import { logWarning } from "../lib/logger";
 import PageCaption from "../components/PageCaption/PageCaption";
+import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
 
 export type LongFormData = {
   title: string,
@@ -924,7 +925,10 @@ const Longform: Component< { naddr: string } > = (props) => {
 
 
   return (
-    <>
+    <Show
+      when={store.article}
+      fallback={<ArticleSkeleton />}
+    >
       <Wormhole
         to="search_section"
       >
@@ -949,25 +953,26 @@ const Longform: Component< { naddr: string } > = (props) => {
             author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
           />
         </Wormhole>
+
         <div class={styles.header}>
           <Show when={store.article?.user}>
-          <A href={`/p/${store.article?.user.npub}`}>
-            <div class={styles.author}>
-              <Avatar user={store.article?.user} size="sm" />
+            <A href={`/p/${store.article?.user.npub}`}>
+              <div class={styles.author}>
+                <Avatar user={store.article?.user} size="sm" />
 
-              <div class={styles.userInfo}>
-                <div class={styles.userName}>
-                  {userName(store.article?.user)}
-                  <VerificationCheck user={store.article?.user} />
-                </div>
-                <Show when={store.article?.user.nip05}>
-                  <div class={styles.nip05}>
-                    {nip05Verification(store.article?.user)}
+                <div class={styles.userInfo}>
+                  <div class={styles.userName}>
+                    {userName(store.article?.user)}
+                    <VerificationCheck user={store.article?.user} />
                   </div>
-                </Show>
+                  <Show when={store.article?.user.nip05}>
+                    <div class={styles.nip05}>
+                      {nip05Verification(store.article?.user)}
+                    </div>
+                  </Show>
+                </div>
               </div>
-            </div>
-          </A>
+            </A>
           </Show>
 
           <Show when={store.hasTiers}>
@@ -1139,7 +1144,7 @@ const Longform: Component< { naddr: string } > = (props) => {
           </For>
         </div>
       </Show>
-    </>);
+    </Show>);
 }
 
 export default Longform;
