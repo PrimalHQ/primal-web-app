@@ -2,6 +2,7 @@ import { A } from '@solidjs/router';
 import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Portal } from 'solid-js/web';
+import { wordsPerMinute } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
@@ -342,7 +343,7 @@ const ArticlePreview: Component<{
           </div>
           <div class={styles.tags}>
             <div class={styles.estimate}>
-              {Math.ceil(props.article.wordCount / 238)} minute read
+              {Math.ceil(props.article.wordCount / wordsPerMinute)} minute read
             </div>
             <For each={props.article.tags?.slice(0, 3)}>
               {tag => (
