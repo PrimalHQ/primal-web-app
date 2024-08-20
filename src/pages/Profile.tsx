@@ -51,6 +51,7 @@ import { getAuthorSubscriptionTiers } from '../lib/feed';
 import { zapSubscription } from '../lib/zap';
 import { updateStore, store } from '../services/StoreService';
 import { subsTo } from '../sockets';
+import { humanizeNumber } from '../lib/stats';
 
 const Profile: Component = () => {
 
@@ -617,7 +618,11 @@ const Profile: Component = () => {
       />
 
       <StickySidebar>
-        <ProfileSidebar notes={profile?.sidebar.notes} profile={profile?.userProfile} />
+        <ProfileSidebar
+          notes={profile?.sidebarNotes.notes}
+          articles={profile?.sidebarArticles.notes}
+          profile={profile?.userProfile}
+        />
       </StickySidebar>
 
       <Wormhole to='search_section'>
@@ -758,6 +763,17 @@ const Profile: Component = () => {
                 <div class={styles.verified}>
                   <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
                 </div>
+
+                <div class={styles.followings}>
+                  <div class={styles.stats}>
+                    <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
+                    <div class={styles.label}>following</div>
+                  </div>
+                  <div class={styles.stats}>
+                    <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
+                    <div class={styles.label}>followers</div>
+                  </div>
+                </div>
               </Show>
             </div>
 
@@ -766,13 +782,29 @@ const Profile: Component = () => {
 
         <ProfileAbout about={profile?.userProfile?.about} />
 
-
-        <Show when={profile?.userProfile?.website}>
+        <Show when={profile?.userProfile}>
           <div class={styles.profileLinks}>
             <div class={styles.website}>
+              <Show when={profile?.userProfile?.website}>
                 <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
                   {sanitize(profile?.userProfile?.website || '')}
                 </a>
+              </Show>
+            </div>
+
+            <div class={styles.commonFollows}>
+              <div class={styles.label}>Followed by</div>
+              <div class={styles.avatars}>
+                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
+                  <Avatar size="micro" user={profile?.userProfile} />
+                </A>
+                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
+                  <Avatar size="micro" user={profile?.userProfile} />
+                </A>
+                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
+                  <Avatar size="micro" user={profile?.userProfile} />
+                </A>
+              </div>
             </div>
           </div>
         </Show>

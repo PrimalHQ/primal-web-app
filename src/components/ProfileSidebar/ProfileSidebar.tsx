@@ -1,5 +1,6 @@
 import { Component, For, Show } from 'solid-js';
 import {
+  PrimalArticle,
   PrimalNote,
   PrimalUser
 } from '../../types/primal';
@@ -10,10 +11,12 @@ import { useIntl } from '@cookbook/solid-intl';
 import { userName } from '../../stores/profile';
 import { profile as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import ArticleShort from '../ArticlePreview/ArticleShort';
 
 
 const ProfileSidebar: Component<{
   notes: PrimalNote[] | undefined,
+  articles: PrimalArticle[] | undefined,
   profile: PrimalUser | undefined,
   id?: string,
 }> = (props) => {
@@ -25,7 +28,23 @@ const ProfileSidebar: Component<{
       <Show when={props.profile}>
         <div class={styles.headingTrending}>
           <div>
-            {intl.formatMessage(t.sidebarCaption)}
+            {intl.formatMessage(t.sidebarCaptionReads)}
+          </div>
+        </div>
+
+        <Show
+          when={props.articles && props.articles.length > 0}
+        >
+          <div class={styles.articles}>
+            <For each={props.articles}>
+              {(article) => <ArticleShort article={article} shorter={true} />}
+            </For>
+          </div>
+        </Show>
+
+        <div class={styles.headingTrending}>
+          <div>
+            {intl.formatMessage(t.sidebarCaptionNotes)}
           </div>
         </div>
 

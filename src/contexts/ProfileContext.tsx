@@ -91,7 +91,8 @@ export type ProfileContextStore = {
   lastReply: PrimalNote | undefined,
   lastGallery: PrimalNote | undefined,
   following: string[],
-  sidebar: FeedPage & { notes: PrimalNote[] },
+  sidebarNotes: FeedPage & { notes: PrimalNote[] },
+  sidebarArticles: FeedPage & { notes: PrimalArticle[] },
   filterReason: { action: 'block' | 'allow', pubkey?: string, group?: string } | null,
   contacts: PrimalUser[],
   followers: PrimalUser[],
@@ -190,7 +191,15 @@ export const initialData = {
   isFetchingFollowers: false,
   relays: {},
   isFetchingRelays: false,
-  sidebar: {
+  sidebarNotes: {
+    messages: [],
+    users: {},
+    postStats: {},
+    notes: [],
+    topZaps: {},
+    noteActions: {},
+  },
+  sidebarArticles: {
     messages: [],
     users: {},
     postStats: {},
@@ -564,7 +573,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
-    updateStore('sidebar', () => ({
+    updateStore('sidebarNotes', () => ({
+      messages: [],
+      users: {},
+      postStats: {},
+      notes: [],
+      noteActions: {},
+    }));
+    updateStore('sidebarArticles', () => ({
       messages: [],
       users: {},
       postStats: {},
@@ -1122,20 +1138,20 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
 
-  const updateSidebar = (content: NostrEventContent) => {
+  const updateSidebar = (content: NostrEventContent, scope: 'sidebarNotes' | 'sidebarArticles' = 'sidebarNotes') => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
-      updateStore('sidebar', 'users', () => ({ [user.pubkey]: user })
+      updateStore(scope, 'users', () => ({ [user.pubkey]: user })
       );
       return;
     }
 
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.Text, Kind.Repost, Kind.LongForm].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
-        updateStore('sidebar', 'messages', (msgs) => [ ...msgs, message ]);
+        updateStore(scope, 'messages', (msgs) => [ ...msgs, message ]);
       }
 
       return;
@@ -1145,7 +1161,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const statistic = content as NostrStatsContent;
       const stat = JSON.parse(statistic.content);
 
-      updateStore('sidebar', 'postStats', () => ({ [stat.event_id]: stat }));
+      updateStore(scope, 'postStats', () => ({ [stat.event_id]: stat }));
       return;
     }
 
@@ -1166,13 +1182,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const saveSidebar = (page: FeedPage) => {
-    const newPosts = sortByScore(convertToNotes(page));
+  const saveSidebar = (page: FeedPage, scope: 'sidebarNotes' | 'sidebarArticles' = 'sidebarNotes') => {
 
-    updateStore('sidebar', 'notes', () => [ ...newPosts ]);
+    if (scope === 'sidebarNotes') {
+     const newPosts = sortByScore(convertToNotes(page));
+      updateStore(scope, 'notes', () => [ ...newPosts ]);
+    }
+
+    if (scope === 'sidebarArticles') {
+      const newPosts = convertToArticles(page);
+      updateStore(scope, 'notes', () => [ ...newPosts ]);
+    }
+
   };
 
-  const setProfileKey = (profileKey?: string) => {
+  const setProfileKey = async (profileKey?: string) => {
     if (profileKey === store.profileKey) return;
 
     updateStore('profileKey', () => profileKey);
@@ -1185,6 +1209,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isProfileFetched', () => false);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
+      const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);
+
+      updateStore('sidebarArticles', () => ({ notes: [...articles ]}))
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
     }
@@ -1400,7 +1427,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if (subId === `profile_scored_${APP_ID}`) {
       if (type === 'EOSE') {
-        saveSidebar(store.sidebar);
+        saveSidebar(store.sidebarNotes);
         return;
       }
 
@@ -1409,6 +1436,18 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         return;
       }
     }
+
+    // if (subId === `profile_articles_latest_${APP_ID}`) {
+    //   if (type === 'EOSE') {
+    //     saveSidebar(store.sidebarArticles, 'sidebarArticles');
+    //     return;
+    //   }
+
+    //   if (type === 'EVENT') {
+    //     updateSidebar(content, 'sidebarArticles');
+    //     return;
+    //   }
+    // }
 
     if (subId === `profile_future_${APP_ID}`) {
       if (type === 'EOSE') {

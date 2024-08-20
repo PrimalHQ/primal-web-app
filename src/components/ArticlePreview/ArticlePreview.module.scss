@@ -267,6 +267,14 @@
           width: 146px;
         }
       }
+
+      &.shorter {
+        width: 188px;
+
+        .title {
+          width: 188px;
+        }
+      }
     }
     .image {
       min-width: 100px;

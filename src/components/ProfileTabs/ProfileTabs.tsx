@@ -180,19 +180,6 @@ const ProfileTabs: Component<{
     >
       <Tabs onChange={onChangeValue}>
         <Tabs.List class={styles.profileTabs}>
-          <Show when={(profile?.userStats.long_form_note_count || 0) > 0}>
-            <Tabs.Trigger class={styles.profileTab} value="articles">
-              <div class={styles.stat}>
-                <div class={styles.statNumber}>
-                  {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
-                </div>
-                <div class={styles.statName}>
-                  {intl.formatMessage(t.stats.articles)}
-                </div>
-              </div>
-            </Tabs.Trigger>
-          </Show>
-
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
@@ -215,8 +202,22 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
+          <Tabs.Trigger class={styles.profileTab} value="articles">
+            <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
+              </div>
+              <div class={styles.statName}>
+                {intl.formatMessage(t.stats.articles)}
+              </div>
+            </div>
+          </Tabs.Trigger>
+
           <Tabs.Trigger class={styles.profileTab} value="gallery">
             <div class={styles.stat}>
+              <div class={styles.statNumber}>
+                {humanizeNumber(0)}
+              </div>
               <div class={styles.statName}>
                 {intl.formatMessage(t.stats.gallery)}
               </div>
@@ -234,7 +235,7 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="follows">
+          {/* <Tabs.Trigger class={styles.profileTab} value="follows">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
                 {humanizeNumber(profile?.userStats?.follows_count || 0)}
@@ -254,7 +255,7 @@ const ProfileTabs: Component<{
                 {intl.formatMessage(t.stats.followers)}
               </div>
             </div>
-          </Tabs.Trigger>
+          </Tabs.Trigger> */}
 
           <Tabs.Trigger class={styles.profileTab} value="relays">
             <div class={styles.stat}>

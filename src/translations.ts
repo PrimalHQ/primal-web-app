@@ -1147,9 +1147,14 @@ export const placeholders = {
 };
 
 export const profile = {
-  sidebarCaption: {
-    id: 'profile.sidebar.caption',
-    defaultMessage: 'Popular notes',
+  sidebarCaptionReads: {
+    id: 'profile.sidebar.captionReads',
+    defaultMessage: 'Latest Reads',
+    description: 'Caption for the profile page sidebar showing a list of latest reads by the profile',
+  },
+  sidebarCaptionNotes: {
+    id: 'profile.sidebar.captionNotes',
+    defaultMessage: 'Popular Notes',
     description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
   },
   sidebarNoNotes: {
@@ -1175,7 +1180,7 @@ export const profile = {
   stats: {
     gallery: {
       id: 'profile.gallery',
-      defaultMessage: 'Gallery',
+      defaultMessage: 'Media',
       description: 'Label for gallery profile stat',
     },
     follow: {
