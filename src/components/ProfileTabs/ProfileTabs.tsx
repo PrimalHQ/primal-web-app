@@ -602,7 +602,7 @@ const ProfileTabs: Component<{
         </Tabs.Content>
 
         <Tabs.Content class={styles.tabContent} value="zaps">
-          <div class={styles.totalSats}>
+          {/* <div class={styles.totalSats}>
             <span class={styles.totalSatsLabel}>
               {intl.formatMessage(t.stats.totalSats)}:
             </span>
@@ -614,7 +614,7 @@ const ProfileTabs: Component<{
                 {intl.formatMessage(t.stats.sats)}
               </span>
             </span>
-          </div>
+          </div> */}
           <div class={styles.profileNotes}>
             <Show
               when={!profile?.isFetchingZaps}
