@@ -658,12 +658,14 @@ export type PrimalRepost = {
 };
 
 export type PrimalZap = {
-  sender?: PrimalUser,
-  reciver?: PrimalUser,
+  sender?: PrimalUser | string,
+  reciver?: PrimalUser | string,
   created_at?: number,
   amount: number,
   message: string,
   id: string,
+  zappedId?: string,
+  zappedKind?: number,
 };
 
 export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;

@@ -55,6 +55,7 @@ import { subscribeTo } from "../sockets";
 import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
+import { fetchUserZaps } from "../handleFeeds";
 
 
 export type ProfileContextStore = {
@@ -67,6 +68,8 @@ export type ProfileContextStore = {
   notes: PrimalNote[],
   replies: PrimalNote[],
   zaps: PrimalZap[],
+  zappedNotes: PrimalNote[],
+  zappedArticles: PrimalArticle[],
   gallery: PrimalNote[],
   zapListOffset: number,
   lastZap: PrimalZap | undefined,
@@ -175,6 +178,8 @@ export const initialData = {
   repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
   zaps: [],
+  zappedNotes: [],
+  zappedArticles: [],
   zappers: {},
   zapListOffset: 0,
   lastNote: undefined,
@@ -246,75 +251,81 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 
 
-  const fetchZapList = (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
+  const fetchZapList = async (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
     if (!pubkey) return;
     const subIdProfiles = `profile_zaps_${APP_ID}`;
 
-    let zapList: NostrUserZaps[] = [];
+    const { zaps, notes, articles } = await fetchUserZaps(pubkey, subIdProfiles, until, offset, 20);
 
-    const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
-      if (type === 'EOSE') {
-        // let zapsToAdd: PrimalZap[] = [];
-        for (let i=0; i< zapList.length; i++) {
-          const zapContent = zapList[i];
+    updateStore('zaps', (zs) => [ ...zs, ...zaps ]);
+    updateStore('zappedNotes', (zn) => [ ...zn,  ...notes ]);
+    updateStore('zappedArticles', (za) => [ ...za, ...articles ]);
 
-          const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
-          const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
-          const senderPubkey = zapEvent.pubkey as string;
+    // let zapList: NostrUserZaps[] = [];
 
-          const zap: PrimalZap = {
-            id: zapContent.id,
-            message: zapEvent.content || '',
-            amount: parseBolt11(bolt11) || 0,
-            sender: store.zappers[senderPubkey],
-            reciver: store.userProfile,
-            created_at: zapContent.created_at,
-          };
+    // const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
+    //   if (type === 'EOSE') {
+    //     // let zapsToAdd: PrimalZap[] = [];
+    //     for (let i=0; i< zapList.length; i++) {
+    //       const zapContent = zapList[i];
 
-          // zapsToAdd.push(zap);
-          updateStore('zaps', store.zaps.length, () => ({ ...zap }));
-        }
+    //       const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+    //       const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+    //       const senderPubkey = zapEvent.pubkey as string;
 
-        // updateStore('zaps', (zs) => [...zs, ...zapsToAdd]);
+    //       const zap: PrimalZap = {
+    //         id: zapContent.id,
+    //         message: zapEvent.content || '',
+    //         amount: parseBolt11(bolt11) || 0,
+    //         sender: store.zappers[senderPubkey],
+    //         reciver: store.userProfile,
+    //         created_at: zapContent.created_at,
+    //       };
 
-        // updateStore('zaps', store.zaps.length, () => ({
-        //   amount: store.zaps[store.zaps.length -1].amount,
-        //   id: 'PAGE_END',
-        // }));
+    //       // zapsToAdd.push(zap);
+    //       updateStore('zaps', store.zaps.length, () => ({ ...zap }));
+    //     }
 
-        updateStore('isFetchingZaps', () => false);
-        unsubProfiles();
-        return;
-      }
+    //     // updateStore('zaps', (zs) => [...zs, ...zapsToAdd]);
 
-      if (type === 'EVENT') {
-        if (content?.kind === Kind.Zap) {
-          zapList.push(content);
-        }
+    //     // updateStore('zaps', store.zaps.length, () => ({
+    //     //   amount: store.zaps[store.zaps.length -1].amount,
+    //     //   id: 'PAGE_END',
+    //     // }));
 
-        if (content?.kind === Kind.Metadata) {
-          let user = JSON.parse(content.content);
+    //     updateStore('isFetchingZaps', () => false);
+    //     unsubProfiles();
+    //     return;
+    //   }
 
-          if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
-            user.displayName = user.display_name;
-          }
-          user.pubkey = content.pubkey;
-          user.npub = hexToNpub(content.pubkey);
-          user.created_at = content.created_at;
+    //   if (type === 'EVENT') {
+    //     if (content?.kind === Kind.Zap) {
+    //       zapList.push(content);
+    //     }
 
-          updateStore('zappers', () => ({ [user.pubkey]: { ...user } }));
-          return;
-        }
-      }
-    });
+    //     if (content?.kind === Kind.Metadata) {
+    //       let user = JSON.parse(content.content);
 
-    if (store.lastZap) {
-      updateStore('lastZap', () => ({ ...store.lastZap }));
-    }
+    //       if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+    //         user.displayName = user.display_name;
+    //       }
+    //       user.pubkey = content.pubkey;
+    //       user.npub = hexToNpub(content.pubkey);
+    //       user.created_at = content.created_at;
 
-    indicateFetching && updateStore('isFetchingZaps', () => true);
+    //       updateStore('zappers', () => ({ [user.pubkey]: { ...user } }));
+    //       return;
+    //     }
+    //   }
+    // });
 
-    getProfileZapList(pubkey, subIdProfiles, until, offset);
+    // if (store.lastZap) {
+    //   updateStore('lastZap', () => ({ ...store.lastZap }));
+    // }
+
+    // indicateFetching && updateStore('isFetchingZaps', () => true);
+
+    // getProfileZapList(pubkey, subIdProfiles, until, offset, 20);
   };
 
   const fetchNextZapsPage = () => {

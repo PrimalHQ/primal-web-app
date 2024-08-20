@@ -74,14 +74,14 @@ export const getProfileFollowerList = (pubkey: string | undefined, subid: string
 }
 
 
-export const getProfileZapList = (pubkey: string | undefined, subid: string, until = 0, offset = 0, extended = false) => {
+export const getProfileZapList = (pubkey: string | undefined, subid: string, until = 0, offset = 0, limit = 20, extended = false) => {
   if (!pubkey) {
     return;
   }
 
   let payload = {
     receiver: pubkey,
-    limit: 20,
+    limit,
     offset,
   };
 

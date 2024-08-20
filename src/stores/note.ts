@@ -135,12 +135,12 @@ export const parseEmptyReposts = (page: FeedPage) => {
   return reposts;
 };
 
-const parseKind6 = (message: NostrNoteContent) => {
+const parseKind6 = (message: NostrNoteContent, defaultKind = 1) => {
   try {
     return JSON.parse(message.content);
   } catch (e) {
     return {
-      kind: 1,
+      kind: defaultKind,
       content: '',
       id: message.id,
       created_at: message.created_at,
@@ -506,7 +506,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
   return  pageMessages.map((message) => {
 
-    const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message) : message;
+    const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message, Kind.LongForm) : message;
 
     const pubkey = msg.pubkey;
     const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];

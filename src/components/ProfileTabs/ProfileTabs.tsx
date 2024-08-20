@@ -4,7 +4,7 @@ import { A } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import { imageRegex, imageRegexG, profileContactListPage } from "../../constants";
+import { imageRegex, imageRegexG, Kind, profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { useMediaContext } from "../../contexts/MediaContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
@@ -14,7 +14,7 @@ import { humanizeNumber } from "../../lib/stats";
 import { store } from "../../services/StoreService";
 import { userName } from "../../stores/profile";
 import { profile as t, actions as tActions } from "../../translations";
-import { PrimalUser } from "../../types/primal";
+import { PrimalUser, PrimalZap } from "../../types/primal";
 import ArticlePreview from "../ArticlePreview/ArticlePreview";
 import Avatar from "../Avatar/Avatar";
 import ButtonCopy from "../Buttons/ButtonCopy";
@@ -26,6 +26,7 @@ import ProfileContact from "../ProfileContact/ProfileContact";
 
 import styles from  "./ProfileTabs.module.scss";
 import NoteGallery from "../Note/NoteGallery";
+import ProfileNoteZap from "../ProfileNoteZap/ProfileNoteZap";
 
 
 const ProfileTabs: Component<{
@@ -172,6 +173,19 @@ const ProfileTabs: Component<{
       return test;
     });
   };
+
+  const getZapSubject = (zap: PrimalZap) => {
+    if (zap.zappedKind === Kind.Text) {
+      return profile?.zappedNotes.find(n => n.id === zap.zappedId);
+    }
+
+    if (zap.zappedKind === Kind.LongForm) {
+      return profile?.zappedArticles.find(a => a.noteId === zap.zappedId);
+    }
+
+
+    return undefined;
+  }
 
   return (
     <Show
@@ -619,42 +633,46 @@ const ProfileTabs: Component<{
                 </div>
               }>
                 {zap =>
-                  <A
-                    class={styles.zapItem}
-                    href={`/p/${zap.sender?.npub}`}
-                    data-zap-id={zap.id}
-                  >
-                    <Avatar src={zap.sender?.picture} size="xs" />
+                  <ProfileNoteZap
+                    zap={zap}
+                    subject={getZapSubject(zap)}
+                  />
+                  // <A
+                  //   class={styles.zapItem}
+                  //   href={`/p/${zap.sender?.npub}`}
+                  //   data-zap-id={zap.id}
+                  // >
+                  //   <Avatar src={zap.sender?.picture} size="xs" />
 
-                    <div class={styles.zapInfo}>
-                      <div class={styles.zapHeader}>
-                        <span class={styles.zapName}>
-                          {userName(zap.sender)}
-                        </span>
+                  //   <div class={styles.zapInfo}>
+                  //     <div class={styles.zapHeader}>
+                  //       <span class={styles.zapName}>
+                  //         {userName(zap.sender)}
+                  //       </span>
 
-                        <Show when={zap.created_at}>
-                          <span
-                            class={styles.zapTime}
-                            title={date(zap.created_at || 0).date.toLocaleString()}
-                          >
-                            {date(zap.created_at || 0).label}
-                          </span>
-                        </Show>
-                      </div>
-                      <div class={styles.zapMessage}>
-                        {zap.message}
-                      </div>
-                    </div>
+                  //       <Show when={zap.created_at}>
+                  //         <span
+                  //           class={styles.zapTime}
+                  //           title={date(zap.created_at || 0).date.toLocaleString()}
+                  //         >
+                  //           {date(zap.created_at || 0).label}
+                  //         </span>
+                  //       </Show>
+                  //     </div>
+                  //     <div class={styles.zapMessage}>
+                  //       {zap.message}
+                  //     </div>
+                  //   </div>
 
-                    <div class={styles.zapValue} title={`${zap.amount} ${intl.formatMessage(t.stats.sats)}`}>
-                      <div class={styles.zapAmount}>
-                        {humanizeNumber(zap.amount)}
-                      </div>
-                      <div class={styles.zapUnit}>
-                        {intl.formatMessage(t.stats.sats)}
-                      </div>
-                    </div>
-                  </A>
+                  //   <div class={styles.zapValue} title={`${zap.amount} ${intl.formatMessage(t.stats.sats)}`}>
+                  //     <div class={styles.zapAmount}>
+                  //       {humanizeNumber(zap.amount)}
+                  //     </div>
+                  //     <div class={styles.zapUnit}>
+                  //       {intl.formatMessage(t.stats.sats)}
+                  //     </div>
+                  //   </div>
+                  // </A>
                 }
               </For>
               <Paginator loadNextPage={profile?.actions.fetchNextZapsPage} isSmall={true} />

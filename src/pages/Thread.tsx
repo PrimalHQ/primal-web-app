@@ -98,7 +98,6 @@ const EventPage: Component = () => {
   }
 
   const render = () => {
-    console.log('NIP19: ', nip19)
     const { id, identifier } = params;
 
     if (!id && !identifier) return <NotFound />;
