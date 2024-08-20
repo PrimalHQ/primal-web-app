@@ -195,6 +195,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
+  gap: 4px;
   text-decoration: none;
   color: unset;
   width: 100%;
@@ -241,9 +242,9 @@
       width: 196px;
       .title {
         color: var(--text-primary);
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 800;
-        line-height: 24px;
+        line-height: 20px;
         width: 196px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -277,22 +278,22 @@
       }
     }
     .image {
-      min-width: 100px;
-      min-height: 72px;
-      max-width: 100px;
-      max-height: 72px;
+      min-width: 80px;
+      min-height: 56px;
+      max-width: 80px;
+      max-height: 56px;
       border: 1px solid var(--devider);
       border-radius: 8px;
       overflow: hidden;
       img {
-        width: 100px;
-        height: 72px;
+        width: 80px;
+        height: 56px;
         object-fit: cover;
       }
 
       .placeholderImage {
-        width: 100px;
-        height: 70px;
+        width: 80px;
+        height: 56px;
         background-image: var(--reads-placeholder-image);
         background-size: contain;
       }

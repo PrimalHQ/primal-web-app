@@ -759,22 +759,22 @@ const Profile: Component = () => {
             </div>
 
             <div class={styles.verificationInfo}>
-              <Show when={profile?.userProfile?.nip05}>
                 <div class={styles.verified}>
-                  <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                  <Show when={profile?.userProfile?.nip05}>
+                    <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                  </Show>
                 </div>
 
-                <div class={styles.followings}>
-                  <div class={styles.stats}>
-                    <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
-                    <div class={styles.label}>following</div>
-                  </div>
-                  <div class={styles.stats}>
-                    <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
-                    <div class={styles.label}>followers</div>
-                  </div>
+              <div class={styles.followings}>
+                <div class={styles.stats}>
+                  <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
+                  <div class={styles.label}>following</div>
                 </div>
-              </Show>
+                <div class={styles.stats}>
+                  <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
+                  <div class={styles.label}>followers</div>
+                </div>
+              </div>
             </div>
 
           </Show>
