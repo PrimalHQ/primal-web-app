@@ -312,7 +312,6 @@ const ProfileTabs: Component<{
                 </div>
               </Match>
               <Match when={profile && profile.articles.length > 0}>
-                <div>{profile?.articles.length}</div>
                 <For each={profile?.articles}>
                   {article => (
                     <ArticlePreview article={article} />
