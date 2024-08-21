@@ -19,6 +19,7 @@ const TextInput: Component<{
   autocomplete?: string,
   name?: string,
   noExtraSpace?: boolean,
+  icon?: JSXElement,
 }> = (props) => {
 
   return (
@@ -36,6 +37,8 @@ const TextInput: Component<{
         </Show>
 
         <div class={styles.inputWrapper}>
+          {props.icon}
+
           <TextField.Input
             ref={props.ref}
             class={styles.input}

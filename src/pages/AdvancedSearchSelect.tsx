@@ -1,6 +1,6 @@
 import { Select } from '@kobalte/core/select';
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, onMount } from 'solid-js';
+import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { style } from 'solid-js/web';
 import Avatar from '../components/Avatar/Avatar';
@@ -21,6 +21,7 @@ const AdvancedSearchSelectBox: Component<{
   value: string
   options: string[],
   onChange: (selection: string) => void,
+  short?: boolean,
 }> = (props) => {
 
 
@@ -37,10 +38,13 @@ const AdvancedSearchSelectBox: Component<{
       )}
     >
       <Select.Label />
-      <Select.Trigger class={styles.trigger}>
+      <Select.Trigger class={`${styles.trigger} ${props.short ? styles.shortTrigger : ''}`}>
         <Select.Value<string>>
           {s => s.selectedOption()}
         </Select.Value>
+        <Show when={!props.short}>
+          <div class={styles.chevronIcon}></div>
+        </Show>
       </Select.Trigger>
       <Select.Description />
       <Select.ErrorMessage />

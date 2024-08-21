@@ -66,7 +66,7 @@
   --center-col-w: 640px;
   --right-col-w: 348px;
   --full-site-w: 1162px;
-  --header-height: 84px;
+  --header-height: 72px;
 
   --search-input-width: 300px;
 
@@ -154,6 +154,10 @@ body::after{
     url(./assets/icons/highlight_comment.svg)
     url(./assets/icons/highlight_remove.svg)
     url(./assets/icons/copy.svg)
+    url(./assets/icons/search.svg)
+    url(./assets/icons/search_filled.svg)
+    url(./assets/icons/close.svg)
+    url(./assets/icons/caret.svg)
     url(./assets/icons/lightning_white.svg);
 }
 

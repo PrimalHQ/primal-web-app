@@ -1,8 +1,9 @@
 import { TextField } from '@kobalte/core/text-field';
+import { Slider } from "@kobalte/core/slider";
+
 import { A } from '@solidjs/router';
 import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { style } from 'solid-js/web';
 import Avatar from '../components/Avatar/Avatar';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -34,7 +35,8 @@ export type SearchState = {
   sentiment: string,
   kind: string,
   orientation: string,
-  duration: string,
+  minDuration: number,
+  maxDuration: number,
   command: string,
 }
 
@@ -126,7 +128,8 @@ const AdvancedSearch: Component = () => {
     sentiment: 'Neutral',
     kind: 'Notes',
     orientation: 'Any',
-    duration: '',
+    minDuration: 0,
+    maxDuration: 0,
     command: '',
   });
 
@@ -173,14 +176,15 @@ const AdvancedSearch: Component = () => {
       `orientation:${state.orientation.toLowerCase()} ` :
       '';
 
-
-    const parsedDuration = parseInt(state.duration);
-
-    let duration = durationKinds.includes(state.kind) && !isNaN(parsedDuration) && parsedDuration > 0 ?
-      `duration:${state.duration} ` :
+    const minDuration = durationKinds.includes(state.kind) && !isNaN(state.minDuration) && state.minDuration > 0 ?
+      `minduration:${state.minDuration} ` :
       '';
 
-    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${mentions}${followings}${since}${sentiment}${orient}${duration}`.trim());
+    const maxDuration = durationKinds.includes(state.kind) && !isNaN(state.maxDuration) && state.maxDuration > state.minDuration ?
+    `maxduration:${state.maxDuration} ` :
+    '';
+
+    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${mentions}${followings}${since}${sentiment}${orient}${minDuration}${maxDuration}`.trim());
 
   })
 
@@ -302,6 +306,8 @@ const AdvancedSearch: Component = () => {
 
   };
 
+  let timeout = 0;
+
   return (
     <>
       <PageTitle title="Advanced Search" />
@@ -310,6 +316,7 @@ const AdvancedSearch: Component = () => {
       >
         <Search />
       </Wormhole>
+
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
@@ -319,42 +326,165 @@ const AdvancedSearch: Component = () => {
       </TextField>
       </StickySidebar>
 
-      <div class={styles.page}>
-        <div class={styles.section}>
-
+      <div class={styles.advancedSearchPage}>
         <form onSubmit={onSubmit}>
-          <div class={styles.searchRow}>
-            <TextInput
-              name="include"
-              type="text"
-              value={state.includes}
-              placeholder="include these words..."
-              onChange={(v) => setState('includes', () => v)}
-              noExtraSpace={true}
-            />
-          </div>
+          <section>
+            <div class={styles.searchRow}>
+              <TextInput
+                name="include"
+                type="text"
+                value={state.includes}
+                placeholder="include these words..."
+                onChange={(v) => setState('includes', () => v)}
+                noExtraSpace={true}
+                icon={<div class={styles.searchIcon}></div>}
+              />
+            </div>
 
-          <div class={styles.searchRow}>
-            <TextInput
-              name="exclude"
-              type="text"
-              value={state.excludes}
-              placeholder="exclude these words..."
-              onChange={(v) => setState('excludes', () => v)}
-              noExtraSpace={true}
-            />
-          </div>
+            <div class={styles.searchRow}>
+              <TextInput
+                name="exclude"
+                type="text"
+                value={state.excludes}
+                placeholder="exclude these words..."
+                onChange={(v) => setState('excludes', () => v)}
+                noExtraSpace={true}
+                icon={<div class={styles.excludeIcon}></div>}
+              />
+            </div>
 
-          <div class={styles.searchRow}>
-            <TextInput
-              name="hashtags"
-              type="text"
-              value={state.hashtags}
-              placeholder="include hashtags..."
-              onChange={(v) => setState('hashtags', () => v)}
-              noExtraSpace={true}
-            />
-          </div>
+            <div class={styles.searchRow}>
+              <div class={styles.caption}>
+                Search kind
+              </div>
+
+              <AdvancedSearchSelectBox
+                value={state.kind}
+                options={Object.keys(kinds)}
+                onChange={setKind}
+              />
+            </div>
+
+            <Show when={orientationKinds.includes(state.kind)}>
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Orientation
+                </div>
+
+                <AdvancedSearchSelectBox
+                  value={state.orientation}
+                  options={orientations}
+                  onChange={setOrientation}
+                  short={true}
+                />
+              </div>
+            </Show>
+
+            <Show when={durationKinds.includes(state.kind)}>
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Duration (seconds)
+                </div>
+
+                <Slider
+                  class={styles.slider}
+                  name="minduration"
+                  minValue={0}
+                  maxValue={2000}
+                  defaultValue={[0,100]}
+                  value={[state.minDuration || 0, state.maxDuration || 0]}
+                  onChange={(v) => {
+                    setState('minDuration', () => v[0]);
+                    setState('maxDuration', () => v[1]);
+                  }}
+                >
+                  <Slider.Track class={styles.track}>
+                    <Slider.Fill class={styles.fill}/>
+                    <Slider.Thumb class={styles.thumb}>
+                      <Slider.Input />
+                    </Slider.Thumb>
+                    <Slider.Thumb class={styles.thumb}>
+                      <Slider.Input />
+                    </Slider.Thumb>
+                  </Slider.Track>
+                </Slider>
+
+                <TextField
+                  class={styles.shortInput}
+                  value={`${state.minDuration} - ${state.maxDuration}`}
+                  readOnly={true}
+                >
+                  <TextField.Input class={styles.input} />
+                </TextField>
+
+              </div>
+
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Min duration (seconds)
+                </div>
+
+                <Slider
+                  class={styles.slider}
+                  name="minduration"
+                  minValue={0}
+                  maxValue={state.minDuration > 2000 ? state.minDuration : 2000}
+                  value={[state.minDuration || 0]}
+                  onChange={(v) => {
+                    setState('minDuration', () => v[0]);
+                    setState('maxDuration', (d) => d < v[0] ? v[0] : d);
+                  }}
+                >
+                  <Slider.Track class={styles.track}>
+                    <Slider.Fill class={styles.fill}/>
+                    <Slider.Thumb class={styles.thumb}>
+                      <Slider.Input />
+                    </Slider.Thumb>
+                  </Slider.Track>
+                </Slider>
+
+                <TextField
+                  class={styles.shortInput}
+                  value={`${state.minDuration}`}
+                  readOnly={true}
+                >
+                  <TextField.Input class={styles.input} />
+                </TextField>
+
+              </div>
+
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Max duration (seconds)
+                </div>
+
+                <Slider
+                  class={styles.slider}
+                  name="maxduration"
+                  minValue={state.minDuration || 0}
+                  maxValue={state.maxDuration > state.minDuration + 2000 ? state.maxDuration : state.minDuration + 2000}
+                  value={[state.maxDuration || 0]}
+                  onChange={(v) => setState('maxDuration', () => v[0])}
+                >
+                  <Slider.Track class={styles.track}>
+                    <Slider.Fill class={styles.fill}/>
+                    <Slider.Thumb class={styles.thumb}>
+                      <Slider.Input />
+                    </Slider.Thumb>
+                  </Slider.Track>
+                </Slider>
+
+                <TextField
+                  class={styles.shortInput}
+                  value={`${state.maxDuration}`}
+                  readOnly={true}
+                >
+                  <TextField.Input class={styles.input} />
+                </TextField>
+
+              </div>
+            </Show>
+          </section>
 
           <div class={styles.searchRow}>
             <div class={styles.caption}>
@@ -514,52 +644,20 @@ const AdvancedSearch: Component = () => {
           </div>
 
           <div class={styles.searchRow}>
-            <div class={styles.caption}>
-              Search kind
-            </div>
-
-            <AdvancedSearchSelectBox
-              value={state.kind}
-              options={Object.keys(kinds)}
-              onChange={setKind}
-            />
-          </div>
-
-          <Show when={durationKinds.includes(state.kind)}>
-            <div class={styles.searchRow}>
-              <div class={styles.caption}>
-                Duration
-              </div>
-
               <TextInput
-                name="duration"
+                name="hashtags"
                 type="text"
-                value={state.duration}
-                placeholder="duration in seconds..."
-                onChange={(v) => setState('duration', () => v)}
+                value={state.hashtags}
+                placeholder="include hashtags..."
+                onChange={(v) => setState('hashtags', () => v)}
+                noExtraSpace={true}
               />
             </div>
-          </Show>
-
-          <Show when={orientationKinds.includes(state.kind)}>
-            <div class={styles.searchRow}>
-              <div class={styles.caption}>
-                Orientation
-              </div>
-
-              <AdvancedSearchSelectBox
-                value={state.orientation}
-                options={orientations}
-                onChange={setOrientation}
-              />
-            </div>
-          </Show>
 
           <div class={styles.submitButton}>
             <A class={styles.primaryButton} href={`/asearch/${encodeURIComponent(state.command)}`}>Search</A>
           </div>
         </form>
-        </div>
       </div>
     </>
   );
