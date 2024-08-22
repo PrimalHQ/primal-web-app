@@ -1,20 +1,7 @@
 import { Select } from '@kobalte/core/select';
-import { A } from '@solidjs/router';
-import { Component, createEffect, For, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { style } from 'solid-js/web';
-import Avatar from '../components/Avatar/Avatar';
-import ButtonPrimary from '../components/Buttons/ButtonPrimary';
-import PageCaption from '../components/PageCaption/PageCaption';
-import PageTitle from '../components/PageTitle/PageTitle';
-import Search from '../components/Search/Search';
-import SearchUsers from '../components/Search/SearchUsers';
-import StickySidebar from '../components/StickySidebar/StickySidebar';
-import TextInput from '../components/TextInput/TextInput';
-import Wormhole from '../components/Wormhole/Wormhole';
-import { userName } from '../stores/profile';
-import { PrimalUser } from '../types/primal';
-import styles from './FeedsTest.module.scss';
+import { Component, Show } from 'solid-js';
+
+import styles from './AdvancedSearch.module.scss';
 
 
 const AdvancedSearchSelectBox: Component<{
@@ -24,16 +11,21 @@ const AdvancedSearchSelectBox: Component<{
   short?: boolean,
 }> = (props) => {
 
-
   return (
     <Select
       class={styles.selectBox}
       value={props.value}
       options={props.options}
       onChange={props.onChange}
+      gutter={2}
       itemComponent={props => (
         <Select.Item class={styles.selectItem} item={props.item}>
-          <Select.ItemLabel>{props.item.rawValue}</Select.ItemLabel>
+          <Select.ItemLabel>
+            <Select.ItemIndicator>
+              <div class={styles.checkIcon}></div>
+            </Select.ItemIndicator>
+            <div>{props.item.rawValue}</div>
+          </Select.ItemLabel>
         </Select.Item>
       )}
     >
