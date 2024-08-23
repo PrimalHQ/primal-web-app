@@ -923,6 +923,24 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   };
 
+  const selectedHighlightCoAuthors = (highlight: any) => {
+    if (!highlight) return [];
+
+    const id = highlight.id;
+    const content = highlight.content;
+    const context = (highlight.tags.find((t: string[]) => t[0] === 'context') || [])[1];
+
+    const pubkeys = store.highlights.filter(hl => {
+      const ctx = (hl.tags.find((t: string[]) => t[0] === 'context') || [])[1];
+
+      return hl.content === content && ctx === context && hl.id !== id;
+    }).reduce((acc: string[], hl) => acc.includes(hl.pubkey) || hl.pubkey === highlight.pubkey ? [ ...acc] : [...acc, hl.pubkey], []);
+
+    console.log('PUBKEYS: ', pubkeys);
+
+    return store.users.filter(u => pubkeys.includes(u.pubkey));
+  }
+
 
   return (
     <Show
@@ -951,6 +969,7 @@ const Longform: Component< { naddr: string } > = (props) => {
             highlight={store.selectedHighlight}
             comments={store.heightlightReplies}
             author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
+            getCoAuthors={selectedHighlightCoAuthors}
           />
         </Wormhole>
 

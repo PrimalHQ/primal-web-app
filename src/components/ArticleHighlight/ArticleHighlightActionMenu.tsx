@@ -138,33 +138,61 @@ const ArticleHighlightActionMenu: Component<{
 
     const naddr = `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
 
-    const { content, context } = generateContentAndContext(props.selection);
+    if (props.highlight === 'NEW_HIGHLIGHT') {
+      const { content, context } = generateContentAndContext(props.selection);
 
-    const highlight = {
-      id: generatePrivateKey(),
-      kind: Kind.Highlight,
-      context,
-      content,
-      tags: [
-        ['p', props.article.pubkey],
-        ['a', naddr],
-        ['context', context],
-      ],
-      created_at: (new Date()).getTime() / 1_000,
-      sig: 'UNSIGNED',
-      pubkey: props.article.pubkey,
-    };
+      const highlight = {
+        id: generatePrivateKey(),
+        kind: Kind.Highlight,
+        context,
+        content,
+        tags: [
+          ['p', props.article.pubkey],
+          ['a', naddr],
+          ['context', context],
+        ],
+        created_at: (new Date()).getTime() / 1_000,
+        sig: 'UNSIGNED',
+        pubkey: account.publicKey || '',
+      };
 
-    then && then(highlight);
+      then && then(highlight);
 
-    const { success, note } = await createHighlight(content, context, props.selection);
+      const { success, note } = await createHighlight(content, context, props.selection);
 
-    if (success && note) {
-      then && then(note, highlight.id)
-    }
+      if (success && note) {
+        then && then(note, highlight.id)
+      }
 
-    if (!success) {
-      props.onRemove && props.onRemove(props.highlight.id);
+      if (!success) {
+        props.onRemove && props.onRemove(highlight.id);
+      }
+    } else {
+      const content = props.highlight.content;
+      const context = (props.highlight.tags.find((t: string[]) => t[0] === 'context') || [])[1];
+
+      const highlight = {
+        id: generatePrivateKey(),
+        kind: Kind.Highlight,
+        context,
+        content,
+        tags: [ ...props.highlight.tags ],
+        created_at: (new Date()).getTime() / 1_000,
+        sig: 'UNSIGNED',
+        pubkey: account.publicKey || '',
+      };
+
+      then && then(highlight);
+
+      const { success, note } = await createHighlight(content, context);
+
+      if (success && note) {
+        then && then(note, highlight.id)
+      }
+
+      if (!success) {
+        props.onRemove && props.onRemove(highlight.id);
+      }
     }
   }
 
@@ -256,16 +284,6 @@ const ArticleHighlightActionMenu: Component<{
       style={`top: ${topP()}px; left: ${leftP()}px;`}
     >
       <Switch>
-        <Match when={account?.publicKey && props.highlight === 'NEW_HIGHLIGHT'}>
-          <button
-            data-highlight-menu-option="highlight"
-            onMouseDown={onNewHighlight}
-          >
-            <div class={styles.iconHighlight}></div>
-            <div class={styles.iconCaption}>Highlight</div>
-          </button>
-        </Match>
-
         <Match when={account?.publicKey && props.highlight.pubkey === account?.publicKey}>
           <button
             data-highlight-menu-option="remove"
@@ -273,6 +291,16 @@ const ArticleHighlightActionMenu: Component<{
           >
             <div class={styles.iconHighlightRemove}></div>
             <div class={styles.iconCaption}>Remove</div>
+          </button>
+        </Match>
+
+        <Match when={account?.publicKey}>
+          <button
+            data-highlight-menu-option="highlight"
+            onMouseDown={onNewHighlight}
+          >
+            <div class={styles.iconHighlight}></div>
+            <div class={styles.iconCaption}>Highlight</div>
           </button>
         </Match>
       </Switch>

@@ -35,6 +35,7 @@ const ArticleHighlightComments: Component<{
   highlight: any,
   comments: PrimalNote[],
   author: PrimalUser,
+  getCoAuthors: (highlight: any) => PrimalUser[],
 }> = (props) => {
   const account = useAccountContext();
 
@@ -69,6 +70,14 @@ const ArticleHighlightComments: Component<{
     setHeight(() => actualH);
   });
 
+  const [coAuthors, setCoAuthors] = createSignal<PrimalUser[]>([]);
+
+  createEffect(() => {
+    const coauth = props.getCoAuthors(props.highlight);
+
+    setCoAuthors(() => [...coauth]);
+  })
+
   const style = () => {
     let ret = '';
 
@@ -94,10 +103,23 @@ const ArticleHighlightComments: Component<{
           <div class={styles.author}>
             <div class={styles.iconHighlight}></div>
             <Avatar user={props.author} size="xxs" />
+            <For each={coAuthors().slice(0, 5)}>
+              {author => (
+                <Avatar user={author} size="xxs" />
+              )}
+            </For>
+            <Show when={coAuthors().length > 5}><div class={styles.dots}>...</div></Show>
           </div>
 
           <div class={styles.caption}>
-            <span class={styles.name}>{userName(props.author)}</span> highlighted
+            <span class={styles.name}>{userName(props.author)}</span>
+            <Show when={coAuthors().length === 1}>
+              <span class={styles.suffix}>and <span class={styles.name}>{userName(coAuthors()[0])}</span></span>
+            </Show>
+            <Show when={coAuthors().length > 1}>
+              <span class={styles.suffix}>and {coAuthors().length} others</span>
+            </Show>
+            <span class={styles.suffix}>highlighted</span>
           </div>
         </div>
         <For each={comms()}>
