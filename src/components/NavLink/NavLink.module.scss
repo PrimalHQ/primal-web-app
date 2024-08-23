@@ -157,6 +157,7 @@
   .bubble {
     width: 8px;
     height: 8px;
+    min-width: 8px;
     >div {
       display: none;
     }

@@ -54,6 +54,15 @@
       height: 32px;
     }
 
+
+    .logoBig {
+      background-image: var(--logo);
+      background-size: contain;
+      margin-right: 10px;
+      width: 32px;
+      height: 32px;
+    }
+
     span {
       display: none;
     }
