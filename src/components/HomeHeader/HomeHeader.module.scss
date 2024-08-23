@@ -116,9 +116,10 @@
   margin: 0px;
   outline: none;
   width: 100%;
+  height: 54px;
 
-  padding-top: 18px;
-  padding-bottom: 12px;
+  // padding-top: 18px;
+  // padding-bottom: 12px;
   padding-inline: 20px;
   border-bottom: 1px solid var(--devider);
   z-index: var(--z-index-header);
@@ -165,7 +166,8 @@
   margin: 0px;
   outline: none;
 
-  padding-block: 21px;
+  // padding-block: 21px;
+  height: 76px;
   padding-inline: 20px;
   border: none;
   border-radius: 0;
@@ -314,9 +316,11 @@
   position: fixed;
   background: var(--background-site);
   top: 0;
-  padding-top: 10px;
-  height: 84px;
+  height: var(--header-height);
   z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 @media only screen and (max-width: 720px) {
