@@ -39,6 +39,8 @@
     justify-content: flex-start;
     align-items: center;
     gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
 
     .userPill {
       position: relative;
