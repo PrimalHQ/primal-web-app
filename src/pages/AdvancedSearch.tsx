@@ -532,43 +532,20 @@ const AdvancedSearch: Component = () => {
                     min={0}
                     max={2000}
                     value={[state.minDuration || 0, state.maxDuration || 0]}
-                    onChange={(v: number[]) => {
+                    onSlide={(v: number[]) => {
                       setState('minDuration', () => v[0]);
                       setState('maxDuration', () => v[1]);
                     }}
+                    onInput={(v: string) => {
+                      const val = v.split('-').map(x => parseInt(x.trim()));
+                      const lo = val[0] || 0;
+                      const hi = val[1] || val[0];
+
+                      setState('minDuration', () => lo);
+                      setState('maxDuration', () => hi);
+                    }}
                   />
                 </div>
-
-                {/* <Slider
-                  class={styles.slider}
-                  name="minduration"
-                  minValue={0}
-                  maxValue={2000}
-                  defaultValue={[0,100]}
-                  value={[state.minDuration || 0, state.maxDuration || 0]}
-                  onChange={(v) => {
-                    setState('minDuration', () => v[0]);
-                    setState('maxDuration', () => v[1]);
-                  }}
-                >
-                  <Slider.Track class={styles.track}>
-                    <Slider.Fill class={styles.fill}/>
-                    <Slider.Thumb class={styles.thumb}>
-                      <Slider.Input />
-                    </Slider.Thumb>
-                    <Slider.Thumb class={styles.thumb}>
-                      <Slider.Input />
-                    </Slider.Thumb>
-                  </Slider.Track>
-                </Slider> */}
-
-                {/* <TextField
-                  class={styles.shortInput}
-                  value={`${state.minDuration} - ${state.maxDuration}`}
-                  readOnly={true}
-                >
-                  <TextField.Input class={styles.input} />
-                </TextField> */}
 
               </div>
 
@@ -581,11 +558,17 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.minDuration > 2000 ? state.minDuration : 2000}
+                    max={state.maxDuration > 2000 ? state.maxDuration : 2000}
                     value={[state.minDuration || 0]}
-                    onChange={(v: number[]) => {
+                    onSlide={(v: number[]) => {
                       setState('minDuration', () => v[0]);
                       setState('maxDuration', (d) => d < v[0] ? v[0] : d);
+                    }}
+                    onInput={(v: string) => {
+                      const val = parseInt(v.trim()) || 0;
+
+                      setState('minDuration', () => val);
+                      setState('maxDuration', (d) => d < val ? val : d);
                     }}
                   />
                 </div>
@@ -602,7 +585,12 @@ const AdvancedSearch: Component = () => {
                     min={state.minDuration || 0}
                     max={state.maxDuration > state.minDuration + 2000 ? state.maxDuration : state.minDuration + 2000}
                     value={[state.maxDuration || 0]}
-                    onChange={(v: number[]) => setState('maxDuration', () => v[0])}
+                    onSlide={(v: number[]) => setState('maxDuration', () => v[0])}
+                    onInput={(v: string) => {
+                      const val = parseInt(v.trim()) || 0;
+
+                      setState('maxDuration', () => val);
+                    }}
                   />
                 </div>
               </div>
@@ -746,8 +734,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minScore || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minScore', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minScore', () => val);
                           }}
                           dark={true}
                         />
@@ -764,8 +757,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minInteractions || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minInteractions', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minInteractions', () => val);
                           }}
                           dark={true}
                         />
@@ -782,8 +780,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minLikes || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minLikes', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minLikes', () => val);
                           }}
                           dark={true}
                         />
@@ -800,8 +803,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minZaps || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minZaps', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minZaps', () => val);
                           }}
                           dark={true}
                         />
@@ -818,8 +826,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minReplies || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minReplies', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minReplies', () => val);
                           }}
                           dark={true}
                         />
@@ -836,8 +849,13 @@ const AdvancedSearch: Component = () => {
                           min={0}
                           max={100}
                           value={[state.filters.minReposts || 0]}
-                          onChange={(v: number[]) => {
+                          onSlide={(v: number[]) => {
                             setState('filters', 'minReposts', () => v[0]);
+                          }}
+                          onInput={(v: string) => {
+                            const val = parseInt(v.trim()) || 0;
+
+                            setState('filters', 'minReposts', () => val);
                           }}
                           dark={true}
                         />

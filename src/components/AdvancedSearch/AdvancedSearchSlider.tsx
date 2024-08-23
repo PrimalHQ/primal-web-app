@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { nip05Verification, userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
@@ -26,12 +26,20 @@ const AdvancedSearchSlider: Component<{
   name?: string,
   defaultValue?: number[],
   dark?: boolean,
-  onChange: (value: number[]) => void,
+  onSlide: (value: number[]) => void,
+  onInput?: (value: string) => void,
   id?: string,
 }> = (props) => {
 
   const min = () => props.min || 0;
-  const max = () => props.max || 100;
+  const max = () => {
+    const m = props.max || 100;
+    const hi = props.value[1] || props.value[0];
+
+    return hi > m ? hi : m;
+  };
+
+  const isRange = () => props.value.length > 1;
 
   return (
 
@@ -44,7 +52,7 @@ const AdvancedSearchSlider: Component<{
         maxValue={max()}
         defaultValue={props.defaultValue}
         value={props.value}
-        onChange={props.onChange}
+        onChange={props.onSlide}
       >
         <Slider.Track class={styles.track}>
           <Slider.Fill class={styles.fill}/>
@@ -52,7 +60,7 @@ const AdvancedSearchSlider: Component<{
           <Slider.Thumb class={styles.thumb}>
             <Slider.Input />
           </Slider.Thumb>
-          <Show when={props.value.length > 1}>
+          <Show when={isRange()}>
             <Slider.Thumb class={styles.thumb}>
               <Slider.Input />
             </Slider.Thumb>
@@ -61,9 +69,10 @@ const AdvancedSearchSlider: Component<{
       </Slider>
 
       <TextField
-        class={`${styles.shortInput} ${props.dark ? styles.dark : ''} ${props.value.length > 1 ? styles.long : ''}`}
-        value={props.value.length > 1 ? `${props.value[0]} - ${props.value[1]}` : `${props.value[0]}`}
-        readOnly={true}
+        class={`${styles.shortInput} ${props.dark ? styles.dark : ''} ${isRange() ? styles.long : ''}`}
+        value={isRange() ? `${props.value[0]} - ${props.value[1]}` : `${props.value[0]}`}
+        onChange={props.onInput}
+        readOnly={!props.onInput}
       >
         <TextField.Input class={styles.input} />
       </TextField>
