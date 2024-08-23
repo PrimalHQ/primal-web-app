@@ -192,6 +192,12 @@
   }
 }
 
+.separator {
+  width: 100%;
+  height: 1px;
+  background-color: var(--devider);
+}
+
 .welcomeMessage {
   display: flex;
   justify-content: space-between;

@@ -114,12 +114,13 @@ const HomeHeader: Component< {
             {intl.formatMessage(t.noteCallToAction)}
           </div>
         </button>
+        <div class={styles.separator}></div>
       </Show>
       <div class={styles.bigFeedSelect}>
         <Show
           when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}
         >
-          <FeedSelect big={true} />
+          <FeedSelect big={false} />
         </Show>
 
         <Show
