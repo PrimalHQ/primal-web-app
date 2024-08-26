@@ -137,6 +137,7 @@ const orientations = ['Any', 'Vertical', 'Horizontal'];
 
 const sortings: Record<string, () => string> = {
   'Time': () => '',
+  'Content Score': () => 'orderby:score',
 };
 
 const AdvancedSearch: Component = () => {
