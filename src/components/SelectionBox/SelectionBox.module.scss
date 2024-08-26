@@ -23,7 +23,8 @@
 }
 
 .trigger {
-  background-color: var(--background-site);
+  background: none;
+  // background-color: var(--background-site);
   margin: 0;
   padding: 0;
   border: none;
@@ -45,7 +46,8 @@
 }
 
 .triggerBig {
-  background-color: var(--background-site);
+  background: none;
+  // background-color: var(--background-site);
   margin: 0;
   padding: 0;
   border: none;

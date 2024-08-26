@@ -320,13 +320,16 @@
 
 .readsHeader {
   position: fixed;
-  background: var(--background-site);
+  background-color: var(--background-modal);
   top: 0;
   height: var(--header-height);
   z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  z-index: var(--z-index-header);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 @media only screen and (max-width: 720px) {
