@@ -638,6 +638,8 @@
     justify-content: space-between;
     width: 100%;
 
+    animation: skeleton-fade 2500ms linear infinite;
+
     .footerOptionN {
       width: 16px;
       height: 16px;
