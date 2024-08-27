@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 
 import {
   EventCoordinate,
@@ -27,6 +27,8 @@ import ArticleShort from '../ArticlePreview/ArticleShort';
 import { userName } from '../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { getRandomIntegers } from '../../utils';
+import ArticleTotalZapsSkeleton from '../Skeleton/ArticleTotalZapsSkeleton';
+import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 
 
 const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: PrimalArticle }  > = (props) => {
@@ -61,23 +63,53 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
 
   return (
     <div id={props.id} class={styles.articleSidebar}>
-      <Show when={account?.isKeyLookupDone && props.article}>
-        <Show when={props.article.satszapped > 0}>
-          <div class={styles.headingPicks}>
-            Total zaps
-          </div>
+      <Show
+        when={account?.isKeyLookupDone && props.article}
+      >
+        <Show
+          when={!isFetchingArticles()}
+          fallback={
+            <>
+              <div class={styles.headingPicks}>
+                Total zaps
+              </div>
 
-          <div class={styles.section}>
-            <div class={styles.totalZaps}>
-              <span class={styles.totalZapsIcon} />
-              <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
-              <span class={styles.unit}>sats</span>
+              <div class={styles.section}>
+                <ArticleTotalZapsSkeleton />
+              </div>
+            </>
+          }
+        >
+          <Show when={props.article.satszapped > 0}>
+            <div class={styles.headingPicks}>
+              Total zaps
             </div>
-          </div>
+
+            <div class={styles.section}>
+              <div class={styles.totalZaps}>
+                <span class={styles.totalZapsIcon} />
+                <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
+                <span class={styles.unit}>sats</span>
+              </div>
+            </div>
+          </Show>
         </Show>
 
         <Show
           when={!isFetchingArticles()}
+          fallback={
+            <>
+              <div class={styles.headingReads}>
+                More Reads from {userName(props.article.user)}
+              </div>
+
+              <div class={styles.section}>
+                <ArticlePreviewSidebarSkeleton />
+                <ArticlePreviewSidebarSkeleton />
+                <ArticlePreviewSidebarSkeleton />
+              </div>
+            </>
+          }
         >
           <Show
             when={recomended.length > 0}

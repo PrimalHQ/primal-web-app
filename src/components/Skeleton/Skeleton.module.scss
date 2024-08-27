@@ -685,3 +685,25 @@
     }
   }
 }
+
+.articleTotalZapsSkeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .zapNumber {
+    width: 160px;
+    height: 28px;
+    border-radius: 14px;
+    background-color: var(--devider);
+  }
+
+  .zapSats {
+    width: 90px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: var(--devider);
+  }
+}

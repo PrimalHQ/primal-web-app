@@ -936,8 +936,6 @@ const Longform: Component< { naddr: string } > = (props) => {
       return hl.content === content && ctx === context && hl.id !== id;
     }).reduce((acc: string[], hl) => acc.includes(hl.pubkey) || hl.pubkey === highlight.pubkey ? [ ...acc] : [...acc, hl.pubkey], []);
 
-    console.log('PUBKEYS: ', pubkeys);
-
     return store.users.filter(u => pubkeys.includes(u.pubkey));
   }
 
