@@ -116,6 +116,7 @@
 
 .bubble {
   display: flex;
+  position: absolute;
   justify-content: center;
   align-items: center;
   min-width: 18px;
@@ -123,6 +124,9 @@
 
   margin-left: 2px;
   margin-top: -8px;
+
+  top: 0;
+  right: 0;
 
   font-family: 'Roboto Condensed';
   font-weight: 500;
@@ -137,11 +141,13 @@
 
   &.doubleSize {
     width: 24px;
+    right: -6px;
   }
 
   &.tripleSize {
     width: 26px;
     padding-left: 2px;
+    right: -8px;
   }
 }
 
@@ -158,6 +164,7 @@
     width: 8px;
     height: 8px;
     min-width: 8px;
+    position: relative;
     >div {
       display: none;
     }
@@ -165,11 +172,13 @@
     &.doubleSize {
       width: 8px;
       height: 8px;
+      right: 0px;
     }
 
     &.tripleSize {
       width: 8px;
       height: 8px;
+      right: 0px;
     }
   }
 }
