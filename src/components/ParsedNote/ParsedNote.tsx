@@ -1024,10 +1024,16 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 1);
 
-        let [_, id] = token.split(':');
+        let [nostr, id] = token.split(':');
 
         if (!id) {
           return <>{token}</>;
+        }
+
+        let prefix = '';
+
+        if (nostr !== 'nostr') {
+          prefix = nostr.split('nostr')[0] || '';
         }
 
         let end = '';
@@ -1052,20 +1058,20 @@ const ParsedNote: Component<{
 
           const label = user ? userName(user) : truncateNpub(npub);
 
-          let link = <span>@{label}{end}</span>;
+          let link = <span>{prefix}@{label}{end}</span>;
 
           if (props.noLinks === 'links') {
-            link = <><span class='linkish'>@{label}</span>{end}</>;
+            link = <>{prefix}<span class='linkish'>@{label}</span>{end}</>;
           }
 
           if (!props.noLinks) {
             link = !user ?
-              <><A href={path}>@{label}</A>{end}</> :
-              <>{MentionedUserLink({ user })}{end}</>;
+              <>{prefix}<A href={path}>@{label}</A>{end}</> :
+              <>{prefix}{MentionedUserLink({ user })}{end}</>;
           }
           return link;
         } catch (e) {
-          return <span class={styles.error}> {token}</span>;
+          return <>{prefix}<span class={styles.error}>{token}</span></>;
         }
       }}
     </For>
