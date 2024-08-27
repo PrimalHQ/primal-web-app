@@ -147,6 +147,7 @@ const ParsedNote: Component<{
   noLinks?: 'links' | 'text',
   noPreviews?: boolean,
   shorten?: boolean,
+  veryShort?: boolean,
   isEmbeded?: boolean,
   width?: number,
   margins?: number,
@@ -1249,7 +1250,7 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.shorten ? styles.shortNote : ''}`} >
+    <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>

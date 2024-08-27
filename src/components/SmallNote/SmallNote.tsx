@@ -103,6 +103,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
               ignoreMedia={true}
               ignoreLinebreaks={true}
               shorten={true}
+              veryShort={true}
             />
           </div>
         </div>
