@@ -157,6 +157,7 @@ export const emptyStats = {
   total_zap_count: 0,
   total_satszapped: 0,
   relay_count: 0,
+  media_count: 0,
 };
 
 export const initialData = {

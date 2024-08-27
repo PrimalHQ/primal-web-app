@@ -503,6 +503,7 @@ export type UserStats = {
   total_zap_count: number,
   total_satszapped: number,
   relay_count: number,
+  media_count: number,
   long_form_note_count?: number,
 };
 

@@ -232,7 +232,7 @@ const ProfileTabs: Component<{
           <Tabs.Trigger class={styles.profileTab} value="gallery">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
-                {humanizeNumber(0)}
+                {humanizeNumber(profile?.userStats.media_count || 0)}
               </div>
               <div class={styles.statName}>
                 {intl.formatMessage(t.stats.gallery)}
