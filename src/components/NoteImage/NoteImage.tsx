@@ -95,6 +95,16 @@ const NoteImage: Component<{
     return h > 680;
   };
 
+  const thumbSrc = () => {
+    const s = src();
+
+    if (!s || !s.includes('cdn.primal.net')) return s;
+
+    const thumb = s.replace('s=o', 's=s');
+
+    return thumb;
+  }
+
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
   onMount(() => {
@@ -132,6 +142,7 @@ const NoteImage: Component<{
         data-pswp-height={zoomH()}
         data-image-group={props.imageGroup}
         data-cropped={true}
+        data-thumb-src={thumbSrc()}
         target="_blank"
       >
         <img

@@ -33,6 +33,8 @@ const NoteGallery: Component<{
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
+    thumbSelector: `a.image_${props.note.post.noteId}`,
+    preloadFirstSlide: true,
     pswpModule: () => import('photoswipe'),
   });
 
