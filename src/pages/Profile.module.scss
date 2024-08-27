@@ -19,19 +19,19 @@
 
 .banner {
   width: 100%;
-  height: 214px;
+  height: 200px;
   overflow: hidden;
 
   img {
     width: 100%;
-    height: 214px;
+    height: 200px;
     object-fit: cover;
   }
 }
 
 .userImage {
   position: absolute;
-  top: 148px;
+  top: 136px;
   left: 15px;
   overflow: hidden;
   .avatar {
@@ -84,12 +84,12 @@
 .profileActions {
   display: flex;
   justify-content: right;
-  padding-top: 20px;
+  padding-top: 12px;
   padding-right: 8px;
-  padding-bottom: 20px;
-  height: 76px;
+  padding-bottom: 12px;
   >button, >div {
     margin-left: 8px;
+    height: 36px;
   }
 }
 
@@ -240,10 +240,10 @@
 .profileVerification {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   margin-inline: 20px;
   min-height: 52px;
-  margin-top: 14px;
+  margin-top: 12px;
 
   .basicInfo {
     display: flex;
@@ -408,6 +408,7 @@
   justify-content: flex-end;
   align-items: center;
   gap: 6px;
+  padding-right: 12px;
 
   .label {
     color: var(--text-tertiary-2);
@@ -420,7 +421,7 @@
     display: flex;
     flex-direction: row-reverse;
     .avatar {
-      margin-right: -12px;
+      margin-right: -10px;
       transition: margin 300ms ease-in-out;
     }
 
@@ -502,7 +503,7 @@
 }
 .desktopAvatar {
   display: block;
-  min-height: 142px;
+  min-height: 128px;
 }
 .addToFeedButton {
   display: block;

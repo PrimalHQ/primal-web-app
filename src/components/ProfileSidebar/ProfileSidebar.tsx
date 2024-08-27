@@ -12,6 +12,9 @@ import { userName } from '../../stores/profile';
 import { profile as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import ArticleShort from '../ArticlePreview/ArticleShort';
+import { useProfileContext } from '../../contexts/ProfileContext';
+import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
+import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 
 
 const ProfileSidebar: Component<{
@@ -21,11 +24,40 @@ const ProfileSidebar: Component<{
   id?: string,
 }> = (props) => {
 
+  const profile = useProfileContext();
   const intl = useIntl();
 
   return (
     <div id={props.id}>
-      <Show when={props.profile}>
+      <Show
+        when={profile?.profileKey && !profile.isFetchingSidebarArticles}
+        fallback={
+          <>
+            <div class={styles.headingTrending}>
+              <div>
+                {intl.formatMessage(t.sidebarCaptionReads)}
+              </div>
+            </div>
+            <div>
+              <ArticlePreviewSidebarSkeleton />
+              <ArticlePreviewSidebarSkeleton />
+            </div>
+
+            <div class={styles.headingTrending}>
+              <div>
+                {intl.formatMessage(t.sidebarCaptionNotes)}
+              </div>
+            </div>
+            <div>
+              <ShortNoteSkeleton />
+              <ShortNoteSkeleton />
+              <ShortNoteSkeleton />
+              <ShortNoteSkeleton />
+              <ShortNoteSkeleton />
+            </div>
+          </>
+        }
+      >
         <div class={styles.headingTrending}>
           <div>
             {intl.formatMessage(t.sidebarCaptionReads)}

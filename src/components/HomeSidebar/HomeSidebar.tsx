@@ -12,6 +12,7 @@ import SelectionBox from '../SelectionBox/SelectionBox';
 import Loader from '../Loader/Loader';
 import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/localStore';
 import { useHomeContext } from '../../contexts/HomeContext';
+import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 
 const sidebarOptions = [
   {
@@ -87,7 +88,18 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       <Show
         when={!home?.sidebar.isFetching}
         fallback={
-          <Loader />
+          <div>
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+            <ShortNoteSkeleton />
+          </div>
         }
       >
         <For each={home?.sidebar.notes}>

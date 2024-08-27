@@ -215,12 +215,12 @@
 
 .xxlAvatar {
   @include avatar;
-  width: 142px;
-  height: 142px;
+  width: 120px;
+  height: 120px;
 
   .missingBack {
-    width: 142px;
-    height: 142px;
+    width: 120px;
+    height: 120px;
   }
 
   .iconBackground {
@@ -328,8 +328,8 @@
 
 .xxlMissing {
   @include missing;
-  width: 142px;
-  height: 142px;
+  width: 120px;
+  height: 120px;
   font-size: 20px;
 }
 

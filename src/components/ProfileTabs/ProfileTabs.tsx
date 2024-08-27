@@ -27,6 +27,8 @@ import ProfileContact from "../ProfileContact/ProfileContact";
 import styles from  "./ProfileTabs.module.scss";
 import NoteGallery from "../Note/NoteGallery";
 import ProfileNoteZap from "../ProfileNoteZap/ProfileNoteZap";
+import FeedNoteSkeleton from "../Skeleton/FeedNoteSkeleton";
+import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
 
 
 const ProfileTabs: Component<{
@@ -290,10 +292,13 @@ const ProfileTabs: Component<{
           <div class={styles.profileNotes}>
             <Switch
               fallback={
-                <div class={styles.loader}>
-                  <Loader />
+                <div>
+                  <ArticlePreviewSkeleton />
+                  <ArticlePreviewSkeleton />
+                  <ArticlePreviewSkeleton />
                 </div>
-            }>
+              }
+            >
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -346,10 +351,13 @@ const ProfileTabs: Component<{
           <div class={styles.profileNotes}>
             <Switch
               fallback={
-                <div class={styles.loader}>
-                  <Loader />
+                <div>
+                  <FeedNoteSkeleton />
+                  <FeedNoteSkeleton />
+                  <FeedNoteSkeleton />
                 </div>
-            }>
+              }
+            >
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -402,10 +410,13 @@ const ProfileTabs: Component<{
           <div class={styles.profileNotes}>
             <Switch
               fallback={
-                <div style="margin-top: 40px;">
-                  <Loader />
+                <div>
+                  <FeedNoteSkeleton />
+                  <FeedNoteSkeleton />
+                  <FeedNoteSkeleton />
                 </div>
-            }>
+              }
+            >
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(

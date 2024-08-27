@@ -32,6 +32,7 @@ import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
+import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
 
 
 const Home: Component = () => {
@@ -148,9 +149,7 @@ const Home: Component = () => {
         <HomeSidebar />
       </StickySidebar>
 
-      <Show
-        when={context?.notes && context.notes.length > 0}
-      >
+      <Show when={context?.notes && context.notes.length > 0}>
         <div class={styles.feed}>
           <For each={context?.notes} >
             {note => <Note note={note} shorten={true} />}
@@ -163,14 +162,18 @@ const Home: Component = () => {
           when={!isPageLoading() && context?.notes && context?.notes.length === 0}
         >
           <div class={styles.noContent}>
-            <Loader />
+            No notes found
           </div>
         </Match>
         <Match
-          when={isPageLoading()}
+          when={isPageLoading() && context?.notes && context?.notes.length == 0}
         >
-          <div class={styles.noContent}>
-            <Loader />
+          <div>
+            <FeedNoteSkeleton />
+            <FeedNoteSkeleton />
+            <FeedNoteSkeleton />
+            <FeedNoteSkeleton />
+            <FeedNoteSkeleton />
           </div>
         </Match>
       </Switch>

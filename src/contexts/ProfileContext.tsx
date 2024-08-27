@@ -96,6 +96,7 @@ export type ProfileContextStore = {
   following: string[],
   sidebarNotes: FeedPage & { notes: PrimalNote[] },
   sidebarArticles: FeedPage & { notes: PrimalArticle[] },
+  isFetchingSidebarArticles: boolean,
   filterReason: { action: 'block' | 'allow', pubkey?: string, group?: string } | null,
   contacts: PrimalUser[],
   followers: PrimalUser[],
@@ -212,6 +213,7 @@ export const initialData = {
     topZaps: {},
     noteActions: {},
   },
+  isFetchingSidebarArticles: false,
   future: {
     notes: [],
     articles: [],
@@ -1220,9 +1222,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isProfileFetched', () => false);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
+
+      updateStore('isFetchingSidebarArticles', () => true);
       const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);
 
       updateStore('sidebarArticles', () => ({ notes: [...articles ]}))
+      updateStore('isFetchingSidebarArticles', () => false);
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
     }

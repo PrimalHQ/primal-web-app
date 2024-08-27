@@ -52,6 +52,14 @@ import { zapSubscription } from '../lib/zap';
 import { updateStore, store } from '../services/StoreService';
 import { subsTo } from '../sockets';
 import { humanizeNumber } from '../lib/stats';
+import ProfileBannerSkeleton from '../components/Skeleton/ProfileBannerSkeleton';
+import { Transition } from 'solid-transition-group';
+import ProfileAvatarSkeleton from '../components/Skeleton/ProfileAvatarSkeleton';
+import ProfileVerificationSkeleton from '../components/Skeleton/ProfileVerificationSkeleton';
+import ProfileAboutSkeleton from '../components/Skeleton/ProfileAboutSkeleton';
+import ProfileLinksSkeleton from '../components/Skeleton/ProfileLinksSkeleton';
+import ProfileTabsSkeleton from '../components/Skeleton/ProfileTabsSkeleton';
+import ArticlePreviewSidebarSkeleton from '../components/Skeleton/ArticlePreviewSidebarSkeleton';
 
 const Profile: Component = () => {
 
@@ -490,9 +498,19 @@ const Profile: Component = () => {
     profile?.actions.resetProfile();
   });
 
-  const isProfileLoaded = () => {
-    return !profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex();
-  };
+  const [isProfileLoaded, setIsProfileLoaded] = createSignal(false);
+
+  createEffect(() => {
+    if (!profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex()) {
+      // setTimeout(() => {
+        setIsProfileLoaded(() => true);
+      // }, 2_000);
+    }
+  })
+
+  // const isProfileLoaded = () => {
+  //   return !profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex();
+  // };
 
   const customZapInfo: () => CustomZapInfo = () => ({
     profile: profile?.userProfile,
@@ -632,25 +650,35 @@ const Profile: Component = () => {
       <div id="central_header" class={styles.fullHeader}>
         <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
           <Show
-            when={profile?.userProfile?.banner}
-            fallback={<div class={styles.bannerPlaceholder}></div>}
+            when={isProfileLoaded()}
+            fallback={<ProfileBannerSkeleton />}
           >
-            <NoteImage
-              class="profile_image"
-              src={banner()}
-              altSrc={profile?.userProfile?.banner}
-              onError={imgError}
-              plainBorder={true}
-            />
+              <Show
+                when={profile?.userProfile?.banner}
+                fallback={<div class={styles.bannerPlaceholder}></div>}
+              >
+                <NoteImage
+                  class="profile_image"
+                  src={banner()}
+                  altSrc={profile?.userProfile?.banner}
+                  onError={imgError}
+                  plainBorder={true}
+                />
+              </Show>
           </Show>
         </div>
 
         <div class={styles.userImage}>
-          <div class={styles.avatar}>
-            <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
-              <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
+          <Show
+            when={isProfileLoaded()}
+            fallback={<ProfileAvatarSkeleton />}
+          >
+            <div class={styles.avatar}>
+              <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
+                <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
+              </div>
             </div>
-          </div>
+          </Show>
         </div>
 
         <div class={styles.profileActions}>
@@ -727,6 +755,7 @@ const Profile: Component = () => {
         <div class={styles.profileVerification}>
           <Show
             when={isProfileLoaded()}
+            fallback={<ProfileVerificationSkeleton />}
           >
             <div class={styles.basicInfo}>
               <div class={styles.name}>
@@ -780,9 +809,17 @@ const Profile: Component = () => {
           </Show>
         </div>
 
-        <ProfileAbout about={profile?.userProfile?.about} />
+        <Show
+          when={isProfileLoaded()}
+          fallback={<ProfileAboutSkeleton />}
+        >
+          <ProfileAbout about={profile?.userProfile?.about} />
+        </Show>
 
-        <Show when={profile?.userProfile}>
+        <Show
+          when={isProfileLoaded()}
+          fallback={<ProfileLinksSkeleton />}
+        >
           <div class={styles.profileLinks}>
             <div class={styles.website}>
               <Show when={profile?.userProfile?.website}>
@@ -810,7 +847,12 @@ const Profile: Component = () => {
         </Show>
       </div>
 
-      <ProfileTabs setProfile={setProfile} />
+      <Show
+        when={isProfileLoaded()}
+        fallback={<ProfileTabsSkeleton />}
+      >
+        <ProfileTabs setProfile={setProfile} />
+      </Show>
 
       <ConfirmModal
         open={confirmReportUser()}

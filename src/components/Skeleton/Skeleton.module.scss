@@ -349,3 +349,337 @@
     }
   }
 }
+
+.profileBannerSkeleton {
+  width: 640px;
+  height: 200px;
+  background-color: var(--devider);
+
+  animation: skeleton-fade 1500ms linear infinite;
+}
+
+.profileAvatarSkeleton {
+  width: 128px;
+  height: 128px;
+  background-color: var(--background-site);
+  border-radius: 64px;
+  padding: 4px;
+
+  .background {
+    width: 120px;
+    height: 120px;
+    background-color: var(--devider);
+    border-radius: 60px;
+    animation: skeleton-fade 1500ms linear infinite;
+  }
+}
+
+.profileVerificationSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  animation: skeleton-fade 1500ms linear infinite;
+
+  .firstRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .name {
+      width: 240px;
+      height: 20px;
+      border-radius: 10px;
+      background-color: var(--devider);
+    }
+
+    .time {
+      width: 180px;
+      height: 16px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+
+  .secondRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .nip05 {
+      width: 180px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+    }
+
+    .connections {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+
+      .follows {
+        width: 100px;
+        height: 14px;
+        border-radius: 7px;
+        background-color: var(--devider);
+      }
+    }
+  }
+}
+
+.profileAboutSkeleton {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+
+  >div {
+    width: 600px;
+    height: 48px;
+    border-radius: 8px;
+    background-color: var(--devider);
+
+    animation: skeleton-fade 1500ms linear infinite;
+  }
+
+}
+
+.profileLinksSkeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 20px;
+  padding-right: 30px;
+  margin-bottom: 16px;
+
+  .website {
+    width: 200px;
+    height: 16px;
+    border-radius: 8px;
+    background-color: var(--devider);
+    animation: skeleton-fade 1500ms linear infinite;
+  }
+
+  .commonFollows {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+
+    .label {
+      width: 68px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+      animation: skeleton-fade 1500ms linear infinite;
+    }
+
+    .avatarsS {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      align-items: center;
+
+      .avatarS {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: -10px;
+        border-radius: 12px;
+        background-color: var(--background-site);
+
+        .fillS {
+          width: 22px;
+          height: 22px;
+          border-radius: 11px;
+          background-color: var(--devider);
+          animation: skeleton-fade 1500ms linear infinite;
+        }
+      }
+    }
+  }
+}
+
+.profileTabsSkeletonWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.profileTabsSkeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-inline: 20px;
+
+  border-bottom: 1px solid var(--devider);
+
+  animation: skeleton-fade 1500ms linear infinite;
+
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 12px;
+
+    .number {
+      width: 60px;
+      height: 24px;
+      border-radius: 12px;
+      background-color: var(--devider);
+    }
+
+    .labelT {
+      color: var(--text-tertiary-2);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+}
+
+.feedNoteSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 20px;
+
+  .headerN {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+
+    .avatarN {
+      width: 42px;
+      height: 42px;
+      border-radius: 24px;
+      background-color: var(--devider);
+      animation: skeleton-fade 1500ms linear infinite;
+    }
+
+    .userInfoN {
+      width: 200px;
+      height: 18px;
+      border-radius: 9px;
+      background-color: var(--devider);
+      animation: skeleton-fade 1500ms linear infinite;
+    }
+  }
+
+  .contentN {
+    width: 600px;
+    height: 80px;
+    border-radius: 8px;
+    background-color: var(--devider);
+    animation: skeleton-fade 1500ms linear infinite;
+  }
+
+  .zapsN {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    .bestZap {
+      width: 150px;
+      height: 26px;
+      border-radius: 13px;
+      background-color: var(--devider);
+      animation: skeleton-fade 1500ms linear infinite;
+    }
+
+    .restZap {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+
+      .avatarsZN {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        align-items: center;
+        padding-right: 10px;
+
+        .avatarZN {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 24px;
+          height: 24px;
+          margin-right: -10px;
+          border-radius: 12px;
+          background-color: var(--background-site);
+
+          .fillZN {
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background-color: var(--devider);
+            animation: skeleton-fade 1500ms linear infinite;
+          }
+        }
+      }
+    }
+  }
+
+  .footerN {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+
+    .footerOptionN {
+      width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+}
+
+
+.shortNoteSkeleton {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  .avatarSN {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background-color: var(--devider);
+  }
+
+  .shortNote {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .headerSN {
+      width: 150px;
+      height: 12px;
+      border-radius: 6px;
+      background-color: var(--devider);
+    }
+
+    .contentSN {
+      width: 268px;
+      height: 36px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+}
