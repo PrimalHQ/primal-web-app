@@ -204,7 +204,7 @@ const EditProfile: Component = () => {
 
     let metadata: Record<string, string> = {};
 
-    [ 'displayName',
+    ['displayName',
       'name',
       'website',
       'about',
@@ -213,18 +213,20 @@ const EditProfile: Component = () => {
       'picture',
       'banner',
     ].forEach(key => {
-      if (data.get(key)) {
-        metadata[key] = data.get(key) as string;
+      const value = data.get(key) as string;
 
-        if (key === 'displayName') {
-          metadata['display_name'] = data.get(key) as string;
+      if (value !== null) {
+        metadata[key] = value;
+
+        if (key === "displayName") {
+          metadata["display_name"] = value;
         }
       }
     });
 
     const oldProfile = profile?.userProfile || {};
 
-    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account.relays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata }, account.relays, account.relaySettings);
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`);
@@ -251,11 +253,11 @@ const EditProfile: Component = () => {
           <Show
             when={banner()}
             fallback={
-            <div class={styles.bannerPlaceholder}>
-              <label for="upload-banner">
-                <div>{intl.formatMessage(tSettings.profile.uploadBanner)}</div>
-              </label>
-            </div>}
+              <div class={styles.bannerPlaceholder}>
+                <label for="upload-banner">
+                  <div>{intl.formatMessage(tSettings.profile.uploadBanner)}</div>
+                </label>
+              </div>}
           >
             <label for="upload-banner">
               <img
@@ -318,7 +320,7 @@ const EditProfile: Component = () => {
               onCancel={() => {
                 resetUpload();
               }}
-              onSuccsess={(url:string) => {
+              onSuccsess={(url: string) => {
                 if (uploadTarget() === 'picture') {
                   setAvatarPreview(url);
                 }
@@ -342,7 +344,7 @@ const EditProfile: Component = () => {
                 accept="image/*"
               />
               <label for="upload-avatar">
-              {intl.formatMessage(tSettings.profile.uploadAvatar)}
+                {intl.formatMessage(tSettings.profile.uploadAvatar)}
               </label>
             </div>
 
@@ -356,7 +358,7 @@ const EditProfile: Component = () => {
                 accept="image/*"
               />
               <label for="upload-banner">
-              {intl.formatMessage(tSettings.profile.uploadBanner)}
+                {intl.formatMessage(tSettings.profile.uploadBanner)}
               </label>
             </div>
           </div>
@@ -386,11 +388,11 @@ const EditProfile: Component = () => {
             onInput={onNameInput}
           />
         </div>
-          <Show when={!isNameValid()}>
-            <div class={styles.inputError}>
-              {intl.formatMessage(tSettings.profile.name.error)}
-            </div>
-          </Show>
+        <Show when={!isNameValid()}>
+          <div class={styles.inputError}>
+            {intl.formatMessage(tSettings.profile.name.error)}
+          </div>
+        </Show>
 
         <div class={styles.inputLabel}>
           <label for='displayName'>{intl.formatMessage(tSettings.profile.displayName.label)}</label>
@@ -449,7 +451,7 @@ const EditProfile: Component = () => {
           <button
             type='button'
             class={`${isMoreVisible() ? styles.shown : styles.hidden}`}
-            onClick={() => setIsMoreVisible(!isMoreVisible()) }
+            onClick={() => setIsMoreVisible(!isMoreVisible())}
           >More</button>
         </div>
 
