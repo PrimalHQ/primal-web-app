@@ -329,6 +329,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const clearNotes = () => {
     updateStore('scrollTop', () => 0);
+    window.scrollTo({ top: 0 });
     updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);

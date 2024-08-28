@@ -2,6 +2,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { useNavigate, useParams } from '@solidjs/router';
 import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from 'solid-js';
 import { createStore } from 'solid-js/store';
+import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import BookmarksHeader from '../components/HomeHeader/BookmarksHeader';
@@ -371,33 +372,33 @@ const Bookmarks: Component = () => {
           </div>
         </Show>
 
-        <Switch>
-          <Match when={kind() === 'notes'}>
-            <For each={store.notes}>
-              {(note) =>
-                <Note note={note} />
-              }
-            </For>
-          </Match>
+        <Transition name="slide-fade">
+          <Show
+            when={!store.fetchingInProgress}
+          >
+            <div>
+              <Switch>
+                <Match when={kind() === 'notes'}>
+                  <For each={store.notes}>
+                    {(note) =>
+                      <div class="animated"><Note note={note} /></div>
+                    }
+                  </For>
+                </Match>
 
-          <Match when={kind() === 'reads'}>
-            <For each={store.notes}>
-              {(note) =>
-                <ArticlePreview article={note} />
-              }
-            </For>
-          </Match>
-        </Switch>
+                <Match when={kind() === 'reads'}>
+                  <For each={store.notes}>
+                    {(note) =>
+                      <div class="animated"><ArticlePreview article={note} /></div>
+                    }
+                  </For>
+                </Match>
+              </Switch>
+            </div>
+          </Show>
+        </Transition>
 
         <Paginator loadNextPage={fetchNextPage} />
-
-        <Show
-          when={store.fetchingInProgress}
-        >
-          <div class={styles.loader}>
-            {<Loader/>}
-          </div>
-        </Show>
       </div>
     </>
   );
