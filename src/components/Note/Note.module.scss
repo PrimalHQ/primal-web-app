@@ -74,6 +74,13 @@
     margin-bottom: 12px;
     width: 100%;
     overflow: hidden;
+
+    &.bigFont {
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+    }
+
   }
 
   .replyingTo {
@@ -195,6 +202,12 @@
         margin-bottom: 12px;
         width: 100%;
         overflow: hidden;
+
+        &.bigFont {
+          font-size: 24px;
+          font-weight: 400;
+          line-height: 32px;
+        }
       }
 
       .replyingTo {

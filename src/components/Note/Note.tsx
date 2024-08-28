@@ -21,6 +21,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
+import { addrRegex, imageRegex, noteRegex, urlRegex } from '../../constants';
 
 export type NoteReactionsState = {
   likes: number,
@@ -265,6 +266,16 @@ const Note: Component<{
 
   const size = () => props.size ?? 'normal';
 
+  const bigMessageFont = () => {
+    const hasImage = imageRegex.test(props.note.content);
+    const hasNoteMention = noteRegex.test(props.note.content);
+    const hasAddrMention = addrRegex.test(props.note.content);
+    const hasLinks = urlRegex.test(props.note.content);
+    const isShort = props.note.content.length < 140;
+
+    return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
+  }
+
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
@@ -402,7 +413,7 @@ const Note: Component<{
 
           <NoteReplyToHeader note={props.note} />
 
-          <div class={styles.message}>
+          <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
             <ParsedNote
               note={props.note}
               shorten={props.shorten}
