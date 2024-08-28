@@ -901,9 +901,8 @@ const ParsedNote: Component<{
         const unknownMention = (nid: string) => {
           setWordsDisplayed(w => w + 1);
 
-          const url = `https://highlighter.com/a/${nid}`;
 
-          return <a href={url} target="_blank" >{token}</a>;
+          return <A href={`/e/${nid}`}>{token}</A>
         }
 
         const decoded = decodeIdentifier(id);
@@ -912,7 +911,6 @@ const ParsedNote: Component<{
         if (decoded.type !== 'naddr' || !mentionedArticles) {
           return unknownMention(id);
         }
-
 
         const mention = mentionedArticles[id];
 
@@ -927,6 +925,7 @@ const ParsedNote: Component<{
   }
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
+
     if(!mention) return <></>;
 
     return (
@@ -967,18 +966,21 @@ const ParsedNote: Component<{
           const path = `/e/${noteId}`;
 
           if (props.noLinks === 'links') {
-            link = <span class='linkish'>@{token}</span>;
+            link = <span class='linkish'>{token}</span>;
           }
 
           if (kind === undefined) {
-            let f = (props.note.mentionedNotes && props.note.mentionedNotes[hex]);
+            let f: any = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+            if (!f) {
+              f = props.note.mentionedArticles && props.note.mentionedArticles[hex];
+            }
             if (!f) {
               f = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
             }
-            kind = f?.post.kind || f?.msg?.kind || Kind.Text;
+            kind = f?.post.kind || f?.msg?.kind || f.event.kind || Kind.Text;
           }
 
-          if ([Kind.Text, Kind.LongForm, Kind.LongFormShell].includes(kind)) {
+          if ([Kind.Text].includes(kind)) {
             if (!props.noLinks) {
               const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
 
@@ -1001,20 +1003,31 @@ const ParsedNote: Component<{
                     />
                   </div>;
                 }
-
               }
             }
           }
 
           if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
-            console.log('MENTION LONGFORM')
-            link = '__MENTION__'
+
+            if (!props.noLinks) {
+              const ment = props.note.mentionedArticles && props.note.mentionedArticles[hex];
+
+              link = <A href={path}>{token}</A>;
+
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
+
+                // @ts-ignore
+                link = renderLongFormMention(ment, index);
+              }
+            }
           }
 
           if (kind === Kind.Highlight) {
             const ment = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
+
             link = <div class={styles.mentionedHighlight}>
-              {ment.event.content}
+              {ment?.event?.content}
             </div>;
           }
 

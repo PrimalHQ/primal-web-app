@@ -370,8 +370,6 @@ const PrimalMarkdown: Component<{
     if (token.type === 'event') {
       let [_, noteId] = token.value.split(':');
 
-      console.log('EVENT: ', noteId, nip19.decode(noteId));
-
       if (noteId.startsWith('nevent')) {
         const data = nip19.decode(noteId).data;
         const note = (props.article?.mentionedNotes || {})[data.id];
