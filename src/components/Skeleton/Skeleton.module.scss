@@ -553,6 +553,9 @@
   gap: 8px;
   padding: 12px 20px;
 
+  border-bottom: 1px slid var(--devider);
+  animation: skeleton-fade 2500ms linear infinite;
+
   .headerN {
     display: flex;
     justify-content: flex-start;
@@ -560,28 +563,25 @@
     gap: 8px;
 
     .avatarN {
-      width: 42px;
-      height: 42px;
-      border-radius: 24px;
+      width: 32px;
+      height: 32px;
+      border-radius: 16px;
       background-color: var(--devider);
-      animation: skeleton-fade 2500ms linear infinite;
     }
 
     .userInfoN {
       width: 200px;
-      height: 18px;
-      border-radius: 9px;
+      height: 14px;
+      border-radius: 7px;
       background-color: var(--devider);
-      animation: skeleton-fade 2500ms linear infinite;
     }
   }
 
   .contentN {
     width: 600px;
-    height: 80px;
+    height: 92px;
     border-radius: 8px;
     background-color: var(--devider);
-    animation: skeleton-fade 2500ms linear infinite;
   }
 
   .zapsN {
