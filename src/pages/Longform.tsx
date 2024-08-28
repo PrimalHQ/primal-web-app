@@ -58,6 +58,7 @@ import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
 import { logWarning } from "../lib/logger";
 import PageCaption from "../components/PageCaption/PageCaption";
 import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
+import { useMediaContext } from "../contexts/MediaContext";
 
 export type LongFormData = {
   title: string,
@@ -136,6 +137,7 @@ const emptyStore: LongformThreadStore = {
 const Longform: Component< { naddr: string } > = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
+  const media = useMediaContext();
   const settings = useSettingsContext();
   const params = useParams();
   const intl = useIntl();
@@ -200,21 +202,39 @@ const Longform: Component< { naddr: string } > = (props) => {
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
+    thumbSelector: `a.hero_image_${naddr()}`,
     pswpModule: () => import('photoswipe')
   });
 
   onMount(() => {
-    lightbox.init();
     clearArticle();
     fetchArticle();
     fetchHighlights();
   });
 
   createEffect(() => {
+    if (store.article) {
+      lightbox.init();
+    }
+  })
+
+  createEffect(() => {
     if (store.article?.user) {
       getTiers(store.article.user);
     }
   });
+
+  const articleMediaImage = () => {
+    if (!store.article?.image) return undefined
+
+    return media?.actions.getMedia(store.article.image, 'o');
+  }
+
+  const articleMediaThumb = () => {
+    if (!store.article?.image) return undefined
+
+    return media?.actions.getMedia(store.article.image, 'm');
+  }
 
   const getTiers = (author: PrimalUser) => {
     if (!author) return;
@@ -1034,6 +1054,8 @@ const Longform: Component< { naddr: string } > = (props) => {
               <NoteImage
                 class={`${styles.image} hero_image_${naddr()}`}
                 src={store.article?.image}
+                media={articleMediaImage()}
+                mediaThumb={articleMediaThumb()}
                 width={640}
               />
             </Show>

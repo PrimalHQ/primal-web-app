@@ -46,6 +46,7 @@ import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActi
 import { useToastContext } from '../Toaster/Toaster';
 import MarkdownSlice from './MarkdownSlice';
 import { convertHtmlEntityToAngleBrackets } from '../../utils';
+import { useMediaContext } from '../../contexts/MediaContext';
 
 export type Coord = {
   x: number;
@@ -101,6 +102,7 @@ const PrimalMarkdown: Component<{
   const account = useAccountContext();
   const toast = useToastContext();
   const navigate = useNavigate();
+  const media = useMediaContext();
 
   let ref: HTMLDivElement | undefined;
   let viewer: HTMLDivElement | undefined;
@@ -121,6 +123,7 @@ const PrimalMarkdown: Component<{
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
+    thumbSelector: `a.image_${props.noteId}`,
     pswpModule: () => import('photoswipe')
   });
 
@@ -423,10 +426,15 @@ const PrimalMarkdown: Component<{
         src = token.value;
       }
 
+      const mediaImage = media?.actions.getMedia(src, 'o');
+      const mediaThumb = media?.actions.getMedia(src, 'm');
+
       return (
         <NoteImage
           class={`noteimage image_${props.noteId}`}
           src={src}
+          media={mediaImage}
+          mediaThumb={mediaThumb}
           width={640}
         />
       );

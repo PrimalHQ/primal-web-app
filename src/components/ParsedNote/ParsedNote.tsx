@@ -177,6 +177,7 @@ const ParsedNote: Component<{
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
+    thumbSelector: `a.image_${props.note.post.noteId}`,
     pswpModule: () => import('photoswipe')
   });
 
@@ -562,6 +563,7 @@ const ParsedNote: Component<{
       let image = media?.actions.getMedia(token, 'o');
       const url = image?.media_url || getMediaUrlDefault(token);
 
+      let imageThumb = media?.actions.getMedia(token, 'm');
       // Images tell a 100 words :)
       setWordsDisplayed(w => w + 100);
 
@@ -570,6 +572,7 @@ const ParsedNote: Component<{
         src={url}
         isDev={dev}
         media={image}
+        mediaThumb={imageThumb}
         width={noteWidth()}
         imageGroup={imageGroup}
         shortHeight={props.shorten}

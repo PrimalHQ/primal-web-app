@@ -38,9 +38,14 @@ const NoteGallery: Component<{
     pswpModule: () => import('photoswipe'),
   });
 
-  const [store, setStore] = createStore<{ url: string, image: MediaVariant | undefined}>({
+  const [store, setStore] = createStore<{
+    url: string,
+    image: MediaVariant | undefined,
+    imageThumb: MediaVariant | undefined,
+  }>({
     url: '',
     image: undefined,
+    imageThumb: undefined,
   });
 
   onMount(() => {
@@ -58,7 +63,9 @@ const NoteGallery: Component<{
     let image = media?.actions.getMedia(url, 'o');
     url = image?.media_url || url;
 
-    setStore(() => ({ url, image }));
+    let imageThumb = media?.actions.getMedia(url, 's');
+
+    setStore(() => ({ url, image, imageThumb }));
 
     const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
       // Plugins options, for example:
@@ -75,6 +82,7 @@ const NoteGallery: Component<{
         class={`noteimage image_${props.note.post.noteId} cell_${1}`}
         src={store.url}
         media={store.image}
+        mediaThumb={store.imageThumb}
         width={210}
         shortHeight={true}
         plainBorder={true}

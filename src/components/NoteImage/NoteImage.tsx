@@ -7,6 +7,7 @@ const NoteImage: Component<{
   class?: string,
   imageGroup?: string,
   media?: MediaVariant,
+  mediaThumb?: MediaVariant,
   width?: number,
   src?: string,
   altSrc?: string,
@@ -96,6 +97,10 @@ const NoteImage: Component<{
   };
 
   const thumbSrc = () => {
+    if (props.mediaThumb) {
+      return props.mediaThumb.media_url;
+    }
+
     const s = src();
 
     if (!s || !s.includes('cdn.primal.net')) return s;
