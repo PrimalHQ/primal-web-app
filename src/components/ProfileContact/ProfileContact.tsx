@@ -20,6 +20,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 const ProfileContact: Component<{
   profile: PrimalUser | undefined,
   profileStats: any,
+  light?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
   id?: string,
 }> = (props) => {
@@ -63,7 +64,7 @@ const ProfileContact: Component<{
           when={account?.publicKey !== props.profile?.pubkey || !account?.following.includes(props.profile?.pubkey || '')}
           fallback={<div class={styles.placeholderDiv}></div>}
         >
-          <FollowButton person={props.profile} postAction={props.postAction} />
+          <FollowButton person={props.profile} postAction={props.postAction} light={props.light} />
         </Show>
       </div>
     </div>

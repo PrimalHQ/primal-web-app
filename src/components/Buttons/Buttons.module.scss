@@ -172,6 +172,9 @@
   &:focus {
     box-shadow: none;
   }
+  &.light {
+    background-color: var(--subtile-devider);
+  }
 }
 
 .link {

@@ -81,6 +81,7 @@ export type ProfileContextStore = {
     repliesPage: FeedPage,
     reposts: Record<string, string> | undefined,
   },
+  contactListDate: number,
   isProfileFollowing: boolean,
   isFetching: boolean,
   isProfileFetched: boolean,
@@ -170,6 +171,7 @@ export const initialData = {
   notes: [],
   replies: [],
   gallery: [],
+  contactListDate: 0,
   isFetching: false,
   isProfileFetched: false,
   isFetchingReplies: false,
@@ -383,6 +385,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       }
 
       if (type === 'EVENT') {
+        if (content?.kind === Kind.Contacts) {
+          updateStore('contactListDate', () => content.created_at || 0);
+        }
+
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 

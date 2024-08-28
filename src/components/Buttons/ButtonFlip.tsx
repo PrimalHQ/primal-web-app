@@ -11,10 +11,17 @@ const ButtonFollow: Component<{
   children?: JSXElement,
   fallback?: JSXElement,
   disabled?: boolean,
+  light?: boolean,
   type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
   const klass = () => {
-    return props.when ? styles.flipActive : styles.flipInactive;
+    let k = props.when ? styles.flipActive : styles.flipInactive;
+
+    if (props.light) {
+      k += ` ${styles.light}`;
+    }
+
+    return k;
   }
 
   return (

@@ -60,6 +60,7 @@ import ProfileAboutSkeleton from '../components/Skeleton/ProfileAboutSkeleton';
 import ProfileLinksSkeleton from '../components/Skeleton/ProfileLinksSkeleton';
 import ProfileTabsSkeleton from '../components/Skeleton/ProfileTabsSkeleton';
 import ArticlePreviewSidebarSkeleton from '../components/Skeleton/ArticlePreviewSidebarSkeleton';
+import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
 
 const Profile: Component = () => {
 
@@ -81,6 +82,8 @@ const Profile: Component = () => {
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [openQr, setOpenQr] = createSignal(false);
+
+  const [followsModal, setFollowsModal] = createSignal<'follows' | 'followers' | false>(false);
 
   const [hasTiers, setHasTiers] = createSignal(false);
 
@@ -795,14 +798,14 @@ const Profile: Component = () => {
                 </div>
 
               <div class={styles.followings}>
-                <div class={styles.stats}>
+                <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
                   <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
                   <div class={styles.label}>following</div>
-                </div>
-                <div class={styles.stats}>
+                </button>
+                <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
                   <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
                   <div class={styles.label}>followers</div>
-                </div>
+                </button>
               </div>
             </div>
 
@@ -872,6 +875,15 @@ const Profile: Component = () => {
           setConfirmMuteUser(false);
         }}
         onAbort={() => setConfirmMuteUser(false)}
+      />
+
+      <ProfileFollowModal
+        open={followsModal()}
+        setOpen={setFollowsModal}
+        stats={{
+          following: profile?.userStats?.follows_count || 0,
+          followers: profile?.userStats?.followers_count || 0,
+        }}
       />
     </>
   )

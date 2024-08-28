@@ -15,6 +15,7 @@ const FollowButton: Component<{
   person: PrimalUser | undefined,
   large?: boolean,
   id?: string,
+  light?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
 }> = (props) => {
 
@@ -56,6 +57,7 @@ const FollowButton: Component<{
           onClick={onFollow}
           disabled={account?.followInProgress !== ''}
           when={isFollowed()}
+          light={props.light}
           fallback={intl.formatMessage(t.follow)}
         >
           {intl.formatMessage(t.unfollow)}
