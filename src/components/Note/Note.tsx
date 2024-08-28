@@ -21,7 +21,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegex, imageRegex, noteRegex, urlRegex } from '../../constants';
+import { addrRegex, addrRegexG, imageRegex, imageRegexG, noteRegex, noteRegexLocal, urlRegex, urlRegexG } from '../../constants';
 
 export type NoteReactionsState = {
   likes: number,
@@ -267,10 +267,10 @@ const Note: Component<{
   const size = () => props.size ?? 'normal';
 
   const bigMessageFont = () => {
-    const hasImage = imageRegex.test(props.note.content);
-    const hasNoteMention = noteRegex.test(props.note.content);
-    const hasAddrMention = addrRegex.test(props.note.content);
-    const hasLinks = urlRegex.test(props.note.content);
+    const hasImage = imageRegexG.test(props.note.content);
+    const hasNoteMention = noteRegexLocal.test(props.note.content);
+    const hasAddrMention = addrRegexG.test(props.note.content);
+    const hasLinks = urlRegexG.test(props.note.content);
     const isShort = props.note.content.length < 140;
 
     return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
