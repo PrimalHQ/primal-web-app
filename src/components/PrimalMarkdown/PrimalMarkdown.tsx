@@ -368,10 +368,35 @@ const PrimalMarkdown: Component<{
     }
 
     if (token.type === 'event') {
-      const [_, noteId] = token.value.split(':');
+      let [_, noteId] = token.value.split(':');
+
+      console.log('EVENT: ', noteId, nip19.decode(noteId));
+
+      if (noteId.startsWith('nevent')) {
+        const data = nip19.decode(noteId).data;
+        const note = (props.article?.mentionedNotes || {})[data.id];
+
+        const kind = note.post.kind || note.msg.kind;
+
+        if (kind === Kind.Text) {
+          noteId = nip19.noteEncode(data.id);
+        }
+
+        if (kind === Kind.LongForm) {
+          noteId = nip19.naddrEncode({
+            kind,
+            pubkey: note.pubkey,
+            identifier: (note.msg.tags.find(t => t[0] === 'd') || [])[1],
+          })
+        }
+
+        if (kind === undefined) {
+          return <>{token.value}</>
+        }
+      }
 
       if (noteId.startsWith('note')) {
-        const id = npubToHex(noteId);
+        const id = nip19.decode(noteId).data;
         const note = (props.article?.mentionedNotes || {})[id];
 
         return (
@@ -440,7 +465,7 @@ const PrimalMarkdown: Component<{
       );
     }
 
-    return <></>;
+    return <>{token.value}</>;
   };
 
   onMount(async () => {
