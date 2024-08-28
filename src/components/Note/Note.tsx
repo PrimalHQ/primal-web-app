@@ -396,7 +396,7 @@ const Note: Component<{
           </div>
           <div class={styles.userHeader}>
             <A href={`/p/${props.note.user.npub}`}>
-              <Avatar user={props.note.user} size="vs" />
+              <Avatar user={props.note.user} size="xs" />
             </A>
 
             <NoteAuthorInfo

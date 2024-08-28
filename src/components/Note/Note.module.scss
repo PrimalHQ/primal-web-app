@@ -35,6 +35,7 @@
     align-items: center;
     width: 100%;
     gap: 8px;
+    position: relative;
   }
 
   .header {
@@ -147,7 +148,6 @@
   }
 
   .header {
-    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -262,7 +262,7 @@
 
     font-size: 16px;
     font-weight: 700;
-    line-height: 18px;
+    line-height: 16px;
   }
   .time{
     display: flex;
@@ -341,7 +341,7 @@
   .contextIcon {
     width: 16px;
     height: 14px;
-    background-color: var(--text-secondary-2);
+    background-color: var(--text-tertiary);
     -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
     mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
   }
@@ -850,8 +850,8 @@
 
 .upRightFloater {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0px;
+  right: 0px;
 }
 
 @keyframes shimmer {
