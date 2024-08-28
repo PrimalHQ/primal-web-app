@@ -489,6 +489,7 @@ const Note: Component<{
                   shorten={props.shorten}
                   width={Math.min(566, window.innerWidth - 72)}
                   margins={1}
+                  footerSize="short"
                 />
               </div>
 

@@ -153,6 +153,7 @@ const ParsedNote: Component<{
   margins?: number,
   noLightbox?: boolean,
   altEmbeds?: boolean,
+  footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
 }> = (props) => {
 
   const intl = useIntl();
@@ -1000,6 +1001,7 @@ const ParsedNote: Component<{
                       mentionedUsers={props.note.mentionedUsers || {}}
                       isLast={index === content.length-1}
                       alternativeBackground={props.altEmbeds}
+                      footerSize={props.footerSize}
                     />
                   </div>;
                 }
