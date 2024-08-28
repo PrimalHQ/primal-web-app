@@ -13,6 +13,7 @@ import Loader from '../Loader/Loader';
 import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/localStore';
 import { useHomeContext } from '../../contexts/HomeContext';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
+import { Transition } from 'solid-transition-group';
 
 const sidebarOptions = [
   {
@@ -72,7 +73,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
-    <Show when={account?.isKeyLookupDone}>
       <div class={styles.headingTrending}>
         <SelectionBox
           options={sidebarOptions}
@@ -85,29 +85,28 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
         />
       </div>
 
-      <Show
-        when={!home?.sidebar.isFetching}
-        fallback={
+      <Transition name="slide-fade">
+        <Show
+          when={!home?.sidebar.isFetching}
+          fallback={
+            <div>
+              <For each={new Array(24)}>
+                {() => <ShortNoteSkeleton />}
+              </For>
+            </div>
+          }
+        >
           <div>
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
-            <ShortNoteSkeleton />
+            <For each={home?.sidebar.notes}>
+              {(note) => (
+                <div class="animated">
+                  <SmallNote note={note} />
+                </div>
+              )}
+            </For>
           </div>
-        }
-      >
-        <For each={home?.sidebar.notes}>
-          {(note) => <SmallNote note={note} />}
-        </For>
-      </Show>
-
-    </Show>
+        </Show>
+      </Transition>
     </div>
   );
 }

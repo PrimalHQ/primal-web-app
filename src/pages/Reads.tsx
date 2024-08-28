@@ -63,14 +63,7 @@ const Home: Component = () => {
   const [newNotesCount, setNewNotesCount] = createSignal(0);
   const [newPostAuthors, setNewPostAuthors] = createStore<PrimalUser[]>([]);
 
-  const [shouldAnimate, setShouldAnimate] = createSignal(isDev() ? localStorage.getItem('animate') === 'true' || false : false);
-
   const newPostCount = () => newNotesCount() < 100 ? newNotesCount() : 100;
-
-  const toggleAnimation = (pressed: boolean) => {
-    setShouldAnimate(() => pressed);
-    localStorage.setItem('animate', `${shouldAnimate()}`);
-  }
 
   onMount(() => {
     // setIsHome(true);
@@ -182,8 +175,6 @@ const Home: Component = () => {
                 loadNewContent={loadNewContent}
                 newPostCount={newPostCount}
                 newPostAuthors={newPostAuthors}
-                onToggle={toggleAnimation}
-                isPressed={shouldAnimate()}
               />
             </div>
           }
@@ -208,7 +199,7 @@ const Home: Component = () => {
       </StickySidebar>
 
       <div class={styles.readsFeed}>
-        <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+        <Transition name="slide-fade">
           <Show
             when={context?.notes && context.notes.length > 0}
             fallback={

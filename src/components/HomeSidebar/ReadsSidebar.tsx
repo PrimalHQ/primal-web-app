@@ -209,8 +209,6 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
     reads.actions.setTopPicks(articles);
   };
 
-  const shouldAnimate = () => isDev() && localStorage.getItem('animate') === 'true';
-
   return (
     <div id={props.id} class={styles.readsSidebar}>
       <Show when={account?.isKeyLookupDone}>
@@ -228,14 +226,14 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
 
         <div class={styles.sectionTopPicks}>
 
-        <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+        <Transition name="slide-fade">
           <Show
             when={reads && reads.topPicks.length > 0}
             fallback={
               <Show when={!reads || reads.topPicks.length === 0}>
                 <div>
                   <For each={Array(3)}>
-                    {() => <ArticlePreviewSidebarSkeleton />}
+                    {() => <div class="animated"><ArticlePreviewSidebarSkeleton /></div>}
                   </For>
                 </div>
               </Show>
@@ -246,7 +244,7 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
                 each={reads?.topPicks}
               >
                 {(note) =>
-                    <div>
+                    <div class="animated">
                       <ArticleShort article={note} />
                     </div>
                   }
@@ -262,12 +260,12 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
         </div>
 
         <div class={styles.sectionTopics}>
-          <Transition name={shouldAnimate() ? 'slide-fade' : 'none'}>
+          <Transition name="slide-fade">
             <Show
               when={reads && reads.topics.length > 0}
               fallback={
                 <Show when={!reads || reads.topics.length === 0}>
-                  <div>
+                  <div class="animated">
                     <ReadsFeaturedTopicsSkeleton />
                   </div>
                 </Show>

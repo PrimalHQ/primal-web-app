@@ -33,6 +33,7 @@ import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
 import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
+import { Transition } from 'solid-transition-group';
 
 
 const Home: Component = () => {
@@ -149,13 +150,19 @@ const Home: Component = () => {
         <HomeSidebar />
       </StickySidebar>
 
-      <Show when={context?.notes && context.notes.length > 0}>
-        <div class={styles.feed}>
-          <For each={context?.notes} >
-            {note => <Note note={note} shorten={true} />}
-          </For>
-        </div>
-      </Show>
+      <Transition name="slide-fade">
+        <Show when={context?.notes && context.notes.length > 0}>
+          <div class={styles.feed}>
+            <For each={context?.notes} >
+              {note => (
+                <div class="animated">
+                  <Note note={note} shorten={true} />
+                </div>
+              )}
+            </For>
+          </div>
+        </Show>
+      </Transition>
 
       <Switch>
         <Match
