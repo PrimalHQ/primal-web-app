@@ -62,6 +62,7 @@ const NoteTopZapsCompact: Component<{
               >
                 <Avatar user={zapSender(zap)} size="micro" />
                 <Show when={index() === 0}>
+                  <div class={styles.topZapIcon}></div>
                   <div class={styles.amount}>
                     {zap.amount.toLocaleString()}
                   </div>

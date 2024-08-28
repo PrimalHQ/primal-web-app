@@ -656,6 +656,7 @@
       font-size: 14px;
       font-weight: 600;
       line-height: 14px;
+      margin-left: -6px;
     }
 
     .description {
@@ -931,4 +932,12 @@
       }
     }
   }
+}
+
+.topZapIcon {
+  width: 10px;
+  height: 12px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
 }
