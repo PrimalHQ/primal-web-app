@@ -960,7 +960,7 @@ const ParsedNote: Component<{
 
         try {
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
-          const kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
+          let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
           const noteId = nip19.noteEncode(hex);
 
@@ -970,7 +970,15 @@ const ParsedNote: Component<{
             link = <span class='linkish'>@{token}</span>;
           }
 
-          if (kind === Kind.Text) {
+          if (kind === undefined) {
+            let f = (props.note.mentionedNotes && props.note.mentionedNotes[hex]);
+            if (!f) {
+              f = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
+            }
+            kind = f?.post.kind || f?.msg?.kind || Kind.Text;
+          }
+
+          if ([Kind.Text, Kind.LongForm, Kind.LongFormShell].includes(kind)) {
             if (!props.noLinks) {
               const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
 
