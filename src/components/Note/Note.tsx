@@ -267,13 +267,14 @@ const Note: Component<{
   const size = () => props.size ?? 'normal';
 
   const bigMessageFont = () => {
-    const hasImage = imageRegexG.test(props.note.content);
-    const hasNoteMention = noteRegexLocal.test(props.note.content);
-    const hasAddrMention = addrRegexG.test(props.note.content);
-    const hasLinks = urlRegexG.test(props.note.content);
+    // const hasImage = imageRegexG.test(props.note.content);
+    // const hasNoteMention = noteRegexLocal.test(props.note.content);
+    // const hasAddrMention = addrRegexG.test(props.note.content);
+    // const hasLinks = urlRegexG.test(props.note.content);
     const isShort = props.note.content.length < 140;
 
-    return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
+    // return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
+    return isShort;
   }
 
   return (
