@@ -227,7 +227,7 @@ const NoteFooter: Component<{
       }
 
       let newLeft = 33;
-      let newTop = -6;
+      let newTop = -13;
 
       if (size() === 'xwide') {
         newLeft = 46;
