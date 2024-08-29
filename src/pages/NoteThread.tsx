@@ -20,6 +20,9 @@ import NavHeader from '../components/NavHeader/NavHeader';
 import Loader from '../components/Loader/Loader';
 import { isIOS } from '../components/BannerIOS/BannerIOS';
 import { unwrap } from 'solid-js/store';
+import PrimaryNoteSkeleton from '../components/Skeleton/PrimaryNoteSkeleton';
+import ReplyToNoteSkeleton from '../components/Skeleton/ReplyToNoteSkeleton';
+import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -180,7 +183,14 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       <Show when={account?.isKeyLookupDone}>
         <Show
           when={!isFetching()}
-          fallback={<Loader />}
+          fallback={<div class={styles.loader}>
+            <PrimaryNoteSkeleton />
+            <ReplyToNoteSkeleton />
+            <For each={new Array(10)}>
+              {() => <ThreadNoteSkeleton />}
+            </For>
+            <ThreadNoteSkeleton />
+          </div>}
         >
           <div class={styles.parentsHolder}>
             <For each={parentNotes()}>

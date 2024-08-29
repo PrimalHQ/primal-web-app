@@ -6,6 +6,7 @@ import { authorName, nip05Verification, truncateNpub } from '../../stores/profil
 import { PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
+import ThreadPeopleSkeleton from '../Skeleton/ThreadPeopleSkeleton';
 import MentionedPerson from './MentionedPerson';
 
 import styles from './PeopleList.module.scss';
@@ -25,19 +26,24 @@ const MentionedPeople: Component<{
   return (
       <>
         <div class={styles.heading}>{props.label}</div>
-        <div id="trending_section" class={styles.authorSection}>
-          <MentionedPerson
-            person={author()}
-          />
+        <Show
+          when={props.author && props.mentioned.length > 0}
+          fallback={<ThreadPeopleSkeleton />}
+        >
+          <div id="trending_section" class={styles.authorSection}>
+            <MentionedPerson
+              person={author()}
+            />
 
-          <For each={mentioned()}>
-            {(person) =>
-              <MentionedPerson
-                person={person}
-              />
-            }
-          </For>
-        </div>
+            <For each={mentioned()}>
+              {(person) =>
+                <MentionedPerson
+                  person={person}
+                />
+              }
+            </For>
+          </div>
+        </Show>
       </>
   );
 }
