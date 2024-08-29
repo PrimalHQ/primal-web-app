@@ -268,13 +268,22 @@ const Note: Component<{
 
   const bigMessageFont = () => {
     // const hasImage = imageRegexG.test(props.note.content);
-    // const hasNoteMention = noteRegexLocal.test(props.note.content);
+    // const hasNoteMention = noteRegex.test(props.note.content);
     // const hasAddrMention = addrRegexG.test(props.note.content);
     // const hasLinks = urlRegexG.test(props.note.content);
-    const isShort = props.note.content.length < 140;
+
+    const strippedContent = props.note.content
+      .replace(imageRegexG, '')
+      .replace(noteRegex, '')
+      .replace(addrRegexG, '')
+      .replace(urlRegexG, '')
+      .trim();
+
+    const isShort = strippedContent.length < 140;
+    const isReply = props.note.replyTo;
 
     // return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
-    return isShort;
+    return isShort && !isReply;
   }
 
   return (

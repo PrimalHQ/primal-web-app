@@ -39,43 +39,45 @@ const NoteTopZapsCompact: Component<{
   })
 
   return (
-    <div class={`${styles.zapHighlightsCompact}`}>
-      <TransitionGroup
-        name="top-zaps-feed"
-        enterClass={styles.topZapEnterTransition}
-        exitClass={styles.topZapExitTransition}
-      >
-        <For each={topZaps()}>
-          {(zap, index) => (
-            <div
-              class={`${styles.zapWrap} ${dontAnimate() ? styles.noAnimation : '' }`}
-              style={`z-index: ${12 - index()};`}
-              data-index={index()}
-            >
-              <button
-                class={`${styles.topZap} ${index() > 0 ? styles.compact : ''}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  props.action();
-                }}
+    <Show when={topZaps().length > 0}>
+      <div class={`${styles.zapHighlightsCompact}`}>
+        <TransitionGroup
+          name="top-zaps-feed"
+          enterClass={styles.topZapEnterTransition}
+          exitClass={styles.topZapExitTransition}
+        >
+          <For each={topZaps()}>
+            {(zap, index) => (
+              <div
+                class={`${styles.zapWrap} ${dontAnimate() ? styles.noAnimation : '' }`}
                 style={`z-index: ${12 - index()};`}
+                data-index={index()}
               >
-                <Avatar user={zapSender(zap)} size="micro" />
-                <Show when={index() === 0}>
-                  <div class={styles.topZapIcon}></div>
-                  <div class={styles.amount}>
-                    {zap.amount.toLocaleString()}
-                  </div>
-                  <div class={styles.description}>
-                    {zap.message}
-                  </div>
-                </Show>
-              </button>
-            </div>
-          )}
-        </For>
-      </TransitionGroup>
-    </div>
+                <button
+                  class={`${styles.topZap} ${index() > 0 ? styles.compact : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    props.action();
+                  }}
+                  style={`z-index: ${12 - index()};`}
+                >
+                  <Avatar user={zapSender(zap)} size="micro" />
+                  <Show when={index() === 0}>
+                    <div class={styles.topZapIcon}></div>
+                    <div class={styles.amount}>
+                      {zap.amount.toLocaleString()}
+                    </div>
+                    <div class={styles.description}>
+                      {zap.message}
+                    </div>
+                  </Show>
+                </button>
+              </div>
+            )}
+          </For>
+        </TransitionGroup>
+      </div>
+    </Show>
   );
 }
 
