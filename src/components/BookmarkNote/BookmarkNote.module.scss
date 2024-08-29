@@ -1,7 +1,7 @@
 .bookmark {
   .emptyBookmark {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
     margin: 0px 0px;
     background-color: var(--text-tertiary);
@@ -15,8 +15,8 @@
   }
 
   .fullBookmark {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
     margin: 0px 0px;
     background-color: var(--active-bookmarked);
@@ -41,6 +41,7 @@
 .right {
   display: flex;
   justify-content: flex-end;
+  padding: 0 !important;
   padding-left: 6px !important;
   padding-right: 0px !important;
 

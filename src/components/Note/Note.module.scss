@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  // gap: 6px;
   padding: 12px 20px;
   margin: 0px;
 
@@ -72,7 +72,7 @@
     font-weight: 400;
     line-height: 20px;
     margin-top: 4px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     width: 100%;
     overflow: hidden;
 
@@ -607,7 +607,7 @@
   align-items: flex-start;
   justify-content: space-between;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 16px;
 
   .break {
     flex-basis: 100%;
