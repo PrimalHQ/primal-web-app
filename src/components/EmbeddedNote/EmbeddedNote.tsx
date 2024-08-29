@@ -29,6 +29,8 @@ const EmbeddedNote: Component<{
   class?: string,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
   hideFooter?: boolean,
+  embedLevel?: number,
+  rootNote?: PrimalNote,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -223,9 +225,10 @@ const EmbeddedNote: Component<{
       <div class={styles.noteContent} ref={noteContent}>
         <ParsedNote
           note={props.note}
-          ignoreMentionedNotes={true}
           shorten={true}
           isEmbeded={true}
+          embedLevel={(props.embedLevel || 0)+1}
+          rootNote={props.rootNote}
           width={noteContent?.getBoundingClientRect().width}
           margins={2}
         />

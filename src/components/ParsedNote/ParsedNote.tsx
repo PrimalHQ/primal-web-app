@@ -29,7 +29,7 @@ import {
 import { authorName, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createResource, createSignal, For, JSXElement, onMount, Show, Suspense,
+  Component, createEffect, createResource, createSignal, For, JSXElement, onMount, Show, Suspense,
 } from 'solid-js';
 import {
   PrimalArticle,
@@ -153,6 +153,8 @@ const ParsedNote: Component<{
   margins?: number,
   noLightbox?: boolean,
   altEmbeds?: boolean,
+  embedLevel?: number,
+  rootNote?: PrimalNote,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
 }> = (props) => {
 
@@ -195,6 +197,8 @@ const ParsedNote: Component<{
   const isNoteTooLong = () => {
     return props.shorten && wordsDisplayed() > shortNoteWords;
   };
+
+  const rootNote = () => props.rootNote || props.note;
 
   const noteContent = () => {
     const content = props.note.post.content;
@@ -906,12 +910,14 @@ const ParsedNote: Component<{
           return <A href={`/e/${nid}`}>{token}</A>
         }
 
+        const rn = rootNote();
         const decoded = decodeIdentifier(id);
-        const mentionedArticles = props.note.mentionedArticles;
+        const mentionedArticles = rn.mentionedArticles;
 
-        if (decoded.type !== 'naddr' || !mentionedArticles) {
+        if (decoded.type !== 'naddr' || !mentionedArticles || (props.embedLevel || 0) > 1) {
           return unknownMention(id);
         }
+
 
         const mention = mentionedArticles[id];
 
@@ -966,24 +972,46 @@ const ParsedNote: Component<{
 
           const path = `/e/${noteId}`;
 
-          if (props.noLinks === 'links') {
-            link = <span class='linkish'>{token}</span>;
+          if (props.noLinks === 'links' || (props.embedLevel || 0) > 1) {
+            return <span class='linkish'>{token}</span>;
+          }
+
+          const rn = rootNote();
+
+          const mentionedNotes = {
+            ...(rn.mentionedNotes || {}),
+            ...(props.note.mentionedNotes || {}),
+          }
+
+          const mentionedArticles = {
+            ...(rn.mentionedArticles || {}),
+            ...(props.note.mentionedArticles || {}),
+          }
+
+          const mentionedHighlights = {
+            ...(rn.mentionedHighlights || {}),
+            ...(props.note.mentionedHighlights || {}),
+          }
+
+          const mentionedUsers = {
+            ...(rn.mentionedUsers || {}),
+            ...(props.note.mentionedUsers || {}),
           }
 
           if (kind === undefined) {
-            let f: any = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+            let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
-              f = props.note.mentionedArticles && props.note.mentionedArticles[hex];
+              f = mentionedArticles && mentionedArticles[hex];
             }
             if (!f) {
-              f = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
+              f = mentionedHighlights && mentionedHighlights[hex];
             }
             kind = f?.post.kind || f?.msg?.kind || f.event.kind || Kind.Text;
           }
 
           if ([Kind.Text].includes(kind)) {
             if (!props.noLinks) {
-              const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+              const ment = mentionedNotes && mentionedNotes[hex];
 
               link = <A href={path}>{token}</A>;
 
@@ -998,10 +1026,13 @@ const ParsedNote: Component<{
                   link = <div>
                     <EmbeddedNote
                       note={ment}
-                      mentionedUsers={props.note.mentionedUsers || {}}
+                      mentionedUsers={mentionedUsers || {}}
                       isLast={index === content.length-1}
                       alternativeBackground={props.altEmbeds}
                       footerSize={props.footerSize}
+                      hideFooter={true}
+                      embedLevel={props.embedLevel}
+                      rootNote={rn}
                     />
                   </div>;
                 }
@@ -1012,7 +1043,7 @@ const ParsedNote: Component<{
           if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
 
             if (!props.noLinks) {
-              const ment = props.note.mentionedArticles && props.note.mentionedArticles[hex];
+              const ment = mentionedArticles && mentionedArticles[hex];
 
               link = <A href={path}>{token}</A>;
 
@@ -1026,7 +1057,7 @@ const ParsedNote: Component<{
           }
 
           if (kind === Kind.Highlight) {
-            const ment = props.note.mentionedHighlights && props.note.mentionedHighlights[hex];
+            const ment = mentionedHighlights && mentionedHighlights[hex];
 
             link = <div class={styles.mentionedHighlight}>
               {ment?.event?.content}
@@ -1072,6 +1103,13 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
+        const rn = rootNote();
+
+        const mentionedUsers = {
+          ...(rn.mentionedUsers || {}),
+          ...(props.note.mentionedUsers || {}),
+        }
+
         try {
           const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
@@ -1080,7 +1118,7 @@ const ParsedNote: Component<{
 
           const path = `/p/${npub}`;
 
-          let user = props.note.mentionedUsers && props.note.mentionedUsers[hex];
+          let user = mentionedUsers && mentionedUsers[hex];
 
           const label = user ? userName(user) : truncateNpub(npub);
 
@@ -1103,7 +1141,7 @@ const ParsedNote: Component<{
     </For>
   };
 
-  const renderTagMention = (item: NoteContent) => {
+  const renderTagMention = (item: NoteContent, index?: number) => {
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -1126,10 +1164,33 @@ const ParsedNote: Component<{
 
         if (tag === undefined || tag.length === 0) return;
 
+
+        const rn = rootNote();
+
+        const mentionedNotes = {
+          ...(rn.mentionedNotes || {}),
+          ...(props.note.mentionedNotes || {}),
+        }
+
+        const mentionedArticles = {
+          ...(rn.mentionedArticles || {}),
+          ...(props.note.mentionedArticles || {}),
+        }
+
+        const mentionedHighlights = {
+          ...(rn.mentionedHighlights || {}),
+          ...(props.note.mentionedHighlights || {}),
+        }
+
+        const mentionedUsers = {
+          ...(rn.mentionedUsers || {}),
+          ...(props.note.mentionedUsers || {}),
+        }
+
         if (
           tag[0] === 'e' &&
-          props.note.mentionedNotes &&
-          props.note.mentionedNotes[tag[1]]
+          mentionedNotes &&
+          mentionedNotes[tag[1]]
         ) {
           const hex = tag[1];
           const noteId = `nostr:${nip19.noteEncode(hex)}`;
@@ -1142,7 +1203,7 @@ const ParsedNote: Component<{
           }
 
           if (!props.noLinks) {
-            const ment = props.note.mentionedNotes[hex];
+            const ment = mentionedNotes[hex];
 
             embeded = <><A href={path}>{noteId}</A>{end}</>;
 
@@ -1152,7 +1213,9 @@ const ParsedNote: Component<{
               embeded = <div>
                 <EmbeddedNote
                   note={ment}
-                  mentionedUsers={props.note.mentionedUsers}
+                  mentionedUsers={mentionedUsers}
+                  hideFooter={true}
+                  embedLevel={props.embedLevel}
                 />
                 {end}
               </div>;
@@ -1162,8 +1225,43 @@ const ParsedNote: Component<{
           return <span class="whole"> {embeded}</span>;
         }
 
-        if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
-          const user = props.note.mentionedUsers[tag[1]];
+        if (
+          tag[0] === 'a' &&
+          mentionedArticles &&
+          mentionedArticles[tag[1]]
+        ) {
+
+          const [kind, pubkey, identifier] = tag[1].split(':');
+          const naddr = nip19.naddrEncode({ kind, pubkey, identifier });
+          const noteId = `nostr:${naddr}`;
+          const path = `/e/${naddr}`;
+
+          let embeded = <span>{noteId}{end}</span>;
+
+          if (props.noLinks === 'links') {
+            embeded = <><span class='linkish'>{noteId}</span>{end}</>;
+          }
+
+          if (!props.noLinks) {
+            const ment = mentionedArticles[naddr];
+
+            embeded = <><A href={path}>{noteId}</A>{end}</>;
+
+            if (ment) {
+              setWordsDisplayed(w => w + shortMentionInWords - 1);
+
+              embeded = <div>
+                {renderLongFormMention(ment, index)}
+                {end}
+              </div>;
+            }
+          }
+
+          return <span class="whole"> {embeded}</span>;
+        }
+
+        if (tag[0] === 'p' && mentionedUsers && mentionedUsers[tag[1]]) {
+          const user = mentionedUsers[tag[1]];
 
           const path = `/p/${user.npub}`;
 
