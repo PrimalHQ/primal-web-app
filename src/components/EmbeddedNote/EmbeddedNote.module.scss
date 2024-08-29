@@ -2,7 +2,7 @@
 .mentionedNote {
   border: none;
   border-radius: 8px;
-  background-color: var(--background-input);
+  background-color: var(--background-header-input);
   margin-block: 6px;
   padding: 18px;
   display: grid;
@@ -19,6 +19,12 @@
 
   &.altBack {
     background-color: var(--background-sheet);
+  }
+
+  &.embededContentWrapper {
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: var(--background-header-input);
   }
 
   .mentionedNoteHeader {

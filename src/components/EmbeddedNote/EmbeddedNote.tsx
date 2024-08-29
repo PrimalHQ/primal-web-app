@@ -77,6 +77,7 @@ const EmbeddedNote: Component<{
     k += ' embeddedNote';
     if (props.isLast) k += ' noBottomMargin';
     if (props.alternativeBackground) k += ` ${styles.altBack}`;
+    if ((props.embedLevel || 0) > 0) k += ` ${styles.embededContentWrapper}`
     if (props.class) k += ` ${props.class}`;
 
     return k;
