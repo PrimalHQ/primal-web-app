@@ -71,7 +71,7 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 20px;
-    margin-top: 4px;
+    margin-top: 6px;
     margin-bottom: 16px;
     width: 100%;
     overflow: hidden;
@@ -851,7 +851,7 @@
 .upRightFloater {
   position: absolute;
   top: 0px;
-  right: 0px;
+  right: -10px;
 }
 
 @keyframes shimmer {
