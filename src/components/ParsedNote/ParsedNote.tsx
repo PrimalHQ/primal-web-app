@@ -912,14 +912,19 @@ const ParsedNote: Component<{
 
         const rn = rootNote();
         const decoded = decodeIdentifier(id);
+        const reEncoded = nip19.naddrEncode({
+          kind: decoded.data.kind,
+          pubkey: decoded.data.pubkey,
+          identifier: decoded.data.identifier || '',
+        });
         const mentionedArticles = rn.mentionedArticles;
 
         if (decoded.type !== 'naddr' || !mentionedArticles || (props.embedLevel || 0) > 1) {
-          return unknownMention(id);
+          return unknownMention(reEncoded);
         }
 
 
-        const mention = mentionedArticles[id];
+        const mention = mentionedArticles[reEncoded];
 
         if (!mention) {
           return unknownMention(id);
@@ -942,11 +947,13 @@ const ParsedNote: Component<{
   };
 
   const renderNoteMention = (item: NoteContent, index?: number) => {
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
 
         let [_, id] = token.split(':');
+
 
         if (!id) {
           return <>{token}</>;
@@ -1001,7 +1008,12 @@ const ParsedNote: Component<{
           if (kind === undefined) {
             let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
-              f = mentionedArticles && mentionedArticles[hex];
+              const reEncoded = nip19.naddrEncode({
+                kind: eventId.kind,
+                pubkey: eventId.pubkey,
+                identifier: eventId.identifier || '',
+              });
+              f = mentionedArticles && mentionedArticles[reEncoded];
             }
             if (!f) {
               f = mentionedHighlights && mentionedHighlights[hex];
@@ -1043,7 +1055,12 @@ const ParsedNote: Component<{
           if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
 
             if (!props.noLinks) {
-              const ment = mentionedArticles && mentionedArticles[hex];
+              const reEncoded = nip19.naddrEncode({
+                kind: eventId.kind,
+                pubkey: eventId.pubkey,
+                identifier: eventId.identifier || '',
+              });
+              const ment = mentionedArticles && mentionedArticles[reEncoded];
 
               link = <A href={path}>{token}</A>;
 
