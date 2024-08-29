@@ -420,6 +420,12 @@
         height: 40px;
       }
 
+      &.bigFont {
+        font-size: 24px;
+        font-weight: 400;
+        line-height: 32px;
+      }
+
     }
 
     .time {
@@ -514,6 +520,7 @@
       font-size: 14px;
       font-weight: 600;
       line-height: 14px;
+      margin-left: -6px;
     }
 
     .description {

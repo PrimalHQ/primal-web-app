@@ -343,7 +343,7 @@ const Note: Component<{
 
           <div class={styles.content}>
 
-            <div class={styles.message}>
+          <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
               <ParsedNote
                 note={props.note}
                 width={Math.min(640, window.innerWidth)}
@@ -356,6 +356,7 @@ const Note: Component<{
                 topZaps={reactionsState.topZaps}
                 zapCount={reactionsState.zapCount}
                 action={() => openReactionModal('zaps')}
+                doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
               />
             </div>
 

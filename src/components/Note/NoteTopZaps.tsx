@@ -31,7 +31,7 @@ const NoteTopZaps: Component<{
 
       digits += length;
 
-      if (digits > 25 || limit > 7) break;
+      if (digits > 25 || limit > 6) break;
 
       limit++;
     }
@@ -80,6 +80,7 @@ const NoteTopZaps: Component<{
                   style={`z-index: ${12 - index()};`}
                 >
                   <Avatar user={zapSender(zap)} size="micro" />
+                  <div class={styles.topZapIcon}></div>
                   <div class={styles.amount}>
                     {zap.amount.toLocaleString()}
                   </div>
