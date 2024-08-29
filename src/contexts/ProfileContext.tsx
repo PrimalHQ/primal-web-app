@@ -41,6 +41,7 @@ import { APP_ID } from "../App";
 import { hexToNpub } from "../lib/keys";
 import {
   extractRelayConfigFromTags,
+  getCommonFollowers,
   getProfileContactList,
   getProfileFollowerList,
   getProfileScoredNotes,
@@ -56,6 +57,7 @@ import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 import { fetchUserZaps } from "../handleFeeds";
+import { convertToUser } from "../stores/profile";
 
 
 export type ProfileContextStore = {
@@ -73,6 +75,7 @@ export type ProfileContextStore = {
   gallery: PrimalNote[],
   zapListOffset: number,
   lastZap: PrimalZap | undefined,
+  commonFollowers: PrimalUser[],
   future: {
     notes: PrimalNote[],
     articles: PrimalArticle[],
@@ -200,6 +203,7 @@ export const initialData = {
   isFetchingFollowers: false,
   relays: {},
   isFetchingRelays: false,
+  commonFollowers: [],
   sidebarNotes: {
     messages: [],
     users: {},
@@ -245,12 +249,13 @@ export const initialData = {
   },
 };
 
-
 export const ProfileContext = createContext<ProfileContextStore>();
 
 export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
+
+  let commonFollowers: PrimalUser[] = [];
 
 // ACTIONS --------------------------------------
 
@@ -1216,6 +1221,22 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   };
 
+
+
+  const updateCommonFollowers = (content: NostrEventContent, scope: 'sidebarNotes' | 'sidebarArticles' = 'sidebarNotes') => {
+    if (content.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      commonFollowers.push(convertToUser(user));
+      return;
+    }
+  };
+
+  const saveCommonFollowers = () => {
+    updateStore('commonFollowers', () => [ ...commonFollowers ]);
+    commonFollowers = [];
+  };
+
   const setProfileKey = async (profileKey?: string) => {
     if (profileKey === store.profileKey) return;
 
@@ -1227,8 +1248,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('userStats', () => ({ ...emptyStats }));
       updateStore('fetchedUserStats', () => false);
       updateStore('isProfileFetched', () => false);
+      updateStore('commonFollowers', () => []);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
-      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 10);
+      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 5);
+      getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 5);
 
       updateStore('isFetchingSidebarArticles', () => true);
       const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);
@@ -1456,6 +1479,18 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT') {
         updateSidebar(content);
+        return;
+      }
+    }
+
+    if (subId === `profile_cf_${APP_ID}`) {
+      if (type === 'EOSE') {
+        saveCommonFollowers();
+        return;
+      }
+
+      if (type === 'EVENT') {
+        updateCommonFollowers(content);
         return;
       }
     }

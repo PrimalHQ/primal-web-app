@@ -293,9 +293,9 @@ const ProfileTabs: Component<{
             <Switch
               fallback={
                 <div>
-                  <ArticlePreviewSkeleton />
-                  <ArticlePreviewSkeleton />
-                  <ArticlePreviewSkeleton />
+                  <For each={new Array(10)}>
+                    {() => <ArticlePreviewSkeleton />}
+                  </For>
                 </div>
               }
             >
@@ -325,7 +325,7 @@ const ProfileTabs: Component<{
               <Match when={profile && profile.articles.length === 0 && !profile.isFetching}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
-                    t.noNotes,
+                    t.noArticles,
                     { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
                   )}
                 </div>
@@ -352,9 +352,9 @@ const ProfileTabs: Component<{
             <Switch
               fallback={
                 <div>
-                  <FeedNoteSkeleton />
-                  <FeedNoteSkeleton />
-                  <FeedNoteSkeleton />
+                  <For each={new Array(10)}>
+                    {() => <FeedNoteSkeleton />}
+                  </For>
                 </div>
               }
             >
@@ -411,9 +411,9 @@ const ProfileTabs: Component<{
             <Switch
               fallback={
                 <div>
-                  <FeedNoteSkeleton />
-                  <FeedNoteSkeleton />
-                  <FeedNoteSkeleton />
+                  <For each={new Array(10)}>
+                    {() => <FeedNoteSkeleton />}
+                  </For>
                 </div>
               }
             >

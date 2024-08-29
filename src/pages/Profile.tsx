@@ -5,6 +5,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  For,
   onCleanup,
   onMount,
   Resource,
@@ -835,15 +836,13 @@ const Profile: Component = () => {
             <div class={styles.commonFollows}>
               <div class={styles.label}>Followed by</div>
               <div class={styles.avatars}>
-                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
-                  <Avatar size="micro" user={profile?.userProfile} />
-                </A>
-                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
-                  <Avatar size="micro" user={profile?.userProfile} />
-                </A>
-                <A href={`/p/${profile?.userProfile?.npub}`} class={styles.avatar}>
-                  <Avatar size="micro" user={profile?.userProfile} />
-                </A>
+                <For each={profile?.commonFollowers}>
+                  {(follower) => (
+                    <A href={`/p/${follower.npub}`} class={styles.avatar}>
+                      <Avatar size="micro" user={follower} />
+                    </A>
+                  )}
+                </For>
               </div>
             </div>
           </div>

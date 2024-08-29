@@ -1244,6 +1244,11 @@ export const profile = {
     defaultMessage: '{name} hasn\'t posted any notes',
     description: 'Label indicating that the profile has no notes',
   },
+  noArticles: {
+    id: 'profile.noArticles',
+    defaultMessage: '{name} hasn\'t published any reads',
+    description: 'Label indicating that the profile has no reads',
+  },
   noReplies: {
     id: 'profile.noReplies',
     defaultMessage: '{name} hasn\'t posted any replies',

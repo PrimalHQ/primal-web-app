@@ -133,6 +133,20 @@ export const getProfileScoredNotes = (pubkey: string | undefined, user_pubkey: s
   ]));
 }
 
+export const getCommonFollowers = (pubkey: string | undefined, user_pubkey: string | undefined, subId: string, limit = 5) => {
+  if (!pubkey || !user_pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["user_profile_followed_by", { pubkey, limit, user_pubkey }]},
+  ]));
+}
+
+
+
 export const getTrendingUsers = (subid: string, user_pubkey: string | undefined) => {
   sendMessage(JSON.stringify([
     "REQ",
