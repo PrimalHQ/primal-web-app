@@ -32,13 +32,11 @@ const PeopleList: Component<{
 
   return (
       <div id={props.id} class={styles.stickyWrapper}>
-        <Show when={author()}>
-          <MentionedPeople
-            mentioned={mentioned()}
-            author={author()}
-            label={props.mentionLabel || ''}
-          />
-        </Show>
+        <MentionedPeople
+          mentioned={mentioned()}
+          author={author()}
+          label={props.mentionLabel || ''}
+        />
 
         <Show when={repliers().length > 0}>
           <Repliers
