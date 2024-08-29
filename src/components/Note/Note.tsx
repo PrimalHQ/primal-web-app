@@ -21,7 +21,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegex, addrRegexG, imageRegex, imageRegexG, noteRegex, noteRegexLocal, urlRegex, urlRegexG } from '../../constants';
+import { addrRegex, addrRegexG, imageRegex, imageRegexG, noteRegex, noteRegexLocal, profileRegexG, urlRegex, urlRegexG } from '../../constants';
 
 export type NoteReactionsState = {
   likes: number,
@@ -276,6 +276,7 @@ const Note: Component<{
       .replace(imageRegexG, '')
       .replace(noteRegex, '')
       .replace(addrRegexG, '')
+      .replace(profileRegexG, '')
       .replace(urlRegexG, '')
       .trim();
 
