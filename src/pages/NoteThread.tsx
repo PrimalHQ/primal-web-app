@@ -23,6 +23,7 @@ import { unwrap } from 'solid-js/store';
 import PrimaryNoteSkeleton from '../components/Skeleton/PrimaryNoteSkeleton';
 import ReplyToNoteSkeleton from '../components/Skeleton/ReplyToNoteSkeleton';
 import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
+import { Transition } from 'solid-transition-group';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -181,73 +182,77 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       <NavHeader title="Thread" />
 
       <Show when={account?.isKeyLookupDone}>
-        <Show
-          when={!isFetching()}
-          fallback={<div class={styles.loader}>
-            <PrimaryNoteSkeleton />
-            <ReplyToNoteSkeleton />
-            <For each={new Array(10)}>
-              {() => <ThreadNoteSkeleton />}
-            </For>
-            <ThreadNoteSkeleton />
-          </div>}
-        >
-          <div class={styles.parentsHolder}>
-            <For each={parentNotes()}>
-              {note =>
-                <div>
-                  <Note
-                    note={note}
-                    parent={true}
-                    shorten={true}
-                    noteType="thread"
-                  />
-                </div>
-              }
-            </For>
-          </div>
-
+        <Transition name='slide-fade'>
           <Show
-            when={primaryNote()}
-            fallback={
-              <div class={styles.missingNote}>
-                <p>
-                  {intl.formatMessage(tPlaceholders.missingNote.firstLine)}
-                </p>
-                <p>
-                  {intl.formatMessage(tPlaceholders.missingNote.secondLine)}
-                </p>
+            when={!isFetching()}
+            fallback={<div class={styles.loader}>
+              <PrimaryNoteSkeleton />
+              <ReplyToNoteSkeleton />
+              <For each={new Array(10)}>
+                {() => <ThreadNoteSkeleton />}
+              </For>
+              <ThreadNoteSkeleton />
+            </div>}
+          >
+            <div>
+              <div class={styles.parentsHolder}>
+                <For each={parentNotes()}>
+                  {note =>
+                    <div>
+                      <Note
+                        note={note}
+                        parent={true}
+                        shorten={true}
+                        noteType="thread"
+                      />
+                    </div>
+                  }
+                </For>
               </div>
-          }>
-            <div id="primary_note">
-              <Note
-                note={primaryNote() as PrimalNote}
-                noteType="primary"
-                quoteCount={threadContext?.quoteCount}
-              />
-              <Show when={account?.hasPublicKey()}>
-                <ReplyToNote
-                  note={primaryNote() as PrimalNote}
-                  onNotePosted={onNotePosted}
-                />
+
+              <Show
+                when={primaryNote()}
+                fallback={
+                  <div class={styles.missingNote}>
+                    <p>
+                      {intl.formatMessage(tPlaceholders.missingNote.firstLine)}
+                    </p>
+                    <p>
+                      {intl.formatMessage(tPlaceholders.missingNote.secondLine)}
+                    </p>
+                  </div>
+              }>
+                <div id="primary_note" class="animated">
+                  <Note
+                    note={primaryNote() as PrimalNote}
+                    noteType="primary"
+                    quoteCount={threadContext?.quoteCount}
+                  />
+                  <Show when={account?.hasPublicKey()}>
+                    <ReplyToNote
+                      note={primaryNote() as PrimalNote}
+                      onNotePosted={onNotePosted}
+                    />
+                  </Show>
+                </div>
               </Show>
+
+              <div class={styles.repliesHolder} ref={repliesHolder}>
+                <For each={replyNotes()}>
+                  {note =>
+                    <div class="animated">
+                      <Note
+                        note={note}
+                        shorten={true}
+                        noteType="thread"
+                      />
+                    </div>
+                  }
+                </For>
+              </div>
             </div>
           </Show>
-
-          <div class={styles.repliesHolder} ref={repliesHolder}>
-            <For each={replyNotes()}>
-              {note =>
-                <div>
-                  <Note
-                    note={note}
-                    shorten={true}
-                    noteType="thread"
-                  />
-                </div>
-              }
-            </For>
-          </div>
-        </Show>
+        </Transition>
       </Show>
     </div>
   )

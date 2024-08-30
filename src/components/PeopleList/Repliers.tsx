@@ -21,16 +21,16 @@ const Repliers: Component<{
   const people = () => props.people;
 
   return (
-    <>
+    <div>
       <div class={styles.heading}>{props.label}</div>
       <div id="trending_section" class={styles.trendingSection}>
         <For each={people()}>
           {
-            (person) => <MentionedPerson person={person} noAbout={true} />
+            (person) => <div class="animated"><MentionedPerson person={person} noAbout={true} /></div>
           }
         </For>
       </div>
-    </>
+    </div>
   );
 }
 

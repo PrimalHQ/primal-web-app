@@ -1,5 +1,6 @@
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
+import { Transition } from 'solid-transition-group';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
@@ -26,24 +27,30 @@ const MentionedPeople: Component<{
   return (
       <>
         <div class={styles.heading}>{props.label}</div>
-        <Show
-          when={props.author && props.mentioned.length > 0}
-          fallback={<ThreadPeopleSkeleton />}
-        >
-          <div id="trending_section" class={styles.authorSection}>
-            <MentionedPerson
-              person={author()}
-            />
-
-            <For each={mentioned()}>
-              {(person) =>
+        <Transition name='slide-fade'>
+          <Show
+            when={props.author && props.mentioned.length > 0}
+            fallback={<ThreadPeopleSkeleton />}
+          >
+            <div id="trending_section" class={`${styles.authorSection}`}>
+              <div class="animated">
                 <MentionedPerson
-                  person={person}
+                  person={author()}
                 />
-              }
-            </For>
-          </div>
-        </Show>
+              </div>
+
+              <For each={mentioned()}>
+                {(person) =>
+                  <div class='animated'>
+                    <MentionedPerson
+                      person={person}
+                    />
+                  </div>
+                }
+              </For>
+            </div>
+          </Show>
+        </Transition>
       </>
   );
 }
