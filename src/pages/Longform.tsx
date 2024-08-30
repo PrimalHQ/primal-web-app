@@ -1179,7 +1179,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
         <div>
           <For each={store.replies}>
-            {reply => <Note note={reply} noteType='feed' size="xwide" />}
+            {reply => <Note note={reply} noteType='thread' shorten={true} size="xwide" />}
           </For>
         </div>
       </Show>

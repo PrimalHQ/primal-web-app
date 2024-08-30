@@ -117,6 +117,12 @@
   }
 }
 
+.upRightFloater {
+  position: absolute;
+  top: 0px;
+  right: -10px;
+}
+
 .noteThread {
   position: relative;
   display: flex;
@@ -242,6 +248,12 @@
         }
       }
     }
+  }
+
+  .upRightFloater {
+    position: absolute;
+    top: 0px;
+    right: 0px;
   }
 }
 
@@ -477,6 +489,12 @@
     .footer {
       padding-inline: 12px;
     }
+  }
+
+  .upRightFloater {
+    position: absolute;
+    top: 0px;
+    right: 0px;
   }
 }
 
@@ -853,12 +871,6 @@
       padding-right: 0px;
     }
   }
-}
-
-.upRightFloater {
-  position: absolute;
-  top: 0px;
-  right: -10px;
 }
 
 @keyframes shimmer {
