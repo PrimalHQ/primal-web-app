@@ -778,25 +778,29 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
           const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
 
           let zappedId = '';
-          let zappedKind: number | undefined;
+          let zappedKind: number = 0;
 
           const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
           const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
 
           if (zapTagA) {
             const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
             zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
-            zappedKind = Kind.LongForm;
+
+            const article = pageArticles.find(a => a.id === zappedId);
+            zappedKind = article?.kind || 0;
           }
           else if (zapTagE) {
             zappedId = zapTagE[1];
+
             const article = pageArticles.find(a => a.id === zappedId);
             const note = pageNotes.find(n => n.id === zappedId);
 
-            zappedKind = article?.kind || note?.kind;
+            zappedKind = article?.kind || note?.kind || 0;
           }
 
-          if (!zappedKind) continue;
+          if (![Kind.Text, Kind.LongForm].includes(zappedKind)) continue;
 
           const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey]) : senderPubkey;
           const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey]) : receiverPubkey;
