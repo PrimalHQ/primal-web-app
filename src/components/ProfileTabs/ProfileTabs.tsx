@@ -30,6 +30,7 @@ import ProfileNoteZap from "../ProfileNoteZap/ProfileNoteZap";
 import FeedNoteSkeleton from "../Skeleton/FeedNoteSkeleton";
 import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
 import { Transition, TransitionGroup } from "solid-transition-group";
+import ZapSkeleton from "../Skeleton/ZapSkeleton";
 
 
 const ProfileTabs: Component<{
@@ -654,8 +655,10 @@ const ProfileTabs: Component<{
             <TransitionGroup name="slide-fade">
               <div>
                 <Show when={profile && profile.isFetchingZaps && profile.zaps.length === 0}>
-                  <div style="margin-top: 40px;">
-                    LOADING
+                  <div>
+                    <For each={new Array(10)}>
+                      {() => <ZapSkeleton />}
+                    </For>
                   </div>
                 </Show>
               </div>

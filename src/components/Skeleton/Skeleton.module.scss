@@ -907,3 +907,43 @@
     background-color: var(--devider);
   }
 }
+
+.zapSkeleton {
+  display:flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+
+  border-bottom: 1px solid var(--devider);
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .zapinfo {
+    width: 148px;
+    height: 68px;
+    border-radius: 8px;
+    background-color: var(--devider);
+  }
+
+  .zapSubjectInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 8px;
+
+    .zapDate {
+      width: 60px;
+      height: 16px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+    .zapSubjectContent {
+      width: 300px;
+      height: 40px;
+      border-radius: 8px;
+      background-color: var(--devider);
+
+    }
+  }
+}
