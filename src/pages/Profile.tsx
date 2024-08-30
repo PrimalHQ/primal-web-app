@@ -833,18 +833,20 @@ const Profile: Component = () => {
               </Show>
             </div>
 
-            <div class={styles.commonFollows}>
-              <div class={styles.label}>Followed by</div>
-              <div class={styles.avatars}>
-                <For each={profile?.commonFollowers}>
-                  {(follower) => (
-                    <A href={`/p/${follower.npub}`} class={styles.avatar}>
-                      <Avatar size="micro" user={follower} />
-                    </A>
-                  )}
-                </For>
+            <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+              <div class={styles.commonFollows}>
+                <div class={styles.label}>Followed by</div>
+                <div class={styles.avatars}>
+                  <For each={profile?.commonFollowers}>
+                    {(follower) => (
+                      <A href={`/p/${follower.npub}`} class={styles.avatar}>
+                        <Avatar size="micro" user={follower} />
+                      </A>
+                    )}
+                  </For>
+                </div>
               </div>
-            </div>
+            </Show>
           </div>
         </Show>
       </div>
