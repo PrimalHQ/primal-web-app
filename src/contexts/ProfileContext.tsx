@@ -260,10 +260,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 // ACTIONS --------------------------------------
 
 
-
   const fetchZapList = async (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
     if (!pubkey) return;
     const subIdProfiles = `profile_zaps_${APP_ID}`;
+
+    updateStore('isFetchingZaps', () => true);
 
     const { zaps, notes, articles } = await fetchUserZaps(pubkey, subIdProfiles, until, offset, 20);
 
@@ -271,71 +272,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('zappedNotes', (zn) => [ ...zn,  ...notes ]);
     updateStore('zappedArticles', (za) => [ ...za, ...articles ]);
 
-    // let zapList: NostrUserZaps[] = [];
-
-    // const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
-    //   if (type === 'EOSE') {
-    //     // let zapsToAdd: PrimalZap[] = [];
-    //     for (let i=0; i< zapList.length; i++) {
-    //       const zapContent = zapList[i];
-
-    //       const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
-    //       const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
-    //       const senderPubkey = zapEvent.pubkey as string;
-
-    //       const zap: PrimalZap = {
-    //         id: zapContent.id,
-    //         message: zapEvent.content || '',
-    //         amount: parseBolt11(bolt11) || 0,
-    //         sender: store.zappers[senderPubkey],
-    //         reciver: store.userProfile,
-    //         created_at: zapContent.created_at,
-    //       };
-
-    //       // zapsToAdd.push(zap);
-    //       updateStore('zaps', store.zaps.length, () => ({ ...zap }));
-    //     }
-
-    //     // updateStore('zaps', (zs) => [...zs, ...zapsToAdd]);
-
-    //     // updateStore('zaps', store.zaps.length, () => ({
-    //     //   amount: store.zaps[store.zaps.length -1].amount,
-    //     //   id: 'PAGE_END',
-    //     // }));
-
-    //     updateStore('isFetchingZaps', () => false);
-    //     unsubProfiles();
-    //     return;
-    //   }
-
-    //   if (type === 'EVENT') {
-    //     if (content?.kind === Kind.Zap) {
-    //       zapList.push(content);
-    //     }
-
-    //     if (content?.kind === Kind.Metadata) {
-    //       let user = JSON.parse(content.content);
-
-    //       if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
-    //         user.displayName = user.display_name;
-    //       }
-    //       user.pubkey = content.pubkey;
-    //       user.npub = hexToNpub(content.pubkey);
-    //       user.created_at = content.created_at;
-
-    //       updateStore('zappers', () => ({ [user.pubkey]: { ...user } }));
-    //       return;
-    //     }
-    //   }
-    // });
-
-    // if (store.lastZap) {
-    //   updateStore('lastZap', () => ({ ...store.lastZap }));
-    // }
-
-    // indicateFetching && updateStore('isFetchingZaps', () => true);
-
-    // getProfileZapList(pubkey, subIdProfiles, until, offset, 20);
+    updateStore('isFetchingZaps', () => false);
   };
 
   const fetchNextZapsPage = () => {

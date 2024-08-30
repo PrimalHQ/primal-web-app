@@ -29,6 +29,7 @@ import NoteGallery from "../Note/NoteGallery";
 import ProfileNoteZap from "../ProfileNoteZap/ProfileNoteZap";
 import FeedNoteSkeleton from "../Skeleton/FeedNoteSkeleton";
 import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
+import { Transition, TransitionGroup } from "solid-transition-group";
 
 
 const ProfileTabs: Component<{
@@ -290,15 +291,7 @@ const ProfileTabs: Component<{
 
         <Tabs.Content class={styles.tabContent} value="articles">
           <div class={styles.profileNotes}>
-            <Switch
-              fallback={
-                <div>
-                  <For each={new Array(10)}>
-                    {() => <ArticlePreviewSkeleton />}
-                  </For>
-                </div>
-              }
-            >
+            <Switch>
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -322,26 +315,47 @@ const ProfileTabs: Component<{
                   </button>
                 </div>
               </Match>
-              <Match when={profile && profile.articles.length === 0 && !profile.isFetching}>
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noArticles,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
-                </div>
-              </Match>
-              <Match when={profile && profile.articles.length > 0}>
-                <For each={profile?.articles}>
-                  {article => (
-                    <ArticlePreview article={article} />
-                  )}
-                </For>
-                <Paginator
-                  loadNextPage={() => {
-                    profile?.actions.fetchNextArticlesPage();
-                  }}
-                  isSmall={true}
-                />
+
+
+              <Match when={true}>
+                <TransitionGroup name="slide-fade">
+                  <div>
+                    <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                      <div>
+                        <For each={new Array(10)}>
+                          {() => <ArticlePreviewSkeleton />}
+                        </For>
+                      </div>
+                    </Show>
+                  </div>
+
+                  <div>
+                    <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                      <div class={styles.mutedProfile}>
+                        {intl.formatMessage(
+                          t.noArticles,
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                        )}
+                      </div>
+                    </Show>
+                  </div>
+
+                  <Show when={profile && profile.articles.length > 0}>
+                    <div>
+                      <For each={profile?.articles}>
+                        {article => (
+                          <div class="animated"><ArticlePreview article={article} /></div>
+                        )}
+                      </For>
+                      <Paginator
+                        loadNextPage={() => {
+                          profile?.actions.fetchNextArticlesPage();
+                        }}
+                        isSmall={true}
+                      />
+                    </div>
+                  </Show>
+                </TransitionGroup>
               </Match>
             </Switch>
           </div>
@@ -349,15 +363,7 @@ const ProfileTabs: Component<{
 
         <Tabs.Content class={styles.tabContent} value="notes">
           <div class={styles.profileNotes}>
-            <Switch
-              fallback={
-                <div>
-                  <For each={new Array(10)}>
-                    {() => <FeedNoteSkeleton />}
-                  </For>
-                </div>
-              }
-            >
+            <Switch>
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -381,26 +387,46 @@ const ProfileTabs: Component<{
                   </button>
                 </div>
               </Match>
-              <Match when={profile && profile.notes.length === 0 && !profile.isFetching}>
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noNotes,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
-                </div>
-              </Match>
-              <Match when={profile && profile.notes.length > 0}>
-                <For each={profile?.notes}>
-                  {note => (
-                    <Note note={note} shorten={true} />
-                  )}
-                </For>
-                <Paginator
-                  loadNextPage={() => {
-                    profile?.actions.fetchNextPage();
-                  }}
-                  isSmall={true}
-                />
+
+              <Match when={true}>
+                <TransitionGroup name="slide-fade">
+                  <div>
+                    <Show when={profile && profile.isFetching && profile.notes.length === 0}>
+                      <div>
+                        <For each={new Array(10)}>
+                          {() => <FeedNoteSkeleton />}
+                        </For>
+                      </div>
+                    </Show>
+                  </div>
+
+                  <div>
+                    <Show when={profile && profile.notes.length === 0 && !profile.isFetching}>
+                      <div class={styles.mutedProfile}>
+                        {intl.formatMessage(
+                          t.noNotes,
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                        )}
+                      </div>
+                    </Show>
+                  </div>
+
+                  <Show when={profile && profile.notes.length > 0}>
+                    <div>
+                      <For each={profile?.notes}>
+                        {note => (
+                          <div class="animated"><Note note={note} shorten={true} /></div>
+                        )}
+                      </For>
+                      <Paginator
+                        loadNextPage={() => {
+                          profile?.actions.fetchNextPage();
+                        }}
+                        isSmall={true}
+                      />
+                    </div>
+                  </Show>
+                </TransitionGroup>
               </Match>
             </Switch>
           </div>
@@ -408,15 +434,7 @@ const ProfileTabs: Component<{
 
         <Tabs.Content class={styles.tabContent} value="replies">
           <div class={styles.profileNotes}>
-            <Switch
-              fallback={
-                <div>
-                  <For each={new Array(10)}>
-                    {() => <FeedNoteSkeleton />}
-                  </For>
-                </div>
-              }
-            >
+            <Switch>
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -440,26 +458,45 @@ const ProfileTabs: Component<{
                   </button>
                 </div>
               </Match>
-              <Match when={profile && profile.replies.length === 0 && !profile.isFetchingReplies}>
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noReplies,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
-                </div>
-              </Match>
-              <Match when={profile && profile.replies.length > 0}>
-                <For each={profile?.replies}>
-                  {reply => (
-                    <Note note={reply} shorten={true} />
-                  )}
-                </For>
-                <Paginator
-                  loadNextPage={() => {
-                    profile?.actions.fetchNextRepliesPage();
-                  }}
-                  isSmall={true}
-                />
+
+              <Match when={true}>
+                <TransitionGroup name="slide-fade">
+                  <div>
+                    <Show when={profile && profile.isFetchingReplies && profile.replies.length === 0}>
+                      <div>
+                        <For each={new Array(10)}>
+                          {() => <FeedNoteSkeleton />}
+                        </For>
+                      </div>
+                    </Show>
+                  </div>
+                  <div>
+                    <Show when={profile && profile.replies.length === 0 && !profile.isFetchingReplies}>
+                      <div class={styles.mutedProfile}>
+                        {intl.formatMessage(
+                          t.noReplies,
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                        )}
+                      </div>
+                    </Show>
+                  </div>
+
+                  <Show when={profile && profile.replies.length > 0}>
+                    <div>
+                      <For each={profile?.replies}>
+                        {reply => (
+                          <div class="animated"><Note note={reply} shorten={true} /></div>
+                        )}
+                      </For>
+                      <Paginator
+                        loadNextPage={() => {
+                          profile?.actions.fetchNextRepliesPage();
+                        }}
+                        isSmall={true}
+                      />
+                    </div>
+                  </Show>
+                </TransitionGroup>
               </Match>
             </Switch>
           </div>
@@ -613,81 +650,42 @@ const ProfileTabs: Component<{
         </Tabs.Content>
 
         <Tabs.Content class={styles.tabContent} value="zaps">
-          {/* <div class={styles.totalSats}>
-            <span class={styles.totalSatsLabel}>
-              {intl.formatMessage(t.stats.totalSats)}:
-            </span>
-            <span class={styles.totalSatsAmount}>
-              <span>
-                {humanizeNumber(profile?.userStats.total_satszapped || 0)}
-              </span>
-              <span>
-                {intl.formatMessage(t.stats.sats)}
-              </span>
-            </span>
-          </div> */}
           <div class={styles.profileNotes}>
-            <Show
-              when={!profile?.isFetchingZaps}
-              fallback={
+            <TransitionGroup name="slide-fade">
+              <div>
+                <Show when={profile && profile.isFetchingZaps && profile.zaps.length === 0}>
                   <div style="margin-top: 40px;">
-                    <Loader />
+                    LOADING
                   </div>
-              }
-            >
-              <For each={profile?.zaps} fallback={
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noZaps,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
+                </Show>
+              </div>
+              <div>
+                <Show when={profile && !profile.isFetchingZaps && profile.zaps.length === 0}>
+                  <div class={styles.mutedProfile}>
+                    {intl.formatMessage(
+                      t.noZaps,
+                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    )}
+                  </div>
+                </Show>
+              </div>
+
+              <Show when={profile && profile.zaps.length > 0}>
+                <div>
+                  <For each={profile?.zaps}>
+                    {zap =>
+                      <div class="animated">
+                        <ProfileNoteZap
+                          zap={zap}
+                          subject={getZapSubject(zap)}
+                        />
+                      </div>
+                    }
+                  </For>
+                  <Paginator loadNextPage={profile?.actions.fetchNextZapsPage} isSmall={true} />
                 </div>
-              }>
-                {zap =>
-                  <ProfileNoteZap
-                    zap={zap}
-                    subject={getZapSubject(zap)}
-                  />
-                  // <A
-                  //   class={styles.zapItem}
-                  //   href={`/p/${zap.sender?.npub}`}
-                  //   data-zap-id={zap.id}
-                  // >
-                  //   <Avatar src={zap.sender?.picture} size="xs" />
-
-                  //   <div class={styles.zapInfo}>
-                  //     <div class={styles.zapHeader}>
-                  //       <span class={styles.zapName}>
-                  //         {userName(zap.sender)}
-                  //       </span>
-
-                  //       <Show when={zap.created_at}>
-                  //         <span
-                  //           class={styles.zapTime}
-                  //           title={date(zap.created_at || 0).date.toLocaleString()}
-                  //         >
-                  //           {date(zap.created_at || 0).label}
-                  //         </span>
-                  //       </Show>
-                  //     </div>
-                  //     <div class={styles.zapMessage}>
-                  //       {zap.message}
-                  //     </div>
-                  //   </div>
-
-                  //   <div class={styles.zapValue} title={`${zap.amount} ${intl.formatMessage(t.stats.sats)}`}>
-                  //     <div class={styles.zapAmount}>
-                  //       {humanizeNumber(zap.amount)}
-                  //     </div>
-                  //     <div class={styles.zapUnit}>
-                  //       {intl.formatMessage(t.stats.sats)}
-                  //     </div>
-                  //   </div>
-                  // </A>
-                }
-              </For>
-              <Paginator loadNextPage={profile?.actions.fetchNextZapsPage} isSmall={true} />
-            </Show>
+              </Show>
+            </TransitionGroup>
           </div>
         </Tabs.Content>
 

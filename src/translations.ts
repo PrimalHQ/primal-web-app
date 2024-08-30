@@ -1266,7 +1266,7 @@ export const profile = {
   },
   noZaps: {
     id: 'profile.noZaps',
-    defaultMessage: 'No one zapped {name}',
+    defaultMessage: '{name} zapped no one',
     description: 'Label indicating that the profile has no zaps',
   },
   noRelays: {

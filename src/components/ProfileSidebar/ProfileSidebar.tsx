@@ -15,6 +15,7 @@ import ArticleShort from '../ArticlePreview/ArticleShort';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
+import { Transition } from 'solid-transition-group';
 
 
 const ProfileSidebar: Component<{
@@ -29,75 +30,70 @@ const ProfileSidebar: Component<{
 
   return (
     <div id={props.id}>
-      <Show
-        when={profile?.profileKey && !profile.isFetchingSidebarArticles}
-        fallback={
-          <>
+      <Transition name='slide-fade' >
+        <Show
+          when={props.articles && props.articles.length > 0}
+          fallback={
+            <Show when={profile?.isFetchingSidebarArticles}>
+              <div class={styles.headingTrending}>
+                <div>
+                </div>
+              </div>
+              <div>
+                <ArticlePreviewSidebarSkeleton />
+                <ArticlePreviewSidebarSkeleton />
+              </div>
+            </Show>
+          }
+        >
+          <div>
             <div class={styles.headingTrending}>
               <div>
                 {intl.formatMessage(t.sidebarCaptionReads)}
               </div>
             </div>
-            <div>
-              <ArticlePreviewSidebarSkeleton />
-              <ArticlePreviewSidebarSkeleton />
-            </div>
 
+            <div class={styles.articles}>
+              <For each={props.articles}>
+                {(article) => <div class="animated"><ArticleShort article={article} shorter={true} /></div>}
+              </For>
+            </div>
+          </div>
+        </Show>
+      </Transition>
+
+      <Transition name='slide-fade' >
+        <Show
+          when={props.notes && props.notes.length > 0}
+          fallback={
+            <Show when={profile?.isFetchingSidebarArticles}>
+              <div class={styles.headingTrending}>
+                <div>
+                </div>
+              </div>
+              <div>
+                <ShortNoteSkeleton />
+                <ShortNoteSkeleton />
+                <ShortNoteSkeleton />
+                <ShortNoteSkeleton />
+                <ShortNoteSkeleton />
+              </div>
+            </Show>
+          }
+        >
+          <div>
             <div class={styles.headingTrending}>
               <div>
                 {intl.formatMessage(t.sidebarCaptionNotes)}
               </div>
             </div>
-            <div>
-              <ShortNoteSkeleton />
-              <ShortNoteSkeleton />
-              <ShortNoteSkeleton />
-              <ShortNoteSkeleton />
-              <ShortNoteSkeleton />
-            </div>
-          </>
-        }
-      >
-        <div class={styles.headingTrending}>
-          <div>
-            {intl.formatMessage(t.sidebarCaptionReads)}
-          </div>
-        </div>
 
-        <Show
-          when={props.articles && props.articles.length > 0}
-        >
-          <div class={styles.articles}>
-            <For each={props.articles}>
-              {(article) => <ArticleShort article={article} shorter={true} />}
+            <For each={props.notes}>
+              {(note) => <div class="animated"><SmallNote note={note} /></div>}
             </For>
           </div>
         </Show>
-
-        <div class={styles.headingTrending}>
-          <div>
-            {intl.formatMessage(t.sidebarCaptionNotes)}
-          </div>
-        </div>
-
-        <Show
-          when={props.notes && props.notes.length > 0}
-          fallback={
-            <div class={styles.noNotes}>
-              {intl.formatMessage(
-                t.sidebarNoNotes,
-                {
-                  name: userName(props.profile),
-                },
-              )}
-            </div>
-          }
-        >
-          <For each={props.notes}>
-            {(note) => <SmallNote note={note} />}
-          </For>
-        </Show>
-      </Show>
+      </Transition>
     </div>
   );
 }
