@@ -21,35 +21,16 @@ const ArticleSkeleton: Component<{
       <div class={styles.body}>
         <div class={styles.toolbar}>
           <div class={styles.time}></div>
-          <div class={styles.tools}>
-            <div class={styles.tool}></div>
-            <div class={styles.tool}></div>
-            <div class={styles.tool}></div>
-          </div>
+          <div class={styles.title}></div>
         </div>
 
-        <div class={styles.title}></div>
 
         <div class={styles.image}></div>
 
         <div class={styles.summary}>
-          <div class={styles.border}></div>
-          <div class={styles.summaryText}>
-            <div class={styles.firstLine}></div>
-            <div class={styles.secondLine}></div>
-          </div>
         </div>
 
-        <div class={styles.topZaps}>
-          <div class={styles.firstZap}></div>
-
-          <div class={styles.restZap}>
-          <div class={styles.zap}></div>
-          <div class={styles.zap}></div>
-          <div class={styles.zap}></div>
-          <div class={styles.zap}></div>
-          <div class={styles.zap}></div>
-          </div>
+        <div class={styles.content}>
         </div>
 
 
