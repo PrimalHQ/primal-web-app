@@ -942,7 +942,7 @@ const ParsedNote: Component<{
 
     return (
       <div class={styles.articlePreview}>
-        <ArticlePreview article={mention} hideFooter={true} />
+        <ArticlePreview article={mention} hideFooter={true} hideContext={true} />
       </div>);
   };
 

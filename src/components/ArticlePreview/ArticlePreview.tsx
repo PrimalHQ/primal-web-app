@@ -31,6 +31,7 @@ const ArticlePreview: Component<{
   height?: number,
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
   hideFooter?: boolean,
+  hideContext?: boolean,
 }> = (props) => {
 
   const app = useAppContext();
@@ -312,12 +313,14 @@ const ArticlePreview: Component<{
       href={`/e/${props.article.naddr}`}
       style={props.height ? `height: ${props.height}px` : ''}
     >
-      <div class={styles.upRightFloater}>
-        <NoteContextTrigger
-          ref={articleContextMenu}
-          onClick={onContextMenuTrigger}
-        />
-      </div>
+      <Show when={!props.hideContext}>
+        <div class={styles.upRightFloater}>
+          <NoteContextTrigger
+            ref={articleContextMenu}
+            onClick={onContextMenuTrigger}
+          />
+        </div>
+      </Show>
 
       <div class={styles.header}>
         <div class={styles.userInfo}>
