@@ -736,7 +736,7 @@ export type ContentZaps = {
 }
 
 
-export const fetchUserZaps = (pubkey: string | undefined, subId: string, until = 0, offset = 10, limit = 10) => {
+export const fetchUserZaps = (pubkey: string | undefined, subId: string, until = 0, offset = 0, limit = 10) => {
   return new Promise<ContentZaps>((resolve, reject) => {
     if (!pubkey) reject('Missing pubkey');
 
@@ -754,8 +754,6 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
       until: 0,
       wordCount: {},
     }
-
-    let lastNote: PrimalArticle | undefined;
 
     const unsub = subscribeTo(subId, (type, _, content) => {
 
@@ -780,7 +778,7 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
           const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
 
           let zappedId = '';
-          let zappedKind = Kind.Metadata;
+          let zappedKind: number | undefined;
 
           const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
           const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
@@ -792,8 +790,13 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
           }
           else if (zapTagE) {
             zappedId = zapTagE[1];
-            zappedKind = Kind.Text;
+            const article = pageArticles.find(a => a.id === zappedId);
+            const note = pageNotes.find(n => n.id === zappedId);
+
+            zappedKind = article?.kind || note?.kind;
           }
+
+          if (!zappedKind) continue;
 
           const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey]) : senderPubkey;
           const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey]) : receiverPubkey;
@@ -829,7 +832,7 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
       }
     });
 
-    getProfileZapList(pubkey, subId, until, offset, limit);
+    getProfileZapList(pubkey, subId, until, 0, limit);
 
     const updatePage = (content: NostrEventContent) => {
       if (content?.kind === Kind.Zap) {

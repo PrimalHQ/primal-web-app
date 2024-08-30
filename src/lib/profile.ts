@@ -80,7 +80,7 @@ export const getProfileZapList = (pubkey: string | undefined, subid: string, unt
   }
 
   let payload = {
-    receiver: pubkey,
+    sender: pubkey,
     limit,
     offset,
   };
@@ -93,7 +93,7 @@ export const getProfileZapList = (pubkey: string | undefined, subid: string, unt
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_zaps_by_satszapped", payload]},
+    {cache: ["user_zaps_sent", payload]},
   ]));
 }
 

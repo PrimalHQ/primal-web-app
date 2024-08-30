@@ -182,7 +182,7 @@ const ProfileTabs: Component<{
     }
 
     if (zap.zappedKind === Kind.LongForm) {
-      return profile?.zappedArticles.find(a => a.noteId === zap.zappedId);
+      return profile?.zappedArticles.find(a => [a.noteId, a.id].includes(zap.zappedId || ''));
     }
 
 

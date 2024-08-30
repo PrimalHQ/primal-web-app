@@ -64,7 +64,7 @@ const ProfileNoteZap: Component<{
   }
 
   return (
-    <div class={styles.contentZap}>
+    <div class={styles.contentZap} data-zap-id={props.zap.id}>
       <div class={styles.zapInfo}>
         <div class={styles.topLine}>
           <A href={`/p/${userNpub(props.zap.sender)}`} class={styles.sender}>

@@ -345,19 +345,20 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    const lastAmount = lastZap.amount;
+    // const lastAmount = lastZap.amount;
 
-    const offset = store.zaps.reduce((acc, zap) =>
-      zap.amount === lastAmount ? acc+1 : acc,
-      0,
-    );
+    // const offset = store.zaps.reduce((acc, zap) =>
+    //   zap.amount === lastAmount ? acc+1 : acc,
+    //   0,
+    // );
+    // const until = lastZap.amount || 0;
 
     updateStore('lastZap', () => ({ ...lastZap }));
 
-    const until = lastZap.amount || 0;
+    const until = lastZap.created_at || 0;
 
     if (until > 0 && store.profileKey) {
-      fetchZapList(store.profileKey, until, offset, false);
+      fetchZapList(store.profileKey, until, 0, false);
     }
   };
 
@@ -1268,6 +1269,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('profileKey', () => undefined);
     updateStore('userProfile', () => undefined);
     updateStore('isFetching', () => false);
+    updateStore('commonFollowers', () => []);
     updateStore('userStats', reconcile(emptyStats));
   };
 
