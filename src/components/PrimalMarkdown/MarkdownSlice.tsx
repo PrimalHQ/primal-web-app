@@ -18,6 +18,7 @@ import { profileRegex } from '../../constants';
 import { PrimalArticle } from '../../types/primal';
 import { userName } from '../../stores/profile';
 import { npubToHex } from '../../lib/keys';
+import DOMPurify from 'dompurify';
 
 
 const MarkdownSlice: Component<{
@@ -168,7 +169,7 @@ const MarkdownSlice: Component<{
   })
 
   return (
-    <div innerHTML={html()}>
+    <div innerHTML={DOMPurify.sanitize(html())}>
     </div>
   )
 }
