@@ -535,9 +535,9 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding-left: 2px;
+    padding-left: 1px;
     padding-right: 10px;
-    padding-block: 2px;
+    padding-block: 1px;
     margin: 0;
     border-radius: 12px;
     background: var(--devider);
@@ -547,12 +547,15 @@
     border: none;
     outline: none;
 
+    .topZapIcon {
+      margin-right: -6px;
+    }
+
     .amount {
       color: var(--text-primary);
       font-size: 14px;
       font-weight: 600;
       line-height: 14px;
-      margin-left: -6px;
     }
 
     .description {
@@ -612,7 +615,7 @@
     border-radius: 12px;
     background: var(--text-primary);
     width: fit-content;
-    min-height: 26px;
+    min-height: 28px;
     max-width: 100%;
     text-decoration: none;
     border: none;
@@ -620,7 +623,7 @@
 
     .zapIcon {
       width: 10px;
-      height: 12px;
+      height: 14px;
       background-color: var(--devider);
       -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
       mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
@@ -628,9 +631,9 @@
 
     .zapText {
       color:  var(--devider);
-      font-size: 12px;
+      font-size: 16px;
       font-weight: 700;
-      line-height: 12px;
+      line-height: 18px;
     }
 
     &:hover {

@@ -22,23 +22,23 @@ const NoteTopZaps: Component<{
   const topZaps = () => {
     const zaps = [...(props.topZaps || [])];
 
-    let limit = 0;
-    let digits = 0;
+    let limit = 5;
+    // let digits = 0;
 
-    for (let i=0; i< zaps.length; i++) {
-      const amount = zaps[i].amount || 0;
-      const length = Math.log(amount) * Math.LOG10E + 1 | 0;
+    // for (let i=0; i< zaps.length; i++) {
+    //   const amount = zaps[i].amount || 0;
+    //   const length = Math.log(amount) * Math.LOG10E + 1 | 0;
 
-      digits += length;
+    //   digits += length;
 
-      if (digits > 25 || limit > 6) break;
+    //   if (digits > 25 || limit > 6) break;
 
-      limit++;
-    }
+    //   limit++;
+    // }
 
     const highlights = zaps.slice(0, limit);
 
-    setHasMoreZaps(() => highlights.length < props.zapCount - 1);
+    // setHasMoreZaps(() => highlights.length < props.zapCount - 1);
 
     return highlights;
   }
@@ -79,8 +79,10 @@ const NoteTopZaps: Component<{
                   onClick={() => props.action()}
                   style={`z-index: ${12 - index()};`}
                 >
-                  <Avatar user={zapSender(zap)} size="micro" />
-                  <div class={styles.topZapIcon}></div>
+                  <Avatar user={zapSender(zap)} size="xss" />
+                  <Show when={index() === 0}>
+                    <div class={styles.topZapIcon}></div>
+                  </Show>
                   <div class={styles.amount}>
                     {zap.amount.toLocaleString()}
                   </div>
