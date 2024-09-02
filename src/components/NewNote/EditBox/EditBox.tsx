@@ -51,6 +51,7 @@ import { useSettingsContext } from "../../../contexts/SettingsContext";
 import ArticlePreview from "../../ArticlePreview/ArticlePreview";
 import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
+import DOMPurify from "dompurify";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -187,7 +188,7 @@ const EditBox: Component<{
 
 
   const renderMessage = () => {
-    const text = parsedMessage();
+    const text = DOMPurify.sanitize(parsedMessage());
 
     if (!noteHasInvoice(text)) {
       return (
@@ -207,7 +208,8 @@ const EditBox: Component<{
 
     let sectionIndex = 0;
 
-    tokens.forEach((t) => {
+    tokens.forEach((tok) => {
+      const t = DOMPurify.sanitize(tok);
       if (t.startsWith('lnbc')) {
         if (sections[sectionIndex]) sectionIndex++;
 

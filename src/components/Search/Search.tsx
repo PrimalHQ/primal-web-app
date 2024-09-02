@@ -14,6 +14,8 @@ import styles from './Search.module.scss';
 import SearchOption from './SearchOption';
 import { hookForDev } from '../../lib/devTools';
 import { useProfileContext } from '../../contexts/ProfileContext';
+import { sanitize } from '../../lib/notes';
+import DOMPurify from 'dompurify';
 
 
 const Search: Component<{
@@ -34,7 +36,7 @@ const Search: Component<{
   const [query, setQuery] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
 
-  const queryUrl = () => query().replaceAll('#', '%23');
+  const queryUrl = () => DOMPurify.sanitize(query().replaceAll('#', '%23'));
 
   let input: HTMLInputElement | undefined;
 
@@ -45,7 +47,7 @@ const Search: Component<{
 
     const data = new FormData(form);
 
-    const q = data.get('searchQuery') as string || '';
+    const q = DOMPurify.sanitize(data.get('searchQuery') as string || '');
 
     if (q.length > 0) {
       if (props.onInputConfirm) {
@@ -74,7 +76,7 @@ const Search: Component<{
         return;
       }
 
-      setQuery(value || '');
+      setQuery(DOMPurify.sanitize(value) || '');
     }, 500);
   };
 

@@ -1,6 +1,7 @@
 import styles from  "./Toaster.module.scss";
 
 import { Component, createContext, JSX, useContext } from "solid-js";
+import DOMPurify from "dompurify";
 
 type ContextProps = { children: number | boolean | Node | JSX.ArrayElement | JSX.FunctionElement | (string & {}) | null | undefined; };
 
@@ -18,7 +19,7 @@ const Toaster: Component<ContextProps> = (props) => {
 
   const toastMesage = (message: string, klass: string, duration = 4000) => {
     const toaster = document.createElement('div');
-    toaster.innerHTML = message;
+    toaster.innerHTML = DOMPurify.sanitize(message);
     toaster.classList.add(klass);
     setTimeout(() => {
       toastHolder?.append(toaster)

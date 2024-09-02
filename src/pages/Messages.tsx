@@ -37,6 +37,7 @@ import { useMediaContext } from '../contexts/MediaContext';
 import PageTitle from '../components/PageTitle/PageTitle';
 import Lnbc from '../components/Lnbc/Lnbc';
 import Cashu from '../components/Cashu/Cashu';
+import DOMPurify from 'dompurify';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -292,7 +293,9 @@ const Messages: Component = () => {
     });
   }
 
-  const parseMessage = (message: string) => {
+  const parseMessage = (msg: string) => {
+    const message = DOMPurify.sanitize(msg);
+
     if (!messages) {
       return message;
     }
