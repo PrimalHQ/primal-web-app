@@ -233,7 +233,7 @@ const Note: Component<{
     onCancel: onCancelZap,
   });
 
-  const openReactionModal = (openOn = 'likes') =>  {
+  const openReactionModal = (openOn = 'default') =>  {
     app?.actions.openReactionModal(props.note.post.id, {
       likes: reactionsState.likes,
       zaps: reactionsState.zapCount,

@@ -38,7 +38,7 @@ const ReactionsModal: Component<{
   const intl = useIntl();
   const account = useAccountContext();
 
-  const [selectedTab, setSelectedTab] = createSignal('likes');
+  const [selectedTab, setSelectedTab] = createSignal('default');
 
   const [likeList, setLikeList] = createStore<any[]>([]);
   const [zapList, setZapList] = createStore<any[]>([]);
@@ -91,11 +91,32 @@ const ReactionsModal: Component<{
   });
 
   createEffect(() => {
+    if (selectedTab() === 'default') {
+      if (props.stats.zaps > 0) {
+        setSelectedTab(() => 'zaps');
+        return;
+      }
+      if (props.stats.likes > 0) {
+        setSelectedTab(() => 'likes');
+        return;
+      }
+      if (props.stats.reposts > 0) {
+        setSelectedTab(() => 'reposts');
+        return;
+      }
+      if (props.stats.quotes > 0) {
+        setSelectedTab(() => 'quotes');
+        return;
+      }
+    }
+  })
+
+  createEffect(() => {
     if (!props.noteId) {
       setLikeList(() => []);
       setZapList(() => []);
       setRepostList(() => []);
-      setSelectedTab(() => 'likes');
+      setSelectedTab(() => 'default');
       setQuotesList(() => []);
       setQuoteCount(() => 0);
 
@@ -408,14 +429,14 @@ const ReactionsModal: Component<{
         <div class={styles.description}>
           <Tabs value={selectedTab()} onChange={setSelectedTab}>
             <Tabs.List class={styles.tabs}>
-              <Show when={props.stats.likes > 0}>
-                <Tabs.Trigger class={styles.tab} value={'likes'} >
-                 {intl.formatMessage(reactionsModal.tabs.likes, { count: props.stats.likes })}
-                </Tabs.Trigger>
-              </Show>
               <Show when={props.stats.zaps > 0}>
                 <Tabs.Trigger class={styles.tab} value={'zaps'} >
                  {intl.formatMessage(reactionsModal.tabs.zaps, { count: props.stats.zaps })}
+                </Tabs.Trigger>
+              </Show>
+              <Show when={props.stats.likes > 0}>
+                <Tabs.Trigger class={styles.tab} value={'likes'} >
+                 {intl.formatMessage(reactionsModal.tabs.likes, { count: props.stats.likes })}
                 </Tabs.Trigger>
               </Show>
               <Show when={props.stats.reposts > 0}>

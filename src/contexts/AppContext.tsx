@@ -98,7 +98,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
     zaps: 0,
     reposts: 0,
     quotes: 0,
-    openOn: 'likes',
+    openOn: 'default',
   },
   showCustomZapModal: false,
   customZap: undefined,
