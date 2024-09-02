@@ -58,7 +58,11 @@ import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
+import { logInfo } from "../lib/logger";
 
+let startTime = 0;
+let midTime = 0;
+let endTime = 0
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -435,6 +439,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
     updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
     updateStore('isFetching', () => false);
+
+    endTime = (new Date()).getTime();
+
+    logInfo(`FETCH NOTES DONE (${store.profileKey}) Total: ${endTime -startTime}ms, Since EOSE: ${endTime - midTime}ms`);
   };
 
   const saveArticles = (newNotes: PrimalArticle[], scope?: 'future') => {
@@ -477,6 +485,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    startTime = (new Date()).getTime()
     updateStore('isFetching', () => true);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
     getUserFeed(account?.publicKey, pubkey, `profile_feed_${APP_ID}`, 'authored', undefined, until, limit);
@@ -1281,6 +1290,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if (subId === `profile_feed_${APP_ID}`) {
       if (type === 'EOSE') {
+        midTime = (new Date()).getTime();
+        logInfo(`FETCH NOTES EOSE (${store.profileKey}) Total: ${midTime -startTime}ms`);
         const reposts = parseEmptyReposts(store.page);
         const ids = Object.keys(reposts);
 

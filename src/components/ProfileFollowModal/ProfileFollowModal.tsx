@@ -45,7 +45,7 @@ const ProfileFollowModal: Component<{
 
 
   createEffect(() => {
-    if (pk() !== profile?.profileKey) {
+    if (pk() !== profile?.profileKey && props.open) {
       setPK(() => profile?.profileKey);
       fetchContacts();
     }
