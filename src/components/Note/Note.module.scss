@@ -266,10 +266,17 @@
   width: 524px;
   position: relative;
   .userName {
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    // text-overflow: ellipsis;
+    // white-space: nowrap;
+    // overflow: hidden;
+    // max-width: 226px;
+
     overflow: hidden;
-    max-width: 226px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+
     color: var(--text-primary);
 
     font-size: 16px;
@@ -294,10 +301,17 @@
     }
   }
   .verification {
-    max-width: 216px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    // max-width: 216px;
+    // text-overflow: ellipsis;
+    // white-space: nowrap;
+    // overflow: hidden;
+
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+
     color: var(--text-tertiary);
 
     font-size: 16px;
