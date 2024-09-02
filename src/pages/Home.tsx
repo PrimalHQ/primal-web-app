@@ -176,11 +176,9 @@ const Home: Component = () => {
           when={isPageLoading() && context?.notes && context?.notes.length == 0}
         >
           <div>
-            <FeedNoteSkeleton />
-            <FeedNoteSkeleton />
-            <FeedNoteSkeleton />
-            <FeedNoteSkeleton />
-            <FeedNoteSkeleton />
+            <For each={new Array(20)}>
+              {() => <FeedNoteSkeleton />}
+            </For>
           </div>
         </Match>
       </Switch>

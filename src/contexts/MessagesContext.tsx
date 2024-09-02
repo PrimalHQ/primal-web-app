@@ -548,6 +548,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   };
 
   const sendMessage = async (receiver: string, message: DirectMessage) => {
+
     if (!account) {
       return false;
     }

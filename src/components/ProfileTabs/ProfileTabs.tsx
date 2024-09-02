@@ -471,6 +471,7 @@ const ProfileTabs: Component<{
                       </div>
                     </Show>
                   </div>
+
                   <div>
                     <Show when={profile && profile.replies.length === 0 && !profile.isFetchingReplies}>
                       <div class={styles.mutedProfile}>
