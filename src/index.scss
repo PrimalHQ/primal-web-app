@@ -599,7 +599,7 @@ button:focus {
 .slide-fade-exit-active {
   .animated
   {
-    transition: opacity 0.6s, transform 0.6s;
+    transition: opacity 0.3s, transform 0.3s;
     transition-delay: 0.1s * 1;
   }
 }

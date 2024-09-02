@@ -236,12 +236,12 @@ const NoteFooter: Component<{
 
       if (size() === 'wide' && props.large) {
         newLeft = 14;
-        newTop = -10;
+        newTop = -14;
       }
 
       if (size() === 'short') {
-        newLeft = 14;
-        newTop = -6;
+        newLeft = 25;
+        newTop = -13;
       }
 
       if (size() === 'compact') {
