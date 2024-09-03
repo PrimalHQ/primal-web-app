@@ -838,8 +838,8 @@ const Profile: Component = () => {
                 <div class={styles.label}>Followed by</div>
                 <div class={styles.avatars}>
                   <For each={profile?.commonFollowers.slice(0, 5)}>
-                    {(follower) => (
-                      <A href={`/p/${follower.npub}`} class={styles.avatar}>
+                    {(follower, index) => (
+                      <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                         <Avatar size="micro" user={follower} />
                       </A>
                     )}
