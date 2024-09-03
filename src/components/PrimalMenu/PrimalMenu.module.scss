@@ -1,3 +1,12 @@
+@keyframes inTop {
+  0% { opacity: 0; top: 58px}
+  100% { opacity: 1; top: 28px}
+}
+@keyframes inBottom {
+  0% { opacity: 0; bottom: 58px}
+  100% { opacity: 1; bottom: 48px}
+}
+
 .contextMenuOptions {
   position: absolute;
   top: 18px;
@@ -8,6 +17,8 @@
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
+  overflow: hidden;
+
 
   &.noteFooter {
     top: 26px;
@@ -19,10 +30,22 @@
     left: 4px;
     right: unset;
   }
+
   &.hidden {
-    height: 1px;
+    max-height: 1px;
     overflow: hidden;
     visibility: hidden;
+    opacity: 0;
+    // top: 58px;
+  }
+
+  &.visible {
+    height: fit-content;
+    overflow: hidden;
+    visibility: visible;
+    opacity: 1;
+    // transition: all 200ms ease-out;
+    animation: inTop 200ms ease-out;
   }
 }
 
@@ -47,7 +70,21 @@
     left: 4px;
     right: unset;
   }
+
   &.hidden {
+    // bottom: 58px;
+    height: 1px;
+    overflow: hidden;
     visibility: hidden;
+    opacity: 0;
+  }
+
+  &.visible {
+    height: fit-content;
+    overflow: hidden;
+    visibility: visible;
+    opacity: 1;
+    // transition: all 200ms ease-out;
+    animation: inBottom 200ms ease-out;
   }
 }

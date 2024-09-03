@@ -19,7 +19,7 @@ const PrimalMenu: Component<{
       return styles.hidden;
     }
 
-    return '';
+    return styles.visible;
   };
 
   const positionClass = () => {
