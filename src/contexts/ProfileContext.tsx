@@ -2,7 +2,7 @@ import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
 import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
 import { convertToArticles, convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
-import { Kind } from "../constants";
+import { emptyPage, Kind } from "../constants";
 import {
   batch,
   createContext,
@@ -1201,6 +1201,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     if (profileKey) {
       batch(() => {
+        updateStore('sidebarNotes', () => ({ ...emptyPage }));
+        updateStore('sidebarArticles', () => ({ ...emptyPage }));
         updateStore('parsedAbout', () => undefined);
         updateStore('filterReason', () => null);
         updateStore('userProfile', () => undefined);
@@ -1208,14 +1210,15 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         updateStore('fetchedUserStats', () => false);
         updateStore('isProfileFetched', () => false);
         updateStore('isFetchingSidebarNotes', () => true);
+        updateStore('isFetchingSidebarArticles', () => true);
         updateStore('isAboutParsed', () => false);
         updateStore('commonFollowers', () => []);
       })
+
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 8);
       getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
 
-      updateStore('isFetchingSidebarArticles', () => true);
       const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);
 
       updateStore('sidebarArticles', () => ({ notes: [...articles ]}))
@@ -1226,8 +1229,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const resetProfile = () => {
+    updateStore('sidebarNotes', () => ({ ...emptyPage }));
+    updateStore('sidebarArticles', () => ({ ...emptyPage }));
     updateStore('isProfileFetched', () => false);
-    updateStore('profileKey', () => undefined);
+    // updateStore('profileKey', () => undefined);
     updateStore('userProfile', () => undefined);
     updateStore('isFetching', () => false);
     updateStore('commonFollowers', () => []);
