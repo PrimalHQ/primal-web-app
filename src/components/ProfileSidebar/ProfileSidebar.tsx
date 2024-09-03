@@ -16,6 +16,7 @@ import { useProfileContext } from '../../contexts/ProfileContext';
 import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 import { Transition } from 'solid-transition-group';
+import { Properties } from 'solid-js/web';
 
 
 const ProfileSidebar: Component<{
@@ -27,6 +28,9 @@ const ProfileSidebar: Component<{
 
   const profile = useProfileContext();
   const intl = useIntl();
+
+  const topNotes = () => (props.articles || []).length > 0 ?
+    (props.notes || []).slice(0, 5) : props.notes;
 
   return (
     <div id={props.id}>
@@ -88,7 +92,7 @@ const ProfileSidebar: Component<{
               </div>
             </div>
 
-            <For each={props.notes}>
+            <For each={topNotes()}>
               {(note) => <div class="animated"><SmallNote note={note} /></div>}
             </For>
           </div>

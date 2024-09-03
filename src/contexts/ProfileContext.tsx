@@ -1199,7 +1199,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isProfileFetched', () => false);
       updateStore('commonFollowers', () => []);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
-      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 5);
+      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 8);
       getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
 
       updateStore('isFetchingSidebarArticles', () => true);
