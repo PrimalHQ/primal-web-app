@@ -630,3 +630,42 @@ button:focus {
     }
   }
 }
+
+
+.anim-fade-enter-active,
+.anim-fade-exit-active {
+  .animated
+  {
+    transition: opacity 0.3s;
+  }
+}
+
+.anim-fade-exit-active, .none-exit-active {
+  >div
+  {
+    display: none;
+  }
+}
+.anim-fade-enter,
+.anim-fade-exit-to {
+  .animated
+  {
+    opacity: 0;
+  }
+}
+.anim-fade-enter {
+  .animated
+  {
+    transition: opacity 1s;
+  }
+  // .animated
+  // {
+  //   transform: translateY(10px);
+  // }
+  // $elements: 10;
+  // @for $i from 0 to $elements {
+  //   .animated:nth-child(#{$i + 1}) {
+  //     transform: translateY(10px + 2px*$i);
+  //   }
+  // }
+}

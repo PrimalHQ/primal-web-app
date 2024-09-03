@@ -31,7 +31,7 @@ const AdvancedSearchDialog: Component<{
 }> = (props) => {
 
   return (
-    <Dialog open={props.open} onOpenChange={props.setOpen}>
+    <Dialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
       <Dialog.Trigger class={props.triggerClass}>
         {props.triggerContent}
       </Dialog.Trigger>
