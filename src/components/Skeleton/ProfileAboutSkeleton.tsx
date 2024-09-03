@@ -7,7 +7,6 @@ const ProfileAboutSkeleton: Component<{
 }> = (props) => {
   return (
     <div class={styles.profileAboutSkeleton}>
-      <div></div>
     </div>
   );
 }

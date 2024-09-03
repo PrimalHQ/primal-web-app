@@ -1,4 +1,4 @@
-import { A, RouteDataFuncArgs, useNavigate, useParams, useRouteData } from '@solidjs/router';
+import { A, RouteDataFuncArgs, useBeforeLeave, useNavigate, useParams, useRouteData } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
 import {
   Component,
@@ -62,6 +62,7 @@ import ProfileLinksSkeleton from '../components/Skeleton/ProfileLinksSkeleton';
 import ProfileTabsSkeleton from '../components/Skeleton/ProfileTabsSkeleton';
 import ArticlePreviewSidebarSkeleton from '../components/Skeleton/ArticlePreviewSidebarSkeleton';
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
+import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 
 const Profile: Component = () => {
 
@@ -502,10 +503,15 @@ const Profile: Component = () => {
     profile?.actions.resetProfile();
   });
 
+  useBeforeLeave(() => {
+    setIsProfileLoaded(() => false);
+    profile?.actions.resetProfile();
+  })
+
   const [isProfileLoaded, setIsProfileLoaded] = createSignal(false);
 
   createEffect(() => {
-    if (!profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex()) {
+    if (profile?.isProfileFetched && !profile.isFetchingSidebarArticles && !profile.isFetchingSidebarNotes && profile.isAboutParsed && profile.profileKey === getHex()) {
       // setTimeout(() => {
         setIsProfileLoaded(() => true);
       // }, 2_000);
@@ -639,68 +645,62 @@ const Profile: Component = () => {
         )}
       />
 
-      <StickySidebar>
-        <ProfileSidebar
-          notes={profile?.sidebarNotes.notes}
-          articles={profile?.sidebarArticles.notes}
-          profile={profile?.userProfile}
-        />
-      </StickySidebar>
-
       <Wormhole to='search_section'>
         <Search />
       </Wormhole>
 
-      <div id="central_header" class={styles.fullHeader}>
-        <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
-          <Show
-            when={isProfileLoaded()}
-            fallback={<ProfileBannerSkeleton />}
-          >
-              <Show
-                when={profile?.userProfile?.banner}
-                fallback={<div class={styles.bannerPlaceholder}></div>}
-              >
-                <NoteImage
-                  class="profile_image"
-                  src={banner()}
-                  altSrc={profile?.userProfile?.banner}
-                  onError={imgError}
-                  plainBorder={true}
-                />
-              </Show>
-          </Show>
-        </div>
+      <Show
+        when={isProfileLoaded()}
+        fallback={<ProfileCardSkeleton />}
+      >
+        <StickySidebar>
+          <ProfileSidebar
+            notes={profile?.sidebarNotes.notes}
+            articles={profile?.sidebarArticles.notes}
+            profile={profile?.userProfile}
+          />
+        </StickySidebar>
+        <div id="central_header" class={styles.fullHeader}>
+          <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
+            <Show
+              when={profile?.userProfile?.banner}
+              fallback={<div class={styles.bannerPlaceholder}></div>}
+            >
+              <NoteImage
+                class="profile_image"
+                src={banner()}
+                altSrc={profile?.userProfile?.banner}
+                onError={imgError}
+                plainBorder={true}
+              />
+            </Show>
+          </div>
 
-        <div class={styles.userImage}>
-          <Show
-            when={isProfileLoaded()}
-            fallback={<ProfileAvatarSkeleton />}
-          >
+          <div class={styles.userImage}>
             <div class={styles.avatar}>
               <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
                 <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
               </div>
             </div>
-          </Show>
-        </div>
-
-        <div class={styles.profileActions}>
-          <div class={styles.contextArea}>
-            <ButtonSecondary
-              onClick={openContextMenu}
-              shrink={true}
-            >
-              <div class={styles.contextIcon}></div>
-            </ButtonSecondary>
-            <PrimalMenu
-              id={'profile_context'}
-              items={profileContext()}
-              position="profile"
-              reverse={true}
-              hidden={!showContext()}
-            />
           </div>
+
+          <div class={styles.profileActions}>
+            <div class={styles.contextArea}>
+              <ButtonSecondary
+                onClick={openContextMenu}
+                shrink={true}
+              >
+                <div class={styles.contextIcon}></div>
+              </ButtonSecondary>
+              <PrimalMenu
+                id={'profile_context'}
+                items={profileContext()}
+                position="profile"
+                reverse={true}
+                hidden={!showContext()}
+              />
+            </div>
+
             <ButtonSecondary
               onClick={() => setOpenQr(true)}
               shrink={true}
@@ -708,59 +708,49 @@ const Profile: Component = () => {
               <div class={styles.qrIcon}></div>
             </ButtonSecondary>
 
-          <ProfileQrCodeModal
-            open={openQr()}
-            onClose={() => setOpenQr(false)}
-            profile={profile?.userProfile}
-          />
-
-          <Show when={!isCurrentUser()}>
-            <ButtonSecondary
-              onClick={() => app?.actions.openCustomZapModal(customZapInfo())}
-              shrink={true}
-            >
-              <div class={styles.zapIcon}></div>
-            </ButtonSecondary>
-          </Show>
-
-          <Show when={account?.publicKey}>
-            <ButtonSecondary
-              onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-              shrink={true}
-            >
-              <div class={styles.messageIcon}></div>
-            </ButtonSecondary>
-          </Show>
-
-          <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
-            <FollowButton person={profile?.userProfile} large={true} />
-          </Show>
-
-          <Show when={hasTiers()}>
-            <ButtonPrimary
-              onClick={openSubscribe}
-            >
-              subscribe
-            </ButtonPrimary>
-          </Show>
-
-          <Show when={isCurrentUser()}>
-            <div class={styles.editProfileButton}>
+            <Show when={!isCurrentUser()}>
               <ButtonSecondary
-                onClick={() => navigate('/settings/profile')}
-                title={intl.formatMessage(tActions.editProfile)}
+                onClick={() => app?.actions.openCustomZapModal(customZapInfo())}
+                shrink={true}
               >
-                <div>{intl.formatMessage(tActions.editProfile)}</div>
+                <div class={styles.zapIcon}></div>
               </ButtonSecondary>
-            </div>
-          </Show>
-        </div>
+            </Show>
 
-        <div class={styles.profileVerification}>
-          <Show
-            when={isProfileLoaded()}
-            fallback={<ProfileVerificationSkeleton />}
-          >
+            <Show when={account?.publicKey}>
+              <ButtonSecondary
+                onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+                shrink={true}
+              >
+                <div class={styles.messageIcon}></div>
+              </ButtonSecondary>
+            </Show>
+
+            <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
+              <FollowButton person={profile?.userProfile} large={true} />
+            </Show>
+
+            <Show when={hasTiers()}>
+              <ButtonPrimary
+                onClick={openSubscribe}
+              >
+                subscribe
+              </ButtonPrimary>
+            </Show>
+
+            <Show when={isCurrentUser()}>
+              <div class={styles.editProfileButton}>
+                <ButtonSecondary
+                  onClick={() => navigate('/settings/profile')}
+                  title={intl.formatMessage(tActions.editProfile)}
+                >
+                  <div>{intl.formatMessage(tActions.editProfile)}</div>
+                </ButtonSecondary>
+              </div>
+            </Show>
+          </div>
+
+          <div class={styles.profileVerification}>
             <div class={styles.basicInfo}>
               <div class={styles.name}>
                 <div class={styles.text}>
@@ -809,21 +799,11 @@ const Profile: Component = () => {
                 </button>
               </div>
             </div>
+          </div>
 
-          </Show>
-        </div>
+          {profile?.parsedAbout}
+          {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
 
-        <Show
-          when={isProfileLoaded()}
-          fallback={<ProfileAboutSkeleton />}
-        >
-          <ProfileAbout about={profile?.userProfile?.about} />
-        </Show>
-
-        <Show
-          when={isProfileLoaded()}
-          fallback={<ProfileLinksSkeleton />}
-        >
           <div class={styles.profileLinks}>
             <div class={styles.website}>
               <Show when={profile?.userProfile?.website}>
@@ -848,13 +828,8 @@ const Profile: Component = () => {
               </div>
             </Show>
           </div>
-        </Show>
-      </div>
+        </div>
 
-      <Show
-        when={isProfileLoaded()}
-        fallback={<ProfileTabsSkeleton />}
-      >
         <ProfileTabs setProfile={setProfile} />
       </Show>
 
@@ -885,6 +860,12 @@ const Profile: Component = () => {
           following: profile?.userStats?.follows_count || 0,
           followers: profile?.userStats?.followers_count || 0,
         }}
+      />
+
+      <ProfileQrCodeModal
+        open={openQr()}
+        onClose={() => setOpenQr(false)}
+        profile={profile?.userProfile}
       />
     </>
   )

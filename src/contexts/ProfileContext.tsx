@@ -4,8 +4,10 @@ import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
 import { convertToArticles, convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
+  JSXElement,
   onCleanup,
   useContext
 } from "solid-js";
@@ -59,6 +61,7 @@ import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import { logInfo } from "../lib/logger";
+import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 
 let startTime = 0;
 let midTime = 0;
@@ -91,6 +94,7 @@ export type ProfileContextStore = {
   contactListDate: number,
   isProfileFollowing: boolean,
   isFetching: boolean,
+  isFetchingSidebarNotes: boolean,
   isProfileFetched: boolean,
   isFetchingReplies: boolean,
   isFetchingGallery: boolean,
@@ -113,12 +117,14 @@ export type ProfileContextStore = {
   isFetchingFollowers: boolean,
   isFetchingZaps: boolean,
   isFetchingRelays: boolean,
+  isAboutParsed: boolean,
   profileStats: Record<string, number>,
   relays: NostrRelays,
   profileHistory: {
     profiles: PrimalUser[],
     stats: Record<string, UserStats>,
   },
+  parsedAbout: JSXElement | undefined,
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -203,10 +209,12 @@ export const initialData = {
   contacts: [],
   profileStats: {},
   isFetchingContacts: false,
+  isFetchingSidebarNotes: false,
   followers: [],
   isFetchingFollowers: false,
   relays: {},
   isFetchingRelays: false,
+  isAboutParsed: false,
   commonFollowers: [],
   sidebarNotes: {
     messages: [],
@@ -251,6 +259,7 @@ export const initialData = {
     profiles: [],
     stats: {},
   },
+  parsedAbout: undefined,
 };
 
 export const ProfileContext = createContext<ProfileContextStore>();
@@ -262,7 +271,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   let commonFollowers: PrimalUser[] = [];
 
 // ACTIONS --------------------------------------
-
 
   const fetchZapList = async (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
     if (!pubkey) return;
@@ -1192,12 +1200,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('profileKey', () => profileKey);
 
     if (profileKey) {
-      updateStore('filterReason', () => null);
-      updateStore('userProfile', () => undefined);
-      updateStore('userStats', () => ({ ...emptyStats }));
-      updateStore('fetchedUserStats', () => false);
-      updateStore('isProfileFetched', () => false);
-      updateStore('commonFollowers', () => []);
+      batch(() => {
+        updateStore('parsedAbout', () => undefined);
+        updateStore('filterReason', () => null);
+        updateStore('userProfile', () => undefined);
+        updateStore('userStats', () => ({ ...emptyStats }));
+        updateStore('fetchedUserStats', () => false);
+        updateStore('isProfileFetched', () => false);
+        updateStore('isFetchingSidebarNotes', () => true);
+        updateStore('isAboutParsed', () => false);
+        updateStore('commonFollowers', () => []);
+      })
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 8);
       getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
@@ -1426,6 +1439,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (subId === `profile_scored_${APP_ID}`) {
       if (type === 'EOSE') {
         saveSidebar(store.sidebarNotes);
+        updateStore('isFetchingSidebarNotes', () => false);
         return;
       }
 
@@ -1543,6 +1557,18 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       { message: onMessage, close: onSocketClose },
     );
   });
+
+  createEffect(() => {
+    if (store.isProfileFetched) {
+      const parsed = parseAbout(store.userProfile?.about || '');
+
+      updateStore('parsedAbout', () => parsed);
+    }
+  })
+
+  const parseAbout = (about: string) => {
+    return <ProfileAbout about={about} onParseComplete={() => updateStore('isAboutParsed', () => true)} />
+  }
 
 // STORES ---------------------------------------
 

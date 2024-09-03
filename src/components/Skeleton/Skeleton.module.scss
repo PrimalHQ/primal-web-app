@@ -430,77 +430,32 @@
 
 .profileAboutSkeleton {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 10px;
+  height: 48px;
+  border-radius: 8px;
+  background-color: var(--devider);
 
-  >div {
-    width: 600px;
-    height: 48px;
-    border-radius: 8px;
-    background-color: var(--devider);
-
-    animation: skeleton-fade 2500ms linear infinite;
-  }
-
+  animation: skeleton-fade 2500ms linear infinite;
 }
 
 .profileLinksSkeleton {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-left: 20px;
-  padding-right: 30px;
-  margin-bottom: 16px;
+  animation: skeleton-fade 2500ms linear infinite;
+  width: 100%;
 
   .website {
-    width: 200px;
-    height: 16px;
-    border-radius: 8px;
+    width: 240px;
+    height: 20px;
+    border-radius: 10px;
     background-color: var(--devider);
-    animation: skeleton-fade 2500ms linear infinite;
   }
 
   .commonFollows {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 6px;
-
-    .label {
-      width: 68px;
-      height: 14px;
-      border-radius: 7px;
-      background-color: var(--devider);
-      animation: skeleton-fade 2500ms linear infinite;
-    }
-
-    .avatarsS {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: flex-end;
-      align-items: center;
-
-      .avatarS {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 24px;
-        height: 24px;
-        margin-right: -10px;
-        border-radius: 12px;
-        background-color: var(--background-site);
-
-        .fillS {
-          width: 22px;
-          height: 22px;
-          border-radius: 11px;
-          background-color: var(--devider);
-          animation: skeleton-fade 2500ms linear infinite;
-        }
-      }
-    }
+    width: 180px;
+    height: 16px;
+    border-radius: 8px;
+    background-color: var(--devider);
   }
 }
 
@@ -944,5 +899,57 @@
       background-color: var(--devider);
 
     }
+  }
+}
+
+.profileActionsSkeleton {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .roundButton {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: var(--devider);
+  }
+
+  .elongButton {
+    width: 100px;
+    height: 42px;
+    border-radius: 18px;
+    background-color: var(--devider);
+  }
+}
+
+.profileCardSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  .userImage {
+    position: absolute;
+    top: 136px;
+    left: 15px;
+    overflow: hidden;
+    .avatar {
+      border: solid 4px var(--background-site);
+      border-radius: 50%;
+      background-color: var(--background-site);
+    }
+  }
+
+  .profileActions {
+    margin-top: -4px;
+    margin-bottom: 12px;
+    padding-inline: 8px;
+  }
+
+  .profileSection {
+    margin-inline: 20px;
   }
 }

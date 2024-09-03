@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { nip19 } from '../../lib/nTools';
-import { Component, createEffect, For, JSXElement, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, JSXElement, onCleanup, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind } from '../../constants';
@@ -15,7 +15,7 @@ import { NoteContent } from '../ParsedNote/ParsedNote';
 
 import styles from '../../pages/Profile.module.scss';
 
-const ProfileAbout: Component<{about: string | undefined }> = (props) => {
+const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () => void }> = (props) => {
 
   const [usersMentionedInAbout, setUsersMentionedInAbout] = createStore<Record<string, any>>({});
 
@@ -275,7 +275,12 @@ const ProfileAbout: Component<{about: string | undefined }> = (props) => {
     <Show when={aboutContent.length > 0}>
       <div class={styles.profileAbout}>
         <For each={aboutContent}>
-          {(item, index) => renderAboutContent(item, index())}
+          {(item, index) => {
+            if (index() === aboutContent.length - 1) {
+              props.onParseComplete && props.onParseComplete()
+            }
+            return renderAboutContent(item, index());
+          }}
         </For>
       </div>
     </Show>
