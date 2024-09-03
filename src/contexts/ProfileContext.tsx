@@ -1174,6 +1174,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
+      if (user.pubkey === store.profileKey) return;
+
       commonFollowers.push(convertToUser(user));
       return;
     }
@@ -1198,7 +1200,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('commonFollowers', () => []);
       getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 5);
-      getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 5);
+      getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
 
       updateStore('isFetchingSidebarArticles', () => true);
       const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);

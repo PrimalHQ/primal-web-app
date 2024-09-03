@@ -837,7 +837,7 @@ const Profile: Component = () => {
               <div class={styles.commonFollows}>
                 <div class={styles.label}>Followed by</div>
                 <div class={styles.avatars}>
-                  <For each={profile?.commonFollowers}>
+                  <For each={profile?.commonFollowers.slice(0, 5)}>
                     {(follower) => (
                       <A href={`/p/${follower.npub}`} class={styles.avatar}>
                         <Avatar size="micro" user={follower} />

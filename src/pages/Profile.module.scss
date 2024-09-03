@@ -438,6 +438,8 @@
     .avatar {
       margin-right: -10px;
       transition: margin 300ms ease-in-out;
+      border-radius: 12px;
+      border: 1px solid var(--background-site);
     }
 
     &:hover {
