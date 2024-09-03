@@ -19,6 +19,7 @@ import ProfileContact from '../ProfileContact/ProfileContact';
 import Paginator from '../Paginator/Paginator';
 import { humanizeNumber } from '../../lib/stats';
 import { date } from '../../lib/dates';
+import { BeforeLeaveEventArgs, useBeforeLeave } from '@solidjs/router';
 
 const ProfileFollowModal: Component<{
   id?: string,
@@ -122,6 +123,10 @@ const ProfileFollowModal: Component<{
       profile?.actions.addContact(pubkey, profile.followers);
     }
   };
+
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    props.setOpen && props.setOpen(false)
+  });
 
   return (
     <AdvancedSearchDialog
