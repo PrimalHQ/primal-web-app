@@ -6,6 +6,7 @@ import { hexToNpub } from '../../lib/keys';
 import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
 import { profile as tProfile } from '../../translations';
 import { PrimalUser } from '../../types/primal';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import ButtonCopy from '../Buttons/ButtonCopy';
 import Modal from '../Modal/Modal';
@@ -41,37 +42,38 @@ const ProfileQrCodeModal: Component<{
   });
 
   return (
-    <Modal open={props.open} onClose={props.onClose}>
-      <div id={props.id} class={styles.ProfileQrCodeModal}>
-        <div class={styles.header}>
-          <div class={styles.userInfo}>
-            <div class={styles.avatar}>
-              <Avatar
-                size="sm"
-                user={props.profile}
-              />
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.userInfo}>
+          <div class={styles.avatar}>
+            <Avatar
+              size="sm"
+              user={props.profile}
+            />
+          </div>
+          <div class={styles.details}>
+            <div class={styles.name}>
+              {authorName(props.profile)}
+              <VerificationCheck user={props.profile} />
             </div>
-            <div class={styles.details}>
-              <div class={styles.name}>
-                {authorName(props.profile)}
-                <VerificationCheck user={props.profile} />
-              </div>
-              <div class={styles.verification} title={props.profile?.nip05}>
-                <Show when={props.profile?.nip05}>
-                  <span
-                    class={styles.verifiedBy}
-                    title={props.profile?.nip05}
-                  >
-                    {nip05Verification(props.profile)}
-                  </span>
-                </Show>
-              </div>
+            <div class={styles.verification} title={props.profile?.nip05}>
+              <Show when={props.profile?.nip05}>
+                <span
+                  class={styles.verifiedBy}
+                  title={props.profile?.nip05}
+                >
+                  {nip05Verification(props.profile)}
+                </span>
+              </Show>
             </div>
           </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
         </div>
-
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.ProfileQrCodeModal}>
         <div class={styles.qrCode}>
           <Tabs>
             <Tabs.List class={styles.tabs}>
@@ -123,7 +125,7 @@ const ProfileQrCodeModal: Component<{
           </For>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

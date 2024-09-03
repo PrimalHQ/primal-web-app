@@ -1,5 +1,4 @@
 .zapEmojiChangeModal {
-  position: fixed;
   height: 344px;
   color: var(--text-secondary);
   background-color: var(--background-input);
@@ -8,10 +7,11 @@
 
   display: flex;
   flex-direction: column;
-  padding-left: 22px;
-  padding-right: 16px;
-  padding-block: 22px;
 
   justify-content: flex-start;
   align-items: center;
+}
+
+.hidden {
+  display: none;
 }

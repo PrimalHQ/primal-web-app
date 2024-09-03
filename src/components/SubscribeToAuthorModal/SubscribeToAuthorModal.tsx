@@ -21,6 +21,7 @@ import Loader from '../Loader/Loader';
 import { logInfo } from '../../lib/logger';
 import { getExchangeRate, getMembershipStatus } from '../../lib/membership';
 import { useAccountContext } from '../../contexts/AccountContext';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 
 export const satsInBTC = 100_000_000;
@@ -232,25 +233,26 @@ const SubscribeToAuthorModal: Component<{
   }
 
   return (
-    <Modal open={props.author !== undefined} onClose={props.onClose}>
-      <div id={props.id} class={styles.subscribeToAuthor}>
-        <div class={styles.header}>
-          <div class={styles.userInfo}>
-            <Avatar user={props.author} />
-            <div class={styles.userData}>
-              <div class={styles.userName}>
-                {userName(props.author)}
-                <VerificationCheck user={props.author} />
-              </div>
-              <div class={styles.nip05}>
-                {props.author?.nip05}
-              </div>
+    <AdvancedSearchDialog
+      open={props.author !== undefined}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.userInfo}>
+          <Avatar user={props.author} />
+          <div class={styles.userData}>
+            <div class={styles.userName}>
+              {userName(props.author)}
+              <VerificationCheck user={props.author} />
+            </div>
+            <div class={styles.nip05}>
+              {props.author?.nip05}
             </div>
           </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
         </div>
-
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.subscribeToAuthor}>
         <div class={styles.modalBody}>
           <div class={styles.tiers}>
             <Show
@@ -376,7 +378,7 @@ const SubscribeToAuthorModal: Component<{
           </Show>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

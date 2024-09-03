@@ -10,6 +10,7 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import TextInput from '../TextInput/TextInput';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const CreatePinModal: Component<{
   id?: string,
@@ -69,21 +70,18 @@ const CreatePinModal: Component<{
     }
   };
 
-
-
   return (
-    <Modal open={props.open} onClose={props.onAbort}>
-      <div id={props.id} class={styles.modal}>
-        <button class={styles.xClose} onClick={props.onAbort}>
-          <div class={styles.iconClose}></div>
-        </button>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+      title={
         <div class={styles.title}>
           {intl.formatMessage(tPin.title)}
         </div>
-        <div class={styles.description}>
-          {intl.formatMessage(tPin.description)}
-        </div>
-
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.modal}>
         <TextInput
           type="password"
           ref={pinInput}
@@ -121,7 +119,7 @@ const CreatePinModal: Component<{
           </ButtonSecondary>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

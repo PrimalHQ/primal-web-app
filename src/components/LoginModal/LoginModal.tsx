@@ -12,6 +12,7 @@ import CreatePinModal from '../CreatePinModal/CreatePinModal';
 import TextInput from '../TextInput/TextInput';
 import { nip19 } from '../../lib/nTools';
 import { storeSec } from '../../lib/localStore';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const LoginModal: Component<{
   id?: string,
@@ -82,14 +83,17 @@ const LoginModal: Component<{
   return (
     <Switch>
       <Match when={step() === 'login'}>
-        <Modal open={props.open} onClose={onAbort}>
-          <div id={props.id} class={styles.modal}>
-            <button class={styles.xClose} onClick={onAbort}>
-              <div class={styles.iconClose}></div>
-            </button>
+        <AdvancedSearchDialog
+          open={props.open}
+          setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+          title={
             <div class={styles.title}>
               {intl.formatMessage(tLogin.title)}
             </div>
+          }
+          triggerClass={styles.hidden}
+        >
+          <div id={props.id} class={styles.modal}>
             <div class={styles.description}>
               {intl.formatMessage(tLogin.description)}
             </div>
@@ -113,7 +117,7 @@ const LoginModal: Component<{
               </ButtonPrimary>
             </div>
           </div>
-        </Modal>
+        </AdvancedSearchDialog>
       </Match>
 
       <Match when={step() === 'pin'}>

@@ -8,6 +8,7 @@ import styles from './ConfirmModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const ConfirmAlternativeModal: Component<{
   id?: string,
@@ -25,11 +26,17 @@ const ConfirmAlternativeModal: Component<{
   const intl = useIntl();
 
   return (
-    <Modal open={props.open} onClose={props.onCancel}>
-      <div id={props.id} class={styles.confirmAlternateModal}>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onCancel && props.onCancel()}
+      title={
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}
         </div>
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.confirmAlternateModal}>
         <div class={styles.feedConfirmationDescription}>
           {props.description}
         </div>
@@ -61,8 +68,7 @@ const ConfirmAlternativeModal: Component<{
           </Show>
         </div>
       </div>
-
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

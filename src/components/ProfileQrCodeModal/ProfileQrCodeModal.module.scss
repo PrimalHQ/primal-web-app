@@ -1,5 +1,4 @@
 .ProfileQrCodeModal {
-  position: fixed;
   min-width: 472px;
   color: var(--text-primary);
   background-color: var(--background-input);
@@ -7,71 +6,6 @@
 
   display: flex;
   flex-direction: column;
-  padding: 20px 24px 28px 24px;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 24px;
-
-    .userInfo {
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-end;
-
-      .avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .details {
-        display: flex;
-        flex-direction: column;
-        margin-left: 8px;
-        justify-content: space-between;
-        height: 44px;
-
-        .name {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-          color: var(--text-primary);
-          font-size: 20px;
-          font-weight: 700;
-          line-height: 20px;
-        }
-
-        .verification {
-          color: var(--text-tertiary);
-          font-size: 16px;
-          font-weight: 400;
-          line-height: 16px;
-        }
-      }
-
-    }
-
-    .close {
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      box-shadow: none;
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      margin: 0px 0px;
-      background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
-
-      &:hover {
-        background-color: var(--text-primary);
-      }
-    }
-  }
 
   .tabs {
     position: relative;
@@ -192,4 +126,48 @@
     font-weight: 400;
     line-height: 20px;
   }
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+  }
+
+  .details {
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+    justify-content: space-between;
+    height: 44px;
+
+    .name {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      color: var(--text-primary);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+
+    .verification {
+      color: var(--text-tertiary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+
+}
+
+.hidden {
+  display: none;
 }

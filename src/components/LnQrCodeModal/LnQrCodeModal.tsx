@@ -9,6 +9,7 @@ import { hookForDev } from '../../lib/devTools';
 import { humanizeNumber } from '../../lib/stats';
 import { lnInvoice } from '../../translations';
 import { LnbcInvoice } from '../../types/primal';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
 import QrCode from '../QrCode/QrCode';
@@ -49,16 +50,17 @@ const LnQrCodeModal: Component<{
     decodeURI(invoice.sections.find(s => s.name === 'description')?.value) || '';
 
   return (
-    <Modal open={props.open} onClose={props.onClose}>
-      <div id={props.id} class={styles.LnQrCodeModal}>
-        <div class={styles.header}>
-          <div class={styles.title}>
-            {intl.formatMessage(lnInvoice.title)}
-          </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.title}>
+          {intl.formatMessage(lnInvoice.title)}
         </div>
-
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.LnQrCodeModal}>
         <div class={styles.body}>
           <div class={styles.qrCode}>
             <QrCode data={props.lnbc || ''} type="lightning"/>
@@ -81,7 +83,7 @@ const LnQrCodeModal: Component<{
           </div>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

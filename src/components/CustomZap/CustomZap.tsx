@@ -9,6 +9,7 @@ import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
 import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
@@ -151,9 +152,11 @@ const CustomZap: Component<{
   let md = false;
 
   return (
-    <Modal
+    <AdvancedSearchDialog
       open={props.open}
-      onClose={() => {
+      setOpen={(isOpen: boolean) => {
+        if (isOpen) return;
+
         if (md) {
           md = false;
         }
@@ -161,6 +164,14 @@ const CustomZap: Component<{
           props.onCancel({ amount: 0, message: '' });
         }
       }}
+      title={
+        <div class={styles.title}>
+          <div class={styles.caption}>
+            {intl.formatMessage(tActions.zap)}
+          </div>
+        </div>
+      }
+      triggerClass={styles.hidden}
     >
       <div
         id={props.id}
@@ -172,15 +183,6 @@ const CustomZap: Component<{
           e.stopPropagation();
         }}
       >
-        <div class={styles.header}>
-          <div class={styles.title}>
-            <div class={styles.caption}>
-              {intl.formatMessage(tActions.zap)}
-            </div>
-          </div>
-          <button class={styles.close} onClick={() => props.onCancel({ amount: 0, message: '' })}>
-          </button>
-        </div>
 
         <div class={styles.description}>
           {intl.formatMessage(zapCustomOption,{
@@ -251,7 +253,7 @@ const CustomZap: Component<{
         </div>
 
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

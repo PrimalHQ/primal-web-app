@@ -1,5 +1,4 @@
 .LnQrCodeModal {
-  position: fixed;
   min-width: 472px;
   color: var(--text-primary);
   background-color: var(--background-input);
@@ -7,39 +6,12 @@
 
   display: flex;
   flex-direction: column;
-  padding: 20px 24px 28px 24px;
 
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 24px;
-
-    .title {
-      color: var(--text-primary);
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 20px;
-    }
-
-    .close {
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      box-shadow: none;
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      margin: 0px 0px;
-      background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
-
-      &:hover {
-        background-color: var(--text-primary);
-      }
-    }
+  .title {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 20px;
   }
 }
 
@@ -125,4 +97,8 @@
   background: var(--sidebar-section-icon-gradient);
   -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
   mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+}
+
+.hidden {
+  display: none;
 }

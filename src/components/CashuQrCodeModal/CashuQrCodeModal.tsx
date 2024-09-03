@@ -15,6 +15,7 @@ import QrCode from '../QrCode/QrCode';
 import { getDecodedToken, Token } from "@cashu/cashu-ts";
 
 import styles from './CashuQrCodeModal.module.scss';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const CashuQrCodeModal: Component<{
   id?: string,
@@ -42,16 +43,17 @@ const CashuQrCodeModal: Component<{
   const description = () => invoice.memo || '';
 
   return (
-    <Modal open={props.open} onClose={props.onClose}>
-      <div id={props.id} class={styles.CashuQrCodeModal}>
-        <div class={styles.header}>
-          <div class={styles.title}>
-            {intl.formatMessage(cashuInvoice.title)}
-          </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.title}>
+          {intl.formatMessage(cashuInvoice.title)}
         </div>
-
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.CashuQrCodeModal}>
         <div class={styles.body}>
           <div class={styles.qrCode}>
             <QrCode data={props.cashu || ''} type="cashu"/>
@@ -76,7 +78,7 @@ const CashuQrCodeModal: Component<{
           </div>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

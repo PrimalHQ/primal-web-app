@@ -18,6 +18,7 @@ import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser } from '../../types/primal';
 import { parseBolt11 } from '../../utils';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
 import Modal from '../Modal/Modal';
@@ -405,21 +406,19 @@ const ReactionsModal: Component<{
   const totalCount = () => props.stats.likes + (quoteCount() || props.stats.quotes || 0) + props.stats.reposts + props.stats.zaps;
 
   return (
-    <Modal
+    <AdvancedSearchDialog
       open={props.noteId !== undefined}
-      onClose={props.onClose}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.title}>
+          <div class={styles.caption}>
+            {intl.formatMessage(tActions.reactions, { count: totalCount() })}
+          </div>
+        </div>
+      }
+      triggerClass={styles.hidden}
     >
       <div id={props.id} class={styles.ReactionsModal}>
-        <div class={styles.header}>
-          <div class={styles.title}>
-            <div class={styles.caption}>
-              {intl.formatMessage(tActions.reactions, { count: totalCount() })}
-            </div>
-          </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
-        </div>
-
         <Switch>
           <Match when={!isFetching && totalCount() === 0}>
             {intl.formatMessage(tPlaceholders.noReactionDetails)}
@@ -644,7 +643,7 @@ const ReactionsModal: Component<{
           </Tabs>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

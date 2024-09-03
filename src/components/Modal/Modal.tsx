@@ -37,13 +37,7 @@ const Modal: Component<{
       setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
       triggerClass={styles.hidden}
     >
-      <div
-        id={props.id}
-        class={`${styles.modal} ${props.opaqueBackdrop ? styles.opaque : ''}`}
-
-      >
         {props.children}
-      </div>
     </AdvancedSearchDialog>
   );
 }
