@@ -136,7 +136,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       const block = rect.height < wh && parentNotes().length > 0 ?
         'end' : 'start';
 
-      pn.scrollIntoView({ block: 'start' });
+      pn.scrollIntoView({ block });
 
       if (block === 'start') {
         const moreScroll = threadHeader + (isIOS() ? iOSBanner : 0);
