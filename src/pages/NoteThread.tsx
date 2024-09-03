@@ -127,7 +127,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     if (!pn) return;
 
     setTimeout(() => {
-      const threadHeader = 80;
+      const threadHeader = 84;
       const iOSBanner = 54;
 
       const rect = pn.getBoundingClientRect();
@@ -136,7 +136,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       const block = rect.height < wh && parentNotes().length > 0 ?
         'end' : 'start';
 
-      pn.scrollIntoView({ block });
+      pn.scrollIntoView({ block: 'start' });
 
       if (block === 'start') {
         const moreScroll = threadHeader + (isIOS() ? iOSBanner : 0);
