@@ -72,7 +72,7 @@ const ProfileFollowModal: Component<{
       return;
     }
 
-    const cts = [...(profile.contacts || [])];
+    const cts = [...(profile.contacts || [])].filter(c => c.pubkey !== profile.profileKey);
 
     cts.sort((a, b) => {
       const aFollowers: number = profile.profileStats[a.pubkey] || 0;
@@ -98,7 +98,7 @@ const ProfileFollowModal: Component<{
       return;
     }
 
-    const cts = [...(profile.followers || [])];
+    const cts = [...(profile.followers || [])].filter(c => c.pubkey !== profile.profileKey);
 
     cts.sort((a, b) => {
       const aFollowers: number = profile.profileStats[a.pubkey] || 0;
