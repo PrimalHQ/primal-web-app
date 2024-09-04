@@ -235,12 +235,12 @@ const NoteFooter: Component<{
       }
 
       if (size() === 'wide' && props.large) {
-        newLeft = 14;
-        newTop = -14;
+        newLeft = 4;
+        newTop = -15;
       }
 
       if (size() === 'short') {
-        newLeft = 25;
+        newLeft = 21;
         newTop = -13;
       }
 

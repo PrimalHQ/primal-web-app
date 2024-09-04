@@ -127,7 +127,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 12px;
+  padding: 12px 20px;
   margin: 0px;
 
   text-decoration: none;
@@ -253,7 +253,7 @@
   .upRightFloater {
     position: absolute;
     top: 0px;
-    right: 0px;
+    right: 8px;
   }
 }
 
@@ -407,7 +407,7 @@
   border: none;
 
   .header {
-    padding-inline: 12px;
+    padding-inline: 20px;
   }
 
   .content {
@@ -429,7 +429,7 @@
       line-height: 24px;
       width: 100%;
       margin-bottom: 12px;
-      padding-inline: 12px;
+      padding-inline: 20px;
 
       a:hover {
         text-decoration: underline;
@@ -456,7 +456,7 @@
 
     .time {
       padding-block: 20px;
-      padding-inline: 12px;
+      padding-inline: 20px;
       border-bottom: 1px solid var(--devider);
       margin-bottom: 16px;
       color: var(--text-tertiary);
@@ -497,11 +497,11 @@
     }
 
     .topZaps {
-      padding-inline: 12px;
+      padding-inline: 20px;
     }
 
     .footer {
-      padding-inline: 12px;
+      padding-inline: 32px;
     }
   }
 
