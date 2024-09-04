@@ -138,6 +138,15 @@ const Profile: Component = () => {
 
   })
 
+  let keyIsDone = false
+
+  createEffect(() => {
+    if (account?.isKeyLookupDone && !keyIsDone) {
+      keyIsDone = true;
+      setProfile(getHex());
+    }
+  });
+
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
 
@@ -150,15 +159,6 @@ const Profile: Component = () => {
     profile?.actions.clearGallery();
     setHasTiers(() => false);
   }
-
-  let keyIsDone = false
-
-  createEffect(() => {
-    if (account?.isKeyLookupDone && !keyIsDone) {
-      keyIsDone = true;
-      setProfile(getHex());
-    }
-  });
 
   const isSmallScreen = () => window.innerWidth < 721;
 
@@ -500,12 +500,12 @@ const Profile: Component = () => {
   });
 
   onCleanup(() => {
-    profile?.actions.resetProfile();
+    // profile?.actions.resetProfile();
   });
 
   useBeforeLeave(() => {
     setIsProfileLoaded(() => false);
-    profile?.actions.resetProfile();
+    // profile?.actions.resetProfile();
   })
 
   const [isProfileLoaded, setIsProfileLoaded] = createSignal(false);

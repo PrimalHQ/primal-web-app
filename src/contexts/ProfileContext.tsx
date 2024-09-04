@@ -98,6 +98,7 @@ export type ProfileContextStore = {
   isProfileFetched: boolean,
   isFetchingReplies: boolean,
   isFetchingGallery: boolean,
+  fetchingProfileForKey: string,
   page: FeedPage,
   repliesPage: FeedPage,
   reposts: Record<string, string> | undefined,
@@ -214,6 +215,7 @@ export const initialData = {
   isFetchingFollowers: false,
   relays: {},
   isFetchingRelays: false,
+  fetchingProfileForKey: '',
   isAboutParsed: false,
   commonFollowers: [],
   sidebarNotes: {
@@ -1195,8 +1197,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const setProfileKey = async (profileKey?: string) => {
-    // if (profileKey === store.profileKey) return;
-
     updateStore('profileKey', () => profileKey);
 
     if (profileKey) {
