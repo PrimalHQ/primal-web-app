@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core/tabs";
-import { A } from "@solidjs/router";
+import { A, useLocation } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
@@ -42,8 +42,13 @@ const ProfileTabs: Component<{
   const profile = useProfileContext();
   const account = useAccountContext();
   const media = useMediaContext();
+  const location = useLocation();
 
-  const [currentTab, setCurrentTab] = createSignal<string>('notes');
+  const hash = () => {
+    return (location.hash.length > 1) ? location.hash.substring(1) : 'notes';
+  }
+
+  const [currentTab, setCurrentTab] = createSignal<string>(hash());
 
   const addToAllowlist = async () => {
     const pk = profile?.profileKey;
@@ -138,10 +143,22 @@ const ProfileTabs: Component<{
     setFollowersOffset(followersOffset() + profileContactListPage);
   }
 
+  onMount(() => {
+    const value = hash();
+    updateTabContent(value);
+  })
+
   const onChangeValue = (value: string) => {
-    if (!profile) return;
 
     setCurrentTab(() => value);
+
+    window.location.hash = value;
+
+    updateTabContent(value);
+  };
+
+  const updateTabContent = (value: string) => {
+    if (!profile) return;
 
     switch(value) {
       case 'articles':
@@ -169,7 +186,7 @@ const ProfileTabs: Component<{
         Object.keys(profile.relays || {}).length === 0 && profile.actions.fetchRelayList(profile.profileKey);
         break;
     }
-  };
+  }
 
   const galleryImages = () => {
     return profile?.gallery.filter(note => {
@@ -196,7 +213,7 @@ const ProfileTabs: Component<{
       when={profile && profile.fetchedUserStats}
       fallback={<div class={styles.profileTabsPlaceholder}></div>}
     >
-      <Tabs onChange={onChangeValue}>
+      <Tabs onChange={onChangeValue} defaultValue={hash()}>
         <Tabs.List class={styles.profileTabs}>
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
