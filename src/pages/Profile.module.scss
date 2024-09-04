@@ -87,10 +87,26 @@
   padding-top: 12px;
   padding-right: 8px;
   padding-bottom: 12px;
-  >button, >div {
+  >div {
     margin-left: 8px;
     height: 36px;
   }
+
+  button {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    margin-left: 8px;
+    height: 36px;
+  }
+}
+
+.profileAboutHolder {
+  display: flex;
+  justify-content: space-between;
+  padding-block: 0;
+  padding-inline: 20px;
+  margin-bottom: 8px;
 }
 
 @mixin smallButton {
@@ -243,7 +259,7 @@
   gap: 8px;
   margin-inline: 20px;
   min-height: 52px;
-  margin-top: 12px;
+  margin-top: 8px;
 
   .basicInfo {
     display: flex;
@@ -400,7 +416,7 @@
   align-items: center;
   justify-content: space-between;
   margin-inline: 20px;
-  margin-block: 12px;
+  margin-bottom: 8px;
 
   .website {
     font-weight: 400;
@@ -426,7 +442,7 @@
 
   .label {
     color: var(--text-tertiary-2);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     line-height: 14px;
   }
@@ -450,7 +466,6 @@
 }
 
 .profileAbout {
-  margin-inline: 20px;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;

@@ -99,6 +99,8 @@ const Profile: Component = () => {
     pswpModule: () => import('photoswipe')
   });
 
+  let profileAboutDiv: HTMLDivElement | undefined;
+
   const getHex = () => {
     if (params.vanityName && routeData()) {
       const name = params.vanityName.toLowerCase();
@@ -632,6 +634,14 @@ const Profile: Component = () => {
     app?.actions.openAuthorSubscribeModal(profile?.userProfile, doSubscription);
   };
 
+  const shortProfileAbout = () => {
+    if (!profileAboutDiv) return true;
+
+    const text = profileAboutDiv.innerText;
+
+    return text.length < 50;
+  }
+
   return (
     <>
       <PageTitle title={
@@ -808,26 +818,19 @@ const Profile: Component = () => {
             </div>
           </div>
 
-          {profile?.parsedAbout}
-          {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
-
-          <div class={styles.profileLinks}>
-            <div class={styles.website}>
-              <Show when={profile?.userProfile?.website}>
-                <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                  {sanitize(profile?.userProfile?.website || '')}
-                </a>
-              </Show>
+          <div class={styles.profileAboutHolder}>
+            <div ref={profileAboutDiv}>
+              {profile?.parsedAbout}
             </div>
 
-            <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+            <Show when={shortProfileAbout() && profile?.commonFollowers && profile.commonFollowers.length > 0}>
               <div class={styles.commonFollows}>
                 <div class={styles.label}>Followed by</div>
                 <div class={styles.avatars}>
                   <For each={profile?.commonFollowers.slice(0, 5)}>
                     {(follower, index) => (
                       <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
-                        <Avatar size="micro" user={follower} />
+                        <Avatar size="nano" user={follower} />
                       </A>
                     )}
                   </For>
@@ -835,6 +838,34 @@ const Profile: Component = () => {
               </div>
             </Show>
           </div>
+          {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
+
+          <Show when={profile?.userProfile?.website || (!shortProfileAbout() && profile?.commonFollowers && profile.commonFollowers.length > 0)}>
+            <div class={styles.profileLinks}>
+              <div class={styles.website}>
+                <Show when={profile?.userProfile?.website}>
+                  <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                    {sanitize(profile?.userProfile?.website || '')}
+                  </a>
+                </Show>
+              </div>
+
+              <Show when={!shortProfileAbout() && profile?.commonFollowers && profile.commonFollowers.length > 0}>
+                <div class={styles.commonFollows}>
+                  <div class={styles.label}>Followed by</div>
+                  <div class={styles.avatars}>
+                    <For each={profile?.commonFollowers.slice(0, 5)}>
+                      {(follower, index) => (
+                        <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
+                          <Avatar size="nano" user={follower} />
+                        </A>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+            </div>
+          </Show>
         </div>
 
         <ProfileTabs setProfile={setProfile} />

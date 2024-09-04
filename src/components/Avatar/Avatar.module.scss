@@ -34,6 +34,23 @@
   border-radius: 50%;
 }
 
+.nanoAvatar {
+  @include avatar;
+  width: 18px;
+  height: 18px;
+
+  .missingBack {
+    width: 18px;
+    height: 18px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+}
+
 .microAvatar {
   @include avatar;
   width: 22px;
@@ -247,6 +264,13 @@
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
   mask-size: contain;
+}
+
+.nanoMissing {
+  @include missing;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
 }
 
 .microMissing {
