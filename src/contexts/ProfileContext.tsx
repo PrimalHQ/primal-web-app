@@ -1195,7 +1195,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const setProfileKey = async (profileKey?: string) => {
-    if (profileKey === store.profileKey) return;
+    // if (profileKey === store.profileKey) return;
 
     updateStore('profileKey', () => profileKey);
 
