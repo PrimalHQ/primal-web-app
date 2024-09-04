@@ -10,6 +10,12 @@
   padding-bottom: 16px;
   border-bottom: 1px solid var(--devider);
 
+  &.bordered {
+    border: 1px solid var(--subtile-devider);
+    border-radius: var(--border-radius-small);
+    padding: 12px 12px 0 12px;
+  }
+
   &:focus {
     background: none;
   }
