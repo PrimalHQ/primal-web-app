@@ -401,7 +401,7 @@
   display: flex;
   flex-direction: column;
   padding-inline: 0px;
-  padding-top: 0;
+  padding-top: 12px;
   padding-bottom: 12px;
   border-radius: 0;
   border: none;
@@ -507,7 +507,7 @@
 
   .upRightFloater {
     position: absolute;
-    top: 0px;
+    top: 6px;
     right: 0px;
   }
 }
