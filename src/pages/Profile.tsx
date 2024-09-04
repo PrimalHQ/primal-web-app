@@ -769,25 +769,6 @@ const Profile: Component = () => {
 
               </div>
 
-              <Show when={profile?.userStats.time_joined}>
-                <div class={styles.joined}>
-                  {intl.formatMessage(
-                    t.jointDate,
-                    {
-                      date: shortDate(profile?.userStats.time_joined),
-                    },
-                  )}
-                </div>
-              </Show>
-            </div>
-
-            <div class={styles.verificationInfo}>
-                <div class={styles.verified}>
-                  <Show when={profile?.userProfile?.nip05}>
-                    <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                  </Show>
-                </div>
-
               <div class={styles.followings}>
                 <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
                   <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
@@ -798,6 +779,25 @@ const Profile: Component = () => {
                   <div class={styles.label}>followers</div>
                 </button>
               </div>
+            </div>
+
+            <div class={styles.verificationInfo}>
+                <div class={styles.verified}>
+                  <Show when={profile?.userProfile?.nip05}>
+                    <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                  </Show>
+                </div>
+
+                <Show when={profile?.userStats.time_joined}>
+                  <div class={styles.joined}>
+                    {intl.formatMessage(
+                      t.jointDate,
+                      {
+                        date: shortDate(profile?.userStats.time_joined),
+                      },
+                    )}
+                  </div>
+                </Show>
             </div>
           </div>
 
