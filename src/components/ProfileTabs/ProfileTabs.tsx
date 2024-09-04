@@ -161,7 +161,7 @@ const ProfileTabs: Component<{
     if (!profile) return;
 
     switch(value) {
-      case 'articles':
+      case 'reads':
         profile.articles.length === 0 && profile.actions.fetchArticles(profile.profileKey);
         break;
       case 'notes':
@@ -170,14 +170,8 @@ const ProfileTabs: Component<{
       case 'replies':
         profile.replies.length === 0 && profile.actions.fetchReplies(profile.profileKey);
         break;
-      case 'gallery':
+      case 'media':
         profile.gallery.length === 0 && profile.actions.fetchGallery(profile.profileKey);
-        break;
-      case 'follows':
-        profile.contacts.length === 0 && profile.actions.fetchContactList(profile.profileKey);
-        break;
-      case 'followers':
-        profile.followers.length === 0 && profile.actions.fetchFollowerList(profile.profileKey);
         break;
       case 'zaps':
         profile.zaps.length === 0 && profile.actions.fetchZapList(profile.profileKey);
@@ -213,7 +207,7 @@ const ProfileTabs: Component<{
       when={profile && profile.fetchedUserStats}
       fallback={<div class={styles.profileTabsPlaceholder}></div>}
     >
-      <Tabs onChange={onChangeValue} defaultValue={hash()}>
+      <Tabs value={hash()} onChange={onChangeValue} defaultValue={hash()}>
         <Tabs.List class={styles.profileTabs}>
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
@@ -237,7 +231,7 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="articles">
+          <Tabs.Trigger class={styles.profileTab} value="reads">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
                 {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
@@ -248,7 +242,7 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="gallery">
+          <Tabs.Trigger class={styles.profileTab} value="media">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
                 {humanizeNumber(profile?.userStats.media_count || 0)}
@@ -270,28 +264,6 @@ const ProfileTabs: Component<{
             </div>
           </Tabs.Trigger>
 
-          {/* <Tabs.Trigger class={styles.profileTab} value="follows">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.follows_count || 0)}
-              </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.follow)}
-              </div>
-            </div>
-          </Tabs.Trigger>
-
-          <Tabs.Trigger class={styles.profileTab} value="followers">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.followers_count || 0)}
-              </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.followers)}
-              </div>
-            </div>
-          </Tabs.Trigger> */}
-
           <Tabs.Trigger class={styles.profileTab} value="relays">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
@@ -307,7 +279,7 @@ const ProfileTabs: Component<{
           <Tabs.Indicator class={styles.profileTabIndicator} />
         </Tabs.List>
 
-        <Tabs.Content class={styles.tabContent} value="articles">
+        <Tabs.Content class={styles.tabContent} value="reads">
           <div class={styles.profileNotes}>
             <Switch>
               <Match when={isMuted(profile?.profileKey)}>
@@ -521,7 +493,7 @@ const ProfileTabs: Component<{
           </div>
         </Tabs.Content>
 
-        <Tabs.Content class={styles.tabContent} value="gallery">
+        <Tabs.Content class={styles.tabContent} value="media">
           <div class={styles.profileNotes}>
             <Switch
               fallback={
