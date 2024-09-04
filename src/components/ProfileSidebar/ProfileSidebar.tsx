@@ -33,8 +33,7 @@ const ProfileSidebar: Component<{
     (props.notes || []).slice(0, 5) : props.notes;
 
   return (
-    <div id={props.id}>
-      <Transition name='slide-fade' >
+    <div id={props.id} class="animated">
         <Show
           when={props.articles && props.articles.length > 0}
           fallback={
@@ -50,7 +49,7 @@ const ProfileSidebar: Component<{
             </Show>
           }
         >
-          <div>
+          <div class="animated">
             <div class={styles.headingTrending}>
               <div>
                 {intl.formatMessage(t.sidebarCaptionReads)}
@@ -59,14 +58,11 @@ const ProfileSidebar: Component<{
 
             <div class={styles.articles}>
               <For each={props.articles}>
-                {(article) => <div class="animated"><ArticleShort article={article} shorter={true} /></div>}
+                {(article) => <ArticleShort article={article} shorter={true} />}
               </For>
             </div>
           </div>
         </Show>
-      </Transition>
-
-      <Transition name='slide-fade' >
         <Show
           when={props.notes && props.notes.length > 0}
           fallback={
@@ -85,7 +81,7 @@ const ProfileSidebar: Component<{
             </Show>
           }
         >
-          <div>
+          <div class="animated">
             <div class={styles.headingTrending}>
               <div>
                 {intl.formatMessage(t.sidebarCaptionNotes)}
@@ -93,11 +89,10 @@ const ProfileSidebar: Component<{
             </div>
 
             <For each={topNotes()}>
-              {(note) => <div class="animated"><SmallNote note={note} /></div>}
+              {(note) => <SmallNote note={note} />}
             </For>
           </div>
         </Show>
-      </Transition>
     </div>
   );
 }

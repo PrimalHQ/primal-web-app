@@ -54,7 +54,7 @@ import { updateStore, store } from '../services/StoreService';
 import { subsTo } from '../sockets';
 import { humanizeNumber } from '../lib/stats';
 import ProfileBannerSkeleton from '../components/Skeleton/ProfileBannerSkeleton';
-import { Transition } from 'solid-transition-group';
+import { Transition, TransitionGroup } from 'solid-transition-group';
 import ProfileAvatarSkeleton from '../components/Skeleton/ProfileAvatarSkeleton';
 import ProfileVerificationSkeleton from '../components/Skeleton/ProfileVerificationSkeleton';
 import ProfileAboutSkeleton from '../components/Skeleton/ProfileAboutSkeleton';
@@ -649,17 +649,24 @@ const Profile: Component = () => {
         <Search />
       </Wormhole>
 
+      <StickySidebar>
+        <TransitionGroup name="slide-fade">
+          <Show
+            when={isProfileLoaded()}
+          >
+            <ProfileSidebar
+              notes={profile?.sidebarNotes.notes}
+              articles={profile?.sidebarArticles.notes}
+              profile={profile?.userProfile}
+            />
+          </Show>
+        </TransitionGroup>
+      </StickySidebar>
+
       <Show
         when={isProfileLoaded()}
         fallback={<ProfileCardSkeleton />}
       >
-        <StickySidebar>
-          <ProfileSidebar
-            notes={profile?.sidebarNotes.notes}
-            articles={profile?.sidebarArticles.notes}
-            profile={profile?.userProfile}
-          />
-        </StickySidebar>
         <div id="central_header" class={styles.fullHeader}>
           <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()}`}>
             <Show
