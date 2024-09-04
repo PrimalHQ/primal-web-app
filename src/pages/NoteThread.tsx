@@ -127,7 +127,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     if (!pn) return;
 
     setTimeout(() => {
-      const threadHeader = 76;
+      const threadHeader = 84;
       const iOSBanner = 54;
 
       const rect = pn.getBoundingClientRect();
