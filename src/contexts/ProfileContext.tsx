@@ -1572,6 +1572,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   })
 
   const parseAbout = (about: string) => {
+    if (about.length === 0) {
+      updateStore('isAboutParsed', () => true);
+      return <></>;
+    }
     return <ProfileAbout about={about} onParseComplete={() => updateStore('isAboutParsed', () => true)} />
   }
 

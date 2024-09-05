@@ -704,7 +704,7 @@ button:focus {
 .slide-down-fade-exit-to {
   .animated
   {
-    transform: translateY(-10px);
+    transform: translateY(10px);
     opacity: 0;
   }
 }
@@ -716,7 +716,7 @@ button:focus {
   $elements: 10;
   @for $i from 0 to $elements {
     .animated:nth-child(#{$i + 1}) {
-      transform: translateY(10px + 2px*$i);
+      transform: translateY(-10px - 2px*$i);
     }
   }
 }
