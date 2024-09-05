@@ -129,7 +129,6 @@ const ArticleHighlightComments: Component<{
                 <Avatar user={comment.user} size="xxs" />
                 <div class={styles.name}>{userName(comment.user)}</div>
                 <VerificationCheck user={comment.user} />
-                <div>commented:</div>
                 <div class={styles.time}>{date(comment.msg.created_at || 0).label}</div>
               </div>
               <div class={styles.commentContent}>

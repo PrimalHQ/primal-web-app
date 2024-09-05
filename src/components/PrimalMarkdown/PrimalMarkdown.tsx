@@ -487,6 +487,7 @@ const PrimalMarkdown: Component<{
 
     if (el.tagName === 'A') {
       const href = el.getAttribute('href') || '';
+      const highlight = el.getAttribute('data-highlight') || '';
 
       if (href.startsWith('nostr:')) {
         const [__, id] = href?.split(':');
@@ -539,10 +540,8 @@ const PrimalMarkdown: Component<{
         return false;
       }
 
-      if (href.startsWith('hl:')) {
-        const [__, id] = href?.split(':');
-
-        showHighlightMenu(id);
+      if (highlight) {
+        showHighlightMenu(highlight);
         el.setAttribute('data-highlight-selected', 'true');
 
         return false;

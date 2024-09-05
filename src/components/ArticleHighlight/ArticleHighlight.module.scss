@@ -155,6 +155,10 @@
       .name {
         margin-left: 8px;
         font-weight: 700;
+        max-width: 160px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
       }
 
       .time {
