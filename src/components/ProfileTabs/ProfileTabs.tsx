@@ -208,7 +208,7 @@ const ProfileTabs: Component<{
       fallback={<div class={styles.profileTabsPlaceholder}></div>}
     >
       <Tabs value={hash()} onChange={onChangeValue} defaultValue={hash()}>
-        <Tabs.List class={styles.profileTabs}>
+        <Tabs.List class={`${styles.profileTabs} animated`}>
           <Tabs.Trigger class={styles.profileTab} value="notes">
             <div class={styles.stat}>
               <div class={styles.statNumber}>
