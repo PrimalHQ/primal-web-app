@@ -29,6 +29,7 @@ import {
 import { parseBolt11 } from "../utils";
 import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
+import { useLocation } from "@solidjs/router";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -122,6 +123,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const settings = useSettingsContext();
   const account = useAccountContext();
+  const location = useLocation();
 
 // ACTIONS --------------------------------------
 
@@ -751,7 +753,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && settings?.defaultFeed) {
+    if (account?.isKeyLookupDone && settings?.defaultFeed && location.pathname === '/home') {
       const storedFeed = fetchStoredFeed(account.publicKey);
       selectFeed(storedFeed || settings?.defaultFeed);
     }
