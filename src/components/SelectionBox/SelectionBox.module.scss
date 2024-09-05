@@ -128,10 +128,25 @@
   }
 }
 
+.selectionContent[data-expanded] {
+  animation: contentShow 200ms ease-out;
+}
+
 @media only screen and (min-width: 720px) {
   .selectionBox {
     >div {
       transform: translate3d(-8px, 28px, 0px) !important;
     }
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

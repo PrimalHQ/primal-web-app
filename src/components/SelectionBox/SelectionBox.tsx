@@ -64,7 +64,7 @@ const SelectionBox: Component<{
           <div class={props.big ? styles.selectionIconBig : styles.selectionIcon}></div>
         </Select.Icon>
       </Select.Trigger>
-      <Select.Content>
+      <Select.Content class={styles.selectionContent}>
         <Select.Listbox class={styles.listbox}/>
       </Select.Content>
     </Select>
