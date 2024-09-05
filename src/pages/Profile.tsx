@@ -840,11 +840,11 @@ const Profile: Component = () => {
                     <div class={styles.columnRight}>
                       <div class={`${styles.followings} animated`}>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
-                          <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
+                          <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
                           <div class={styles.label}>following</div>
                         </button>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
-                          <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
+                          <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
                           <div class={styles.label}>followers</div>
                         </button>
                       </div>
@@ -899,11 +899,11 @@ const Profile: Component = () => {
 
                       <div class={styles.followings}>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
-                          <div class={styles.number}>{humanizeNumber(profile?.userStats?.follows_count || 0)}</div>
+                          <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
                           <div class={styles.label}>following</div>
                         </button>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
-                          <div class={styles.number}>{humanizeNumber(profile?.userStats?.followers_count || 0)}</div>
+                          <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
                           <div class={styles.label}>followers</div>
                         </button>
                       </div>
