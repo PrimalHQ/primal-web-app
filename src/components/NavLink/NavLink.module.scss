@@ -137,13 +137,12 @@
 
   &.doubleSize {
     width: 24px;
-    right: -6px;
   }
 
   &.tripleSize {
-    width: 26px;
+    width: 28px;
     padding-left: 2px;
-    right: -8px;
+    margin-left: 0px;
   }
 }
 
