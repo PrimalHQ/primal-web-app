@@ -502,9 +502,9 @@ const Profile: Component = () => {
     }
   });
 
-  onMount(() => {
-    lightbox.init();
-  });
+  // onMount(() => {
+  //   lightbox.init();
+  // });
 
   onCleanup(() => {
     // profile?.actions.resetProfile();
@@ -520,15 +520,15 @@ const Profile: Component = () => {
 
   createEffect(() => {
     if (profile?.isProfileFetched && !profile.isFetchingSidebarArticles && !profile.isFetchingSidebarNotes && profile.isAboutParsed && profile.profileKey === getHex() && isBannerLoaded()) {
-      // setTimeout(() => {
-        setIsProfileLoaded(() => true);
-      // }, 2_000);
+      setIsProfileLoaded(() => true);
     }
   })
 
-  // const isProfileLoaded = () => {
-  //   return !profile?.isFetching && profile?.isProfileFetched && profile?.profileKey === getHex();
-  // };
+  createEffect(() => {
+    if (isProfileLoaded()) {
+      lightbox.init();
+    }
+  })
 
   const customZapInfo: () => CustomZapInfo = () => ({
     profile: profile?.userProfile,
@@ -664,7 +664,6 @@ const Profile: Component = () => {
       <Show when={profile?.userProfile}>
         <div class="preload">
           <NoteImage
-            class="profile_image"
             src={banner()}
             altSrc={profile?.userProfile?.banner}
             onError={imgError}
