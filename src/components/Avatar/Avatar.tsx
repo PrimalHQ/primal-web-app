@@ -130,6 +130,12 @@ const Avatar: Component<{
     return media?.actions.getMedia(src, 'o');
   };
 
+  const imageThumb = () => {
+    const src = props.user?.picture || props.src || defaultAvatar;
+
+    return media?.actions.getMedia(src, 'm');
+  };
+
   return (
     <div
       id={props.id}
@@ -154,6 +160,7 @@ const Avatar: Component<{
               src={imageSrc()}
               altSrc={props.user?.picture || props.src}
               onError={imgError}
+              mediaThumb={imageThumb()}
             />
           </Show>
         </div>

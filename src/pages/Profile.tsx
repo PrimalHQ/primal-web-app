@@ -669,7 +669,10 @@ const Profile: Component = () => {
             onError={imgError}
             plainBorder={true}
             onImageLoaded={() => {
-              setIsBannerLoaded(true)}}
+              setIsBannerLoaded(true);
+            }}
+            media={media?.actions.getMedia(banner() || '', 'o')}
+            mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
           />
         </div>
       </Show>
@@ -709,6 +712,8 @@ const Profile: Component = () => {
                     altSrc={profile?.userProfile?.banner}
                     onError={imgError}
                     plainBorder={true}
+                    media={media?.actions.getMedia(banner() || '', 'o')}
+                    mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
                   />
                 </Show>
               </div>
