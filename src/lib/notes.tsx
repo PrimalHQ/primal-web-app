@@ -705,7 +705,7 @@ export const getEventQuotes = (eventId: string, subid: string, offset = 0, user_
   }
 
   let payload = {
-    imit: 20,
+    limit: 20,
     offset,
   };
 
