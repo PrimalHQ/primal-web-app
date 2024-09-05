@@ -586,6 +586,19 @@ button:focus {
   }
 }
 
+.hidden {
+  display: none;
+}
+
+.preload {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  top:0;
+  left:0;
+  visibility: hidden;
+}
+
 // -------------------------------
 
 .article_highlight {
@@ -668,4 +681,42 @@ button:focus {
   //     transform: translateY(10px + 2px*$i);
   //   }
   // }
+}
+
+
+.slide-down-fade-enter-active,
+.slide-down-fade-exit-active {
+  $elements: 10;
+  @for $i from 0 to $elements {
+    .animated:nth-child(#{$i})
+      {
+        transition: opacity 0.3s, transform 0.3s;
+        transition-delay: 0.05s * $i;
+      }}
+}
+.slide-down-fade-exit-active, .none-exit-active {
+  >div
+  {
+    display: none;
+  }
+}
+.slide-down-fade-enter,
+.slide-down-fade-exit-to {
+  .animated
+  {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+.slide-down-fade-enter {
+  // .animated
+  // {
+  //   transform: translateY(10px);
+  // }
+  $elements: 10;
+  @for $i from 0 to $elements {
+    .animated:nth-child(#{$i + 1}) {
+      transform: translateY(10px + 2px*$i);
+    }
+  }
 }
