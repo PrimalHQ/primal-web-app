@@ -70,7 +70,6 @@ const EmojiPickModal: Component<{
         />
 
         <EmojiPicker
-          active={props.open}
           showPreset={showPreset()}
           preset={account?.emojiHistory || []}
           filter={emojiSearchTerm()}

@@ -18,7 +18,6 @@ const EmojiPicker: Component<{
   preset?: EmojiOption[],
   showPreset?: boolean,
   short?: boolean,
-  active?: boolean,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
 
@@ -126,17 +125,15 @@ const EmojiPicker: Component<{
     }
   };
 
-  createEffect(() => {
-    if (props.active) {
-      window.addEventListener('keydown', emojiChangeKeyboard);
-    } else {
-      window.removeEventListener('keydown', emojiChangeKeyboard);
-    }
+  onMount(() => {
+    window.addEventListener('keydown', emojiChangeKeyboard);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('keydown', emojiChangeKeyboard);
   });
 
   createEffect(() => {
-    if (!props.active) return;
-
     const val = props.filter.trim();
 
     setEmojiResults(emojiSearch(val));

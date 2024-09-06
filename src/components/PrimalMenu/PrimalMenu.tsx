@@ -8,7 +8,7 @@ import PrimalMenuItem from "./PrimalMenuItem";
 const PrimalMenu: Component<{
   id: string,
   items: MenuItem[],
-  position?: 'note_footer' | 'profile' | 'note_context',
+  position?: 'note_footer' | 'profile',
   orientation?: 'up' | 'down',
   reverse?: boolean,
   hidden?: boolean,
@@ -23,10 +23,6 @@ const PrimalMenu: Component<{
   };
 
   const positionClass = () => {
-    if (props.position == 'note_context') {
-      return styles.noteContext
-    }
-
     if (props.position == 'note_footer') {
       return styles.noteFooter
     }
@@ -49,8 +45,7 @@ const PrimalMenu: Component<{
   return (
     <div
       id={props.id}
-      class={`${orientationClass()} ${positionClass()}`}
-      data-open={!props.hidden}
+      class={`${orientationClass()} ${positionClass()} ${visibilityClass()}`}
     >
       <For each={props.items}>
         {item => (

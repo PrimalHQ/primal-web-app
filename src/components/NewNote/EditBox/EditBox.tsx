@@ -1693,15 +1693,16 @@ const EditBox: Component<{
               ></div>
             </ButtonGhost>
 
-            <EmojiPickPopover
-              open={isPickingEmoji()}
-              onClose={() => {
-                setIsPickingEmoji(false);
-                textArea?.focus();
-              }}
-              onSelect={addSelectedEmoji}
-              orientation={determineOrient()}
-            />
+            <Show when={isPickingEmoji()}>
+              <EmojiPickPopover
+                onClose={() => {
+                  setIsPickingEmoji(false);
+                  textArea?.focus();
+                }}
+                onSelect={addSelectedEmoji}
+                orientation={determineOrient()}
+              />
+            </Show>
           </div>
         </div>
         <div class={styles.editorDescision}>
