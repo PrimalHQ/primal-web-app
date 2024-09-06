@@ -1,10 +1,143 @@
 @keyframes inTop {
-  0% { opacity: 0; top: 8px}
-  100% { opacity: 1; top: 26px}
+  0% {
+    opacity: 0;
+    transform-origin: top right;
+    transform: scale(0.6);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform-origin: top right;
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+  }
 }
+
+@keyframes outTop {
+  0% {
+    opacity: 1;
+    transform-origin: top right;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform-origin: top right;
+    transform: scale(0.6);
+    visibility: hidden;
+    opacity: 0;
+    // height: 0px;
+  }
+}
+
 @keyframes inBottom {
-  0% { opacity: 0; bottom: 28px}
-  100% { opacity: 1; bottom: 46px}
+  0% {
+    opacity: 0;
+    transform-origin: bottom right;
+    transform: scale(0.6);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform-origin: bottom right;
+    transform: scale(1);
+    visibility: visible;
+    opacity: 1;
+    // height: 0px;
+  }
+}
+
+@keyframes outBottom {
+  0% {
+    opacity: 1;
+    transform-origin: bottom right;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform-origin: bottom right;
+    transform: scale(0.6);
+    visibility: hidden;
+    opacity: 0;
+    // height: 0px;
+  }
+}
+
+@keyframes inTopLeft {
+  0% {
+    opacity: 0;
+    transform-origin: top left;
+    transform: scale(0.6);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform-origin: top left;
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes outTopLeft {
+  0% {
+    opacity: 1;
+    transform-origin: top left;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform-origin: top left;
+    transform: scale(0.6);
+    visibility: hidden;
+    opacity: 0;
+    // height: 0px;
+  }
+}
+
+@keyframes inBottomLeft {
+  0% {
+    opacity: 0;
+    transform-origin: bottom left;
+    transform: scale(0.6);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform-origin: bottom left;
+    transform: scale(1);
+    visibility: visible;
+    opacity: 1;
+    // height: 0px;
+  }
+}
+
+@keyframes outBottomLeft {
+  0% {
+    opacity: 1;
+    transform-origin: bottom left;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    transform-origin: bottom left;
+    transform: scale(0.6);
+    visibility: hidden;
+    opacity: 0;
+    // height: 0px;
+  }
 }
 
 .contextMenuOptions {
@@ -18,34 +151,48 @@
   z-index: var(--z-index-header);
   width: max-content;
   overflow: hidden;
-
+  height: fit-content;
+  animation: outTop 100ms ease-in forwards;
 
   &.noteFooter {
     top: 26px;
     left: unset;
-    right: 0px;
+    right: 52px;
+  }
+  &.noteContext {
+    top: 18px;
+    left: unset;
+    right: -4px;
   }
   &.profile {
     top: 46px;
     left: 4px;
     right: unset;
+    animation: outTopLeft 100ms ease-in forwards;
   }
 
-  &.hidden {
-    max-height: 1px;
-    overflow: hidden;
-    visibility: hidden;
-    opacity: 0;
-    // top: 58px;
-  }
+  // &.hidden {
+  //   // max-height: 1px;
+  //   // overflow: hidden;
+  //   // visibility: hidden;
+  //   // opacity: 0;
+  //   // top: 58px;
+  //   animation: outTop 100ms ease-in forwards;
+  // }
 
-  &.visible {
-    height: fit-content;
-    overflow: hidden;
-    visibility: visible;
-    opacity: 1;
-    // transition: all 200ms ease-out;
-    animation: inTop 200ms ease-out;
+  // &.visible {
+  //   // height: fit-content;
+  //   // overflow: hidden;
+  //   // visibility: visible;
+  //   // opacity: 1;
+  //   // transition: all 100ms ease-out;
+  //   animation: inTop 100ms ease-out;
+  // }
+}
+.contextMenuOptions[data-open="true"] {
+  animation: inTop 100ms ease-out;
+  &.profile {
+    animation: inTopLeft 100ms ease-out;
   }
 }
 
@@ -59,32 +206,48 @@
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
+  height: fit-content;
+  animation: outBottom 100ms ease-in forwards;
 
   &.noteFooter {
-    bottom: 46px;
+    bottom: 28px;
     left: unset;
-    right: 0px;
+    right: 52px;
+  }
+  &.noteContext {
+    bottom: 42px;
+    left: unset;
+    right: -4px;
   }
   &.profile {
     bottom: 46px;
     left: 4px;
     right: unset;
+    animation: outBottomLeft 100ms ease-in forwards;
   }
 
-  &.hidden {
-    // bottom: 58px;
-    height: 1px;
-    overflow: hidden;
-    visibility: hidden;
-    opacity: 0;
-  }
 
-  &.visible {
-    height: fit-content;
-    overflow: hidden;
-    visibility: visible;
-    opacity: 1;
-    // transition: all 200ms ease-out;
-    animation: inBottom 200ms ease-out;
+  // &.hidden {
+  //   // bottom: 58px;
+  //   // height: 1px;
+  //   overflow: hidden;
+  //   // visibility: hidden;
+  //   // opacity: 0;
+  //   animation: outBottom 100ms ease-in forwards;
+  // }
+
+  // &.visible {
+  //   // height: fit-content;
+  //   // overflow: hidden;
+  //   // visibility: visible;
+  //   // opacity: 1;
+  //   // transition: all 100ms ease-out;
+  //   animation: inBottom 100ms ease-out;
+  // }
+}
+.contextMenuOptionsUp[data-open="true"] {
+  animation: inBottom 100ms ease-out;
+  &.profile {
+    animation: inBottomLeft 100ms ease-out;
   }
 }

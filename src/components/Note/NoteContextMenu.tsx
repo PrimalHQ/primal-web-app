@@ -40,7 +40,10 @@ const NoteContextMenu: Component<{
     if(!context) return;
 
     if (!props.open) {
-      context.setAttribute('style',`top: -1024px; left: -1034px;`);
+      // Delay for animation
+      setTimeout(() => {
+        context && context.setAttribute('style',`top: -1024px; left: -1034px; height: 0;`);
+      }, 100)
       return;
     }
 
@@ -254,7 +257,7 @@ const NoteContextMenu: Component<{
         id={`note_context_${note()?.id}`}
         items={noteContext()}
         hidden={!props.open}
-        position="note_footer"
+        position="note_context"
         orientation={orientation()}
       />
     </div>

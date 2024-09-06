@@ -1,17 +1,40 @@
 @keyframes contentShow {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(-8px);
+    // transform: translateY(-8px);
+    transform: scale(0);
   }
-  to {
+  80% {
     opacity: 1;
-    transform: translateY(0);
+  }
+  100% {
+    // transform: translateY(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes contentHide {
+  0% {
+    opacity: 1;
+    // transform: translateY(0);
+    transform: scale(1);
+    // transform-origin: top left;
+  }
+  80% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    // transform: translateY(-8px);
+    transform: scale(0.6);
+    // transform-origin: top left;
   }
 }
 
 .emojiPickHolder {
   position: absolute;
-  animation: contentShow 200ms ease-out;
+  transform-origin: top left;
+  animation: contentHide 100ms ease-out forwards;
 
   &.down {
     top: 40px;
@@ -22,6 +45,10 @@
     bottom: -20px;
     left: 40px;
   }
+}
+
+.emojiPickHolder[data-open="true"] {
+  animation: contentShow 100ms ease-out;
 }
 
 .zapEmojiChangeModal {

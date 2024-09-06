@@ -10,6 +10,7 @@ const defaultTerm = 'face';
 
 const EmojiPickPopover: Component<{
   id?: string,
+  open?: boolean,
   onClose: (e: MouseEvent | KeyboardEvent) => void,
   onSelect: (emoji: EmojiOption) => void,
   orientation?: 'up' | 'down',
@@ -47,6 +48,9 @@ const EmojiPickPopover: Component<{
   };
 
   const onClickOutside = (e: MouseEvent) => {
+    const target = e.target as Element;
+    if (target.classList.contains('emoji_icon')) return;
+
     props.onClose(e);
   };
 
@@ -55,19 +59,19 @@ const EmojiPickPopover: Component<{
     setShowPreset(() => term.length === 0);
   };
 
-  onMount(() => {
-    setTimeout(() => {
+  createEffect(() => {
+    if (props.open) {
+      console.log('EMOJI OPENED')
       setEmojiSearchTerm(() => defaultTerm);
       setFocusInput(() => true);
       setFocusInput(() => false);
       window.addEventListener('keyup', onKey);
       window.addEventListener('click', onClickOutside);
-    }, 10);
-  });
-
-  onCleanup(() => {
-    window.removeEventListener('keyup', onKey);
-    window.removeEventListener('click', onClickOutside);
+    } else {
+      console.log('EMOJI CLOSED')
+      window.removeEventListener('keyup', onKey);
+      window.removeEventListener('click', onClickOutside);
+    }
   });
 
 
@@ -75,6 +79,7 @@ const EmojiPickPopover: Component<{
     <div
       id={props.id}
       class={`${styles.emojiPickHolder} ${props.orientation && styles[props.orientation]}`}
+      data-open={props.open || false}
       onClick={e => e.stopPropagation()}
     >
       <div
@@ -87,6 +92,7 @@ const EmojiPickPopover: Component<{
         />
 
         <EmojiPicker
+          active={props.open}
           showPreset={showPreset()}
           preset={account?.emojiHistory || []}
           filter={emojiSearchTerm()}

@@ -143,7 +143,7 @@ const Home: Component = () => {
         return;
       }
 
-      const selected = context?.selectedFeed;;
+      const selected = context?.selectedFeed;
 
       // context?.actions.resetSelectedFeed();
       if (selected) {
