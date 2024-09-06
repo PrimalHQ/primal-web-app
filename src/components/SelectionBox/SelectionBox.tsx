@@ -12,6 +12,7 @@ import SelectionItem from "./SelectionItem";
 
 // Apply custom styling. See stylesheet below.
 import styles from  "./SelectionBox.module.scss";
+import { A } from "@solidjs/router";
 
 
 const SelectionBox: Component<{
@@ -65,6 +66,12 @@ const SelectionBox: Component<{
         </Select.Icon>
       </Select.Trigger>
       <Select.Content class={styles.selectionContent}>
+        <div class={styles.caption}>
+          <div class={styles.title}>
+            Note Feeds:
+          </div>
+          <A href='/settings/feeds'>Edit Feeds</A>
+        </div>
         <Select.Listbox class={styles.listbox}/>
       </Select.Content>
     </Select>

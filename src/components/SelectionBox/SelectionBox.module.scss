@@ -65,7 +65,7 @@
   line-height: 20px;
   list-style-type: none;
   border: none;
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   padding-block: 4px;
   padding-inline: 4px;
   transform: none;
@@ -131,6 +131,37 @@
 .selectionContent {
   transform-origin: top left;
   animation: contentHide 100ms ease-out forwards;
+
+  .caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background-color: var(--background-header-input);
+    border-radius: 8px 8px 0 0;
+
+    padding-top: 8px;
+    padding-bottom: 6px;
+    padding-inline: 16px;
+
+    .title {
+      color: var(--text-tertiary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16px;
+      text-transform: none;
+    }
+
+    a {
+      color: var(--accent-links);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 16px;
+      text-transform: none;
+    }
+
+
+  }
 }
 .selectionContent[data-expanded] {
   transform-origin: top left;
