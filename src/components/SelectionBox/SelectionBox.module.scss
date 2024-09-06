@@ -84,9 +84,10 @@
   justify-content: flex-start;
   align-items: center;
   padding-block: 10px;
-  padding-right: 32px;
+  padding-inline: 12px;
   border-radius: 8px;
   text-transform: capitalize;
+  min-width: 292px;
   cursor: pointer;
 
   &:hover, &:focus-visible {
@@ -129,6 +130,7 @@
 }
 
 .selectionContent {
+  margin-top: 7px;
   transform-origin: top left;
   animation: contentHide 150ms ease-in forwards;
 
@@ -140,8 +142,8 @@
     background-color: var(--background-header-input);
     border-radius: 8px 8px 0 0;
 
-    padding-top: 8px;
-    padding-bottom: 6px;
+    padding-top: 10px;
+    padding-bottom: 8px;
     padding-inline: 16px;
 
     .title {

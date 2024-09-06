@@ -55,7 +55,6 @@ const SelectionBox2: Component<{
       defaultValue={defaultValue()}
       value={value()}
       onChange={props.onChange}
-      gutter={8}
     >
       <Select.Trigger class={props.big ? styles.triggerBig : styles.trigger}>
         <Select.Value<SelectionOption>>
