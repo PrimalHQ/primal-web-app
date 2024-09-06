@@ -620,6 +620,7 @@
     text-decoration: none;
     border: none;
     outline: none;
+    z-index: 15;
 
     .zapIcon {
       width: 10px;
@@ -747,7 +748,7 @@
 
 .topZapEnterTransition {
   opacity: 0;
-  transform: translateX(300px);
+  transform: translateX(30px);
 }
 
 .topZapExitTransition {

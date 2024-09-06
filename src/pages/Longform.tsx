@@ -225,6 +225,10 @@ const Longform: Component< { naddr: string } > = (props) => {
     }
   });
 
+  createEffect(() => {
+    updateReactionsState('topZaps', () =>  [ ...(store.article?.topZaps || []) ]);
+  });
+
   const articleMediaImage = () => {
     if (!store.article?.image) return undefined
 
@@ -994,7 +998,6 @@ const Longform: Component< { naddr: string } > = (props) => {
             }
           >
           <div>
-
             <div class={styles.header}>
               <Show when={store.article?.user}>
                 <A href={`/p/${store.article?.user.npub}`}>
@@ -1072,7 +1075,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                 </div>
 
                 <NoteTopZaps
-                  topZaps={store.article?.topZaps}
+                  topZaps={reactionsState.topZaps}
                   zapCount={reactionsState.zapCount}
                   users={store.users}
                   action={() => openReactionModal('zaps')}
