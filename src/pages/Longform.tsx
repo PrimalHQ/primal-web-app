@@ -59,6 +59,7 @@ import { logWarning } from "../lib/logger";
 import PageCaption from "../components/PageCaption/PageCaption";
 import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
 import { useMediaContext } from "../contexts/MediaContext";
+import { Transition, TransitionGroup } from "solid-transition-group";
 
 export type LongFormData = {
   title: string,
@@ -961,24 +962,13 @@ const Longform: Component< { naddr: string } > = (props) => {
 
 
   return (
-    <Show
-      when={store.article}
-      fallback={<ArticleSkeleton />}
-    >
+    <>
       <Wormhole
         to="search_section"
       >
         <Search />
       </Wormhole>
-      <Show
-        when={!store.noContent}
-        fallback={
-          <>
-            <PageCaption title="Read not found" />
-          </>
-        }
-      >
-        <Wormhole to='right_sidebar'>
+      <Wormhole to='right_sidebar'>
           <ArticleSidebar
             user={store.article?.user}
             article={store.article}
@@ -989,201 +979,219 @@ const Longform: Component< { naddr: string } > = (props) => {
             author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
             getCoAuthors={selectedHighlightCoAuthors}
           />
-        </Wormhole>
-
-        <div class={styles.header}>
-          <Show when={store.article?.user}>
-            <A href={`/p/${store.article?.user.npub}`}>
-              <div class={styles.author}>
-                <Avatar user={store.article?.user} size="sm" />
-
-                <div class={styles.userInfo}>
-                  <div class={styles.userName}>
-                    {userName(store.article?.user)}
-                    <VerificationCheck user={store.article?.user} />
-                  </div>
-                  <Show when={store.article?.user.nip05}>
-                    <div class={styles.nip05}>
-                      {nip05Verification(store.article?.user)}
-                    </div>
-                  </Show>
-                </div>
-              </div>
-            </A>
-          </Show>
-
-          <Show when={store.hasTiers}>
-            <ButtonPrimary
-              onClick={openSubscribe}
-            >
-              subscribe
-            </ButtonPrimary>
-          </Show>
-        </div>
-
-        <div class={styles.topBar}>
-          <div class={styles.left}>
-            <div class={styles.time}>
-              {shortDate(store.article?.published)}
-            </div>
-            <Show when={store.article?.client}>
-              <div class={styles.client}>
-                via {store.article?.client}
-              </div>
-            </Show>
-          </div>
-
-          <div class={styles.right}>
-            <BookmarkArticle note={store.article} />
-            <NoteContextTrigger
-              ref={articleContextMenu}
-              onClick={onContextMenuTrigger}
-            />
-          </div>
-        </div>
-
-        <div id={`read_${naddr()}`} class={styles.longform}>
+      </Wormhole>
+      <Transition name="slide-fade">
+        <Show
+          when={store.article}
+          fallback={<ArticleSkeleton />}
+        >
           <Show
-            when={store.article}
+            when={!store.noContent}
+            fallback={
+              <>
+                <PageCaption title="Read not found" />
+              </>
+            }
           >
-            <div class={styles.title}>
-              {store.article?.title}
+          <div>
+
+            <div class={styles.header}>
+              <Show when={store.article?.user}>
+                <A href={`/p/${store.article?.user.npub}`}>
+                  <div class={styles.author}>
+                    <Avatar user={store.article?.user} size="sm" />
+
+                    <div class={styles.userInfo}>
+                      <div class={styles.userName}>
+                        {userName(store.article?.user)}
+                        <VerificationCheck user={store.article?.user} />
+                      </div>
+                      <Show when={store.article?.user.nip05}>
+                        <div class={styles.nip05}>
+                          {nip05Verification(store.article?.user)}
+                        </div>
+                      </Show>
+                    </div>
+                  </div>
+                </A>
+              </Show>
+
+              <Show when={store.hasTiers}>
+                <ButtonPrimary
+                  onClick={openSubscribe}
+                >
+                  subscribe
+                </ButtonPrimary>
+              </Show>
             </div>
 
-            <Show when={(store.article?.image || '').length > 0}>
-              <NoteImage
-                class={`${styles.image} hero_image_${naddr()}`}
-                src={store.article?.image}
-                media={articleMediaImage()}
-                mediaThumb={articleMediaThumb()}
-                width={640}
-              />
-            </Show>
+            <div class={`${styles.topBar} animated`}>
+              <div class={styles.left}>
+                <div class={styles.time}>
+                  {shortDate(store.article?.published)}
+                </div>
+                <Show when={store.article?.client}>
+                  <div class={styles.client}>
+                    via {store.article?.client}
+                  </div>
+                </Show>
+              </div>
 
-            <div class={styles.summary}>
-              <div class={styles.border}></div>
-              <div class={styles.text}>
-                {store.article?.summary}
+              <div class={styles.right}>
+                <BookmarkArticle note={store.article} />
+                <NoteContextTrigger
+                  ref={articleContextMenu}
+                  onClick={onContextMenuTrigger}
+                />
               </div>
             </div>
 
-            <NoteTopZaps
-              topZaps={store.article?.topZaps}
-              zapCount={reactionsState.zapCount}
-              users={store.users}
-              action={() => openReactionModal('zaps')}
-              doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
-            />
+            <div id={`read_${naddr()}`} class={`${styles.longform} animated`}>
+              <Show
+                when={store.article}
+              >
+                <div class={styles.title}>
+                  {store.article?.title}
+                </div>
 
-            <PrimalMarkdown
-              noteId={props.naddr}
-              content={store.article?.content || ''}
-              readonly={true}
-              article={store.article}
-              highlights={store.highlights}
-              onHighlightSelected={(hl: any) => {
-                if (!hl) {
-                  updateStore('selectedHighlight', () => undefined);
-                  return;
-                }
-                updateStore('selectedHighlight', () => ({...hl}));
-              }}
-              onHighlightDeselected={() => {
-                updateStore('selectedHighlight', () => undefined);
-              }}
-              onHighlightCreated={(hl: any, replaceId?: string) => {
-                updateStore('highlights', store.highlights.length, () => ({...hl}));
-                updateStore('selectedHighlight', () => undefined);
+                <Show when={(store.article?.image || '').length > 0}>
+                  <NoteImage
+                    class={`${styles.image} hero_image_${naddr()}`}
+                    src={store.article?.image}
+                    media={articleMediaImage()}
+                    mediaThumb={articleMediaThumb()}
+                    width={640}
+                  />
+                </Show>
 
-                if (replaceId && store.highlights.find(h => h.id === replaceId)) {
-                  updateStore('highlights', (hs) => hs.filter(h => h.id !== replaceId));
-                }
-              }}
-              onHighlightRemoved={(id: string) => {
-                updateStore('highlights', (hs) => hs.filter(h => h.id !== id));
-              }}
-              onHighlightReply={(hl: any) => {
-                const highlight = store.highlights.find(h => h.id === hl.id);
+                <div class={styles.summary}>
+                  <div class={styles.border}></div>
+                  <div class={styles.text}>
+                    {store.article?.summary}
+                  </div>
+                </div>
 
-                if (!highlight) {
-                  updateStore('highlights', store.highlights.length, () => ({...hl}));
-                }
+                <NoteTopZaps
+                  topZaps={store.article?.topZaps}
+                  zapCount={reactionsState.zapCount}
+                  users={store.users}
+                  action={() => openReactionModal('zaps')}
+                  doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
+                />
 
-                updateStore('replyToHighlight', () => ({ ...hl }));
-                setTimeout(() => {
-                  const trigger = document.querySelector(`#trigger_reply_${hl.id}`) as HTMLButtonElement;
+                <PrimalMarkdown
+                  noteId={props.naddr}
+                  content={store.article?.content || ''}
+                  readonly={true}
+                  article={store.article}
+                  highlights={store.highlights}
+                  onHighlightSelected={(hl: any) => {
+                    if (!hl) {
+                      updateStore('selectedHighlight', () => undefined);
+                      return;
+                    }
+                    updateStore('selectedHighlight', () => ({...hl}));
+                  }}
+                  onHighlightDeselected={() => {
+                    updateStore('selectedHighlight', () => undefined);
+                  }}
+                  onHighlightCreated={(hl: any, replaceId?: string) => {
+                    updateStore('highlights', store.highlights.length, () => ({...hl}));
+                    updateStore('selectedHighlight', () => undefined);
 
-                  trigger.click();
-                  updateStore('selectedHighlight', () => undefined);
-                }, 10);
-              }}
-              onHighlightQuoted={(hl: any) => {
-                const highlight = store.highlights.find(h => h.id === hl.id);
+                    if (replaceId && store.highlights.find(h => h.id === replaceId)) {
+                      updateStore('highlights', (hs) => hs.filter(h => h.id !== replaceId));
+                    }
+                  }}
+                  onHighlightRemoved={(id: string) => {
+                    updateStore('highlights', (hs) => hs.filter(h => h.id !== id));
+                  }}
+                  onHighlightReply={(hl: any) => {
+                    const highlight = store.highlights.find(h => h.id === hl.id);
 
-                if (!highlight) {
-                  updateStore('highlights', store.highlights.length, () => ({...hl}));
-                }
+                    if (!highlight) {
+                      updateStore('highlights', store.highlights.length, () => ({...hl}));
+                    }
 
-                updateStore('selectedHighlight', () => undefined);
-              }}
-            />
+                    updateStore('replyToHighlight', () => ({ ...hl }));
+                    setTimeout(() => {
+                      const trigger = document.querySelector(`#trigger_reply_${hl.id}`) as HTMLButtonElement;
 
-            <div class={styles.tags}>
-              <For each={store.article?.tags}>
-                {tag => (
-                  <A href={`/reads/${tag}`} class={styles.tag}>
-                    {tag}
-                  </A>
-                )}
+                      trigger.click();
+                      updateStore('selectedHighlight', () => undefined);
+                    }, 10);
+                  }}
+                  onHighlightQuoted={(hl: any) => {
+                    const highlight = store.highlights.find(h => h.id === hl.id);
+
+                    if (!highlight) {
+                      updateStore('highlights', store.highlights.length, () => ({...hl}));
+                    }
+
+                    updateStore('selectedHighlight', () => undefined);
+                  }}
+                />
+
+                <div class={styles.tags}>
+                  <For each={store.article?.tags}>
+                    {tag => (
+                      <A href={`/reads/${tag}`} class={styles.tag}>
+                        {tag}
+                      </A>
+                    )}
+                  </For>
+                </div>
+                {/* <div class={styles.content} innerHTML={inner()}>
+                  <SolidMarkdown
+                    children={note.content || ''}
+                  />
+                </div> */}
+
+                <div class={styles.footer}>
+                  <ArticleFooter
+                    note={store.article}
+                    state={reactionsState}
+                    updateState={updateReactionsState}
+                    customZapInfo={customZapInfo()}
+                    onZapAnim={addTopZapFeed}
+                    size="xwide"
+                  />
+                </div>
+              </Show>
+            </div>
+
+            <Switch>
+              <Match when={store.replyToHighlight}>
+                <ReplyToHighlight
+                  id={`reply_${store.replyToHighlight.id}`}
+                  highlight={store.replyToHighlight}
+                  author={store.users.find(u => u.pubkey === store.replyToHighlight.pubkey)}
+                  onNotePosted={onHighlightPosted}
+                  onCancel={() => {
+                    scrollToHighlight(store.replyToHighlight.id);
+                    updateStore('replyToHighlight', () => undefined);
+                  }}
+                />
+              </Match>
+              <Match when={store.article}>
+                <ReplyToNote
+                  note={store.article}
+                  onNotePosted={onReplyPosted}
+                />
+              </Match>
+            </Switch>
+
+            <div>
+              <For each={store.replies}>
+                {reply => <Note note={reply} noteType='thread' shorten={true} size="xwide" />}
               </For>
             </div>
-            {/* <div class={styles.content} innerHTML={inner()}>
-              <SolidMarkdown
-                children={note.content || ''}
-              />
-            </div> */}
-
-            <div class={styles.footer}>
-              <ArticleFooter
-                note={store.article}
-                state={reactionsState}
-                updateState={updateReactionsState}
-                customZapInfo={customZapInfo()}
-                onZapAnim={addTopZapFeed}
-                size="xwide"
-              />
-            </div>
+          </div>
           </Show>
-        </div>
-
-        <Switch>
-          <Match when={store.replyToHighlight}>
-            <ReplyToHighlight
-              id={`reply_${store.replyToHighlight.id}`}
-              highlight={store.replyToHighlight}
-              author={store.users.find(u => u.pubkey === store.replyToHighlight.pubkey)}
-              onNotePosted={onHighlightPosted}
-              onCancel={() => {
-                scrollToHighlight(store.replyToHighlight.id);
-                updateStore('replyToHighlight', () => undefined);
-              }}
-            />
-          </Match>
-          <Match when={store.article}>
-            <ReplyToNote
-              note={store.article}
-              onNotePosted={onReplyPosted}
-            />
-          </Match>
-        </Switch>
-
-        <div>
-          <For each={store.replies}>
-            {reply => <Note note={reply} noteType='thread' shorten={true} size="xwide" />}
-          </For>
-        </div>
-      </Show>
-    </Show>);
+        </Show>
+      </Transition>
+    </>
+  );
 }
 
 export default Longform;

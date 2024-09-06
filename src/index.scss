@@ -645,6 +645,7 @@ button:focus {
 }
 
 .slide-fade-exit-active {
+  display: none !important;
   transition: opacity 0.1s;
 }
 .slide-fade-exit-to {
