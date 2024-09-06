@@ -180,16 +180,22 @@ const Home: Component = () => {
           }
         >
           <div class={styles.readsTopicHeader}>
-            <Link
+            <div
               class={styles.backToReads}
-              href={'/reads'}
-              onClick={() => context?.actions.resetSelectedFeed()}
             >
-              Reads:
+              topic:
+            </div>
+            <Link
+              class={styles.topicBubble}
+              href={'/reads'}
+              onClick={() => context?.actions.refetchSelectedFeed()}
+            >
+              <div>
+                {decodeURIComponent(params.topic)}
+              </div>
+
+              <div class={styles.closeIcon}></div>
             </Link>
-            <span>
-              &nbsp;{decodeURIComponent(params.topic)}
-            </span>
           </div>
         </Show>
       </PageCaption>

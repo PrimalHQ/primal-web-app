@@ -350,7 +350,7 @@ const Bookmarks: Component = () => {
         <Show
           when={kind()}
           fallback={
-            <div class={styles.readsTopicHeader}>
+            <div>
               <span>
                 Bookmarks
               </span>

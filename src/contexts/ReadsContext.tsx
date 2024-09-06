@@ -79,6 +79,7 @@ type ReadsContextStore = {
     setTopPicks: (picks: PrimalArticle[]) => void,
     setTopics: (topicks: string[]) => void,
     setFeaturedAuthor: (author: PrimalUser) => void,
+    refetchSelectedFeed: () => void,
   }
 }
 
@@ -408,6 +409,13 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       fetchNotes(feed.spec , `${APP_ID}`, 0);
     }
   };
+
+  const refetchSelectedFeed = () => {
+    if (!store.selectedFeed) return;
+
+    clearNotes();
+    fetchNotes(store.selectedFeed.spec , `${APP_ID}`, 0);
+  }
 
   const resetSelectedFeed = () => {
     currentFeed = undefined;
@@ -813,6 +821,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       setTopPicks,
       setTopics,
       setFeaturedAuthor,
+      refetchSelectedFeed,
     },
   });
 
