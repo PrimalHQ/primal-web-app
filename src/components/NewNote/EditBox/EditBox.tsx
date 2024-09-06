@@ -60,7 +60,7 @@ const EditBox: Component<{
   id?: string,
   replyToNote?: PrimalNote | PrimalArticle,
   onClose?: () => void,
-  onSuccess?: (note: SendNoteResult) => void,
+  onSuccess?: (note: SendNoteResult, meta: any) => void,
   open?: boolean,
   idPrefix?: string,
   context?: string,
@@ -782,7 +782,7 @@ const EditBox: Component<{
           if (type === 'EOSE') {
             if (note) {
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-              props.onSuccess && props.onSuccess({ success, reasons, note });
+              props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
               setIsPostingInProgress(false);
               saveNoteDraft(account.publicKey, '', rep?.noteId)
               clearEditor();

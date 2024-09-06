@@ -2,7 +2,7 @@ import { Component, createEffect, createMemo, For, onCleanup, onMount, Show } fr
 import Note from '../components/Note/Note';
 import styles from './NoteThread.module.scss';
 import { useNavigate, useParams } from '@solidjs/router';
-import { PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
+import { PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
@@ -10,7 +10,7 @@ import { nip19 } from '../lib/nTools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
-import { sortByRecency } from '../stores/note';
+import { generateNote, sortByRecency } from '../stores/note';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { placeholders as tPlaceholders, thread as t } from '../translations';
@@ -151,8 +151,28 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     pn && observer?.unobserve(pn);
   });
 
-  const onNotePosted = (result: SendNoteResult) => {
-    threadContext?.actions.fetchNotes(postId());
+  const onNotePosted = (result: SendNoteResult, meta?: {
+    userRefs: Record<string, PrimalUser>,
+    noteRefs: Record<string, PrimalNote>,
+    articleRefs: Record<string, PrimalArticle>,
+    highlightRefs: Record<string, any>,
+    relayHints: Record<string, string>,
+  }) => {
+    const pNote = primaryNote();
+    if (!meta || !result.note || !account?.activeUser || !pNote ) return;
+
+    const modifiedMeta = {
+      ...meta,
+      noteRefs: { ...meta.noteRefs, [pNote.id]: {...pNote} }
+    }
+
+    const note = generateNote(result.note, account?.activeUser, modifiedMeta);
+
+    threadContext?.actions.insertNote(note);
+
+    // setTimeout(() => {
+    //   threadContext?.actions.updateNotes(postId());
+    // }, 2_000)
   };
 
   return (

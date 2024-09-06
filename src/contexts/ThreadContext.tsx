@@ -67,6 +67,7 @@ export type ThreadContextStore = {
     setPrimaryNote: (context: PrimalNote | undefined) => void,
     fetchTopZaps: (noteId: string) => void,
     fetchUsers: (pubkeys: string[]) => void,
+    insertNote: (note: PrimalNote) => void,
   }
 }
 
@@ -107,7 +108,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     const oldNotesIds = store.notes.map(n => n.post.id);
     const reallyNewNotes = newNotes.filter(n => !oldNotesIds.includes(n.post.id));
 
-    updateStore('notes', (notes) => [ ...notes, ...reallyNewNotes ]);
+    updateStore('notes', (notes) => [ ...reallyNewNotes, ...notes ]);
     updateStore('isFetching', () => false);
   };
 
@@ -120,8 +121,13 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => true);
   }
 
+  const insertNote = (note: PrimalNote) => {
+    updateStore('notes', (nts) => [ { ...note }, ...nts]);
+  }
+
   const updateNotes = (noteId: string, until = 0, limit = 100) => {
-    getThread(account?.publicKey, noteId, `thread_${APP_ID}`, until, limit);
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
+    getThread(account?.publicKey, noteId, `thread_diff_${APP_ID}`, until, limit);
     // updateStore('isFetching', () => true);
   }
 
@@ -367,7 +373,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === `thread_${APP_ID}`) {
+    if (subId === `thread_${APP_ID}` || subId === `thread_diff_${APP_ID}`) {
       if (type === 'EOSE') {
         const reposts = parseEmptyReposts(store.page);
         const ids = Object.keys(reposts);
@@ -512,6 +518,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       setPrimaryNote,
       fetchTopZaps,
       fetchUsers,
+      insertNote,
     },
   });
 

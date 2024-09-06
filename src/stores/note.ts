@@ -4,7 +4,7 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
-import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap, PrimalArticle } from "../types/primal";
+import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, NostrEventContent, NostrEOSE, NostrEvent, PrimalUser, TopZap, PrimalArticle, NostrRelaySignedEvent } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -12,14 +12,6 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
   const userMeta = JSON.parse(user?.content || '{}');
   const stat = page?.postStats[message.id];
-
-  const noActions = {
-    event_id: message.id,
-    liked: false,
-    replied: false,
-    reposted: false,
-    zapped: false,
-  };
 
   return {
     user: {
@@ -55,7 +47,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
       noteId: nip19.noteEncode(message.id),
-      noteActions: (page.noteActions && page.noteActions[message.id]) || noActions,
+      noteActions: (page.noteActions && page.noteActions[message.id]) || noActions(message.id),
       relayHints: page.relayHints,
     },
   }
@@ -200,6 +192,102 @@ const parseLFKind6 = (message: NostrNoteContent) => {
 // };
 
 type ConvertToNotes = (page: FeedPage | undefined, topZaps?: Record<string, TopZap[]>) => PrimalNote[];
+
+const noActions = (id: string) => ({
+  event_id: id,
+  liked: false,
+  replied: false,
+  reposted: false,
+  zapped: false,
+});
+
+export const generateNote = (
+  noteEvent: NostrRelaySignedEvent,
+  author: PrimalUser,
+  meta: {
+    userRefs: Record<string, PrimalUser>,
+    noteRefs: Record<string, PrimalNote>,
+    articleRefs: Record<string, PrimalArticle>,
+    highlightRefs: Record<string, any>,
+    relayHints: Record<string, string>,
+  },
+) => {
+  const msg = noteEvent;
+
+  let replyTo: string[] | undefined;
+  const tgs = [...noteEvent.tags];
+
+  console.log('TAGS: ',tgs);
+
+  // Determine parent by finding the `e` tag with `reply` then `root` as `marker`
+  // If both fail return the last `e` tag
+  for (let i=0; i<tgs.length; i++) {
+    const tag = tgs[i];
+
+    if (tag[0] !== 'e') continue;
+
+    if (tag[3] === 'mention') continue;
+
+    if (tag[3] === 'reply') {
+      replyTo = [...tag];
+      break;
+    }
+
+    if (tag[3] === 'root') {
+      replyTo = [...tag];
+      continue;
+    }
+  }
+
+  if (!replyTo) {
+    const eTags = tgs.filter(t => t[0] === 'e' && t[3] !== 'mention');
+
+    if (eTags.length === 1) {
+      replyTo = [...eTags[0]];
+    }
+    else if (eTags.length > 1){
+      replyTo = [...eTags[eTags.length - 1]];
+    }
+  }
+
+  return {
+    user: { ...author },
+    post: {
+      id: msg.id,
+      pubkey: msg.pubkey,
+      created_at: msg.created_at || 0,
+      tags: msg.tags,
+      content: sanitize(msg.content),
+      kind: msg.kind,
+      sig: msg.sig,
+      likes: 0,
+      mentions: 0,
+      reposts: 0,
+      replies: 0,
+      zaps: 0,
+      score: 0,
+      score24h: 0,
+      satszapped: 0,
+      noteId: nip19.noteEncode(msg.id),
+      noteActions: noActions(msg.id),
+      relayHints: meta.relayHints,
+    },
+    msg,
+    mentionedNotes: meta.noteRefs,
+    mentionedUsers: meta.userRefs,
+    mentionedHighlights: meta.highlightRefs,
+    mentionedArticles: meta.articleRefs,
+    replyTo: replyTo && replyTo[1],
+    tags: msg.tags,
+    id: msg.id,
+    noteId: nip19.noteEncode(msg.id),
+    pubkey: msg.pubkey,
+    topZaps: [],
+    content: sanitize(msg.content),
+    relayHints: meta.relayHints,
+  };
+}
+
 
 export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
@@ -429,14 +517,6 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       }
     }
 
-    const noActions = {
-      event_id: msg.id,
-      liked: false,
-      replied: false,
-      reposted: false,
-      zapped: false,
-    };
-
     return {
       user: {
         id: user?.id || '',
@@ -471,7 +551,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
         noteId: nip19.noteEncode(msg.id),
-        noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions,
+        noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions(msg.id),
         relayHints: page.relayHints,
       },
       repost,
@@ -685,15 +765,6 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
     const wordCount = page.wordCount ? page.wordCount[message.id] || 0 : 0;
 
-
-    const noActions = {
-      event_id: msg.id,
-      liked: false,
-      replied: false,
-      reposted: false,
-      zapped: false,
-    };
-
     let article: PrimalArticle = {
       id: msg.id,
       pubkey: msg.pubkey,
@@ -717,7 +788,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       mentionedHighlights,
       mentionedArticles,
       wordCount,
-      noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions,
+      noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions(msg.id),
       likes: stat?.likes || 0,
       mentions: stat?.mentions || 0,
       reposts: stat?.reposts || 0,
