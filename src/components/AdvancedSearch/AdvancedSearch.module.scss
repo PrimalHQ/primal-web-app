@@ -347,10 +347,10 @@
   background-color: var(--background-site);
   opacity: 0.7;
 
-  animation: overlayHide 200ms ease 100ms forwards;
+  animation: overlayHide 100ms ease 50ms forwards;
 
   &[data-expanded] {
-    animation: overlayShow 200ms ease;
+    animation: overlayShow 100ms ease;
   }
 }
 
@@ -367,10 +367,10 @@
     background-color: var(--background-input);
     border-radius: var(--border-radius-big);
 
-    animation: contentHide 300ms ease-in forwards;
+    animation: contentHide 150ms ease-in forwards;
 
     &[data-expanded] {
-      animation: contentShow 300ms ease-out;
+      animation: contentShow 150ms ease-out;
     }
 
     .dialogHeader {

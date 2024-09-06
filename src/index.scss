@@ -612,8 +612,8 @@ button:focus {
 .slide-fade-exit-active {
   .animated
   {
-    transition: opacity 0.3s, transform 0.3s;
-    transition-delay: 0.1s * 1;
+    transition: opacity 150ms, transform 150ms;
+    transition-delay: 50ms * 1;
   }
 }
 
@@ -657,7 +657,7 @@ button:focus {
 .anim-fade-exit-active {
   .animated
   {
-    transition: opacity 0.3s;
+    transition: opacity 150ms;
   }
 }
 
@@ -677,7 +677,7 @@ button:focus {
 .anim-fade-enter {
   .animated
   {
-    transition: opacity 1s;
+    transition: opacity 150ms;
   }
   // .animated
   // {
@@ -705,7 +705,7 @@ button:focus {
   @for $i from 0 to $elements {
     .animated:nth-child(#{$i})
       {
-        transition: opacity 0.3s, transform 0.3s;
+        transition: opacity 150ms, transform 150ms;
         transition-delay: 0.05s * $i;
       }}
 }
