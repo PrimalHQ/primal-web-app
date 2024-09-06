@@ -27,6 +27,7 @@ import AdvancedSearchSlider from '../components/AdvancedSearch/AdvancedSearchSli
 import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonLink from '../components/Buttons/ButtonLink';
+import { wordsPerMinute } from '../constants';
 
 export type SearchState = {
   includes: string,
@@ -45,6 +46,8 @@ export type SearchState = {
   orientation: string,
   minDuration: number,
   maxDuration: number,
+  minWords: number,
+  maxWords: number,
   minScore: number,
   minInteractions: number,
   minLikes: number,
@@ -64,48 +67,49 @@ export type SearchState = {
 }
 
 const orientationKinds = ['Video', 'Images'];
-const durationKinds = ['Video', 'Sound', 'Reads'];
+const durationKinds = ['Video', 'Sound'];
+const readTimeKinds = ['Reads'];
 
 
 const timeframes: Record<string, (s?: any) => string> = {
   'Anytime': () => '',
 
-  'past hour': () => {
-    const date = dayjs();
-    const result = date.subtract(1, 'hour');
+  // 'past hour': () => {
+  //   const date = dayjs();
+  //   const result = date.subtract(1, 'hour');
 
-    return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
-  },
+  //   return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
+  // },
 
-  'past 24 hours': () => {
+  'Today': () => {
     const date = dayjs();
     const result = date.subtract(1, 'day');
 
     return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
   },
 
-  'past week': () => {
+  'This Week': () => {
     const date = dayjs();
     const result = date.subtract(1, 'week');
 
     return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
   },
 
-  'past month': () => {
+  'This Month': () => {
     const date = dayjs();
     const result = date.subtract(1, 'month');
 
     return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
   },
 
-  'past year': () => {
+  'This Year': () => {
     const date = dayjs();
     const result = date.subtract(1, 'year');
 
     return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
   },
 
-  'custom': (stateTimeframe: { since: string, until: string}) => {
+  'Custom': (stateTimeframe: { since: string, until: string}) => {
     if (stateTimeframe.since.length === 0 && stateTimeframe.until.length === 0) {
       return '';
     }
@@ -123,14 +127,14 @@ const sentiments: Record<string, () => string> = {
 
 const kinds: Record<string, () => string> = {
   'Notes': () => 'kind:1',
-  'Replies': () => 'kind:1 filter:replies',
+  'Note Replies': () => 'kind:1 filter:replies',
   'Reads': () => 'kind:30023',
-  'Reads comments': () => 'kind:30023 filter:replies',
+  'Reads Comments': () => 'kind:30023 filter:replies',
   'Images': () => 'filter:image',
   'Video': () => 'filter:video',
   'Sound': () => 'filter:audio',
-  'Zaps': () => 'kind:9735',
-  'People': () => 'kind:0',
+  // 'Zaps': () => 'kind:9735',
+  // 'People': () => 'kind:0',
 };
 
 const orientations = ['Any', 'Vertical', 'Horizontal'];
@@ -159,6 +163,8 @@ const AdvancedSearch: Component = () => {
     orientation: 'Any',
     minDuration: 0,
     maxDuration: 0,
+    minWords: 0,
+    maxWords: 0,
     minScore: 0,
     minInteractions: 0,
     minLikes: 0,
@@ -231,6 +237,14 @@ const AdvancedSearch: Component = () => {
     `maxduration:${state.maxDuration} ` :
     '';
 
+    const minWords = readTimeKinds.includes(state.kind) && !isNaN(state.minWords) && state.minWords > 0 ?
+      `minwords:${state.minWords * wordsPerMinute} ` :
+      '';
+
+    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > state.minDuration ?
+    `maxwords:${state.maxDuration * wordsPerMinute} ` :
+    '';
+
     // FILTERS -------
 
     const minScore = state.minScore === 0 ?
@@ -257,7 +271,7 @@ const AdvancedSearch: Component = () => {
       '' :
       `minreposts:${state.minReposts} `;
 
-    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${sentiment}${orient}${minDuration}${maxDuration}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
+    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${sentiment}${orient}${minDuration}${maxDuration}${minWords}${maxWords}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
 
   })
 
@@ -475,7 +489,7 @@ const AdvancedSearch: Component = () => {
                 name="include"
                 type="text"
                 value={state.includes}
-                placeholder="include these words..."
+                placeholder="Include these words..."
                 onChange={(v) => setState('includes', () => v)}
                 noExtraSpace={true}
                 icon={<div class={styles.searchIcon}></div>}
@@ -487,7 +501,7 @@ const AdvancedSearch: Component = () => {
                 name="exclude"
                 type="text"
                 value={state.excludes}
-                placeholder="exclude these words..."
+                placeholder="Exclude these words..."
                 onChange={(v) => setState('excludes', () => v)}
                 noExtraSpace={true}
                 icon={<div class={styles.excludeIcon}></div>}
@@ -516,40 +530,11 @@ const AdvancedSearch: Component = () => {
                   value={state.orientation}
                   options={orientations}
                   onChange={setOrientation}
-                  short={true}
                 />
               </div>
             </Show>
 
             <Show when={durationKinds.includes(state.kind)}>
-              <div class={styles.searchRow}>
-                <div class={styles.caption}>
-                  Duration (seconds)
-                </div>
-
-                <div class={styles.durationSlider}>
-                  <AdvancedSearchSlider
-                    name="duration"
-                    min={0}
-                    max={2000}
-                    value={[state.minDuration || 0, state.maxDuration || 0]}
-                    onSlide={(v: number[]) => {
-                      setState('minDuration', () => v[0]);
-                      setState('maxDuration', () => v[1]);
-                    }}
-                    onInput={(v: string) => {
-                      const val = v.split('-').map(x => parseInt(x.trim()));
-                      const lo = val[0] || 0;
-                      const hi = val[1] || val[0];
-
-                      setState('minDuration', () => lo);
-                      setState('maxDuration', () => hi);
-                    }}
-                  />
-                </div>
-
-              </div>
-
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Min duration (seconds)
@@ -591,6 +576,55 @@ const AdvancedSearch: Component = () => {
                       const val = parseInt(v.trim()) || 0;
 
                       setState('maxDuration', () => val);
+                    }}
+                  />
+                </div>
+              </div>
+            </Show>
+
+
+            <Show when={readTimeKinds.includes(state.kind)}>
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Min read time (minutes)
+                </div>
+
+                <div class={styles.durationSlider}>
+                  <AdvancedSearchSlider
+                    name="minduration"
+                    min={0}
+                    max={state.maxWords > 100 ? state.maxWords : 100}
+                    value={[state.minWords || 0]}
+                    onSlide={(v: number[]) => {
+                      setState('minWords', () => v[0]);
+                      setState('maxWords', (d) => d < v[0] ? v[0] : d);
+                    }}
+                    onInput={(v: string) => {
+                      const val = parseInt(v.trim()) || 0;
+
+                      setState('minWords', () => val);
+                      setState('maxWords', (d) => d < val ? val : d);
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div class={styles.searchRow}>
+                <div class={styles.caption}>
+                  Max read time (minutes)
+                </div>
+
+                <div class={styles.durationSlider}>
+                  <AdvancedSearchSlider
+                    name="maxduration"
+                    min={state.minWords || 0}
+                    max={state.maxWords > state.minWords + 100 ? state.maxWords : state.minWords + 100}
+                    value={[state.maxWords || 0]}
+                    onSlide={(v: number[]) => setState('maxWords', () => v[0])}
+                    onInput={(v: string) => {
+                      const val = parseInt(v.trim()) || 0;
+
+                      setState('maxWords', () => val);
                     }}
                   />
                 </div>
@@ -819,7 +853,7 @@ const AdvancedSearch: Component = () => {
 
                     <div class={styles.filterRow}>
                       <div class={styles.filterCaption}>
-                        Min content score
+                        Min replies
                       </div>
                       <div class={styles.filterValue}>
                         <AdvancedSearchSlider

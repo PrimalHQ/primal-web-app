@@ -102,6 +102,7 @@
 .submitButton {
   margin-top: 20px;
   width: 100%;
+  padding-inline: 20px;
   button {
     width: 100%;
   }
@@ -190,12 +191,12 @@
 }
 
 .excludeIcon {
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
 
   background-color: var(--text-tertiary-2);
-  -webkit-mask: url(../assets/icons/close.svg) 0 / 100% no-repeat;
-  mask: url(../assets/icons/close.svg) 0 / 100% no-repeat;
+  -webkit-mask: url(../assets/icons/close.svg) 0 / 13px no-repeat;
+  mask: url(../assets/icons/close.svg) 0 / 13px no-repeat;
 }
 
 .chevronIcon {
@@ -299,7 +300,7 @@
 }
 
 .durationSlider {
-  width: 432px;
+  width: 400px;
 }
 
 .filters {
