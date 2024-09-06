@@ -1,10 +1,41 @@
 @keyframes inTop {
-  0% { opacity: 0; top: 8px}
-  100% { opacity: 1; top: 26px}
+  from {
+    visibility: visible;
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
+@keyframes outTop {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 @keyframes inBottom {
-  0% { opacity: 0; bottom: 28px}
-  100% { opacity: 1; bottom: 46px}
+  0% {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes outBottom {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 .contextMenuOptions {
@@ -18,12 +49,12 @@
   z-index: var(--z-index-header);
   width: max-content;
   overflow: hidden;
-
+  height: fit-content;
 
   &.noteFooter {
     top: 26px;
     left: unset;
-    right: 0px;
+    right: 52px;
   }
   &.profile {
     top: 46px;
@@ -31,22 +62,17 @@
     right: unset;
   }
 
-  &.hidden {
-    max-height: 1px;
-    overflow: hidden;
-    visibility: hidden;
-    opacity: 0;
-    // top: 58px;
+  &.noteContext {
+    top: 18px;
+    left: unset;
+    right: -4px;
   }
 
-  &.visible {
-    height: fit-content;
-    overflow: hidden;
-    visibility: visible;
-    opacity: 1;
-    // transition: all 200ms ease-out;
-    animation: inTop 200ms ease-out;
-  }
+  animation: outTop 150ms ease-in forwards;
+}
+
+.contextMenuOptions[data-open="true"] {
+  animation: inTop 150ms ease-out;
 }
 
 .contextMenuOptionsUp {
@@ -59,32 +85,26 @@
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
+  height: fit-content;
 
   &.noteFooter {
-    bottom: 46px;
+    bottom: 28px;
     left: unset;
-    right: 0px;
+    right: 52px;
   }
   &.profile {
     bottom: 46px;
     left: 4px;
     right: unset;
   }
-
-  &.hidden {
-    // bottom: 58px;
-    height: 1px;
-    overflow: hidden;
-    visibility: hidden;
-    opacity: 0;
+  &.noteContext {
+    bottom: 42px;
+    left: unset;
+    right: -4px;
   }
+  animation: outBottom 150ms ease-in forwards;
+}
 
-  &.visible {
-    height: fit-content;
-    overflow: hidden;
-    visibility: visible;
-    opacity: 1;
-    // transition: all 200ms ease-out;
-    animation: inBottom 200ms ease-out;
-  }
+.contextMenuOptionsUp[data-open="true"] {
+  animation: inBottom 150ms ease-out;
 }
