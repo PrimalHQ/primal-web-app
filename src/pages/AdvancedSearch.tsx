@@ -249,7 +249,7 @@ const AdvancedSearch: Component = () => {
       `minduration:${state.minDuration} ` :
       '';
 
-    const maxDuration = durationKinds.includes(state.kind) && !isNaN(state.maxDuration) && state.maxDuration > state.minDuration ?
+    const maxDuration = durationKinds.includes(state.kind) && !isNaN(state.maxDuration) && state.maxDuration > 0 ?
     `maxduration:${state.maxDuration} ` :
     '';
 
@@ -257,7 +257,7 @@ const AdvancedSearch: Component = () => {
       `minwords:${state.minWords * wordsPerMinute} ` :
       '';
 
-    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > state.minWords ?
+    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > 0 ?
     `maxwords:${state.maxWords * wordsPerMinute} ` :
     '';
 
@@ -564,17 +564,15 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.maxDuration > maxDuration ? state.maxDuration : maxDuration}
+                    max={state.minDuration > maxDuration ? state.minDuration : maxDuration}
                     value={[state.minDuration || 0]}
                     onSlide={(v: number[]) => {
                       setState('minDuration', () => v[0]);
-                      setState('maxDuration', (d) => d < v[0] ? v[0] : d);
                     }}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
                       setState('minDuration', () => val);
-                      setState('maxDuration', (d) => d < val ? val : d);
                     }}
                   />
                 </div>
@@ -588,8 +586,8 @@ const AdvancedSearch: Component = () => {
                 <div class={styles.durationSlider}>
                   <AdvancedSearchSlider
                     name="maxduration"
-                    min={state.minDuration || 0}
-                    max={state.maxDuration > state.minDuration + maxDuration ? state.maxDuration : state.minDuration + maxDuration}
+                    min={0}
+                    max={state.maxDuration > maxDuration ? state.maxDuration : maxDuration}
                     value={[state.maxDuration || 0]}
                     onSlide={(v: number[]) => setState('maxDuration', () => v[0])}
                     onInput={(v: string) => {
@@ -613,17 +611,15 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.maxWords > maxReadTime ? state.maxWords : maxReadTime}
+                    max={state.minWords > maxReadTime ? state.minWords : maxReadTime}
                     value={[state.minWords || 0]}
                     onSlide={(v: number[]) => {
                       setState('minWords', () => v[0]);
-                      setState('maxWords', (d) => d < v[0] ? v[0] : d);
                     }}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
                       setState('minWords', () => val);
-                      setState('maxWords', (d) => d < val ? val : d);
                     }}
                   />
                 </div>
@@ -637,8 +633,8 @@ const AdvancedSearch: Component = () => {
                 <div class={styles.durationSlider}>
                   <AdvancedSearchSlider
                     name="maxduration"
-                    min={state.minWords || 0}
-                    max={state.maxWords > state.minWords + maxReadTime ? state.maxWords : state.minWords + maxReadTime}
+                    min={0}
+                    max={state.maxWords > maxReadTime ? state.maxWords : maxReadTime}
                     value={[state.maxWords || 0]}
                     onSlide={(v: number[]) => setState('maxWords', () => v[0])}
                     onInput={(v: string) => {
