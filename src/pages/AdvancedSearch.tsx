@@ -41,6 +41,7 @@ export type SearchState = {
   timeframe: string,
   customTimeframe: { since: string, until: string },
   sentiment: string,
+  scope: string,
   sortBy: string,
   kind: string,
   orientation: string,
@@ -125,10 +126,17 @@ const sentiments: Record<string, () => string> = {
   'Neutral': () => '',
 };
 
+const scopes: Record<string, () => string> = {
+  'Global': () => '',
+  'My Follows': () => 'scope:myfollows',
+  'My Network': () => 'scope:mynetwork',
+  'My Follows Interactions': () => 'scope:myfollowinteractions',
+};
+
 const kinds: Record<string, () => string> = {
   'Notes': () => 'kind:1',
-  'Note Replies': () => 'kind:1 filter:replies',
   'Reads': () => 'kind:30023',
+  'Note Replies': () => 'kind:1 filter:replies',
   'Reads Comments': () => 'kind:30023 filter:replies',
   'Images': () => 'filter:image',
   'Video': () => 'filter:video',
@@ -159,6 +167,7 @@ const AdvancedSearch: Component = () => {
     customTimeframe: { since: '', until: ''},
     sortBy: 'Time',
     sentiment: 'Neutral',
+    scope: 'Global',
     kind: 'Notes',
     orientation: 'Any',
     minDuration: 0,
@@ -221,6 +230,8 @@ const AdvancedSearch: Component = () => {
 
     const sentiment = `${sentiments[state.sentiment]()} `;
 
+    const scope = `${scopes[state.scope]()} `;
+
     const sort = `${sortings[state.sortBy]()} `;
 
     const kind = `${kinds[state.kind]()} `;
@@ -271,7 +282,7 @@ const AdvancedSearch: Component = () => {
       '' :
       `minreposts:${state.minReposts} `;
 
-    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${sentiment}${orient}${minDuration}${maxDuration}${minWords}${maxWords}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
+    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${scope}${sentiment}${orient}${minDuration}${maxDuration}${minWords}${maxWords}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
 
   })
 
@@ -351,6 +362,10 @@ const AdvancedSearch: Component = () => {
 
   const setSentiment = (sentiment: string) => {
     setState('sentiment', () => sentiment);
+  };
+
+  const setScope = (scope: string) => {
+    setState('scope', () => scope);
   };
 
   const setSortBy = (sort: string) => {
@@ -726,9 +741,9 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchSelectBox
-                value={state.sentiment}
-                options={Object.keys(sentiments)}
-                onChange={setSentiment}
+                value={state.scope}
+                options={Object.keys(scopes)}
+                onChange={setScope}
               />
             </div>
 
