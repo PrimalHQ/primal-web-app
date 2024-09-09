@@ -1019,13 +1019,13 @@ const Longform: Component< { naddr: string } > = (props) => {
                 </A>
               </Show>
 
-              <Show when={store.hasTiers}>
+              {/* <Show when={store.hasTiers}>
                 <ButtonPrimary
                   onClick={openSubscribe}
                 >
                   subscribe
                 </ButtonPrimary>
-              </Show>
+              </Show> */}
             </div>
 
             <div class={`${styles.topBar} animated`}>

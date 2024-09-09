@@ -772,13 +772,13 @@ const Profile: Component = () => {
                   <FollowButton person={profile?.userProfile} large={true} />
                 </Show>
 
-                <Show when={hasTiers()}>
+                {/* <Show when={hasTiers()}>
                   <ButtonPrimary
                     onClick={openSubscribe}
                   >
                     subscribe
                   </ButtonPrimary>
-                </Show>
+                </Show> */}
 
                 <Show when={isCurrentUser()}>
                   <div class={styles.editProfileButton}>
