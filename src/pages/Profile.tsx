@@ -971,9 +971,14 @@ const Profile: Component = () => {
 
           </div>
 
-          <ProfileTabs setProfile={setProfile} />
         </Show>
       </TransitionGroup>
+
+      <Show
+        when={isProfileLoaded()}
+      >
+        <ProfileTabs setProfile={setProfile} />
+      </Show>
 
       <ConfirmModal
         open={confirmReportUser()}

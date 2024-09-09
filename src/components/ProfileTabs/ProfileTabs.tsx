@@ -203,81 +203,79 @@ const ProfileTabs: Component<{
   }
 
   return (
-    <Show
-      when={profile && profile.fetchedUserStats}
-      fallback={<div class={styles.profileTabsPlaceholder}></div>}
-    >
       <Tabs value={hash()} onChange={onChangeValue} defaultValue={hash()}>
-        <Tabs.List class={`${styles.profileTabs} animated`}>
-          <Tabs.Trigger class={styles.profileTab} value="notes">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.note_count || 0)}
+        <Show when={profile && profile.fetchedUserStats}>
+          <Tabs.List class={styles.profileTabs}>
+            <Tabs.Trigger class={styles.profileTab} value="notes">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.note_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.notes)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.notes)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="replies">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.reply_count || 0)}
+            <Tabs.Trigger class={styles.profileTab} value="replies">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.reply_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.replies)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.replies)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="reads">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
+            <Tabs.Trigger class={styles.profileTab} value="reads">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.long_form_note_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.articles)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.articles)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="media">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats.media_count || 0)}
+            <Tabs.Trigger class={styles.profileTab} value="media">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats.media_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.gallery)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.gallery)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="zaps">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.total_zap_count || 0)}
+            <Tabs.Trigger class={styles.profileTab} value="zaps">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.total_zap_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.zaps)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.zaps)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
-          <Tabs.Trigger class={styles.profileTab} value="relays">
-            <div class={styles.stat}>
-              <div class={styles.statNumber}>
-                {humanizeNumber(profile?.userStats?.relay_count || 0)}
+            <Tabs.Trigger class={styles.profileTab} value="relays">
+              <div class={styles.stat}>
+                <div class={styles.statNumber}>
+                  {humanizeNumber(profile?.userStats?.relay_count || 0)}
+                </div>
+                <div class={styles.statName}>
+                  {intl.formatMessage(t.stats.relays)}
+                </div>
               </div>
-              <div class={styles.statName}>
-                {intl.formatMessage(t.stats.relays)}
-              </div>
-            </div>
-          </Tabs.Trigger>
+            </Tabs.Trigger>
 
 
-          <Tabs.Indicator class={styles.profileTabIndicator} />
-        </Tabs.List>
+            <Tabs.Indicator class={styles.profileTabIndicator} />
+          </Tabs.List>
+        </Show>
 
         <Tabs.Content class={styles.tabContent} value="reads">
           <div class={styles.profileNotes}>
@@ -722,7 +720,6 @@ const ProfileTabs: Component<{
           </div>
         </Tabs.Content>
       </Tabs>
-    </Show>
   );
 }
 
