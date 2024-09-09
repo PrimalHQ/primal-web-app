@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, JSX,  onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
@@ -16,7 +16,7 @@ const NoteImage: Component<{
   onImageLoaded?: (url: string | undefined) => void,
   shortHeight?: boolean,
   plainBorder?: boolean,
-  caption?: string,
+  caption?: JSXElement | string,
 }> = (props) => {
   const imgId = generatePrivateKey();
 

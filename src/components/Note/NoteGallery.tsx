@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import { MediaVariant, PrimalNote } from '../../types/primal';
 
 
@@ -16,6 +16,7 @@ import { generatePrivateKey } from '../../lib/nTools';
 import { imageRegexG } from '../../constants';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
+import { A } from '@solidjs/router';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -68,25 +69,44 @@ const NoteGallery: Component<{
     setStore(() => ({ url, image, imageThumb }));
 
     const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
-      // Plugins options, for example:
-      type: 'auto',
+      // Plugins options
+      type: 'aside',
       captionContent: '.pswp-caption-content'
     });
 
     lightbox.init();
   });
 
+  onCleanup(() => {
+    lightbox.destroy()
+  })
+
+  const imageFreeContent = (note: PrimalNote) => {
+    const content = note.content.replace(imageRegexG, '').trim();
+
+    if (content.length === 0) {
+      return 'Go to note';
+    }
+
+    return content;
+  }
+
   return (
     <div id={`galleryimage_${props.note.id}`} data-note={props.note.id} data-url={store.url}>
       <NoteImage
-        class={`noteimage image_${props.note.post.noteId} cell_${1}`}
+        class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
         src={store.url}
         media={store.image}
         mediaThumb={store.imageThumb}
         width={210}
         shortHeight={true}
         plainBorder={true}
-        caption={props.note.content.replace(imageRegexG, '')}
+        caption={
+          <A
+            href={`/e/${props.note.noteId}`}
+          >
+            {imageFreeContent(props.note)}
+          </A>}
       />
     </div>
   )

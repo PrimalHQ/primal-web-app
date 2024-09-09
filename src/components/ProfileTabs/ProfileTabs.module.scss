@@ -307,11 +307,11 @@
   display: flex;
   flex-wrap: wrap;
   width: 640px;
+  gap: 2px;
 
   .galleryColumn {
     flex: 33%;
     max-width: 33%;
-    padding: 0 4px;
   }
 
   // >div {
