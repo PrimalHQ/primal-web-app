@@ -283,6 +283,7 @@ export const addrRegexG = /nostr:((naddr)1\w+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
 export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
+export const imageRegexEnd = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)$/;
 
 export const eventRegexLocal = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/;
 export const eventRegexG = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/g;

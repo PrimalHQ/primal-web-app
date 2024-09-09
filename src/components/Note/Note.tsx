@@ -21,7 +21,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegex, addrRegexG, imageRegex, imageRegexG, noteRegex, noteRegexLocal, profileRegexG, urlRegex, urlRegexG } from '../../constants';
+import { addrRegex, addrRegexG, imageRegex, imageRegexEnd, imageRegexG, linebreakRegex, noteRegex, noteRegexLocal, profileRegexG, urlRegex, urlRegexG } from '../../constants';
 
 export type NoteReactionsState = {
   likes: number,
@@ -272,13 +272,22 @@ const Note: Component<{
     // const hasAddrMention = addrRegexG.test(props.note.content);
     // const hasLinks = urlRegexG.test(props.note.content);
 
-    const strippedContent = props.note.content
-      .replace(imageRegexG, '')
-      .replace(noteRegex, '')
-      .replace(addrRegexG, '')
-      .replace(profileRegexG, '')
-      .replace(urlRegexG, '')
+    const lnCount = props.note.content.match(linebreakRegex)?.length || 0;
+    if (lnCount > 4) return false;
+
+    let strippedContent = props.note.content
+      .replace(imageRegexG, '__PRIMAL_REPLACEMENT__')
+      .replace(noteRegex, '__PRIMAL_REPLACEMENT__')
+      .replace(addrRegexG, '__PRIMAL_REPLACEMENT__')
+      .replace(profileRegexG, '__PRIMAL_REPLACEMENT__')
+      .replace(urlRegexG, '__PRIMAL_REPLACEMENT__')
       .trim();
+
+    const splitContent = strippedContent.replace(/\s+/g, '').split('__PRIMAL_REPLACEMENT__');
+
+    if (splitContent.length > 1 && splitContent[1].length > 0) return false;
+
+    strippedContent.replaceAll('__PRIMAL_REPLACEMENT__', '');
 
     const isShort = strippedContent.length < 140;
     const isReply = props.note.replyTo;
