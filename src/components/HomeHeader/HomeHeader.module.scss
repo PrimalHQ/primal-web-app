@@ -6,7 +6,7 @@
 
 .smallHeader {
   position:absolute;
-  height: 84px;
+  height: 76px;
 }
 
 .smallHeaderMain {
@@ -14,9 +14,9 @@
   flex-direction: row;
   justify-content: stretch;
   align-items: flex-end;
-  height: 84px;
+  height: 76px;
   background-color: var(--background-site);
-  padding-inline: 12px;
+  padding-inline: 20px;
   border-block: 1px solid var(--devider);
   z-index: var(--z-index-header);
 }
