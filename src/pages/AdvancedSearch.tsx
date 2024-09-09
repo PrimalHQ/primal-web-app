@@ -257,8 +257,8 @@ const AdvancedSearch: Component = () => {
       `minwords:${state.minWords * wordsPerMinute} ` :
       '';
 
-    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > state.minDuration ?
-    `maxwords:${state.maxDuration * wordsPerMinute} ` :
+    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > state.minWords ?
+    `maxwords:${state.maxWords * wordsPerMinute} ` :
     '';
 
     // FILTERS -------
