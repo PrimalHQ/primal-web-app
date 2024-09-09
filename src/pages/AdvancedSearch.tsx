@@ -67,6 +67,11 @@ export type SearchState = {
   command: string,
 }
 
+const maxReadTime = 20; // minutes
+const maxDuration = 600; // seconds
+const maxContentScore = 100;
+const maxFilterValue = 20;
+
 const orientationKinds = ['Video', 'Images'];
 const durationKinds = ['Video', 'Sound'];
 const readTimeKinds = ['Reads'];
@@ -559,7 +564,7 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.maxDuration > 2000 ? state.maxDuration : 2000}
+                    max={state.maxDuration > maxDuration ? state.maxDuration : maxDuration}
                     value={[state.minDuration || 0]}
                     onSlide={(v: number[]) => {
                       setState('minDuration', () => v[0]);
@@ -584,7 +589,7 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="maxduration"
                     min={state.minDuration || 0}
-                    max={state.maxDuration > state.minDuration + 2000 ? state.maxDuration : state.minDuration + 2000}
+                    max={state.maxDuration > state.minDuration + maxDuration ? state.maxDuration : state.minDuration + maxDuration}
                     value={[state.maxDuration || 0]}
                     onSlide={(v: number[]) => setState('maxDuration', () => v[0])}
                     onInput={(v: string) => {
@@ -608,7 +613,7 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.maxWords > 100 ? state.maxWords : 100}
+                    max={state.maxWords > maxReadTime ? state.maxWords : maxReadTime}
                     value={[state.minWords || 0]}
                     onSlide={(v: number[]) => {
                       setState('minWords', () => v[0]);
@@ -633,7 +638,7 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="maxduration"
                     min={state.minWords || 0}
-                    max={state.maxWords > state.minWords + 100 ? state.maxWords : state.minWords + 100}
+                    max={state.maxWords > state.minWords + maxReadTime ? state.maxWords : state.minWords + maxReadTime}
                     value={[state.maxWords || 0]}
                     onSlide={(v: number[]) => setState('maxWords', () => v[0])}
                     onInput={(v: string) => {
@@ -782,7 +787,7 @@ const AdvancedSearch: Component = () => {
                         <AdvancedSearchSlider
                           name="minscore"
                           min={0}
-                          max={100}
+                          max={maxContentScore}
                           value={[state.filters.minScore || 0]}
                           onSlide={(v: number[]) => {
                             setState('filters', 'minScore', () => v[0]);
@@ -828,7 +833,7 @@ const AdvancedSearch: Component = () => {
                         <AdvancedSearchSlider
                           name="minlikes"
                           min={0}
-                          max={100}
+                          max={maxFilterValue}
                           value={[state.filters.minLikes || 0]}
                           onSlide={(v: number[]) => {
                             setState('filters', 'minLikes', () => v[0]);
@@ -851,7 +856,7 @@ const AdvancedSearch: Component = () => {
                         <AdvancedSearchSlider
                           name="minzaps"
                           min={0}
-                          max={100}
+                          max={maxFilterValue}
                           value={[state.filters.minZaps || 0]}
                           onSlide={(v: number[]) => {
                             setState('filters', 'minZaps', () => v[0]);
@@ -874,7 +879,7 @@ const AdvancedSearch: Component = () => {
                         <AdvancedSearchSlider
                           name="minreplies"
                           min={0}
-                          max={100}
+                          max={maxFilterValue}
                           value={[state.filters.minReplies || 0]}
                           onSlide={(v: number[]) => {
                             setState('filters', 'minReplies', () => v[0]);
@@ -897,7 +902,7 @@ const AdvancedSearch: Component = () => {
                         <AdvancedSearchSlider
                           name="minreposts"
                           min={0}
-                          max={100}
+                          max={maxFilterValue}
                           value={[state.filters.minReposts || 0]}
                           onSlide={(v: number[]) => {
                             setState('filters', 'minReposts', () => v[0]);
