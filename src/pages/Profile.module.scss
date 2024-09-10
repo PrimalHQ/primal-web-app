@@ -122,8 +122,8 @@
   }
 
   opacity: 0;
-  animation: fadeIn 150ms ease-in forwards;
-  animation-delay: 100ms;
+  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  animation-delay: var(--profile-card-animation-delay);
 }
 
 .profileAboutHolder {
