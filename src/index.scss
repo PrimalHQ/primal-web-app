@@ -70,6 +70,11 @@
 
   --search-input-width: 300px;
 
+  --profile-animation-duration: 350ms;
+  --profile-banner-animation-delay: 0ms;
+  --profile-card-animation-delay: 150ms;
+  --profile-avatar-animation-delay: 350ms;
+
   background-color: var(--background-site);
 
   .mentioned_user {

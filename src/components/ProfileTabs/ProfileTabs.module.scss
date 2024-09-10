@@ -23,8 +23,8 @@
   border-top: none;
   opacity: 0;
 
-  animation: fadeIn 150ms ease-out forwards;
-  animation-delay: 250ms;
+  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  animation-delay: var(--profile-card-animation-delay);
 }
 
 .profileTab {

@@ -695,166 +695,231 @@ const Profile: Component = () => {
         </TransitionGroup>
       </StickySidebar>
 
-      <TransitionGroup name="slide-down-fade">
         <Show
           when={isProfileLoaded()}
           fallback={<ProfileCardSkeleton />}
         >
           <div id="central_header" class={styles.fullHeader}>
-              <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()} animated`}>
-                <Show
-                  when={profile?.userProfile?.banner}
-                  fallback={<div class={styles.bannerPlaceholder}></div>}
-                >
-                  <NoteImage
-                    class="profile_image"
-                    src={banner()}
-                    altSrc={profile?.userProfile?.banner}
-                    onError={imgError}
-                    plainBorder={true}
-                    media={media?.actions.getMedia(banner() || '', 'o')}
-                    mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
-                  />
-                </Show>
-              </div>
+            <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()} animated`}>
+              <Show
+                when={profile?.userProfile?.banner}
+                fallback={<div class={styles.bannerPlaceholder}></div>}
+              >
+                <NoteImage
+                  class="profile_image"
+                  src={banner()}
+                  altSrc={profile?.userProfile?.banner}
+                  onError={imgError}
+                  plainBorder={true}
+                  media={media?.actions.getMedia(banner() || '', 'o')}
+                  mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
+                />
+              </Show>
+            </div>
 
-              <div class={`${styles.userImage} animated`}>
-                <div class={styles.avatar}>
-                  <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
-                    <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
-                  </div>
+            <div class={`${styles.userImage} animated`}>
+              <div class={styles.avatar}>
+                <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
+                  <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
                 </div>
               </div>
+            </div>
 
-              <div class={`${styles.profileActions} animated`}>
-                <div class={styles.contextArea}>
-                  <ButtonSecondary
-                    onClick={openContextMenu}
-                    shrink={true}
-                  >
-                    <div class={styles.contextIcon}></div>
-                  </ButtonSecondary>
-                  <PrimalMenu
-                    id={'profile_context'}
-                    items={profileContext()}
-                    position="profile"
-                    reverse={true}
-                    hidden={!showContext()}
-                  />
-                </div>
-
+            <div class={`${styles.profileActions} animated`}>
+              <div class={styles.contextArea}>
                 <ButtonSecondary
-                  onClick={() => setOpenQr(true)}
+                  onClick={openContextMenu}
                   shrink={true}
                 >
-                  <div class={styles.qrIcon}></div>
+                  <div class={styles.contextIcon}></div>
                 </ButtonSecondary>
-
-                <Show when={!isCurrentUser()}>
-                  <ButtonSecondary
-                    onClick={() => app?.actions.openCustomZapModal(customZapInfo())}
-                    shrink={true}
-                  >
-                    <div class={styles.zapIcon}></div>
-                  </ButtonSecondary>
-                </Show>
-
-                <Show when={account?.publicKey}>
-                  <ButtonSecondary
-                    onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
-                    shrink={true}
-                  >
-                    <div class={styles.messageIcon}></div>
-                  </ButtonSecondary>
-                </Show>
-
-                <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
-                  <FollowButton person={profile?.userProfile} large={true} />
-                </Show>
-
-                {/* <Show when={hasTiers()}>
-                  <ButtonPrimary
-                    onClick={openSubscribe}
-                  >
-                    subscribe
-                  </ButtonPrimary>
-                </Show> */}
-
-                <Show when={isCurrentUser()}>
-                  <div class={styles.editProfileButton}>
-                    <ButtonSecondary
-                      onClick={() => navigate('/settings/profile')}
-                      title={intl.formatMessage(tActions.editProfile)}
-                    >
-                      <div>{intl.formatMessage(tActions.editProfile)}</div>
-                    </ButtonSecondary>
-                  </div>
-                </Show>
+                <PrimalMenu
+                  id={'profile_context'}
+                  items={profileContext()}
+                  position="profile"
+                  reverse={true}
+                  hidden={!showContext()}
+                />
               </div>
 
-              <div ref={profileAboutDiv} class="hidden">
-                {profile?.parsedAbout}
-              </div>
+              <ButtonSecondary
+                onClick={() => setOpenQr(true)}
+                shrink={true}
+              >
+                <div class={styles.qrIcon}></div>
+              </ButtonSecondary>
 
-              <div class={styles.profileCard}>
-                <Switch>
-                  <Match when={shortProfileAbout()}>
-                    <div class={styles.smallAbout}>
-                      <div class={styles.columnLeft}>
-                        <div class={`${styles.basicInfoName} animated`}>
-                          <div class={styles.text}>
-                            {profileName()}
-                          </div>
-                          <Show when={profile?.userProfile?.nip05 && verification()}>
-                            <div class={styles.vc}>
-                              <VerificationCheck user={profile?.userProfile} large={true} />
-                            </div>
-                          </Show>
-                          <Show when={isFollowingYou()}>
-                            <div class={styles.followsBadge}>
-                              {intl.formatMessage(t.followsYou)}
-                            </div>
-                          </Show>
+              <Show when={!isCurrentUser()}>
+                <ButtonSecondary
+                  onClick={() => app?.actions.openCustomZapModal(customZapInfo())}
+                  shrink={true}
+                >
+                  <div class={styles.zapIcon}></div>
+                </ButtonSecondary>
+              </Show>
+
+              <Show when={account?.publicKey}>
+                <ButtonSecondary
+                  onClick={() => navigate(`/messages/${profile?.userProfile?.npub}`)}
+                  shrink={true}
+                >
+                  <div class={styles.messageIcon}></div>
+                </ButtonSecondary>
+              </Show>
+
+              <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
+                <FollowButton person={profile?.userProfile} large={true} />
+              </Show>
+
+              {/* <Show when={hasTiers()}>
+                <ButtonPrimary
+                  onClick={openSubscribe}
+                >
+                  subscribe
+                </ButtonPrimary>
+              </Show> */}
+
+              <Show when={isCurrentUser()}>
+                <div class={styles.editProfileButton}>
+                  <ButtonSecondary
+                    onClick={() => navigate('/settings/profile')}
+                    title={intl.formatMessage(tActions.editProfile)}
+                  >
+                    <div>{intl.formatMessage(tActions.editProfile)}</div>
+                  </ButtonSecondary>
+                </div>
+              </Show>
+            </div>
+
+            <div ref={profileAboutDiv} class="hidden">
+              {profile?.parsedAbout}
+            </div>
+
+            <div class={styles.profileCard}>
+              <Switch>
+                <Match when={shortProfileAbout()}>
+                  <div class={styles.smallAbout}>
+                    <div class={styles.columnLeft}>
+                      <div class={`${styles.basicInfoName} animated`}>
+                        <div class={styles.text}>
+                          {profileName()}
                         </div>
-
-                        <Show when={profile?.userProfile?.nip05}>
-                          <div class={`${styles.verificationInfo} animated`}>
-                            <div class={styles.verified}>
-                                <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                            </div>
+                        <Show when={profile?.userProfile?.nip05 && verification()}>
+                          <div class={styles.vc}>
+                            <VerificationCheck user={profile?.userProfile} large={true} />
                           </div>
                         </Show>
-
-                        <Show when={profile?.userProfile?.about}>
-                          <div class={`${styles.profileAboutHolder} animated`}>
-                            <div ref={profileAboutDiv}>
-                              {profile?.parsedAbout}
-                            </div>
-                          </div>
-                        </Show>
-
-                        <Show when={profile?.userProfile?.website}>
-                          <div class={`${styles.website} animated`}>
-                            <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                              {sanitize(profile?.userProfile?.website || '')}
-                            </a>
+                        <Show when={isFollowingYou()}>
+                          <div class={styles.followsBadge}>
+                            {intl.formatMessage(t.followsYou)}
                           </div>
                         </Show>
                       </div>
-                      <div class={styles.columnRight}>
-                        <div class={`${styles.followings} animated`}>
-                          <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
-                            <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
-                            <div class={styles.label}>following</div>
-                          </button>
-                          <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
-                            <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
-                            <div class={styles.label}>followers</div>
-                          </button>
+
+                      <Show when={profile?.userProfile?.nip05}>
+                        <div class={`${styles.verificationInfo} animated`}>
+                          <div class={styles.verified}>
+                              <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                          </div>
+                        </div>
+                      </Show>
+
+                      <Show when={profile?.userProfile?.about}>
+                        <div class={`${styles.profileAboutHolder} animated`}>
+                          <div ref={profileAboutDiv}>
+                            {profile?.parsedAbout}
+                          </div>
+                        </div>
+                      </Show>
+
+                      <Show when={profile?.userProfile?.website}>
+                        <div class={`${styles.website} animated`}>
+                          <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                            {sanitize(profile?.userProfile?.website || '')}
+                          </a>
+                        </div>
+                      </Show>
+                    </div>
+                    <div class={styles.columnRight}>
+                      <div class={`${styles.followings} animated`}>
+                        <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
+                          <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
+                          <div class={styles.label}>following</div>
+                        </button>
+                        <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
+                          <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
+                          <div class={styles.label}>followers</div>
+                        </button>
+                      </div>
+
+                      <Show when={profile?.userStats.time_joined}>
+                        <div class={`${styles.joined} animated`}>
+                          {intl.formatMessage(
+                            t.jointDate,
+                            {
+                              date: shortDate(profile?.userStats.time_joined),
+                            },
+                          )}
+                        </div>
+                      </Show>
+
+                      <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+                        <div class={`${styles.commonFollows} animated`}>
+                          <div class={styles.label}>Followed by</div>
+                          <div class={styles.avatars}>
+                            <For each={profile?.commonFollowers.slice(0, 5)}>
+                              {(follower, index) => (
+                                <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
+                                  <Avatar size="nano" user={follower} />
+                                </A>
+                              )}
+                            </For>
+                          </div>
+                        </div>
+                      </Show>
+
+                    </div>
+                  </div>
+                </Match>
+                <Match when={!shortProfileAbout()}>
+                  <div class={styles.bigAbout}>
+                    <div class={`${styles.basicInfo} animated`}>
+                      <div class={styles.basicInfoName}>
+                        <div class={styles.text}>
+                          {profileName()}
+                        </div>
+                        <Show when={profile?.userProfile?.nip05 && verification()}>
+                          <div class={styles.vc}>
+                            <VerificationCheck user={profile?.userProfile} large={true} />
+                          </div>
+                        </Show>
+                        <Show when={isFollowingYou()}>
+                          <div class={styles.followsBadge}>
+                            {intl.formatMessage(t.followsYou)}
+                          </div>
+                        </Show>
+                      </div>
+
+                      <div class={styles.followings}>
+                        <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
+                          <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
+                          <div class={styles.label}>following</div>
+                        </button>
+                        <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
+                          <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
+                          <div class={styles.label}>followers</div>
+                        </button>
+                      </div>
+                    </div>
+                    <div class={`${styles.verificationInfo} animated`}>
+                        <div class={styles.verified}>
+                          <Show when={profile?.userProfile?.nip05}>
+                            <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                          </Show>
                         </div>
 
                         <Show when={profile?.userStats.time_joined}>
-                          <div class={`${styles.joined} animated`}>
+                          <div class={styles.joined}>
                             {intl.formatMessage(
                               t.jointDate,
                               {
@@ -863,9 +928,26 @@ const Profile: Component = () => {
                             )}
                           </div>
                         </Show>
+                    </div>
+                    <div class={`${styles.profileAboutHolder} animated`}>
+                      <div ref={profileAboutDiv}>
+                        {profile?.parsedAbout}
+                      </div>
+
+                    </div>
+                    {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
+                    <div class="animated">
+                      <div class={styles.profileLinks}>
+                        <div class={styles.website}>
+                          <Show when={profile?.userProfile?.website}>
+                            <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
+                              {sanitize(profile?.userProfile?.website || '')}
+                            </a>
+                          </Show>
+                        </div>
 
                         <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
-                          <div class={`${styles.commonFollows} animated`}>
+                          <div class={styles.commonFollows}>
                             <div class={styles.label}>Followed by</div>
                             <div class={styles.avatars}>
                               <For each={profile?.commonFollowers.slice(0, 5)}>
@@ -878,101 +960,15 @@ const Profile: Component = () => {
                             </div>
                           </div>
                         </Show>
-
                       </div>
                     </div>
-                  </Match>
-                  <Match when={!shortProfileAbout()}>
-                    <div class={styles.bigAbout}>
-                      <div class={`${styles.basicInfo} animated`}>
-                        <div class={styles.basicInfoName}>
-                          <div class={styles.text}>
-                            {profileName()}
-                          </div>
-                          <Show when={profile?.userProfile?.nip05 && verification()}>
-                            <div class={styles.vc}>
-                              <VerificationCheck user={profile?.userProfile} large={true} />
-                            </div>
-                          </Show>
-                          <Show when={isFollowingYou()}>
-                            <div class={styles.followsBadge}>
-                              {intl.formatMessage(t.followsYou)}
-                            </div>
-                          </Show>
-                        </div>
-
-                        <div class={styles.followings}>
-                          <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
-                            <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
-                            <div class={styles.label}>following</div>
-                          </button>
-                          <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
-                            <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
-                            <div class={styles.label}>followers</div>
-                          </button>
-                        </div>
-                      </div>
-                      <div class={`${styles.verificationInfo} animated`}>
-                          <div class={styles.verified}>
-                            <Show when={profile?.userProfile?.nip05}>
-                              <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                            </Show>
-                          </div>
-
-                          <Show when={profile?.userStats.time_joined}>
-                            <div class={styles.joined}>
-                              {intl.formatMessage(
-                                t.jointDate,
-                                {
-                                  date: shortDate(profile?.userStats.time_joined),
-                                },
-                              )}
-                            </div>
-                          </Show>
-                      </div>
-                      <div class={`${styles.profileAboutHolder} animated`}>
-                        <div ref={profileAboutDiv}>
-                          {profile?.parsedAbout}
-                        </div>
-
-                      </div>
-                      {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
-                      <div class="animated">
-                        <div class={styles.profileLinks}>
-                          <div class={styles.website}>
-                            <Show when={profile?.userProfile?.website}>
-                              <a href={rectifyUrl(profile?.userProfile?.website || '')} target="_blank">
-                                {sanitize(profile?.userProfile?.website || '')}
-                              </a>
-                            </Show>
-                          </div>
-
-                          <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
-                            <div class={styles.commonFollows}>
-                              <div class={styles.label}>Followed by</div>
-                              <div class={styles.avatars}>
-                                <For each={profile?.commonFollowers.slice(0, 5)}>
-                                  {(follower, index) => (
-                                    <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
-                                      <Avatar size="nano" user={follower} />
-                                    </A>
-                                  )}
-                                </For>
-                              </div>
-                            </div>
-                          </Show>
-                        </div>
-                      </div>
-                    </div>
-                  </Match>
-                </Switch>
-              </div>
-
-
+                  </div>
+                </Match>
+              </Switch>
+            </div>
           </div>
 
         </Show>
-      </TransitionGroup>
 
       <Show
         when={isProfileLoaded()}
