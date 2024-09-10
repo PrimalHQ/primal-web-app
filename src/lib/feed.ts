@@ -47,6 +47,40 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
+export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20) => {
+
+  const start = until === 0 ? 'since' : 'until';
+
+  let payload = { spec, limit, [start]: until };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+}
+
+export const getFutureMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, since: number) => {
+
+  let payload: { since: number, spec: string, user_pubkey?: string, limit: number } =
+    { since, spec, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+};
+
 export const getArticlesFeed2 = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20) => {
 
 
@@ -441,5 +475,15 @@ export const getDefaultArticleFeeds = (subid: string) => {
     "REQ",
     subid,
     {cache: ["get_reads_feeds"]},
+  ]));
+}
+
+
+
+export const getDefaultHomeFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_home_feeds"]},
   ]));
 }

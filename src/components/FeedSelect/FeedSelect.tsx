@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -7,6 +7,7 @@ import { fetchStoredFeed } from '../../lib/localStore';
 import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
+import SelectionBox2 from '../SelectionBox/SelectionBox2';
 
 const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
@@ -14,92 +15,90 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   const home = useHomeContext();
   const settings = useSettingsContext();
 
-  const findFeed = (hex: string, includeReplies: string) => {
-    const ir = includeReplies === 'undefined' ? undefined :
-      includeReplies === 'true';
-
-    return settings?.availableFeeds.find(f => {
-      const isHex = f.hex === hex;
-      const isOpt = typeof ir === typeof f.includeReplies ?
-        f.includeReplies === ir :
-        false;
-
-      return isHex && isOpt;
-    });
-  };
+  const genId = (v: string) => Object.values(JSON.parse(v)).join('_')
 
   const selectFeed = (option: FeedOption) => {
+    if (!option) return;
 
-    const [hex, includeReplies] = option.value?.split('_') || [];
-    // const selector = document.getElementById('defocus');
+    const feed = {
+      spec: option.value || '',
+      name: option.label,
+      description: option.description || '',
+      default: option.deafault || false,
+    };
 
-    // selector?.focus();
-    // selector?.blur();
+    const selected = home?.selectedFeed;
 
-    if (hex && !isSelected(option)) {
-      const feed = findFeed(decodeURI(hex), includeReplies);
+    if (selected && selected.spec === feed.spec) return;
 
-      if (hex !== initialValue()?.value) {
-        home?.actions.clearNotes();
-        home?.actions.selectFeed(feed);
-      }
-      return;
-    }
-
+    home?.actions.clearNotes();
+    home?.actions.selectFeed(feed);
   };
 
   const isSelected = (option: FeedOption) => {
     const selected = home?.selectedFeed;
 
+    return selected && selected.spec === option.value;
 
-    if (selected?.hex && option.value) {
-      const t = option.value.split('_');
 
-      const isHex = encodeURI(selected.hex) == t[0];
-      const isOpt = t[1] === 'undefined' ?
-        selected.includeReplies === undefined :
-        selected.includeReplies?.toString() === t[1];
+    // if (selected?.hex && option.value) {
+    //   const t = option.value.split('_');
 
-      return isHex && isOpt;
-    }
+    //   const isHex = encodeURI(selected.hex) == t[0];
+    //   const isOpt = t[1] === 'undefined' ?
+    //     selected.includeReplies === undefined :
+    //     selected.includeReplies?.toString() === t[1];
 
-    return false;
+    //   return isHex && isOpt;
+    // }
+
+    // return false;
   }
 
   const options:() => SelectionOption[] = () => {
-    if (settings?.availableFeeds === undefined) {
-     return [];
-    }
+    return settings?.homeFeeds.map(f => ({
+      label: f.name,
+      value: f.spec,
+      description: f.description,
+      default: f.default,
+      id: genId(f.spec),
+    })) || [];
+    // let opts = [];
 
-    return settings.availableFeeds.map(feed => ({
-      label: feed.name,
-      value: `${encodeURI(feed.hex || '')}_${feed.includeReplies}`,
-    }));
+    // if (account?.publicKey) {
+    //   opts.push(
+    //     {
+    //       label: 'My Reads',
+    //       value: account?.publicKey || '',
+    //     }
+    //   );
+    // }
+
+    // opts.push(
+    //   {
+    //     label: 'All Reads',
+    //     value: 'none',
+    //   }
+    // );
+
+    // return [ ...opts ];
   };
 
   const initialValue = () => {
-    const selected = home?.selectedFeed || fetchStoredFeed(account?.publicKey);
+    const selected = home?.selectedFeed;
 
     if (!selected) {
-      return {
-        label: '',
-        value: undefined,
-      };
+      const feed = options()[0];
+      selectFeed(feed);
+      return feed;
     }
 
-    const feed = settings?.availableFeeds.find(f =>
-      f.hex === selected.hex && f.includeReplies === selected.includeReplies
-    );
-
-    if (feed) {
-      const [scope, timeframe] = feed.hex?.split(';') || [];
-
-      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${encodeURI(feed.hex || '')}_${feed.includeReplies}`;
-
-      return {
-        label: feed.name,
-        value,
-      };
+    return {
+      label: selected.name,
+      value: selected.spec || '',
+      description: selected.description,
+      default: selected.default,
+      id: genId(selected.spec),
     }
   }
 
@@ -107,24 +106,27 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     if (!home?.selectedFeed)
       return initialValue();
 
-    const value = `${encodeURI(home.selectedFeed.hex || '')}_${home.selectedFeed.includeReplies}`;
-
     return {
       label: home.selectedFeed.name,
-      value,
+      value: home.selectedFeed.spec,
+      description: home.selectedFeed.description,
+      default: home.selectedFeed.default,
+      id: genId(home.selectedFeed.spec),
     };
   };
 
   return (
-    <SelectionBox
-      options={options()}
-      onChange={selectFeed}
-      initialValue={initialValue()}
-      value={selectedValue()}
-      isSelected={isSelected}
-      isPhone={props.isPhone}
-      big={props.big}
-    />
+    <Show when={options().length > 0}>
+      <SelectionBox2
+        options={options()}
+        onChange={selectFeed}
+        initialValue={initialValue()}
+        value={selectedValue()}
+        isSelected={isSelected}
+        isPhone={props.isPhone}
+        big={props.big}
+      />
+    </Show>
   );
 }
 

@@ -614,6 +614,7 @@ export type PrimalArticleFeed = {
   spec: string,
   description: string,
   default: boolean,
+  feedkind?: string,
 };
 
 export type PrimalScopeFeed = {

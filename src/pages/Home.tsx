@@ -60,13 +60,23 @@ const Home: Component = () => {
     scrollWindowTo(context?.scrollTop);
   });
 
+  // createEffect(() => {
+  //   if (account?.isKeyLookupDone && account.publicKey) {
+  //     const selected = context?.selectedFeed;;
+
+  //     if (selected) {
+  //       context?.actions.selectFeed({ ...selected });
+  //     }
+  //   }
+  // });
+
   createEffect(() => {
     if ((context?.future.notes.length || 0) > 99 || app?.isInactive) {
       clearInterval(checkNewNotesTimer);
       return;
     }
 
-    const hex = context?.selectedFeed?.hex;
+    const spec = context?.selectedFeed?.spec || '';
 
     if (checkNewNotesTimer) {
       clearInterval(checkNewNotesTimer);
@@ -78,7 +88,7 @@ const Home: Component = () => {
     const timeout = 25_000 + Math.random() * 10_000;
 
     checkNewNotesTimer = setInterval(() => {
-      context?.actions.checkForNewNotes(hex);
+      context?.actions.checkForNewNotes(spec);
     }, timeout);
   });
 
@@ -150,35 +160,42 @@ const Home: Component = () => {
         <HomeSidebar />
       </StickySidebar>
 
-      <Transition name="slide-fade">
-        <Show when={context?.notes && context.notes.length > 0}>
-          <div class={styles.feed}>
-            <For each={context?.notes} >
-              {note => (
-                <div class="animated">
-                  <Note note={note} shorten={true} />
-                </div>
-              )}
-            </For>
-          </div>
-        </Show>
-      </Transition>
+      <div class={styles.homeFeed}>
+        <Transition name="slide-fade">
+          <Show
+            when={context?.notes && context.notes.length > 0}
+            fallback={
+              <div>
+                <For each={new Array(5)}>
+                  {() => <FeedNoteSkeleton />}
+                </For>
+              </div>
+            }
+          >
+            <div class={styles.feed}>
+              <For each={context?.notes} >
+                {note => (
+                  <div class="animated">
+                    <Note note={note} shorten={true} />
+                  </div>
+                )}
+              </For>
+            </div>
+          </Show>
+        </Transition>
+      </div>
 
       <Switch>
         <Match
           when={!isPageLoading() && context?.notes && context?.notes.length === 0}
         >
           <div class={styles.noContent}>
-            No notes found
           </div>
         </Match>
         <Match
-          when={isPageLoading() && context?.notes && context?.notes.length == 0}
+          when={isPageLoading()}
         >
-          <div>
-            <For each={new Array(20)}>
-              {() => <FeedNoteSkeleton />}
-            </For>
+          <div class={styles.noContent}>
           </div>
         </Match>
       </Switch>

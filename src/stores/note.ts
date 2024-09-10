@@ -217,8 +217,6 @@ export const generateNote = (
   let replyTo: string[] | undefined;
   const tgs = [...noteEvent.tags];
 
-  console.log('TAGS: ',tgs);
-
   // Determine parent by finding the `e` tag with `reply` then `root` as `marker`
   // If both fail return the last `e` tag
   for (let i=0; i<tgs.length; i++) {

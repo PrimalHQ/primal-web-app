@@ -40,7 +40,7 @@ import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
-import { getDefaultArticleFeeds } from "../lib/feed";
+import { getDefaultArticleFeeds, getDefaultHomeFeeds } from "../lib/feed";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -53,6 +53,7 @@ export type SettingsContextStore = {
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
   articleFeeds: PrimalArticleFeed[],
+  homeFeeds: PrimalArticleFeed[],
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
   availableZapOptions: ZapOption[],
@@ -90,6 +91,7 @@ export const initialData = {
   themes,
   availableFeeds: [],
   articleFeeds: [],
+  homeFeeds: [],
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
@@ -561,6 +563,23 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultArticleFeeds(subId);
   }
 
+  const getHomeFeeds = () => {
+    const subId = `home_feeds_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const feeds = JSON.parse(content.content || '[]');
+
+        updateStore('homeFeeds', () => [...feeds]);
+      },
+      onEose: () => {
+        unsub();
+      },
+    });
+
+    getDefaultHomeFeeds(subId);
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const onMessage = (event: MessageEvent) => {
@@ -649,6 +668,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       }
 
       getArticleFeeds();
+
+      getHomeFeeds();
     });
   });
 

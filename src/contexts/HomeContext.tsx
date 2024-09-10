@@ -2,8 +2,8 @@ import { nip19 } from "../lib/nTools";
 import { createContext, createEffect, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind } from "../constants";
-import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
+import { Kind, minKnownProfiles } from "../constants";
+import { getArticlesFeed2, getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed, getFutureMegaFeed, getMegaFeed } from "../lib/feed";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { setLinkPreviews } from "../lib/notes";
 import { getScoredUsers, searchContent } from "../lib/search";
@@ -21,6 +21,7 @@ import {
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
+  PrimalArticleFeed,
   PrimalFeed,
   PrimalNote,
   SelectionOption,
@@ -35,7 +36,7 @@ type HomeContextStore = {
   notes: PrimalNote[],
   isFetching: boolean,
   scrollTop: number,
-  selectedFeed: PrimalFeed | undefined,
+  selectedFeed: PrimalArticleFeed | undefined,
   page: FeedPage,
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
@@ -57,17 +58,19 @@ type HomeContextStore = {
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
-    fetchNotes: (topic: string, subId: string, until?: number) => void,
+    fetchNotes: (topic: string, subId: string, until?: number, includeIsFetching?: boolean) => void,
     fetchNextPage: () => void,
-    selectFeed: (feed: PrimalFeed | undefined) => void,
+    selectFeed: (feed: PrimalArticleFeed | undefined) => void,
     updateScrollTop: (top: number) => void,
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
-    checkForNewNotes: (topic: string | undefined) => void,
+    checkForNewNotes: (spec: string) => void,
     loadFutureContent: () => void,
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
     getFirstPage: () => void,
+    resetSelectedFeed: () => void,
+    refetchSelectedFeed: () => void,
   }
 }
 
@@ -234,22 +237,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('isFetching', () => false);
   };
 
-  const checkForNewNotes = (topic: string | undefined) => {
-
-    if (!topic) {
-      return;
-    }
+  const checkForNewNotes = (spec: string) => {
 
     if (store.future.notes.length > 100) {
       return;
-    }
-
-    const [scope, timeframe] = topic.split(';');
-
-    if (scope !== store.future.scope || timeframe !== store.future.timeframe) {
-      clearFuture();
-      updateStore('future', 'scope', () => scope);
-      updateStore('future', 'timeframe', () => timeframe);
     }
 
     let since = 0;
@@ -276,23 +267,68 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       noteActions: {},
     }))
 
-    if (scope && timeframe) {
-      if (timeframe !== 'latest') {
-        return;
-      }
-
-      getFutureExploreFeed(
-        account?.publicKey,
-        `home_future_${APP_ID}`,
-        scope,
-        timeframe,
-        since,
-      );
-      return;
-    }
-
-    getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
+    getFutureMegaFeed(account?.publicKey, spec, `home_future_${APP_ID}`, since);
   }
+
+  // const checkForNewNotes = (topic: string | undefined) => {
+
+  //   if (!topic) {
+  //     return;
+  //   }
+
+  //   if (store.future.notes.length > 100) {
+  //     return;
+  //   }
+
+  //   const [scope, timeframe] = topic.split(';');
+
+  //   if (scope !== store.future.scope || timeframe !== store.future.timeframe) {
+  //     clearFuture();
+  //     updateStore('future', 'scope', () => scope);
+  //     updateStore('future', 'timeframe', () => timeframe);
+  //   }
+
+  //   let since = 0;
+
+  //   if (store.notes[0]) {
+  //     since = store.notes[0].repost ?
+  //       store.notes[0].repost.note.created_at :
+  //       store.notes[0].post.created_at;
+  //   }
+
+  //   if (store.future.notes[0]) {
+  //     const lastFutureNote = unwrap(store.future.notes).sort((a, b) => b.post.created_at - a.post.created_at)[0];
+
+  //     since = lastFutureNote.repost ?
+  //       lastFutureNote.repost.note.created_at :
+  //       lastFutureNote.post.created_at;
+  //   }
+
+  //   updateStore('future', 'page', () =>({
+  //     messages: [],
+  //     users: {},
+  //     postStats: {},
+  //     mentions: {},
+  //     noteActions: {},
+  //   }))
+
+  //   if (scope && timeframe) {
+  //     if (timeframe !== 'latest') {
+  //       return;
+  //     }
+
+  //     getFutureExploreFeed(
+  //       account?.publicKey,
+  //       `home_future_${APP_ID}`,
+  //       scope,
+  //       timeframe,
+  //       since,
+  //     );
+  //     return;
+  //   }
+
+  //   getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
+  // }
 
   const loadFutureContent = () => {
     if (store.future.notes.length === 0) {
@@ -303,31 +339,42 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
-    const [scope, timeframe] = topic.split(';');
+  const fetchNotes = (spec: string, subId: string, until = 0, includeIsFetching = true) => {
 
-    updateStore('isFetching', true);
+    updateStore('isFetching' , () => includeIsFetching);
     updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
-    if (scope && timeframe) {
 
-      if (scope === 'search') {
-        searchContent(account?.publicKey, `home_feed_${subId}`, decodeURI(timeframe));
-        return;
-      }
+    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
-      getExploreFeed(
-        account?.publicKey,
-        `home_feed_${subId}`,
-        scope,
-        timeframe,
-        until,
-      );
-      return;
-    }
-
-    getFeed(account?.publicKey, topic, `home_feed_${subId}`, until, 20, includeReplies);
+    getMegaFeed(pubkey, spec, `home_feed_${subId}`, until, 20);
   };
+
+  // const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
+  //   const [scope, timeframe] = topic.split(';');
+
+  //   updateStore('isFetching', true);
+  //   updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+
+  //   if (scope && timeframe) {
+
+  //     if (scope === 'search') {
+  //       searchContent(account?.publicKey, `home_feed_${subId}`, decodeURI(timeframe));
+  //       return;
+  //     }
+
+  //     getExploreFeed(
+  //       account?.publicKey,
+  //       `home_feed_${subId}`,
+  //       scope,
+  //       timeframe,
+  //       until,
+  //     );
+  //     return;
+  //   }
+
+  //   getFeed(account?.publicKey, topic, `home_feed_${subId}`, until, 20, includeReplies);
+  // };
 
   const clearNotes = () => {
     updateStore('scrollTop', () => 0);
@@ -340,7 +387,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     clearFuture();
   };
 
-  const fetchNextPage = () => {
+  const fetchNextPage = (mainTopic?: string) => {
     if (store.isFetching) {
       return;
     }
@@ -352,57 +399,96 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     updateStore('lastNote', () => ({ ...lastNote }));
 
-    const topic = store.selectedFeed?.hex;
-    const includeReplies = store.selectedFeed?.includeReplies;
+    const spec = mainTopic || store.selectedFeed?.spec || '';
 
-    if (!topic) {
-      return;
-    }
 
-    const [scope, timeframe] = topic.split(';');
-
-    if (scope === 'search') {
-      return;
-    }
-
-    const pagCriteria = timeframe || 'latest';
-
-    const criteria = paginationPlan(pagCriteria);
+    const criteria = 'created_at';
 
     const noteData: Record<string, any> =  lastNote.repost ?
-      lastNote.repost.note :
-      lastNote.post;
+    lastNote.repost.note :
+    lastNote;
 
     const until = noteData[criteria];
 
     if (until > 0) {
-      fetchNotes(topic, `${APP_ID}`, until, includeReplies);
+      fetchNotes(spec, `${APP_ID}`, until);
     }
   };
+
+  // const fetchNextPage = () => {
+  //   if (store.isFetching) {
+  //     return;
+  //   }
+  //   const lastNote = store.notes[store.notes.length - 1];
+
+  //   if (!lastNote) {
+  //     return;
+  //   }
+
+  //   updateStore('lastNote', () => ({ ...lastNote }));
+
+  //   const topic = store.selectedFeed?.hex;
+  //   const includeReplies = store.selectedFeed?.includeReplies;
+
+  //   if (!topic) {
+  //     return;
+  //   }
+
+  //   const [scope, timeframe] = topic.split(';');
+
+  //   if (scope === 'search') {
+  //     return;
+  //   }
+
+  //   const pagCriteria = timeframe || 'latest';
+
+  //   const criteria = paginationPlan(pagCriteria);
+
+  //   const noteData: Record<string, any> =  lastNote.repost ?
+  //     lastNote.repost.note :
+  //     lastNote.post;
+
+  //   const until = noteData[criteria];
+
+  //   if (until > 0) {
+  //     fetchNotes(topic, `${APP_ID}`, until, includeReplies);
+  //   }
+  // };
 
   const updateScrollTop = (top: number) => {
     updateStore('scrollTop', () => top);
   };
 
-  let currentFeed: PrimalFeed | undefined;
+  let currentFeed: PrimalArticleFeed | undefined;
 
-  const selectFeed = (feed: PrimalFeed | undefined) => {
-    if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
+  const selectFeed = (feed: PrimalArticleFeed | undefined, force?: boolean) => {
+    if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
-      saveStoredFeed(account?.publicKey, currentFeed);
-
+      // saveStoredFeed(account?.publicKey, currentFeed);
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
-      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+      fetchNotes(feed.spec , `${APP_ID}`, 0);
     }
+  };
+
+  const refetchSelectedFeed = () => {
+    if (!store.selectedFeed) return;
+
+    clearNotes();
+    fetchNotes(store.selectedFeed.spec , `${APP_ID}`, 0);
+  }
+
+  const resetSelectedFeed = () => {
+    currentFeed = undefined;
+    updateStore('selectedFeed', () => undefined);
   };
 
   const getFirstPage = () => {
     const feed = store.selectedFeed;
-    if (!feed?.hex) return;
+    if (!feed?.spec) return;
 
     clearNotes();
-    fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+    fetchNotes(feed.spec , `${APP_ID}`, 0, false);
   };
 
   const updatePage = (content: NostrEventContent, scope?: 'future') => {
@@ -611,15 +697,23 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const savePage = (page: FeedPage, scope?: 'future') => {
-    const topic = (store.selectedFeed?.hex || '').split(';');
-    const sortingFunction = sortingPlan(topic[1]);
-
     const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps
 
-    const newPosts = sortingFunction(convertToNotes(page, topZaps));
+    const newPosts = convertToNotes(page, topZaps);
 
     saveNotes(newPosts, scope);
   };
+
+  // const savePage = (page: FeedPage, scope?: 'future') => {
+  //   const topic = (store.selectedFeed?.hex || '').split(';');
+  //   const sortingFunction = sortingPlan(topic[1]);
+
+  //   const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps
+
+  //   const newPosts = sortingFunction(convertToNotes(page, topZaps));
+
+  //   saveNotes(newPosts, scope);
+  // };
 
 // SOCKET HANDLERS ------------------------------
 
@@ -752,12 +846,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  createEffect(() => {
-    if (account?.isKeyLookupDone && settings?.defaultFeed && location.pathname === '/home') {
-      const storedFeed = fetchStoredFeed(account.publicKey);
-      selectFeed(storedFeed || settings?.defaultFeed);
-    }
-  });
+  // createEffect(() => {
+  //   if (account?.isKeyLookupDone && settings?.defaultFeed && location.pathname === '/home') {
+  //     const storedFeed = fetchStoredFeed(account.publicKey);
+  //     selectFeed(storedFeed || settings?.defaultFeed);
+  //   }
+  // });
 
   onCleanup(() => {
     removeSocketListeners(
@@ -785,6 +879,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       doSidebarSearch,
       updateSidebarQuery,
       getFirstPage,
+      resetSelectedFeed,
+      refetchSelectedFeed,
     },
   });
 

@@ -117,11 +117,7 @@ const HomeHeader: Component< {
         <div class={styles.separator}></div>
       </Show>
       <div class={styles.bigFeedSelect}>
-        <Show
-          when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}
-        >
-          <FeedSelect big={false} />
-        </Show>
+        <FeedSelect big={false} />
 
         <Show
           when={props.hasNewPosts()}
