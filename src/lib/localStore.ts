@@ -1,5 +1,4 @@
-import { UserStats } from "../contexts/ProfileContext";
-import { EmojiOption, NostrRelays, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation } from "../types/primal";
+import { EmojiOption, NostrRelays, PrimalArticleFeed, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -10,6 +9,8 @@ export type LocalStore = {
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
+  homeFeeds: PrimalArticleFeed[],
+  readsFeeds: PrimalArticleFeed[],
   theme: string,
   homeSidebarSelection: SelectionOption | undefined,
   userProfile: PrimalUser | undefined,
@@ -58,6 +59,8 @@ export const emptyStorage: LocalStore = {
   relaySettings: {},
   likes: [],
   feeds: [],
+  homeFeeds: [],
+  readsFeeds: [],
   msgContacts: { profiles: { other: {}, follows: {}, any: {} }, counts: {} },
   dmConversations: { profiles: {}, counts: {} },
   theme: 'sunrise',
@@ -175,6 +178,28 @@ export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
   const store = getStorage(pubkey);
 
   store.feeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
+
+export const saveHomeFeeds = (pubkey: string | undefined, feeds: PrimalArticleFeed[]) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.homeFeeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
+
+export const saveReadsFeeds = (pubkey: string | undefined, feeds: PrimalArticleFeed[]) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.readsFeeds = [ ...feeds ];
 
   setStorage(pubkey, store);
 };

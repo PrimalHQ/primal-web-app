@@ -26,21 +26,25 @@ import {
 } from "../types/primal";
 import {
   initAvailableFeeds,
+  initHomeFeeds,
+  initReadsFeeds,
+  loadHomeFeeds,
+  loadReadsFeeds,
   removeFromAvailableFeeds,
   replaceAvailableFeeds,
   updateAvailableFeeds,
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
-import { saveTheme } from "../lib/localStore";
-import { getDefaultSettings, getSettings, sendSettings } from "../lib/settings";
+import { saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/localStore";
+import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
 import { settings as t } from "../translations";
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
-import { getDefaultArticleFeeds, getDefaultHomeFeeds } from "../lib/feed";
+import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -52,7 +56,7 @@ export type SettingsContextStore = {
   theme: string,
   themes: PrimalTheme[],
   availableFeeds: PrimalFeed[],
-  articleFeeds: PrimalArticleFeed[],
+  readsFeeds: PrimalArticleFeed[],
   homeFeeds: PrimalArticleFeed[],
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
@@ -90,7 +94,7 @@ export const initialData = {
   theme: 'sunrise',
   themes,
   availableFeeds: [],
-  articleFeeds: [],
+  readsFeeds: [],
   homeFeeds: [],
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
@@ -254,56 +258,56 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const restoreDefaultFeeds = () => {
 
-    const subid = `restore_default_${APP_ID}`;
+    // const subid = `restore_default_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
+    // const unsub = subscribeTo(subid, async (type, subId, content) => {
 
-      if (type === 'EVENT' && content?.content) {
-        try {
-          const settings = JSON.parse(content?.content);
+    //   if (type === 'EVENT' && content?.content) {
+    //     try {
+    //       const settings = JSON.parse(content?.content);
 
-          let feeds = settings.feeds as PrimalFeed[];
+    //       let feeds = settings.feeds as PrimalFeed[];
 
-          if (account?.hasPublicKey()) {
-            feeds.unshift({
-              name: feedLatestWithRepliesLabel,
-              hex: account?.publicKey,
-              npub: hexToNpub(account?.publicKey),
-              includeReplies: true,
-            });
-            feeds.unshift({
-              name: feedLatestLabel,
-              hex: account?.publicKey,
-              npub: hexToNpub(account?.publicKey),
-            });
-          }
+    //       if (account?.hasPublicKey()) {
+    //         feeds.unshift({
+    //           name: feedLatestWithRepliesLabel,
+    //           hex: account?.publicKey,
+    //           npub: hexToNpub(account?.publicKey),
+    //           includeReplies: true,
+    //         });
+    //         feeds.unshift({
+    //           name: feedLatestLabel,
+    //           hex: account?.publicKey,
+    //           npub: hexToNpub(account?.publicKey),
+    //         });
+    //       }
 
-          updateStore('availableFeeds',
-            () => replaceAvailableFeeds(account?.publicKey, feeds),
-          );
+    //       updateStore('availableFeeds',
+    //         () => replaceAvailableFeeds(account?.publicKey, feeds),
+    //       );
 
-          updateStore('defaultFeed', () => store.availableFeeds[0]);
+    //       updateStore('defaultFeed', () => store.availableFeeds[0]);
 
-          saveSettings();
-        }
-        catch (e) {
-          logError('Error parsing settings response: ', e);
-        }
-      }
+    //       saveSettings();
+    //     }
+    //     catch (e) {
+    //       logError('Error parsing settings response: ', e);
+    //     }
+    //   }
 
-      if (type === 'NOTICE') {
-        toaster?.sendWarning(intl.formatMessage({
-          id: 'settings.loadFail',
-          defaultMessage: 'Failed to load settings. Will be using local settings.',
-          description: 'Toast message after settings have failed to be loaded from the server',
-        }));
-      }
+    //   if (type === 'NOTICE') {
+    //     toaster?.sendWarning(intl.formatMessage({
+    //       id: 'settings.loadFail',
+    //       defaultMessage: 'Failed to load settings. Will be using local settings.',
+    //       description: 'Toast message after settings have failed to be loaded from the server',
+    //     }));
+    //   }
 
-      unsub();
-      return;
-    });
+    //   unsub();
+    //   return;
+    // });
 
-    getDefaultSettings(subid)
+    // getDefaultSettings(subid)
   };
 
   const modifyContentModeration = (name: string, content = true, trending = true) => {
@@ -393,7 +397,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     getDefaultSettings(subid);
-    getArticleFeeds();
+    getDefaultArticleFeeds();
   };
 
   const loadSettings = (pubkey: string | undefined, then?: () => void) => {
@@ -402,15 +406,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    const subid = `load_settings_${APP_ID}`;
+    updateStore('homeFeeds', () => [ ...loadHomeFeeds(pubkey) ])
+    updateStore('readsFeeds', () => [ ...loadReadsFeeds(pubkey) ])
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
+    const settingsSubId = `load_settings_${APP_ID}`;
+    const settingsHomeSubId = `load_home_settings_${APP_ID}`;
+    const settingsReadsSubId = `load_reads_settings_${APP_ID}`;
+
+    const unsubSettings = subscribeTo(settingsSubId, async (type, subId, content) => {
 
       if (type === 'EVENT' && content?.content) {
         try {
           const {
             theme,
-            feeds,
             zapDefault,
             zapConfig,
             defaultZapAmount,
@@ -468,41 +476,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             }
           }
 
-          if (feeds) {
-
-            let fs = [...feeds];
-
-            const feedLatest = {
-              name: feedLatestLabel,
-              hex: account?.publicKey,
-              npub: hexToNpub(account?.publicKey),
-            };
-
-            const feedLatestWithReplies = {
-              name: feedLatestWithRepliesLabel,
-              hex: account?.publicKey,
-              npub: hexToNpub(account?.publicKey),
-              includeReplies: true,
-            };
-
-            if (!fs.find(f => f.hex === feedLatest.hex && f.includeReplies === undefined)) {
-              fs.push(feedLatest);
-            }
-
-            if (!fs.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === true)) {
-              const latestIndex = fs.findIndex(f => f.hex === feedLatest.hex && f.includeReplies === undefined);
-
-              if (latestIndex >= 0) {
-                fs.splice(latestIndex + 1, 0, feedLatestWithReplies);
-              }
-              else {
-                fs.push(feedLatestWithReplies);
-              }
-            }
-
-            setAvailableFeeds(fs, true);
-          }
-
           account?.actions.setProxyThroughPrimal(proxyThroughPrimal);
         }
         catch (e) {
@@ -518,14 +491,48 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         }));
       }
 
-      updateStore('defaultFeed', () => store.availableFeeds[0]);
+      // updateStore('defaultFeed', () => store.availableFeeds[0]);
 
       then && then();
-      unsub();
+      unsubSettings();
       return;
     });
 
-    pubkey && getSettings(pubkey, subid);
+    pubkey && getSettings(pubkey, settingsSubId);
+
+    const unsubHomeSettings = subsTo(settingsHomeSubId, {
+      onEvent: (_, content) => {
+        const feeds = JSON.parse(content?.content || '[]');
+
+        updateStore('homeFeeds', () => [...feeds]);
+      },
+      onEose: () => {
+        if (store.homeFeeds.length === 0) {
+          getDefaultHomeFeeds();
+        }
+        saveHomeFeeds(pubkey, store.homeFeeds);
+        unsubHomeSettings();
+      }
+    });
+
+    pubkey && getHomeSettings(pubkey, settingsHomeSubId);
+
+    const unsubReadsSettings = subsTo(settingsReadsSubId, {
+      onEvent: (_, content) => {
+        const feeds = JSON.parse(content?.content || '[]');
+
+        updateStore('readsFeeds', [...feeds])
+      },
+      onEose: () => {
+        if (store.readsFeeds.length === 0) {
+          getDefaultArticleFeeds();
+        }
+        saveReadsFeeds(pubkey, store.readsFeeds);
+        unsubReadsSettings();
+      }
+    });
+
+    pubkey && getReadsSettings(pubkey, settingsReadsSubId);
   }
 
   const refreshMobileReleases = () => {
@@ -546,24 +553,25 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getMobileReleases(subid);
   };
 
-  const getArticleFeeds = () => {
+  const getDefaultArticleFeeds = () => {
     const subId = `article_feeds_${APP_ID}`;
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         const feeds = JSON.parse(content.content || '[]');
 
-        updateStore('articleFeeds', () => [...feeds]);
+        updateStore('readsFeeds', () => [...feeds]);
       },
       onEose: () => {
         unsub();
+        initReadsFeeds(account?.publicKey, store.readsFeeds);
       },
     });
 
-    getDefaultArticleFeeds(subId);
+    fetchDefaultArticleFeeds(subId);
   }
 
-  const getHomeFeeds = () => {
+  const getDefaultHomeFeeds = () => {
     const subId = `home_feeds_${APP_ID}`;
 
     const unsub = subsTo(subId, {
@@ -574,10 +582,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
+        initHomeFeeds(account?.publicKey, store.homeFeeds)
       },
     });
 
-    getDefaultHomeFeeds(subId);
+    fetchDefaultHomeFeeds(subId);
   }
 
 // SOCKET HANDLERS ------------------------------
@@ -608,14 +617,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     refreshMobileReleases();
   });
 
-
-  // This is here as to not trigger the effect
-  // TODO Solve this.
-  const feedLatestLabel = intl.formatMessage(t.feedLatest);
-  const feedLatestWithRepliesLabel = intl.formatMessage(t.feedLatestWithReplies);
-
-  // let publicKey: string | undefined;
-
   // Initial setup for a user with a public key
   createEffect(() => {
     if (!account?.hasPublicKey() && account?.isKeyLookupDone) {
@@ -625,51 +626,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const publicKey = account?.publicKey;
 
-    const initFeeds = initAvailableFeeds(publicKey);
-
-    if (initFeeds && initFeeds.length > 0) {
-      updateStore('defaultFeed', () => initFeeds[0]);
-      updateStore('availableFeeds', () => replaceAvailableFeeds(publicKey, initFeeds));
-    }
-
-    const feedLatest = {
-      name: feedLatestLabel,
-      hex: publicKey,
-      npub: hexToNpub(publicKey),
-    };
-
-    const feedLatestWithReplies = {
-      name: feedLatestWithRepliesLabel,
-      hex: publicKey,
-      npub: hexToNpub(publicKey),
-      includeReplies: true,
-    };
-
-    // Add trendingFeed if it's missing
-    // @ts-ignore
-    // if (initFeeds && !initFeeds.find((f) => f.hex === trendingFeed.hex)) {
-    //   addAvailableFeed(trendingFeed, true, false);
-    // }
-
     loadSettings(publicKey, () => {
-      const fwr = initFeeds?.find(f => f.hex === feedLatestWithReplies.hex && f.includeReplies === feedLatestWithReplies.includeReplies);
-
-      // Add active user's feed if it's missing
-      // @ts-ignore
-      if (!fwr) {
-        addAvailableFeed(feedLatestWithReplies, true, false);
-      }
-
-
-      // Add active user's feed if it's missing
-      // @ts-ignore
-      if (initFeeds && !initFeeds.find(f => f.hex === feedLatest.hex && f.includeReplies === feedLatest.includeReplies)) {
-        addAvailableFeed(feedLatest, true, false);
-      }
-
-      getArticleFeeds();
-
-      getHomeFeeds();
     });
   });
 
@@ -718,7 +675,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       modifyContentModeration,
       refreshMobileReleases,
       setProxyThroughPrimal,
-      getArticleFeeds,
+      getArticleFeeds: getDefaultArticleFeeds,
     },
   });
 

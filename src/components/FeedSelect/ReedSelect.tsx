@@ -72,7 +72,7 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   }
 
   const options:() => SelectionOption[] = () => {
-    return settings?.articleFeeds.map(f => ({
+    return settings?.readsFeeds.map(f => ({
       label: f.name,
       value: f.spec,
       description: f.description,

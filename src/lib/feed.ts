@@ -470,7 +470,7 @@ export const getAuthorSubscriptionTiers = (
 };
 
 
-export const getDefaultArticleFeeds = (subid: string) => {
+export const fetchDefaultArticleFeeds = (subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -480,7 +480,7 @@ export const getDefaultArticleFeeds = (subid: string) => {
 
 
 
-export const getDefaultHomeFeeds = (subid: string) => {
+export const fetchDefaultHomeFeeds = (subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
