@@ -37,11 +37,11 @@ import {
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
 import { saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/localStore";
-import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings } from "../lib/settings";
+import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { hexToNpub } from "../lib/keys";
-import { settings as t } from "../translations";
+import { feedProfile, feedProfileDesription, settings as t } from "../translations";
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
@@ -86,6 +86,15 @@ export type SettingsContextStore = {
     refreshMobileReleases: () => void,
     setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
     getArticleFeeds: () => void,
+    addProfileHomeFeed: ( name: string, pubkey: string | undefined) => void,
+    removeProfileHomeFeed: (pubkey: string | undefined) => void,
+    hasProfileFeedAtHome: (pubkey: string | undefined) => boolean,
+    moveHomeFeed: (fromIndex: number, toIndex: number) => void,
+    renameHomeFeed: (feed: PrimalArticleFeed, newName: string) => void,
+    removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
+    moveFeed: (fromIndex: number, toIndex: number, feedType: FeedType) => void,
+    renameFeed: (feed: PrimalArticleFeed, newName: string, feedType: FeedType) => void,
+    enableFeed: (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => void,
   }
 }
 
@@ -109,6 +118,8 @@ export const initialData = {
     android: { date: `${andRD}`, version: andVersion },
   },
 };
+
+export type FeedType = 'home' | 'reads';
 
 
 export const SettingsContext = createContext<SettingsContextStore>();
@@ -248,6 +259,161 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return af.hex === feed.hex && af.includeReplies === feed.includeReplies ? { ...af, name: newName } : { ...af };
     });
     setAvailableFeeds(list);
+  };
+
+  const specifyUserFeed = (pubkey: string) => JSON.stringify({ id: "latest", kind: "notes", pubkey });
+
+  const addProfileHomeFeed = (name: string, pubkey: string | undefined) => {
+    // if (!pubkey) return;
+
+    // const feed: PrimalArticleFeed = {
+    //   name: intl.formatMessage(feedProfile, { name }),
+    //   spec: specifyUserFeed(pubkey),
+    //   description: intl.formatMessage(feedProfileDesription, { name }),
+    //   enabled: true,
+    //   feedkind: 'user',
+    // };
+
+    // updateStore('homeFeeds', store.homeFeeds.length, () => ({ ...feed }));
+    // saveHomeFeeds(pubkey, store.homeFeeds);
+  }
+
+  const removeProfileHomeFeed = (pubkey: string | undefined) => {
+    // if (!pubkey) return;
+
+    // const spec = specifyUserFeed(pubkey);
+    // const updated = store.homeFeeds.filter(f => f.spec !== spec);
+
+    // updateStore('homeFeeds', () => [ ...updated ]);
+    // saveHomeFeeds(account?.publicKey, updated);
+  }
+
+  const removeFeed = (feed: PrimalArticleFeed, feedType: 'home' | 'reads') => {
+
+    if (feedType === 'home') {
+      const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
+      updateStore('homeFeeds', () => [ ...updated ]);
+      saveHomeFeeds(account?.publicKey, updated);
+    }
+
+    if (feedType === 'reads') {
+      const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
+      updateStore('readsFeeds', () => [ ...updated ]);
+      saveReadsFeeds(account?.publicKey, updated);
+    }
+  }
+
+  const moveFeed = (fromIndex: number, toIndex: number, feedType: FeedType) => {
+
+    if (feedType === 'home') {
+      moveHomeFeed(fromIndex, toIndex);
+    }
+
+    if (feedType === 'reads') {
+      moveReadsFeed(fromIndex, toIndex);
+    }
+  };
+
+  const renameFeed = (feed: PrimalArticleFeed, newName: string, feedType: FeedType) => {
+    if (feedType === 'home') {
+      renameHomeFeed(feed, newName);
+    }
+
+    if (feedType === 'reads') {
+      renameReadsFeed(feed, newName);
+    }
+  };
+
+  const enableFeed = (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => {
+    if (feedType === 'home') {
+      enableHomeFeed(feed, enabled);
+    }
+
+    if (feedType === 'reads') {
+      enableReadsFeed(feed, enabled);
+    }
+  }
+
+  const hasProfileFeedAtHome = (pubkey: string | undefined) => {
+    if (!pubkey) return false;
+
+    const spec = specifyUserFeed(pubkey);
+
+    return store.homeFeeds.find(f => f.spec === spec) !== undefined;
+  }
+
+  const updateHomeFeeds = (feeds: PrimalArticleFeed[]) => {
+    updateStore('homeFeeds', () => [...feeds]);
+    saveHomeFeeds(account?.publicKey, feeds);
+
+    const subId = `set_home_feeds_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEose: () => { unsub(); }
+    })
+
+    setHomeSettings(subId, store.homeFeeds)
+  }
+
+  const updateReadsFeeds = (feeds: PrimalArticleFeed[]) => {
+    updateStore('readsFeeds', () => [...feeds]);
+    saveHomeFeeds(account?.publicKey, feeds);
+
+    const subId = `set_home_feeds_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEose: () => { unsub(); }
+    })
+
+    setReadsSettings(subId, store.readsFeeds)
+  }
+
+  const moveHomeFeed = (fromIndex: number, toIndex: number) => {
+
+    let list = [...store.homeFeeds];
+
+    list.splice(toIndex, 0, list.splice(fromIndex, 1)[0]);
+
+    updateHomeFeeds(list);
+  };
+
+  const moveReadsFeed = (fromIndex: number, toIndex: number) => {
+
+    let list = [...store.readsFeeds];
+
+    list.splice(toIndex, 0, list.splice(fromIndex, 1)[0]);
+
+    updateReadsFeeds(list);
+  };
+
+  const renameHomeFeed = (feed: PrimalArticleFeed, newName: string) => {
+    const list = store.homeFeeds.map(f => {
+      return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
+    });
+    updateHomeFeeds(list);
+  };
+
+  const renameReadsFeed = (feed: PrimalArticleFeed, newName: string) => {
+    const list = store.readsFeeds.map(f => {
+      return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
+    });
+    updateReadsFeeds(list);
+  };
+
+  const enableHomeFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
+    const list = store.homeFeeds.map(f => {
+      return f.spec === feed.spec ? { ...f, enabled } : { ...f };
+    });
+
+    updateHomeFeeds(list);
+  };
+
+  const enableReadsFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
+    const list = store.readsFeeds.map(f => {
+      return f.spec === feed.spec ? { ...f, enabled } : { ...f };
+    });
+
+    updateReadsFeeds(list);
   };
 
   const updateNotificationSettings = (key: string, value: boolean, temp?: boolean) => {
@@ -515,7 +681,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       }
     });
 
-    pubkey && getHomeSettings(pubkey, settingsHomeSubId);
+    pubkey && getHomeSettings(settingsHomeSubId);
 
     const unsubReadsSettings = subsTo(settingsReadsSubId, {
       onEvent: (_, content) => {
@@ -532,7 +698,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       }
     });
 
-    pubkey && getReadsSettings(pubkey, settingsReadsSubId);
+    pubkey && getReadsSettings(settingsReadsSubId);
   }
 
   const refreshMobileReleases = () => {
@@ -664,6 +830,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setAvailableFeeds,
       moveAvailableFeed,
       renameAvailableFeed,
+      addProfileHomeFeed,
+      removeProfileHomeFeed,
+      hasProfileFeedAtHome,
+      moveHomeFeed,
+      renameHomeFeed,
       saveSettings,
       loadSettings,
       restoreDefaultFeeds,
@@ -676,6 +847,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       refreshMobileReleases,
       setProxyThroughPrimal,
       getArticleFeeds: getDefaultArticleFeeds,
+
+      removeFeed,
+      moveFeed,
+      renameFeed,
+      enableFeed,
     },
   });
 

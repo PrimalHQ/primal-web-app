@@ -103,6 +103,8 @@
 }
 
 .profileActions {
+  position: relative;
+  z-index: var(--z-index-header);
   display: flex;
   justify-content: right;
   padding-top: 12px;

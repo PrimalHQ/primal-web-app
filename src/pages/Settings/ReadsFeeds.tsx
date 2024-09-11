@@ -11,7 +11,7 @@ import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 
-const HomeFeeds: Component = () => {
+const ReadsFeeds: Component = () => {
 
   const intl = useIntl();
   const settings = useSettingsContext();
@@ -25,17 +25,17 @@ const HomeFeeds: Component = () => {
 
   return (
     <div>
-      <PageTitle title={`${intl.formatMessage(t.homeFeeds.title)} ${intl.formatMessage(t.title)}`} />
+      <PageTitle title={`${intl.formatMessage(t.readsFeeds.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
         <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
-        <div>{intl.formatMessage(t.homeFeeds.title)}</div>
+        <div>{intl.formatMessage(t.readsFeeds.title)}</div>
       </PageCaption>
 
       <div class={styles.settingsContent}>
         <div class={styles.feedCaption}>
           <div class={styles.settingsCaption}>
-          {intl.formatMessage(t.homeFeeds.caption)}
+          {intl.formatMessage(t.readsFeeds.caption)}
           </div>
 
           <ButtonLink
@@ -54,8 +54,8 @@ const HomeFeeds: Component = () => {
 
         <div class={styles.feedSettings}>
           <FeedSorter
-            feedType="home"
-            feeds={settings?.homeFeeds || []}
+            feedType="reads"
+            feeds={settings?.readsFeeds || []}
             actions={{
               remove: settings?.actions.removeFeed,
               move: settings?.actions.moveFeed,
@@ -69,4 +69,4 @@ const HomeFeeds: Component = () => {
   )
 }
 
-export default HomeFeeds;
+export default ReadsFeeds;

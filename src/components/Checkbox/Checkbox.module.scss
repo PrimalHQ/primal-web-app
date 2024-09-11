@@ -17,3 +17,38 @@
     color: var(--text-secondary);
   }
 }
+
+.checkbox2 {
+  display: inline-flex;
+  align-items: center;
+
+  .control {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px;
+    width: 20px;
+    border-radius: 4px;
+    border: 1px solid var(--text-tertiary-2);
+    // background-color: var(--background-site);
+  }
+  .input:focus-visible + .control {
+  }
+  .control[data-checked] {
+  }
+  .label {
+    margin-left: 6px;
+    color: hsl(240 6% 10%);
+    font-size: 14px;
+    user-select: none;
+  }
+}
+
+.checkIcon {
+  width: 12px;
+  height: 12px;
+
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+}

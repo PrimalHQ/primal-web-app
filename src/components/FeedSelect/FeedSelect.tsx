@@ -1,3 +1,4 @@
+import { A } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
@@ -24,7 +25,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       spec: option.value || '',
       name: option.label,
       description: option.description || '',
-      default: option.deafault || false,
+      enabled: true,
     };
 
     const selected = home?.selectedFeed;
@@ -56,13 +57,26 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   }
 
   const options:() => SelectionOption[] = () => {
-    return settings?.homeFeeds.map(f => ({
-      label: f.name,
-      value: f.spec,
-      description: f.description,
-      default: f.default,
-      id: genId(f.spec),
-    })) || [];
+    if (!settings) return [];
+
+    return settings?.homeFeeds.reduce<SelectionOption[]>((acc, f) => {
+      return f.enabled ? [ ...acc, {
+        label: f.name,
+        value: f.spec,
+        description: f.description,
+        id: genId(f.spec),
+      }] : acc;
+    }, [])
+
+
+    // return settings?.homeFeeds.map(f => ({
+    //   label: f.name,
+    //   value: f.spec,
+    //   description: f.description,
+    //   enabled: f.enabled,
+    //   id: genId(f.spec),
+    // })) || [];
+
     // let opts = [];
 
     // if (account?.publicKey) {
@@ -97,7 +111,6 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       label: selected.name,
       value: selected.spec || '',
       description: selected.description,
-      default: selected.default,
       id: genId(selected.spec),
     }
   }
@@ -110,7 +123,6 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       label: home.selectedFeed.name,
       value: home.selectedFeed.spec,
       description: home.selectedFeed.description,
-      default: home.selectedFeed.default,
       id: genId(home.selectedFeed.spec),
     };
   };
@@ -125,6 +137,8 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         isSelected={isSelected}
         isPhone={props.isPhone}
         big={props.big}
+        caption="Notes Feed"
+        captionAction={<A href="/settings/home_feeds">Edit Feeds</A>}
       />
     </Show>
   );

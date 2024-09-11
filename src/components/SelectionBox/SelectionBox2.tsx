@@ -3,7 +3,7 @@ import { Select } from "@kobalte/core/select";
 
 // Import default styles. (All examples use this via a global import)
 import "@thisbeyond/solid-select/style.css";
-import { Component } from "solid-js";
+import { Component, JSXElement, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
 import { placeholders } from "../../translations";
 import { SelectionOption } from "../../types/primal";
@@ -22,6 +22,8 @@ const SelectionBox2: Component<{
   big?: boolean,
   value?: string | SelectionOption,
   id?: string,
+  caption?: string,
+  captionAction?: JSXElement,
 }> = (props) => {
 
   const defaultValue = () => {
@@ -42,6 +44,8 @@ const SelectionBox2: Component<{
 
     return props.value;
   }
+
+  const hasCaption = () => props.caption || props.captionAction;
 
   return (
     <Select
@@ -65,13 +69,15 @@ const SelectionBox2: Component<{
         </Select.Icon>
       </Select.Trigger>
       <Select.Content class={styles.selectionContent}>
-        <div class={styles.caption}>
-          <div class={styles.title}>
-            Reads Feeds:
+        <Show when={hasCaption()}>
+          <div class={styles.caption}>
+            <div class={styles.title}>
+              {props.caption && `${props.caption}:`}
+            </div>
+            {props.captionAction}
           </div>
-          <A href='/settings/feeds'>Edit Feeds</A>
-        </div>
-        <Select.Listbox class={styles.listbox}/>
+        </Show>
+        <Select.Listbox class={`${styles.listbox} ${hasCaption() ? styles.withCaption : '' }`}/>
       </Select.Content>
     </Select>
   );

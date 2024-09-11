@@ -37,6 +37,7 @@ const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Account = lazy(() => import('./pages/Settings/Account'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
 const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
+const ReadsFeeds = lazy(() => import('./pages/Settings/ReadsFeeds'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
@@ -127,7 +128,8 @@ const Router: Component = () => {
             <Route path="/" component={Menu} />
             <Route path="/account" component={Account} />
             <Route path="/appearance" component={Appearance} />
-            <Route path="/feeds" component={HomeFeeds} />
+            <Route path="/home_feeds" component={HomeFeeds} />
+            <Route path="/reads_feeds" component={ReadsFeeds} />
             <Route path="/notifications" component={NotifSettings} />
             <Route path="/zaps" component={ZapSettings} />
             <Route path="/muted" component={Muted} />

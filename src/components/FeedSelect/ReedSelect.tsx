@@ -1,3 +1,4 @@
+import { A } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
@@ -40,7 +41,7 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       spec: option.value || '',
       name: option.label,
       description: option.description || '',
-      default: option.deafault || false,
+      enabled: true,
     };
 
     const selected = reeds?.selectedFeed;
@@ -72,13 +73,23 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   }
 
   const options:() => SelectionOption[] = () => {
-    return settings?.readsFeeds.map(f => ({
-      label: f.name,
-      value: f.spec,
-      description: f.description,
-      default: f.default,
-      id: genId(f.spec),
-    })) || [];
+    if (!settings) return [];
+
+    return settings?.readsFeeds.reduce<SelectionOption[]>((acc, f) => {
+      return f.enabled ? [ ...acc, {
+        label: f.name,
+        value: f.spec,
+        description: f.description,
+        id: genId(f.spec),
+      }] : acc;
+    }, []);
+
+    // return settings?.readsFeeds.map(f => ({
+    //   label: f.name,
+    //   value: f.spec,
+    //   description: f.description,
+    //   id: genId(f.spec),
+    // })) || [];
     // let opts = [];
 
     // if (account?.publicKey) {
@@ -113,7 +124,6 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       label: selected.name,
       value: selected.spec || '',
       description: selected.description,
-      default: selected.default,
       id: genId(selected.spec),
     }
   }
@@ -126,7 +136,6 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
       label: reeds.selectedFeed.name,
       value: reeds.selectedFeed.spec,
       description: reeds.selectedFeed.description,
-      default: reeds.selectedFeed.default,
       id: genId(reeds.selectedFeed.spec),
     };
   };
@@ -141,6 +150,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         isSelected={isSelected}
         isPhone={props.isPhone}
         big={props.big}
+        caption="Reads Feeds"
+        captionAction={<A href="/settings/reads_feeds">Edit Feeds</A>}
       />
     </Show>
   );

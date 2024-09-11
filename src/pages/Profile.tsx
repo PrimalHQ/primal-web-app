@@ -177,29 +177,25 @@ const Profile: Component = () => {
   }
 
   const addToHome = () => {
-    const feed = {
-      name: intl.formatMessage(feedProfile, { name: profileName() }),
-      hex: profile?.profileKey,
-      npub: profileNpub(),
-    };
+    settings?.actions.addProfileHomeFeed(
+      profileName(),
+      profile?.profileKey,
+    );
 
-    settings?.actions.addAvailableFeed(feed);
     toaster?.sendSuccess(intl.formatMessage(tToast.addFeedToHomeSuccess, { name: profileName()}));
   };
 
   const removeFromHome = () => {
-    const feed = {
-      name: intl.formatMessage(feedProfile, { name: profileName() }),
-      hex: profile?.profileKey,
-      npub: profileNpub(),
-    };
+    settings?.actions.removeProfileHomeFeed(
+      profile?.profileKey,
+    );
 
-    settings?.actions.removeAvailableFeed(feed);
     toaster?.sendSuccess(intl.formatMessage(tToast.removeFeedFromHomeSuccess, { name: profileName()}));
   };
 
   const hasFeedAtHome = () => {
-    return !!settings?.availableFeeds.find(f => f.hex === profile?.profileKey);
+    return settings?.actions.hasProfileFeedAtHome(profile?.profileKey);
+    // return !!settings?.availableFeeds.find(f => f.hex === profile?.profileKey);
   };
 
   const imgError = (event: any) => {

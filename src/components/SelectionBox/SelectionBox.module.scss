@@ -65,7 +65,7 @@
   line-height: 20px;
   list-style-type: none;
   border: none;
-  border-radius: 0 0 8px 8px;
+  border-radius: 8px;
   padding-block: 4px;
   padding-inline: 4px;
   transform: none;
@@ -76,6 +76,10 @@
     &:last-child {
       margin-bottom: 0;
     }
+  }
+
+  &.withCaption {
+    border-radius: 0 0 8px 8px;
   }
 }
 

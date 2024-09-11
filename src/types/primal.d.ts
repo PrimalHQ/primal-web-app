@@ -613,7 +613,7 @@ export type PrimalArticleFeed = {
   name: string,
   spec: string,
   description: string,
-  default: boolean,
+  enabled: boolean,
   feedkind?: string,
 };
 

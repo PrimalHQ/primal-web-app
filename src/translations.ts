@@ -639,9 +639,15 @@ export const explore = {
 };
 
 export const feedProfile = {
-  id: 'feedName',
+  id: 'feedProfile',
   defaultMessage: '{name}\'s feed',
   description: 'Generic name for a feed created from a profile',
+};
+
+export const feedProfileDesription = {
+  id: 'feedProfileDesription',
+  defaultMessage: 'Notes feed of {name}',
+  description: 'Generic description for a feed created from a profile',
 };
 
 export const feedNewPosts = {
@@ -1394,6 +1400,18 @@ export const settings = {
       id: 'settings.homeFeeds.caption',
       defaultMessage: 'Edit and order your home page feeds',
       description: 'Caption for home feed ordering',
+    },
+  },
+  readsFeeds: {
+    title: {
+      id: 'settings.readsFeeds.title',
+      defaultMessage: 'Reads Feeds',
+      description: 'Title of the reads feeds settings sub-page',
+    },
+    caption: {
+      id: 'settings.readsFeeds.caption',
+      defaultMessage: 'Edit and order your reads page feeds',
+      description: 'Caption for reads feed ordering',
     },
   },
   moderation: {

@@ -14,6 +14,7 @@ import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/lo
 import { useHomeContext } from '../../contexts/HomeContext';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 import { Transition } from 'solid-transition-group';
+import SelectionBox2 from '../SelectionBox/SelectionBox2';
 
 const sidebarOptions = [
   {
@@ -74,7 +75,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
   return (
     <div id={props.id}>
       <div class={styles.headingTrending}>
-        <SelectionBox
+        <SelectionBox2
           options={sidebarOptions}
           value={home?.sidebar.query}
           onChange={(option: SelectionOption) => {

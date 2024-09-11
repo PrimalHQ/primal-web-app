@@ -54,6 +54,12 @@
 
   .manageControls {
     display: flex;
+    align-items: center;
+
+    .feedEnabled {
+      display: flex;
+    }
+
     .mngButton {
       @include controlButton();
       width: 32px;

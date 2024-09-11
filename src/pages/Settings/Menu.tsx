@@ -38,8 +38,13 @@ const Menu: Component = () => {
           <div class={styles.chevron}></div>
         </Link>
 
-        <Link href="/settings/feeds">
+        <Link href="/settings/home_feeds">
           {intl.formatMessage(t.homeFeeds.title)}
+          <div class={styles.chevron}></div>
+        </Link>
+
+        <Link href="/settings/reads_feeds">
+          {intl.formatMessage(t.readsFeeds.title)}
           <div class={styles.chevron}></div>
         </Link>
 
