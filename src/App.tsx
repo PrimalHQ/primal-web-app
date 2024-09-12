@@ -18,7 +18,7 @@ import { ReadsProvider } from './contexts/ReadsContext';
 import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
 
 
-export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
+export const APP_ID = `web_dev_${Math.floor(Math.random()*10000000000)}`;
 
 const App: Component = () => {
 
