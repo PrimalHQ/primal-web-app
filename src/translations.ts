@@ -1609,9 +1609,14 @@ export const settings = {
     defaultMessage: 'Home page feeds',
     description: 'Title of the feeds section on the settings page',
   },
+  feedsAddNew: {
+    id: 'settings.feedsAddNew',
+    defaultMessage: 'Add New Feed',
+    description: 'Label for the button for adding new feed to the feeds list',
+  },
   feedsRestore: {
     id: 'settings.feedsRestore',
-    defaultMessage: 'restore defaults',
+    defaultMessage: 'Restore Default Feeds',
     description: 'Label for the button for restoring default feeds to the feeds list',
   },
   feedsRestoreConfirm: {

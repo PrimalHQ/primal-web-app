@@ -32,26 +32,7 @@ const HomeFeeds: Component = () => {
         <div>{intl.formatMessage(t.homeFeeds.title)}</div>
       </PageCaption>
 
-      <div class={styles.settingsContent}>
-        <div class={styles.feedCaption}>
-          <div class={styles.settingsCaption}>
-          {intl.formatMessage(t.homeFeeds.caption)}
-          </div>
-
-          <ButtonLink
-            onClick={() => setIsRestoringFeeds(true)}
-          >
-            {intl.formatMessage(t.feedsRestore)}
-          </ButtonLink>
-
-          <ConfirmModal
-            open={isRestoringFeeds()}
-            description={intl.formatMessage(t.feedsRestoreConfirm)}
-            onConfirm={onRestoreFeeds}
-            onAbort={() => setIsRestoringFeeds(false)}
-          ></ConfirmModal>
-        </div>
-
+      <div class={styles.settingsContentFull}>
         <div class={styles.feedSettings}>
           <FeedSorter
             feedType="home"
@@ -64,7 +45,30 @@ const HomeFeeds: Component = () => {
             }}
           />
         </div>
+
+        <div class={styles.separator}></div>
+
+        <div class={styles.feedManage}>
+          <ButtonLink
+            onClick={() => {}}
+          >
+            {intl.formatMessage(t.feedsAddNew)}
+          </ButtonLink>
+
+          <ButtonLink
+            onClick={() => setIsRestoringFeeds(true)}
+          >
+            {intl.formatMessage(t.feedsRestore)}
+          </ButtonLink>
+        </div>
       </div>
+
+      <ConfirmModal
+        open={isRestoringFeeds()}
+        description={intl.formatMessage(t.feedsRestoreConfirm)}
+        onConfirm={onRestoreFeeds}
+        onAbort={() => setIsRestoringFeeds(false)}
+      ></ConfirmModal>
     </div>
   )
 }

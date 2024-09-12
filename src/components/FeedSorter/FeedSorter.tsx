@@ -134,37 +134,45 @@ const FeedSorter: Component<{
                 when={editMode() === constructId(feed)}
                 fallback={
                   <>
+                    <div class={styles.feedInfo}>
+                      <div class={styles.feedName}>{feed.name}</div>
+                      <div class={styles.feedDescription}>{feed.description}</div>
+                    </div>
                     <Show when={account?.hasPublicKey()}>
-                      <div class={styles.sortControls}>
-                        <div class={styles.dragIcon}></div>
-                      </div>
-                      <div class={styles.manageControls}>
-                        <div class={styles.feedEnabled}>
-                          <CheckBox2
-                            onChange={(v: boolean) => {
-                              props.actions.enable && props.actions.enable(feed, v, props.feedType);
-                            }}
-                            checked={feed.enabled}
-                          />
-                        </div>
+                      <div class={styles.controls}>
+                        <div class={styles.manageControls}>
+                          <div class={styles.feedEnabled}>
+                            <CheckBox2
+                              onChange={(v: boolean) => {
+                                props.actions.enable && props.actions.enable(feed, v, props.feedType);
+                              }}
+                              checked={feed.enabled}
+                            />
+                          </div>
 
-                        <button
-                          class={styles.mngButton}
-                          onClick={() => editFeed(feed)}
-                          disabled={lockedFeeds.includes(feed.feedkind || '')}
-                        >
-                          <div class={styles.editButton}></div>
-                        </button>
-                        <button
-                          class={styles.mngButton}
-                          onClick={() => removeFeed(feed)}
-                          disabled={lockedFeeds.includes(feed.feedkind || '')}
-                        >
-                          <div class={styles.deleteButton}></div>
-                        </button>
+                          <button
+                            class={styles.mngButton}
+                            onClick={() => editFeed(feed)}
+                            disabled={lockedFeeds.includes(feed.feedkind || '')}
+                          >
+                            <div class={styles.editButton}></div>
+                          </button>
+                          <button
+                            class={styles.mngButton}
+                            onClick={() => removeFeed(feed)}
+                            disabled={lockedFeeds.includes(feed.feedkind || '')}
+                          >
+                            <div class={styles.deleteButton}></div>
+                          </button>
+                          <button
+                            class={styles.sortButton}
+                            onClick={() => {}}
+                          >
+                            <div class={styles.dragIcon}></div>
+                          </button>
+                        </div>
                       </div>
                     </Show>
-                    <div class={styles.feedName}>{feed.name}</div>
                   </>
                 }
               >
