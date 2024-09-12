@@ -94,7 +94,9 @@ const Layout: Component = () => {
   createEffect(() => {
     if (location.pathname === '/') return;
 
-    account?.actions.checkNostrKey();
+    if (!account?.publicKey) {
+      account?.actions.checkNostrKey();
+    }
   });
 
   const containerClass = () => {
