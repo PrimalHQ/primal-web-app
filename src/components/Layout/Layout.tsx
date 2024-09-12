@@ -79,7 +79,7 @@ const Layout: Component = () => {
 
     if (path[1] === 'home' && home) {
       // check for new notes on the home feed
-      home.actions.checkForNewNotes(home.selectedFeed?.hex)
+      home.actions.checkForNewNotes(home.selectedFeed?.spec || '')
       return;
     }
 
