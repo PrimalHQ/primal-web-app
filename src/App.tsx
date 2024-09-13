@@ -16,7 +16,8 @@ import { MediaProvider } from './contexts/MediaContext';
 import { AppProvider } from './contexts/AppContext';
 
 
-export const APP_ID = `${Math.floor(Math.random()*10000000000)}`;
+const version = import.meta.env.PRIMAL_VERSION;
+export const APP_ID = `web_${version}_${Math.floor(Math.random()*10000000000)}`;
 
 const App: Component = () => {
 
