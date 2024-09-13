@@ -58,7 +58,7 @@ const Avatar: Component<{
 
     let src = props.user?.picture || props.src;
 
-    if (image.src === src) {
+    if (image.src === src || image.src.endsWith(src)) {
       src = defaultAvatar;
     }
 
