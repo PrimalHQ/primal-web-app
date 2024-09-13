@@ -136,6 +136,21 @@
   }
 }
 
+.vs2Avatar {
+  @include avatar;
+  width: 40px;
+  height: 40px;
+
+  .missingBack {
+    width: 40px;
+    height: 40px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+  }
+}
+
 .vsAvatar {
   @include avatar;
   width: 42px;
@@ -305,6 +320,13 @@
   @include missing;
   width: 36px;
   height: 36px;
+  font-size: 10px;
+}
+
+.vs2Missing {
+  @include missing;
+  width: 40px;
+  height: 40px;
   font-size: 10px;
 }
 

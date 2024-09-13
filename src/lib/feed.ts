@@ -487,3 +487,12 @@ export const fetchDefaultHomeFeeds = (subid: string) => {
     {cache: ["get_home_feeds"]},
   ]));
 }
+
+
+export const fetchDVMFeeds = (kind: 'notes' | 'reads', subId: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["get_featured_dvm_feeds", { kind }]},
+  ]));
+}

@@ -91,10 +91,11 @@ export type SettingsContextStore = {
     hasProfileFeedAtHome: (pubkey: string | undefined) => boolean,
     moveHomeFeed: (fromIndex: number, toIndex: number) => void,
     renameHomeFeed: (feed: PrimalArticleFeed, newName: string) => void,
-    removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     moveFeed: (fromIndex: number, toIndex: number, feedType: FeedType) => void,
     renameFeed: (feed: PrimalArticleFeed, newName: string, feedType: FeedType) => void,
     enableFeed: (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => void,
+    addFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
+    removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
   }
 }
 
@@ -288,18 +289,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // saveHomeFeeds(account?.publicKey, updated);
   }
 
-  const removeFeed = (feed: PrimalArticleFeed, feedType: 'home' | 'reads') => {
+  const removeFeed = (feed: PrimalArticleFeed, feedType: FeedType) => {
 
     if (feedType === 'home') {
       const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
-      updateStore('homeFeeds', () => [ ...updated ]);
-      saveHomeFeeds(account?.publicKey, updated);
+      updateHomeFeeds(updated);
     }
 
     if (feedType === 'reads') {
       const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
-      updateStore('readsFeeds', () => [ ...updated ]);
-      saveReadsFeeds(account?.publicKey, updated);
+      updateReadsFeeds(updated);
     }
   }
 
@@ -331,6 +330,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     if (feedType === 'reads') {
       enableReadsFeed(feed, enabled);
+    }
+  }
+
+  const addFeed = (feed: PrimalArticleFeed, feedType: FeedType) => {
+    if (feedType === 'home') {
+      addHomeFeed(feed);
+    }
+
+    if (feedType === 'reads') {
+      addReadsFeed(feed);
     }
   }
 
@@ -412,6 +421,18 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const list = store.readsFeeds.map(f => {
       return f.spec === feed.spec ? { ...f, enabled } : { ...f };
     });
+
+    updateReadsFeeds(list);
+  };
+
+  const addHomeFeed = (feed: PrimalArticleFeed) => {
+    const list = [ ...store.homeFeeds, {...feed}];
+
+    updateHomeFeeds(list);
+  };
+
+  const addReadsFeed = (feed: PrimalArticleFeed) => {
+    const list = [ ...store.readsFeeds, {...feed}];
 
     updateReadsFeeds(list);
   };
@@ -848,10 +869,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setProxyThroughPrimal,
       getArticleFeeds: getDefaultArticleFeeds,
 
-      removeFeed,
       moveFeed,
       renameFeed,
       enableFeed,
+      addFeed,
+      removeFeed,
     },
   });
 

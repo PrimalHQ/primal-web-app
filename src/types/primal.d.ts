@@ -281,6 +281,15 @@ export type NostrHighlight = {
   tags?: string[][],
 };
 
+export type NostrDVM = {
+  kind: Kind.DVM,
+  pubkey: string,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -318,7 +327,8 @@ export type NostrEventContent =
   NostrSubscribe |
   NostrUnsubscribe |
   NostrWordCount |
-  NostrHighlight;
+  NostrHighlight |
+  NostrDVM;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -492,6 +502,17 @@ export type NostrMessage = [
     content: string,
   },
 ];
+
+export type PrimalDVM = {
+  id: string,
+  name: string,
+  about: string,
+  amount: string,
+  primalVerifiedRequired: boolean,
+  author: string,
+  supportedKinds: string[],
+  identifier: string,
+}
 
 export type UserStats = {
   pubkey: string,

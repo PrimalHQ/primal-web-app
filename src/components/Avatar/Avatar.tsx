@@ -11,7 +11,7 @@ import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs" | "sm" | "md" | "ml" | "lg" | "xl" | "xxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "lg" | "xl" | "xxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -32,6 +32,7 @@ const Avatar: Component<{
     xss: styles.xssAvatar,
     xs: styles.xsAvatar,
     vvs: styles.vvsAvatar,
+    vs2: styles.vs2Avatar,
     vs: styles.vsAvatar,
     sm: styles.smallAvatar,
     md: styles.midAvatar,
@@ -48,6 +49,7 @@ const Avatar: Component<{
     xss: styles.xssMissing,
     xs: styles.xsMissing,
     vvs: styles.vvsMissing,
+    vs2: styles.vs2Missing,
     vs: styles.vsMissing,
     sm: styles.smallMissing,
     md: styles.midMissing,
@@ -60,9 +62,9 @@ const Avatar: Component<{
   const imgError = (event: any) => {
     const image = event.target;
 
-    let src = props.user?.picture || props.src;
+    let src: string = props.user?.picture || props.src || '';
 
-    if (image.src === src) {
+    if (image.src === src || image.src.endsWith(src)) {
       src = defaultAvatar;
     }
 
@@ -83,11 +85,13 @@ const Avatar: Component<{
     let size: MediaSize = 'm';
 
     switch (selectedSize) {
+      case 'nano':
       case 'micro':
       case 'xxs':
       case 'xss':
       case 'xs':
       case 'vvs':
+      case 'vs2':
       case 'vs':
       case 'sm':
       case 'md':

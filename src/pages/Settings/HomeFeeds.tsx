@@ -10,6 +10,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
+import FeedMarketPlace from '../../components/FeedMarketplace/FeedMarketPlace';
 
 const HomeFeeds: Component = () => {
 
@@ -17,6 +18,7 @@ const HomeFeeds: Component = () => {
   const settings = useSettingsContext();
 
   const [isRestoringFeeds, setIsRestoringFeeds] = createSignal(false);
+  const [openMarketplace, setOpenMarketplace] = createSignal(false);
 
   const onRestoreFeeds = () => {
     // settings?.actions.restoreDefaultFeeds();
@@ -50,7 +52,7 @@ const HomeFeeds: Component = () => {
 
         <div class={styles.feedManage}>
           <ButtonLink
-            onClick={() => {}}
+            onClick={() => setOpenMarketplace(() => true)}
           >
             {intl.formatMessage(t.feedsAddNew)}
           </ButtonLink>
@@ -69,6 +71,16 @@ const HomeFeeds: Component = () => {
         onConfirm={onRestoreFeeds}
         onAbort={() => setIsRestoringFeeds(false)}
       ></ConfirmModal>
+
+      <FeedMarketPlace
+        open={openMarketplace()}
+        setOpen={setOpenMarketplace}
+        type="notes"
+        onAddFeed={(feed) => {
+          settings?.actions.addFeed(feed, 'home');
+          setOpenMarketplace(() => false);
+        }}
+      />
     </div>
   )
 }
