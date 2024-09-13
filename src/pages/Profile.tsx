@@ -508,7 +508,7 @@ const Profile: Component = () => {
 
   useBeforeLeave(() => {
     setIsProfileLoaded(() => false);
-    // profile?.actions.resetProfile();
+    profile?.actions.resetProfile();
   })
 
   const [isBannerLoaded, setIsBannerLoaded] = createSignal(false);
