@@ -154,7 +154,7 @@ const HomeHeader: Component< {
             </div>
           </Show>
 
-          <Show when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}>
+          <Show when={settings?.homeFeeds && settings?.homeFeeds.length > 0 && home?.selectedFeed}>
             <div class={styles.smallRight}>
               <FeedSelect />
             </div>
