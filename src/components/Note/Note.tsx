@@ -273,13 +273,14 @@ const Note: Component<{
     // const hasLinks = urlRegexG.test(props.note.content);
 
     const lnCount = props.note.content.match(linebreakRegex)?.length || 0;
+
     if (lnCount > 4) return false;
 
     let strippedContent = props.note.content
       .replace(imageRegexG, '__PRIMAL_REPLACEMENT__')
       .replace(noteRegex, '__PRIMAL_REPLACEMENT__')
       .replace(addrRegexG, '__PRIMAL_REPLACEMENT__')
-      .replace(profileRegexG, '__PRIMAL_REPLACEMENT__')
+      // .replace(profileRegexG, '__PRIMAL_REPLACEMENT__')
       .replace(urlRegexG, '__PRIMAL_REPLACEMENT__')
       .trim();
 
