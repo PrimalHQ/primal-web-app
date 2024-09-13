@@ -7,6 +7,7 @@
   to {
     opacity: 1;
     transform: translateY(0);
+    visibility: visible;
   }
 }
 
@@ -27,6 +28,7 @@
   100% {
     opacity: 1;
     transform: translateY(0);
+    visibility: visible;
   }
 }
 
@@ -50,6 +52,8 @@
   width: max-content;
   overflow: hidden;
   height: fit-content;
+  opacity: 0;
+  visibility: hidden;
 
   &.noteFooter {
     top: 26px;
@@ -72,7 +76,7 @@
 }
 
 .contextMenuOptions[data-open="true"] {
-  animation: inTop 150ms ease-out;
+  animation: inTop 150ms ease-out forwards;
 }
 
 .contextMenuOptionsUp {
@@ -86,6 +90,7 @@
   z-index: var(--z-index-header);
   width: max-content;
   height: fit-content;
+  opacity: 0;
 
   &.noteFooter {
     bottom: 28px;
@@ -106,5 +111,5 @@
 }
 
 .contextMenuOptionsUp[data-open="true"] {
-  animation: inBottom 150ms ease-out;
+  animation: inBottom 150ms ease-out forwards;
 }
