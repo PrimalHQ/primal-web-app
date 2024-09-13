@@ -21,7 +21,11 @@ import NoteTopZaps from '../Note/NoteTopZaps';
 import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
+import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
+import defaultAvatarLight from '../../assets/images/reads_image_light.png';
+
 import styles from './ArticlePreview.module.scss';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -39,6 +43,7 @@ const ArticlePreview: Component<{
   const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
+  const settings = useSettingsContext();
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
     likes: props.article.likes || 0,
@@ -266,6 +271,20 @@ const ArticlePreview: Component<{
     props.onRender && props.onRender(props.article, articlePreview);
   };
 
+  const onImageError = (event: any) => {
+    const image = event.target;
+
+    let src: string = authorAvatar();
+
+    if (image.src === src || image.src.endsWith(src)) {
+      src = ['sunrise_wave', 'ice_wave'].includes(settings?.theme || '') ? defaultAvatarLight : defaultAvatarDark;
+    }
+
+    image.onerror = "";
+    image.src = src;
+    return true;
+  };
+
   const countLines = (el: Element) => {
 
     // @ts-ignore
@@ -371,13 +390,14 @@ const ArticlePreview: Component<{
                 when={authorAvatar()}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
-                <img src={props.article.user.picture} onload={onImageLoaded} />
+                <img src={props.article.user.picture} onload={onImageLoaded} onerror={onImageError} />
               </Show>
             }
           >
             <img
               src={articleImage()}
               onload={onImageLoaded}
+              onerror={onImageError}
               class={isDev && missingCacheImage() ? 'redBorder' : ''}
             />
           </Show>
