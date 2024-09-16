@@ -401,14 +401,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const spec = mainTopic || store.selectedFeed?.spec || '';
 
-
-    const criteria = 'created_at';
-
-    const noteData: Record<string, any> =  lastNote.repost ?
+    const noteData =  lastNote.repost ?
     lastNote.repost.note :
-    lastNote;
+    lastNote.post;
 
-    const until = noteData[criteria];
+    const until = noteData.created_at;
 
     if (until > 0) {
       fetchNotes(spec, `${APP_ID}`, until);
