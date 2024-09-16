@@ -38,8 +38,10 @@ const FeedMarketItem: Component<{
       </div>
 
       <div class={styles.right}>
-        <div class={styles.title}>{props.dvm?.name || ''}</div>
-        <div class={styles.about}>{props.dvm?.about || ''}</div>
+        <div class={styles.info}>
+          <div class={styles.title}>{props.dvm?.name || ''}</div>
+          <div class={styles.about}>{props.dvm?.about || ''}</div>
+        </div>
 
         <div class={styles.stats}>
           <div class={styles.stat}>
