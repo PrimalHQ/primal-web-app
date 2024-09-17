@@ -515,7 +515,14 @@ const Profile: Component = () => {
   const [isProfileLoaded, setIsProfileLoaded] = createSignal(false);
 
   createEffect(() => {
-    if (profile?.isProfileFetched && !profile.isFetchingSidebarArticles && !profile.isFetchingSidebarNotes && profile.isAboutParsed && profile.profileKey === getHex() && isBannerLoaded()) {
+    if (
+      profile?.isProfileFetched &&
+      !profile.isFetchingSidebarArticles &&
+      !profile.isFetchingSidebarNotes &&
+      profile.isAboutParsed &&
+      profile.profileKey === getHex() &&
+      (profile.userProfile ? isBannerLoaded() : true)
+    ) {
       setIsProfileLoaded(() => true);
     }
   })
