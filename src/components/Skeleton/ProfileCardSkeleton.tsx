@@ -10,6 +10,7 @@ import styles from './Skeleton.module.scss';
 
 const ProfileCardSkeleton: Component<{
   id?: string,
+  tab?: string,
 }> = (props) => {
   return (
     <div class={styles.profileCardSkeleton}>
@@ -27,7 +28,7 @@ const ProfileCardSkeleton: Component<{
         <ProfileAboutSkeleton />
       </div>
 
-      <ProfileTabsSkeleton />
+      <ProfileTabsSkeleton tab={props.tab} />
     </div>
   );
 }

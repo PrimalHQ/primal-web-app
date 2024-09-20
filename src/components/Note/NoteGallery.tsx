@@ -92,7 +92,12 @@ const NoteGallery: Component<{
   }
 
   return (
-    <div id={`galleryimage_${props.note.id}`} data-note={props.note.id} data-url={store.url}>
+    <div
+      id={`galleryimage_${props.note.id}`}
+      data-note={props.note.id}
+      data-url={store.url}
+      class="animated"
+    >
       <NoteImage
         class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
         src={store.url}

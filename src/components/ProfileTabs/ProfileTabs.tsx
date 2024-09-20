@@ -31,6 +31,7 @@ import FeedNoteSkeleton from "../Skeleton/FeedNoteSkeleton";
 import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
 import { Transition, TransitionGroup } from "solid-transition-group";
 import ZapSkeleton from "../Skeleton/ZapSkeleton";
+import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton";
 
 
 const ProfileTabs: Component<{
@@ -493,12 +494,7 @@ const ProfileTabs: Component<{
 
         <Tabs.Content class={styles.tabContent} value="media">
           <div class={styles.profileNotes}>
-            <Switch
-              fallback={
-                <div style="margin-top: 40px;">
-                  <Loader />
-                </div>
-            }>
+            <Switch>
               <Match when={isMuted(profile?.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
@@ -522,49 +518,45 @@ const ProfileTabs: Component<{
                   </button>
                 </div>
               </Match>
-              <Match when={profile && profile.gallery.length === 0 && !profile.isFetchingGallery}>
-                <div class={styles.mutedProfile}>
+              <Match when={true}>
+                <TransitionGroup name="slide-fade">
+                  <div>
+                    <Show when={profile && profile.isFetchingGallery && profile.gallery.length === 0}>
+                      <div class={styles.galleryGrid}>
+                        <For each={new Array(24)}>
+                          {() => <ProfileGalleryImageSkeleton />}
+                        </For>
+                      </div>
+                    </Show>
+                  </div>
+
+                  <div>
+                    <Show when={profile && profile.gallery.length === 0 && !profile.isFetchingGallery}>
+                      <div class={styles.mutedProfile}>
                   {intl.formatMessage(
                     t.noReplies,
                     { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
                   )}
-                </div>
-              </Match>
-              <Match when={profile && profile.gallery.length > 0}>
-                <div class={styles.galleryGrid}>
-                  <div class={styles.galleryColumn}>
-                    <For each={galleryImages()}>
-                      {(note, index) => (
-                        <Show when={index()%3 === 1}>
-                          <NoteGallery note={note} />
-                        </Show>
-                      )}
-                    </For>
+                      </div>
+                    </Show>
                   </div>
-                  <div class={styles.galleryColumn}>
-                    <For each={galleryImages()}>
-                      {(note, index) => (
-                        <Show when={index()%3 === 2}>
+
+                  <Show when={profile && profile.gallery.length > 0}>
+                    <div class={styles.galleryGrid}>
+                      <For each={galleryImages()}>
+                        {(note) => (
                           <NoteGallery note={note} />
-                        </Show>
-                      )}
-                    </For>
-                  </div>
-                  <div class={styles.galleryColumn}>
-                    <For each={galleryImages()}>
-                      {(note, index) => (
-                        <Show when={index()%3 === 0}>
-                          <NoteGallery note={note} />
-                        </Show>
-                      )}
-                    </For>
-                  </div>
-                </div>
-                <Paginator
-                  loadNextPage={() => {
-                    profile?.actions.fetchNextGalleryPage();
-                  }}
-                />
+                        )}
+                      </For>
+                    </div>
+                    <Paginator
+                      loadNextPage={() => {
+                        profile?.actions.fetchNextGalleryPage();
+                      }}
+                      isSmall={true}
+                    />
+                  </Show>
+                </TransitionGroup>
               </Match>
             </Switch>
           </div>

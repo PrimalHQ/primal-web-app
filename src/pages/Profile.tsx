@@ -101,6 +101,11 @@ const Profile: Component = () => {
     pswpModule: () => import('photoswipe')
   });
 
+
+  const tabHash = () => {
+    return (location.hash.length > 1) ? location.hash.substring(1) : 'notes';
+  }
+
   let profileAboutDiv: HTMLDivElement | undefined;
 
   const getHex = () => {
@@ -700,7 +705,7 @@ const Profile: Component = () => {
 
         <Show
           when={isProfileLoaded()}
-          fallback={<ProfileCardSkeleton />}
+          fallback={<ProfileCardSkeleton tab={tabHash()} />}
         >
           <div id="central_header" class={styles.fullHeader}>
             <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()} animated`}>

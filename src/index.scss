@@ -252,7 +252,7 @@ body::after{
   display: block !important;
 }
 .galleryimage {
-  margin-block: 4px !important;
+  // margin-block: 4px !important;
   display: block !important;
 }
 
@@ -652,7 +652,7 @@ button:focus {
   // {
   //   transform: translateY(10px);
   // }
-  $elements: 10;
+  $elements: 20;
   @for $i from 0 to $elements {
     .animated:nth-child(#{$i + 1}) {
       transform: translateY(10px + 2px*$i);

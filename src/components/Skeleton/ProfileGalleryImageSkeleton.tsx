@@ -2,12 +2,12 @@ import { Component } from 'solid-js';
 
 import styles from './Skeleton.module.scss';
 
-const ZapSkeleton: Component<{
+const ProfileGalleryImageSkeleton: Component<{
   id?: string,
 }> = (props) => {
 
   return (
-    <div class={styles.zapSkeleton}>
+    <div class={styles.profileGalleryImageSkeleton}>
       <div class={styles.zapinfo}></div>
       <div class={styles.zapSubjectInfo}>
         <div class={styles.zapDate}></div>
@@ -17,4 +17,4 @@ const ZapSkeleton: Component<{
   );
 }
 
-export default ZapSkeleton;
+export default ProfileGalleryImageSkeleton;

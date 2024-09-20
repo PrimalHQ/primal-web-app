@@ -1,5 +1,4 @@
 import { Component } from 'solid-js';
-import FeedNoteSkeleton from './FeedNoteSkeleton';
 
 import styles from './Skeleton.module.scss';
 

@@ -1,8 +1,5 @@
 import { Component } from 'solid-js';
 
-import feedSkeleton from '../../assets/lottie/primal-loader-webapp-reads.json';
-
-
 import styles from './Skeleton.module.scss';
 
 const ArticlePreviewSkeleton: Component<{
@@ -19,16 +16,6 @@ const ArticlePreviewSkeleton: Component<{
       <div class={styles.body}>
         <div class={styles.text}></div>
         <div class={styles.image}></div>
-      </div>
-      <div class={styles.topZaps}>
-        <div class={styles.zaps}></div>
-      </div>
-      <div class={styles.stats}>
-        <div class={styles.stat}></div>
-        <div class={styles.stat}></div>
-        <div class={styles.stat}></div>
-        <div class={styles.stat}></div>
-        <div class={styles.stat}></div>
       </div>
     </div>
   );

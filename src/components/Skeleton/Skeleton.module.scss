@@ -31,9 +31,9 @@
     gap: 8px;
 
     .avatar {
-      width: 24px;
-      height: 24px;
-      border-radius: 12px;
+      width: 22px;
+      height: 22px;
+      border-radius: 11px;
       background-color: var(--devider);
     }
 
@@ -137,15 +137,15 @@
     gap: 10px;
 
     .text {
-      width: 190px;
-      height: 72px;
+      width: 210px;
+      height: 56px;
       border-radius: 8px;
       background-color: var(--devider);
     }
 
     .image {
-      width: 100px;
-      height: 72px;
+      width: 80px;
+      height: 56px;
       border-radius: 8px;
       background-color: var(--devider);
     }
@@ -157,7 +157,7 @@
   border-radius: 8px;
   background: var(--devider);
   width: 300px;
-  height: 120px;
+  height: 118px;
   padding: 16px;
 
   animation: skeleton-fade 2500ms linear infinite;
@@ -246,7 +246,7 @@
 
       .time {
         width: 150px;
-        height: 14px;
+        height: 16px;
         border-radius: 7px;
         background-color: var(--devider);
       }
@@ -464,6 +464,16 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+
+
+  .galleryGrid {
+    display: grid;
+    grid-template-columns: 148px 148px 148px 148px;
+    grid-column-gap: 2px;
+    grid-row-gap: 2px;
+    padding-inline: 20px;
+    padding-top: 12px;
+  }
 }
 
 .profileTabsSkeleton {
@@ -533,7 +543,7 @@
 
   .contentN {
     width: 600px;
-    height: 92px;
+    height: 150px;
     border-radius: 8px;
     background-color: var(--devider);
   }
@@ -609,14 +619,14 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 
   animation: skeleton-fade 2500ms linear infinite;
 
   .avatarSN {
-    width: 22px;
-    height: 22px;
-    border-radius: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 14px;
     background-color: var(--devider);
   }
 
@@ -627,15 +637,15 @@
     gap: 8px;
 
     .headerSN {
-      width: 150px;
+      width: 140px;
       height: 12px;
       border-radius: 6px;
       background-color: var(--devider);
     }
 
     .contentSN {
-      width: 268px;
-      height: 36px;
+      width: 264px;
+      height: 34px;
       border-radius: 8px;
       background-color: var(--devider);
     }
@@ -703,8 +713,9 @@
     .userInfoPN {
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: center;
       align-items: flex-start;
+      gap: 10px;
 
       .namePN {
         width: 80px;
@@ -758,21 +769,20 @@
 
 .threadNoteSkeleton {
   display: flex;
-  flex-direction: column;
   width: 100%;
   justify-content: flex-start;
   align-items: flex-start;
   padding: 12px 20px 16px;
+  gap: 8px;
 
   border-bottom: 1px solid var(--devider);
   animation: skeleton-fade 2500ms linear infinite;
 
   .headerTN {
     display: flex;
-    width: 100%;
     gap: 8px;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
 
     .avatarTN {
       width: 42px;
@@ -797,7 +807,7 @@
 
     .fillTN {
       width: 550px;
-      height: 92px;
+      height: 120px;
       border-radius: 8px;
       background-color: var(--devider);
     }
@@ -952,4 +962,11 @@
   .profileSection {
     margin-inline: 20px;
   }
+}
+
+.profileGalleryImageSkeleton {
+  width: 148px;
+  height: 148px;
+  background-color: var(--devider);
+  animation: skeleton-fade 2500ms linear infinite;
 }

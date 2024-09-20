@@ -1,10 +1,12 @@
-import { Component } from 'solid-js';
+import { Component, For, Match, Switch } from 'solid-js';
 import FeedNoteSkeleton from './FeedNoteSkeleton';
+import ProfileGalleryImageSkeleton from './ProfileGalleryImageSkeleton';
 
 import styles from './Skeleton.module.scss';
 
 const ProfileTabsSkeleton: Component<{
   id?: string,
+  tab?: string,
 }> = (props) => {
   return (
     <div class={styles.profileTabsSkeletonWrapper}>
@@ -34,9 +36,21 @@ const ProfileTabsSkeleton: Component<{
           <div class={styles.labelT}>relays</div>
         </div>
       </div>
-      <FeedNoteSkeleton />
-      <FeedNoteSkeleton />
-      <FeedNoteSkeleton />
+      <Switch fallback={
+        <>
+          <For each={new Array(10)}>
+            {() => <FeedNoteSkeleton />}
+          </For>
+        </>
+      }>
+        <Match when={props.tab === 'media'}>
+          <div class={styles.galleryGrid}>
+            <For each={new Array(24)}>
+              {() => <ProfileGalleryImageSkeleton />}
+            </For>
+          </div>
+        </Match>
+      </Switch>
     </div>
   );
 }
