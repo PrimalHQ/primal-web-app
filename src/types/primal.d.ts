@@ -396,7 +396,25 @@ export type FeedPage = {
   topZaps: Record<string, TopZap[]>,
   since?: number,
   until?: number,
+  sortBy?: string,
   wordCount?: Record<string, number>,
+};
+
+export type MegaFeedPage = {
+  users: {
+    [pubkey: string]: NostrUserContent,
+  },
+  notes: NostrNoteContent[],
+  reads: NostrNoteContent[],
+  noteStats: NostrPostStats,
+  mentions: Record<string, NostrNoteContent>,
+  noteActions: Record<string, NoteActions>,
+  relayHints: Record<string, string>,
+  topZaps: Record<string, TopZap[]>,
+  since: number,
+  until: number,
+  sortBy: string,
+  wordCount: Record<string, number>,
 };
 
 export type TrendingNotesStore = {
@@ -692,6 +710,8 @@ export type PrimalZap = {
 };
 
 export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
+
+export type MegaRepostInfo = (page: MegaFeedPage, message: NostrNoteContent) => PrimalRepost;
 
 export type ExploreFeedPayload = {
   timeframe: string,
