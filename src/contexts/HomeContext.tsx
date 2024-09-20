@@ -15,6 +15,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrFeedRange,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -31,6 +32,7 @@ import { parseBolt11 } from "../utils";
 import { useAccountContext } from "./AccountContext";
 import { useSettingsContext } from "./SettingsContext";
 import { useLocation } from "@solidjs/router";
+import { FeedRange } from "../pages/FeedQueryTest";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -391,25 +393,34 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (store.isFetching) {
       return;
     }
-    const lastNote = store.notes[store.notes.length - 1];
-
-    if (!lastNote) {
-      return;
-    }
-
-    updateStore('lastNote', () => ({ ...lastNote }));
 
     const spec = mainTopic || store.selectedFeed?.spec || '';
 
-    const noteData =  lastNote.repost ?
-    lastNote.repost.note :
-    lastNote.post;
-
-    const until = noteData.created_at;
+    const until = store.page.since || 0;
 
     if (until > 0) {
       fetchNotes(spec, `${APP_ID}`, until);
     }
+
+    // const lastNote = store.notes[store.notes.length - 1];
+
+    // if (!lastNote) {
+    //   return;
+    // }
+
+    // updateStore('lastNote', () => ({ ...lastNote }));
+
+    // const spec = mainTopic || store.selectedFeed?.spec || '';
+
+    // const noteData =  lastNote.repost ?
+    // lastNote.repost.note :
+    // lastNote.post;
+
+    // const until = noteData.created_at;
+
+    // if (until > 0) {
+    //   fetchNotes(spec, `${APP_ID}`, until);
+    // }
   };
 
   // const fetchNextPage = () => {
@@ -489,6 +500,22 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const updatePage = (content: NostrEventContent, scope?: 'future') => {
+    if (content.kind === Kind.FeedRange) {
+      const feedRange: FeedRange = JSON.parse(content.content || '{}');
+
+      if (scope) {
+        updateStore(scope, 'page', 'since', () => feedRange.since);
+        updateStore(scope, 'page', 'until', () => feedRange.until);
+        updateStore(scope, 'page', 'sortBy', () => feedRange.order_by);
+        return;
+      }
+
+      updateStore('page', 'since', () => feedRange.since);
+      updateStore('page', 'until', () => feedRange.until);
+      updateStore('page', 'sortBy', () => feedRange.order_by);
+
+      return;
+    }
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
@@ -519,7 +546,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
         const scopeNotes = store[scope].notes;
 
-        const isaAlreadyIn = message.kind === Kind.Text &&
+        const isAlreadyIn = message.kind === Kind.Text &&
           scopeNotes &&
           scopeNotes.find(n => n.post.noteId === messageId);
 
@@ -529,7 +556,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         //   store.future.notes[0]?.post?.noteId === messageId :
         //   store.future.notes[0]?.repost?.note.noteId === messageId;
 
-        if (isFirstNote || isaAlreadyIn || isAlreadyReposted) return;
+        if (isFirstNote || isAlreadyIn || isAlreadyReposted) return;
 
         updateStore(scope, 'page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
@@ -538,13 +565,16 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         return;
       }
 
-      const isLastNote = message.kind === Kind.Text ?
-        store.lastNote?.post?.noteId === messageId :
-        store.lastNote?.repost?.note.noteId === messageId;
+      const scopeNotes = store.notes;
+
+      const isAlreadyIn = message.kind === Kind.Text &&
+        scopeNotes &&
+        scopeNotes.find(n => n.post.noteId === messageId);
+
 
       let isAlreadyReposted = isRepostInCollection(store.page.messages, message);
 
-      if (isLastNote || isAlreadyReposted) return;
+      if (isAlreadyIn || isAlreadyReposted) return;
 
       updateStore('page', 'messages',
         (msgs) => [ ...msgs, { ...message }]
