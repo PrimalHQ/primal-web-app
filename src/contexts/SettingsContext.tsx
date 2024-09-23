@@ -262,31 +262,32 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     setAvailableFeeds(list);
   };
 
-  const specifyUserFeed = (pubkey: string) => JSON.stringify({ id: "latest", kind: "notes", pubkey });
+  const specifyUserFeed = (pubkey: string) => JSON.stringify({ id: "feed", kind: "notes", pubkey });
 
   const addProfileHomeFeed = (name: string, pubkey: string | undefined) => {
-    // if (!pubkey) return;
+    if (!pubkey) return;
 
-    // const feed: PrimalArticleFeed = {
-    //   name: intl.formatMessage(feedProfile, { name }),
-    //   spec: specifyUserFeed(pubkey),
-    //   description: intl.formatMessage(feedProfileDesription, { name }),
-    //   enabled: true,
-    //   feedkind: 'user',
-    // };
 
-    // updateStore('homeFeeds', store.homeFeeds.length, () => ({ ...feed }));
-    // saveHomeFeeds(pubkey, store.homeFeeds);
+    const feed: PrimalArticleFeed = {
+      name: intl.formatMessage(feedProfile, { name }),
+      spec: specifyUserFeed(pubkey),
+      description: intl.formatMessage(feedProfileDesription, { name }),
+      enabled: true,
+      feedkind: 'user',
+    };
+
+    const list = [ ...store.homeFeeds, { ...feed }];
+
+    updateHomeFeeds(list);
   }
 
   const removeProfileHomeFeed = (pubkey: string | undefined) => {
-    // if (!pubkey) return;
+    if (!pubkey) return;
 
-    // const spec = specifyUserFeed(pubkey);
-    // const updated = store.homeFeeds.filter(f => f.spec !== spec);
+    const spec = specifyUserFeed(pubkey);
+    const list = store.homeFeeds.filter(f => f.spec !== spec);
 
-    // updateStore('homeFeeds', () => [ ...updated ]);
-    // saveHomeFeeds(account?.publicKey, updated);
+    updateHomeFeeds(list);
   }
 
   const removeFeed = (feed: PrimalArticleFeed, feedType: FeedType) => {
