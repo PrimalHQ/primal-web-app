@@ -31,13 +31,13 @@ const AdvancedSearchResults: Component = () => {
   const kind = () => {
     const isRead = queryString().search(/kind:(\s)?30023\s/) >= 0;
 
-    if (isRead) return Kind.LongFormShell;
+    if (isRead) return Kind.LongForm;
 
     return 1;
   }
 
   onMount(() => {
-    search?.actions.findContent(queryString(), kind());
+    search?.actions.findContent(queryString());
   })
 
 
@@ -64,12 +64,18 @@ const AdvancedSearchResults: Component = () => {
 
 
       <div class={styles.list}>
-        <Switch fallback={
-          <For each={search?.notes} >
-            {note => <Note note={note} shorten={true} />}
-          </For>
-        }>
-          <Match when={!search?.isFetchingContent && search?.notes.length === 0}>
+        <Switch>
+          <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
+            <For each={search?.reads} >
+              {article => <ArticlePreview article={article} />}
+            </For>
+          </Match>
+          <Match when={[Kind.Text].includes(kind())}>
+            <For each={search?.notes} >
+              {note => <Note note={note} shorten={true} />}
+            </For>
+          </Match>
+          <Match when={!search?.isFetchingContent && (search?.notes.length === 0 || search?.reads.length === 0)}>
             <div class={styles.noResults}>
               No results found
 
@@ -78,17 +84,12 @@ const AdvancedSearchResults: Component = () => {
               </For>
             </div>
           </Match>
-          <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
-            <For each={search?.notes} >
-              {article => <ArticlePreview article={article} />}
-            </For>
-          </Match>
         </Switch>
 
         <Show when={search?.isFetchingContent}><Loader /></Show>
       </div>
 
-      <Paginator loadNextPage={() => search?.actions.fetchContentNextPage(queryString(), kind())} />
+      <Paginator loadNextPage={() => search?.actions.fetchContentNextPage(queryString())} />
     </>
   )
 }

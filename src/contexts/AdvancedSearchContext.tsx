@@ -27,6 +27,8 @@ import { subscribeTo, subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
+import { fetchMegaFeed, PaginationInfo } from "../megaFeeds";
+import { logError } from "../lib/logger";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -47,20 +49,21 @@ export type AdvancedSearchContextStore = {
   scores: Record<string, number>,
   contentUsers: PrimalUser[],
   contentScores: Record<string, number>,
-  notes: PrimalNote[] | PrimalArticle[],
+  notes: PrimalNote[],
+  reads: PrimalArticle[],
   isFetchingUsers: boolean,
   isFetchingContent: boolean,
-  page: FeedPage,
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
   filteringReasons: string[],
   errors: string[],
+  paging: PaginationInfo,
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
     findContentUsers: (query: string, pubkey?: string) => void,
-    findContent: (query: string, kind?: number) => void,
-    fetchContentNextPage: (query: string, kind?: number) => void,
+    findContent: (query: string, until?: number) => void,
+    fetchContentNextPage: (query: string) => void,
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
@@ -74,13 +77,18 @@ const initialData = {
   contentUsers: [],
   contentScores: {},
   notes: [],
+  reads: [],
   isFetchingUsers: false,
   isFetchingContent: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
   mentionedNotes: {},
   filteringReasons: [],
   errors: [],
+  paging: {
+    since: 0,
+    until: 0,
+    sortBy: 'created_at',
+  },
 };
 
 export const AdvancedSearchContext = createContext<AdvancedSearchContextStore>();
@@ -301,134 +309,47 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     searchUsers(pubkey, subid, query);
   }
 
-  const saveNotes = (newNotes: PrimalNote[] | PrimalArticle[]) => {
-    // @ts-ignore
-    updateStore('notes', (ns) => [...ns, ...newNotes ]);
-    updateStore('isFetchingContent', () => false);
-  };
+  const fetchContentNextPage = (query: string) => {
 
-
-  const updatePage = (content: NostrEventContent) => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      updateStore('page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
+    if (store.isFetchingContent) {
       return;
     }
 
-    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
+    const until = store.paging.since || 0;
 
-      updateStore('page', 'messages',
-        (msgs) => [ ...msgs, { ...message }]
-      );
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      updateStore('page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      updateStore('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
-      return;
+    if (until > 0) {
+      findContent(query, until);
     }
   };
 
-  const savePage = (page: FeedPage, kind = 1) => {
-    const newPosts = ([Kind.LongForm, Kind.LongFormShell].includes(kind)) ? convertToArticles(page) : convertToNotes(page);
+  const findContent = async (query: string, until = 0) => {
 
-    saveNotes(newPosts);
-  };
+    try {
 
-  const fetchContentNextPage = (query: string, kind = 1) => {
-    const lastNote = store.notes[store.notes.length - 1];
-    let until = 0;
-    let offset = 0;
+      const spec = JSON.stringify({ id: 'advsearch', query });
 
-    if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
-      until = (lastNote as PrimalArticle)?.published || 0;
-      offset = (store.notes as PrimalArticle[]).filter(n => n.published === until).length;
-    } else {
-      until = (lastNote as PrimalNote).msg.created_at || 0;
-      offset = (store.notes as PrimalNote[]).filter(n => n.msg.created_at === until).length;
+      updateStore('isFetchingContent' , () => true);
+
+      const { notes, reads, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        spec,
+        `adv_search_${APP_ID}`,
+        {
+          limit: 20,
+          until,
+          offset: store.reads.map(n => n.repost ? n.repost.note.created_at : (n.published || 0)),
+        }
+      );
+
+      updateStore('paging', () => ({ ...paging }));
+      updateStore('reads', (ns) => [ ...ns, ...reads]);
+      updateStore('notes', (ns) => [ ...ns, ...notes]);
+
+    } catch (e) {
+      logError('ERROR fetching search results: ', e);
     }
 
-
-    const subid = `advanced_search_content_np_${APP_ID}`;
-
-    const unsub = subscribeTo(subid, (type, _, content) => {
-
-      if (type === 'EOSE') {
-        savePage(store.page, kind);
-        unsub();
-        return;
-      }
-
-      if (!content) {
-        return;
-      }
-
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-
-    });
-
-    updateStore('isFetchingContent', () => true);
-    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
-
-    advancedSearchContent(account?.publicKey, subid, query, 20, until, offset);
-  };
-
-  const findContent = (query: string, until = 0, kind = 1) => {
-    const subid = `advanced_search_content_${APP_ID}`;
-
-    const unsub = subsTo(subid, {
-      onEvent: (_, content) => {
-        updatePage(content);
-      },
-      onNotice: (_, reason) => {
-        updateStore('errors', store.errors.length, () => reason);
-      },
-      onEose: (_) => {
-        savePage(store.page, kind);
-        unsub();
-      }
-    });
-
-    updateStore('isFetchingContent', () => true);
-    updateStore('notes', () => []);
-    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
-    updateStore('errors', () => []);
-
-    advancedSearchContent(account?.publicKey, subid, query, 20, 0);
+    updateStore('isFetchingContent' , () => false);
   }
 
   const setContentQuery = (query: string) => {
@@ -473,13 +394,6 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
       searchFilteredUsers(pubkey, account?.publicKey, subId);
     }
   }
-
-
-
-// EFFECTS --------------------------------------
-
-// SOCKET HANDLERS ------------------------------
-
 
 // STORES ---------------------------------------
 
