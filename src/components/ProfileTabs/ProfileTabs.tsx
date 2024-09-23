@@ -14,7 +14,7 @@ import { humanizeNumber } from "../../lib/stats";
 import { store } from "../../services/StoreService";
 import { userName } from "../../stores/profile";
 import { profile as t, actions as tActions } from "../../translations";
-import { PrimalUser, PrimalZap } from "../../types/primal";
+import { PrimalNote, PrimalUser, PrimalZap } from "../../types/primal";
 import ArticlePreview from "../ArticlePreview/ArticlePreview";
 import Avatar from "../Avatar/Avatar";
 import ButtonCopy from "../Buttons/ButtonCopy";
@@ -195,6 +195,11 @@ const ProfileTabs: Component<{
       return test;
     });
   };
+
+  const hasImages = (note: PrimalNote) => {
+    const test = (imageRegex).test(note.content);
+    return test;
+  }
 
   const getZapSubject = (zap: PrimalZap) => {
     if (zap.zappedKind === Kind.Text) {
@@ -542,10 +547,10 @@ const ProfileTabs: Component<{
                   <div>
                     <Show when={profile && profile.gallery.length === 0 && !profile.isFetchingGallery}>
                       <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noReplies,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
+                        {intl.formatMessage(
+                          t.noReplies,
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                        )}
                       </div>
                     </Show>
                   </div>
@@ -554,7 +559,16 @@ const ProfileTabs: Component<{
                     <div class={styles.galleryGrid}>
                       <For each={galleryImages()}>
                         {(note) => (
-                          <NoteGallery note={note} />
+                          <Switch>
+                            <Match when={hasImages(note)}>
+                              <NoteGallery note={note} />
+                            </Match>
+                            <Match when={!hasImages(note)}>
+                              <A href={`/e/${note.noteId}`} class={styles.missingImage}>
+                                <NoteGallery note={note} />
+                              </A>
+                            </Match>
+                          </Switch>
                         )}
                       </For>
                     </div>
