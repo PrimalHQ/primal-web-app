@@ -14,6 +14,22 @@ export const noActions = (id: string) => ({
   zapped: false,
 });
 
+export const parseRepost = (message: NostrNoteContent, defaultKind = 1) => {
+  try {
+    return JSON.parse(message.content) as NostrNoteContent;
+  } catch (e) {
+    return {
+      kind: defaultKind,
+      content: '',
+      id: message.id,
+      created_at: message.created_at,
+      pubkey: message.pubkey,
+      sig: message.sig,
+      tags: message.tags,
+    } as NostrNoteContent;
+  }
+};
+
 export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
 
   const identifier = (event.tags.find(t => t[0] === 'd') || [])[1];
@@ -270,13 +286,19 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
   let notes: PrimalNote[] = [];
 
   for (i=0;i<page.notes.length;i++) {
-    const note = page.notes[i];
+    const pageNote = page.notes[i];
+
+    // If this is a repost, parse it for the originsl note.
+    const note = pageNote.kind === Kind.Repost ? parseRepost(pageNote) : pageNote;
+
+    // if this is a repost extract repost info
+    const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
+
     const author = convertToUser(page.users[note.pubkey]) || emptyUser(note.pubkey);
     const stat = page.noteStats[note.id];
     const topZaps = page.topZaps[note.id] || [];
 
 
-    const repost = note.kind === Kind.Repost ? extractRepostInfo(page, note) : undefined;
     const tags = note.tags || [];
     const userMentionIds = tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
     const replyTo = extractReplyTo(tags);

@@ -1,6 +1,6 @@
 import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
-import { getEvents, getFutureUserFeed, getUserFeed } from "../lib/feed";
+import { getEvents, getFutureUserFeed, getMegaFeed, getUserFeed } from "../lib/feed";
 import { convertToArticles, convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
 import { emptyPage, Kind } from "../constants";
 import {
@@ -62,6 +62,7 @@ import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import { logInfo } from "../lib/logger";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
+import { fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 
 let startTime = 0;
 let midTime = 0;
@@ -83,6 +84,7 @@ export type ProfileContextStore = {
   zapListOffset: number,
   lastZap: PrimalZap | undefined,
   commonFollowers: PrimalUser[],
+  paging: Record<string, PaginationInfo>,
   future: {
     notes: PrimalNote[],
     articles: PrimalArticle[],
@@ -127,25 +129,11 @@ export type ProfileContextStore = {
   },
   parsedAbout: JSXElement | undefined,
   actions: {
-    saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
-    saveReplies: (newNotes: PrimalNote[]) => void,
     clearReplies: () => void,
     clearZaps: () => void,
-    fetchReplies: (noteId: string | undefined, until?: number) => void,
-    fetchNextRepliesPage: () => void,
-    fetchNotes: (noteId: string | undefined, until?: number) => void,
-    fetchNextPage: () => void,
-    fetchArticles: (noteId: string | undefined, until?: number) => void,
-    fetchNextArticlesPage: () => void,
     clearArticles: () => void,
-    fetchGallery: (noteId: string | undefined, until?: number) => void,
-    fetchNextGalleryPage: () => void,
     clearGallery: () => void,
-    updatePage: (content: NostrEventContent) => void,
-    savePage: (page: FeedPage) => void,
-    updateRepliesPage: (content: NostrEventContent) => void,
-    saveRepliesPage: (page: FeedPage) => void,
     setProfileKey: (profileKey?: string) => void,
     refreshNotes: () => void,
     checkForNewNotes: (pubkey: string | undefined) => void,
@@ -159,6 +147,8 @@ export type ProfileContextStore = {
     fetchZapList: (pubkey: string | undefined) => void,
     fetchNextZapsPage: () => void,
     resetProfile: () => void,
+    getProfileMegaFeed: (pubkey: string | undefined, tab: string, until?: number, limit?: number) => void,
+    getProfileMegaFeedNextPage: (pubkey: string | undefined, tab: string) => void,
   }
 }
 
@@ -262,6 +252,28 @@ export const initialData = {
     stats: {},
   },
   parsedAbout: undefined,
+  paging: {
+    notes: {
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    },
+    reads: {
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    },
+    gallery: {
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    },
+    replies: {
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    },
+  },
 };
 
 export const ProfileContext = createContext<ProfileContextStore>();
@@ -273,6 +285,125 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   let commonFollowers: PrimalUser[] = [];
 
 // ACTIONS --------------------------------------
+
+  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0) => {
+    if (!pubkey) return;
+
+    if (tab === 'notes') {
+      const specification = {
+        id: 'feed',
+        kind:'notes',
+        notes: 'authored',
+        pubkey,
+      };
+
+      updateStore('isFetching', () => true);
+
+      const { notes, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        JSON.stringify(specification),
+        `profile_notes_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: offset || store.notes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+        },
+      );
+
+      updateStore('paging', 'notes', () => ({ ...paging }));
+      updateStore('notes', (ns) => [ ...ns, ...notes]);
+      updateStore('isFetching', () => false);
+      return;
+    }
+
+    if (tab === 'replies') {
+      const specification = {
+        id: 'feed',
+        kind:'notes',
+        notes: 'replies',
+        pubkey,
+      };
+
+      updateStore('isFetchingReplies', () => true);
+
+      const { notes, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        JSON.stringify(specification),
+        `profile_replies_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: offset || store.replies.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+        },
+      );
+
+      updateStore('paging', 'replies', () => ({ ...paging }));
+      updateStore('replies', (ns) => [ ...ns, ...notes]);
+      updateStore('isFetchingReplies', () => false);
+      return;
+    }
+
+    if (tab === 'reads') {
+      const specification = {
+        id: 'feed',
+        kind:'reads',
+        notes: 'authored',
+        pubkey,
+      };
+
+      updateStore('isFetching', () => true);
+
+      const { reads, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        JSON.stringify(specification),
+        `profile_reads_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: offset || store.articles.map(n => n.published || 0),
+        },
+      );
+
+      updateStore('paging', 'reads', () => ({ ...paging }));
+      updateStore('articles', (ns) => [ ...ns, ...reads]);
+      updateStore('isFetching', () => false);
+      return;
+    }
+
+    if (tab === 'media') {
+      const specification = {
+        id: 'feed',
+        kind:'notes',
+        notes: 'user_media_thumbnails',
+        pubkey,
+      };
+
+      updateStore('isFetchingGallery', () => true);
+
+      const { notes, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        JSON.stringify(specification),
+        `profile_media_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: offset || store.gallery.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+        },
+      );
+
+      updateStore('paging', 'media', () => ({ ...paging }));
+      updateStore('gallery', (ns) => [ ...ns, ...notes]);
+      updateStore('isFetchingGallery', () => false);
+      return;
+    }
+  }
+  const getProfileMegaFeedNextPage = async (pubkey: string | undefined, tab: string) => {
+    if (!pubkey) return;
+
+    const paging = store.paging[tab] || { until: 0, since: 0, sortBy: 'created_at'};
+
+    getProfileMegaFeed(pubkey, tab, paging.since, 20);
+  }
 
   const fetchZapList = async (pubkey: string | undefined, until = 0, offset = 0, indicateFetching = true) => {
     if (!pubkey) return;
@@ -372,7 +503,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     getProfileContactList(pubkey, subIdContacts, extended);
   };
 
-
   const fetchRelayList = (pubkey: string | undefined) => {
     if (!pubkey) return;
 
@@ -441,110 +571,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     getProfileFollowerList(pubkey, subIdProfiles);
   };
 
-  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
-    if (scope) {
-      updateStore(scope, 'notes', (notes) => [ ...notes, ...newNotes ]);
-      loadFutureContent();
-      return;
-    }
-    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
-    updateStore('isFetching', () => false);
-
-    endTime = (new Date()).getTime();
-
-    logInfo(`FETCH NOTES DONE (${store.profileKey}) Total: ${endTime -startTime}ms, Since EOSE: ${endTime - midTime}ms`);
-  };
-
-  const saveArticles = (newNotes: PrimalArticle[], scope?: 'future') => {
-    if (scope) {
-      updateStore(scope, 'articles', (notes) => [ ...notes, ...newNotes ]);
-      loadFutureContent();
-      return;
-    }
-    updateStore('articles', (notes) => [ ...notes, ...newNotes ]);
-    updateStore('isFetching', () => false);
-  };
-
-  const saveReplies = (newNotes: PrimalNote[], scope?: 'future') => {
-    if (scope) {
-      updateStore(scope, 'replies', (notes) => [ ...notes, ...newNotes ]);
-      loadFutureContent();
-      return;
-    }
-    updateStore('replies', (notes) => [ ...notes, ...newNotes ]);
-    updateStore('isFetchingReplies', () => false);
-  };
-
-  const fetchArticles = async (pubkey: string | undefined, until = 0, limit = 20) => {
-    if (!pubkey) {
-      return;
-    }
-
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    updateStore('isFetching', () => true);
-    let articles = await fetchUserArticles(account?.publicKey, pubkey, 'authored', `profile_articles_1_${APP_ID}`, until, limit);
-
-    articles = articles.filter(a => a.id !== store.lastArticle?.id);
-
-    updateStore('articles', (arts) => [ ...arts, ...articles]);
-    updateStore('isFetching', () => false);
-  }
-
-  const fetchNotes = (pubkey: string | undefined, until = 0, limit = 20) => {
-    if (!pubkey) {
-      return;
-    }
-
-    startTime = (new Date()).getTime()
-    updateStore('isFetching', () => true);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-    getUserFeed(account?.publicKey, pubkey, `profile_feed_${APP_ID}`, 'authored', undefined, until, limit);
-  }
-
-  const fetchReplies = (pubkey: string | undefined, until = 0, limit = 20) => {
-    if (!pubkey) {
-      return;
-    }
-
-    updateStore('isFetchingReplies', () => true);
-    updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {} }));
-    getUserFeed(account?.publicKey, pubkey, `profile_replies_${APP_ID}`, 'replies', undefined, until, limit);
-  }
-
-  const fetchGallery = async (pubkey: string | undefined, until = 0, limit = 20) => {
-    if (!pubkey) {
-      return;
-    }
-
-    updateStore('isFetchingGallery', () => true);
-    let gallery = await fetchUserGallery(account?.publicKey, pubkey, 'user_media_thumbnails', `profile_gallery_${APP_ID}`, until, limit);
-
-    updateStore('gallery', (arts) => [ ...arts, ...gallery]);
-    updateStore('isFetchingGallery', () => false);
-  }
-
-  const fetchNextGalleryPage = () => {
-    const lastNote = store.gallery[store.gallery.length - 1];
-
-    if (!lastNote) {
-      return;
-    }
-
-    updateStore('lastGallery', () => ({ ...lastNote }));
-
-    const criteria = paginationPlan('latest');
-
-    const noteData: Record<string, any> =  lastNote.repost ?
-      lastNote.repost.note :
-      lastNote.post;
-
-    const until = noteData[criteria];
-
-    if (until > 0 && store.profileKey) {
-      fetchGallery(store.profileKey, until);
-    }
-  };
-
   const clearGallery = () => {
     updateStore('gallery', () => []);
     updateStore('lastGallery', () => undefined);
@@ -598,66 +624,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   const clearFilterReason = () => {
     updateStore('filterReason', () => null);
-  };
-
-  const fetchNextPage = () => {
-    const lastNote = store.notes[store.notes.length - 1];
-
-    if (!lastNote) {
-      return;
-    }
-
-    updateStore('lastNote', () => ({ ...lastNote }));
-
-    const criteria = paginationPlan('latest');
-
-    const noteData: Record<string, any> =  lastNote.repost ?
-      lastNote.repost.note :
-      lastNote.post;
-
-    const until = noteData[criteria];
-
-    if (until > 0 && store.profileKey) {
-      fetchNotes(store.profileKey, until);
-    }
-  };
-
-  const fetchNextArticlesPage = () => {
-    const lastArticle = store.articles[store.articles.length - 1];
-
-    if (!lastArticle) {
-      return;
-    }
-
-    updateStore('lastArticle', () => ({ ...lastArticle }));
-
-    const until = parseInt((lastArticle.msg.tags.find(t => t[0] === 'published_at') || [])[1] || '0');
-
-    if (!isNaN(until) && until > 0 && store.profileKey) {
-      fetchArticles(store.profileKey, until);
-    }
-  };
-
-  const fetchNextRepliesPage = () => {
-    const lastReply = store.replies[store.replies.length - 1];
-
-    if (!lastReply) {
-      return;
-    }
-
-    updateStore('lastReply', () => ({ ...lastReply }));
-
-    const criteria = paginationPlan('latest');
-
-    const noteData: Record<string, any> =  lastReply.repost ?
-      lastReply.repost.note :
-      lastReply.post;
-
-    const until = noteData[criteria];
-
-    if (until > 0 && store.profileKey) {
-      fetchReplies(store.profileKey, until);
-    }
   };
 
   const clearFuture = () => {
@@ -715,408 +681,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('notes', (notes) => [...store.future.notes, ...notes]);
     clearFuture();
-  };
-
-  const updatePage = (content: NostrEventContent, scope?: 'future') => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      if (scope) {
-        updateStore(scope, 'page', 'users',
-          () => ({ [user.pubkey]: { ...user } })
-        );
-        return;
-      }
-
-      updateStore('page', 'users',
-        () => ({ [user.pubkey]: { ...user } })
-      );
-      return;
-    }
-
-    if ([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-      const messageId = nip19.naddrEncode({ kind: Kind.LongForm, pubkey: message.pubkey, identifier: (message.tags.find(t => t[0] === 'd') || [])[1]});
-
-      if (scope) {
-        const isFirstNote = store.articles[0]?.noteId === messageId;
-
-          if (!isFirstNote) {
-            updateStore(scope, 'page', 'messages',
-              (msgs) => [ ...msgs, { ...message }]
-            );
-          }
-        return;
-      }
-
-      const isLastNote = store.lastArticle?.noteId === messageId;
-
-      if (!isLastNote) {
-        updateStore('page', 'messages', messages => [ ...messages, message]);
-      }
-
-      return;
-    }
-
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-      const messageId = nip19.noteEncode(message.id);
-
-      if (scope) {
-        const isFirstNote = message.kind === Kind.Text ?
-          store.notes[0]?.post?.noteId === messageId :
-          store.notes[0]?.repost?.note.noteId === messageId;
-
-          if (!isFirstNote) {
-            updateStore(scope, 'page', 'messages',
-              (msgs) => [ ...msgs, { ...message }]
-            );
-          }
-        return;
-      }
-
-      const isLastNote = message.kind === Kind.Text ?
-        store.lastNote?.post?.noteId === messageId :
-        store.lastNote?.repost?.note.noteId === messageId;
-
-      if (!isLastNote) {
-        updateStore('page', 'messages', messages => [ ...messages, message]);
-      }
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      if (scope) {
-        updateStore(scope, 'page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-        );
-        return;
-      }
-
-      updateStore('page', 'postStats', () => ({ [stat.event_id]: stat }));
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      if (scope) {
-        updateStore(scope, 'page', 'mentions',
-        () => ({ [mention.id]: { ...mention } })
-        );
-        return;
-      }
-      updateStore('page', 'mentions', () => ({ [mention.id]: { ...mention } }));
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      if (scope) {
-        updateStore(scope, 'page', 'noteActions',
-        () => ({ [noteActions.event_id]: { ...noteActions } })
-        );
-        return;
-      }
-      updateStore('page', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
-      return;
-    }
-
-    if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
-      }
-
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
-      return;
-    }
-
-    if (content?.kind === Kind.Zap) {
-      const zapTag = content.tags.find(t => t[0] === 'description');
-
-      if (!zapTag) return;
-
-      const zapInfo = JSON.parse(zapTag[1] || '{}');
-
-      let amount = '0';
-
-      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
-
-      if (bolt11Tag) {
-        try {
-          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
-        } catch (e) {
-          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
-
-          amount = amountTag ? amountTag[1] : '0';
-        }
-      }
-
-      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
-
-      const zap: TopZap = {
-        id: zapInfo.id,
-        amount: parseInt(amount || '0'),
-        pubkey: zapInfo.pubkey,
-        message: zapInfo.content,
-        eventId,
-      };
-
-      if (scope) {
-        const oldZaps = store[scope].page.topZaps[eventId];
-
-        if (oldZaps === undefined) {
-          updateStore(scope, 'page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
-          return;
-        }
-
-        if (oldZaps.find(i => i.id === zap.id)) {
-          return;
-        }
-
-        const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-        updateStore(scope, 'page', 'topZaps', eventId, () => [ ...newZaps ]);
-        return;
-      }
-
-      const oldZaps = store.page.topZaps[eventId];
-
-      if (oldZaps === undefined) {
-        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
-        return;
-      }
-
-      if (oldZaps.find(i => i.id === zap.id)) {
-        return;
-      }
-
-      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
-
-      return;
-    }
-
-  };
-
-  const savePage = (page: FeedPage, scope?: 'future') => {
-    const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps;
-    const newPosts = sortByRecency(convertToNotes(page, topZaps));
-
-    saveNotes(newPosts, scope);
-  };
-
-  const saveArticlesPage = (page: FeedPage, scope?: 'future') => {
-    const topZaps = scope ? store[scope].page.topZaps : store.page.topZaps;
-    const newPosts = convertToArticles(page, topZaps);
-
-    saveArticles(newPosts, scope);
-  };
-
-
-  const updateRepliesPage = (content: NostrEventContent, scope?: 'future') => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      if (scope) {
-        updateStore(scope, 'repliesPage', 'users',
-          () => ({ [user.pubkey]: { ...user } })
-        );
-        return;
-      }
-
-      updateStore('repliesPage', 'users',
-        () => ({ [user.pubkey]: { ...user } })
-      );
-      return;
-    }
-
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-      const messageId = nip19.noteEncode(message.id);
-
-      if (scope) {
-        const isFirstReply = message.kind === Kind.Text ?
-          store.replies[0]?.post?.noteId === messageId :
-          store.replies[0]?.repost?.note.noteId === messageId;
-
-          if (!isFirstReply) {
-            updateStore(scope, 'repliesPage', 'messages',
-              (msgs) => [ ...msgs, { ...message }]
-            );
-          }
-        return;
-      }
-
-      const isLastReply = message.kind === Kind.Text ?
-        store.lastReply?.post?.noteId === messageId :
-        store.lastReply?.repost?.note.noteId === messageId;
-
-      if (!isLastReply) {
-        updateStore('repliesPage', 'messages', messages => [ ...messages, message]);
-      }
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      if (scope) {
-        updateStore(scope, 'repliesPage', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-        );
-        return;
-      }
-
-      updateStore('repliesPage', 'postStats', () => ({ [stat.event_id]: stat }));
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      if (scope) {
-        updateStore(scope, 'repliesPage', 'mentions',
-        () => ({ [mention.id]: { ...mention } })
-        );
-        return;
-      }
-      updateStore('repliesPage', 'mentions', () => ({ [mention.id]: { ...mention } }));
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      if (scope) {
-        updateStore(scope, 'repliesPage', 'noteActions',
-        () => ({ [noteActions.event_id]: { ...noteActions } })
-        );
-        return;
-      }
-      updateStore('repliesPage', 'noteActions', () => ({ [noteActions.event_id]: noteActions }));
-      return;
-    }
-
-    if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
-      }
-
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
-      return;
-    }
-
-    if (content?.kind === Kind.Zap) {
-      const zapTag = content.tags.find(t => t[0] === 'description');
-
-      if (!zapTag) return;
-
-      const zapInfo = JSON.parse(zapTag[1] || '{}');
-
-      let amount = '0';
-
-      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
-
-      if (bolt11Tag) {
-        try {
-          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
-        } catch (e) {
-          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
-
-          amount = amountTag ? amountTag[1] : '0';
-        }
-      }
-
-      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
-
-      const zap: TopZap = {
-        id: zapInfo.id,
-        amount: parseInt(amount || '0'),
-        pubkey: zapInfo.pubkey,
-        message: zapInfo.content,
-        eventId,
-      };
-
-      if (scope) {
-        const oldZaps = store[scope].repliesPage.topZaps[eventId];
-
-        if (oldZaps === undefined) {
-          updateStore(scope, 'repliesPage', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
-          return;
-        }
-
-        if (oldZaps.find(i => i.id === zap.id)) {
-          return;
-        }
-
-        const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-        updateStore(scope, 'repliesPage', 'topZaps', eventId, () => [ ...newZaps ]);
-        return;
-      }
-
-      const oldZaps = store.repliesPage.topZaps[eventId];
-
-      if (oldZaps === undefined) {
-        updateStore('repliesPage', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
-        return;
-      }
-
-      if (oldZaps.find(i => i.id === zap.id)) {
-        return;
-      }
-
-      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-      updateStore('repliesPage', 'topZaps', eventId, () => [ ...newZaps ]);
-
-      return;
-    }
-  };
-
-  const saveRepliesPage = (page: FeedPage, scope?: 'future') => {
-    const newPosts = sortByRecency(convertToNotes(page));
-
-    saveReplies(newPosts, scope);
   };
 
 
@@ -1219,9 +783,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 8);
       getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
 
-      const articles = await fetchUserArticles(account?.publicKey, profileKey, 'authored', `profile_articles_latest_${APP_ID}`, 0, 2);
 
-      updateStore('sidebarArticles', () => ({ notes: [...articles ]}))
+      const readsSidebarSpec = {
+        id: 'feed',
+        kind:'reads',
+        notes: 'authored',
+        pubkey: profileKey,
+      };
+
+      const { reads } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_articles_latest_${APP_ID}`, { until: 0, limit: 2 });
+
+      updateStore('sidebarArticles', () => ({ notes: [...reads ]}))
       updateStore('isFetchingSidebarArticles', () => false);
 
       isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
@@ -1286,63 +858,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === `profile_articles_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          saveArticlesPage(store.page);
-          return;
-        }
-
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `profile_reposts_${APP_ID}`);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-    }
-
-    if (subId === `profile_feed_${APP_ID}`) {
-      if (type === 'EOSE') {
-        midTime = (new Date()).getTime();
-        logInfo(`FETCH NOTES EOSE (${store.profileKey}) Total: ${midTime -startTime}ms`);
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
-        }
-
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `profile_reposts_${APP_ID}`);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-    }
-
-    if (subId === `profile_replies_${APP_ID}`) {
-      if (type === 'EOSE') {
-        saveRepliesPage(store.repliesPage);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updateRepliesPage(content);
-        return;
-      }
-    }
 
     if (subId === `profile_info_${APP_ID}`) {
       if (type === 'EOSE') {
@@ -1385,37 +900,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         return;
       }
     }
-
-    if (subId === `profile_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.page);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
-        return;
-      }
-    }
-
-    // if (subId === `profile_oldest_${APP_ID}`) {
-    //   if (content?.kind === Kind.OldestEvent) {
-    //     const timestamp = Number.parseInt(content.content);
-    //     if (isNaN(timestamp)) {
-    //       updateStore('oldestNoteDate', () => undefined);
-    //       return;
-    //     }
-    //     updateStore('oldestNoteDate', () => timestamp);
-    //   }
-    //   return;
-    // }
 
     if (subId === `profile_contacts_${APP_ID}`) {
       if (content && content.kind === Kind.Contacts) {
@@ -1462,60 +946,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT') {
         updateCommonFollowers(content);
-        return;
-      }
-    }
-
-    // if (subId === `profile_articles_latest_${APP_ID}`) {
-    //   if (type === 'EOSE') {
-    //     saveSidebar(store.sidebarArticles, 'sidebarArticles');
-    //     return;
-    //   }
-
-    //   if (type === 'EVENT') {
-    //     updateSidebar(content, 'sidebarArticles');
-    //     return;
-    //   }
-    // }
-
-    if (subId === `profile_future_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.future.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.future.page, 'future');
-          return;
-        }
-
-        updateStore('future', 'reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `profile_future_reposts_${APP_ID}`);
-
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content, 'future');
-        return;
-      }
-    }
-
-    if (subId === `profile_future_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.future.page, 'future');
-        return;
-      }
-
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.future.reposts || {};
-        const parent = store.future.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('future', 'page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
         return;
       }
     }
@@ -1585,24 +1015,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const [store, updateStore] = createStore<ProfileContextStore>({
     ...initialData,
     actions: {
-      saveNotes,
       clearNotes,
-      fetchNotes,
-      fetchNextPage,
-      fetchArticles,
-      fetchNextArticlesPage,
       clearArticles,
-      fetchGallery,
-      fetchNextGalleryPage,
       clearGallery,
-      updatePage,
-      savePage,
-      saveReplies,
       clearReplies,
-      fetchReplies,
-      fetchNextRepliesPage,
-      updateRepliesPage,
-      saveRepliesPage,
       setProfileKey,
       refreshNotes,
       checkForNewNotes,
@@ -1617,6 +1033,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearZaps,
       resetProfile,
       clearFilterReason,
+
+      getProfileMegaFeed,
+      getProfileMegaFeedNextPage,
     },
   });
 

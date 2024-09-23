@@ -163,16 +163,21 @@ const ProfileTabs: Component<{
 
     switch(value) {
       case 'reads':
-        profile.articles.length === 0 && profile.actions.fetchArticles(profile.profileKey);
+        // profile.articles.length === 0 && profile.actions.fetchArticles(profile.profileKey);
+        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'reads');
         break;
       case 'notes':
-        profile.notes.length === 0 && profile.actions.fetchNotes(profile.profileKey);
+        // profile.notes.length === 0 && profile.actions.fetchNotes(profile.profileKey);
+
+        profile.notes.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'notes');
         break;
       case 'replies':
-        profile.replies.length === 0 && profile.actions.fetchReplies(profile.profileKey);
+        // profile.replies.length === 0 && profile.actions.fetchReplies(profile.profileKey);
+        profile.replies.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'replies');
         break;
       case 'media':
-        profile.gallery.length === 0 && profile.actions.fetchGallery(profile.profileKey);
+        // profile.gallery.length === 0 && profile.actions.fetchGallery(profile.profileKey);
+        profile.gallery.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'media');
         break;
       case 'zaps':
         profile.zaps.length === 0 && profile.actions.fetchZapList(profile.profileKey);
@@ -184,6 +189,7 @@ const ProfileTabs: Component<{
   }
 
   const galleryImages = () => {
+    return profile?.gallery;
     return profile?.gallery.filter(note => {
       const test = (imageRegex).test(note.content);
       return test;
@@ -338,7 +344,8 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.fetchNextArticlesPage();
+                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'reads');
+                          // profile?.actions.fetchNextArticlesPage();
                         }}
                         isSmall={true}
                       />
@@ -409,7 +416,8 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.fetchNextPage();
+                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'notes');
+                          // profile?.actions.fetchNextPage();
                         }}
                         isSmall={true}
                       />
@@ -480,7 +488,8 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.fetchNextRepliesPage();
+                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'replies');
+                          // profile?.actions.fetchNextRepliesPage();
                         }}
                         isSmall={true}
                       />
@@ -551,7 +560,8 @@ const ProfileTabs: Component<{
                     </div>
                     <Paginator
                       loadNextPage={() => {
-                        profile?.actions.fetchNextGalleryPage();
+                        profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'media');
+                        // profile?.actions.fetchNextGalleryPage();
                       }}
                       isSmall={true}
                     />
@@ -559,74 +569,6 @@ const ProfileTabs: Component<{
                 </TransitionGroup>
               </Match>
             </Switch>
-          </div>
-        </Tabs.Content>
-
-        <Tabs.Content class={styles.tabContent} value="follows">
-          <div class={styles.profileNotes}>
-            <Show
-              when={!profile?.isFetchingContacts}
-              fallback={
-                  <div style="margin-top: 40px;">
-                    <Loader />
-                  </div>
-              }
-            >
-              <For each={contacts} fallback={
-                <div class={styles.mutedProfile}>
-                  {intl.formatMessage(
-                    t.noFollows,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                  )}
-                </div>
-              }>
-                {contact =>
-                  <div>
-                    <ProfileContact
-                      profile={contact}
-                      profileStats={profile?.profileStats[contact.pubkey]}
-                      postAction={onContactAction}
-                    />
-                  </div>}
-              </For>
-              <Paginator loadNextPage={loadMoreFollows} isSmall={true} />
-            </Show>
-          </div>
-        </Tabs.Content>
-
-        <Tabs.Content class={styles.tabContent} value="followers">
-          <div class={styles.profileNotes}>
-            <Show
-              when={!profile?.isFetchingFollowers}
-              fallback={
-                <div style="margin-top: 40px;">
-                  <Loader />
-                </div>
-              }
-            >
-              <For
-                each={followers}
-                fallback={
-                  <div class={styles.mutedProfile}>
-                    {intl.formatMessage(
-                      t.noFollowers,
-                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
-                    )}
-                  </div>
-                }
-              >
-                {follower =>
-                  <div>
-                    <ProfileContact
-                      profile={follower}
-                      profileStats={profile?.profileStats[follower.pubkey]}
-                      postAction={onContactAction}
-                    />
-                  </div>
-                }
-              </For>
-              <Paginator loadNextPage={loadMoreFollowers} isSmall={true} />
-            </Show>
           </div>
         </Tabs.Content>
 
