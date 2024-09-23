@@ -52,7 +52,7 @@ const SelectionBox2: Component<{
       id={props.id}
       class={styles.selectionBox}
       options={props.options}
-      optionValue="id"
+      optionValue="value"
       optionTextValue="label"
       optionDisabled="disabled"
       itemComponent={(prps) => SelectionItem(prps)}

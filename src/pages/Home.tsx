@@ -60,18 +60,8 @@ const Home: Component = () => {
     scrollWindowTo(context?.scrollTop);
   });
 
-  // createEffect(() => {
-  //   if (account?.isKeyLookupDone && account.publicKey) {
-  //     const selected = context?.selectedFeed;;
-
-  //     if (selected) {
-  //       context?.actions.selectFeed({ ...selected });
-  //     }
-  //   }
-  // });
-
   createEffect(() => {
-    if ((context?.future.notes.length || 0) > 99 || app?.isInactive) {
+    if ((context?.futureNotes.length || 0) > 99 || app?.isInactive) {
       clearInterval(checkNewNotesTimer);
       return;
     }
@@ -93,7 +83,7 @@ const Home: Component = () => {
   });
 
   createEffect(() => {
-    const count = context?.future.notes.length || 0;
+    const count = context?.futureNotes.length || 0;
     if (count === 0) {
       return
     }
@@ -103,7 +93,7 @@ const Home: Component = () => {
     }
 
     if (newPostAuthors.length < 3) {
-      const users = context?.future.notes.map(note => note.user) || [];
+      const users = context?.futureNotes.map(note => note.user) || [];
 
       const uniqueUsers = users.reduce<PrimalUser[]>((acc, user) => {
         const isDuplicate = acc.find(u => u.pubkey === user.pubkey);

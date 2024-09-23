@@ -64,11 +64,11 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
   const home = useHomeContext();
 
   onMount(() => {
-    if (account?.isKeyLookupDone && home?.sidebar.notes.length === 0) {
+    if (account?.isKeyLookupDone && home?.sidebarNotes.length === 0) {
       const stored = readHomeSidebarSelection(account.publicKey) || sidebarOptions[0];
 
       home?.actions.updateSidebarQuery(stored);
-      home?.actions.doSidebarSearch(home?.sidebar.query?.value || '');
+      home?.actions.doSidebarSearch(stored.value || '');
     }
   });
 
@@ -77,18 +77,19 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       <div class={styles.headingTrending}>
         <SelectionBox2
           options={sidebarOptions}
-          value={home?.sidebar.query}
+          value={home?.sidebarQuery}
           onChange={(option: SelectionOption) => {
+            console.log('SELECTED: ', option)
             home?.actions.updateSidebarQuery(option);
             saveHomeSidebarSelection(account?.publicKey, option);
-            home?.actions.doSidebarSearch(home?.sidebar.query?.value || '');
+            home?.actions.doSidebarSearch(option.value || '');
           }}
         />
       </div>
 
       <Transition name="slide-fade">
         <Show
-          when={!home?.sidebar.isFetching}
+          when={!home?.isFetchingSidebar}
           fallback={
             <div>
               <For each={new Array(24)}>
@@ -98,7 +99,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
           }
         >
           <div>
-            <For each={home?.sidebar.notes}>
+            <For each={home?.sidebarNotes}>
               {(note) => (
                 <div class="animated">
                   <SmallNote note={note} />

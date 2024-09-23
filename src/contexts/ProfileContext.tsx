@@ -791,7 +791,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey: profileKey,
       };
 
-      const { reads } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_articles_latest_${APP_ID}`, { until: 0, limit: 2 });
+      const { reads } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
 
       updateStore('sidebarArticles', () => ({ notes: [...reads ]}))
       updateStore('isFetchingSidebarArticles', () => false);

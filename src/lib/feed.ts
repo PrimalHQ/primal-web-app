@@ -47,11 +47,21 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
-export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, offset = 0) => {
+export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, since = 0, offset = 0) => {
 
   const start = until === 0 ? 'since' : 'until';
 
-  let payload = { spec, limit, [start]: until, offset };
+  let payload = { spec, limit, offset };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
 
   if (user_pubkey) {
     // @ts-ignore
