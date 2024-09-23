@@ -19,7 +19,9 @@ import {
 import { parseBolt11 } from "./utils";
 import { convertToNotesMega, convertToReadsMega } from "./stores/megaFeed";
 import { FeedRange } from "./pages/FeedQueryTest";
-import { getScoredUsers } from "./lib/search";
+import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
+import { fetchArticles } from "./handleNotes";
+import { APP_ID } from "./App";
 
 export type PaginationInfo = {
   since: number,
@@ -156,6 +158,31 @@ export const fetchScoredContent = (
     });
 
     getScoredUsers(pubkey, selector, 10, subId);
+  });
+}
+
+export const fetchRecomendedReads = (
+  subId: string,
+) => {
+  return new Promise<PrimalArticle[]>((resolve) => {
+    let ids: string[] = [];
+
+    const unsub = subsTo(subId, {
+      onEose: () => {
+        unsub();
+
+        fetchArticles(ids, `get_paramertized_${APP_ID}`).then((reads) => {
+          resolve(reads);
+        });
+
+      },
+      onEvent: (_, content) => {
+        const recomended = JSON.parse(content?.content || '{}');
+        ids = recomended.reads.reduce((acc: string[], r: string[]) => r[0] ? [ ...acc, r[0] ] : acc, []);
+      }
+    });
+
+    getRecomendedArticleIds(subId);
   });
 }
 

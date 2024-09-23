@@ -205,7 +205,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
 
     updateStore('isFetching' , () => includeIsFetching);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
 
     const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 

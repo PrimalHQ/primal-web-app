@@ -181,33 +181,33 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
   });
 
 
-  createEffect(() => {
-    const rec = reads?.recomendedReads || [];
+  // createEffect(() => {
+  //   const rec = reads?.recomendedReads || [];
 
-    if (rec.length > 0 && !got()) {
-      setGot(() => true);
-      let randomIndices = getRandomIntegers(0, rec.length, 3);
+  //   if (rec.length > 0 && !got()) {
+  //     setGot(() => true);
+  //     let randomIndices = getRandomIntegers(0, rec.length, 3);
 
-      const reads = [ ...randomIndices ].map(i => rec[i]);
+  //     const reads = [ ...randomIndices ].map(i => rec[i]);
 
-      getRecomendedArticles(reads)
-    }
-  });
+  //     getRecomendedArticles(reads)
+  //   }
+  // });
 
-  const getRecomendedArticles = async (ids: string[]) => {
-    if (!reads) return;
-    if (reads.topPicks.length > 0) return;
+  // const getRecomendedArticles = async (ids: string[]) => {
+  //   if (!reads) return;
+  //   if (reads.topPicks.length > 0) return;
 
-    const subId = `reads_picks_${APP_ID}`;
+  //   const subId = `reads_picks_${APP_ID}`;
 
-    setIsFetching(() => true);
+  //   setIsFetching(() => true);
 
-    const articles = await fetchArticles(ids,subId);
+  //   const articles = await fetchArticles(ids,subId);
 
-    setIsFetching(() => false);
+  //   setIsFetching(() => false);
 
-    reads.actions.setTopPicks(articles);
-  };
+  //   reads.actions.setTopPicks(articles);
+  // };
 
   return (
     <div id={props.id} class={styles.readsSidebar}>
@@ -244,10 +244,10 @@ const ReadsSidebar: Component< { id?: string } > = (props) => {
                 each={reads?.topPicks}
               >
                 {(note) =>
-                    <div class="animated">
-                      <ArticleShort article={note} />
-                    </div>
-                  }
+                  <div class="animated">
+                    <ArticleShort article={note} />
+                  </div>
+                }
               </For>
             </div>
           </Show>

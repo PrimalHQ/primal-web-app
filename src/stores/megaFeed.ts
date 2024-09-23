@@ -130,6 +130,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
   const mentionIds = Object.keys(page.mentions || {});
   const userMentionIds = note.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
   const wordCounts = page.wordCount || {};
+  const topZaps = page.topZaps[note.id] || [];
 
   let mentionedNotes: Record<string, PrimalNote> = {};
   let mentionedUsers: Record<string, PrimalUser> = {};
@@ -150,11 +151,19 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     mentionedUsers[mention.pubkey] = convertToUser(page.users[mention.pubkey] || emptyUser(mention.pubkey));
 
     // Parse mention tags for more mentioned users
-    for (let i = 0;i<mention.tags.length;i++) {
+    for (let i=0;i<mention.tags.length;i++) {
       const t = mention.tags[i];
-      if (t[0] === 'p' && !mentionedUsers[t[1]]) {
-        mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
-      }
+      if (t[0] !== 'p' || mentionedUsers[t[1]]) continue;
+
+      mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
+    }
+
+    // include senders of top zaps into mentioned users
+    for(let i=0; i<topZaps.length; i++) {
+      const topZap = topZaps[i];
+      if (mentionedUsers[topZap.pubkey]) continue;
+
+      mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey] || emptyUser(topZap.pubkey));
     }
 
     const mentionStat = page.noteStats[mentionId];
@@ -192,6 +201,13 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
       const wordCount = wordCounts[mention.id] || 0;
 
+      const published = mention.tags.reduce<number>((acc, t) => {
+        if (t[0] !== 'published_at') return acc;
+
+        const time = parseInt(t[1]);
+        return time > acc ? time : acc;
+      }, 0);
+
       let article: PrimalArticle = {
         id: mention.id,
         pubkey: mention.pubkey,
@@ -199,7 +215,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         summary: '',
         image: '',
         tags: [],
-        published: mention.created_at || 0,
+        published: published || mention.created_at || 0,
         content: sanitize(mention.content || ''),
         user: mentionedUsers[mention.pubkey],
         topZaps: page.topZaps[mention.id] || [],
@@ -298,19 +314,11 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
     const stat = page.noteStats[note.id];
     const topZaps = page.topZaps[note.id] || [];
 
-
     const tags = note.tags || [];
-    const userMentionIds = tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
     const replyTo = extractReplyTo(tags);
 
-    // include senders of top zaps into mentioned users
-    for(let i=0; i<topZaps.length; i++) {
-      if (userMentionIds.includes(topZaps[i].pubkey)) continue;
-      userMentionIds.push(topZaps[i].pubkey);
-    }
-
     // Parse mentions
-    const {
+    let {
       mentionedNotes,
       mentionedArticles,
       mentionedUsers,
@@ -399,6 +407,12 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedHighlights,
     } = extractMentions(page, read);
 
+    const published = read.tags.reduce<number>((acc, t) => {
+      if (t[0] !== 'published_at') return acc;
+
+      const time = parseInt(t[1]);
+      return time > acc ? time : acc;
+    }, 0);
 
     let newRead: PrimalArticle = {
       id: read.id,
@@ -407,7 +421,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       summary: '',
       image: '',
       tags: [],
-      published: parseInt((read.tags.find(t => t[0] === 'published_at') || [])[1] || `${read.created_at}` || '0'),
+      published: published || read.created_at || 0,
       content: sanitize(read.content || ''),
       user: author,
       topZaps,
