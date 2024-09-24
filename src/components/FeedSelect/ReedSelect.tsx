@@ -141,7 +141,6 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   };
 
   return (
-    <Show when={options().length > 0}>
       <SelectionBox2
         options={options()}
         onChange={selectFeed}
@@ -153,7 +152,6 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         caption="Reads Feeds"
         captionAction={<A href="/settings/reads_feeds">Edit Feeds</A>}
       />
-    </Show>
   );
 }
 

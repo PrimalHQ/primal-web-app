@@ -353,7 +353,7 @@ const Note: Component<{
 
           <div class={styles.content}>
 
-          <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
+            <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
               <ParsedNote
                 note={props.note}
                 width={Math.min(640, window.innerWidth)}

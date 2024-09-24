@@ -3,7 +3,7 @@ import { Select } from "@kobalte/core/select";
 
 // Import default styles. (All examples use this via a global import)
 import "@thisbeyond/solid-select/style.css";
-import { Component, JSXElement, Show } from "solid-js";
+import { Component, createEffect, JSXElement, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
 import { placeholders } from "../../translations";
 import { SelectionOption } from "../../types/primal";
@@ -13,6 +13,7 @@ import SelectionItem from "./SelectionItem";
 // Apply custom styling. See stylesheet below.
 import styles from  "./SelectionBox.module.scss";
 import { A } from "@solidjs/router";
+import { createStore } from "solid-js/store";
 
 
 const SelectionBox2: Component<{
@@ -47,6 +48,14 @@ const SelectionBox2: Component<{
 
   const hasCaption = () => props.caption || props.captionAction;
 
+  const [opts, setOpts] = createStore<SelectionOption[]>([]);
+
+  createEffect(() => {
+    if (props.options.length > 0) {
+      setTimeout(() => setOpts(() => [...props.options]), 200);
+    }
+  })
+
   return (
     <Select
       id={props.id}
@@ -61,12 +70,14 @@ const SelectionBox2: Component<{
       onChange={props.onChange}
     >
       <Select.Trigger class={props.big ? styles.triggerBig : styles.trigger}>
-        <Select.Value<SelectionOption>>
-          {state => state.selectedOption()?.label || ''}
-        </Select.Value>
-        <Select.Icon>
-          <div class={props.big ? styles.selectionIconBig : styles.selectionIcon}></div>
-        </Select.Icon>
+          <Select.Value<SelectionOption>>
+            {state => opts.length > 0 ? state.selectedOption()?.label || '' : ''}
+          </Select.Value>
+          <Select.Icon>
+            <Show when={opts.length > 0}>
+              <div class={props.big ? styles.selectionIconBig : styles.selectionIcon}></div>
+            </Show>
+          </Select.Icon>
       </Select.Trigger>
       <Select.Content class={styles.selectionContent}>
         <Show when={hasCaption()}>
