@@ -1124,7 +1124,7 @@ const EditBox: Component<{
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
 
-            const u = convertToUser(user)
+            const u = convertToUser(user, content.pubkey)
 
             setUserRefs(() => ({ [u.pubkey]: u }));
 

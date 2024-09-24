@@ -802,8 +802,8 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
 
           if (![Kind.Text, Kind.LongForm].includes(zappedKind)) continue;
 
-          const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey]) : senderPubkey;
-          const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey]) : receiverPubkey;
+          const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
+          const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;
 
           const zap: PrimalZap = {
             id: zapContent.id,

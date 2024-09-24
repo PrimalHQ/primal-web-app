@@ -4,12 +4,9 @@ import { getEvents, getMegaFeed, getUserArticleFeed, getUserFeed } from "./lib/f
 import { decodeIdentifier, hexToNpub } from "./lib/keys";
 import { getParametrizedEvents, setLinkPreviews } from "./lib/notes";
 import { getUserProfileInfo } from "./lib/profile";
-import { updateStore, store } from "./services/StoreService";
 import { subscribeTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
-import { convertToUser } from "./stores/profile";
-import { account } from "./translations";
-import { EventCoordinate, FeedPage, NostrEventContent, NostrEventType, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
+import { EventCoordinate, FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
 import { parseBolt11 } from "./utils";
 
 export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {

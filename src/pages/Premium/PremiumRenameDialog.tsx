@@ -46,7 +46,6 @@ const PremiumRenameDialog: Component<{
     clearTimeout(nameCheckTimeout);
 
     nameCheckTimeout = setTimeout(async () => {
-      console.log('CHECK NAME: ', name)
 
       if (name.length < 3) {
         setErrorMessage(() => intl.formatMessage(t.errors.nameTooShort));

@@ -131,7 +131,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 
@@ -173,7 +173,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 
@@ -226,7 +226,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 
@@ -275,7 +275,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 

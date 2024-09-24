@@ -668,7 +668,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ...page,
       messages: page.messages.filter(m => m.kind === Kind.Text)
     }
-    const users = Object.values(page.users).map(convertToUser);
+    const users = Object.values(page.users).map(u => convertToUser(u, u.pubkey));
 
     const replies = sortByRecency(convertToNotes(pageWithNotes, pageWithNotes.topZaps));
     const articles = convertToArticles(page, page.topZaps);
@@ -936,7 +936,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   const saveHighlightsPage = (page: FeedPage) => {
 
-    const users = Object.values(page.users).map(convertToUser);
+    const users = Object.values(page.users).map(u => convertToUser(u, u.pubkey));
 
     const replies = sortByRecency(convertToNotes(page, page.topZaps));
 

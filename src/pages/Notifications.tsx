@@ -394,7 +394,7 @@ const Notifications: Component = () => {
         const pageUsers = oldNotifications.page.users;
 
         const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
-          return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key])}};
+          return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key], key)}};
         },  {});
 
         setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
@@ -446,7 +446,7 @@ const Notifications: Component = () => {
 
     return pks.map((pk) => {
       const user = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       return { ...user, ...userStats[pk]} as PrimalNotifUser;
@@ -607,7 +607,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -651,7 +651,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -695,7 +695,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -739,7 +739,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -787,7 +787,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -830,7 +830,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -874,7 +874,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -917,7 +917,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -965,7 +965,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -1008,7 +1008,7 @@ const Notifications: Component = () => {
       const pk: string = note.user.pubkey;
 
       const rUser: PrimalUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];

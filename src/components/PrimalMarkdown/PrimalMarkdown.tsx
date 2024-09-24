@@ -1,47 +1,31 @@
-import { Component, createEffect, createSignal, For, lazy, Match, onCleanup, onMount, Show, Suspense, Switch } from 'solid-js';
-import { editorViewOptionsCtx, Editor, rootCtx } from '@milkdown/core';
+import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Editor } from '@milkdown/core';
 
 import {
-  commonmark,
   toggleStrongCommand,
   toggleEmphasisCommand,
 } from '@milkdown/preset-commonmark';
 
 import {
-  gfm,
   insertTableCommand,
 } from '@milkdown/preset-gfm';
 
-import { callCommand, getMarkdown, replaceAll, insert, getHTML, outline } from '@milkdown/utils';
+import { callCommand } from '@milkdown/utils';
 import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
-
-import { listener, listenerCtx } from '@milkdown/plugin-listener';
-
 import  styles from './PrimalMarkdown.module.scss';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { Ctx } from '@milkdown/ctx';
-import { decodeIdentifier, hexToNpub, npubToHex } from '../../lib/keys';
-import { subscribeTo } from '../../sockets';
-import { APP_ID } from '../../App';
-import { getUserProfileInfo } from '../../lib/profile';
+import { hexToNpub, npubToHex } from '../../lib/keys';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { eventRegexLocal, Kind, mdImageRegex, noteRegex, profileRegex, profileRegexG } from '../../constants';
-import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
-import { authorName, convertToUser, userName } from '../../stores/profile';
+import { eventRegexLocal, Kind, mdImageRegex, profileRegexG } from '../../constants';
+import { NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
+import { userName } from '../../stores/profile';
 import { A, useNavigate } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
 import { nip19 } from '../../lib/nTools';
-import { fetchNotes } from '../../handleNotes';
-import { logError } from '../../lib/logger';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import NoteImage from '../NoteImage/NoteImage';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
-import { template } from 'solid-js/web';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
-import LinkPreview from '../LinkPreview/LinkPreview';
-import ArticleLinkPreview from '../LinkPreview/ArticleLinkPreview';
-import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
 import { useToastContext } from '../Toaster/Toaster';
 import MarkdownSlice from './MarkdownSlice';

@@ -311,7 +311,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
         if (content?.kind === Kind.Metadata) {
           const userData = content as NostrUserContent;
-          const user = convertToUser(userData);
+          const user = convertToUser(userData, content.pubkey);
 
           !followed.includes(user.pubkey) && setFollowed(followed.length, user.pubkey);
           setSuggestedData('users', () => ({ [user.pubkey]: { ...user }}))

@@ -243,7 +243,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT') {
         if (content?.kind === Kind.Metadata) {
-          user = convertToUser(content);
+          user = convertToUser(content, content.pubkey);
         }
       }
 
@@ -530,7 +530,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     const refs = store.referencePage.users;
 
     const users = Object.keys(refs).reduce((acc, id) => {
-      const user = convertToUser(refs[id]);
+      const user = convertToUser(refs[id], id);
       return {...acc, [user.pubkey]: { ...user }};
     }, {});
 
@@ -683,7 +683,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
             return;
           }
 
-          const user = convertToUser(content);
+          const user = convertToUser(content, content.pubkey);
           fetchedSenders[user.pubkey] = { ...user };
           // updateStore('senders', user.pubkey, () => ({ ...user }));
         }

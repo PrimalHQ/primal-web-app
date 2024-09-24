@@ -97,7 +97,7 @@ const Moderation: Component = () => {
           if (response.kind === Kind.Metadata) {
             const user = response as NostrUserContent;
 
-            const u = convertToUser(user);
+            const u = convertToUser(user, response.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
             return;
           }
@@ -128,7 +128,7 @@ const Moderation: Component = () => {
           if (response.kind === Kind.Metadata) {
             const user = response as NostrUserContent;
 
-            const u = convertToUser(user);
+            const u = convertToUser(user, response.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
             return;
           }
@@ -159,7 +159,7 @@ const Moderation: Component = () => {
           if (response.kind === Kind.Metadata) {
             const user = response as NostrUserContent;
 
-            const u = convertToUser(user);
+            const u = convertToUser(user, response.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
             return;
           }

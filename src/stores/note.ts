@@ -381,7 +381,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
         for (let i = 0;i<m.tags.length;i++) {
           const t = m.tags[i];
           if (t[0] === 'p') {
-            mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
+            mentionedUsers[t[1]] = convertToUser(page.users[t[1]], t[1]);
           }
         }
 
@@ -412,7 +412,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
               satszapped: mentionStat?.satszapped || 0,
               noteActions,
             },
-            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            user: convertToUser(page.users[m.pubkey], m.pubkey),
             mentionedUsers,
             pubkey: m.pubkey,
             id: m.id,
@@ -447,7 +447,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             tags: [],
             published: m.created_at || 0,
             content: sanitize(m.content || ''),
-            user: user ? convertToUser(user) : emptyUser(m.pubkey),
+            user: convertToUser(user, m.pubkey),
             topZaps: [...tz],
             naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
             noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
@@ -498,7 +498,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
         if ([Kind.Highlight].includes(m.kind)) {
           mentionedHighlights[id] = {
-            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            user: convertToUser(page.users[m.pubkey], m.pubkey),
             event: { ...m },
           }
         }
@@ -511,7 +511,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
         const id = userMentionIds[i];
         const m = page.users && page.users[id];
 
-        mentionedUsers[id] = convertToUser(m || emptyUser(id));
+        mentionedUsers[id] = convertToUser(m, id);
       }
     }
 
@@ -627,7 +627,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
         for (let i = 0;i<m.tags.length;i++) {
           const t = m.tags[i];
           if (t[0] === 'p') {
-            mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
+            mentionedUsers[t[1]] = convertToUser(page.users[t[1]], t[1]);
           }
         }
 
@@ -658,7 +658,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
               satszapped: mentionStat?.satszapped || 0,
               noteActions,
             },
-            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            user: convertToUser(page.users[m.pubkey], m.pubkey),
             mentionedUsers,
             pubkey: m.pubkey,
             id: m.id,
@@ -693,7 +693,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             tags: [],
             published: m.created_at || 0,
             content: sanitize(m.content || ''),
-            user: user ? convertToUser(user) : emptyUser(m.pubkey),
+            user: convertToUser(user, m.pubkey),
             topZaps: [...tz],
             naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
             noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
@@ -744,7 +744,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
         if ([Kind.Highlight].includes(m.kind)) {
           mentionedHighlights[id] = {
-            user: convertToUser(page.users[m.pubkey] || emptyUser(m.pubkey)),
+            user: convertToUser(page.users[m.pubkey], m.pubkey),
             event: { ...m },
           }
         }
@@ -757,7 +757,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
         const id = userMentionIds[i];
         const m = page.users && page.users[id];
 
-        mentionedUsers[id] = convertToUser(m || emptyUser(id));
+        mentionedUsers[id] = convertToUser(m, id);
       }
     }
 
@@ -772,7 +772,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       tags: [],
       published: parseInt((msg.tags.find(t => t[0] === 'published_at') || [])[1] || `${msg.created_at}` || '0'),
       content: sanitize(msg.content || ''),
-      user: user ? convertToUser(user) : emptyUser(msg.pubkey),
+      user: convertToUser(user, msg.pubkey),
       topZaps: [...tz],
       naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
       noteId: nip19.naddrEncode({ identifier, pubkey, kind }),

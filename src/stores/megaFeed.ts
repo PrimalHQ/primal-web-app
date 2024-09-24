@@ -148,14 +148,14 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     const stat = page.noteStats[mentionId];
 
     // Add mention author to mentioned users list
-    mentionedUsers[mention.pubkey] = convertToUser(page.users[mention.pubkey] || emptyUser(mention.pubkey));
+    mentionedUsers[mention.pubkey] = convertToUser(page.users[mention.pubkey], mention.pubkey);
 
     // Parse mention tags for more mentioned users
     for (let i=0;i<mention.tags.length;i++) {
       const t = mention.tags[i];
       if (t[0] !== 'p' || mentionedUsers[t[1]]) continue;
 
-      mentionedUsers[t[1]] = convertToUser(page.users[t[1]] || emptyUser(t[1]));
+      mentionedUsers[t[1]] = convertToUser(page.users[t[1]], t[1]);
     }
 
     // include senders of top zaps into mentioned users
@@ -163,7 +163,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
       const topZap = topZaps[i];
       if (mentionedUsers[topZap.pubkey]) continue;
 
-      mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey] || emptyUser(topZap.pubkey));
+      mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey], topZap.pubkey);
     }
 
     const mentionStat = page.noteStats[mentionId];
@@ -268,7 +268,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
     if ([Kind.Highlight].includes(mention.kind)) {
       mentionedHighlights[mentionId] = {
-        user: convertToUser(page.users[mention.pubkey] || emptyUser(mention.pubkey)),
+        user: convertToUser(page.users[mention.pubkey], mention.pubkey),
         event: { ...mention },
       }
     }
@@ -279,7 +279,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
       const id = userMentionIds[i];
       const m = page.users && page.users[id];
 
-      mentionedUsers[id] = convertToUser(m || emptyUser(id));
+      mentionedUsers[id] = convertToUser(m, id);
     }
   }
 
@@ -310,7 +310,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
     // if this is a repost extract repost info
     const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
 
-    const author = convertToUser(page.users[note.pubkey]) || emptyUser(note.pubkey);
+    const author = convertToUser(page.users[note.pubkey], note.pubkey);
     const stat = page.noteStats[note.id];
     const topZaps = page.topZaps[note.id] || [];
 
@@ -380,7 +380,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
 
   for (i=0;i<page.reads.length;i++) {
     const read = page.reads[i];
-    const author = convertToUser(page.users[read.pubkey]) || emptyUser(read.pubkey);
+    const author = convertToUser(page.users[read.pubkey], read.pubkey);
     const stat = page.noteStats[read.id];
     const topZaps = page.topZaps[read.id] || [];
     const wordCount = (page.wordCount || {})[read.id] || 0;

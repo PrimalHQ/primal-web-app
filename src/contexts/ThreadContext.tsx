@@ -343,7 +343,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
   const savePage = (page: FeedPage) => {
     const newPosts = sortByRecency(convertToNotes(page, store.topZaps));
-    const users = Object.values(page.users).map(convertToUser);
+    const users = Object.values(page.users).map((u) => convertToUser(u, u.pubkey));
 
     updateStore('users', () => [ ...users ]);
     saveNotes(newPosts);

@@ -16,7 +16,8 @@ export const truncateName = (name: string, limit = 20) => {
   return `${name.slice(0, limit)}...`;
 };
 
-export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
+export const convertToUser: (user: NostrUserContent, pubkey: string) => PrimalUser = (user: NostrUserContent, pubkey: string) => {
+  if (!user) return emptyUser(pubkey);
 
   let userMeta: any = {};
 

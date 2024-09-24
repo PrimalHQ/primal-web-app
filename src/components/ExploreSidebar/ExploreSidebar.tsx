@@ -49,7 +49,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
           return emptyUser(key);
         }
 
-        return convertToUser(store.users[key]);
+        return convertToUser(store.users[key], key);
       });
 
       setTrendingUsers(() => [...users]);

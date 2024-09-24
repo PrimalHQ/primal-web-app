@@ -72,7 +72,7 @@ const FeedMarketPlace: Component<{
         }
 
         if (content.kind === Kind.Metadata) {
-          const user = convertToUser(content);
+          const user = convertToUser(content, content.pubkey);
 
           updateStore('users', user.pubkey, () => ({ ...user }));
           return;
@@ -91,7 +91,6 @@ const FeedMarketPlace: Component<{
         }
       },
       onEose: () => {
-        console.log('STORE: ', { ...store });
         unsub();
       }
     });

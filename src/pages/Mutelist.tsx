@@ -52,7 +52,7 @@ const Mutelist: Component = () => {
           pubkeys = response.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
         }
         if (response?.kind === Kind.Metadata) {
-          users[response.pubkey] = convertToUser(response);
+          users[response.pubkey] = convertToUser(response, response.pubkey);
         }
       }
 
@@ -82,7 +82,7 @@ const Mutelist: Component = () => {
     const unsub = subscribeTo(subId, (type, _, response) => {
       if (type === 'EVENT') {
         if (response?.kind === Kind.Metadata) {
-          user = convertToUser(response);
+          user = convertToUser(response, response.pubkey);
         }
       }
 

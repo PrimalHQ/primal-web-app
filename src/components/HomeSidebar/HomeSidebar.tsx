@@ -79,7 +79,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
           options={sidebarOptions}
           value={home?.sidebarQuery}
           onChange={(option: SelectionOption) => {
-            console.log('SELECTED: ', option)
             home?.actions.updateSidebarQuery(option);
             saveHomeSidebarSelection(account?.publicKey, option);
             home?.actions.doSidebarSearch(option.value || '');

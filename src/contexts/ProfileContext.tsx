@@ -750,7 +750,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       if (user.pubkey === store.profileKey) return;
 
-      commonFollowers.push(convertToUser(user));
+      commonFollowers.push(convertToUser(user, content.pubkey));
       return;
     }
   };
