@@ -45,7 +45,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
-import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -202,7 +202,7 @@ const ParsedNote: Component<{
 
   const noteContent = () => {
     const content = props.note.post.content;
-    const charLimit = 7 * shortNoteWords;
+    const charLimit = shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
 
