@@ -274,7 +274,7 @@ const Note: Component<{
 
     const lnCount = props.note.content.match(linebreakRegex)?.length || 0;
 
-    if (lnCount > 4) return false;
+    if (lnCount > 0) return false;
 
     let strippedContent = props.note.content
       .replace(imageRegexG, '__PRIMAL_REPLACEMENT__')
@@ -290,7 +290,7 @@ const Note: Component<{
 
     strippedContent.replaceAll('__PRIMAL_REPLACEMENT__', '');
 
-    const isShort = strippedContent.length < 140;
+    const isShort = strippedContent.length < 42;
     const isReply = props.note.replyTo;
 
     // return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
