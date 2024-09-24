@@ -366,7 +366,7 @@ const Note: Component<{
                 topZaps={reactionsState.topZaps}
                 zapCount={reactionsState.zapCount}
                 action={() => openReactionModal('zaps')}
-                doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
+                // doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
               />
             </div>
 
