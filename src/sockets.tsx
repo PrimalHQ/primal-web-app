@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { logError, logInfo } from "./lib/logger";
-import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow, NostrNotice } from "./types/primal";
+import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow, NostrNotice, NostrEvents } from "./types/primal";
+import pako from 'pako';
 
 export const [socket, setSocket] = createSignal<WebSocket>();
 
@@ -45,7 +46,9 @@ export const connect = () => {
       localStorage.getItem('cacheServer') ||
       import.meta.env.PRIMAL_CACHE_URL;
 
-    setSocket(new WebSocket(cacheServer));
+    let s = new WebSocket(cacheServer);
+    s.binaryType = 'arraybuffer';
+    setSocket(s);
     logInfo('CACHE SOCKET: ', socket());
 
     socket()?.addEventListener('open', onOpen);
@@ -109,12 +112,31 @@ export const removeSocketListeners = (
 };
 
 export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
-  const listener = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-    const [type, subscriptionId, content] = message;
+  const listener = async (event: MessageEvent) => {
+    try {
+      const data = await readData(event);
+      const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
+      const [type, subscriptionId, content] = message;
 
-    if (subId === subscriptionId) {
-      cb(type, subscriptionId, content);
+      console.log('SUBSCRIBE: ', subscriptionId, content);
+
+      if (type === 'EVENTS') {
+        let i = 0;
+
+        for (i=0;i<content.length;i++) {
+          const e = content[i];
+          cb('EVENT', subscriptionId, e);
+        }
+
+        cb('EOSE', subscriptionId);
+        return;
+      }
+
+      if (subId === subscriptionId) {
+        cb(type, subscriptionId, content);
+      }
+    } catch (e) {
+      logError('SOCKET LISTENER: ', subId, ' : ', e)
     }
   };
 
@@ -125,13 +147,53 @@ export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: str
   };
 };
 
-export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
-  const listener = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-    const [type, subscriptionId, content] = message;
+export const decompressBlob  = async (blob: ArrayBuffer) => {
+  try {
+    const result = pako.inflate(blob, { to: 'string' });
+    return result as string;
+  } catch (e) {
+    logError('ERROR PAKO: ', e)
+    return '{}'
+  }
+}
 
-    if (subId === subscriptionId) {
-      cb(type, subscriptionId, content);
+export const readData = async (event: MessageEvent) => {
+  if (typeof event.data === 'string') return event.data;
+
+  try {
+    const decom = await decompressBlob(event.data);
+    return decom;
+  } catch(e) {
+    console.log('ERROR TO DECOMPRESS BLOB: ', e)
+    return '{}'
+  }
+}
+
+export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
+  const listener = async (event: MessageEvent) => {
+    try {
+      const data = await readData(event);
+      const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
+      const [type, subscriptionId, content] = message;
+
+      console.log('SUBSCRIBE: ', subscriptionId, content);
+      if (type === 'EVENTS') {
+        let i = 0;
+
+        for (i=0;i<content.length;i++) {
+          const e = content[i];
+          cb('EVENT', subscriptionId, e);
+        }
+
+        cb('EOSE', subscriptionId);
+        return;
+      }
+
+      if (subId === subscriptionId) {
+        cb(type, subscriptionId, content);
+      }
+    } catch (e) {
+      logError('SOCKET LISTENER: ', subId, ' : ', e)
     }
 
   };
@@ -152,22 +214,43 @@ export const subsTo = (
     onEose?: (subId: string) => void,
   },
 ) => {
-  const listener = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE | NostrNotice = JSON.parse(event.data);
-    const [type, subscriptionId] = message;
 
-    if (handlers && subId === subscriptionId) {
-      if (type === 'EVENT') {
-        handlers.onEvent && handlers.onEvent(subscriptionId, message[2]);
-      }
+  const listener = async (event: MessageEvent) => {
+    try {
+      const data = await readData(event);
+      const message: NostrEvent | NostrEOSE | NostrNotice | NostrEvents = JSON.parse(data);
+      const [type, subscriptionId] = message;
 
-      if (type === 'EOSE') {
-        handlers.onEose && handlers.onEose(subscriptionId);
-      }
 
-      if (type === 'NOTICE') {
-        handlers.onNotice && handlers.onNotice(subscriptionId, message[2])
+      if (handlers && subId === subscriptionId) {
+        if (type === 'EVENTS') {
+          const events = message[2];
+
+          console.log('GOT: ', type, subscriptionId, events);
+          let i = 0;
+
+          for (i=0;i<events.length;i++) {
+            const e = events[i];
+            handlers.onEvent && handlers.onEvent(subscriptionId, e)
+          }
+
+          handlers.onEose && handlers.onEose(subscriptionId);
+        }
+
+        if (type === 'EVENT') {
+          handlers.onEvent && handlers.onEvent(subscriptionId, message[2]);
+        }
+
+        if (type === 'EOSE') {
+          handlers.onEose && handlers.onEose(subscriptionId);
+        }
+
+        if (type === 'NOTICE') {
+          handlers.onNotice && handlers.onNotice(subscriptionId, message[2])
+        }
       }
+    } catch (e) {
+      logError('SOCKET LISTENER: ', subId, ' : ', e)
     }
 
   };

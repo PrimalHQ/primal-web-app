@@ -12,7 +12,9 @@ import {
   useContext
 } from "solid-js";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket
@@ -23,6 +25,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrEvents,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -853,99 +856,169 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleProfileInfoEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.FilteringReason) {
+      const reason:  { action: 'block' | 'allow', pubkey?: string, group?: string } | null =
+        JSON.parse(content.content) || null;
+
+      if (reason?.action === 'block') {
+        updateStore('filterReason', () => ({ ...reason }));
+      } else {
+        updateStore('filterReason', () => null);
+      }
+    }
+
+    if (content?.kind === Kind.Metadata) {
+      let user = JSON.parse(content.content);
+
+      if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
+        user.displayName = user.display_name;
+      }
+      user.pubkey = content.pubkey;
+      user.npub = hexToNpub(content.pubkey);
+      user.created_at = content.created_at;
+
+      updateStore('userProfile', () => ({ ...user }));
+      addProfileToHistory(user);
+      return;
+    }
+
+    if (content?.kind === Kind.UserStats) {
+      const stats = JSON.parse(content.content);
+
+      updateStore('userStats', () => ({ ...stats }));
+      addStatsToHistory(stats)
+      updateStore('fetchedUserStats', () => true);
+      return;
+    }
+  }
+
+  const handleProfileInfoEose = () => {
+    updateStore('isProfileFetched', () => true);
+  }
+
+  const handleProfileContectsEvent = (content: NostrEventContent) => {
+    if (content && content.kind === Kind.Contacts) {
+      const tags = content.tags;
+      let contacts: string[] = [];
+
+      for (let i = 0;i<tags.length;i++) {
+        const tag = tags[i];
+        if (tag[0] === 'p') {
+          contacts.push(tag[1]);
+        }
+      }
+
+      updateStore('following', () => contacts);
+    }
+  }
+
+  const handleProfileFollowingEvent = (content: NostrEventContent) => {
+    updateStore('isProfileFollowing', JSON.parse(content?.content || 'false'))
+  }
+  const handleProfileScoredEvent = (content: NostrEventContent) => {
+    updateSidebar(content);
+  }
+  const handleProfileScoredEose = () => {
+    saveSidebar(store.sidebarNotes);
+    updateStore('isFetchingSidebarNotes', () => false);
+  }
+  const handleProfileCommonFollowersEvent = (content: NostrEventContent) => {
+    updateCommonFollowers(content);
+  }
+  const handleProfileCommonFollowersEose = () => {
+    saveCommonFollowers();
+  }
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
 
     if (subId === `profile_info_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleProfileInfoEvent(e);
+        }
+
+        handleProfileInfoEose();
+      }
+
       if (type === 'EOSE') {
-        updateStore('isProfileFetched', () => true);
+        handleProfileInfoEose()
         return;
       }
 
-      if (content?.kind === Kind.FilteringReason) {
-        const reason:  { action: 'block' | 'allow', pubkey?: string, group?: string } | null =
-          JSON.parse(content.content) || null;
-
-        if (reason?.action === 'block') {
-          updateStore('filterReason', () => ({ ...reason }));
-        } else {
-          updateStore('filterReason', () => null);
-        }
-      }
-
-      if (content?.kind === Kind.Metadata) {
-        let user = JSON.parse(content.content);
-
-        if (!user.displayName || typeof user.displayName === 'string' && user.displayName.trim().length === 0) {
-          user.displayName = user.display_name;
-        }
-        user.pubkey = content.pubkey;
-        user.npub = hexToNpub(content.pubkey);
-        user.created_at = content.created_at;
-
-        updateStore('userProfile', () => ({ ...user }));
-        addProfileToHistory(user);
-        return;
-      }
-
-      if (content?.kind === Kind.UserStats) {
-        const stats = JSON.parse(content.content);
-
-        updateStore('userStats', () => ({ ...stats }));
-        addStatsToHistory(stats)
-        updateStore('fetchedUserStats', () => true);
-        return;
+      if (type === 'EVENT') {
+        handleProfileInfoEvent(content);
       }
     }
 
     if (subId === `profile_contacts_${APP_ID}`) {
-      if (content && content.kind === Kind.Contacts) {
-        const tags = content.tags;
-        let contacts: string[] = [];
-
-        for (let i = 0;i<tags.length;i++) {
-          const tag = tags[i];
-          if (tag[0] === 'p') {
-            contacts.push(tag[1]);
-          }
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleProfileContectsEvent(e);
         }
-
-        updateStore('following', () => contacts);
+      }
+      if (type === 'EVENT') {
+        handleProfileContectsEvent(content);
       }
       return;
     }
 
     if (subId === `is_profile_following_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleProfileFollowingEvent(e);
+        }
+      }
       if (type === 'EVENT') {
-        updateStore('isProfileFollowing', JSON.parse(content?.content || 'false'))
+        handleProfileFollowingEvent(content)
         return;
       }
     }
 
     if (subId === `profile_scored_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleProfileScoredEvent(e);
+        }
+
+        handleProfileScoredEose();
+      }
       if (type === 'EOSE') {
-        saveSidebar(store.sidebarNotes);
-        updateStore('isFetchingSidebarNotes', () => false);
+        handleProfileScoredEose();
         return;
       }
 
       if (type === 'EVENT') {
-        updateSidebar(content);
+        handleProfileScoredEvent(content)
         return;
       }
     }
 
     if (subId === `profile_cf_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleProfileCommonFollowersEvent(e);
+        }
+
+        handleProfileCommonFollowersEose();
+      }
       if (type === 'EOSE') {
-        saveCommonFollowers();
+        handleProfileCommonFollowersEose();
         return;
       }
 
       if (type === 'EVENT') {
-        updateCommonFollowers(content);
+        handleProfileCommonFollowersEvent(content);
         return;
       }
     }

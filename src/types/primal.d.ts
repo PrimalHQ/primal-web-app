@@ -335,6 +335,11 @@ export type NostrEvent = [
   subkey: string,
   content: NostrEventContent,
 ];
+export type NostrEvents = [
+  type: "EVENTS",
+  subkey: string,
+  content: NostrEventContent[],
+];
 
 export type NostrEOSE = [
   type: "EOSE",

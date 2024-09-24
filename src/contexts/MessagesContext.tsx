@@ -8,7 +8,9 @@ import {
   useContext
 } from "solid-js";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket,
@@ -21,6 +23,8 @@ import {
   FeedPage,
   NostrEOSE,
   NostrEvent,
+  NostrEventContent,
+  NostrEvents,
   NostrMentionContent,
   NostrMessageEncryptedContent,
   NostrNoteActionsContent,
@@ -641,210 +645,307 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   let emptyUsers: string[] = [];
   let fetchedSenders: Record<string, PrimalUser> = {};
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleMsgCountEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.MessageStats) {
+      const count = parseInt(content.cnt);
+
+      if (count !== store.messageCount) {
+        updateStore('messageCount', () => count);
+        // updateStore('selectedSender', () => null);
+      }
+    }
+  }
+
+  const handleMsgCountPerSenderEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.MesagePerSenderStats) {
+      const senderCount = JSON.parse(content.content);
+
+      emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
+        if (store.senders[pk]) return [ ...acc ];
+
+        return [ ...acc, pk];
+      }, []);
+
+      updateStore('messageCountPerSender', () => ({ ...senderCount }));
+      updateMessageTimings();
+    }
+
+    if (content?.kind === Kind.Metadata) {
+
+      const isFollowing = account?.following.includes(content.pubkey);
+
+      if (isFollowing && store.senderRelation !== 'follows' ||
+        !isFollowing && store.senderRelation !== 'other'
+      ) {
+        return;
+      }
+
+      const user = convertToUser(content, content.pubkey);
+      fetchedSenders[user.pubkey] = { ...user };
+      // updateStore('senders', user.pubkey, () => ({ ...user }));
+    }
+  };
+
+  const handleMsgCountPerSenderEose = () => {
+    const keys = Object.keys(store.senders);
+    const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
+
+    let sendersToAdd: Record<string, PrimalUser> = {};
+
+    const pks = Object.keys(fetchedSenders)
+
+    for (let i=0; i < pks.length; i++) {
+      const pk = pks[i];
+
+      if (store.senders[pk]) continue;
+
+      sendersToAdd[pk] = fetchedSenders[pk];
+    }
+
+    for (let i=0; i < emptyUsers.length; i++) {
+      const pk = emptyUsers[i];
+      if (store.senders[pk] || sendersToAdd[pk]) continue;
+
+      sendersToAdd[pk] = emptyUser(pk);
+    }
+
+    updateStore('senders', () => ({ ...fetchedSenders, ...sendersToAdd }));
+
+    fetchedSenders = {};
+
+    // saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
+    saveDmConversations(store.activePubkey, store.senders, store.messageCountPerSender);
+
+    if (store.messageCount > cnt) {
+      updateStore('hasMessagesInDifferentTab', () => true);
+    }
+
+    if (store.addSender !== undefined) {
+      const key = store.addSender.pubkey;
+      const user = { ...store.addSender }
+
+      updateStore('senders', () => ({ [key]: user }));
+      updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
+      selectSender(store.addSender.pubkey);
+      updateStore('addSender', () => undefined);
+      return;
+    }
+
+    const senders = orderedSenders();
+
+    if (!store.selectedSender) {
+      selectSender(senders[0].npub);
+    }
+    // !store.selectedSender && updateStore('selectedSender', () => ({ ...store.senders[senderIds[0]] }));
+
+  }
+
+  const handleMsgCoversationEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.EncryptedDirectMessage) {
+      updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
+    }
+  }
+
+  const handleMsgCoversationEose = (subId: string) => {
+    if (subId === subidCoversation) {
+      decryptMessages(generateConversation);
+      return;
+    }
+
+    if (subId === subidCoversationNextPage) {
+      decryptMessages(prependToConversation);
+      return;
+    }
+  }
+
+  const handleNewMsgEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.EncryptedDirectMessage) {
+      updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
+    }
+  }
+
+  const handleNewMsgEose = () => {
+    decryptMessages((msgs) => addToConversation(msgs, true));
+  }
+
+  const handleUserRefEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      updateStore('referencePage', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      );
+    }
+  }
+
+  const handleUserRefEose = () => {
+    updateRefUsers();
+  }
+
+
+  const handleNoteRefEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.Metadata) {
+      const user = content as NostrUserContent;
+
+      updateStore('referencePage', 'users',
+        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
+      );
+    }
+
+    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      updateStore('referencePage', 'messages',
+        (msgs) => [ ...msgs, { ...message }]
+      );
+
+      return;
+    }
+
+    if (content.kind === Kind.NoteStats) {
+      const statistic = content as NostrStatsContent;
+      const stat = JSON.parse(statistic.content);
+
+      updateStore('referencePage', 'postStats',
+        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.Mentions) {
+      const mentionContent = content as NostrMentionContent;
+      const mention = JSON.parse(mentionContent.content);
+
+      updateStore('referencePage', 'mentions',
+        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+      );
+      return;
+    }
+
+    if (content.kind === Kind.NoteActions) {
+      const noteActionContent = content as NostrNoteActionsContent;
+      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+      updateStore('referencePage', 'noteActions',
+        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
+      );
+      return;
+    }
+  }
+
+  const handleNoteRefEose = () => {
+    updateRefNotes();
+    updateRefUsers();
+  }
+
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === subidMsgCount()) {
-      if (content?.kind === Kind.MessageStats) {
-        const count = parseInt(content.cnt);
-
-        if (count !== store.messageCount) {
-          updateStore('messageCount', () => count);
-          // updateStore('selectedSender', () => null);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleMsgCountEvent(e);
         }
-
+        return;
+      }
+      if (type === 'EVENT') {
+        handleMsgCountEvent(content);
       }
     }
 
     if (subId === subidMsgCountPerSender) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleMsgCountPerSenderEvent(e);
+        }
+        handleMsgCountPerSenderEose();
+        return;
+      }
       if (type === 'EVENT') {
-        if (content?.kind === Kind.MesagePerSenderStats) {
-          const senderCount = JSON.parse(content.content);
-
-          emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
-            if (store.senders[pk]) return [ ...acc ];
-
-            return [ ...acc, pk];
-          }, []);
-
-          updateStore('messageCountPerSender', () => ({ ...senderCount }));
-          updateMessageTimings();
-        }
-
-        if (content?.kind === Kind.Metadata) {
-
-          const isFollowing = account?.following.includes(content.pubkey);
-
-          if (isFollowing && store.senderRelation !== 'follows' ||
-            !isFollowing && store.senderRelation !== 'other'
-          ) {
-            return;
-          }
-
-          const user = convertToUser(content, content.pubkey);
-          fetchedSenders[user.pubkey] = { ...user };
-          // updateStore('senders', user.pubkey, () => ({ ...user }));
-        }
+        handleMsgCountPerSenderEvent(content);
       }
 
       if (type === 'EOSE') {
-        const keys = Object.keys(store.senders);
-        const cnt = keys.reduce((acc, k) => acc + (store.messageCountPerSender[k]?.cnt || 0) , 0);
-
-        let sendersToAdd: Record<string, PrimalUser> = {};
-
-        const pks = Object.keys(fetchedSenders)
-
-        for (let i=0; i < pks.length; i++) {
-          const pk = pks[i];
-
-          if (store.senders[pk]) continue;
-
-          sendersToAdd[pk] = fetchedSenders[pk];
-        }
-
-        for (let i=0; i < emptyUsers.length; i++) {
-          const pk = emptyUsers[i];
-          if (store.senders[pk] || sendersToAdd[pk]) continue;
-
-          sendersToAdd[pk] = emptyUser(pk);
-        }
-
-        updateStore('senders', () => ({ ...fetchedSenders, ...sendersToAdd }));
-
-        fetchedSenders = {};
-
-        // saveMsgContacts(store.activePubkey, store.senders, store.messageCountPerSender, store.senderRelation);
-        saveDmConversations(store.activePubkey, store.senders, store.messageCountPerSender);
-
-        if (store.messageCount > cnt) {
-          updateStore('hasMessagesInDifferentTab', () => true);
-        }
-
-        if (store.addSender !== undefined) {
-          const key = store.addSender.pubkey;
-          const user = { ...store.addSender }
-
-          updateStore('senders', () => ({ [key]: user }));
-          updateStore('messageCountPerSender', user.pubkey, () => ({ cnt: 0 }));
-          selectSender(store.addSender.pubkey);
-          updateStore('addSender', () => undefined);
-          return;
-        }
-
-        const senders = orderedSenders();
-
-        if (!store.selectedSender) {
-          selectSender(senders[0].npub);
-        }
-        // !store.selectedSender && updateStore('selectedSender', () => ({ ...store.senders[senderIds[0]] }));
+        handleMsgCountPerSenderEose();
       }
     }
 
     if (subId === subidCoversation || subId === subidCoversationNextPage) {
-      if (type === 'EVENT') {
-        if (content?.kind === Kind.EncryptedDirectMessage) {
-          updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleMsgCoversationEvent(e);
         }
+        handleMsgCoversationEose(subId);
+        return;
+      }
+
+      if (type === 'EVENT') {
+        handleMsgCoversationEvent(content);
       }
 
       if (type === 'EOSE') {
-        if (subId === subidCoversation) {
-          decryptMessages(generateConversation);
-          return;
-        }
-
-        if (subId === subidCoversationNextPage) {
-          decryptMessages(prependToConversation);
-          return;
-        }
+        handleMsgCoversationEose(subId);
       }
     }
 
     if (subId === subidNewMsg) {
-      if (type === 'EVENT') {
-        if (content?.kind === Kind.EncryptedDirectMessage) {
-          updateStore('encryptedMessages', (conv) => [ ...conv, {...content}]);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleNewMsgEvent(e);
         }
+        handleNewMsgEose();
+        return;
+      }
+      if (type === 'EVENT') {
+        handleNewMsgEvent(content);
       }
 
       if (type === 'EOSE') {
-        decryptMessages((msgs) => addToConversation(msgs, true));
+        handleNewMsgEose();
       }
     }
 
     if (subId === subidUserRef) {
-      if (type === 'EVENT') {
-        if (content?.kind === Kind.Metadata) {
-          const user = content as NostrUserContent;
-
-          updateStore('referencePage', 'users',
-            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-          );
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleUserRefEvent(e);
         }
+        handleUserRefEose();
+        return;
+      }
+      if (type === 'EVENT') {
+        handleUserRefEvent(content);
       }
 
       if (type === 'EOSE') {
-        updateRefUsers();
+        handleUserRefEose()
       }
     }
 
     if (subId === subidNoteRef) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleNoteRefEvent(e);
+        }
+        handleNoteRefEose();
+        return;
+      }
       if (type === 'EVENT') {
-        if (content?.kind === Kind.Metadata) {
-          const user = content as NostrUserContent;
-
-          updateStore('referencePage', 'users',
-            (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-          );
-        }
-
-        if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-          const message = content as NostrNoteContent;
-
-          updateStore('referencePage', 'messages',
-            (msgs) => [ ...msgs, { ...message }]
-          );
-
-          return;
-        }
-
-        if (content.kind === Kind.NoteStats) {
-          const statistic = content as NostrStatsContent;
-          const stat = JSON.parse(statistic.content);
-
-          updateStore('referencePage', 'postStats',
-            (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-          );
-          return;
-        }
-
-        if (content.kind === Kind.Mentions) {
-          const mentionContent = content as NostrMentionContent;
-          const mention = JSON.parse(mentionContent.content);
-
-          updateStore('referencePage', 'mentions',
-            (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-          );
-          return;
-        }
-
-        if (content.kind === Kind.NoteActions) {
-          const noteActionContent = content as NostrNoteActionsContent;
-          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-          updateStore('referencePage', 'noteActions',
-            (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-          );
-          return;
-        }
+        handleNoteRefEvent(content);
       }
 
       if (type === 'EOSE') {
-        updateRefNotes();
-        updateRefUsers();
+        handleNoteRefEose()
       }
     }
   };

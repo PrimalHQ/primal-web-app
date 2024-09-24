@@ -22,9 +22,10 @@ import {
   PrimalUser,
   NostrEventContent,
   PrimalArticle,
+  NostrEvents,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo, decompressBlob, readData } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
@@ -1531,89 +1532,164 @@ export function AccountProvider(props: { children: JSXElement }) {
     webSocket.removeEventListener('close', onSocketClose);
   };
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleUserProfileEvent = (content: NostrEventContent) => {
+    if (content?.content) {
+      const user = JSON.parse(content.content);
+
+      updateStore('activeUser', () => ({...user}));
+      setStoredProfile(user);
+    }
+  }
+
+  const handleUserContectsEvent = (content: NostrEventContent) => {
+    if (content && content.kind === Kind.Contacts) {
+      if (!content.created_at || content.created_at < store.followingSince) {
+        return;
+      }
+
+      updateContacts(content);
+    }
+  }
+
+  const handleUserRelaysEvent = (content: NostrEventContent) => {
+    if (content && content.kind === Kind.UserRelays) {
+      const relays = extractRelayConfigFromTags(content.tags);
+
+      setRelaySettings(relays, true);
+    }
+  }
+
+  const handleMuteListEvent = (content: NostrEventContent) => {
+    if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
+
+      if (!content.created_at || content.created_at < store.mutedSince) {
+        return;
+      }
+
+      updateMuted(content as NostrMutedContent);
+    }
+  }
+
+  const handleDefaultRelaysEvent = (content: NostrEventContent) => {
+    const resp = JSON.parse(content.content || '[]');
+
+    updateStore('defaultRelays', () => [...resp]);
+
+    const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
+
+    if (Object.keys(relaySettings).length > 0) {
+      connectToRelays(relaySettings);
+    }
+  }
+
+  const handleUserBookmarksEvent = (content: NostrEventContent) => {
+    if (!content || content.kind !== Kind.Bookmarks || !content.created_at || content.created_at < store.followingSince) {
+      return;
+    }
+
+    const notes = content.tags.reduce((acc, t) => {
+      if (supportedBookmarkTypes.includes(t[0])) {
+        return [...acc, t[1]];
+      }
+      return [...acc];
+    }, []);
+
+    updateStore('bookmarks', () => [...notes]);
+  }
+
+  const handleUserBookmarksEose = () => {
+    saveBookmarks(store.publicKey, store.bookmarks);
+  }
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === `user_profile_${APP_ID}`) {
-      if (content?.content) {
-        const user = JSON.parse(content.content);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleUserProfileEvent(e);
+        }
+      }
 
-        updateStore('activeUser', () => ({...user}));
-        setStoredProfile(user);
+      if (type === 'EVENT') {
+        handleUserProfileEvent(content);
       }
       return;
     }
 
     if (subId === `user_contacts_${APP_ID}`) {
-      if (content && content.kind === Kind.Contacts) {
-        if (!content.created_at || content.created_at < store.followingSince) {
-          return;
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleUserContectsEvent(e);
         }
+      }
 
-        updateContacts(content);
+      if (type === 'EVENT') {
+        handleUserContectsEvent(content);
       }
       return;
     }
 
     if (subId === `user_relays_${APP_ID}`) {
-      if (content && content.kind === Kind.UserRelays) {
-        const relays = extractRelayConfigFromTags(content.tags);
-
-        setRelaySettings(relays, true);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleUserRelaysEvent(e);
+        }
+      }
+      if (type === 'EVENT') {
+        handleUserRelaysEvent(content);
       }
       return;
     }
 
     if (subId === `mutelist_${APP_ID}`) {
-      if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
-
-        if (!content.created_at || content.created_at < store.mutedSince) {
-          return;
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleMuteListEvent(e);
         }
-
-        updateMuted(content as NostrMutedContent);
+      }
+      if (type === 'EVENT') {
+        handleMuteListEvent(content);
       }
       return;
     }
 
     if (subId === `default_relays_${APP_ID}`) {
-      if (type === 'EVENT') {
-        const resp = JSON.parse(content.content || '[]');
-
-        updateStore('defaultRelays', () => [...resp]);
-
-        const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
-
-        if (Object.keys(relaySettings).length > 0) {
-          connectToRelays(relaySettings);
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleDefaultRelaysEvent(e);
         }
+      }
+      if (type === 'EVENT') {
+        handleDefaultRelaysEvent(content);
       }
     }
 
     if (subId === `user_bookmarks_${APP_ID}`) {
-      if (type === 'EVENT' && content && content.kind === Kind.Bookmarks) {
-        if (!content.created_at || content.created_at < store.followingSince) {
-          return;
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleUserBookmarksEvent(e);
         }
-
-        const notes = content.tags.reduce((acc, t) => {
-          if (supportedBookmarkTypes.includes(t[0])) {
-            return [...acc, t[1]];
-          }
-          return [...acc];
-        }, []);
-
-        updateStore('bookmarks', () => [...notes]);
+        handleUserBookmarksEose();
       }
-
+      if (type === 'EVENT') {
+        handleUserBookmarksEvent(content);
+      }
+      if (type === 'EOSE') {
+        handleUserBookmarksEose();
+      }
       return;
     }
 
-    if (type === 'EOSE') {
-      saveBookmarks(store.publicKey, store.bookmarks);
-    }
 
   };
 

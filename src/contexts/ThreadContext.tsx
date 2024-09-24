@@ -15,7 +15,9 @@ import {
   useContext
 } from "solid-js";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket
@@ -26,6 +28,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrEvents,
   NostrMediaInfo,
   NostrMentionContent,
   NostrNoteActionsContent,
@@ -368,83 +371,159 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+const handleThreadEvent = (content: NostrEventContent) => {
+  updatePage(content);
+}
+const handleThreadEose = () => {
+  const reposts = parseEmptyReposts(store.page);
+  const ids = Object.keys(reposts);
+
+  if (ids.length === 0) {
+    savePage(store.page);
+    return;
+  }
+
+  updateStore('reposts', () => reposts);
+
+  getEvents(account?.publicKey, ids, `thread_reposts_${APP_ID}`);
+}
+
+const handleThreadRepostEvent = (content: NostrEventContent) => {
+
+  const repostId = (content as NostrNoteContent).id;
+  const reposts = store.reposts || {};
+  const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+  if (parent) {
+    updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+  }
+}
+const handleThreadRepostEose = () => {
+  savePage(store.page);
+}
+const handleThreadZapsEvent = (content: NostrEventContent) => {
+
+  updatePage(content);
+}
+const handleThreadZapsEose = () => {
+  savePage(store.page);
+  updateStore('isFetchingTopZaps', () => false);
+}
+const handleThreadPKEvent = (content: NostrEventContent) => {
+
+  updatePage(content);
+}
+const handleThreadPKEose = () => {
+  savePage(store.page);
+}
+const handleThreadQuoteStatsEvent = (content: NostrEventContent) => {
+
+  updatePage(content);
+}
+const handleThreadQuoteStatsEose = () => {
+  savePage(store.page);
+}
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === `thread_${APP_ID}` || subId === `thread_diff_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
 
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleThreadEvent(e);
         }
 
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `thread_reposts_${APP_ID}`);
-
+        handleThreadEose();
+      }
+      if (type === 'EOSE') {
+        handleThreadEose();
         return;
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
+        handleThreadEvent(content);
         return;
       }
     }
 
     if (subId === `thread_reposts_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleThreadRepostEvent(e);
+        }
+
+        handleThreadRepostEose();
+      }
       if (type === 'EOSE') {
-        savePage(store.page);
+        handleThreadRepostEose();
         return;
       }
 
       if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
+        handleThreadRepostEvent(content)
         return;
       }
     }
 
     if (subId === `thread_zapps_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleThreadZapsEvent(e);
+        }
+
+        handleThreadZapsEose();
+      }
       if (type === 'EOSE') {
-        savePage(store.page);
-        updateStore('isFetchingTopZaps', () => false);
+        handleThreadZapsEose()
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
+        handleThreadZapsEvent(content);
         return;
       }
     }
 
     if (subId === `thread_pk_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleThreadPKEvent(e);
+        }
+
+        handleThreadPKEose();
+      }
       if (type === 'EOSE') {
-        savePage(store.page);
+        handleThreadPKEose()
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
+        handleThreadPKEvent(content);
         return;
       }
     }
 
     if (subId === `thread_quote_stats_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleThreadQuoteStatsEvent(e);
+        }
+
+        handleThreadQuoteStatsEose();
+      }
       if (type === 'EOSE') {
-        savePage(store.page);
+        handleThreadQuoteStatsEose()
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
+        handleThreadQuoteStatsEvent(content);
         return;
       }
     }

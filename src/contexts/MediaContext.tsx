@@ -7,8 +7,8 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { MediaEvent, MediaSize, MediaVariant, NostrEOSE, NostrEvent } from "../types/primal";
-import { removeSocketListeners, isConnected, refreshSocketListeners, socket } from "../sockets";
+import { MediaEvent, MediaSize, MediaVariant, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents } from "../types/primal";
+import { removeSocketListeners, isConnected, refreshSocketListeners, socket, decompressBlob, readData } from "../sockets";
 import { Kind } from "../constants";
 
 export type MediaContextStore = {
@@ -86,29 +86,42 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleMediaEvent = (content: NostrEventContent) => {
+
+    if (content.kind === Kind.MediaInfo) {
+      const mediaInfo: MediaEvent = JSON.parse(content.content);
+
+      let media: Record<string, MediaVariant[]> = {};
+
+      for (let i = 0;i<mediaInfo.resources.length;i++) {
+        const resource = mediaInfo.resources[i];
+        media[resource.url] = resource.variants;
+      }
+
+      try {
+        updateStore('media', () => ({ ...media }));
+      } catch(e) {
+        console.warn('Error updating media: ', e);
+      }
+    }
+  }
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, _, content] = message;
 
+    if (type === 'EVENTS') {
+      for (let i=0;i<content.length;i++) {
+        const e = content[i];
+        handleMediaEvent(e);
+      }
+
+    }
 
     if (type === 'EVENT') {
-      if (content.kind === Kind.MediaInfo) {
-        const mediaInfo: MediaEvent = JSON.parse(content.content);
-
-        let media: Record<string, MediaVariant[]> = {};
-
-        for (let i = 0;i<mediaInfo.resources.length;i++) {
-          const resource = mediaInfo.resources[i];
-          media[resource.url] = resource.variants;
-        }
-
-        try {
-          updateStore('media', () => ({ ...media }));
-        } catch(e) {
-          console.warn('Error updating media: ', e);
-        }
-      }
+      handleMediaEvent(content)
     }
   };
 

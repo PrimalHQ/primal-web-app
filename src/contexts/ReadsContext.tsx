@@ -248,7 +248,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     const { reads, paging } = await fetchMegaFeed(
       pubkey,
       spec,
-      `reads_feed_2_${APP_ID}`,
+      `reads_feed_${APP_ID}`,
       {
         until,
         limit: 20,

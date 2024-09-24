@@ -16,7 +16,9 @@ import {
   stopListeningForNostrStats
 } from "../lib/stats";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket
@@ -27,6 +29,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrEvents,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -307,61 +310,107 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleExploreEvent = (content: NostrEventContent) => {
+    updatePage(content);
+  }
+  const handleExploreEose = () => {
+    const reposts = parseEmptyReposts(store.page);
+    const ids = Object.keys(reposts);
+
+    if (ids.length === 0) {
+      savePage(store.page);
+      return;
+    }
+
+    updateStore('reposts', () => reposts);
+
+    getEvents(account?.publicKey, ids, `explore_reposts_${APP_ID}`);
+  }
+
+  const handleExploreRepostEvent = (content: NostrEventContent) => {
+    const repostId = (content as NostrNoteContent).id;
+    const reposts = store.reposts || {};
+    const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+    if (parent) {
+      updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+    }
+  }
+
+  const handleExploreRepostEose = () => {
+    savePage(store.page);
+  }
+
+  const handleExploreStatsEvent = (content: NostrEventContent) => {
+    const stats = JSON.parse(content.content || '{}');
+
+    if (content.kind === Kind.NetStats) {
+      updateStore('stats', () => ({ ...stats }));
+    }
+
+    if (content.kind === Kind.LegendStats) {
+      updateStore('legend', () => ({ ...stats }));
+    }
+  }
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === `explore_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleExploreEvent(e);
         }
 
-        updateStore('reposts', () => reposts);
+        handleExploreEose();
+        return;
+      }
 
-        getEvents(account?.publicKey, ids, `explore_reposts_${APP_ID}`);
-
+      if (type === 'EOSE') {
+        handleExploreEose()
         return;
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
+        handleExploreEvent(content);
         return;
       }
     }
 
-    if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId) && content?.content) {
-      const stats = JSON.parse(content.content);
-
-      if (content.kind === Kind.NetStats) {
-        updateStore('stats', () => ({ ...stats }));
+    if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId)) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleExploreStatsEvent(e);
+        }
       }
 
-      if (content.kind === Kind.LegendStats) {
-        updateStore('legend', () => ({ ...stats }));
+      if (type === 'EVENT') {
+        handleExploreStatsEvent(content);
       }
     }
 
     if (subId === `explore_reposts_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleExploreRepostEvent(e);
+        }
+
+        handleExploreRepostEose();
+        return;
+      }
       if (type === 'EOSE') {
-        savePage(store.page);
+        handleExploreRepostEose();
         return;
       }
 
       if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
+        handleExploreRepostEvent(content);
         return;
       }
     }

@@ -4,10 +4,10 @@ import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { APP_ID } from '../../App';
 import { getExploreFeed } from '../../lib/feed';
-import { cacheServer, isConnected, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
+import { cacheServer, decompressBlob, isConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from '../../sockets';
 import { sortingPlan, convertToNotes } from '../../stores/note';
 import { convertToUser, emptyUser, truncateNpub } from '../../stores/profile';
-import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
+import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ExploreSidebar.module.scss';
@@ -80,12 +80,23 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
     webSocket.removeEventListener('close', onSocketClose);
   };
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === `explore_sidebar_${APP_ID}`) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          processUsers('EVENT', e);
+        }
+
+        processUsers('EOSE', undefined);
+        return;
+      }
+
       processUsers(type, content);
       return;
     }

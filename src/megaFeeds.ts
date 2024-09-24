@@ -97,7 +97,7 @@ export const fetchMegaFeed = (
           unsub();
           resolve(pageResolve(page));
         },
-        onEvent: (_, content) => {
+        onEvent: (s, content) => {
           updateFeedPage(page, content);
         }
       });
@@ -171,7 +171,7 @@ export const fetchRecomendedReads = (
       onEose: () => {
         unsub();
 
-        fetchArticles(ids, `get_paramertized_${APP_ID}`).then((reads) => {
+        fetchArticles(ids, `get_reads_pe_${APP_ID}`).then((reads) => {
           resolve(reads);
         });
 
