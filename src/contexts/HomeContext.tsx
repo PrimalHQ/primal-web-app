@@ -216,11 +216,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         until,
         limit: 20,
         offset: store.notes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
-      });
+      },
+    );
 
-      updateStore('paging', 'notes', () => ({ ...paging }));
-      updateStore('notes', (ns) => [ ...ns, ...notes]);
-      updateStore('isFetching', () => false);
+    updateStore('paging', 'notes', () => ({ ...paging }));
+    updateStore('notes', (ns) => [ ...ns, ...notes]);
+    updateStore('isFetching', () => false);
 
   };
 

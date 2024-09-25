@@ -36,7 +36,7 @@ import {
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
-import { saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/localStore";
+import { saveAnimated, saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
@@ -55,6 +55,7 @@ export type SettingsContextStore = {
   locale: string,
   theme: string,
   themes: PrimalTheme[],
+  isAnimated: boolean,
   availableFeeds: PrimalFeed[],
   readsFeeds: PrimalArticleFeed[],
   homeFeeds: PrimalArticleFeed[],
@@ -96,6 +97,7 @@ export type SettingsContextStore = {
     enableFeed: (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => void,
     addFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
+    setAnimation: (isAnimated: boolean, temp?: boolean) => void,
   }
 }
 
@@ -103,6 +105,7 @@ export const initialData = {
   locale: 'en-us',
   theme: 'sunrise',
   themes,
+  isAnimated: true,
   availableFeeds: [],
   readsFeeds: [],
   homeFeeds: [],
@@ -203,6 +206,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const availableTheme = store.themes.find(t => t.name === name);
     availableTheme && setTheme(availableTheme, temp);
   }
+
+  const setAnimation = (isAnimated: boolean, temp?: boolean) => {
+
+    saveAnimated(account?.publicKey, isAnimated);
+    updateStore('isAnimated', () => isAnimated);
+    !temp && saveSettings();
+  };
 
   const setApplyContentModeration = (flag = true) => {
     updateStore('applyContentModeration', () => flag);
@@ -519,6 +529,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
       proxyThroughPrimal: account?.proxyThroughPrimal || false,
+      animated: store.isAnimated,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -802,6 +813,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     // when waiting for pubkey (like when reloading a page).
     const storedTheme = localStorage.getItem('theme');
     setThemeByName(storedTheme, true);
+    const storedAnimated = localStorage.getItem('animated') || 'true';
+    const anim = storedAnimated === 'true' ? true : false;
+    setAnimation(anim);
+
     refreshMobileReleases();
   });
 
@@ -822,6 +837,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const html: HTMLElement | null = document.querySelector('html');
     localStorage.setItem('theme', store.theme);
     html?.setAttribute('data-theme', store.theme);
+  });
+
+  createEffect(() => {
+    const html: HTMLElement | null = document.querySelector('html');
+    localStorage.setItem('animated', `${store.isAnimated}`);
+    html?.setAttribute('data-animated', `${store.isAnimated}`);
   });
 
   createEffect(() => {
@@ -875,6 +896,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       enableFeed,
       addFeed,
       removeFeed,
+
+      setAnimation,
     },
   });
 

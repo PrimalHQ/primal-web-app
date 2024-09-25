@@ -37,6 +37,14 @@
   }
 }
 
+:root[data-animated="false"] {
+  * {
+    transition-property: none !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
 /* Common styles */
 :root {
   --missing-avatar-text: #FFFFFF;
@@ -116,6 +124,7 @@
   }
 
 }
+
 
 body {
   margin: 0;

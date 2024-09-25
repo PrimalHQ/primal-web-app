@@ -7,9 +7,12 @@ import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { Link } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
+import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const Appearance: Component = () => {
 
+  const settings = useSettingsContext();
   const intl = useIntl();
 
   return (
@@ -27,6 +30,15 @@ const Appearance: Component = () => {
         </div>
 
         <ThemeChooser />
+
+        <div>
+          <CheckBox2
+            checked={settings?.isAnimated}
+            onChange={settings?.actions.setAnimation}
+          >
+            <div class={styles.appearanceCheckLabel}>Show Animations</div>
+          </CheckBox2>
+        </div>
       </div>
     </div>
   )

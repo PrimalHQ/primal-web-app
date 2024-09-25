@@ -32,6 +32,7 @@ export type LocalStore = {
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
   uploadTime: Record<string, number>,
   selectedFeed: PrimalFeed | undefined,
+  animated: boolean,
 };
 
 export type UploadTime = {
@@ -73,6 +74,7 @@ export const emptyStorage: LocalStore = {
   uploadTime: defaultUploadTime,
   selectedFeed: undefined,
   bookmarks: [],
+  animated: true,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -211,6 +213,17 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
   const store = getStorage(pubkey);
 
   store.theme = theme;
+
+  setStorage(pubkey, store);
+};
+
+export const saveAnimated = (pubkey: string | undefined, animated: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.animated = animated;
 
   setStorage(pubkey, store);
 };
