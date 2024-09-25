@@ -118,8 +118,6 @@ export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: str
       const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
       const [type, subscriptionId, content] = message;
 
-      console.log('SUBSCRIBE: ', subscriptionId, content);
-
       if (type === 'EVENTS') {
         let i = 0;
 
@@ -164,7 +162,7 @@ export const readData = async (event: MessageEvent) => {
     const decom = await decompressBlob(event.data);
     return decom;
   } catch(e) {
-    console.log('ERROR TO DECOMPRESS BLOB: ', e)
+    logError('ERROR TO DECOMPRESS BLOB: ', e)
     return '{}'
   }
 }
@@ -176,7 +174,6 @@ export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventTyp
       const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
       const [type, subscriptionId, content] = message;
 
-      console.log('SUBSCRIBE: ', subscriptionId, content);
       if (type === 'EVENTS') {
         let i = 0;
 
@@ -226,7 +223,6 @@ export const subsTo = (
         if (type === 'EVENTS') {
           const events = message[2];
 
-          console.log('GOT: ', type, subscriptionId, events);
           let i = 0;
 
           for (i=0;i<events.length;i++) {

@@ -60,6 +60,7 @@ import PageCaption from "../components/PageCaption/PageCaption";
 import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
 import { useMediaContext } from "../contexts/MediaContext";
 import { Transition, TransitionGroup } from "solid-transition-group";
+import { fetchReadThread } from "../megaFeeds";
 
 export type LongFormData = {
   title: string,
@@ -466,44 +467,36 @@ const Longform: Component< { naddr: string } > = (props) => {
     updateStore(() => ({ ...emptyStore }));
   };
 
-  const fetchArticle = () => {
-    const decoded = decodeIdentifier(naddr());
-
-    const { pubkey, identifier, kind } = decoded.data;
-
-    if (![Kind.LongForm, Kind.LongFormShell].includes(kind)) return;
-
-    const subId = `naddr_${naddr()}_${APP_ID}`;
-
-    const unsub = subscribeTo(subId, (type, subId, content) =>{
-      if (type === 'EOSE') {
-        unsub();
-        savePage(store.page);
-        return;
-      }
-
-      if (type === 'NOTICE') {
-        updateStore('noContent', () => true);
-      }
-
-      if (type === 'EVENT') {
-        content && updatePage(content);
-      }
-    });
+  const fetchArticle = async () => {
 
     updateStore('isFetching', () => true);
 
-    updateStore('page', () => ({
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-      topZaps: {},
-      wordCount: {},
-    }));
+    const { users, notes, reads } = await fetchReadThread(
+      account?.publicKey,
+      naddr(),
+      `thread_read_${naddr()}_${APP_ID}`,
+    );
 
-    getArticleThread(account?.publicKey, pubkey, identifier, kind, subId);
+    const article = reads.find(a => {
+      if (a.noteId === naddr()) return true;
+
+      const decode1 = decodeIdentifier(naddr());
+      const decode2 = decodeIdentifier(a.naddr);
+
+      const a1 = `${decode1.data.kind}_${decode1.data.pubkey}_${decode1.data.identifier}`;
+      const a2 = `${decode2.data.kind}_${decode2.data.pubkey}_${decode2.data.identifier}`;
+
+      return a1 === a2;
+    });
+
+
+    batch(() => {
+      updateStore('users', () => [ ...users ]);
+      updateStore('replies', () => [ ...notes ]);
+      updateStore('article', () => ({ ...article }));
+    });
+
+    updateStore('isFetching', () => false);
   }
 
   const updatePage = (content: NostrEventContent) => {

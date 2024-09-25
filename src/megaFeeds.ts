@@ -1,5 +1,5 @@
 import { Kind } from "./constants";
-import { getMegaFeed } from "./lib/feed";
+import { getArticleThread, getMegaFeed } from "./lib/feed";
 import { setLinkPreviews } from "./lib/notes";
 import { subsTo } from "./sockets";
 import { isRepostInCollection } from "./stores/note";
@@ -14,14 +14,16 @@ import {
   NoteActions,
   PrimalArticle,
   PrimalNote,
+  PrimalUser,
   TopZap,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
-import { convertToNotesMega, convertToReadsMega } from "./stores/megaFeed";
+import { convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
 import { FeedRange } from "./pages/FeedQueryTest";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
+import { decodeIdentifier } from "./lib/keys";
 
 export type PaginationInfo = {
   since: number,
@@ -30,6 +32,7 @@ export type PaginationInfo = {
 };
 
 export type MegaFeedResults = {
+  users: PrimalUser[],
   notes: PrimalNote[],
   reads: PrimalArticle[],
   paging: PaginationInfo,
@@ -186,6 +189,49 @@ export const fetchRecomendedReads = (
   });
 }
 
+export const fetchReadThread = (
+  userPubkey: string | undefined,
+  naddr: string,
+  subId: string,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {
+      users: {},
+      notes: [],
+      reads: [],
+      noteStats: {},
+      mentions: {},
+      noteActions: {},
+      relayHints: {},
+      topZaps: {},
+      wordCount: {},
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    };
+
+    const decoded = decodeIdentifier(naddr);
+
+    const { pubkey, identifier, kind } = decoded.data;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ users: [], notes: [], reads: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+      }
+    });
+
+    getArticleThread(userPubkey, pubkey, identifier, kind, subId);
+  });
+}
+
 const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
@@ -204,10 +250,12 @@ const pageResolve = (page: MegaFeedPage) => {
     })
   }
 
+  const users = convertToUsersMega(page);
   const notes = convertToNotesMega(page);
   const reads = convertToReadsMega(page);
 
   return {
+    users,
     notes,
     reads,
     paging: {

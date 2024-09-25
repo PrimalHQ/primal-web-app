@@ -27,11 +27,30 @@
   height: 466px;
 }
 
+[data-animated="true"] {
+  .banner, .profileActions, .bigAbout, .smallAbout {
+    opacity: 0;
+    animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  }
+  .banner {
+    animation-delay: var(--profile-banner-animation-delay);
+  }
+  .avatar {
+    >div {
+      opacity: 0;
+      animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+      animation-delay: var(--profile-avatar-animation-delay);
+    }
+  }
+  .profileActions, .bigAbout, .smallAbout {
+    animation-delay: var(--profile-card-animation-delay);
+  }
+}
+
 .banner {
   width: 100%;
   height: 200px;
   overflow: hidden;
-  opacity: 0;
 
   img {
     width: 100%;
@@ -39,9 +58,9 @@
     object-fit: cover;
   }
 
-  opacity: 0;
-  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-  animation-delay: var(--profile-banner-animation-delay);
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-banner-animation-delay);
 }
 
 .userImage {
@@ -55,9 +74,9 @@
     border-radius: 50%;
     background-color: var(--background-site);
     >div {
-      opacity: 0;
-      animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-      animation-delay: var(--profile-avatar-animation-delay);
+      // opacity: 0;
+      // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+      // animation-delay: var(--profile-avatar-animation-delay);
     }
   }
 
@@ -124,9 +143,9 @@
     height: 36px;
   }
 
-  opacity: 0;
-  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-  animation-delay: var(--profile-card-animation-delay);
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
 }
 
 .profileAboutHolder {
@@ -290,9 +309,9 @@
   justify-content: flex-start;
   align-items: stretch;
 
-  opacity: 0;
-  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-  animation-delay: var(--profile-card-animation-delay);
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
 }
 
 .smallAbout {
@@ -301,9 +320,9 @@
   align-items: flex-start;
   width: 100%;
 
-  opacity: 0;
-  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-  animation-delay: var(--profile-card-animation-delay);
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
 
   .columnLeft {
     width: 50%;

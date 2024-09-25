@@ -33,7 +33,7 @@ const Appearance: Component = () => {
 
         <div>
           <CheckBox2
-            checked={settings?.isAnimated}
+            checked={settings?.isAnimated !== undefined ? settings.isAnimated : true}
             onChange={settings?.actions.setAnimation}
           >
             <div class={styles.appearanceCheckLabel}>Show Animations</div>

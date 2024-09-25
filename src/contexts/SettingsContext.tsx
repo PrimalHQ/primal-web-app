@@ -138,16 +138,20 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
     account?.actions.setProxyThroughPrimal(shouldProxy);
+
     !temp && saveSettings();
   }
 
   const setDefaultZapAmount = (option: ZapOption, temp?: boolean) => {
     updateStore('defaultZap', () => option);
+
     !temp && saveSettings();
   };
 
   const setZapOptions = (option: ZapOption, index: number, temp?: boolean) => {
     updateStore('availableZapOptions', index, () => ({ ...option }));
+
+
     !temp && saveSettings();
   };
 
@@ -165,6 +169,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
           updateStore('availableZapOptions', () => options);
           updateStore('defaultZap', () => amount);
+
 
           !temp && saveSettings();
         }
@@ -195,6 +200,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     saveTheme(account?.publicKey, theme.name);
     updateStore('theme', () => theme.name);
+
     !temp && saveSettings();
   }
 
@@ -211,11 +217,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     saveAnimated(account?.publicKey, isAnimated);
     updateStore('isAnimated', () => isAnimated);
+
     !temp && saveSettings();
   };
 
   const setApplyContentModeration = (flag = true) => {
     updateStore('applyContentModeration', () => flag);
+
 
     saveSettings();
   };
@@ -228,6 +236,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       const add = addToTop ? updateAvailableFeedsTop : updateAvailableFeeds;
 
       updateStore('availableFeeds', (feeds) => add(account?.publicKey, feed, feeds));
+
+
       !temp && saveSettings();
     }
   };
@@ -242,6 +252,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         (feeds) => removeFromAvailableFeeds(account?.publicKey, feed, feeds),
       );
 
+
       !temp && saveSettings();
     }
   };
@@ -251,6 +262,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       updateStore('availableFeeds',
         () => replaceAvailableFeeds(account?.publicKey, feedList),
       );
+
       !temp && saveSettings();
     }
   };
@@ -451,6 +463,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const updateNotificationSettings = (key: string, value: boolean, temp?: boolean) => {
     updateStore('notificationSettings', () => ({ [key]: value }));
 
+
     !temp && saveSettings();
   };
 
@@ -514,6 +527,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (trending) scopes.push(trendingScope);
 
     updateStore('contentModeration', x => x.name === name, () => ({ scopes }));
+
+
     saveSettings();
   };
 
@@ -617,6 +632,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       if (type === 'EVENT' && content?.content) {
         try {
           const {
+            animated,
             theme,
             zapDefault,
             zapConfig,
@@ -629,6 +645,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           } = JSON.parse(content?.content);
 
           theme && setThemeByName(theme, true);
+
+          setAnimation(animated, true);
 
           // If new setting is missing, merge with the old setting
           if (zapDefault) {
@@ -815,7 +833,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     setThemeByName(storedTheme, true);
     const storedAnimated = localStorage.getItem('animated') || 'true';
     const anim = storedAnimated === 'true' ? true : false;
-    setAnimation(anim);
+    setAnimation(anim, true);
 
     refreshMobileReleases();
   });

@@ -42,7 +42,6 @@ export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
   return { coordinate, naddr };
 }
 
-
 export const extractRepostInfo: MegaRepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
   const userMeta = JSON.parse(user?.content || '{}');
@@ -290,6 +289,15 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     mentionedHighlights,
   };
 }
+
+export const convertToUsersMega = (page: MegaFeedPage) => {
+
+  if (page === undefined) {
+    return [];
+  }
+
+  return Object.values(page.users).map(u => convertToUser(u, u.pubkey));
+};
 
 export const convertToNotesMega = (page: MegaFeedPage) => {
 
