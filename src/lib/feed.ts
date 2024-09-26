@@ -1,7 +1,7 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "nostr-tools";
-import { day, hour } from "../constants";
+import { day, hour, minKnownProfiles } from "../constants";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
   if (!pubkey) {
@@ -32,6 +32,7 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   let payload = { limit, until: time, pubkey };
 
   if (user_pubkey) {
+    // @ts-ignore
     payload.user_pubkey = user_pubkey;
   }
   if (include_replies) {
@@ -144,6 +145,9 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
+  // else {
+  //   payload.user_pubkey = minKnownProfiles.names['primal'];
+  // }
 
   sendMessage(JSON.stringify([
     "REQ",
