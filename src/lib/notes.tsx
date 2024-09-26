@@ -456,11 +456,11 @@ export const sendContacts = async (tags: string[][], date: number, content: stri
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const sendMuteList = async (muteList: string[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendMuteList = async (muteList: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.MuteList,
-    tags: muteList.map(c => ['p', c]),
+    tags: muteList,
     created_at: date,
   };
 

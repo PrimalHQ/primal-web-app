@@ -57,6 +57,7 @@ export type AccountContextStore = {
   followingSince: number,
   followInProgress: string,
   muted: string[],
+  mutedTags: string[][],
   mutedPrivate: string,
   mutedSince: number,
   hasPublicKey: () => boolean,
@@ -128,6 +129,7 @@ const initialData = {
   followingSince: 0,
   followInProgress: '',
   muted: [],
+  mutedTags: [],
   mutedPrivate: '',
   mutedSince: 0,
   isKeyLookupDone: false,
@@ -743,6 +745,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       return [ ...acc, pubkey ];
     }, []);
 
+    updateStore('mutedTags', () => [...tags]);
     updateStore('muted', (ml) => [ ...ml, ...muted]);
     updateStore('mutedPrivate', () => content.content);
     updateStore('mutedSince', () => mutedSince || 0);
@@ -949,7 +952,9 @@ export function AccountProvider(props: { children: JSXElement }) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...store.muted, pubkey];
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+          const tags = [ ...store.mutedTags, ['p', pubkey]];
+
+          const { success, note } = await sendMuteList(tags, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -987,7 +992,9 @@ export function AccountProvider(props: { children: JSXElement }) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = store.muted.filter(m => m !== pubkey);
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+          const tags = store.mutedTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+          const { success, note } = await sendMuteList(tags, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
