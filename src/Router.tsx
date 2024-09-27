@@ -122,11 +122,11 @@ const Router: Component = () => {
           <Route path="/reads/:topic?" component={Reads} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
-          <Route path="/explore_new">
+          <Route path="/explore">
             <Route path="/" component={ExploreNew} />
             <Route path="/feed/:id" component={ExploreFeeds} />
           </Route>
-          <Route path="/explore/:scope?/:timeframe?" component={Explore} />
+          {/* <Route path="/explore/:scope?/:timeframe?" component={Explore} /> */}
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />

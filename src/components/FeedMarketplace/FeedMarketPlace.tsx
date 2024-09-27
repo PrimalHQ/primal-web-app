@@ -157,7 +157,7 @@ const FeedMarketPlace: Component<{
                       store.users[dvm.pubkey],
                       store.dvmActions[dvm.id],
                     )
-                    navigate(`/explore_new/feed/${dvm.identifier}_by_${dvm.pubkey}`)
+                    navigate(`/explore/feed/${dvm.identifier}_by_${dvm.pubkey}`)
                   }}
                 />
               )}
