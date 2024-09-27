@@ -202,7 +202,7 @@ const ParsedNote: Component<{
 
   const noteContent = () => {
     const content = props.note.post.content;
-    const charLimit = shortNoteChars;
+    const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
 
