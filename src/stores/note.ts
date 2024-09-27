@@ -29,6 +29,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       lud16: (userMeta.lud16 || '') as string,
       website: (userMeta.website || '') as string,
       tags: user?.tags || [],
+      msg: {...user},
     },
     note: {
       id: message.id,
@@ -531,6 +532,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
         lud16: (userMeta.lud16 || '') as string,
         website: (userMeta.website || '') as string,
         tags: user?.tags || [],
+        msg: { ...user },
       },
       post: {
         id: msg.id,

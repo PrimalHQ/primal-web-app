@@ -210,6 +210,10 @@ const ProfileTabs: Component<{
       return profile?.zappedArticles.find(a => [a.noteId, a.id].includes(zap.zappedId || ''));
     }
 
+    if (zap.zappedKind === Kind.Metadata) {
+      return zap.reciver
+    }
+
 
     return undefined;
   }
@@ -610,7 +614,7 @@ const ProfileTabs: Component<{
               </div>
 
               <Show when={profile && profile.zaps.length > 0}>
-                <div>
+                <div class={styles.profileZaps}>
                   <For each={profile?.zaps}>
                     {zap =>
                       <div class="animated">

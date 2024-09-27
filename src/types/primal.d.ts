@@ -590,6 +590,7 @@ export type PrimalUser = {
   website: string,
   tags: string[][],
   userStats?: UserStats,
+  msg: NostrUserContent,
 };
 
 export type PrimalNoteData = {

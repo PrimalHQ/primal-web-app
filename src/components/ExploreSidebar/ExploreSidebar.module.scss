@@ -34,12 +34,11 @@
 }
 
 .trendingUsersCaption {
-  margin-bottom: 24px;
-  font-weight: 800;
-  font-size: 18px;
-  line-height: 20px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .hotTopicsCaption {

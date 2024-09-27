@@ -13,6 +13,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { imageRegex } from '../../constants';
 import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
+import Paginator from '../../components/Paginator/Paginator';
 
 const ExploreMedia: Component<{ open?: boolean }> = (props) => {
 
@@ -24,13 +25,29 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   const account = useAccountContext();
 
   onMount(() => {
-    getMedia();
+    if (explore?.exploreMedia.length === 0) {
+      getMedia();
+    }
   });
 
   const getMedia = async () => {
-    const { notes } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 20 });
+    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 20 });
 
-    explore?.actions.setExploreMedia(notes);
+    explore?.actions.setExploreMedia(notes, paging);
+  }
+
+  const getNextMediaPage = async () => {
+    if (!explore) return;
+
+    const page = {
+      limit: 20,
+      until: explore.mediaPaging.since,
+      offset: explore.exploreMedia.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+    }
+
+    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , page);
+
+    explore?.actions.setExploreMedia(notes, paging);
   }
 
   const hasImages = (note: PrimalNote) => {
@@ -55,6 +72,10 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
             </Switch>
           )}
         </For>
+        <Paginator
+          isSmall={true}
+          loadNextPage={getNextMediaPage}
+        />
       </div>
     </div>
   )

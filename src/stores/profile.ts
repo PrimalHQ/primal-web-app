@@ -1,3 +1,4 @@
+import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { NostrUserContent, PrimalUser } from "../types/primal";
@@ -43,6 +44,7 @@ export const convertToUser: (user: NostrUserContent, pubkey: string) => PrimalUs
     lud06: (userMeta.lud06 || '') as string,
     lud16: (userMeta.lud16 || '') as string,
     website: (userMeta.website || '') as string,
+    msg: { ...user },
   };
 }
 
@@ -62,6 +64,14 @@ export const emptyUser = (pubkey: string) => {
     lud06: '',
     lud16: '',
     website: '',
+    msg: {
+      kind: Kind.Metadata,
+      content: '',
+      id: '',
+      pubkey,
+      sig: '',
+      tags: [],
+    }
   } as PrimalUser;
 };
 

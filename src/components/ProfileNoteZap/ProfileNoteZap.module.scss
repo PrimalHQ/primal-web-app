@@ -3,33 +3,31 @@
   gap: 10px;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 20px;
   width: 100%;
-  height: 92px;
-  border-bottom: 1px solid var(--devider);
+  padding: 6px;
+  border-radius: 99px;
+  background-color: var(--background-header-input);
 
   .zapInfo {
-    min-width: 148px;
-    min-height: 68px;
-    max-width: 148px;
-    max-height: 68px;
-    border-radius: var(--border-radius-small);
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 99px;
+    background-color: var(--background-site);
+    padding: 5px;
+    min-width: 244px;
+    max-width: 244px;
 
-    .topLine {
-      padding: 6px;
-      width: 100%;
+    .sender, .receiver {
+      width: 40px;
+      height: 40px;
+    }
+
+    .data {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      background-color: var(--background-input);
-
-      .sender, .receiver {
-        width: 32px;
-        height: 32px;
-      }
+      justify-content: center;
 
       .amount {
         display: flex;
@@ -49,28 +47,28 @@
           font-size: 15px;
           font-weight: 800;
           line-height: 16px;
+
+          overflow: hidden;
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          line-clamp: 1;
+          -webkit-box-orient: vertical;
         }
       }
-    }
-
-    .bottomLine {
-      width: 100%;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-inline: 14px;
-      background-color: var(--background-header-input);
 
       .message {
         color: var(--text-primary);
         text-align: center;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
         font-size: 12px;
         font-weight: 400;
         line-height: 16px;
+        max-width: 120px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
     }
   }
@@ -109,8 +107,6 @@
 
     .body {
       width: 100%;
-      max-height: 36px;
-      display: -webkit-box;
 
       color: var(--text-tertiary);
 
@@ -120,9 +116,10 @@
       line-clamp: 2;
       -webkit-box-orient: vertical;
 
-      font-size: 14px;
+
+      font-size: 12px;
       font-weight: 400;
-      line-height: 18px;
+      line-height: 16px;
     }
   }
 }

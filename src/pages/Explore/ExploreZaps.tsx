@@ -9,6 +9,10 @@ import { fetchExplorePeople, fetchExploreZaps } from '../../megaFeeds';
 import { APP_ID } from '../../App';
 import { userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
+import Paginator from '../../components/Paginator/Paginator';
+import ProfileNoteZap from '../../components/ProfileNoteZap/ProfileNoteZap';
+import { PrimalZap } from '../../types/primal';
+import { Kind } from '../../constants';
 
 const ExploreZaps: Component<{ open?: boolean }> = (props) => {
 
@@ -18,28 +22,58 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   const explore = useExploreContext();
   const location = useLocation();
 
-
-
   onMount(() => {
-    getZaps();
+    if (explore?.exploreMedia.length === 0) {
+      getZaps();
+    }
   });
 
   const getZaps = async () => {
-    const { zaps } = await fetchExploreZaps(`explore_zaps_${APP_ID}`, { limit: 20 });
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(`explore_zaps_${APP_ID}`, { limit: 20 });
 
-    explore?.actions.setExploreZaps(zaps);
+    explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
+  }
+
+  const getNextZapPage = async () => {
+    if (!explore) return;
+
+    const page = {
+      limit: 20,
+      until: explore.zapPaging.since,
+      offset: explore.exploreZaps.map(n => n.created_at || 0),
+    }
+
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(`explore_zaps_${APP_ID}` , page);
+
+    explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
+  }
+
+  const getZapSubject = (zap: PrimalZap) => {
+    if (zap.zappedKind === Kind.Text) {
+      return explore?.zapSubjects.notes.find(n => n.id === zap.zappedId);
+    }
+
+    if (zap.zappedKind === Kind.LongForm) {
+      return explore?.zapSubjects.reads.find(a => [a.noteId, a.id].includes(zap.zappedId || ''));
+    }
+
+    if (zap.zappedKind === Kind.Metadata) {
+      return zap.reciver
+    }
+
+
+    return undefined;
   }
 
   return (
     <div class={styles.exploreZaps}>
       <For each={explore?.exploreZaps}>
-        {zap => <div>
-          <Avatar user={zap.sender} />
-          <div>{zap.amount}</div>
-          <Avatar user={zap.reciver} />
-          <div>{zap.message.length > 0 ? zap.message : '---'}</div>
-        </div>}
+        {zap => <ProfileNoteZap zap={zap} subject={getZapSubject(zap)} />  }
       </For>
+      <Paginator
+        isSmall={true}
+        loadNextPage={getNextZapPage}
+      />
     </div>
   )
 }

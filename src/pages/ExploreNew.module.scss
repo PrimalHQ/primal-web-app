@@ -143,3 +143,27 @@
   align-items: flex-end;
   gap: 36px;
 }
+
+.exploreMedia {
+
+  .galleryGrid {
+    display: grid;
+    grid-template-columns: 148px 148px 148px 148px;
+    grid-column-gap: 2px;
+    grid-row-gap: 2px;
+    padding-inline: 20px;
+    padding-top: 12px;
+
+    img {
+      object-fit: cover;
+      width: 148px;
+      height: 148px;
+    }
+  }
+}
+
+.exploreZaps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

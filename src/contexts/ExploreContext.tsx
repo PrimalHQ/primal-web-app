@@ -39,6 +39,7 @@ import {
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
+  PrimalArticle,
   PrimalDVM,
   PrimalNote,
   PrimalUser,
@@ -47,7 +48,7 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { parseBolt11 } from "../utils";
-import { TopicStat } from "../megaFeeds";
+import { PaginationInfo, TopicStat } from "../megaFeeds";
 
 export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
@@ -55,7 +56,14 @@ export type ExploreContextStore = {
   previewDVMMetadata: DVMMetadata | undefined,
   explorePeople: PrimalUser[],
   exploreZaps: PrimalZap[],
+  zapPaging: PaginationInfo,
+  zapSubjects: {
+    notes: PrimalNote[],
+    reads: PrimalArticle[],
+    users: PrimalUser[],
+  },
   exploreMedia: PrimalNote[],
+  mediaPaging: PaginationInfo,
   exploreTopics: TopicStat[],
 
 
@@ -97,8 +105,8 @@ export type ExploreContextStore = {
     selectTab: (tab: string) => void,
     setPreviewDVM: (dvm: PrimalDVM, stats: DVMStats | undefined, metadata: DVMMetadata | undefined) => void,
     setExplorePeople: (users: PrimalUser[]) => void,
-    setExploreZaps: (zaps: PrimalZap[]) => void,
-    setExploreMedia: (zaps: PrimalNote[]) => void,
+    setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
+    setExploreMedia: (notes: PrimalNote[], paging: PaginationInfo) => void,
     setExploreTopics: (topics: TopicStat[]) => void,
   }
 }
@@ -109,7 +117,14 @@ export const initialExploreData = {
   previewDVMMetadata: undefined,
   explorePeople: [],
   exploreZaps: [],
+  zapPaging: { since: 0, until: 0, sortBy: 'created_at' },
+  zapSubjects: {
+    notes: [],
+    reads: [],
+    users: [],
+  },
   exploreMedia: [],
+  mediaPaging: { since: 0, until: 0, sortBy: 'created_at' },
   exploreTopics: [],
 
 
@@ -158,11 +173,18 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   const setExplorePeople = (users: PrimalUser[]) => {
     updateStore('explorePeople', () => [...users]);
   }
-  const setExploreZaps = (zaps: PrimalZap[]) => {
-    updateStore('exploreZaps', () => [...zaps]);
+  const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
+    updateStore('exploreZaps', (zps) => [...zps, ...zaps]);
+    updateStore('zapPaging', () => ({ ...paging }));
+    updateStore('zapSubjects', (s) => ({
+      notes: [ ...s.notes, ...subjects.notes],
+      reads: [ ...s.reads, ...subjects.reads],
+      users: [ ...s.users, ...subjects.users],
+    }));
   }
-  const setExploreMedia = (notes: PrimalNote[]) => {
-    updateStore('exploreMedia', () => [...notes]);
+  const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
+    updateStore('exploreMedia', (nts) => [...nts, ...notes]);
+    updateStore('mediaPaging', () => ({ ...paging }));
   }
   const setExploreTopics = (topics: TopicStat[]) => {
     updateStore('exploreTopics', () => [...topics]);

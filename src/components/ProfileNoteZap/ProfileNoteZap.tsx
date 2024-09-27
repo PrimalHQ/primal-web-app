@@ -13,7 +13,7 @@ import styles from  "./ProfileNoteZap.module.scss";
 
 const ProfileNoteZap: Component<{
   id?: string,
-  subject: PrimalArticle | PrimalNote | undefined,
+  subject: PrimalArticle | PrimalNote | PrimalUser | undefined,
   zap: PrimalZap,
 }> = (props) => {
 
@@ -29,25 +29,38 @@ const ProfileNoteZap: Component<{
     let content = '';
     let time = 0;
     let link = '';
+    let name = ''
 
     if (props.subject.msg.kind === Kind.Text) {
-      content = props.subject.content;
-      time = props.subject.msg.created_at || 0;
-      link = `/e/${props.subject.noteId}`;
+      const sub = props.subject as PrimalNote;
+
+      content = sub.content;
+      time = props.zap.created_at || 0;
+      link = `/e/${sub.noteId}`;
+      name = userName(sub.user);
     }
 
     if (props.subject.msg.kind === Kind.LongForm) {
-      const sub = (props.subject as PrimalArticle);
+      const sub = props.subject as PrimalArticle;
       content = sub.title;
-      time = sub.published;
+      time = props.zap.created_at || 0;
       link = `/e/${sub.noteId}`;
+      name = userName(sub.user);
+    }
+
+    if (props.subject.msg.kind === Kind.Metadata) {
+      const sub = props.subject as PrimalUser;
+      content = sub.about;
+      time = props.zap.created_at || 0;
+      link = `/p/${sub.npub}`;
+      name = userName(sub);
     }
 
     return (
       <A href={link} class={styles.subject}>
         <div class={styles.header}>
           <div class={styles.userName}>
-            {userName(props.subject.user)}
+            {name}
           </div>
           <Show when={time > 0}>
             <div class={styles.bullet}>&middot;</div>
@@ -66,25 +79,23 @@ const ProfileNoteZap: Component<{
   return (
     <div class={styles.contentZap} data-zap-id={props.zap.id}>
       <div class={styles.zapInfo}>
-        <div class={styles.topLine}>
-          <A href={`/p/${userNpub(props.zap.sender)}`} class={styles.sender}>
-            <Avatar size="xs" user={props.zap.sender} />
-          </A >
+        <A href={`/p/${userNpub(props.zap.sender)}`} class={styles.sender}>
+          <Avatar size="vs2" user={props.zap.sender} />
+        </A >
+
+        <div class={styles.data}>
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
-            <div class={styles.number}>
-              {humanizeNumber(props.zap.amount, true)}
-            </div>
+            <div class={styles.number}>{props.zap.amount.toLocaleString()}</div>
           </div>
-          <A href={`/p/${userNpub(props.zap.reciver)}`} class={styles.receiver}>
-            <Avatar size="xs" user={props.zap.reciver} />
-          </A>
-        </div>
-        <div class={styles.bottomLine}>
           <div class={styles.message}>
             {props.zap.message}
           </div>
         </div>
+
+        <A href={`/p/${userNpub(props.zap.reciver)}`} class={styles.receiver}>
+          <Avatar size="vs2" user={props.zap.reciver} />
+        </A>
       </div>
 
       {subject()}

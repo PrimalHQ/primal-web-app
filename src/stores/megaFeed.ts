@@ -63,6 +63,7 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
       lud16: (userMeta.lud16 || '') as string,
       website: (userMeta.website || '') as string,
       tags: user?.tags || [],
+      msg: {...user},
     },
     note: {
       id: message.id,
