@@ -5,6 +5,7 @@ import { useAccountContext } from "./AccountContext";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import { Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
@@ -25,6 +26,8 @@ import {
 } from "../sockets";
 import {
   ContextChildren,
+  DVMMetadata,
+  DVMStats,
   FeedPage,
   NostrEOSE,
   NostrEvent,
@@ -36,13 +39,26 @@ import {
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
+  PrimalDVM,
   PrimalNote,
+  PrimalUser,
+  PrimalZap,
   TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { parseBolt11 } from "../utils";
+import { TopicStat } from "../megaFeeds";
 
 export type ExploreContextStore = {
+  previewDVM: PrimalDVM | undefined,
+  previewDVMStats: DVMStats | undefined,
+  previewDVMMetadata: DVMMetadata | undefined,
+  explorePeople: PrimalUser[],
+  exploreZaps: PrimalZap[],
+  exploreMedia: PrimalNote[],
+  exploreTopics: TopicStat[],
+
+
   notes: PrimalNote[],
   scope: string,
   timeframe: string,
@@ -51,6 +67,7 @@ export type ExploreContextStore = {
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
   isNetStatsStreamOpen: boolean,
+  selectedTab: string,
   stats: {
     users: number,
     pubkeys: number,
@@ -76,14 +93,31 @@ export type ExploreContextStore = {
     openNetStatsStream: () => void,
     closeNetStatsStream: () => void,
     fetchLegendStats: (pubkey?: string) => void,
+
+    selectTab: (tab: string) => void,
+    setPreviewDVM: (dvm: PrimalDVM, stats: DVMStats | undefined, metadata: DVMMetadata | undefined) => void,
+    setExplorePeople: (users: PrimalUser[]) => void,
+    setExploreZaps: (zaps: PrimalZap[]) => void,
+    setExploreMedia: (zaps: PrimalNote[]) => void,
+    setExploreTopics: (topics: TopicStat[]) => void,
   }
 }
 
 export const initialExploreData = {
+  previewDVM: undefined,
+  previewDVMStats: undefined,
+  previewDVMMetadata: undefined,
+  explorePeople: [],
+  exploreZaps: [],
+  exploreMedia: [],
+  exploreTopics: [],
+
+
   notes: [],
   isFetching: false,
   scope: 'global',
   timeframe: 'latest',
+  selectedTab: 'feeds',
   page: {
     messages: [],
     users: {},
@@ -120,6 +154,47 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const setExplorePeople = (users: PrimalUser[]) => {
+    updateStore('explorePeople', () => [...users]);
+  }
+  const setExploreZaps = (zaps: PrimalZap[]) => {
+    updateStore('exploreZaps', () => [...zaps]);
+  }
+  const setExploreMedia = (notes: PrimalNote[]) => {
+    updateStore('exploreMedia', () => [...notes]);
+  }
+  const setExploreTopics = (topics: TopicStat[]) => {
+    updateStore('exploreTopics', () => [...topics]);
+  }
+
+  const setPreviewDVM = (dvm: PrimalDVM, stats: DVMStats | undefined, metadata: DVMMetadata | undefined) => {
+    batch(() => {
+      updateStore('previewDVM', () => ({...dvm}));
+      updateStore('previewDVMStats', () => ({...stats}));
+      updateStore('previewDVMMetadata', () => ({...metadata}));
+    })
+  }
+
+  const selectTab = (tab: string) => {
+    updateStore('selectedTab', () => tab);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
@@ -457,6 +532,13 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       openNetStatsStream,
       closeNetStatsStream,
       fetchLegendStats,
+
+      selectTab,
+      setPreviewDVM,
+      setExplorePeople,
+      setExploreZaps,
+      setExploreMedia,
+      setExploreTopics,
     },
   });
 

@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Match, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, onMount, Switch } from 'solid-js';
 import styles from './FeedMarketPlace.module.scss';
 
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
@@ -7,34 +7,41 @@ import { APP_ID } from '../../App';
 import { fetchDVMFeeds } from '../../lib/feed';
 import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
-import { NostrDVM, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
+import { DVMMetadata, DVMStats, NostrDVM, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
 import { convertToUser } from '../../stores/profile';
 import FeedMarketItem from './FeedMarketPlaceItem';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import FeedMarketPlacePreview from './FeedMarketPlacePreview';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
+import { useNavigate } from '@solidjs/router';
+import { explore } from '../../translations';
+import { useExploreContext } from '../../contexts/ExploreContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 export type MarketplaceStore = {
   dvms: PrimalDVM[],
-  dvmStats: Record<string, { likes: number, satszapped: number }>,
+  dvmStats: Record<string, DVMStats>,
   users: Record<string, PrimalUser>,
   previewDvm: PrimalDVM | undefined,
+  dvmMetadata: Record<string, DVMMetadata>
 
 }
 
-const emptyStore: MarketplaceStore = {
+export const emptyStore: MarketplaceStore = {
   dvms: [],
   dvmStats: {},
   users: {},
   previewDvm: undefined,
+  dvmMetadata: {},
 }
 
 const FeedMarketPlace: Component<{
   open?: boolean,
-  type: 'notes' | 'reads',
-  setOpen?: (v: boolean) => void,
+  type?: 'notes' | 'reads',
   onAddFeed?: (feed: PrimalArticleFeed) => void,
 }> = (props) => {
+  const navigate = useNavigate();
+  const explore = useExploreContext();
 
   const [store, updateStore] = createStore<MarketplaceStore>({ ...emptyStore });
 
@@ -48,7 +55,7 @@ const FeedMarketPlace: Component<{
   });
 
   const fetchDVMs = () => {
-    const subId = `feed_market_${APP_ID}`;
+    const subId = `explore_feeds_${APP_ID}`;
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -65,6 +72,8 @@ const FeedMarketPlace: Component<{
             author: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
             identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
+            picture: dvmData.picture,
+            image: dvmData.image,
           };
 
           updateStore('dvms', store.dvms.length, () => ({ ...dvm }));
@@ -87,7 +96,14 @@ const FeedMarketPlace: Component<{
             likes: stats.likes || 0,
             satszapped: stats.satszapped || 0,
           }));
+        }
 
+        if (content.kind === Kind.DVMMetadata) {
+          const metadata = JSON.parse(content.content);
+
+          if (!metadata.event_id) return;
+
+          updateStore('dvmMetadata', metadata.event_id, () => ({ kind: metadata.kind, isPrimal: metadata.is_primal}))
         }
       },
       onEose: () => {
@@ -95,7 +111,7 @@ const FeedMarketPlace: Component<{
       }
     });
 
-    fetchDVMFeeds(props.type, subId);
+    fetchDVMFeeds(subId, props.type);
   }
 
   const clearDVMs = () => {
@@ -113,91 +129,27 @@ const FeedMarketPlace: Component<{
 
 
   return (
-    <AdvancedSearchDialog
-      open={props.open}
-      setOpen={props.setOpen}
-      title={
-        <div class={styles.feedMarketplaceTitle}>
-          Feed Marketplace
+    <Switch>
+      <Match when={!store.previewDvm}>
+        <div class={styles.feedMarketplaceContent}>
+          <div class={styles.boothsPage}>
+            <For each={store.dvms}>
+              {dvm => (
+                <FeedMarketItem
+                  dvm={dvm}
+                  stats={store.dvmStats[dvm.id]}
+                  metadata={store.dvmMetadata[dvm.id]}
+                  onClick={(d) => {
+                    explore?.actions.setPreviewDVM(dvm, store.dvmStats[dvm.id], store.dvmMetadata[dvm.id])
+                    navigate(`/explore_new/feed/${dvm.identifier}_by_${dvm.author}`)
+                  }}
+                />
+              )}
+            </For>
+          </div>
         </div>
-      }
-      triggerClass={'hidden'}
-    >
-      <Switch>
-        <Match when={!store.previewDvm}>
-          <div class={styles.feedMarketplaceContent}>
-            <div class={styles.booths}>
-              <For each={store.dvms}>
-                {dvm => (
-                  <FeedMarketItem
-                    dvm={dvm}
-                    stats={store.dvmStats[dvm.id]}
-                    onClick={(d) => {
-                      updateStore('previewDvm', () => ({ ...d }))
-                    }}
-                  />
-                )}
-              </For>
-            </div>
-
-            <div class={styles.feedMarketplaceFooter}>
-              <div class={styles.instruction}>
-                Select a feed to preview it
-              </div>
-
-              <ButtonSecondary
-                light={true}
-                onClick={() => props.setOpen && props.setOpen(false)}
-              >
-                Cancel
-              </ButtonSecondary>
-            </div>
-          </div>
-        </Match>
-        <Match when={store.previewDvm}>
-          <div class={styles.feedMarketplaceContent}>
-            <FeedMarketPlacePreview
-              dvm={store.previewDvm}
-              stats={store.dvmStats[store.previewDvm?.id || '']}
-              type={props.type}
-            />
-          </div>
-
-          <div class={styles.feedMarketplacePreviewFooter}>
-            <ButtonSecondary
-              light={true}
-              onClick={() => updateStore('previewDvm', () => undefined)}
-            >
-              Back
-            </ButtonSecondary>
-            <ButtonPrimary
-              onClick={() => {
-                const dvm = store.previewDvm;
-                if (!props.onAddFeed || !dvm) return;
-
-                const spec = JSON.stringify({
-                  dvm_id: dvm.id,
-                  dvm_pubkey: dvm.author,
-                  kind: props.type,
-                });
-
-                const feed: PrimalArticleFeed = {
-                  name: dvm.name,
-                  description: dvm.about,
-                  spec,
-                  enabled: true,
-                  feedkind: 'dvm',
-                }
-
-                props.onAddFeed(feed)
-              }}
-            >
-              Add feed
-            </ButtonPrimary>
-          </div>
-        </Match>
-      </Switch>
-    </AdvancedSearchDialog>
+      </Match>
+    </Switch>
   )
 }
 

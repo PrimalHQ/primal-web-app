@@ -15,6 +15,8 @@ import {
   PrimalArticle,
   PrimalNote,
   PrimalUser,
+  PrimalZap,
+  TopicStats,
   TopZap,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
@@ -24,6 +26,9 @@ import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
 import { decodeIdentifier } from "./lib/keys";
+import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } from "./lib/profile";
+import { nip19 } from "nostr-tools";
+import { convertToUser } from "./stores/profile";
 
 export type PaginationInfo = {
   since: number,
@@ -31,17 +36,29 @@ export type PaginationInfo = {
   sortBy: string,
 };
 
+export type TopicStat = [string, number];
+
 export type MegaFeedResults = {
   users: PrimalUser[],
   notes: PrimalNote[],
   reads: PrimalArticle[],
+  zaps: PrimalZap[],
+  topicStats: TopicStat[],
   paging: PaginationInfo,
 };
+
+export type FeedPaging = {
+  limit?: number,
+  until?: number,
+  since?: number,
+  offset?: number | number[],
+}
 
 export const emptyMegaFeedPage = {
   users: {},
   notes: [],
   reads: [],
+  topicStats: {},
   noteStats: {},
   mentions: {},
   noteActions: {},
@@ -72,18 +89,15 @@ export const fetchMegaFeed = (
   pubkey: string | undefined,
   specification: any,
   subId: string,
-  paging?: {
-    limit?: number,
-    until?: number,
-    since?: number,
-    offset?: number | number[],
-  },
+  paging?: FeedPaging,
   ) => {
     return new Promise<MegaFeedResults>((resolve) => {
       let page: MegaFeedPage = {
         users: {},
         notes: [],
         reads: [],
+        zaps: [],
+        topicStats: {},
         noteStats: {},
         mentions: {},
         noteActions: {},
@@ -139,6 +153,8 @@ export const fetchScoredContent = (
       users: {},
       notes: [],
       reads: [],
+      zaps: [],
+      topicStats: {},
       noteStats: {},
       mentions: {},
       noteActions: {},
@@ -199,6 +215,8 @@ export const fetchReadThread = (
       users: {},
       notes: [],
       reads: [],
+      zaps: [],
+      topicStats: {},
       noteStats: {},
       mentions: {},
       noteActions: {},
@@ -224,11 +242,231 @@ export const fetchReadThread = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
       }
     });
 
     getArticleThread(userPubkey, pubkey, identifier, kind, subId);
+  });
+}
+
+export const fetchExplorePeople = (
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {
+      users: {},
+      notes: [],
+      reads: [],
+      zaps: [],
+      topicStats: {},
+      noteStats: {},
+      mentions: {},
+      noteActions: {},
+      relayHints: {},
+      topZaps: {},
+      wordCount: {},
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    console.log('')
+    getExplorePeople(subId, until, limit, since, offset);
+  });
+}
+
+export const fetchExploreZaps = (
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {
+      users: {},
+      notes: [],
+      reads: [],
+      zaps: [],
+      topicStats: {},
+      noteStats: {},
+      mentions: {},
+      noteActions: {},
+      relayHints: {},
+      topZaps: {},
+      wordCount: {},
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    console.log('')
+    getExploreZaps(subId, until, limit, since, offset);
+  });
+}
+
+export const fetchExploreMedia = (
+  user_pubkey: string | undefined,
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {
+      users: {},
+      notes: [],
+      reads: [],
+      zaps: [],
+      topicStats: {},
+      noteStats: {},
+      mentions: {},
+      noteActions: {},
+      relayHints: {},
+      topZaps: {},
+      wordCount: {},
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    console.log('')
+    getExploreMedia(subId, user_pubkey, until, limit, since, offset);
+  });
+}
+
+export const fetchExploreTopics = (
+  subId: string,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {
+      users: {},
+      notes: [],
+      reads: [],
+      zaps: [],
+      topicStats: {},
+      noteStats: {},
+      mentions: {},
+      noteActions: {},
+      relayHints: {},
+      topZaps: {},
+      wordCount: {},
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+      }
+    });
+
+    getExploreTopics(subId);
   });
 }
 
@@ -253,11 +491,15 @@ const pageResolve = (page: MegaFeedPage) => {
   const users = convertToUsersMega(page);
   const notes = convertToNotesMega(page);
   const reads = convertToReadsMega(page);
+  const zaps = convertToZapsMega(page);
+  const topicStats = convertToTopicStatsMega(page);
 
   return {
     users,
     notes,
     reads,
+    zaps,
+    topicStats,
     paging: {
       since: page.since,
       until: page.until,
@@ -352,7 +594,9 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     return;
   }
 
-  if (content?.kind === Kind.Zap) {
+  if (content.kind === Kind.Zap) {
+    page.zaps.push(content);
+
     const zapTag = content.tags.find(t => t[0] === 'description');
 
     if (!zapTag) return;
@@ -375,7 +619,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
 
     const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
 
-    const zap: TopZap = {
+    const topZap: TopZap = {
       id: zapInfo.id,
       amount: parseInt(amount || '0'),
       pubkey: zapInfo.pubkey,
@@ -386,17 +630,89 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     const oldZaps = page.topZaps[eventId];
 
     if (oldZaps === undefined) {
-      page.topZaps[eventId] = [{ ...zap }];
+      page.topZaps[eventId] = [{ ...topZap }];
       return;
     }
 
-    if (oldZaps.find(i => i.id === zap.id)) {
+    if (oldZaps.find(i => i.id === topZap.id)) {
       return;
     }
 
-    const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+    const newZaps = [ ...oldZaps, { ...topZap }].sort((a, b) => b.amount - a.amount);
 
     page.topZaps[eventId] = [ ...newZaps ];
     return;
   }
+
+  if (content.kind === Kind.NoteTopicStat) {
+    const topics = JSON.parse(content.content);
+
+    page.topicStats = topics;
+    return;
+  }
 };
+
+const convertToZapsMega = (page: MegaFeedPage) => {
+  const pageZaps = page.zaps;
+
+  let zaps: PrimalZap[] = [];
+
+  for (let i=0; i< pageZaps.length; i++) {
+    const zapContent = pageZaps[i];
+
+    const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+    const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+    const senderPubkey = zapEvent.pubkey as string;
+    const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+
+    let zappedId = '';
+    let zappedKind: number = 0;
+
+    const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+    const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+
+    if (zapTagA) {
+      const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
+      zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+
+      const article = page.reads.find(a => a.id === zappedId);
+      zappedKind = article?.kind || 0;
+    }
+    else if (zapTagE) {
+      zappedId = zapTagE[1];
+
+      const article = page.reads.find(a => a.id === zappedId);
+      const note = page.notes.find(n => n.id === zappedId);
+
+      zappedKind = article?.kind || note?.kind || 0;
+    }
+
+    if (![Kind.Text, Kind.LongForm].includes(zappedKind)) continue;
+
+    const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
+    const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;
+
+    const zap: PrimalZap = {
+      id: zapContent.id,
+      message: zapEvent.content || '',
+      amount: parseBolt11(bolt11) || 0,
+      sender,
+      reciver,
+      created_at: zapContent.created_at,
+      zappedId,
+      zappedKind,
+    };
+
+    if (!zaps.find(z => z.id === zap.id)) {
+      zaps.push(zap);
+    }
+  }
+
+  return zaps;
+}
+
+const convertToTopicStatsMega = (page: MegaFeedPage) => {
+  return Object.entries(page.topicStats);
+
+}

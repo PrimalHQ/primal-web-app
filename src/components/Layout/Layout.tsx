@@ -219,7 +219,7 @@ const Layout: Component = () => {
                 <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
                 </div>
               </div>
-              <div class={styles.rightContent}>
+              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore_new') ? styles.exploreHeader : ''}`}>
                 <div id="right_sidebar">
                 </div>
               </div>

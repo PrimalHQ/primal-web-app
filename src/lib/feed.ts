@@ -499,10 +499,20 @@ export const fetchDefaultHomeFeeds = (subid: string) => {
 }
 
 
-export const fetchDVMFeeds = (kind: 'notes' | 'reads', subId: string) => {
+export const fetchDVMFeeds = (subId: string, kind?: 'notes' | 'reads') => {
+  const payload = kind ? { kind } : {};
+
   sendMessage(JSON.stringify([
     "REQ",
     subId,
-    {cache: ["get_featured_dvm_feeds", { kind }]},
+    {cache: ["get_featured_dvm_feeds", { ...payload }]},
+  ]));
+}
+
+export const fetchDVM = (subId: string, identifier: string, pubkey: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["dvm_feed_info", { identifier, pubkey }]},
   ]));
 }

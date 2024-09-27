@@ -11,6 +11,7 @@ import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import FeedMarketPlace from '../../components/FeedMarketplace/FeedMarketPlace';
+import FeedMarketPlaceDialog from '../../components/FeedMarketplace/FeedMarketPlaceDialog';
 
 const HomeFeeds: Component = () => {
 
@@ -72,7 +73,7 @@ const HomeFeeds: Component = () => {
         onAbort={() => setIsRestoringFeeds(false)}
       ></ConfirmModal>
 
-      <FeedMarketPlace
+      <FeedMarketPlaceDialog
         open={openMarketplace()}
         setOpen={setOpenMarketplace}
         type="notes"

@@ -1,5 +1,5 @@
 import { Component, Show } from 'solid-js';
-import { PrimalDVM } from '../../types/primal';
+import { DVMMetadata, PrimalDVM } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import styles from './FeedMarketPlace.module.scss';
 
@@ -7,6 +7,7 @@ import styles from './FeedMarketPlace.module.scss';
 const FeedMarketItem: Component<{
   dvm: PrimalDVM | undefined,
   stats?: { likes: number, satszapped: number },
+  metadata?: DVMMetadata,
   onClick?: (dvm: PrimalDVM | undefined) => void,
 }> = (props) => {
 
@@ -25,7 +26,7 @@ const FeedMarketItem: Component<{
     >
       <div class={styles.left}>
         <div class={styles.avatar}>
-          <Avatar size="vs2"/>
+          <Avatar size="vs2" src={props.dvm?.picture || props.dvm?.image || ''} />
         </div>
         <div class={styles.paid}>
           <Show

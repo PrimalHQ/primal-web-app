@@ -20,6 +20,7 @@ const Reads = lazy(() => import('./pages/Reads'));
 const Layout = lazy(() => import('./components/Layout/Layout'));
 const Explore = lazy(() => import('./pages/Explore'));
 const ExploreNew = lazy(() => import('./pages/ExploreNew'));
+const ExploreFeeds = lazy(() => import('./pages/Explore/ExploreFeeds'));
 const Thread = lazy(() => import('./pages/Thread'));
 const Messages = lazy(() => import('./pages/Messages'));
 const Bookmarks = lazy(() => import('./pages/Bookmarks'));
@@ -121,7 +122,10 @@ const Router: Component = () => {
           <Route path="/reads/:topic?" component={Reads} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
-          <Route path="/explore_new" component={ExploreNew} />
+          <Route path="/explore_new">
+            <Route path="/" component={ExploreNew} />
+            <Route path="/feed/:id" component={ExploreFeeds} />
+          </Route>
           <Route path="/explore/:scope?/:timeframe?" component={Explore} />
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />

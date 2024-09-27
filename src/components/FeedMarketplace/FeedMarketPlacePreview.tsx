@@ -42,7 +42,7 @@ const FeedMarketPlacePreview: Component<{
     }
 
     const spec = JSON.stringify({
-      dvm_id: props.dvm?.id,
+      dvm_id: props.dvm?.identifier,
       dvm_pubkey: props.dvm?.author,
       kind: props.type,
     });
@@ -66,6 +66,7 @@ const FeedMarketPlacePreview: Component<{
   }
 
   createEffect(() => {
+    console.log('DVM: ', props.dvm);
     if (props.dvm) {
       getFeedPreview();
     } else {

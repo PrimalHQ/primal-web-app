@@ -149,6 +149,8 @@ export enum Kind  {
   NoteQuoteStats=10_000_143,
   WordCount=10_000_144,
   FeaturedAuthors=10_000_148,
+  DVMMetadata=10_000_159,
+  NoteTopicStat=10_000_160,
 
   WALLET_OPERATION = 10_000_300,
 

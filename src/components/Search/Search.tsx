@@ -25,6 +25,7 @@ const Search: Component<{
   hideDefault?: boolean,
   placeholder?: string,
   id?: string,
+  fullWidth?: boolean,
 }> = (props) => {
 
   const toaster = useToastContext();
@@ -115,9 +116,9 @@ const Search: Component<{
   });
 
   return (
-    <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''}`}>
+    <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''} ${props.fullWidth ? styles.wideHolder : ''}`}>
       <form
-        class={styles.search}
+        class={`${styles.search} ${props.fullWidth ? styles.wide : ''}`}
         onsubmit={onSearch}
         autocomplete="off"
       >
@@ -138,7 +139,7 @@ const Search: Component<{
         />
       </form>
 
-      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''} ${props.fullWidth ? styles.wide : ''}`}>
         <Show
           when={!props.hideDefault}
         >
@@ -163,7 +164,7 @@ const Search: Component<{
         </Show>
       </div>
 
-      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''} ${props.fullWidth ? styles.wide : ''}`}>
         <Show when={search?.isFetchingUsers && query().length > 0}>
           <div class={styles.loadingOverlay}>
             <div>

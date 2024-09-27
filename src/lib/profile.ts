@@ -399,7 +399,7 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, sh
       return acc;
     }
 
-    const permission = config.read ? 'read' : 'write';
+    const permission: string = config.read ? 'read' : 'write';
 
     return [ ...acc, ['r', url, permission]];
   }, []);
@@ -452,4 +452,84 @@ export const extractRelayConfigFromTags = (tags: string[][]) => {
     return { ...acc, [tag[1]]: config };
 
   }, {});
+};
+
+
+export const getExplorePeople = async (subid: string, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 20, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_people", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreZaps = async (subid: string, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 20, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_zaps", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreMedia = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 20, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_media", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreTopics = async (subid: string  ) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_topics"]},
+  ]));
 };

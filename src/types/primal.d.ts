@@ -290,6 +290,16 @@ export type NostrDVM = {
   tags?: string[][],
 };
 
+export type NostrDVMMetadata = {
+  kind: Kind.DVMMetadata,
+  content: string,
+};
+
+export type NostrTopicStats = {
+  kind: Kind.NoteTopicStat,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -328,7 +338,9 @@ export type NostrEventContent =
   NostrUnsubscribe |
   NostrWordCount |
   NostrHighlight |
-  NostrDVM;
+  NostrDVM |
+  NostrDVMMetadata |
+  NostrTopicStats;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -405,6 +417,8 @@ export type FeedPage = {
   wordCount?: Record<string, number>,
 };
 
+export type TopicStats = Record<string, number>;
+
 export type MegaFeedPage = {
   users: {
     [pubkey: string]: NostrUserContent,
@@ -412,6 +426,8 @@ export type MegaFeedPage = {
   notes: NostrNoteContent[],
   reads: NostrNoteContent[],
   noteStats: NostrPostStats,
+  zaps: NostrUserZaps[],
+  topicStats: TopicStats,
   mentions: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
   relayHints: Record<string, string>,
@@ -535,7 +551,13 @@ export type PrimalDVM = {
   author: string,
   supportedKinds: string[],
   identifier: string,
+  picture?: string,
+  image?: string,
 }
+export type DVMStats = { likes: number, satszapped: number };
+
+export type DVMMetadata = { kind: 'reads' | 'notes', isPrimal: boolean};
+
 
 export type UserStats = {
   pubkey: string,

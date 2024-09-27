@@ -41,3 +41,34 @@
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+
+.hotTopicsCaption {
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  margin-bottom: 12px;
+}
+
+.exploreHotTopics {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  -webkit-flex-wrap: wrap;
+
+  .exploreHotTopic {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-block: 8px;
+    padding-inline: 10px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    border-radius: 99px;
+    background-color: var(--background-input);
+  }
+}
