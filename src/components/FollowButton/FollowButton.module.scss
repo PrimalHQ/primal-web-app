@@ -19,6 +19,18 @@
   }
 }
 
+.flexible {
+  button {
+    max-width: 100%;
+    height: 28px;
+    padding-block: 0;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 12px;
+    text-transform: lowercase;
+  }
+}
+
 
   // @mixin followButton {
   //   grid-area: follow;

@@ -54,7 +54,12 @@ export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
   previewDVMStats: DVMStats | undefined,
   previewDVMMetadata: DVMMetadata | undefined,
+  previewDVMAuthor: PrimalUser | undefined,
+  previewDVMActions: NoteActions | undefined,
+
   explorePeople: PrimalUser[],
+  peoplePaging: PaginationInfo,
+
   exploreZaps: PrimalZap[],
   zapPaging: PaginationInfo,
   zapSubjects: {
@@ -62,6 +67,7 @@ export type ExploreContextStore = {
     reads: PrimalArticle[],
     users: PrimalUser[],
   },
+
   exploreMedia: PrimalNote[],
   mediaPaging: PaginationInfo,
   exploreTopics: TopicStat[],
@@ -103,8 +109,14 @@ export type ExploreContextStore = {
     fetchLegendStats: (pubkey?: string) => void,
 
     selectTab: (tab: string) => void,
-    setPreviewDVM: (dvm: PrimalDVM, stats: DVMStats | undefined, metadata: DVMMetadata | undefined) => void,
-    setExplorePeople: (users: PrimalUser[]) => void,
+    setPreviewDVM: (
+      dvm: PrimalDVM,
+      stats: DVMStats | undefined,
+      metadata: DVMMetadata | undefined,
+      author: PrimalUser | undefined,
+      actions: NoteActions | undefined,
+    ) => void,
+    setExplorePeople: (users: PrimalUser[], paging: PaginationInfo) => void,
     setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
     setExploreMedia: (notes: PrimalNote[], paging: PaginationInfo) => void,
     setExploreTopics: (topics: TopicStat[]) => void,
@@ -115,7 +127,12 @@ export const initialExploreData = {
   previewDVM: undefined,
   previewDVMStats: undefined,
   previewDVMMetadata: undefined,
+  previewDVMAuthor: undefined,
+  previewDVMActions: undefined,
+
   explorePeople: [],
+  peoplePaging: { since: 0, until: 0, sortBy: 'created_at' },
+
   exploreZaps: [],
   zapPaging: { since: 0, until: 0, sortBy: 'created_at' },
   zapSubjects: {
@@ -123,8 +140,10 @@ export const initialExploreData = {
     reads: [],
     users: [],
   },
+
   exploreMedia: [],
   mediaPaging: { since: 0, until: 0, sortBy: 'created_at' },
+
   exploreTopics: [],
 
 
@@ -170,9 +189,11 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const setExplorePeople = (users: PrimalUser[]) => {
-    updateStore('explorePeople', () => [...users]);
+  const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo) => {
+    updateStore('explorePeople', (usrs) => [ ...usrs, ...users]);
+    updateStore('peoplePaging', () => ({ ...paging }));
   }
+
   const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
     updateStore('exploreZaps', (zps) => [...zps, ...zaps]);
     updateStore('zapPaging', () => ({ ...paging }));
@@ -182,19 +203,29 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       users: [ ...s.users, ...subjects.users],
     }));
   }
+
   const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
     updateStore('exploreMedia', (nts) => [...nts, ...notes]);
     updateStore('mediaPaging', () => ({ ...paging }));
   }
+
   const setExploreTopics = (topics: TopicStat[]) => {
     updateStore('exploreTopics', () => [...topics]);
   }
 
-  const setPreviewDVM = (dvm: PrimalDVM, stats: DVMStats | undefined, metadata: DVMMetadata | undefined) => {
+  const setPreviewDVM = (
+    dvm: PrimalDVM,
+    stats: DVMStats | undefined,
+    metadata: DVMMetadata | undefined,
+    author: PrimalUser | undefined,
+    actions: NoteActions | undefined,
+  ) => {
     batch(() => {
-      updateStore('previewDVM', () => ({...dvm}));
-      updateStore('previewDVMStats', () => ({...stats}));
-      updateStore('previewDVMMetadata', () => ({...metadata}));
+      updateStore('previewDVM', () => (dvm ? {...dvm} : undefined));
+      updateStore('previewDVMStats', () => (stats ? {...stats} : undefined));
+      updateStore('previewDVMMetadata', () => (metadata ? {...metadata} : undefined));
+      updateStore('previewDVMAuthor', () => (author ? {...author} : undefined));
+      updateStore('previewDVMActions', () => (actions ? {...actions} : undefined));
     })
   }
 

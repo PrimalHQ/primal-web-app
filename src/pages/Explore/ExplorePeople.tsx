@@ -4,11 +4,15 @@ import { useToastContext } from '../../components/Toaster/Toaster';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { useLocation } from '@solidjs/router';
+import { A, useLocation } from '@solidjs/router';
 import { fetchExplorePeople } from '../../megaFeeds';
 import { APP_ID } from '../../App';
-import { userName } from '../../stores/profile';
+import { nip05Verification, userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
+import Paginator from '../../components/Paginator/Paginator';
+import FollowButton from '../../components/FollowButton/FollowButton';
+import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
+import { humanizeNumber } from '../../lib/stats';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
 
@@ -19,27 +23,85 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   const location = useLocation();
 
 
-
   onMount(() => {
-    getPeople();
+    if (explore?.exploreMedia.length === 0) {
+      getPeople();
+    }
   });
 
   const getPeople = async () => {
-    const { users } = await fetchExplorePeople(`explore_people_${APP_ID}`, { limit: 20 });
+    const { users, paging } = await fetchExplorePeople(`explore_people_${APP_ID}`, { limit: 20 });
 
-    explore?.actions.setExplorePeople(users);
+    explore?.actions.setExplorePeople(users, paging);
   }
 
+  const getNextPeoplePage = async () => {
+    if (!explore) return;
+
+    const page = {
+      limit: 20,
+      until: explore.peoplePaging.since,
+      // offset: explore.explorePeople.map(u => u.),
+    }
+
+    const { users, paging } = await fetchExplorePeople(`explore_media_${APP_ID}` , page);
+
+    explore?.actions.setExplorePeople(users, paging);
+  }
 
 
   return (
     <div class={styles.explorePeople}>
-      <For each={explore?.explorePeople}>
-        {user => <div>
-          <Avatar user={user} />
-          <div>{userName(user)}</div>
-        </div>}
-      </For>
+      <div class={styles.peopleGrid}>
+        <For each={explore?.explorePeople}>
+          {user => (
+            <A href={`/p/${user.npub}`} class={styles.explorePerson}>
+              <div class={styles.userImage}>
+                <Avatar user={user} size="mll"/>
+                <div class={styles.follow}>
+                  <FollowButton
+                    person={user}
+                  />
+                </div>
+              </div>
+
+              <div class={styles.userInfo}>
+                <div class={styles.userBasicData}>
+                  <div class={styles.userName}>
+                    {userName(user)}
+                    <VerificationCheck user={user} />
+                  </div>
+                  <Show when={user.nip05}>
+                    <div class={styles.nip05}>
+                      {nip05Verification(user)}
+                    </div>
+                  </Show>
+                </div>
+                <div class={styles.userAdditionalData}>
+                  <div class={`${styles.userAbout} ${!user.nip05 ? styles.extended : ''}`}>
+                    {user.about}
+                  </div>
+                </div>
+
+                <div class={styles.userStats}>
+                  <Show when={user.userStats?.followers_count}>
+                    <div class={styles.number}>
+                      {humanizeNumber(user.userStats?.followers_count || 0)}
+                    </div>
+                    <div class={styles.unit}>
+                      followers
+                    </div>
+                  </Show>
+                </div>
+              </div>
+            </A>
+          )}
+        </For>
+      </div>
+      <Paginator
+        isSmall={true}
+        loadNextPage={getNextPeoplePage}
+      />
     </div>
   )
 }

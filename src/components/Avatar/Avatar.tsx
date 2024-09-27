@@ -11,7 +11,7 @@ import styles from './Avatar.module.scss';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "lg" | "xl" | "xxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -37,6 +37,7 @@ const Avatar: Component<{
     sm: styles.smallAvatar,
     md: styles.midAvatar,
     ml: styles.mlAvatar,
+    mll: styles.mllAvatar,
     lg: styles.largeAvatar,
     xl: styles.extraLargeAvatar,
     xxl: styles.xxlAvatar,
@@ -54,6 +55,7 @@ const Avatar: Component<{
     sm: styles.smallMissing,
     md: styles.midMissing,
     ml: styles.mlMissing,
+    mll: styles.mllMissing,
     lg: styles.largeMissing,
     xl: styles.extraLargeMissing,
     xxl: styles.xxlMissing,
@@ -95,6 +97,8 @@ const Avatar: Component<{
       case 'vs':
       case 'sm':
       case 'md':
+      case 'ml':
+      case 'mll':
       case 'lg':
         size = 's';
         break;

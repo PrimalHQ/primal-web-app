@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { fetchNoteFeedBySpec, fetchReadsFeedBySpec } from '../../handleNotes';
-import { PrimalArticle, PrimalDVM, PrimalNote } from '../../types/primal';
+import { DVMMetadata, NoteActions, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from '../../types/primal';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import Note from '../Note/Note';
 import styles from './FeedMarketPlace.module.scss';
@@ -16,7 +16,10 @@ type FeedPreviewStore = {
 
 const FeedMarketPlacePreview: Component<{
   dvm: PrimalDVM | undefined,
+  author: PrimalUser | undefined,
   stats?: { likes: number, satszapped: number},
+  actions?: NoteActions,
+  metadata?: DVMMetadata,
   type: 'notes' | 'reads',
 }> = (props) => {
   const account = useAccountContext();
@@ -43,7 +46,7 @@ const FeedMarketPlacePreview: Component<{
 
     const spec = JSON.stringify({
       dvm_id: props.dvm?.identifier,
-      dvm_pubkey: props.dvm?.author,
+      dvm_pubkey: props.dvm?.pubkey,
       kind: props.type,
     });
 
@@ -66,7 +69,6 @@ const FeedMarketPlacePreview: Component<{
   }
 
   createEffect(() => {
-    console.log('DVM: ', props.dvm);
     if (props.dvm) {
       getFeedPreview();
     } else {
@@ -81,7 +83,10 @@ const FeedMarketPlacePreview: Component<{
       <div class={styles.dvmCaption}>
         <FeedMarketItem
           dvm={props.dvm}
+          author={props.author}
           stats={props.stats}
+          metadata={props.metadata}
+          actions={props.actions}
         />
       </div>
 
@@ -92,6 +97,7 @@ const FeedMarketPlacePreview: Component<{
               {note => <Note
                 note={note}
                 shorten={true}
+                noteType={'feed'}
               />}
             </For>
           </Match>

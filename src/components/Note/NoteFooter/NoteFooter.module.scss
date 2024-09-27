@@ -115,109 +115,108 @@
     justify-content: flex-end;
     align-items: center;
   }
+}
 
-  .stat {
-    align-items: center;
-    margin: 0px;
-    padding: 0px;
-    border: none;
-    background-color: unset;
-    width: fit-content;
-    position: relative;
-    padding-right: 48px;
+.stat {
+  align-items: center;
+  margin: 0px;
+  padding: 0px;
+  border: none;
+  background-color: unset;
+  width: fit-content;
+  position: relative;
+  padding-right: 48px;
+
+  .likeType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+      mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .replyType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+      mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .repostType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+      mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .zapType {
+    @include typeDiv;
+    .icon {
+      @include statIcon;
+      -webkit-mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
+      mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
+    }
+  }
+
+  &:hover, &.highlighted {
+    .zapType {
+      .statNumber {
+        color: var(--active-zap);
+      }
+      .icon {
+        background-color: var(--active-zap);
+        -webkit-mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat center 0 / auto 100%;
+        mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat center 0 / auto 100%;
+      }
+    }
 
     .likeType {
-      @include typeDiv;
+      .statNumber {
+        color: var(--active-liked);
+      }
       .icon {
-        @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
-        mask: url(../../../assets/icons/feed_like.svg) no-repeat 0 / 100%;
+        background-color: var(--active-liked);
+        -webkit-mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
       }
     }
 
     .replyType {
-      @include typeDiv;
+      .statNumber {
+        color: var(--active-reply);
+      }
       .icon {
-        @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
-        mask: url(../../../assets/icons/feed_reply.svg) no-repeat 0 / 100%;
+        background-color: var(--active-reply);
+        -webkit-mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
       }
     }
 
     .repostType {
-      @include typeDiv;
+      .statNumber {
+        color: var(--active-reposted);
+      }
       .icon {
-        @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
-        mask: url(../../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
+        background-color: var(--active-reposted);
+        -webkit-mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
+        mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
       }
-    }
-
-    .zapType {
-      @include typeDiv;
-      .icon {
-        @include statIcon;
-        -webkit-mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
-        mask: url(../../../assets/icons/feed_zap_2.svg) no-repeat center 0 / auto 100%;
-      }
-    }
-
-    &:hover, &.highlighted {
-      .zapType {
-        .statNumber {
-          color: var(--active-zap);
-        }
-        .icon {
-          background-color: var(--active-zap);
-          -webkit-mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat center 0 / auto 100%;
-          mask: url(../../../assets/icons/feed_zap_fill_2.svg) no-repeat center 0 / auto 100%;
-        }
-      }
-
-      .likeType {
-        .statNumber {
-          color: var(--active-liked);
-        }
-        .icon {
-          background-color: var(--active-liked);
-          -webkit-mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
-          mask: url(../../../assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
-        }
-      }
-
-      .replyType {
-        .statNumber {
-          color: var(--active-reply);
-        }
-        .icon {
-          background-color: var(--active-reply);
-          -webkit-mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
-          mask: url(../../../assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
-        }
-      }
-
-      .repostType {
-        .statNumber {
-          color: var(--active-reposted);
-        }
-        .icon {
-          background-color: var(--active-reposted);
-          -webkit-mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
-          mask: url(../../../assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
-        }
-      }
-    }
-    &:focus {
-      box-shadow: none;
-    }
-
-    .statNumber {
-      text-align: left;
-      color: var(--text-tertiary-2);
-      padding-left: 7px;
     }
   }
+  &:focus {
+    box-shadow: none;
+  }
 
+  .statNumber {
+    text-align: left;
+    color: var(--text-tertiary-2);
+    padding-left: 7px;
+  }
 }
 
 .largeZapLottie {

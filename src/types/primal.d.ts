@@ -435,6 +435,7 @@ export type MegaFeedPage = {
   since: number,
   until: number,
   sortBy: string,
+  userStats: Record<string, UserStats>,
   wordCount: Record<string, number>,
 };
 
@@ -548,11 +549,12 @@ export type PrimalDVM = {
   about: string,
   amount: string,
   primalVerifiedRequired: boolean,
-  author: string,
+  pubkey: string,
   supportedKinds: string[],
   identifier: string,
   picture?: string,
   image?: string,
+  user?: PrimalUser,
 }
 export type DVMStats = { likes: number, satszapped: number };
 

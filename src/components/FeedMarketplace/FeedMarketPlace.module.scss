@@ -99,6 +99,23 @@
       }
     }
 
+    .createdBy {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+
+      .authorName {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+    }
 
     .stats {
       display: flex;
@@ -166,15 +183,14 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 16px;
-  width: 600px;
-  max-height: 662px;
-  overflow-y: scroll;
+  width: 100%;
 
   .dvmCaption {
     width: 100%;
   }
 
   .dvmList {
+    width: 100%;
     background-color: var(--background-site);
   }
 }
@@ -215,4 +231,12 @@
   padding: 5px 7px;
   align-items: flex-start;
   gap: 12px;
+}
+
+.primalLogo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url(../../assets/icons/logo_fire.svg);
+  background-size: cover;
 }

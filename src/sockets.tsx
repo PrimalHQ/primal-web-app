@@ -113,7 +113,7 @@ export const removeSocketListeners = (
 
 export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
   const listener = async (event: MessageEvent) => {
-    try {
+    // try {
       const data = await readData(event);
       const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
       const [type, subscriptionId, content] = message;
@@ -133,9 +133,9 @@ export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: str
       if (subId === subscriptionId) {
         cb(type, subscriptionId, content);
       }
-    } catch (e) {
-      logError('SOCKET LISTENER: ', subId, ' : ', e)
-    }
+    // } catch (e) {
+    //   logError('SOCKET LISTENER: ', subId, ' : ', e)
+    // }
   };
 
   socket()?.addEventListener('message', listener);
@@ -169,7 +169,7 @@ export const readData = async (event: MessageEvent) => {
 
 export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
   const listener = async (event: MessageEvent) => {
-    try {
+    // try {
       const data = await readData(event);
       const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
       const [type, subscriptionId, content] = message;
@@ -189,9 +189,9 @@ export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventTyp
       if (subId === subscriptionId) {
         cb(type, subscriptionId, content);
       }
-    } catch (e) {
-      logError('SOCKET LISTENER: ', subId, ' : ', e)
-    }
+    // } catch (e) {
+    //   logError('SOCKET LISTENER: ', subId, ' : ', e)
+    // }
 
   };
 
@@ -213,7 +213,7 @@ export const subsTo = (
 ) => {
 
   const listener = async (event: MessageEvent) => {
-    try {
+    // try {
       const data = await readData(event);
       const message: NostrEvent | NostrEOSE | NostrNotice | NostrEvents = JSON.parse(data);
       const [type, subscriptionId] = message;
@@ -245,9 +245,9 @@ export const subsTo = (
           handlers.onNotice && handlers.onNotice(subscriptionId, message[2])
         }
       }
-    } catch (e) {
-      logError('SOCKET LISTENER: ', subId, ' : ', e)
-    }
+    // } catch (e) {
+    //   logError('SOCKET LISTENER: ', subId, ' : ', e)
+    // }
 
   };
 

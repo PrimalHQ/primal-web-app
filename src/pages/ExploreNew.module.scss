@@ -151,8 +151,6 @@
     grid-template-columns: 148px 148px 148px 148px;
     grid-column-gap: 2px;
     grid-row-gap: 2px;
-    padding-inline: 20px;
-    padding-top: 12px;
 
     img {
       object-fit: cover;
@@ -166,4 +164,134 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.explorePeople {
+  .peopleGrid {
+    display: grid;
+    grid-template-columns: 294px 294px;
+    grid-column-gap: 12px;
+    grid-row-gap: 12px;
+
+    .explorePerson {
+      text-decoration: none;
+
+      width: 294px;
+      height: 146px;
+      border-radius: var(--border-radius-small);
+      background-color: var(--background-header-input);
+
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+
+      .userImage {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+
+        .follow {
+          width: 64px;
+        }
+
+      }
+
+      .userInfo {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100%;
+        padding-block: 12px;
+        margin-right: 12px;
+        overflow: hidden;
+        gap: 2px;
+
+        .userBasicData {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: flex-start;
+          gap: 2px;
+
+          .userName {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+            line-height: 18px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 152px;
+          }
+          .nip05 {
+            overflow: hidden;
+            color: var(--text-tertiary);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 16px;
+            max-width: 182px;
+          }
+        }
+
+        .userAdditionalData {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: flex-start;
+          gap: 2px;
+
+          .userAbout {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 16px;
+            max-width: 182px;
+
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
+
+            &.extended {
+              -webkit-line-clamp: 3;
+              line-clamp: 3;
+            }
+          }
+
+          .userStats {
+            display: flex;
+            gap: 2px;
+            max-width: 182px;
+
+            .number {
+              color: var(--text-tertiary);
+              text-overflow: ellipsis;
+              font-size: 14px;
+              font-weight: 700;
+              line-height: 16px;
+            }
+            .unit {
+              color: var(--text-tertiary);
+              text-overflow: ellipsis;
+              font-size: 14px;
+              font-weight: 400;
+              line-height: 16px;
+            }
+          }
+        }
+      }
+    }
+  }
 }

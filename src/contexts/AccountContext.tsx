@@ -23,6 +23,7 @@ import {
   NostrEventContent,
   PrimalArticle,
   NostrEvents,
+  PrimalDVM,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo, decompressBlob, readData } from "../sockets";
@@ -85,7 +86,7 @@ export type AccountContextStore = {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
     setActiveUser: (user: PrimalUser) => void,
-    addLike: (note: PrimalNote | PrimalArticle) => Promise<boolean>,
+    addLike: (note: PrimalNote | PrimalArticle | PrimalDVM) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
@@ -586,7 +587,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('showNewNoteForm', () => false);
   };
 
-  const addLike = async (note: PrimalNote | PrimalArticle) => {
+  const addLike = async (note: PrimalNote | PrimalArticle | PrimalDVM) => {
     if (store.likes.includes(note.id)) {
       return false;
     }

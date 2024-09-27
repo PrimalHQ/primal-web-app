@@ -49,7 +49,7 @@ const FeedMarketPlaceDialog: Component<{
             about: dvmData.about || '',
             amount: dvmData.amount || 'free',
             primalVerifiedRequired: dvmData.primalVerifiedRequired || false,
-            author: content.pubkey,
+            pubkey: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
             identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
           };
@@ -118,6 +118,7 @@ const FeedMarketPlaceDialog: Component<{
                 {dvm => (
                   <FeedMarketItem
                     dvm={dvm}
+                    author={store.users[dvm.pubkey]}
                     stats={store.dvmStats[dvm.id]}
                     onClick={(d) => {
                       updateStore('previewDvm', () => ({ ...d }))
@@ -145,6 +146,7 @@ const FeedMarketPlaceDialog: Component<{
           <div class={styles.feedMarketplaceContent}>
             <FeedMarketPlacePreview
               dvm={store.previewDvm}
+              author={store.users[store.previewDvm?.pubkey || '']}
               stats={store.dvmStats[store.previewDvm?.id || '']}
               type={props.type || 'notes'}
             />
@@ -164,7 +166,7 @@ const FeedMarketPlaceDialog: Component<{
 
                 const spec = JSON.stringify({
                   dvm_id: dvm.id,
-                  dvm_pubkey: dvm.author,
+                  dvm_pubkey: dvm.pubkey,
                   kind: props.type,
                 });
 

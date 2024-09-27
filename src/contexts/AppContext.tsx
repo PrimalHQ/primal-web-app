@@ -7,7 +7,7 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { PrimalArticle, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import { PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 
@@ -22,7 +22,7 @@ export type ReactionStats = {
 
 export type CustomZapInfo = {
   profile?: PrimalUser,
-  note?: PrimalNote | PrimalArticle,
+  note?: PrimalNote | PrimalArticle | PrimalDVM,
   onConfirm: (zapOption: ZapOption) => void,
   onSuccess: (zapOption: ZapOption) => void,
   onFail: (zapOption: ZapOption) => void,

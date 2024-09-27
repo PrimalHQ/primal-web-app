@@ -7,11 +7,10 @@ import { APP_ID } from '../../App';
 import { fetchDVMFeeds } from '../../lib/feed';
 import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
-import { DVMMetadata, DVMStats, NostrDVM, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
+import { DVMMetadata, DVMStats, NostrDVM, NostrNoteActionsContent, NoteActions, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
 import { convertToUser } from '../../stores/profile';
 import FeedMarketItem from './FeedMarketPlaceItem';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import FeedMarketPlacePreview from './FeedMarketPlacePreview';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useNavigate } from '@solidjs/router';
 import { explore } from '../../translations';
@@ -24,7 +23,7 @@ export type MarketplaceStore = {
   users: Record<string, PrimalUser>,
   previewDvm: PrimalDVM | undefined,
   dvmMetadata: Record<string, DVMMetadata>
-
+  dvmActions: Record<string, NoteActions>,
 }
 
 export const emptyStore: MarketplaceStore = {
@@ -33,6 +32,7 @@ export const emptyStore: MarketplaceStore = {
   users: {},
   previewDvm: undefined,
   dvmMetadata: {},
+  dvmActions: {},
 }
 
 const FeedMarketPlace: Component<{
@@ -45,13 +45,13 @@ const FeedMarketPlace: Component<{
 
   const [store, updateStore] = createStore<MarketplaceStore>({ ...emptyStore });
 
-  createEffect(() => {
-    if (props.open) {
+  onMount(() => {
+    if (store.dvms.length === 0) {
       fetchDVMs();
     }
-    else {
-      clearDVMs();
-    }
+    // else {
+    //   clearDVMs();
+    // }
   });
 
   const fetchDVMs = () => {
@@ -69,7 +69,7 @@ const FeedMarketPlace: Component<{
             about: dvmData.about || '',
             amount: dvmData.amount || 'free',
             primalVerifiedRequired: dvmData.primalVerifiedRequired || false,
-            author: content.pubkey,
+            pubkey: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
             identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
             picture: dvmData.picture,
@@ -105,6 +105,14 @@ const FeedMarketPlace: Component<{
 
           updateStore('dvmMetadata', metadata.event_id, () => ({ kind: metadata.kind, isPrimal: metadata.is_primal}))
         }
+
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          updateStore('dvmActions', noteActions.event_id, () => ({ ...noteActions }));
+          return;
+        }
       },
       onEose: () => {
         unsub();
@@ -137,11 +145,19 @@ const FeedMarketPlace: Component<{
               {dvm => (
                 <FeedMarketItem
                   dvm={dvm}
+                  author={store.users[dvm.pubkey]}
                   stats={store.dvmStats[dvm.id]}
                   metadata={store.dvmMetadata[dvm.id]}
-                  onClick={(d) => {
-                    explore?.actions.setPreviewDVM(dvm, store.dvmStats[dvm.id], store.dvmMetadata[dvm.id])
-                    navigate(`/explore_new/feed/${dvm.identifier}_by_${dvm.author}`)
+                  actions={store.dvmActions[dvm.id]}
+                  onClick={() => {
+                    explore?.actions.setPreviewDVM(
+                      dvm,
+                      store.dvmStats[dvm.id],
+                      store.dvmMetadata[dvm.id],
+                      store.users[dvm.pubkey],
+                      store.dvmActions[dvm.id],
+                    )
+                    navigate(`/explore_new/feed/${dvm.identifier}_by_${dvm.pubkey}`)
                   }}
                 />
               )}

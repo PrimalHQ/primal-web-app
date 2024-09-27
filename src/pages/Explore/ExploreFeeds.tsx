@@ -17,7 +17,7 @@ import FeedMarketPlacePreview from '../../components/FeedMarketplace/FeedMarketP
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { Kind } from '../../constants';
-import { DVMMetadata, DVMStats, PrimalDVM } from '../../types/primal';
+import { DVMMetadata, DVMStats, NostrNoteActionsContent, NostrUserContent, NoteActions, PrimalDVM, PrimalUser } from '../../types/primal';
 import { createStore } from 'solid-js/store';
 import { convertToUser } from '../../stores/profile';
 import { fetchDVM } from '../../lib/feed';
@@ -31,22 +31,27 @@ const ExploreFeeds: Component = () => {
   const location = useLocation();
   const params = useParams();
 
-  const [store, setStore] = createStore<{ dvm?: PrimalDVM, stats?: DVMStats, metadata?: DVMMetadata }>({});
+  const [store, setStore] = createStore<{
+    dvm?: PrimalDVM,
+    stats?: DVMStats,
+    metadata?: DVMMetadata,
+    author?: PrimalUser,
+    actions?: NoteActions,
+  }>({});
 
   createEffect(() => {
-    console.log('DOES: ', explore?.previewDVM, params)
     if (explore?.previewDVM) {
       setStore(() => ({
         dvm: explore.previewDVM,
         stats: explore.previewDVMStats,
-        metadat: explore.previewDVMMetadata,
+        metadata: explore.previewDVMMetadata,
+        author: explore.previewDVMAuthor,
+        actions: explore.previewDVMActions,
       }));
-      console.log('HAS: ', explore.previewDVM)
       return;
     }
 
     if (params.id) {
-      console.log('HAS NOT: ', params.id)
       const [identifier, pubkey] = params.id.split('_by_');
 
       getDVM(identifier, pubkey);
@@ -69,7 +74,7 @@ const ExploreFeeds: Component = () => {
             about: dvmData.about || '',
             amount: dvmData.amount || 'free',
             primalVerifiedRequired: dvmData.primalVerifiedRequired || false,
-            author: content.pubkey,
+            pubkey: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
             identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
             picture: dvmData.picture,
@@ -79,15 +84,23 @@ const ExploreFeeds: Component = () => {
           setStore('dvm', () => ({ ...dvm }));
           return;
         }
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          const autor = convertToUser(user, user.pubkey);
+
+          setStore('author', () => ({...autor}));
+          return;
+        }
 
         if (content.kind === Kind.NoteStats) {
-          const stats = JSON.parse(content.content);
+          const st = JSON.parse(content.content);
 
-          if (!stats.event_id) return;
+          if (!st.event_id) return;
 
-          setStore('stats', stats.event_id, () => ({
-            likes: stats.likes || 0,
-            satszapped: stats.satszapped || 0,
+          setStore('stats', () => ({
+            likes: st.likes || 0,
+            satszapped: st.satszapped || 0,
           }));
         }
 
@@ -96,7 +109,15 @@ const ExploreFeeds: Component = () => {
 
           if (!metadata.event_id) return;
 
-          setStore('metadata', metadata.event_id, () => ({ kind: metadata.kind, isPrimal: metadata.is_primal}))
+          setStore('metadata', () => ({ kind: metadata.kind, isPrimal: metadata.is_primal}))
+        }
+
+        if (content.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          setStore('actions', () => ({ ...noteActions }));
+          return;
         }
       },
       onEose: () => {
@@ -110,32 +131,34 @@ const ExploreFeeds: Component = () => {
   const dvm = () => store.dvm;
   const stats = () => store.stats;
   const metadata = () => store.metadata;
+  const author = () => store.author;
+  const actions = () => store.actions;
 
-    return (
-      <>
-        <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
+  return (
+    <>
+      <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
 
-        <PageCaption>
-          <div class={styles.exploreHeader}>
-            <Search fullWidth={true} />
-          </div>
-        </PageCaption>
-
-        <StickySidebar>
-        </StickySidebar>
-
-
-        <div class={styles.explorePageTabs}>
-          <div class={styles.feedMarketplaceContent}>
-            <FeedMarketPlacePreview
-              dvm={dvm()}
-              stats={stats()}
-              type={metadata()?.kind || 'notes'}
-            />
-          </div>
+      <PageCaption>
+        <div class={styles.exploreHeader}>
+          <Search fullWidth={true} />
         </div>
-      </>
-    )
+      </PageCaption>
+
+
+      <div class={styles.explorePageTabs}>
+        <div class={styles.feedMarketplaceContent}>
+          <FeedMarketPlacePreview
+            dvm={dvm()}
+            author={author()}
+            stats={stats()}
+            actions={actions()}
+            metadata={metadata()}
+            type={metadata()?.kind || 'notes'}
+          />
+        </div>
+      </div>
+    </>
+  )
 }
 
 export default ExploreFeeds;

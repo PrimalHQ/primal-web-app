@@ -14,6 +14,7 @@ import styles from './FollowButton.module.scss';
 const FollowButton: Component<{
   person: PrimalUser | undefined,
   large?: boolean,
+  flexible?: boolean,
   id?: string,
   light?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
@@ -47,7 +48,9 @@ const FollowButton: Component<{
   }
 
   const klass = () => {
-    return props.large ? styles.large : styles.small;
+    if (props.large) return styles.large;
+    if (props.flexible) return styles.flexible;
+    return styles.small;
   }
 
   return (

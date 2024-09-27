@@ -1,7 +1,7 @@
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
-import { NostrUserContent, PrimalUser } from "../types/primal";
+import { NostrUserContent, PrimalUser, UserStats } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
   if (npub.length < 24) {
@@ -17,7 +17,7 @@ export const truncateName = (name: string, limit = 20) => {
   return `${name.slice(0, limit)}...`;
 };
 
-export const convertToUser: (user: NostrUserContent, pubkey: string) => PrimalUser = (user: NostrUserContent, pubkey: string) => {
+export const convertToUser = (user: NostrUserContent, pubkey: string, stats?: Record<string, UserStats>) => {
   if (!user) return emptyUser(pubkey);
 
   let userMeta: any = {};
@@ -45,7 +45,8 @@ export const convertToUser: (user: NostrUserContent, pubkey: string) => PrimalUs
     lud16: (userMeta.lud16 || '') as string,
     website: (userMeta.website || '') as string,
     msg: { ...user },
-  };
+    userStats: stats ? { ...stats[user.pubkey] } : undefined,
+  } as PrimalUser;
 }
 
 export const emptyUser = (pubkey: string) => {

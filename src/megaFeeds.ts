@@ -18,6 +18,7 @@ import {
   PrimalZap,
   TopicStats,
   TopZap,
+  UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
 import { convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
@@ -54,10 +55,11 @@ export type FeedPaging = {
   offset?: number | number[],
 }
 
-export const emptyMegaFeedPage = {
+export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   users: {},
   notes: [],
   reads: [],
+  zaps: [],
   topicStats: {},
   noteStats: {},
   mentions: {},
@@ -65,10 +67,11 @@ export const emptyMegaFeedPage = {
   relayHints: {},
   topZaps: {},
   wordCount: {},
+  userStats: {},
   since: 0,
   until: 0,
   sortBy: 'created_at',
-};
+});
 
 export const parseEmptyReposts = (page: MegaFeedPage) => {
   let reposts: Record<string, string> = {};
@@ -92,22 +95,7 @@ export const fetchMegaFeed = (
   paging?: FeedPaging,
   ) => {
     return new Promise<MegaFeedResults>((resolve) => {
-      let page: MegaFeedPage = {
-        users: {},
-        notes: [],
-        reads: [],
-        zaps: [],
-        topicStats: {},
-        noteStats: {},
-        mentions: {},
-        noteActions: {},
-        relayHints: {},
-        topZaps: {},
-        wordCount: {},
-        since: 0,
-        until: 0,
-        sortBy: 'created_at',
-      };
+      let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
       const unsub = subsTo(subId, {
         onEose: () => {
@@ -149,22 +137,7 @@ export const fetchScoredContent = (
   subId: string,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEose: () => {
@@ -211,22 +184,7 @@ export const fetchReadThread = (
   subId: string,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const decoded = decodeIdentifier(naddr);
 
@@ -255,22 +213,7 @@ export const fetchExplorePeople = (
   paging?: FeedPaging,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -305,7 +248,6 @@ export const fetchExplorePeople = (
       }
     }
 
-    console.log('')
     getExplorePeople(subId, until, limit, since, offset);
   });
 }
@@ -315,22 +257,7 @@ export const fetchExploreZaps = (
   paging?: FeedPaging,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -376,22 +303,7 @@ export const fetchExploreMedia = (
   paging?: FeedPaging,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -435,22 +347,7 @@ export const fetchExploreTopics = (
   subId: string,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {
-      users: {},
-      notes: [],
-      reads: [],
-      zaps: [],
-      topicStats: {},
-      noteStats: {},
-      mentions: {},
-      noteActions: {},
-      relayHints: {},
-      topZaps: {},
-      wordCount: {},
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    };
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -650,6 +547,13 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.topicStats = topics;
     return;
   }
+
+  if (content.kind === Kind.UserStats) {
+    let stats = JSON.parse(content.content) as UserStats;
+
+    page.userStats[stats.pubkey] = { ...stats };
+  }
+
 };
 
 const convertToZapsMega = (page: MegaFeedPage) => {

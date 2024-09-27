@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
-import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, TopZap } from "../types/primal";
+import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "../types/primal";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -297,7 +297,13 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
     return [];
   }
 
-  return Object.values(page.users).map(u => convertToUser(u, u.pubkey));
+  let stats: Record<string, UserStats> | undefined
+
+  if (Object.keys(page.userStats).length > 0) {
+    stats = page.userStats;
+  }
+
+  return Object.values(page.users).map(u => convertToUser(u, u.pubkey, stats));
 };
 
 export const convertToNotesMega = (page: MegaFeedPage) => {
