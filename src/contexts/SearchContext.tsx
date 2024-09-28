@@ -26,6 +26,7 @@ import { subscribeTo } from "../sockets";
 import { nip19 } from "nostr-tools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
+import { bitcoinExplorer, PlebNameHistory } from 'plebnames'
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -55,6 +56,7 @@ export type SearchContextStore = {
   filteringReasons: string[],
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
+    findUserByPlebName: (npub: string) => void,
     findUserByNupub: (npub: string) => void,
     findContentUsers: (query: string, pubkey?: string) => void,
     findContent: (query: string) => void,
@@ -86,6 +88,22 @@ export function SearchProvider(props: { children: JSX.Element }) {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+
+  const findUserByPlebName = (plebName: string) => {
+    const subId = `find_plebname_${APP_ID}`;
+
+    bitcoinExplorer.followNameHistory(plebName).then((nameHistory) => {
+      if (nameHistory === 'unclaimed') {
+        return;
+      }
+      const plebNameData = nameHistory.getData();
+      if(!plebNameData.nostr) {
+        return;
+      }
+      findUserByNupub(plebNameData.nostr);
+    });
+  };
 
   const findUserByNupub = (npub: string) => {
     const subId = `find_npub_${APP_ID}`;
@@ -444,6 +462,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
 const [store, updateStore] = createStore<SearchContextStore>({
   ...initialData,
   actions: {
+    findUserByPlebName,
     findUsers,
     findUserByNupub,
     findContent,
