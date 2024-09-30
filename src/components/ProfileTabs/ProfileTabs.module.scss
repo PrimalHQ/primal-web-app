@@ -25,10 +25,17 @@
   padding-top: 14px;
   border-bottom: 1px solid var(--devider);
   border-top: none;
-  opacity: 0;
+}
 
-  animation: fadeIn var(--profile-animation-duration) ease-in forwards;
-  animation-delay: var(--profile-card-animation-delay);
+
+[data-animated="true"] {
+  .profileTabs {
+    opacity: 0;
+
+    animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+    animation-delay: var(--profile-card-animation-delay);
+  }
+
 }
 
 .profileTab {
