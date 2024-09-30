@@ -67,10 +67,16 @@ const Search: Component<{
     setIsFocused(true);
     debounce(() => {
       // @ts-ignore
-      const value = e.target?.value;
+      const value = e.target?.value as string;
 
       if (value.startsWith('npub') || value.startsWith('nprofile')) {
         search?.actions.findUserByNupub(value);
+        return;
+      }
+
+      const plebName = value.match(/^([a-zA-Z0-9]+)\.btc$/);
+      if (plebName) {
+        search?.actions.findUserByPlebName(plebName[1]);
         return;
       }
 
