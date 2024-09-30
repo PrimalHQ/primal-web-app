@@ -31,16 +31,16 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   });
 
   const getMedia = async () => {
-    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 20 });
+    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 60 });
 
     explore?.actions.setExploreMedia(notes, paging);
   }
 
   const getNextMediaPage = async () => {
-    if (!explore) return;
+    if (!explore || explore.mediaPaging.since === 0) return;
 
     const page = {
-      limit: 20,
+      limit: 60,
       until: explore.mediaPaging.since,
       offset: explore.exploreMedia.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
     }

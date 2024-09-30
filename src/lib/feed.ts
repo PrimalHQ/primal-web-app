@@ -499,8 +499,13 @@ export const fetchDefaultHomeFeeds = (subid: string) => {
 }
 
 
-export const fetchDVMFeeds = (subId: string, kind?: 'notes' | 'reads') => {
+export const fetchDVMFeeds = (user_pubkey: string | undefined, subId: string, kind?: 'notes' | 'reads') => {
   const payload = kind ? { kind } : {};
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
 
   sendMessage(JSON.stringify([
     "REQ",
@@ -509,10 +514,17 @@ export const fetchDVMFeeds = (subId: string, kind?: 'notes' | 'reads') => {
   ]));
 }
 
-export const fetchDVM = (subId: string, identifier: string, pubkey: string) => {
+export const fetchDVM = (user_pubkey: string | undefined, subId: string, identifier: string, pubkey: string) => {
+  const payload = { identifier, pubkey };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subId,
-    {cache: ["dvm_feed_info", { identifier, pubkey }]},
+    {cache: ["dvm_feed_info", { ...payload }]},
   ]));
 }

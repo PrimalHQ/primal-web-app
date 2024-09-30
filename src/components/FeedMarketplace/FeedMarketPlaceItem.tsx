@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { truncateNumber } from '../../lib/notifications';
@@ -14,6 +14,7 @@ import { canUserReceiveZaps, zapDVM } from '../../lib/zap';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
+import { A } from '@solidjs/router';
 
 
 const FeedMarketItem: Component<{
@@ -22,6 +23,8 @@ const FeedMarketItem: Component<{
   stats?: { likes: number, satszapped: number },
   metadata?: DVMMetadata,
   actions?: NoteActions,
+  size?: 'header' | 'list',
+  commonUsers?: PrimalUser[],
   onClick?: (dvm: PrimalDVM | undefined) => void,
 }> = (props) => {
   const account = useAccountContext();
@@ -36,6 +39,8 @@ const FeedMarketItem: Component<{
     liked: false,
     zapped: false,
   });
+
+  const size = () => props.size || 'list';
 
   createEffect(() => {
     if (props.stats) {
@@ -284,12 +289,15 @@ const FeedMarketItem: Component<{
   return (
     <div
       data-id={props.dvm?.id}
-      class={styles.feedMarketPlaceItem}
+      class={`${styles.feedMarketPlaceItem} ${size() === 'header' ? styles.header : ''}`}
       onClick={() => props.onClick && props.onClick(props.dvm)}
     >
       <div class={styles.left}>
         <div class={styles.avatar}>
           <Avatar size="vs2" src={props.dvm?.picture || props.dvm?.image || ''} />
+          <Show when={props.metadata?.isPrimal && size() === 'list'}>
+            <div class={styles.smallPrimalLogo}></div>
+          </Show>
         </div>
         <div class={styles.paid}>
           <Show
@@ -307,34 +315,50 @@ const FeedMarketItem: Component<{
           <div class={styles.about}>{props.dvm?.about || ''}</div>
         </div>
 
-        <Show when={props.metadata?.isPrimal}>
-          <div class={styles.createdBy}>
-            <div class={styles.primalLogo}></div>
-            <span>Created by</span> <span class={styles.authorName}>Primal</span>
-          </div>
-        </Show>
+          <Show when={props.metadata?.isPrimal && size() === 'header'}>
+            <div class={styles.createdBy}>
+              <div class={styles.primalLogo}></div>
+              <span>Created by</span> <span class={styles.authorName}>Primal</span>
+            </div>
+          </Show>
 
-        <div class={styles.stats}>
-          <DvmFooterActionButton
-            dvm={props.dvm}
-            onClick={doLike}
-            type="like"
-            highlighted={state.liked || account?.likes.includes(props.dvm?.id || '')}
-            label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
-            title={likes().toLocaleString()}
-          />
-          <DvmFooterActionButton
-            dvm={props.dvm}
-            onClick={(e: MouseEvent) => e.preventDefault()}
-            onMouseDown={startZap}
-            onMouseUp={commitZap}
-            onTouchStart={startZap}
-            onTouchEnd={commitZap}
-            type="zap"
-            highlighted={state.zapped}
-            label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
-            title={likes().toLocaleString()}
-          />
+        <div class={styles.actions}>
+          <div class={styles.commonUsersList}>
+            <For each={props.commonUsers}>
+              {user => (
+                <A
+                  href={`/p/${user.npub}`}
+                  class={styles.avatar}
+                  onClick={(e: MouseEvent) => {e.stopPropagation(); return true;}}
+                >
+                  <Avatar size="micro" user={user} />
+                </A>
+              )}
+            </For>
+          </div>
+
+          <div class={styles.stats}>
+            <DvmFooterActionButton
+              dvm={props.dvm}
+              onClick={doLike}
+              type="like"
+              highlighted={state.liked || account?.likes.includes(props.dvm?.id || '')}
+              label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
+              title={likes().toLocaleString()}
+            />
+            <DvmFooterActionButton
+              dvm={props.dvm}
+              onClick={(e: MouseEvent) => e.stopPropagation()}
+              onMouseDown={startZap}
+              onMouseUp={commitZap}
+              onTouchStart={startZap}
+              onTouchEnd={commitZap}
+              type="zap"
+              highlighted={state.zapped}
+              label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
+              title={likes().toLocaleString()}
+            />
+          </div>
         </div>
       </div>
 

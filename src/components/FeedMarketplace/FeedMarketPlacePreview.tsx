@@ -20,6 +20,7 @@ const FeedMarketPlacePreview: Component<{
   stats?: { likes: number, satszapped: number},
   actions?: NoteActions,
   metadata?: DVMMetadata,
+  commonFollows?: PrimalUser[],
   type: 'notes' | 'reads',
 }> = (props) => {
   const account = useAccountContext();
@@ -87,6 +88,8 @@ const FeedMarketPlacePreview: Component<{
           stats={props.stats}
           metadata={props.metadata}
           actions={props.actions}
+          size="header"
+          commonUsers={props.commonFollows}
         />
       </div>
 

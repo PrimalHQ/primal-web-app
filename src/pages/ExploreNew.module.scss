@@ -8,6 +8,29 @@
   form {
     margin-left: 4px !important;
   }
+
+  .exploreDVMFeedHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    .backButton {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
+
+      >div {
+        text-transform: none;
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+    }
+  }
 }
 
 .explorePageTabs {
@@ -294,4 +317,12 @@
       }
     }
   }
+}
+
+.backIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/back.svg) no-repeat center;
+  mask: url(../assets/icons/back.svg) no-repeat center;
 }

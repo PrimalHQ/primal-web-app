@@ -21,9 +21,11 @@ import { DVMMetadata, DVMStats, NostrNoteActionsContent, NostrUserContent, NoteA
 import { createStore } from 'solid-js/store';
 import { convertToUser } from '../../stores/profile';
 import { fetchDVM } from '../../lib/feed';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const ExploreFeeds: Component = () => {
 
+  const account = useAccountContext();
   const settings = useSettingsContext();
   const toaster = useToastContext();
   const intl = useIntl();
@@ -37,6 +39,8 @@ const ExploreFeeds: Component = () => {
     metadata?: DVMMetadata,
     author?: PrimalUser,
     actions?: NoteActions,
+    users?: Record<string, PrimalUser>,
+    commonFollowsPubkeys?: string[],
   }>({});
 
   createEffect(() => {
@@ -47,6 +51,8 @@ const ExploreFeeds: Component = () => {
         metadata: explore.previewDVMMetadata,
         author: explore.previewDVMAuthor,
         actions: explore.previewDVMActions,
+        users: explore.previewDVMUsers || {},
+        commonFollowsPubkeys: explore.previewDVMFollows || [],
       }));
       return;
     }
@@ -89,7 +95,9 @@ const ExploreFeeds: Component = () => {
 
           const autor = convertToUser(user, user.pubkey);
 
-          setStore('author', () => ({...autor}));
+          if (autor) {
+            setStore('users', () => ({ [user.pubkey]: {...autor}}));
+          }
           return;
         }
 
@@ -119,13 +127,25 @@ const ExploreFeeds: Component = () => {
           setStore('actions', () => ({ ...noteActions }));
           return;
         }
+
+        if (content.kind === Kind.DVMFollowsActions) {
+          const followsActions = JSON.parse(content.content);
+
+          setStore('commonFollowsPubkeys', () => [...followsActions.users])
+        }
       },
       onEose: () => {
         unsub();
+        if (!store.users) return;
+
+        const autor = store.users[store.dvm?.pubkey || ''];
+        if (autor) {
+          setStore('author', () => ({ ...autor }));
+        }
       }
     });
 
-    fetchDVM(subId, identifier, pubkey);
+    fetchDVM(account?.publicKey, subId, identifier, pubkey);
   }
 
   const dvm = () => store.dvm;
@@ -134,13 +154,39 @@ const ExploreFeeds: Component = () => {
   const author = () => store.author;
   const actions = () => store.actions;
 
+  const commonUsers = () => {
+    const users = store.users;
+    if (!users) return [];
+
+    const pks = store.commonFollowsPubkeys || [];
+
+    const c = pks.reduce<PrimalUser[]>((acc, pk) => {
+      const user = users[pk];
+
+      return user ?
+        [ ...acc, { ...user }] :
+        acc;
+    }, []);
+
+
+    return c;
+  }
+
   return (
     <>
       <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
 
       <PageCaption>
         <div class={styles.exploreHeader}>
-          <Search fullWidth={true} />
+          <div class={styles.exploreDVMFeedHeader}>
+            <A
+              class={styles.backButton}
+              href={'/explore#feeds'}
+            >
+                <div class={styles.backIcon}></div>
+                <div>Feed Marketplace</div>
+            </A>
+          </div>
         </div>
       </PageCaption>
 
@@ -154,6 +200,7 @@ const ExploreFeeds: Component = () => {
             actions={actions()}
             metadata={metadata()}
             type={metadata()?.kind || 'notes'}
+            commonFollows={commonUsers()}
           />
         </div>
       </div>

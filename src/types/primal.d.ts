@@ -300,6 +300,11 @@ export type NostrTopicStats = {
   content: string,
 };
 
+export type NostrDVMFollowsActions = {
+  kind: Kind.DVMFollowsActions,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -340,6 +345,7 @@ export type NostrEventContent =
   NostrHighlight |
   NostrDVM |
   NostrDVMMetadata |
+  NostrDVMFollowsActions |
   NostrTopicStats;
 
 export type NostrEvent = [

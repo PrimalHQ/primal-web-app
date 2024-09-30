@@ -36,23 +36,46 @@
   padding-top: 16px;
   padding-bottom: 12px;
 
-  border: 1px solid var(--subtile-devider);
+  // border: 1px solid var(--subtile-devider);
   border-radius: var(--border-radius-small);
 
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
   gap:16px;
-  background: none;
+  background: var(--background-header-input);
   transition: background-color 300ms ease-in;
 
   cursor: pointer;
+
+  &.header {
+    border-radius: 0;
+  }
 
   .left {
     display: flex;
     flex-direction: column;
     gap: 6px;
     width: 40px;
+
+    .avatar {
+      position: relative;
+
+      .smallPrimalLogo {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+
+        display: block;
+        width: 16px;
+        height: 16px;
+        background-color: var(--background-header-input);
+        border: 2px solid var(--background-header-input);
+        border-radius: 99px;
+        background-image: url(../../assets/icons/logo_fire.svg);
+        background-size: cover;
+      }
+    }
   }
 
   .right {
@@ -62,6 +85,7 @@
     align-items: flex-start;
     gap: 4px;
     height: 100%;
+    width: 100%;
 
     .info {
       display: flex;
@@ -117,28 +141,61 @@
       }
     }
 
-    .stats {
+    .actions {
       display: flex;
-      justify-content: flex-start;
+      flex-direction: row-reverse;
+      justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      width: 100%;
 
-      .stat {
+      .commonUsersList {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        align-items: center;
+
+        .avatar {
+          margin-right: -10px;
+          transition: margin 150ms ease-in-out;
+          border-radius: 12px;
+          border: 1px solid var(--background-site);
+          text-decoration: none;
+
+          &:first-child {
+            margin-right: 1px;
+          }
+        }
+
+        &:hover {
+          .avatar {
+            margin-right: 1px;
+          }
+        }
+      }
+
+      .stats {
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: 4px;
-        color: var(--text-tertiary);
-        font-size: 12px;
-        font-weight: 400;
-        line-height: 16px;
+        gap: 16px;
       }
     }
   }
 
   &:hover {
-    background-color: var(--background-header-input);
+    background-color: var(--background-input);
     transition: background-color 300ms ease-out;
+  }
+
+  &.dark {
+    border: 1px solid var(--subtile-devider);
+    background: none;
+
+    &:hover {
+      background-color: var(--background-header-input);
+      transition: background-color 300ms ease-out;
+    }
+
   }
 }
 

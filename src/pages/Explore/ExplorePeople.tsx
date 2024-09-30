@@ -36,7 +36,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   }
 
   const getNextPeoplePage = async () => {
-    if (!explore) return;
+    if (!explore || explore.peoplePaging.since === 0) return;
 
     const page = {
       limit: 20,
@@ -44,7 +44,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
       // offset: explore.explorePeople.map(u => u.),
     }
 
-    const { users, paging } = await fetchExplorePeople(`explore_media_${APP_ID}` , page);
+    const { users, paging } = await fetchExplorePeople(`explore_people_${APP_ID}` , page);
 
     explore?.actions.setExplorePeople(users, paging);
   }

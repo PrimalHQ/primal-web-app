@@ -14,6 +14,7 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import FeedMarketPlacePreview from './FeedMarketPlacePreview';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { emptyStore, MarketplaceStore } from './FeedMarketPlace';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 
 const FeedMarketPlaceDialog: Component<{
@@ -22,6 +23,7 @@ const FeedMarketPlaceDialog: Component<{
   setOpen?: (v: boolean) => void,
   onAddFeed?: (feed: PrimalArticleFeed) => void,
 }> = (props) => {
+  const account = useAccountContext();
 
   const [store, updateStore] = createStore<MarketplaceStore>({ ...emptyStore });
 
@@ -82,7 +84,7 @@ const FeedMarketPlaceDialog: Component<{
       }
     });
 
-    fetchDVMFeeds(subId, props.type);
+    fetchDVMFeeds(account?.publicKey, subId, props.type);
   }
 
   const clearDVMs = () => {

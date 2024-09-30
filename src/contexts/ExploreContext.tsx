@@ -56,6 +56,8 @@ export type ExploreContextStore = {
   previewDVMMetadata: DVMMetadata | undefined,
   previewDVMAuthor: PrimalUser | undefined,
   previewDVMActions: NoteActions | undefined,
+  previewDVMUsers: Record<string, PrimalUser>,
+  previewDVMFollows: string[],
 
   explorePeople: PrimalUser[],
   peoplePaging: PaginationInfo,
@@ -115,6 +117,8 @@ export type ExploreContextStore = {
       metadata: DVMMetadata | undefined,
       author: PrimalUser | undefined,
       actions: NoteActions | undefined,
+      users: Record<string, PrimalUser> | undefined,
+      followers: string[] | undefined,
     ) => void,
     setExplorePeople: (users: PrimalUser[], paging: PaginationInfo) => void,
     setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
@@ -129,6 +133,9 @@ export const initialExploreData = {
   previewDVMMetadata: undefined,
   previewDVMAuthor: undefined,
   previewDVMActions: undefined,
+  previewDVMUsers: {},
+  previewDVMFollows: [],
+
 
   explorePeople: [],
   peoplePaging: { since: 0, until: 0, sortBy: 'created_at' },
@@ -219,6 +226,8 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     metadata: DVMMetadata | undefined,
     author: PrimalUser | undefined,
     actions: NoteActions | undefined,
+    users: Record<string, PrimalUser> | undefined,
+    followers: string[] | undefined,
   ) => {
     batch(() => {
       updateStore('previewDVM', () => (dvm ? {...dvm} : undefined));
@@ -226,6 +235,8 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       updateStore('previewDVMMetadata', () => (metadata ? {...metadata} : undefined));
       updateStore('previewDVMAuthor', () => (author ? {...author} : undefined));
       updateStore('previewDVMActions', () => (actions ? {...actions} : undefined));
+      updateStore('previewDVMUsers', () => (users ? {...users} : {}));
+      updateStore('previewDVMFollows', () => (followers ? [...followers] : []));
     })
   }
 

@@ -13,7 +13,7 @@ import FeedMarketItem from './FeedMarketPlaceItem';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useNavigate } from '@solidjs/router';
-import { explore } from '../../translations';
+import { account, explore } from '../../translations';
 import { useExploreContext } from '../../contexts/ExploreContext';
 import { useAccountContext } from '../../contexts/AccountContext';
 
@@ -24,6 +24,7 @@ export type MarketplaceStore = {
   previewDvm: PrimalDVM | undefined,
   dvmMetadata: Record<string, DVMMetadata>
   dvmActions: Record<string, NoteActions>,
+  dvmCommonPubkeys: Record<string, string[]>,
 }
 
 export const emptyStore: MarketplaceStore = {
@@ -33,6 +34,7 @@ export const emptyStore: MarketplaceStore = {
   previewDvm: undefined,
   dvmMetadata: {},
   dvmActions: {},
+  dvmCommonPubkeys: {},
 }
 
 const FeedMarketPlace: Component<{
@@ -40,6 +42,7 @@ const FeedMarketPlace: Component<{
   type?: 'notes' | 'reads',
   onAddFeed?: (feed: PrimalArticleFeed) => void,
 }> = (props) => {
+  const account = useAccountContext();
   const navigate = useNavigate();
   const explore = useExploreContext();
 
@@ -113,13 +116,19 @@ const FeedMarketPlace: Component<{
           updateStore('dvmActions', noteActions.event_id, () => ({ ...noteActions }));
           return;
         }
+
+        if (content.kind === Kind.DVMFollowsActions) {
+          const followsActions = JSON.parse(content.content);
+
+          updateStore('dvmCommonPubkeys', followsActions.event_id, () => [...followsActions.users])
+        }
       },
       onEose: () => {
         unsub();
       }
     });
 
-    fetchDVMFeeds(subId, props.type);
+    fetchDVMFeeds(account?.publicKey, subId, props.type);
   }
 
   const clearDVMs = () => {
@@ -133,6 +142,18 @@ const FeedMarketPlace: Component<{
       }));
 
     }, 300);
+  }
+
+  const commonUsers = (id: string) => {
+    const pks = store.dvmCommonPubkeys[id] || [];
+
+    return pks.reduce<PrimalUser[]>((acc, pk) => {
+      const user = store.users[pk];
+
+      return user ?
+        [ ...acc, { ...user }] :
+        acc;
+    }, []);
   }
 
 
@@ -149,6 +170,7 @@ const FeedMarketPlace: Component<{
                   stats={store.dvmStats[dvm.id]}
                   metadata={store.dvmMetadata[dvm.id]}
                   actions={store.dvmActions[dvm.id]}
+                  commonUsers={commonUsers(dvm.id)}
                   onClick={() => {
                     explore?.actions.setPreviewDVM(
                       dvm,
@@ -156,6 +178,8 @@ const FeedMarketPlace: Component<{
                       store.dvmMetadata[dvm.id],
                       store.users[dvm.pubkey],
                       store.dvmActions[dvm.id],
+                      store.users,
+                      store.dvmCommonPubkeys[dvm.id],
                     )
                     navigate(`/explore/feed/${dvm.identifier}_by_${dvm.pubkey}`)
                   }}
