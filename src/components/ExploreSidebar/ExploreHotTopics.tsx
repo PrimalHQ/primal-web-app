@@ -38,7 +38,7 @@ const ExploreHotTopics: Component<{ id?: string }> = (props) => {
   })
 
   const getTopics = async () => {
-    const { topicStats } = await fetchExploreTopics(`explore_topics_${APP_ID}`);
+    const { topicStats } = await fetchExploreTopics(account?.publicKey, `explore_topics_${APP_ID}`);
 
     explore?.actions.setExploreTopics(topicStats);
   }

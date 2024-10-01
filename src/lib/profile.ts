@@ -455,7 +455,7 @@ export const extractRelayConfigFromTags = (tags: string[][]) => {
 };
 
 
-export const getExplorePeople = async (subid: string, until: number, limit: number, since: number, offset: number) => {
+export const getExplorePeople = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
 
   let payload:any = { limit: limit || 20, offset: offset || 0 };
 
@@ -467,6 +467,11 @@ export const getExplorePeople = async (subid: string, until: number, limit: numb
   if (since > 0) {
     // @ts-ignore
     payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey
   }
 
   sendMessage(JSON.stringify([
@@ -477,7 +482,7 @@ export const getExplorePeople = async (subid: string, until: number, limit: numb
 };
 
 
-export const getExploreZaps = async (subid: string, until: number, limit: number, since: number, offset: number) => {
+export const getExploreZaps = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
 
   let payload:any = { limit: limit || 20, offset: offset || 0 };
 
@@ -489,6 +494,11 @@ export const getExploreZaps = async (subid: string, until: number, limit: number
   if (since > 0) {
     // @ts-ignore
     payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey
   }
 
   sendMessage(JSON.stringify([
@@ -526,7 +536,13 @@ export const getExploreMedia = async (subid: string, user_pubkey: string | undef
 };
 
 
-export const getExploreTopics = async (subid: string  ) => {
+export const getExploreTopics = async (subid: string, user_pubkey: string | undefined) => {
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,

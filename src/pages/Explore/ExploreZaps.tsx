@@ -13,6 +13,7 @@ import Paginator from '../../components/Paginator/Paginator';
 import ProfileNoteZap from '../../components/ProfileNoteZap/ProfileNoteZap';
 import { PrimalZap } from '../../types/primal';
 import { Kind } from '../../constants';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const ExploreZaps: Component<{ open?: boolean }> = (props) => {
 
@@ -21,6 +22,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   const intl = useIntl();
   const explore = useExploreContext();
   const location = useLocation();
+  const account = useAccountContext();
 
   onMount(() => {
     if (explore?.exploreMedia.length === 0) {
@@ -29,7 +31,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   });
 
   const getZaps = async () => {
-    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(`explore_zaps_${APP_ID}`, { limit: 20 });
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}`, { limit: 20 });
 
     explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
   }
@@ -43,7 +45,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
       offset: explore.exploreZaps.map(n => n.created_at || 0),
     }
 
-    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(`explore_zaps_${APP_ID}` , page);
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}` , page);
 
     explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
   }

@@ -13,6 +13,7 @@ import Paginator from '../../components/Paginator/Paginator';
 import FollowButton from '../../components/FollowButton/FollowButton';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { humanizeNumber } from '../../lib/stats';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
 
@@ -21,6 +22,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   const intl = useIntl();
   const explore = useExploreContext();
   const location = useLocation();
+  const account = useAccountContext();
 
 
   onMount(() => {
@@ -30,7 +32,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   });
 
   const getPeople = async () => {
-    const { users, paging } = await fetchExplorePeople(`explore_people_${APP_ID}`, { limit: 20 });
+    const { users, paging } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}`, { limit: 20 });
 
     explore?.actions.setExplorePeople(users, paging);
   }
@@ -44,7 +46,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
       // offset: explore.explorePeople.map(u => u.),
     }
 
-    const { users, paging } = await fetchExplorePeople(`explore_people_${APP_ID}` , page);
+    const { users, paging } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}` , page);
 
     explore?.actions.setExplorePeople(users, paging);
   }

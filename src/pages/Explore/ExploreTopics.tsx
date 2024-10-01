@@ -29,7 +29,7 @@ const ExploreTopics: Component<{ open?: boolean }> = (props) => {
   });
 
   const getTopics = async () => {
-    const { topicStats } = await fetchExploreTopics(`explore_topics_${APP_ID}`);
+    const { topicStats } = await fetchExploreTopics(account?.publicKey, `explore_topics_${APP_ID}`);
 
     explore?.actions.setExploreTopics(topicStats);
   }

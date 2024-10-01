@@ -211,6 +211,7 @@ export const fetchReadThread = (
 }
 
 export const fetchExplorePeople = (
+  user_pubkey: string | undefined,
   subId: string,
   paging?: FeedPaging,
 ) => {
@@ -257,11 +258,12 @@ export const fetchExplorePeople = (
       }
     }
 
-    getExplorePeople(subId, until, limit, since, offset);
+    getExplorePeople(subId, user_pubkey, until, limit, since, offset);
   });
 }
 
 export const fetchExploreZaps = (
+  user_pubkey: string | undefined,
   subId: string,
   paging?: FeedPaging,
 ) => {
@@ -301,8 +303,7 @@ export const fetchExploreZaps = (
       }
     }
 
-    console.log('')
-    getExploreZaps(subId, until, limit, since, offset);
+    getExploreZaps(subId, user_pubkey, until, limit, since, offset);
   });
 }
 
@@ -353,6 +354,7 @@ export const fetchExploreMedia = (
 }
 
 export const fetchExploreTopics = (
+  user_pubkey: string | undefined,
   subId: string,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
@@ -372,7 +374,7 @@ export const fetchExploreTopics = (
       }
     });
 
-    getExploreTopics(subId);
+    getExploreTopics(subId, user_pubkey);
   });
 }
 
