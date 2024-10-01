@@ -68,6 +68,8 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   topZaps: {},
   wordCount: {},
   userStats: {},
+  userFollowerCounts: {},
+  userFollowerIncrease: {},
   since: 0,
   until: 0,
   sortBy: 'created_at',
@@ -225,7 +227,14 @@ export const fetchExplorePeople = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({
+          users: [],
+          notes: [],
+          reads: [],
+          zaps: [],
+          topicStats: [],
+          paging: { since: 0, until: 0, sortBy: 'created_at'},
+        });
       }
     });
 
@@ -552,6 +561,18 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     let stats = JSON.parse(content.content) as UserStats;
 
     page.userStats[stats.pubkey] = { ...stats };
+  }
+
+  if (content.kind === Kind.UserFollowerCounts) {
+    let stats = JSON.parse(content.content);
+
+    page.userFollowerCounts = { ...stats };
+  }
+
+  if (content.kind === Kind.UserFollowerIncrease) {
+    let stats = JSON.parse(content.content);
+
+    page.userFollowerIncrease = { ...stats };
   }
 
 };

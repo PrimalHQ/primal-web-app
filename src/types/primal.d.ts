@@ -305,6 +305,11 @@ export type NostrDVMFollowsActions = {
   content: string,
 };
 
+export type NostrUserFollowerIncrease = {
+  kind: Kind.UserFollowerIncrease,
+  content: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -346,6 +351,7 @@ export type NostrEventContent =
   NostrDVM |
   NostrDVMMetadata |
   NostrDVMFollowsActions |
+  NostrUserFollowerIncrease |
   NostrTopicStats;
 
 export type NostrEvent = [
@@ -442,6 +448,8 @@ export type MegaFeedPage = {
   until: number,
   sortBy: string,
   userStats: Record<string, UserStats>,
+  userFollowerCounts: Record<string, number>,
+  userFollowerIncrease: Record<string, { increase: number, ratio: number}>,
   wordCount: Record<string, number>,
 };
 
@@ -579,6 +587,7 @@ export type UserStats = {
   relay_count: number,
   media_count: number,
   long_form_note_count?: number,
+  followers_increase?: number,
 };
 
 export type PrimalUser = {

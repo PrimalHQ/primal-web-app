@@ -66,20 +66,22 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
               </div>
 
               <div class={styles.userInfo}>
-                <div class={styles.userBasicData}>
-                  <div class={styles.userName}>
-                    {userName(user)}
-                    <VerificationCheck user={user} />
-                  </div>
-                  <Show when={user.nip05}>
-                    <div class={styles.nip05}>
-                      {nip05Verification(user)}
+                <div class={styles.userData}>
+                  <div class={styles.userBasicData}>
+                    <div class={styles.userName}>
+                      {userName(user)}
+                      <VerificationCheck user={user} />
                     </div>
-                  </Show>
-                </div>
-                <div class={styles.userAdditionalData}>
-                  <div class={`${styles.userAbout} ${!user.nip05 ? styles.extended : ''}`}>
-                    {user.about}
+                    <Show when={user.nip05}>
+                      <div class={styles.nip05}>
+                        {nip05Verification(user)}
+                      </div>
+                    </Show>
+                  </div>
+                  <div class={styles.userAdditionalData}>
+                    <div class={`${styles.userAbout} ${!user.nip05 ? styles.extended : ''}`}>
+                      {user.about}
+                    </div>
                   </div>
                 </div>
 
@@ -90,6 +92,13 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
                     </div>
                     <div class={styles.unit}>
                       followers
+                    </div>
+                  </Show>
+                  <Show when={user.userStats?.followers_increase}>
+                    <div class={styles.increaseCount}>
+                      <span>
+                        + {user.userStats?.followers_increase}
+                      </span>
                     </div>
                   </Show>
                 </div>

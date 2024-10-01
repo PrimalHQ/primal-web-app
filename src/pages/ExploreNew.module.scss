@@ -229,88 +229,111 @@
         justify-content: space-between;
         align-items: flex-start;
         height: 100%;
-        padding-block: 12px;
         margin-right: 12px;
         overflow: hidden;
         gap: 2px;
 
-        .userBasicData {
+        .userData {
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
           align-items: flex-start;
           gap: 2px;
 
-          .userName {
+          .userBasicData {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: flex-start;
-            color: var(--text-primary);
-            font-size: 18px;
-            font-weight: 600;
-            line-height: 18px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 152px;
-          }
-          .nip05 {
-            overflow: hidden;
-            color: var(--text-tertiary);
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 16px;
-            max-width: 182px;
-          }
-        }
-
-        .userAdditionalData {
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;
-          align-items: flex-start;
-          gap: 2px;
-
-          .userAbout {
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 400;
-            line-height: 16px;
-            max-width: 182px;
-
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-box-orient: vertical;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            text-overflow: ellipsis;
-            word-wrap: break-word;
-
-            &.extended {
-              -webkit-line-clamp: 3;
-              line-clamp: 3;
-            }
-          }
-
-          .userStats {
-            display: flex;
+            align-items: flex-start;
             gap: 2px;
-            max-width: 182px;
 
-            .number {
-              color: var(--text-tertiary);
+            .userName {
+              display: flex;
+              align-items: center;
+              justify-content: flex-start;
+              color: var(--text-primary);
+              font-size: 18px;
+              font-weight: 600;
+              line-height: 18px;
               text-overflow: ellipsis;
-              font-size: 14px;
-              font-weight: 700;
-              line-height: 16px;
+              white-space: nowrap;
+              max-width: 152px;
             }
-            .unit {
+            .nip05 {
+              overflow: hidden;
               color: var(--text-tertiary);
               text-overflow: ellipsis;
+              white-space: nowrap;
               font-size: 14px;
               font-weight: 400;
               line-height: 16px;
+              max-width: 182px;
+            }
+          }
+
+          .userAdditionalData {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 2px;
+
+            .userAbout {
+              color: var(--text-primary);
+              font-size: 14px;
+              font-weight: 400;
+              line-height: 16px;
+              max-width: 182px;
+
+              overflow: hidden;
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 2;
+              line-clamp: 2;
+              text-overflow: ellipsis;
+              word-wrap: break-word;
+
+              &.extended {
+                -webkit-line-clamp: 3;
+                line-clamp: 3;
+              }
+            }
+          }
+        }
+
+
+        .userStats {
+          display: flex;
+          justify-content: flex-start;
+          align-items: baseline;
+          gap: 4px;
+          max-width: 182px;
+
+          .number {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 18px;
+          }
+          .unit {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 18px;
+          }
+
+          .increaseCount {
+            position: relative;
+            > span {
+              position: absolute;
+              display: inline-block;
+              bottom: 6px;
+              left: 0;
+              color: var(--text-primary);
+              font-size: 12px;
+              font-weight: 700;
+              line-height: 12px;
+              width: 120px;
             }
           }
         }

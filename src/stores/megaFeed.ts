@@ -3,6 +3,7 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "../types/primal";
+import { mergeArrays } from "../utils";
 import { convertToUser, emptyUser } from "./profile";
 
 
@@ -297,10 +298,56 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
     return [];
   }
 
-  let stats: Record<string, UserStats> | undefined
+  let stats = page.userStats || {};
 
-  if (Object.keys(page.userStats).length > 0) {
-    stats = page.userStats;
+  let pks = Object.keys(page.userFollowerCounts);
+
+  if (pks.length > 0) {
+    pks.forEach(pk => {
+      if (stats[pk]) {
+        stats[pk].followers_count = page.userFollowerCounts[pk];
+      } else {
+        stats[pk] = {
+          pubkey: pk,
+          followers_count: page.userFollowerCounts[pk],
+          follows_count: 0,
+          note_count: 0,
+          reply_count: 0,
+          time_joined: 0,
+          total_zap_count: 0,
+          total_satszapped: 0,
+          relay_count: 0,
+          media_count: 0,
+          long_form_note_count: 0,
+
+        }
+      }
+    })
+  }
+
+  pks = Object.keys(page.userFollowerIncrease);
+
+  if (pks.length > 0) {
+    pks.forEach(pk => {
+      if (stats[pk]) {
+        stats[pk].followers_increase = page.userFollowerIncrease[pk].increase;
+      } else {
+        stats[pk] = {
+          pubkey: pk,
+          followers_count: page.userFollowerCounts[pk],
+          follows_count: 0,
+          note_count: 0,
+          reply_count: 0,
+          time_joined: 0,
+          total_zap_count: 0,
+          total_satszapped: 0,
+          relay_count: 0,
+          media_count: 0,
+          long_form_note_count: 0,
+          followers_increase: page.userFollowerIncrease[pk].increase,
+        }
+      }
+    })
   }
 
   return Object.values(page.users).map(u => convertToUser(u, u.pubkey, stats));

@@ -262,7 +262,7 @@ const ExploreFeeds: Component = () => {
             stats={stats()}
             actions={actions()}
             metadata={metadata()}
-            type={metadata()?.kind || 'notes'}
+            type={metadata()?.kind}
             commonFollows={commonUsers()}
           />
         </div>

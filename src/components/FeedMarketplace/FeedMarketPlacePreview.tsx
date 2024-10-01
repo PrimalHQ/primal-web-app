@@ -21,7 +21,7 @@ const FeedMarketPlacePreview: Component<{
   actions?: NoteActions,
   metadata?: DVMMetadata,
   commonFollows?: PrimalUser[],
-  type: 'notes' | 'reads',
+  type?: 'notes' | 'reads',
 }> = (props) => {
   const account = useAccountContext();
 
@@ -30,7 +30,12 @@ const FeedMarketPlacePreview: Component<{
     reads: [],
   });
 
+  let isFetching = false;
+
   const getFeedPreview = async () => {
+    if (isFetching || !props.type) return;
+
+    isFetching = true;
     let fetcher: Function | undefined;
 
     if (props.type === 'notes') {
@@ -51,6 +56,7 @@ const FeedMarketPlacePreview: Component<{
       kind: props.type,
     });
 
+    console.log('GET PREVIEW')
     const notes = await fetcher(
       account?.publicKey,
       spec,
@@ -60,6 +66,7 @@ const FeedMarketPlacePreview: Component<{
     );
 
     updateStore(props.type, () => [ ...notes ]);
+    isFetching = false;
   }
 
   const clearPreview = () => {
