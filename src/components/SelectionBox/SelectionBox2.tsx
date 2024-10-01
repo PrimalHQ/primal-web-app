@@ -14,6 +14,7 @@ import SelectionItem from "./SelectionItem";
 import styles from  "./SelectionBox.module.scss";
 import { A } from "@solidjs/router";
 import { createStore } from "solid-js/store";
+import { generatePrivateKey } from "../../lib/nTools";
 
 
 const SelectionBox2: Component<{
@@ -28,53 +29,121 @@ const SelectionBox2: Component<{
 }> = (props) => {
 
   const defaultValue = () => {
-    if (typeof props.initialValue === 'string') {
-      return props.options.find(o => o.value === props.initialValue);
+    const init = props.initialValue;
+
+    if (!init) return;
+
+    if (typeof init === 'string') {
+      const found = Object.entries(opts).find(([_, oo]) => oo.id === init);
+
+      if (!found) return;
+
+      return {
+        ...found[1],
+        value: found[0],
+      }
     }
 
-    return props.initialValue;
+    const found = Object.entries(opts).find(([_, oo]) => oo.id === init.id);
+
+    if (!found) return;
+
+    return {
+      ...found[1],
+      value: found[0],
+    }
+    // if (typeof props.initialValue === 'string') {
+    //   return props.options.find(o => o.value === props.initialValue);
+    // }
+
+    // return props.initialValue;
   }
+
   const value = () => {
-    if (!props.value) {
+    const v = props.value;
+
+    if (!v) {
       return defaultValue();
     }
 
-    if (typeof props.value === 'string') {
-      return { label: props.value, value: props.value };
+    if (typeof v === 'string') {
+      const found = Object.entries(opts).find(([_, oo]) => oo.id === v);
+
+      if (!found) return;
+
+      return {
+        ...found[1],
+        value: found[0],
+      }
     }
 
-    return props.value;
+
+    const found = Object.entries(opts).find(([_, oo]) => oo.id === v.id);
+
+    if (!found) return;
+
+    return {
+      ...found[1],
+      value: found[0],
+    }
   }
 
   const hasCaption = () => props.caption || props.captionAction;
 
-  const [opts, setOpts] = createStore<SelectionOption[]>([]);
+  const [opts, setOpts] = createStore<Record<string,SelectionOption>>({});
 
   createEffect(() => {
     if (props.options.length > 0) {
-      setTimeout(() => setOpts(() => [...props.options]), 200);
+      setTimeout(() => {
+        // setOpts(() => [...props.options]);
+        let temp: Record<string,SelectionOption> = {};
+        for (let i=0;i<props.options.length;i++) {
+          const id = generatePrivateKey();
+
+          temp[id] = props.options[i];
+        }
+
+        setOpts(() => ({...temp}));
+      }, 200);
     }
-  })
+  });
+
+  const options = () => {
+    return Object.entries(opts).reduce<SelectionOption[]>((acc, [id, option]) => {
+      return [ ...acc, {
+        ...option,
+        value: id,
+      }]
+    }, []);
+  }
+
+  const onOptionSelect = (option: SelectionOption) => {
+    if (!option) return;
+
+    const o = opts[option.value];
+
+    o && props.onChange(o);
+  }
 
   return (
     <Select
       id={props.id}
       class={styles.selectionBox}
-      options={props.options}
+      options={options()}
       optionValue="value"
       optionTextValue="label"
       optionDisabled="disabled"
       itemComponent={(prps) => SelectionItem(prps)}
       defaultValue={defaultValue()}
       value={value()}
-      onChange={props.onChange}
+      onChange={onOptionSelect}
     >
       <Select.Trigger class={props.big ? styles.triggerBig : styles.trigger}>
           <Select.Value<SelectionOption>>
-            {state => opts.length > 0 ? state.selectedOption()?.label || '' : ''}
+            {state => options().length > 0 ? state.selectedOption()?.label || '' : ''}
           </Select.Value>
           <Select.Icon>
-            <Show when={opts.length > 0}>
+            <Show when={options().length > 0}>
               <div class={props.big ? styles.selectionIconBig : styles.selectionIcon}></div>
             </Show>
           </Select.Icon>
