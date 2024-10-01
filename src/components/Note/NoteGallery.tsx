@@ -16,7 +16,9 @@ import { generatePrivateKey } from '../../lib/nTools';
 import { imageRegexG } from '../../constants';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
+import ParsedNote from '../ParsedNote/ParsedNote';
+import ButtonSecondary from '../Buttons/ButtonSecondary';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -24,6 +26,7 @@ const NoteGallery: Component<{
 }> = (props) => {
   const intl = useIntl();
   const media = useMediaContext();
+  const navigate = useNavigate();
 
   const id = generatePrivateKey();
 
@@ -91,6 +94,23 @@ const NoteGallery: Component<{
     return content;
   }
 
+  const imageFreeNote = (note: PrimalNote) => {
+    const newNote = {
+      ...note,
+      content: note.content.replace(imageRegexG, '').trim(),
+    };
+
+    return <ParsedNote
+      note={newNote}
+      ignoreMedia={true}
+      noLinks="links"
+      noPreviews={true}
+      shorten={true}
+      isEmbeded={false}
+      noLightbox={true}
+    />
+  }
+
   return (
     <div
       id={`galleryimage_${props.note.id}`}
@@ -107,11 +127,18 @@ const NoteGallery: Component<{
         shortHeight={true}
         plainBorder={true}
         caption={
-          <A
-            href={`/e/${props.note.noteId}`}
-          >
-            {imageFreeContent(props.note)}
-          </A>}
+          <div class={styles.mediaNote}>
+            <div class={styles.note}>
+              {imageFreeNote(props.note)}
+            </div>
+            <A
+              class={styles.noteLink}
+              href={`/e/${props.note.noteId}`}
+            >
+              Go to note
+            </A>
+          </div>
+        }
       />
     </div>
   )

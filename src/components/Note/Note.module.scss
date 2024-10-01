@@ -978,3 +978,36 @@
   -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 / 100%;
 }
+
+.mediaNote {
+  .note {
+    max-height: 616px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 20;
+    line-clamp: 20;
+    -webkit-box-orient: vertical;
+  }
+
+  a.noteLink {
+    display: block;
+    text-decoration: none;
+    width: fit-content;
+
+    background-color: var(--subtile-devider);
+    padding: 11px 16px;
+    border-radius: 99px;
+
+    margin-top: 20px;
+    margin-left: 20px;
+
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 14px;
+
+    &:hover {
+      background-color: var(--text-tertiary-2);
+    }
+  }
+}
