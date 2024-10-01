@@ -22,8 +22,9 @@ const ReadsFeeds: Component = () => {
   const [openMarketplace, setOpenMarketplace] = createSignal(false);
 
   const onRestoreFeeds = () => {
+    settings?.actions.restoreReadsFeeds();
     // settings?.actions.restoreDefaultFeeds();
-    // setIsRestoringFeeds(false);
+    setIsRestoringFeeds(false);
   };
 
   return (

@@ -86,7 +86,10 @@ export type SettingsContextStore = {
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
     refreshMobileReleases: () => void,
     setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
-    getArticleFeeds: () => void,
+    getDefaultReadsFeeds: () => void,
+    getDefaultHomeFeeds: () => void,
+    restoreReadsFeeds: () => void,
+    restoreHomeFeeds: () => void,
     addProfileHomeFeed: ( name: string, pubkey: string | undefined) => void,
     removeProfileHomeFeed: (pubkey: string | undefined) => void,
     hasProfileFeedAtHome: (pubkey: string | undefined) => boolean,
@@ -321,7 +324,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     }
 
     if (feedType === 'reads') {
-      const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
+      const updated = store.readsFeeds.filter(f => f.spec !== feed.spec);
       updateReadsFeeds(updated);
     }
   }
@@ -373,6 +376,46 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const spec = specifyUserFeed(pubkey);
 
     return store.homeFeeds.find(f => f.spec === spec) !== undefined;
+  }
+
+  const restoreHomeFeeds = () => {
+    const subId = `restore_feeds_${APP_ID}`;
+
+    let feeds: PrimalArticleFeed[] = []
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        feeds = JSON.parse(content.content || '[]') as PrimalArticleFeed[];
+
+        updateStore('homeFeeds', () => [...feeds]);
+      },
+      onEose: () => {
+        unsub();
+        updateHomeFeeds(feeds)
+      },
+    });
+
+    fetchDefaultHomeFeeds(subId);
+  }
+
+  const restoreReadsFeeds = () => {
+    const subId = `restore_feeds_${APP_ID}`;
+
+    let feeds: PrimalArticleFeed[] = []
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        feeds = JSON.parse(content.content || '[]') as PrimalArticleFeed[];
+
+        updateStore('readsFeeds', () => [...feeds]);
+      },
+      onEose: () => {
+        unsub();
+        updateReadsFeeds(feeds)
+      },
+    });
+
+    fetchDefaultArticleFeeds(subId);
   }
 
   const updateHomeFeeds = (feeds: PrimalArticleFeed[]) => {
@@ -449,8 +492,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     updateReadsFeeds(list);
   };
 
-
-  const isFeedAdded = (feed: PrimalArticleFeed, destination: 'home' | 'reads') => {
+  const isFeedAdded: (f: PrimalArticleFeed, d: 'home' | 'reads') => boolean = (feed: PrimalArticleFeed, destination: 'home' | 'reads') => {
     if (destination === 'reads') {
       return store.readsFeeds.find(f => f.spec === feed.spec) !== undefined;
     }
@@ -620,7 +662,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     getDefaultSettings(subid);
-    getDefaultArticleFeeds();
+    getDefaultReadsFeeds();
   };
 
   const loadSettings = (pubkey: string | undefined, then?: () => void) => {
@@ -751,7 +793,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         if (store.readsFeeds.length === 0) {
-          getDefaultArticleFeeds();
+          getDefaultReadsFeeds();
         }
         saveReadsFeeds(pubkey, store.readsFeeds);
         unsubReadsSettings();
@@ -779,7 +821,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getMobileReleases(subid);
   };
 
-  const getDefaultArticleFeeds = () => {
+  const getDefaultReadsFeeds = () => {
     const subId = `article_feeds_${APP_ID}`;
 
     const unsub = subsTo(subId, {
@@ -916,7 +958,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       modifyContentModeration,
       refreshMobileReleases,
       setProxyThroughPrimal,
-      getArticleFeeds: getDefaultArticleFeeds,
+      getDefaultReadsFeeds,
+      getDefaultHomeFeeds,
+      restoreReadsFeeds,
+      restoreHomeFeeds,
 
       moveFeed,
       renameFeed,
