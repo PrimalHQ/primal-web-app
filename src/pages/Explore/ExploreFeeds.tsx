@@ -17,11 +17,12 @@ import FeedMarketPlacePreview from '../../components/FeedMarketplace/FeedMarketP
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { Kind } from '../../constants';
-import { DVMMetadata, DVMStats, NostrNoteActionsContent, NostrUserContent, NoteActions, PrimalDVM, PrimalUser } from '../../types/primal';
+import { DVMMetadata, DVMStats, NostrNoteActionsContent, NostrUserContent, NoteActions, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
 import { createStore } from 'solid-js/store';
 import { convertToUser } from '../../stores/profile';
 import { fetchDVM } from '../../lib/feed';
 import { useAccountContext } from '../../contexts/AccountContext';
+import ButtonFlip from '../../components/Buttons/ButtonFlip';
 
 const ExploreFeeds: Component = () => {
 
@@ -172,6 +173,55 @@ const ExploreFeeds: Component = () => {
     return c;
   }
 
+  const generateFeedDefinition = () => {
+    const dvm = store.dvm;
+
+    if (!dvm) return;
+
+    const spec = JSON.stringify({
+      dvm_id: dvm.id,
+      dvm_pubkey: dvm.pubkey,
+      kind: store.metadata?.kind || 'notes',
+    });
+
+    const feed: PrimalArticleFeed = {
+      name: dvm.name,
+      description: dvm.about,
+      spec,
+      enabled: true,
+      feedkind: 'dvm',
+    };
+
+    return feed;
+  }
+
+  const isFeedAdded = () => {
+    const feed = generateFeedDefinition();
+
+    if (!feed) return false;
+
+    return settings?.actions.isFeedAdded(feed, addFeedDestination());
+  }
+
+  const addFeedDestination = () => {
+    if (metadata()?.kind === 'reads') return 'reads';
+
+    return 'home';
+  }
+
+  const toggleFeed = () => {
+    const feed = generateFeedDefinition();
+
+    if (!feed) return;
+
+    if (isFeedAdded()) {
+      settings?.actions.removeFeed(feed, addFeedDestination());
+      return;
+    }
+
+    settings?.actions.addFeed(feed, addFeedDestination());
+  }
+
   return (
     <>
       <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
@@ -186,7 +236,20 @@ const ExploreFeeds: Component = () => {
                 <div class={styles.backIcon}></div>
                 <div>Feed Marketplace</div>
             </A>
+            <ButtonFlip
+              when={isFeedAdded()}
+              class={styles.addToFeed}
+              onClick={toggleFeed}
+              fallback={
+                <>
+                  Add this feed to your {addFeedDestination()} feed
+                </>
+              }
+              >
+              <>Remove this feed to your {addFeedDestination()} feed</>
+            </ButtonFlip>
           </div>
+
         </div>
       </PageCaption>
 

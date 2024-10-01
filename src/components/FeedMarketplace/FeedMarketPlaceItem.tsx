@@ -57,8 +57,6 @@ const FeedMarketItem: Component<{
     }
   })
 
-  createEffect(() => console.log('DVM: ', {...state}))
-
   const likes = () => state.likes;
   const satszapped = () => state.satszapped;
 

@@ -97,6 +97,7 @@ export type SettingsContextStore = {
     enableFeed: (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => void,
     addFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
+    isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
   }
 }
@@ -447,6 +448,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     updateReadsFeeds(list);
   };
+
+
+  const isFeedAdded = (feed: PrimalArticleFeed, destination: 'home' | 'reads') => {
+    if (destination === 'reads') {
+      return store.readsFeeds.find(f => f.spec === feed.spec) !== undefined;
+    }
+    return store.homeFeeds.find(f => f.spec === feed.spec) !== undefined;
+  }
 
   const addHomeFeed = (feed: PrimalArticleFeed) => {
     const list = [ ...store.homeFeeds, {...feed}];
@@ -914,6 +923,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       enableFeed,
       addFeed,
       removeFeed,
+      isFeedAdded,
 
       setAnimation,
     },
