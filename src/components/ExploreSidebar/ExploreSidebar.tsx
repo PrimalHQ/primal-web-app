@@ -1,5 +1,5 @@
 import { A, useResolvedPath } from '@solidjs/router';
-import { Component, createEffect, createMemo, For, onCleanup } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { APP_ID } from '../../App';
@@ -17,6 +17,7 @@ import { hexToNpub } from '../../lib/keys';
 import { exploreSidebarCaption } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
+import { loadTrendingUsers, saveTrendingUsers } from '../../lib/localStore';
 
 const ExploreSidebar: Component<{ id?: string }> = (props) => {
 
@@ -36,6 +37,12 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
       truncateNpub(user.npub);
   }
 
+  onMount(() => {
+    const users = loadTrendingUsers();
+
+    setTrendingUsers(() => ({ ...users }));
+  })
+
 //  ACTIONS -------------------------------------
 
   const processUsers = (type: string, content: NostrEventContent | undefined) => {
@@ -53,6 +60,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
       });
 
       setTrendingUsers(() => [...users]);
+      saveTrendingUsers(users);
       return;
     }
 
@@ -131,7 +139,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
 // RENDER ---------------------------------------
 
   return (
-    <div id={props.id}>
+    <div id={props.id} class={styles.topUsersHolder}>
       <div class={styles.trendingUsersCaption}>
         {intl.formatMessage(exploreSidebarCaption)}
       </div>

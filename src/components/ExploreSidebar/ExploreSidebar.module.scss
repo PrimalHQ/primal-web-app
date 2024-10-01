@@ -34,11 +34,17 @@
 }
 
 .trendingUsersCaption {
+  text-align: left;
   text-transform: capitalize;
   color: var(--text-secondary);
   font-size: 16px;
   font-weight: 400;
   line-height: 20px;
+  width: 100%;
+}
+
+.topicsHolder, .topUsersHolder {
+  width: 100%;
 }
 
 .hotTopicsCaption {
@@ -47,6 +53,9 @@
   font-weight: 400;
   line-height: 20px;
   margin-bottom: 12px;
+  text-align: left;
+  width: 100%;
+  text-transform: capitalize;
 }
 
 .exploreHotTopics {
@@ -54,6 +63,7 @@
   justify-content: flex-start;
   align-items: center;
   gap: 8px;
+  width:100%;
   flex-wrap: wrap;
   -webkit-flex-wrap: wrap;
 

@@ -9,6 +9,7 @@ import {
   createContext,
   createEffect,
   onCleanup,
+  onMount,
   useContext
 } from "solid-js";
 import {
@@ -36,6 +37,7 @@ import {
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
+  NostrStats,
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
@@ -49,6 +51,7 @@ import {
 import { APP_ID } from "../App";
 import { parseBolt11 } from "../utils";
 import { PaginationInfo, TopicStat } from "../megaFeeds";
+import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
 
 export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
@@ -84,16 +87,7 @@ export type ExploreContextStore = {
   reposts: Record<string, string> | undefined,
   isNetStatsStreamOpen: boolean,
   selectedTab: string,
-  stats: {
-    users: number,
-    pubkeys: number,
-    pubnotes: number,
-    reactions: number,
-    reposts: number,
-    any: number,
-    zaps: number,
-    satszapped: number,
-  },
+  stats: NostrStats,
   legend: {
     your_follows: number,
     your_inner_network: number,
@@ -194,6 +188,14 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
 
+  onMount(() => {
+    const stats = loadNostrStats();
+    const topics = loadHotTopics();
+
+    updateStore('stats', () => ({ ...stats }));
+    updateStore('exploreTopics', () => [...topics])
+  })
+
 // ACTIONS --------------------------------------
 
   const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo) => {
@@ -218,6 +220,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const setExploreTopics = (topics: TopicStat[]) => {
     updateStore('exploreTopics', () => [...topics]);
+    saveHotTopics(topics);
   }
 
   const setPreviewDVM = (
@@ -485,6 +488,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     if (content.kind === Kind.NetStats) {
       updateStore('stats', () => ({ ...stats }));
+      saveNostrStats(stats);
     }
 
     if (content.kind === Kind.LegendStats) {

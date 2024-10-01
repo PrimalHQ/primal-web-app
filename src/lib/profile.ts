@@ -538,6 +538,8 @@ export const getExploreMedia = async (subid: string, user_pubkey: string | undef
 
 export const getExploreTopics = async (subid: string, user_pubkey: string | undefined) => {
 
+  let payload = {};
+
   if (user_pubkey) {
     // @ts-ignore
     payload.user_pubkey = user_pubkey

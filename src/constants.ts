@@ -299,8 +299,8 @@ export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
 
 // How long, in words, should a short note be
-export const shortNoteWords = 60;
-export const shortNoteChars = 280;
+export const shortNoteWords = 200;
+export const shortNoteChars = 200;
 
 export const wordsPerMinute = 238;
 

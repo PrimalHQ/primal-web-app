@@ -23,6 +23,9 @@ import { convertToUser } from '../../stores/profile';
 import { fetchDVM } from '../../lib/feed';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonFlip from '../../components/Buttons/ButtonFlip';
+import ExploreHotTopics from '../../components/ExploreSidebar/ExploreHotTopics';
+import ExploreSidebar from '../../components/ExploreSidebar/ExploreSidebar';
+import NostrStats from '../../components/NostrStats/NostrStats';
 
 const ExploreFeeds: Component = () => {
 
@@ -225,6 +228,16 @@ const ExploreFeeds: Component = () => {
   return (
     <>
       <PageTitle title={intl.formatMessage(tExplore.pageTitle)} />
+
+      <StickySidebar>
+        <div class={styles.exploreSide}>
+          <NostrStats stats={explore?.stats}/>
+
+          <ExploreHotTopics />
+
+          <ExploreSidebar />
+        </div>
+      </StickySidebar>
 
       <PageCaption>
         <div class={styles.exploreHeader}>

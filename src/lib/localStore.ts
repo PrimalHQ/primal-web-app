@@ -1,4 +1,6 @@
-import { EmojiOption, NostrRelays, PrimalArticleFeed, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { TopicStat } from "../megaFeeds";
+import { convertToUser, userName } from "../stores/profile";
+import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -508,4 +510,46 @@ export const readBookmarks = (pubkey: string | undefined) => {
   const store = getStorage(pubkey)
 
   return store.bookmarks || [];
+};
+
+
+export const saveNostrStats = (stats: NostrStats) => {
+  localStorage.setItem('nostrStats', JSON.stringify(stats))
+};
+
+export const loadNostrStats = () => {
+  const stats = localStorage.getItem('nostrStats') ||
+    JSON.stringify({
+      users: 0,
+      pubkeys: 0,
+      pubnotes: 0,
+      reactions: 0,
+      reposts: 0,
+      any: 0,
+      zaps: 0,
+      satszapped: 0,
+    });
+
+  return JSON.parse(stats) as NostrStats;
+};
+
+export const saveTrendingUsers = (users: PrimalUser[]) => {
+  localStorage.setItem('trendingUsers', JSON.stringify(users));
+};
+
+export const loadTrendingUsers = () => {
+  const stored = JSON.parse(localStorage.getItem('trendingUsers') || '[]');
+
+  return stored as PrimalUser[];
+};
+
+
+export const saveHotTopics = (topics: TopicStat[]) => {
+  localStorage.setItem('hotTopics', JSON.stringify(topics));
+};
+
+export const loadHotTopics = () => {
+  const stored = JSON.parse(localStorage.getItem('hotTopics') || '[]');
+
+  return stored as TopicStat[];
 };

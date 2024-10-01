@@ -973,3 +973,14 @@ export type PageRange = {
 };
 
 export type EventCoordinate = { pubkey: string, identifier: string, kind: number };
+
+export type NostrStats = {
+  users: number,
+  pubkeys: number,
+  pubnotes: number,
+  reactions: number,
+  reposts: number,
+  any: number,
+  zaps: number,
+  satszapped: number,
+};
