@@ -99,7 +99,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
                   <Show when={user.userStats?.followers_increase}>
                     <div class={styles.increaseCount}>
                       <span>
-                        + {user.userStats?.followers_increase}
+                        + {user.userStats?.followers_increase?.toLocaleString()}
                       </span>
                     </div>
                   </Show>
