@@ -64,6 +64,7 @@
         line-height: 16px;
         max-width: 120px;
 
+
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 1;
@@ -94,6 +95,13 @@
         font-size: 14px;
         font-weight: 600;
         line-height: 16px;
+        max-width: 260px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
 
       .bullet {
@@ -120,6 +128,8 @@
       font-size: 12px;
       font-weight: 400;
       line-height: 16px;
+
+      padding-right: 20px;
     }
   }
 }

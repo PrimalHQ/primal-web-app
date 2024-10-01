@@ -496,10 +496,10 @@ export const getExploreZaps = async (subid: string, user_pubkey: string | undefi
     payload.since = since
   }
 
-  if (user_pubkey) {
-    // @ts-ignore
-    payload.user_pubkey = user_pubkey
-  }
+  // if (user_pubkey) {
+  //   // @ts-ignore
+  //   payload.user_pubkey = user_pubkey
+  // }
 
   sendMessage(JSON.stringify([
     "REQ",
