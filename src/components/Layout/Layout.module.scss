@@ -252,6 +252,7 @@
 
     .headerFloater {
       width: 100%;
+      z-index: var(--z-index-floater-2);
     }
   }
 
