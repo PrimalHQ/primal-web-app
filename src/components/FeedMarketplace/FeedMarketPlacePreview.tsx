@@ -1,17 +1,22 @@
-import { Component, createEffect, For, Match, Switch } from 'solid-js';
+import { batch, Component, createEffect, For, Match, on, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { fetchNoteFeedBySpec, fetchReadsFeedBySpec } from '../../handleNotes';
+import { emptyPaging, fetchMegaFeed, PaginationInfo } from '../../megaFeeds';
 import { DVMMetadata, NoteActions, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from '../../types/primal';
+import { calculatePagingOffset } from '../../utils';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import Note from '../Note/Note';
+import Paginator from '../Paginator/Paginator';
 import styles from './FeedMarketPlace.module.scss';
 import FeedMarketItem from './FeedMarketPlaceItem';
 
 type FeedPreviewStore = {
   notes: PrimalNote[],
   reads: PrimalArticle[],
+  paging: PaginationInfo,
+  isFetching: boolean,
 }
 
 const FeedMarketPlacePreview: Component<{
@@ -28,27 +33,14 @@ const FeedMarketPlacePreview: Component<{
   const [store, updateStore] = createStore<FeedPreviewStore>({
     notes: [],
     reads: [],
+    paging: { ...emptyPaging() },
+    isFetching: false,
   });
 
-  let isFetching = false;
-
   const getFeedPreview = async () => {
-    if (isFetching || !props.type) return;
+    if (store.isFetching || !props.type) return;
 
-    isFetching = true;
-    let fetcher: Function | undefined;
-
-    if (props.type === 'notes') {
-      fetcher = fetchNoteFeedBySpec;
-    }
-
-    if (props.type === 'reads') {
-      fetcher = fetchReadsFeedBySpec;
-    }
-
-    if (!fetcher) {
-      return;
-    }
+    updateStore('isFetching', () => true);
 
     const spec = JSON.stringify({
       dvm_id: props.dvm?.identifier,
@@ -56,31 +48,53 @@ const FeedMarketPlacePreview: Component<{
       kind: props.type,
     });
 
-    const notes = await fetcher(
-      account?.publicKey,
-      spec,
-      `note_dvm_preview_${APP_ID}`,
-      0,
-      3,
+    const collection = props.type == 'reads' ?
+      store.reads :
+      store.notes;
+
+    const offset = calculatePagingOffset(
+      collection,
+      store.paging.elements,
     );
 
-    updateStore(props.type, () => [ ...notes ]);
-    isFetching = false;
-  }
+    const { notes, reads, paging } = await fetchMegaFeed(
+      account?.publicKey,
+      spec,
+      `dvm_preview_${APP_ID}`,
+      {
+        limit: 20,
+        until: store.paging.since,
+        offset,
+      }
+    );
+
+    batch(() => {
+      updateStore('notes', (ns) => [ ...ns, ...notes]);
+      updateStore('reads', (rs) => [ ...rs, ...reads]);
+      updateStore('paging', () => ({ ...paging }));
+    });
+
+    updateStore('isFetching', () => false);
+  };
 
   const clearPreview = () => {
     updateStore(() => ({
       notes: [],
       reads: [],
+      paging: { ...emptyPaging() },
+      isFetching: false,
     }));
   }
 
-  createEffect(() => {
-    if (props.dvm) {
+  createEffect(on(() => props.dvm && props.type, () => {
+    if (props.dvm && props.type) {
       getFeedPreview();
     } else {
       clearPreview();
     }
+  }))
+
+  createEffect(() => {
   })
 
   return (
@@ -119,6 +133,9 @@ const FeedMarketPlacePreview: Component<{
           </Match>
         </Switch>
       </div>
+      <Paginator
+        loadNextPage={getFeedPreview}
+      />
     </div>
   )
 }

@@ -447,6 +447,7 @@ export type MegaFeedPage = {
   since: number,
   until: number,
   sortBy: string,
+  elements: string[],
   userStats: Record<string, UserStats>,
   userFollowerCounts: Record<string, number>,
   userFollowerIncrease: Record<string, { increase: number, ratio: number}>,
@@ -569,6 +570,7 @@ export type PrimalDVM = {
   picture?: string,
   image?: string,
   user?: PrimalUser,
+  coordinate?: string,
 }
 export type DVMStats = { likes: number, satszapped: number };
 
@@ -983,4 +985,11 @@ export type NostrStats = {
   any: number,
   zaps: number,
   satszapped: number,
+};
+
+export type FeedRange = {
+  order_by: string,
+  since: number,
+  until: number,
+  elements: string[],
 };

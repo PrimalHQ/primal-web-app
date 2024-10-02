@@ -14,6 +14,7 @@ import { imageRegex } from '../../constants';
 import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
 import Paginator from '../../components/Paginator/Paginator';
+import { calculatePagingOffset } from '../../utils';
 
 const ExploreMedia: Component<{ open?: boolean }> = (props) => {
 
@@ -42,7 +43,10 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
     const page = {
       limit: 60,
       until: explore.mediaPaging.since,
-      offset: explore.exploreMedia.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+      offset: calculatePagingOffset(
+        explore.exploreMedia,
+        explore.mediaPaging.elements,
+      ),
     }
 
     const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , page);

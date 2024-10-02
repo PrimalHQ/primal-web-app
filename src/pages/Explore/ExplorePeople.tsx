@@ -14,6 +14,7 @@ import FollowButton from '../../components/FollowButton/FollowButton';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { humanizeNumber } from '../../lib/stats';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { calculatePagingOffset } from '../../utils';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
 
@@ -40,10 +41,15 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   const getNextPeoplePage = async () => {
     if (!explore || explore.peoplePaging.since === 0) return;
 
+    const offset = calculatePagingOffset(
+      explore.explorePeople,
+      explore.peoplePaging.elements,
+    );
+
     const page = {
       limit: 20,
       until: explore.peoplePaging.since,
-      // offset: explore.explorePeople.map(u => u.),
+      offset,
     }
 
     const { users, paging } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}` , page);

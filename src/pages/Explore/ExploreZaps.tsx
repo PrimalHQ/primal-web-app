@@ -14,6 +14,7 @@ import ProfileNoteZap from '../../components/ProfileNoteZap/ProfileNoteZap';
 import { PrimalZap } from '../../types/primal';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { calculatePagingOffset } from '../../utils';
 
 const ExploreZaps: Component<{ open?: boolean }> = (props) => {
 
@@ -42,7 +43,10 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
     const page = {
       limit: 20,
       until: explore.zapPaging.since,
-      offset: explore.exploreZaps.map(n => n.created_at || 0),
+      offset: calculatePagingOffset(
+        explore.exploreZaps,
+        explore.zapPaging.elements,
+      ),
     }
 
     const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}` , page);

@@ -65,7 +65,7 @@ import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import { logInfo } from "../lib/logger";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 
 let startTime = 0;
 let midTime = 0;
@@ -256,26 +256,10 @@ export const initialData = {
   },
   parsedAbout: undefined,
   paging: {
-    notes: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
-    reads: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
-    gallery: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
-    replies: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
+    notes: { ...emptyPaging() },
+    reads: { ...emptyPaging() },
+    gallery: { ...emptyPaging() },
+    replies: { ...emptyPaging() },
   },
 };
 

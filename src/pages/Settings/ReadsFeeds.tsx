@@ -23,7 +23,6 @@ const ReadsFeeds: Component = () => {
 
   const onRestoreFeeds = () => {
     settings?.actions.restoreReadsFeeds();
-    // settings?.actions.restoreDefaultFeeds();
     setIsRestoringFeeds(false);
   };
 

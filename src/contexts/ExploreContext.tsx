@@ -132,10 +132,10 @@ export const initialExploreData = {
 
 
   explorePeople: [],
-  peoplePaging: { since: 0, until: 0, sortBy: 'created_at' },
+  peoplePaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
 
   exploreZaps: [],
-  zapPaging: { since: 0, until: 0, sortBy: 'created_at' },
+  zapPaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
   zapSubjects: {
     notes: [],
     reads: [],
@@ -143,7 +143,7 @@ export const initialExploreData = {
   },
 
   exploreMedia: [],
-  mediaPaging: { since: 0, until: 0, sortBy: 'created_at' },
+  mediaPaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
 
   exploreTopics: [],
 

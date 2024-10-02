@@ -4,6 +4,7 @@ import { setLinkPreviews } from "./lib/notes";
 import { subsTo } from "./sockets";
 import { isRepostInCollection } from "./stores/note";
 import {
+  FeedRange,
   MegaFeedPage,
   NostrEventContent,
   NostrMentionContent,
@@ -22,7 +23,6 @@ import {
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
 import { convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
-import { FeedRange } from "./pages/FeedQueryTest";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
@@ -35,6 +35,7 @@ export type PaginationInfo = {
   since: number,
   until: number,
   sortBy: string,
+  elements: string[],
 };
 
 export type TopicStat = [string, number];
@@ -73,7 +74,12 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   since: 0,
   until: 0,
   sortBy: 'created_at',
+  elements: [],
 });
+
+export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
+
+export const emptyMegaFeedResults = () => ({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { ...emptyPaging()}});
 
 export const parseEmptyReposts = (page: MegaFeedPage) => {
   let reposts: Record<string, string> = {};
@@ -202,7 +208,7 @@ export const fetchReadThread = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({ ...emptyMegaFeedResults()});
       }
     });
 
@@ -228,14 +234,7 @@ export const fetchExplorePeople = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({
-          users: [],
-          notes: [],
-          reads: [],
-          zaps: [],
-          topicStats: [],
-          paging: { since: 0, until: 0, sortBy: 'created_at'},
-        });
+        resolve({ ...emptyMegaFeedResults() });
       }
     });
 
@@ -280,7 +279,7 @@ export const fetchExploreZaps = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({ ...emptyMegaFeedResults() });
       }
     });
 
@@ -325,7 +324,7 @@ export const fetchExploreMedia = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({ ...emptyMegaFeedResults() });
       }
     });
 
@@ -369,7 +368,7 @@ export const fetchExploreTopics = (
       },
       onNotice: (_, reason) => {
         unsub();
-        resolve({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { since: 0, until: 0, sortBy: 'created_at'}});
+        resolve({ ...emptyMegaFeedResults() });
       }
     });
 
@@ -411,6 +410,7 @@ const pageResolve = (page: MegaFeedPage) => {
       since: page.since,
       until: page.until,
       sortBy: page.sortBy,
+      elements: page.elements,
     },
   };
 }
@@ -422,6 +422,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.since = feedRange.since;
     page.until = feedRange.until;
     page.sortBy = feedRange.order_by;
+    page.elements = [...feedRange.elements];
     return;
   }
 
