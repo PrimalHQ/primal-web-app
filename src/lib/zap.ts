@@ -217,6 +217,8 @@ export const zapDVM = async (dvm: PrimalDVM, author: PrimalUser, sender: string 
     return false;
   }
 
+  const a = `${Kind.DVM}:${dvm.pubkey}:${dvm.identifier}`;
+
   const sats = Math.round(amount * 1000);
 
   let payload = {
@@ -232,6 +234,10 @@ export const zapDVM = async (dvm: PrimalDVM, author: PrimalUser, sender: string 
   }
 
   const zapReq = nip57.makeZapRequest(payload);
+
+  if (!zapReq.tags.find((t: string[]) => t[0] === 'a' && t[1] === a)) {
+    zapReq.tags.push(['a', a]);
+  }
 
   try {
     const signedEvent = await signEvent(zapReq);

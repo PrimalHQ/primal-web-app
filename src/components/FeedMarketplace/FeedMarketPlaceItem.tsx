@@ -38,6 +38,8 @@ const FeedMarketItem: Component<{
     satszapped: 0,
     liked: false,
     zapped: false,
+    isZapping: false,
+    zapFailed: false,
   });
 
   const size = () => props.size || 'list';
@@ -69,18 +71,15 @@ const FeedMarketItem: Component<{
   }
 
   const doLike = async (e: MouseEvent) => {
-    console.log('0')
     e.preventDefault();
     e.stopPropagation();
 
     if (!account || !props.dvm) {
-      console.log('1')
       return;
     }
 
     if (!account.hasPublicKey()) {
       account.actions.showGetStarted();
-      console.log('2')
       return;
     }
 
@@ -88,7 +87,6 @@ const FeedMarketItem: Component<{
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
       );
-      console.log('3')
       return;
     }
 
@@ -106,7 +104,7 @@ const FeedMarketItem: Component<{
   let quickZapDelay = 0;
 
   const customZapInfo: () => CustomZapInfo = () => ({
-    note: props.dvm,
+    dvm: props.dvm ? { ...props.dvm, user: props.author } : undefined,
     onConfirm: onConfirmZap,
     onSuccess: onSuccessZap,
     onFail: onFailZap,
@@ -194,7 +192,7 @@ const FeedMarketItem: Component<{
 
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted();
-      // props.updateState && props.updateState('isZapping', () => false);
+      setState('isZapping', () => false);
       return;
     }
 
@@ -205,17 +203,18 @@ const FeedMarketItem: Component<{
       return;
     }
 
-    // if (!canUserReceiveZaps(props.dvm?.pubkey)) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.zapUnavailable),
-    //   );
-    //   props.updateState && props.updateState('isZapping', () => false);
-    //   return;
-    // }
+    if (!canUserReceiveZaps(props.author)) {
+      toast?.sendWarning(
+        intl.formatMessage(t.zapDVMUnavailable),
+      );
+      setState('isZapping', () => false);
+      setState('zapFailed', () => true);
+      return;
+    }
 
     quickZapDelay = setTimeout(() => {
       app?.actions.openCustomZapModal(customZapInfo());
-      // props.updateState && props.updateState('isZapping', () => true);
+      setState('isZapping', () => true);
     }, 500);
   };
 
@@ -224,6 +223,11 @@ const FeedMarketItem: Component<{
     e.stopPropagation();
 
     clearTimeout(quickZapDelay);
+
+    if (state.zapFailed) {
+      setState('zapFailed', () => false);
+      return;
+    }
 
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted();
@@ -249,7 +253,8 @@ const FeedMarketItem: Component<{
     const message = settings?.defaultZap.message || '';
     const emoji = settings?.defaultZap.emoji;
 
-    setState('satszapped', (sz) => sz - (amount || 0));
+    setState('satszapped', (sz) => sz + (amount || 0));
+    setState('isZapping', () => true);
 
     // batch(() => {
     //   props.updateState && props.updateState('isZapping', () => true);
@@ -263,7 +268,7 @@ const FeedMarketItem: Component<{
       if (!props.dvm || !props.author) return;
       const success = await zapDVM(props.dvm, props.author, account.publicKey, amount, message, account.activeRelays);
 
-      // props.updateState && props.updateState('isZapping', () => false);
+      setState('isZapping', () => false);
 
       if (success) {
         customZapInfo().onSuccess({
@@ -352,9 +357,9 @@ const FeedMarketItem: Component<{
               onTouchStart={startZap}
               onTouchEnd={commitZap}
               type="zap"
-              highlighted={state.zapped}
-              label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
-              title={likes().toLocaleString()}
+              highlighted={state.zapped || state.isZapping}
+              label={satszapped() === 0 ? '' : truncateNumber(satszapped(), 2)}
+              title={satszapped().toLocaleString()}
             />
           </div>
         </div>

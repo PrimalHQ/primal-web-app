@@ -22,7 +22,8 @@ export type ReactionStats = {
 
 export type CustomZapInfo = {
   profile?: PrimalUser,
-  note?: PrimalNote | PrimalArticle | PrimalDVM,
+  note?: PrimalNote | PrimalArticle,
+  dvm?: PrimalDVM,
   onConfirm: (zapOption: ZapOption) => void,
   onSuccess: (zapOption: ZapOption) => void,
   onFail: (zapOption: ZapOption) => void,

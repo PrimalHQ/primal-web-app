@@ -66,6 +66,8 @@ const FeedMarketPlace: Component<{
         if (content.kind === Kind.DVM) {
           const dvmData = JSON.parse(content.content);
 
+          const identifier = (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1];
+
           const dvm: PrimalDVM = {
             id: content.id,
             name: dvmData.name || '',
@@ -74,9 +76,10 @@ const FeedMarketPlace: Component<{
             primalVerifiedRequired: dvmData.primalVerifiedRequired || false,
             pubkey: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
-            identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
+            identifier,
             picture: dvmData.picture,
             image: dvmData.image,
+            coordinate: `${Kind.DVM}:${content.pubkey}:${identifier}`,
           };
 
           updateStore('dvms', store.dvms.length, () => ({ ...dvm }));
@@ -85,6 +88,7 @@ const FeedMarketPlace: Component<{
 
         if (content.kind === Kind.Metadata) {
           const user = convertToUser(content, content.pubkey);
+
 
           updateStore('users', user.pubkey, () => ({ ...user }));
           return;

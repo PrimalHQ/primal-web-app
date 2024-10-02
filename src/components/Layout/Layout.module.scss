@@ -91,7 +91,7 @@
     opacity: 0;
     pointer-events: none;
     width: var(--center-col-w);
-    z-index: var(--z-index-floater);
+    z-index: var(--z-index-floater-2);
 
     &.animatedShow {
       opacity: 1;

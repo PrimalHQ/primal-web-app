@@ -348,7 +348,6 @@ export const fetchExploreMedia = (
       }
     }
 
-    console.log('')
     getExploreMedia(subId, user_pubkey, until, limit, since, offset);
   });
 }

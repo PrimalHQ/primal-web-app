@@ -173,6 +173,7 @@ const Layout: Component = () => {
                   open={app?.showCustomZapModal}
                   note={app?.customZap?.note}
                   profile={app?.customZap?.profile}
+                  dvm={app?.customZap?.dvm}
                   onConfirm={app?.customZap?.onConfirm}
                   onSuccess={app?.customZap?.onSuccess}
                   onFail={app?.customZap?.onFail}

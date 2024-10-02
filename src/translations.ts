@@ -2057,6 +2057,11 @@ export const toast = {
     defaultMessage: 'Author of this note cannot be zapped',
     description: 'Toast message indicating user cannot receieve a zap',
   },
+  zapDVMUnavailable: {
+    id: 'toast.zapDVMUnavailable',
+    defaultMessage: 'Author of this feed cannot be zapped',
+    description: 'Toast message indicating user cannot receieve a zap',
+  },
   updateProfileSuccess: {
     id: 'toast.updateProfileSuccess',
     defaultMessage: 'Profile updated successfully',

@@ -56,7 +56,6 @@ const FeedMarketPlacePreview: Component<{
       kind: props.type,
     });
 
-    console.log('GET PREVIEW')
     const notes = await fetcher(
       account?.publicKey,
       spec,

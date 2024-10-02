@@ -4,10 +4,10 @@ import { defaultZap, defaultZapOptions, Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { zapArticle, zapNote, zapProfile } from '../../lib/zap';
+import { zapArticle, zapDVM, zapNote, zapProfile } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
+import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
@@ -23,6 +23,7 @@ const CustomZap: Component<{
   open?: boolean,
   note?: PrimalNote,
   profile?: PrimalUser,
+  dvm?: PrimalDVM,
   onConfirm: (zapOption?: ZapOption) => void,
   onSuccess: (zapOption?: ZapOption) => void,
   onFail: (zapOption?: ZapOption) => void,
@@ -131,6 +132,26 @@ const CustomZap: Component<{
         );
 
         handleZap(success);
+        return;
+      }
+
+      const dvm = props.dvm;
+      const dvmUser = dvm?.user;
+
+      if (dvm && dvmUser) {
+        setTimeout(async () => {
+
+          const success = await zapDVM(
+            dvm,
+            dvmUser,
+            account.publicKey,
+            selectedValue().amount || 0,
+            selectedValue().message,
+            account.activeRelays,
+            );
+
+            handleZap(success);
+          }, lottieDuration());
         return;
       }
     }
