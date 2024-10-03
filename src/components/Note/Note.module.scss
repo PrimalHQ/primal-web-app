@@ -1011,3 +1011,18 @@
     }
   }
 }
+
+.videoGallery {
+  position: relative;
+
+  .videoIcon {
+    display: inline-block;
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 18px;
+    height: 18px;
+    background-image: url(../../assets/icons/video.png);
+    background-size: contain;
+  }
+}

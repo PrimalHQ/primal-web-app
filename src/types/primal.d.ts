@@ -858,6 +858,7 @@ export type MediaVariant = {
 export type MediaEvent = {
   event_id: string,
   resources: { url: string, variants: MediaVariant[] }[],
+  thumbnails?: Record<string, string>,
 }
 
 export type ScopeDescriptor = {

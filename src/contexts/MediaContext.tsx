@@ -14,15 +14,18 @@ import { Kind } from "../constants";
 export type MediaContextStore = {
   windowSize: { w: number, h: number },
   media: Record<string, MediaVariant[]>,
+  thumbnails: Record<string, string>,
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
     addVideo: (video: HTMLVideoElement | undefined) => void,
+    getThumbnail: (url: string | undefined) => string | undefined,
   },
 }
 
 const initialData = {
   media: {},
+  thumbnails: {},
   windowSize: { w: window.innerWidth, h: window.innerHeight },
 };
 
@@ -84,6 +87,12 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     observer.observe(video);
   };
 
+  const getThumbnail = (url: string | undefined) => {
+    if (!url) return;
+
+    return store.thumbnails[url];
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const handleMediaEvent = (content: NostrEventContent) => {
@@ -100,6 +109,9 @@ export const MediaProvider = (props: { children: JSXElement }) => {
 
       try {
         updateStore('media', () => ({ ...media }));
+        if (mediaInfo.thumbnails) {
+          updateStore('thumbnails', (thumbs) => ({ ...thumbs, ...mediaInfo.thumbnails }));
+        }
       } catch(e) {
         console.warn('Error updating media: ', e);
       }
@@ -172,6 +184,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       getMedia,
       getMediaUrl,
       addVideo,
+      getThumbnail,
     },
   });
 

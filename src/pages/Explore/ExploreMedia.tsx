@@ -10,7 +10,7 @@ import { APP_ID } from '../../App';
 import { userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { imageRegex } from '../../constants';
+import { imageRegex, videoRegex } from '../../constants';
 import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
 import Paginator from '../../components/Paginator/Paginator';
@@ -55,8 +55,9 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   }
 
   const hasImages = (note: PrimalNote) => {
-    const test = (imageRegex).test(note.content);
-    return test;
+    const isImage = (imageRegex).test(note.content);
+    const isVideo = (videoRegex).test(note.content);
+    return isImage || isVideo;
   }
 
   return (

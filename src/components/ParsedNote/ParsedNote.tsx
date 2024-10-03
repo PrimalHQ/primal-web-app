@@ -166,7 +166,7 @@ const ParsedNote: Component<{
   const id = () => {
     // if (props.id) return props.id;
 
-    return `note_${props.note.post.noteId}`;
+    return `note_${props.note.noteId}`;
   }
 
   const noteWidth = () => props.width || 514;
@@ -175,12 +175,12 @@ const ParsedNote: Component<{
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: `#${id()}`,
-    children: `a.image_${props.note.post.noteId}`,
+    children: `a.image_${props.note.noteId}`,
     showHideAnimationType: 'zoom',
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
-    thumbSelector: `a.image_${props.note.post.noteId}`,
+    thumbSelector: `a.image_${props.note.noteId}`,
     pswpModule: () => import('photoswipe')
   });
 
@@ -201,7 +201,7 @@ const ParsedNote: Component<{
   const rootNote = () => props.rootNote || props.note;
 
   const noteContent = () => {
-    const content = props.note.post.content;
+    const content = props.note.content;
     const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
@@ -573,7 +573,7 @@ const ParsedNote: Component<{
       setWordsDisplayed(w => w + 100);
 
       return <NoteImage
-        class={`noteimage image_${props.note.post.noteId} ${lastClass}`}
+        class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
         isDev={dev}
         media={image}
@@ -602,7 +602,7 @@ const ParsedNote: Component<{
           }
 
           return <NoteImage
-            class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()+1}`}
+            class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
             isDev={dev}
             media={image}
@@ -1182,7 +1182,7 @@ const ParsedNote: Component<{
 
         let r = parseInt(t.slice(2, t.length - 1));
 
-        const tag = props.note.post.tags[r];
+        const tag = props.note.msg.tags[r];
 
         if (tag === undefined || tag.length === 0) return;
 
@@ -1342,7 +1342,7 @@ const ParsedNote: Component<{
 
         const emoji = token.split(':')[1];
 
-        const tag = props.note.post.tags.find(t => t[0] === 'emoji' && t[1] === emoji);
+        const tag = props.note.msg.tags.find(t => t[0] === 'emoji' && t[1] === emoji);
 
         if (tag === undefined || tag.length === 0) return <>{token}</>;
 
@@ -1406,7 +1406,7 @@ const ParsedNote: Component<{
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
-      <Show when={isNoteTooLong() || noteContent().length < props.note.post.content.length}>
+      <Show when={isNoteTooLong() || noteContent().length < props.note.content.length}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>

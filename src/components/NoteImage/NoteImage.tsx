@@ -7,7 +7,7 @@ const NoteImage: Component<{
   class?: string,
   imageGroup?: string,
   media?: MediaVariant,
-  mediaThumb?: MediaVariant,
+  mediaThumb?: MediaVariant | string,
   width?: number,
   src?: string,
   altSrc?: string,
@@ -98,7 +98,9 @@ const NoteImage: Component<{
 
   const thumbSrc = () => {
     if (props.mediaThumb) {
-      return props.mediaThumb.media_url;
+      return typeof props.mediaThumb === 'string' ?
+        props.mediaThumb :
+        props.mediaThumb.media_url;
     }
 
     const s = src();

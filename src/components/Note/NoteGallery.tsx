@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { MediaVariant, PrimalNote } from '../../types/primal';
 
 
@@ -10,10 +10,12 @@ import MentionedUserLink from './MentionedUserLink/MentionedUserLink';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 // @ts-ignore
 import PhotoSwipeDynamicCaption from 'photoswipe-dynamic-caption-plugin';
+// @ts-ignore
+import PhotoSwipeVideoPlugin from 'photoswipe-video-plugin';
 
 import NoteImage from '../NoteImage/NoteImage';
 import { generatePrivateKey } from '../../lib/nTools';
-import { imageRegexG } from '../../constants';
+import { imageOrVideoRegexG, imageRegexG, videoRegexG } from '../../constants';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
 import { A, useNavigate } from '@solidjs/router';
@@ -45,15 +47,17 @@ const NoteGallery: Component<{
   const [store, setStore] = createStore<{
     url: string,
     image: MediaVariant | undefined,
-    imageThumb: MediaVariant | undefined,
+    imageThumb: string | undefined,
+    type: string | undefined,
   }>({
     url: '',
     image: undefined,
     imageThumb: undefined,
+    type: undefined,
   });
 
   onMount(() => {
-    const urls = props.note.content.matchAll(imageRegexG);
+    const urls = props.note.content.matchAll(imageOrVideoRegexG);
     let result = urls.next();
     let images: string[] = [];
 
@@ -62,14 +66,22 @@ const NoteGallery: Component<{
       result = urls.next();
     }
 
-    let url = images[0];
+    let origUrl = images[0];
 
-    let image = media?.actions.getMedia(url, 'o');
-    url = image?.media_url || url;
+    let image = media?.actions.getMedia(origUrl, 'o');
+    let url = image?.media_url || origUrl;
+    let type = image?.mt;
 
-    let imageThumb = media?.actions.getMedia(url, 's');
+    let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
 
-    setStore(() => ({ url, image, imageThumb }));
+    setStore(() => ({ url, image, imageThumb, type }));
+
+
+    const videoPlugin = new PhotoSwipeVideoPlugin(lightbox, {
+      // Plugins options
+      // type: 'aside',
+      // captionContent: '.pswp-caption-content'
+    });
 
     const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
       // Plugins options
@@ -84,20 +96,10 @@ const NoteGallery: Component<{
     lightbox.destroy()
   })
 
-  const imageFreeContent = (note: PrimalNote) => {
-    const content = note.content.replace(imageRegexG, '').trim();
-
-    if (content.length === 0) {
-      return 'Go to note';
-    }
-
-    return content;
-  }
-
-  const imageFreeNote = (note: PrimalNote) => {
+  const mediaFreeNote = (note: PrimalNote) => {
     const newNote = {
       ...note,
-      content: note.content.replace(imageRegexG, '').trim(),
+      content: note.content.replace(imageOrVideoRegexG, '').trim(),
     };
 
     return <ParsedNote
@@ -105,7 +107,6 @@ const NoteGallery: Component<{
       ignoreMedia={true}
       noLinks="links"
       noPreviews={true}
-      shorten={true}
       isEmbeded={false}
       noLightbox={true}
     />
@@ -118,28 +119,64 @@ const NoteGallery: Component<{
       data-url={store.url}
       class="animated"
     >
-      <NoteImage
-        class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
-        src={store.url}
-        media={store.image}
-        mediaThumb={store.imageThumb}
-        width={210}
-        shortHeight={true}
-        plainBorder={true}
-        caption={
-          <div class={styles.mediaNote}>
-            <div class={styles.note}>
-              {imageFreeNote(props.note)}
-            </div>
-            <A
-              class={styles.noteLink}
-              href={`/e/${props.note.noteId}`}
+      <Switch>
+        <Match when={store.type?.startsWith('video')}>
+          <div class={styles.videoGallery}>
+            <div class={styles.videoIcon}></div>
+            <a
+              class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
+              href={store.image?.media_url}
+              data-pswp-video-src={store.image?.media_url}
+              data-pswp-width="800"
+              data-pswp-height="600"
+              data-pswp-type="video"
             >
-              Go to note
-            </A>
+              <img src={store.imageThumb} alt="" />
+              <div class="pswp-caption-content">
+                <div class={styles.mediaNote}>
+                  <div class={styles.note}>
+                    {mediaFreeNote(props.note)}
+                  </div>
+                  <A
+                    class={styles.noteLink}
+                    href={`/e/${props.note.noteId}`}
+                  >
+                    Go to note
+                  </A>
+                </div>
+              </div>
+            </a>
           </div>
-        }
-      />
+        </Match>
+        <Match when={store.type?.startsWith('image')}>
+          <div class={styles.imageGallery}>
+
+            <NoteImage
+              class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
+              src={store.url}
+              media={store.image}
+              mediaThumb={store.imageThumb}
+              altSrc={store.imageThumb}
+              width={210}
+              shortHeight={true}
+              plainBorder={true}
+              caption={
+                <div class={styles.mediaNote}>
+                  <div class={styles.note}>
+                    {mediaFreeNote(props.note)}
+                  </div>
+                  <A
+                    class={styles.noteLink}
+                    href={`/e/${props.note.noteId}`}
+                  >
+                    Go to note
+                  </A>
+                </div>
+              }
+            />
+          </div>
+        </Match>
+      </Switch>
     </div>
   )
 }
