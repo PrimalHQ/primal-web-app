@@ -148,9 +148,8 @@ const NoteGallery: Component<{
             </a>
           </div>
         </Match>
-        <Match when={store.type?.startsWith('image')}>
+        <Match when={true}>
           <div class={styles.imageGallery}>
-
             <NoteImage
               class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
               src={store.url}
