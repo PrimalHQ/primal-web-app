@@ -206,7 +206,7 @@ const AdvancedSearch: Component = () => {
   }
 
   createEffect(() => {
-    if (state.timeframe !== 'custom') {
+    if (state.timeframe !== 'Custom') {
       setState('customTimeframe', () => ({ since: '', until: '' }));
     }
   });
@@ -226,8 +226,8 @@ const AdvancedSearch: Component = () => {
 
     let since = '';
 
-    if (state.timeframe === 'custom') {
-      since = timeframes['custom'](state.customTimeframe);
+    if (state.timeframe === 'Custom') {
+      since = timeframes['Custom'](state.customTimeframe);
     }
     else {
       since = `${timeframes[state.timeframe]()} `;
@@ -700,7 +700,7 @@ const AdvancedSearch: Component = () => {
               />
             </div>
 
-            <Show when={state.timeframe === 'custom'}>
+            <Show when={state.timeframe === 'Custom'}>
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Time frame:
