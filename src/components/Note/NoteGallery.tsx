@@ -45,15 +45,19 @@ const NoteGallery: Component<{
   });
 
   const [store, setStore] = createStore<{
+    origUrl: string,
     url: string,
     image: MediaVariant | undefined,
     imageThumb: string | undefined,
     type: string | undefined,
+    noVideoThumbnail?: boolean,
   }>({
+    origUrl: '',
     url: '',
     image: undefined,
     imageThumb: undefined,
     type: undefined,
+    noVideoThumbnail: false,
   });
 
   onMount(() => {
@@ -74,7 +78,7 @@ const NoteGallery: Component<{
 
     let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
 
-    setStore(() => ({ url, image, imageThumb, type }));
+    setStore(() => ({ origUrl, url, image, imageThumb, type }));
 
 
     const videoPlugin = new PhotoSwipeVideoPlugin(lightbox, {
@@ -124,14 +128,22 @@ const NoteGallery: Component<{
           <div class={styles.videoGallery}>
             <div class={styles.videoIcon}></div>
             <a
-              class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
+              class={`galleryimage image_${props.note.noteId} cell_${1}`}
               href={store.image?.media_url}
               data-pswp-video-src={store.image?.media_url}
               data-pswp-width="800"
               data-pswp-height="600"
               data-pswp-type="video"
             >
-              <img src={store.imageThumb} alt="" />
+              <Show
+                when={!store.noVideoThumbnail}
+                fallback={<>
+                  <video src={store.origUrl} width={148} height={148} ></video>
+                </>}
+              >
+                <img src={store.imageThumb} onerror={() => setStore('noVideoThumbnail', true)} />
+              </Show>
+
               <div class="pswp-caption-content">
                 <div class={styles.mediaNote}>
                   <div class={styles.note}>
