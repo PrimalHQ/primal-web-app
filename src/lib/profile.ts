@@ -457,7 +457,7 @@ export const extractRelayConfigFromTags = (tags: string[][]) => {
 
 export const getExplorePeople = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
 
-  let payload:any = { limit: limit || 20, offset: offset || 0 };
+  let payload:any = { limit: limit || 10, offset: offset || 0 };
 
   if (until > 0) {
     // @ts-ignore

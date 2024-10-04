@@ -190,8 +190,8 @@ export const mergeArrays = (a: any[], b: any[], predicate = (a: any, b: any) => 
   return c;
 }
 
-export const calculatePagingOffset = (collection: any[], elements: any[], pageLimit = 20) => {
-  return collection.slice(pageLimit * (-1)).reduce<number>((acc, p) => {
+export const calculatePagingOffset = (collection: any[], elements: any[]) => {
+  return collection.slice((elements.length - 1) * (-1)).reduce<number>((acc, p) => {
     return elements.includes(p.id) ? acc + 1 : acc;
   }, 0)
 }

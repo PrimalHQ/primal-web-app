@@ -319,7 +319,7 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
           relay_count: 0,
           media_count: 0,
           long_form_note_count: 0,
-
+          followers_increase: {increase:0, ratio: 0, count: 0},
         }
       }
     })
@@ -330,11 +330,11 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
   if (pks.length > 0) {
     pks.forEach(pk => {
       if (stats[pk]) {
-        stats[pk].followers_increase = page.userFollowerIncrease[pk].increase;
+        stats[pk].followers_increase = page.userFollowerIncrease[pk];
       } else {
         stats[pk] = {
           pubkey: pk,
-          followers_count: page.userFollowerCounts[pk],
+          followers_count: 0,
           follows_count: 0,
           note_count: 0,
           reply_count: 0,
@@ -344,7 +344,7 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
           relay_count: 0,
           media_count: 0,
           long_form_note_count: 0,
-          followers_increase: page.userFollowerIncrease[pk].increase,
+          followers_increase: page.userFollowerIncrease[pk],
         }
       }
     })

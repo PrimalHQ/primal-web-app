@@ -41,10 +41,11 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   const getNextPeoplePage = async () => {
     if (!explore || explore.peoplePaging.since === 0) return;
 
-    const offset = calculatePagingOffset(
-      explore.explorePeople,
-      explore.peoplePaging.elements,
-    );
+    const since = explore.peoplePaging.since || 0;
+    const offset = explore.explorePeople.slice(-19).reduce<number>((acc, m) => {
+      // @ts-ignore
+      return since === m.userStats?.followers_increase?.ratio ? acc + 1 : acc
+    }, 0)
 
     const page = {
       limit: 20,
@@ -102,10 +103,10 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
                       followers
                     </div>
                   </Show>
-                  <Show when={user.userStats?.followers_increase}>
+                  <Show when={user.userStats?.followers_increase?.increase}>
                     <div class={styles.increaseCount}>
                       <span>
-                        + {user.userStats?.followers_increase?.toLocaleString()}
+                        + {user.userStats?.followers_increase?.increase.toLocaleString()}
                       </span>
                     </div>
                   </Show>

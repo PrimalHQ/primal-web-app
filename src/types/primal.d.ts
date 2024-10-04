@@ -450,7 +450,7 @@ export type MegaFeedPage = {
   elements: string[],
   userStats: Record<string, UserStats>,
   userFollowerCounts: Record<string, number>,
-  userFollowerIncrease: Record<string, { increase: number, ratio: number}>,
+  userFollowerIncrease: Record<string, { increase: number, ratio: number, count: number}>,
   wordCount: Record<string, number>,
 };
 
@@ -589,7 +589,11 @@ export type UserStats = {
   relay_count: number,
   media_count: number,
   long_form_note_count?: number,
-  followers_increase?: number,
+  followers_increase?: {
+    increase: number,
+    ratio: number,
+    count: number,
+  },
 };
 
 export type PrimalUser = {

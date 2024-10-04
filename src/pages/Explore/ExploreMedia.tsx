@@ -32,7 +32,7 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   });
 
   const getMedia = async () => {
-    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 60 });
+    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 30 });
 
     explore?.actions.setExploreMedia(notes, paging);
   }
@@ -40,13 +40,17 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   const getNextMediaPage = async () => {
     if (!explore || explore.mediaPaging.since === 0) return;
 
+    const since = explore.mediaPaging.since || 0;
+    const order = explore.mediaPaging.sortBy;
+    const offset = explore.exploreMedia.slice(-19).reduce<number>((acc, m) => {
+      // @ts-ignore
+      return since === m.msg[order] ? acc + 1 : acc
+    }, 0)
+
     const page = {
-      limit: 60,
+      limit: 30,
       until: explore.mediaPaging.since,
-      offset: calculatePagingOffset(
-        explore.exploreMedia,
-        explore.mediaPaging.elements,
-      ),
+      offset,
     }
 
     const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , page);

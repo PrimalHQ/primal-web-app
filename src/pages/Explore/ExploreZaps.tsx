@@ -40,13 +40,17 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   const getNextZapPage = async () => {
     if (!explore) return;
 
+    const since = explore.zapPaging.since || 0;
+    const order = explore.zapPaging.sortBy;
+    const offset = explore.exploreZaps.slice(-19).reduce<number>((acc, m) => {
+      // @ts-ignore
+      return since === m.amount ? acc + 1 : acc
+    }, 0)
+
     const page = {
       limit: 20,
       until: explore.zapPaging.since,
-      offset: calculatePagingOffset(
-        explore.exploreZaps,
-        explore.zapPaging.elements,
-      ),
+      offset,
     }
 
     const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}` , page);
