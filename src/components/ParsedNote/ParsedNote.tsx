@@ -1406,7 +1406,7 @@ const ParsedNote: Component<{
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
-      <Show when={isNoteTooLong() || noteContent().length < props.note.content.length}>
+      <Show when={isNoteTooLong() || noteContent().length < (props.note.content?.length || 0)}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
