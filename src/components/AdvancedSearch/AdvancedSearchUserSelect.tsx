@@ -76,6 +76,8 @@ const AdvancedSearchUserSelect: Component<{
   };
 
   const selectUser = (user: PrimalUser) => {
+    profile?.actions.addProfileToHistory(user);
+    input?.focus();
     if (props.onUserSelect) {
       props.onUserSelect(user);
     }
@@ -90,6 +92,16 @@ const AdvancedSearchUserSelect: Component<{
 
     search?.actions.findUsers(query());
   });
+
+  const onOpen = (open: boolean) => {
+    if (open) {
+      setTimeout(() => {
+        input?.focus()
+      }, 10)
+    } else {
+      setQuery('');
+    }
+  }
 
   return (
 
@@ -111,6 +123,7 @@ const AdvancedSearchUserSelect: Component<{
         flip={true}
         sameWidth={true}
         preventScroll={false}
+        onOpenChange={onOpen}
       >
         <DropdownMenu.Trigger class={styles.dropdownMenuTrigger}>
           <div class={styles.selctionLabel}>

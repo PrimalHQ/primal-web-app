@@ -27,7 +27,7 @@ import { subscribeTo, subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
-import { fetchMegaFeed, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, PaginationInfo } from "../megaFeeds";
 import { logError } from "../lib/logger";
 
 const recomendedUsers = [
@@ -67,6 +67,7 @@ export type AdvancedSearchContextStore = {
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
+    clearSearch: () => void,
   },
 }
 
@@ -84,11 +85,7 @@ const initialData = {
   mentionedNotes: {},
   filteringReasons: [],
   errors: [],
-  paging: {
-    since: 0,
-    until: 0,
-    sortBy: 'created_at',
-  },
+  paging: { ...emptyPaging() },
 };
 
 export const AdvancedSearchContext = createContext<AdvancedSearchContextStore>();
@@ -322,6 +319,12 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     }
   };
 
+  const clearSearch = () => {
+    updateStore('paging', () => ({ ...emptyPaging() }));
+    updateStore('reads', () => []);
+    updateStore('notes', () => []);
+  }
+
   const findContent = async (query: string, until = 0) => {
 
     try {
@@ -408,6 +411,7 @@ const [store, updateStore] = createStore<AdvancedSearchContextStore>({
     setContentQuery,
     getRecomendedUsers,
     findFilteredUserByNpub,
+    clearSearch,
   },
 });
 

@@ -152,6 +152,7 @@ export type ProfileContextStore = {
     resetProfile: () => void,
     getProfileMegaFeed: (pubkey: string | undefined, tab: string, until?: number, limit?: number) => void,
     getProfileMegaFeedNextPage: (pubkey: string | undefined, tab: string) => void,
+    addProfileToHistory: (user: PrimalUser) => void,
   }
 }
 
@@ -1017,6 +1018,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     );
   };
 
+
 // EFFECTS --------------------------------------
 
   createEffect(() => {
@@ -1090,6 +1092,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearZaps,
       resetProfile,
       clearFilterReason,
+      addProfileToHistory,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,

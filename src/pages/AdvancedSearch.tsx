@@ -136,6 +136,8 @@ const scopes: Record<string, () => string> = {
   'My Follows': () => 'scope:myfollows',
   'My Network': () => 'scope:mynetwork',
   'My Follows Interactions': () => 'scope:myfollowinteractions',
+  'My Network Interactions': () => 'scope:mynetworkinteractions',
+  'Not My Follows': () => 'scope:notmyfollows',
 };
 
 const kinds: Record<string, () => string> = {

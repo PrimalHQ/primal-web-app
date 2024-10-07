@@ -37,6 +37,7 @@ const AdvancedSearchResults: Component = () => {
   }
 
   onMount(() => {
+    search?.actions.clearSearch();
     search?.actions.findContent(queryString());
   })
 
