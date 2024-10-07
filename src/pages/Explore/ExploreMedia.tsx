@@ -42,7 +42,7 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
 
     const since = explore.mediaPaging.since || 0;
     const order = explore.mediaPaging.sortBy;
-    const offset = explore.exploreMedia.slice(-19).reduce<number>((acc, m) => {
+    const offset = explore.exploreMedia.reduce<number>((acc, m) => {
       // @ts-ignore
       return since === m.msg[order] ? acc + 1 : acc
     }, 0)
@@ -58,27 +58,20 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
     explore?.actions.setExploreMedia(notes, paging);
   }
 
-  const hasImages = (note: PrimalNote) => {
-    const isImage = (imageRegex).test(note.content);
-    const isVideo = (videoRegex).test(note.content);
-    return isImage || isVideo;
-  }
+  // const hasImages = (note: PrimalNote) => {
+  //   const isImage = (imageRegex).test(note.content);
+  //   const isVideo = (videoRegex).test(note.content);
+  //   return isImage || isVideo;
+  // }
 
   return (
     <div class={styles.exploreMedia}>
       <div class={styles.galleryGrid}>
         <For each={explore?.exploreMedia}>
           {(note) => (
-            <Switch>
-              <Match when={hasImages(note)}>
-                <NoteGallery note={note} />
-              </Match>
-              <Match when={!hasImages(note)}>
                 <A href={`/e/${note.noteId}`} class={styles.missingImage}>
                   <NoteGallery note={note} />
                 </A>
-              </Match>
-            </Switch>
           )}
         </For>
         <Paginator

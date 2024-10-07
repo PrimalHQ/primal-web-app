@@ -47,6 +47,7 @@ export type MegaFeedResults = {
   zaps: PrimalZap[],
   topicStats: TopicStat[],
   paging: PaginationInfo,
+  page: MegaFeedPage,
 };
 
 export type FeedPaging = {
@@ -79,7 +80,15 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
 
 export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
 
-export const emptyMegaFeedResults = () => ({ users: [], notes: [], reads: [], zaps: [], topicStats: [], paging: { ...emptyPaging()}});
+export const emptyMegaFeedResults = () => ({
+  users: [],
+  notes: [],
+  reads: [],
+  zaps: [],
+  topicStats: [],
+  paging: { ...emptyPaging() },
+  page: { ...emptyMegaFeedPage() },
+});
 
 export const parseEmptyReposts = (page: MegaFeedPage) => {
   let reposts: Record<string, string> = {};
@@ -313,9 +322,13 @@ export const fetchExploreMedia = (
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
     let page: MegaFeedPage = {...emptyMegaFeedPage()};
-
+    let count = 0
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
+        if (content.kind === Kind.Text || content.kind === Kind.Repost) {
+          console.log('RESULTS MEDIA: ', count)
+          count++;
+        }
         content && updateFeedPage(page, content);
       },
       onEose: () => {
@@ -412,6 +425,7 @@ const pageResolve = (page: MegaFeedPage) => {
       sortBy: page.sortBy,
       elements: page.elements,
     },
+    page,
   };
 }
 

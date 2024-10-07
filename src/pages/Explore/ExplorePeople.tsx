@@ -5,7 +5,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useExploreContext } from '../../contexts/ExploreContext';
 import { A, useLocation } from '@solidjs/router';
-import { fetchExplorePeople } from '../../megaFeeds';
+import { fetchExplorePeople, PaginationInfo } from '../../megaFeeds';
 import { APP_ID } from '../../App';
 import { nip05Verification, userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
@@ -15,6 +15,7 @@ import VerificationCheck from '../../components/VerificationCheck/VerificationCh
 import { humanizeNumber } from '../../lib/stats';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { calculatePagingOffset } from '../../utils';
+import { PrimalUser } from '../../types/primal';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
 
@@ -33,29 +34,30 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   });
 
   const getPeople = async () => {
-    const { users, paging } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}`, { limit: 20 });
+    const { users, paging, page } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}`, { limit: 20 });
 
-    explore?.actions.setExplorePeople(users, paging);
+    explore?.actions.setExplorePeople(users, paging, page);
   }
 
   const getNextPeoplePage = async () => {
     if (!explore || explore.peoplePaging.since === 0) return;
 
     const since = explore.peoplePaging.since || 0;
-    const offset = explore.explorePeople.slice(-19).reduce<number>((acc, m) => {
+    const offset = explore.explorePeople.reduce<number>((acc, m) => {
       // @ts-ignore
       return since === m.userStats?.followers_increase?.ratio ? acc + 1 : acc
     }, 0)
 
-    const page = {
+    const pagination = {
       limit: 20,
       until: explore.peoplePaging.since,
       offset,
     }
 
-    const { users, paging } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}` , page);
+    const { users, paging, page } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}` , pagination);
 
-    explore?.actions.setExplorePeople(users, paging);
+
+    explore?.actions.setExplorePeople(users, paging, page);
   }
 
 

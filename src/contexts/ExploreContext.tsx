@@ -30,6 +30,7 @@ import {
   DVMMetadata,
   DVMStats,
   FeedPage,
+  MegaFeedPage,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
@@ -52,6 +53,8 @@ import { APP_ID } from "../App";
 import { parseBolt11 } from "../utils";
 import { PaginationInfo, TopicStat } from "../megaFeeds";
 import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
+import { emptyUser, userName } from "../stores/profile";
+import { emptyStats } from "./ProfileContext";
 
 export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
@@ -114,7 +117,7 @@ export type ExploreContextStore = {
       users: Record<string, PrimalUser> | undefined,
       followers: string[] | undefined,
     ) => void,
-    setExplorePeople: (users: PrimalUser[], paging: PaginationInfo) => void,
+    setExplorePeople: (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => void,
     setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
     setExploreMedia: (notes: PrimalNote[], paging: PaginationInfo) => void,
     setExploreTopics: (topics: TopicStat[]) => void,
@@ -198,12 +201,37 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo) => {
-    updateStore('explorePeople', (usrs) => [ ...usrs, ...users]);
+  const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
+
+    const sorted = paging.elements.reduce<PrimalUser[]>((acc, pk) => {
+      let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
+
+      // If we encounter a user without a metadata event
+      // construct a user object for them
+      if (!f) {
+        f = emptyUser(pk);
+        const stats = { ...emptyStats };
+
+        f.userStats = {
+          ...stats,
+          followers_increase: page.userFollowerIncrease[pk],
+          followers_count: page.userFollowerCounts[pk],
+        };
+      }
+
+      return f ? [...acc, {...f}] : acc;
+    } , []);
+
+    // console.log('RESULTS: ', users.map(u => [u.userStats?.followers_increase?.ratio, userName(u), u.pubkey]));
+    // console.log('RESULTS E: ', paging.elements);
+
+    updateStore('explorePeople', (usrs) => [ ...usrs, ...sorted]);
     updateStore('peoplePaging', () => ({ ...paging }));
   }
 
   const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
+
+    // console.log('RESULTS: ', zaps.map(z => [z.amount, z.sender, z.reciver]));
     updateStore('exploreZaps', (zps) => [...zps, ...zaps]);
     updateStore('zapPaging', () => ({ ...paging }));
     updateStore('zapSubjects', (s) => ({
@@ -214,6 +242,8 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   }
 
   const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
+    // console.log('RESULTS: ', notes.map(n => [n.id, n.content.slice(0, 21)]));
+
     updateStore('exploreMedia', (nts) => [...nts, ...notes]);
     updateStore('mediaPaging', () => ({ ...paging }));
   }

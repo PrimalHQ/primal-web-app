@@ -26,7 +26,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   const account = useAccountContext();
 
   onMount(() => {
-    if (explore?.exploreMedia.length === 0) {
+    if (explore?.exploreZaps.length === 0) {
       getZaps();
     }
   });
@@ -38,14 +38,16 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   }
 
   const getNextZapPage = async () => {
-    if (!explore) return;
+    if (!explore || explore.zapPaging.since === 0) return;
 
     const since = explore.zapPaging.since || 0;
     const order = explore.zapPaging.sortBy;
-    const offset = explore.exploreZaps.slice(-19).reduce<number>((acc, m) => {
+    const offset = explore.exploreZaps.reduce<number>((acc, m) => {
       // @ts-ignore
       return since === m.amount ? acc + 1 : acc
     }, 0)
+
+    // console.log('RESULTS OFFSET: ', offset);
 
     const page = {
       limit: 20,

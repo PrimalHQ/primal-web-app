@@ -213,10 +213,48 @@ const AdvancedSearch: Component = () => {
     }
   });
 
+  const extractQuery = (content: string) => {
+    const contentArray = content.split(' ');
+
+    let retArray: string[] = [];
+    let quoted = false;
+    let phrase = '';
+
+    contentArray.forEach(word => {
+      let quoteFound = false;
+      if (word.startsWith('"') || word.endsWith('"')) {
+        quoteFound = true;
+      }
+
+      if (quoteFound && quoted) {
+        phrase += ` ${word}`;
+        retArray.push(phrase);
+        phrase = '';
+        quoted = false;
+        return;
+      }
+
+      if (quoteFound) {
+        phrase = word;
+        quoted = true;
+        return;
+      }
+
+      if (quoted) {
+        phrase += ` ${word}`;
+      }
+
+      retArray.push(word);
+    })
+
+    return retArray;
+  }
+
   createEffect(() => {
-    const includes = state.includes.length === 0 ? '' : state.includes.split(',').map(x => x.trim()).reduce((acc, x) => `${acc}${x} `, '');
-    const excludes = state.excludes.length === 0 ? '' : state.excludes.split(',').map(x => x.trim()).reduce((acc, x) => `${acc}-${x} `, '');;
-    const hashtags = state.hashtags.length === 0 ? '' : state.hashtags.split(',').map(x => {
+    console.log('QUERY: ',  extractQuery(state.includes))
+    const includes = extractQuery(state.includes).join(' ').trim()
+    const excludes = extractQuery(state.excludes).reduce<string>((acc, w) => `${acc} -${w}`, '')
+    const hashtags = state.hashtags.length === 0 ? '' : state.hashtags.split(' ').map(x => {
       const y = x.trim();
       return y.startsWith('#') ? y : `#${y}`;
     }).reduce((acc, x) => `${acc}${x} `, '');
