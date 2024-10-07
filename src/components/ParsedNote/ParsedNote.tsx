@@ -201,7 +201,7 @@ const ParsedNote: Component<{
   const rootNote = () => props.rootNote || props.note;
 
   const noteContent = () => {
-    const content = props.note.content;
+    const content = props.note.content || '';
     const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
