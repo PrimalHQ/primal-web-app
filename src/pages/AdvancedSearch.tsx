@@ -73,7 +73,7 @@ const maxContentScore = 100;
 const maxFilterValue = 20;
 
 const orientationKinds = ['Video', 'Images'];
-const durationKinds = ['Video', 'Sound'];
+const durationKinds = ['Video', 'Audio'];
 const readTimeKinds = ['Reads'];
 
 
@@ -147,7 +147,7 @@ const kinds: Record<string, () => string> = {
   'Reads Comments': () => 'kind:30023 filter:replies',
   'Images': () => 'filter:image',
   'Video': () => 'filter:video',
-  'Sound': () => 'filter:audio',
+  'Audio': () => 'filter:audio',
   // 'Zaps': () => 'kind:9735',
   // 'People': () => 'kind:0',
 };
