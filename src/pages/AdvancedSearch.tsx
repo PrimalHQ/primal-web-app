@@ -217,31 +217,30 @@ const AdvancedSearch: Component = () => {
     const contentArray = content.split(' ');
 
     let retArray: string[] = [];
-    let quoted = false;
-    let phrase = '';
+    let quoted = -1;
+    let phrase: string[] = [];
 
-    contentArray.forEach(word => {
+    contentArray.forEach((word, index) => {
       let quoteFound = false;
       if (word.startsWith('"') || word.endsWith('"')) {
         quoteFound = true;
       }
 
-      if (quoteFound && quoted) {
-        phrase += ` ${word}`;
-        retArray.push(phrase);
-        phrase = '';
-        quoted = false;
+      if (quoteFound && quoted > -1) {
+        phrase.push(word);
+        retArray.splice(quoted, quoted + phrase.length, phrase.join(' '));
+        phrase = [];
+        quoted = -1;
         return;
       }
 
       if (quoteFound) {
-        phrase = word;
-        quoted = true;
-        return;
+        phrase.push(word);
+        quoted = index;
       }
-
-      if (quoted) {
-        phrase += ` ${word}`;
+      else if (quoted > -1) {
+        phrase.push(word);
+        // return;
       }
 
       retArray.push(word);
@@ -251,9 +250,8 @@ const AdvancedSearch: Component = () => {
   }
 
   createEffect(() => {
-    console.log('QUERY: ',  extractQuery(state.includes))
     const includes = extractQuery(state.includes).join(' ').trim()
-    const excludes = extractQuery(state.excludes).reduce<string>((acc, w) => `${acc} -${w}`, '')
+    const excludes = extractQuery(state.excludes).reduce<string>((acc, w) => w.length > 0 ? `${acc} -${w}` : acc, '')
     const hashtags = state.hashtags.length === 0 ? '' : state.hashtags.split(' ').map(x => {
       const y = x.trim();
       return y.startsWith('#') ? y : `#${y}`;
