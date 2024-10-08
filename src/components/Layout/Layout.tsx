@@ -216,11 +216,15 @@ const Layout: Component = () => {
 
           <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') ? styles.messagesColumn : ''}`}>
             <div>
-              <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
-                <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
+              <Show
+                when={!location.pathname.startsWith('/asearch')}
+              >
+                <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
+                  <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
+                  </div>
                 </div>
-              </div>
-              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ? styles.exploreHeader : ''}`}>
+              </Show>
+              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/asearch') ? styles.exploreHeader : ''}`}>
                 <div id="right_sidebar">
                 </div>
               </div>

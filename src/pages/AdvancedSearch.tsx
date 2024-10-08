@@ -2,7 +2,7 @@ import { TextField } from '@kobalte/core/text-field';
 import { Slider } from "@kobalte/core/slider";
 import { Dialog } from '@kobalte/core/dialog';
 
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { batch, Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Avatar from '../components/Avatar/Avatar';
@@ -28,6 +28,7 @@ import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDia
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
+import { useSearchContext } from '../contexts/SearchContext';
 
 export type SearchState = {
   includes: string,
@@ -160,6 +161,8 @@ const sortings: Record<string, () => string> = {
 };
 
 const AdvancedSearch: Component = () => {
+  const navigate = useNavigate();
+  const search = useSearchContext();
 
   const [state, setState] = createStore<SearchState>({
     includes: '',
@@ -521,22 +524,23 @@ const AdvancedSearch: Component = () => {
     return label;
   }
 
+  const submitSearch = () => {
+    search?.actions.setAdvancedSearchCommand(state.command);
+
+    navigate(`/asearch/${encodeURIComponent(state.command)}`);
+  }
+
   return (
     <>
       <PageTitle title="Advanced Search" />
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
 
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
-      <TextField class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
-        <TextField.Label>Search Command</TextField.Label>
-        <TextField.TextArea autoResize={true}/>
-      </TextField>
+        <TextField class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
+          <TextField.Label>Search Command</TextField.Label>
+          <TextField.TextArea autoResize={true}/>
+        </TextField>
       </StickySidebar>
 
       <div class={styles.advancedSearchPage}>
@@ -970,9 +974,14 @@ const AdvancedSearch: Component = () => {
             </div>
           </section>
 
-          <div class={styles.submitButton}>
-            <A class={styles.primaryButton} href={`/asearch/${encodeURIComponent(state.command)}`}>Search</A>
+          <div class={styles.submitSearch}>
+            <ButtonPrimary
+              onClick={submitSearch}
+            >
+              Search
+            </ButtonPrimary>
           </div>
+
         </form>
       </div>
     </>

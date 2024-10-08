@@ -293,21 +293,25 @@ export type NostrDVM = {
 export type NostrDVMMetadata = {
   kind: Kind.DVMMetadata,
   content: string,
+  created_at?: number,
 };
 
 export type NostrTopicStats = {
   kind: Kind.NoteTopicStat,
   content: string,
+  created_at?: number,
 };
 
 export type NostrDVMFollowsActions = {
   kind: Kind.DVMFollowsActions,
   content: string,
+  created_at?: number,
 };
 
 export type NostrUserFollowerIncrease = {
   kind: Kind.UserFollowerIncrease,
   content: string,
+  created_at?: number,
 };
 
 export type NostrEventContent =
