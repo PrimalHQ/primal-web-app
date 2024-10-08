@@ -4,6 +4,7 @@ import {
   createSignal,
   For,
   Match,
+  on,
   onCleanup,
   onMount,
   Show,
@@ -134,19 +135,21 @@ const Home: Component = () => {
     setNewPostAuthors(() => []);
   }
 
+  createEffect(on(() => params.topic, (v) => {
+    if (params.topic?.length > 0) {
+      context?.actions.clearNotes();
+      context?.actions.fetchNotes(`{\"kind\":\"reads\",\"topic\":\"${decodeURIComponent(params.topic)}\"}`);
+      return;
+    }
+  }));
+
   createEffect(() => {
-    if (account?.isKeyLookupDone && account.publicKey) {
-
-      if (params.topic) {
-        context?.actions.clearNotes();
-        context?.actions.fetchNotes(`{\"kind\":\"reads\",\"topic\":\"${decodeURIComponent(params.topic)}\"}`);
-        return;
-      }
-
+    if (account?.isKeyLookupDone && account.publicKey && !params.topic) {
       const selected = context?.selectedFeed;;
 
       // context?.actions.resetSelectedFeed();
       if (selected) {
+        context?.actions.clearNotes();
         context?.actions.selectFeed({ ...selected });
       }
     }

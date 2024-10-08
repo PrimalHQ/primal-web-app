@@ -295,7 +295,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
   let currentFeed: PrimalArticleFeed | undefined;
 
-  const selectFeed = (feed: PrimalArticleFeed | undefined, force?: boolean) => {
+  const selectFeed = (feed: PrimalArticleFeed | undefined) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
       // saveStoredFeed(account?.publicKey, currentFeed);
