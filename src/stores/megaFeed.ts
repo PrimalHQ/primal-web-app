@@ -188,6 +188,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
           satszapped: mentionStat?.satszapped || 0,
           noteActions,
         },
+        content: mention.content,
         user: mentionedUsers[mention.pubkey],
         mentionedUsers,
         pubkey: mention.pubkey,
