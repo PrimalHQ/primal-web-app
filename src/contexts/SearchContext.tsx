@@ -53,6 +53,7 @@ export type SearchContextStore = {
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
   filteringReasons: string[],
+  advancedSearchCommand: string,
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
@@ -61,6 +62,7 @@ export type SearchContextStore = {
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
+    setAdvancedSearchCommand: (cmd: string) => void,
   },
 }
 
@@ -77,6 +79,7 @@ const initialData = {
   reposts: {},
   mentionedNotes: {},
   filteringReasons: [],
+  advancedSearchCommand: '',
 };
 
 export const SearchContext = createContext<SearchContextStore>();
@@ -432,6 +435,9 @@ export function SearchProvider(props: { children: JSX.Element }) {
     }
   }
 
+  const setAdvancedSearchCommand = (cmd: string) => {
+    updateStore('advancedSearchCommand', () => cmd);
+  }
 
 
 // EFFECTS --------------------------------------
@@ -451,6 +457,7 @@ const [store, updateStore] = createStore<SearchContextStore>({
     setContentQuery,
     getRecomendedUsers,
     findFilteredUserByNpub,
+    setAdvancedSearchCommand,
   },
 });
 
