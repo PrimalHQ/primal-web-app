@@ -220,6 +220,7 @@
     padding-top: 8px;
     padding-bottom: 8px;
     border-radius: 12px;
+    overflow-y: auto;
 
     &.focused {
       background-color: var(--background-input);

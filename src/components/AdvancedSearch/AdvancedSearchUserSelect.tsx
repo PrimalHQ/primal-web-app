@@ -103,6 +103,12 @@ const AdvancedSearchUserSelect: Component<{
     }
   }
 
+  let dropdownMenu: HTMLDivElement | undefined;
+
+  const freeHeight = () => {
+    return window.innerHeight - 22;
+  }
+
   return (
 
     <div class={styles.userSelector}>
@@ -124,6 +130,7 @@ const AdvancedSearchUserSelect: Component<{
         sameWidth={true}
         preventScroll={false}
         onOpenChange={onOpen}
+        fitViewport={true}
       >
         <DropdownMenu.Trigger class={styles.dropdownMenuTrigger}>
           <div class={styles.selctionLabel}>
@@ -135,8 +142,11 @@ const AdvancedSearchUserSelect: Component<{
         </DropdownMenu.Trigger>
         <DropdownMenu.Portal>
           <DropdownMenu.Content class={styles.dropdownMenuContent}>
-
-            <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''} ${styles.userSearch}`}>
+            <div
+              id={props.id}
+              class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''} ${styles.userSearch}`}
+              style={`max-height: ${freeHeight()}px`}
+            >
               <form
                 class={styles.search}
                 onsubmit={onSearch}
