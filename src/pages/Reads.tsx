@@ -135,25 +135,30 @@ const Home: Component = () => {
     setNewPostAuthors(() => []);
   }
 
-  createEffect(on(() => params.topic, (v) => {
-    if (params.topic?.length > 0) {
+  createEffect(on(() => params.topic, (v, p) => {
+    if (v && v.length > 0) {
       context?.actions.clearNotes();
       context?.actions.fetchNotes(`{\"kind\":\"reads\",\"topic\":\"${decodeURIComponent(params.topic)}\"}`);
       return;
+    } else {
+      if (p && p.length > 0) {
+        context?.actions.refetchSelectedFeed();
+      }
     }
   }));
 
-  createEffect(() => {
-    if (account?.isKeyLookupDone && account.publicKey && !params.topic) {
+  createEffect(on(() => account?.isKeyLookupDone, (v, p) => {
+
+    if (v && v !== p && account?.publicKey && !params.topic) {
       const selected = context?.selectedFeed;;
 
       // context?.actions.resetSelectedFeed();
       if (selected) {
-        context?.actions.clearNotes();
+        // context?.actions.clearNotes();
         context?.actions.selectFeed({ ...selected });
       }
     }
-  });
+  }));
 
   const onArticleRendered = (article: PrimalArticle, el: HTMLAnchorElement | undefined) => {
     context?.actions.setArticleHeight(article.naddr, el?.getBoundingClientRect().height || 0);
