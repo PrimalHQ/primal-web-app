@@ -3,6 +3,8 @@ import { logError, logInfo } from "./lib/logger";
 import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow, NostrNotice, NostrEvents } from "./types/primal";
 import pako from 'pako';
 
+export const [reconnect, setReconnect] = createSignal(true);
+
 export const [socket, setSocket] = createSignal<WebSocket>();
 
 export const [isConnected, setConnected] = createSignal<Boolean>(false);
@@ -29,9 +31,11 @@ const onClose = () => {
   socket()?.removeEventListener('close', onClose);
   socket()?.removeEventListener('error', onError);
 
-  setTimeout(() => {
-    connect();
-  }, 200);
+  if (reconnect()) {
+    setTimeout(() => {
+      connect();
+    }, 200);
+  }
 }
 
 const onError = (error: Event) => {
@@ -54,10 +58,13 @@ export const connect = () => {
     socket()?.addEventListener('open', onOpen);
     socket()?.addEventListener('close', onClose);
     socket()?.addEventListener('error', onError);
+
+    setReconnect(() => true);
   }
 };
 
-export const disconnect = () => {
+export const disconnect = (autoreconnect = true) => {
+  setReconnect(() => autoreconnect)
   socket()?.close();
 };
 

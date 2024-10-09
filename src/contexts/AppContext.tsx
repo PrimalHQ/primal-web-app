@@ -10,6 +10,9 @@ import {
 import { PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { connect, disconnect, isNotConnected, socket } from "../sockets";
+import { Relay } from "../lib/nTools";
+import { logInfo } from "../lib/logger";
 
 
 export type ReactionStats = {
@@ -70,6 +73,7 @@ export type AppContextStore = {
   cashuMints: Map<string, CashuMint>,
   subscribeToAuthor: PrimalUser | undefined,
   subscribeToTier: (tier: Tier) => void,
+  connectedRelays: Relay[],
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -87,6 +91,8 @@ export type AppContextStore = {
     getCashuMint: (url: string) => CashuMint | undefined,
     openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => void,
     closeAuthorSubscribeModal: () => void,
+    addConnectedRelay: (relay: Relay) => void,
+    removeConnectedRelay: (relay: Relay) => void,
   },
 }
 
@@ -113,6 +119,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   confirmInfo: undefined,
   cashuMints: new Map(),
   subscribeToAuthor: undefined,
+  connectedRelays: [],
   subscribeToTier: () => {},
 };
 
@@ -131,7 +138,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
     inactivityCounter = setTimeout(() => {
       updateStore('isInactive', () => true)
-    }, 3 * 60_000);
+    }, 5 * 60_000);
   };
 
   const openReactionModal = (noteId: string, stats: ReactionStats) => {
@@ -240,6 +247,18 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('subscribeToAuthor', () => undefined);
   };
 
+  const addConnectedRelay = (relay: Relay) => {
+    if (store.connectedRelays.find(r => r.url === relay.url)) return;
+
+    updateStore('connectedRelays', store.connectedRelays.length, () => ({ ...relay }));
+  };
+
+  const removeConnectedRelay = (relay: Relay) => {
+    if (!store.connectedRelays.find(r => r.url === relay.url)) return;
+
+    updateStore('connectedRelays', (rs) => rs.filter(r => r.url !== relay.url));
+  };
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
@@ -273,6 +292,19 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }
   });
 
+  createEffect(() => {
+    if (store.appState === 'sleep') {
+      logInfo('Disconnected from Primal socket due to inactivity at: ', (new Date()).toLocaleTimeString())
+      disconnect(false);
+      return;
+    }
+
+    if (store.appState === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
+      logInfo('Reconnected to Primal socket at: ', (new Date()).toLocaleTimeString());
+      connect();
+    }
+  })
+
 // STORES ---------------------------------------
 
   const [store, updateStore] = createStore<AppContextStore>({
@@ -294,6 +326,8 @@ export const AppProvider = (props: { children: JSXElement }) => {
       getCashuMint,
       openAuthorSubscribeModal,
       closeAuthorSubscribeModal,
+      addConnectedRelay,
+      removeConnectedRelay,
     }
   });
 

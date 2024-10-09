@@ -23,7 +23,7 @@ type ConnectToRelay = (
   onConnect: (relay: Relay) => void,
   onFail: (relay: Relay, reasons: any) => void,
   tryReconnecting: boolean,
-) => void;
+) => Promise<boolean>;
 
 export const connectToRelay: ConnectToRelay =
   async (relay, timeout, onConnect, onFail, tryReconnecting) => {
@@ -65,9 +65,11 @@ export const connectToRelay: ConnectToRelay =
       await relay.connect();
       logInfo('Connected to relay: ', relay);
       onConnect(relay);
+      return true;
     } catch (e) {
       logError('Failed to initiate connection to relay ', e)
       onFail(relay, 'failed connection');
+      return false;
     }
   };
 
