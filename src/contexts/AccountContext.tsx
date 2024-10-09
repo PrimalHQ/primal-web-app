@@ -3,6 +3,7 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   onMount,
   useContext
@@ -177,6 +178,51 @@ export function AccountProvider(props: { children: JSXElement }) {
   //   }, 1_000);
   // });
 
+  const suspendRelays = () => {
+    if (store.relays.length === 0) {
+      const urls: string[] = Object.keys(store.relaySettings || {}).map(utils.normalizeURL);
+      const suspendedRelays = urls.map(relayInit);
+      updateStore('suspendedRelays', () => suspendedRelays);
+    }
+    else {
+      updateStore('suspendedRelays', () => store.relays);
+
+      for (let i=0; i<store.relays.length; i++) {
+        const relay = store.relays[i];
+        relay.close();
+      }
+    }
+
+    const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+    for (let i=0; i<priorityRelays.length; i++) {
+      const pr = priorityRelays[i];
+
+      if (!store.suspendedRelays.find(r => r.url === pr)) {
+        updateStore('suspendedRelays', store.suspendedRelays.length, () => relayInit(pr));
+      }
+    }
+
+    updateStore('relays', () => []);
+    updateStore('activeRelays', () => [...store.suspendedRelays]);
+  }
+
+  const reconnectSuspendedRelays = async () => {
+    const relaysToConnect = store.suspendedRelays.length > 0 ?
+    store.suspendedRelays.reduce((acc, r) => {
+      return {
+        ...acc,
+        [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
+      };
+    }, {}) :
+    store.relaySettings;
+
+    await connectToRelays(relaysToConnect);
+
+    updateStore('suspendedRelays', () => []);
+    updateStore('activeRelays', () => store.relays);
+  }
+
   const setProxyThroughPrimal = async (shouldProxy: boolean) => {
     updateStore('proxyThroughPrimal', () => shouldProxy);
 
@@ -185,49 +231,25 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     if (shouldProxy) {
-      if (store.relays.length === 0) {
-        const urls: string[] = Object.keys(store.relaySettings || {}).map(utils.normalizeURL);
-        const suspendedRelays = urls.map(relayInit);
-        updateStore('suspendedRelays', () => suspendedRelays);
-      }
-      else {
-        updateStore('suspendedRelays', () => store.relays);
-
-        for (let i=0; i<store.relays.length; i++) {
-          const relay = store.relays[i];
-          relay.close();
-        }
-      }
-
-      const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-
-      for (let i=0; i<priorityRelays.length; i++) {
-        const pr = priorityRelays[i];
-
-        if (!store.suspendedRelays.find(r => r.url === pr)) {
-          updateStore('suspendedRelays', store.suspendedRelays.length, () => relayInit(pr));
-        }
-      }
-
-      updateStore('relays', () => []);
-      updateStore('activeRelays', () => [...store.suspendedRelays]);
+      suspendRelays();
     }
     else {
-      const relaysToConnect = store.suspendedRelays.length > 0 ?
-        store.suspendedRelays.reduce((acc, r) => {
-          return {
-            ...acc,
-            [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
-          };
-        }, {}) :
-        store.relaySettings;
-
-      await connectToRelays(relaysToConnect);
-
-      updateStore('suspendedRelays', () => []);
-      updateStore('activeRelays', () => store.relays);
+      reconnectSuspendedRelays();
     }
   }
+
+
+  createEffect(on(() => app?.appState, (v, p) => {
+    if (v === 'sleep') {
+      suspendRelays();
+      return;
+    }
+
+    if (v === 'waking' && p === 'sleep') {
+      console.log('RECONNECTING RELAYS: ', store.suspendedRelays)
+      reconnectSuspendedRelays();
+    }
+  }))
 
   const checkNostrChange = async () => {
     if (location.pathname === '/') return;
@@ -451,6 +473,14 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     const onConnect = (connectedRelay: Relay) => {
+
+      // connectedRelay.onclose = () => {
+      //   console.log('Relay closed');
+      //   setTimeout(async () => {
+      //     await connectToRelay(connectedRelay, relayConnectingTimeout, onConnect, onFail, true);
+      //   }, 200)
+      // }
+
       if (sendRelayList) {
         sendRelays([connectedRelay], relaySettings, store.proxyThroughPrimal);
       }
@@ -1443,7 +1473,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     if (store.isKeyLookupDone && store.publicKey) {
       relaySettings = { ...getStorage(store.publicKey).relaySettings };
-      connectToRelays(relaySettings);
+
+    connectToRelays(relaySettings);
       return;
     }
   });
@@ -1482,13 +1513,15 @@ export function AccountProvider(props: { children: JSXElement }) {
   });
 
   createEffect(() => {
-    connectedRelaysCopy = [...store.relays];
-    if (!store.publicKey || store.relays.length === 0 || !store.proxySettingSet || store.proxyThroughPrimal) return;
+    setTimeout(() => {
+      connectedRelaysCopy = [...store.relays];
+      if (!store.publicKey || store.relays.length === 0 || !store.proxySettingSet || store.proxyThroughPrimal) return;
 
-    getLikes(store.publicKey, store.activeRelays, (likes: string[]) => {
-      updateStore('likes', () => [...likes]);
-      saveLikes(store.publicKey, likes);
-    });
+      getLikes(store.publicKey, store.activeRelays, (likes: string[]) => {
+        updateStore('likes', () => [...likes]);
+        saveLikes(store.publicKey, likes);
+      });
+    }, 100)
   });
 
   createEffect(() => {
@@ -1504,7 +1537,14 @@ export function AccountProvider(props: { children: JSXElement }) {
     const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
 
     if (store.connectToPrimaryRelays) {
-      const relaySettings = rels.reduce((acc, r) => ({ ...acc, [r]: { read: true, write: true } }), {});
+      const aru = store.suspendedRelays.map(r => r.url) as string[];
+
+      const relaySettings = rels.
+        filter(u => !aru.includes(u) && !aru.includes(`${u}/`)).
+        reduce((acc, r) => ({
+          ...acc,
+          [r]: { read: true, write: true } ,
+        }), {});
 
       connectToRelays(relaySettings)
     }
