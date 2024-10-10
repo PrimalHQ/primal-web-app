@@ -44,6 +44,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { account as tAccount, followWarning, forgotPin, settings } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
+import { useAppContext } from "./AppContext";
 
 
 export type AccountContextStore = {
@@ -159,6 +160,7 @@ export const AccountContext = createContext<AccountContextStore>();
 
 export function AccountProvider(props: { children: JSXElement }) {
 
+  const app = useAppContext();
   const toast = useToastContext();
   const intl = useIntl();
 

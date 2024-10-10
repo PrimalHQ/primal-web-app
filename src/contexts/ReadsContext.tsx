@@ -5,7 +5,7 @@ import { Kind, minKnownProfiles } from "../constants";
 import { getEvents } from "../lib/feed";
 import { setLinkPreviews } from "../lib/notes";
 import { getRecomendedArticleIds } from "../lib/search";
-import { fetchMegaFeed, fetchRecomendedReads, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, PaginationInfo } from "../megaFeeds";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { parseEmptyReposts, isRepostInCollection, convertToArticles } from "../stores/note";
 import {
@@ -131,21 +131,9 @@ const initialHomeData = {
     query: undefined,
   },
   paging: {
-    notes: {
-      since: 0,
-      until: 0,
-      sortBy: 'published_at',
-    },
-    future: {
-      since: 0,
-      until: 0,
-      sortBy: 'published_at',
-    },
-    sidebar: {
-      since: 0,
-      until: 0,
-      sortBy: 'published_at',
-    },
+    notes: { ...emptyPaging() },
+    future: { ...emptyPaging() },
+    sidebar: { ...emptyPaging() },
   },
   recomendedReads: [],
   articleHeights: {},
