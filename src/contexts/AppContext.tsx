@@ -7,12 +7,13 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import { MediaEvent, MediaVariant, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import { connect, disconnect, isNotConnected, socket } from "../sockets";
-import { Relay } from "../lib/nTools";
+import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
+import { nip19, Relay } from "../lib/nTools";
 import { logInfo } from "../lib/logger";
+import { Kind } from "../constants";
 
 
 export type ReactionStats = {
@@ -74,6 +75,7 @@ export type AppContextStore = {
   subscribeToAuthor: PrimalUser | undefined,
   subscribeToTier: (tier: Tier) => void,
   connectedRelays: Relay[],
+  verifiedUsers: Record<string, string>,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -93,6 +95,7 @@ export type AppContextStore = {
     closeAuthorSubscribeModal: () => void,
     addConnectedRelay: (relay: Relay) => void,
     removeConnectedRelay: (relay: Relay) => void,
+    profileLink: (pubkey: string | undefined) => string,
   },
 }
 
@@ -120,6 +123,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   cashuMints: new Map(),
   subscribeToAuthor: undefined,
   connectedRelays: [],
+  verifiedUsers: {},
   subscribeToTier: () => {},
 };
 
@@ -259,6 +263,68 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('connectedRelays', (rs) => rs.filter(r => r.url !== relay.url));
   };
 
+  const profileLink = (pubkey: string | undefined) => {
+    if (!pubkey) return '/home';
+
+    let pk = `${pubkey}`;
+
+    if (pk.startsWith('npub')) {
+      pk = nip19.decode(pk).data;
+    }
+
+    const verifiedUser: string = store.verifiedUsers[pk];
+
+    if (verifiedUser) return `/${verifiedUser}`;
+
+    try {
+      const npub = nip19.npubEncode(pk);
+      return `/p/${npub}`;
+    } catch (e) {
+      return `/p/${pk}`;
+    }
+
+  }
+
+
+// SOCKET HANDLERS ------------------------------
+
+const handleVerifiedUsersEvent = (content: NostrEventContent) => {
+
+  if (content.kind === Kind.VerifiedUsersDict) {
+    const verifiedUsers: Record<string, string> = JSON.parse(content.content);
+
+    updateStore('verifiedUsers', (vu) => ({ ...vu, ...verifiedUsers }));
+  }
+}
+
+const onMessage = async (event: MessageEvent) => {
+  const data = await readData(event);
+  const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
+
+  const [type, _, content] = message;
+
+  if (type === 'EVENTS') {
+    for (let i=0;i<content.length;i++) {
+      const e = content[i];
+      handleVerifiedUsersEvent(e);
+    }
+
+  }
+
+  if (type === 'EVENT') {
+    handleVerifiedUsersEvent(content)
+  }
+};
+
+const onSocketClose = (closeEvent: CloseEvent) => {
+  const webSocket = closeEvent.target as WebSocket;
+
+  removeSocketListeners(
+    webSocket,
+    { message: onMessage, close: onSocketClose },
+  );
+};
+
 // EFFECTS --------------------------------------
 
   onMount(() => {
@@ -305,6 +371,22 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }
   })
 
+  createEffect(() => {
+    if (isConnected()) {
+      refreshSocketListeners(
+        socket(),
+        { message: onMessage, close: onSocketClose },
+      );
+    }
+  });
+
+  onCleanup(() => {
+    removeSocketListeners(
+      socket(),
+      { message: onMessage, close: onSocketClose },
+    );
+  });
+
 // STORES ---------------------------------------
 
   const [store, updateStore] = createStore<AppContextStore>({
@@ -328,6 +410,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
       closeAuthorSubscribeModal,
       addConnectedRelay,
       removeConnectedRelay,
+      profileLink,
     }
   });
 

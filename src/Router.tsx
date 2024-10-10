@@ -100,6 +100,7 @@ const Router: Component = () => {
 
   const getKnownProfiles = ({ params }: RouteDataFuncArgs) => {
     const [profiles] = createResource(params.vanityName, fetchKnownProfiles)
+
     return profiles;
   }
 
@@ -161,11 +162,11 @@ const Router: Component = () => {
             <Route path="/:query" component={AdvancedSearchResults} />
           </Route>
           <Route path="/premium/:step?" component={Premium} />
-          <Route path="/404" component={NotFound} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} data={getKnownProfiles} />
             <Route path="/:identifier" component={Thread} data={getKnownProfiles} />
           </Route>
+          <Route path="/404" component={NotFound} />
         </Route>
       </Routes>
     </>

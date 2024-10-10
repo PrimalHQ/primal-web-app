@@ -25,6 +25,7 @@ import Uploader from '../components/Uploader/Uploader';
 import { triggerImportEvents } from '../lib/notes';
 import { APP_ID } from '../App';
 import { useSettingsContext } from '../contexts/SettingsContext';
+import { useAppContext } from '../contexts/AppContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -37,6 +38,7 @@ const EditProfile: Component = () => {
   const account = useAccountContext();
   const toast = useToastContext();
   const settings = useSettingsContext();
+  const app = useAppContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -95,7 +97,6 @@ const EditProfile: Component = () => {
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
     profile?.actions.clearNotes();
-    profile?.actions.fetchNotes(hex);
   }
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
@@ -494,7 +495,7 @@ const EditProfile: Component = () => {
           </ButtonPrimary>
           <ButtonSecondary
             type='button'
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(app?.actions.profileLink(account?.publicKey) || '')}
           >
             {intl.formatMessage(tActions.cancel)}
           </ButtonSecondary>

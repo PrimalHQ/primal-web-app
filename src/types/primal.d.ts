@@ -314,6 +314,12 @@ export type NostrUserFollowerIncrease = {
   created_at?: number,
 };
 
+export type NostrPrimalVanityNames = {
+  kind: Kind.VerifiedUsersDict,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -356,6 +362,7 @@ export type NostrEventContent =
   NostrDVMMetadata |
   NostrDVMFollowsActions |
   NostrUserFollowerIncrease |
+  NostrPrimalVanityNames |
   NostrTopicStats;
 
 export type NostrEvent = [

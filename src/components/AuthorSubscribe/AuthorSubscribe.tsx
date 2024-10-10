@@ -122,7 +122,7 @@ const AuthorSubscribe: Component<{
         when={props.author}
         fallback={<div><AuthorSubscribeSkeleton /></div>}
       >
-        <A href={`/p/${props.author?.npub}`} class={styles.authorFeaturCard}>
+        <A href={app?.actions.profileLink(props.author?.npub) || ''} class={styles.authorFeaturCard}>
           <Show when={props.author?.picture}>
             <div class={styles.imageHolder}>
               <img class={styles.image} src={props.author?.picture} />

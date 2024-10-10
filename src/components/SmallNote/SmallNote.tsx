@@ -11,12 +11,14 @@ import { note as t } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
 import ParsedNote from '../ParsedNote/ParsedNote';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: string }> = (props) => {
 
   const threadContext = useThreadContext();
   const intl = useIntl();
+  const app = useAppContext();
 
   const navToThread = (note: PrimalNote) => {
     threadContext?.actions.setPrimaryNote(note);
@@ -74,7 +76,7 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
 
   return (
     <div id={props.id} class={styles.smallNote} data-note-id={props.note.post.noteId}>
-      <A href={`/p/${props.note.user.npub}`} class={styles.avatar}>
+      <A href={app?.actions.profileLink(props.note.user.npub) || ''} class={styles.avatar}>
         <Avatar user={props.note.user} size="xxs" />
       </A>
       <A

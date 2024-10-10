@@ -1,6 +1,7 @@
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
 import { PrimalNote, PrimalUser } from '../../types/primal';
@@ -16,9 +17,10 @@ const MentionedPerson: Component<{
   noAbout?: boolean,
 }> = (props) => {
   const account = useAccountContext();
+  const app = useAppContext();
 
   return (
-    <A href={`/p/${props.person?.npub}`} class={styles.mentionedPerson}>
+    <A href={app?.actions.profileLink(props.person?.npub) || ''} class={styles.mentionedPerson}>
       <div class={styles.header}>
         <Avatar
           size="sm"

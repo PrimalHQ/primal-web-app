@@ -58,6 +58,7 @@ import { convertToNotes } from '../../stores/note';
 import { account } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { logError } from '../../lib/logger';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 export type Token = {
@@ -87,6 +88,7 @@ const ParsingToken: Component<{
 }> = (props) => {
 
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [store, updateStore] = createStore<ParserContextStore>({
     userRefs: {},
@@ -469,7 +471,7 @@ const ParsingToken: Component<{
 
       const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
 
-      const path = `/p/${npub}`;
+      const path = app?.actions.profileLink(npub) || '';
 
       let user = store.userRefs && store.userRefs[hex];
 

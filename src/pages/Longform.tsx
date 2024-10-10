@@ -993,7 +993,7 @@ const Longform: Component< { naddr: string } > = (props) => {
           <div>
             <div class={styles.header}>
               <Show when={store.article?.user}>
-                <A href={`/p/${store.article?.user.npub}`}>
+                <A href={app?.actions.profileLink(store.article?.user.npub) || ''}>
                   <div class={styles.author}>
                     <Avatar user={store.article?.user} size="sm" />
 

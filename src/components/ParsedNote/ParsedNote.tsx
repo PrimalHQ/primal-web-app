@@ -55,6 +55,7 @@ import { subscribeTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { logError } from '../../lib/logger';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
+import { useAppContext } from '../../contexts/AppContext';
 
 const groupGridLimit = 7;
 
@@ -160,6 +161,7 @@ const ParsedNote: Component<{
 
   const intl = useIntl();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
@@ -1138,7 +1140,7 @@ const ParsedNote: Component<{
           const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
           const npub = hexToNpub(hex);
 
-          const path = `/p/${npub}`;
+          const path = app?.actions.profileLink(npub) || '';
 
           let user = mentionedUsers && mentionedUsers[hex];
 
@@ -1285,7 +1287,7 @@ const ParsedNote: Component<{
         if (tag[0] === 'p' && mentionedUsers && mentionedUsers[tag[1]]) {
           const user = mentionedUsers[tag[1]];
 
-          const path = `/p/${user.npub}`;
+          const path = app?.actions.profileLink(user.npub) || '';
 
           const label = userName(user);
 

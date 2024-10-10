@@ -18,11 +18,13 @@ import { exploreSidebarCaption } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { loadTrendingUsers, saveTrendingUsers } from '../../lib/localStore';
+import { useAppContext } from '../../contexts/AppContext';
 
 const ExploreSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [store, setStore] = createStore<{ users: Record<string, NostrUserContent>, scores: Record<string, number> }>({
     users: {},
@@ -148,7 +150,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
           {
             user => (
               <A
-                href={`/p/${user.npub}`}
+                href={app?.actions.profileLink(user.npub) || ''}
                 class={styles.user}
                 title={authorName(user)}
               >

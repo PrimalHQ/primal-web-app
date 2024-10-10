@@ -330,7 +330,7 @@ const FeedMarketItem: Component<{
             <For each={props.commonUsers}>
               {user => (
                 <A
-                  href={`/p/${user.npub}`}
+                  href={app?.actions.profileLink(user.npub) || ''}
                   class={styles.avatar}
                   onClick={(e: MouseEvent) => {e.stopPropagation(); return true;}}
                 >

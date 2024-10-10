@@ -1,5 +1,6 @@
 import { A } from "@solidjs/router";
 import { Component, JSXElement } from "solid-js";
+import { useAppContext } from "../../../contexts/AppContext";
 import { hookForDev } from "../../../lib/devTools";
 import { nip05Verification, userName } from "../../../stores/profile";
 import { unknown } from "../../../translations";
@@ -14,6 +15,7 @@ const MentionedUserLink: Component<{
   openInNewTab?: boolean,
   id?: string,
 }> = (props) => {
+  const app = useAppContext();
 
   const LinkComponent: Component<{ children: JSXElement }> = (p) => {
 
@@ -30,7 +32,7 @@ const MentionedUserLink: Component<{
       return <a
         id={props.id}
         class={styles.userMention}
-        href={`/p/${props.user?.npub}`}
+        href={app?.actions.profileLink(props.user?.npub) || ''}
         target="_blank"
       >
         {p.children}
@@ -40,7 +42,7 @@ const MentionedUserLink: Component<{
     return <A
         id={props.id}
         class={styles.userMention}
-        href={`/p/${props.user.npub || props.npub}`}
+        href={app?.actions.profileLink(props.user?.npub || props.npub) || ''}
       >
         {p.children}
       </A>;

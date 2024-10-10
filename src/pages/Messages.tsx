@@ -38,6 +38,7 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import Lnbc from '../components/Lnbc/Lnbc';
 import Cashu from '../components/Cashu/Cashu';
 import DOMPurify from 'dompurify';
+import { useAppContext } from '../contexts/AppContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -89,46 +90,6 @@ export const parseNoteLinks = (text: string, mentionedNotes: Record<string, Prim
 
 };
 
-export const parseNpubLinks = (text: string, mentionedUsers: Record<string, PrimalUser>, highlightOnly = false) => {
-
-  const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
-
-  return text.replace(regex, (url) => {
-    const [_, id] = url.split(':');
-
-    if (!id) {
-      return url;
-    }
-
-    try {
-      const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
-
-      const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-      const npub = hexToNpub(hex);
-      const path = `/p/${npub}`;
-
-      const user = mentionedUsers[hex];
-
-      let link = highlightOnly ?
-        <span class='linkish'>@{truncateNpub(npub)}</span> :
-        <A href={path}>@{truncateNpub(npub)}</A>;
-
-      if (user) {
-        link = highlightOnly ?
-          <span class='linkish'>@{userName(user)}</span> :
-          <A href={path}>@{userName(user)}</A>;
-      }
-
-
-      // @ts-ignore
-      return link.outerHTML || url;
-    } catch (e) {
-      return `<span class="${styles.error}">${url}</span>`;
-    }
-  });
-
-};
-
 const Messages: Component = () => {
   const instanceId = uuidv4();
 
@@ -137,6 +98,7 @@ const Messages: Component = () => {
   const account = useAccountContext();
   const profile = useProfileContext();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const navigate = useNavigate();
 
@@ -190,6 +152,46 @@ const Messages: Component = () => {
     return pubkey;
 
   }
+
+  const parseNpubLinks = (text: string, mentionedUsers: Record<string, PrimalUser>, highlightOnly = false) => {
+
+    const regex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
+
+    return text.replace(regex, (url) => {
+      const [_, id] = url.split(':');
+
+      if (!id) {
+        return url;
+      }
+
+      try {
+        const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
+
+        const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
+        const npub = hexToNpub(hex);
+        const path = app?.actions.profileLink(npub) || '';
+
+        const user = mentionedUsers[hex];
+
+        let link = highlightOnly ?
+          <span class='linkish'>@{truncateNpub(npub)}</span> :
+          <A href={path}>@{truncateNpub(npub)}</A>;
+
+        if (user) {
+          link = highlightOnly ?
+            <span class='linkish'>@{userName(user)}</span> :
+            <A href={path}>@{userName(user)}</A>;
+        }
+
+
+        // @ts-ignore
+        return link.outerHTML || url;
+      } catch (e) {
+        return `<span class="${styles.error}">${url}</span>`;
+      }
+    });
+
+  };
 
   createEffect(() => {
     if (!params.sender) return;
@@ -1155,7 +1157,7 @@ const Messages: Component = () => {
                     fallback={
                       <div class={styles.myThread}>
                         <A
-                          href={`/p/${hexToNpub(thread.author)}`}
+                          href={app?.actions.profileLink(hexToNpub(thread.author)) || ''}
                           class={styles.avatar}
                         >
                           <Avatar user={account?.activeUser} size="xxs" />
@@ -1175,7 +1177,7 @@ const Messages: Component = () => {
                   >
                     <div class={styles.theirThread}>
                       <A
-                        href={`/p/${hexToNpub(thread.author)}`}
+                        href={app?.actions.profileLink(hexToNpub(thread.author)) || ''}
                         class={styles.avatar}
                       >
                         <Avatar user={user(thread.author)} size="xxs" />

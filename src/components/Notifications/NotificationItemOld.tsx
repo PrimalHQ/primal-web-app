@@ -34,6 +34,7 @@ import { truncateNumber } from '../../lib/notifications';
 import { notificationsOld as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import Note from '../Note/Note';
+import { useAppContext } from '../../contexts/AppContext';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -70,6 +71,7 @@ type NotificationItemProps = {
 const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
+  const app = useAppContext();
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
 
@@ -129,7 +131,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
       <div class={styles.notifContent}>
         <div class={styles.avatars}>
           <A
-            href={`/p/${user()?.npub}`} class={styles.avatar}
+            href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
             title={userName(user())}
           >
             <Avatar user={user()} size="xs" />

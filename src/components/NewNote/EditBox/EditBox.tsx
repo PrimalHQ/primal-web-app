@@ -52,6 +52,7 @@ import ArticlePreview from "../../ArticlePreview/ArticlePreview";
 import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
+import { useAppContext } from "../../../contexts/AppContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -68,6 +69,7 @@ const EditBox: Component<{
 
   const intl = useIntl();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const instanceId = uuidv4();
 
@@ -919,8 +921,8 @@ const EditBox: Component<{
         const user = userRefs[userId];
 
         const link = user ?
-          <a href={`${window.location.origin}/p/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}/p/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
+          <a href={`${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`} target="_blank" class='linkish'>@{userName(user)}</a> :
+          <a href={`${window.location.origin}${app?.actions.profileLink(id) || ''}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
 
         // @ts-ignore
         return link.outerHTML || url;

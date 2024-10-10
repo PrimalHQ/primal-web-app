@@ -221,11 +221,13 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
-    const content = await fetch(`${window.location.origin}/.well-known/nostr.json?name=${name}`);
+    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+
+    const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
 
     return await content.json();
   } catch (e) {
-    logError('Failed to fetch known users: ', e);
+    logError('Failed to fetch known users: ', vanityName, e);
 
     return { ...minKnownProfiles };
   }

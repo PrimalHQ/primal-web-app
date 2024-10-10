@@ -78,34 +78,6 @@ export const isAppleMusic = (url: string) => appleMusicRegex.test(url);
 export const isNostrNests = (url: string) => nostrNestsRegex.test(url);
 export const isWavelake = (url: string) => wavlakeRegex.test(url);
 
-
-export const linkifyNostrProfileLink = (text: string) => {
-
-  return text.replace(profileRegexG, (url) => {
-    if (isUserMention(url)) {
-      const npub = url.split('nostr:')[1];
-      // @ts-ignore
-      return (<span><A href={`/p/${npub}`}>{npub}</A></span>)?.innerHTML || url;
-    }
-
-    return url;
-
-  });
-}
-export const linkifyNostrNoteLink = (text: string) => {
-
-  return text.replace(noteRegex, (url) => {
-    if (isNoteMention(url)) {
-      const noteId = url.split('nostr:')[1];
-      // @ts-ignore
-      return (<span><A href={`/e/${noteId}`}>{noteId}</A></span>)?.innerHTML || url;
-    }
-
-    return url;
-
-  });
-}
-
 export const urlify = (
   text: string,
   getMediaUrl: ((url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined) | undefined,

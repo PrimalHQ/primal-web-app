@@ -1,6 +1,7 @@
 import { A } from "@solidjs/router";
 import { Component, createSignal, onMount, Show } from "solid-js";
 import { Kind } from "../../constants";
+import { useAppContext } from "../../contexts/AppContext";
 import { date } from "../../lib/dates";
 import { hookForDev } from "../../lib/devTools";
 import { hexToNpub } from "../../lib/keys";
@@ -16,6 +17,8 @@ const ProfileNoteZap: Component<{
   subject: PrimalArticle | PrimalNote | PrimalUser | undefined,
   zap: PrimalZap,
 }> = (props) => {
+
+  const app = useAppContext();
 
   const userNpub = (user: PrimalUser | string | undefined) => {
     if (typeof user === 'string') return hexToNpub(user);
@@ -52,7 +55,7 @@ const ProfileNoteZap: Component<{
       const sub = props.subject as PrimalUser;
       content = sub.about;
       time = props.zap.created_at || 0;
-      link = `/p/${sub.npub}`;
+      link = app?.actions.profileLink(sub.npub) || '';
       name = userName(sub);
     }
 
@@ -79,7 +82,7 @@ const ProfileNoteZap: Component<{
   return (
     <div class={styles.contentZap} data-zap-id={props.zap.id}>
       <div class={styles.zapInfo}>
-        <A href={`/p/${userNpub(props.zap.sender)}`} class={styles.sender}>
+        <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.sender}>
           <Avatar size="vs2" user={props.zap.sender} />
         </A >
 
@@ -93,7 +96,7 @@ const ProfileNoteZap: Component<{
           </div>
         </div>
 
-        <A href={`/p/${userNpub(props.zap.reciver)}`} class={styles.receiver}>
+        <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.receiver}>
           <Avatar size="vs2" user={props.zap.reciver} />
         </A>
       </div>

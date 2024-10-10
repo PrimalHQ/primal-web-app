@@ -6,7 +6,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { ReactionStats } from '../../contexts/AppContext';
+import { ReactionStats, useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
 import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, setLinkPreviews } from '../../lib/notes';
@@ -38,6 +38,7 @@ const ReactionsModal: Component<{
 
   const intl = useIntl();
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [selectedTab, setSelectedTab] = createSignal('default');
 
@@ -468,7 +469,7 @@ const ReactionsModal: Component<{
               >
                 {admirer =>
                   <A
-                    href={`/p/${admirer.npub}`}
+                    href={app?.actions.profileLink(admirer.npub) || ''}
                     class={styles.likeItem}
                     onClick={props.onClose}
                   >
@@ -518,7 +519,7 @@ const ReactionsModal: Component<{
               >
                 {zap =>
                   <A
-                    href={`/p/${hexToNpub(zap.pubkey)}`}
+                    href={app?.actions.profileLink(hexToNpub(zap.pubkey)) || ''}
                     class={styles.zapItem}
                     onClick={props.onClose}
                   >
@@ -575,7 +576,7 @@ const ReactionsModal: Component<{
               >
                 {reposter =>
                   <A
-                    href={`/p/${reposter.npub}`}
+                    href={app?.actions.profileLink(reposter.npub) || ''}
                     class={styles.repostItem}
                     onClick={props.onClose}
                   >

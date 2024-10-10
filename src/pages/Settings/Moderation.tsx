@@ -11,6 +11,7 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { contentScope, Kind, specialAlgos, trendingScope } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useAppContext } from '../../contexts/AppContext';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hexToNpub, npubToHex } from '../../lib/keys';
@@ -28,6 +29,7 @@ const Moderation: Component = () => {
   const account = useAccountContext();
   const settings = useSettingsContext();
   const search = useSearchContext();
+  const app = useAppContext();
 
   let searchFilteredAccount: HTMLInputElement | undefined;
   let allowlistInput: HTMLInputElement | undefined;
@@ -258,7 +260,7 @@ const Moderation: Component = () => {
             {mutelist => (
               <div class={styles.filterListItem}>
                 <div class={styles.filterListName} title={mutelist.pubkey}>
-                  <A href={`/p/${users[mutelist.pubkey || '']?.npub}`} class={styles.avatar}>
+                  <A href={app?.actions.profileLink(mutelist.pubkey) || ''} class={styles.avatar}>
                     <Avatar
                       user={users[mutelist.pubkey || '']}
                       size='xs'
@@ -384,7 +386,7 @@ const Moderation: Component = () => {
                   fallback={(
                     <div class={styles.filterListItem}>
                       <div class={styles.filterListName} title={reason}>
-                        <A href={`/p/${users[reason || '']?.npub}`} class={styles.avatar}>
+                        <A href={app?.actions.profileLink(reason) || ''} class={styles.avatar}>
                           <Avatar
                             user={users[reason || '']}
                             size='xs'

@@ -416,7 +416,7 @@ const Note: Component<{
             </Show>
           </div>
           <div class={styles.userHeader}>
-            <A href={`/p/${props.note.user.npub}`}>
+            <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
               <Avatar user={props.note.user} size="xs" />
             </A>
 
@@ -479,7 +479,7 @@ const Note: Component<{
           </div>
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              <A href={`/p/${props.note.user.npub}`}>
+              <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
                 <Avatar user={props.note.user} size="vs" />
               </A>
               <Show
@@ -548,7 +548,7 @@ const Note: Component<{
         >
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              <A href={`/p/${props.note.user.npub}`}>
+              <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
                 <Avatar user={props.note.user} size="vs" />
               </A>
               <Show

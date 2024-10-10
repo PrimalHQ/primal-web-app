@@ -16,6 +16,7 @@ import { humanizeNumber } from '../../lib/stats';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { calculatePagingOffset } from '../../utils';
 import { PrimalUser } from '../../types/primal';
+import { useAppContext } from '../../contexts/AppContext';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
 
@@ -25,6 +26,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   const explore = useExploreContext();
   const location = useLocation();
   const account = useAccountContext();
+  const app = useAppContext();
 
 
   onMount(() => {
@@ -66,7 +68,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
       <div class={styles.peopleGrid}>
         <For each={explore?.explorePeople}>
           {user => (
-            <A href={`/p/${user.npub}`} class={styles.explorePerson}>
+            <A href={app?.actions.profileLink(user.npub) || ''} class={styles.explorePerson}>
               <div class={styles.userImage}>
                 <Avatar user={user} size="mll"/>
                 <div class={styles.follow}>

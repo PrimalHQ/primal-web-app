@@ -151,6 +151,7 @@ export enum Kind  {
   FeaturedAuthors=10_000_148,
   DVMFollowsActions=10_000_156,
   UserFollowerIncrease=10_000_157,
+  VerifiedUsersDict=10_000_158,
   DVMMetadata=10_000_159,
   NoteTopicStat=10_000_160,
 

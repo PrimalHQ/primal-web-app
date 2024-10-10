@@ -31,6 +31,7 @@ import { useToastContext } from '../Toaster/Toaster';
 import MarkdownSlice from './MarkdownSlice';
 import { convertHtmlEntityToAngleBrackets } from '../../utils';
 import { useMediaContext } from '../../contexts/MediaContext';
+import { useAppContext } from '../../contexts/AppContext';
 
 export type Coord = {
   x: number;
@@ -87,6 +88,7 @@ const PrimalMarkdown: Component<{
   const toast = useToastContext();
   const navigate = useNavigate();
   const media = useMediaContext();
+  const app = useAppContext();
 
   let ref: HTMLDivElement | undefined;
   let viewer: HTMLDivElement | undefined;
@@ -488,14 +490,14 @@ const PrimalMarkdown: Component<{
 
         switch (decode.type) {
           case 'npub':
-            navigate(`/p/${id}`);
+            navigate(app?.actions.profileLink(id) || '');
             break;
           case 'note':
             navigate(`/e/${id}`);
             break;
           case 'nprofile':
             const npub = hexToNpub(decode.data.pubkey);
-            navigate(`/p/${npub}`);
+            navigate(app?.actions.profileLink(npub) || '');
             break;
           case 'nevent':
             if ([Kind.Text].includes(decode.data.kind)) {
@@ -509,7 +511,7 @@ const PrimalMarkdown: Component<{
 
             if ([Kind.Metadata].includes(decode.data.kind)) {
               const nId = hexToNpub(decode.data.id);
-              navigate(`/p/${nId}`);
+              navigate(app?.actions.profileLink(nId) || '');
             }
             break;
           case 'naddr':

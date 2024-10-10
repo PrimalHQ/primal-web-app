@@ -17,11 +17,13 @@ import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
+import { useAppContext } from '../../contexts/AppContext';
 
 const Muted: Component = () => {
 
   const intl = useIntl();
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [mutedUsers, setMutedUsers] = createStore<Record<string,PrimalUser>>({});
 
@@ -89,7 +91,7 @@ const Muted: Component = () => {
                 when={user(pubkey)}
                 fallback={
                   <>
-                    <Link class={styles.userInfo} href={`/p/${hexToNpub(pubkey)}`}>
+                    <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                       <div class={styles.userName}>
                         <div class={styles.verification}>{hexToNpub(pubkey)}</div>
                       </div>
@@ -100,7 +102,7 @@ const Muted: Component = () => {
                   </>
                 }
               >
-                <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
+                <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                   <Avatar user={user(pubkey)} size='vvs' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>

@@ -19,6 +19,7 @@ import { useToastContext } from '../components/Toaster/Toaster';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { useAppContext } from '../contexts/AppContext';
 
 const lists: Record<string, string> = {
   primal_nsfw: 'nsfw_list',
@@ -30,6 +31,7 @@ const Mutelist: Component = () => {
 
   const intl = useIntl();
   const toast = useToastContext();
+  const app = useAppContext();
 
   const [mutedUsers, setMutedUsers] = createStore<Record<string,PrimalUser>>({});
   const [mutedPubkeys, setMutedPubkeys] = createStore<string[]>([]);
@@ -162,14 +164,14 @@ const Mutelist: Component = () => {
               <Show
                 when={user(pubkey)}
                 fallback={
-                  <Link class={styles.userInfo} href={`/p/${hexToNpub(pubkey)}`}>
+                  <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                     <div class={styles.userName}>
                       <div class={styles.verification}>{hexToNpub(pubkey)}</div>
                     </div>
                   </Link>
                 }
               >
-                <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
+                <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                   <Avatar user={user(pubkey)} size='sm' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>

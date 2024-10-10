@@ -16,6 +16,7 @@ import { hookForDev } from '../../lib/devTools';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import { sanitize } from '../../lib/notes';
 import DOMPurify from 'dompurify';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const Search: Component<{
@@ -33,6 +34,7 @@ const Search: Component<{
   const navigate = useNavigate();
   const intl = useIntl();
   const profile = useProfileContext();
+  const app = useAppContext();
 
   const [query, setQuery] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
@@ -176,7 +178,7 @@ const Search: Component<{
         <For each={search?.users}>
           {(user) => (
             <SearchOption
-              href={props.noLinks ? undefined : `/p/${user.npub}`}
+              href={props.noLinks ? undefined : app?.actions.profileLink(user.npub) || ''}
               title={userName(user)}
               description={nip05Verification(user)}
               icon={<Avatar user={user} size="vvs" />}

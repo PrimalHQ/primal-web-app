@@ -36,7 +36,7 @@ import { useMediaContext } from '../contexts/MediaContext';
 import { profile as t, actions as tActions, toast as tToast, feedProfile, toastZapProfile } from '../translations';
 import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
-import { isAccountVerified, reportUser } from '../lib/profile';
+import { fetchKnownProfiles, isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
@@ -108,20 +108,23 @@ const Profile: Component = () => {
 
   let profileAboutDiv: HTMLDivElement | undefined;
 
-  const getHex = () => {
-    if (params.vanityName && routeData()) {
-      const name = params.vanityName.toLowerCase();
-      const hex = routeData()?.names[name];
+  const [getHex, setHex] = createSignal<string>();
 
-      if (hex) {
-        return hex;
+  const resolveHex = async (vanityName: string | undefined) => {
+    if (vanityName) {
+      const name = vanityName.toLowerCase();
+      const vanityProfile = await fetchKnownProfiles(name);
+      const hex = vanityProfile?.names[name];
+
+      console.log('VANITY: ', vanityName, hex)
+
+      if (!hex) {
+        navigate('/404');
       }
 
-      navigate('/404');
-    }
+      setHex(() => hex);
 
-    if (params.vanityName) {
-      return '';
+      return;
     }
 
     let hex = params.npub || account?.publicKey;
@@ -130,8 +133,40 @@ const Profile: Component = () => {
       hex = nip19.decode(params.npub).data as string;
     }
 
-    return hex;
+    setHex(() => hex);
+
+    return;
   }
+
+  createEffect(() => {
+    resolveHex(params.vanityName)
+  })
+
+  // const getHex = () => {
+  //   console.log('PROFILE: ', params.vanityName, routeData())
+  //   if (params.vanityName && routeData()) {
+  //     const name = params.vanityName.toLowerCase();
+  //     const hex = routeData()?.names[name];
+
+  //     if (hex) {
+  //       return hex;
+  //     }
+
+  //     navigate('/404');
+  //   }
+
+  //   if (params.vanityName) {
+  //     return '';
+  //   }
+
+  //   let hex = params.npub || account?.publicKey;
+
+  //   if (params.npub?.startsWith('npub')) {
+  //     hex = nip19.decode(params.npub).data as string;
+  //   }
+
+  //   return hex;
+  // }
 
   let firstTime = true;
 
@@ -460,7 +495,7 @@ const Profile: Component = () => {
   };
 
   const copyProfileLink = () => {
-    navigator.clipboard.writeText(`${window.location.host}/p/${hexToNpub(getHex())}`);
+    navigator.clipboard.writeText(`${window.location.host}${app?.actions.profileLink(getHex()) || ''}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
@@ -877,7 +912,7 @@ const Profile: Component = () => {
                           <div class={styles.avatars}>
                             <For each={profile?.commonFollowers.slice(0, 5)}>
                               {(follower, index) => (
-                                <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
+                                <A href={app?.actions.profileLink(follower.npub) || ''} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                                   <Avatar size="nano" user={follower} />
                                 </A>
                               )}
@@ -960,7 +995,7 @@ const Profile: Component = () => {
                             <div class={styles.avatars}>
                               <For each={profile?.commonFollowers.slice(0, 5)}>
                                 {(follower, index) => (
-                                  <A href={`/p/${follower.npub}`} class={styles.avatar} style={`z-index: ${1 + index()}`}>
+                                  <A href={app?.actions.profileLink(follower.npub) || ''} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                                     <Avatar size="nano" user={follower} />
                                   </A>
                                 )}

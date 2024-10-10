@@ -19,6 +19,7 @@ import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
+import { useAppContext } from '../../../contexts/AppContext';
 
 const NoteHeader: Component<{
   note: PrimalNote,
@@ -30,6 +31,7 @@ const NoteHeader: Component<{
   const intl = useIntl();
   const toaster = useToastContext();
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -204,7 +206,7 @@ const NoteHeader: Component<{
             title={props.note?.user?.npub}
           >
             <A
-              href={`/p/${props.note.user.npub}`}
+              href={app?.actions.profileLink(props.note.user.npub) || ''}
             >
               <Avatar
                 user={props.note?.user}

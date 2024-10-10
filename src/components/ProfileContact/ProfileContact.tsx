@@ -15,6 +15,7 @@ import FollowButton from '../FollowButton/FollowButton';
 import { A } from '@solidjs/router';
 import { humanizeNumber } from '../../lib/stats';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const ProfileContact: Component<{
@@ -27,10 +28,11 @@ const ProfileContact: Component<{
 
   const intl = useIntl();
   const account = useAccountContext();
+  const app = useAppContext();
 
   return (
     <div id={props.id} class={styles.profileContact}>
-      <A href={`/p/${props.profile?.npub}`} class={styles.info}>
+      <A href={app?.actions.profileLink(props.profile?.npub) || ''} class={styles.info}>
         <div class={styles.personal}>
           <Avatar src={props.profile?.picture} size="sm" />
 

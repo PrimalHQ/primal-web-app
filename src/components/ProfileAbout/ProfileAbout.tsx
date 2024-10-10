@@ -14,8 +14,11 @@ import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { NoteContent } from '../ParsedNote/ParsedNote';
 
 import styles from '../../pages/Profile.module.scss';
+import { useAppContext } from '../../contexts/AppContext';
 
 const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () => void }> = (props) => {
+
+  const app = useAppContext();
 
   const [usersMentionedInAbout, setUsersMentionedInAbout] = createStore<Record<string, any>>({});
 
@@ -172,7 +175,7 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
           const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
           const npub = hexToNpub(hex);
 
-          const path = `/p/${npub}`;
+          const path = app?.actions.profileLink(npub) || '';
 
           let user = usersMentionedInAbout && usersMentionedInAbout[hex];
 
