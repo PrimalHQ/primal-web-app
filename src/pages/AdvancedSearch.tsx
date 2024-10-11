@@ -157,7 +157,10 @@ const orientations = ['Any', 'Vertical', 'Horizontal'];
 
 const sortings: Record<string, () => string> = {
   'Time': () => '',
-  'Content Score': () => 'orderby:score',
+  'Content Score': () => 'orderby:contentscore',
+  'Number of Replies': () => 'orderby:numberofreplies',
+  'Sats Zapped': () => 'orderby:satszapped',
+  'Number of Interactions': () => 'orderby:numberofinteractions',
 };
 
 const AdvancedSearch: Component = () => {
@@ -239,11 +242,10 @@ const AdvancedSearch: Component = () => {
 
       if (quoteFound) {
         phrase.push(word);
-        quoted = index;
+        quoted = retArray.length;
       }
       else if (quoted > -1) {
         phrase.push(word);
-        // return;
       }
 
       retArray.push(word);
@@ -252,18 +254,32 @@ const AdvancedSearch: Component = () => {
     return retArray;
   }
 
+  const parseUserList = (list: PrimalUser[], command: string) => {
+    if (list.length === 0) return '';
+
+    const cmdList = list.reduce<string[]>((acc, u) => [ ...acc, `${command}${u.npub}` ], []);
+
+    if (cmdList.length > 1) {
+      return `(${cmdList.join(' OR ')}) `;
+    }
+
+    return `${cmdList.join(' ')} `;
+  }
+
   createEffect(() => {
-    const includes = extractQuery(state.includes).join(' ').trim()
-    const excludes = extractQuery(state.excludes).reduce<string>((acc, w) => w.length > 0 ? `${acc} -${w}` : acc, '')
+    const includes = `${extractQuery(state.includes).join(' ').trim()} `;
+    const excludes = `${extractQuery(state.excludes).reduce<string>((acc, w) => w.length > 0 ? `${acc} -${w}` : acc, '')} `;
     const hashtags = state.hashtags.length === 0 ? '' : state.hashtags.split(' ').map(x => {
       const y = x.trim();
       return y.startsWith('#') ? y : `#${y}`;
     }).reduce((acc, x) => `${acc}${x} `, '');
-    const froms = state.postedBy.reduce((acc, u) => acc + 'from:' + u.npub + ' ', '');
-    const tos = state.replingTo.reduce((acc, u) => acc + 'to:' + u.npub + ' ', '');
-    const zappers = state.zappedBy.reduce((acc, u) => acc + 'zappedby:' + u.npub + ' ', '');
-    const mentions = state.userMentions.reduce((acc, u) => acc + '@' + u.npub + ' ', '');
-    const followings = state.following.reduce((acc, u) => acc + 'following:' + u.npub + ' ', '');
+
+    const froms = parseUserList(state.postedBy, 'from:');
+    const tos = parseUserList(state.replingTo, 'to:');
+    const zappers = parseUserList(state.zappedBy, 'zappedby:');
+
+    const mentions = parseUserList(state.userMentions, '@');
+    const followings = parseUserList(state.following, 'following:');
 
     let since = '';
 
