@@ -48,14 +48,21 @@ const FeedMarketPlacePreview: Component<{
       kind: props.type,
     });
 
-    const collection = props.type == 'reads' ?
-      store.reads :
-      store.notes;
+    let offset = 0;
 
-    const offset = calculatePagingOffset(
-      collection,
-      store.paging.elements,
-    );
+    const since = store.paging.since || 0;
+
+    if (props.type === 'reads') {
+      offset = store.reads.reduce<number>((acc, m) => {
+        // @ts-ignore
+        return since === m.published ? acc + 1 : acc
+      }, 0)
+    } else if (props.type === 'notes') {
+      offset = store.notes.reduce<number>((acc, m) => {
+        // @ts-ignore
+        return since === m.msg.created_at ? acc + 1 : acc
+      }, 0)
+    }
 
     const { notes, reads, paging } = await fetchMegaFeed(
       account?.publicKey,

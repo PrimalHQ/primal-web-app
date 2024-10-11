@@ -1,45 +1,25 @@
-import { paragraphSchema } from '@milkdown/preset-commonmark';
-import { A, useLocation, useNavigate, useParams, useRouteData } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
+import { useNavigate, useParams } from '@solidjs/router';
+import { Component, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
 import Loader from '../components/Loader/Loader';
 import Note from '../components/Note/Note';
-import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
-import SearchSidebar from '../components/SearchSidebar/SearchSidebar';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import Wormhole from '../components/Wormhole/Wormhole';
-import { search } from '../translations';
-import SearchComponent from '../components/Search/Search';
 import styles from './FeedsTest.module.scss';
-import { SearchState } from './AdvancedSearch';
-import { useSearchContext } from '../contexts/SearchContext';
 import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
 import { Kind } from '../constants';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import Paginator from '../components/Paginator/Paginator';
 import { TextField } from '@kobalte/core/text-field';
-import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ButtonLink from '../components/Buttons/ButtonLink';
-import { useAccountContext } from '../contexts/AccountContext';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import { PrimalArticleFeed } from '../types/primal';
-import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
-import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import ButtonPremium from '../components/Buttons/ButtonPremium';
+import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
 
 
 const AdvancedSearchResults: Component = () => {
   const params = useParams()
   const search = useAdvancedSearchContext();
-  const settings = useSettingsContext();
   const navigate = useNavigate();
 
-  const [openAddFeedDialog, setAddFeedDialog] = createSignal<'home' | 'reads' | undefined>();
-
-  const [feedName, setFeedName] = createSignal('Seach results');
-  const [feedDescription, setFeedDescription] = createSignal('Primal Saved Search');
+  const [openAddFeedDialog, setAddFeedDialog] = createSignal<boolean>(false);
 
   const queryString = () => decodeURIComponent(params.query);
 
@@ -56,62 +36,8 @@ const AdvancedSearchResults: Component = () => {
     search?.actions.findContent(queryString());
   });
 
-  const generateFeedDefinition = () => {
-
-    const spec = JSON.stringify({
-        id: 'advsearch',
-        query: queryString(),
-      });
-
-    const feed: PrimalArticleFeed = {
-      name: feedName(),
-      description: feedDescription(),
-      spec,
-      enabled: true,
-      feedkind: 'search',
-    };
-
-    return feed;
-  }
-
-  const toggleFeed = () => {
-    const feed = generateFeedDefinition();
-    const feedtype = feedType();
-
-    if (!feed) return;
-
-    const isAlreadyAdded = settings?.actions.isFeedAdded(feed, feedtype)
-
-    if (isAlreadyAdded) {
-      settings?.actions.removeFeed(feed, feedtype);
-      return;
-    }
-
-    setAddFeedDialog(() => feedtype);
-
-    // settings?.actions.addFeed(feed, feedtype);
-  };
-
   const feedType = () => [Kind.LongForm].includes(kind()) ?
   'reads' : 'home';
-
-  const isFeedAdded = () => {
-    const feed = generateFeedDefinition();
-    const feedtype = feedType();
-
-    if (!feed) return false;
-
-    return settings?.actions.isFeedAdded(feed, feedtype);
-  }
-
-
-  const scopeName = () => {
-    if ([Kind.LongForm].includes(kind())) {
-      return 'reads';
-    }
-
-    return 'home';
-  };
 
   return (
     <>
@@ -122,22 +48,13 @@ const AdvancedSearchResults: Component = () => {
             <div>search results</div>
           </div>
           <div class={styles.actions}>
-            <button
-              class={styles.addToFeed}
-              onClick={toggleFeed}
-            >
-              <Show
-                when={isFeedAdded()}
-                fallback={<>
-                  <div class={styles.addIcon}></div>
-                  <div>
-                    Add this search to my {scopeName()} feeds
-                  </div>
-                </>}
-              >
-                Remove this search from my {scopeName()} feeds
-              </Show>
-            </button>
+
+            <SaveFeedDialog
+              open={openAddFeedDialog()}
+              setOpen={setAddFeedDialog}
+              query={queryString()}
+              feedType={feedType()}
+            />
 
             <ButtonLink
               onClick={() => navigate('/asearch')}
@@ -153,46 +70,6 @@ const AdvancedSearchResults: Component = () => {
           <TextField.TextArea autoResize={true}/>
         </TextField>
       </StickySidebar>
-
-      <AdvancedSearchDialog
-        open={openAddFeedDialog()}
-        setOpen={(b: boolean) => setAddFeedDialog(() => b ? feedType() : undefined)}
-        triggerClass="hidden"
-        title={<div class={styles.addToFeedDialogTitle}>
-          Save to <span>{scopeName()}</span> Feeds
-        </div>}
-      >
-        <div class={styles.addToFeedDialogContent}>
-          <div class={styles.form}>
-            <TextField class={styles.searchCommand} value={feedName()} onChange={setFeedName}>
-              <TextField.Label>Feed name:</TextField.Label>
-              <TextField.Input />
-            </TextField>
-
-            <TextField class={styles.searchCommand} value={feedDescription()} onChange={setFeedDescription}>
-              <TextField.Label>Feed description</TextField.Label>
-              <TextField.Input />
-            </TextField>
-          </div>
-          <div class={styles.footer}>
-            <ButtonSecondary
-              onClick={() => setAddFeedDialog(() => undefined)}
-              light={true}
-            >
-              Cancel
-            </ButtonSecondary>
-            <ButtonPremium
-              onClick={() => {
-                settings?.actions.addFeed(generateFeedDefinition(), feedType());
-                setAddFeedDialog(() => undefined);
-              }}
-            >
-              Save
-            </ButtonPremium>
-          </div>
-        </div>
-      </AdvancedSearchDialog>
-
 
       <div class={styles.list}>
         <Switch>

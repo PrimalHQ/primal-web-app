@@ -258,52 +258,26 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     searchUsers(pubkey, subid, query);
   }
 
-  const findContentUsers = (query: string, publicKey?: string) => {
-    const subid = `search_users_c_${APP_ID}`;
+  const findContentUsers = async (query: string, publicKey?: string) => {
+    const subId = `search_users_c_${APP_ID}`;
 
-    let users: PrimalUser[] = [];
+    try {
+      const spec = JSON.stringify({ id: 'advsearch', query: `kind:0 ${query}` });
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
+      const { users } = await fetchMegaFeed(
+        account?.publicKey,
+        spec,
+        subId,
+        {
+          limit: 10,
         }
+      );
 
-        if (content.kind === Kind.Metadata) {
-          const user = content as NostrUserContent;
+      updateStore('contentUsers', () => users);
 
-          users.push(convertToUser(user, content.pubkey));
-          return;
-        }
-
-        if (content.kind === Kind.UserScore) {
-          const scores = JSON.parse(content.content);
-
-          updateStore('contentScores', () => ({ ...scores }));
-          return;
-        }
-      }
-
-      if (type === 'EOSE') {
-        const sorted = users.sort((a, b) => {
-          const aScore = store.scores[a.pubkey];
-          const bScore = store.scores[b.pubkey];
-
-          return bScore - aScore;
-        });
-
-        updateStore('contentUsers', () => sorted.slice(0, 10));
-
-        unsub();
-        return;
-      }
-
-    });
-
-    const pubkey = query.length > 0 ? undefined : publicKey;
-
-    updateStore('isFetchingUsers', () => true);
-    searchUsers(pubkey, subid, query);
+    } catch (e) {
+      logError('ERROR fetching search results: ', e);
+    }
   }
 
   const fetchContentNextPage = (query: string) => {
@@ -333,6 +307,24 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
       updateStore('isFetchingContent' , () => true);
 
+      const kind = query.includes('kind:30023') ? 'reads' : 'notes';
+
+      let offset = 0;
+
+      const since = store.paging.since || 0;
+
+      if (kind === 'reads') {
+        offset = store.reads.reduce<number>((acc, m) => {
+          // @ts-ignore
+          return since === m.published ? acc + 1 : acc
+        }, 0)
+      } else if (kind === 'notes') {
+        offset = store.notes.reduce<number>((acc, m) => {
+          // @ts-ignore
+          return since === m.msg.created_at ? acc + 1 : acc
+        }, 0)
+      }
+
       const { notes, reads, paging } = await fetchMegaFeed(
         account?.publicKey,
         spec,
@@ -340,7 +332,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         {
           limit: 20,
           until,
-          offset: store.reads.map(n => n.repost ? n.repost.note.created_at : (n.published || 0)),
+          offset,
         }
       );
 

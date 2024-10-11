@@ -29,7 +29,7 @@ const MentionedPeople: Component<{
         <div class={styles.heading}>{props.label}</div>
         <Transition name='slide-fade'>
           <Show
-            when={props.author && props.mentioned.length > 0}
+            when={props.author || props.mentioned.length > 0}
             fallback={<ThreadPeopleSkeleton />}
           >
             <div id="trending_section" class={`${styles.authorSection}`}>

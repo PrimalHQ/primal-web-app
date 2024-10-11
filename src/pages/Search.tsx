@@ -1,11 +1,13 @@
 import {
   Component,
   createEffect,
+  createSignal,
   For,
+  on,
+  onMount,
   Show,
 } from 'solid-js';
 import Note from '../components/Note/Note';
-import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -16,55 +18,32 @@ import styles from './Search.module.scss';
 import { useSearchContext } from '../contexts/SearchContext';
 import SearchSidebar from '../components/SearchSidebar/SearchSidebar';
 import Loader from '../components/Loader/Loader';
-import { useToastContext } from '../components/Toaster/Toaster';
-import { useSettingsContext } from '../contexts/SettingsContext';
 import SearchComponent from '../components/Search/Search';
-import { toast as t, search as tSearch, actions as tActions  } from '../translations';
+import { toast as t, search as tSearch  } from '../translations';
 import PageCaption from '../components/PageCaption/PageCaption';
-import AddToHomeFeedButton from '../components/AddToHomeFeedButton/AddToHomeFeedButton';
 import PageTitle from '../components/PageTitle/PageTitle';
+import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
+import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
+import Paginator from '../components/Paginator/Paginator';
 
 const Search: Component = () => {
   const params = useParams();
-  const search = useSearchContext();
+  const basicSearch = useSearchContext();
+  const search = useAdvancedSearchContext();
   const account = useAccountContext();
-  const toaster = useToastContext();
-  const settings = useSettingsContext();
   const intl = useIntl();
 
   const query = () => decodeURI(params.query).replaceAll('%23', '#');
 
-  createEffect(() => {
-    if (isConnected() && query().length > 0 && search?.contentQuery !== query()) {
-      search?.actions.setContentQuery(query());
-      search?.actions.findContent(query());
-      search?.actions.findContentUsers(query(), account?.publicKey);
-    }
-  });
+  const [openAddFeedDialog, setAddFeedDialog] = createSignal<boolean>(false);
 
-  const hasFeedAtHome = () => {
-    const hex = `search;${decodeURI(params.query)}`;
+  createEffect(on(query, (v, p) => {
+    if (v === p) return;
 
-    return !!settings?.availableFeeds.find(f => f.hex === hex);
-  };
-
-  const addToHomeFeed = () => {
-    const q = decodeURI(params.query).replaceAll('%23', '#')
-    const hex = `search;${q}`;
-    const name = intl.formatMessage(
-      tSearch.feedLabel,
-      { query: q || '' },
-    );
-
-    const feed = { name, hex };
-
-    settings?.actions.addAvailableFeed(feed);
-
-    toaster?.sendSuccess(intl.formatMessage(
-      t.addFeedToHomeSuccess,
-      { name },
-    ));
-  };
+    search?.actions.clearSearch();
+    search?.actions.findContent(v);
+    basicSearch?.actions.findContentUsers(v);
+  }));
 
   return (
     <>
@@ -76,7 +55,7 @@ const Search: Component = () => {
       />
 
       <StickySidebar>
-        <SearchSidebar users={search?.contentUsers || []} />
+        <SearchSidebar users={basicSearch?.contentUsers || []} />
       </StickySidebar>
 
       <Wormhole
@@ -94,11 +73,11 @@ const Search: Component = () => {
             )}
           </div>
           <div class={styles.addToFeed}>
-            <AddToHomeFeedButton
-              disabled={hasFeedAtHome()}
-              onAdd={addToHomeFeed}
-              activeLabel={intl.formatMessage(tActions.addFeedToHome)}
-              disabledLabel={intl.formatMessage(tActions.disabledAddFeedToHome)}
+            <SaveFeedDialog
+              open={openAddFeedDialog()}
+              setOpen={setAddFeedDialog}
+              query={query()}
+              feedType={'home'}
             />
           </div>
         </div>
@@ -107,7 +86,7 @@ const Search: Component = () => {
 
       <div class={styles.searchContent}>
         <Show
-          when={!search?.isFetchingContent}
+          when={!search?.isFetchingContent || search.notes.length > 0}
           fallback={<div class={styles.loader}><Loader /></div>}
         >
           <Show
@@ -125,6 +104,9 @@ const Search: Component = () => {
             </For>
           </Show>
         </Show>
+        <Paginator
+          loadNextPage={() => search?.actions.fetchContentNextPage(query())}
+        />
       </div>
     </>
   )

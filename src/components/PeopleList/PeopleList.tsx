@@ -33,11 +33,13 @@ const PeopleList: Component<{
 
   return (
       <div id={props.id} class={styles.stickyWrapper}>
-        <MentionedPeople
-          mentioned={mentioned()}
-          author={author()}
-          label={props.mentionLabel || ''}
-        />
+        <Show when={author()}>
+          <MentionedPeople
+            mentioned={mentioned()}
+            author={author()}
+            label={props.mentionLabel || ''}
+          />
+        </Show>
 
         <Transition name='slide-fade'>
           <Show when={repliers().length > 0}>
