@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from '@solidjs/router';
-import { Component, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from 'solid-js';
 import Loader from '../components/Loader/Loader';
 import Note from '../components/Note/Note';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -36,6 +36,13 @@ const AdvancedSearchResults: Component = () => {
     search?.actions.findContent(queryString());
   });
 
+
+  createEffect(on(queryString, (v, p) => {
+    if (!v || v === p) return;
+
+    search?.actions.setSearchCommand(v);
+  }))
+
   const feedType = () => [Kind.LongForm].includes(kind()) ?
   'reads' : 'home';
 
@@ -57,7 +64,7 @@ const AdvancedSearchResults: Component = () => {
             />
 
             <ButtonLink
-              onClick={() => navigate('/asearch')}
+              onClick={() => navigate('/asearch', { state: { query: queryString() } })}
             >
               Back to Advanced search
             </ButtonLink>

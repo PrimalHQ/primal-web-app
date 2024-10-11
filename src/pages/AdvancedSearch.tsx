@@ -2,7 +2,7 @@ import { TextField } from '@kobalte/core/text-field';
 import { Slider } from "@kobalte/core/slider";
 import { Dialog } from '@kobalte/core/dialog';
 
-import { A, useNavigate } from '@solidjs/router';
+import { A, useLocation, useNavigate } from '@solidjs/router';
 import { batch, Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import Avatar from '../components/Avatar/Avatar';
@@ -29,6 +29,7 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
 import { useSearchContext } from '../contexts/SearchContext';
+import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
 
 export type SearchState = {
   includes: string,
@@ -142,7 +143,7 @@ const scopes: Record<string, () => string> = {
 };
 
 const kinds: Record<string, () => string> = {
-  'Notes': () => 'kind:1',
+  'Notes': () => '',
   'Reads': () => 'kind:30023',
   'Note Replies': () => 'kind:1 filter:replies',
   'Reads Comments': () => 'kind:30023 filter:replies',
@@ -166,6 +167,8 @@ const sortings: Record<string, () => string> = {
 const AdvancedSearch: Component = () => {
   const navigate = useNavigate();
   const search = useSearchContext();
+  const advSearch = useAdvancedSearchContext();
+  const location = useLocation();
 
   const [state, setState] = createStore<SearchState>({
     includes: '',
@@ -212,6 +215,15 @@ const AdvancedSearch: Component = () => {
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
   }
+
+  createEffect(() => {
+    if (state.command.length === 0) {
+      setState('command', () => advSearch?.searchCommand || '');
+      return;
+    }
+
+    advSearch?.actions.setSearchCommand(state.command);
+  })
 
   createEffect(() => {
     if (state.timeframe !== 'Custom') {

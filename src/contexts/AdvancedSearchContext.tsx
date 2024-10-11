@@ -58,6 +58,7 @@ export type AdvancedSearchContextStore = {
   filteringReasons: string[],
   errors: string[],
   paging: PaginationInfo,
+  searchCommand: string,
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
@@ -68,6 +69,7 @@ export type AdvancedSearchContextStore = {
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
     clearSearch: () => void,
+    setSearchCommand: (command: string) => void,
   },
 }
 
@@ -85,6 +87,7 @@ const initialData = {
   mentionedNotes: {},
   filteringReasons: [],
   errors: [],
+  searchCommand: '',
   paging: { ...emptyPaging() },
 };
 
@@ -390,6 +393,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     }
   }
 
+  const setSearchCommand = (command: string) => updateStore('searchCommand', () => command);
+
 // STORES ---------------------------------------
 
 const [store, updateStore] = createStore<AdvancedSearchContextStore>({
@@ -404,6 +409,7 @@ const [store, updateStore] = createStore<AdvancedSearchContextStore>({
     getRecomendedUsers,
     findFilteredUserByNpub,
     clearSearch,
+    setSearchCommand,
   },
 });
 
