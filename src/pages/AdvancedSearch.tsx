@@ -143,10 +143,10 @@ const scopes: Record<string, () => string> = {
 };
 
 const kinds: Record<string, () => string> = {
-  'Notes': () => '',
+  'Notes': () => 'kind:1',
   'Reads': () => 'kind:30023',
-  'Note Replies': () => 'kind:1 filter:replies',
-  'Reads Comments': () => 'kind:30023 filter:replies',
+  'Note Replies': () => 'kind:1 repliestokind:1',
+  'Reads Comments': () => 'kind:1 repliestokind:30023',
   'Images': () => 'filter:image',
   'Video': () => 'filter:video',
   'Audio': () => 'filter:audio',
@@ -158,10 +158,10 @@ const orientations = ['Any', 'Vertical', 'Horizontal'];
 
 const sortings: Record<string, () => string> = {
   'Time': () => '',
-  'Content Score': () => 'orderby:contentscore',
-  'Number of Replies': () => 'orderby:numberofreplies',
+  'Content Score': () => 'orderby:score',
+  'Number of Replies': () => 'orderby:replies',
   'Sats Zapped': () => 'orderby:satszapped',
-  'Number of Interactions': () => 'orderby:numberofinteractions',
+  'Number of Interactions': () => 'orderby:likes',
 };
 
 const AdvancedSearch: Component = () => {
@@ -216,14 +216,15 @@ const AdvancedSearch: Component = () => {
     e.preventDefault();
   }
 
-  createEffect(() => {
-    if (state.command.length === 0) {
-      setState('command', () => advSearch?.searchCommand || '');
-      return;
-    }
+  // createEffect(() => {
+  //   console.log('ADV: ', advSearch?.searchCommand)
+  //   if ((advSearch?.searchCommand.length || 0) > 0) {
+  //     setState('command', () => advSearch?.searchCommand || '');
+  //     return;
+  //   }
 
-    advSearch?.actions.setSearchCommand(state.command);
-  })
+  //   advSearch?.actions.setSearchCommand(state.command);
+  // })
 
   createEffect(() => {
     if (state.timeframe !== 'Custom') {
@@ -308,6 +309,7 @@ const AdvancedSearch: Component = () => {
 
     const sort = `${sortings[state.sortBy]()} `;
 
+    console.log('KIND: ', kinds[state.kind]())
     const kind = `${kinds[state.kind]()} `;
 
     const orient = orientationKinds.includes(state.kind) && state.orientation !== 'Any' ?
