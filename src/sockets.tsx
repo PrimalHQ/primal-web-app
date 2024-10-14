@@ -140,40 +140,6 @@ export const removeSocketListeners = (
   });
 };
 
-export const subscribeTo = (subId: string, cb: (type: NostrEventType, subId: string, content?: NostrEventContent) => void ) => {
-  const listener = async (event: MessageEvent) => {
-    // try {
-      const data = await readData(event);
-      const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
-      const [type, subscriptionId, content] = message;
-
-      if (type === 'EVENTS') {
-        let i = 0;
-
-        for (i=0;i<content.length;i++) {
-          const e = content[i];
-          cb('EVENT', subscriptionId, e);
-        }
-
-        cb('EOSE', subscriptionId);
-        return;
-      }
-
-      if (subId === subscriptionId) {
-        cb(type, subscriptionId, content);
-      }
-    // } catch (e) {
-    //   logError('SOCKET LISTENER: ', subId, ' : ', e)
-    // }
-  };
-
-  socket()?.addEventListener('message', listener);
-
-  return () => {
-    socket()?.removeEventListener('message', listener);
-  };
-};
-
 export const decompressBlob  = async (blob: ArrayBuffer) => {
   try {
     const result = pako.inflate(blob, { to: 'string' });

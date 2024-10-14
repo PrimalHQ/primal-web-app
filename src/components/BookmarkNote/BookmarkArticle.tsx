@@ -1,19 +1,19 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { APP_ID } from '../../App';
 import { Kind, supportedBookmarkTypes } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { logWarning } from '../../lib/logger';
 import { getBookmarks, sendBookmarks } from '../../lib/profile';
-import { subscribeTo } from '../../sockets';
-import { PrimalArticle, PrimalNote } from '../../types/primal';
+import { subsTo } from '../../sockets';
+import { PrimalArticle } from '../../types/primal';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { account, bookmarks as tBookmarks } from '../../translations';
+import { bookmarks as tBookmarks } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
-import { importEvents, triggerImportEvents } from '../../lib/notes';
+import { triggerImportEvents } from '../../lib/notes';
 
 const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: boolean }> = (props) => {
   const account = useAccountContext();
@@ -119,9 +119,13 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
 
     let bookmarks: string[][] = []
 
-    const unsub = subscribeTo(`before_bookmark_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(`before_bookmark_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (!content || content.kind !== Kind.Bookmarks) return;
 
+        bookmarks = content.tags;
+      },
+      onEose: async () => {
         if (remove) {
           await removeBookmark(bookmarks);
         }
@@ -132,14 +136,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         then && then();
         setBookmarkInProgress(() => false);
         unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content || content.kind !== Kind.Bookmarks) return;
-
-        bookmarks = content.tags;
-      }
+      },
     });
 
     setBookmarkInProgress(() => true);

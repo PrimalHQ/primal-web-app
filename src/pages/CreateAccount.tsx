@@ -30,7 +30,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { sendContacts, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
-import { subscribeTo } from '../sockets';
+import { subsTo } from '../sockets';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
 import Uploader from '../components/Uploader/Uploader';
@@ -293,8 +293,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const getSugestedUsers = () => {
     const subId = `get_suggested_users_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.SuggestedUsersByCategory) {
           const list = JSON.parse(content.content);
           let groups: Record<string, string[]> = {};
@@ -316,11 +316,10 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           !followed.includes(user.pubkey) && setFollowed(followed.length, user.pubkey);
           setSuggestedData('users', () => ({ [user.pubkey]: { ...user }}))
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         unsub();
-      }
+      },
     });
 
     getSuggestions(subId);

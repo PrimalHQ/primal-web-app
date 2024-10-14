@@ -1,13 +1,10 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { useNavigate, useParams } from '@solidjs/router';
-import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch, untrack } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import BookmarksHeader from '../components/HomeHeader/BookmarksHeader';
-import ReadsHeader from '../components/HomeHeader/ReadsHeader';
-import Loader from '../components/Loader/Loader';
 import Note from '../components/Note/Note';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -16,7 +13,7 @@ import { Kind } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { getEvents, getUserFeed } from '../lib/feed';
 import { setLinkPreviews } from '../lib/notes';
-import { subscribeTo } from '../sockets';
+import { subsTo } from '../sockets';
 import { convertToArticles, convertToNotes, parseEmptyReposts } from '../stores/note';
 import { bookmarks as tBookmarks } from '../translations';
 import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap, PrimalArticle } from '../types/primal';
@@ -87,8 +84,11 @@ const Bookmarks: Component = () => {
 
     const subId = `bookmark_feed_${until}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updatePage(content);
+      },
+      onEose: () => {
         const reposts = parseEmptyReposts(store.page);
         const ids = Object.keys(reposts);
 
@@ -103,12 +103,7 @@ const Bookmarks: Component = () => {
         fetchReposts(ids);
 
         unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        content && updatePage(content);
-      }
+      },
     });
 
     const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
@@ -121,14 +116,8 @@ const Bookmarks: Component = () => {
   const fetchReposts = (ids: string[]) => {
     const subId = `bookmark_reposts_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EOSE') {
-        savePage(store.page);
-        unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         const repostId = (content as NostrNoteContent).id;
         const reposts = store.reposts || {};
         const parent = store.page.messages.find(m => m.id === reposts[repostId]);
@@ -136,8 +125,10 @@ const Bookmarks: Component = () => {
         if (parent) {
           updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
         }
-
-        return;
+      },
+      onEose: () => {
+        savePage(store.page);
+        unsub();
       }
     });
 

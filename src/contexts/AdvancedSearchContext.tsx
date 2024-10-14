@@ -5,14 +5,8 @@ import {
   useContext
 } from "solid-js";
 import {
-  FeedPage,
-  NostrEventContent,
-  NostrMentionContent,
-  NostrNoteActionsContent,
   NostrNoteContent,
-  NostrStatsContent,
   NostrUserContent,
-  NoteActions,
   PrimalArticle,
   PrimalNote,
   PrimalUser,
@@ -20,10 +14,9 @@ import {
 import { Kind } from "../constants";
 import { APP_ID } from "../App";
 import { getUserProfiles } from "../lib/profile";
-import { advancedSearchContent, searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
+import { searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
-import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
-import { subscribeTo, subsTo } from "../sockets";
+import { subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
@@ -122,8 +115,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (!content) {
           return;
         }
@@ -141,10 +134,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
           updateStore('scores', () => ({ ...scores }));
           return;
         }
-      }
-
-      if (type === 'EOSE') {
-
+      },
+      onEose: () => {
         if (users.length > 0) {
           updateStore('users', () => [users[0]]);
         }
@@ -152,8 +143,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         updateStore('isFetchingUsers', () => false);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getUserProfiles([hex], subId);
@@ -164,11 +154,9 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
@@ -183,10 +171,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
           updateStore('scores', () => ({ ...scores }));
           return;
         }
-      }
-
-      if (type === 'EOSE') {
-
+      },
+      onEose: () => {
         let sorted: PrimalUser[] = [];
 
         users.forEach((user) => {
@@ -202,8 +188,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         updateStore('isFetchingUsers', () => false);
 
         unsub();
-        return;
-      }
+      },
     });
 
 
@@ -217,11 +202,9 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
@@ -236,9 +219,8 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
           updateStore('scores', () => ({ ...scores }));
           return;
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         const sorted = users.sort((a, b) => {
           const aScore = store.scores[a.pubkey];
           const bScore = store.scores[b.pubkey];
@@ -250,9 +232,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         updateStore('isFetchingUsers', () => false);
 
         unsub();
-        return;
-      }
-
+      },
     });
 
     const pubkey = query.length > 0 ? undefined : publicKey;
@@ -362,31 +342,30 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
     if (pubkey.length > 0) {
       const subId = `search_filtered_users_${APP_ID}`;
 
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EVENT') {
-          if (response?.kind === Kind.FilteringReason) {
-            const content: { action: 'block' | 'allow', pubkey?: string, group?: string } = JSON.parse(response.content);
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.FilteringReason) {
+            const filterConfig: { action: 'block' | 'allow', pubkey?: string, group?: string } = JSON.parse(content.content);
 
-            if (content.action === 'allow') {
+            if (filterConfig.action === 'allow') {
               return;
             }
 
-            if (content.pubkey) {
-              reasons.push(content.pubkey);
+            if (filterConfig.pubkey) {
+              reasons.push(filterConfig.pubkey);
               return
             }
 
-            if (content.group) {
-              reasons.push(content.group);
+            if (filterConfig.group) {
+              reasons.push(filterConfig.group);
               return
             }
           }
-        }
-
-        if (type === 'EOSE') {
+        },
+        onEose: () => {
           updateStore('filteringReasons', () => [...reasons]);
           unsub();
-        }
+        },
       });
 
       searchFilteredUsers(pubkey, account?.publicKey, subId);

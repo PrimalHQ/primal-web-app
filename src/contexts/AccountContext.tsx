@@ -27,7 +27,7 @@ import {
   PrimalDVM,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo, decompressBlob, readData } from "../sockets";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
@@ -643,22 +643,19 @@ export function AccountProvider(props: { children: JSXElement }) {
     // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
 
-    const unsub = subscribeTo(`before_add_relay_${APP_ID}`, (type, subId, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_add_relay_${APP_ID}`, {
+      onEvent: (_, content) => {
         const relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
 
         const relays = { ...store.relaySettings, ...relayInfo };
 
         setRelaySettings(relays, true);
-      }
-
-      if (type === 'EOSE') {
-
+      },
+      onEose: () => {
         sendRelays(store.activeRelays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getRelays(store.publicKey, `before_add_relay_${APP_ID}`);
@@ -685,8 +682,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     saveRelaySettings(store.publicKey, store.relaySettings);
 
-    const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, (type, subId, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
+      onEvent: (_, content) => {
         let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
 
         delete relayInfo[url];
@@ -694,15 +691,13 @@ export function AccountProvider(props: { children: JSXElement }) {
         const relays = { ...store.relaySettings, ...relayInfo };
 
         setRelaySettings(relays, true);
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
 
         sendRelays(store.activeRelays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getRelays(store.publicKey, `before_remove_relay_${APP_ID}`);
@@ -843,14 +838,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let rawContacts: NostrEventContent[] = [];
 
-    const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-        updateStore('followInProgress', () => '');
-        unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_follow_${APP_ID}`, {
+      onEvent: (_, content) => {
         if (!content || content.kind !== Kind.Contacts) return;
 
         rawContacts.push(content);
@@ -886,10 +875,14 @@ export function AccountProvider(props: { children: JSXElement }) {
             }));
           }
           else {
-            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
-      }
+      },
+      onEose: () => {
+        updateStore('followInProgress', () => '');
+        unsub();
+      },
     });
 
     getProfileContactList(store.publicKey, `before_follow_${APP_ID}`);
@@ -916,14 +909,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let rawContacts: NostrEventContent[] = [];
 
-    const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-        updateStore('followInProgress', () => '');
-        unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_unfollow_${APP_ID}`, {
+      onEvent: (_, content) => {
         if (!content || content.kind !== Kind.Contacts) return;
 
         rawContacts.push(content);
@@ -959,10 +946,15 @@ export function AccountProvider(props: { children: JSXElement }) {
             }));
           }
           else {
-            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
-      }
+
+      },
+      onEose: () => {
+        updateStore('followInProgress', () => '');
+        unsub();
+      },
     });
 
     getProfileContactList(store.publicKey, `before_unfollow_${APP_ID}`);
@@ -978,16 +970,24 @@ export function AccountProvider(props: { children: JSXElement }) {
       return;
     }
 
-    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(`before_mute_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (content &&
+          (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
+          content.created_at &&
+          content.created_at > store.mutedSince
+        ) {
+          updateMuted(content);
+        }
+      },
+      onEose: async () => {
         if (!store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...store.muted, pubkey];
 
           const tags = [ ...store.mutedTags, ['p', pubkey]];
 
-          const { success, note } = await sendMuteList(tags, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -998,16 +998,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
-        content.created_at &&
-        content.created_at > store.mutedSince
-      ) {
-        updateMuted(content);
-      }
+      },
     });
 
     getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
@@ -1018,16 +1009,24 @@ export function AccountProvider(props: { children: JSXElement }) {
       return;
     }
 
-    const unsub = subscribeTo(`before_unmute_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(`before_unmute_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (content &&
+          ([Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) &&
+          content.created_at &&
+          content.created_at > store.followingSince
+        ) {
+          updateMuted(content as NostrMutedContent);
+        }
+      },
+      onEose: async () => {
         if (store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = store.muted.filter(m => m !== pubkey);
 
           const tags = store.mutedTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-          const { success, note } = await sendMuteList(tags, date, content?.content || '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -1039,15 +1038,6 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         then && then();
         unsub();
-        return;
-      }
-
-      if (content &&
-        ([Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) &&
-        content.created_at &&
-        content.created_at > store.followingSince
-      ) {
-        updateMuted(content as NostrMutedContent);
       }
     });
 
@@ -1145,20 +1135,17 @@ export function AccountProvider(props: { children: JSXElement }) {
     let filterlists: Filterlist[] = [];
 
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-
-      if (type === 'EVENT') {
-        filterlists = updateFilterlists(response as NostrMutedContent);
-      }
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        filterlists = updateFilterlists(content as NostrMutedContent);
+      },
+      onEose: () => {
         if (store.publicKey && !filterlists.find(l => l.pubkey === store.publicKey)) {
           filterlists.unshift({ pubkey: store.publicKey, content: true, trending: true });
         }
         updateStore('mutelists', () => [...filterlists]);
         unsub();
-      }
-
+      },
     });
 
     getFilterlists(pubkey, subId);
@@ -1174,8 +1161,17 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let filterlists: Filterlist[] = [...store.mutelists];
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.mutelistSince
+        ) {
+          filterlists = [...updateFilterlists(content)];
+        }
+      },
+      onEose: async () => {
         updateStore('mutelists', () => [...filterlists]);
 
         if (store.mutelists.find(m => m.pubkey === pubkey)) {
@@ -1193,23 +1189,14 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.mutelistSince
-      ) {
-        filterlists = [...updateFilterlists(content)];
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
 
   };
 
-  const removeFilterList = async (pubkey: string | undefined) => {
+  const removeFilterList = (pubkey: string | undefined) => {
     if (!pubkey || pubkey === store.publicKey) {
       return;
     }
@@ -1218,8 +1205,16 @@ export function AccountProvider(props: { children: JSXElement }) {
     const subId = `bmr_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [...store.mutelists];
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        filterlists = updateFilterlists(content);
+      }
+      },
+      onEose: async () => {
         updateStore('mutelists', () => [...filterlists]);
 
         const modified = store.mutelists.filter(m => m.pubkey !== pubkey);
@@ -1234,30 +1229,29 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.mutelistSince
-      ) {
-        filterlists = updateFilterlists(content);
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
   };
 
-  const updateFilterList = async (pubkey: string | undefined, content = true, trending = true) => {
+  const updateFilterList = (pubkey: string | undefined, content = true, trending = true) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
     const subId = `bmu_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, c) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        updateFilterlists(content);
+      }
+      },
+      onEose: async () => {
 
         if (!store.mutelists.find(m => m.pubkey === pubkey)) {
           unsub();
@@ -1278,16 +1272,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (c &&
-        c.kind === Kind.CategorizedPeople &&
-        c.created_at &&
-        c.created_at > store.mutelistSince
-      ) {
-        updateFilterlists(c);
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
@@ -1322,30 +1307,36 @@ export function AccountProvider(props: { children: JSXElement }) {
     const subId = `allowlist_${APP_ID}`;
 
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-
-      if (type === 'EVENT') {
-        updateAllowlist(response as NostrMutedContent);
-      }
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        updateAllowlist(content as NostrMutedContent);
+      },
+      onEose: () => {
         unsub();
       }
-
     });
 
     getAllowlist(pubkey, subId);
   };
 
-  const addToAllowlist = async (pubkey: string | undefined, then?: () => void) => {
+  const addToAllowlist = (pubkey: string | undefined, then?: () => void) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
     const subId = `baa_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.allowlistSince
+        ) {
+          updateAllowlist(content);
+        }
+      },
+      onEose: async () => {
 
         if (store.allowlist.includes(pubkey)) {
           return;
@@ -1363,32 +1354,31 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         then && then();
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.allowlistSince
-      ) {
-        updateAllowlist(content);
-      }
+      },
     });
 
     getAllowlist(store.publicKey, subId);
 
   };
 
-  const removeFromAllowlist = async (pubkey: string | undefined) => {
+  const removeFromAllowlist = (pubkey: string | undefined) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
-    const subId = `bar_${random}_${APP_ID}`;
+    const subId = `allow_list_remove_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.allowlistSince
+        ) {
+          updateAllowlist(content);
+        }
+      },
+      onEose: async () => {
         if (!store.allowlist.includes(pubkey)) {
           return;
         }
@@ -1406,16 +1396,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.allowlistSince
-      ) {
-        updateAllowlist(content);
-      }
+      },
     });
 
     getAllowlist(store.publicKey, subId);

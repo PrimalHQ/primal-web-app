@@ -8,13 +8,12 @@ import {
   useContext
 } from "solid-js";
 import {
-  decompressBlob,
   isConnected,
   readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket,
-  subscribeTo
+  subsTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -243,15 +242,13 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     const subid = `msg_unk_${APP_ID}`;
     let user: PrimalUser | undefined;
 
-    const unsub = subscribeTo(subid, (type, subId, content) => {
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           user = convertToUser(content, content.pubkey);
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         user && addSender(user);
         unsub();
       }

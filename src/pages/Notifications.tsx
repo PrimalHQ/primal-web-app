@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -15,8 +15,8 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
-import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
-import { subscribeTo } from '../sockets';
+import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
+import { subsTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
@@ -136,18 +136,14 @@ const Notifications: Component = () => {
     if (account?.hasPublicKey() && publicKey() === account.publicKey) {
       const subid = `notif_sls_${APP_ID}`;
 
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EOSE') {
+      const unsub = subsTo(subid, {
+        onEose: () => {
           unsub();
-          return;
-        }
-
-        if (type === 'NOTICE') {
+        },
+        onNotice: () => {
           logError('Error setting notifications lats seen');
           unsub();
-          return;
         }
-
       });
 
       setTimeout(() => {
@@ -163,11 +159,9 @@ const Notifications: Component = () => {
   const fetchNewNotifications = (pk: string, group: NotificationGroup) => {
     const subid = `notif_${APP_ID}`
 
-    const unsub = subscribeTo(subid, async (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content?.content) {
-          return;
-        }
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Notification) {
 
@@ -241,18 +235,14 @@ const Notifications: Component = () => {
           );
           return;
         }
-
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
         setNotifSince(timeNow());
         unsub();
-        return;
-      }
-
+      },
     });
 
     const since = queryParams.ignoreLastSeen ? 0 : notifSince;
@@ -300,8 +290,8 @@ const Notifications: Component = () => {
   const fetchOldNotifications = (until: number, group: NotificationGroup) => {
     const subid = `notif_old_${APP_ID}`
 
-    const unsub = subscribeTo(subid, async (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         if (!content?.content) {
           return;
         }
@@ -377,10 +367,8 @@ const Notifications: Component = () => {
           return;
         }
 
-      }
-
-      if (type === 'EOSE') {
-
+      },
+      onEose: () => {
         // Sort notifications
         const notifs = [...oldNotifications.page.notifications];
 
@@ -401,9 +389,7 @@ const Notifications: Component = () => {
 
         setfetchingOldNotifs(false);
         unsub();
-        return;
-      }
-
+      },
     });
 
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));

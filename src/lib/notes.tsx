@@ -1,9 +1,8 @@
-import { A } from "@solidjs/router";
 import { Relay, relayInit } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, profileRegexG, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
-import { sendMessage, subscribeTo } from "../sockets";
+import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
+import { sendMessage, subsTo } from "../sockets";
 import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
@@ -368,23 +367,18 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
 
     const subId = `publish_event_${signedNote.id}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === "NOTICE") {
-        unsub();
-        reject("Failed to publish note");
-        return;
-      }
-
-      if (type === "EVENT") {
+    const unsub = subsTo(subId, {
+      onEvent: () => {
         unsub();
         resolve(true);
-        return;
-      }
-
-      if (type === "EOSE") {
+      },
+      onNotice: () => {
+        unsub();
+        reject("Failed to publish note");
+      },
+      onEose: () => {
         unsub();
         reject('No publish confirmation')
-        return;
       }
     })
 
@@ -607,9 +601,8 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
 
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {
 
-  const unsub = subscribeTo(subId, (type) => {
-
-    if (type === 'EOSE') {
+  const unsub = subsTo(subId, {
+    onEose: () => {
       unsub();
       then && then();
     }

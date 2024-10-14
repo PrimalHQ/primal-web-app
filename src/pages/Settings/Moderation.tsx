@@ -16,7 +16,7 @@ import { useSearchContext } from '../../contexts/SearchContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hexToNpub, npubToHex } from '../../lib/keys';
 import { getUserProfiles } from '../../lib/profile';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { convertToUser, nip05Verification, userName } from '../../stores/profile';
 import { settings as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import { NostrUserContent, PrimalUser } from '../../types/primal';
@@ -85,24 +85,17 @@ const Moderation: Component = () => {
 
     if (userMutelists.length > 0) {
       const subId = `user_mutelist_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
-
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
-
-            const u = convertToUser(user, response.pubkey);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
-            return;
           }
+        },
+        onEose: () => {
+          unsub();
         }
       });
 
@@ -115,26 +108,23 @@ const Moderation: Component = () => {
     const rand = Math.floor(Math.random()*10_000);
 
     if (allowList.length > 0) {
-      const subId = `user_allowlist_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const subId = `user_allowlist_${rand}_${APP_ID}`;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-            const u = convertToUser(user, response.pubkey);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
-            return;
           }
-        }
+
+        },
+        onEose: () => {
+          unsub();
+        },
       });
 
       getUserProfiles(allowList || [], subId)
@@ -147,25 +137,21 @@ const Moderation: Component = () => {
 
     if (reasons.length > 0) {
       const subId = `user_reasons_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
-
-            const u = convertToUser(user, response.pubkey);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
             return;
           }
-        }
+        },
+        onEose: () => {
+          unsub();
+        },
       });
 
       getUserProfiles(reasons, subId)

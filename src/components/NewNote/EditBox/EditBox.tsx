@@ -10,7 +10,7 @@ import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
-import { subscribeTo } from "../../../sockets";
+import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
@@ -44,11 +44,8 @@ import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserR
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
 import Lnbc from "../../Lnbc/Lnbc";
-import { decodeIdentifier, hexToNpub } from "../../../lib/keys";
-import LinkPreview from "../../LinkPreview/LinkPreview";
-import { ToggleButton } from "@kobalte/core";
+import { decodeIdentifier } from "../../../lib/keys";
 import { useSettingsContext } from "../../../contexts/SettingsContext";
-import ArticlePreview from "../../ArticlePreview/ArticlePreview";
 import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
@@ -780,8 +777,8 @@ const EditBox: Component<{
 
         const importId = `import_note_${APP_ID}`;
 
-        const unsub = subscribeTo(importId, (type, _, response) => {
-          if (type === 'EOSE') {
+        const unsub = subsTo(importId, {
+          onEose: () => {
             if (note) {
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
@@ -965,32 +962,10 @@ const EditBox: Component<{
 
       setReferencedArticles(id, { messages: [], users: {}, postStats: {}, mentions: {} })
 
-      const unsub = subscribeTo(subId, (type, subId, content) =>{
-        if (type === 'EOSE') {
-          const newNote = convertToArticles(referencedArticles[id])[0];
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
 
-          setArticleRefs((refs) => ({
-            ...refs,
-            [newNote.noteId]: newNote
-          }));
-
-          subNaddrRef(newNote.noteId);
-
-          unsub();
-          return;
-        }
-
-        // if (type === 'EOSE') {
-        //   subNaddrRef(id);
-        //   unsub();
-        //   return;
-        // }
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
-
+          if (!content) return;
 
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
@@ -1033,20 +1008,19 @@ const EditBox: Component<{
             const hints = JSON.parse(content.content) as Record<string, string>;
             setRelayHints(() => ({ ...hints }))
           }
+        },
+        onEose: () => {
+          const newNote = convertToArticles(referencedArticles[id])[0];
 
-          // if([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
-          //   const url = `https://highlighter.com/${hexToNpub(pubkey)}/${identifier}`;
+          setArticleRefs((refs) => ({
+            ...refs,
+            [newNote.noteId]: newNote
+          }));
 
-          //   const preview = {
-          //     url,
-          //     description: (content.tags.find(t => t[0] === 'summary') || [])[1] || content.content.slice(0, 100),
-          //     images: [(content.tags.find(t => t[0] === 'image') || [])[1] || ''],
-          //     title: (content.tags.find(t => t[0] === 'title') || [])[1] || '',
-          //   }
+          subNaddrRef(newNote.noteId);
 
-          //   setAddrRef(id, () => ({ ...preview }));
-          // }
-        }
+          unsub();
+        },
       });
 
       getParametrizedEvent(pubkey, identifier, kind, subId);
@@ -1098,30 +1072,15 @@ const EditBox: Component<{
         return;
       }
 
+      const subId = `nu_${id}_${APP_ID}`
       const eventId = nip19.decode(id).data as string | nip19.ProfilePointer;
       const hex = typeof eventId === 'string' ? eventId : eventId.pubkey;
 
       // setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
 
-      const unsub = subscribeTo(`nu_${id}`, (type, subId, content) =>{
-        if (type === 'EOSE') {
-        //   // const newNote = convertToNotes(referencedNotes[subId])[0];
-
-        //   // setNoteRefs((refs) => ({
-        //   //   ...refs,
-        //   //   [newNote.noteId]: newNote
-        //   // }));
-
-          subUserRef(hex);
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
@@ -1133,11 +1092,16 @@ const EditBox: Component<{
             // setReferencedNotes(subId, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
             return;
           }
+
+        },
+        onEose: () => {
+          subUserRef(hex);
+
+          unsub();
         }
       });
 
-
-      getUserProfiles([hex], `nu_${id}`);
+      getUserProfiles([hex], subId);
 
     });
 
@@ -1159,34 +1123,15 @@ const EditBox: Component<{
         return;
       }
 
+      const subId = `nn_${id}_${APP_ID}`;
       const event = nip19.decode(id);
       const eventId = nip19.decode(id).data as string | nip19.EventPointer;
       const hex = typeof eventId === 'string' ? eventId : eventId.id;
 
-      setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
+      setReferencedNotes(subId, { messages: [], users: {}, postStats: {}, mentions: {} })
 
-      const unsub = subscribeTo(`nn_${id}`, (type, subId, content) =>{
-        if (type === 'EOSE') {
-          const newNote = convertToNotes(referencedNotes[subId])[0];
-
-          if (newNote) {
-            setNoteRefs((refs) => ({
-              ...refs,
-              [newNote.noteId]: newNote
-            }));
-
-            subNoteRef(newNote.noteId);
-          } else {
-            subNoteRef(id);
-          }
-
-
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
           if (!content) {
             return;
           }
@@ -1237,11 +1182,28 @@ const EditBox: Component<{
             const hints = JSON.parse(content.content) as Record<string, string>;
             setRelayHints(() => ({ ...hints }))
           }
-        }
+        },
+        onEose: () => {
+          const newNote = convertToNotes(referencedNotes[subId])[0];
+
+          if (newNote) {
+            setNoteRefs((refs) => ({
+              ...refs,
+              [newNote.noteId]: newNote
+            }));
+
+            subNoteRef(newNote.noteId);
+          } else {
+            subNoteRef(id);
+          }
+
+
+
+          unsub();
+        },
       });
 
-
-      getEvents(account?.publicKey, [hex], `nn_${id}`, true);
+      getEvents(account?.publicKey, [hex], subId, true);
 
     });
 

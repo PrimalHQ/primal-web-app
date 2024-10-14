@@ -4,7 +4,7 @@ import { getEvents, getMegaFeed, getUserArticleFeed, getUserFeed } from "./lib/f
 import { decodeIdentifier, hexToNpub } from "./lib/keys";
 import { getParametrizedEvents, setLinkPreviews } from "./lib/notes";
 import { getUserProfileInfo } from "./lib/profile";
-import { subscribeTo } from "./sockets";
+import { subsTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
 import { EventCoordinate, FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
 import { parseBolt11 } from "./utils";
@@ -27,19 +27,16 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
 
     let lastNote: PrimalNote | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToNotes(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
       }
     });
 
@@ -213,19 +210,16 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
 
     let lastNote: PrimalArticle | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToArticles(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
       }
     });
 
@@ -400,20 +394,17 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
 
     let lastNote: PrimalArticle | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToArticles(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
-      }
+      },
     });
 
     getEvents(pubkey, [...noteIds], subId, true);
@@ -574,20 +565,17 @@ export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string
 
     let lastNote: PrimalArticle | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToArticles(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
-      }
+      },
     });
 
     getUserArticleFeed(userPubkey, pubkey, subId, type, until, limit);
@@ -746,9 +734,12 @@ export const fetchUserProfile = (userPubkey: string | undefined, pubkey: string 
     let user: PrimalUser | undefined;
     let userStats: UserStats | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         if (!user) {
           reject('user not found')
@@ -760,13 +751,7 @@ export const fetchUserProfile = (userPubkey: string | undefined, pubkey: string 
         }
 
         resolve(user);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
-      }
+      },
     });
 
     getUserProfileInfo(pubkey, userPubkey, subId);
@@ -814,20 +799,17 @@ export const fetchUserGallery = (userPubkey: string | undefined, pubkey: string 
 
     let lastNote: PrimalNote | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToNotes(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
-      }
+      },
     });
 
     getUserFeed(userPubkey, pubkey, subId, type, undefined, until, limit);
@@ -1000,20 +982,17 @@ export const fetchNoteFeedBySpec = (pubkey: string | undefined, spec: string, su
 
     let lastNote: PrimalNote | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToNotes(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
-      }
+      },
     });
 
     getMegaFeed(pubkey, spec, subId, until, limit);
@@ -1183,19 +1162,16 @@ export const fetchReadsFeedBySpec = (pubkey: string | undefined, spec: string, s
 
     let lastNote: PrimalArticle | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updatePage(content);
+      },
+      onEose: () => {
         unsub();
         const notes = convertToArticles(page, page.topZaps);
 
         resolve(notes);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content) return;
-        updatePage(content);
       }
     });
 

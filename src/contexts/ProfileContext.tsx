@@ -1,7 +1,7 @@
 import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
-import { getEvents, getFutureUserFeed, getMegaFeed, getUserFeed } from "../lib/feed";
-import { convertToArticles, convertToNotes, paginationPlan, parseEmptyReposts, sortByRecency, sortByScore } from "../stores/note";
+import { getFutureUserFeed, } from "../lib/feed";
+import { convertToArticles, convertToNotes, sortByScore } from "../stores/note";
 import { emptyPage, Kind } from "../constants";
 import {
   batch,
@@ -12,12 +12,12 @@ import {
   useContext
 } from "solid-js";
 import {
-  decompressBlob,
   isConnected,
   readData,
   refreshSocketListeners,
   removeSocketListeners,
-  socket
+  socket,
+  subsTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -32,13 +32,11 @@ import {
   NostrRelays,
   NostrStatsContent,
   NostrUserContent,
-  NostrUserZaps,
   NoteActions,
   PrimalArticle,
   PrimalNote,
   PrimalUser,
   PrimalZap,
-  TopZap,
   UserStats,
   VanityProfiles,
 } from "../types/primal";
@@ -50,20 +48,14 @@ import {
   getProfileContactList,
   getProfileFollowerList,
   getProfileScoredNotes,
-  getProfileZapList,
   getRelays,
   getUserProfileInfo,
   isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
-import { setLinkPreviews } from "../lib/notes";
-import { subscribeTo } from "../sockets";
-import { parseBolt11 } from "../utils";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
-import { fetchUserArticles, fetchUserGallery } from "../handleNotes";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
-import { logInfo } from "../lib/logger";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 import { emptyPaging, fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 
@@ -452,15 +444,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const subIdContacts = `profile_contacts_${APP_ID}`;
 
-    const unsubContacts = subscribeTo(subIdContacts, (type, _, content) => {
-
-      if (type === 'EOSE') {
-        updateStore('isFetchingContacts', () => false);
-        unsubContacts();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsubContacts = subsTo(subIdContacts, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Contacts) {
           updateStore('contactListDate', () => content.created_at || 0);
         }
@@ -485,7 +470,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
           updateStore('profileStats', () => ({ ...stats }));
           return;
         }
-      }
+      },
+      onEose: () => {
+        updateStore('isFetchingContacts', () => false);
+        unsubContacts();
+      },
     });
 
     getProfileContactList(pubkey, subIdContacts, extended);
@@ -496,22 +485,19 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const subIdRelays = `profile_relays_${APP_ID}`;
 
-    const unsubContacts = subscribeTo(subIdRelays, (type, _, content) => {
-
-      if (type === 'EOSE') {
-        updateStore('isFetchingRelays', () => false);
-        unsubContacts();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsubContacts = subsTo(subIdRelays, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.UserRelays) {
           const relays = extractRelayConfigFromTags(content.tags);
 
           updateStore('relays', reconcile(relays));
           return;
         }
-      }
+      },
+      onEose: () => {
+        updateStore('isFetchingRelays', () => false);
+        unsubContacts();
+      },
     });
 
     updateStore('isFetchingRelays', () => true);
@@ -523,14 +509,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if (!pubkey) return;
     const subIdProfiles = `profile_followers_${APP_ID}`;
 
-    const unsubProfiles = subscribeTo(subIdProfiles, (type, _, content) => {
-      if (type === 'EOSE') {
-        updateStore('isFetchingFollowers', () => false);
-        unsubProfiles();
-        return;
-      }
-
-      if (type === 'EVENT') {
+    const unsubProfiles = subsTo(subIdProfiles, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -542,16 +522,18 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
           user.created_at = content.created_at;
 
           updateStore('followers', store.followers.length, () => ({ ...user }));
-          return;
         }
 
         if (content?.kind === Kind.UserFollowerCounts) {
           const stats: Record<string, number> = JSON.parse(content.content);
 
           updateStore('profileStats', () => ({ ...stats }));
-          return;
         }
-      }
+      },
+      onEose: () => {
+        updateStore('isFetchingFollowers', () => false);
+        unsubProfiles();
+      },
     });
 
     updateStore('isFetchingFollowers', () => true);

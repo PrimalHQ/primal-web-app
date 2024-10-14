@@ -13,7 +13,6 @@ import {
   refreshSocketListeners,
   removeSocketListeners,
   socket,
-  subscribeTo,
   subsTo
 } from "../sockets";
 import {
@@ -25,7 +24,6 @@ import {
   ZapOption,
 } from "../types/primal";
 import {
-  initAvailableFeeds,
   initHomeFeeds,
   initReadsFeeds,
   loadHomeFeeds,
@@ -40,7 +38,6 @@ import { saveAnimated, saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/l
 import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
-import { hexToNpub } from "../lib/keys";
 import { feedProfile, feedProfileDesription, settings as t } from "../translations";
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
@@ -162,11 +159,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const resetZapOptionsToDefault = (temp?: boolean) => {
     const subid = `restore_default_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
-
-      if (type === 'EVENT' && content?.content) {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
         try {
-          const settings = JSON.parse(content?.content);
+          const settings = JSON.parse(content?.content || '{}');
 
           let options = settings.zapConfig;
           let amount = settings.zapDefault;
@@ -180,18 +177,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         catch (e) {
           logError('Error parsing settings response: ', e);
         }
-      }
-
-      if (type === 'NOTICE') {
+      },
+      onNotice: () => {
         toaster?.sendWarning(intl.formatMessage({
           id: 'settings.loadFail',
           defaultMessage: 'Failed to load settings. Will be using local settings.',
           description: 'Toast message after settings have failed to be loaded from the server',
         }));
-      }
-
-      unsub();
-      return;
+      },
+      onEose: () => {
+        unsub();
+      },
     });
 
     getDefaultSettings(subid);
@@ -600,17 +596,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const subid = `save_settings_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
-      if (type === 'NOTICE') {
+    const unsub = subsTo(subid, {
+      onNotice: () => {
         toaster?.sendWarning(intl.formatMessage({
           id: 'settings.saveFail',
           defaultMessage: 'Failed to save settings',
           description: 'Toast message after settings have failed to be saved on the server',
         }));
+      },
+      onEose: () => {
+        unsub();
       }
-
-      unsub();
-      return;
     });
 
     sendSettings(settings, subid);
@@ -620,11 +616,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const subid = `load_defaults_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
-      if (type === 'EVENT' && content?.content) {
         try {
-          const settings = JSON.parse(content?.content);
+          const settings = JSON.parse(content.content || '{}');
 
           const feeds = settings.feeds as PrimalFeed[];
           const notificationSettings = settings.notifications as Record<string, boolean>;
@@ -647,18 +644,17 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         catch (e) {
           logError('Error parsing settings response: ', e);
         }
-      }
-
-      if (type === 'NOTICE') {
+      },
+      onNotice: () => {
         toaster?.sendWarning(intl.formatMessage({
           id: 'settings.loadFail',
           defaultMessage: 'Failed to load settings. Will be using local settings.',
           description: 'Toast message after settings have failed to be loaded from the server',
         }));
-      }
-
-      unsub();
-      return;
+      },
+      onEose: () => {
+        unsub();
+      },
     });
 
     getDefaultSettings(subid);
@@ -678,9 +674,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const settingsHomeSubId = `load_home_settings_${APP_ID}`;
     const settingsReadsSubId = `load_reads_settings_${APP_ID}`;
 
-    const unsubSettings = subscribeTo(settingsSubId, async (type, subId, content) => {
+    const unsubSettings = subsTo(settingsSubId, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
-      if (type === 'EVENT' && content?.content) {
         try {
           const {
             animated,
@@ -693,7 +690,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             applyContentModeration,
             contentModeration,
             proxyThroughPrimal,
-          } = JSON.parse(content?.content);
+          } = JSON.parse(content.content || '{}');
 
           theme && setThemeByName(theme, true);
 
@@ -749,21 +746,18 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
         catch (e) {
           logError('Error parsing settings response: ', e);
         }
-      }
-
-      if (type === 'NOTICE') {
+      },
+      onNotice: () => {
         toaster?.sendWarning(intl.formatMessage({
           id: 'settings.loadFail',
           defaultMessage: 'Failed to load settings. Will be using local settings.',
           description: 'Toast message after settings have failed to be loaded from the server',
         }));
-      }
-
-      // updateStore('defaultFeed', () => store.availableFeeds[0]);
-
-      then && then();
-      unsubSettings();
-      return;
+      },
+      onEose: () => {
+        then && then();
+        unsubSettings();
+      },
     });
 
     pubkey && getSettings(pubkey, settingsSubId);
@@ -806,16 +800,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const refreshMobileReleases = () => {
     const subid = `mobile_releases_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, async (type, subId, content) => {
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         const releases = JSON.parse(content?.content || '{}') as MobileReleases;
         updateStore('mobileReleases', () => ({ ...releases }));
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         unsub();
-      }
+      },
     });
 
     getMobileReleases(subid);

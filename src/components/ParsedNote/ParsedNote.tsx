@@ -1,9 +1,7 @@
 import { A } from '@solidjs/router';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
-  addLinkPreviews,
   getLinkPreview,
-  getParametrizedEvent,
   isAddrMention,
   isAppleMusic,
   isCustomEmoji,
@@ -26,10 +24,10 @@ import {
   isWebmVideo,
   isYouTube,
 } from '../../lib/notes';
-import { authorName, truncateNpub, userName } from '../../stores/profile';
+import { truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createEffect, createResource, createSignal, For, JSXElement, onMount, Show, Suspense,
+  Component, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
   PrimalArticle,
@@ -44,15 +42,13 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
-import { createStore, unwrap } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
-import { subscribeTo } from '../../sockets';
-import { APP_ID } from '../../App';
 import { logError } from '../../lib/logger';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import { useAppContext } from '../../contexts/AppContext';

@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core/tabs';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
@@ -11,17 +11,15 @@ import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
 import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, setLinkPreviews } from '../../lib/notes';
 import { truncateNumber2 } from '../../lib/notifications';
-import { updateStore } from '../../services/StoreService';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { convertToNotes } from '../../stores/note';
 import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser } from '../../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote } from '../../types/primal';
 import { parseBolt11 } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
-import Modal from '../Modal/Modal';
 import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
@@ -136,15 +134,8 @@ const ReactionsModal: Component<{
 
     const users: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        setLikeList((likes) => [ ...likes, ...users ]);
-        loadedLikes = likeList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -156,10 +147,14 @@ const ReactionsModal: Component<{
           user.created_at = content.created_at;
 
           users.push(user);
-
-          return;
         }
-      }
+      },
+      onEose: () => {
+        setLikeList((likes) => [ ...likes, ...users ]);
+        loadedLikes = likeList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
@@ -174,21 +169,8 @@ const ReactionsModal: Component<{
     const users: Record<string, any> = {};
     const zaps: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        const zapData = zaps.map((zap => ({
-          ...zap,
-          amount: parseInt(zap.amount || '0'),
-          sender: users[zap.pubkey],
-        })));
-
-        setZapList((zapItems) => [ ...zapItems, ...zapData ]);
-        loadedZaps = zapList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -233,7 +215,19 @@ const ReactionsModal: Component<{
 
           return;
         }
-      }
+      },
+      onEose: () => {
+        const zapData = zaps.map((zap => ({
+          ...zap,
+          amount: parseInt(zap.amount || '0'),
+          sender: users[zap.pubkey],
+        })));
+
+        setZapList((zapItems) => [ ...zapItems, ...zapData ]);
+        loadedZaps = zapList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
@@ -248,16 +242,8 @@ const ReactionsModal: Component<{
 
     const users: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-
-      if (type === 'EOSE') {
-        setRepostList((reposts) => [...reposts, ...users]);
-        loadedReposts = repostList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -269,10 +255,14 @@ const ReactionsModal: Component<{
           user.created_at = content.created_at;
 
           users.push(user);
-
-          return;
         }
-      }
+      },
+      onEose: () => {
+        setRepostList((reposts) => [...reposts, ...users]);
+        loadedReposts = repostList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
@@ -293,17 +283,8 @@ const ReactionsModal: Component<{
       topZaps: {},
     };
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        const pageNotes = convertToNotes(page);
-
-        setQuotesList((notes) => [...notes, ...pageNotes]);
-        loadedQuotes = quotesList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
@@ -375,7 +356,15 @@ const ReactionsModal: Component<{
           setLinkPreviews(() => ({ [data.url]: preview }));
           return;
         }
-      }
+      },
+      onEose: () => {
+        const pageNotes = convertToNotes(page);
+
+        setQuotesList((notes) => [...notes, ...pageNotes]);
+        loadedQuotes = quotesList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
@@ -387,18 +376,17 @@ const ReactionsModal: Component<{
 
     const subId = `nr_qc_${props.noteId}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.NoteQuoteStats) {
           const quoteStats = JSON.parse(content.content);
 
           setQuoteCount(() => quoteStats.count || 0);
         }
-      }
+      },
+      onEose: () => {
+        unsub();
+      },
     });
 
     getEventQuoteStats(props.noteId, subId);

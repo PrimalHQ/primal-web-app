@@ -1,20 +1,16 @@
 import { A } from '@solidjs/router';
-import { hexToNpub } from '../../lib/keys';
 import {
   addLinkPreviews,
   isAppleMusic,
-  isHashtag,
   isImage,
   isInterpunction,
   isLinebreak,
   isMixCloud,
   isMp4Video,
-  isNostrNests,
   isNoteMention,
   isOggVideo,
   isSoundCloud,
   isSpotify,
-  isTagMention,
   isTwitch,
   isUrl,
   isUserMention,
@@ -25,10 +21,9 @@ import {
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createEffect, createSignal, For, JSXElement, Match, onMount, Show, Switch,
+  Component, createEffect, JSXElement, Match, Show, Switch,
 } from 'solid-js';
 import {
-  MediaSize,
   NostrMentionContent,
   NostrNoteContent,
   NostrPostStats,
@@ -43,19 +38,15 @@ import {
 import { nip19 } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
-import { useMediaContext } from '../../contexts/MediaContext';
-import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { Kind, linebreakRegex } from '../../constants';
+import { Kind } from '../../constants';
 import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
 import { getUserProfileInfo } from '../../lib/profile';
-import { store, updateStore } from '../../services/StoreService';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { convertToNotes } from '../../stores/note';
-import { account } from '../../translations';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
@@ -117,25 +108,23 @@ const ParsingToken: Component<{
         return;
       }
 
-      const unsub = subscribeTo(subId, (type, _, content) => {
-          if (type === 'EOSE') {
-            updateStore('isDataFetched', () => true)
-            unsub();
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
+
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
+
+            const u = convertToUser(user, content.pubkey);
+
+            updateStore('userRefs', () => ({ [u.pubkey]: u }));
             return;
           }
-
-          if (type === 'EVENT') {
-            if (!content) return;
-
-            if (content.kind === Kind.Metadata) {
-              const user = content as NostrUserContent;
-
-              const u = convertToUser(user, content.pubkey);
-
-              updateStore('userRefs', () => ({ [u.pubkey]: u }));
-              return;
-            }
-          }
+        },
+        onEose: () => {
+          updateStore('isDataFetched', () => true)
+          unsub();
+        },
       });
 
       getUserProfileInfo(hex, account?.publicKey, subId);
@@ -169,27 +158,10 @@ const ParsingToken: Component<{
       let noteStats: NostrPostStats = {};
       let noteMentions: Record<string, NostrNoteContent> = {};
 
-      const unsub = subscribeTo(subId, (type, subId, content) =>{
-        if (type === 'EOSE') {
-          // @ts-ignore
-          const newNote = convertToNotes({
-            users,
-            messages,
-            postStats: noteStats,
-            mentions: noteMentions,
-            noteActions: {},
-          })[0];
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
 
-          updateStore('noteRefs', () => ({[newNote.post.id]: { ...newNote }}));
-          updateStore('isDataFetched', () => true)
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
+          if (!content) return;
 
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
@@ -220,7 +192,21 @@ const ParsingToken: Component<{
             noteMentions[mention.id] = { ...mention };
             return;
           }
-        }
+        },
+        onEose: () => {
+          // @ts-ignore
+          const newNote = convertToNotes({
+            users,
+            messages,
+            postStats: noteStats,
+            mentions: noteMentions,
+            noteActions: {},
+          })[0];
+
+          updateStore('noteRefs', () => ({[newNote.post.id]: { ...newNote }}));
+          updateStore('isDataFetched', () => true)
+          unsub();
+        },
       });
 
 

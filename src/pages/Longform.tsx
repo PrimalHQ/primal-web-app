@@ -1,65 +1,50 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { A, useParams } from "@solidjs/router";
-import { batch, Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
+import { batch, Component, createEffect, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
-import { getHighlights, getParametrizedEvent, sendEvent, setLinkPreviews } from "../lib/notes";
-import { subscribeTo, subsTo } from "../sockets";
-import { SolidMarkdown } from "solid-markdown";
+import { getHighlights, sendEvent, setLinkPreviews } from "../lib/notes";
+import { subsTo } from "../sockets";
 
 import styles from './Longform.module.scss';
-import Loader from "../components/Loader/Loader";
 import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrTier, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult, TopZap, ZapOption } from "../types/primal";
-import { getUserProfileInfo, getUserProfiles } from "../lib/profile";
+import { getUserProfiles } from "../lib/profile";
 import { convertToUser, nip05Verification, userName } from "../stores/profile";
 import Avatar from "../components/Avatar/Avatar";
 import { shortDate } from "../lib/dates";
 
-import hljs from 'highlight.js'
-
-import mdFoot from 'markdown-it-footnote';
-import { full as mdEmoji } from 'markdown-it-emoji';
 
 import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
 import NoteTopZaps from "../components/Note/NoteTopZaps";
 import { parseBolt11, uuidv4 } from "../utils";
 import Note, { NoteReactionsState } from "../components/Note/Note";
-import NoteFooter from "../components/Note/NoteFooter/NoteFooter";
-import { getArticleThread, getAuthorSubscriptionTiers, getThread } from "../lib/feed";
+import { getAuthorSubscriptionTiers } from "../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../components/NoteImage/NoteImage";
 import { nip19 } from "../lib/nTools";
-import { saveNotes } from "../services/StoreService";
 import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
-import { tableNodeTypes } from "@milkdown/prose/tables";
 import VerificationCheck from "../components/VerificationCheck/VerificationCheck";
 import BookmarkArticle from "../components/BookmarkNote/BookmarkArticle";
 import NoteContextTrigger from "../components/Note/NoteContextTrigger";
 import { CustomZapInfo, useAppContext } from "../contexts/AppContext";
 import ArticleFooter from "../components/Note/NoteFooter/ArticleFooter";
-import { thread } from "../translations";
-import { useThreadContext } from "../contexts/ThreadContext";
 import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
 import ArticleSidebar from "../components/HomeSidebar/ArticleSidebar";
 import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
-import { sanitize } from "dompurify";
 import { fetchNotes } from "../handleNotes";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import ButtonPrimary from "../components/Buttons/ButtonPrimary";
 import { zapSubscription } from "../lib/zap";
-import Paginator from "../components/Paginator/Paginator";
 import { useSettingsContext } from "../contexts/SettingsContext";
 import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
 import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
-import { logWarning } from "../lib/logger";
 import PageCaption from "../components/PageCaption/PageCaption";
 import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
 import { useMediaContext } from "../contexts/MediaContext";
-import { Transition, TransitionGroup } from "solid-transition-group";
+import { Transition } from "solid-transition-group";
 import { fetchReadThread } from "../megaFeeds";
 
 export type LongFormData = {
@@ -403,16 +388,14 @@ const Longform: Component< { naddr: string } > = (props) => {
     if (!store.users.find((u) => u.pubkey === pubkey)) {
       const subId = `article_pk_${APP_ID}`;
 
-      const unsub = subscribeTo(subId, (type, _, content) =>{
-        if (type === 'EOSE') {
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          content && updatePage(content);
+        },
+        onEose: () => {
           unsub();
           savePage(store.page);
-          return;
-        }
-
-        if (type === 'EVENT') {
-          content && updatePage(content);
-        }
+        },
       });
 
       getUserProfiles([pubkey], subId);

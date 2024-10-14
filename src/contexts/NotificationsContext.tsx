@@ -7,13 +7,12 @@ import {
   useContext
 } from "solid-js";
 import {
-  decompressBlob,
   isConnected,
   readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket,
-  subscribeTo
+  subsTo
 } from "../sockets";
 import {
   ContextChildren,
@@ -176,25 +175,25 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     if (pk) {
       const subid = `notif_ls_${APP_ID}`
 
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EVENT' && content?.kind === Kind.Timestamp) {
+      const unsub = subsTo(subid, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.Timestamp) {
 
-          const timestamp = parseInt(content.content);
+            const timestamp = parseInt(content.content);
 
-          if (!isNaN(timestamp)) {
-            setNotifSince(timestamp);
+            if (!isNaN(timestamp)) {
+              setNotifSince(timestamp);
+            }
+
+            unsub();
+            return;
           }
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EOSE') {
+        },
+        onEose: () => {
           if (!notifSince) {
             setNotifSince(0);
           }
-        }
-
+        },
       });
 
       getLastSeen(pk as string, subid);

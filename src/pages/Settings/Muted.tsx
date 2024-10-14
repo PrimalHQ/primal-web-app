@@ -8,7 +8,7 @@ import { A, Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getUserProfiles } from '../../lib/profile';
 import { APP_ID } from '../../App';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { convertToUser, nip05Verification, userName } from '../../stores/profile';
 import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
@@ -39,22 +39,21 @@ const Muted: Component = () => {
       let pubkeys: string[] = [];
       let users: Record<string, PrimalUser> = {};
 
-      const unsub = subscribeTo(mutedMetadataSubId, (type, subId, response) => {
-        if (type === 'EVENT') {
-          if (response && [Kind.MuteList].includes(response?.kind || 0)) {
+      const unsub = subsTo(mutedMetadataSubId, {
+        onEvent: (_, content) => {
+          if (content && [Kind.MuteList].includes(content?.kind || 0)) {
             // @ts-ignore
-            pubkeys = response.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+            pubkeys = content.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
           }
-          if (response?.kind === Kind.Metadata) {
-            users[response.pubkey] = convertToUser(response, response.pubkey);
+          if (content?.kind === Kind.Metadata) {
+            users[content.pubkey] = convertToUser(content, content.pubkey);
           }
-        }
-
-        if (type === 'EOSE') {
+        },
+        onEose: () => {
           setMutedUsers(() => ({ ...users }));
           setIsFetching(false);
           unsub();
-        }
+        },
       });
 
       getUserProfiles(account.muted, mutedMetadataSubId);

@@ -1,13 +1,13 @@
 import { A } from '@solidjs/router';
 import { nip19 } from '../../lib/nTools';
-import { Component, createEffect, createSignal, For, JSXElement, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, For, JSXElement, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind } from '../../constants';
 import { hexToNpub, npubToHex } from '../../lib/keys';
 import { isInterpunction, isUrl, isUserMention, isHashtag } from '../../lib/notes';
 import { getUserProfiles } from '../../lib/profile';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { userName, truncateNpub } from '../../stores/profile';
 import { NostrUserContent } from '../../types/primal';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
@@ -248,18 +248,20 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
 
     const subId = `pa_u_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EVENT' && content?.kind === Kind.Metadata) {
-        const user = content as NostrUserContent;
-        const profile = JSON.parse(user.content);
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
 
-        setUsersMentionedInAbout(() => ({[user.pubkey]: ({ ...profile })}));
-      }
+        if (content?.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+          const profile = JSON.parse(user.content);
 
-      if(type === 'EOSE') {
+          setUsersMentionedInAbout(() => ({[user.pubkey]: ({ ...profile })}));
+        }
+      },
+      onEose: () => {
         unsub();
         tokenizeAbout(about);
-      }
+      },
     });
 
     getUserProfiles(userMentions, subId);

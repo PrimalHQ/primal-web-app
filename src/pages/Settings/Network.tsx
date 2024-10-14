@@ -14,7 +14,7 @@ import { Link } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getDefaultRelays } from '../../lib/relays';
 import { APP_ID } from '../../App';
-import { isConnected as isSocketConnected, socket, subscribeTo } from '../../sockets';
+import { isConnected as isSocketConnected, socket, subsTo } from '../../sockets';
 import { createStore } from 'solid-js/store';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
@@ -165,15 +165,14 @@ const Network: Component = () => {
   }
 
   createEffect(() => {
-    const unsub = subscribeTo(`settings_drs_${APP_ID}`, (type, subId, content) => {
-      if (type === 'EVENT' && content) {
+    const unsub = subsTo(`settings_drs_${APP_ID}`, {
+      onEvent: (_, content) => {
         const urls = JSON.parse(content.content || '[]') || [];
         setRecomendedRelays(() => urls.map(relayInit));
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         unsub();
-      }
+      },
     });
 
     getDefaultRelays(`settings_drs_${APP_ID}`);
