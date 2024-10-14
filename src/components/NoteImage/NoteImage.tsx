@@ -32,7 +32,7 @@ const NoteImage: Component<{
   const onError = (event: any) => {
     const image = event.target;
 
-    if (image.src === props.altSrc || !props.altSrc) {
+    if (image.src === props.altSrc || !props.altSrc || image.src.endsWith(props.altSrc)) {
       // @ts-ignore
       props.onError && props.onError(event);
       return true;
