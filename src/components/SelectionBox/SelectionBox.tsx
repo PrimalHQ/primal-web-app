@@ -69,7 +69,6 @@ const SelectionBox: Component<{
           <div class={styles.title}>
             Note Feeds:
           </div>
-          <A href='/settings/feeds'>Edit Feeds</A>
         </div>
         <Select.Listbox class={styles.listbox}/>
       </Select.Content>

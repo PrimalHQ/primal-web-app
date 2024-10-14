@@ -71,6 +71,7 @@ const Bookmarks: Component = () => {
   createEffect(on(() => account?.isKeyLookupDone, (v) => {
     if (v && account?.publicKey) {
       updateStore(() => ({ ...emptyStore }));
+      updateStore('fetchingInProgress', () => true);
       fetchBookmarks(account.publicKey);
     }
   }));
@@ -82,7 +83,7 @@ const Bookmarks: Component = () => {
   const kind = () => store.kind || 'notes';
 
   const fetchBookmarks = (pubkey: string | undefined, until = 0) => {
-    if (store.fetchingInProgress || !pubkey) return;
+    if (!pubkey) return;
 
     const subId = `bookmark_feed_${until}_${APP_ID}`;
 
@@ -112,7 +113,6 @@ const Bookmarks: Component = () => {
 
     const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
 
-    updateStore('fetchingInProgress', () => true);
     getUserFeed(pubkey, pubkey, subId, 'bookmarks', k, until, pageSize, store.offset);
   }
 
