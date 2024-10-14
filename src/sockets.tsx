@@ -2,6 +2,7 @@ import { createSignal } from "solid-js";
 import { logError, logInfo } from "./lib/logger";
 import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow, NostrNotice, NostrEvents } from "./types/primal";
 import pako from 'pako';
+import { APP_ID } from "./App";
 
 export const [reconnect, setReconnect] = createSignal(true);
 
@@ -11,8 +12,29 @@ export const [isConnected, setConnected] = createSignal<Boolean>(false);
 
 export const isNotConnected = () => !isConnected();
 
+export const setPrimalProtocol = (compression: 'zlib', then: () => void) => {
+
+  const subId = `set_protocol_${APP_ID}`;
+
+  const unsub = subsTo(subId, {
+    onEose: () => {
+      unsub();
+      then();
+    }
+  });
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["set_primal_protocol", { compression }]},
+  ]), true);
+}
+
 const onOpen = () => {
-  setConnected(true);
+  setPrimalProtocol('zlib', () => {
+    setConnected(true);
+  });
+
   if (localStorage.getItem('devMode') === 'true') {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
     hook && hook(cacheServer, socket());
@@ -73,8 +95,8 @@ export const reset = () => {
   setTimeout(connect, 1000);
 };
 
-export const sendMessage = (message: string) => {
-  if (isConnected()) {
+export const sendMessage = (message: string, force = false) => {
+  if (isConnected() || force) {
     const e = new CustomEvent('send', { detail: { message, ws: socket() }});
     socket()?.send(message);
     socket()?.dispatchEvent(e);
@@ -189,7 +211,7 @@ export const subTo = (socket: WebSocket, subId: string, cb: (type: NostrEventTyp
           cb('EVENT', subscriptionId, e);
         }
 
-        cb('EOSE', subscriptionId);
+        // cb('EOSE', subscriptionId);
         return;
       }
 
@@ -237,7 +259,7 @@ export const subsTo = (
             handlers.onEvent && handlers.onEvent(subscriptionId, e)
           }
 
-          handlers.onEose && handlers.onEose(subscriptionId);
+          // handlers.onEose && handlers.onEose(subscriptionId);
         }
 
         if (type === 'EVENT') {
