@@ -1,29 +1,29 @@
 import { Component, createEffect, onCleanup, onMount, Show } from 'solid-js';
-import styles from './ExploreNew.module.scss';
-import { useToastContext } from '../components/Toaster/Toaster';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import StickySidebar from '../components/StickySidebar/StickySidebar';
-import Wormhole from '../components/Wormhole/Wormhole';
-import { toast as t, explore as tExplore, actions as tAction } from '../translations';
+import styles from './Explore.module.scss';
+import { useToastContext } from '../../components/Toaster/Toaster';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import StickySidebar from '../../components/StickySidebar/StickySidebar';
+import Wormhole from '../../components/Wormhole/Wormhole';
+import { toast as t, explore as tExplore, actions as tAction } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import Search from '../components/Search/Search';
-import PageCaption from '../components/PageCaption/PageCaption';
-import PageTitle from '../components/PageTitle/PageTitle';
+import Search from '../../components/Search/Search';
+import PageCaption from '../../components/PageCaption/PageCaption';
+import PageTitle from '../../components/PageTitle/PageTitle';
 import { Tabs } from '@kobalte/core/tabs';
-import { useExploreContext } from '../contexts/ExploreContext';
+import { useExploreContext } from '../../contexts/ExploreContext';
 import { A, useLocation } from '@solidjs/router';
-import FeedMarketPlace from '../components/FeedMarketplace/FeedMarketPlace';
-import ExplorePeople from './Explore/ExplorePeople';
-import ExploreZaps from './Explore/ExploreZaps';
-import ExploreMedia from './Explore/ExploreMedia';
-import ExploreTopics from './Explore/ExploreTopics';
-import NostrStats from '../components/NostrStats/NostrStats';
-import { isConnected } from '../sockets';
-import { useAccountContext } from '../contexts/AccountContext';
-import ExploreSidebar from '../components/ExploreSidebar/ExploreSidebar';
-import ExploreHotTopics from '../components/ExploreSidebar/ExploreHotTopics';
+import FeedMarketPlace from '../../components/FeedMarketplace/FeedMarketPlace';
+import ExplorePeople from './ExplorePeople';
+import ExploreZaps from './ExploreZaps';
+import ExploreMedia from './ExploreMedia';
+import ExploreTopics from './ExploreTopics';
+import NostrStats from '../../components/NostrStats/NostrStats';
+import { isConnected } from '../../sockets';
+import { useAccountContext } from '../../contexts/AccountContext';
+import ExploreSidebar from '../../components/ExploreSidebar/ExploreSidebar';
+import ExploreHotTopics from '../../components/ExploreSidebar/ExploreHotTopics';
 
-const ExploreNew: Component = () => {
+const Explore: Component = () => {
 
   const settings = useSettingsContext();
   const toaster = useToastContext();
@@ -173,4 +173,4 @@ const ExploreNew: Component = () => {
     )
 }
 
-export default ExploreNew;
+export default Explore;

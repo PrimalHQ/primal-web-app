@@ -18,9 +18,9 @@ import { useSearchContext } from './contexts/SearchContext';
 const Home = lazy(() => import('./pages/Home'));
 const Reads = lazy(() => import('./pages/Reads'));
 const Layout = lazy(() => import('./components/Layout/Layout'));
-const Explore = lazy(() => import('./pages/Explore'));
-const ExploreNew = lazy(() => import('./pages/ExploreNew'));
-const ExploreFeeds = lazy(() => import('./pages/Explore/ExploreFeeds'));
+// const Explore = lazy(() => import('./pages/Explore'));
+const Explore = lazy(() => import('./pages/Explore/Explore'));
+// const ExploreFeeds = lazy(() => import('./pages/Explore/ExploreFeeds'));
 const Thread = lazy(() => import('./pages/Thread'));
 const Messages = lazy(() => import('./pages/Messages'));
 const Bookmarks = lazy(() => import('./pages/Bookmarks'));
@@ -124,8 +124,8 @@ const Router: Component = () => {
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
           <Route path="/explore">
-            <Route path="/" component={ExploreNew} />
-            <Route path="/feed/:id" component={ExploreFeeds} />
+            <Route path="/" component={Explore} />
+            {/* <Route path="/feed/:id" component={ExploreFeeds} /> */}
           </Route>
           {/* <Route path="/explore/:scope?/:timeframe?" component={Explore} /> */}
           <Route path="/messages/:sender?" component={Messages} />
@@ -150,7 +150,7 @@ const Router: Component = () => {
           <Route path="/p/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
           <Route path="/search/:query" component={Search} />
-          <Route path="/rest" component={Explore} />
+          {/* <Route path="/rest" component={Explore} /> */}
           <Route path="/mutelist/:npub" component={Mutelist} />
           <Route path="/new" component={CreateAccount} />
           <Route path="/feeds">

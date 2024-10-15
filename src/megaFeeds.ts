@@ -321,7 +321,7 @@ export const fetchExploreMedia = (
   paging?: FeedPaging,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+    let page: MegaFeedPage = { ...emptyMegaFeedPage() };
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {

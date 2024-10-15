@@ -1,5 +1,5 @@
 import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
-import styles from '../ExploreNew.module.scss';
+import styles from './Explore.module.scss';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
@@ -47,7 +47,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
     const since = explore.peoplePaging.since || 0;
     const offset = explore.explorePeople.reduce<number>((acc, m) => {
       // @ts-ignore
-      return since === m.userStats?.followers_increase?.ratio ? acc + 1 : acc
+      return since === m.userStats?.followers_increase?.increase ? acc + 1 : acc
     }, 0)
 
     const pagination = {

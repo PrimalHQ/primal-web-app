@@ -1,5 +1,5 @@
 import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
-import styles from '../ExploreNew.module.scss';
+import styles from './Explore.module.scss';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
