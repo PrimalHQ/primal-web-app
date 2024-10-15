@@ -116,8 +116,6 @@ const Profile: Component = () => {
       const vanityProfile = await fetchKnownProfiles(name);
       const hex = vanityProfile?.names[name];
 
-      console.log('VANITY: ', vanityName, hex)
-
       if (!hex) {
         navigate('/404');
       }

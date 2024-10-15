@@ -322,13 +322,9 @@ export const fetchExploreMedia = (
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
     let page: MegaFeedPage = {...emptyMegaFeedPage()};
-    let count = 0
+
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
-        if (content.kind === Kind.Text || content.kind === Kind.Repost) {
-          console.log('RESULTS MEDIA: ', count)
-          count++;
-        }
         content && updateFeedPage(page, content);
       },
       onEose: () => {

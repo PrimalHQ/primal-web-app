@@ -118,10 +118,6 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
 
-  createEffect(() => {
-    console.log('SIDEBAR FETCHING: ', store.isFetchingSidebar)
-  })
-
 // ACTIONS --------------------------------------
 
   const updateSidebarQuery = (selection: SelectionOption) => {

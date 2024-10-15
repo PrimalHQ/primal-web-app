@@ -309,7 +309,6 @@ const AdvancedSearch: Component = () => {
 
     const sort = `${sortings[state.sortBy]()} `;
 
-    console.log('KIND: ', kinds[state.kind]())
     const kind = `${kinds[state.kind]()} `;
 
     const orient = orientationKinds.includes(state.kind) && state.orientation !== 'Any' ?
