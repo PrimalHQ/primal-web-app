@@ -43,7 +43,7 @@ import {
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
 import { getEventQuoteStats, getEventZaps, setLinkPreviews } from "../lib/notes";
-import { parseBolt11 } from "../utils";
+import { handleSubscription, parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
 
 export type ThreadContextStore = {
@@ -118,7 +118,16 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const fetchNotes = (noteId: string, until = 0, limit = 100) => {
     clearNotes();
     updateStore('noteId', noteId)
-    getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
+
+    const threadId = `thread_${APP_ID}`;
+
+    handleSubscription(
+      threadId,
+      () => getThread(account?.publicKey, noteId, threadId),
+      handleThreadEvent,
+      handleThreadEose,
+    )
+
     fetchTopZaps(noteId);
     fetchNoteQuoteStats(noteId);
     updateStore('isFetching', () => true);
@@ -130,8 +139,15 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
   const updateNotes = (noteId: string, until = 0, limit = 100) => {
     updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
-    getThread(account?.publicKey, noteId, `thread_diff_${APP_ID}`, until, limit);
-    // updateStore('isFetching', () => true);
+
+    const threadDiffId = `thread_diff_${APP_ID}`;
+
+    handleSubscription(
+      threadDiffId,
+      () => getThread(account?.publicKey, noteId, threadDiffId, until, limit),
+      handleThreadEvent,
+      handleThreadEose,
+    );
   }
 
   const clearNotes = () => {
@@ -358,203 +374,100 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
   const fetchTopZaps = (noteId: string) => {
     updateStore('isFetchingTopZaps', () => true);
-    getEventZaps(noteId, account?.publicKey, `thread_zapps_${APP_ID}`, 10, 0);
+
+    const threadZapsId = `thread_zapps_${APP_ID}`;
+
+    handleSubscription(
+      threadZapsId,
+      () => getEventZaps(noteId, account?.publicKey, threadZapsId, 10, 0),
+      handleThreadZapsEvent,
+      handleThreadZapsEose,
+    );
   };
 
   const fetchUsers = (pubkeys: string[]) => {
-    getUserProfiles(pubkeys, `thread_pk_${APP_ID}`);
+    const threadPKId = `thread_pk_${APP_ID}`;
+
+    handleSubscription(
+      threadPKId,
+      () => getUserProfiles(pubkeys, threadPKId),
+      handleThreadPKEvent,
+      handleThreadPKEose,
+    );
   };
 
   const fetchNoteQuoteStats = (noteId: string) => {
-    getEventQuoteStats(noteId, `thread_quote_stats_${APP_ID}`)
+    const threadQuoteStatsId = `thread_quote_stats_${APP_ID}`;
+
+    handleSubscription(
+      threadQuoteStatsId,
+      () => getEventQuoteStats(noteId, threadQuoteStatsId),
+      handleThreadPKEvent,
+      handleThreadPKEose,
+    );
   }
 
 // SOCKET HANDLERS ------------------------------
 
-const handleThreadEvent = (content: NostrEventContent) => {
-  updatePage(content);
-}
-const handleThreadEose = () => {
-  const reposts = parseEmptyReposts(store.page);
-  const ids = Object.keys(reposts);
+  const handleThreadEvent = (content: NostrEventContent) => {
+    updatePage(content);
+  }
+  const handleThreadEose = () => {
+    const reposts = parseEmptyReposts(store.page);
+    const ids = Object.keys(reposts);
 
-  if (ids.length === 0) {
+    if (ids.length === 0) {
+      savePage(store.page);
+      return;
+    }
+
+    updateStore('reposts', () => reposts);
+
+    const threadRepostId = `thread_reposts_${APP_ID}`;
+
+    handleSubscription(
+      threadRepostId,
+      () => getEvents(account?.publicKey, ids, threadRepostId),
+      handleThreadRepostEvent,
+      handleThreadRepostEose,
+    );
+  }
+
+  const handleThreadRepostEvent = (content: NostrEventContent) => {
+
+    const repostId = (content as NostrNoteContent).id;
+    const reposts = store.reposts || {};
+    const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+    if (parent) {
+      updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+    }
+  }
+  const handleThreadRepostEose = () => {
     savePage(store.page);
-    return;
   }
+  const handleThreadZapsEvent = (content: NostrEventContent) => {
 
-  updateStore('reposts', () => reposts);
-
-  getEvents(account?.publicKey, ids, `thread_reposts_${APP_ID}`);
-}
-
-const handleThreadRepostEvent = (content: NostrEventContent) => {
-
-  const repostId = (content as NostrNoteContent).id;
-  const reposts = store.reposts || {};
-  const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-  if (parent) {
-    updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+    updatePage(content);
   }
-}
-const handleThreadRepostEose = () => {
-  savePage(store.page);
-}
-const handleThreadZapsEvent = (content: NostrEventContent) => {
+  const handleThreadZapsEose = () => {
+    savePage(store.page);
+    updateStore('isFetchingTopZaps', () => false);
+  }
+  const handleThreadPKEvent = (content: NostrEventContent) => {
 
-  updatePage(content);
-}
-const handleThreadZapsEose = () => {
-  savePage(store.page);
-  updateStore('isFetchingTopZaps', () => false);
-}
-const handleThreadPKEvent = (content: NostrEventContent) => {
+    updatePage(content);
+  }
+  const handleThreadPKEose = () => {
+    savePage(store.page);
+  }
+  const handleThreadQuoteStatsEvent = (content: NostrEventContent) => {
 
-  updatePage(content);
-}
-const handleThreadPKEose = () => {
-  savePage(store.page);
-}
-const handleThreadQuoteStatsEvent = (content: NostrEventContent) => {
-
-  updatePage(content);
-}
-const handleThreadQuoteStatsEose = () => {
-  savePage(store.page);
-}
-
-  const onMessage = async (event: MessageEvent) => {
-    const data = await readData(event);
-    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
-
-    const [type, subId, content] = message;
-
-    if (subId === `thread_${APP_ID}` || subId === `thread_diff_${APP_ID}`) {
-
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleThreadEvent(e);
-        }
-
-        handleThreadEose();
-      }
-      if (type === 'EOSE') {
-        handleThreadEose();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleThreadEvent(content);
-        return;
-      }
-    }
-
-    if (subId === `thread_reposts_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleThreadRepostEvent(e);
-        }
-
-        handleThreadRepostEose();
-      }
-      if (type === 'EOSE') {
-        handleThreadRepostEose();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleThreadRepostEvent(content)
-        return;
-      }
-    }
-
-    if (subId === `thread_zapps_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleThreadZapsEvent(e);
-        }
-
-        handleThreadZapsEose();
-      }
-      if (type === 'EOSE') {
-        handleThreadZapsEose()
-      }
-
-      if (type === 'EVENT') {
-        handleThreadZapsEvent(content);
-        return;
-      }
-    }
-
-    if (subId === `thread_pk_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleThreadPKEvent(e);
-        }
-
-        handleThreadPKEose();
-      }
-      if (type === 'EOSE') {
-        handleThreadPKEose()
-      }
-
-      if (type === 'EVENT') {
-        handleThreadPKEvent(content);
-        return;
-      }
-    }
-
-    if (subId === `thread_quote_stats_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleThreadQuoteStatsEvent(e);
-        }
-
-        handleThreadQuoteStatsEose();
-      }
-      if (type === 'EOSE') {
-        handleThreadQuoteStatsEose()
-      }
-
-      if (type === 'EVENT') {
-        handleThreadQuoteStatsEvent(content);
-        return;
-      }
-    }
-  };
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    removeSocketListeners(
-      webSocket,
-      { message: onMessage, close: onSocketClose },
-    );
-  };
-
-// EFFECTS --------------------------------------
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
-  });
-
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
-  });
+    updatePage(content);
+  }
+  const handleThreadQuoteStatsEose = () => {
+    savePage(store.page);
+  }
 
 // STORES ---------------------------------------
 

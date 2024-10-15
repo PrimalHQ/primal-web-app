@@ -849,23 +849,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     fetchDefaultHomeFeeds(subId);
   }
 
-// SOCKET HANDLERS ------------------------------
-
-  const onMessage = (event: MessageEvent) => {
-    // const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    // const [type, subId, content] = message;
-  };
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    removeSocketListeners(
-      webSocket,
-      { message: onMessage, close: onSocketClose },
-    );
-  };
-
 
 // EFFECTS --------------------------------------
 
@@ -904,22 +887,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const html: HTMLElement | null = document.querySelector('html');
     localStorage.setItem('animated', `${store.isAnimated}`);
     html?.setAttribute('data-animated', `${store.isAnimated}`);
-  });
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
-  });
-
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
   });
 
 // STORES ---------------------------------------

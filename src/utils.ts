@@ -1,4 +1,6 @@
 import { format } from 'd3-format';
+import { subsTo } from './sockets';
+import { NostrEventContent } from './types/primal';
 
 let debounceTimer: number = 0;
 
@@ -194,4 +196,23 @@ export const calculatePagingOffset = (collection: any[], elements: any[]) => {
   return collection.slice((elements.length - 1) * (-1)).reduce<number>((acc, p) => {
     return elements.includes(p.id) ? acc + 1 : acc;
   }, 0)
+}
+
+export const handleSubscription = (
+  subId: string,
+  fetcher: () => void,
+  onEventHandler?: (content: NostrEventContent) => void,
+  onEoseHandler?: () => void,
+) => {
+  const unsub = subsTo(subId, {
+    onEvent: (_, content) => {
+      onEventHandler && onEventHandler(content);
+    },
+    onEose: () => {
+      onEoseHandler && onEoseHandler();
+      unsub();
+    },
+  });
+
+  fetcher();
 }

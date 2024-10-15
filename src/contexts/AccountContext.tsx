@@ -41,10 +41,11 @@ import LoginModal from "../components/LoginModal/LoginModal";
 import { logError, logInfo, logWarning } from "../lib/logger";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
-import { account as tAccount, followWarning, forgotPin, settings } from "../translations";
+import { account as tAccount, bookmarks, followWarning, forgotPin, settings } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 import { useAppContext } from "./AppContext";
+import { handleSubscription } from "../utils";
 
 
 export type AccountContextStore = {
@@ -281,12 +282,31 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfiles([key], `user_profile_${APP_ID}`);
+      getUserProfile(key);
     } catch (e: any) {
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
       logError('error fetching public key: ', e);
     }
+  };
+
+  const getUserProfile = (pubkey: string) => {
+    const subId = `user_profile_${APP_ID}`;
+
+    handleSubscription(
+      subId,
+      () => getUserProfiles([pubkey], subId),
+      handleUserProfileEvent,
+    );
+
+    // const unsub = subsTo(subId, {
+    //   onEvent: handleUserProfileEvent,
+    //   onEose: () => {
+    //     unsub();
+    //   },
+    // });
+
+    // getUserProfiles([pubkey], subId);
   };
 
   const openMembershipSocket = (onOpen: () => void) => {
@@ -369,7 +389,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfiles([pubkey], `user_profile_${APP_ID}`);
+      getUserProfile(pubkey);
     }
   }
 
@@ -458,7 +478,12 @@ export function AccountProvider(props: { children: JSXElement }) {
     if (!store.proxySettingSet || store.proxyThroughPrimal) return;
 
     if (Object.keys(relaySettings).length === 0) {
-      getDefaultRelays(`default_relays_${APP_ID}`);
+      const defaultRelaysId = `default_relays_${APP_ID}`;
+      handleSubscription(
+        defaultRelaysId,
+        () => getDefaultRelays(defaultRelaysId),
+        handleDefaultRelaysEvent,
+      );
       return;
     }
 
@@ -598,7 +623,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         // Fetch it anyway, maybe there is an update
-        getUserProfiles([key], `user_profile_${APP_ID}`);
+        getUserProfile(key);
       }
     } catch (e: any) {
       setPublicKey(undefined);
@@ -1427,7 +1452,14 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const fetchBookmarks = () => {
-    getBookmarks(store.publicKey, `user_bookmarks_${APP_ID}`);
+    const bookmarksId = `user_bookmarks_${APP_ID}`;
+
+    handleSubscription(
+      bookmarksId,
+      () => getBookmarks(store.publicKey, bookmarksId),
+      handleUserBookmarksEvent,
+      handleUserBookmarksEose,
+    );
   }
 
   const updateBookmarks = (bookmarks: string[]) => {
@@ -1472,8 +1504,23 @@ export function AccountProvider(props: { children: JSXElement }) {
         updateStore('followingSince', () => storage.followingSince);
       }
 
-      getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
-      getRelays(store.publicKey, `user_relays_${APP_ID}`);
+      const contactsId = `user_contacts_${APP_ID}`;
+
+      handleSubscription(
+        contactsId,
+        () =>   getProfileContactList(store.publicKey, contactsId),
+        handleUserContactsEvent,
+      );
+
+      const relaysId = `user_relays_${APP_ID}`;
+
+
+      handleSubscription(
+        contactsId,
+        () => getRelays(store.publicKey, relaysId),
+        handleUserRelaysEvent,
+      );
+
 
       updateStore('emojiHistory', () => readEmojiHistory(store.publicKey))
     }
@@ -1489,7 +1536,14 @@ export function AccountProvider(props: { children: JSXElement }) {
         updateStore('mutedPrivate', () => storage.mutedPrivate);
       }
 
-      getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
+      const mutelistId = `mutelist_${APP_ID}`;
+
+      handleSubscription(
+        mutelistId,
+        () => getProfileMuteList(store.publicKey, mutelistId),
+        handleMuteListEvent,
+      );
+
       getFilterLists(store.publicKey);
       getAllowList(store.publicKey);
     }
@@ -1505,15 +1559,6 @@ export function AccountProvider(props: { children: JSXElement }) {
         saveLikes(store.publicKey, likes);
       });
     }, 100)
-  });
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
   });
 
   createEffect(() => {
@@ -1546,22 +1591,8 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   });
 
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
-    store.relays.forEach(relay => relay.close())
-  });
+// EVENT HANDLERS ------------------------------
 
-// SOCKET HANDLERS ------------------------------
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    webSocket.removeEventListener('message', onMessage);
-    webSocket.removeEventListener('close', onSocketClose);
-  };
 
   const handleUserProfileEvent = (content: NostrEventContent) => {
     if (content?.content) {
@@ -1572,7 +1603,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   }
 
-  const handleUserContectsEvent = (content: NostrEventContent) => {
+  const handleUserContactsEvent = (content: NostrEventContent) => {
     if (content && content.kind === Kind.Contacts) {
       if (!content.created_at || content.created_at < store.followingSince) {
         return;
@@ -1631,98 +1662,6 @@ export function AccountProvider(props: { children: JSXElement }) {
   const handleUserBookmarksEose = () => {
     saveBookmarks(store.publicKey, store.bookmarks);
   }
-
-  const onMessage = async (event: MessageEvent) => {
-    const data = await readData(event);
-    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
-
-    const [type, subId, content] = message;
-
-    if (subId === `user_profile_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleUserProfileEvent(e);
-        }
-      }
-
-      if (type === 'EVENT') {
-        handleUserProfileEvent(content);
-      }
-      return;
-    }
-
-    if (subId === `user_contacts_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleUserContectsEvent(e);
-        }
-      }
-
-      if (type === 'EVENT') {
-        handleUserContectsEvent(content);
-      }
-      return;
-    }
-
-    if (subId === `user_relays_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleUserRelaysEvent(e);
-        }
-      }
-      if (type === 'EVENT') {
-        handleUserRelaysEvent(content);
-      }
-      return;
-    }
-
-    if (subId === `mutelist_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleMuteListEvent(e);
-        }
-      }
-      if (type === 'EVENT') {
-        handleMuteListEvent(content);
-      }
-      return;
-    }
-
-    if (subId === `default_relays_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleDefaultRelaysEvent(e);
-        }
-      }
-      if (type === 'EVENT') {
-        handleDefaultRelaysEvent(content);
-      }
-    }
-
-    if (subId === `user_bookmarks_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleUserBookmarksEvent(e);
-        }
-        handleUserBookmarksEose();
-      }
-      if (type === 'EVENT') {
-        handleUserBookmarksEvent(content);
-      }
-      if (type === 'EOSE') {
-        handleUserBookmarksEose();
-      }
-      return;
-    }
-
-
-  };
 
 // STORES ---------------------------------------
 

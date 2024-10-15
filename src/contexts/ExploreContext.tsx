@@ -50,7 +50,7 @@ import {
   TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { parseBolt11 } from "../utils";
+import { handleSubscription, parseBolt11 } from "../utils";
 import { PaginationInfo, TopicStat } from "../megaFeeds";
 import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
 import { emptyUser, userName } from "../stores/profile";
@@ -310,14 +310,23 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       updateStore('scope', () => scope);
       updateStore('timeframe', () => timeframe);
 
-      getExploreFeed(
-        account?.publicKey || '',
-        `explore_${APP_ID}`,
-        scope,
-        timeframe,
-        until,
-        limit,
-      );
+      const exploreId = `explore_${APP_ID}`;
+
+      handleSubscription(
+        exploreId,
+        () => getExploreFeed(
+          account?.publicKey || '',
+          exploreId,
+          scope,
+          timeframe,
+          until,
+          limit,
+        ),
+        handleExploreEvent,
+        handleExploreEose,
+      )
+
+
       return;
     }
   }
@@ -496,7 +505,15 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     updateStore('reposts', () => reposts);
 
-    getEvents(account?.publicKey, ids, `explore_reposts_${APP_ID}`);
+    const exploreRepostsIds = `explore_reposts_${APP_ID}`;
+
+    handleSubscription(
+      exploreRepostsIds,
+      () => getEvents(account?.publicKey, ids, exploreRepostsIds),
+      handleExploreRepostEvent,
+      handleExploreRepostEose,
+    );
+
   }
 
   const handleExploreRepostEvent = (content: NostrEventContent) => {
@@ -532,28 +549,6 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     const [type, subId, content] = message;
 
-    if (subId === `explore_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleExploreEvent(e);
-        }
-
-        handleExploreEose();
-        return;
-      }
-
-      if (type === 'EOSE') {
-        handleExploreEose()
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleExploreEvent(content);
-        return;
-      }
-    }
-
     if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId)) {
       if (type === 'EVENTS') {
         for (let i=0;i<content.length;i++) {
@@ -564,27 +559,6 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
       if (type === 'EVENT') {
         handleExploreStatsEvent(content);
-      }
-    }
-
-    if (subId === `explore_reposts_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleExploreRepostEvent(e);
-        }
-
-        handleExploreRepostEose();
-        return;
-      }
-      if (type === 'EOSE') {
-        handleExploreRepostEose();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleExploreRepostEvent(content);
-        return;
       }
     }
   };

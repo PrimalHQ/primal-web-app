@@ -46,7 +46,7 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   }
 }
 
-export const getMessageCounts = (user_pubkey: string, relation: UserRelation, subid: string) => {
+export const getMessageCounts = (user_pubkey: string | undefined, relation: UserRelation, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,
@@ -54,7 +54,7 @@ export const getMessageCounts = (user_pubkey: string, relation: UserRelation, su
   ]));
 }
 
-export const getOldMessages = (receiver: string, sender: string, subid: string, until = 0, limit = 20) => {
+export const getOldMessages = (receiver: string | undefined, sender: string | undefined | null, subid: string, until = 0, limit = 20) => {
 
   const start = until === 0 ? 'since' : 'until';
 

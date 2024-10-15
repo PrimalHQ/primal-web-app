@@ -58,6 +58,7 @@ import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 import { emptyPaging, fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import { handleSubscription } from "../utils";
 
 let startTime = 0;
 let midTime = 0;
@@ -447,6 +448,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     const unsubContacts = subsTo(subIdContacts, {
       onEvent: (_, content) => {
         if (content?.kind === Kind.Contacts) {
+          const tags = content.tags;
+          let contacts: string[] = [];
+
+          for (let i = 0;i<tags.length;i++) {
+            const tag = tags[i];
+            if (tag[0] === 'p') {
+              contacts.push(tag[1]);
+            }
+          }
+
+          updateStore('following', () => contacts);
           updateStore('contactListDate', () => content.created_at || 0);
         }
 
@@ -747,12 +759,32 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         updateStore('isFetchingSidebarArticles', () => true);
         updateStore('isAboutParsed', () => false);
         updateStore('commonFollowers', () => []);
-      })
+      });
 
-      getUserProfileInfo(profileKey, account?.publicKey, `profile_info_${APP_ID}`);
-      getProfileScoredNotes(profileKey, account?.publicKey, `profile_scored_${APP_ID}`, 8);
-      getCommonFollowers(profileKey, account?.publicKey, `profile_cf_${APP_ID}`, 6);
+      const profileInfoId = `profile_info_${APP_ID}`;
+      const profileScoredId = `profile_scored_${APP_ID}`;
+      const profileCommonFollowersId = `profile_common_followers_${APP_ID}`;
 
+      handleSubscription(
+        profileInfoId,
+        () => getUserProfileInfo(profileKey, account?.publicKey, profileInfoId),
+        handleProfileInfoEvent,
+        handleProfileInfoEose,
+      );
+
+      handleSubscription(
+        profileScoredId,
+        () => getProfileScoredNotes(profileKey, account?.publicKey, profileScoredId, 8),
+        handleProfileScoredEvent,
+        handleProfileScoredEose,
+      );
+
+      handleSubscription(
+        profileCommonFollowersId,
+        () => getCommonFollowers(profileKey, account?.publicKey, profileCommonFollowersId, 6),
+        handleProfileCommonFollowersEvent,
+        handleProfileCommonFollowersEose,
+      );
 
       const readsSidebarSpec = {
         id: 'feed',
@@ -766,7 +798,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('sidebarArticles', () => ({ notes: [...reads ]}))
       updateStore('isFetchingSidebarArticles', () => false);
 
-      isUserFollowing(profileKey, account?.publicKey, `is_profile_following_${APP_ID}`);
+      const isProfileFollowingId = `is_profile_following_${APP_ID}`
+
+      handleSubscription(
+        isProfileFollowingId,
+        () => isUserFollowing(profileKey, account?.publicKey, isProfileFollowingId),
+        handleProfileFollowingEvent,
+      );
     }
   }
 
@@ -864,22 +902,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('isProfileFetched', () => true);
   }
 
-  const handleProfileContectsEvent = (content: NostrEventContent) => {
-    if (content && content.kind === Kind.Contacts) {
-      const tags = content.tags;
-      let contacts: string[] = [];
-
-      for (let i = 0;i<tags.length;i++) {
-        const tag = tags[i];
-        if (tag[0] === 'p') {
-          contacts.push(tag[1]);
-        }
-      }
-
-      updateStore('following', () => contacts);
-    }
-  }
-
   const handleProfileFollowingEvent = (content: NostrEventContent) => {
     updateStore('isProfileFollowing', JSON.parse(content?.content || 'false'))
   }
@@ -897,120 +919,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     saveCommonFollowers();
   }
 
-  const onMessage = async (event: MessageEvent) => {
-    const data = await readData(event);
-    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
-
-    const [type, subId, content] = message;
-
-
-    if (subId === `profile_info_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleProfileInfoEvent(e);
-        }
-
-        handleProfileInfoEose();
-      }
-
-      if (type === 'EOSE') {
-        handleProfileInfoEose()
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleProfileInfoEvent(content);
-      }
-    }
-
-    if (subId === `profile_contacts_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleProfileContectsEvent(e);
-        }
-      }
-      if (type === 'EVENT') {
-        handleProfileContectsEvent(content);
-      }
-      return;
-    }
-
-    if (subId === `is_profile_following_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleProfileFollowingEvent(e);
-        }
-      }
-      if (type === 'EVENT') {
-        handleProfileFollowingEvent(content)
-        return;
-      }
-    }
-
-    if (subId === `profile_scored_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleProfileScoredEvent(e);
-        }
-
-        handleProfileScoredEose();
-      }
-      if (type === 'EOSE') {
-        handleProfileScoredEose();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleProfileScoredEvent(content)
-        return;
-      }
-    }
-
-    if (subId === `profile_cf_${APP_ID}`) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleProfileCommonFollowersEvent(e);
-        }
-
-        handleProfileCommonFollowersEose();
-      }
-      if (type === 'EOSE') {
-        handleProfileCommonFollowersEose();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleProfileCommonFollowersEvent(content);
-        return;
-      }
-    }
-  };
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    removeSocketListeners(
-      webSocket,
-      { message: onMessage, close: onSocketClose },
-    );
-  };
-
 
 // EFFECTS --------------------------------------
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
-  });
 
   createEffect(() => {
     if (account && account.hasPublicKey()) {
@@ -1025,13 +935,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     const stats = { ...store.profileHistory.stats };
 
     saveRecomendedUsers(account?.publicKey, { profiles, stats });
-  });
-
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
   });
 
   createEffect(() => {

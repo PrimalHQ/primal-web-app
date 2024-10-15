@@ -50,6 +50,7 @@ import { decrypt, encrypt } from "../lib/nostrAPI";
 import { loadDmCoversations, loadMsgContacts, saveDmConversations, saveMsgContacts } from "../lib/localStore";
 import { useAppContext } from "./AppContext";
 import { useSettingsContext } from "./SettingsContext";
+import { handleSubscription } from "../utils";
 
 
 export type MessagesContextStore = {
@@ -196,9 +197,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
         updateStore('messageCountPerSender', () => ({ ...counts }));
       })
 
-
-      // @ts-ignore
-      getMessageCounts(account.publicKey, store.senderRelation, subidMsgCountPerSender);
+      handleSubscription(
+        subidMsgCountPerSender,
+        () => getMessageCounts(account?.publicKey, store.senderRelation, subidMsgCountPerSender),
+        handleMsgCountPerSenderEvent,
+        handleMsgCountPerSenderEose,
+      )
     }
   };
 
@@ -279,8 +283,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
     resetConversationLoaded();
 
-    // @ts-ignore
-    getOldMessages(account.publicKey, sender, subidCoversation, until);
+    handleSubscription(
+      subidCoversation,
+       () => getOldMessages(account.publicKey, sender, subidCoversation, until),
+       handleMsgCoversationEvent,
+       handleMsgCoversationEose,
+    )
+
+
   };
 
   const getNextConversationPage = () => {
@@ -296,8 +306,14 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
 
     updateStore('encryptedMessages', () => []);
 
-    // @ts-ignore
-    lastMessage.created_at > 0 && getOldMessages(account.publicKey, store.selectedSender, subidCoversationNextPage, lastMessage.created_at);
+    if (lastMessage.created_at <= 0 || !store.selectedSender) return;
+
+    handleSubscription(
+      subidCoversationNextPage,
+       () => getOldMessages(account.publicKey, store.selectedSender, subidCoversationNextPage, lastMessage.created_at),
+       handleMsgCoversationEvent,
+       handleMsgCoversationNextPageEose,
+    )
   };
 
   const actualDecrypt = (sender: string, message: string) => {
@@ -422,8 +438,19 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       noteActions: {},
     }));
 
-    getUserProfiles(pubkeys, subidUserRef);
-    getEvents(account?.publicKey, noteIds, subidNoteRef, true);
+    handleSubscription(
+      subidUserRef,
+      () => getUserProfiles(pubkeys, subidUserRef),
+      handleUserRefEvent,
+      handleUserRefEose,
+    );
+
+    handleSubscription(
+      subidNoteRef,
+      () => getEvents(account?.publicKey, noteIds, subidNoteRef, true),
+      handleNoteRefEvent,
+      handleNoteRefEose,
+    );
   };
 
   const prependToConversation = (messages: DirectMessage[]) => {
@@ -743,16 +770,12 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     }
   }
 
-  const handleMsgCoversationEose = (subId: string) => {
-    if (subId === subidCoversation) {
+  const handleMsgCoversationEose = () => {
       decryptMessages(generateConversation);
-      return;
-    }
+  }
 
-    if (subId === subidCoversationNextPage) {
+  const handleMsgCoversationNextPageEose = () => {
       decryptMessages(prependToConversation);
-      return;
-    }
   }
 
   const handleNewMsgEvent = (content: NostrEventContent) => {
@@ -852,97 +875,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       }
       if (type === 'EVENT') {
         handleMsgCountEvent(content);
-      }
-    }
-
-    if (subId === subidMsgCountPerSender) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleMsgCountPerSenderEvent(e);
-        }
-        handleMsgCountPerSenderEose();
-        return;
-      }
-      if (type === 'EVENT') {
-        handleMsgCountPerSenderEvent(content);
-      }
-
-      if (type === 'EOSE') {
-        handleMsgCountPerSenderEose();
-      }
-    }
-
-    if (subId === subidCoversation || subId === subidCoversationNextPage) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleMsgCoversationEvent(e);
-        }
-        handleMsgCoversationEose(subId);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        handleMsgCoversationEvent(content);
-      }
-
-      if (type === 'EOSE') {
-        handleMsgCoversationEose(subId);
-      }
-    }
-
-    if (subId === subidNewMsg) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleNewMsgEvent(e);
-        }
-        handleNewMsgEose();
-        return;
-      }
-      if (type === 'EVENT') {
-        handleNewMsgEvent(content);
-      }
-
-      if (type === 'EOSE') {
-        handleNewMsgEose();
-      }
-    }
-
-    if (subId === subidUserRef) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleUserRefEvent(e);
-        }
-        handleUserRefEose();
-        return;
-      }
-      if (type === 'EVENT') {
-        handleUserRefEvent(content);
-      }
-
-      if (type === 'EOSE') {
-        handleUserRefEose()
-      }
-    }
-
-    if (subId === subidNoteRef) {
-      if (type === 'EVENTS') {
-        for (let i=0;i<content.length;i++) {
-          const e = content[i];
-          handleNoteRefEvent(e);
-        }
-        handleNoteRefEose();
-        return;
-      }
-      if (type === 'EVENT') {
-        handleNoteRefEvent(content);
-      }
-
-      if (type === 'EOSE') {
-        handleNoteRefEose()
       }
     }
   };

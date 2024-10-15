@@ -289,7 +289,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
 // SOCKET HANDLERS ------------------------------
 
 const handleVerifiedUsersEvent = (content: NostrEventContent) => {
-
   if (content.kind === Kind.VerifiedUsersDict) {
     const verifiedUsers: Record<string, string> = JSON.parse(content.content);
 

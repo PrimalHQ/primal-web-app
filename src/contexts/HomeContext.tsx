@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { createContext, createEffect, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
@@ -11,7 +11,7 @@ import {
   SelectionOption,
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
-import { fetchMegaFeed, fetchScoredContent, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchScoredContent, PaginationInfo } from "../megaFeeds";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -106,21 +106,9 @@ const initialHomeData = {
     query: undefined,
   },
   paging: {
-    notes: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
-    future: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
-    sidebar: {
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    },
+    notes: { ...emptyPaging() },
+    future: { ...emptyPaging() },
+    sidebar: { ...emptyPaging() },
   },
 };
 
@@ -129,6 +117,10 @@ export const HomeContext = createContext<HomeContextStore>();
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
+
+  createEffect(() => {
+    console.log('SIDEBAR FETCHING: ', store.isFetchingSidebar)
+  })
 
 // ACTIONS --------------------------------------
 
