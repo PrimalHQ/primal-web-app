@@ -105,7 +105,7 @@ const NoteImage: Component<{
 
     const s = src();
 
-    if (!s || !s.includes('cdn.primal.net')) return s;
+    if (!s || !s.includes('media-cache')) return s;
 
     const thumb = s.replace('s=o', 's=s');
 

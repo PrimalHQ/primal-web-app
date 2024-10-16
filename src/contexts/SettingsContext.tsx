@@ -658,6 +658,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     getDefaultSettings(subid);
+    getDefaultHomeFeeds();
     getDefaultReadsFeeds();
   };
 
