@@ -155,7 +155,7 @@ const NoteImage: Component<{
         <img
           id={imgId}
           ref={imgActual}
-          src={src()}
+          src={thumbSrc()}
           class={klass()}
           onerror={onError}
           width={willBeTooBig() ? undefined : `${props.width || 524}px`}
