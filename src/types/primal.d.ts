@@ -868,6 +868,7 @@ export type MediaVariant = {
   h: number,
   mt: string,
   media_url: string,
+  dur?: number,
 }
 
 export type MediaEvent = {

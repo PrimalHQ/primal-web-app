@@ -135,7 +135,7 @@ const NoteImage: Component<{
 
   createEffect(() => {
     isImageLoaded() && props.onImageLoaded && props.onImageLoaded(src());
-  })
+  });
 
   return (
     <Show

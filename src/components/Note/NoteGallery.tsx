@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { MediaVariant, PrimalNote } from '../../types/primal';
 
 
@@ -21,6 +21,7 @@ import { createStore } from 'solid-js/store';
 import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import { humanizeTime, isDev } from '../../utils';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -45,19 +46,16 @@ const NoteGallery: Component<{
   });
 
   const [store, setStore] = createStore<{
-    origUrl: string,
-    url: string,
-    image: MediaVariant | undefined,
-    imageThumb: string | undefined,
-    type: string | undefined,
-    noVideoThumbnail?: boolean,
+    images : {
+      origUrl: string,
+      url: string,
+      image: MediaVariant | undefined,
+      imageThumb: string | undefined,
+      type: string | undefined,
+      noVideoThumbnail?: boolean,
+    }[],
   }>({
-    origUrl: '',
-    url: '',
-    image: undefined,
-    imageThumb: undefined,
-    type: undefined,
-    noVideoThumbnail: false,
+    images: [],
   });
 
   onMount(() => {
@@ -70,15 +68,17 @@ const NoteGallery: Component<{
       result = urls.next();
     }
 
-    let origUrl = images[0];
+    for (let i=0; i<images.length; i++) {
+      let origUrl = images[i];
 
-    let image = media?.actions.getMedia(origUrl, 'o');
-    let url = image?.media_url || origUrl;
-    let type = image?.mt;
+      let image = media?.actions.getMedia(origUrl, 'o');
+      let url = image?.media_url || origUrl;
+      let type = image?.mt;
 
-    let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
+      let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
 
-    setStore(() => ({ origUrl, url, image, imageThumb, type }));
+      setStore('images', store.images.length, () => ({ origUrl, url, image, imageThumb, type }));
+    }
 
 
     const videoPlugin = new PhotoSwipeVideoPlugin(lightbox, {
@@ -116,78 +116,107 @@ const NoteGallery: Component<{
     />
   }
 
+  const firstImage = () => store.images[0];
+
+  createEffect(() => {
+    console.log('IMAGES: ', store.images)
+  })
+
   return (
     <div
       id={`galleryimage_${props.note.id}`}
       data-note={props.note.id}
-      data-url={store.url}
+      data-url={firstImage()?.url}
       class="animated"
     >
-      <Switch>
-        <Match when={store.type?.startsWith('video')}>
-          <div class={styles.videoGallery}>
-            <div class={styles.videoIcon}></div>
-            <a
-              class={`galleryimage image_${props.note.noteId} cell_${1}`}
-              href={store.image?.media_url}
-              data-pswp-video-src={store.image?.media_url}
-              data-pswp-width="800"
-              data-pswp-height="600"
-              data-pswp-type="video"
-            >
-              <Show
-                when={!store.noVideoThumbnail}
-                fallback={<>
-                  <video src={store.origUrl} width={148} height={148} ></video>
-                </>}
-              >
-                <img src={store.imageThumb} onerror={() => setStore('noVideoThumbnail', true)} />
-              </Show>
+      <div class={styles.imageGallery}>
+        <For each={store.images}>
+          {(image) => (
+            <Switch>
+              <Match when={image.type?.startsWith('video')}>
+                <div class={styles.videoGallery}>
+                  <Show
+                    when={store.images.length > 1}
+                    fallback={<div class={styles.videoIcon}></div>}
+                  >
+                    <div class={styles.galleryIcon}></div>
+                  </Show>
+                  <Show when={image.image?.dur}>
+                    <div class={styles.videoDuration}>
+                      {humanizeTime(image.image?.dur || 0)}
+                    </div>
+                  </Show>
+                  <a
+                    class={`galleryimage image_${props.note.noteId} cell_${1}`}
+                    href={image.image?.media_url}
+                    data-pswp-video-src={image.image?.media_url}
+                    data-pswp-width="800"
+                    data-pswp-height="600"
+                    data-pswp-type="video"
+                  >
+                    <Show
+                      when={!image.noVideoThumbnail}
+                      fallback={<>
+                        <video src={image.origUrl} width={148} height={148} ></video>
+                      </>}
+                    >
+                      <img src={image.imageThumb} onerror={() => setStore('images', 0, 'noVideoThumbnail', true)} />
+                    </Show>
 
-              <div class="pswp-caption-content">
-                <div class={styles.mediaNote}>
-                  <div class={styles.note}>
-                    {mediaFreeNote(props.note)}
-                  </div>
-                  <A
-                    class={styles.noteLink}
-                    href={`/e/${props.note.noteId}`}
-                  >
-                    Go to note
-                  </A>
+                    <div class="pswp-caption-content">
+                      <div class={styles.mediaNote}>
+                        <div class={styles.note}>
+                          {mediaFreeNote(props.note)}
+                        </div>
+                        <A
+                          class={styles.noteLink}
+                          href={`/e/${props.note.noteId}`}
+                        >
+                          Go to note
+                        </A>
+                      </div>
+                    </div>
+                  </a>
                 </div>
-              </div>
-            </a>
-          </div>
-        </Match>
-        <Match when={true}>
-          <div class={styles.imageGallery}>
-            <NoteImage
-              class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
-              src={store.url}
-              media={store.image}
-              mediaThumb={store.imageThumb}
-              altSrc={store.imageThumb}
-              width={210}
-              shortHeight={true}
-              plainBorder={true}
-              caption={
-                <div class={styles.mediaNote}>
-                  <div class={styles.note}>
-                    {mediaFreeNote(props.note)}
-                  </div>
-                  <A
-                    class={styles.noteLink}
-                    href={`/e/${props.note.noteId}`}
+              </Match>
+              <Match when={true}>
+                <div class={styles.videoGallery}>
+                  <Show
+                    when={store.images.length > 1}
                   >
-                    Go to note
-                  </A>
+                    <div class={styles.galleryIcon}></div>
+                  </Show>
+
+                  <NoteImage
+                    class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
+                    src={image.url}
+                    media={image.image}
+                    mediaThumb={image.imageThumb}
+                    altSrc={image.imageThumb}
+                    isDev={isDev()}
+                    width={210}
+                    shortHeight={true}
+                    plainBorder={true}
+                    caption={
+                      <div class={styles.mediaNote}>
+                        <div class={styles.note}>
+                          {mediaFreeNote(props.note)}
+                        </div>
+                        <A
+                          class={styles.noteLink}
+                          href={`/e/${props.note.noteId}`}
+                        >
+                          Go to note
+                        </A>
+                      </div>
+                    }
+                  />
                 </div>
-              }
-            />
-          </div>
-        </Match>
-      </Switch>
+              </Match>
+            </Switch>
+          )}
+        </For>
+      </div>
     </div>
   )
 }
