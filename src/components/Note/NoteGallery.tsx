@@ -131,10 +131,13 @@ const NoteGallery: Component<{
     >
       <div class={styles.imageGallery}>
         <For each={store.images}>
-          {(image) => (
+          {(image, index) => (
             <Switch>
               <Match when={image.type?.startsWith('video')}>
-                <div class={styles.videoGallery}>
+                <div
+                  class={styles.videoGallery}
+                  style={`z-index: ${store.images.length - index()}`}
+                >
                   <Show
                     when={store.images.length > 1}
                     fallback={<div class={styles.videoIcon}></div>}
@@ -180,7 +183,10 @@ const NoteGallery: Component<{
                 </div>
               </Match>
               <Match when={true}>
-                <div class={styles.videoGallery}>
+                <div
+                  class={styles.videoGallery}
+                  style={`z-index: ${store.images.length - index()}`}
+                >
                   <Show
                     when={store.images.length > 1}
                   >

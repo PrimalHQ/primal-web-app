@@ -1013,10 +1013,13 @@
 }
 
 .videoGallery {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 148px;
   height: 148px;
   overflow: hidden;
+  background-color: var(--background-site);
 
   .videoIcon {
     display: inline-block;
@@ -1061,4 +1064,5 @@
   width: 148px;
   height: 148px;
   overflow: hidden;
+  position: relative;
 }
