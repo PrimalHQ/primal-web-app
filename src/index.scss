@@ -37,12 +37,23 @@
   }
 }
 
+// $animation-enabled: false;
+
+:root[data-animated="true"] {
+  // $animation-enabled: true;
+  // *:not([role="presentation"], [data-open="true"], .pswp) {
+  //   transition-property: none !important;
+  //   transform: none !important;
+  //   animation: none !important;
+  // }
+}
 :root[data-animated="false"] {
-  *:not([role="presentation"], [data-open="true"]) {
-    transition-property: none !important;
-    transform: none !important;
-    animation: none !important;
-  }
+  // $animation-enabled: false;
+  // *:not([role="presentation"], [data-open="true"], .pswp) {
+  //   transition-property: none !important;
+  //   transform: none !important;
+  //   animation: none !important;
+  // }
 }
 
 /* Common styles */
@@ -639,140 +650,142 @@ button:focus {
   font-style: normal;
 }
 
-
-.slide-fade-enter-active,
-.slide-fade-exit-active {
-  .animated
-  {
-    transition: opacity 150ms, transform 150ms;
-    transition-delay: 50ms * 1;
-  }
-}
-
-.slide-fade-exit-active, .none-exit-active {
-  >div
-  {
-    display: none;
-  }
-}
-.slide-fade-enter,
-.slide-fade-exit-to {
-  .animated
-  {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-}
-.slide-fade-enter {
-  // .animated
-  // {
-  //   transform: translateY(10px);
-  // }
-  $elements: 20;
-  @for $i from 0 to $elements {
-    .animated:nth-child(#{$i + 1}) {
-      transform: translateY(10px + 2px*$i);
+:root[data-animated="true"] {
+  .slide-fade-enter-active,
+  .slide-fade-exit-active {
+    .animated
+    {
+      transition: opacity 150ms, transform 150ms;
+      transition-delay: 50ms * 1;
     }
   }
-}
 
-.slide-fade-exit-active {
-  display: none !important;
-  transition: opacity 0.1s;
-}
-.slide-fade-exit-to {
-  opacity: 0;
-}
-
-
-.anim-fade-enter-active,
-.anim-fade-exit-active {
-  .animated
-  {
-    transition: opacity 150ms;
+  .slide-fade-exit-active, .none-exit-active {
+    >div
+    {
+      display: none;
+    }
   }
-}
-
-.anim-fade-exit-active, .none-exit-active {
-  >div
-  {
-    display: none;
+  .slide-fade-enter,
+  .slide-fade-exit-to {
+    .animated
+    {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
   }
-}
-.anim-fade-enter,
-.anim-fade-exit-to {
-  .animated
-  {
+  .slide-fade-enter {
+    // .animated
+    // {
+    //   transform: translateY(10px);
+    // }
+    $elements: 20;
+    @for $i from 0 to $elements {
+      .animated:nth-child(#{$i + 1}) {
+        transform: translateY(10px + 2px*$i);
+      }
+    }
+  }
+
+  .slide-fade-exit-active {
+    display: none !important;
+    transition: opacity 0.1s;
+  }
+  .slide-fade-exit-to {
     opacity: 0;
   }
-}
-.anim-fade-enter {
-  .animated
-  {
-    transition: opacity 150ms;
+
+
+  .anim-fade-enter-active,
+  .anim-fade-exit-active {
+    .animated
+    {
+      transition: opacity 150ms;
+    }
   }
-  // .animated
-  // {
-  //   transform: translateY(10px);
+
+  .anim-fade-exit-active, .none-exit-active {
+    >div
+    {
+      display: none;
+    }
+  }
+  .anim-fade-enter,
+  .anim-fade-exit-to {
+    .animated
+    {
+      opacity: 0;
+    }
+  }
+  .anim-fade-enter {
+    .animated
+    {
+      transition: opacity 150ms;
+    }
+    // .animated
+    // {
+    //   transform: translateY(10px);
+    // }
+    // $elements: 10;
+    // @for $i from 0 to $elements {
+    //   .animated:nth-child(#{$i + 1}) {
+    //     transform: translateY(10px + 2px*$i);
+    //   }
+    // }
+  }
+
+  // .anim-fade-exit-active {
+  //   transition: opacity 0.1s;
   // }
-  // $elements: 10;
-  // @for $i from 0 to $elements {
-  //   .animated:nth-child(#{$i + 1}) {
-  //     transform: translateY(10px + 2px*$i);
+  // .anim-fade-exit-to {
+  //   opacity: 0;
+  // }
+
+
+  .slide-down-fade-enter-active,
+  .slide-down-fade-exit-active {
+    $elements: 10;
+    @for $i from 0 to $elements {
+      .animated:nth-child(#{$i})
+        {
+          transition: opacity 350ms;//, transform 150ms;
+          transition-delay: 0.05s * $i;
+        }}
+  }
+
+  .slide-down-fade-exit-active, .none-exit-active {
+    // display: none;
+    >div
+    {
+      display: none;
+    }
+  }
+  .slide-down-fade-enter,
+  .slide-down-fade-exit-to {
+    .animated
+    {
+      // transform: translateY(10px);
+      opacity: 0;
+    }
+  }
+  // .slide-down-fade-enter {
+  //   // .animated
+  //   // {
+  //   //   transform: translateY(10px);
+  //   // }
+  //   $elements: 10;
+  //   @for $i from 0 to $elements {
+  //     .animated:nth-child(#{$i + 1}) {
+  //       // transform: translateY(-10px - 2px*$i);
+  //     }
   //   }
   // }
-}
 
-// .anim-fade-exit-active {
-//   transition: opacity 0.1s;
-// }
-// .anim-fade-exit-to {
-//   opacity: 0;
-// }
-
-
-.slide-down-fade-enter-active,
-.slide-down-fade-exit-active {
-  $elements: 10;
-  @for $i from 0 to $elements {
-    .animated:nth-child(#{$i})
-      {
-        transition: opacity 350ms;//, transform 150ms;
-        transition-delay: 0.05s * $i;
-      }}
-}
-
-.slide-down-fade-exit-active, .none-exit-active {
-  // display: none;
-  >div
-  {
-    display: none;
+  .slide-down-fade-exit-active {
+    transition: opacity 0.1s;
   }
-}
-.slide-down-fade-enter,
-.slide-down-fade-exit-to {
-  .animated
-  {
-    // transform: translateY(10px);
+  .slide-down-fade-exit-to {
     opacity: 0;
   }
-}
-// .slide-down-fade-enter {
-//   // .animated
-//   // {
-//   //   transform: translateY(10px);
-//   // }
-//   $elements: 10;
-//   @for $i from 0 to $elements {
-//     .animated:nth-child(#{$i + 1}) {
-//       // transform: translateY(-10px - 2px*$i);
-//     }
-//   }
-// }
 
-.slide-down-fade-exit-active {
-  transition: opacity 0.1s;
-}
-.slide-down-fade-exit-to {
-  opacity: 0;
 }
