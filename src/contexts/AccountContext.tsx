@@ -905,6 +905,11 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
       },
       onEose: () => {
+        if (store.following.length === 0) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const tags = [['p', pubkey]];
+          resolveContacts(pubkey, [pubkey], date, tags, store.relays[0].url, cb);
+        }
         updateStore('followInProgress', () => '');
         unsub();
       },
