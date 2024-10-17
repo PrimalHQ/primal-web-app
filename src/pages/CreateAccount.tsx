@@ -220,19 +220,21 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         tags.push(['p', pubkey]);
       }
 
-      const sendResult = await sendContacts(tags, date, '', account.proxyThroughPrimal, account.activeRelays, relaySettings);
+      const sendResult = await sendContacts(tags, date, '', account.proxyThroughPrimal, account.relays, relaySettings);
 
       if (sendResult.success && sendResult.note) {
         triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
-          getProfileContactList(pubkey, `user_contacts_${APP_ID}`);
+          account.actions.updateContactsList()
+          // getProfileContactList(pubkey, `user_contacts_${APP_ID}`);
         });
       }
 
-      const relayResult = await sendRelays(account.activeRelays, relaySettings, account.proxyThroughPrimal);
+      const relayResult = await sendRelays(account.relays, relaySettings, account.proxyThroughPrimal);
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {
-          getRelays(pubkey, `user_relays_${APP_ID}`);
+          // getRelays(pubkey, `user_relays_${APP_ID}`);
+          account.actions.updateRelays()
         });
       }
 

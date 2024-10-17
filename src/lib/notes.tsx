@@ -529,9 +529,15 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     return [...acc];
   }, []);
 
-  for (let i = 0;i < relays.length;i++) {
+  let relaysActual = [...relays];
 
-    const relay = relays[i];
+  if (relaysActual.length === 0) {
+    relaysActual = Object.keys(relaySettings || {});
+  }
+
+  for (let i = 0;i < relaysActual.length;i++) {
+
+    const relay = relaysActual[i];
 
     const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
 

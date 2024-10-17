@@ -116,6 +116,8 @@ export type AccountContextStore = {
     updateBookmarks: (bookmarks: string[]) => void,
     resetRelays: (relays: Relay[]) => void,
     setProxyThroughPrimal: (shouldProxy: boolean) => void,
+    updateRelays: () => void,
+    updateContactsList: () => void,
   },
 }
 
@@ -1471,6 +1473,27 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('bookmarks', () => [...bookmarks]);
   };
 
+  const updateRelays = () => {
+    const relaysId = `user_relays_${APP_ID}`;
+
+    handleSubscription(
+      relaysId,
+      () => getRelays(store.publicKey, relaysId),
+      handleUserRelaysEvent,
+    );
+  }
+
+  const updateContactsList = () => {
+
+    const contactsId = `user_contacts_${APP_ID}`;
+
+    handleSubscription(
+      contactsId,
+      () =>   getProfileContactList(store.publicKey, contactsId),
+      handleUserContactsEvent,
+    );
+  }
+
 // EFFECTS --------------------------------------
 
   createEffect(() => {
@@ -1509,24 +1532,8 @@ export function AccountProvider(props: { children: JSXElement }) {
         updateStore('followingSince', () => storage.followingSince);
       }
 
-      const contactsId = `user_contacts_${APP_ID}`;
-
-      handleSubscription(
-        contactsId,
-        () =>   getProfileContactList(store.publicKey, contactsId),
-        handleUserContactsEvent,
-      );
-
-      const relaysId = `user_relays_${APP_ID}`;
-
-
-      handleSubscription(
-        contactsId,
-        () => getRelays(store.publicKey, relaysId),
-        handleUserRelaysEvent,
-      );
-
-
+      updateContactsList();
+      updateRelays();
       updateStore('emojiHistory', () => readEmojiHistory(store.publicKey))
     }
   });
@@ -1704,6 +1711,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     updateBookmarks,
     resetRelays,
     setProxyThroughPrimal,
+    updateRelays,
+    updateContactsList,
   },
 });
 
