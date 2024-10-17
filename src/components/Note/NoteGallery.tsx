@@ -22,6 +22,7 @@ import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { humanizeTime, isDev } from '../../utils';
+import { logInfo } from '../../lib/logger';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -75,6 +76,8 @@ const NoteGallery: Component<{
       let url = image?.media_url || origUrl;
       let type = image?.mt;
 
+      logInfo('THUMBS: ', origUrl, media?.thumbnails)
+
       let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
 
       setStore('images', store.images.length, () => ({ origUrl, url, image, imageThumb, type }));
@@ -118,9 +121,7 @@ const NoteGallery: Component<{
 
   const firstImage = () => store.images[0];
 
-  createEffect(() => {
-    console.log('IMAGES: ', store.images)
-  })
+  const isMissingThumbnal = (image: any) => !isDev() || image.noVideoThumbnail;
 
   return (
     <div
@@ -159,9 +160,9 @@ const NoteGallery: Component<{
                   >
                     <Show
                       when={!image.noVideoThumbnail}
-                      fallback={<>
+                      fallback={<div class={isMissingThumbnal(image) ? styles.missingThumb : ''}>
                         <video src={image.origUrl} width={148} height={148} ></video>
-                      </>}
+                      </div>}
                     >
                       <img src={image.imageThumb} onerror={() => setStore('images', 0, 'noVideoThumbnail', true)} />
                     </Show>

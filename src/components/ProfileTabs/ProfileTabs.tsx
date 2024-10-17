@@ -4,7 +4,7 @@ import { A, useLocation } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
-import { imageRegex, imageRegexG, Kind, profileContactListPage } from "../../constants";
+import { imageOrVideoRegex, imageOrVideoRegexG, imageRegex, imageRegexG, Kind, profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
 import { useMediaContext } from "../../contexts/MediaContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
@@ -197,7 +197,7 @@ const ProfileTabs: Component<{
   };
 
   const hasImages = (note: PrimalNote) => {
-    const test = (imageRegex).test(note.content);
+    const test = (imageOrVideoRegex).test(note.content);
     return test;
   }
 
