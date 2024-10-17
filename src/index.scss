@@ -38,7 +38,7 @@
 }
 
 :root[data-animated="false"] {
-  *:not([role="presentation"]) {
+  *:not([role="presentation"], [data-open="true"]) {
     transition-property: none !important;
     transform: none !important;
     animation: none !important;
