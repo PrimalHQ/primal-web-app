@@ -413,7 +413,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
               satszapped: mentionStat?.satszapped || 0,
               noteActions,
             },
-            contemt: m.content,
+            content: m.content,
             user: convertToUser(page.users[m.pubkey], m.pubkey),
             mentionedUsers,
             pubkey: m.pubkey,
