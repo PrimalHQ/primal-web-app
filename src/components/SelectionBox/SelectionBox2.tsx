@@ -52,11 +52,6 @@ const SelectionBox2: Component<{
       ...found[1],
       value: found[0],
     }
-    // if (typeof props.initialValue === 'string') {
-    //   return props.options.find(o => o.value === props.initialValue);
-    // }
-
-    // return props.initialValue;
   }
 
   const value = () => {
@@ -95,10 +90,12 @@ const SelectionBox2: Component<{
   createEffect(() => {
     if (props.options.length > 0) {
       setTimeout(() => {
-        // setOpts(() => [...props.options]);
         let temp: Record<string,SelectionOption> = {};
+
         for (let i=0;i<props.options.length;i++) {
-          const id = generatePrivateKey();
+          const option = props.options[i];
+
+          const id = option.id || generateOptionId(option);
 
           temp[id] = props.options[i];
         }
@@ -107,6 +104,13 @@ const SelectionBox2: Component<{
       }, 200);
     }
   });
+
+  const generateOptionId = (option: SelectionOption) => {
+    const label = option.label;
+    const desc = option.description || '';
+
+    return `${label}__${desc}`.split(' ').join('_');
+  }
 
   const options = () => {
     return Object.entries(opts).reduce<SelectionOption[]>((acc, [id, option]) => {

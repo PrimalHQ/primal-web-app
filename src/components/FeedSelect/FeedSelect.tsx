@@ -59,43 +59,15 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
   const options:() => SelectionOption[] = () => {
     if (!settings) return [];
 
+
     return settings?.homeFeeds.reduce<SelectionOption[]>((acc, f) => {
       return f.enabled ? [ ...acc, {
         label: f.name,
         value: f.spec,
         description: f.description,
         id: genId(f.spec),
-      }] : acc;
-    }, [])
-
-
-    // return settings?.homeFeeds.map(f => ({
-    //   label: f.name,
-    //   value: f.spec,
-    //   description: f.description,
-    //   enabled: f.enabled,
-    //   id: genId(f.spec),
-    // })) || [];
-
-    // let opts = [];
-
-    // if (account?.publicKey) {
-    //   opts.push(
-    //     {
-    //       label: 'My Reads',
-    //       value: account?.publicKey || '',
-    //     }
-    //   );
-    // }
-
-    // opts.push(
-    //   {
-    //     label: 'All Reads',
-    //     value: 'none',
-    //   }
-    // );
-
-    // return [ ...opts ];
+      }] : [ ...acc ];
+    }, []);
   };
 
   const initialValue = () => {
