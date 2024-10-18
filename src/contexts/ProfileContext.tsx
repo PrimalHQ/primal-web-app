@@ -146,6 +146,7 @@ export type ProfileContextStore = {
     getProfileMegaFeed: (pubkey: string | undefined, tab: string, until?: number, limit?: number) => void,
     getProfileMegaFeedNextPage: (pubkey: string | undefined, tab: string) => void,
     addProfileToHistory: (user: PrimalUser) => void,
+    clearProfile: () => void,
   }
 }
 
@@ -953,6 +954,15 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     return <ProfileAbout about={about} onParseComplete={() => updateStore('isAboutParsed', () => true)} />
   }
 
+  const clearProfile = () => {
+    clearNotes();
+    clearArticles();
+    clearGallery();
+    clearReplies();
+    clearZaps();
+    resetProfile();
+  }
+
 // STORES ---------------------------------------
 
 
@@ -978,6 +988,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       resetProfile,
       clearFilterReason,
       addProfileToHistory,
+      clearProfile,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,

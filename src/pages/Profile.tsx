@@ -540,9 +540,11 @@ const Profile: Component = () => {
   //   lightbox.init();
   // });
 
-  onCleanup(() => {
-    // profile?.actions.resetProfile();
-  });
+  useBeforeLeave(() => profile?.actions.clearProfile());
+
+  // onCleanup(() => {
+  //   // profile?.actions.resetProfile();
+  // });
 
   useBeforeLeave(() => {
     setIsProfileLoaded(() => false);
