@@ -595,6 +595,8 @@ const ParsedNote: Component<{
           let image = media?.actions.getMedia(token, 'o');
           const url = image?.media_url || getMediaUrlDefault(token);
 
+          let imageThumb = media?.actions.getMedia(token, 'm');
+
           if (props.shorten && index() > 11) {
             return <></>;
           }
@@ -605,6 +607,7 @@ const ParsedNote: Component<{
             isDev={dev}
             media={image}
             width={514}
+            mediaThumb={imageThumb}
             imageGroup={imageGroup}
             shortHeight={props.shorten}
             plainBorder={true}
