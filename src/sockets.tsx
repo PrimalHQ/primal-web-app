@@ -31,9 +31,9 @@ export const setPrimalProtocol = (compression: 'zlib', then: () => void) => {
 }
 
 const onOpen = () => {
-  setPrimalProtocol('zlib', () => {
+  // setPrimalProtocol('zlib', () => {
     setConnected(true);
-  });
+  // });
 
   if (localStorage.getItem('devMode') === 'true') {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;

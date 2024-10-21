@@ -1,26 +1,19 @@
 import { TextField } from '@kobalte/core/text-field';
-import { Slider } from "@kobalte/core/slider";
-import { Dialog } from '@kobalte/core/dialog';
 
-import { A, useLocation, useNavigate } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { batch, Component, createEffect, For, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import Avatar from '../components/Avatar/Avatar';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
-import Search from '../components/Search/Search';
-import SearchUsers from '../components/Search/SearchUsers';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import TextInput from '../components/TextInput/TextInput';
-import Wormhole from '../components/Wormhole/Wormhole';
-import { userName } from '../stores/profile';
 import { PrimalUser } from '../types/primal';
 import AdvancedSearchSelectBox from '../components/AdvancedSearch/AdvancedSearchSelect';
 import styles from './FeedsTest.module.scss';
 import dayjs from 'dayjs';
 import objectSupport from 'dayjs/plugin/objectSupport';
-import DatePicker, { PickerValue } from "@rnwonder/solid-date-picker";
+import DatePicker from "@rnwonder/solid-date-picker";
 import utils from "@rnwonder/solid-date-picker/utilities";
 import AdvancedSearchUserSelect from '../components/AdvancedSearch/AdvancedSearchUserSelect';
 import AdvancedSearchSlider from '../components/AdvancedSearch/AdvancedSearchSlider';
@@ -29,7 +22,6 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
 import { useSearchContext } from '../contexts/SearchContext';
-import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
 
 export type SearchState = {
   includes: string,
@@ -90,31 +82,19 @@ const timeframes: Record<string, (s?: any) => string> = {
   // },
 
   'Today': () => {
-    const date = dayjs();
-    const result = date.subtract(1, 'day');
-
-    return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
+    return 'since:yesterday';
   },
 
   'This Week': () => {
-    const date = dayjs();
-    const result = date.subtract(1, 'week');
-
-    return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
+    return 'since:lastweek';
   },
 
   'This Month': () => {
-    const date = dayjs();
-    const result = date.subtract(1, 'month');
-
-    return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
+    return 'since:lastmonth';
   },
 
   'This Year': () => {
-    const date = dayjs();
-    const result = date.subtract(1, 'year');
-
-    return `since:${result.format('YYYY-MM-DD_HH:mm')}`;
+    return 'since:lastyear';
   },
 
   'Custom': (stateTimeframe: { since: string, until: string}) => {
