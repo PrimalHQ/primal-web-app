@@ -137,8 +137,9 @@ const scopes: Record<string, () => string> = {
   'Global': () => '',
   'My Follows': () => 'scope:myfollows',
   'My Network': () => 'scope:mynetwork',
-  'My Follows Interactions': () => 'scope:myfollowinteractions',
+  'My Follows Interactions': () => 'scope:myfollowsinteractions',
   'My Network Interactions': () => 'scope:mynetworkinteractions',
+  'My Notifications': () => 'scope:mynotifications',
   'Not My Follows': () => 'scope:notmyfollows',
 };
 
@@ -164,49 +165,48 @@ const sortings: Record<string, () => string> = {
   'Number of Interactions': () => 'orderby:likes',
 };
 
-const AdvancedSearch: Component = () => {
-  const navigate = useNavigate();
-  const search = useSearchContext();
-  const advSearch = useAdvancedSearchContext();
-  const location = useLocation();
-
-  const [state, setState] = createStore<SearchState>({
-    includes: '',
-    excludes: '',
-    hashtags: '',
-    postedBy: [],
-    replingTo: [],
-    zappedBy: [],
-    userMentions: [],
-    following: [],
-    timeframe: 'Anytime',
-    customTimeframe: { since: '', until: ''},
-    sortBy: 'Time',
-    sentiment: 'Neutral',
-    scope: 'Global',
-    kind: 'Notes',
-    orientation: 'Any',
-    minDuration: 0,
-    maxDuration: 0,
-    minWords: 0,
-    maxWords: 0,
+export const [advSearchState, setAdvSearchState] = createStore<SearchState>({
+  includes: '',
+  excludes: '',
+  hashtags: '',
+  postedBy: [],
+  replingTo: [],
+  zappedBy: [],
+  userMentions: [],
+  following: [],
+  timeframe: 'Anytime',
+  customTimeframe: { since: '', until: ''},
+  sortBy: 'Time',
+  sentiment: 'Neutral',
+  scope: 'Global',
+  kind: 'Notes',
+  orientation: 'Any',
+  minDuration: 0,
+  maxDuration: 0,
+  minWords: 0,
+  maxWords: 0,
+  minScore: 0,
+  minInteractions: 0,
+  minLikes: 0,
+  minZaps: 0,
+  minReplies: 0,
+  minReposts: 0,
+  filters: {
     minScore: 0,
     minInteractions: 0,
     minLikes: 0,
     minZaps: 0,
     minReplies: 0,
     minReposts: 0,
-    filters: {
-      minScore: 0,
-      minInteractions: 0,
-      minLikes: 0,
-      minZaps: 0,
-      minReplies: 0,
-      minReposts: 0,
-    },
-    filtersOpened: false,
-    command: '',
-  });
+  },
+  filtersOpened: false,
+  command: '',
+});
+
+const AdvancedSearch: Component = () => {
+  const navigate = useNavigate();
+  const search = useSearchContext();
+
 
   onMount(() => {
     dayjs.extend(objectSupport);
@@ -227,8 +227,8 @@ const AdvancedSearch: Component = () => {
   // })
 
   createEffect(() => {
-    if (state.timeframe !== 'Custom') {
-      setState('customTimeframe', () => ({ since: '', until: '' }));
+    if (advSearchState.timeframe !== 'Custom') {
+      setAdvSearchState('customTimeframe', () => ({ since: '', until: '' }));
     }
   });
 
@@ -280,183 +280,183 @@ const AdvancedSearch: Component = () => {
   }
 
   createEffect(() => {
-    const includes = `${extractQuery(state.includes).join(' ').trim()} `;
-    const excludes = `${extractQuery(state.excludes).reduce<string>((acc, w) => w.length > 0 ? `${acc} -${w}` : acc, '')} `;
-    const hashtags = state.hashtags.length === 0 ? '' : state.hashtags.split(' ').map(x => {
+    const includes = `${extractQuery(advSearchState.includes).join(' ').trim()} `;
+    const excludes = `${extractQuery(advSearchState.excludes).reduce<string>((acc, w) => w.length > 0 ? `${acc} -${w}` : acc, '')} `;
+    const hashtags = advSearchState.hashtags.length === 0 ? '' : advSearchState.hashtags.split(' ').map(x => {
       const y = x.trim();
       return y.startsWith('#') ? y : `#${y}`;
     }).reduce((acc, x) => `${acc}${x} `, '');
 
-    const froms = parseUserList(state.postedBy, 'from:');
-    const tos = parseUserList(state.replingTo, 'to:');
-    const zappers = parseUserList(state.zappedBy, 'zappedby:');
+    const froms = parseUserList(advSearchState.postedBy, 'from:');
+    const tos = parseUserList(advSearchState.replingTo, 'to:');
+    const zappers = parseUserList(advSearchState.zappedBy, 'zappedby:');
 
-    const mentions = parseUserList(state.userMentions, '@');
-    const followings = parseUserList(state.following, 'following:');
+    const mentions = parseUserList(advSearchState.userMentions, '@');
+    const followings = parseUserList(advSearchState.following, 'following:');
 
     let since = '';
 
-    if (state.timeframe === 'Custom') {
-      since = timeframes['Custom'](state.customTimeframe);
+    if (advSearchState.timeframe === 'Custom') {
+      since = timeframes['Custom'](advSearchState.customTimeframe);
     }
     else {
-      since = `${timeframes[state.timeframe]()} `;
+      since = `${timeframes[advSearchState.timeframe]()} `;
     }
 
-    const sentiment = `${sentiments[state.sentiment]()} `;
+    const sentiment = `${sentiments[advSearchState.sentiment]()} `;
 
-    const scope = `${scopes[state.scope]()} `;
+    const scope = `${scopes[advSearchState.scope]()} `;
 
-    const sort = `${sortings[state.sortBy]()} `;
+    const sort = `${sortings[advSearchState.sortBy]()} `;
 
-    const kind = `${kinds[state.kind]()} `;
+    const kind = `${kinds[advSearchState.kind]()} `;
 
-    const orient = orientationKinds.includes(state.kind) && state.orientation !== 'Any' ?
-      `orientation:${state.orientation.toLowerCase()} ` :
+    const orient = orientationKinds.includes(advSearchState.kind) && advSearchState.orientation !== 'Any' ?
+      `orientation:${advSearchState.orientation.toLowerCase()} ` :
       '';
 
-    const minDuration = durationKinds.includes(state.kind) && !isNaN(state.minDuration) && state.minDuration > 0 ?
-      `minduration:${state.minDuration} ` :
+    const minDuration = durationKinds.includes(advSearchState.kind) && !isNaN(advSearchState.minDuration) && advSearchState.minDuration > 0 ?
+      `minduration:${advSearchState.minDuration} ` :
       '';
 
-    const maxDuration = durationKinds.includes(state.kind) && !isNaN(state.maxDuration) && state.maxDuration > 0 ?
-    `maxduration:${state.maxDuration} ` :
+    const maxDuration = durationKinds.includes(advSearchState.kind) && !isNaN(advSearchState.maxDuration) && advSearchState.maxDuration > 0 ?
+    `maxduration:${advSearchState.maxDuration} ` :
     '';
 
-    const minWords = readTimeKinds.includes(state.kind) && !isNaN(state.minWords) && state.minWords > 0 ?
-      `minwords:${state.minWords * wordsPerMinute} ` :
+    const minWords = readTimeKinds.includes(advSearchState.kind) && !isNaN(advSearchState.minWords) && advSearchState.minWords > 0 ?
+      `minwords:${advSearchState.minWords * wordsPerMinute} ` :
       '';
 
-    const maxWords = readTimeKinds.includes(state.kind) && !isNaN(state.maxWords) && state.maxWords > 0 ?
-    `maxwords:${state.maxWords * wordsPerMinute} ` :
+    const maxWords = readTimeKinds.includes(advSearchState.kind) && !isNaN(advSearchState.maxWords) && advSearchState.maxWords > 0 ?
+    `maxwords:${advSearchState.maxWords * wordsPerMinute} ` :
     '';
 
     // FILTERS -------
 
-    const minScore = state.minScore === 0 ?
+    const minScore = advSearchState.minScore === 0 ?
       '' :
-      `minscore:${state.minScore} `;
+      `minscore:${advSearchState.minScore} `;
 
-    const minInteractions = state.minInteractions === 0 ?
+    const minInteractions = advSearchState.minInteractions === 0 ?
       '' :
-      `mininteractions:${state.minInteractions} `;
+      `mininteractions:${advSearchState.minInteractions} `;
 
-    const minLikes = state.minLikes === 0 ?
+    const minLikes = advSearchState.minLikes === 0 ?
       '' :
-      `minlikes:${state.minLikes} `;
+      `minlikes:${advSearchState.minLikes} `;
 
-    const minZaps = state.minZaps === 0 ?
+    const minZaps = advSearchState.minZaps === 0 ?
       '' :
-      `minzaps:${state.minZaps} `;
+      `minzaps:${advSearchState.minZaps} `;
 
-    const minReplies = state.minReplies === 0 ?
+    const minReplies = advSearchState.minReplies === 0 ?
       '' :
-      `minreplies:${state.minReplies} `;
+      `minreplies:${advSearchState.minReplies} `;
 
-    const minReposts = state.minReposts === 0 ?
+    const minReposts = advSearchState.minReposts === 0 ?
       '' :
-      `minreposts:${state.minReposts} `;
+      `minreposts:${advSearchState.minReposts} `;
 
-    setState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${scope}${sentiment}${orient}${minDuration}${maxDuration}${minWords}${maxWords}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
+    setAdvSearchState('command', () => `${kind}${includes}${excludes}${hashtags}${froms}${tos}${zappers}${mentions}${followings}${since}${scope}${sentiment}${orient}${minDuration}${maxDuration}${minWords}${maxWords}${minScore}${minInteractions}${minLikes}${minZaps}${minReplies}${minReposts}${sort}`.trim());
 
   })
 
   const addFrom = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    setState('postedBy', state.postedBy.length, () => ({ ...user }))
+    setAdvSearchState('postedBy', advSearchState.postedBy.length, () => ({ ...user }))
   }
 
   const removeFrom = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    const filtered = state.postedBy.filter(u => u.npub !== user.npub);
+    const filtered = advSearchState.postedBy.filter(u => u.npub !== user.npub);
 
-    setState('postedBy', () => [...filtered]);
+    setAdvSearchState('postedBy', () => [...filtered]);
   }
 
   const addReply = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    setState('replingTo', state.replingTo.length, () => ({ ...user }))
+    setAdvSearchState('replingTo', advSearchState.replingTo.length, () => ({ ...user }))
   }
 
   const removeReply = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    const filtered = state.replingTo.filter(u => u.npub !== user.npub);
+    const filtered = advSearchState.replingTo.filter(u => u.npub !== user.npub);
 
-    setState('replingTo', () => [...filtered]);
+    setAdvSearchState('replingTo', () => [...filtered]);
   }
 
   const addZapper = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    setState('zappedBy', state.zappedBy.length, () => ({ ...user }))
+    setAdvSearchState('zappedBy', advSearchState.zappedBy.length, () => ({ ...user }))
   }
 
   const removeZapper = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    const filtered = state.zappedBy.filter(u => u.npub !== user.npub);
+    const filtered = advSearchState.zappedBy.filter(u => u.npub !== user.npub);
 
-    setState('zappedBy', () => [...filtered]);
+    setAdvSearchState('zappedBy', () => [...filtered]);
   }
 
   const addMention = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    setState('userMentions', state.userMentions.length, () => ({ ...user }))
+    setAdvSearchState('userMentions', advSearchState.userMentions.length, () => ({ ...user }))
   }
 
   const removeMention = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    const filtered = state.userMentions.filter(u => u.npub !== user.npub);
+    const filtered = advSearchState.userMentions.filter(u => u.npub !== user.npub);
 
-    setState('userMentions', () => [...filtered]);
+    setAdvSearchState('userMentions', () => [...filtered]);
   }
 
   const addFollow = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    setState('following', state.following.length, () => ({ ...user }))
+    setAdvSearchState('following', advSearchState.following.length, () => ({ ...user }))
   }
 
   const removeFollow = (user: PrimalUser | undefined) => {
     if (!user) return;
 
-    const filtered = state.following.filter(u => u.npub !== user.npub);
+    const filtered = advSearchState.following.filter(u => u.npub !== user.npub);
 
-    setState('following', () => [...filtered]);
+    setAdvSearchState('following', () => [...filtered]);
   }
 
   const setTimeframe = (timeframe: string) => {
-    setState('timeframe', () => timeframe);
+    setAdvSearchState('timeframe', () => timeframe);
   };
 
   const setSentiment = (sentiment: string) => {
-    setState('sentiment', () => sentiment);
+    setAdvSearchState('sentiment', () => sentiment);
   };
 
   const setScope = (scope: string) => {
-    setState('scope', () => scope);
+    setAdvSearchState('scope', () => scope);
   };
 
   const setSortBy = (sort: string) => {
-    setState('sortBy', () => sort);
+    setAdvSearchState('sortBy', () => sort);
   };
 
   const setKind = (kind: string) => {
-    setState('kind', () => kind);
+    setAdvSearchState('kind', () => kind);
   };
 
   const setOrientation = (orient: string) => {
-    setState('orientation', () => orient);
+    setAdvSearchState('orientation', () => orient);
   };
 
   const onCommandChange = (v: string) => {
-    setState('command', () => v);
+    setAdvSearchState('command', () => v);
     parseCommand();
   }
 
@@ -502,7 +502,7 @@ const AdvancedSearch: Component = () => {
   };
 
   const clearFilters = () => {
-    setState('filters', () => ({
+    setAdvSearchState('filters', () => ({
       minScore: 0,
       minInteractions: 0,
       minLikes: 0,
@@ -513,40 +513,40 @@ const AdvancedSearch: Component = () => {
   }
 
   const cancelFilterChanges = () => {
-    setState('filters', () => ({
-      minScore: state.minScore,
-      minInteractions: state.minInteractions,
-      minLikes: state.minLikes,
-      minZaps: state.minZaps,
-      minReplies: state.minReplies,
-      minReposts: state.minReposts,
+    setAdvSearchState('filters', () => ({
+      minScore: advSearchState.minScore,
+      minInteractions: advSearchState.minInteractions,
+      minLikes: advSearchState.minLikes,
+      minZaps: advSearchState.minZaps,
+      minReplies: advSearchState.minReplies,
+      minReposts: advSearchState.minReposts,
     }))
 
-    setState('filtersOpened', () => false);
+    setAdvSearchState('filtersOpened', () => false);
   }
 
   const applyFilters = () => {
     batch(() => {
-      setState('minScore', () => state.filters.minScore);
-      setState('minInteractions', () => state.filters.minInteractions);
-      setState('minLikes', () => state.filters.minLikes);
-      setState('minZaps', () => state.filters.minZaps);
-      setState('minReplies', () => state.filters.minReplies);
-      setState('minReposts', () => state.filters.minReposts);
+      setAdvSearchState('minScore', () => advSearchState.filters.minScore);
+      setAdvSearchState('minInteractions', () => advSearchState.filters.minInteractions);
+      setAdvSearchState('minLikes', () => advSearchState.filters.minLikes);
+      setAdvSearchState('minZaps', () => advSearchState.filters.minZaps);
+      setAdvSearchState('minReplies', () => advSearchState.filters.minReplies);
+      setAdvSearchState('minReposts', () => advSearchState.filters.minReposts);
 
-      setState('filtersOpened', () => false);
+      setAdvSearchState('filtersOpened', () => false);
     });
   }
 
   const filtersTriggerLabel = () => {
     let label = '';
 
-    if (state.minScore > 0) label += `Min score=${state.minScore};`;
-    if (state.minInteractions > 0) label += ` Min interactions=${state.minInteractions};`;
-    if (state.minLikes > 0) label += ` Min likes=${state.minLikes};`;
-    if (state.minZaps > 0) label += ` Min zaps=${state.minZaps};`;
-    if (state.minReplies > 0) label += ` Min replies=${state.minReplies};`;
-    if (state.minReposts > 0) label += ` Min reposts=${state.minReposts};`;
+    if (advSearchState.minScore > 0) label += `Min score=${advSearchState.minScore};`;
+    if (advSearchState.minInteractions > 0) label += ` Min interactions=${advSearchState.minInteractions};`;
+    if (advSearchState.minLikes > 0) label += ` Min likes=${advSearchState.minLikes};`;
+    if (advSearchState.minZaps > 0) label += ` Min zaps=${advSearchState.minZaps};`;
+    if (advSearchState.minReplies > 0) label += ` Min replies=${advSearchState.minReplies};`;
+    if (advSearchState.minReposts > 0) label += ` Min reposts=${advSearchState.minReposts};`;
 
     if (label.length == 0) label = 'Edit Filters';
 
@@ -554,9 +554,9 @@ const AdvancedSearch: Component = () => {
   }
 
   const submitSearch = () => {
-    search?.actions.setAdvancedSearchCommand(state.command);
+    search?.actions.setAdvancedSearchCommand(advSearchState.command);
 
-    navigate(`/asearch/${encodeURIComponent(state.command)}`);
+    navigate(`/asearch/${encodeURIComponent(advSearchState.command)}`);
   }
 
   return (
@@ -566,22 +566,22 @@ const AdvancedSearch: Component = () => {
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
-        <TextField class={styles.searchCommand} value={state.command} onChange={onCommandChange}>
+        <TextField class={styles.searchCommand} value={advSearchState.command} onChange={onCommandChange}>
           <TextField.Label>Search Command</TextField.Label>
           <TextField.TextArea autoResize={true}/>
         </TextField>
       </StickySidebar>
 
       <div class={styles.advancedSearchPage}>
-        <form onSubmit={onSubmit}>
+        <form onSubmit={submitSearch}>
           <section>
             <div class={styles.searchRow}>
               <TextInput
                 name="include"
                 type="text"
-                value={state.includes}
+                value={advSearchState.includes}
                 placeholder="Include these words..."
-                onChange={(v) => setState('includes', () => v)}
+                onChange={(v) => setAdvSearchState('includes', () => v)}
                 noExtraSpace={true}
                 icon={<div class={styles.searchIcon}></div>}
               />
@@ -591,9 +591,9 @@ const AdvancedSearch: Component = () => {
               <TextInput
                 name="exclude"
                 type="text"
-                value={state.excludes}
+                value={advSearchState.excludes}
                 placeholder="Exclude these words..."
-                onChange={(v) => setState('excludes', () => v)}
+                onChange={(v) => setAdvSearchState('excludes', () => v)}
                 noExtraSpace={true}
                 icon={<div class={styles.excludeIcon}></div>}
               />
@@ -605,27 +605,27 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchSelectBox
-                value={state.kind}
+                value={advSearchState.kind}
                 options={Object.keys(kinds)}
                 onChange={setKind}
               />
             </div>
 
-            <Show when={orientationKinds.includes(state.kind)}>
+            <Show when={orientationKinds.includes(advSearchState.kind)}>
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Orientation
                 </div>
 
                 <AdvancedSearchSelectBox
-                  value={state.orientation}
+                  value={advSearchState.orientation}
                   options={orientations}
                   onChange={setOrientation}
                 />
               </div>
             </Show>
 
-            <Show when={durationKinds.includes(state.kind)}>
+            <Show when={durationKinds.includes(advSearchState.kind)}>
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Min duration (seconds)
@@ -635,15 +635,15 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.minDuration > maxDuration ? state.minDuration : maxDuration}
-                    value={[state.minDuration || 0]}
+                    max={advSearchState.minDuration > maxDuration ? advSearchState.minDuration : maxDuration}
+                    value={[advSearchState.minDuration || 0]}
                     onSlide={(v: number[]) => {
-                      setState('minDuration', () => v[0]);
+                      setAdvSearchState('minDuration', () => v[0]);
                     }}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
-                      setState('minDuration', () => val);
+                      setAdvSearchState('minDuration', () => val);
                     }}
                   />
                 </div>
@@ -658,13 +658,13 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="maxduration"
                     min={0}
-                    max={state.maxDuration > maxDuration ? state.maxDuration : maxDuration}
-                    value={[state.maxDuration || 0]}
-                    onSlide={(v: number[]) => setState('maxDuration', () => v[0])}
+                    max={advSearchState.maxDuration > maxDuration ? advSearchState.maxDuration : maxDuration}
+                    value={[advSearchState.maxDuration || 0]}
+                    onSlide={(v: number[]) => setAdvSearchState('maxDuration', () => v[0])}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
-                      setState('maxDuration', () => val);
+                      setAdvSearchState('maxDuration', () => val);
                     }}
                   />
                 </div>
@@ -672,7 +672,7 @@ const AdvancedSearch: Component = () => {
             </Show>
 
 
-            <Show when={readTimeKinds.includes(state.kind)}>
+            <Show when={readTimeKinds.includes(advSearchState.kind)}>
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Min read time (minutes)
@@ -682,15 +682,15 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="minduration"
                     min={0}
-                    max={state.minWords > maxReadTime ? state.minWords : maxReadTime}
-                    value={[state.minWords || 0]}
+                    max={advSearchState.minWords > maxReadTime ? advSearchState.minWords : maxReadTime}
+                    value={[advSearchState.minWords || 0]}
                     onSlide={(v: number[]) => {
-                      setState('minWords', () => v[0]);
+                      setAdvSearchState('minWords', () => v[0]);
                     }}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
-                      setState('minWords', () => val);
+                      setAdvSearchState('minWords', () => val);
                     }}
                   />
                 </div>
@@ -705,13 +705,13 @@ const AdvancedSearch: Component = () => {
                   <AdvancedSearchSlider
                     name="maxduration"
                     min={0}
-                    max={state.maxWords > maxReadTime ? state.maxWords : maxReadTime}
-                    value={[state.maxWords || 0]}
-                    onSlide={(v: number[]) => setState('maxWords', () => v[0])}
+                    max={advSearchState.maxWords > maxReadTime ? advSearchState.maxWords : maxReadTime}
+                    value={[advSearchState.maxWords || 0]}
+                    onSlide={(v: number[]) => setAdvSearchState('maxWords', () => v[0])}
                     onInput={(v: string) => {
                       const val = parseInt(v.trim()) || 0;
 
-                      setState('maxWords', () => val);
+                      setAdvSearchState('maxWords', () => val);
                     }}
                   />
                 </div>
@@ -726,7 +726,7 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchUserSelect
-                userList={state.postedBy}
+                userList={advSearchState.postedBy}
                 onUserSelect={addFrom}
                 onRemoveUser={removeFrom}
               />
@@ -738,7 +738,7 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchUserSelect
-                userList={state.replingTo}
+                userList={advSearchState.replingTo}
                 onUserSelect={addReply}
                 onRemoveUser={removeReply}
               />
@@ -750,7 +750,7 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchUserSelect
-                userList={state.zappedBy}
+                userList={advSearchState.zappedBy}
                 onUserSelect={addZapper}
                 onRemoveUser={removeZapper}
               />
@@ -765,13 +765,13 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchSelectBox
-                value={state.timeframe}
+                value={advSearchState.timeframe}
                 options={Object.keys(timeframes)}
                 onChange={setTimeframe}
               />
             </div>
 
-            <Show when={state.timeframe === 'Custom'}>
+            <Show when={advSearchState.timeframe === 'Custom'}>
               <div class={styles.searchRow}>
                 <div class={styles.caption}>
                   Time frame:
@@ -789,7 +789,7 @@ const AdvancedSearch: Component = () => {
                         // @ts-ignore
                         const ed = dayjs({ year: data.endDate.year || 0, month: data.endDate.month || 0, day: data.endDate.day });
 
-                        setState('customTimeframe', () => ({
+                        setAdvSearchState('customTimeframe', () => ({
                           since: sd.format('YYYY-MM-DD'),
                           until: ed.format('YYYY-MM-DD'),
                         }));
@@ -813,7 +813,7 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchSelectBox
-                value={state.scope}
+                value={advSearchState.scope}
                 options={Object.keys(scopes)}
                 onChange={setScope}
               />
@@ -825,7 +825,7 @@ const AdvancedSearch: Component = () => {
               </div>
 
               <AdvancedSearchSelectBox
-                value={state.sortBy}
+                value={advSearchState.sortBy}
                 options={Object.keys(sortings)}
                 onChange={setSortBy}
               />
@@ -838,8 +838,8 @@ const AdvancedSearch: Component = () => {
 
               <div class={styles.leftFloat}>
                 <AdvancedSearchDialog
-                  open={state.filtersOpened}
-                  setOpen={(v: boolean) => setState('filtersOpened', () => v)}
+                  open={advSearchState.filtersOpened}
+                  setOpen={(v: boolean) => setAdvSearchState('filtersOpened', () => v)}
                   triggerClass={styles.linkButton}
                   triggerContent={<div>{filtersTriggerLabel()}</div>}
                   title={<div class={styles.dialogTitle}>Search Filter</div>}
@@ -855,14 +855,14 @@ const AdvancedSearch: Component = () => {
                           name="minscore"
                           min={0}
                           max={maxContentScore}
-                          value={[state.filters.minScore || 0]}
+                          value={[advSearchState.filters.minScore || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minScore', () => v[0]);
+                            setAdvSearchState('filters', 'minScore', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minScore', () => val);
+                            setAdvSearchState('filters', 'minScore', () => val);
                           }}
                           dark={true}
                         />
@@ -878,14 +878,14 @@ const AdvancedSearch: Component = () => {
                           name="mininteractions"
                           min={0}
                           max={100}
-                          value={[state.filters.minInteractions || 0]}
+                          value={[advSearchState.filters.minInteractions || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minInteractions', () => v[0]);
+                            setAdvSearchState('filters', 'minInteractions', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minInteractions', () => val);
+                            setAdvSearchState('filters', 'minInteractions', () => val);
                           }}
                           dark={true}
                         />
@@ -901,14 +901,14 @@ const AdvancedSearch: Component = () => {
                           name="minlikes"
                           min={0}
                           max={maxFilterValue}
-                          value={[state.filters.minLikes || 0]}
+                          value={[advSearchState.filters.minLikes || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minLikes', () => v[0]);
+                            setAdvSearchState('filters', 'minLikes', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minLikes', () => val);
+                            setAdvSearchState('filters', 'minLikes', () => val);
                           }}
                           dark={true}
                         />
@@ -924,14 +924,14 @@ const AdvancedSearch: Component = () => {
                           name="minzaps"
                           min={0}
                           max={maxFilterValue}
-                          value={[state.filters.minZaps || 0]}
+                          value={[advSearchState.filters.minZaps || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minZaps', () => v[0]);
+                            setAdvSearchState('filters', 'minZaps', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minZaps', () => val);
+                            setAdvSearchState('filters', 'minZaps', () => val);
                           }}
                           dark={true}
                         />
@@ -947,14 +947,14 @@ const AdvancedSearch: Component = () => {
                           name="minreplies"
                           min={0}
                           max={maxFilterValue}
-                          value={[state.filters.minReplies || 0]}
+                          value={[advSearchState.filters.minReplies || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minReplies', () => v[0]);
+                            setAdvSearchState('filters', 'minReplies', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minReplies', () => val);
+                            setAdvSearchState('filters', 'minReplies', () => val);
                           }}
                           dark={true}
                         />
@@ -970,14 +970,14 @@ const AdvancedSearch: Component = () => {
                           name="minreposts"
                           min={0}
                           max={maxFilterValue}
-                          value={[state.filters.minReposts || 0]}
+                          value={[advSearchState.filters.minReposts || 0]}
                           onSlide={(v: number[]) => {
-                            setState('filters', 'minReposts', () => v[0]);
+                            setAdvSearchState('filters', 'minReposts', () => v[0]);
                           }}
                           onInput={(v: string) => {
                             const val = parseInt(v.trim()) || 0;
 
-                            setState('filters', 'minReposts', () => val);
+                            setAdvSearchState('filters', 'minReposts', () => val);
                           }}
                           dark={true}
                         />
@@ -1005,7 +1005,7 @@ const AdvancedSearch: Component = () => {
 
           <div class={styles.submitSearch}>
             <ButtonPrimary
-              onClick={submitSearch}
+              type="submit"
             >
               Search
             </ButtonPrimary>
