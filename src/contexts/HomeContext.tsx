@@ -13,6 +13,7 @@ import {
 import { useAccountContext } from "./AccountContext";
 import { emptyPaging, fetchMegaFeed, fetchScoredContent, PaginationInfo } from "../megaFeeds";
 import { saveStoredFeed } from "../lib/localStore";
+import { calculateNotesOffset } from "../utils";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -148,6 +149,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   }
 
   const checkForNewNotes = async (spec: string) => {
+    if (store.paging.notes.sortBy !== 'created_at') return;
 
     if (store.futureNotes.length > 100) {
       return;
@@ -159,9 +161,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       store.futureNotes :
       store.notes.slice(0, 20);
 
-    // let offset = store.futureNotes.length > 0 ?
-    //   store.futureNotes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)) :
-    //   lastPageNotes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0));
+    const offset = calculateNotesOffset(
+      lastPageNotes, 
+      store.futureNotes.length > 0 ? 
+        store.paging.future : store.paging.notes,
+    );
 
     const { notes, paging } = await fetchMegaFeed(
       account?.publicKey,
@@ -170,7 +174,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       {
         since,
         limit: 100,
-        // offset,
+        offset,
       }
     );
 
@@ -197,6 +201,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
+    const offset = calculateNotesOffset(store.notes, store.paging.notes);
+
     const { notes, paging } = await fetchMegaFeed(
       pubkey,
       spec,
@@ -204,7 +210,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       {
         until,
         limit: 20,
-        offset: store.notes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+        offset,
       },
     );
 

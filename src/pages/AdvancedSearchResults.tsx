@@ -12,6 +12,7 @@ import Paginator from '../components/Paginator/Paginator';
 import { TextField } from '@kobalte/core/text-field';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
+import { setAdvSearchState } from './AdvancedSearch';
 
 
 const AdvancedSearchResults: Component = () => {
@@ -40,7 +41,7 @@ const AdvancedSearchResults: Component = () => {
   createEffect(on(queryString, (v, p) => {
     if (!v || v === p) return;
 
-    search?.actions.setSearchCommand(v);
+    setAdvSearchState('command', () => v);
   }))
 
   const feedType = () => [Kind.LongForm].includes(kind()) ?

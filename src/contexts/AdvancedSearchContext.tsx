@@ -22,6 +22,7 @@ import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
 import { emptyPaging, fetchMegaFeed, PaginationInfo } from "../megaFeeds";
 import { logError } from "../lib/logger";
+import { calculateNotesOffset, calculateReadsOffset } from "../utils";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -294,18 +295,10 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
       let offset = 0;
 
-      const since = store.paging.since || 0;
-
       if (kind === 'reads') {
-        offset = store.reads.reduce<number>((acc, m) => {
-          // @ts-ignore
-          return since === m.published ? acc + 1 : acc
-        }, 0)
+        offset = calculateReadsOffset(store.reads, store.paging);
       } else if (kind === 'notes') {
-        offset = store.notes.reduce<number>((acc, m) => {
-          // @ts-ignore
-          return since === m.msg.created_at ? acc + 1 : acc
-        }, 0)
+        offset = calculateNotesOffset(store.notes, store.paging);
       }
 
       const { notes, reads, paging } = await fetchMegaFeed(

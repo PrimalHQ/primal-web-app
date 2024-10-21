@@ -26,7 +26,7 @@ import {
   SelectionOption,
   TopZap,
 } from "../types/primal";
-import { parseBolt11 } from "../utils";
+import { calculateReadsOffset, parseBolt11 } from "../utils";
 import { useAccountContext } from "./AccountContext";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 
@@ -184,6 +184,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
 
   const checkForNewNotes = async (spec: string) => {
+    if (store.paging.notes.sortBy !== 'created_at') return;
 
     if (store.futureNotes.length > 100) {
       return;
@@ -195,9 +196,11 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       store.futureNotes :
       store.notes.slice(0, 20);
 
-    // let offset = store.futureNotes.length > 0 ?
-    //   store.futureNotes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)) :
-    //   lastPageNotes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0));
+    const offset = calculateReadsOffset(
+      lastPageNotes, 
+      store.futureNotes.length > 0 ? 
+        store.paging.future : store.paging.notes,
+    );
 
     const { reads, paging } = await fetchMegaFeed(
       account?.publicKey,
@@ -206,7 +209,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       {
         since,
         limit: 100,
-        // offset,
+        offset,
       }
     );
 
@@ -234,6 +237,8 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
     const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
+    const offset = calculateReadsOffset(store.notes, store.paging.notes);
+
     const { reads, paging } = await fetchMegaFeed(
       pubkey,
       spec,
@@ -241,7 +246,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       {
         until,
         limit: 20,
-        offset: store.notes.map(n => n.repost ? n.repost.note.created_at : (n.published || 0)),
+        offset,
       });
 
       updateStore('paging', 'notes', () => ({ ...paging }));

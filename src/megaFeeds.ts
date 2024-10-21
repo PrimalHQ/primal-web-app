@@ -205,6 +205,7 @@ export const fetchReadThread = (
 
     const decoded = decodeIdentifier(naddr);
 
+    // @ts-ignore
     const { pubkey, identifier, kind } = decoded.data;
 
     const unsub = subsTo(subId, {

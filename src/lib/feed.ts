@@ -49,8 +49,6 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
 
 export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, since = 0, offset = 0) => {
 
-  const start = until === 0 ? 'since' : 'until';
-
   let payload = { spec, limit, offset };
 
   if (until > 0) {

@@ -1,6 +1,7 @@
 import { format } from 'd3-format';
 import { subsTo } from './sockets';
-import { NostrEventContent } from './types/primal';
+import { NostrEventContent, PrimalArticle, PrimalNote } from './types/primal';
+import { PaginationInfo } from './megaFeeds';
 
 let debounceTimer: number = 0;
 
@@ -223,4 +224,58 @@ export const humanizeTime = (seconds: number) => {
   const secs = String(Math.ceil(seconds % 60)).padStart(2, '0');
 
   return `${mins}:${secs}`;
+}
+
+export const calculateNotesOffset = (notes: PrimalNote[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=notes.length-1;i>=0;i--) {
+    const note = notes[i];
+
+    if (
+      paging.sortBy === 'created_at' &&
+      note.msg.created_at !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'satszapped' &&
+      note.post.satszapped !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'score' &&
+      note.post.score !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  return offset;
+}
+
+export const calculateReadsOffset = (reads: PrimalArticle[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=reads.length-1;i>=0;i--) {
+    const read = reads[i];
+
+    if (
+      paging.sortBy === 'created_at' &&
+      read.msg.created_at !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'satszapped' &&
+      read.satszapped !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'score' &&
+      read.score !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  return offset;
 }
