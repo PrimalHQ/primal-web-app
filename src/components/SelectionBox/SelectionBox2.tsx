@@ -36,7 +36,7 @@ const SelectionBox2: Component<{
     if (typeof init === 'string') {
       const found = Object.entries(opts).find(([_, oo]) => oo.id === init);
 
-      if (!found) return;
+      if (!found) return props.options[0];
 
       return {
         ...found[1],
@@ -46,7 +46,7 @@ const SelectionBox2: Component<{
 
     const found = Object.entries(opts).find(([_, oo]) => oo.id === init.id);
 
-    if (!found) return;
+    if (!found) return props.options[0];
 
     return {
       ...found[1],

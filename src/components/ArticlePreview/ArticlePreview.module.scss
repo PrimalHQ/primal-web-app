@@ -39,6 +39,14 @@
         font-size: 14px;
         font-weight: 700;
         line-height: 14px;
+
+        max-width: 218px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
 
       .nip05 {
@@ -46,6 +54,14 @@
         font-size: 14px;
         font-weight: 400;
         line-height: 14px;
+        
+        max-width: 218px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
       }
     }
 

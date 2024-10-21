@@ -346,7 +346,7 @@ const ArticlePreview: Component<{
         <div class={styles.userInfo}>
           <Avatar user={props.article.user} size="micro"/>
           <div class={styles.userName}>{userName(props.article.user)}</div>
-          <VerificationCheck  user={props.article.user} />
+          <VerificationCheck user={props.article.user} />
           <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
         </div>
         <div class={styles.time}>
