@@ -19,6 +19,7 @@ import { bookmarks as tBookmarks } from '../translations';
 import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap, PrimalArticle } from '../types/primal';
 import { parseBolt11 } from '../utils';
 import styles from './Bookmarks.module.scss';
+import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
@@ -68,6 +69,13 @@ const Bookmarks: Component = () => {
   createEffect(on(() => account?.isKeyLookupDone, (v) => {
     if (v && account?.publicKey) {
       updateStore(() => ({ ...emptyStore }));
+
+      const k = fetchBookmarksFeed(account?.publicKey);
+  
+      if (k && k !== store.kind) {
+        updateStore('kind', () => k);
+      }
+
       updateStore('fetchingInProgress', () => true);
       fetchBookmarks(account.publicKey);
     }
@@ -330,6 +338,7 @@ const Bookmarks: Component = () => {
   const onChangeKind = (newKind: string) => {
     updateStore(() => ({ ...emptyStore }));
     updateStore('kind', () => newKind);
+    saveBookmarksFeed(account?.publicKey, newKind);
     fetchBookmarks(account?.publicKey);
   }
 

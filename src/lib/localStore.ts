@@ -34,6 +34,9 @@ export type LocalStore = {
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
   uploadTime: Record<string, number>,
   selectedFeed: PrimalFeed | undefined,
+  selectedHomeFeed: PrimalArticleFeed | undefined,
+  selectedReadsFeed: PrimalArticleFeed | undefined,
+  selectedBookmarksFeed: string | undefined,
   animated: boolean,
 };
 
@@ -77,6 +80,9 @@ export const emptyStorage: LocalStore = {
   selectedFeed: undefined,
   bookmarks: [],
   animated: true,
+  selectedHomeFeed: undefined,
+  selectedReadsFeed: undefined,
+  selectedBookmarksFeed: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -476,20 +482,49 @@ export const loadDmCoversations = (pubkey: string) => {
 };
 
 
-export const fetchStoredFeed = (pubkey: string | undefined) => {
+export const fetchStoredFeed = (pubkey: string | undefined, type: 'home' | 'reads') => {
   if (!pubkey) return undefined;
 
   const store = getStorage(pubkey)
 
-  return store.selectedFeed;
+  if (type === 'reads') {
+    return store.selectedReadsFeed;
+  }
+  
+  return store.selectedHomeFeed;
 };
 
-export const saveStoredFeed = (pubkey: string | undefined, feed: PrimalFeed) => {
+export const saveStoredFeed = (pubkey: string | undefined, type: 'home' | 'reads', feed: PrimalArticleFeed) => {
   if (!pubkey) return;
 
   const store = getStorage(pubkey);
 
-  store.selectedFeed = { ...feed };
+  if (type === 'home') {
+    store.selectedHomeFeed = { ...feed };
+  }
+  else if (type === 'reads') {
+    store.selectedReadsFeed = { ...feed };
+  }
+
+  setStorage(pubkey, store);
+};
+
+
+
+export const fetchBookmarksFeed = (pubkey: string | undefined) => {
+  if (!pubkey) return undefined;
+
+  const store = getStorage(pubkey)
+
+  return store.selectedBookmarksFeed;
+};
+
+export const saveBookmarksFeed = (pubkey: string | undefined, kind: string) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.selectedBookmarksFeed = kind;
 
   setStorage(pubkey, store);
 };

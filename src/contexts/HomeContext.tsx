@@ -12,6 +12,7 @@ import {
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
 import { emptyPaging, fetchMegaFeed, fetchScoredContent, PaginationInfo } from "../megaFeeds";
+import { saveStoredFeed } from "../lib/localStore";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -251,6 +252,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
       updateStore('selectedFeed', reconcile({...feed}));
+      saveStoredFeed(account?.publicKey, 'home', feed);
       clearNotes();
       fetchNotes(feed.spec, 0);
     }

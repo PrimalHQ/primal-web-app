@@ -115,9 +115,22 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     const selected = reeds?.selectedFeed;
 
     if (!selected) {
-      const feed = options()[0];
-      selectFeed(feed);
-      return feed;
+      let feed = fetchStoredFeed(account?.publicKey, 'reads');
+
+      if (feed) {
+        return {
+          label: feed.name,
+          value: feed.spec || '',
+          description: feed.description,
+          id: genId(feed.spec),
+        }
+      }
+
+      
+      const opt = options()[0];
+      
+      selectFeed(opt);
+      return opt;
     }
 
     return {

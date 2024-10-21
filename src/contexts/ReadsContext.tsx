@@ -1,4 +1,4 @@
-import { createContext, createEffect, onCleanup, useContext } from "solid-js";
+import { createContext, createEffect, on, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind, minKnownProfiles } from "../constants";
@@ -28,6 +28,7 @@ import {
 } from "../types/primal";
 import { parseBolt11 } from "../utils";
 import { useAccountContext } from "./AccountContext";
+import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 
 
 type ReadsContextStore = {
@@ -286,7 +287,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const selectFeed = (feed: PrimalArticleFeed | undefined) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
-      // saveStoredFeed(account?.publicKey, currentFeed);
+      saveStoredFeed(account?.publicKey, 'reads', currentFeed);
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.spec, 0);
@@ -316,6 +317,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const setArticleHeight = (id: string, height: number) => {
     updateStore('articleHeights', id, () => height);
   }
+
 
 // STORES ---------------------------------------
 
