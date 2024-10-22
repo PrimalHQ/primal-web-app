@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core/tabs";
 import { A, useLocation } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
+import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import { imageOrVideoRegex, imageOrVideoRegexG, imageRegex, imageRegexG, Kind, profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
@@ -29,7 +29,7 @@ import NoteGallery from "../Note/NoteGallery";
 import ProfileNoteZap from "../ProfileNoteZap/ProfileNoteZap";
 import FeedNoteSkeleton from "../Skeleton/FeedNoteSkeleton";
 import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
-import { Transition, TransitionGroup } from "solid-transition-group";
+import { TransitionGroup } from "solid-transition-group";
 import ZapSkeleton from "../Skeleton/ZapSkeleton";
 import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton";
 
@@ -37,6 +37,7 @@ import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton
 const ProfileTabs: Component<{
   id?: string,
   setProfile?: (pk: string) => void,
+  profileKey: string,
 }> = (props) => {
 
   const intl = useIntl();
@@ -52,7 +53,7 @@ const ProfileTabs: Component<{
   const [currentTab, setCurrentTab] = createSignal<string>(hash());
 
   const addToAllowlist = async () => {
-    const pk = profile?.profileKey;
+    const pk = props.profileKey;
     if (pk) {
       account?.actions.addToAllowlist(pk);
     }
@@ -71,7 +72,7 @@ const ProfileTabs: Component<{
   };
 
   const unMuteProfile = () => {
-    const pk = profile?.profileKey;
+    const pk = props.profileKey;
 
     if (!account || !pk) {
       return;
@@ -144,10 +145,11 @@ const ProfileTabs: Component<{
     setFollowersOffset(followersOffset() + profileContactListPage);
   }
 
-  onMount(() => {
+  createEffect(on(() => props.profileKey, (v,p) => {
+    if (!v || v === p) return;
     const value = hash();
     updateTabContent(value);
-  })
+  }))
 
   const onChangeValue = (value: string) => {
 
@@ -163,37 +165,28 @@ const ProfileTabs: Component<{
 
     switch(value) {
       case 'reads':
-        // profile.articles.length === 0 && profile.actions.fetchArticles(profile.profileKey);
-        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'reads');
+        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(props.profileKey, 'reads');
         break;
       case 'notes':
-        // profile.notes.length === 0 && profile.actions.fetchNotes(profile.profileKey);
-
-        profile.notes.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'notes');
+        profile.notes.length === 0 && profile.actions.getProfileMegaFeed(props.profileKey, 'notes');
         break;
       case 'replies':
-        // profile.replies.length === 0 && profile.actions.fetchReplies(profile.profileKey);
-        profile.replies.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'replies');
+        profile.replies.length === 0 && profile.actions.getProfileMegaFeed(props.profileKey, 'replies');
         break;
       case 'media':
-        // profile.gallery.length === 0 && profile.actions.fetchGallery(profile.profileKey);
-        profile.gallery.length === 0 && profile.actions.getProfileMegaFeed(profile.profileKey, 'media');
+        profile.gallery.length === 0 && profile.actions.getProfileMegaFeed(props.profileKey, 'media');
         break;
       case 'zaps':
-        profile.zaps.length === 0 && profile.actions.fetchZapList(profile.profileKey);
+        profile.zaps.length === 0 && profile.actions.fetchZapList(props.profileKey);
         break;
       case 'relays':
-        Object.keys(profile.relays || {}).length === 0 && profile.actions.fetchRelayList(profile.profileKey);
+        Object.keys(profile.relays || {}).length === 0 && profile.actions.fetchRelayList(props.profileKey);
         break;
     }
   }
 
   const galleryImages = () => {
     return profile?.gallery;
-    return profile?.gallery.filter(note => {
-      const test = (imageRegex).test(note.content);
-      return test;
-    });
   };
 
   const hasImages = (note: PrimalNote) => {
@@ -296,11 +289,11 @@ const ProfileTabs: Component<{
         <Tabs.Content class={styles.tabContent} value="reads">
           <div class={styles.profileNotes}>
             <Switch>
-              <Match when={isMuted(profile?.profileKey)}>
+              <Match when={isMuted(props.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
                     t.isMuted,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                   )}
                   <button
                     onClick={unMuteProfile}
@@ -338,7 +331,7 @@ const ProfileTabs: Component<{
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
                           t.noArticles,
-                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                         )}
                       </div>
                     </Show>
@@ -353,7 +346,7 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'reads');
+                          profile?.actions.getProfileMegaFeedNextPage(props.profileKey, 'reads');
                           // profile?.actions.fetchNextArticlesPage();
                         }}
                         isSmall={true}
@@ -369,11 +362,11 @@ const ProfileTabs: Component<{
         <Tabs.Content class={styles.tabContent} value="notes">
           <div class={styles.profileNotes}>
             <Switch>
-              <Match when={isMuted(profile?.profileKey)}>
+              <Match when={isMuted(props.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
                     t.isMuted,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                   )}
                   <button
                     onClick={unMuteProfile}
@@ -410,7 +403,7 @@ const ProfileTabs: Component<{
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
                           t.noNotes,
-                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                         )}
                       </div>
                     </Show>
@@ -425,7 +418,7 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'notes');
+                          profile?.actions.getProfileMegaFeedNextPage(props.profileKey, 'notes');
                           // profile?.actions.fetchNextPage();
                         }}
                         isSmall={true}
@@ -441,11 +434,11 @@ const ProfileTabs: Component<{
         <Tabs.Content class={styles.tabContent} value="replies">
           <div class={styles.profileNotes}>
             <Switch>
-              <Match when={isMuted(profile?.profileKey)}>
+              <Match when={isMuted(props.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
                     t.isMuted,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                   )}
                   <button
                     onClick={unMuteProfile}
@@ -482,7 +475,7 @@ const ProfileTabs: Component<{
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
                           t.noReplies,
-                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                         )}
                       </div>
                     </Show>
@@ -497,7 +490,7 @@ const ProfileTabs: Component<{
                       </For>
                       <Paginator
                         loadNextPage={() => {
-                          profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'replies');
+                          profile?.actions.getProfileMegaFeedNextPage(props.profileKey, 'replies');
                           // profile?.actions.fetchNextRepliesPage();
                         }}
                         isSmall={true}
@@ -513,11 +506,11 @@ const ProfileTabs: Component<{
         <Tabs.Content class={styles.tabContent} value="media">
           <div class={styles.profileNotes}>
             <Switch>
-              <Match when={isMuted(profile?.profileKey)}>
+              <Match when={isMuted(props.profileKey)}>
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(
                     t.isMuted,
-                    { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                    { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                   )}
                   <button
                     onClick={unMuteProfile}
@@ -553,7 +546,7 @@ const ProfileTabs: Component<{
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
                           t.noReplies,
-                          { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                          { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                         )}
                       </div>
                     </Show>
@@ -578,7 +571,7 @@ const ProfileTabs: Component<{
                     </div>
                     <Paginator
                       loadNextPage={() => {
-                        profile?.actions.getProfileMegaFeedNextPage(profile.profileKey, 'media');
+                        profile?.actions.getProfileMegaFeedNextPage(props.profileKey, 'media');
                         // profile?.actions.fetchNextGalleryPage();
                       }}
                       isSmall={true}
@@ -607,7 +600,7 @@ const ProfileTabs: Component<{
                   <div class={styles.mutedProfile}>
                     {intl.formatMessage(
                       t.noZaps,
-                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                      { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                     )}
                   </div>
                 </Show>
@@ -650,7 +643,7 @@ const ProfileTabs: Component<{
                   <div class={styles.mutedProfile}>
                     {intl.formatMessage(
                       t.noRelays,
-                      { name: profile?.userProfile ? userName(profile?.userProfile) : profile?.profileKey },
+                      { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                     )}
                   </div>
                 }

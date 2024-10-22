@@ -7,6 +7,7 @@ import {
   createSignal,
   For,
   Match,
+  on,
   onCleanup,
   onMount,
   Resource,
@@ -140,31 +141,10 @@ const Profile: Component = () => {
     resolveHex(params.vanityName)
   })
 
-  // const getHex = () => {
-  //   console.log('PROFILE: ', params.vanityName, routeData())
-  //   if (params.vanityName && routeData()) {
-  //     const name = params.vanityName.toLowerCase();
-  //     const hex = routeData()?.names[name];
-
-  //     if (hex) {
-  //       return hex;
-  //     }
-
-  //     navigate('/404');
-  //   }
-
-  //   if (params.vanityName) {
-  //     return '';
-  //   }
-
-  //   let hex = params.npub || account?.publicKey;
-
-  //   if (params.npub?.startsWith('npub')) {
-  //     hex = nip19.decode(params.npub).data as string;
-  //   }
-
-  //   return hex;
-  // }
+  createEffect(on(() => profile?.profileKey, (v,p) => {
+    if (!v || v === p) return;
+    setIsProfileLoaded(false);
+  }))
 
   let firstTime = true;
 
@@ -1014,9 +994,9 @@ const Profile: Component = () => {
         </Show>
 
       <Show
-        when={isProfileLoaded()}
+        when={profile?.profileKey && isProfileLoaded()}
       >
-        <ProfileTabs setProfile={setProfile} />
+        <ProfileTabs setProfile={setProfile} profileKey={profile?.profileKey} />
       </Show>
 
       <ConfirmModal
