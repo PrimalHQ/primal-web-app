@@ -61,10 +61,17 @@ const AdvancedSearchResults: Component = () => {
   'reads' : 'home';
 
   const onKeyUp = (e: KeyboardEvent) => {
-    console.log('KEY: ', e.code)
     if (e.code === 'Enter') {
       e.stopPropagation();
       e.preventDefault();
+
+      const q = decodeURIComponent(params.query);
+      if (q === queryString()) {
+        search?.actions.clearSearch();
+        search?.actions.findContent(q);
+        return false;
+      }
+
       submitCommandChange();
       return false;
     }
