@@ -9,7 +9,7 @@ import { useAccountContext } from "../../contexts/AccountContext";
 
 const NoteTopZapsCompact: Component<{
   note: PrimalNote,
-  action: () => void,
+  action: (zap: TopZap) => void,
   topZaps: TopZap[],
   topZapLimit: number,
   id?: string,
@@ -22,7 +22,7 @@ const NoteTopZapsCompact: Component<{
   const topZaps = () => {
     const zaps = props.topZaps ? [...props.topZaps] : [ ...props.note.topZaps ];
 
-    const highlights = zaps.slice(0, 4);
+    const highlights = zaps.slice(0, props.topZapLimit);
 
     return highlights;
   }
@@ -41,7 +41,7 @@ const NoteTopZapsCompact: Component<{
 
   return (
     <Show when={topZaps().length > 0}>
-      <div class={`${styles.zapHighlightsCompact}`}>
+      <div class={`${styles.zapHighlightsTiny}`}>
         <TransitionGroup
           name="top-zaps-feed"
           enterClass={styles.topZapEnterTransition}
@@ -55,23 +55,15 @@ const NoteTopZapsCompact: Component<{
                 data-index={index()}
               >
                 <button
-                  class={`${styles.topZap} ${index() > 0 ? styles.compact : ''}`}
+                  class={`${styles.topZap} ${styles.compact}`}
                   onClick={(e) => {
                     e.preventDefault();
-                    props.action();
+                    e.stopPropagation();
+                    props.action(zap);
                   }}
                   style={`z-index: ${12 - index()};`}
                 >
                   <Avatar user={zapSender(zap)} size="micro" />
-                  <Show when={!props.hideMessage && index() === 0}>
-                    <div class={styles.topZapIcon}></div>
-                    <div class={styles.amount}>
-                      {zap.amount.toLocaleString()}
-                    </div>
-                    <div class={styles.description}>
-                      {zap.message}
-                    </div>
-                  </Show>
                 </button>
               </div>
             )}

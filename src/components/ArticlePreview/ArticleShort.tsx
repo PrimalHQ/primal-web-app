@@ -25,7 +25,7 @@ import styles from './ArticlePreview.module.scss';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
-const ArticlePreview: Component<{
+const ArticleShort: Component<{
   id?: string,
   article: PrimalArticle,
   short?: boolean,
@@ -123,4 +123,4 @@ const ArticlePreview: Component<{
   );
 }
 
-export default hookForDev(ArticlePreview);
+export default hookForDev(ArticleShort);

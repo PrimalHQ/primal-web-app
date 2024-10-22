@@ -400,7 +400,7 @@ const Note: Component<{
         </div>
       </Match>
 
-      <Match when={noteType() === 'feed'}>
+      {/* <Match when={noteType() === 'feed'}>
         <A
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
@@ -460,9 +460,9 @@ const Note: Component<{
             size={size()}
           />
         </A>
-      </Match>
+      </Match> */}
 
-      <Match when={noteType() === 'thread'}>
+      <Match when={noteType() === 'thread' || noteType() === 'feed'}>
         <A
           id={props.id}
           class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}

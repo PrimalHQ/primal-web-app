@@ -134,11 +134,12 @@
 .articlePreview {
   background-color: var(--background-header-input);
   border-radius: var(--border-radius-small);
-  padding-block: 20px;
+  padding: 0px;
+  overflow: hidden;
+
   a {
     text-decoration: none !important;
     padding: 0;
-    padding-inline: 16px;
     margin: 0;
   }
 }

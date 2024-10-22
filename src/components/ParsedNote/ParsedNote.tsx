@@ -52,6 +52,7 @@ import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import { useAppContext } from '../../contexts/AppContext';
+import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 
 const groupGridLimit = 7;
 
@@ -943,7 +944,7 @@ const ParsedNote: Component<{
 
     return (
       <div class={styles.articlePreview}>
-        <ArticlePreview
+        <ArticleCompactPreview
           article={mention}
           hideFooter={true}
           hideContext={true}
