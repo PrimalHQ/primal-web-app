@@ -24,6 +24,9 @@ import PrimaryNoteSkeleton from '../components/Skeleton/PrimaryNoteSkeleton';
 import ReplyToNoteSkeleton from '../components/Skeleton/ReplyToNoteSkeleton';
 import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 import { Transition } from 'solid-transition-group';
+import { APP_ID } from '../App';
+import { subsTo } from '../sockets';
+import { fetchNotes } from '../handleNotes';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -43,6 +46,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     }
 
     if (noteId.startsWith('nevent')) {
+      // @ts-ignore
       return nip19.noteEncode(nip19.decode(noteId).data.id);
     }
 
@@ -151,7 +155,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     pn && observer?.unobserve(pn);
   });
 
-  const onNotePosted = (result: SendNoteResult, meta?: {
+  const onNotePosted = async (result: SendNoteResult, meta?: {
     userRefs: Record<string, PrimalUser>,
     noteRefs: Record<string, PrimalNote>,
     articleRefs: Record<string, PrimalArticle>,
@@ -166,9 +170,15 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       noteRefs: { ...meta.noteRefs, [pNote.id]: {...pNote} }
     }
 
-    const note = generateNote(result.note, account?.activeUser, modifiedMeta);
+    const subId = `posted_note_${APP_ID}`;
 
-    threadContext?.actions.insertNote(note);
+
+    const notes = await fetchNotes(account.publicKey, [result.note.id], subId);
+
+
+    // const note = generateNote(result.note, account?.activeUser, modifiedMeta);
+
+    threadContext?.actions.insertNote(notes[0]);
 
     // setTimeout(() => {
     //   threadContext?.actions.updateNotes(postId());
