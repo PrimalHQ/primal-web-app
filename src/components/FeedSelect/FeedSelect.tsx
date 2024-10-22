@@ -9,6 +9,7 @@ import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
 import SelectionBox2 from '../SelectionBox/SelectionBox2';
+import { isDev } from '../../utils';
 
 const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
@@ -85,9 +86,9 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         }
       }
 
-      
+
       const opt = options()[0];
-      
+
       selectFeed(opt);
       return opt;
     }
@@ -125,6 +126,9 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         caption="Notes Feed"
         captionAction={<A href="/settings/home_feeds">Edit Feeds</A>}
       />
+      <Show when={isDev() && home?.selectedFeed?.spec.includes('advsearch')}>
+        <A href={`/asearch/${encodeURIComponent(JSON.parse(home?.selectedFeed?.spec || '{}').query)}`}>go to advanced search</A>
+      </Show>
     </Show>
   );
 }
