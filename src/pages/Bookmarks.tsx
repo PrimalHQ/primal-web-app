@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, For, Match, on, onCleanup, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
@@ -17,42 +17,24 @@ import { subsTo } from '../sockets';
 import { convertToArticles, convertToNotes, parseEmptyReposts } from '../stores/note';
 import { bookmarks as tBookmarks } from '../translations';
 import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap, PrimalArticle } from '../types/primal';
-import { parseBolt11 } from '../utils';
+import { calculateNotesOffset, calculateReadsOffset, parseBolt11 } from '../utils';
 import styles from './Bookmarks.module.scss';
 import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
+import { emptyPaging, fetchMegaFeed, PaginationInfo } from '../megaFeeds';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
-  page: FeedPage,
-  notes: (PrimalNote | PrimalArticle)[],
-  noteIds: string[],
-  offset: number,
-  pageRange: PageRange,
-  reposts: Record<string, string> | undefined,
-  firstLoad: boolean,
+  notes: PrimalNote[],
+  reads: PrimalArticle[],
+  paging: PaginationInfo,
   kind: string,
 }
 
 const emptyStore: BookmarkStore = {
   fetchingInProgress: false,
-  page: {
-    messages: [],
-    users: {},
-    postStats: {},
-    mentions: {},
-    noteActions: {},
-    topZaps: {},
-  },
   notes: [],
-  noteIds: [],
-  pageRange: {
-    since: 0,
-    until: 0,
-    order_by: 'created_at',
-  },
-  reposts: {},
-  offset: 0,
-  firstLoad: true,
+  reads: [],
+  paging: { ...emptyPaging() },
   kind: 'notes',
 };
 
@@ -68,17 +50,19 @@ const Bookmarks: Component = () => {
 
   createEffect(on(() => account?.isKeyLookupDone, (v) => {
     if (v && account?.publicKey) {
-      updateStore(() => ({ ...emptyStore }));
-
       const k = fetchBookmarksFeed(account?.publicKey);
-  
+
       if (k && k !== store.kind) {
         updateStore('kind', () => k);
       }
 
-      updateStore('fetchingInProgress', () => true);
-      fetchBookmarks(account.publicKey);
-    }
+      if (
+        (k==='notes' && store.notes.length === 0) ||
+        (k==='reads' && store.reads.length === 0)
+      )
+        updateStore('fetchingInProgress', () => true);
+        fetchBookmarks(account?.publicKey);
+      }
   }));
 
   onCleanup(() => {
@@ -87,256 +71,91 @@ const Bookmarks: Component = () => {
 
   const kind = () => store.kind || 'notes';
 
-  const fetchBookmarks = (pubkey: string | undefined, until = 0) => {
+  const fetchBookmarks = async (pubkey: string | undefined, until = 0) => {
     if (!pubkey) return;
 
     const subId = `bookmark_feed_${until}_${APP_ID}`;
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updatePage(content);
-      },
-      onEose: () => {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          unsub();
-          return;
-        }
-
-        updateStore('reposts', () => reposts);
-
-        fetchReposts(ids);
-
-        unsub();
-      },
-    });
-
     const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
 
-    getUserFeed(pubkey, pubkey, subId, 'bookmarks', k, until, pageSize, store.offset);
-  }
-
-  const fetchNextPage = () => since > 0 && fetchBookmarks(account?.publicKey, since);
-
-  const fetchReposts = (ids: string[]) => {
-    const subId = `bookmark_reposts_${APP_ID}`;
-
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-      },
-      onEose: () => {
-        savePage(store.page);
-        unsub();
-      }
+    const spec = JSON.stringify({
+      id: 'feed',
+      kind: 'notes',
+      kinds: [k],
+      notes: 'bookmarks',
+      pubkey,
     });
 
-    getEvents(account?.publicKey, ids, subId);
-  };
+    let offset = 0;
 
-  const updatePage = (content: NostrEventContent) => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      updateStore('page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
-      return;
+    if (kind() === 'reads') {
+      offset = calculateReadsOffset(store.reads, store.paging);
+    } else if (kind() === 'notes') {
+      offset = calculateNotesOffset(store.notes, store.paging);
     }
 
-    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-
-      updateStore('page', 'messages',
-        (msgs) => [ ...msgs, { ...message }]
-      );
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      updateStore('page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      updateStore('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.FeedRange) {
-      const noteActionContent = content as NostrFeedRange;
-      const range = JSON.parse(noteActionContent.content) as PageRange;
-
-      updateStore('pageRange', () => ({ ...range }));
-      since = range.until;
-      return;
-    }
-
-    if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
+    const { notes, reads, paging } = await fetchMegaFeed(
+      account?.publicKey,
+      spec,
+      subId,
+      {
+        until,
+        limit: pageSize,
+        offset,
       }
+    );
 
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
-      return;
-    }
-
-    if (content?.kind === Kind.Zap) {
-      const zapTag = content.tags.find(t => t[0] === 'description');
-
-      if (!zapTag) return;
-
-      const zapInfo = JSON.parse(zapTag[1] || '{}');
-
-      let amount = '0';
-
-      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
-
-      if (bolt11Tag) {
-        try {
-          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
-        } catch (e) {
-          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
-
-          amount = amountTag ? amountTag[1] : '0';
-        }
-      }
-
-      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
-
-      const zap: TopZap = {
-        id: zapInfo.id,
-        amount: parseInt(amount || '0'),
-        pubkey: zapInfo.pubkey,
-        message: zapInfo.content,
-        eventId,
-      };
-
-      const oldZaps = store.page.topZaps[eventId];
-
-      if (oldZaps === undefined) {
-        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
-        return;
-      }
-
-      if (oldZaps.find(i => i.id === zap.id)) {
-        return;
-      }
-
-      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
-
-      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
-
-      return;
-    }
-  };
-
-  const savePage = (page: FeedPage) => {
     if (kind() === 'notes') {
-      const newPosts = convertToNotes(page, page.topZaps);
-
-      saveNotes(newPosts);
-      return;
+      updateStore('notes', (nts) => [...nts, ...notes]);
     }
 
     if (kind() === 'reads') {
-      const newPosts = convertToArticles(page, page.topZaps);
-
-      saveArticles(newPosts);
-      return;
+      updateStore('reads', (nts) => [...nts, ...reads]);
     }
-  };
 
-  const saveNotes = (newNotes: PrimalNote[]) => {
-    const notesToAdd = newNotes.filter(n => !store.noteIds.includes(n.post.id));
+    updateStore('paging', () => ({ ...paging }));
 
-    const lastTimestamp = store.pageRange.since;
-    const offset = notesToAdd.reduce<number>((acc, n) => n.post.created_at === lastTimestamp ? acc+1 : acc, 0);
-
-    const ids = notesToAdd.map(m => m.post.id)
-
-    ids.length > 0 && updateStore('noteIds', () => [...ids]);
-
-    updateStore('offset', () => offset);
-    updateStore('notes', (notes) => [ ...notes, ...notesToAdd ]);
-    updateStore('page', () => ({
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-    }));
     updateStore('fetchingInProgress', () => false);
-  };
+    console.log('EFFECT: ', store.fetchingInProgress)
 
+    // const unsub = subsTo(subId, {
+    //   onEvent: (_, content) => {
+    //     content && updatePage(content);
+    //   },
+    //   onEose: () => {
+    //     const reposts = parseEmptyReposts(store.page);
+    //     const ids = Object.keys(reposts);
 
-  const saveArticles = (newNotes: PrimalArticle[]) => {
-    const notesToAdd = newNotes.filter(n => !store.noteIds.includes(n.id));
+    //     if (ids.length === 0) {
+    //       savePage(store.page);
+    //       unsub();
+    //       return;
+    //     }
 
-    const lastTimestamp = store.pageRange.since;
-    const offset = notesToAdd.reduce<number>((acc, n) => n.published === lastTimestamp ? acc+1 : acc, 0);
+    //     updateStore('reposts', () => reposts);
 
-    const ids = notesToAdd.map(m => m.id)
+    //     fetchReposts(ids);
 
-    ids.length > 0 && updateStore('noteIds', () => [...ids]);
+    //     unsub();
+    //   },
+    // });
 
-    updateStore('offset', () => offset);
-    updateStore('notes', (notes) => [ ...notes, ...notesToAdd ]);
-    updateStore('page', () => ({
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-    }));
-    updateStore('fetchingInProgress', () => false);
+    // const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
+
+    // getUserFeed(pubkey, pubkey, subId, 'bookmarks', k, until, pageSize, store.offset);
+  }
+
+  const fetchNextPage = () => {
+    const until = store.paging.since || 0;
+
+    if (until > 0) {
+      fetchBookmarks(account?.publicKey, until)
+    }
   };
 
   const onChangeKind = (newKind: string) => {
     updateStore(() => ({ ...emptyStore }));
+    updateStore('fetchingInProgress', () => true);
     updateStore('kind', () => newKind);
     saveBookmarksFeed(account?.publicKey, newKind);
     fetchBookmarks(account?.publicKey);
@@ -366,7 +185,7 @@ const Bookmarks: Component = () => {
 
       <div class={styles.bookmarkFeed}>
 
-        <Show when={!store.fetchingInProgress && store.notes.length === 0}>
+        <Show when={!store.fetchingInProgress && store.notes.length === 0 && store.reads.length === 0}>
           <div class={styles.noBookmarks}>
             {intl.formatMessage(tBookmarks.noBookmarks)}
           </div>
@@ -387,9 +206,9 @@ const Bookmarks: Component = () => {
                 </Match>
 
                 <Match when={kind() === 'reads'}>
-                  <For each={store.notes}>
-                    {(note) =>
-                      <div class="animated"><ArticlePreview article={note} /></div>
+                  <For each={store.reads}>
+                    {(read) =>
+                      <div class="animated"><ArticlePreview article={read} /></div>
                     }
                   </For>
                 </Match>
