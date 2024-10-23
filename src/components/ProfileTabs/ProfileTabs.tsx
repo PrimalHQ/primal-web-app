@@ -186,7 +186,10 @@ const ProfileTabs: Component<{
   }
 
   const galleryImages = () => {
-    return profile?.gallery;
+    return profile?.gallery.filter(note => {
+      const test = (imageOrVideoRegex).test(note.content);
+      return test;
+    });
   };
 
   const hasImages = (note: PrimalNote) => {
