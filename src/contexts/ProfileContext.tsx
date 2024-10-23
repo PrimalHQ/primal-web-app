@@ -384,6 +384,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const paging = store.paging[tab] || { until: 0, since: 0, sortBy: 'created_at'};
 
+    if (!paging.since) return;
+
     getProfileMegaFeed(pubkey, tab, paging.since, 20);
   }
 

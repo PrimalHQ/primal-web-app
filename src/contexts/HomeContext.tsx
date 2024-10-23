@@ -162,8 +162,8 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       store.notes.slice(0, 20);
 
     const offset = calculateNotesOffset(
-      lastPageNotes, 
-      store.futureNotes.length > 0 ? 
+      lastPageNotes,
+      store.futureNotes.length > 0 ?
         store.paging.future : store.paging.notes,
     );
 

@@ -18,10 +18,6 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
     return i;
   };
 
-  createEffect(() => {
-    console.log('RATIO: ', ratio());
-  })
-
   const ratio = () => {
     const img = image();
 

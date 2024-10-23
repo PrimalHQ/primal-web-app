@@ -530,7 +530,6 @@ const ProfileTabs: Component<{
                 </div>
               </Match>
               <Match when={true}>
-                <TransitionGroup name="slide-fade">
                   <div>
                     <Show when={profile && profile.isFetchingGallery && profile.gallery.length === 0}>
                       <div class={styles.galleryGrid}>
@@ -577,7 +576,6 @@ const ProfileTabs: Component<{
                       isSmall={true}
                     />
                   </Show>
-                </TransitionGroup>
               </Match>
             </Switch>
           </div>
