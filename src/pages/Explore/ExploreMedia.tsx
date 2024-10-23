@@ -10,7 +10,7 @@ import { APP_ID } from '../../App';
 import { userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { imageRegex, videoRegex } from '../../constants';
+import { imageOrVideoRegex, imageRegex, videoRegex } from '../../constants';
 import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
 import Paginator from '../../components/Paginator/Paginator';
@@ -58,6 +58,13 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
     explore?.actions.setExploreMedia(notes, paging);
   }
 
+  const galleryImages = () => {
+    return explore?.exploreMedia.filter(note => {
+      const test = (imageOrVideoRegex).test(note.content);
+      return test;
+    });
+  };
+
   // const hasImages = (note: PrimalNote) => {
   //   const isImage = (imageRegex).test(note.content);
   //   const isVideo = (videoRegex).test(note.content);
@@ -67,11 +74,11 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   return (
     <div class={styles.exploreMedia}>
       <div class={styles.galleryGrid}>
-        <For each={explore?.exploreMedia}>
+        <For each={galleryImages()}>
           {(note) => (
-                <A href={`/e/${note.noteId}`} class={styles.missingImage}>
-                  <NoteGallery note={note} />
-                </A>
+            <A href={`/e/${note.noteId}`} class={styles.missingImage}>
+              <NoteGallery note={note} />
+            </A>
           )}
         </For>
         <Paginator
