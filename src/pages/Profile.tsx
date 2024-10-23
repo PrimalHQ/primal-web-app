@@ -123,6 +123,7 @@ const Profile: Component = () => {
 
       setHex(() => hex);
 
+      setProfile(hex);
       return;
     }
 
@@ -134,6 +135,8 @@ const Profile: Component = () => {
 
     setHex(() => hex);
 
+    setProfile(hex);
+
     return;
   }
 
@@ -144,32 +147,10 @@ const Profile: Component = () => {
   createEffect(on(() => profile?.profileKey, (v,p) => {
     if (!v || v === p) return;
     setIsProfileLoaded(false);
-  }))
-
-  let firstTime = true;
-
-  createEffect(() => {
-    const npub = params.npub;
-
-    if (firstTime && npub) {
-      firstTime = false;
-      return;
-    }
-
-    setProfile(getHex());
-
-  })
-
-  let keyIsDone = false
-
-  createEffect(() => {
-    if (account?.isKeyLookupDone && !keyIsDone) {
-      keyIsDone = true;
-      setProfile(getHex());
-    }
-  });
+  }));
 
   const setProfile = (hex: string | undefined) => {
+
     profile?.actions.setProfileKey(hex);
 
     profile?.actions.clearArticles();
