@@ -578,7 +578,7 @@ const ParsedNote: Component<{
         media={image}
         mediaThumb={imageThumb}
         width={noteWidth()}
-        imageGroup={imageGroup}
+        imageGroup={`${imageGroup}`}
         shortHeight={props.shorten}
       />
     }
@@ -609,7 +609,7 @@ const ParsedNote: Component<{
             media={image}
             width={514}
             mediaThumb={imageThumb}
-            imageGroup={imageGroup}
+            imageGroup={`${imageGroup}`}
             shortHeight={props.shorten}
             plainBorder={true}
           />

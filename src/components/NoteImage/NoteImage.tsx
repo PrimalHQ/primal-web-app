@@ -17,6 +17,7 @@ const NoteImage: Component<{
   shortHeight?: boolean,
   plainBorder?: boolean,
   caption?: JSXElement | string,
+  ignoreRatio?: boolean,
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -55,20 +56,20 @@ const NoteImage: Component<{
       2;
   };
 
-  // const height = () => {
-  //   if (!props.media) {
-  //     return '100%';
-  //   }
+  const height = () => {
+    if (!props.media || props.ignoreRatio) {
+      return '100%';
+    }
 
-  //   const img = props.media;
+    const img = props.media;
 
-  //   if (!img || ratio() <= 1.2) return 'auto';
+    if (!img || ratio() <= 1.2) return '500px';
 
-  //   // width of the note over the ratio of the preview image
-  //   const h = props.width || 524 / ratio();
+    // width of the note over the ratio of the preview image
+    const h = props.width || 524 / ratio();
 
-  //   return `${h}px`;
-  // };
+    return `${h}px`;
+  };
 
   const zoomW = () => {
 
@@ -153,12 +154,14 @@ const NoteImage: Component<{
         target="_blank"
       >
         <img
-          id={imgId}
+          id={`${imgId}`}
           ref={imgActual}
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          width={willBeTooBig() ? undefined : `${props.width || 524}px`}
+          style={`width: ${willBeTooBig() ? undefined : `${props.width || 524}px`}; height: ${height()}`}
+          // width={willBeTooBig() ? undefined : `${props.width || 524}px`}
+          // height={height()}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

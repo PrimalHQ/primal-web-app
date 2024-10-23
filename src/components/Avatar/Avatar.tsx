@@ -169,6 +169,7 @@ const Avatar: Component<{
               altSrc={props.user?.picture || props.src}
               onError={imgError}
               mediaThumb={imageThumb()}
+              ignoreRatio={true}
             />
           </Show>
         </div>
