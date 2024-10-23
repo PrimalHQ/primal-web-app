@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { nip19 } from '../../lib/nTools';
-import { Component, createEffect, For, JSXElement, Show } from 'solid-js';
+import { Component, createEffect, For, JSXElement, on, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind } from '../../constants';
@@ -267,14 +267,14 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
     getUserProfiles(userMentions, subId);
   };
 
-  createEffect(() => {
-    if (props.about && props.about.length > 0) {
+  createEffect(on(() => props.about, (v, p) => {
+    if (v && v !== p && v.length > 0) {
       setAboutContent([]);
       setAboutTokens([]);
       setUsersMentionedInAbout(reconcile({}));
-      parseForMentions(props.about);
+      parseForMentions(v);
     }
-  });
+  }));
 
   return (
     <Show when={aboutContent.length > 0}>
