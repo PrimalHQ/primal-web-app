@@ -63,10 +63,11 @@ const NoteImage: Component<{
 
     const img = props.media;
 
-    if (!img || ratio() <= 1.2) return '500px';
+    if (!img || ratio() <= 1.2) return 'auto';
+
 
     // width of the note over the ratio of the preview image
-    const h = props.width || 524 / ratio();
+    const h = (props.width || 524) / ratio();
 
     return `${h}px`;
   };
@@ -159,6 +160,7 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
+          data-media={`${props.media?.w}/${props.media?.h}`}
           style={`width: ${willBeTooBig() ? undefined : `${props.width || 524}px`}; height: ${height()}`}
           // width={willBeTooBig() ? undefined : `${props.width || 524}px`}
           // height={height()}
