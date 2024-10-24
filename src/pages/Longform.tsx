@@ -224,7 +224,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   const articleMediaThumb = () => {
     if (!store.article?.image) return undefined
 
-    return media?.actions.getMedia(store.article.image, 'm');
+    return media?.actions.getMedia(store.article.image, 'm') || media?.actions.getMedia(store.article.image, 'o') || store.article.image;
   }
 
   const getTiers = (author: PrimalUser) => {

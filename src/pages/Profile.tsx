@@ -677,7 +677,7 @@ const Profile: Component = () => {
             }}
             width={640}
             media={media?.actions.getMedia(banner() || '', 'o')}
-            mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
+            mediaThumb={media?.actions.getMedia(banner() || '', 'm') || media?.actions.getMedia(banner() || '', 'o') || banner()}
           />
         </div>
       </Show>
@@ -718,7 +718,7 @@ const Profile: Component = () => {
                   plainBorder={true}
                   width={640}
                   media={media?.actions.getMedia(banner() || '', 'o')}
-                  mediaThumb={media?.actions.getMedia(banner() || '', 'm')}
+                  mediaThumb={media?.actions.getMedia(banner() || '', 'm') || media?.actions.getMedia(banner() || '', 'o') || banner()}
                 />
               </Show>
             </div>

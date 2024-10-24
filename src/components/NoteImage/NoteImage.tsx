@@ -112,13 +112,13 @@ const NoteImage: Component<{
         props.mediaThumb.media_url;
     }
 
-    const s = src();
+    return src();
 
-    if (!s || !s.includes('media-cache')) return s;
+    // if (!s || !s.includes('media-cache')) return s;
 
-    const thumb = s.replace('s=o', 's=s');
+    // const thumb = s.replace('s=o', 's=s');
 
-    return thumb;
+    // return thumb;
   }
 
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;

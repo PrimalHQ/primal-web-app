@@ -76,9 +76,12 @@ const NoteGallery: Component<{
       let url = image?.media_url || origUrl;
       let type = image?.mt;
 
-      logInfo('THUMBS: ', origUrl, media?.thumbnails)
-
-      let imageThumb = media?.thumbnails[origUrl] || media?.actions.getMediaUrl(origUrl, 's');
+      let imageThumb =
+        media?.thumbnails[origUrl] ||
+        media?.actions.getMediaUrl(origUrl, 's') ||
+        media?.actions.getMediaUrl(origUrl, 'm') ||
+        media?.actions.getMediaUrl(origUrl, 'o') ||
+        origUrl;
 
       setStore('images', store.images.length, () => ({ origUrl, url, image, imageThumb, type }));
     }

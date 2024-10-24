@@ -565,9 +565,13 @@ const ParsedNote: Component<{
 
       const token = item.tokens[0];
       let image = media?.actions.getMedia(token, 'o');
-      const url = image?.media_url || getMediaUrlDefault(token);
+      const url = image?.media_url || getMediaUrlDefault(token) || token;
 
-      let imageThumb = media?.actions.getMedia(token, 'm');
+      let imageThumb =
+        media?.actions.getMedia(token, 'm') ||
+        media?.actions.getMedia(token, 'o') ||
+        token;
+
       // Images tell a 100 words :)
       setWordsDisplayed(w => w + 100);
 
@@ -594,9 +598,12 @@ const ParsedNote: Component<{
         {(token, index) => {
 
           let image = media?.actions.getMedia(token, 'o');
-          const url = image?.media_url || getMediaUrlDefault(token);
+          const url = image?.media_url || getMediaUrlDefault(token) || token;
 
-          let imageThumb = media?.actions.getMedia(token, 'm');
+          let imageThumb =
+            media?.actions.getMedia(token, 'm') ||
+            media?.actions.getMedia(token, 'o') ||
+            token;
 
           if (props.shorten && index() > 11) {
             return <></>;

@@ -436,7 +436,7 @@ const PrimalMarkdown: Component<{
       }
 
       const mediaImage = media?.actions.getMedia(src, 'o');
-      const mediaThumb = media?.actions.getMedia(src, 'm');
+      const mediaThumb = media?.actions.getMedia(src, 'm') || media?.actions.getMedia(src, 'o') || src;
 
       return (
         <NoteImage

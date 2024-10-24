@@ -141,7 +141,7 @@ const Avatar: Component<{
   const imageThumb = () => {
     const src = props.user?.picture || props.src || defaultAvatar;
 
-    return media?.actions.getMedia(src, 'm');
+    return media?.actions.getMedia(src, 'm') || media?.actions.getMedia(src, 'o') || src;
   };
 
   return (
