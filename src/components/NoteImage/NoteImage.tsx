@@ -18,6 +18,7 @@ const NoteImage: Component<{
   plainBorder?: boolean,
   caption?: JSXElement | string,
   ignoreRatio?: boolean,
+  forceHeight?: number;
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -59,6 +60,10 @@ const NoteImage: Component<{
   const width = () => props.width || 538;
 
   const height = () => {
+    if (props.forceHeight) {
+      return `${props.forceHeight}px`;
+    }
+
     if (!props.media || props.ignoreRatio) {
       return '100%';
     }

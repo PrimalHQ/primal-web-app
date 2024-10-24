@@ -612,6 +612,7 @@ const ParsedNote: Component<{
             imageGroup={`${imageGroup}`}
             shortHeight={props.shorten}
             plainBorder={true}
+            forceHeight={500}
           />
         }}
       </For>
