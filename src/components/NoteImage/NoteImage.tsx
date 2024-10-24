@@ -56,6 +56,8 @@ const NoteImage: Component<{
       2;
   };
 
+  const width = () => props.width || 538;
+
   const height = () => {
     if (!props.media || props.ignoreRatio) {
       return '100%';
@@ -67,7 +69,7 @@ const NoteImage: Component<{
 
 
     // width of the note over the ratio of the preview image
-    const h = (props.width || 524) / ratio();
+    const h = width() / ratio();
 
     return `${h}px`;
   };
@@ -91,7 +93,7 @@ const NoteImage: Component<{
   };
 
   const willBeTooBig = () => {
-    const maxW = props.width || 524;
+    const maxW = width();
 
     const h = maxW / ratio();
 
@@ -160,10 +162,7 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          data-media={`${props.media?.w}/${props.media?.h}`}
-          style={`width: ${willBeTooBig() ? undefined : `${props.width || 524}px`}; height: ${height()}`}
-          // width={willBeTooBig() ? undefined : `${props.width || 524}px`}
-          // height={height()}
+          style={`width: ${willBeTooBig() ? undefined : `${width()}px`}; height: ${height()}`}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>
