@@ -101,13 +101,24 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
   };
 
   const people = () => {
+    const pNote = primaryNote();
+
+    if (!pNote) return [];
+
     const authors = (threadContext?.notes || []).
       reduce<PrimalUser[]>((acc, n) => acc.find(u => u.pubkey === n.user.pubkey) ? [...acc] : [ ...acc, { ...n.user }], []);
 
-    const mentions = Object.values(primaryNote()?.mentionedUsers || {}).
+    const mentions = Object.values(pNote.mentionedUsers || {}).
       filter((u) => !authors.find(a => u.pubkey === a.pubkey));
 
-    return [ ...authors, ...mentions ];
+    const curatedMentions = mentions.filter(m => {
+      const mpks = pNote.msg.tags.filter(t => t[0] === 'p').map(t => t[1]);
+      const tzpk = pNote.topZaps[0].pubkey;
+
+      return [ ...mpks, tzpk].includes(m.pubkey);
+    });
+
+    return [ ...authors, ...curatedMentions ];
   };
 
   const isFetching = () => threadContext?.isFetching;
