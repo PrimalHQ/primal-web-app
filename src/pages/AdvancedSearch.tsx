@@ -22,6 +22,7 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
 import { useSearchContext } from '../contexts/SearchContext';
+import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
 
 export type SearchState = {
   includes: string,
@@ -440,6 +441,11 @@ const AdvancedSearch: Component = () => {
     parseCommand();
   }
 
+  const submitCommandChange = (v: string) => {
+    onCommandChange(v);
+    submitSearch();
+  }
+
   const parseCommand = () => {
     // const tokens = state.command.split(/\s+/);
     // const parsed = { ...state };
@@ -546,10 +552,11 @@ const AdvancedSearch: Component = () => {
       <PageCaption title="Advanced Search" />
 
       <StickySidebar>
-        <TextField class={styles.searchCommand} value={advSearchState.command} onChange={onCommandChange}>
-          <TextField.Label>Search Command</TextField.Label>
-          <TextField.TextArea autoResize={true}/>
-        </TextField>
+        <AdvancedSearchCommadTextField
+          command={advSearchState.command}
+          onCommandChange={onCommandChange}
+          submitCommandChange={submitCommandChange}
+        />
       </StickySidebar>
 
       <div class={styles.advancedSearchPage}>

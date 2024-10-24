@@ -13,6 +13,7 @@ import { TextField } from '@kobalte/core/text-field';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
 import { setAdvSearchState } from './AdvancedSearch';
+import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
 
 
 const AdvancedSearchResults: Component = () => {
@@ -34,8 +35,6 @@ const AdvancedSearchResults: Component = () => {
     search?.actions.findContent(q);
   }));
 
-  // const queryString = () => decodeURIComponent(params.query);
-
   const kind = () => {
     const isRead = queryString().search(/kind:(\s)?30023\s/) >= 0;
 
@@ -43,13 +42,6 @@ const AdvancedSearchResults: Component = () => {
 
     return 1;
   }
-
-  // onMount(() => {
-  //   const q = decodeURIComponent(params.query);
-  //   search?.actions.clearSearch();
-  //   search?.actions.findContent(q);
-  // });
-
 
   createEffect(on(() => params.query, (v, p) => {
     if (!v || v === p) return;
@@ -60,24 +52,13 @@ const AdvancedSearchResults: Component = () => {
   const feedType = () => [Kind.LongForm].includes(kind()) ?
   'reads' : 'home';
 
-  const onKeyUp = (e: KeyboardEvent) => {
-    if (e.code === 'Enter') {
-      e.stopPropagation();
-      e.preventDefault();
-
-      const q = decodeURIComponent(params.query);
-      if (q === queryString()) {
-        search?.actions.clearSearch();
-        search?.actions.findContent(q);
-        return false;
-      }
-
-      submitCommandChange();
+  const submitCommandChange = (command: string) => {
+    if (command === queryString()) {
+      search?.actions.clearSearch();
+      search?.actions.findContent(command);
       return false;
     }
-  }
 
-  const submitCommandChange = () => {
     navigate(`/asearch/${encodeURIComponent(queryString())}`);
   }
 
@@ -107,27 +88,11 @@ const AdvancedSearchResults: Component = () => {
         </div>
 
       <StickySidebar>
-        <TextField
-          class={styles.searchCommand}
-          value={queryString()}
-          onKeyDown={onKeyUp}
-          onChange={setQueryString}
-        >
-          <TextField.Label>Search Command</TextField.Label>
-          <TextField.TextArea
-            autoResize={true}
-            onFocus={() => setAllowCommandChange(() => true)}
-            onBlur={() => setAllowCommandChange(() => false)}
-          />
-        </TextField>
-        <Show when={allowCommandChange()}>
-          <button
-            class={styles.faintButton}
-            type="submit"
-          >
-            Press Enter to apply changes
-          </button>
-        </Show>
+        <AdvancedSearchCommadTextField
+          command={queryString()}
+          onCommandChange={setQueryString}
+          submitCommandChange={submitCommandChange}
+        />
       </StickySidebar>
 
       <div class={styles.list}>
