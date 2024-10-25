@@ -11,7 +11,7 @@ import {
   SelectionOption,
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
-import { emptyPaging, fetchMegaFeed, fetchScoredContent, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
 import { saveStoredFeed } from "../lib/localStore";
 import { calculateNotesOffset } from "../utils";
 
@@ -177,6 +177,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         offset,
       }
     );
+    // const sortedNotes = filterAndSortNotes(notes, paging);
 
     // Filter out duplicates
     const ids = lastPageNotes.map(n => n.id);
@@ -214,8 +215,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       },
     );
 
+    const sortedNotes = filterAndSortNotes(notes, paging);
+
     updateStore('paging', 'notes', () => ({ ...paging }));
-    updateStore('notes', (ns) => [ ...ns, ...notes]);
+    updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
     updateStore('isFetching', () => false);
 
   };

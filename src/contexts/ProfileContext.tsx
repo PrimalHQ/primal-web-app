@@ -57,7 +57,7 @@ import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { emptyPaging, fetchMegaFeed, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 import { handleSubscription } from "../utils";
 
 let startTime = 0;
@@ -163,101 +163,6 @@ export const emptyStats = {
   media_count: 0,
 };
 
-export const initialData = {
-  profileKey: undefined,
-  userProfile: undefined,
-  userStats: { ...emptyStats },
-  fetchedUserStats: false,
-  knownProfiles: { names: {} },
-  articles: [],
-  notes: [],
-  replies: [],
-  gallery: [],
-  contactListDate: 0,
-  isFetching: false,
-  isProfileFetched: false,
-  isFetchingReplies: false,
-  isProfileFollowing: false,
-  isFetchingZaps: false,
-  isFetchingGallery: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
-  repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
-  reposts: {},
-  zaps: [],
-  zappedNotes: [],
-  zappedArticles: [],
-  zappers: {},
-  zapListOffset: 0,
-  lastNote: undefined,
-  lastArticle: undefined,
-  lastReply: undefined,
-  lastZap: undefined,
-  lastGallery: undefined,
-  following: [],
-  filterReason: null,
-  contacts: [],
-  profileStats: {},
-  isFetchingContacts: false,
-  isFetchingSidebarNotes: false,
-  followers: [],
-  isFetchingFollowers: false,
-  relays: {},
-  isFetchingRelays: false,
-  fetchingProfileForKey: '',
-  isAboutParsed: false,
-  commonFollowers: [],
-  sidebarNotes: {
-    messages: [],
-    users: {},
-    postStats: {},
-    notes: [],
-    topZaps: {},
-    noteActions: {},
-  },
-  sidebarArticles: {
-    messages: [],
-    users: {},
-    postStats: {},
-    notes: [],
-    topZaps: {},
-    noteActions: {},
-  },
-  isFetchingSidebarArticles: false,
-  future: {
-    notes: [],
-    articles: [],
-    replies: [],
-    reposts: {},
-    page: {
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-      topZaps: {},
-    },
-    repliesPage: {
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-      topZaps: {},
-    },
-  },
-  profileHistory: {
-    profiles: [],
-    stats: {},
-  },
-  parsedAbout: undefined,
-  paging: {
-    notes: { ...emptyPaging() },
-    reads: { ...emptyPaging() },
-    gallery: { ...emptyPaging() },
-    replies: { ...emptyPaging() },
-  },
-};
-
 export const ProfileContext = createContext<ProfileContextStore>();
 
 export const ProfileProvider = (props: { children: ContextChildren }) => {
@@ -265,6 +170,101 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
   let commonFollowers: PrimalUser[] = [];
+
+  const initialData = {
+    profileKey: undefined,
+    userProfile: undefined,
+    userStats: { ...emptyStats },
+    fetchedUserStats: false,
+    knownProfiles: { names: {} },
+    articles: [],
+    notes: [],
+    replies: [],
+    gallery: [],
+    contactListDate: 0,
+    isFetching: false,
+    isProfileFetched: false,
+    isFetchingReplies: false,
+    isProfileFollowing: false,
+    isFetchingZaps: false,
+    isFetchingGallery: false,
+    page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
+    repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
+    reposts: {},
+    zaps: [],
+    zappedNotes: [],
+    zappedArticles: [],
+    zappers: {},
+    zapListOffset: 0,
+    lastNote: undefined,
+    lastArticle: undefined,
+    lastReply: undefined,
+    lastZap: undefined,
+    lastGallery: undefined,
+    following: [],
+    filterReason: null,
+    contacts: [],
+    profileStats: {},
+    isFetchingContacts: false,
+    isFetchingSidebarNotes: false,
+    followers: [],
+    isFetchingFollowers: false,
+    relays: {},
+    isFetchingRelays: false,
+    fetchingProfileForKey: '',
+    isAboutParsed: false,
+    commonFollowers: [],
+    sidebarNotes: {
+      messages: [],
+      users: {},
+      postStats: {},
+      notes: [],
+      topZaps: {},
+      noteActions: {},
+    },
+    sidebarArticles: {
+      messages: [],
+      users: {},
+      postStats: {},
+      notes: [],
+      topZaps: {},
+      noteActions: {},
+    },
+    isFetchingSidebarArticles: false,
+    future: {
+      notes: [],
+      articles: [],
+      replies: [],
+      reposts: {},
+      page: {
+        messages: [],
+        users: {},
+        postStats: {},
+        mentions: {},
+        noteActions: {},
+        topZaps: {},
+      },
+      repliesPage: {
+        messages: [],
+        users: {},
+        postStats: {},
+        mentions: {},
+        noteActions: {},
+        topZaps: {},
+      },
+    },
+    profileHistory: {
+      profiles: [],
+      stats: {},
+    },
+    parsedAbout: undefined,
+    paging: {
+      notes: { ...emptyPaging() },
+      reads: { ...emptyPaging() },
+      gallery: { ...emptyPaging() },
+      replies: { ...emptyPaging() },
+    },
+  };
 
 // ACTIONS --------------------------------------
 
@@ -292,8 +292,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         },
       );
 
+      const sortedNotes = filterAndSortNotes(notes, paging);
+
       updateStore('paging', 'notes', () => ({ ...paging }));
-      updateStore('notes', (ns) => [ ...ns, ...notes]);
+      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
       updateStore('isFetching', () => false);
       return;
     }
@@ -319,8 +321,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         },
       );
 
+      const sortedNotes = filterAndSortNotes(notes, paging);
+
       updateStore('paging', 'replies', () => ({ ...paging }));
-      updateStore('replies', (ns) => [ ...ns, ...notes]);
+      updateStore('replies', (ns) => [ ...ns, ...sortedNotes]);
       updateStore('isFetchingReplies', () => false);
       return;
     }
@@ -346,8 +350,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         },
       );
 
+      const sortedReads = filterAndSortReads(reads, paging);
+
       updateStore('paging', 'reads', () => ({ ...paging }));
-      updateStore('articles', (ns) => [ ...ns, ...reads]);
+      updateStore('articles', (ns) => [ ...ns, ...sortedReads]);
       updateStore('isFetching', () => false);
       return;
     }
@@ -373,8 +379,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         },
       );
 
+      const sortedNotes = filterAndSortNotes(notes, paging);
+
       updateStore('paging', 'media', () => ({ ...paging }));
-      updateStore('gallery', (ns) => [ ...ns, ...notes]);
+      updateStore('gallery', (ns) => [ ...ns, ...sortedNotes]);
       updateStore('isFetchingGallery', () => false);
       return;
     }
@@ -395,9 +403,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetchingZaps', () => true);
 
-    const { zaps, notes, articles } = await fetchUserZaps(pubkey, subIdProfiles, until, offset, 20);
+    const { zaps, notes, articles, paging } = await fetchUserZaps(pubkey, subIdProfiles, until, offset, 20);
 
-    updateStore('zaps', (zs) => [ ...zs, ...zaps ]);
+    const sortedZaps = filterAndSortZaps(zaps, paging);
+
+    updateStore('zaps', (zs) => [ ...zs, ...sortedZaps ]);
     updateStore('zappedNotes', (zn) => [ ...zn,  ...notes ]);
     updateStore('zappedArticles', (za) => [ ...za, ...articles ]);
 
@@ -796,9 +806,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey: profileKey,
       };
 
-      const { reads } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
+      const { reads, paging } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
 
-      updateStore('sidebarArticles', () => ({ notes: [...reads ]}))
+      const sortedReads = filterAndSortReads(reads, paging);
+
+      updateStore('sidebarArticles', () => ({ notes: [...sortedReads ]}))
       updateStore('isFetchingSidebarArticles', () => false);
 
       const isProfileFollowingId = `is_profile_following_${APP_ID}`

@@ -51,10 +51,8 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { handleSubscription, parseBolt11 } from "../utils";
-import { PaginationInfo, TopicStat } from "../megaFeeds";
+import { filterAndSortNotes, filterAndSortUsers, filterAndSortZaps, PaginationInfo, TopicStat } from "../megaFeeds";
 import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
-import { emptyUser, userName } from "../stores/profile";
-import { emptyStats } from "./ProfileContext";
 
 export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
@@ -203,27 +201,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
 
-    const sorted = paging.elements.reduce<PrimalUser[]>((acc, pk) => {
-      let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
-
-      // If we encounter a user without a metadata event
-      // construct a user object for them
-      if (!f) {
-        f = emptyUser(pk);
-        const stats = { ...emptyStats };
-
-        f.userStats = {
-          ...stats,
-          followers_increase: page.userFollowerIncrease[pk],
-          followers_count: page.userFollowerCounts[pk],
-        };
-      }
-
-      return f ? [...acc, {...f}] : acc;
-    } , []);
-
-    // console.log('RESULTS: ', users.map(u => [u.userStats?.followers_increase?.ratio, userName(u), u.pubkey]));
-    // console.log('RESULTS E: ', paging.elements);
+    const sorted = filterAndSortUsers(users, paging, page);
 
     updateStore('explorePeople', (usrs) => [ ...usrs, ...sorted]);
     updateStore('peoplePaging', () => ({ ...paging }));
@@ -231,8 +209,9 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
 
-    // console.log('RESULTS: ', zaps.map(z => [z.amount, z.sender, z.reciver]));
-    updateStore('exploreZaps', (zps) => [...zps, ...zaps]);
+    const zapsToAdd = filterAndSortZaps(zaps, paging);
+
+    updateStore('exploreZaps', (zps) => [...zps, ...zapsToAdd]);
     updateStore('zapPaging', () => ({ ...paging }));
     updateStore('zapSubjects', (s) => ({
       notes: [ ...s.notes, ...subjects.notes],
@@ -242,9 +221,10 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   }
 
   const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
-    // console.log('RESULTS: ', notes.map(n => [n.id, n.content.slice(0, 21)]));
 
-    updateStore('exploreMedia', (nts) => [...nts, ...notes]);
+    const notesToAdd = filterAndSortNotes(notes, paging);
+
+    updateStore('exploreMedia', (nts) => [...nts, ...notesToAdd]);
     updateStore('mediaPaging', () => ({ ...paging }));
   }
 
@@ -276,22 +256,6 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   const selectTab = (tab: string) => {
     updateStore('selectedTab', () => tab);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 

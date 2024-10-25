@@ -36,7 +36,7 @@ const AdvancedSearchResults: Component = () => {
   }));
 
   const kind = () => {
-    const isRead = queryString().search(/kind:(\s)?30023\s/) >= 0;
+    const isRead = queryString().search(/kind:30023/) >= 0;
 
     if (isRead) return Kind.LongForm;
 

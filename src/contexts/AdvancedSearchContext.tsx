@@ -20,7 +20,7 @@ import { subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
-import { emptyPaging, fetchMegaFeed, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from "../megaFeeds";
 import { logError } from "../lib/logger";
 import { calculateNotesOffset, calculateReadsOffset } from "../utils";
 
@@ -312,9 +312,12 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         }
       );
 
+      const sortedNotes = filterAndSortNotes(notes, paging);
+      const sortedReads = filterAndSortReads(reads, paging);
+
       updateStore('paging', () => ({ ...paging }));
-      updateStore('reads', (ns) => [ ...ns, ...reads]);
-      updateStore('notes', (ns) => [ ...ns, ...notes]);
+      updateStore('reads', (ns) => [ ...ns, ...sortedReads]);
+      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
 
     } catch (e) {
       logError('ERROR fetching search results: ', e);

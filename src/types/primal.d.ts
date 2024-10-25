@@ -438,6 +438,7 @@ export type FeedPage = {
   until?: number,
   sortBy?: string,
   wordCount?: Record<string, number>,
+  elements?: string[],
 };
 
 export type TopicStats = Record<string, number>;

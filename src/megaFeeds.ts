@@ -29,7 +29,8 @@ import { APP_ID } from "./App";
 import { decodeIdentifier } from "./lib/keys";
 import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } from "./lib/profile";
 import { nip19 } from "nostr-tools";
-import { convertToUser } from "./stores/profile";
+import { convertToUser, emptyUser } from "./stores/profile";
+import { emptyStats } from "./contexts/ProfileContext";
 
 export type PaginationInfo = {
   since: number,
@@ -589,6 +590,61 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
   }
 
 };
+
+export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalNote[]>(
+    (acc, id) => {
+      const note = notes.find(n => n.id === id);
+
+      return note ? [ ...acc, { ...note } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalArticle[]>(
+    (acc, id) => {
+      const read = reads.find(n => n.id === id);
+
+      return read ? [ ...acc, { ...read } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalZap[]>(
+    (acc, id) => {
+      const zap = zaps.find(n => n.id === id);
+
+      return zap ? [ ...acc, { ...zap } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
+  return paging.elements.reduce<PrimalUser[]>((acc, pk) => {
+
+    let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
+
+    // If we encounter a user without a metadata event
+    // construct a user object for them
+    if (!f) {
+      f = emptyUser(pk);
+      const stats = { ...emptyStats };
+
+      f.userStats = {
+        ...stats,
+        followers_increase: page.userFollowerIncrease[pk],
+        followers_count: page.userFollowerCounts[pk],
+      };
+    }
+
+    return f ? [...acc, {...f}] : acc;
+  } , []);
+}
 
 const convertToZapsMega = (page: MegaFeedPage) => {
   const pageZaps = page.zaps;

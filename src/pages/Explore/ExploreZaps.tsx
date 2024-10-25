@@ -14,7 +14,7 @@ import ProfileNoteZap from '../../components/ProfileNoteZap/ProfileNoteZap';
 import { PrimalZap } from '../../types/primal';
 import { Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { calculatePagingOffset } from '../../utils';
+import { calculatePagingOffset, calculateZapsOffset } from '../../utils';
 
 const ExploreZaps: Component<{ open?: boolean }> = (props) => {
 
@@ -40,14 +40,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   const getNextZapPage = async () => {
     if (!explore || explore.zapPaging.since === 0) return;
 
-    const since = explore.zapPaging.since || 0;
-    const order = explore.zapPaging.sortBy;
-    const offset = explore.exploreZaps.reduce<number>((acc, m) => {
-      // @ts-ignore
-      return since === m.amount ? acc + 1 : acc
-    }, 0)
-
-    // console.log('RESULTS OFFSET: ', offset);
+    const offset = calculateZapsOffset(explore.exploreZaps, explore.zapPaging);
 
     const page = {
       limit: 20,

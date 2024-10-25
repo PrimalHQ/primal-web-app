@@ -1,6 +1,6 @@
 import { format } from 'd3-format';
 import { subsTo } from './sockets';
-import { NostrEventContent, PrimalArticle, PrimalNote } from './types/primal';
+import { NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
 import { PaginationInfo } from './megaFeeds';
 
 let debounceTimer: number = 0;
@@ -272,6 +272,35 @@ export const calculateReadsOffset = (reads: PrimalArticle[], paging: PaginationI
     if (
       paging.sortBy === 'score' &&
       read.score !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  return offset;
+}
+
+
+
+export const calculateZapsOffset = (zaps: PrimalZap[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=zaps.length-1;i>=0;i--) {
+    const zap = zaps[i];
+
+    if (
+      paging.sortBy === 'created_at' &&
+      zap.created_at !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'satszapped' &&
+      zap.amount !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'amount_sats' &&
+      zap.amount !== paging.since
     ) break;
 
     offset++;

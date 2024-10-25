@@ -3,7 +3,7 @@ import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { fetchNoteFeedBySpec, fetchReadsFeedBySpec } from '../../handleNotes';
-import { emptyPaging, fetchMegaFeed, PaginationInfo } from '../../megaFeeds';
+import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../../megaFeeds';
 import { DVMMetadata, NoteActions, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from '../../types/primal';
 import { calculatePagingOffset } from '../../utils';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
@@ -75,9 +75,12 @@ const FeedMarketPlacePreview: Component<{
       }
     );
 
+    const sortedNotes = filterAndSortNotes(notes, paging);
+    const sortedReads = filterAndSortReads(reads, paging);
+
     batch(() => {
-      updateStore('notes', (ns) => [ ...ns, ...notes]);
-      updateStore('reads', (rs) => [ ...rs, ...reads]);
+      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+      updateStore('reads', (rs) => [ ...rs, ...sortedReads]);
       updateStore('paging', () => ({ ...paging }));
     });
 

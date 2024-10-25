@@ -5,7 +5,7 @@ import { Kind, minKnownProfiles } from "../constants";
 import { getEvents } from "../lib/feed";
 import { setLinkPreviews } from "../lib/notes";
 import { getRecomendedArticleIds } from "../lib/search";
-import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, filterAndSortReads, PaginationInfo } from "../megaFeeds";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { parseEmptyReposts, isRepostInCollection, convertToArticles } from "../stores/note";
 import {
@@ -197,8 +197,8 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       store.notes.slice(0, 20);
 
     const offset = calculateReadsOffset(
-      lastPageNotes, 
-      store.futureNotes.length > 0 ? 
+      lastPageNotes,
+      store.futureNotes.length > 0 ?
         store.paging.future : store.paging.notes,
     );
 
@@ -212,6 +212,8 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
         offset,
       }
     );
+
+    // const sortedReads = filterAndSortReads(reads, paging);
 
     // Filter out duplicates
     const ids = lastPageNotes.map(n => n.id);
@@ -249,8 +251,10 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
         offset,
       });
 
+      const sortedReads = filterAndSortReads(reads, paging);
+
       updateStore('paging', 'notes', () => ({ ...paging }));
-      updateStore('notes', (ns) => [ ...ns, ...reads]);
+      updateStore('notes', (ns) => [ ...ns, ...sortedReads]);
       updateStore('isFetching', () => false);
 
   };

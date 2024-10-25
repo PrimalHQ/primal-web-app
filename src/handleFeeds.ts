@@ -7,9 +7,10 @@ import { getProfileZapList, getUserProfileInfo } from "./lib/profile";
 import { subsTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
 import { convertToUser } from "./stores/profile";
-import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserZaps, NoteActions, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap } from "./types/primal";
+import { FeedPage, FeedRange, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserZaps, NoteActions, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap } from "./types/primal";
 import { parseBolt11 } from "./utils";
 import { getFeedItems } from "./lib/search";
+import { PaginationInfo } from "./megaFeeds";
 
 export const fetchNotesFeed = (pubkey: string | undefined, specification: any, subId: string, limit = 20, until = 0, offset = 0) => {
   return new Promise<PrimalNote[]>((resolve, reject) => {
@@ -719,6 +720,7 @@ export type ContentZaps = {
   notes: PrimalNote[],
   articles: PrimalArticle[],
   zaps: PrimalZap[],
+  paging: PaginationInfo,
 }
 
 
@@ -738,7 +740,9 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
       topZaps: {},
       since: 0,
       until: 0,
+      sortBy: 'created_at',
       wordCount: {},
+      elements: [],
     }
 
     const unsub = subsTo(subId, {
@@ -754,6 +758,13 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
 
         const notes = convertToNotes({ ...page, messages: [...pageNotes] }, page.topZaps);
         const articles = convertToArticles({ ...page, messages: [...pageArticles] }, page.topZaps);
+
+        const paging: PaginationInfo = {
+          since: page.since || 0,
+          until: page.until || 0,
+          sortBy: page.sortBy || 'created_at',
+          elements: page.elements || [],
+        };
 
         let zaps: PrimalZap[] = [];
 
@@ -815,6 +826,7 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
           notes,
           articles,
           zaps,
+          paging,
         });
 
       }
@@ -968,6 +980,16 @@ export const fetchUserZaps = (pubkey: string | undefined, subId: string, until =
 
 
         // updateStore('quoteCount', () => quoteStats.count || 0);
+        return;
+      }
+
+      if (content.kind === Kind.FeedRange) {
+        const feedRange: FeedRange = JSON.parse(content.content || '{}');
+
+        page.since = feedRange.since;
+        page.until = feedRange.until;
+        page.sortBy = feedRange.order_by;
+        page.elements = [...feedRange.elements];
         return;
       }
     };

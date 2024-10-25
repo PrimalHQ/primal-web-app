@@ -20,7 +20,7 @@ import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsConten
 import { calculateNotesOffset, calculateReadsOffset, parseBolt11 } from '../utils';
 import styles from './Bookmarks.module.scss';
 import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
-import { emptyPaging, fetchMegaFeed, PaginationInfo } from '../megaFeeds';
+import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../megaFeeds';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
@@ -106,43 +106,18 @@ const Bookmarks: Component = () => {
     );
 
     if (kind() === 'notes') {
-      updateStore('notes', (nts) => [...nts, ...notes]);
+      const sortedNotes = filterAndSortNotes(notes, paging);
+      updateStore('notes', (nts) => [...nts, ...sortedNotes]);
     }
 
     if (kind() === 'reads') {
-      updateStore('reads', (nts) => [...nts, ...reads]);
+      const sortedReads = filterAndSortReads(reads, paging);
+      updateStore('reads', (nts) => [...nts, ...sortedReads]);
     }
 
     updateStore('paging', () => ({ ...paging }));
 
     updateStore('fetchingInProgress', () => false);
-    console.log('EFFECT: ', store.fetchingInProgress)
-
-    // const unsub = subsTo(subId, {
-    //   onEvent: (_, content) => {
-    //     content && updatePage(content);
-    //   },
-    //   onEose: () => {
-    //     const reposts = parseEmptyReposts(store.page);
-    //     const ids = Object.keys(reposts);
-
-    //     if (ids.length === 0) {
-    //       savePage(store.page);
-    //       unsub();
-    //       return;
-    //     }
-
-    //     updateStore('reposts', () => reposts);
-
-    //     fetchReposts(ids);
-
-    //     unsub();
-    //   },
-    // });
-
-    // const k = kind() === 'reads' ? Kind.LongForm : Kind.Text;
-
-    // getUserFeed(pubkey, pubkey, subId, 'bookmarks', k, until, pageSize, store.offset);
   }
 
   const fetchNextPage = () => {

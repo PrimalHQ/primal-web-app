@@ -251,7 +251,6 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     if (v === 'waking' && p === 'sleep') {
-      console.log('RECONNECTING RELAYS: ', store.suspendedRelays)
       reconnectSuspendedRelays();
     }
   }))
