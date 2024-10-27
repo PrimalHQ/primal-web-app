@@ -684,6 +684,8 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
     if (content?.kind === Kind.MesagePerSenderStats) {
       const senderCount = JSON.parse(content.content);
 
+      console.log('DM: ', senderCount)
+
       emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
         if (store.senders[pk]) return [ ...acc ];
 

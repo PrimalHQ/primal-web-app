@@ -205,9 +205,9 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
           term = term.slice(0, i);
         }
 
-        const embeded = <A href={`/search/%23${term}`}>#{term}</A>;
+        // const embeded = <A href={`/search/%23${term}`}>#{term}</A>;
 
-        return <span class="whole"> {embeded}{end}</span>;
+        return <span class="whole"> <A href={`/search/%23${term}`}>#{term}</A> {end}</span>;
       }}
     </For>
   };

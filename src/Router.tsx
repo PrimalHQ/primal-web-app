@@ -1,5 +1,5 @@
 import { Component, createEffect, createResource, lazy } from 'solid-js';
-import { Routes, Route, Navigate, RouteDataFuncArgs, useLocation } from "@solidjs/router";
+import { Router, Route, Navigate, useLocation, cache } from "@solidjs/router";
 
 import { PrimalWindow } from './types/primal';
 import { fetchKnownProfiles } from './lib/profile';
@@ -23,6 +23,7 @@ const Explore = lazy(() => import('./pages/Explore/Explore'));
 const ExploreFeeds = lazy(() => import('./pages/Explore/ExploreFeeds'));
 const Thread = lazy(() => import('./pages/Thread'));
 const Messages = lazy(() => import('./pages/Messages'));
+// const DirectMessages = lazy(() => import('./pages/DirectMessages'));
 const Bookmarks = lazy(() => import('./pages/Bookmarks'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Downloads = lazy(() => import('./pages/Downloads'));
@@ -62,7 +63,17 @@ const primalWindow = window as PrimalWindow;
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
-const Router: Component = () => {
+export const getKnownProfiles = cache(({ params }: any) => {
+  return fetchKnownProfiles(params.vanityName);
+}, 'vanityName')
+
+// export const getKnownProfiles = cache(({ params }: any) => {
+//   const [profiles] = createResource(params.vanityName, fetchKnownProfiles)
+
+//   return profiles;
+// }, 'vanityName')
+
+const AppRouter: Component = () => {
 
   const account = useAccountContext();
   const profile = useProfileContext();
@@ -74,7 +85,6 @@ const Router: Component = () => {
   const media = useMediaContext();
   const notifications = useNotificationsContext();
   const search = useSearchContext();
-  const locations = useLocation();
 
   if (isDev) {
     primalWindow.primal = {
@@ -98,21 +108,8 @@ const Router: Component = () => {
     primalWindow.onPrimalCacheServerMessageSent = () => {};
   }
 
-  const getKnownProfiles = ({ params }: RouteDataFuncArgs) => {
-    const [profiles] = createResource(params.vanityName, fetchKnownProfiles)
-
-    return profiles;
-  }
-
-  createEffect(() => {
-    if (locations.pathname) {
-      settings?.actions.refreshMobileReleases();
-    }
-  });
-
   return (
-    <>
-      <Routes>
+      <Router>
         <Route path="/app-download-qr" component={AppDownloadQr} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
@@ -128,10 +125,11 @@ const Router: Component = () => {
             <Route path="/feed/:id" component={ExploreFeeds} />
           </Route>
           {/* <Route path="/explore/:scope?/:timeframe?" component={Explore} /> */}
+          {/* <Route path="/dms/:contact?" component={DirectMessages} /> */}
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />
-          <Route path="/download" element={<Navigate href='/downloads' />} />;
+          <Route path="/download" component={() => <Navigate href='/downloads' />} />;
           <Route path="/settings" component={Settings}>
             <Route path="/" component={Menu} />
             <Route path="/account" component={Account} />
@@ -163,14 +161,13 @@ const Router: Component = () => {
           </Route>
           <Route path="/premium/:step?" component={Premium} />
           <Route path="/:vanityName">
-            <Route path="/" component={Profile} data={getKnownProfiles} />
-            <Route path="/:identifier" component={Thread} data={getKnownProfiles} />
+            <Route path="/" component={Profile} preload={getKnownProfiles} />
+            <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
           <Route path="/404" component={NotFound} />
         </Route>
-      </Routes>
-    </>
+      </Router>
   );
 };
 
-export default Router;
+export default AppRouter;

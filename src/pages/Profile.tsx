@@ -1,4 +1,4 @@
-import { A, RouteDataFuncArgs, useBeforeLeave, useNavigate, useParams, useRouteData } from '@solidjs/router';
+import { A, createAsync, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
 import {
   Component,
@@ -66,6 +66,7 @@ import ProfileTabsSkeleton from '../components/Skeleton/ProfileTabsSkeleton';
 import ArticlePreviewSidebarSkeleton from '../components/Skeleton/ArticlePreviewSidebarSkeleton';
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
+import { getKnownProfiles } from '../Router';
 
 const Profile: Component = () => {
 
@@ -80,8 +81,6 @@ const Profile: Component = () => {
   const navigate = useNavigate();
 
   const params = useParams();
-
-  const routeData = useRouteData<(opts: RouteDataFuncArgs) => Resource<VanityProfiles>>();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -115,10 +114,12 @@ const Profile: Component = () => {
     if (vanityName) {
       const name = vanityName.toLowerCase();
       const vanityProfile = await fetchKnownProfiles(name);
-      const hex = vanityProfile?.names[name];
+
+      const hex = vanityProfile.names[name];
 
       if (!hex) {
         navigate('/404');
+        return;
       }
 
       setHex(() => hex);
@@ -520,7 +521,7 @@ const Profile: Component = () => {
       profile?.isProfileFetched &&
       !profile.isFetchingSidebarArticles &&
       !profile.isFetchingSidebarNotes &&
-      profile.isAboutParsed &&
+      // profile.isAboutParsed &&
       profile.profileKey === getHex() &&
       (profile.userProfile ? isBannerLoaded() : true)
     ) {
@@ -798,7 +799,7 @@ const Profile: Component = () => {
             </div>
 
             <div ref={profileAboutDiv} class="hidden">
-              {profile?.parsedAbout}
+              <ProfileAbout about={profile?.userProfile?.about} />
             </div>
 
             <div class={styles.profileCard}>
@@ -833,7 +834,7 @@ const Profile: Component = () => {
                       <Show when={profile?.userProfile?.about}>
                         <div class={`${styles.profileAboutHolder} animated`}>
                           <div ref={profileAboutDiv}>
-                            {profile?.parsedAbout}
+                            <ProfileAbout about={profile?.userProfile?.about} />
                           </div>
                         </div>
                       </Show>
@@ -937,11 +938,10 @@ const Profile: Component = () => {
                     </div>
                     <div class={`${styles.profileAboutHolder} animated`}>
                       <div ref={profileAboutDiv}>
-                        {profile?.parsedAbout}
+                        <ProfileAbout about={profile?.userProfile?.about} />
                       </div>
 
                     </div>
-                    {/* <ProfileAbout about={profile?.userProfile?.about} /> */}
                     <div class="animated">
                       <div class={styles.profileLinks}>
                         <div class={styles.website}>

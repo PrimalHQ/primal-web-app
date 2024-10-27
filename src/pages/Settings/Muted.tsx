@@ -4,7 +4,7 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { A, Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getUserProfiles } from '../../lib/profile';
 import { APP_ID } from '../../App';
@@ -69,7 +69,7 @@ const Muted: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.muted.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.muted.title)}</div>
       </PageCaption>
 
@@ -90,24 +90,24 @@ const Muted: Component = () => {
                 when={user(pubkey)}
                 fallback={
                   <>
-                    <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
+                    <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                       <div class={styles.userName}>
                         <div class={styles.verification}>{hexToNpub(pubkey)}</div>
                       </div>
-                    </Link>
+                    </A>
                     <button onClick={() => unMuteUser(user(pubkey))}>
                       {intl.formatMessage(tActions.unmute)}
                     </button>
                   </>
                 }
               >
-                <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
+                <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                   <Avatar user={user(pubkey)} size='vvs' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>
                     <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
                   </div>
-                </Link>
+                </A>
                 <ButtonSecondary onClick={() => unMuteUser(user(pubkey))}>
                   {intl.formatMessage(tActions.unmute)}
                 </ButtonSecondary>

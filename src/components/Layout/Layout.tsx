@@ -2,7 +2,7 @@ import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 
 
 import styles from './Layout.module.scss';
 
-import { Outlet, useLocation, useParams, useSearchParams } from '@solidjs/router';
+import { useLocation, useParams, useSearchParams } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
@@ -22,10 +22,17 @@ import LnQrCodeModal from '../LnQrCodeModal/LnQrCodeModal';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import CashuQrCodeModal from '../CashuQrCodeModal/CashuQrCodeModal';
 import SubscribeToAuthorModal from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import EnterPinModal from '../EnterPinModal/EnterPinModal';
+import CreateAccountModal from '../CreateAccountModal/CreateAccountModal';
+import LoginModal from '../LoginModal/LoginModal';
+import { unwrap } from 'solid-js/store';
+import { followWarning, forgotPin } from '../../translations';
+import { useIntl } from '@cookbook/solid-intl';
 
 export const [isHome, setIsHome] = createSignal(false);
 
-const Layout: Component = () => {
+const Layout: Component<any> = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
@@ -33,6 +40,8 @@ const Layout: Component = () => {
   const location = useLocation();
   const params = useParams();
   const app = useAppContext();
+  const settings = useSettingsContext();
+  const intl = useIntl();
 
   let container: HTMLDivElement | undefined;
 
@@ -92,6 +101,12 @@ const Layout: Component = () => {
   }
 
   createEffect(() => {
+    if (location.pathname) {
+      settings?.actions.refreshMobileReleases();
+    }
+  });
+
+  createEffect(() => {
     if (location.pathname === '/') return;
 
     if (!account?.publicKey) {
@@ -112,7 +127,7 @@ const Layout: Component = () => {
       when={location.pathname !== '/'}
       fallback={<>
         <div id="modal" class={styles.modal}></div>
-        <Outlet />
+        {props.children}
       </>}
     >
       <>
@@ -160,7 +175,7 @@ const Layout: Component = () => {
                 </div>
 
                 <div>
-                  <Outlet />
+                  {props.children}
                 </div>
 
                 <ReactionsModal
@@ -208,6 +223,75 @@ const Layout: Component = () => {
                   author={app?.subscribeToAuthor}
                   onClose={app?.actions.closeAuthorSubscribeModal}
                   onSubscribe={app?.subscribeToTier}
+                />
+
+                <EnterPinModal
+                  open={(account?.showPin || '').length > 0}
+                  valueToDecrypt={account?.showPin}
+                  onSuccess={(sec: string) => {
+                    account?.actions.setSec(sec);
+                    account?.actions.setString('showPin', '');
+                  }}
+                  onAbort={() => account?.actions.setString('showPin', '')}
+                  onForgot={() => {
+                    account?.actions.setString('showPin', '');
+                    account?.actions.setFlag('showForgot', true);
+                  }}
+                />
+                <CreateAccountModal
+                  open={account?.showGettingStarted}
+                  onAbort={() => account?.actions.setFlag('showGettingStarted', false)}
+                  onLogin={() => {
+                    account?.actions.setFlag('showGettingStarted', false);
+                    account?.actions.setFlag('showLogin', true);
+                  }}
+                />
+                <LoginModal
+                  open={account?.showLogin}
+                  onAbort={() => account?.actions.setFlag('showLogin', false)}
+                />
+                <ConfirmModal
+                  open={account?.followData.openDialog}
+                  title={intl.formatMessage(followWarning.title)}
+                  description={intl.formatMessage(followWarning.description)}
+                  confirmLabel={intl.formatMessage(followWarning.confirm)}
+                  abortLabel={intl.formatMessage(followWarning.abort)}
+                  onConfirm={async () => {
+                    if (account?.publicKey) {
+                      const data = unwrap(account?.followData)
+                      await account.actions.resolveContacts(account?.publicKey, data.following, data.date, data.tags, data.relayInfo);
+                    }
+                    account?.actions.setFollowData({
+                      tags: [],
+                      date: 0,
+                      relayInfo: '',
+                      openDialog: false,
+                      following: [],
+                    });
+                  }}
+                  onAbort={() => {
+                    account?.actions.setFollowData({
+                      tags: [],
+                      date: 0,
+                      relayInfo: '',
+                      openDialog: false,
+                      following: [],
+                    });
+                  }}
+                />
+                <ConfirmModal
+                  open={account?.showForgot}
+                  title={intl.formatMessage(forgotPin.title)}
+                  description={intl.formatMessage(forgotPin.description)}
+                  confirmLabel={intl.formatMessage(forgotPin.confirm)}
+                  abortLabel={intl.formatMessage(forgotPin.abort)}
+                  onConfirm={async () => {
+                    account?.actions.logout();
+                    account?.actions.setFlag('showForgot', false);
+                  }}
+                  onAbort={() => {
+                    account?.actions.setFlag('showForgot', false);
+                  }}
                 />
               </div>
             </Show>

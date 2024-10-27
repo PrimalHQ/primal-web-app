@@ -10,7 +10,7 @@ import {
   placeholders as tPlaceholders,
 } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { getDefaultRelays } from '../../lib/relays';
 import { APP_ID } from '../../App';
@@ -184,7 +184,7 @@ const Network: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.network.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.network.title)}</div>
       </PageCaption>
 

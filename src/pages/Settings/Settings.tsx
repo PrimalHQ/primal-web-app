@@ -5,12 +5,11 @@ import Wormhole from '../../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../../components/Search/Search';
 import { settings as t } from '../../translations';
-import { Outlet } from '@solidjs/router';
 import StickySidebar from '../../components/StickySidebar/StickySidebar';
 import SettingsSidebar from '../../components/SettingsSidebar/SettingsSidebar';
 import PageTitle from '../../components/PageTitle/PageTitle';
 
-const Settings: Component = () => {
+const Settings: Component<any> = (props) => {
 
   const intl = useIntl();
 
@@ -26,7 +25,7 @@ const Settings: Component = () => {
         <SettingsSidebar />
       </StickySidebar>
 
-      <Outlet />
+      {props.children}
     </div>
   )
 }

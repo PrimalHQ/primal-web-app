@@ -39,7 +39,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 import ReedSelect from '../components/FeedSelect/ReedSelect';
 import ReadsHeader from '../components/HomeHeader/ReadsHeader';
-import { Link, useParams } from '@solidjs/router';
+import { A, useParams } from '@solidjs/router';
 import { APP_ID } from '../App';
 import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
@@ -193,7 +193,7 @@ const Home: Component = () => {
             >
               topic:
             </div>
-            <Link
+            <A
               class={styles.topicBubble}
               href={'/reads'}
               onClick={() => context?.actions.refetchSelectedFeed()}
@@ -203,7 +203,7 @@ const Home: Component = () => {
               </div>
 
               <div class={styles.closeIcon}></div>
-            </Link>
+            </A>
           </div>
         </Show>
       </PageCaption>

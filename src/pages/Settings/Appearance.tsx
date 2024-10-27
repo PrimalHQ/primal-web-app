@@ -5,7 +5,7 @@ import ThemeChooser from '../../components/ThemeChooser/ThemeChooser';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox2 from '../../components/Checkbox/CheckBox2';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -20,7 +20,7 @@ const Appearance: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.appearance.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.appearance.title)}</div>
       </PageCaption>
 

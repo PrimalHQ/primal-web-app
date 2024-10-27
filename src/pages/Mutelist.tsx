@@ -1,4 +1,4 @@
-import { A, Link, useParams } from '@solidjs/router';
+import { A, useParams } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
@@ -160,20 +160,20 @@ const Mutelist: Component = () => {
               <Show
                 when={user(pubkey)}
                 fallback={
-                  <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
+                  <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                     <div class={styles.userName}>
                       <div class={styles.verification}>{hexToNpub(pubkey)}</div>
                     </div>
-                  </Link>
+                  </A>
                 }
               >
-                <Link class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
+                <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                   <Avatar user={user(pubkey)} size='sm' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>
                     <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
                   </div>
-                </Link>
+                </A>
               </Show>
             </div>
           )}

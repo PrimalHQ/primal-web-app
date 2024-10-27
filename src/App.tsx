@@ -5,7 +5,7 @@ import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
 import { ExploreProvider } from './contexts/ExploreContext';
 import { ThreadProvider } from './contexts/ThreadContext';
-import Router from './Router';
+import AppRouter from './Router';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { TranslatorProvider } from './contexts/TranslatorContext';
@@ -47,7 +47,7 @@ const App: Component = () => {
                             <HomeProvider>
                               <ExploreProvider>
                                 <ThreadProvider>
-                                  <Router />
+                                  <AppRouter />
                                 </ThreadProvider>
                               </ExploreProvider>
                             </HomeProvider>

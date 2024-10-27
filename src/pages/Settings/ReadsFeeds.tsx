@@ -4,7 +4,7 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
@@ -31,7 +31,7 @@ const ReadsFeeds: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.readsFeeds.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.readsFeeds.title)}</div>
       </PageCaption>
 

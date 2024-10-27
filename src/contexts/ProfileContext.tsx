@@ -952,13 +952,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     saveRecomendedUsers(account?.publicKey, { profiles, stats });
   });
 
-  createEffect(() => {
-    if (store.isProfileFetched) {
-      const parsed = parseAbout(store.userProfile?.about || '');
+  // createEffect(() => {
+  //   if (store.isProfileFetched) {
+  //     const parsed = parseAbout(store.userProfile?.about || '');
 
-      updateStore('parsedAbout', () => parsed);
-    }
-  })
+  //     updateStore('parsedAbout', () => parsed);
+  //   }
+  // })
 
   const parseAbout = (about: string) => {
     if (about.length === 0) {

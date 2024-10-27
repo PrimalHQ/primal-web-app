@@ -47,6 +47,13 @@ import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 import { useAppContext } from "./AppContext";
 import { handleSubscription } from "../utils";
 
+export type FollowData = {
+  tags: string[][],
+  date: number,
+  relayInfo: string,
+  openDialog: boolean,
+  following: string[],
+};
 
 export type AccountContextStore = {
   likes: string[],
@@ -85,6 +92,7 @@ export type AccountContextStore = {
   proxyThroughPrimal: boolean,
   proxySettingSet: boolean,
   activeRelays: Relay[],
+  followData: FollowData,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -118,6 +126,17 @@ export type AccountContextStore = {
     setProxyThroughPrimal: (shouldProxy: boolean) => void,
     updateRelays: () => void,
     updateContactsList: () => void,
+    setFlag: (key: string, flag: boolean) => void,
+    setString: (key: string, string: string) => void,
+    setFollowData: (followData: FollowData) => void,
+    resolveContacts: (
+      pubkey: string,
+      following: string[],
+      date: number,
+      tags: string[][],
+      relayInfo: string,
+      cb?: (remove: boolean, pubkey: string) => void,
+    ) => Promise<void>,
   },
 }
 
@@ -157,6 +176,13 @@ const initialData = {
   bookmarks: [],
   proxyThroughPrimal: false,
   proxySettingSet: false,
+  followData: {
+    tags: [],
+    date: 0,
+    relayInfo: '',
+    openDialog: false,
+    following: [],
+  }
 };
 
 export const AccountContext = createContext<AccountContextStore>();
@@ -807,22 +833,6 @@ export function AccountProvider(props: { children: JSXElement }) {
     saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
   };
 
-  type FollowData = {
-    tags: string[][],
-    date: number,
-    relayInfo: string,
-    openDialog: boolean,
-    following: string[],
-  }
-
-  const [followData, setFollowData] = createStore<FollowData>({
-    tags: [],
-    date: 0,
-    relayInfo: '',
-    openDialog: false,
-    following: [],
-  });
-
   const resolveContacts = async (
     pubkey: string,
     following: string[],
@@ -892,7 +902,7 @@ export function AccountProvider(props: { children: JSXElement }) {
             logWarning('FOLLOW CONTENT: ', rawContacts);
             logWarning('FOLLOW DATA: ', contactData);
 
-            setFollowData(() => ({
+            updateStore('followData', () => ({
               openDialog: true,
               date,
               tags,
@@ -968,7 +978,7 @@ export function AccountProvider(props: { children: JSXElement }) {
             logWarning('FOLLOW CONTENT: ', rawContacts);
             logWarning('FOLLOW DATA: ', contactData);
 
-            setFollowData(() => ({
+            updateStore('followData', () => ({
               openDialog: true,
               date,
               tags,
@@ -1674,6 +1684,20 @@ export function AccountProvider(props: { children: JSXElement }) {
     saveBookmarks(store.publicKey, store.bookmarks);
   }
 
+  const setString = (key: string, string: string) => {
+    // @ts-ignore
+    updateStore(key, () => string);
+  }
+
+  const setFlag = (key: string, flag: boolean) => {
+    // @ts-ignore
+    updateStore(key, () => flag);
+  }
+
+  const setFollowData = (followData: FollowData) => {
+    updateStore('followData', () => ({ ...followData }));
+  }
+
 // STORES ---------------------------------------
 
 const [store, updateStore] = createStore<AccountContextStore>({
@@ -1712,80 +1736,16 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setProxyThroughPrimal,
     updateRelays,
     updateContactsList,
+    setString,
+    setFlag,
+    setFollowData,
+    resolveContacts,
   },
 });
 
   return (
     <AccountContext.Provider value={store}>
       {props.children}
-      <EnterPinModal
-        open={store.showPin.length > 0}
-        valueToDecrypt={store.showPin}
-        onSuccess={(sec: string) => {
-          setSec(sec);
-          updateStore('showPin', () => '');
-        }}
-        onAbort={() => updateStore('showPin', () => '')}
-        onForgot={() => {
-          updateStore('showPin', () => '');
-          updateStore('showForgot', () => true);
-        }}
-      />
-      <CreateAccountModal
-        open={store.showGettingStarted}
-        onAbort={() => updateStore('showGettingStarted', () => false)}
-        onLogin={() => {
-          updateStore('showGettingStarted', () => false);
-          updateStore('showLogin', () => true);
-        }}
-      />
-      <LoginModal
-        open={store.showLogin}
-        onAbort={() => updateStore('showLogin', () => false)}
-      />
-      <ConfirmModal
-        open={followData.openDialog}
-        title={intl.formatMessage(followWarning.title)}
-        description={intl.formatMessage(followWarning.description)}
-        confirmLabel={intl.formatMessage(followWarning.confirm)}
-        abortLabel={intl.formatMessage(followWarning.abort)}
-        onConfirm={async () => {
-          if (store.publicKey) {
-            const data = unwrap(followData)
-            await resolveContacts(store.publicKey, data.following, data.date, data.tags, data.relayInfo);
-          }
-          setFollowData(() => ({
-            tags: [],
-            date: 0,
-            relayInfo: '',
-            openDialog: false,
-            following: [],
-          }));
-        }}
-        onAbort={() => {
-          setFollowData(() => ({
-            tags: [],
-            date: 0,
-            relayInfo: '',
-            openDialog: false,
-            following: [],
-          }));
-        }}
-      />
-      <ConfirmModal
-        open={store.showForgot}
-        title={intl.formatMessage(forgotPin.title)}
-        description={intl.formatMessage(forgotPin.description)}
-        confirmLabel={intl.formatMessage(forgotPin.confirm)}
-        abortLabel={intl.formatMessage(forgotPin.abort)}
-        onConfirm={async () => {
-          logout();
-          updateStore('showForgot', () => false);
-        }}
-        onAbort={() => {
-          updateStore('showForgot', () => false);
-        }}
-      />
     </AccountContext.Provider>
   );
 }

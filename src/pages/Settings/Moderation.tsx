@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A, Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
@@ -163,7 +163,7 @@ const Moderation: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.moderation.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.moderation.title)}</div>
       </PageCaption>
 
