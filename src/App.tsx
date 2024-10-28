@@ -16,6 +16,7 @@ import { MediaProvider } from './contexts/MediaContext';
 import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
 import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
+import { DMProvider } from './contexts/DMContext';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -42,17 +43,19 @@ const App: Component = () => {
                   <SettingsProvider>
                     <ProfileProvider>
                       <MessagesProvider>
-                        <NotificationsProvider>
-                          <ReadsProvider>
-                            <HomeProvider>
-                              <ExploreProvider>
-                                <ThreadProvider>
-                                  <AppRouter />
-                                </ThreadProvider>
-                              </ExploreProvider>
-                            </HomeProvider>
-                          </ReadsProvider>
-                        </NotificationsProvider>
+                        <DMProvider>
+                          <NotificationsProvider>
+                            <ReadsProvider>
+                              <HomeProvider>
+                                <ExploreProvider>
+                                  <ThreadProvider>
+                                    <AppRouter />
+                                  </ThreadProvider>
+                                </ExploreProvider>
+                              </HomeProvider>
+                            </ReadsProvider>
+                          </NotificationsProvider>
+                        </DMProvider>
                       </MessagesProvider>
                     </ProfileProvider>
                   </SettingsProvider>

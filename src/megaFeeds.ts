@@ -17,8 +17,10 @@ import {
   PrimalNote,
   PrimalUser,
   PrimalZap,
+  SenderMessageCount,
   TopicStats,
   TopZap,
+  UserRelation,
   UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
@@ -31,6 +33,7 @@ import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } f
 import { nip19 } from "nostr-tools";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
+import { getMessageCounts } from "./lib/messages";
 
 export type PaginationInfo = {
   since: number,
@@ -41,6 +44,13 @@ export type PaginationInfo = {
 
 export type TopicStat = [string, number];
 
+
+export type DMContact = {
+  pubkey: string,
+  user: PrimalUser,
+  dmInfo: SenderMessageCount,
+}
+
 export type MegaFeedResults = {
   users: PrimalUser[],
   notes: PrimalNote[],
@@ -49,6 +59,7 @@ export type MegaFeedResults = {
   topicStats: TopicStat[],
   paging: PaginationInfo,
   page: MegaFeedPage,
+  dmContacts: DMContact[],
 };
 
 export type FeedPaging = {
@@ -77,6 +88,7 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   until: 0,
   sortBy: 'created_at',
   elements: [],
+  dmContacts: {},
 });
 
 export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
@@ -87,6 +99,7 @@ export const emptyMegaFeedResults = () => ({
   reads: [],
   zaps: [],
   topicStats: [],
+  dmContacts: [],
   paging: { ...emptyPaging() },
   page: { ...emptyMegaFeedPage() },
 });
@@ -387,6 +400,53 @@ export const fetchExploreTopics = (
   });
 }
 
+
+export const fetchDMContacts = (
+  user_pubkey: string | undefined,
+  relation: UserRelation,
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    getMessageCounts(user_pubkey, relation, subId);
+  });
+}
+
 const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
@@ -410,6 +470,7 @@ const pageResolve = (page: MegaFeedPage) => {
   const reads = convertToReadsMega(page);
   const zaps = convertToZapsMega(page);
   const topicStats = convertToTopicStatsMega(page);
+  const dmContacts = convertToContactsMega(page);
 
   return {
     users,
@@ -417,6 +478,7 @@ const pageResolve = (page: MegaFeedPage) => {
     reads,
     zaps,
     topicStats,
+    dmContacts,
     paging: {
       since: page.since,
       until: page.until,
@@ -589,6 +651,21 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.userFollowerIncrease = { ...stats };
   }
 
+  if (content?.kind === Kind.MesagePerSenderStats) {
+    const senderCount = JSON.parse(content.content);
+
+    page.dmContacts = { ...senderCount };
+
+    // emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
+    //   if (store.senders[pk]) return [ ...acc ];
+
+    //   return [ ...acc, pk];
+    // }, []);
+
+    // updateStore('messageCountPerSender', () => ({ ...senderCount }));
+    // updateMessageTimings();
+  }
+
 };
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
@@ -708,5 +785,18 @@ const convertToZapsMega = (page: MegaFeedPage) => {
 
 const convertToTopicStatsMega = (page: MegaFeedPage) => {
   return Object.entries(page.topicStats);
+}
 
+const convertToContactsMega = (page: MegaFeedPage) => {
+  // const [keys, totalCount] = Object.entries(page.dmContacts).reduce<[string[], number]>((acc, [id, info]) => {
+  //   return [[ ...acc[0], id ], acc[1] + info.cnt];
+  // }, [[], 0]);
+
+  const ids = Object.keys(page.dmContacts);
+
+  return ids.map(id => ({
+    pubkey: id,
+    user: convertToUser(page.users[id], id),
+    dmInfo: page.dmContacts[id],
+  })) as DMContact[];
 }

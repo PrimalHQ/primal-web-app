@@ -1,0 +1,67 @@
+.directMessageContact {
+  position: relative;
+  display: flex;
+  background-color: var(--background-card);
+  padding-inline: 15px;
+  padding-block: 12px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--devider);
+  margin-bottom: 0px;
+  align-items: center;
+  width: 334px;
+
+  &:hover, &.selected, &.focus {
+    background-color: var(--background-input);
+    box-shadow: none;
+    outline: none;
+  }
+
+  .senderInfo {
+    margin-left: 12px;
+    display: flex;
+    flex-direction: column;
+    .firstLine {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      .senderName {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 16px;
+        max-width: 178px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .dotSeparator {
+        width: 4px;
+        height: 4px;
+        margin-inline: 6px;
+        border-radius: 2px;
+        background-color: var(--text-tertiary-2);
+      }
+      .lastMessageTime {
+        color: var(--text-tertiary-2);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 16px;
+      }
+    }
+
+    .secondLine {
+      text-align: left;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 16px;
+      margin-top: 4px;
+      padding: 0;
+      max-width: 228px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+  }
+}

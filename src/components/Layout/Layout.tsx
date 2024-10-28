@@ -298,7 +298,7 @@ const Layout: Component<any> = (props) => {
           </div>
 
 
-          <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') ? styles.messagesColumn : ''}`}>
+          <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms') ? styles.messagesColumn : ''}`}>
             <div>
               <Show
                 when={!location.pathname.startsWith('/asearch')}

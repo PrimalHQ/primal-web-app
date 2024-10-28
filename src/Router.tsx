@@ -23,7 +23,7 @@ const Explore = lazy(() => import('./pages/Explore/Explore'));
 const ExploreFeeds = lazy(() => import('./pages/Explore/ExploreFeeds'));
 const Thread = lazy(() => import('./pages/Thread'));
 const Messages = lazy(() => import('./pages/Messages'));
-// const DirectMessages = lazy(() => import('./pages/DirectMessages'));
+const DirectMessages = lazy(() => import('./pages/DirectMessages'));
 const Bookmarks = lazy(() => import('./pages/Bookmarks'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Downloads = lazy(() => import('./pages/Downloads'));
@@ -125,7 +125,7 @@ const AppRouter: Component = () => {
             <Route path="/feed/:id" component={ExploreFeeds} />
           </Route>
           {/* <Route path="/explore/:scope?/:timeframe?" component={Explore} /> */}
-          {/* <Route path="/dms/:contact?" component={DirectMessages} /> */}
+          <Route path="/dms/:contact?" component={DirectMessages} />
           <Route path="/messages/:sender?" component={Messages} />
           <Route path="/notifications" component={Notifications} />
           <Route path="/downloads" component={Downloads} />

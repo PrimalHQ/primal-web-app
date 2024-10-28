@@ -38,6 +38,8 @@ export type LocalStore = {
   selectedReadsFeed: PrimalArticleFeed | undefined,
   selectedBookmarksFeed: string | undefined,
   animated: boolean,
+  dmLastConversation: string | undefined,
+  dmLastRelation: UserRelation | undefined,
 };
 
 export type UploadTime = {
@@ -83,6 +85,8 @@ export const emptyStorage: LocalStore = {
   selectedHomeFeed: undefined,
   selectedReadsFeed: undefined,
   selectedBookmarksFeed: undefined,
+  dmLastConversation: undefined,
+  dmLastRelation: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -481,6 +485,29 @@ export const loadDmCoversations = (pubkey: string) => {
   return store.dmConversations || { profiles: {}, counts: {} };
 };
 
+export const loadLastDMConversations = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmLastConversation;
+};
+
+export const saveLastDMConversations = (pubkey: string, contactPubkey: string) => {
+  const store = getStorage(pubkey)
+  store.dmLastConversation = contactPubkey;
+  setStorage(pubkey, store);
+};
+
+export const loadLastDMRelation = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmLastRelation;
+};
+
+export const saveLastDMRelation = (pubkey: string, relation: UserRelation) => {
+  const store = getStorage(pubkey)
+  store.dmLastRelation = relation;
+  setStorage(pubkey, store);
+};
 
 export const fetchStoredFeed = (pubkey: string | undefined, type: 'home' | 'reads') => {
   if (!pubkey) return undefined;
@@ -490,7 +517,7 @@ export const fetchStoredFeed = (pubkey: string | undefined, type: 'home' | 'read
   if (type === 'reads') {
     return store.selectedReadsFeed;
   }
-  
+
   return store.selectedHomeFeed;
 };
 
