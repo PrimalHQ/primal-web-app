@@ -45,7 +45,7 @@ const Terms: Component = () => {
         </section>
 
         <section>
-          <h3>1.4 Content ownership.</h3>
+          <h3>1.4 Prohibited content.</h3>
           You agree not to use our Services to create, upload, post, send, store, or share any content that is illegal, infringing, fraudulent, harmful, threatening, abusive, hateful, harassing, defamatory, obscene, or invasive of another's privacy. Such content includes, but is not limited to, content that is harmful to minors, pornographic material, violent images, hate speech, discriminatory content, and content that promotes terrorism or other criminal activities.
         </section>
 
