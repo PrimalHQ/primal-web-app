@@ -11,12 +11,14 @@ import DirectMessageContact from "../components/DirectMessages/DirectMessageCont
 import styles from './DirectMessages.module.scss';
 import { Tabs } from "@kobalte/core/tabs";
 
-import { messages as tMessages } from "../translations";
+import { placeholders, messages as tMessages } from "../translations";
 import PageTitle from "../components/PageTitle/PageTitle";
 import { useIntl } from "@cookbook/solid-intl";
 import PageCaption from "../components/PageCaption/PageCaption";
 import { loadLastDMConversations, loadLastDMRelation } from "../lib/localStore";
 import { UserRelation } from "../types/primal";
+import Wormhole from "../components/Wormhole/Wormhole";
+import Search from "../components/Search/Search";
 
 const DirectMessages: Component = () => {
 
@@ -32,11 +34,11 @@ const DirectMessages: Component = () => {
     return dms.dmContacts[relation] || [];
   }
 
-  const changeRelation = (relation: string) => {
+  const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
     if (relation === dms.lastConversationRelation) return;
 
-    dms.actions.setDmRelation(relation as UserRelation);
+    return await dms.actions.setDmRelation(relation as UserRelation);
   }
 
   const isFollowing = (pubkey: string) => {
@@ -45,15 +47,15 @@ const DirectMessages: Component = () => {
     return account.following.includes(pubkey);
   }
 
-  const updateRelationOfContact = (pubkey: string) => {
+  const updateRelationOfContact = async (pubkey: string) => {
     if (!dms || !account || !account.following) return;
 
     if (isFollowing(pubkey)) {
-      changeRelation('follows');
+      return await changeRelation('follows');
     }
 
     if (!isFollowing(pubkey)) {
-      changeRelation('other');
+      return await changeRelation('other');
     }
   };
 
@@ -64,21 +66,19 @@ const DirectMessages: Component = () => {
   }
 
   const selectContact = (pubkey: string) => {
-    navigate(`/dms/${pubkey}`);
+    dms?.actions.selectContact(pubkey);
   }
 
-  const setupPageState = (contact: string) => {
+  const setupPageState = async (contact: string) => {
     const pubkey = account?.publicKey;
 
     if (!pubkey || !account.isKeyLookupDone) return;
 
     if (!contact) {
       const lastContact = loadLastDMConversations(pubkey);
-      // const lastRelation = loadLastDMRelation(pubkey);
-
-      // dms?.actions.setDmRelation(lastRelation || 'follows');
 
       if (lastContact) {
+        await updateRelationOfContact(lastContact);
         selectContact(lastContact);
         return;
       }
@@ -95,7 +95,13 @@ const DirectMessages: Component = () => {
     if (isDone) {
       setupPageState(contact as string);
     }
-  }))
+  }));
+
+  createEffect(on(() => dms?.lastConversationContact?.pubkey, (v, p) => {
+    if (!v || v === p) return;
+
+    navigate(`/dms/${v}`);
+  }));
 
   return (
     <div class={styles.dmLayout}>
@@ -104,6 +110,20 @@ const DirectMessages: Component = () => {
       <div class={styles.dmHeader}>
         <PageCaption title={intl.formatMessage(tMessages.title)} />
       </div>
+
+      <Wormhole
+        to="search_section"
+      >
+        <Search
+          placeholder={
+            intl.formatMessage(placeholders.findUser)
+          }
+          onInputConfirm={() => {}}
+          noLinks={true}
+          hideDefault={true}
+          onUserSelect={dms?.actions.addContact}
+        />
+      </Wormhole>
 
       <div class={styles.dmContent}>
         <div class={styles.dmSidebar}>

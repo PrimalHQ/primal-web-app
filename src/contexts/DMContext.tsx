@@ -72,9 +72,10 @@ export type DMStore = {
 
   actions: {
     setDmContacts: (contacts: DMContact[], relation: UserRelation) => void,
-    setDmRelation: (relation: UserRelation) => void,
+    setDmRelation: (relation: UserRelation) => Promise<void>,
     getContacts: (relation: UserRelation) => void,
     selectContact: (pubkey: string) => void,
+    addContact: (user: PrimalUser) => void,
   },
 
 };
@@ -116,13 +117,13 @@ const setDmContacts = (contacts: DMContact[], relation: UserRelation) => {
   updateStore('dmContacts', relation, () => [ ...sorted ]);
 }
 
-const setDmRelation = (relation: UserRelation) => {
+const setDmRelation = async (relation: UserRelation) => {
   if (!account?.publicKey) return;
 
   updateStore('lastConversationRelation', () => relation);
   saveLastDMRelation(account.publicKey, relation);
 
-  getContacts(relation);
+  return await getContacts(relation);
 }
 
 const getContacts = async (relation: UserRelation) => {
@@ -141,6 +142,41 @@ const selectContact = (pubkey: string) => {
   saveLastDMConversations(account.publicKey, pubkey);
 }
 
+const addContact = async (user: PrimalUser) => {
+  const isFollowing = account?.following.includes(user.pubkey);
+
+  const contact: DMContact =  {
+    pubkey: user.pubkey,
+    user: {...user},
+    dmInfo: {
+      cnt: 0,
+      latest_at: 0,
+      latest_event_id: '',
+    }
+  }
+
+  if (isFollowing) {
+    await setDmRelation('follows');
+
+    if (store.dmContacts.follows.find(c => c.pubkey === user.pubkey)) {
+      selectContact(user.pubkey);
+      return;
+    }
+
+    updateStore('dmContacts', 'follows', (cs) => [{ ...contact }, ...cs ]);
+  }
+  else {
+    await setDmRelation('other');
+
+    if (store.dmContacts.other.find(c => c.pubkey === user.pubkey)) {
+      selectContact(user.pubkey);
+      return;
+    }
+    updateStore('dmContacts', 'other', (cs) => [{ ...contact }, ...cs ]);
+  }
+
+  selectContact(user.pubkey);
+}
 // EFFECTS --------------------------------------
 
 // STORES ---------------------------------------
@@ -153,6 +189,7 @@ const selectContact = (pubkey: string) => {
       setDmRelation,
       getContacts,
       selectContact,
+      addContact,
     },
   });
 
