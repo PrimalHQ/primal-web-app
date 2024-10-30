@@ -1,5 +1,5 @@
 import { useBeforeLeave, useNavigate, useParams } from "@solidjs/router";
-import { Component, createEffect, For, on, onMount } from "solid-js";
+import { Component, createEffect, For, on, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { DMContact, fetchDMContacts } from "../megaFeeds";
 import { APP_ID } from "../App";
@@ -19,6 +19,7 @@ import { loadLastDMConversations, loadLastDMRelation } from "../lib/localStore";
 import { UserRelation } from "../types/primal";
 import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
+import DirectMessageConversation from "../components/DirectMessages/DirectMessageConversation";
 
 const DirectMessages: Component = () => {
 
@@ -59,8 +60,8 @@ const DirectMessages: Component = () => {
     }
   };
 
-  const setupContact = (contact: string) => {
-    updateRelationOfContact(contact);
+  const setupContact = async (contact: string) => {
+    await updateRelationOfContact(contact);
 
     dms?.actions.selectContact(contact);
   }
@@ -151,35 +152,34 @@ const DirectMessages: Component = () => {
             </div>
 
             <div class={styles.dmContactsList}>
-              <Tabs.Content class={styles.dmContactsTabContent} value={'follows'}>
-                <For each={contacts('follows')}>
-                  {contact => (
-                    <DirectMessageContact
-                      dmContact={contact}
-                      onSelect={selectContact}
-                      isSelected={params.contact === contact.pubkey}
-                    />
-                  )}
-                </For>
-              </Tabs.Content>
-
-              <Tabs.Content class={styles.dmContactsTabContent} value={'other'}>
-                <For each={contacts('other')}>
-                    {contact => (
-                      <DirectMessageContact
-                        dmContact={contact}
-                        onSelect={selectContact}
-                        isSelected={params.contact === contact.pubkey}
-                      />
-                    )}
-                </For>
-              </Tabs.Content>
+              <For each={['follows', 'other']}>
+                {relation => (
+                  <Tabs.Content class={styles.dmContactsTabContent} value={relation}>
+                    <For each={contacts(relation as UserRelation)}>
+                      {contact => (
+                        <DirectMessageContact
+                          dmContact={contact}
+                          onSelect={selectContact}
+                          isSelected={params.contact === contact.pubkey}
+                        />
+                      )}
+                    </For>
+                  </Tabs.Content>
+                )}
+              </For>
             </div>
           </Tabs>
         </div>
 
         <div class={styles.dmConversation}>
-          <div class={styles.dmMessages}></div>
+          <div class={styles.dmMessages}>
+            <Show when={!dms?.isFetchingMessages}>
+              <DirectMessageConversation
+                contact={dms?.lastConversationContact}
+                messages={dms?.messages}
+              />
+            </Show>
+          </div>
           <div class={styles.dmCompose}></div>
         </div>
       </div>

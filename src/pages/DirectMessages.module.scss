@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: 334px 1fr;
   width: 100%;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 70px);
   border-top: 1px solid var(--devider);
 }
 
@@ -42,7 +42,7 @@
   overflow-y: overlay;
   overflow-x: hidden;
   width: 100%;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 118px);
   border-radius: 0;
 }
 

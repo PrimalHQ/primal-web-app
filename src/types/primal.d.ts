@@ -465,6 +465,7 @@ export type MegaFeedPage = {
   userFollowerIncrease: Record<string, { increase: number, ratio: number, count: number}>,
   wordCount: Record<string, number>,
   dmContacts: Record<string, SenderMessageCount>,
+  encryptedMessages: NostrMessageEncryptedContent[],
 };
 
 export type TrendingNotesStore = {

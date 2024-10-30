@@ -8,6 +8,7 @@ import {
   MegaFeedPage,
   NostrEventContent,
   NostrMentionContent,
+  NostrMessageEncryptedContent,
   NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
@@ -33,7 +34,7 @@ import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } f
 import { nip19 } from "nostr-tools";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
-import { getMessageCounts } from "./lib/messages";
+import { getMessageCounts, getOldMessages } from "./lib/messages";
 
 export type PaginationInfo = {
   since: number,
@@ -60,6 +61,7 @@ export type MegaFeedResults = {
   paging: PaginationInfo,
   page: MegaFeedPage,
   dmContacts: DMContact[],
+  encryptedMessages: NostrMessageEncryptedContent[],
 };
 
 export type FeedPaging = {
@@ -89,6 +91,7 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   sortBy: 'created_at',
   elements: [],
   dmContacts: {},
+  encryptedMessages: [],
 });
 
 export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
@@ -102,6 +105,7 @@ export const emptyMegaFeedResults = () => ({
   dmContacts: [],
   paging: { ...emptyPaging() },
   page: { ...emptyMegaFeedPage() },
+  encryptedMessages: [],
 });
 
 export const parseEmptyReposts = (page: MegaFeedPage) => {
@@ -124,7 +128,7 @@ export const fetchMegaFeed = (
   specification: any,
   subId: string,
   paging?: FeedPaging,
-  ) => {
+) => {
     return new Promise<MegaFeedResults>((resolve) => {
       let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
@@ -400,7 +404,6 @@ export const fetchExploreTopics = (
   });
 }
 
-
 export const fetchDMContacts = (
   user_pubkey: string | undefined,
   relation: UserRelation,
@@ -447,6 +450,55 @@ export const fetchDMContacts = (
   });
 }
 
+
+export const fetchDMConversation = (
+  reciever: string | undefined,
+  sender: string | undefined,
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    console.log('NEXT PAGE: ', since, limit, offset)
+
+    getOldMessages(reciever, sender, subId, since, limit, offset);
+  });
+}
+
 const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
@@ -471,6 +523,7 @@ const pageResolve = (page: MegaFeedPage) => {
   const zaps = convertToZapsMega(page);
   const topicStats = convertToTopicStatsMega(page);
   const dmContacts = convertToContactsMega(page);
+  const encryptedMessages = [...page.encryptedMessages];
 
   return {
     users,
@@ -479,6 +532,7 @@ const pageResolve = (page: MegaFeedPage) => {
     zaps,
     topicStats,
     dmContacts,
+    encryptedMessages,
     paging: {
       since: page.since,
       until: page.until,
@@ -655,15 +709,10 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     const senderCount = JSON.parse(content.content);
 
     page.dmContacts = { ...senderCount };
+  }
 
-    // emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
-    //   if (store.senders[pk]) return [ ...acc ];
-
-    //   return [ ...acc, pk];
-    // }, []);
-
-    // updateStore('messageCountPerSender', () => ({ ...senderCount }));
-    // updateMessageTimings();
+  if (content?.kind === Kind.EncryptedDirectMessage) {
+    page.encryptedMessages.push({ ...content });
   }
 
 };

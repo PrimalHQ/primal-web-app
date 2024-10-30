@@ -1,6 +1,6 @@
 import { format } from 'd3-format';
 import { subsTo } from './sockets';
-import { NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
+import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
 import { PaginationInfo } from './megaFeeds';
 
 let debounceTimer: number = 0;
@@ -218,6 +218,28 @@ export const handleSubscription = (
   fetcher();
 }
 
+export const handleSubscriptionAsync =  (
+  subId: string,
+  fetcher: () => void,
+  onEventHandler?: (content: NostrEventContent) => void,
+  onEoseHandler?: () => void,
+) => {
+  return new Promise((resolve) => {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        onEventHandler && onEventHandler(content);
+      },
+      onEose: () => {
+        onEoseHandler && onEoseHandler();
+        unsub();
+        resolve(true);
+      },
+    });
+
+    fetcher();
+  })
+}
+
 
 export const humanizeTime = (seconds: number) => {
   const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -308,3 +330,37 @@ export const calculateZapsOffset = (zaps: PrimalZap[], paging: PaginationInfo) =
 
   return offset;
 }
+
+export const calculateDMConversationOffset = (messages: DirectMessage[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=messages.length-1;i>=0;i--) {
+    const message = messages[i];
+
+    if (
+      paging.sortBy === 'created_at' &&
+      message.created_at !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  return offset;
+}
+
+export const msgHasInvoice = (content: string) => {
+  const r =/(\s+|\r\n|\r|\n|^)lnbc[a-zA-Z0-9]+/;
+  const test = r.test(content);
+
+  return test
+};
+
+export const msgHasCashu = (content: string) => {
+  const r =/(\s+|\r\n|\r|\n|^)cashuA[a-zA-Z0-9]+/;
+  const test = r.test(content);
+
+  return test
+};
+
+
+export const now = () => Math.floor((new Date()).getTime() / 1000);

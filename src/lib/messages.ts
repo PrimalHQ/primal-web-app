@@ -54,11 +54,11 @@ export const getMessageCounts = (user_pubkey: string | undefined, relation: User
   ]));
 }
 
-export const getOldMessages = (receiver: string | undefined, sender: string | undefined | null, subid: string, until = 0, limit = 20) => {
+export const getOldMessages = (receiver: string | undefined, sender: string | undefined | null, subid: string, until = 0, limit = 20, offset = 0) => {
 
   const start = until === 0 ? 'since' : 'until';
 
-  const payload = { limit, [start]: until, receiver, sender };
+  const payload = { limit, [start]: until, receiver, sender, offset };
 
   sendMessage(JSON.stringify([
     "REQ",
