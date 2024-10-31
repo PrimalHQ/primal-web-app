@@ -20,6 +20,8 @@ import { UserRelation } from "../types/primal";
 import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
 import DirectMessageConversation from "../components/DirectMessages/DirectMessageConversation";
+import { TextField } from "@kobalte/core/text-field";
+import DirectMessagesComposer from "../components/DirectMessages/DirectMessagesComposer";
 
 const DirectMessages: Component = () => {
 
@@ -172,15 +174,14 @@ const DirectMessages: Component = () => {
         </div>
 
         <div class={styles.dmConversation}>
-          <div class={styles.dmMessages}>
-            <Show when={!dms?.isFetchingMessages}>
-              <DirectMessageConversation
-                contact={dms?.lastConversationContact}
-                messages={dms?.messages}
-              />
-            </Show>
-          </div>
-          <div class={styles.dmCompose}></div>
+          <DirectMessagesComposer
+            pubkey={dms?.lastConversationContact?.pubkey}
+            messageCount={dms?.messages.length}
+          />
+          <DirectMessageConversation
+            contact={dms?.lastConversationContact}
+            messages={dms?.messages}
+          />
         </div>
       </div>
     </div>

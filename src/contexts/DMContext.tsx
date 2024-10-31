@@ -55,6 +55,7 @@ import { useAppContext } from "./AppContext";
 import { useSettingsContext } from "./SettingsContext";
 import { calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, PaginationInfo } from "../megaFeeds";
+import { logWarning } from "../lib/logger";
 
 
 export type DMCount = {
@@ -89,6 +90,7 @@ export type DMStore = {
     addContact: (user: PrimalUser) => void,
     getConversation: (contact: string | null, until: number) => void,
     getConversationNextPage: () => void,
+    sendMessage: (reciever: string, message: DirectMessage) => void,
   },
 
 };
@@ -180,6 +182,7 @@ const selectContact = (pubkey: string) => {
   saveLastDMConversations(account.publicKey, pubkey);
 
   updateStore('messages', () => []);
+  updateStore('conversationPaging', () => ({ ...emptyPaging() }));
   updateStore('isFetchingMessages', () => true);
 
   getConversation(pubkey);
@@ -302,20 +305,23 @@ const parseForMentions = async (messages: DirectMessage[]) => {
     }
   }
 
-  const pubkeys = userRefs.map(x => {
-    const decoded = nip19.decode(x);
+  const pubkeys = userRefs.map((x) => {
+    try {
+      const decoded = nip19.decode(x);
+      if (decoded.type === 'npub') {
+        return decoded.data;
+      }
 
-    if (decoded.type === 'npub') {
-      return decoded.data;
+      if (decoded.type === 'nprofile') {
+        return decoded.data.pubkey;
+      }
+
+      return '';
+    } catch (e) {
+      logWarning('Unable to decode npub: ', e);
+      return '';
     }
-
-    if (decoded.type === 'nprofile') {
-      return decoded.data.pubkey;
-    }
-
-    return '';
-
-  });
+  }).filter(x => x.length > 0);
 
   const noteIds = noteRefs.map(x => {
     const decoded = nip19.decode(x);
@@ -357,13 +363,6 @@ const parseForMentions = async (messages: DirectMessage[]) => {
     handleNoteRefEose,
   );
 };
-
-const handleMsgCoversationEose = () => {
-  if (!store.lastConversationContact) return;
-
-  console.log('ENCRYPTED: ', { ...store.lastConversationContact })
-
-}
 
 const getConversation = async (contact: string | null | undefined) => {
   if (!account?.isKeyLookupDone || !account.hasPublicKey() || !contact) {
@@ -424,6 +423,52 @@ const updateRefNotes = () => {
 
   updateStore('referecedNotes', (nts) => ({ ...nts, ...notes }));
 };
+
+const addToConversation = (messagesToAdd: DirectMessage[], ignoreMy?: boolean) => {
+
+  for (let i=0;i<messagesToAdd.length;i++) {
+    const message = messagesToAdd[i];
+
+    if (ignoreMy && message.sender === account?.publicKey) {
+      return;
+    }
+
+    updateStore('messages', (ms) => [{...message}, ...ms]);
+
+  };
+};
+
+const sendMessage = async (receiver: string, message: DirectMessage) => {
+
+  if (!account) {
+    return false;
+  }
+
+  try {
+    const content = await encrypt(receiver, message.content);
+
+    const event = {
+      content,
+      kind: Kind.EncryptedDirectMessage,
+      tags: [['p', receiver]],
+      created_at: Math.floor((new Date).getTime() / 1000),
+    };
+
+    const { success } = await sendEvent(event, account.activeRelays, account?.relaySettings, account?.proxyThroughPrimal || false);
+
+    if (success) {
+      const msg = { ...message, content: sanitize(message.content) };
+      addToConversation([msg]);
+      // updateStore('messageCountPerSender', receiver, 'latest_at', message.created_at);
+    }
+
+    return success;
+  } catch (reason) {
+    console.error('Failed to send message: ', reason);
+    return false;
+  }
+
+}
 
 
 const handleUserRefEvent = (content: NostrEventContent) => {
@@ -510,6 +555,7 @@ const handleNoteRefEose = () => {
       addContact,
       getConversation,
       getConversationNextPage,
+      sendMessage,
     },
   });
 

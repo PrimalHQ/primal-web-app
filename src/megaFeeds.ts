@@ -493,8 +493,6 @@ export const fetchDMConversation = (
       }
     }
 
-    console.log('NEXT PAGE: ', since, limit, offset)
-
     getOldMessages(reciever, sender, subId, since, limit, offset);
   });
 }

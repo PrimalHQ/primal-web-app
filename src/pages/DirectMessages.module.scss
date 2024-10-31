@@ -48,7 +48,12 @@
 
 .dmConversation {
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 72px);
+  display: flex;
+  flex-direction: column-reverse;
+  border: 1px solid var(--devider);
+  border-bottom: none;
+  border-left: none;
   // background-color: beige;
 }
 

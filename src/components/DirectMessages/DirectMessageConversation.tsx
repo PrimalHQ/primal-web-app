@@ -11,6 +11,8 @@ import { useDMContext } from '../../contexts/DMContext';
 import { useAccountContext } from '../../contexts/AccountContext';
 import DirectMessageContent from './DirectMessageContent';
 import Paginator from '../Paginator/Paginator';
+import { TextField } from '@kobalte/core/text-field';
+import DirectMessagesComposer from './DirectMessagesComposer';
 
 const DirectMessageConversation: Component<{
   id?: string,
@@ -24,22 +26,24 @@ const DirectMessageConversation: Component<{
 
   return (
     <div class={styles.conversation}>
-      <div class={styles.messages} ref={conversationHolder}>
-        <For each={props.messages}>
-          {(message, index) => (
-            <DirectMessageContent
-              previousMessage={props.messages[index()-1]}
-              nextMessage={props.messages[index()+1]}
-              contact={props.contact}
-              message={message}
-            />
-          )}
-        </For>
-        <Paginator
-          loadNextPage={dms?.actions.getConversationNextPage}
-          isSmall={true}
-        />
-      </div>
+      <Show when={!dms?.isFetchingMessages}>
+        <div class={styles.messages} ref={conversationHolder}>
+          <For each={props.messages}>
+            {(message, index) => (
+              <DirectMessageContent
+                previousMessage={props.messages[index()-1]}
+                nextMessage={props.messages[index()+1]}
+                contact={props.contact}
+                message={message}
+              />
+            )}
+          </For>
+          <Paginator
+            loadNextPage={dms?.actions.getConversationNextPage}
+            isSmall={true}
+          />
+        </div>
+      </Show>
     </div>
   )
 }
