@@ -37,6 +37,10 @@ const DirectMessages: Component = () => {
     return dms.dmContacts[relation] || [];
   }
 
+  useBeforeLeave(() => {
+    dms?.actions.resetRelation()
+  })
+
   const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
     if (relation === dms.lastConversationRelation) return;
@@ -109,7 +113,6 @@ const DirectMessages: Component = () => {
 
     navigate(`/dms/${v}`);
   }));
-
 
   createEffect(on(() => dms?.dmCount, (v, p) => {
     if (!v || v === p) return;

@@ -42,7 +42,7 @@ const App: Component = () => {
                 <AdvancedSearchProvider>
                   <SettingsProvider>
                     <ProfileProvider>
-                      <MessagesProvider>
+                      {/* <MessagesProvider> */}
                         <DMProvider>
                           <NotificationsProvider>
                             <ReadsProvider>
@@ -56,7 +56,7 @@ const App: Component = () => {
                             </ReadsProvider>
                           </NotificationsProvider>
                         </DMProvider>
-                      </MessagesProvider>
+                      {/* </MessagesProvider> */}
                     </ProfileProvider>
                   </SettingsProvider>
                 </AdvancedSearchProvider>

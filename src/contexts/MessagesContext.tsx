@@ -237,7 +237,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    console.log('RESET')
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
     updateStore('selectedSender', () => sender.pubkey);
@@ -684,8 +683,6 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
   const handleMsgCountPerSenderEvent = (content: NostrEventContent) => {
     if (content?.kind === Kind.MesagePerSenderStats) {
       const senderCount = JSON.parse(content.content);
-
-      console.log('DM: ', senderCount)
 
       emptyUsers = Object.keys(senderCount).reduce<string[]>((acc, pk) => {
         if (store.senders[pk]) return [ ...acc ];

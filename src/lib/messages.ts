@@ -46,12 +46,16 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   }
 }
 
-export const getMessageCounts = (user_pubkey: string | undefined, relation: UserRelation, subid: string, limit = 100, until = 0, offset = 0) => {
+export const getMessageCounts = (user_pubkey: string | undefined, relation: UserRelation, subid: string, limit = 0, until = 0, offset = 0) => {
   let payload = {
     user_pubkey,
     relation,
-    limit,
   };
+
+  if (limit > 0) {
+    // @ts-ignore
+    payload.limit = limit;
+  }
 
   if (until > 0) {
     // @ts-ignore

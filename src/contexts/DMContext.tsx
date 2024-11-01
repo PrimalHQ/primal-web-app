@@ -88,6 +88,7 @@ export type DMStore = {
     setDmContacts: (contacts: DMContact[], relation: UserRelation) => void,
     setDmRelation: (relation: UserRelation) => Promise<void>,
     getContacts: (relation: UserRelation) => void,
+    getContactsNextPage: (relation: UserRelation) => void,
     refreshContacts: (relation: UserRelation) => void,
     selectContact: (pubkey: string) => void,
     addContact: (user: PrimalUser) => void,
@@ -95,6 +96,7 @@ export type DMStore = {
     getConversationNextPage: () => void,
     sendMessage: (reciever: string, message: DirectMessage) => void,
     resetAllMessages: () => Promise<boolean>,
+    resetRelation: () => void,
   },
 
 };
@@ -147,25 +149,38 @@ export const DMProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-const setDmContacts = (contacts: DMContact[], relation: UserRelation) => {
-  const existingContacts = store.dmContacts[relation];
-  const existingPubkeys = existingContacts.map(c => c.pubkey);
+const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { replace: boolean }) => {
+  const replace = opts?.replace || false;
 
-  const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
+  let sorted = [];
 
-  const sorted = [ ...existingContacts, ...filtered].
-    sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+  // if (replace) {
+    sorted = [ ...contacts ].
+      sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+  // }
+  // else {
+  //   const existingContacts = store.dmContacts[relation];
+  //   const existingPubkeys = existingContacts.map(c => c.pubkey);
 
-  // const sorted = [ ...contacts ].
-  //   sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+  //   const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
+
+  //   sorted = [ ...existingContacts, ...filtered].
+  //     sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+  // }
 
   updateStore('dmContacts', relation, () => [ ...sorted ]);
 
   const selected = contacts.find(c => c.pubkey === store.lastConversationContact?.pubkey);
 
   if (selected) {
-    updateStore('lastConversationContact', 'dmInfo', () => ({ ...selected.dmInfo }));
+    updateStore('lastConversationContact', 'dmInfo', 'cnt', () => selected.dmInfo.cnt);
+    updateStore('lastConversationContact', 'dmInfo', 'latest_at', () => selected.dmInfo.latest_at);
+    updateStore('lastConversationContact', 'dmInfo', 'latest_event_id', () => selected.dmInfo.latest_event_id);
   }
+}
+
+const resetRelation = () => {
+  updateStore('lastConversationRelation', () => 'any');
 }
 
 const setDmRelation = async (relation: UserRelation) => {
@@ -188,32 +203,55 @@ const refreshContacts = async (relation: UserRelation) => {
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
-      limit: existing.length,
+      // limit: existing.length,
     }
   );
 
-  setDmContacts(dmContacts, relation);
+  updateStore('contactsPaging', () => ({ ...paging }));
+  setDmContacts(dmContacts, relation, { replace: true });
 }
 
 const getContacts = async (relation: UserRelation) => {
 
-  const existing = store.dmContacts[relation] || [];
+  // const existing = store.dmContacts[relation] || [];
 
-  const since = store.contactsPaging.since || 0;
-  const offset = calculateDMContactsOffset(existing, store.conversationPaging)
+  // const since = store.contactsPaging.since || 0;
+  // const offset = calculateDMContactsOffset(existing, store.conversationPaging)
 
   const { dmContacts, paging } = await fetchDMContacts(
     account?.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
-      limit: 100,
-      since,
-      offset,
+      // limit: 100,
+      // since,
+      // offset,
     }
   );
 
   updateStore('conversationPaging', () => ({ ...paging }));
+  setDmContacts(dmContacts, relation, { replace: true });
+}
+
+const getContactsNextPage = async (relation: UserRelation) => {
+
+  const existing = store.dmContacts[relation] || [];
+
+  const since = store.contactsPaging.since || 0;
+  const offset = 1//calculateDMContactsOffset(existing, store.conversationPaging)
+
+  const { dmContacts, paging } = await fetchDMContacts(
+    account?.publicKey,
+    relation,
+    `dm_contacts_${relation}_${APP_ID}`,
+    {
+      // limit: 3,
+      // since,
+      // offset,
+    }
+  );
+
+  updateStore('contactsPaging', () => ({ ...paging }));
   setDmContacts(dmContacts, relation);
 }
 
@@ -227,7 +265,7 @@ const selectContact = async (pubkey: string) => {
 
   if (!contact) return;
 
-  resetContactMessages(contact.pubkey);
+  await resetContactMessages(contact.pubkey, relation);
 
   updateStore('lastConversationContact', () => ({ ...contact }));
   saveLastDMConversations(account.publicKey, pubkey);
@@ -238,7 +276,7 @@ const selectContact = async (pubkey: string) => {
 
   await getConversation(pubkey);
 
-  refreshContacts(relation);
+  // refreshContacts(relation);
 }
 
 const addContact = async (user: PrimalUser) => {
@@ -327,8 +365,6 @@ const decryptMessages = async (contact: string, encrypted: NostrMessageEncrypted
   }
 
   await parseForMentions(newMessages);
-
-  updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
 
   then(newMessages);
 };
@@ -439,7 +475,8 @@ const getConversation = async (contact: string | null | undefined) => {
   updateStore('encryptedMessages', () => [...encryptedMessages]);
   updateStore('conversationPaging', () => ({ ...paging }));
 
-  decryptMessages(contact, store.encryptedMessages, () => {
+  decryptMessages(contact, store.encryptedMessages, (newMessages) => {
+    updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
     updateStore('isFetchingMessages', () => false);
   });
 };
@@ -457,8 +494,8 @@ const getConversationNewMessages = async (contact: string | null | undefined) =>
 
   const subId = `dm_conversation_new_ ${APP_ID}`;
 
-  const since = store.conversationPaging.since || 0;
-  const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
+  const since = store.conversationPaging.until || 0;
+  // const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
 
   const { encryptedMessages, paging } = await fetchDMConversationNew(
     account?.publicKey,
@@ -467,15 +504,21 @@ const getConversationNewMessages = async (contact: string | null | undefined) =>
     {
       limit: 20,
       since,
-      offset
+      offset: 0,
     }
   );
 
   updateStore('encryptedMessages', () => [...encryptedMessages]);
   updateStore('conversationPaging', () => ({ ...paging }));
 
-  decryptMessages(contact, store.encryptedMessages, () => {
+  decryptMessages(contact, store.encryptedMessages, (newMessages) => {
+    const existing = store.messages.map(m => m.id);
+    const filtered = newMessages.filter(m => !existing.includes(m.id));
+
+    updateStore('messages', (conv) => [ ...filtered, ...conv ]);
     updateStore('isFetchingMessages', () => false);
+
+    resetContactMessages(contact, store.lastConversationRelation);
   });
 };
 
@@ -549,8 +592,17 @@ const resetAllMessages = async () => {
   return await markAllAsRead(`dm_all_read_${APP_ID}`);
 };
 
-const resetContactMessages = async (pubkey: string) => {
-  return await resetMessageCount(pubkey, `dm_reset_msg_${pubkey}_${APP_ID}`);
+const resetContactMessages = async (pubkey: string, relation: UserRelation) => {
+  const success =  await resetMessageCount(pubkey, `dm_reset_msg_${pubkey}_${APP_ID}`);
+
+  if (success) {
+    updateStore('dmContacts', relation, c => c.pubkey === pubkey, 'dmInfo', 'cnt', () => 0);
+    if (store.lastConversationContact) {
+      updateStore('lastConversationContact', 'dmInfo', 'cnt', () => 0);
+    }
+  }
+
+  return success;
 };
 
 const handleUserRefEvent = (content: NostrEventContent) => {
@@ -652,7 +704,7 @@ createEffect(() => {
 });
 
 createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
-  if (!v || v === p) return;
+  if (!v || v === p || (p && v < p)) return;
 
   getConversationNewMessages(store.lastConversationContact?.pubkey)
 }));
@@ -666,6 +718,7 @@ createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
       setDmContacts,
       setDmRelation,
       getContacts,
+      getContactsNextPage,
       refreshContacts,
       selectContact,
       addContact,
@@ -673,6 +726,7 @@ createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
       getConversationNextPage,
       sendMessage,
       resetAllMessages,
+      resetRelation,
     },
   });
 

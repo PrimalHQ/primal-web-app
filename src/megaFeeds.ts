@@ -429,7 +429,7 @@ export const fetchDMContacts = (
 
     const until = paging?.until || 0;
     const since = paging?.since || 0;
-    const limit = paging?.limit || 20;
+    const limit = paging?.limit || 0;
 
     let offset = 0;
 
