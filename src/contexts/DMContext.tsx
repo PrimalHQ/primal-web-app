@@ -217,15 +217,17 @@ const getContacts = async (relation: UserRelation) => {
   setDmContacts(dmContacts, relation);
 }
 
-const selectContact = (pubkey: string) => {
+const selectContact = async (pubkey: string) => {
   if (store.isFetchingMessages) return;
 
   if (!account?.publicKey) return;
 
   const relation = store.lastConversationRelation;
-  const contact = store.dmContacts[relation].find(c => c.pubkey === pubkey);
+  let contact = store.dmContacts[relation].find(c => c.pubkey === pubkey);
 
   if (!contact) return;
+
+  resetContactMessages(contact.pubkey);
 
   updateStore('lastConversationContact', () => ({ ...contact }));
   saveLastDMConversations(account.publicKey, pubkey);
@@ -234,7 +236,9 @@ const selectContact = (pubkey: string) => {
   updateStore('conversationPaging', () => ({ ...emptyPaging() }));
   updateStore('isFetchingMessages', () => true);
 
-  getConversation(pubkey);
+  await getConversation(pubkey);
+
+  refreshContacts(relation);
 }
 
 const addContact = async (user: PrimalUser) => {
@@ -543,6 +547,10 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
 
 const resetAllMessages = async () => {
   return await markAllAsRead(`dm_all_read_${APP_ID}`);
+};
+
+const resetContactMessages = async (pubkey: string) => {
+  return await resetMessageCount(pubkey, `dm_reset_msg_${pubkey}_${APP_ID}`);
 };
 
 const handleUserRefEvent = (content: NostrEventContent) => {

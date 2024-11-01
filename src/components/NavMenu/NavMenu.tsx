@@ -13,11 +13,12 @@ import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
+import { useDMContext } from '../../contexts/DMContext';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
-  const messages = useMessagesContext();
+  const dms = useDMContext();
   const intl = useIntl();
   const loc = useLocation();
   const media = useMediaContext();
@@ -40,10 +41,10 @@ const NavMenu: Component< { id?: string } > = (props) => {
       icon: 'exploreIcon',
     },
     {
-      to: '/messages',
+      to: '/dms',
       label: intl.formatMessage(t.messages),
       icon: 'messagesIcon',
-      bubble: () => messages?.messageCount || 0,
+      bubble: () => dms?.dmCount || 0,
     },
     {
       to: '/bookmarks',
