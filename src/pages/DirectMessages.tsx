@@ -117,9 +117,7 @@ const DirectMessages: Component = () => {
     const count = v;
 
     if (count > 0) {
-      setTimeout(() => {
-        dms?.actions.refreshContacts(dms.lastConversationRelation);
-      }, 7_000);
+      dms?.actions.refreshContacts(dms.lastConversationRelation);
     }
   }, { defer: true }));
 
