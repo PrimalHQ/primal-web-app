@@ -237,6 +237,7 @@ export const MessagesProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    console.log('RESET')
     await resetMessageCount(sender.pubkey, subidResetMsgCount);
 
     updateStore('selectedSender', () => sender.pubkey);

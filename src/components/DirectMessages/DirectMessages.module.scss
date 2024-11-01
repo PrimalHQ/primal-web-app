@@ -427,3 +427,32 @@
     }
   }
 }
+
+.senderBubble {
+  position: absolute;
+  text-align: center;
+  padding-top: 2px;
+  padding-inline: 4px;
+  top: 12px;
+  right: 12px;
+  min-width: 18px;
+  min-height: 18px;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 12px;
+  z-index: var(--z-index-lifted);
+
+  background: var(--accent);
+  border: 1px solid var(--background-site);
+  border-radius: 8px;
+
+  color: var(--text-primary-button);
+  text-shadow: 0.5px 0.5px 0px black;
+
+  &.doubleSize {
+    right: -24px;
+  }
+  &.tripleSize {
+    right: -30px;
+  }
+}

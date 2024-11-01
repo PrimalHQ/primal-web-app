@@ -92,6 +92,10 @@ const DirectMessages: Component = () => {
     setupContact(contact);
   }
 
+  const markAllAsRead = () => {
+    dms?.actions.resetAllMessages();
+  };
+
   createEffect(on(() => [account?.isKeyLookupDone, params.contact], (next) => {
     const [ isDone, contact ] = next;
 
@@ -105,6 +109,19 @@ const DirectMessages: Component = () => {
 
     navigate(`/dms/${v}`);
   }));
+
+
+  createEffect(on(() => dms?.dmCount, (v, p) => {
+    if (!v || v === p) return;
+
+    const count = v;
+
+    if (count > 0) {
+      setTimeout(() => {
+        dms?.actions.refreshContacts(dms.lastConversationRelation);
+      }, 6_500);
+    }
+  }, { defer: true }));
 
   return (
     <div class={styles.dmLayout}>
@@ -135,22 +152,31 @@ const DirectMessages: Component = () => {
             onChange={changeRelation}
           >
             <div class={styles.dmControls}>
-              <Tabs.List class={styles.dmContactsTabs}>
-                <Tabs.Trigger
-                  class={styles.dmContactTab}
-                  value={'follows'}
-                >
-                  {intl.formatMessage(tMessages.follows)}
-                </Tabs.Trigger>
-                <Tabs.Trigger
-                  class={styles.dmContactTab}
-                  value={'other'}
-                >
-                  {intl.formatMessage(tMessages.other)}
-                </Tabs.Trigger>
+              <div>
+                <Tabs.List class={styles.dmContactsTabs}>
+                  <Tabs.Trigger
+                    class={styles.dmContactTab}
+                    value={'follows'}
+                  >
+                    {intl.formatMessage(tMessages.follows)}
+                  </Tabs.Trigger>
+                  <Tabs.Trigger
+                    class={styles.dmContactTab}
+                    value={'other'}
+                  >
+                    {intl.formatMessage(tMessages.other)}
+                  </Tabs.Trigger>
 
-                <Tabs.Indicator class={styles.dmContactsTabIndicator} />
-              </Tabs.List>
+                  <Tabs.Indicator class={styles.dmContactsTabIndicator} />
+                </Tabs.List>
+              </div>
+              <button
+                class={styles.markAsRead}
+                disabled={dms?.dmCount === 0}
+                onClick={markAllAsRead}
+              >
+                {intl.formatMessage(tMessages.markAsRead)}
+              </button>
             </div>
 
             <div class={styles.dmContactsList}>

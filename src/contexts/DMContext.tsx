@@ -53,8 +53,8 @@ import { decrypt, encrypt } from "../lib/nostrAPI";
 import { loadDmCoversations, loadLastDMRelation, loadMsgContacts, saveDmConversations, saveLastDMConversations, saveLastDMRelation, saveMsgContacts } from "../lib/localStore";
 import { useAppContext } from "./AppContext";
 import { useSettingsContext } from "./SettingsContext";
-import { calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
-import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, PaginationInfo } from "../megaFeeds";
+import { calculateDMContactsOffset, calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
+import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
 import { logWarning } from "../lib/logger";
 
 
@@ -68,6 +68,8 @@ export type DMStore = {
   dmCountPerContact: Record<string, DMCount>,
   dmCountUnread: number,
   dmContacts: Record<UserRelation, DMContact[]>,
+  contactsPaging: PaginationInfo,
+  dmCount: number,
   lastMessageCheck: number,
   lastConversationContact: DMContact | undefined,
   lastConversationRelation: UserRelation,
@@ -86,11 +88,13 @@ export type DMStore = {
     setDmContacts: (contacts: DMContact[], relation: UserRelation) => void,
     setDmRelation: (relation: UserRelation) => Promise<void>,
     getContacts: (relation: UserRelation) => void,
+    refreshContacts: (relation: UserRelation) => void,
     selectContact: (pubkey: string) => void,
     addContact: (user: PrimalUser) => void,
     getConversation: (contact: string | null, until: number) => void,
     getConversationNextPage: () => void,
     sendMessage: (reciever: string, message: DirectMessage) => void,
+    resetAllMessages: () => Promise<boolean>,
   },
 
 };
@@ -105,6 +109,8 @@ export const emptyDMStore: () => Omit<DMStore, 'actions'> = () => ({
   dmCountPerContact: {},
   dmCountUnread: 0,
   dmContacts: { ...emptyDMContacts() },
+  contactsPaging: { ...emptyPaging() },
+  dmCount: 0,
   lastMessageCheck: 0,
   lastConversationContact: undefined,
   lastConversationRelation: 'any',
@@ -135,6 +141,10 @@ export const DMProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
   const app = useAppContext();
 
+  let unsubFromDMCount: (() => void) | undefined;
+
+  const subidMsgCount = `dm_count_${APP_ID}`;
+
 // ACTIONS --------------------------------------
 
 const setDmContacts = (contacts: DMContact[], relation: UserRelation) => {
@@ -146,26 +156,65 @@ const setDmContacts = (contacts: DMContact[], relation: UserRelation) => {
   const sorted = [ ...existingContacts, ...filtered].
     sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
 
+  // const sorted = [ ...contacts ].
+  //   sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+
   updateStore('dmContacts', relation, () => [ ...sorted ]);
+
+  const selected = contacts.find(c => c.pubkey === store.lastConversationContact?.pubkey);
+
+  if (selected) {
+    updateStore('lastConversationContact', 'dmInfo', () => ({ ...selected.dmInfo }));
+  }
 }
 
 const setDmRelation = async (relation: UserRelation) => {
   if (!account?.publicKey) return;
 
+  updateStore('contactsPaging', () => ({ ...emptyPaging() }))
   updateStore('lastConversationRelation', () => relation);
   saveLastDMRelation(account.publicKey, relation);
+
 
   return await getContacts(relation);
 }
 
-const getContacts = async (relation: UserRelation) => {
-  start = (new Date()).getTime();
-  const { dmContacts } = await fetchDMContacts(account?.publicKey, relation, `dm_contacts_${relation}_${APP_ID}`);
+const refreshContacts = async (relation: UserRelation) => {
+
+  const existing = store.dmContacts[relation] || [];
+
+  const { dmContacts, paging } = await fetchDMContacts(
+    account?.publicKey,
+    relation,
+    `dm_contacts_${relation}_${APP_ID}`,
+    {
+      limit: existing.length,
+    }
+  );
 
   setDmContacts(dmContacts, relation);
+}
 
-  end = (new Date()).getTime();
-  console.log('TIME: ', end - start);
+const getContacts = async (relation: UserRelation) => {
+
+  const existing = store.dmContacts[relation] || [];
+
+  const since = store.contactsPaging.since || 0;
+  const offset = calculateDMContactsOffset(existing, store.conversationPaging)
+
+  const { dmContacts, paging } = await fetchDMContacts(
+    account?.publicKey,
+    relation,
+    `dm_contacts_${relation}_${APP_ID}`,
+    {
+      limit: 100,
+      since,
+      offset,
+    }
+  );
+
+  updateStore('conversationPaging', () => ({ ...paging }));
+  setDmContacts(dmContacts, relation);
 }
 
 const selectContact = (pubkey: string) => {
@@ -234,10 +283,9 @@ const handleMsgCoversationEvent = (content: NostrEventContent) => {
 const actualDecrypt = (pubkey: string, message: string) => {
   return new Promise<string>((resolve) => {
     decrypt(pubkey, message).then((m) => {
-      console.log('DECRYPT: ', pubkey, message, ' -> ', m);
       resolve(m)
     }).catch((reason) => {
-      console.warn('Failed to decrypt, will retry: ', message, reason);
+      logWarning('Failed to decrypt, will retry: ', message, reason);
       resolve('');
     });
   });
@@ -253,7 +301,6 @@ const decryptMessages = async (contact: string, encrypted: NostrMessageEncrypted
   for (let i = 0; i < encrypted.length; i++) {
     const eMsg = encrypted[i];
 
-    console.log('ENCRYPT: ', eMsg.content);
     try {
       const content = await actualDecrypt(contact, eMsg.content);
 
@@ -276,8 +323,6 @@ const decryptMessages = async (contact: string, encrypted: NostrMessageEncrypted
   }
 
   await parseForMentions(newMessages);
-
-  console.log('DECRYPTED: ', newMessages.length)
 
   updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
 
@@ -372,7 +417,6 @@ const getConversation = async (contact: string | null | undefined) => {
   updateStore('encryptedMessages', () => []);
 
   const subId = `dm_conversation_ ${APP_ID}`;
-  console.log('NEXT PAGE 2: ', store.conversationPaging.since);
 
   const since = store.conversationPaging.since || 0;
   const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
@@ -393,7 +437,6 @@ const getConversation = async (contact: string | null | undefined) => {
 
   decryptMessages(contact, store.encryptedMessages, () => {
     updateStore('isFetchingMessages', () => false);
-    console.log('DONE DECRYPTING:');
   });
 };
 
@@ -401,6 +444,35 @@ const getConversationNextPage = () => {
   if (store.messages.length === 0 || !store.conversationPaging.since) return;
 
   getConversation(store.lastConversationContact?.pubkey)
+};
+
+const getConversationNewMessages = async (contact: string | null | undefined) => {
+  if (!contact) return;
+
+  updateStore('encryptedMessages', () => []);
+
+  const subId = `dm_conversation_new_ ${APP_ID}`;
+
+  const since = store.conversationPaging.since || 0;
+  const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
+
+  const { encryptedMessages, paging } = await fetchDMConversationNew(
+    account?.publicKey,
+    contact,
+    subId,
+    {
+      limit: 20,
+      since,
+      offset
+    }
+  );
+
+  updateStore('encryptedMessages', () => [...encryptedMessages]);
+  updateStore('conversationPaging', () => ({ ...paging }));
+
+  decryptMessages(contact, store.encryptedMessages, () => {
+    updateStore('isFetchingMessages', () => false);
+  });
 };
 
 const updateRefUsers = () => {
@@ -467,9 +539,11 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
     console.error('Failed to send message: ', reason);
     return false;
   }
+};
 
-}
-
+const resetAllMessages = async () => {
+  return await markAllAsRead(`dm_all_read_${APP_ID}`);
+};
 
 const handleUserRefEvent = (content: NostrEventContent) => {
   if (content?.kind === Kind.Metadata) {
@@ -540,7 +614,40 @@ const handleNoteRefEose = () => {
   updateRefUsers();
 }
 
+const subToMessagesStats = () => {
+  if (!account?.publicKey || unsubFromDMCount !== undefined) return;
+
+  unsubFromDMCount = subsTo(subidMsgCount, {
+    onEvent: (_, content) => {
+      if (content?.kind === Kind.MessageStats) {
+        const count = parseInt(content.cnt);
+
+        if (count !== store.dmCount) {
+          updateStore('dmCount', () => count);
+        }
+      }
+    },
+  });
+
+  subscribeToMessagesStats(account.publicKey, subidMsgCount);
+}
+
 // EFFECTS --------------------------------------
+
+createEffect(() => {
+  if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
+    subToMessagesStats();
+  } else {
+    unsubscribeToMessagesStats(subidMsgCount);
+    unsubFromDMCount = undefined;
+  }
+});
+
+createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
+  if (!v || v === p) return;
+
+  getConversationNewMessages(store.lastConversationContact?.pubkey)
+}));
 
 // STORES ---------------------------------------
 
@@ -551,11 +658,13 @@ const handleNoteRefEose = () => {
       setDmContacts,
       setDmRelation,
       getContacts,
+      refreshContacts,
       selectContact,
       addContact,
       getConversation,
       getConversationNextPage,
       sendMessage,
+      resetAllMessages,
     },
   });
 

@@ -1,7 +1,7 @@
 import { format } from 'd3-format';
 import { subsTo } from './sockets';
 import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
-import { PaginationInfo } from './megaFeeds';
+import { DMContact, PaginationInfo } from './megaFeeds';
 
 let debounceTimer: number = 0;
 
@@ -340,6 +340,23 @@ export const calculateDMConversationOffset = (messages: DirectMessage[], paging:
     if (
       paging.sortBy === 'created_at' &&
       message.created_at !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  return offset;
+}
+
+export const calculateDMContactsOffset = (contacts: DMContact[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=contacts.length-1;i>=0;i--) {
+    const contact = contacts[i];
+
+    if (
+      paging.sortBy === 'latest_at' &&
+      contact.dmInfo.latest_at !== paging.since
     ) break;
 
     offset++;

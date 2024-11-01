@@ -34,7 +34,7 @@ import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } f
 import { nip19 } from "nostr-tools";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
-import { getMessageCounts, getOldMessages } from "./lib/messages";
+import { getMessageCounts, getNewMessages, getOldMessages } from "./lib/messages";
 
 export type PaginationInfo = {
   since: number,
@@ -429,7 +429,7 @@ export const fetchDMContacts = (
 
     const until = paging?.until || 0;
     const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
+    const limit = paging?.limit || 20;
 
     let offset = 0;
 
@@ -446,10 +446,9 @@ export const fetchDMContacts = (
       }
     }
 
-    getMessageCounts(user_pubkey, relation, subId);
+    getMessageCounts(user_pubkey, relation, subId, limit, since, offset);
   });
 }
-
 
 export const fetchDMConversation = (
   reciever: string | undefined,
@@ -494,6 +493,57 @@ export const fetchDMConversation = (
     }
 
     getOldMessages(reciever, sender, subId, since, limit, offset);
+  });
+}
+
+export const fetchDMConversationNew = (
+  reciever: string | undefined,
+  sender: string | undefined,
+  subId: string,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    if (!reciever || !sender) {
+      resolve({ ...emptyMegaFeedResults() });
+      return;
+    }
+
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+    else if (Array.isArray(paging?.offset)) {
+      if (until > 0) {
+        offset = (paging?.offset || []).filter(v => v === until).length;
+      }
+
+      if (since > 0) {
+        offset = (paging?.offset || []).filter(v => v === since).length;
+      }
+    }
+
+    getNewMessages(reciever, sender, subId, since, limit, offset);
   });
 }
 

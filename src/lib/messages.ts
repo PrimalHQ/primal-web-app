@@ -46,11 +46,27 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   }
 }
 
-export const getMessageCounts = (user_pubkey: string | undefined, relation: UserRelation, subid: string) => {
+export const getMessageCounts = (user_pubkey: string | undefined, relation: UserRelation, subid: string, limit = 100, until = 0, offset = 0) => {
+  let payload = {
+    user_pubkey,
+    relation,
+    limit,
+  };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    payload.offset = offset;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsg_contacts", { user_pubkey, relation }]},
+    {cache: ["get_directmsg_contacts", { ...payload }]},
   ]));
 }
 
@@ -67,11 +83,24 @@ export const getOldMessages = (receiver: string | undefined, sender: string | un
   ]));
 }
 
-export const getNewMessages = (receiver: string, sender: string, subid: string, since = 0, limit = 20) => {
+export const getNewMessages = (receiver: string, sender: string, subid: string, since = 0, limit = 20, offset = 0) => {
+
+  let payload = {
+    receiver,
+    sender,
+    since,
+    limit,
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    payload.offset = offset;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["get_directmsgs", { receiver, sender, since, limit }]},
+    {cache: ["get_directmsgs", { ...payload }]},
   ]));
 }
 

@@ -1,4 +1,4 @@
-import { Component, Show } from 'solid-js';
+import { Component, createEffect, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './DirectMessages.module.scss';
