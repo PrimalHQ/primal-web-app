@@ -41,11 +41,25 @@ const DirectMessages: Component = () => {
     dms?.actions.resetRelation()
   })
 
+  const isContactInTheList = (pubkey: string | undefined, relation: UserRelation) => {
+    if (!pubkey) return false;
+
+    const known = dms?.dmContacts[relation].map(c => c.pubkey);
+
+    return known?.includes(pubkey);
+  };
+
   const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
     if (relation === dms.lastConversationRelation) return;
 
-    return await dms.actions.setDmRelation(relation as UserRelation);
+    await dms.actions.setDmRelation(relation as UserRelation);
+
+    if (!isContactInTheList(dms.lastConversationContact?.pubkey, dms.lastConversationRelation)) {
+      const first = dms?.dmContacts[relation as UserRelation][0].pubkey;
+
+      first && dms.actions.selectContact(first)
+    }
   }
 
   const isFollowing = (pubkey: string) => {
