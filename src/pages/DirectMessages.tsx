@@ -37,29 +37,33 @@ const DirectMessages: Component = () => {
     return dms.dmContacts[relation] || [];
   }
 
-  useBeforeLeave(() => {
-    dms?.actions.resetRelation()
-  })
-
-  const isContactInTheList = (pubkey: string | undefined, relation: UserRelation) => {
-    if (!pubkey) return false;
-
-    const known = dms?.dmContacts[relation].map(c => c.pubkey);
-
-    return known?.includes(pubkey);
-  };
-
   const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
     if (relation === dms.lastConversationRelation) return;
 
-    await dms.actions.setDmRelation(relation as UserRelation);
+    dms.actions.setDmRelation2(relation as UserRelation);
 
-    if (!isContactInTheList(dms.lastConversationContact?.pubkey, dms.lastConversationRelation)) {
-      const first = dms?.dmContacts[relation as UserRelation][0].pubkey;
+    let list = dms?.dmContacts[relation as UserRelation];
 
-      first && dms.actions.selectContact(first)
+    if (list.length > 0) {
+      const first = list[0].pubkey;
+
+      navigate(`/dms/${first}`);
+      return;
     }
+
+    await dms.actions.getContacts(relation as UserRelation);
+
+    list = dms?.dmContacts[relation as UserRelation];
+
+    const first = list[0].pubkey;
+
+    navigate(`/dms/${first}`);
+    // if (!isContactInTheList(dms.lastConversationContact?.pubkey, dms.lastConversationRelation)) {
+    //   const first = dms?.dmContacts[relation as UserRelation][0].pubkey;
+
+    //   first && dms.actions.selectContact(first)
+    // }
   }
 
   const isFollowing = (pubkey: string) => {
@@ -87,7 +91,7 @@ const DirectMessages: Component = () => {
   }
 
   const selectContact = (pubkey: string) => {
-    dms?.actions.selectContact(pubkey);
+    navigate(`/dms/${pubkey}`);
   }
 
   const setupPageState = async (contact: string) => {
@@ -96,7 +100,7 @@ const DirectMessages: Component = () => {
     if (!pubkey || !account.isKeyLookupDone) return;
 
     if (!contact) {
-      const lastContact = loadLastDMConversations(pubkey);
+      const lastContact = dms?.lastConversationContact?.pubkey;
 
       if (lastContact) {
         await updateRelationOfContact(lastContact);
@@ -104,6 +108,7 @@ const DirectMessages: Component = () => {
         return;
       }
 
+      changeRelation(dms?.lastConversationRelation || 'follows')
       return;
     }
 
@@ -120,12 +125,6 @@ const DirectMessages: Component = () => {
     if (isDone) {
       setupPageState(contact as string);
     }
-  }));
-
-  createEffect(on(() => dms?.lastConversationContact?.pubkey, (v, p) => {
-    if (!v || v === p) return;
-
-    navigate(`/dms/${v}`);
   }));
 
   createEffect(on(() => dms?.dmCount, (v, p) => {

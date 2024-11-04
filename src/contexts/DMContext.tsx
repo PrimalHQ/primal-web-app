@@ -55,7 +55,7 @@ import { useAppContext } from "./AppContext";
 import { useSettingsContext } from "./SettingsContext";
 import { calculateDMContactsOffset, calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
-import { logWarning } from "../lib/logger";
+import { logError, logWarning } from "../lib/logger";
 
 
 export type DMCount = {
@@ -87,7 +87,8 @@ export type DMStore = {
   actions: {
     setDmContacts: (contacts: DMContact[], relation: UserRelation) => void,
     setDmRelation: (relation: UserRelation) => Promise<void>,
-    getContacts: (relation: UserRelation) => void,
+    setDmRelation2: (relation: UserRelation) => void,
+    getContacts: (relation: UserRelation) => Promise<void>,
     getContactsNextPage: (relation: UserRelation) => void,
     refreshContacts: (relation: UserRelation) => void,
     selectContact: (pubkey: string) => void,
@@ -192,6 +193,17 @@ const setDmRelation = async (relation: UserRelation) => {
 
 
   return await getContacts(relation);
+}
+
+const setDmRelation2 = (relation: UserRelation) => {
+  if (!account?.publicKey) return;
+
+  updateStore('contactsPaging', () => ({ ...emptyPaging() }))
+  updateStore('lastConversationRelation', () => relation);
+  saveLastDMRelation(account.publicKey, relation);
+
+
+  // getContacts(relation);
 }
 
 const refreshContacts = async (relation: UserRelation) => {
@@ -583,7 +595,7 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
 
     return success;
   } catch (reason) {
-    console.error('Failed to send message: ', reason);
+    logError('Failed to send message: ', reason);
     return false;
   }
 };
@@ -717,6 +729,7 @@ createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
     actions: {
       setDmContacts,
       setDmRelation,
+      setDmRelation2,
       getContacts,
       getContactsNextPage,
       refreshContacts,
