@@ -498,19 +498,13 @@ const Profile: Component = () => {
     }
   });
 
-  // onMount(() => {
-  //   lightbox.init();
-  // });
+  useBeforeLeave((e) => {
+    if (e.to.toString().startsWith(e.from.pathname)) return;
 
-  useBeforeLeave(() => profile?.actions.clearProfile());
-
-  // onCleanup(() => {
-  //   // profile?.actions.resetProfile();
-  // });
-
-  useBeforeLeave(() => {
     setIsProfileLoaded(() => false);
+    profile?.actions.clearProfile();
     profile?.actions.resetProfile();
+    console.log('LEAVE: ', e.from, e.to, e.options);
   })
 
   const [isBannerLoaded, setIsBannerLoaded] = createSignal(false);
