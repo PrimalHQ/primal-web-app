@@ -325,7 +325,7 @@
   // animation-delay: var(--profile-card-animation-delay);
 
   .columnLeft {
-    width: 50%;
+    width: 60%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -333,7 +333,7 @@
     gap: 8px;
   }
   .columnRight {
-    width: 50%;
+    width: 40%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -352,19 +352,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  max-width: 60%;
 
   .text {
     color: var(--text-primary);
     font-size: 20px;
     line-height: 23px;
     font-weight: 700;
-    text-overflow: ellipsis;
+
     overflow: hidden;
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
-    vertical-align: baseline;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 
   .followsBadge {
