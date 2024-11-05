@@ -768,7 +768,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
   return paging.elements.reduce<PrimalNote[]>(
     (acc, id) => {
-      const note = notes.find(n => n.id === id);
+      let note = notes.find(n => [n.id, n.repost?.note.id].includes(id));
 
       return note ? [ ...acc, { ...note } ] : acc;
     },
