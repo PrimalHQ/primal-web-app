@@ -56,6 +56,7 @@ import { useSettingsContext } from "./SettingsContext";
 import { calculateDMContactsOffset, calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
 import { logError, logWarning } from "../lib/logger";
+import { fetchUserProfile } from "../handleNotes";
 
 
 export type DMCount = {
@@ -275,7 +276,21 @@ const selectContact = async (pubkey: string) => {
   const relation = store.lastConversationRelation;
   let contact = store.dmContacts[relation].find(c => c.pubkey === pubkey);
 
-  if (!contact) return;
+  if (!contact) {
+    let user = await fetchUserProfile(account?.publicKey, pubkey, `dm_contact_info_${APP_ID}`);
+
+    addContact(user);
+
+    contact = {
+      pubkey: user.pubkey,
+      user,
+      dmInfo: {
+        cnt: 0,
+        latest_at: 0,
+        latest_event_id: '',
+      }
+    }
+  }
 
   await resetContactMessages(contact.pubkey, relation);
 
