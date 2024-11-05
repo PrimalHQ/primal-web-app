@@ -124,7 +124,7 @@ const Profile: Component = () => {
 
       setHex(() => hex);
 
-      setProfile(hex);
+      profile?.profileKey !== hex && setProfile(hex);
       return;
     }
 
@@ -136,7 +136,7 @@ const Profile: Component = () => {
 
     setHex(() => hex);
 
-    setProfile(hex);
+    profile?.profileKey !== hex && setProfile(hex);
 
     return;
   }
@@ -151,7 +151,6 @@ const Profile: Component = () => {
   }));
 
   const setProfile = (hex: string | undefined) => {
-
     profile?.actions.setProfileKey(hex);
 
     profile?.actions.clearArticles();
@@ -504,7 +503,6 @@ const Profile: Component = () => {
     setIsProfileLoaded(() => false);
     profile?.actions.clearProfile();
     profile?.actions.resetProfile();
-    console.log('LEAVE: ', e.from, e.to, e.options);
   })
 
   const [isBannerLoaded, setIsBannerLoaded] = createSignal(false);
