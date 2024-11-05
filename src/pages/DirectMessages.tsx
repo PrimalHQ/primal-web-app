@@ -22,6 +22,8 @@ import Search from "../components/Search/Search";
 import DirectMessageConversation from "../components/DirectMessages/DirectMessageConversation";
 import { TextField } from "@kobalte/core/text-field";
 import DirectMessagesComposer from "../components/DirectMessages/DirectMessagesComposer";
+import { Pagination } from "@kobalte/core/*";
+import Paginator from "../components/Paginator/Paginator";
 
 const DirectMessages: Component = () => {
 
@@ -206,6 +208,10 @@ const DirectMessages: Component = () => {
                         />
                       )}
                     </For>
+                    <Paginator
+                      isSmall={true}
+                      loadNextPage={() => dms?.actions.getContactsNextPage(relation as UserRelation)}
+                    />
                   </Tabs.Content>
                 )}
               </For>

@@ -43,7 +43,7 @@ import {
 import { APP_ID } from "../App";
 import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
-import { convertToUser, emptyUser } from "../stores/profile";
+import { convertToUser, emptyUser, userName } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "../lib/nTools";
@@ -156,19 +156,20 @@ const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { r
 
   let sorted = [];
 
-  // if (replace) {
+  if (replace) {
     sorted = [ ...contacts ].
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
-  // }
-  // else {
-  //   const existingContacts = store.dmContacts[relation];
-  //   const existingPubkeys = existingContacts.map(c => c.pubkey);
+  }
+  else {
+    const existingContacts = store.dmContacts[relation];
+    const existingPubkeys = existingContacts.map(c => c.pubkey);
 
-  //   const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
+    const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
+    // const filtered = [...contacts];
 
-  //   sorted = [ ...existingContacts, ...filtered].
-  //     sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
-  // }
+    sorted = [ ...existingContacts, ...filtered].
+      sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+  }
 
   updateStore('dmContacts', relation, () => [ ...sorted ]);
 
@@ -216,7 +217,7 @@ const refreshContacts = async (relation: UserRelation) => {
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
-      // limit: existing.length,
+      limit: existing.length,
     }
   );
 
@@ -226,23 +227,23 @@ const refreshContacts = async (relation: UserRelation) => {
 
 const getContacts = async (relation: UserRelation) => {
 
-  // const existing = store.dmContacts[relation] || [];
+  const existing = store.dmContacts[relation] || [];
 
-  // const since = store.contactsPaging.since || 0;
-  // const offset = calculateDMContactsOffset(existing, store.conversationPaging)
+  const since = store.contactsPaging.since || 0;
+  const offset = calculateDMContactsOffset(existing, store.conversationPaging)
 
   const { dmContacts, paging } = await fetchDMContacts(
     account?.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
-      // limit: 100,
-      // since,
-      // offset,
+      limit: 20,
+      since,
+      offset,
     }
   );
 
-  updateStore('conversationPaging', () => ({ ...paging }));
+  updateStore('contactsPaging', () => ({ ...paging }));
   setDmContacts(dmContacts, relation, { replace: true });
 }
 
@@ -253,16 +254,22 @@ const getContactsNextPage = async (relation: UserRelation) => {
   const since = store.contactsPaging.since || 0;
   const offset = 1//calculateDMContactsOffset(existing, store.conversationPaging)
 
+  console.log('SINCE: ', since)
+
+  if (since === 0) return;
+
   const { dmContacts, paging } = await fetchDMContacts(
     account?.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
-      // limit: 3,
-      // since,
-      // offset,
+      limit: 20,
+      since,
+      offset,
     }
   );
+
+  dmContacts.forEach(c => console.log('CONTACT: ', userName(c.user)))
 
   updateStore('contactsPaging', () => ({ ...paging }));
   setDmContacts(dmContacts, relation);
