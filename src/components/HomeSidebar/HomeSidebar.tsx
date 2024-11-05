@@ -73,7 +73,11 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   onMount(() => {
     if (account?.isKeyLookupDone && home?.sidebarNotes.length === 0) {
-      const stored = readHomeSidebarSelection(account.publicKey) || sidebarOptions[0];
+      let stored = readHomeSidebarSelection(account.publicKey) || { ...sidebarOptions[0] };
+
+      if (!stored.id) {
+        stored = { ...sidebarOptions[0] };
+      }
 
       home?.actions.updateSidebarQuery(stored);
       home?.actions.doSidebarSearch(stored.value || '');
