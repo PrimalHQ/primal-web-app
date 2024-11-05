@@ -92,7 +92,7 @@ export type DMStore = {
     getContacts: (relation: UserRelation) => Promise<void>,
     getContactsNextPage: (relation: UserRelation) => void,
     refreshContacts: (relation: UserRelation) => void,
-    selectContact: (pubkey: string) => void,
+    selectContact: (pubkey: string) => Promise<void>,
     addContact: (user: PrimalUser) => void,
     getConversation: (contact: string | null, until: number) => void,
     getConversationNextPage: () => void,
@@ -154,21 +154,26 @@ export const DMProvider = (props: { children: ContextChildren }) => {
 const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { replace: boolean }) => {
   const replace = opts?.replace || false;
 
+  const existingContacts = store.dmContacts[relation];
+  const existingPubkeys = existingContacts.map(c => c.pubkey);
+
   let sorted = [];
 
   if (replace) {
     sorted = [ ...contacts ].
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+
+    const extra = existingContacts.filter(e => !contacts.map(c => c.pubkey).includes(e.pubkey));
+
+    sorted = [ ...extra, ...sorted];
   }
   else {
-    const existingContacts = store.dmContacts[relation];
-    const existingPubkeys = existingContacts.map(c => c.pubkey);
-
     const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
-    // const filtered = [...contacts];
 
-    sorted = [ ...existingContacts, ...filtered].
+    sorted = [...filtered].
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
+
+    sorted = [...existingContacts, ...sorted]
   }
 
   updateStore('dmContacts', relation, () => [ ...sorted ]);
@@ -244,17 +249,15 @@ const getContacts = async (relation: UserRelation) => {
   );
 
   updateStore('contactsPaging', () => ({ ...paging }));
-  setDmContacts(dmContacts, relation, { replace: true });
+  return setDmContacts(dmContacts, relation, { replace: true });
 }
 
 const getContactsNextPage = async (relation: UserRelation) => {
 
-  const existing = store.dmContacts[relation] || [];
+  // const existing = store.dmContacts[relation] || [];
 
   const since = store.contactsPaging.since || 0;
   const offset = 1//calculateDMContactsOffset(existing, store.conversationPaging)
-
-  console.log('SINCE: ', since)
 
   if (since === 0) return;
 
@@ -268,8 +271,6 @@ const getContactsNextPage = async (relation: UserRelation) => {
       offset,
     }
   );
-
-  dmContacts.forEach(c => console.log('CONTACT: ', userName(c.user)))
 
   updateStore('contactsPaging', () => ({ ...paging }));
   setDmContacts(dmContacts, relation);

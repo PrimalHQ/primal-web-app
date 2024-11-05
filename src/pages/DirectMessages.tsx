@@ -16,7 +16,7 @@ import PageTitle from "../components/PageTitle/PageTitle";
 import { useIntl } from "@cookbook/solid-intl";
 import PageCaption from "../components/PageCaption/PageCaption";
 import { loadLastDMConversations, loadLastDMRelation } from "../lib/localStore";
-import { UserRelation } from "../types/primal";
+import { PrimalUser, UserRelation } from "../types/primal";
 import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
 import DirectMessageConversation from "../components/DirectMessages/DirectMessageConversation";
@@ -87,9 +87,8 @@ const DirectMessages: Component = () => {
   };
 
   const setupContact = async (contact: string) => {
+    await dms?.actions.selectContact(contact);
     await updateRelationOfContact(contact);
-
-    dms?.actions.selectContact(contact);
   }
 
   const selectContact = (pubkey: string) => {
@@ -157,7 +156,7 @@ const DirectMessages: Component = () => {
           onInputConfirm={() => {}}
           noLinks={true}
           hideDefault={true}
-          onUserSelect={dms?.actions.addContact}
+          onUserSelect={(user: PrimalUser) => navigate(`/dms/${user.pubkey}`)}
         />
       </Wormhole>
 
