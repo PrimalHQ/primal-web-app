@@ -5,6 +5,7 @@ import Search from '../components/Search/Search';
 
 import appstoreImg from '../assets/images/appstore_download.svg';
 import playstoreImg from '../assets/images/playstore_download.svg';
+import primalQR from '../assets/images/primal_qr.png';
 
 import gitHubLight from '../assets/icons/github_light.svg';
 import gitHubDark from '../assets/icons/github.svg';
@@ -117,11 +118,19 @@ const Downloads: Component = () => {
 
       <div class={styles.downloadsContent}>
 
-        <div class={styles.promoHolder}>
-          <img src={primalDownloads} />
+        <div class={styles.promoVideo}>
+          <video
+            src='https://m.primal.net/HcyV.mp4'
+            controls={false}
+            muted={true}
+            loop={true}
+            playsinline={true}
+            autoplay={true}
+          />
         </div>
 
-        <div class={styles.linkHolder}>
+        <div class={styles.appInfo}>
+
           <div class={styles.appStore}>
             <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionIOSTitle)}</div>
 
@@ -144,6 +153,14 @@ const Downloads: Component = () => {
               <img src={appstoreImg} />
             </a>
           </div>
+
+          <div class={styles.qrCode}>
+            <img src={primalQR} width={180} />
+            <div class={styles.qrCaption}>
+            {intl.formatMessage(t.callToActionQRTitle)}
+            </div>
+          </div>
+
           <div class={styles.playStore}>
             <div class={styles.desktopCTA}>{intl.formatMessage(t.callToActionAndroidTitle)}</div>
 

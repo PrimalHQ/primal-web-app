@@ -492,13 +492,18 @@ export const downloads = {
   },
   callToActionAndroidTitle: {
     id: 'downloads.ctaAndroidTitle',
-    defaultMessage: 'Primal Android Beta',
+    defaultMessage: 'Primal Android',
     description: 'Title for the Android downloads\' page call-to-action',
   },
   callToActionAndroidDescription: {
     id: 'downloads.ctaAndroidDescription',
     defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
     description: 'Description for the Android downloads\' page call-to-action',
+  },
+  callToActionQRTitle: {
+    id: 'downloads.ctaQRTitle',
+    defaultMessage: 'Scan to install app',
+    description: 'Title for the QR code downloads\' page call-to-action',
   },
   appStoreCaption: {
     id: 'downloads.appStoreCaption',
