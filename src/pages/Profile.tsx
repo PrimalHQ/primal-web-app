@@ -67,6 +67,7 @@ import ArticlePreviewSidebarSkeleton from '../components/Skeleton/ArticlePreview
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import { getKnownProfiles } from '../Router';
+import { scrollWindowTo } from '../lib/scroll';
 
 const Profile: Component = () => {
 
@@ -497,12 +498,18 @@ const Profile: Component = () => {
     }
   });
 
+  // createEffect(on(() => profile?.profileKey, (v, p) => {
+  //   if (!v || v === p) return;
+
+  //   setIsProfileLoaded(false);
+  // }))
+
   useBeforeLeave((e) => {
     if (e.to.toString().startsWith(e.from.pathname)) return;
 
-    setIsProfileLoaded(() => false);
-    profile?.actions.clearProfile();
-    profile?.actions.resetProfile();
+    // setIsProfileLoaded(() => false);
+    // profile?.actions.clearProfile();
+    // profile?.actions.resetProfile();
   })
 
   const [isBannerLoaded, setIsBannerLoaded] = createSignal(false);
@@ -517,6 +524,7 @@ const Profile: Component = () => {
       profile.profileKey === getHex() &&
       (profile.userProfile ? isBannerLoaded() : true)
     ) {
+      console.log('IS PROFILE LOADED')
       setIsProfileLoaded(() => true);
     }
   })
@@ -548,8 +556,6 @@ const Profile: Component = () => {
       app?.actions.resetCustomZap();
     },
   });
-
-
 
   createEffect(() => {
     if (profile?.userProfile) {

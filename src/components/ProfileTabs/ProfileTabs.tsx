@@ -2,7 +2,7 @@ import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core/tabs";
 import { A, useLocation } from "@solidjs/router";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
-import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
+import { Component, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, unwrap } from "solid-js/store";
 import { imageOrVideoRegex, imageOrVideoRegexG, imageRegex, imageRegexG, Kind, profileContactListPage } from "../../constants";
 import { useAccountContext } from "../../contexts/AccountContext";
@@ -32,6 +32,7 @@ import ArticlePreviewSkeleton from "../Skeleton/ArticlePreviewSkeleton";
 import { TransitionGroup } from "solid-transition-group";
 import ZapSkeleton from "../Skeleton/ZapSkeleton";
 import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton";
+import { scrollWindowTo } from "../../lib/scroll";
 
 
 const ProfileTabs: Component<{
@@ -148,14 +149,21 @@ const ProfileTabs: Component<{
   createEffect(on(() => props.profileKey, (v,p) => {
     if (!v || v === p) return;
     const value = hash();
+
+    profile?.actions.clearNotes();
+    profile?.actions.clearArticles();
+    profile?.actions.clearGallery();
+    profile?.actions.clearZaps();
+    profile?.actions.clearReplies();
     updateTabContent(value);
   }))
 
   const onChangeValue = (value: string) => {
-
     setCurrentTab(() => value);
 
     window.location.hash = value;
+
+    profile?.actions.resetScroll();
 
     updateTabContent(value);
   };
@@ -213,6 +221,52 @@ const ProfileTabs: Component<{
 
     return undefined;
   }
+
+  createEffect(on(currentTab, (tab, prev) => {
+    if (tab === prev) {
+      return;
+    }
+
+    if (tab === 'notes' && !profile?.isFetching) {
+      scrollWindowTo(profile?.scrollTop.notes);
+      return;
+    }
+
+    if (tab === 'reads' && !profile?.isFetching) {
+      scrollWindowTo(profile?.scrollTop.reads);
+      return;
+    }
+
+    if (tab === 'replies' && !profile?.isFetchingReplies) {
+      scrollWindowTo(profile?.scrollTop.replies);
+      return;
+    }
+
+    if (tab === 'media' && !profile?.isFetchingGallery) {
+      scrollWindowTo(profile?.scrollTop.media);
+      return;
+    }
+
+    if (tab === 'zaps' && !profile?.isFetchingZaps) {
+      scrollWindowTo(profile?.scrollTop.zaps);
+      return;
+    }
+  }));
+
+  const onScroll = () => {
+    const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+    const tab = currentTab() as 'reads' | 'notes' | 'media' | 'replies' | 'zaps';
+
+    profile?.actions.updateScrollTop(scrollTop, tab);
+  }
+
+  onMount(() => {
+    window.addEventListener('scroll', onScroll);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('scroll', onScroll);
+  });
 
   return (
       <Tabs value={hash()} onChange={onChangeValue} defaultValue={hash()}>

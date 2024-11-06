@@ -8,6 +8,7 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   useContext
 } from "solid-js";
@@ -124,6 +125,13 @@ export type ProfileContextStore = {
     stats: Record<string, UserStats>,
   },
   parsedAbout: JSXElement | undefined,
+  scrollTop: {
+    reads: number,
+    notes: number,
+    replies: number,
+    zaps: number,
+    media: number,
+  },
   actions: {
     clearNotes: () => void,
     clearReplies: () => void,
@@ -147,6 +155,8 @@ export type ProfileContextStore = {
     getProfileMegaFeedNextPage: (pubkey: string | undefined, tab: string) => void,
     addProfileToHistory: (user: PrimalUser) => void,
     clearProfile: () => void,
+    updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
+    resetScroll: () => void,
   }
 }
 
@@ -263,6 +273,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       reads: { ...emptyPaging() },
       gallery: { ...emptyPaging() },
       replies: { ...emptyPaging() },
+    },
+    scrollTop: {
+      reads: 0,
+      notes: 0,
+      replies: 0,
+      zaps: 0,
+      media: 0,
     },
   };
 
@@ -569,6 +586,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   const clearGallery = () => {
     updateStore('gallery', () => []);
     updateStore('lastGallery', () => undefined);
+
+    //resetScroll();
   };
 
   const clearNotes = () => {
@@ -590,23 +609,31 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       notes: [],
       noteActions: {},
     }));
+
+    //resetScroll();
   };
 
   const clearArticles = () => {
     updateStore('articles', () => []);
     updateStore('lastArticle', () => undefined);
+
+    //resetScroll();
   };
 
   const clearReplies = () => {
     updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('replies', () => []);
     updateStore('lastReply', () => undefined);
+
+    //resetScroll();
   };
 
   const clearZaps = () => {
     updateStore('zaps', () => []);
     updateStore('zappers', reconcile({}));
     updateStore('lastZap', () => undefined);
+
+    //resetScroll();
   };
 
   const clearContacts = () => {
@@ -755,7 +782,14 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     commonFollowers = [];
   };
 
+  createEffect(on(() => store.profileKey, (v, p) => {
+    if (v && v !== p) {
+      updateStore('isProfileFetched', () => false);
+    }
+  }))
+
   const setProfileKey = async (profileKey?: string) => {
+    if (profileKey === store.profileKey) return;
     updateStore('profileKey', () => profileKey);
 
     if (profileKey) {
@@ -977,6 +1011,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     resetProfile();
   }
 
+  const resetScroll = () => {
+    updateStore('scrollTop', () => ({
+      reads: 0,
+      notes: 0,
+      replies: 0,
+      zaps: 0,
+      media: 0,
+    }));
+    window.scrollTo({ top: 0 });
+  }
+
+  const updateScrollTop = (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => {
+    updateStore('scrollTop', tab, () => top);
+  };
+
 // STORES ---------------------------------------
 
 
@@ -1003,6 +1052,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearFilterReason,
       addProfileToHistory,
       clearProfile,
+      updateScrollTop,
+      resetScroll,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,
