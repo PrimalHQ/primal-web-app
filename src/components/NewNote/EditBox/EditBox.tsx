@@ -956,6 +956,7 @@ const EditBox: Component<{
         return;
       }
 
+      // @ts-ignore
       const { pubkey, kind, identifier } = addr.data;
 
       const subId = `naddr_${id}_${APP_ID}`;
@@ -1214,6 +1215,7 @@ const EditBox: Component<{
     const parsed = parsedMessage().replace(noteRegex, (url) => {
       const [_, id] = url.split(':');
 
+
       if (!id || id !== noteId) {
         return url;
       }
@@ -1302,8 +1304,6 @@ const EditBox: Component<{
       const p = await parseForReferece(msg);
       setParsedMessage(p);
     }, 500);
-
-
   })
 
   createEffect(() => {
@@ -1559,7 +1559,7 @@ const EditBox: Component<{
                 resetUpload();
               }}
               onSuccsess={(url:string) => {
-                insertAtCursor(`${url} `);
+                insertAtCursor(` ${url} `);
                 resetUpload();
               }}
             />
