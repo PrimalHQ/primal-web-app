@@ -1234,18 +1234,16 @@ const EditBox: Component<{
           return link.outerHTML || url;
         }
 
-
         const link = note ?
           <div>
             <TranslatorProvider>
-              <Router>
                 <EmbeddedNote
                   note={note}
                   mentionedUsers={note.mentionedUsers || {}}
                   includeEmbeds={true}
                   hideFooter={true}
+                  noLinks="links"
                 />
-              </Router>
             </TranslatorProvider>
           </div> :
           <span class="linkish">{url}</span>;

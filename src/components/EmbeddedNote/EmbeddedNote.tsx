@@ -31,6 +31,7 @@ const EmbeddedNote: Component<{
   hideFooter?: boolean,
   embedLevel?: number,
   rootNote?: PrimalNote,
+  noLinks?: 'text' | 'links',
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -62,6 +63,7 @@ const EmbeddedNote: Component<{
     quoteCount: 0,
   });
 
+  // @ts-ignore
   const noteId = () => nip19.noteEncode(props.note?.post.id);
 
   const navToThread = () => {
@@ -232,6 +234,7 @@ const EmbeddedNote: Component<{
           rootNote={props.rootNote}
           width={noteContent?.getBoundingClientRect().width}
           margins={2}
+          noLinks={props.noLinks}
         />
       </div>
       <div class={styles.footer}>

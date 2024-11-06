@@ -923,8 +923,11 @@ const ParsedNote: Component<{
         const rn = rootNote();
         const decoded = decodeIdentifier(id);
         const reEncoded = nip19.naddrEncode({
+          // @ts-ignore
           kind: decoded.data.kind,
+          // @ts-ignore
           pubkey: decoded.data.pubkey,
+          // @ts-ignore
           identifier: decoded.data.identifier || '',
         });
         const mentionedArticles = rn.mentionedArticles;
@@ -968,7 +971,6 @@ const ParsedNote: Component<{
         if (isNoteTooLong()) return;
 
         let [_, id] = token.split(':');
-
 
         if (!id) {
           return <>{token}</>;
@@ -1024,8 +1026,11 @@ const ParsedNote: Component<{
             let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
               const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
                 kind: eventId.kind,
+                // @ts-ignore
                 pubkey: eventId.pubkey,
+                // @ts-ignore
                 identifier: eventId.identifier || '',
               });
               f = mentionedArticles && mentionedArticles[reEncoded];
@@ -1036,7 +1041,7 @@ const ParsedNote: Component<{
             kind = f?.post.kind || f?.msg?.kind || f.event.kind || Kind.Text;
           }
 
-          if ([Kind.Text].includes(kind)) {
+          if ([Kind.Text].includes(kind || -1)) {
             if (!props.noLinks) {
               const ment = mentionedNotes && mentionedNotes[hex];
 
@@ -1067,12 +1072,15 @@ const ParsedNote: Component<{
             }
           }
 
-          if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
+          if ([Kind.LongForm, Kind.LongFormShell].includes(kind || -1)) {
 
             if (!props.noLinks) {
               const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
                 kind: eventId.kind,
+                // @ts-ignore
                 pubkey: eventId.pubkey,
+                // @ts-ignore
                 identifier: eventId.identifier || '',
               });
               const ment = mentionedArticles && mentionedArticles[reEncoded];
@@ -1264,7 +1272,7 @@ const ParsedNote: Component<{
         ) {
 
           const [kind, pubkey, identifier] = tag[1].split(':');
-          const naddr = nip19.naddrEncode({ kind, pubkey, identifier });
+          const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
           const noteId = `nostr:${naddr}`;
           const path = `/e/${naddr}`;
 
