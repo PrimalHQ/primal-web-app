@@ -174,7 +174,7 @@
 }
 
 .promoVideo {
-  width: 600px;
+  // width: 600px;
   height: 337px;
   display: flex;
   justify-content: center;
@@ -184,7 +184,7 @@
   border-radius: 12px;
   overflow: hidden;
 
-  background: var(--background-header-input);
+  background: #1A1A1A;
   video {
     width: 100%;
     height: 100%;

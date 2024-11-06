@@ -10,7 +10,7 @@ import primalQR from '../assets/images/primal_qr.png';
 import gitHubLight from '../assets/icons/github_light.svg';
 import gitHubDark from '../assets/icons/github.svg';
 
-import primalDownloads from '../assets/images/primal_downloads.png';
+import primalDownloads from '../assets/images/video_placeholder.png';
 
 import styles from './Downloads.module.scss';
 import { downloads as t } from '../translations';
@@ -119,14 +119,15 @@ const Downloads: Component = () => {
       <div class={styles.downloadsContent}>
 
         <div class={styles.promoVideo}>
-          <video
+          <img src={primalDownloads} />
+          {/* <video
             src='https://m.primal.net/HcyV.mp4'
             controls={false}
             muted={true}
             loop={true}
             playsinline={true}
             autoplay={true}
-          />
+          /> */}
         </div>
 
         <div class={styles.appInfo}>
