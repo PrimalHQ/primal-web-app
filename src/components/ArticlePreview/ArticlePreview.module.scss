@@ -341,7 +341,7 @@
   }
 
   .image {
-    width: 175px;
+    width: 200px;
     height: 148px;
     border: 1px solid var(--devider);
     border-radius: 8px 0 0 8px;
@@ -388,13 +388,10 @@
           font-weight: 700;
           line-height: 14px;
 
-          max-width: 218px;
-
+          max-width: 200px;
+          text-overflow: ellipsis;
           overflow: hidden;
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          line-clamp: 1;
-          -webkit-box-orient: vertical;
+          white-space: nowrap;
         }
 
         .nip05 {
@@ -403,13 +400,10 @@
           font-weight: 400;
           line-height: 14px;
 
-          max-width: 218px;
-
+          // max-width: 218px;
+          text-overflow: ellipsis;
           overflow: hidden;
-          display: -webkit-box;
-          -webkit-line-clamp: 1;
-          line-clamp: 1;
-          -webkit-box-orient: vertical;
+          white-space: nowrap;
         }
       }
 
@@ -418,6 +412,11 @@
         font-size: 14px;
         font-weight: 400;
         line-height: 14px;
+
+        max-width: 90px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
 
         &::before {
           content: '• ';
