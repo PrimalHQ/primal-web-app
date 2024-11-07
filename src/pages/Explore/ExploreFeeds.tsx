@@ -89,6 +89,7 @@ const ExploreFeeds: Component = () => {
             identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
             picture: dvmData.picture,
             image: dvmData.image,
+            primal_spec: dvmData.primal_spec,
           };
 
           setStore('dvm', () => ({ ...dvm }));
@@ -181,11 +182,11 @@ const ExploreFeeds: Component = () => {
 
     if (!dvm) return;
 
-    const spec = JSON.stringify({
-      dvm_id: dvm.id,
-      dvm_pubkey: dvm.pubkey,
-      kind: store.metadata?.kind || 'notes',
-    });
+    const spec = store.dvm?.primal_spec ?? JSON.stringify({
+        dvm_id: dvm.id,
+        dvm_pubkey: dvm.pubkey,
+        kind: store.metadata?.kind || 'notes',
+      });
 
     const feed: PrimalArticleFeed = {
       name: dvm.name,

@@ -80,6 +80,7 @@ const FeedMarketPlace: Component<{
             picture: dvmData.picture,
             image: dvmData.image,
             coordinate: `${Kind.DVM}:${content.pubkey}:${identifier}`,
+            primal_spec: dvmData.primal_spec,
           };
 
           updateStore('dvms', store.dvms.length, () => ({ ...dvm }));

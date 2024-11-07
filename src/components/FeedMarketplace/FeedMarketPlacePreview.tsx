@@ -42,7 +42,7 @@ const FeedMarketPlacePreview: Component<{
 
     updateStore('isFetching', () => true);
 
-    const spec = JSON.stringify({
+    const spec = props.dvm?.primal_spec ?? JSON.stringify({
       dvm_id: props.dvm?.identifier,
       dvm_pubkey: props.dvm?.pubkey,
       kind: props.type,

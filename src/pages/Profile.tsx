@@ -524,7 +524,6 @@ const Profile: Component = () => {
       profile.profileKey === getHex() &&
       (profile.userProfile ? isBannerLoaded() : true)
     ) {
-      console.log('IS PROFILE LOADED')
       setIsProfileLoaded(() => true);
     }
   })

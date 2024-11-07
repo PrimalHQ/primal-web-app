@@ -584,6 +584,7 @@ export type PrimalDVM = {
   picture?: string,
   image?: string,
   user?: PrimalUser,
+  primal_spec?: string,
   coordinate?: string,
 }
 export type DVMStats = { likes: number, satszapped: number };
