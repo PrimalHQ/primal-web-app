@@ -2,11 +2,9 @@ import { useIntl } from '@cookbook/solid-intl';
 import { useLocation } from '@solidjs/router';
 import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { useMessagesContext } from '../../contexts/MessagesContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
-import FloatingNewPostButton from '../FloatingNewPostButton/FloatingNewPostButton';
 
 import styles from './NavMenu.module.scss';
 import { hookForDev } from '../../lib/devTools';

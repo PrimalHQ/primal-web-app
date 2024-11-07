@@ -147,7 +147,9 @@ export const DMProvider = (props: { children: ContextChildren }) => {
 
   let unsubFromDMCount: (() => void) | undefined;
 
-  const subidMsgCount = `dm_count_${APP_ID}`;
+  let subIdMsgCount = '';
+
+  const subidMsgCount = () => `dm_count_${Math.random() * 35_000}_${APP_ID}`;
 
 // ACTIONS --------------------------------------
 
@@ -712,7 +714,9 @@ const handleNoteRefEose = () => {
 const subToMessagesStats = () => {
   if (!account?.publicKey || unsubFromDMCount !== undefined) return;
 
-  unsubFromDMCount = subsTo(subidMsgCount, {
+  subIdMsgCount = subidMsgCount();
+
+  unsubFromDMCount = subsTo(subIdMsgCount, {
     onEvent: (_, content) => {
       if (content?.kind === Kind.MessageStats) {
         const count = parseInt(content.cnt);
@@ -724,7 +728,7 @@ const subToMessagesStats = () => {
     },
   });
 
-  subscribeToMessagesStats(account.publicKey, subidMsgCount);
+  subscribeToMessagesStats(account.publicKey, subIdMsgCount);
 }
 
 // EFFECTS --------------------------------------
@@ -732,8 +736,8 @@ const subToMessagesStats = () => {
 createEffect(() => {
   if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
     subToMessagesStats();
-  } else {
-    unsubscribeToMessagesStats(subidMsgCount);
+  } else if (app?.isInactive) {
+    unsubscribeToMessagesStats(subIdMsgCount);
     unsubFromDMCount = undefined;
   }
 });

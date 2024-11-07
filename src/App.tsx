@@ -11,7 +11,6 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { TranslatorProvider } from './contexts/TranslatorContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { SearchProvider } from './contexts/SearchContext';
-import { MessagesProvider } from './contexts/MessagesContext';
 import { MediaProvider } from './contexts/MediaContext';
 import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
@@ -42,21 +41,19 @@ const App: Component = () => {
                 <AdvancedSearchProvider>
                   <SettingsProvider>
                     <ProfileProvider>
-                      {/* <MessagesProvider> */}
-                        <DMProvider>
-                          <NotificationsProvider>
-                            <ReadsProvider>
-                              <HomeProvider>
-                                <ExploreProvider>
-                                  <ThreadProvider>
-                                    <AppRouter />
-                                  </ThreadProvider>
-                                </ExploreProvider>
-                              </HomeProvider>
-                            </ReadsProvider>
-                          </NotificationsProvider>
-                        </DMProvider>
-                      {/* </MessagesProvider> */}
+                      <DMProvider>
+                        <NotificationsProvider>
+                          <ReadsProvider>
+                            <HomeProvider>
+                              <ExploreProvider>
+                                <ThreadProvider>
+                                  <AppRouter />
+                                </ThreadProvider>
+                              </ExploreProvider>
+                            </HomeProvider>
+                          </ReadsProvider>
+                        </NotificationsProvider>
+                      </DMProvider>
                     </ProfileProvider>
                   </SettingsProvider>
                 </AdvancedSearchProvider>
