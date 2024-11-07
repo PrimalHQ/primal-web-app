@@ -27,6 +27,7 @@ const FeedMarketPlacePreview: Component<{
   metadata?: DVMMetadata,
   commonFollows?: PrimalUser[],
   type?: 'notes' | 'reads',
+  isInDialog?: boolean,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -109,7 +110,7 @@ const FeedMarketPlacePreview: Component<{
 
   return (
     <div
-      class={styles.feedMarketplacePreview}
+      class={`${styles.feedMarketplacePreview} ${props.isInDialog ? styles.previewInDialog : ''}`}
     >
       <div class={styles.dvmCaption}>
         <FeedMarketItem

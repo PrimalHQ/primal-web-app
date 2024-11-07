@@ -45,6 +45,8 @@ const FeedMarketPlaceDialog: Component<{
         if (content.kind === Kind.DVM) {
           const dvmData = JSON.parse(content.content);
 
+          const identifier = (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1];
+
           const dvm: PrimalDVM = {
             id: content.id,
             name: dvmData.name || '',
@@ -53,7 +55,11 @@ const FeedMarketPlaceDialog: Component<{
             primalVerifiedRequired: dvmData.primalVerifiedRequired || false,
             pubkey: content.pubkey,
             supportedKinds: content.tags?.reduce<string[]>((acc, t: string[]) => t[0] === 'k' ? [...acc, t[1]] : acc, []) || [],
-            identifier: (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1],
+            identifier,
+            picture: dvmData.picture,
+            image: dvmData.image,
+            coordinate: `${Kind.DVM}:${content.pubkey}:${identifier}`,
+            primal_spec: dvmData.primal_spec,
           };
 
           updateStore('dvms', store.dvms.length, () => ({ ...dvm }));
@@ -151,6 +157,7 @@ const FeedMarketPlaceDialog: Component<{
               author={store.users[store.previewDvm?.pubkey || '']}
               stats={store.dvmStats[store.previewDvm?.id || '']}
               type={props.type || 'notes'}
+              isInDialog={true}
             />
           </div>
 
@@ -166,7 +173,7 @@ const FeedMarketPlaceDialog: Component<{
                 const dvm = store.previewDvm;
                 if (!props.onAddFeed || !dvm) return;
 
-                const spec = JSON.stringify({
+                const spec = dvm.primal_spec ?? JSON.stringify({
                   dvm_id: dvm.id,
                   dvm_pubkey: dvm.pubkey,
                   kind: props.type,

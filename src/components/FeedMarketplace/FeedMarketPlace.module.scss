@@ -11,7 +11,9 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 16px;
-  min-width: 600px;
+  width: 640px;
+
+  overflow-y: hidden;
 }
 
 .booths {
@@ -19,7 +21,7 @@
   grid-template-columns: 294px 294px;
   gap: 12px;
 
-  max-height: 512px;
+  max-height: 600px;
   overflow-y: scroll;
 }
 
@@ -240,7 +242,13 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 16px;
-  width: 100%;
+  width: 640px;
+
+  &.previewInDialog {
+    width: 640px;
+    height: 600px;
+    overflow-y: scroll;
+  }
 
   .dvmCaption {
     width: 100%;
@@ -258,6 +266,7 @@
   align-items: center;
   width: 100%;
   gap: 16px;
+  margin-top: 20px;
 }
 
 .paidToken {
