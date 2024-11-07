@@ -124,6 +124,8 @@ const FeedSorter: Component<{
     }
   });
 
+  const isLockedFeed = (feed: PrimalArticleFeed) => lockedFeeds.includes(feed.feedkind || '');
+
   return (
     <div id={props.id} class={styles.feedSorter} ref={sorter}>
       <Show when={props.feeds.length > 0}>
@@ -141,29 +143,33 @@ const FeedSorter: Component<{
                     <Show when={account?.hasPublicKey()}>
                       <div class={styles.controls}>
                         <div class={styles.manageControls}>
-                          <div class={styles.feedEnabled}>
-                            <CheckBox2
-                              onChange={(v: boolean) => {
-                                props.actions.enable && props.actions.enable(feed, v, props.feedType);
-                              }}
-                              checked={feed.enabled}
-                            />
-                          </div>
+                          <Show when={isLockedFeed(feed)}>
+                            <div class={styles.feedEnabled}>
+                              <CheckBox2
+                                onChange={(v: boolean) => {
+                                  props.actions.enable && props.actions.enable(feed, v, props.feedType);
+                                }}
+                                checked={feed.enabled}
+                              />
+                            </div>
+                          </Show>
 
-                          <button
-                            class={styles.mngButton}
-                            onClick={() => editFeed(feed)}
-                            disabled={lockedFeeds.includes(feed.feedkind || '')}
-                          >
-                            <div class={styles.editButton}></div>
-                          </button>
-                          <button
-                            class={styles.mngButton}
-                            onClick={() => removeFeed(feed)}
-                            disabled={lockedFeeds.includes(feed.feedkind || '')}
-                          >
-                            <div class={styles.deleteButton}></div>
-                          </button>
+                          <Show when={!isLockedFeed(feed)}>
+                            <button
+                              class={styles.mngButton}
+                              onClick={() => editFeed(feed)}
+                              disabled={isLockedFeed(feed)}
+                            >
+                              <div class={styles.editButton}></div>
+                            </button>
+                            <button
+                              class={styles.mngButton}
+                              onClick={() => removeFeed(feed)}
+                              disabled={isLockedFeed(feed)}
+                            >
+                              <div class={styles.deleteButton}></div>
+                            </button>
+                          </Show>
                           <button
                             class={styles.sortButton}
                             onClick={() => {}}
