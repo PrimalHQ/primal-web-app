@@ -591,24 +591,25 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const clearNotes = () => {
+    console.log('PROFILE CLEAR')
     updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
-    updateStore('sidebarNotes', () => ({
-      messages: [],
-      users: {},
-      postStats: {},
-      notes: [],
-      noteActions: {},
-    }));
-    updateStore('sidebarArticles', () => ({
-      messages: [],
-      users: {},
-      postStats: {},
-      notes: [],
-      noteActions: {},
-    }));
+    // updateStore('sidebarNotes', () => ({
+    //   messages: [],
+    //   users: {},
+    //   postStats: {},
+    //   notes: [],
+    //   noteActions: {},
+    // }));
+    // updateStore('sidebarArticles', () => ({
+    //   messages: [],
+    //   users: {},
+    //   postStats: {},
+    //   notes: [],
+    //   noteActions: {},
+    // }));
 
     //resetScroll();
   };
@@ -858,6 +859,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const resetProfile = () => {
+    console.log('PROFILE Reset')
     updateStore('sidebarNotes', () => ({ ...emptyPage }));
     updateStore('sidebarArticles', () => ({ ...emptyPage }));
     updateStore('isProfileFetched', () => false);
