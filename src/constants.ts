@@ -156,6 +156,7 @@ export enum Kind  {
   NoteTopicStat=10_000_160,
 
   WALLET_OPERATION = 10_000_300,
+  ExchangeRate = 10_000_305,
 
   LongFormShell = 10_030_023,
 }

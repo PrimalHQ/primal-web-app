@@ -591,7 +591,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   };
 
   const clearNotes = () => {
-    console.log('PROFILE CLEAR')
     updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
@@ -859,7 +858,6 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
   }
 
   const resetProfile = () => {
-    console.log('PROFILE Reset')
     updateStore('sidebarNotes', () => ({ ...emptyPage }));
     updateStore('sidebarArticles', () => ({ ...emptyPage }));
     updateStore('isProfileFetched', () => false);

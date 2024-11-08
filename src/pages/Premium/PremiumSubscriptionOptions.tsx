@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
+import { Component, createEffect, For, onMount, Show } from 'solid-js';
 import ButtonFlip from '../../components/Buttons/ButtonFlip';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
@@ -27,13 +27,12 @@ const PremiumSubscriptionOptions: Component<{
 }> = (props) => {
   const intl = useIntl();
 
-
   return (
     <div class={styles.subOptions}>
       <div class={styles.totalPrice}>
         <TransactionAmount
-          amountUSD={props.data.subscriptions[props.selectedOption.id].amounts.usd}
-          amountSats={Math.round(props.data.subscriptions[props.selectedOption.id].amounts.sats)}
+          amountUSD={props.data.subscriptions[props.selectedOption.id]?.amounts.usd || 0}
+          amountSats={Math.round(props.data.subscriptions[props.selectedOption.id]?.amounts.sats || 0)}
         />
       </div>
       <div class={styles.subOptionsSelections}>

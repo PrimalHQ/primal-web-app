@@ -25,25 +25,42 @@ export const satoshi: Currency = {
   symbol: '',
   name: 'Satoshi',
   shorthand: 'sats',
+};
+
+
+export const BTC: Currency = {
+  symbol: '',
+  name: 'Bitcoin',
+  shorthand: 'BTC',
 }
 
 const TransactionAmount: Component<{
   amountUSD?: number,
   amountSats?: number,
+  amountBTC?: number,
 }> = (props) => {
 
   const [reverseCurrencies, setReverseCurrencies] = createSignal(false);
 
+  const btcValue = () => {
+    if (props.amountBTC) return {
+      amount: props.amountBTC || 0,
+      currency: BTC,
+    }
+
+    return {
+      amount: props.amountSats || 0,
+      currency: satoshi,
+    };
+  }
+
   const primary = () => {
     return reverseCurrencies() ?
-      {
-        amount: props.amountSats || 0,
-        currency: satoshi,
-      } :
+      btcValue() :
       {
         amount: props.amountUSD || 0,
         currency: USD,
-      }
+      };
   };
 
   const secondary = () => {
@@ -52,10 +69,7 @@ const TransactionAmount: Component<{
         amount: props.amountUSD || 0,
         currency: USD,
       } :
-      {
-        amount: props.amountSats || 0,
-        currency: satoshi,
-      }
+      btcValue();
   };
 
   return (

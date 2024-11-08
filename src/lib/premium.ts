@@ -210,3 +210,21 @@ export const isPremiumNameAvailable = (name: string, socket: WebSocket | undefin
 
   })
 };
+
+
+export const fetchExchangeRate = (subId: string, socket: WebSocket, target_currency = 'USD') => {
+  const message = JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["membership_exchange_rate", { target_currency }]},
+  ]);
+
+  if (socket) {
+    const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+    socket.send(message);
+    socket.dispatchEvent(e);
+  } else {
+    throw('no_socket');
+  }
+};

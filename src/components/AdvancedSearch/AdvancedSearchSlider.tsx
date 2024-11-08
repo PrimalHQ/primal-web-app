@@ -28,7 +28,9 @@ const AdvancedSearchSlider: Component<{
   dark?: boolean,
   onSlide: (value: number[]) => void,
   onInput?: (value: string) => void,
+  hideInput?: boolean,
   id?: string,
+  step?: number,
 }> = (props) => {
 
   const min = () => props.min || 0;
@@ -53,6 +55,7 @@ const AdvancedSearchSlider: Component<{
         defaultValue={props.defaultValue}
         value={props.value}
         onChange={props.onSlide}
+        step={props.step}
       >
         <Slider.Track class={styles.track}>
           <Slider.Fill class={styles.fill}/>
@@ -68,14 +71,16 @@ const AdvancedSearchSlider: Component<{
         </Slider.Track>
       </Slider>
 
-      <TextField
-        class={`${styles.shortInput} ${props.dark ? styles.dark : ''} ${isRange() ? styles.long : ''}`}
-        value={isRange() ? `${props.value[0]} - ${props.value[1]}` : `${props.value[0]}`}
-        onChange={props.onInput}
-        readOnly={!props.onInput}
-      >
-        <TextField.Input class={styles.input} />
-      </TextField>
+      <Show when={!props.hideInput}>
+        <TextField
+          class={`${styles.shortInput} ${props.dark ? styles.dark : ''} ${isRange() ? styles.long : ''}`}
+          value={isRange() ? `${props.value[0]} - ${props.value[1]}` : `${props.value[0]}`}
+          onChange={props.onInput}
+          readOnly={!props.onInput}
+        >
+          <TextField.Input class={styles.input} />
+        </TextField>
+      </Show>
     </div>
 
   )

@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { useNavigate } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { unwrap } from 'solid-js/store';
 import Avatar from '../../components/Avatar/Avatar';
@@ -65,6 +65,16 @@ const PremiumStatusOverview: Component<{
         data={props.data}
         expanded={true}
       />
+
+      <Show when={!isExpired()}>
+        <div class={styles.support}>
+          <div>{intl.formatMessage(t.labels.supportFirstLine)}</div>
+          <div>
+            {intl.formatMessage(t.labels.supportSecondLine)}
+            <A href={'/premium/support'}>{intl.formatMessage(t.actions.support)}</A>
+          </div>
+        </div>
+      </Show>
 
       <Show
         when={isExpired()}

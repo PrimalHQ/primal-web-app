@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
@@ -13,7 +13,7 @@ import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
 import { APP_ID } from '../../App';
-import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable } from '../../lib/premium';
+import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -42,6 +42,10 @@ import PremiumSidebarInactve from './PremiumSidebarInactive';
 import PremiumSidebarActive from './PremiumSidebarActive';
 import PremiumRenameDialog from './PremiumRenameDialog';
 import PremiumRenewModal from './PremiumRenewModal';
+import PremiumSupport from './PremiumSupport';
+import PremiumLegend from './PremiumLegend';
+import PremiumBecomeLegend from './PremiumBecomeLegend';
+import { Kind } from '../../constants';
 
 export const satsInBTC = 100_000_000;
 
@@ -73,6 +77,8 @@ export type PremiumStore = {
   recipientPubkey: string | undefined,
   recipient: PrimalUser | undefined,
   promoCode: string,
+  isSocketOpen: boolean,
+  exchangeRateUSD: number,
 }
 
 export type PremiumStatus = {
@@ -122,6 +128,8 @@ const Premium: Component = () => {
     recipientPubkey: undefined,
     recipient: undefined,
     promoCode: '',
+    isSocketOpen: false,
+    exchangeRateUSD: 0,
   });
 
   // const setPremiumStatus = async () => {
@@ -351,6 +359,7 @@ const Premium: Component = () => {
 
     premiumSocket.addEventListener('close', () => {
       logInfo('PREMIUM SOCKET CLOSED');
+      setPremiumData('isSocketOpen', () => false);
       if (keepSoceketOpen) {
         openSocket();
       }
@@ -358,8 +367,29 @@ const Premium: Component = () => {
 
     premiumSocket.addEventListener('open', () => {
       logInfo('PREMIUM SOCKET OPENED');
+      setPremiumData('isSocketOpen', () => true);
       checkPremiumStatus();
     });
+  }
+
+  const getExchangeRate = async () => {
+    if (!premiumSocket) return;
+
+    const subId = `premium_exchange_rate_${APP_ID}`;
+
+    const unsub = subTo(premiumSocket, subId, (type, _, content) => {
+
+      if (type === 'EVENT' && content?.kind === Kind.ExchangeRate) {
+        const ex = JSON.parse(content.content)
+        setPremiumData('exchangeRateUSD', ex.rate);
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+      }
+    });
+
+    fetchExchangeRate(subId, premiumSocket);
   }
 
   onMount(() => {
@@ -406,8 +436,9 @@ const Premium: Component = () => {
     }
   });
 
-  createEffect(() => {
-    const pubkey = premiumData.recipientPubkey;
+  createEffect(on(() => premiumData.recipientPubkey, (pubkey, old) => {
+
+    if (!pubkey || pubkey === old) return;
 
     if (pubkey) {
       getSubscriptionInfo();
@@ -420,7 +451,7 @@ const Premium: Component = () => {
 
       getRecipientUser(pubkey);
     }
-  })
+  }))
 
   const handlePremiumAction = (action: string) => {
     switch (action) {
@@ -446,7 +477,23 @@ const Premium: Component = () => {
       </Wormhole>
 
       <PageCaption>
-        <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
+        <Switch
+          fallback={
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
+          }
+        >
+          <Match when={params.step === 'support'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
+          </Match>
+
+          <Match when={params.step === 'legend'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
+          </Match>
+
+          <Match when={params.step === 'legendary'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
+          </Match>
+        </Switch>
       </PageCaption>
 
       <StickySidebar>
@@ -582,6 +629,25 @@ const Premium: Component = () => {
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
               </div>
+            </Match>
+
+            <Match when={params.step === 'support'}>
+              <PremiumSupport
+                onExtendPremium={() => handlePremiumAction('extendSubscription')}
+              />
+            </Match>
+
+            <Match when={params.step === 'legend'}>
+              <PremiumLegend
+              />
+            </Match>
+
+            <Match when={params.step === 'legendary'}>
+              <PremiumBecomeLegend
+                data={premiumData}
+                profile={account?.activeUser}
+                getExchangeRate={getExchangeRate}
+              />
             </Match>
 
             <Match when={premiumData.membershipStatus?.tier === 'premium'}>

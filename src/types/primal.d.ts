@@ -320,6 +320,12 @@ export type NostrPrimalVanityNames = {
   created_at?: number,
 };
 
+export type NostrPrimalExchangeRate = {
+  kind: Kind.ExchangeRate,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -363,6 +369,7 @@ export type NostrEventContent =
   NostrDVMFollowsActions |
   NostrUserFollowerIncrease |
   NostrPrimalVanityNames |
+  NostrPrimalExchangeRate |
   NostrTopicStats;
 
 export type NostrEvent = [

@@ -162,6 +162,9 @@ a {
 body::after{
   position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
   content:
+    url(./assets/images/5stars.svg)
+    url(./assets/images/legend.png)
+
     url(./assets/icons/nav/bookmarks.svg)
     url(./assets/icons/nav/bookmarks_selected.svg)
     url(./assets/icons/nav/home.svg)

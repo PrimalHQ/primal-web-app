@@ -2386,7 +2386,114 @@ export const reactionsModal = {
 };
 
 export const premium = {
+  labels: {
+    foreverPremium: {
+      id: 'pages.premium.labes.foreverPremium',
+      defaultMessage: 'Forever Premium',
+      description: 'Forever Premium perk title',
+    },
+    foreverPremiumDescription: {
+      id: 'pages.premium.labes.foreverPremiumDescription',
+      defaultMessage: 'Premium subscription never expires for legends.',
+      description: 'Forever Premium perk description',
+    },
+    privateBetaBuilds: {
+      id: 'pages.premium.labes.privateBetaBuilds',
+      defaultMessage: 'Private Beta Builds',
+      description: 'Private Beta Builds perk title',
+    },
+    privateBetaBuildsDescription: {
+      id: 'pages.premium.labes.privateBetaBuildsDescription',
+      defaultMessage: 'Get access to new features before they are public.',
+      description: 'Private Beta perk description',
+    },
+    customLegendProfile: {
+      id: 'pages.premium.labes.customLegendProfile',
+      defaultMessage: 'Legendary Custom Profile',
+      description: 'Legendary Custom Profile perk title',
+    },
+    customLegendDescription: {
+      id: 'pages.premium.labes.customLegendDescription',
+      defaultMessage: 'Option to pick the color of your verified badge and set the glow around your avatar',
+      description: 'Legendary Custom Profile perk description',
+    },
+    legendPageCaption: {
+      id: 'pages.premium.labes.legendPageCaption',
+      defaultMessage: 'Donate $1000 or more to gain:',
+      description: 'Legend page caption',
+    },
+    supportFirstLine: {
+      id: 'pages.premium.labes.supportFirstLine',
+      defaultMessage: 'Are you enjoying Primal?',
+      description: 'Support label first line',
+    },
+    supportSecondLine: {
+      id: 'pages.premium.labes.supportSecondLine',
+      defaultMessage: 'if so, see how you can ',
+      description: 'Support label second line',
+    },
+    supportCaption: {
+      id: 'pages.premium.labes.supportCaption',
+      defaultMessage: 'Be a part of the Nostr revolution and help us continue building for this ecosystem.',
+      description: 'Support page caption',
+    },
+    leaveStars: {
+      id: 'pages.premium.labes.leaveStars',
+      defaultMessage: 'Leave a 5 Star Review',
+      description: 'Support page 5 star review caption',
+    },
+    leaveStarsDescription: {
+      id: 'pages.premium.labes.leaveStarsDescription',
+      defaultMessage: 'App Store reviews really help improve the visibility of Nostr apps at this early stage.',
+      description: 'Support page 5 star review description',
+    },
+    extendSubscription: {
+      id: 'pages.premium.labes.extendSubscription',
+      defaultMessage: 'Extend Subscription',
+      description: 'Support page extend subscription caption',
+    },
+    extendSubscriptionDescription: {
+      id: 'pages.premium.labes.extendSubscriptionDescription',
+      defaultMessage: 'Extend your existing subscription to gain peace of mind and help fund Primal.',
+      description: 'Support page extend subscription description',
+    },
+    becomeLegend: {
+      id: 'pages.premium.labes.becomeLegend',
+      defaultMessage: 'Become a Legend',
+      description: 'Support page become legend caption',
+    },
+    becomeLegendDescription: {
+      id: 'pages.premium.labes.becomeLegendDescription',
+      defaultMessage: 'Donate $1000 or more to gain permanent membership and exclusive perks!',
+      description: 'Support page become legend description',
+    },
+  },
   actions: {
+    payNow: {
+      id: 'pages.premium.actions.payNow',
+      defaultMessage: 'Pay Now',
+      description: 'Action to pay now',
+    },
+    becomeLegend: {
+      id: 'pages.premium.actions.becomeLegend',
+      defaultMessage: 'Become a Legend Now',
+      description: 'Action that takes user to the Become a Legend page',
+    },
+    getIOS: {
+      id: 'pages.premium.actions.getIOS',
+      defaultMessage: 'Go to iOS App',
+      description: 'Action that takes user to the iOS APP page',
+    },
+    getAndroid: {
+      id: 'pages.premium.actions.getAndroid',
+      defaultMessage: 'Go to Android App',
+      description: 'Action that takes user to the Android App page',
+    },
+    support: {
+      id: 'pages.premium.actions.support',
+      defaultMessage: 'support us',
+      description: 'Action that takes user to the support page',
+    },
     start: {
       id: 'pages.premium.actions.start',
       defaultMessage: 'Find Primal Name',
@@ -2458,6 +2565,16 @@ export const premium = {
       id: 'pages.premium.rename',
       defaultMessage: 'Change your primal name',
       description: 'Title of the premium rename page',
+    },
+    support: {
+      id: 'pages.premium.support',
+      defaultMessage: 'Support Primal',
+      description: 'Title of the premium support page',
+    },
+    legend: {
+      id: 'pages.premium.legend',
+      defaultMessage: 'Become a Primal Legend',
+      description: 'Title of the premium support page',
     },
   },
   subOptions: {

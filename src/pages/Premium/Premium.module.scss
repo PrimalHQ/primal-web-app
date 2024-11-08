@@ -715,6 +715,15 @@
     width: 100%;
     margin-top: 42px;
   }
+
+  .support {
+    margin-top: 20px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
 }
 
 .purpleCheck {
@@ -1130,5 +1139,256 @@
 
   .expiredPremium {
     background-color: var(--subtile-devider);
+  }
+}
+
+.supportLayout {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  .supportContent {
+    width: 335px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 16px;
+
+    .caption {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 23px;
+    }
+
+    .supportCard {
+      width: 100%;
+      background-color: var(--background-header-input);
+      padding-top: 20px;
+      padding-bottom: 16px;
+      padding-inline: 16px;
+      border-radius: 12px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+
+      gap: 8px;
+
+      .title {
+        color: var(--text-primary);
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+
+      .description {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 22px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+
+        .delimiter {
+          width: 1px;
+          height: 16px;
+          background-color: var(--subtile-devider);
+        }
+
+        a {
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 16px;
+        }
+      }
+
+      .starsImage {
+        width: 178px;
+        margin-bottom: 8px;
+      }
+
+      .legendImage {
+        width: 220px;
+      }
+
+      .purpleCheckImage {
+        width: 36px;
+      }
+    }
+  }
+}
+
+.legendLayout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+
+  gap: 32px;
+
+  .legendCaption {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 23px;
+  }
+
+  .legendPerks {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 24px;
+
+    .legendPerk {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 300px;
+
+      .foreverPremiumIcon {
+        width: 74px;
+        // height: 74px;
+      }
+      .privateBetaIcon {
+        width: 70px;
+        margin-left: 8px;
+        // height: 74px;
+      }
+      .customProfileIcon {
+        width: 66px;
+        margin-left: 3px;
+        border: 2px solid #FFC830;
+        border-radius: 99999px;
+        box-shadow: 0px 0px 16px #FFC830;
+
+        // height: 74px;
+      }
+
+      .perkInfo {
+        width: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 8px;
+
+        .perkTitle {
+          color: var(--text-primary);
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 22px;
+        }
+
+        .perkDescription {
+          color: var(--text-secondary);
+          font-size: 15px;
+          font-weight: 400;
+          line-height: 22px;
+        }
+      }
+    }
+  }
+
+  .gratitude {
+    width: 305px;
+    .gratitudeTitle {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 4px;
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 22px;
+
+      img {
+        height: 16px;
+      }
+    }
+
+    .gratitudeMessage {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 22px;
+    }
+  }
+
+  .legendFooter {
+    width: 305px;
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.premiumBecomeLegend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding-top: 40px;
+
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+
+    .userName {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 24px;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.legendarySliderHolder {
+  margin-top: 54px;
+  width: 335px;
+
+  .legendarySliderLimits {
+    margin-top: 16px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: var(--text-tertiary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  .legendaryPay {
+    width: 100%;
+    margin-top: 48px;
+
+    button {
+      width: 100%;
+    }
   }
 }
