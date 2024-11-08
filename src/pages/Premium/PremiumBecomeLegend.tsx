@@ -84,6 +84,7 @@ const PremiumBecomeLegend: Component<{
           {userName(props.profile)}
           <VerificationCheck
             user={props.profile}
+            large={true}
           />
         </div>
       </div>

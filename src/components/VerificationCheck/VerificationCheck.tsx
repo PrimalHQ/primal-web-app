@@ -33,7 +33,6 @@ const VerificationCheck: Component<{
     isAccountVerified(nip05).then(profile => {
       if (profile) {
         setIsVerified(() => profile.pubkey === props.user?.pubkey);
-        console.log('CHECK VERIFIED: ', profile, { ...props.user}, isVerified());
         return;
       }
 
