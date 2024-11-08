@@ -207,7 +207,8 @@ const Premium: Component = () => {
     let isAvailable = false;
 
     try {
-      isAvailable = await isPremiumNameAvailable(premiumData.name, premiumSocket, subId);
+      console.log('CHECK 1')
+      isAvailable = await isPremiumNameAvailable(premiumData.name, account?.publicKey, premiumSocket, subId);
     } catch (e: any) {
       isAvailable = false;
       logError('ERROR while checking premium name availability: ', e);
@@ -850,7 +851,7 @@ const Premium: Component = () => {
               setPremiumData('openRename', () => false)
             }}
             name={premiumData.name}
-            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, premiumSocket, `rename_check_${APP_ID}`)}
+            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, account?.publicKey, premiumSocket, `rename_check_${APP_ID}`)}
           />
 
           <PremiumRenewModal

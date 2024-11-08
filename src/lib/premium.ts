@@ -2,11 +2,18 @@ import { Kind } from "../constants";
 import { subTo } from "../sockets";
 import { signEvent } from "./nostrAPI";
 
-export const sendPremiumNameCheck = (name: string, subId: string, socket: WebSocket) => {
+export const sendPremiumNameCheck = (name: string, pubkey: string | undefined, subId: string, socket: WebSocket) => {
+  let payload = { name };
+
+  if (pubkey) {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+  }
+
   const message = JSON.stringify([
     "REQ",
     subId,
-    {cache: ["membership_name_available", { name  }]},
+    {cache: ["membership_name_available", { ...payload  }]},
   ]);
 
   if (socket) {
@@ -242,7 +249,7 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
 
 
 
-export const isPremiumNameAvailable = (name: string, socket: WebSocket | undefined, subId: string) => {
+export const isPremiumNameAvailable = (name: string, pubkey: string | undefined, socket: WebSocket | undefined, subId: string) => {
   return new Promise<boolean>((resolve, reject) => {
     if (!socket) {
       resolve(false);
@@ -281,7 +288,7 @@ export const isPremiumNameAvailable = (name: string, socket: WebSocket | undefin
       }
     });
 
-    sendPremiumNameCheck(name, subId, socket);
+    sendPremiumNameCheck(name, pubkey, subId, socket);
 
   })
 };
