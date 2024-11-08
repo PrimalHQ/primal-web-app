@@ -28,6 +28,8 @@ const PremiumStatusOverview: Component<{
   const navigate = useNavigate();
 
   const isExpired = () => {
+    if (props.data.membershipStatus.cohort_1 === 'Primal Legend') return false;
+
     const expiration = props.data.membershipStatus.expires_on || 0;
     const now = (new Date()).getTime() / 1_000;
 

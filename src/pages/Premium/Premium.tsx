@@ -414,7 +414,7 @@ const Premium: Component = () => {
         unsub();
 
         if (!gotEvent) {
-          setPremiumData('membershipStatus', () => ({ tier: 'none' }));
+          setPremiumData('membershipStatus', () => ({ tier: 'free' }));
         }
       }
     });
@@ -537,7 +537,7 @@ const Premium: Component = () => {
     if (!pubkey || pubkey === old) return;
 
     if (pubkey) {
-      getSubscriptionInfo();
+      // getSubscriptionInfo();
 
       if (pubkey === account?.publicKey) {
         const recipient = account.activeUser;
@@ -594,7 +594,7 @@ const Premium: Component = () => {
 
       <StickySidebar>
         <Switch>
-          <Match when={premiumData.membershipStatus.tier === 'none'}>
+          <Match when={premiumData.membershipStatus.tier === 'free'}>
             <PremiumSidebarInactve
               onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
             />
@@ -757,7 +757,7 @@ const Premium: Component = () => {
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}/>
             </Match>
 
-            <Match when={premiumData.membershipStatus?.tier === 'none'}>
+            <Match when={premiumData.membershipStatus?.tier === 'free'}>
               <PremiumHighlights
                 onStart={onStartAction}
                 onMore={() => setPremiumData('openFeatures', () => 'features')}
