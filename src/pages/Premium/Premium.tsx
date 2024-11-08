@@ -189,6 +189,8 @@ const Premium: Component = () => {
       lud16: `${`${premiumData.name}@primal.net`}`,
     };
 
+    if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
+
     sendProfile({ ...user, ...metaUpdate }, account.proxyThroughPrimal,  account.activeRelays, account.relaySettings);
   }
 
@@ -257,7 +259,7 @@ const Premium: Component = () => {
 
   let purchuseMonitorUnsub: () => void = () => {};
   const purchuseSubId = `pay_${APP_ID}`;
-  const purchuseLegendSubId = `pay_legend_${APP_ID}`;
+  const purchuseLegendSubId = (mId: string) => `pay_legend_${mId}_${APP_ID}`;
 
   const listenForPayement = () => {
     if (!premiumSocket) return;
@@ -289,9 +291,11 @@ const Premium: Component = () => {
   }
 
   const listenForLegendPayement = () => {
-    if (!premiumSocket) return;
+    const membershipId = premiumData.legendSupscription.membershipId;
+    if (!premiumSocket || membershipId.length === 0) return;
 
-    purchuseMonitorUnsub = subTo(premiumSocket, purchuseLegendSubId, (type, _, content) => {
+    purchuseMonitorUnsub = subTo(premiumSocket, purchuseLegendSubId(membershipId), (type, _, content) => {
+
       if (type === 'EVENT') {
         const cont: {
           completed_at: number | null,
@@ -300,7 +304,7 @@ const Premium: Component = () => {
         if (!premiumSocket) return;
 
         if (cont.completed_at !== null) {
-          stopListeningForLegendPurchase(purchuseLegendSubId, premiumSocket);
+          stopListeningForLegendPurchase(purchuseLegendSubId(membershipId), premiumSocket);
           purchuseMonitorUnsub();
           updateUserMetadata();
           setPremiumData('openLegend', () => false);
@@ -312,9 +316,8 @@ const Premium: Component = () => {
       }
     });
 
-    const membershipId = premiumData.legendSupscription.membershipId;
 
-    startListeningForLegendPurchase(membershipId, purchuseLegendSubId, premiumSocket);
+    startListeningForLegendPurchase(membershipId, purchuseLegendSubId(membershipId), premiumSocket);
   }
 
   const getSubscriptionInfo = () => {
@@ -784,6 +787,14 @@ const Premium: Component = () => {
             onClose={() => {
               if (!premiumData.openLegend) return;
               setPremiumData('openLegend', () => false);
+              setPremiumData('legendSupscription', () => ({
+                lnUrl: '',
+                membershipId: '',
+                amounts: {
+                  usd: 0,
+                  sats: 0,
+                },
+              }))
 
               premiumSocket && stopListeningForLegendPurchase(purchuseSubId, premiumSocket);
               purchuseMonitorUnsub();

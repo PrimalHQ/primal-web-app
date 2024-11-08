@@ -106,6 +106,7 @@ const PremiumBecomeLegend: Component<{
       <div class={styles.legendarySliderHolder}>
         <AdvancedSearchSlider
           value={[amount()]}
+          // min={Math.floor(1_000 / rate())}
           min={Math.floor(5 / rate())}
           max={100_000_000}
           onSlide={onSlide}

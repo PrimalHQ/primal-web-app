@@ -65,7 +65,7 @@ const PremiumLegendModal: Component<{
         <div class={styles.pricePlan}>
           <TransactionAmount
             amountUSD={props.subscription.amounts.usd}
-            amountSats={props.subscription.amounts.sats}
+            amountBTC={props.subscription.amounts.sats / 100_000_000}
           />
         </div>
       </div>
