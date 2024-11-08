@@ -91,6 +91,10 @@ export type PremiumStatus = {
   primal_vip_profile?: string,
   used_storage?: number,
   expires_on?: number,
+  cohort_1?: string,
+  cohort_2?: string,
+  recurring?: boolean,
+  renews_on?: number | null,
 };
 
 const availablePremiumOptions: PremiumOption[] = [

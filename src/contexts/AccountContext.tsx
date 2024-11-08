@@ -1617,10 +1617,14 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   const handleUserProfileEvent = (content: NostrEventContent) => {
     if (content?.content) {
-      const user = JSON.parse(content.content);
+      if (content.kind === Kind.Metadata) {
+        const user = JSON.parse(content.content);
 
-      updateStore('activeUser', () => ({...user}));
-      setStoredProfile(user);
+
+        console.log('ACTIVE USER 3: ', user)
+        updateStore('activeUser', () => ({...user, pubkey: content.pubkey}));
+        setStoredProfile(user);
+      }
     }
   }
 

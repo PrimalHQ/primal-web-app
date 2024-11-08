@@ -1,9 +1,10 @@
 import styles from  "./VerificationCheck.module.scss";
 
-import { Component, createSignal, JSXElement, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSXElement, onMount, Show } from "solid-js";
 import { PrimalUser } from "../../types/primal";
 import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
+import { userName } from "../../stores/profile";
 
 
 const VerificationCheck: Component<{
@@ -30,7 +31,13 @@ const VerificationCheck: Component<{
     }
 
     isAccountVerified(nip05).then(profile => {
-      setIsVerified(profile && profile.pubkey === props.user?.pubkey);
+      if (profile) {
+        setIsVerified(() => profile.pubkey === props.user?.pubkey);
+        console.log('CHECK VERIFIED: ', profile, { ...props.user}, isVerified());
+        return;
+      }
+
+      setIsVerified(() => false);
     });
   }
 

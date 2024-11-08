@@ -16,6 +16,7 @@ import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
 import PremiumSummary from './PremiumSummary';
+import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 
 
 const PremiumStatusOverview: Component<{
@@ -40,7 +41,9 @@ const PremiumStatusOverview: Component<{
         <Avatar user={props.profile} size="xl" />
         <div class={styles.userName}>
           {userName(props.profile)}
-          <div class={styles.orangeCheck}></div>
+          <VerificationCheck
+            user={props.profile}
+          />
         </div>
       </div>
 
@@ -49,8 +52,10 @@ const PremiumStatusOverview: Component<{
           when={isExpired()}
           fallback={
             <div class={styles.activePremium}>
-              <div class={styles.caption}>ACTIVE Premium</div>
-              <div class={styles.date}><div>{shortDate(props.data.membershipStatus.expires_on || 0)}</div></div>
+              <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
+              <div class={styles.date}>
+                <div>{props.data.membershipStatus.cohort_2 || shortDate(props.data.membershipStatus.expires_on || 0)}</div>
+              </div>
             </div>
           }
         >

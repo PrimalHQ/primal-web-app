@@ -28,6 +28,7 @@ import { PremiumStore } from './Premium';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
 import AdvancedSearchSlider from '../../components/AdvancedSearch/AdvancedSearchSlider';
 import { subsTo, subTo } from '../../sockets';
+import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 
 
 const PremiumBecomeLegend: Component<{
@@ -81,14 +82,18 @@ const PremiumBecomeLegend: Component<{
         <Avatar user={props.profile} size="xl" />
         <div class={styles.userName}>
           {userName(props.profile)}
-          <div class={styles.orangeCheck}></div>
+          <VerificationCheck
+            user={props.profile}
+          />
         </div>
       </div>
 
       <div class={styles.premiumActive}>
         <div class={styles.activePremium}>
-          <div class={styles.caption}>ACTIVE Premium</div>
-          <div class={styles.date}><div>{shortDate(props.data.membershipStatus.expires_on || 0)}</div></div>
+          <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
+          <div class={styles.date}>
+            <div>{props.data.membershipStatus.cohort_2 || shortDate(props.data.membershipStatus.expires_on || 0)}</div>
+          </div>
         </div>
       </div>
 
