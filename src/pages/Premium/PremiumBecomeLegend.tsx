@@ -34,7 +34,7 @@ import VerificationCheck from '../../components/VerificationCheck/VerificationCh
 const PremiumBecomeLegend: Component<{
   data: PremiumStore,
   profile?: PrimalUser,
-  onExtendPremium?: () => void,
+  onBuyLegend?: (amount: number) => void,
   getExchangeRate?: () => void,
 }> = (props) => {
   const intl = useIntl()
@@ -106,7 +106,7 @@ const PremiumBecomeLegend: Component<{
       <div class={styles.legendarySliderHolder}>
         <AdvancedSearchSlider
           value={[amount()]}
-          min={Math.floor(1_000 / rate())}
+          min={Math.floor(5 / rate())}
           max={100_000_000}
           onSlide={onSlide}
           hideInput={true}
@@ -119,7 +119,7 @@ const PremiumBecomeLegend: Component<{
 
         <div class={styles.legendaryPay}>
           <ButtonPremium
-            onClick={() => {}}
+            onClick={() => props.onBuyLegend && props.onBuyLegend(subscription().amounts.usd)}
           >
             {intl.formatMessage(t.actions.payNow)}
           </ButtonPremium>

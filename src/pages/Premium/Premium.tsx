@@ -13,7 +13,7 @@ import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
 import { APP_ID } from '../../App';
-import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate } from '../../lib/premium';
+import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -46,6 +46,7 @@ import PremiumSupport from './PremiumSupport';
 import PremiumLegend from './PremiumLegend';
 import PremiumBecomeLegend from './PremiumBecomeLegend';
 import { Kind } from '../../constants';
+import PremiumLegendModal from './PremiumLegendModal';
 
 export const satsInBTC = 100_000_000;
 
@@ -72,6 +73,7 @@ export type PremiumStore = {
   openRename: boolean,
   openRenew: boolean,
   openFeatures: 'features' | 'faq' | undefined,
+  openLegend: boolean,
   subscriptions: Record<string, PrimalPremiumSubscription>,
   membershipStatus: PremiumStatus,
   recipientPubkey: string | undefined,
@@ -79,6 +81,8 @@ export type PremiumStore = {
   promoCode: string,
   isSocketOpen: boolean,
   exchangeRateUSD: number,
+  legendAmount: number,
+  legendSupscription: PrimalPremiumSubscription,
 }
 
 export type PremiumStatus = {
@@ -126,6 +130,7 @@ const Premium: Component = () => {
     openPromoCode: false,
     openRename: false,
     openRenew: false,
+    openLegend: false,
     openFeatures: undefined,
     subscriptions: {},
     membershipStatus: {},
@@ -134,6 +139,15 @@ const Premium: Component = () => {
     promoCode: '',
     isSocketOpen: false,
     exchangeRateUSD: 0,
+    legendAmount: 0,
+    legendSupscription: {
+      lnUrl: '',
+      membershipId: '',
+      amounts: {
+        usd: 0,
+        sats: 0,
+      },
+    },
   });
 
   // const setPremiumStatus = async () => {
@@ -243,6 +257,7 @@ const Premium: Component = () => {
 
   let purchuseMonitorUnsub: () => void = () => {};
   const purchuseSubId = `pay_${APP_ID}`;
+  const purchuseLegendSubId = `pay_legend_${APP_ID}`;
 
   const listenForPayement = () => {
     if (!premiumSocket) return;
@@ -271,6 +286,35 @@ const Premium: Component = () => {
     const membershipId = premiumData.subscriptions[premiumData.selectedSubOption.id].membershipId;
 
     startListeningForPremiumPurchase(membershipId, purchuseSubId, premiumSocket);
+  }
+
+  const listenForLegendPayement = () => {
+    if (!premiumSocket) return;
+
+    purchuseMonitorUnsub = subTo(premiumSocket, purchuseLegendSubId, (type, _, content) => {
+      if (type === 'EVENT') {
+        const cont: {
+          completed_at: number | null,
+        } = JSON.parse(content?.content || '{ "completed_at": null }');
+
+        if (!premiumSocket) return;
+
+        if (cont.completed_at !== null) {
+          stopListeningForLegendPurchase(purchuseLegendSubId, premiumSocket);
+          purchuseMonitorUnsub();
+          updateUserMetadata();
+          setPremiumData('openLegend', () => false);
+          setPremiumData('openSuccess', () => true);
+        }
+      }
+
+      if (type === 'EOSE') {
+      }
+    });
+
+    const membershipId = premiumData.legendSupscription.membershipId;
+
+    startListeningForLegendPurchase(membershipId, purchuseLegendSubId, premiumSocket);
   }
 
   const getSubscriptionInfo = () => {
@@ -309,6 +353,42 @@ const Premium: Component = () => {
 
     })
 
+  };
+
+
+  const getLegendInfo = () => {
+    if (!premiumSocket) return;
+
+    const subId = `qr__legend_${APP_ID}`;
+    const unsub = subTo(premiumSocket, subId, (type, _, content) => {
+      if (type === 'EVENT') {
+        console.log('EVENT: ', content)
+        const cont: {
+          qr_code?: string,
+          membership_quote_id?: string,
+          amount_usd?: string,
+          amount_btc?: string,
+        } = JSON.parse(content?.content || '{}');
+
+        const usd = parseFloat(cont.amount_usd || '0');
+        const btc = parseFloat(cont.amount_btc || '0');
+
+        setPremiumData('legendSupscription', () => ({
+          lnUrl:  cont.qr_code || '',
+          membershipId: cont.membership_quote_id || '',
+          amounts: {
+            usd: isNaN(usd) ? 0 : usd,
+            sats: isNaN(btc) ? 0 : btc * 100_000_000,
+          },
+        }))
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+      }
+    });
+
+    getLegendQRCode(premiumData.recipientPubkey, premiumData.name, premiumData.legendAmount, subId, premiumSocket)
   };
 
   const checkPremiumStatus = () => {
@@ -413,6 +493,12 @@ const Premium: Component = () => {
   })
 
   createEffect(() => {
+    if (premiumData.openLegend) {
+      getLegendInfo();
+    }
+  })
+
+  createEffect(() => {
     if (params.step === 'name') {
       nameInput?.focus();
       setPremiumData('name', () => account?.activeUser?.name || '');
@@ -424,6 +510,9 @@ const Premium: Component = () => {
     else if (params.step === 'overview') {
       getSubscriptionInfo();
     }
+    // else if (params.step === 'legendary') {
+    //   getLegendInfo();
+    // }
   });
 
   createEffect(() => {
@@ -651,6 +740,10 @@ const Premium: Component = () => {
                 data={premiumData}
                 profile={account?.activeUser}
                 getExchangeRate={getExchangeRate}
+                onBuyLegend={(amount: number) => {
+                  setPremiumData('legendAmount', () => amount);
+                  setPremiumData('openLegend', () => true);
+                }}
               />
             </Match>
 
@@ -683,6 +776,22 @@ const Premium: Component = () => {
               listenForPayement();
             }}
             subscription={premiumData.subscriptions[premiumData.selectedSubOption.id]}
+          />
+
+          <PremiumLegendModal
+            open={premiumData.openLegend}
+            setOpen={(v: boolean) => setPremiumData('openLegend', () => v)}
+            onClose={() => {
+              if (!premiumData.openLegend) return;
+              setPremiumData('openLegend', () => false);
+
+              premiumSocket && stopListeningForLegendPurchase(purchuseSubId, premiumSocket);
+              purchuseMonitorUnsub();
+            }}
+            onOpen={() => {
+              listenForLegendPayement();
+            }}
+            subscription={premiumData.legendSupscription}
           />
 
           <PremiumSuccessModal

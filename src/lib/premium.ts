@@ -129,6 +129,81 @@ export const stopListeningForPremiumPurchase = (subId: string, socket: WebSocket
 };
 
 
+export const getLegendQRCode = async (pubkey: string | undefined, name: string, amount_usd: number, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify({
+      name,
+      product_id: 'legend-premium',
+      receiver_pubkey: pubkey,
+      amount_usd: `${amount_usd}`,
+    }),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_purchase_product", { event_from_user: signedNote }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to upload: ', reason);
+    return false;
+  }
+}
+
+export const startListeningForLegendPurchase = (membershipId: string, subId: string, socket: WebSocket) => {
+  const message = JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["membership_purchase_monitor", { membership_quote_id: membershipId }]},
+  ]);
+
+  if (socket) {
+    const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+    socket.send(message);
+    socket.dispatchEvent(e);
+  } else {
+    throw('no_socket');
+  }
+};
+
+export const stopListeningForLegendPurchase = (subId: string, socket: WebSocket) => {
+  const message = JSON.stringify([
+    "CLOSE",
+    subId,
+  ]);
+
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+    socket.send(message);
+    socket.dispatchEvent(e);
+  } else {
+    throw('no_socket');
+  }
+};
+
+
 export const getPremiumStatus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
   if (!pubkey) return;
 

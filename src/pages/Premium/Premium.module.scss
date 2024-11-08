@@ -300,6 +300,14 @@
   border-radius: 12px;
   background: var(--background-input);
 
+  .subsModalCaption {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
   .userInfo {
     display: flex;
     justify-content: flex-start;
