@@ -70,7 +70,7 @@ const PremiumSuccessModal: Component<{
                     {intl.formatMessage(t.subOptions.success.caption)}
                   </div>
                   <div class={styles.successDescription}>
-                    {intl.formatMessage(t.subOptions.success[props.data.selectedSubOption.duration])}
+                    {props.data.successMessage}
                   </div>
                   <ButtonGreen onClick={props.onClose}>
                     {intl.formatMessage(t.actions.done)}

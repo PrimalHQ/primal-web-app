@@ -68,6 +68,7 @@ export type PremiumStore = {
   selectedSubOption: PremiumOption,
   openSubscribe: boolean,
   openSuccess: boolean,
+  successMessage: string,
   openAssignPubkey: boolean,
   openPromoCode: boolean,
   openRename: boolean,
@@ -126,6 +127,7 @@ const Premium: Component = () => {
     selectedSubOption: { ...availablePremiumOptions[0] },
     openSubscribe: false,
     openSuccess: false,
+    successMessage: '',
     openAssignPubkey: false,
     openPromoCode: false,
     openRename: false,
@@ -207,7 +209,6 @@ const Premium: Component = () => {
     let isAvailable = false;
 
     try {
-      console.log('CHECK 1')
       isAvailable = await isPremiumNameAvailable(premiumData.name, account?.publicKey, premiumSocket, subId);
     } catch (e: any) {
       isAvailable = false;
@@ -279,6 +280,7 @@ const Premium: Component = () => {
           updateUserMetadata();
           setPremiumData('openSubscribe', () => false);
           setPremiumData('openSuccess', () => true);
+          setPremiumData('successMessage', () => intl.formatMessage(t.subOptions.success[premiumData.selectedSubOption.duration]));
         }
       }
 
@@ -310,6 +312,7 @@ const Premium: Component = () => {
           updateUserMetadata();
           setPremiumData('openLegend', () => false);
           setPremiumData('openSuccess', () => true);
+          setPremiumData('successMessage', () => intl.formatMessage(t.subOptions.success.legend));
         }
       }
 

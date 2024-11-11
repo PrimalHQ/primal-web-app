@@ -2618,6 +2618,11 @@ export const premium = {
         defaultMessage: 'You subscribed to Primal Premium for 12 months.',
         description: 'Payment success description for 12 month plan',
       },
+      legend: {
+        id: 'pages.premium.success.legend',
+        defaultMessage: 'You are now a Primal Legend.',
+        description: 'Payment success description for legends',
+      },
     }
   },
   errors: {
