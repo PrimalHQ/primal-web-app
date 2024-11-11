@@ -1400,3 +1400,86 @@
     }
   }
 }
+
+.premiumRelayLayout {
+  display: flex;
+  flex-direction: column;
+  width: 295px;
+  margin-top: 40px;
+  justify-content: flex-start;
+  align-items: center;
+
+  .primalLogo {
+    width: 64px;
+    height: 64px;
+    background-image: var(--logo);
+    background-size: contain;
+  }
+
+  .title {
+    margin-top: 16px;
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+
+  .subtitle {
+    margin-top: 4px;
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .separator {
+    margin-block: 28px;
+    width: 85px;
+    height: 1px;
+    border-radius: 1px;
+    background-color: var(--subtile-devider);
+  }
+
+  .relayDescription {
+    color: var(--text-secondary);
+    text-align: center;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .premiumRelayAddress {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-block: 24px;
+    width: 100%;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 16px;
+    padding-block: 14px;
+    border-radius: 12px;
+    background-color: var(--devider);
+  }
+
+
+  .connected {
+    background-color: var(--success-bright);
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    margin-right: 8px;
+  }
+
+  .disconnected {
+    background-color: var(--text-secondary);
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    margin-right: 8px;
+  }
+}
+

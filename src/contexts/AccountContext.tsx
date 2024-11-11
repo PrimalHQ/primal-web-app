@@ -714,7 +714,9 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const removeRelay = (url: string) => {
-    const relay: Relay = store.relays.find(r => r.url === url);
+    const relay: Relay = store.relays.find(r => {
+      return r.url === url || `${r.url}/` === url;
+    });
 
     // if relay is connected, close it and remove it from the list of open relays
     if (relay) {

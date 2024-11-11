@@ -2574,7 +2574,27 @@ export const premium = {
     legend: {
       id: 'pages.premium.legend',
       defaultMessage: 'Become a Primal Legend',
-      description: 'Title of the premium support page',
+      description: 'Title of the premium legend page',
+    },
+    relay: {
+      id: 'pages.premium.relay',
+      defaultMessage: 'Primal Relay',
+      description: 'Title of the premium relay page',
+    },
+    media: {
+      id: 'pages.premium.media',
+      defaultMessage: 'Media Managment',
+      description: 'Title of the premium media managment page',
+    },
+    contacts: {
+      id: 'pages.premium.contacts',
+      defaultMessage: 'Recover Follow List',
+      description: 'Title of the premium recover contacts page',
+    },
+    content: {
+      id: 'pages.premium.content',
+      defaultMessage: 'Content Backup',
+      description: 'Title of the premium content backup page',
     },
   },
   subOptions: {

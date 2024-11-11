@@ -47,6 +47,11 @@ import PremiumLegend from './PremiumLegend';
 import PremiumBecomeLegend from './PremiumBecomeLegend';
 import { Kind } from '../../constants';
 import PremiumLegendModal from './PremiumLegendModal';
+import PremiumRelay from './PremiumRelay';
+import PremiumMediaManagment from './PremiumMediaManagment';
+import PremiumContactBackup from './PremiumContactBackup';
+import PremiumContentBackup from './PremiumContentBackup';
+import PremiumCustomLegend from './PremiumCustomLegend';
 
 export const satsInBTC = 100_000_000;
 
@@ -561,6 +566,21 @@ const Premium: Component = () => {
       case 'extendSubscription':
         setPremiumData('openRenew', () => true);
         break;
+      case 'premiumRelay':
+        navigate('/premium/relay');
+        break;
+      case 'mediaManagment':
+        navigate('/premium/media');
+        break;
+      case 'contactBackup':
+        navigate('/premium/contacts');
+        break;
+      case 'contentBackup':
+        navigate('/premium/content');
+        break;
+      case 'customLegend':
+        navigate('/premium/customize');
+        break;
     }
   }
 
@@ -592,6 +612,22 @@ const Premium: Component = () => {
 
           <Match when={params.step === 'legendary'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
+          </Match>
+
+          <Match when={params.step === 'relay'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
+          </Match>
+
+          <Match when={params.step === 'media'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
+          </Match>
+
+          <Match when={params.step === 'contacts'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
+          </Match>
+
+          <Match when={params.step === 'content'}>
+            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
           </Match>
         </Switch>
       </PageCaption>
@@ -751,6 +787,36 @@ const Premium: Component = () => {
                   setPremiumData('legendAmount', () => amount);
                   setPremiumData('openLegend', () => true);
                 }}
+              />
+            </Match>
+
+            <Match when={params.step === 'relay'}>
+              <PremiumRelay
+                data={premiumData}
+              />
+            </Match>
+
+            <Match when={params.step === 'media'}>
+              <PremiumMediaManagment
+                data={premiumData}
+              />
+            </Match>
+
+            <Match when={params.step === 'contacts'}>
+              <PremiumContactBackup
+                data={premiumData}
+              />
+            </Match>
+
+            <Match when={params.step === 'content'}>
+              <PremiumContentBackup
+                data={premiumData}
+              />
+            </Match>
+
+            <Match when={params.step === 'customize'}>
+              <PremiumCustomLegend
+                data={premiumData}
               />
             </Match>
 
