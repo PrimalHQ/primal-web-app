@@ -119,15 +119,14 @@ const Downloads: Component = () => {
       <div class={styles.downloadsContent}>
 
         <div class={styles.promoVideo}>
-          <img src={primalDownloads} />
-          {/* <video
-            src='https://m.primal.net/HcyV.mp4'
+          <video
+            src='https://m.primal.net/MAww.mp4'
             controls={false}
             muted={true}
             loop={true}
             playsinline={true}
             autoplay={true}
-          /> */}
+          />
         </div>
 
         <div class={styles.appInfo}>
