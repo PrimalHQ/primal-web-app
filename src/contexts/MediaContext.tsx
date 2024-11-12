@@ -11,10 +11,17 @@ import { MediaEvent, MediaSize, MediaVariant, NostrEOSE, NostrEvent, NostrEventC
 import { removeSocketListeners, isConnected, refreshSocketListeners, socket, decompressBlob, readData } from "../sockets";
 import { Kind } from "../constants";
 
+export type MediaStats = {
+  video: number,
+  image: number,
+  other: number,
+}
+
 export type MediaContextStore = {
   windowSize: { w: number, h: number },
   media: Record<string, MediaVariant[]>,
   thumbnails: Record<string, string>,
+  mediaStats: MediaStats,
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
@@ -25,6 +32,11 @@ export type MediaContextStore = {
 
 const initialData = {
   media: {},
+  mediaStats: {
+    video: 0,
+    image: 0,
+    other: 0,
+  },
   thumbnails: {},
   windowSize: { w: window.innerWidth, h: window.innerHeight },
 };
@@ -115,6 +127,12 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       } catch(e) {
         console.warn('Error updating media: ', e);
       }
+    }
+
+    if (content.kind === Kind.MediaStats) {
+      const stats = JSON.parse(content.content) as MediaStats;
+
+      updateStore('mediaStats', () => ({ ...stats }));
     }
   }
 

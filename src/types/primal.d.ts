@@ -326,6 +326,18 @@ export type NostrPrimalExchangeRate = {
   created_at?: number,
 };
 
+export type NostrPrimalMediaStats = {
+  kind: Kind.MediaStats,
+  content: string,
+  created_at?: number,
+};
+
+export type NostrPrimalMediaList= {
+  kind: Kind.MediaList,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -370,6 +382,8 @@ export type NostrEventContent =
   NostrUserFollowerIncrease |
   NostrPrimalVanityNames |
   NostrPrimalExchangeRate |
+  NostrPrimalMediaStats |
+  NostrPrimalMediaList |
   NostrTopicStats;
 
 export type NostrEvent = [

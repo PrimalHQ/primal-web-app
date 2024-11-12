@@ -249,6 +249,133 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
 
 
 
+export const getPremiumMediaStats = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "get media stats'"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_media_management_stats", { event_from_user: signedNote }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch media stats: ', reason);
+    return false;
+  }
+}
+
+export const getPremiumMediaList = async (pubkey: string | undefined, until: number, offset: number, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "get media list'"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+      limit: 20,
+    }
+
+    if (until > 0) {
+      // @ts-ignore
+      payload.until = until
+    }
+
+    if (offset > 0) {
+      // @ts-ignore
+      payload.offset = offset;
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_media_management_uploads", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch media list: ', reason);
+    return false;
+  }
+}
+
+export const deletePremiumMedia = async (pubkey: string | undefined, url: string, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "url": "${url}"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_media_management_delete", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to delete media: ', reason);
+    return false;
+  }
+}
+
 export const isPremiumNameAvailable = (name: string, pubkey: string | undefined, socket: WebSocket | undefined, subId: string) => {
   return new Promise<boolean>((resolve, reject) => {
     if (!socket) {

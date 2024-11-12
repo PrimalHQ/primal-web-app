@@ -154,6 +154,8 @@ export enum Kind  {
   VerifiedUsersDict=10_000_158,
   DVMMetadata=10_000_159,
   NoteTopicStat=10_000_160,
+  MediaStats=10_000_163,
+  MediaList=10_000_164,
 
   WALLET_OPERATION = 10_000_300,
   ExchangeRate = 10_000_305,

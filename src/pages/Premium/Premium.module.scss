@@ -10,13 +10,14 @@
   width: 100%;
   border-top: 1px solid var(--devider);
   padding-top: 20px;
+  padding-inline: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
   .premiumStepContent {
-    width: 440px;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -114,7 +115,7 @@
   border-radius: 12px;
 
   display: flex;
-  width: 100%;
+  width: 440px;
   flex-direction: column;
   align-items: flex-start;
 
@@ -154,7 +155,7 @@
 
 .premiumProfile {
   display: flex;
-  width: 100%;
+  width: 440px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -367,7 +368,6 @@
     margin-bottom: 0;
   }
 }
-
 
 .renewModal {
   display: flex;
@@ -651,7 +651,7 @@
   justify-content: center;
   align-items: center;
   padding-top: 11vh;
-  width: 100%;
+  width: 440px;
 
   .userInfo {
     display: flex;
@@ -1237,7 +1237,7 @@
 }
 
 .legendLayout {
-  width: 100%;
+  width: 440px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -1351,7 +1351,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  width: 440px;
   padding-top: 40px;
 
   .userInfo {
@@ -1483,3 +1483,175 @@
   }
 }
 
+.premiumMediaLayout {
+  width: 100%;
+}
+
+.mediaSatsHolder {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mediaStorageStats {
+  width: 100%;
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.mediaStatsBar {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100%;
+  height: 22px;
+  background-color: var(--subtile-devider);
+  border-radius: 4px;
+  overflow: hidden;
+
+  .image {
+    border:1px solid var(--background-site);
+    height: 22px;
+    background-color: var(--media-stats-image);
+  }
+  .video {
+    border:1px solid var(--background-site);
+    height: 22px;
+    background-color: var(--media-stats-video);
+  }
+  .other {
+    border:1px solid var(--background-site);
+    height: 22px;
+    background-color: var(--media-stats-other);
+  }
+
+  .spaceLeft {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 14px;
+  }
+}
+
+.mediaStatsLegend {
+  display: flex;
+  width: 100%;
+  gap: 16px;
+
+  >div {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+  }
+
+  .label {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .legendItemImages {
+    .dot {
+      background-color: var(--media-stats-image);
+    }
+  }
+
+  .legendItemVideos {
+    .dot {
+      background-color: var(--media-stats-video);
+    }
+  }
+
+  .legendItemOther {
+    .dot {
+      background-color: var(--media-stats-other);
+    }
+  }
+}
+
+
+.mediaList {
+  table {
+    width: 100%;
+    margin-top: 24px;
+
+    th {
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+      padding-inline: 9px;
+      border-bottom: 1px solid var(--devider);
+    }
+
+    td {
+      border-top: 1px solid var(--devider);
+      border-bottom: 1px solid var(--devider);
+    }
+
+    .tdDetails {
+      .fileInfo {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+
+        span {
+          margin-right: 4px;
+        }
+      }
+
+      .fileDate {
+        color: var(--text-secondary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+    }
+
+    .tdAction {
+      width: 20px;
+      button {
+        border: none;
+        margin: 0;
+        padding: 0;
+        outline: none;
+        background: none;
+      }
+    }
+  }
+
+  img, video {
+    width: 64px;
+  }
+}
+
+.deleteIcon {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--warning-bright);
+  -webkit-mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
+  mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
+}
