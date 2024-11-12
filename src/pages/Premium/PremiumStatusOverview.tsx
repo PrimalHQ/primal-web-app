@@ -69,6 +69,12 @@ const PremiumStatusOverview: Component<{
         </Show>
       </div>
 
+      <Show when={props.data.membershipStatus.cohort_1 === 'Primal OG' || props.data.membershipStatus.cohort_2 === 'Free'}>
+          <div class={styles.freeCaption}>
+            Hey there! You are an early Primal user who interacted with our team, so we gave you 6 months of Primal Premium for free. ♥️🫂
+          </div>
+      </Show>
+
       <PremiumSummary
         data={props.data}
         expanded={true}

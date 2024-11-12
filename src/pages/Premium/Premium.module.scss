@@ -1150,6 +1150,15 @@
   }
 }
 
+.freeCaption {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  margin-bottom: 20px;
+}
+
 .supportLayout {
   display: flex;
   justify-content: center;
