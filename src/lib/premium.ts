@@ -376,6 +376,57 @@ export const deletePremiumMedia = async (pubkey: string | undefined, url: string
   }
 }
 
+export const getContactListHistory = async (pubkey: string | undefined, until: number, offset: number, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "get contacts history list'"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+      limit: 30,
+    }
+
+    if (until > 0) {
+      // @ts-ignore
+      payload.until = until
+    }
+
+    if (offset > 0) {
+      // @ts-ignore
+      payload.offset = offset;
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_recovery_contact_lists", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch media list: ', reason);
+    return false;
+  }
+}
+
 export const isPremiumNameAvailable = (name: string, pubkey: string | undefined, socket: WebSocket | undefined, subId: string) => {
   return new Promise<boolean>((resolve, reject) => {
     if (!socket) {

@@ -80,6 +80,7 @@ export type NostrContactsContent = {
   pubkey?: string,
   created_at?: number,
   tags: string[][],
+  id: string,
 };
 
 export type NostrMutedContent = {

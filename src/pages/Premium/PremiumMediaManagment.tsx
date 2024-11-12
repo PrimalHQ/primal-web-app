@@ -310,7 +310,6 @@ const PremiumMediaManagment: Component<{
           loadNextPage={getMediaListNextPage}
         />
 
-
         <ConfirmModal
           open={store.showConfirmDelete.length > 0}
           onConfirm={() => {

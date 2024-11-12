@@ -374,7 +374,6 @@ const Premium: Component = () => {
     const subId = `qr__legend_${APP_ID}`;
     const unsub = subTo(premiumSocket, subId, (type, _, content) => {
       if (type === 'EVENT') {
-        console.log('EVENT: ', content)
         const cont: {
           qr_code?: string,
           membership_quote_id?: string,

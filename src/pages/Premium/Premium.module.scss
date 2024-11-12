@@ -1591,6 +1591,7 @@
 
 
 .mediaList {
+  width: 100%;
   table {
     width: 100%;
     margin-top: 24px;
@@ -1607,6 +1608,10 @@
     td {
       border-top: 1px solid var(--devider);
       border-bottom: 1px solid var(--devider);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
     }
 
     .tdDetails {

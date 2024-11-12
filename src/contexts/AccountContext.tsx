@@ -137,6 +137,12 @@ export type AccountContextStore = {
       relayInfo: string,
       cb?: (remove: boolean, pubkey: string) => void,
     ) => Promise<void>,
+    replaceContactList: (
+      date: number,
+      tags: string[][],
+      relayInfo: string,
+      cb?: (remove: boolean, pubkey: string | undefined) => void,
+    ) => Promise<void>,
   },
 }
 
@@ -854,6 +860,29 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
         cb && cb(false, pubkey);
+      });
+    }
+  };
+
+  const replaceContactList = async (
+    date: number,
+    tags: string[][],
+    relayInfo: string,
+    cb?: (remove: boolean, pubkey: string | undefined) => void,
+  ) => {
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+    if (success && event) {
+      const following = event.tags.reduce<string[]>((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+
+      updateStore('following', () => following);
+      updateStore('followingSince', () => date);
+      updateStore('contactsTags', () => [...tags]);
+      updateStore('contactsContent', () => relayInfo);
+      saveFollowing(store.publicKey, following, date);
+
+      triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
+        cb && cb(false, store.publicKey);
       });
     }
   };
@@ -1622,8 +1651,6 @@ export function AccountProvider(props: { children: JSXElement }) {
       if (content.kind === Kind.Metadata) {
         const user = JSON.parse(content.content);
 
-
-        console.log('ACTIVE USER 3: ', user)
         updateStore('activeUser', () => ({...user, pubkey: content.pubkey}));
         setStoredProfile(user);
       }
@@ -1746,6 +1773,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setFlag,
     setFollowData,
     resolveContacts,
+    replaceContactList,
   },
 });
 

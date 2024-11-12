@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -16,22 +16,160 @@ import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
 import customProfile from '../../assets/images/preston_small.png';
 import heart from '../../assets/images/heart.png';
 
-import { appStoreLink, playstoreLink } from '../../constants';
+import { appStoreLink, Kind, playstoreLink } from '../../constants';
 import { A, useNavigate } from '@solidjs/router';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
+import { isConnected, socket, subsTo } from '../../sockets';
+import { getContactListHistory } from '../../lib/premium';
+import { APP_ID } from '../../App';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { createStore } from 'solid-js/store';
+import { emptyPaging, PaginationInfo } from '../../megaFeeds';
+import { longDate } from '../../lib/dates';
+import Paginator from '../../components/Paginator/Paginator';
+import { NostrContactsContent } from '../../types/primal';
+import { sendContacts } from '../../lib/notes';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
+export type ContactHistoryItem = {
+  created_at: number,
+  follows_count: number,
+  id: string,
+  event: NostrContactsContent,
+}
+
+export type ContactsStore = {
+  history: ContactHistoryItem[],
+  rawHistory: ContactHistoryItem[],
+  paging: PaginationInfo,
+  showConfirmRecover: string,
+};
 
 const PremiumContactBackup: Component<{
   data: PremiumStore,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();
+  const account = useAccountContext();
+
+  const [store, updateStore] = createStore<ContactsStore>({
+    history: [],
+    rawHistory: [],
+    paging: { ...emptyPaging() },
+    showConfirmRecover: '',
+  });
+
+  createEffect(() => {
+    if (isConnected() &&  account?.isKeyLookupDone && account.publicKey) {
+      getContactHistory(account.publicKey)
+    }
+  });
+
+  const getContactHistory = (pubkey: string, until = 0, offset = 0) => {
+    const ws = socket();
+
+    if (!ws) return;
+
+    const subId = `premium_contact_history_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === Kind.Contacts) {
+          const item: ContactHistoryItem = {
+            id: content.id,
+            created_at: content.created_at || 0,
+            follows_count: content.tags.reduce((acc, t) => {
+              if (t[0] !== 'p') return acc;
+
+              return acc + 1;
+            }, 0),
+            event: content,
+          };
+
+          updateStore('rawHistory', store.rawHistory.length, () => ({ ...item }));
+        }
+        if (content.kind === Kind.FeedRange) {
+          const paging = JSON.parse(content.content) as PaginationInfo;
+
+          updateStore('paging', () => ({ ...paging }));
+        }
+      },
+      onEose: () => {
+        unsub();
+        const list = store.paging.elements.reduce<ContactHistoryItem[]>((acc, id) => {
+          const item = store.rawHistory.find(i => i.id === id);
+
+          return item ? [ ...acc, {...item}] : acc;
+        }, []);
+
+        updateStore('history', (ml) => [...ml, ...list]);
+        updateStore('rawHistory', () => []);
+      }
+    })
+
+    getContactListHistory(pubkey, until, offset, subId, ws);
+  }
+
+  const getContactHistoryNextPage = () => {
+    const pubkey = account?.publicKey;
+    if (!pubkey || store.history.length === 0 || store.paging.since === 0) return;
+
+    getContactHistory(pubkey, store.paging.since, 1);
+  }
+
+  const onRecover = (id: string) => {
+    const item = store.history.find(i => i.id === id);
+
+    if (account && item) {
+      const date = Math.floor((new Date()).getTime() / 1000);
+
+      account.actions.replaceContactList(date, JSON.parse(JSON.stringify(item.event.tags)), item.event.content);
+    }
+  }
 
   return (
-    <div class={styles.legendLayout}>
-      Recover Follow List
+    <div class={styles.mediaList}>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Follows</th>
+            <th>Recover list</th>
+          </tr>
+        </thead>
+        <tbody>
+          <For each={store.history}>
+            {item => (
+              <tr>
+                <td>{longDate(item.created_at)}</td>
+                <td>{item.follows_count}</td>
+                <td>
+                  <ButtonLink
+                    onClick={() => updateStore('showConfirmRecover', () => item.id)}
+                  >
+                    Recover
+                  </ButtonLink>
+                </td>
+              </tr>
+            )}
+          </For>
+        </tbody>
+      </table>
+      <Paginator
+        isSmall={true}
+        loadNextPage={getContactHistoryNextPage}
+      />
+
+      <ConfirmModal
+        open={store.showConfirmRecover.length > 0}
+        onConfirm={() => {
+          onRecover(store.showConfirmRecover);
+          updateStore('showConfirmRecover', () => '');
+        }}
+        onAbort={() => updateStore('showConfirmRecover', () => '')}
+      />
     </div>
   );
 }
