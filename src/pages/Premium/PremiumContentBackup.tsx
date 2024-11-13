@@ -41,6 +41,7 @@ export type ContentItem = {
 export type ContentStore = {
   stats: ContentItem[],
   isDownloading: number | undefined,
+  isBroadcasting: number | undefined,
 };
 
 export const kindNames = {
@@ -86,6 +87,7 @@ const PremiumContentBackup: Component<{
   const [store, updateStore] = createStore<ContentStore>({
     stats: [],
     isDownloading: undefined,
+    isBroadcasting: undefined,
   });
 
   createEffect(() => {
@@ -174,6 +176,31 @@ const PremiumContentBackup: Component<{
     getContentDownloadData(pubkey, kinds, subId, ws);
   }
 
+  const onBroadcast = (kind: number) => {
+    const ws = socket();
+    const pubkey = account?.publicKey;
+
+    if (!ws || !pubkey) return;
+
+    updateStore('isBroadcasting', () => kind);
+
+    const subId = `premium_content_broadcast_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+      },
+      onEose: () => {
+        unsub();
+
+        updateStore('isBroadcasting', () => undefined);
+      }
+    })
+
+    const kinds = kind > -1 ? [kind] : [];
+
+    getContentDownloadData(pubkey, kinds, subId, ws);
+  }
+
   return (
     <div class={styles.mediaList}>
       <table>
@@ -191,14 +218,19 @@ const PremiumContentBackup: Component<{
               <tr>
                 <td>{item.cnt.toLocaleString()}</td>
                 <td>{getKindName(item.kind)}</td>
-                <td>
-                  <ButtonLink
-                    onClick={() => {}}
+                <td class={styles.tdAction}>
+                  <Show
+                    when={store.isBroadcasting !== item.kind}
+                    fallback={<div class="linkish">Broadcasting...</div>}
                   >
-                    <div class={styles.broadcastIcon}></div>
-                  </ButtonLink>
+                    <ButtonLink
+                      onClick={() => onBroadcast(item.kind)}
+                    >
+                      <div class={styles.broadcastIcon}></div>
+                    </ButtonLink>
+                  </Show>
                 </td>
-                <td>
+                <td class={styles.tdAction}>
                   <Show
                     when={store.isDownloading !== item.kind}
                     fallback={<div class="linkish">Downloading...</div>}
@@ -216,14 +248,19 @@ const PremiumContentBackup: Component<{
           <tr>
             <td>{totalCount().toLocaleString()}</td>
             <td>All Events</td>
-            <td>
-              <ButtonLink
-                onClick={() => {}}
+            <td class={styles.tdAction}>
+              <Show
+                when={store.isBroadcasting !== -1}
+                fallback={<div class="linkish">Broadcasting...</div>}
               >
-                <div class={styles.broadcastIcon}></div>
-              </ButtonLink>
+                <ButtonLink
+                  onClick={() => onBroadcast(-1)}
+                >
+                  <div class={styles.broadcastIcon}></div>
+                </ButtonLink>
+              </Show>
             </td>
-            <td>
+            <td class={styles.tdAction}>
               <Show
                 when={store.isDownloading !== -1}
                 fallback={<div class="linkish">Downloading...</div>}
@@ -238,19 +275,6 @@ const PremiumContentBackup: Component<{
           </tr>
         </tbody>
       </table>
-      {/* <Paginator
-        isSmall={true}
-        loadNextPage={getContentListNextPage}
-      /> */}
-
-      {/* <ConfirmModal
-        open={store.showConfirmRecover.length > 0}
-        onConfirm={() => {
-          onRecover(store.showConfirmRecover);
-          updateStore('showConfirmRecover', () => '');
-        }}
-        onAbort={() => updateStore('showConfirmRecover', () => '')}
-      /> */}
     </div>
   );
 }

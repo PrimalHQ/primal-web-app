@@ -292,7 +292,7 @@ export const getPremiumMediaList = async (pubkey: string | undefined, until: num
     kind: Kind.Settings,
     tags: [['p', pubkey]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: `{ "description": "get media list'"}`,
+    content: `{ "description": "get media list"}`,
   };
 
   try {
@@ -383,7 +383,7 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
     kind: Kind.Settings,
     tags: [['p', pubkey]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: `{ "description": "get contacts history list'"}`,
+    content: `{ "description": "get contacts history list"}`,
   };
 
   try {
@@ -434,7 +434,7 @@ export const getContentListHistory = async (pubkey: string | undefined, subId: s
     kind: Kind.Settings,
     tags: [['p', pubkey]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: `{ "description": "get content list'"}`,
+    content: `{ "description": "get content list"}`,
   };
 
   try {
@@ -474,7 +474,7 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
     kind: Kind.Settings,
     tags: [['p', pubkey]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: `{ "description": "get content download data'"}`,
+    content: `{ "description": "get content download data"}`,
   };
 
   try {
@@ -493,6 +493,52 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
       "REQ",
       subId,
       {cache: ["membership_content_backup", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch content download list: ', reason);
+    return false;
+  }
+}
+
+
+export const startContentBroadcast = async (pubkey: string | undefined, kinds: number[], subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "broadcats content data"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    if (kinds.length > 0) {
+      // @ts-ignore
+      payload.kinds = [...kinds]
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_content_rebroadcast_start", { ...payload }]},
     ]);
 
     if (socket) {
