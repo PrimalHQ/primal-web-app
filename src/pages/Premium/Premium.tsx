@@ -52,6 +52,7 @@ import PremiumMediaManagment from './PremiumMediaManagment';
 import PremiumContactBackup from './PremiumContactBackup';
 import PremiumContentBackup from './PremiumContentBackup';
 import PremiumCustomLegend from './PremiumCustomLegend';
+import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 
 export const satsInBTC = 100_000_000;
 
@@ -78,6 +79,7 @@ export type PremiumStore = {
   openPromoCode: boolean,
   openRename: boolean,
   openRenew: boolean,
+  openOrderHistory: boolean,
   openFeatures: 'features' | 'faq' | undefined,
   openLegend: boolean,
   subscriptions: Record<string, PrimalPremiumSubscription>,
@@ -138,6 +140,7 @@ const Premium: Component = () => {
     openRename: false,
     openRenew: false,
     openLegend: false,
+    openOrderHistory: false,
     openFeatures: undefined,
     subscriptions: {},
     membershipStatus: {},
@@ -568,6 +571,9 @@ const Premium: Component = () => {
         await getSubscriptionInfo();
         setPremiumData('openRenew', () => true);
         break;
+      case 'orderHistory':
+        setPremiumData('openOrderHistory', () => true);
+        break;
       case 'premiumRelay':
         navigate('/premium/relay');
         break;
@@ -931,6 +937,12 @@ const Premium: Component = () => {
             setOpen={(v: boolean) => setPremiumData('openRenew', () => v)}
             data={premiumData}
             setData={setPremiumData}
+          />
+
+          <PremiumOrderHistoryModal
+            open={premiumData.openOrderHistory}
+            setOpen={(v: boolean) => setPremiumData('openOrderHistory', () => v)}
+            socket={premiumSocket}
           />
         </div>
       </div>

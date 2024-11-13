@@ -21,7 +21,7 @@ import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
 import { isConnected, socket, subsTo } from '../../sockets';
-import { getContactListHistory, getContentDownloadData, getContentListHistory } from '../../lib/premium';
+import { getContactListHistory, getContentBroadcastStaus, getContentDownloadData, getContentListHistory } from '../../lib/premium';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { createStore } from 'solid-js/store';
@@ -41,7 +41,7 @@ export type ContentItem = {
 export type ContentStore = {
   stats: ContentItem[],
   isDownloading: number | undefined,
-  isBroadcasting: number | undefined,
+  isBroadcasting: boolean,
 };
 
 export const kindNames = {
@@ -87,7 +87,7 @@ const PremiumContentBackup: Component<{
   const [store, updateStore] = createStore<ContentStore>({
     stats: [],
     isDownloading: undefined,
-    isBroadcasting: undefined,
+    isBroadcasting: false,
   });
 
   createEffect(() => {
@@ -160,7 +160,7 @@ const PremiumContentBackup: Component<{
         var a = window.document.createElement('a');
         const content = pako.gzip(data);
         a.href = window.URL.createObjectURL(new Blob([content], {type: 'application/x-gzip-compressed'}));
-        a.download = `nostr-content-${kindName}-${userId}-${date}.gzip`;
+        a.download = `nostr-content-${kindName}-${userId}-${date}.txt.gzip`;
 
         document.body.appendChild(a);
         a.click();
@@ -182,7 +182,7 @@ const PremiumContentBackup: Component<{
 
     if (!ws || !pubkey) return;
 
-    updateStore('isBroadcasting', () => kind);
+    updateStore('isBroadcasting', () => true);
 
     const subId = `premium_content_broadcast_${APP_ID}`;
 
@@ -192,13 +192,52 @@ const PremiumContentBackup: Component<{
       onEose: () => {
         unsub();
 
-        updateStore('isBroadcasting', () => undefined);
+        // startListeningForBroadcastStatus()
+        updateStore('isBroadcasting', () => false);
       }
     })
 
     const kinds = kind > -1 ? [kind] : [];
 
     getContentDownloadData(pubkey, kinds, subId, ws);
+  }
+
+  const startListeningForBroadcastStatus = () => {
+    // const ws = socket();
+    // const pubkey = account?.publicKey;
+
+    // if (!ws || !pubkey) return;
+
+    // const subId = `premium_broadcast_status_${APP_ID}`;
+
+    // let prog = 0;
+
+    // const unsub = subsTo(subId, {
+    //   onEvent: (_, content) => {
+    //     if (content.kind === 10_000_167) {
+    //       const stats = JSON.parse(content.content)
+    //       prog = stats.progress || 0;
+    //     }
+    //   },
+    //   onEose: () => {
+    //     unsub();
+
+    //     if (prog === 1) return;
+
+    //     setTimeout(() => {
+    //       startListeningForBroadcastStatus();
+    //     }, 4_000);
+
+    //     // updateStore('isBroadcasting', () => false);
+    //   }
+    // })
+
+    // getContentBroadcastStaus(pubkey, subId, ws);
+  };
+
+  const filteredStats = () => {
+    const allowed = [1, 4, 7, 30_023]
+    return store.stats.filter(s => allowed.includes(s.kind));
   }
 
   return (
@@ -213,14 +252,14 @@ const PremiumContentBackup: Component<{
           </tr>
         </thead>
         <tbody>
-          <For each={store.stats}>
+          <For each={filteredStats()}>
             {item => (
               <tr>
                 <td>{item.cnt.toLocaleString()}</td>
                 <td>{getKindName(item.kind)}</td>
                 <td class={styles.tdAction}>
                   <Show
-                    when={store.isBroadcasting !== item.kind}
+                    when={!store.isBroadcasting}
                     fallback={<div class="linkish">Broadcasting...</div>}
                   >
                     <ButtonLink
@@ -250,7 +289,7 @@ const PremiumContentBackup: Component<{
             <td>All Events</td>
             <td class={styles.tdAction}>
               <Show
-                when={store.isBroadcasting !== -1}
+                when={!store.isBroadcasting}
                 fallback={<div class="linkish">Broadcasting...</div>}
               >
                 <ButtonLink
