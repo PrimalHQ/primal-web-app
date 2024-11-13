@@ -312,6 +312,7 @@ const PremiumMediaManagment: Component<{
 
         <ConfirmModal
           open={store.showConfirmDelete.length > 0}
+          description="Are you sure you want to delete this media file? All notes referencing this media file will look broken."
           onConfirm={() => {
             deleteMedia(account?.publicKey, store.showConfirmDelete);
             updateStore('showConfirmDelete', () => '');
