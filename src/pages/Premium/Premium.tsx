@@ -330,41 +330,43 @@ const Premium: Component = () => {
   }
 
   const getSubscriptionInfo = () => {
-    premiumData.subOptions.forEach(option => {
-      if (!premiumSocket) return;
+    return new Promise((resolve) => {
+      premiumData.subOptions.forEach(option => {
+        if (!premiumSocket) return;
 
-      const subId = `qr__${option.id}_${APP_ID}`;
-      const unsub = subTo(premiumSocket, subId, (type, _, content) => {
-        if (type === 'EVENT') {
-          const cont: {
-            qr_code?: string,
-            membership_quote_id?: string,
-            amount_usd?: string,
-            amount_btc?: string,
-          } = JSON.parse(content?.content || '{}');
+        const subId = `qr__${option.id}_${APP_ID}`;
+        const unsub = subTo(premiumSocket, subId, (type, _, content) => {
+          if (type === 'EVENT') {
+            const cont: {
+              qr_code?: string,
+              membership_quote_id?: string,
+              amount_usd?: string,
+              amount_btc?: string,
+            } = JSON.parse(content?.content || '{}');
 
-          const usd = parseFloat(cont.amount_usd || '0');
-          const btc = parseFloat(cont.amount_btc || '0');
+            const usd = parseFloat(cont.amount_usd || '0');
+            const btc = parseFloat(cont.amount_btc || '0');
 
-          setPremiumData('subscriptions', option.id, () => ({
-            lnUrl:  cont.qr_code || '',
-            membershipId: cont.membership_quote_id || '',
-            amounts: {
-              usd: isNaN(usd) ? 0 : usd,
-              sats: isNaN(btc) ? 0 : btc * 100_000_000,
-            },
-          }))
-        }
+            setPremiumData('subscriptions', option.id, () => ({
+              lnUrl:  cont.qr_code || '',
+              membershipId: cont.membership_quote_id || '',
+              amounts: {
+                usd: isNaN(usd) ? 0 : usd,
+                sats: isNaN(btc) ? 0 : btc * 100_000_000,
+              },
+            }));
+          }
 
-        if (type === 'EOSE') {
-          unsub();
-        }
+          if (type === 'EOSE') {
+            unsub();
+            resolve(true);
+          }
+        });
+
+        getPremiumQRCode(premiumData.recipientPubkey, premiumData.name, option.id, subId, premiumSocket)
+
       });
-
-      getPremiumQRCode(premiumData.recipientPubkey, premiumData.name, option.id, subId, premiumSocket)
-
-    })
-
+    });
   };
 
 
@@ -557,12 +559,13 @@ const Premium: Component = () => {
     }
   }))
 
-  const handlePremiumAction = (action: string) => {
+  const handlePremiumAction = async (action: string) => {
     switch (action) {
       case 'changeName':
         setPremiumData('openRename', () => true);
         break;
       case 'extendSubscription':
+        await getSubscriptionInfo();
         setPremiumData('openRenew', () => true);
         break;
       case 'premiumRelay':
@@ -640,6 +643,7 @@ const Premium: Component = () => {
           </Match>
           <Match when={premiumData.membershipStatus.tier === 'premium'}>
             <PremiumSidebarActive
+              data={premiumData}
               onSidebarAction={handlePremiumAction}
               onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
             />

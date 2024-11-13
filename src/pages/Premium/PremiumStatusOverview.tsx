@@ -90,22 +90,25 @@ const PremiumStatusOverview: Component<{
         </div>
       </Show>
 
-      <Show
-        when={isExpired()}
-        fallback={
+      <Show when={props.data.membershipStatus.cohort_1 !== 'Primal Legend'}>
+        <Show
+          when={isExpired()}
+          fallback={
+            <div class={styles.extendPlan}>
+              <ButtonPremium onClick={props.onExtendPremium}>
+                {intl.formatMessage(t.actions.extendPlan)}
+              </ButtonPremium>
+            </div>
+          }
+        >
           <div class={styles.extendPlan}>
             <ButtonPremium onClick={props.onExtendPremium}>
-              {intl.formatMessage(t.actions.extendPlan)}
+              {intl.formatMessage(t.actions.renewPlan)}
             </ButtonPremium>
           </div>
-        }
-      >
-        <div class={styles.extendPlan}>
-          <ButtonPremium onClick={props.onExtendPremium}>
-            {intl.formatMessage(t.actions.renewPlan)}
-          </ButtonPremium>
-        </div>
+        </Show>
       </Show>
+
     </div>
   );
 }

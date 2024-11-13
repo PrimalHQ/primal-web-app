@@ -11,9 +11,19 @@ import styles from './Premium.module.scss';
 
 
 const PremiumSidebarActive: Component<{
+  data: PremiumStore,
   onSidebarAction: (action: string) => void,
   onOpenFAQ?: () => void,
 }> = (props) => {
+
+  const isExpired = () => {
+    if (props.data.membershipStatus.cohort_1 === 'Primal Legend') return false;
+
+    const expiration = props.data.membershipStatus.expires_on || 0;
+    const now = (new Date()).getTime() / 1_000;
+
+    return now > expiration;
+  }
 
   return (
 
@@ -59,11 +69,18 @@ const PremiumSidebarActive: Component<{
               Order history
             </ButtonLink>
           </li>
-          <li>
-            <ButtonLink onClick={() => props.onSidebarAction('extendSubscription')}>
-              Extend your subscripton
-            </ButtonLink>
-          </li>
+          <Show when={props.data.membershipStatus.cohort_1 !== 'Primal Legend'}>
+            <li>
+              <ButtonLink onClick={() => props.onSidebarAction('extendSubscription')}>
+                <Show
+                  when={isExpired()}
+                  fallback="Extend your subscripton"
+                >
+                  Renew your subscripton
+                </Show>
+              </ButtonLink>
+            </li>
+          </Show>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('changeName')}>
               Change your Primal name
