@@ -427,6 +427,91 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
   }
 }
 
+export const getContentListHistory = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "get content list'"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_content_stats", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch content list: ', reason);
+    return false;
+  }
+}
+
+export const getContentDownloadData = async (pubkey: string | undefined, kinds: number[], subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "get content download data'"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    if (kinds.length > 0) {
+      // @ts-ignore
+      payload.kinds = [...kinds]
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_content_backup", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch content download list: ', reason);
+    return false;
+  }
+}
+
 export const isPremiumNameAvailable = (name: string, pubkey: string | undefined, socket: WebSocket | undefined, subId: string) => {
   return new Promise<boolean>((resolve, reject) => {
     if (!socket) {

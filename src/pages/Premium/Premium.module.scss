@@ -1669,3 +1669,24 @@
   -webkit-mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
   mask: url(../../assets/icons/delete.svg) no-repeat 0px / 12px;
 }
+
+
+.broadcastIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--accent);
+  -webkit-mask: url(../../assets/icons/broadcast.svg) no-repeat 0px / 16px;
+  mask: url(../../assets/icons/broadcast.svg) no-repeat 0px / 16px;
+}
+
+.downloadIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--accent);
+  -webkit-mask: url(../../assets/icons/download.svg) no-repeat 0px / 16px;
+  mask: url(../../assets/icons/download.svg) no-repeat 0px / 16px;
+}

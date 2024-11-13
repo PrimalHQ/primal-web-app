@@ -156,6 +156,7 @@ export enum Kind  {
   NoteTopicStat=10_000_160,
   MediaStats=10_000_163,
   MediaList=10_000_164,
+  ContentStats=10_000_166,
 
   WALLET_OPERATION = 10_000_300,
   ExchangeRate = 10_000_305,

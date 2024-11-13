@@ -339,6 +339,12 @@ export type NostrPrimalMediaList= {
   created_at?: number,
 };
 
+export type NostrContactList= {
+  kind: Kind.ContentStats,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -385,6 +391,7 @@ export type NostrEventContent =
   NostrPrimalExchangeRate |
   NostrPrimalMediaStats |
   NostrPrimalMediaList |
+  NostrContactList |
   NostrTopicStats;
 
 export type NostrEvent = [
