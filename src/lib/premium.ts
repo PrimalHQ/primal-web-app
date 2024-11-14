@@ -601,7 +601,7 @@ export const getContentBroadcastStaus = async (pubkey: string | undefined, subId
 export const getOrderListHistory = async (pubkey: string | undefined, until: number, offset: number, subId: string, socket: WebSocket) => {
   if (!pubkey) return;
 
-  let content = { limit: 30 };
+  let content = { limit: 20 };
 
   if (until > 0) {
     // @ts-ignore

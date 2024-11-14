@@ -220,6 +220,18 @@ const PremiumMediaManagment: Component<{
     return `${ext} ${type}`;
   }
 
+  const getMediaUrl = (url:string) => {
+    let murl = media?.actions.getMediaUrl(url, 's');
+
+    if (!murl) {
+      murl = media?.actions.getMediaUrl(url, 'o');
+    }
+
+    if (!murl) return url;
+
+    return murl;
+  };
+
   return (
     <div class={styles.premiumMediaLayout}>
 
@@ -271,9 +283,14 @@ const PremiumMediaManagment: Component<{
                   <td class={styles.tdFile}>
                     <Show
                       when={item.mimetype.startsWith('video')}
-                      fallback={<img src={item.url} />}
+                      fallback={<img src={getMediaUrl(item.url)} />}
                     >
-                      <video src={item.url} />
+                      <Show
+                        when={media?.thumbnails[item.url]}
+                        fallback={<video src={getMediaUrl(item.url)} />}
+                      >
+                        <img src={media?.thumbnails[item.url]} />
+                      </Show>
                     </Show>
                   </td>
                   <td class={styles.tdDetails}>

@@ -54,6 +54,7 @@ import PremiumContentBackup from './PremiumContentBackup';
 import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 import { updateStore } from '../../services/StoreService';
+import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 
 export const satsInBTC = 100_000_000;
 
@@ -102,6 +103,7 @@ export type PremiumStore = {
   legendAmount: number,
   legendSupscription: PrimalPremiumSubscription,
   orderHistory: OrderHistoryItem[],
+  pagingOrderHistory: PaginationInfo,
 }
 
 export type PremiumStatus = {
@@ -170,6 +172,7 @@ const Premium: Component = () => {
       },
     },
     orderHistory: [],
+    pagingOrderHistory: { ...emptyPaging() },
   });
 
   // const setPremiumStatus = async () => {
@@ -505,7 +508,7 @@ const Premium: Component = () => {
   }
 
 
-  const getOrderHistory = () => {
+  const getOrderHistory = (until = 0, offset = 0) => {
     if (!premiumSocket) return;
 
     const subId = `premium_order_history_${APP_ID}`;
@@ -514,7 +517,12 @@ const Premium: Component = () => {
       if (type === 'EVENT') {
         if (content?.kind === Kind.OrderHistory) {
           const history = JSON.parse(content.content) as OrderHistoryItem[];
-          setPremiumData('orderHistory', () => [...history])
+          setPremiumData('orderHistory', (hs) => [...hs, ...history])
+        }
+
+        if (content?.kind === Kind.FeedRange) {
+          const feedRange: PaginationInfo = JSON.parse(content.content || '{}');
+          setPremiumData('pagingOrderHistory', () => ({ ...feedRange}))
         }
       }
 
@@ -523,8 +531,17 @@ const Premium: Component = () => {
       }
     });
 
-    getOrderListHistory(account?.publicKey, 0, 0, subId, premiumSocket)
+    getOrderListHistory(account?.publicKey, until, offset, subId, premiumSocket)
   }
+
+  const getOrderHistoryNextPage = () => {
+    if (premiumData.orderHistory.length === 0 && premiumData.pagingOrderHistory.since === 0) return;
+
+    getOrderHistory(
+      premiumData.pagingOrderHistory.since,
+      1,
+    );
+  };
 
   onMount(() => {
     keepSoceketOpen = true;
@@ -977,7 +994,10 @@ const Premium: Component = () => {
             open={premiumData.openOrderHistory}
             setOpen={(v: boolean) => setPremiumData('openOrderHistory', () => v)}
             data={premiumData}
-            onOpen={getOrderHistory}
+            onOpen={() => {
+              premiumData.orderHistory.length === 0 && getOrderHistory();
+            }}
+            onNextPage={getOrderHistoryNextPage}
           />
         </div>
       </div>

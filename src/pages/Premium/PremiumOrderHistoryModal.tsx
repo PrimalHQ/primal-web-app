@@ -18,6 +18,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { subTo } from '../../sockets';
 import { shortDate } from '../../lib/dates';
+import Paginator from '../../components/Paginator/Paginator';
 
 
 const PremiumOrderHistoryModal: Component<{
@@ -26,7 +27,7 @@ const PremiumOrderHistoryModal: Component<{
   setOpen: (v: boolean) => void,
   onOpen?: () => void,
   onClose?: () => void,
-  socket: WebSocket | undefined,
+  onNextPage?: () => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -86,6 +87,10 @@ const PremiumOrderHistoryModal: Component<{
                   </For>
                 </tbody>
               </table>
+              <Paginator
+                isSmall={true}
+                loadNextPage={props.onNextPage}
+              />
         </div>
 
       </div>
