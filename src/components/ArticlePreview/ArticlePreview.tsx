@@ -26,6 +26,7 @@ import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 
 import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { nip19 } from 'nostr-tools';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -326,11 +327,23 @@ const ArticlePreview: Component<{
     return ''
   }
 
+  const articleUrl = () => {
+    const vanityName = app?.verifiedUsers[props.article.pubkey];
+
+    if (!vanityName) return `/e/${props.article.naddr}`;
+
+    const decoded = nip19.decode(props.article.naddr);
+
+    const data = decoded.data as nip19.AddressPointer;
+
+    return `/${vanityName}/${data.identifier}`;
+  }
+
   return (
     <A
       ref={articlePreview}
       class={`${styles.article} ${props.boredered ? styles.bordered : ''}`}
-      href={`/e/${props.article.naddr}`}
+      href={articleUrl()}
       style={props.height ? `height: ${props.height}px` : ''}
     >
       <Show when={!props.hideContext}>

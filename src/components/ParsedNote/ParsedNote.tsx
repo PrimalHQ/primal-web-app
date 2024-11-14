@@ -1274,7 +1274,13 @@ const ParsedNote: Component<{
           const [kind, pubkey, identifier] = tag[1].split(':');
           const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
           const noteId = `nostr:${naddr}`;
-          const path = `/e/${naddr}`;
+          let path = `/e/${naddr}`;
+
+          const vanityName = app?.verifiedUsers[pubkey];
+
+          if (vanityName) {
+            path = `/${vanityName}/${identifier}`;
+          }
 
           let embeded = <span>{noteId}{end}</span>;
 

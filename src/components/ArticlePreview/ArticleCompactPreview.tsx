@@ -22,6 +22,7 @@ import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import NoteTopZapsTiny from '../Note/NoteTopZapsTiny';
+import { nip19 } from 'nostr-tools';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -323,11 +324,23 @@ const ArticleCompactPreview: Component<{
     return ''
   }
 
+  const articleUrl = () => {
+    const vanityName = app?.verifiedUsers[props.article.pubkey];
+
+    if (!vanityName) return `/e/${props.article.naddr}`;
+
+    const decoded = nip19.decode(props.article.naddr);
+
+    const data = decoded.data as nip19.AddressPointer;
+
+    return `/${vanityName}/${data.identifier}`;
+  }
+
   return (
     <A
       ref={articlePreview}
       class={styles.articleCompact}
-      href={`/e/${props.article.naddr}`}
+      href={articleUrl()}
     >
       <div class={styles.image}>
         <Show

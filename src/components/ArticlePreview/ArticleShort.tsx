@@ -22,6 +22,7 @@ import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticlePreview.module.scss';
+import { nip19 } from 'nostr-tools';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -32,6 +33,7 @@ const ArticleShort: Component<{
   shorter?: boolean,
 }> = (props) => {
   const media = useMediaContext();
+  const app = useAppContext();
 
   const [missingCacheImage, setMissingChacheImage] = createSignal(false);
 
@@ -78,10 +80,22 @@ const ArticleShort: Component<{
     return m;
   }
 
+  const articleUrl = () => {
+    const vanityName = app?.verifiedUsers[props.article.pubkey];
+
+    if (!vanityName) return `/e/${props.article.naddr}`;
+
+    const decoded = nip19.decode(props.article.naddr);
+
+    const data = decoded.data as nip19.AddressPointer;
+
+    return `/${vanityName}/${data.identifier}`;
+  }
+
   return (
     <A
       class={styles.articleShort}
-      href={`/e/${props.article.noteId}`}
+      href={articleUrl()}
       data-event={props.article.id}
     >
       <div class={styles.header}>
