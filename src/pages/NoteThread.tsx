@@ -113,7 +113,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     const curatedMentions = mentions.filter(m => {
       const mpks = pNote.msg.tags.filter(t => t[0] === 'p').map(t => t[1]);
-      const tzpk = pNote.topZaps[0].pubkey;
+      const tzpk = (pNote.topZaps[0] || {}).pubkey;
 
       return [ ...mpks, tzpk].includes(m.pubkey);
     });
@@ -196,14 +196,20 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     // }, 2_000)
   };
 
+
+  const pageTitle = () => {
+    const name = userName(primaryNote()?.user);
+
+
+    return intl.formatMessage(
+      t.pageTitle,
+      { name },
+    );
+  }
+
   return (
     <div>
-      <PageTitle title={
-        intl.formatMessage(
-          t.pageTitle,
-          { name: userName(primaryNote()?.user) },
-        )}
-      />
+      <PageTitle title={pageTitle()} />
 
       <Wormhole
         to="search_section"
