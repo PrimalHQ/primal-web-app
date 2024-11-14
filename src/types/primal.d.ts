@@ -345,6 +345,12 @@ export type NostrContactList= {
   created_at?: number,
 };
 
+export type NostrOrderHistory= {
+  kind: Kind.OrderHistory,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -392,6 +398,7 @@ export type NostrEventContent =
   NostrPrimalMediaStats |
   NostrPrimalMediaList |
   NostrContactList |
+  NostrOrderHistory |
   NostrTopicStats;
 
 export type NostrEvent = [

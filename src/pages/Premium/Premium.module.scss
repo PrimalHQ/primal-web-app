@@ -1663,6 +1663,81 @@
   }
 }
 
+
+.orderHistoryModal {
+  display: flex;
+  flex-direction: column;
+  padding: 20px 24px 28px 24px;
+  width: 672px;
+  border-radius: 12px;
+  background: var(--background-input);
+}
+
+.orderHistory {
+  width: 100%;
+  table {
+    width: 100%;
+    margin-top: 24px;
+
+    th {
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+      padding-inline: 9px;
+      border-bottom: 2px solid var(--text-primary);
+    }
+
+    td {
+      padding-left: 10px;
+      border-top: 1px solid var(--subtile-devider);
+      border-bottom: 1px solid var(--subtile-devider);
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    .tdDetails {
+      .fileInfo {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+
+        span {
+          margin-right: 4px;
+        }
+      }
+
+      .fileDate {
+        color: var(--text-secondary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+    }
+
+    .tdAction {
+      width: 140px;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+      button {
+        border: none;
+        margin: 0;
+        padding: 0;
+        outline: none;
+        background: none;
+      }
+    }
+  }
+
+  img, video {
+    width: 64px;
+  }
+}
+
 .deleteIcon {
   width: 12px;
   height: 12px;

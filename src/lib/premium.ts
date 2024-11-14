@@ -598,14 +598,26 @@ export const getContentBroadcastStaus = async (pubkey: string | undefined, subId
   }
 }
 
-export const getOrderListHistory = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+export const getOrderListHistory = async (pubkey: string | undefined, until: number, offset: number, subId: string, socket: WebSocket) => {
   if (!pubkey) return;
+
+  let content = { limit: 30 };
+
+  if (until > 0) {
+    // @ts-ignore
+    content.until = until;
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    content.offset = offset;
+  }
 
   const event = {
     kind: Kind.Settings,
     tags: [['p', pubkey]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: `{ "description": "get order history list"}`,
+    content: JSON.stringify(content),
   };
 
   try {

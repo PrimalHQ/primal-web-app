@@ -13,7 +13,7 @@ import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
 import { APP_ID } from '../../App';
-import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getPremiumMediaStats } from '../../lib/premium';
+import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getPremiumMediaStats, getOrderListHistory } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -53,8 +53,18 @@ import PremiumContactBackup from './PremiumContactBackup';
 import PremiumContentBackup from './PremiumContentBackup';
 import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
+import { updateStore } from '../../services/StoreService';
 
 export const satsInBTC = 100_000_000;
+
+export type OrderHistoryItem = {
+  purchased_at: number,
+  product_id: string,
+  product_label: string,
+  amount_btc: string,
+  amount_usd: string,
+  currency: string,
+}
 
 export type PrimalPremiumSubscription = {
   lnUrl: string,
@@ -91,6 +101,7 @@ export type PremiumStore = {
   exchangeRateUSD: number,
   legendAmount: number,
   legendSupscription: PrimalPremiumSubscription,
+  orderHistory: OrderHistoryItem[],
 }
 
 export type PremiumStatus = {
@@ -158,6 +169,7 @@ const Premium: Component = () => {
         sats: 0,
       },
     },
+    orderHistory: [],
   });
 
   // const setPremiumStatus = async () => {
@@ -490,6 +502,28 @@ const Premium: Component = () => {
     });
 
     fetchExchangeRate(subId, premiumSocket);
+  }
+
+
+  const getOrderHistory = () => {
+    if (!premiumSocket) return;
+
+    const subId = `premium_order_history_${APP_ID}`;
+
+    const unsub = subTo(premiumSocket, subId, (type, _, content) => {
+      if (type === 'EVENT') {
+        if (content?.kind === Kind.OrderHistory) {
+          const history = JSON.parse(content.content) as OrderHistoryItem[];
+          setPremiumData('orderHistory', () => [...history])
+        }
+      }
+
+      if (type === 'EOSE') {
+        unsub();
+      }
+    });
+
+    getOrderListHistory(account?.publicKey, 0, 0, subId, premiumSocket)
   }
 
   onMount(() => {
@@ -942,7 +976,8 @@ const Premium: Component = () => {
           <PremiumOrderHistoryModal
             open={premiumData.openOrderHistory}
             setOpen={(v: boolean) => setPremiumData('openOrderHistory', () => v)}
-            socket={premiumSocket}
+            data={premiumData}
+            onOpen={getOrderHistory}
           />
         </div>
       </div>

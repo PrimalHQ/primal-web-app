@@ -161,6 +161,8 @@ export enum Kind  {
   WALLET_OPERATION = 10_000_300,
   ExchangeRate = 10_000_305,
 
+  OrderHistory = 10_000_605,
+
   LongFormShell = 10_030_023,
 }
 
