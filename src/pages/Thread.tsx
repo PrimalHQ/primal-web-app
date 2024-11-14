@@ -20,7 +20,7 @@ import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
 import { nip19 } from '../lib/nTools';
@@ -33,13 +33,17 @@ import { getEvents } from '../lib/feed';
 import { useAccountContext } from '../contexts/AccountContext';
 import { hexToNpub } from '../lib/keys';
 import { fetchKnownProfiles } from '../lib/profile';
+import { fetchUserProfile } from '../handleNotes';
+import { useAppContext } from '../contexts/AppContext';
 
 const EventPage: Component = () => {
 
   const account = useAccountContext();
   const params = useParams();
+  const app = useAppContext();
+  const navigate = useNavigate();
 
-  const [evId, setEvId] = createSignal<string>();
+  const [evId, setEvId] = createSignal<string>('');
 
   const resolveFromId = (id: string) => {
     const subId = `event_${APP_ID}`;
@@ -60,6 +64,8 @@ const EventPage: Component = () => {
           } else {
             setEvId('NONE');
           }
+
+          setComponent(() => 'read');
           return;
         }
 
@@ -70,33 +76,24 @@ const EventPage: Component = () => {
             logWarning('Failed to decode note id: ', content.id)
             setEvId(() => 'NONE');
           }
+
+          setComponent(() => 'read');
           return;
         }
       },
       onEose: () => {
-        if (!evId()) setEvId(() => 'NONE');
+        if (evId().length === 0) {
+          setEvId(() => '');
+          setComponent(() => 'not_found');
+        }
         unsub();
       }
     });
 
     getEvents(account?.publicKey, [id], subId, false);
-
-    return (
-      <Switch>
-        <Match when={evId() === 'NONE'}>
-          <NotFound />
-        </Match>
-        <Match when={evId()?.startsWith('naddr')}>
-          <Longform naddr={evId() || ''} />
-        </Match>
-        <Match when={evId()?.startsWith('note')}>
-          <NoteThread noteId={evId() || ''} />
-        </Match>
-      </Switch>
-    )
   }
 
-  const [component, setComponent] = createSignal<JSXElement>();
+  const [component, setComponent] = createSignal<'note' | 'read' | 'none' | 'not_found'>('none');
 
   createEffect(() => {
     render(params.id, params.identifier);
@@ -106,18 +103,37 @@ const EventPage: Component = () => {
     // const { id, identifier } = params;
 
     if (!id && !identifier) {
-      setComponent(() => <NotFound />);
+      setComponent(() => 'not_found');
       return;
     }
 
     if (id) {
       if (id.startsWith('naddr')) {
-        setComponent(() => <Longform naddr={id} />);
+
+        const decoded = nip19.decode(id);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        const pubkey = data.pubkey;
+        const identifier = data.identifier;
+
+        await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
+
+        const vanityName = app?.verifiedUsers[pubkey];
+
+        if (vanityName) {
+          navigate(`/${vanityName}/${identifier}`);
+          return;
+        }
+
+        setEvId(() => id);
+        setComponent(() => 'read');
         return;
       }
 
       if (id.startsWith('note')) {
-        setComponent(() => <NoteThread noteId={id} />);
+        setEvId(() => id);
+        setComponent(() => 'note');
         return;
       }
 
@@ -126,16 +142,16 @@ const EventPage: Component = () => {
           const decoded = nip19.decode(id);
 
           // @ts-ignore
-          setComponent(() => resolveFromId(decoded.data.id));
+          resolveFromId(decoded.data.id);
           return;
         } catch (e) {
           logWarning('Failed to decode nevent: ', id)
-          setComponent(() => <NotFound />);
+          setComponent(() => 'not_found');
           return;
         }
       }
 
-      setComponent(() => resolveFromId(id));
+      resolveFromId(id);
       return;
     }
 
@@ -143,7 +159,7 @@ const EventPage: Component = () => {
       const name = params.vanityName.toLowerCase();
 
       if (!name) {
-        setComponent(() => <NotFound />);
+        setComponent(() => 'not_found');
         return;
       }
 
@@ -154,11 +170,13 @@ const EventPage: Component = () => {
 
       try {
         const naddr = nip19.naddrEncode({ pubkey, kind, identifier });
-        setComponent(() => <Longform naddr={naddr} />);
+
+        setEvId(() => naddr);
+        setComponent(() => 'read');
         return;
       } catch (e) {
         logError('Error encoding naddr: ', e);
-        setComponent(() => <NotFound />);
+        setComponent(() => 'not_found');
         return;
       }
 
@@ -166,7 +184,19 @@ const EventPage: Component = () => {
 
   };
 
-  return <>{component()}</>;
+  return <>
+    <Switch>
+      <Match when={component() === 'not_found'}>
+        <NotFound />
+      </Match>
+      <Match when={component() === 'read'}>
+        <Longform naddr={evId()} />
+      </Match>
+      <Match when={component() === 'note'}>
+        <NoteThread noteId={evId()} />
+      </Match>
+    </Switch>
+  </>;
 }
 
 export default EventPage;
