@@ -12,8 +12,9 @@ import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { broadcastEvent } from '../../lib/notes';
-import { NoteContextMenuInfo } from '../../contexts/AppContext';
+import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
+import { nip19 } from 'nostr-tools';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -24,6 +25,7 @@ const NoteContextMenu: Component<{
   const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
+  const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -79,7 +81,22 @@ const NoteContextMenu: Component<{
 
   const copyNoteLink = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${window.location.origin}/e/${note().noteId}`);
+
+    let link = `e/${note().noteId}`;
+
+    if (note().noteId.startsWith('naddr')) {
+      const vanityName = app?.verifiedUsers[note().pubkey];
+
+      if (vanityName) {
+        const decoded = nip19.decode(note().noteId);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        link = `${vanityName}/${data.identifier}`;
+      }
+    }
+
+    navigator.clipboard.writeText(`${window.location.origin}/${link}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
