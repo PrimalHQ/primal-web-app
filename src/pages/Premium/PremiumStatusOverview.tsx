@@ -17,6 +17,7 @@ import { PremiumStore } from './Premium';
 import styles from './Premium.module.scss';
 import PremiumSummary from './PremiumSummary';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
+import PremiumUserInfo from './PremiumUserInfo';
 
 
 const PremiumStatusOverview: Component<{
@@ -39,35 +40,10 @@ const PremiumStatusOverview: Component<{
   return (
     <div class={styles.premiumStatusOverview}>
 
-      <div class={styles.userInfo}>
-        <Avatar user={props.profile} size="xl" />
-        <div class={styles.userName}>
-          {userName(props.profile)}
-          <VerificationCheck
-            user={props.profile}
-            large={true}
-          />
-        </div>
-      </div>
-
-      <div class={styles.premiumActive}>
-        <Show
-          when={isExpired()}
-          fallback={
-            <div class={styles.activePremium}>
-              <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
-              <div class={styles.date}>
-                <div>{props.data.membershipStatus.cohort_2 || shortDate(props.data.membershipStatus.expires_on || 0)}</div>
-              </div>
-            </div>
-          }
-        >
-          <div class={styles.expiredPremium}>
-            <div class={styles.caption}>Expired</div>
-            <div class={styles.date}><div>{shortDate(props.data.membershipStatus.expires_on || 0)}</div></div>
-          </div>
-        </Show>
-      </div>
+      <PremiumUserInfo
+        data={props.data}
+        profile={props.profile}
+      />
 
       <Show when={props.data.membershipStatus.cohort_1 === 'Primal OG' || props.data.membershipStatus.cohort_2 === 'Free'}>
           <div class={styles.freeCaption}>

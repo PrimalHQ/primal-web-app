@@ -2,6 +2,23 @@ import { Kind } from "../constants";
 import { subTo } from "../sockets";
 import { signEvent } from "./nostrAPI";
 
+export type LegendCustomizationStyle = '' |
+  'GOLD' |
+  'AQUA' |
+  'SILVER' |
+  'PURPLE' |
+  'PURPLEHAZE' |
+  'TEAL' |
+  'BROWN' |
+  'BLUE' |
+  'SUNFIRE';
+
+export type LegendCustomizationConfig = {
+  style: LegendCustomizationStyle,
+  custom_badge: boolean,
+  avatar_glow: boolean,
+};
+
 export const sendPremiumNameCheck = (name: string, pubkey: string | undefined, subId: string, socket: WebSocket) => {
   let payload = { name };
 
@@ -631,6 +648,47 @@ export const getOrderListHistory = async (pubkey: string | undefined, until: num
       "REQ",
       subId,
       {cache: ["membership_purchase_history", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch media list: ', reason);
+    return false;
+  }
+}
+
+
+export const setLegendCutumization = async (pubkey: string | undefined, config: LegendCustomizationConfig, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: JSON.stringify(config),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_legend_customization", { ...payload }]},
     ]);
 
     if (socket) {

@@ -25,6 +25,10 @@ const PremiumSidebarActive: Component<{
     return now > expiration;
   }
 
+  const isLegend = () => {
+    return props.data.membershipStatus.cohort_1 === 'Primal Legend';
+  }
+
   return (
 
     <div class={styles.premiumSidebar}>
@@ -69,7 +73,7 @@ const PremiumSidebarActive: Component<{
               Order history
             </ButtonLink>
           </li>
-          <Show when={props.data.membershipStatus.cohort_1 !== 'Primal Legend'}>
+          <Show when={!isLegend()}>
             <li>
               <ButtonLink onClick={() => props.onSidebarAction('extendSubscription')}>
                 <Show
@@ -86,11 +90,13 @@ const PremiumSidebarActive: Component<{
               Change your Primal name
             </ButtonLink>
           </li>
-          <li>
-            <ButtonLink onClick={() => props.onSidebarAction('customLegend')}>
-              Legendary Profile Customization
-            </ButtonLink>
-          </li>
+          <Show when={isLegend()}>
+            <li>
+              <ButtonLink onClick={() => props.onSidebarAction('customLegend')}>
+                Legendary Profile Customization
+              </ButtonLink>
+            </li>
+          </Show>
         </ul>
       </div>
 

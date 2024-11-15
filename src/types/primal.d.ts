@@ -351,6 +351,12 @@ export type NostrOrderHistory= {
   created_at?: number,
 };
 
+export type NostrLegendCustomization= {
+  kind: Kind.LegendCustomization,
+  content: string,
+  created_at?: number,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -399,6 +405,7 @@ export type NostrEventContent =
   NostrPrimalMediaList |
   NostrContactList |
   NostrOrderHistory |
+  NostrLegendCustomization |
   NostrTopicStats;
 
 export type NostrEvent = [

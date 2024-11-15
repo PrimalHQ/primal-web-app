@@ -13,7 +13,7 @@ import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
 import { APP_ID } from '../../App';
-import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getPremiumMediaStats, getOrderListHistory } from '../../lib/premium';
+import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getPremiumMediaStats, getOrderListHistory, LegendCustomizationConfig, setLegendCutumization } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -55,6 +55,7 @@ import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 import { updateStore } from '../../services/StoreService';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
+import { useToastContext } from '../../components/Toaster/Toaster';
 
 export const satsInBTC = 100_000_000;
 
@@ -132,6 +133,7 @@ const Premium: Component = () => {
   const account = useAccountContext();
   const params = useParams();
   const navigate = useNavigate();
+  const toast = useToastContext();
 
   let nameInput: HTMLInputElement | undefined;
   let renameInput: HTMLInputElement | undefined;
@@ -543,6 +545,32 @@ const Premium: Component = () => {
     );
   };
 
+  const updateLegendConfig = (config: LegendCustomizationConfig) => {
+    if (!premiumSocket) return;
+
+    const subId = `premium_legend_config_${APP_ID}`;
+
+    let error = false;
+
+    const unsub = subTo(premiumSocket, subId, (type, _, content) => {
+      if (type === 'NOTICE') {
+        error = true;
+      }
+
+      if (type === 'EOSE') {
+        if (error) {
+          toast?.sendWarning('Failed to save changes');
+        } else {
+          toast?.sendSuccess('Changes have been saved');
+        }
+
+        unsub();
+      }
+    })
+
+    setLegendCutumization(account?.publicKey, config, subId, premiumSocket);
+  }
+
   onMount(() => {
     keepSoceketOpen = true;
     openSocket();
@@ -877,6 +905,7 @@ const Premium: Component = () => {
             <Match when={params.step === 'customize'}>
               <PremiumCustomLegend
                 data={premiumData}
+                onConfigSave={updateLegendConfig}
               />
             </Match>
 

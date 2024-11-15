@@ -1771,3 +1771,121 @@
   -webkit-mask: url(../../assets/icons/download.svg) no-repeat 0px / 16px;
   mask: url(../../assets/icons/download.svg) no-repeat 0px / 16px;
 }
+
+
+.premiumProfileLayout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 440px;
+
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+
+    .userName {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 24px;
+      color: var(--text-primary);
+    }
+  }
+}
+
+
+.legendCustomizationLayout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+  width: 440px;
+}
+
+.legendStylePicker {
+  display: grid;
+  grid-template-columns: repeat(5, 44px);
+  gap: 24px;
+  margin-bottom: 40px;
+
+  .legendStyleItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    cursor: pointer;
+
+    >div {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #666666;
+    }
+
+    &.selected {
+      border: 3px solid var(--text-primary);
+    }
+
+    &[data-legend-style="GOLD"] {
+      >div {background: var(--legend-gold);}
+    }
+    &[data-legend-style="AQUA"] {
+      >div {background: var(--legend-aqua);}
+    }
+    &[data-legend-style="SILVER"] {
+      >div {background: var(--legend-silver);}
+    }
+    &[data-legend-style="PURPLE"] {
+      >div {background: var(--legend-purple);}
+    }
+    &[data-legend-style="PURPLEHAZE"] {
+      >div {background: var(--legend-purplehaze);}
+    }
+    &[data-legend-style="TEAL"] {
+      >div {background: var(--legend-teal);}
+    }
+    &[data-legend-style="BROWN"] {
+      >div {background: var(--legend-brown);}
+    }
+    &[data-legend-style="BLUE"] {
+      >div {background: var(--legend-blue);}
+    }
+    &[data-legend-style="SUNFIRE"] {
+      >div {background: var(--legend-sunfire);}
+    }
+  }
+}
+
+.legendStyleOptions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 44px;
+
+  .optionLabel {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+
+.legendStyleDescription {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  margin-bottom: 26px;
+}

@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, createEffect, Match, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -21,17 +21,109 @@ import { A, useNavigate } from '@solidjs/router';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
+import PremiumUserInfo from './PremiumUserInfo';
+import { useAccountContext } from '../../contexts/AccountContext';
+import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
+import { createStore } from 'solid-js/store';
+import { LegendCustomizationConfig, LegendCustomizationStyle } from '../../lib/premium';
+import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import { useAppContext } from '../../contexts/AppContext';
 
+const legendStyles: LegendCustomizationStyle[] = [
+  '',
+  'GOLD',
+  'AQUA',
+  'SILVER',
+  'PURPLE',
+  'PURPLEHAZE',
+  'TEAL',
+  'BROWN',
+  'BLUE',
+  'SUNFIRE',
+];
 
 const PremiumCustomLegend: Component<{
   data: PremiumStore,
+  onConfigSave?: (config: LegendCustomizationConfig) => void,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();
+  const account = useAccountContext();
+  const app = useAppContext();
+
+  const [config, setConfig] = createStore<LegendCustomizationConfig>({
+    style: '',
+    custom_badge: false,
+    avatar_glow: false,
+  });
+
+  createEffect(() => {
+    if (account?.isKeyLookupDone && account?.publicKey) {
+      const cf = app?.legendCustomization[account.publicKey];
+
+      setConfig(() => ({ ...cf }));
+    }
+  })
+
+  const styleOptions = () => {
+    return legendStyles.map(style => {
+
+      let klass = styles.legendStyleItem;
+
+      if (config.style === style) {
+        klass += ` ${styles.selected}`;
+      }
+
+      return <div
+        class={klass}
+        data-legend-style={style}
+        onClick={() => setConfig('style', () => style)}
+      >
+        <div></div>
+      </div>;
+    })
+  };
 
   return (
-    <div class={styles.legendLayout}>
-      Customize Legend
+    <div class={styles.legendCustomizationLayout}>
+      <PremiumUserInfo
+        data={props.data}
+        profile={account?.activeUser}
+      />
+
+      <div class={styles.legendStylePicker}>
+        {styleOptions()}
+      </div>
+
+      <div class={styles.legendStyleOptions}>
+        <CheckBox2
+          checked={config.custom_badge}
+          onChange={(v: boolean) => setConfig('custom_badge', () => v)}
+        >
+          <div class={styles.optionLabel}>Custom badge</div>
+        </CheckBox2>
+        <CheckBox2
+          checked={config.avatar_glow}
+          onChange={(v: boolean) => setConfig('avatar_glow', () => v)}
+        >
+        <div class={styles.optionLabel}>Avatar Glow</div>
+      </CheckBox2>
+      </div>
+
+      <div class={styles.legendStyleDescription}>
+        <div>Don’t want to stand out?</div>
+        <div>
+          If you disable the custom badge and avatar glow,
+        </div>
+        <div>
+          your profile will look like any other profile on  Primal.
+        </div>
+      </div>
+
+      <ButtonPrimary onClick={() => props.onConfigSave && props.onConfigSave(config)}>
+        Apply Legendary Profile Customization
+      </ButtonPrimary>
+
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { connect, disconnect, isConnected, isNotConnected, readData, refreshSock
 import { nip19, Relay } from "../lib/nTools";
 import { logInfo } from "../lib/logger";
 import { Kind } from "../constants";
+import { LegendCustomizationConfig } from "../lib/premium";
 
 
 export type ReactionStats = {
@@ -76,6 +77,7 @@ export type AppContextStore = {
   subscribeToTier: (tier: Tier) => void,
   connectedRelays: Relay[],
   verifiedUsers: Record<string, string>,
+  legendCustomization: Record<string, LegendCustomizationConfig>,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -124,6 +126,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   subscribeToAuthor: undefined,
   connectedRelays: [],
   verifiedUsers: {},
+  legendCustomization: {},
   subscribeToTier: () => {},
 };
 
@@ -293,6 +296,12 @@ const handleVerifiedUsersEvent = (content: NostrEventContent) => {
     const verifiedUsers: Record<string, string> = JSON.parse(content.content);
 
     updateStore('verifiedUsers', (vu) => ({ ...vu, ...verifiedUsers }));
+  }
+
+  if (content.kind === Kind.LegendCustomization) {
+    const config = JSON.parse(content.content) as Record<string, LegendCustomizationConfig>;
+
+    updateStore('legendCustomization', (lc) => ({ ...lc, ...config }));
   }
 }
 
