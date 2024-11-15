@@ -1,4 +1,4 @@
-import { Component, createEffect, Match, Switch } from 'solid-js';
+import { Component, createEffect, Match, Show, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -91,39 +91,41 @@ const PremiumCustomLegend: Component<{
         profile={account?.activeUser}
       />
 
-      <div class={styles.legendStylePicker}>
-        {styleOptions()}
-      </div>
+      <Show when={props.data.membershipStatus.cohort_1 === 'Primal Legend'}>
 
-      <div class={styles.legendStyleOptions}>
-        <CheckBox2
-          checked={config.custom_badge}
-          onChange={(v: boolean) => setConfig('custom_badge', () => v)}
-        >
-          <div class={styles.optionLabel}>Custom badge</div>
+        <div class={styles.legendStylePicker}>
+          {styleOptions()}
+        </div>
+
+        <div class={styles.legendStyleOptions}>
+          <CheckBox2
+            checked={config.custom_badge}
+            onChange={(v: boolean) => setConfig('custom_badge', () => v)}
+          >
+            <div class={styles.optionLabel}>Custom badge</div>
+          </CheckBox2>
+          <CheckBox2
+            checked={config.avatar_glow}
+            onChange={(v: boolean) => setConfig('avatar_glow', () => v)}
+          >
+          <div class={styles.optionLabel}>Avatar Glow</div>
         </CheckBox2>
-        <CheckBox2
-          checked={config.avatar_glow}
-          onChange={(v: boolean) => setConfig('avatar_glow', () => v)}
-        >
-        <div class={styles.optionLabel}>Avatar Glow</div>
-      </CheckBox2>
-      </div>
-
-      <div class={styles.legendStyleDescription}>
-        <div>Don’t want to stand out?</div>
-        <div>
-          If you disable the custom badge and avatar glow,
         </div>
-        <div>
-          your profile will look like any other profile on  Primal.
+
+        <div class={styles.legendStyleDescription}>
+          <div>Don’t want to stand out?</div>
+          <div>
+            If you disable the custom badge and avatar glow,
+          </div>
+          <div>
+            your profile will look like any other profile on  Primal.
+          </div>
         </div>
-      </div>
 
-      <ButtonPrimary onClick={() => props.onConfigSave && props.onConfigSave(config)}>
-        Apply Legendary Profile Customization
-      </ButtonPrimary>
-
+        <ButtonPrimary onClick={() => props.onConfigSave && props.onConfigSave(config)}>
+          Apply Legendary Profile Customization
+        </ButtonPrimary>
+      </Show>
     </div>
   );
 }

@@ -594,18 +594,18 @@ const Premium: Component = () => {
   })
 
   createEffect(() => {
-    if (params.step === 'name') {
+    if (premiumStep() === 'name') {
       nameInput?.focus();
       setPremiumData('name', () => account?.activeUser?.name || '');
     }
-    else if (params.step === 'rename') {
+    else if (premiumStep() === 'rename') {
       renameInput?.focus();
       setPremiumData('rename', () => premiumData.name);
     }
-    else if (params.step === 'overview') {
+    else if (premiumStep() === 'overview') {
       getSubscriptionInfo();
     }
-    // else if (params.step === 'legendary') {
+    // else if (premiumStep() === 'legendary') {
     //   getLegendInfo();
     // }
   });
@@ -639,7 +639,19 @@ const Premium: Component = () => {
 
       getRecipientUser(pubkey);
     }
-  }))
+  }));
+
+  const premiumStep = () => {
+    if (
+      params.step === 'customize' &&
+      premiumData.membershipStatus.cohort_1 &&
+      premiumData.membershipStatus.cohort_1 !== 'Primal Legend'
+    ) {
+      return '';
+    }
+
+    return params.step;
+  }
 
   const handlePremiumAction = async (action: string) => {
     switch (action) {
@@ -689,31 +701,31 @@ const Premium: Component = () => {
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
           }
         >
-          <Match when={params.step === 'support'}>
+          <Match when={premiumStep() === 'support'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
           </Match>
 
-          <Match when={params.step === 'legend'}>
+          <Match when={premiumStep() === 'legend'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
           </Match>
 
-          <Match when={params.step === 'legendary'}>
+          <Match when={premiumStep() === 'legendary'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
           </Match>
 
-          <Match when={params.step === 'relay'}>
+          <Match when={premiumStep() === 'relay'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
           </Match>
 
-          <Match when={params.step === 'media'}>
+          <Match when={premiumStep() === 'media'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
           </Match>
 
-          <Match when={params.step === 'contacts'}>
+          <Match when={premiumStep() === 'contacts'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
           </Match>
 
-          <Match when={params.step === 'content'}>
+          <Match when={premiumStep() === 'content'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
           </Match>
         </Switch>
@@ -742,7 +754,7 @@ const Premium: Component = () => {
           <Switch
             fallback={<Loader />}
           >
-            <Match when={params.step === 'name'}>
+            <Match when={premiumStep() === 'name'}>
               <div class={styles.nameStep}>
                 <div class={styles.title}>
                   {intl.formatMessage(t.title.name)}
@@ -779,7 +791,7 @@ const Premium: Component = () => {
               </div>
             </Match>
 
-            <Match when={params.step === 'overview'}>
+            <Match when={premiumStep() === 'overview'}>
               <div class={styles.congrats}>
                 <div>{intl.formatMessage(t.title.subscription)}</div>
                 <div>{intl.formatMessage(t.title.subscriptionSubtitle)}</div>
@@ -804,7 +816,7 @@ const Premium: Component = () => {
 
             </Match>
 
-            <Match when={params.step === 'confirm'}>
+            <Match when={premiumStep() === 'confirm'}>
               <div class={styles.confirmStep}>
                 <div class={styles.title}>
                   <div>You are Buying:</div>
@@ -855,18 +867,18 @@ const Premium: Component = () => {
               </div>
             </Match>
 
-            <Match when={params.step === 'support'}>
+            <Match when={premiumStep() === 'support'}>
               <PremiumSupport
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}
               />
             </Match>
 
-            <Match when={params.step === 'legend'}>
+            <Match when={premiumStep() === 'legend'}>
               <PremiumLegend
               />
             </Match>
 
-            <Match when={params.step === 'legendary'}>
+            <Match when={premiumStep() === 'legendary'}>
               <PremiumBecomeLegend
                 data={premiumData}
                 profile={account?.activeUser}
@@ -878,31 +890,31 @@ const Premium: Component = () => {
               />
             </Match>
 
-            <Match when={params.step === 'relay'}>
+            <Match when={premiumStep() === 'relay'}>
               <PremiumRelay
                 data={premiumData}
               />
             </Match>
 
-            <Match when={params.step === 'media'}>
+            <Match when={premiumStep() === 'media'}>
               <PremiumMediaManagment
                 data={premiumData}
               />
             </Match>
 
-            <Match when={params.step === 'contacts'}>
+            <Match when={premiumStep() === 'contacts'}>
               <PremiumContactBackup
                 data={premiumData}
               />
             </Match>
 
-            <Match when={params.step === 'content'}>
+            <Match when={premiumStep() === 'content'}>
               <PremiumContentBackup
                 data={premiumData}
               />
             </Match>
 
-            <Match when={params.step === 'customize'}>
+            <Match when={premiumStep() === 'customize'}>
               <PremiumCustomLegend
                 data={premiumData}
                 onConfigSave={updateLegendConfig}
