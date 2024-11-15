@@ -121,7 +121,7 @@ const Downloads: Component = () => {
         <div class={styles.promoVideo}>
           <video
             src='https://m.primal.net/MAww.mp4'
-            controls={false}
+            controls={true}
             muted={true}
             loop={true}
             playsinline={true}
