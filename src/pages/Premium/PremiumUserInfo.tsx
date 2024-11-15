@@ -55,6 +55,7 @@ const PremiumUserInfo: Component<{
           <VerificationCheck
             user={props.profile}
             large={true}
+            legendConfig={props.legendConfig}
           />
         </div>
       </div>

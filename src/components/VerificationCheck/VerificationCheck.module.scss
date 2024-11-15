@@ -31,8 +31,54 @@
 .verifiedIconPrimal {
   width: 100%;
   height: 100%;
-  background-image: url(../../assets/icons/purple_check.svg);
-  background-size: contain;
+
+  background: var(--accent);
+  -webkit-mask: url(../../assets/icons/purple_check.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/purple_check.svg) 0 / 100% no-repeat;
+  // background-image: url(../../assets/icons/purple_check.svg);
+  // background-size: contain;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .checkIcon {
+    width: 50%;
+    height: 50%;
+
+    background-color: var(--text-primary-button);
+    -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+    mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+
+  }
+
+  &.legend_GOLD {
+    background: var(--legend-gold);
+  }
+  &.legend_AQUA {
+    background: var(--legend-aqua);
+  }
+  &.legend_SILVER {
+    background: var(--legend-silver);
+  }
+  &.legend_PURPLE {
+    background: var(--legend-purple);
+  }
+  &.legend_PURPLEHAZE {
+    background: var(--legend-purplehaze);
+  }
+  &.legend_TEAL {
+    background: var(--legend-teal);
+  }
+  &.legend_BROWN {
+    background: var(--legend-brown);
+  }
+  &.legend_BLUE {
+    background: var(--legend-blue);
+  }
+  &.legend_SUNFIRE {
+    background: var(--legend-sunfire);
+  }
 }
 
 .whiteCheck {

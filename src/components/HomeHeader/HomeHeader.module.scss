@@ -174,7 +174,7 @@
   justify-content: flex-start;
 
   .input {
-    width: 100%;
+    width: calc(100% - 50px);
     height: 36px;
     font-size: 16px;
     font-weight: 400;

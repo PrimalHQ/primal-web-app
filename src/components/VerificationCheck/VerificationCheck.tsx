@@ -5,6 +5,8 @@ import { PrimalUser } from "../../types/primal";
 import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
 import { userName } from "../../stores/profile";
+import { LegendCustomizationConfig } from "../../lib/premium";
+import { useAppContext } from "../../contexts/AppContext";
 
 
 const VerificationCheck: Component<{
@@ -12,7 +14,9 @@ const VerificationCheck: Component<{
   large?: boolean,
   fallback?: JSXElement,
   id?: string,
+  legendConfig?: LegendCustomizationConfig,
 }> = (props) => {
+  const app = useAppContext();
 
   const [isVerified, setIsVerified] = createSignal(false);
 
@@ -40,6 +44,29 @@ const VerificationCheck: Component<{
     });
   }
 
+  const legendConfig = () => {
+    const pubkey = props.user?.pubkey;
+
+    if (!pubkey) return undefined;
+
+    return props.legendConfig || app?.legendCustomization[pubkey];
+  }
+
+  const primalCheckKlass = () => {
+    let klass = styles.verifiedIconPrimal;
+    const lc = legendConfig();
+
+    if (lc?.custom_badge) {
+      const style = lc.style;
+
+      if (style !== '') {
+        klass += ` ${styles[`legend_${style}`]}`
+      }
+    }
+
+    return klass;
+  }
+
   onMount(() => {
     checkVerification();
   })
@@ -53,15 +80,17 @@ const VerificationCheck: Component<{
         when={props.large}
         fallback={
           <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
-          <Show
-            when={isVerifiedByPrimal()}
-            fallback={
-              <span class={styles.verifiedIcon} />
-            }
-          >
-            <span class={styles.verifiedIconPrimal} />
-          </Show>
-        </div>
+            <Show
+              when={isVerifiedByPrimal()}
+              fallback={
+                <span class={styles.verifiedIcon} />
+              }
+            >
+              <div class={primalCheckKlass()}>
+                <div class={styles.checkIcon}></div>
+              </div>
+            </Show>
+          </div>
         }
       >
         <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIconL}>
@@ -71,7 +100,9 @@ const VerificationCheck: Component<{
               <span class={styles.verifiedIcon} />
             }
           >
-            <span class={styles.verifiedIconPrimal} />
+            <div class={primalCheckKlass()}>
+              <div class={styles.checkIcon}></div>
+            </div>
           </Show>
         </div>
       </Show>
