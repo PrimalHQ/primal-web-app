@@ -89,6 +89,7 @@ const PremiumCustomLegend: Component<{
       <PremiumUserInfo
         data={props.data}
         profile={account?.activeUser}
+        legendConfig={config}
       />
 
       <Show when={props.data.membershipStatus.cohort_1 === 'Primal Legend'}>

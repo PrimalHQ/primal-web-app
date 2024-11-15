@@ -8,6 +8,8 @@ import NoteImage from '../NoteImage/NoteImage';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './Avatar.module.scss';
+import { useAppContext } from '../../contexts/AppContext';
+import { LegendCustomizationConfig } from '../../lib/premium';
 
 const Avatar: Component<{
   src?: string | undefined,
@@ -17,9 +19,11 @@ const Avatar: Component<{
   id?: string,
   showCheck?: boolean,
   zoomable?: boolean,
+  legendConfig?: LegendCustomizationConfig,
 }> = (props) => {
 
   const media = useMediaContext();
+  const app = useAppContext();
 
   const [isCached, setIsCached] = createSignal(false);
 
@@ -75,7 +79,47 @@ const Avatar: Component<{
     return true;
   }
 
+  const legendClass = () => {
+    if (props.user){
+      const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
+
+      if (legendConfig) {
+        return legendConfig.custom_badge ? styles.legend : '';
+      }
+    }
+
+    return '';
+
+  }
+
   const highlightClass = () => {
+    if (props.user){
+      const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
+
+      if (legendConfig) {
+        const style = legendConfig.style
+
+        const showHighlight = style !== '' &&
+          legendConfig.custom_badge;
+
+        const showGlow = style !== '' &&
+          legendConfig.avatar_glow &&
+          legendConfig.custom_badge;
+
+        let klass = '';
+
+        if (showHighlight) {
+          klass += `${styles.legend} ${styles[`legend_${style}`]}`;
+        }
+
+        if (showGlow) {
+          klass += ` ${styles[`legend_glow_${style}`]}`;
+        }
+
+        return klass;
+      }
+    }
+
     if (props.highlightBorder) {
       return styles.highlightBorder;
     }
@@ -147,7 +191,7 @@ const Avatar: Component<{
   return (
     <div
       id={props.id}
-      class={`${avatarClass[selectedSize]} ${highlightClass()}`}
+      class={`${avatarClass[selectedSize]} ${legendClass()} ${highlightClass()}`}
       data-user={props.user?.pubkey}
     >
       <Show

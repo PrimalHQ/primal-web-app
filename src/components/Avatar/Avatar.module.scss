@@ -49,6 +49,14 @@
     bottom: -6px;
     right: -6px;
   }
+
+  &.legend {
+    padding: 1px;
+    .missingBack {
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .microAvatar {
@@ -65,6 +73,14 @@
     @include iconBackground;
     bottom: -6px;
     right: -6px;
+  }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 18px;
+      height: 18px;
+    }
   }
 }
 
@@ -83,6 +99,14 @@
     bottom: -6px;
     right: -6px;
   }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
 .xssAvatar {
@@ -99,6 +123,14 @@
     @include iconBackground;
     bottom: -6px;
     right: -6px;
+  }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 22px;
+      height: 22px;
+    }
   }
 }
 
@@ -117,6 +149,14 @@
     bottom: -6px;
     right: -6px;
   }
+
+  &.legend {
+    padding: 1px;
+    .missingBack {
+      width: 28px;
+      height: 28px;
+    }
+  }
 }
 
 .vvsAvatar {
@@ -134,6 +174,14 @@
     bottom: -6px;
     right: -6px;
   }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 32px;
+      height: 32px;
+    }
+  }
 }
 
 .vs2Avatar {
@@ -148,6 +196,14 @@
 
   .iconBackground {
     @include iconBackground;
+  }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 36px;
+      height: 36px;
+    }
   }
 }
 
@@ -164,6 +220,14 @@
   .iconBackground {
     @include iconBackground;
   }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 38px;
+      height: 38px;
+    }
+  }
 }
 
 .smallAvatar {
@@ -178,6 +242,14 @@
 
   .iconBackground {
     @include iconBackground;
+  }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 40px;
+      height: 40px;
+    }
   }
 }
 
@@ -194,6 +266,14 @@
   .iconBackground {
     @include iconBackground;
   }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 48px;
+      height: 48px;
+    }
+  }
 }
 
 .mlAvatar {
@@ -209,6 +289,14 @@
   .iconBackground {
     @include iconBackground;
   }
+
+  &.legend {
+    padding: 2px;
+    .missingBack {
+      width: 56px;
+      height: 56px;
+    }
+  }
 }
 
 .mllAvatar {
@@ -223,6 +311,14 @@
 
   .iconBackground {
     @include iconBackground;
+  }
+
+  &.legend {
+    padding: 3px;
+    .missingBack {
+      width: 58px;
+      height: 58px;
+    }
   }
 }
 
@@ -241,6 +337,14 @@
     bottom: 3px;
     right: 3px;
   }
+
+  &.legend {
+    padding: 3px;
+    .missingBack {
+      width: 66px;
+      height: 66px;
+    }
+  }
 }
 
 .extraLargeAvatar {
@@ -258,6 +362,14 @@
     bottom: 4px;
     right: 4px;
   }
+
+  &.legend {
+    padding: 3px;
+    .missingBack {
+      width: 74px;
+      height: 74px;
+    }
+  }
 }
 
 .xxlAvatar {
@@ -274,6 +386,14 @@
     @include iconBackground;
     bottom: 4px;
     right: 4px;
+  }
+
+  &.legend {
+    padding: 4px;
+    .missingBack {
+      width: 112px;
+      height: 112px;
+    }
   }
 }
 
@@ -410,4 +530,92 @@
   img {
     filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(300deg) blur(0.1rem);
   }
+}
+
+@mixin highlight {
+  border-radius: 99999px;
+  overflow: hidden
+}
+
+.legend_GOLD {
+  @include highlight;
+  background: var(--legend-gold);
+}
+.legend_AQUA {
+  @include highlight;
+  background: var(--legend-aqua);
+}
+.legend_SILVER {
+  @include highlight;
+  background: var(--legend-silver);
+}
+.legend_PURPLE {
+  @include highlight;
+  background: var(--legend-purple);
+}
+.legend_PURPLEHAZE {
+  @include highlight;
+  background: var(--legend-purplehaze);
+}
+.legend_TEAL {
+  @include highlight;
+  background: var(--legend-teal);
+}
+.legend_BROWN {
+  @include highlight;
+  background: var(--legend-brown);
+}
+.legend_BLUE {
+  @include highlight;
+  background: var(--legend-blue);
+}
+.legend_SUNFIRE {
+  @include highlight;
+  background: var(--legend-sunfire);
+}
+
+.legend_glow_GOLD {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-gold);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-gold);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-gold);
+}
+.legend_glow_AQUA {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-aqua);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-aqua);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-aqua);
+}
+.legend_glow_SILVER {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-silver);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-silver);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-silver);
+}
+.legend_glow_PURPLE {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-purple);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-purple);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-purple);
+}
+.legend_glow_PURPLEHAZE {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-purplehaze);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-purplehaze);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-purplehaze);
+}
+.legend_glow_TEAL {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-teal);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-teal);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-teal);
+}
+.legend_glow_BROWN {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-brown);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-brown);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-brown);
+}
+.legend_glow_BLUE {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-blue);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-blue);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-blue);
+}
+.legend_glow_SUNFIRE {
+  -webkit-box-shadow: 0px 0px 20px 0px var(--legend-glow-sunfire);
+  -moz-box-shadow: 0px 0px 20px 0px var(--legend-glow-sunfire);
+  box-shadow: 0px 0px 20px 0px var(--legend-glow-sunfire);
 }

@@ -114,6 +114,16 @@
   --legend-blue: linear-gradient(135deg, #01E0FF 4.5%, #0190F8 29.97%, #2555EE 58.06%, #4A05CA 86.5%), #F00;
   --legend-sunfire: linear-gradient(135deg, #FFA722 4.5%, #FA3C3C 29.97%, #F00492 58.06%, #620BA9 86.5%), linear-gradient(135deg, #B300D3 15.94%, #4800FF 85.31%), #08F;
 
+  --legend-glow-gold: #FFB700;
+  --legend-glow-aqua: #6BCCFF;
+  --legend-glow-silver: #CCC;
+  --legend-glow-purple: #B300D3;
+  --legend-glow-purplehaze: #FB00C4;
+  --legend-glow-teal: #40FCFF;
+  --legend-glow-brown: #BB9971;
+  --legend-glow-blue: #01E0FF;
+  --legend-glow-sunfire: #FFA722;
+
   background-color: var(--background-site);
 
   .mentioned_user {

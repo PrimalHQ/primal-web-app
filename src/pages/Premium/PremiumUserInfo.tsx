@@ -26,12 +26,13 @@ import VerificationCheck from '../../components/VerificationCheck/VerificationCh
 import { shortDate } from '../../lib/dates';
 import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
+import { LegendCustomizationConfig } from '../../lib/premium';
 
 
 const PremiumUserInfo: Component<{
   data: PremiumStore,
   profile?: PrimalUser,
-
+  legendConfig?: LegendCustomizationConfig,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ const PremiumUserInfo: Component<{
   return (
     <div class={styles.premiumProfileLayout}>
       <div class={styles.userInfo}>
-        <Avatar user={props.profile} size="xl" />
+        <Avatar user={props.profile} size="xl" legendConfig={props.legendConfig} />
         <div class={styles.userName}>
           {userName(props.profile)}
           <VerificationCheck
