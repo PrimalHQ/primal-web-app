@@ -1829,11 +1829,18 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #666666;
+      background: var(--text-tertiary-2);
     }
 
     &.selected {
       border: 3px solid var(--text-primary);
+    }
+    &[data-legend-style=""] {
+      >div {
+        background-color: var(--text-tertiary-2);
+        -webkit-mask: url(../../assets/icons/nothing.svg) 0 / 100% no-repeat;
+        mask: url(../../assets/icons/nothing.svg) 0 / 100% no-repeat;
+      }
     }
 
     &[data-legend-style="GOLD"] {
