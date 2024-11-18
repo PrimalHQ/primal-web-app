@@ -214,21 +214,25 @@ const Premium: Component = () => {
 
     if (!user) return;
 
-    let metaUpdate: {nip05?: string, lud16?: string} = {};
+    const shouldUpdateNip05 = user.nip05.endsWith('@primal.net');
+    const shouldUpdateLud16 = user.lud16.endsWith('@primal.net');
+
+    if (!shouldUpdateLud16 && !shouldUpdateNip05) return;
+
+    let metaUpdate: {nip05?: string, lud16?: string} = {
+      nip05: user.nip05,
+      lud16: user.lud16,
+    };
 
     const nip05 = `${premiumData.name}@primal.net`;
     const lud16 = `${`${premiumData.name}@primal.net`}`;
 
-    if (!option) {
-      metaUpdate = { nip05, lud16 };
+    if (shouldUpdateNip05 && (!option || option === 'nip05')) {
+      metaUpdate.nip05 = nip05;
     }
 
-    if (option === 'nip05') {
-      metaUpdate = { nip05, lud16: user.lud16 }
-    }
-
-    if (option === 'lud16') {
-      metaUpdate = { lud16, nip05: user.nip05 }
+    if (shouldUpdateLud16 && (!option || option === 'lud16')) {
+      metaUpdate.lud16 = lud16;
     }
 
     if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
@@ -240,7 +244,7 @@ const Premium: Component = () => {
         account.publicKey && account.actions.updateAccountProfile(account.publicKey);
         toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       });
-      return false;
+      return;
     }
   }
 
