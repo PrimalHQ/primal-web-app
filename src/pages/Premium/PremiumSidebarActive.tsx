@@ -97,6 +97,13 @@ const PremiumSidebarActive: Component<{
               </ButtonLink>
             </li>
           </Show>
+            <Show when={!isExpired() && !isLegend()}>
+              <li>
+                <ButtonLink onClick={() => props.onSidebarAction('becomeLegend')}>
+                  Become a Legend
+                </ButtonLink>
+              </li>
+            </Show>
         </ul>
       </div>
 

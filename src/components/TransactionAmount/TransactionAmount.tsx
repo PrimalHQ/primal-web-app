@@ -1,4 +1,4 @@
-import { Component, createSignal } from 'solid-js';
+import { Component, createEffect, createSignal } from 'solid-js';
 
 import styles from './TransactionAmount.module.scss';
 import { floatingPoints } from '../../constants';
@@ -38,9 +38,14 @@ const TransactionAmount: Component<{
   amountUSD?: number,
   amountSats?: number,
   amountBTC?: number,
+  reverse?: boolean,
 }> = (props) => {
 
   const [reverseCurrencies, setReverseCurrencies] = createSignal(false);
+
+  createEffect(() => {
+    setReverseCurrencies(() => props.reverse || false);
+  })
 
   const btcValue = () => {
     if (props.amountBTC) return {

@@ -99,6 +99,7 @@ const PremiumBecomeLegend: Component<{
       </div>
 
       <TransactionAmount
+        reverse={true}
         amountUSD={subscription().amounts.usd}
         amountBTC={subscription().amounts.sats / 100_000_000}
       />

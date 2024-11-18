@@ -712,6 +712,9 @@ const Premium: Component = () => {
       case 'customLegend':
         navigate('/premium/customize');
         break;
+      case 'becomeLegend':
+        navigate('/premium/legend');
+        break;
     }
   }
 
