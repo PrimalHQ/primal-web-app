@@ -51,6 +51,7 @@ import {
   getProfileScoredNotes,
   getRelays,
   getUserProfileInfo,
+  getUserProfiles,
   isUserFollowing,
 } from "../lib/profile";
 import { useAccountContext } from "./AccountContext";
@@ -157,6 +158,7 @@ export type ProfileContextStore = {
     clearProfile: () => void,
     updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
     resetScroll: () => void,
+    updateProfile: (pubkey: string) => void,
   }
 }
 
@@ -868,6 +870,28 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('userStats', reconcile(emptyStats));
   };
 
+  const handleUserProfileEvent = (content: NostrEventContent) => {
+    if (content?.content) {
+      if (content.kind === Kind.Metadata) {
+        const user = JSON.parse(content.content);
+
+        updateStore('userProfile', () => ({...user, pubkey: content.pubkey}));
+      }
+    }
+  }
+
+  const updateProfile = (pubkey: string) => {
+    if (pubkey !== store.profileKey) return;
+
+    const subId = `user_profile_${APP_ID}`;
+
+    handleSubscription(
+      subId,
+      () => getUserProfiles([pubkey], subId),
+      handleUserProfileEvent,
+    );
+  };
+
   const refreshNotes = () => {
   };
 
@@ -1054,6 +1078,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearProfile,
       updateScrollTop,
       resetScroll,
+      updateProfile,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,

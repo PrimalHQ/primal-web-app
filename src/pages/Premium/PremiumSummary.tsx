@@ -7,17 +7,36 @@ import { formatStorage } from '../../utils';
 import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
+import { useAccountContext } from '../../contexts/AccountContext';
+import ButtonLink from '../../components/Buttons/ButtonLink';
 
 
 const PremiumSummary: Component<{
   data: PremiumStore,
   rename?: boolean,
   expanded?: boolean,
+  updateUserMetadata: (option?: 'nip05' | 'lud16') => void,
 }> = (props) => {
+  const account = useAccountContext();
 
   const name = () => props.rename ? props.data.rename : props.data.name;
 
   const status = () => props.data.membershipStatus;
+
+  const isNip05Primal = () => {
+    return account?.activeUser?.nip05 === `${name()}@primal.net`;
+  }
+  const isLud16Primal = () => {
+    return account?.activeUser?.lud16 === `${name()}@primal.net`;
+  }
+
+  const applyNip05 = () => {
+    props.updateUserMetadata('nip05')
+  }
+
+  const applyLud16 = () => {
+    props.updateUserMetadata('lud16')
+  }
 
   return (
     <div class={styles.premiumSummary}>
@@ -26,10 +45,25 @@ const PremiumSummary: Component<{
           <div class={styles.verifIcon}></div>
           <div>Verified nostr address</div>
         </div>
-        <div>
-          <span class={styles.summaryValue}>
-            {name()}@primal.net
-          </span>
+        <div class={styles.summaryValueHolder}>
+          <Show
+            when={isNip05Primal()}
+            fallback={
+              <>
+                <div class={styles.summaryValue}>
+                  {account?.activeUser?.nip05}
+                </div>
+                <div class={styles.summaryAlternateValue}>
+                  <div>{name()}@primal.net</div>
+                  <ButtonLink onClick={applyNip05}>apply</ButtonLink>
+                </div>
+              </>
+            }
+          >
+            <div class={styles.summaryValue}>
+              {name()}@primal.net
+            </div>
+          </Show>
         </div>
       </div>
 
@@ -38,10 +72,25 @@ const PremiumSummary: Component<{
           <div class={styles.zapIcon}></div>
           <div>Bitcoin lightning address</div>
         </div>
-        <div>
-          <span class={styles.summaryValue}>
-            {name()}@primal.net
-          </span>
+        <div class={styles.summaryValueHolder}>
+          <Show
+            when={isLud16Primal()}
+            fallback={
+              <>
+                <div class={styles.summaryValue}>
+                  {account?.activeUser?.lud16}
+                </div>
+                <div class={styles.summaryAlternateValue}>
+                  <div>{name()}@primal.net</div>
+                  <ButtonLink onClick={applyLud16}>apply</ButtonLink>
+                </div>
+              </>
+            }
+          >
+            <div class={styles.summaryValue}>
+              {name()}@primal.net
+            </div>
+          </Show>
         </div>
       </div>
 

@@ -144,11 +144,35 @@
       border-bottom: none;
     }
 
+    .summaryValueHolder {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
     .summaryValue {
       font-size: 15px;
       font-weight: 600;
       line-height: 16px;
       color: var(--text-primary);
+    }
+
+    .summaryAlternateValue {
+      display: flex;
+      gap: 4px;
+      color: var(--text-secondary);
+      text-align: right;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 14px;
+
+      button {
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 14px;
+      }
     }
   }
 }
@@ -650,7 +674,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 11vh;
+  padding-top: 40px;
   width: 440px;
 
   .userInfo {

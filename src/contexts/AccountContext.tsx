@@ -99,6 +99,7 @@ export type AccountContextStore = {
     setActiveUser: (user: PrimalUser) => void,
     addLike: (note: PrimalNote | PrimalArticle | PrimalDVM) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
+    updateAccountProfile: (pubkey: string) => void,
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     quoteNote: (noteId: string | undefined) => void,
@@ -315,7 +316,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfile(key);
+      updateAccountProfile(key);
     } catch (e: any) {
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
@@ -323,7 +324,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   };
 
-  const getUserProfile = (pubkey: string) => {
+  const updateAccountProfile = (pubkey: string) => {
     const subId = `user_profile_${APP_ID}`;
 
     handleSubscription(
@@ -422,7 +423,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfile(pubkey);
+      updateAccountProfile(pubkey);
     }
   }
 
@@ -656,7 +657,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         // Fetch it anyway, maybe there is an update
-        getUserProfile(key);
+        updateAccountProfile(key);
       }
     } catch (e: any) {
       setPublicKey(undefined);
@@ -1742,6 +1743,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setActiveUser,
     addLike,
     setPublicKey,
+    updateAccountProfile,
     addFollow,
     removeFollow,
     quoteNote,

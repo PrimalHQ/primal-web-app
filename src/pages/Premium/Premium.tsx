@@ -4,7 +4,7 @@ import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
 
-import { premium as t } from '../../translations';
+import { premium as t, toast as tToast } from '../../translations';
 
 import styles from './Premium.module.scss';
 import Search from '../../components/Search/Search';
@@ -56,6 +56,7 @@ import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 import { updateStore } from '../../services/StoreService';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
+import { triggerImportEvents } from '../../lib/notes';
 
 export const satsInBTC = 100_000_000;
 
@@ -206,19 +207,39 @@ const Premium: Component = () => {
     setPremiumData('name', () => name);
   };
 
-  const updateUserMetadata = () => {
+  const updateUserMetadata = async (option?: 'nip05' | 'lud16') => {
     const user = account?.activeUser;
 
     if (!user) return;
 
-    const metaUpdate = {
-      nip05: `${premiumData.name}@primal.net`,
-      lud16: `${`${premiumData.name}@primal.net`}`,
-    };
+    let metaUpdate: {nip05?: string, lud16?: string} = {};
+
+    const nip05 = `${premiumData.name}@primal.net`;
+    const lud16 = `${`${premiumData.name}@primal.net`}`;
+
+    if (!option) {
+      metaUpdate = { nip05, lud16 };
+    }
+
+    if (option === 'nip05') {
+      metaUpdate = { nip05, lud16: user.lud16 }
+    }
+
+    if (option === 'lud16') {
+      metaUpdate = { lud16, nip05: user.nip05 }
+    }
 
     if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
 
-    sendProfile({ ...user, ...metaUpdate }, account.proxyThroughPrimal,  account.activeRelays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...user, ...metaUpdate }, account.proxyThroughPrimal,  account.activeRelays, account.relaySettings);
+
+    if (success) {
+      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
+        account.publicKey && account.actions.updateAccountProfile(account.publicKey);
+        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
+      });
+      return false;
+    }
   }
 
   const checkName = async () => {
@@ -774,7 +795,7 @@ const Premium: Component = () => {
                   />
                 </div>
 
-                <PremiumSummary data={premiumData} />
+                <PremiumSummary data={premiumData} updateUserMetadata={updateUserMetadata}/>
 
                 <div class={styles.nameFooter}>
                   <ButtonSecondary
@@ -799,7 +820,7 @@ const Premium: Component = () => {
 
               <PremiumProfile profile={account?.activeUser} />
 
-              <PremiumSummary data={premiumData} />
+              <PremiumSummary data={premiumData} updateUserMetadata={updateUserMetadata}/>
 
               <div class={styles.overviewFooter}>
                 <ButtonSecondary
@@ -925,6 +946,7 @@ const Premium: Component = () => {
               <PremiumStatusOverview
                 data={premiumData}
                 profile={account?.activeUser}
+                updateUserMetadata={updateUserMetadata}
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}/>
             </Match>
 

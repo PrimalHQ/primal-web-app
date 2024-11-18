@@ -230,8 +230,11 @@ const EditProfile: Component = () => {
     const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.activeRelays, account.relaySettings);
 
     if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`);
-      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
+      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
+        note && profile?.actions.updateProfile(note.pubkey);
+        note && navigate(app?.actions.profileLink(note.pubkey) || '/home')
+        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
+      });
       return false;
     }
 
