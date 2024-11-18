@@ -27,7 +27,7 @@ import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { createStore } from 'solid-js/store';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
-import { longDate } from '../../lib/dates';
+import { longDate, shortDate } from '../../lib/dates';
 import Paginator from '../../components/Paginator/Paginator';
 import { NostrContactsContent } from '../../types/primal';
 import { sendContacts } from '../../lib/notes';
@@ -44,7 +44,7 @@ export type ContactsStore = {
   history: ContactHistoryItem[],
   rawHistory: ContactHistoryItem[],
   paging: PaginationInfo,
-  showConfirmRecover: string,
+  showConfirmRecover: ContactHistoryItem | undefined,
 };
 
 const PremiumContactBackup: Component<{
@@ -58,7 +58,7 @@ const PremiumContactBackup: Component<{
     history: [],
     rawHistory: [],
     paging: { ...emptyPaging() },
-    showConfirmRecover: '',
+    showConfirmRecover: undefined,
   });
 
   createEffect(() => {
@@ -119,9 +119,7 @@ const PremiumContactBackup: Component<{
     getContactHistory(pubkey, store.paging.since, 1);
   }
 
-  const onRecover = (id: string) => {
-    const item = store.history.find(i => i.id === id);
-
+  const onRecover = (item: ContactHistoryItem | undefined) => {
     if (account && item) {
       const date = Math.floor((new Date()).getTime() / 1000);
 
@@ -147,7 +145,7 @@ const PremiumContactBackup: Component<{
                 <td>{item.follows_count}</td>
                 <td>
                   <ButtonLink
-                    onClick={() => updateStore('showConfirmRecover', () => item.id)}
+                    onClick={() => updateStore('showConfirmRecover', () => item)}
                   >
                     Recover
                   </ButtonLink>
@@ -163,12 +161,13 @@ const PremiumContactBackup: Component<{
       />
 
       <ConfirmModal
-        open={store.showConfirmRecover.length > 0}
+        open={store.showConfirmRecover !== undefined}
         onConfirm={() => {
           onRecover(store.showConfirmRecover);
-          updateStore('showConfirmRecover', () => '');
+          updateStore('showConfirmRecover', () => undefined);
         }}
-        onAbort={() => updateStore('showConfirmRecover', () => '')}
+        description={`Are you sure? This will update your follow list with the version from ${shortDate(store.showConfirmRecover?.created_at)}, containing ${store.showConfirmRecover?.follows_count} contacts.`}
+        onAbort={() => updateStore('showConfirmRecover', () => undefined)}
       />
     </div>
   );

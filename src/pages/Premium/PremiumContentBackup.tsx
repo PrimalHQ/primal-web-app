@@ -32,6 +32,7 @@ import { NostrContactsContent } from '../../types/primal';
 import { sendContacts } from '../../lib/notes';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import pako from 'pako';
+import { useToastContext } from '../../components/Toaster/Toaster';
 
 export type ContentItem = {
   cnt: number,
@@ -83,6 +84,7 @@ const PremiumContentBackup: Component<{
   const intl = useIntl()
   const navigate = useNavigate();
   const account = useAccountContext();
+  const toast = useToastContext();
 
   const [store, updateStore] = createStore<ContentStore>({
     stats: [],
@@ -153,6 +155,13 @@ const PremiumContentBackup: Component<{
       },
       onEose: () => {
         unsub();
+
+        if (data.length === 0) {
+          toast?.sendWarning('Failed to fetch events. Please try again.');
+          updateStore('isDownloading', () => undefined);
+          return;
+        }
+
         const kindName = kind >= 0 ? `${kind}` : 'all';
         const userId = account.activeUser?.nip05 || account.publicKey;
         const date = (new Date()).toISOString().split('T')[0];
