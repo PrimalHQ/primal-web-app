@@ -33,6 +33,9 @@ import ButtonCopy from '../../components/Buttons/ButtonCopy';
 import Paginator from '../../components/Paginator/Paginator';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
+import missingVideo from '../../assets/icons/missing_video.svg';
+import missingImage from '../../assets/icons/missing_image.svg';
+
 const total = 10_000_000_000;
 
 export type MediaListItem = {
@@ -140,8 +143,7 @@ const PremiumMediaManagment: Component<{
     const unsub = subsTo(subId, {
       onEose: () => {
         unsub();
-
-        // const ms = store.mediaList.filter(i => i.url === url)
+        updateStore('mediaList', (ms) => ms.filter(i => i.url !== url))
       }
     });
 
@@ -232,6 +234,26 @@ const PremiumMediaManagment: Component<{
     return murl;
   };
 
+  const onImgError = (event: any) => {
+
+    const image = event.target;
+
+    image.onerror = "";
+    image.src = missingImage;
+
+    return true;
+  }
+
+  const onVideoThumbnailError = (event: any) => {
+
+    const image = event.target;
+
+    image.onerror = "";
+    image.src = missingVideo;
+
+    return true;
+  }
+
   return (
     <div class={styles.premiumMediaLayout}>
 
@@ -283,13 +305,15 @@ const PremiumMediaManagment: Component<{
                   <td class={styles.tdFile}>
                     <Show
                       when={item.mimetype.startsWith('video')}
-                      fallback={<img src={getMediaUrl(item.url)} />}
+                      fallback={
+                        <img src={getMediaUrl(item.url)} onerror={onImgError} />
+                      }
                     >
                       <Show
                         when={media?.thumbnails[item.url]}
-                        fallback={<video src={getMediaUrl(item.url)} />}
+                        fallback={<img src={missingVideo} />}
                       >
-                        <img src={media?.thumbnails[item.url]} />
+                        <img src={media?.thumbnails[item.url]} onerror={onVideoThumbnailError} />
                       </Show>
                     </Show>
                   </td>

@@ -1670,7 +1670,10 @@
       font-size: 12px;
       font-weight: 400;
       line-height: 14px;
+      text-align: left;
+      padding-inline: 10px;
       button {
+        text-align: left;
         border: none;
         margin: 0;
         padding: 0;
@@ -1682,6 +1685,8 @@
 
   img, video {
     width: 64px;
+    height: 44px;
+    object-fit: cover;
   }
 }
 
