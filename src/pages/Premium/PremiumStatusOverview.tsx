@@ -29,8 +29,10 @@ const PremiumStatusOverview: Component<{
   const intl = useIntl();
   const navigate = useNavigate();
 
+  const isLegend = () => props.data.membershipStatus.cohort_1 === 'Primal Legend';
+
   const isExpired = () => {
-    if (props.data.membershipStatus.cohort_1 === 'Primal Legend') return false;
+    if (isLegend()) return false;
 
     const expiration = props.data.membershipStatus.expires_on || 0;
     const now = (new Date()).getTime() / 1_000;
@@ -58,7 +60,7 @@ const PremiumStatusOverview: Component<{
         updateUserMetadata={props.updateUserMetadata}
       />
 
-      <Show when={!isExpired()}>
+      <Show when={!isExpired() && !isLegend()}>
         <div class={styles.support}>
           <div>{intl.formatMessage(t.labels.supportFirstLine)}</div>
           <div>
