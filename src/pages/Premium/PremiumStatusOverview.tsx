@@ -40,6 +40,7 @@ const PremiumStatusOverview: Component<{
       <PremiumUserInfo
         data={props.data}
         profile={props.profile}
+        // @ts-ignore
         legendConfig={app?.legendCustomization[props.profile?.pubkey]}
       />
 

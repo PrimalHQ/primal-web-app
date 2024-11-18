@@ -15,7 +15,8 @@ const PremiumSummary: Component<{
   data: PremiumStore,
   rename?: boolean,
   expanded?: boolean,
-  updateUserMetadata: (option?: 'nip05' | 'lud16') => void,
+  hideApply?: boolean,
+  updateUserMetadata: (option?: 'nip05' | 'lud16', force?: boolean) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -24,18 +25,18 @@ const PremiumSummary: Component<{
   const status = () => props.data.membershipStatus;
 
   const isNip05Primal = () => {
-    return account?.activeUser?.nip05 === `${name()}@primal.net`;
+    return props.data.recipient?.nip05 === `${name()}@primal.net`;
   }
   const isLud16Primal = () => {
-    return account?.activeUser?.lud16 === `${name()}@primal.net`;
+    return props.data.recipient?.lud16 === `${name()}@primal.net`;
   }
 
   const applyNip05 = () => {
-    props.updateUserMetadata('nip05')
+    props.updateUserMetadata('nip05', true)
   }
 
   const applyLud16 = () => {
-    props.updateUserMetadata('lud16')
+    props.updateUserMetadata('lud16', true)
   }
 
   return (
@@ -47,11 +48,11 @@ const PremiumSummary: Component<{
         </div>
         <div class={styles.summaryValueHolder}>
           <Show
-            when={isNip05Primal()}
+            when={isNip05Primal() || props.hideApply}
             fallback={
               <>
                 <div class={styles.summaryValue}>
-                  {account?.activeUser?.nip05}
+                  {props.data.recipient?.nip05}
                 </div>
                 <div class={styles.summaryAlternateValue}>
                   <div>{name()}@primal.net</div>
@@ -74,11 +75,11 @@ const PremiumSummary: Component<{
         </div>
         <div class={styles.summaryValueHolder}>
           <Show
-            when={isLud16Primal()}
+            when={isLud16Primal() || props.hideApply}
             fallback={
               <>
                 <div class={styles.summaryValue}>
-                  {account?.activeUser?.lud16}
+                  {props.data.recipient?.lud16}
                 </div>
                 <div class={styles.summaryAlternateValue}>
                   <div>{name()}@primal.net</div>

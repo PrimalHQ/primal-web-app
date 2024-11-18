@@ -209,13 +209,13 @@ const Premium: Component = () => {
     setPremiumData('name', () => name);
   };
 
-  const updateUserMetadata = async (option?: 'nip05' | 'lud16') => {
-    const user = account?.activeUser;
+  const updateUserMetadata = async (option?: 'nip05' | 'lud16', force?: boolean) => {
+    const user = premiumData.recipient;
 
-    if (!user) return;
+    if (!user || !account) return;
 
-    const shouldUpdateNip05 = user.nip05.endsWith('@primal.net');
-    const shouldUpdateLud16 = user.lud16.endsWith('@primal.net');
+    const shouldUpdateNip05 = force || user.nip05.endsWith('@primal.net');
+    const shouldUpdateLud16 = force || user.lud16.endsWith('@primal.net');
 
     if (!shouldUpdateLud16 && !shouldUpdateNip05) return;
 
@@ -241,7 +241,9 @@ const Premium: Component = () => {
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
-        account.publicKey && account.actions.updateAccountProfile(account.publicKey);
+        const prof = JSON.parse(note.content)
+        premiumData.recipientPubkey && account.actions.updateAccountProfile(premiumData.recipientPubkey);
+        setPremiumData('recipient', () => ({...prof}));
         toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       });
       return;
@@ -295,6 +297,7 @@ const Premium: Component = () => {
           setPremiumData('errorMessage', () => intl.formatMessage(t.errors.nameUnavailable));
         } else {
           setPremiumData('name', () => newName);
+          updateUserMetadata();
         }
       }
 
@@ -657,10 +660,9 @@ const Premium: Component = () => {
   });
 
   createEffect(() => {
-    const pubkey = account?.publicKey;
-
-    if (pubkey) {
-      setPremiumData('recipientPubkey', () => pubkey);
+    if (account?.isKeyLookupDone && account.activeUser !== undefined) {
+      const pubkey = account?.publicKey;
+      pubkey && setPremiumData('recipientPubkey', () => pubkey);
     }
   });
 
@@ -673,8 +675,8 @@ const Premium: Component = () => {
 
       if (pubkey === account?.publicKey) {
         const recipient = account.activeUser;
+        checkPremiumStatus();
         recipient && setPremiumData('recipient', () => ({ ...recipient }));
-        return;
       }
 
       getRecipientUser(pubkey);
@@ -781,7 +783,7 @@ const Premium: Component = () => {
               onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
             />
           </Match>
-          <Match when={premiumData.membershipStatus.tier === 'premium'}>
+          <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus.tier || '')}>
             <PremiumSidebarActive
               data={premiumData}
               onSidebarAction={handlePremiumAction}
@@ -817,7 +819,11 @@ const Premium: Component = () => {
                   />
                 </div>
 
-                <PremiumSummary data={premiumData} updateUserMetadata={updateUserMetadata}/>
+                <PremiumSummary
+                  data={premiumData}
+                  updateUserMetadata={updateUserMetadata}
+                  hideApply={true}
+                />
 
                 <div class={styles.nameFooter}>
                   <ButtonSecondary
@@ -842,7 +848,11 @@ const Premium: Component = () => {
 
               <PremiumProfile data={premiumData} profile={account?.activeUser} />
 
-              <PremiumSummary data={premiumData} updateUserMetadata={updateUserMetadata}/>
+              <PremiumSummary
+                data={premiumData}
+                updateUserMetadata={updateUserMetadata}
+                hideApply={true}
+              />
 
               <div class={styles.overviewFooter}>
                 <ButtonSecondary
@@ -964,7 +974,7 @@ const Premium: Component = () => {
               />
             </Match>
 
-            <Match when={premiumData.membershipStatus?.tier === 'premium'}>
+            <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus?.tier || '')}>
               <PremiumStatusOverview
                 data={premiumData}
                 profile={account?.activeUser}
@@ -1022,7 +1032,7 @@ const Premium: Component = () => {
 
           <PremiumSuccessModal
             open={premiumData.openSuccess}
-            profile={account?.activeUser}
+            profile={premiumData.recipient}
             setOpen={(v: boolean) => setPremiumData('openSuccess', () => v)}
             onClose={() => {
               setPremiumData('openSuccess', () => false);

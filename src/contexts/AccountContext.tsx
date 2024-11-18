@@ -325,6 +325,8 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const updateAccountProfile = (pubkey: string) => {
+    if (pubkey !== store.publicKey) return;
+
     const subId = `user_profile_${APP_ID}`;
 
     handleSubscription(
