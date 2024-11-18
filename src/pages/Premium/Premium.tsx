@@ -57,6 +57,7 @@ import { updateStore } from '../../services/StoreService';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { triggerImportEvents } from '../../lib/notes';
+import { useAppContext } from '../../contexts/AppContext';
 
 export const satsInBTC = 100_000_000;
 
@@ -135,6 +136,7 @@ const Premium: Component = () => {
   const params = useParams();
   const navigate = useNavigate();
   const toast = useToastContext();
+  const app = useAppContext();
 
   let nameInput: HTMLInputElement | undefined;
   let renameInput: HTMLInputElement | undefined;
@@ -566,8 +568,8 @@ const Premium: Component = () => {
     );
   };
 
-  const updateLegendConfig = (config: LegendCustomizationConfig) => {
-    if (!premiumSocket) return;
+  const updateLegendConfig = async (config: LegendCustomizationConfig) => {
+    if (!premiumSocket || !account?.publicKey) return;
 
     const subId = `premium_legend_config_${APP_ID}`;
 
@@ -589,7 +591,9 @@ const Premium: Component = () => {
       }
     })
 
-    setLegendCutumization(account?.publicKey, config, subId, premiumSocket);
+    await setLegendCutumization(account.publicKey, config, subId, premiumSocket);
+
+    app?.actions.setLegendCustomization(account.publicKey, config);
   }
 
   onMount(() => {

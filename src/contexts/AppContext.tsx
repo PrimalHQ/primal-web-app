@@ -15,6 +15,7 @@ import { nip19, Relay } from "../lib/nTools";
 import { logInfo } from "../lib/logger";
 import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
+import { config } from "@milkdown/core";
 
 
 export type ReactionStats = {
@@ -98,6 +99,7 @@ export type AppContextStore = {
     addConnectedRelay: (relay: Relay) => void,
     removeConnectedRelay: (relay: Relay) => void,
     profileLink: (pubkey: string | undefined) => string,
+    setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
   },
 }
 
@@ -288,6 +290,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   }
 
+  const setLegendCustomization = (pubkey: string, config: LegendCustomizationConfig) => {
+    updateStore('legendCustomization', () => ({ [pubkey]: { ...config }}));
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -419,6 +425,7 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       addConnectedRelay,
       removeConnectedRelay,
       profileLink,
+      setLegendCustomization,
     }
   });
 
