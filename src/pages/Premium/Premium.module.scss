@@ -1133,7 +1133,7 @@
 
 .premiumActive {
   margin-bottom: 32px;
-  .expiredPremium, .activePremium {
+  .expiredPremium, .activePremium, .legendPremium {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1169,6 +1169,36 @@
 
   .expiredPremium {
     background-color: var(--subtile-devider);
+  }
+
+  .legendPremium {
+    &.legend_GOLD {
+      background: var(--legend-gold);
+    }
+    &.legend_AQUA {
+      background: var(--legend-aqua);
+    }
+    &.legend_SILVER {
+      background: var(--legend-silver);
+    }
+    &.legend_PURPLE {
+      background: var(--legend-purple);
+    }
+    &.legend_PURPLEHAZE {
+      background: var(--legend-purplehaze);
+    }
+    &.legend_TEAL {
+      background: var(--legend-teal);
+    }
+    &.legend_BROWN {
+      background: var(--legend-brown);
+    }
+    &.legend_BLUE {
+      background: var(--legend-blue);
+    }
+    &.legend_SUNFIRE {
+      background: var(--legend-sunfire);
+    }
   }
 }
 

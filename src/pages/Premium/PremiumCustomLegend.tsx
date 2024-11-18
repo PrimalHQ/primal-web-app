@@ -53,8 +53,8 @@ const PremiumCustomLegend: Component<{
 
   const [config, setConfig] = createStore<LegendCustomizationConfig>({
     style: '',
-    custom_badge: false,
-    avatar_glow: false,
+    custom_badge: true,
+    avatar_glow: true,
   });
 
   createEffect(() => {
@@ -109,7 +109,7 @@ const PremiumCustomLegend: Component<{
             checked={config.avatar_glow}
             onChange={(v: boolean) => setConfig('avatar_glow', () => v)}
           >
-          <div class={styles.optionLabel}>Avatar Glow</div>
+          <div class={styles.optionLabel}>Avatar Ring</div>
         </CheckBox2>
         </div>
 

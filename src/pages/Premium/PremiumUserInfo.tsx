@@ -46,6 +46,10 @@ const PremiumUserInfo: Component<{
     return now > expiration;
   }
 
+  const isLegend = () => {
+    return props.data.membershipStatus.cohort_1 === 'Primal Legend';
+  }
+
   return (
     <div class={styles.premiumProfileLayout}>
       <div class={styles.userInfo}>
@@ -61,8 +65,7 @@ const PremiumUserInfo: Component<{
       </div>
 
       <div class={styles.premiumActive}>
-        <Show
-          when={isExpired()}
+        <Switch
           fallback={
             <div class={styles.activePremium}>
               <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
@@ -72,11 +75,21 @@ const PremiumUserInfo: Component<{
             </div>
           }
         >
-          <div class={styles.expiredPremium}>
-            <div class={styles.caption}>Expired</div>
-            <div class={styles.date}><div>{shortDate(props.data.membershipStatus.expires_on || 0)}</div></div>
-          </div>
-        </Show>
+          <Match when={isExpired()}>
+            <div class={styles.expiredPremium}>
+              <div class={styles.caption}>Expired</div>
+              <div class={styles.date}><div>{shortDate(props.data.membershipStatus.expires_on || 0)}</div></div>
+            </div>
+          </Match>
+          <Match when={isLegend()}>
+            <div class={`${styles.legendPremium} ${styles[`legend_${props.legendConfig?.style}`]}`}>
+              <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
+              <div class={styles.date}>
+                <div>{props.data.membershipStatus.cohort_2 || shortDate(props.data.membershipStatus.expires_on || 0)}</div>
+              </div>
+            </div>
+          </Match>
+        </Switch>
       </div>
     </div>
   );
