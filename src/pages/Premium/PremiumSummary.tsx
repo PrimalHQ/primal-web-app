@@ -126,7 +126,7 @@ const PremiumSummary: Component<{
           </div>
           <div>
             <span class={styles.summaryValue}>
-              {shortDate(status().expires_on || 0)}
+              {status().expires_on ? shortDate(status().expires_on || 0) : 'Never'}
             </span>
           </div>
         </div>
