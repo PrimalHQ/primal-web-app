@@ -15,7 +15,7 @@ import { LegendCustomizationConfig } from '../../lib/premium';
 const PremiumUserInfo: Component<{
   data: PremiumStore,
   profile?: PrimalUser,
-  legendConfig?: LegendCustomizationConfig,
+  legendConfig?: LegendCustomizationConfig | undefined,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();

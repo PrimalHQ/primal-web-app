@@ -10,6 +10,7 @@ import { PremiumStore } from './Premium';
 import styles from './Premium.module.scss';
 import PremiumSummary from './PremiumSummary';
 import PremiumUserInfo from './PremiumUserInfo';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const PremiumStatusOverview: Component<{
@@ -20,6 +21,7 @@ const PremiumStatusOverview: Component<{
 }> = (props) => {
   const intl = useIntl();
   const navigate = useNavigate();
+  const app = useAppContext();
 
   const isLegend = () => props.data.membershipStatus.cohort_1 === 'Primal Legend';
 
@@ -38,6 +40,7 @@ const PremiumStatusOverview: Component<{
       <PremiumUserInfo
         data={props.data}
         profile={props.profile}
+        legendConfig={app?.legendCustomization[props.profile?.pubkey]}
       />
 
       <Show when={props.data.membershipStatus.cohort_1 === 'Primal OG' || props.data.membershipStatus.cohort_2 === 'Free'}>
