@@ -321,6 +321,7 @@
   display: flex;
   flex-direction: column;
   padding: 20px 24px 28px 24px;
+  gap: 24px;
   width: 472px;
   border-radius: 12px;
   background: var(--background-input);
@@ -376,16 +377,13 @@
     align-items: center;
 
     width: 100%;
+    padding-bottom: 24px;
     border-bottom: 1px solid var(--subtile-devider);
-
-    padding-block: 24px;
   }
 
   .pricePlan {
     border-top: 1px solid var(--devider);
     width: 100%;
-
-    margin-block: 24px;
   }
 
   .subOptions {

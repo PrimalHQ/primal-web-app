@@ -624,6 +624,17 @@ const Premium: Component = () => {
       setPremiumData('rename', () => premiumData.name);
     }
     else if (premiumStep() === 'overview') {
+      if (premiumData.name.length === 0) {
+        navigate('/premium');
+        return;
+      }
+      getSubscriptionInfo();
+    }
+    else if (premiumStep() === 'confirm') {
+      if (premiumData.name.length === 0) {
+        navigate('/premium');
+        return;
+      }
       getSubscriptionInfo();
     }
     // else if (premiumStep() === 'legendary') {

@@ -57,7 +57,7 @@ const PremiumSubscriptionOptions: Component<{
         </For>
       </div>
 
-      <div class={styles.promoCodeLink}>
+      {/* <div class={styles.promoCodeLink}>
         <Show
           when={props.promoCode && props.promoCode.length > 0}
           fallback={
@@ -74,7 +74,7 @@ const PremiumSubscriptionOptions: Component<{
             promo code applied
           </ButtonLink>
         </Show>
-      </div>
+      </div> */}
     </div>
   );
 }

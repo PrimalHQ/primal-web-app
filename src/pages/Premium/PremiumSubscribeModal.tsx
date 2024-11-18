@@ -45,6 +45,11 @@ const PremiumSubscribeModal: Component<{
     >
       <div class={styles.subscribeModal}>
 
+        <div class={styles.subsModalCaption}>
+          Pay this lightning invoice to complete your purchase.
+          Your subscription will be active immediately.
+        </div>
+
         <div>
           <QrCode data={props.subscription.lnUrl || ''} />
         </div>

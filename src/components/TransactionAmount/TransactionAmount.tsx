@@ -49,7 +49,7 @@ const TransactionAmount: Component<{
     }
 
     return {
-      amount: props.amountSats || 0,
+      amount: Math.round(props.amountSats || 0),
       currency: satoshi,
     };
   }
