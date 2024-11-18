@@ -1,12 +1,10 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Dialog } from '@kobalte/core/dialog';
-import { Component, createEffect, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import Avatar from '../../components/Avatar/Avatar';
 import ButtonGreen from '../../components/Buttons/ButtonGreen';
 import FeedbackCircle from '../../components/FeedbackCircle/FeedbackCircle';
-import Modal from '../../components/Modal/Modal';
-import QrCode from '../../components/QrCode/QrCode';
-import { authorName, nip05Verification, userName } from '../../stores/profile';
+import { nip05Verification, userName } from '../../stores/profile';
 import { premium as t } from '../../translations';
 
 import { PrimalUser } from '../../types/primal';
@@ -23,6 +21,12 @@ const PremiumSuccessModal: Component<{
   data: PremiumStore,
 }> = (props) => {
   const intl = useIntl();
+
+  const displayName = () => {
+    if (props.data.name.length > 0) return props.data.name;
+
+    return userName(props.profile);
+  }
 
   return (
       <Dialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
@@ -43,7 +47,7 @@ const PremiumSuccessModal: Component<{
                     </div>
                     <div class={styles.details}>
                       <div class={styles.name}>
-                        {authorName(props.profile)}
+                        {displayName()}
                         <div class={`${styles.orangeCheck} ${styles.small}`}></div>
                       </div>
                       <div class={styles.verification} title={props.profile?.nip05}>

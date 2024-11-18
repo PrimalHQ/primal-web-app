@@ -1,24 +1,11 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createSignal } from 'solid-js';
 import AdvancedSearchDialog from '../../components/AdvancedSearch/AdvancedSearchDialog';
-import Avatar from '../../components/Avatar/Avatar';
-import ButtonCopy from '../../components/Buttons/ButtonCopy';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
-import Modal from '../../components/Modal/Modal';
-import QrCode from '../../components/QrCode/QrCode';
-import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
-import { authorName, nip05Verification, userName } from '../../stores/profile';
 import { premium as t } from '../../translations';
-import { nip19 } from '../../lib/nTools';
-
-import { PrimalUser } from '../../types/primal';
-import { PremiumStore, PrimalPremiumSubscription } from './Premium';
 
 import styles from './Premium.module.scss';
-import PremiumSubscriptionOptions, { PremiumOption } from './PremiumSubscriptionOptions';
 import TextInput from '../../components/TextInput/TextInput';
-import { usernameRegex } from '../../constants';
-import { isPremiumNameAvailable } from '../../lib/premium';
 import { useIntl } from '@cookbook/solid-intl';
 
 

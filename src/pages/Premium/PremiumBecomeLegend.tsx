@@ -43,6 +43,12 @@ const PremiumBecomeLegend: Component<{
   const rate = () => (props.data.exchangeRateUSD || 1) / 100_000_000;
   const [amount, setAmount] = createSignal(0);
 
+  const displayName = () => {
+    if (props.data.name.length > 0) return props.data.name;
+
+    return userName(props.profile);
+  }
+
   createEffect(() => {
     if (props.data.isSocketOpen) {
       props.getExchangeRate && props.getExchangeRate()
@@ -81,7 +87,7 @@ const PremiumBecomeLegend: Component<{
       <div class={styles.userInfo}>
         <Avatar user={props.profile} size="xl" />
         <div class={styles.userName}>
-          {userName(props.profile)}
+          {displayName()}
           <VerificationCheck
             user={props.profile}
             large={true}

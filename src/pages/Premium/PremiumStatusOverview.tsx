@@ -1,22 +1,14 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A, useNavigate } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
-import { unwrap } from 'solid-js/store';
-import Avatar from '../../components/Avatar/Avatar';
-import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { shortDate } from '../../lib/dates';
-import { userName } from '../../stores/profile';
 
 import { premium as t } from '../../translations';
 import { PrimalUser } from '../../types/primal';
-import { formatStorage } from '../../utils';
 import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
 import PremiumSummary from './PremiumSummary';
-import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import PremiumUserInfo from './PremiumUserInfo';
 
 

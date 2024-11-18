@@ -1,21 +1,12 @@
 import { Component, createEffect, Show } from 'solid-js';
 import { SetStoreFunction } from 'solid-js/store';
 import AdvancedSearchDialog from '../../components/AdvancedSearch/AdvancedSearchDialog';
-import Avatar from '../../components/Avatar/Avatar';
-import ButtonCopy from '../../components/Buttons/ButtonCopy';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
-import Modal from '../../components/Modal/Modal';
-import QrCode from '../../components/QrCode/QrCode';
-import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
-import { authorName, nip05Verification, userName } from '../../stores/profile';
-import { account } from '../../translations';
-
-import { PrimalUser } from '../../types/primal';
-import { PremiumStore, PrimalPremiumSubscription } from './Premium';
+import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
-import PremiumSubscriptionOptions, { PremiumOption } from './PremiumSubscriptionOptions';
+import PremiumSubscriptionOptions from './PremiumSubscriptionOptions';
 
 
 const PremiumRenewModal: Component<{

@@ -1,25 +1,8 @@
-import { Component, Match, Show, Switch } from 'solid-js';
+import { Component, Match, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
 import { useIntl } from '@cookbook/solid-intl';
-import { premium as t } from '../../translations';
-
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
-
-import { appStoreLink, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
-import ButtonLink from '../../components/Buttons/ButtonLink';
-import ButtonPremium from '../../components/Buttons/ButtonPremium';
+import { useNavigate } from '@solidjs/router';
 import { PremiumStore } from './Premium';
 import Avatar from '../../components/Avatar/Avatar';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
@@ -50,12 +33,18 @@ const PremiumUserInfo: Component<{
     return props.data.membershipStatus.cohort_1 === 'Primal Legend';
   }
 
+  const displayName = () => {
+    if (props.data.name.length > 0) return props.data.name;
+
+    return userName(props.profile);
+  }
+
   return (
     <div class={styles.premiumProfileLayout}>
       <div class={styles.userInfo}>
         <Avatar user={props.profile} size="xl" legendConfig={props.legendConfig} />
         <div class={styles.userName}>
-          {userName(props.profile)}
+          {displayName()}
           <VerificationCheck
             user={props.profile}
             large={true}

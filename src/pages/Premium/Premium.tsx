@@ -836,7 +836,7 @@ const Premium: Component = () => {
                 <div>{intl.formatMessage(t.title.subscriptionSubtitle)}</div>
               </div>
 
-              <PremiumProfile profile={account?.activeUser} />
+              <PremiumProfile data={premiumData} profile={account?.activeUser} />
 
               <PremiumSummary data={premiumData} updateUserMetadata={updateUserMetadata}/>
 
