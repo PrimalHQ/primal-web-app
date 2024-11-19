@@ -1989,3 +1989,84 @@
   line-height: 20px;
   margin-bottom: 26px;
 }
+
+
+.broadcastProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+
+  .progressLabelContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+  .progressLabel,
+  .progressValue {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 32px;
+  }
+
+  .progressTrackContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .iconClose {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    .iconCheck {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--success-bright);
+      -webkit-mask: url(../../assets/icons/check.svg) no-repeat center;
+      mask: url(../../assets/icons/check.svg) no-repeat center;
+    }
+  }
+  .progressTrack {
+    width: calc(100% - 24px);
+    height: 2px;
+    background-color: var(--background-input);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progressFill {
+    background-color: var(--accent);
+    height: 2px;
+    border-radius: 1px;
+    width: var(--kb-progress-fill-width);
+    transition: width var(--progress-rate) linear;
+
+    // &.huge {
+    //   transition: width 400ms linear;
+    // }
+
+    // &.large {
+    //   transition: width 1500ms linear;
+    // }
+
+    // &.medium {
+    //   transition: width 500ms linear;
+    // }
+
+    // &.small {
+    //   transition: width 250ms linear;
+    // }
+
+
+  }
+  .progressFill[data-progress="complete"] {
+    background-color: var(--success-bright);
+  }
+}

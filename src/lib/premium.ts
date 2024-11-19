@@ -529,7 +529,6 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
   }
 }
 
-
 export const startContentBroadcast = async (pubkey: string | undefined, kinds: number[], subId: string, socket: WebSocket) => {
   if (!pubkey) return;
 
@@ -575,7 +574,47 @@ export const startContentBroadcast = async (pubkey: string | undefined, kinds: n
   }
 }
 
-export const getContentBroadcastStaus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+export const cancelContentBroadcast = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  const event = {
+    kind: Kind.Settings,
+    tags: [['p', pubkey]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+    content: `{ "description": "broadcats content data"}`,
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    let payload = {
+      event_from_user: signedNote,
+    }
+
+    const message = JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["membership_content_rebroadcast_cancel", { ...payload }]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to fetch content download list: ', reason);
+    return false;
+  }
+}
+
+export const startListeningForContentBroadcastStaus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
   if (!pubkey) return;
 
   const event = {
@@ -595,7 +634,7 @@ export const getContentBroadcastStaus = async (pubkey: string | undefined, subId
     const message = JSON.stringify([
       "REQ",
       subId,
-      {cache: ["membership_content_rebroadcast_status", { ...payload }]},
+      {cache: ["rebroadcasting_status", { ...payload }]},
     ]);
 
     if (socket) {
@@ -610,7 +649,33 @@ export const getContentBroadcastStaus = async (pubkey: string | undefined, subId
 
     return true;
   } catch (reason) {
-    console.error('Failed to fetch content download list: ', reason);
+    console.error('Failed to start listening to broadcast status: ', reason);
+    return false;
+  }
+}
+export const stopListeningForContentBroadcastStaus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
+  if (!pubkey) return;
+
+  try {
+    const message = JSON.stringify([
+      "CLOSE",
+      subId,
+      {cache: ["rebroadcasting_status"]},
+    ]);
+
+    if (socket) {
+      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+      socket.send(message);
+      socket.dispatchEvent(e);
+    } else {
+      throw('no_socket');
+    }
+
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to stop listening to broadcast status: ', reason);
     return false;
   }
 }

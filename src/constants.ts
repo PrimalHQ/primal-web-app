@@ -157,6 +157,7 @@ export enum Kind  {
   MediaStats=10_000_163,
   MediaList=10_000_164,
   ContentStats=10_000_166,
+  BroadcastStatus=10_000_167,
   LegendCustomization=10_000_168,
 
   WALLET_OPERATION = 10_000_300,

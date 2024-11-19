@@ -1,48 +1,38 @@
-import { Component, createEffect, For, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Show } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
 import { useIntl } from '@cookbook/solid-intl';
 
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
-
-import { appStoreLink, Kind, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
+import { Kind } from '../../constants';
+import { useNavigate } from '@solidjs/router';
 import ButtonLink from '../../components/Buttons/ButtonLink';
-import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
-import { isConnected, socket, subsTo } from '../../sockets';
-import { getContactListHistory, getContentBroadcastStaus, getContentDownloadData, getContentListHistory } from '../../lib/premium';
+import { isConnected, socket, subsTo, subTo } from '../../sockets';
+import { startListeningForContentBroadcastStaus, getContentDownloadData, getContentListHistory, startContentBroadcast, stopListeningForContentBroadcastStaus, cancelContentBroadcast } from '../../lib/premium';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { createStore } from 'solid-js/store';
-import { emptyPaging, PaginationInfo } from '../../megaFeeds';
-import { longDate } from '../../lib/dates';
-import Paginator from '../../components/Paginator/Paginator';
-import { NostrContactsContent } from '../../types/primal';
-import { sendContacts } from '../../lib/notes';
-import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import pako from 'pako';
 import { useToastContext } from '../../components/Toaster/Toaster';
+import { Progress } from '@kobalte/core/progress';
+import ButtonGhost from '../../components/Buttons/ButtonGhost';
 
 export type ContentItem = {
   cnt: number,
   kind: number,
+};
+export type BroadcastStatus = {
+  running: boolean,
+  status: string,
+  progress: number,
+  message: string,
 };
 
 export type ContentStore = {
   stats: ContentItem[],
   isDownloading: number | undefined,
   isBroadcasting: boolean,
+  broadcastStatus: BroadcastStatus,
 };
 
 export const kindNames = {
@@ -77,6 +67,13 @@ export const kindNames = {
   37_001: 'Tier',
 };
 
+export const emptyBroadcastStatus = () => ({
+  running: false,
+  status: '',
+  progress: 0,
+  message: '',
+})
+
 
 const PremiumContentBackup: Component<{
   data: PremiumStore,
@@ -90,6 +87,7 @@ const PremiumContentBackup: Component<{
     stats: [],
     isDownloading: undefined,
     isBroadcasting: false,
+    broadcastStatus: { ...emptyBroadcastStatus() },
   });
 
   createEffect(() => {
@@ -201,52 +199,88 @@ const PremiumContentBackup: Component<{
       onEose: () => {
         unsub();
 
-        // startListeningForBroadcastStatus()
-        updateStore('isBroadcasting', () => false);
+        startListeningForBroadcastStatus()
       }
     })
 
     const kinds = kind > -1 ? [kind] : [];
 
-    getContentDownloadData(pubkey, kinds, subId, ws);
+    startContentBroadcast(pubkey, kinds, subId, ws);
   }
 
   const startListeningForBroadcastStatus = () => {
-    // const ws = socket();
-    // const pubkey = account?.publicKey;
+    const ws = socket();
+    const pubkey = account?.publicKey;
 
-    // if (!ws || !pubkey) return;
+    if (!ws || !pubkey) return;
 
-    // const subId = `premium_broadcast_status_${APP_ID}`;
+    const subId = `premium_broadcast_status_${APP_ID}`;
 
-    // let prog = 0;
+    let prog = 0;
 
-    // const unsub = subsTo(subId, {
-    //   onEvent: (_, content) => {
-    //     if (content.kind === 10_000_167) {
-    //       const stats = JSON.parse(content.content)
-    //       prog = stats.progress || 0;
-    //     }
-    //   },
-    //   onEose: () => {
-    //     unsub();
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === Kind.BroadcastStatus) {
+          const stats = JSON.parse(content.content) as BroadcastStatus;
+          const running = stats.running || false;
 
-    //     if (prog === 1) return;
+          if (!running) {
+            if (stats.status = 'finished fine') {
+              updateStore('broadcastStatus', (bs) => ({ ...bs, progress: 1.0 }));
+            }
 
-    //     setTimeout(() => {
-    //       startListeningForBroadcastStatus();
-    //     }, 4_000);
+            setTimeout(() => {
+              stopListeningForContentBroadcastStaus(pubkey, subId, ws);
+              updateStore('broadcastStatus', () => ({ ...emptyBroadcastStatus() }));
+              updateStore('isBroadcasting', () => false);
+            }, 100)
+            unsub();
+          }
 
-    //     // updateStore('isBroadcasting', () => false);
-    //   }
-    // })
+          updateStore('broadcastStatus', () => ({ ...stats }));
+        }
+      },
+      onEose: () => {
+        // unsub();
 
-    // getContentBroadcastStaus(pubkey, subId, ws);
+        // if (prog === 1) return;
+
+        // setTimeout(() => {
+          // startListeningForBroadcastStatus();
+        // }, 4_000);
+
+        // updateStore('isBroadcasting', () => false);
+      }
+    })
+
+    startListeningForContentBroadcastStaus(pubkey, subId, ws);
   };
+
+  const cancelBroadcast = () => {
+    const ws = socket();
+    const pubkey = account?.publicKey;
+
+    if (!ws || !pubkey) return;
+
+    const subId = `premium_broadcast_cancel_${APP_ID}`;
+
+    cancelContentBroadcast(pubkey, subId, ws);
+
+    stopListeningForContentBroadcastStaus(pubkey, subId, ws);
+    updateStore('broadcastStatus', () => ({ ...emptyBroadcastStatus() }));
+    updateStore('isBroadcasting', () => false);
+
+  }
 
   const filteredStats = () => {
     const allowed = [1, 4, 7, 30_023]
     return store.stats.filter(s => allowed.includes(s.kind));
+  }
+
+  const activeProgress = () => {
+    if (!store.broadcastStatus.running) return 0;
+
+    return Math.round(store.broadcastStatus.progress * 100);
   }
 
   return (
@@ -323,6 +357,35 @@ const PremiumContentBackup: Component<{
           </tr>
         </tbody>
       </table>
+
+      <Show when={store.isBroadcasting}>
+        <Progress value={activeProgress()} class={styles.broadcastProgress}>
+          <div class={styles.progressLabelContainer}>
+            <Progress.Label class={styles.progressLabel}>Rebroadcasting: {activeProgress()}%</Progress.Label>
+          </div>
+          <div class={styles.progressTrackContainer}>
+            <Progress.Track class={styles.progressTrack}>
+              <Progress.Fill
+                class={styles.progressFill}
+              />
+            </Progress.Track>
+
+            <ButtonGhost
+              onClick={() => {
+                cancelBroadcast();
+              }}
+              disabled={activeProgress() > 100}
+            >
+              <Show
+                when={(activeProgress() < 100)}
+                fallback={<div class={styles.iconCheck}></div>}
+              >
+                <div class={styles.iconClose}></div>
+              </Show>
+            </ButtonGhost>
+          </div>
+        </Progress>
+      </Show>
     </div>
   );
 }
