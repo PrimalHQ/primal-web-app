@@ -36,8 +36,6 @@ import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import missingVideo from '../../assets/icons/missing_video.svg';
 import missingImage from '../../assets/icons/missing_image.svg';
 
-const total = 10_000_000_000;
-
 export type MediaListItem = {
   url: string,
   size: number,
@@ -50,6 +48,10 @@ export type MediaListStore = {
   rawList: MediaListItem[],
   paging: PaginationInfo,
   showConfirmDelete: string,
+  videoWidth: number,
+  imageWidth: number,
+  otherWidth: number,
+  zoomed: boolean,
 }
 
 const PremiumMediaManagment: Component<{
@@ -65,7 +67,12 @@ const PremiumMediaManagment: Component<{
     rawList: [],
     paging: { ...emptyPaging() },
     showConfirmDelete: '',
+    videoWidth: 0,
+    imageWidth: 0,
+    otherWidth: 0,
+    zoomed: false,
   });
+
 
   createEffect(() => {
     if (isConnected() &&  account?.isKeyLookupDone && account.publicKey) {
@@ -73,6 +80,18 @@ const PremiumMediaManagment: Component<{
       getMediaList(account.publicKey);
     }
   });
+
+  const total = () => {
+    if (props.data.membershipStatus.tier === 'premium-legend') {
+      return 100_000_000_000;
+    }
+
+    if (props.data.membershipStatus.tier === 'premium') {
+      return 10_000_000_000;
+    }
+
+    return 0;
+  }
 
   const getMediaStats = (pubkey: string) => {
     const ws = socket();
@@ -155,41 +174,36 @@ const PremiumMediaManagment: Component<{
 
   let totalBar: HTMLDivElement | undefined;
 
-  const imageWidth = () => {
-    if (!media) return 0;
+  const updateProgressBar = (w: number, t: number) => {
+    if (!media) return;
 
-    const { image } = media?.mediaStats;
-    const width = totalBar?.clientWidth || 0;
+    if (t === 0) return;
 
-    return Math.floor(image * width / total);
+    const image = media?.mediaStats.image;
+    const video = media?.mediaStats.video;
+    const other = media?.mediaStats.other;
+
+    updateStore('imageWidth', () => Math.floor(image * w / t));
+    updateStore('videoWidth', () => Math.floor(video * w / t));
+    updateStore('otherWidth', () => Math.floor(other * w / t));
   }
 
-  const videoWidth = () => {
-    if (!media) return 0;
+  createEffect(() => {
+    if (!media || !totalBar) return;
+    const w = totalBar.clientWidth;
+    const t = total();
 
-    const { video } = media?.mediaStats;
-    const width = totalBar?.clientWidth || 0;
-
-    return Math.floor(video * width / total);
-  }
-
-  const otherWidth = () => {
-    if (!media) return 0;
-
-    const { other } = media?.mediaStats;
-    const width = totalBar?.clientWidth || 0;
-
-    return Math.floor(other * width / total);
-  }
+    updateProgressBar(w, t);
+  });
 
   const used = () => {
-    if (!media) return '0';
+    if (!media) return 0;
 
     const { image, video, other } = media?.mediaStats;
 
     const taken = image + video + other;
 
-    return (taken / 1_000_000_000).toFixed(2);
+    return taken;
   }
 
   const fileSize = (size: number) => {
@@ -211,9 +225,11 @@ const PremiumMediaManagment: Component<{
 
 
   const freeSpace = () => {
-    if (!media) return 0;
+    if (!media) return '0';
 
-    return ((total / 1_000_000_000) - parseFloat(used())).toFixed(2);
+    const diff = (total() / 1_000_000_000) - (used() / 1_000_000_000);
+
+    return diff > 0 ? diff.toFixed(2) : '0';
   }
 
   const fileType = (mimetype: string) => {
@@ -254,20 +270,47 @@ const PremiumMediaManagment: Component<{
     return true;
   }
 
+  const onZoomIn = () => {
+    if (!totalBar) return;
+
+    const t = used();
+    const w = Math.ceil(totalBar.clientWidth * 0.8);
+
+    updateStore('zoomed', () => true);
+
+    updateProgressBar(w, t);
+  }
+
+  const onZoomOut = () => {
+    if (!totalBar) return;
+
+    const t = total();
+    const w = totalBar.clientWidth;
+
+    updateStore('zoomed', () => false);
+
+    updateProgressBar(w, t);
+  }
+
   return (
     <div class={styles.premiumMediaLayout}>
 
       <div class={styles.mediaSatsHolder}>
         <div class={styles.mediaStorageStats}>
-          {used()} GB of {total / 1_000_000_000} GB used
+          {(used() / 1_000_000_000).toFixed(2)} GB of {total() / 1_000_000_000} GB used
         </div>
 
-        <div class={styles.mediaStatsBar} ref={totalBar}>
-          <div class={styles.image} style={`width: ${imageWidth()}px;`}></div>
-          <div class={styles.video} style={`width: ${videoWidth()}px;`}></div>
-          <div class={styles.other} style={`width: ${otherWidth()}px;`}></div>
+        <div class={styles.mediaStatsBar} ref={totalBar} onMouseOver={onZoomIn} onMouseOut={onZoomOut}>
+          <div class={styles.image} style={`width: ${store.imageWidth}px;`}></div>
+          <div class={styles.video} style={`width: ${store.videoWidth}px`}></div>
+          <div class={styles.other} style={`width: ${store.otherWidth}px;`}></div>
           <div class={styles.spaceLeft}>
-            {freeSpace()} GB free
+            <Show
+              when={!store.zoomed}
+              fallback={<>{(used() / 1_000_000_000).toFixed(2)} GB used</>}
+            >
+              {freeSpace()} GB free
+            </Show>
           </div>
         </div>
 

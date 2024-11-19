@@ -1579,16 +1579,31 @@
     border:1px solid var(--background-site);
     height: 22px;
     background-color: var(--media-stats-image);
+
+    -webkit-transition: width 200ms ease-out;
+    -moz-transition: width 200ms ease-out;
+    -o-transition: width 200ms ease-out;
+    transition: width 200ms ease-out;
   }
   .video {
     border:1px solid var(--background-site);
     height: 22px;
     background-color: var(--media-stats-video);
+
+    -webkit-transition: width 200ms ease-out;
+    -moz-transition: width 200ms ease-out;
+    -o-transition: width 200ms ease-out;
+    transition: width 200ms ease-out;
   }
   .other {
     border:1px solid var(--background-site);
     height: 22px;
     background-color: var(--media-stats-other);
+
+    -webkit-transition: width 200ms ease-out;
+    -moz-transition: width 200ms ease-out;
+    -o-transition: width 200ms ease-out;
+    transition: width 200ms ease-out;
   }
 
   .spaceLeft {
