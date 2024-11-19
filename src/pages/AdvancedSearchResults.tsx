@@ -34,7 +34,7 @@ const AdvancedSearchResults: Component = () => {
 
     let q = decodeURIComponent(params.query);
 
-    if (!isPremium() && !q.includes(' pas:1')) {
+    if (!q.includes(' pas:1')) {
       q += ' pas:1';
     }
 

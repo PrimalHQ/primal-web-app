@@ -547,7 +547,7 @@ const AdvancedSearch: Component = () => {
   const submitSearch = () => {
     let cmd = advSearchState.command;
 
-    if(!isPremium() && !cmd.includes(' pas:1')) {
+    if(!cmd.includes(' pas:1')) {
       cmd += ' pas:1';
     }
 
