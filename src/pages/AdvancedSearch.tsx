@@ -23,6 +23,8 @@ import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
 import { useSearchContext } from '../contexts/SearchContext';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
+import { useAppContext } from '../contexts/AppContext';
+import { useAccountContext } from '../contexts/AccountContext';
 
 export type SearchState = {
   includes: string,
@@ -187,6 +189,7 @@ export const [advSearchState, setAdvSearchState] = createStore<SearchState>({
 const AdvancedSearch: Component = () => {
   const navigate = useNavigate();
   const search = useSearchContext();
+  const account = useAccountContext();
 
 
   onMount(() => {
@@ -539,10 +542,18 @@ const AdvancedSearch: Component = () => {
     return label;
   }
 
-  const submitSearch = () => {
-    search?.actions.setAdvancedSearchCommand(advSearchState.command);
+  const isPremium = () => ['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '');
 
-    navigate(`/asearch/${encodeURIComponent(advSearchState.command)}`);
+  const submitSearch = () => {
+    let cmd = advSearchState.command;
+
+    if(!isPremium() && !cmd.includes(' pas:1')) {
+      cmd += ' pas:1';
+    }
+
+    search?.actions.setAdvancedSearchCommand(cmd);
+
+    navigate(`/asearch/${encodeURIComponent(cmd)}`);
   }
 
   return (

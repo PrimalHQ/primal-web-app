@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from '@solidjs/router';
+import { A, useNavigate, useParams } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from 'solid-js';
 import Loader from '../components/Loader/Loader';
 import Note from '../components/Note/Note';
@@ -14,21 +14,29 @@ import ButtonLink from '../components/Buttons/ButtonLink';
 import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
 import { setAdvSearchState } from './AdvancedSearch';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
+import { useAccountContext } from '../contexts/AccountContext';
 
 
 const AdvancedSearchResults: Component = () => {
   const params = useParams()
   const search = useAdvancedSearchContext();
   const navigate = useNavigate();
+  const account = useAccountContext();
 
   const [openAddFeedDialog, setAddFeedDialog] = createSignal<boolean>(false);
   const [allowCommandChange, setAllowCommandChange] = createSignal(false);
   const [queryString, setQueryString] = createSignal('');
 
+  const isPremium = () => ['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '');
+
   createEffect(on(() => params.query, (v, p) => {
     if (!v || v === p) return;
 
-    const q = decodeURIComponent(params.query);
+    let q = decodeURIComponent(params.query);
+
+    if (!isPremium() && !q.includes(' pas:1')) {
+      q += ' pas:1';
+    }
 
     setQueryString(() => q);
     search?.actions.clearSearch();
@@ -119,6 +127,21 @@ const AdvancedSearchResults: Component = () => {
         </Switch>
 
         <Show when={search?.isFetchingContent}><Loader /></Show>
+
+        <Show when={!isPremium()}>
+          <div class={styles.moreSearchInfo}>
+            <div>
+              <div class={styles.moreSearchCaption}>
+                This is a Primal Premium feed.
+              </div>
+              <div class={styles.moreSearchDescription}>
+                Buy a Subscription to become a Nostr power user and support our work:
+              </div>
+            </div>
+
+            <A href='/premium' class={styles.premiumLink}>Get Primal Premium</A>
+          </div>
+        </Show>
       </div>
 
       <Paginator loadNextPage={() => search?.actions.fetchContentNextPage(queryString())} />
