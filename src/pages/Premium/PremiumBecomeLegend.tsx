@@ -97,9 +97,9 @@ const PremiumBecomeLegend: Component<{
 
       <div class={styles.premiumActive}>
         <div class={styles.activePremium}>
-          <div class={styles.caption}>{props.data.membershipStatus.cohort_1 || ''}</div>
+          <div class={styles.caption}>{'Primal Legend'}</div>
           <div class={styles.date}>
-            <div>{props.data.membershipStatus.cohort_2 || shortDate(props.data.membershipStatus.expires_on || 0)}</div>
+            <div>{`Class of ${(new Date()).getFullYear()}`}</div>
           </div>
         </div>
       </div>
