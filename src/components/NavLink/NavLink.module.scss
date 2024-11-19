@@ -53,7 +53,7 @@
     @include iconNav(url(../../assets/icons/nav/long.svg), var(--text-secondary));
   }
   .exploreIcon {
-    @include iconNav(url(../../assets/icons/nav/search.svg), var(--text-secondary));
+    @include iconNav(url(../../assets/icons/nav/explore.svg), var(--text-secondary));
   }
   .messagesIcon {
     @include iconNav(url(../../assets/icons/nav/messages.svg), var(--text-secondary));
@@ -63,6 +63,9 @@
   }
   .downloadIcon {
     @include iconNav(url(../../assets/icons/nav/downloads.svg), var(--text-secondary));
+  }
+  .premiumIcon {
+    @include iconNav(url(../../assets/icons/nav/premium.svg), var(--text-secondary));
   }
   .settingsIcon {
     @include iconNav(url(../../assets/icons/nav/settings.svg), var(--text-secondary));
@@ -86,7 +89,7 @@
       @include iconNav(url(../../assets/icons/nav/long_selected.svg), var(--text-primary));
     }
     .exploreIcon {
-      @include iconNav(url(../../assets/icons/nav/search_selected.svg), var(--text-primary));
+      @include iconNav(url(../../assets/icons/nav/explore.svg), var(--text-primary));
     }
     .messagesIcon {
       @include iconNav(url(../../assets/icons/nav/messages_selected.svg), var(--text-primary));
@@ -96,6 +99,9 @@
     }
     .downloadIcon {
       @include iconNav(url(../../assets/icons/nav/downloads_selected.svg), var(--text-primary));
+    }
+    .premiumIcon {
+      @include iconNav(url(../../assets/icons/nav/premium.svg), var(--text-primary));
     }
     .settingsIcon {
       @include iconNav(url(../../assets/icons/nav/settings_selected.svg), var(--text-primary));

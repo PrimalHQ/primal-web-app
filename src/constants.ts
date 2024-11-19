@@ -450,3 +450,5 @@ export const floatingPoints: Record<string,number> = {
   USD: 2,
   _: 2,
 };
+
+export const sevenDays = 7 * 24 * 60 * 60 * 1_000;

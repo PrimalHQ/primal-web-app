@@ -606,6 +606,7 @@ const Premium: Component = () => {
   onMount(() => {
     keepSoceketOpen = true;
     openSocket();
+    account?.actions.clearPremiumRemider();
   });
 
   onCleanup(() => {

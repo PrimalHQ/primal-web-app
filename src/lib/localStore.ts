@@ -40,6 +40,7 @@ export type LocalStore = {
   animated: boolean,
   dmLastConversation: string | undefined,
   dmLastRelation: UserRelation | undefined,
+  premiumReminder: number,
 };
 
 export type UploadTime = {
@@ -87,6 +88,7 @@ export const emptyStorage: LocalStore = {
   selectedBookmarksFeed: undefined,
   dmLastConversation: undefined,
   dmLastRelation: undefined,
+  premiumReminder: 0,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -398,6 +400,27 @@ export const readHomeSidebarSelection = (pubkey: string | undefined) => {
   const selection = store.homeSidebarSelection;
 
   return selection ? selection as SelectionOption : undefined;
+};
+
+export const savePremiumReminder = (pubkey: string | undefined, timestamp: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.premiumReminder = timestamp;
+
+  setStorage(pubkey, store);
+}
+
+export const readPremiumReminder = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return undefined;
+  }
+  const store = getStorage(pubkey)
+
+  return store.premiumReminder;
 };
 
 export const readSecFromStorage = () => {

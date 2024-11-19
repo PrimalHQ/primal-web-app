@@ -755,6 +755,11 @@ export const navBar = {
     defaultMessage: 'Downloads',
     description: 'Label for the nav bar item link to Downloads page',
   },
+  premium: {
+    id: 'navbar.premium',
+    defaultMessage: 'Premium',
+    description: 'Label for the nav bar item link to Premium page',
+  },
   settings: {
     id: 'navbar.settings',
     defaultMessage: 'Settings',

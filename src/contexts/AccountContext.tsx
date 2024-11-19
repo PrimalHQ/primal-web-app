@@ -26,13 +26,13 @@ import {
   NostrEvents,
   PrimalDVM,
 } from '../types/primal';
-import { Kind, pinEncodePrefix, relayConnectingTimeout, supportedBookmarkTypes } from "../constants";
+import { Kind, pinEncodePrefix, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, savePremiumReminder, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
@@ -93,6 +93,7 @@ export type AccountContextStore = {
   proxySettingSet: boolean,
   activeRelays: Relay[],
   followData: FollowData,
+  premiumReminder: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -144,6 +145,7 @@ export type AccountContextStore = {
       relayInfo: string,
       cb?: (remove: boolean, pubkey: string | undefined) => void,
     ) => Promise<void>,
+    clearPremiumRemider: () => void,
   },
 }
 
@@ -183,6 +185,7 @@ const initialData = {
   bookmarks: [],
   proxyThroughPrimal: false,
   proxySettingSet: false,
+  premiumReminder: false,
   followData: {
     tags: [],
     date: 0,
@@ -381,12 +384,38 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (!gotEvent) {
             updateStore('membershipStatus', () => ({ tier: 'none' }));
           }
+
+          checkPremiumRemider()
         }
       });
 
       getMembershipStatus(store.publicKey, subId, membershipSocket);
     });
   };
+
+  const checkPremiumRemider = () => {
+    if (['premium', 'premium-legend'].includes(store.membershipStatus.tier || '')) {
+      updateStore('premiumReminder', () => false);
+    };
+
+    const now = (new Date()).getTime();
+    const reminder = readPremiumReminder(store.publicKey) || 0;
+
+    if (now - reminder > sevenDays) {
+      updateStore('premiumReminder', () => true);
+    }
+  }
+
+  const clearPremiumRemider = () => {
+    const now = (new Date()).getTime();
+    updateStore('premiumReminder', () => false);
+
+    savePremiumReminder(store.publicKey, now);
+
+    setTimeout(() => {
+      checkPremiumRemider()
+    }, sevenDays)
+  }
 
   const showGetStarted = () => {
     updateStore('showGettingStarted', () => true);
@@ -1778,6 +1807,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setFollowData,
     resolveContacts,
     replaceContactList,
+    clearPremiumRemider,
   },
 });
 
