@@ -11,9 +11,9 @@ import PremiumSidebarInactve from './PremiumSidebarInactive';
 import { useIntl } from '@cookbook/solid-intl';
 import { premium as t } from '../../translations';
 
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
+import foreverPremium from '../../assets/images/forever.png';
+import privateBetaBuilds from '../../assets/images/beta.png';
+import customProfile from '../../assets/images/preston.png';
 import heart from '../../assets/images/heart.png';
 
 import { appStoreLink, playstoreLink } from '../../constants';
