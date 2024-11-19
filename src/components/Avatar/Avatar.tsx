@@ -100,11 +100,10 @@ const Avatar: Component<{
         const style = legendConfig.style
 
         const showHighlight = style !== '' &&
-          legendConfig.custom_badge;
+          legendConfig.avatar_glow;
 
         const showGlow = style !== '' &&
-          legendConfig.avatar_glow &&
-          legendConfig.custom_badge;
+          legendConfig.avatar_glow;
 
         let klass = '';
 
