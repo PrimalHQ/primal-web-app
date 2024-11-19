@@ -433,6 +433,7 @@ export const threadLenghtInMs = 900;
 export const uploadLimit = {
   regular: 100,
   premium: 1024,
+  premiumLegend: 1024,
 }
 
 export const emptyInvoice: LnbcInvoice = {

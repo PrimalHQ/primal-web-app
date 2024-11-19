@@ -134,6 +134,10 @@ const Uploader: Component<{
       setUploadState('uploadLimit', () => uploadLimit.premium);
       return;
     }
+    if (membershipTier === 'premium-legend') {
+      setUploadState('uploadLimit', () => uploadLimit.premiumLegend);
+      return;
+    }
 
     setUploadState('uploadLimit',  () => uploadLimit.regular);
   };
