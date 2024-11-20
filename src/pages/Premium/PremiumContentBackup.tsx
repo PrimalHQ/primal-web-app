@@ -199,7 +199,7 @@ const PremiumContentBackup: Component<{
         var a = window.document.createElement('a');
         const content = pako.gzip(data);
         a.href = window.URL.createObjectURL(new Blob([content], {type: 'application/x-gzip-compressed'}));
-        a.download = `nostr-content-${kindName}-${userId}-${date}.txt.gzip`;
+        a.download = `nostr-content-${kindName}-${userId}-${date}.txt.gz`;
 
         document.body.appendChild(a);
         a.click();
