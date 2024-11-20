@@ -63,7 +63,7 @@ const premiumFeatures = [
     name: 'Advanced Nostr search',
     free: 'false',
     premium: 'true',
-    help: 'Advanced search is available on web, iOS, and android. It includes searching by [complete]',
+    help: 'Find anything on Nostr! Search by keywords & phrases, content type, who posted, who replied, who zapped, time posted, network scope, plus a bunch of filters.',
   },
   {
     name: 'Premium paid relay',
