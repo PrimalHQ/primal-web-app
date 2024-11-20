@@ -210,7 +210,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       await (new Promise((res) => setTimeout(() => res(true), 100)));
 
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
-      pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
+      pubkey && account.actions.updateAccountProfile(pubkey);
+      // pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
       let tags = followed.map(pk => ['p', pk]);
       const date = Math.floor((new Date()).getTime() / 1000);
@@ -330,6 +331,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   onMount(() => {
     const { sec, pubkey } = generateKeys(true);
 
+    // @ts-ignore
     const nsec = hexToNsec(sec);
 
     account?.actions.setSec(nsec);
