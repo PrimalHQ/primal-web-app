@@ -1,16 +1,25 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A } from '@solidjs/router';
-import { Component } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 
 import { premium as t } from '../../translations';
 
 import styles from './Premium.module.scss';
+import { PrimalUser } from '../../types/primal';
 
 
-const PremiumHighlights: Component<{ onStart: () => void, onMore: () => void }> = (props) => {
+const PremiumHighlights: Component<{
+  onStart?: () => void,
+  onMore?: () => void,
+  pubkey?: string | undefined,
+  user?: PrimalUser | undefined,
+}> = (props) => {
   const intl = useIntl();
+
+  const isGuest = () => !props.pubkey;
+
+  const hasNoMetadata = () => props.pubkey && !props.user;
 
   return (
     <div class={styles.premiumHighlights}>
@@ -62,13 +71,33 @@ const PremiumHighlights: Component<{ onStart: () => void, onMore: () => void }> 
       </div>
 
       <div class={styles.premiumStart}>
-        Start by reserving your Primal name:
+        <Switch>
+          <Match when={isGuest()}>
+            <>Start by creating your Primal account:</>
+          </Match>
+          <Match when={hasNoMetadata()}>
+            <>Start by editing your profile:</>
+          </Match>
+          <Match when={true}>
+            <>Start by reserving your Primal name:</>
+          </Match>
+        </Switch>
       </div>
 
       <ButtonPremium
         onClick={props.onStart}
       >
-        {intl.formatMessage(t.actions.start)}
+        <Switch>
+          <Match when={isGuest()}>
+            <>Create account</>
+          </Match>
+          <Match when={hasNoMetadata()}>
+            <>Edit profile</>
+          </Match>
+          <Match when={true}>
+            <>{intl.formatMessage(t.actions.start)}</>
+          </Match>
+        </Switch>
       </ButtonPremium>
     </div>
   );

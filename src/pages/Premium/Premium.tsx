@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, Match, on, onCleanup, onMount, Switch } from 'solid-js';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
@@ -8,12 +8,12 @@ import { premium as t, toast as tToast } from '../../translations';
 
 import styles from './Premium.module.scss';
 import Search from '../../components/Search/Search';
-import { A, useNavigate, useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
 import { APP_ID } from '../../App';
-import { changePremiumName, sendPremiumNameCheck, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getPremiumMediaStats, getOrderListHistory, LegendCustomizationConfig, setLegendCutumization } from '../../lib/premium';
+import { changePremiumName, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getOrderListHistory, LegendCustomizationConfig, setLegendCutumization } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -30,11 +30,9 @@ import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
 import { truncateNpub } from '../../stores/profile';
-import { getExchangeRate } from '../../lib/membership';
 import { logError, logInfo } from '../../lib/logger';
 import PremiumFeaturesDialog from './PremiumFeaturedDialog';
 import ButtonLink from '../../components/Buttons/ButtonLink';
-import { socket, subsTo } from '../../sockets';
 import { fetchUserProfile } from '../../handleNotes';
 import PremiumChangeRecipientDialog from './PremiumChangeRecipientDialog';
 import PremiumPromoCodeDialog from './PremiumPromoCodeDialog';
@@ -53,7 +51,6 @@ import PremiumContactBackup from './PremiumContactBackup';
 import PremiumContentBackup from './PremiumContentBackup';
 import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
-import { updateStore } from '../../services/StoreService';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { triggerImportEvents } from '../../lib/notes';
@@ -201,6 +198,15 @@ const Premium: Component = () => {
   }
 
   const onStartAction = () => {
+    if (!account?.publicKey) {
+      account?.actions.showGetStarted()
+      return;
+    }
+    if (!account?.activeUser) {
+      navigate('/settings/profile');
+      return;
+    }
+
     navigate('/premium/name');
   };
 
@@ -983,10 +989,15 @@ const Premium: Component = () => {
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}/>
             </Match>
 
-            <Match when={premiumData.membershipStatus?.tier === 'free'}>
+            <Match when={
+              premiumData.membershipStatus?.tier === 'free' ||
+              (account?.isKeyLookupDone && (!account.publicKey || !account.activeUser))
+            }>
               <PremiumHighlights
                 onStart={onStartAction}
                 onMore={() => setPremiumData('openFeatures', () => 'features')}
+                pubkey={account?.publicKey}
+                user={account?.activeUser}
               />
             </Match>
           </Switch>

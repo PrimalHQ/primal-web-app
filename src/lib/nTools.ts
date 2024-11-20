@@ -5,6 +5,7 @@ import {
   verifyEvent
 } from 'nostr-tools';
 
+// @ts-ignore
 import { AbstractRelay as Relay } from 'nostr-tools/abstract-relay';
 import { Relay as RelayFactory } from 'nostr-tools';
 

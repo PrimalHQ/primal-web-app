@@ -232,6 +232,7 @@ const EditProfile: Component = () => {
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
         note && profile?.actions.updateProfile(note.pubkey);
+        note && account.actions.updateAccountProfile(note.pubkey);
         note && navigate(app?.actions.profileLink(note.pubkey) || '/home')
         toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
       });
