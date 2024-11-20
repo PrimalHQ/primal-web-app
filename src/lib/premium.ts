@@ -408,18 +408,18 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
 
     let payload = {
       event_from_user: signedNote,
-      limit: 30,
+      // limit: 30,
     }
 
-    if (until > 0) {
-      // @ts-ignore
-      payload.until = until
-    }
+    // if (until > 0) {
+    //   // @ts-ignore
+    //   payload.until = until
+    // }
 
-    if (offset > 0) {
-      // @ts-ignore
-      payload.offset = offset;
-    }
+    // if (offset > 0) {
+    //   // @ts-ignore
+    //   payload.offset = offset;
+    // }
 
     const message = JSON.stringify([
       "REQ",

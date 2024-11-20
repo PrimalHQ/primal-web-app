@@ -112,13 +112,6 @@ const PremiumContactBackup: Component<{
     getContactListHistory(pubkey, until, offset, subId, ws);
   }
 
-  const getContactHistoryNextPage = () => {
-    const pubkey = account?.publicKey;
-    if (!pubkey || store.history.length === 0 || store.paging.since === 0) return;
-
-    getContactHistory(pubkey, store.paging.since, 1);
-  }
-
   const onRecover = (item: ContactHistoryItem | undefined) => {
     if (account && item) {
       const date = Math.floor((new Date()).getTime() / 1000);
@@ -155,10 +148,6 @@ const PremiumContactBackup: Component<{
           </For>
         </tbody>
       </table>
-      <Paginator
-        isSmall={true}
-        loadNextPage={getContactHistoryNextPage}
-      />
 
       <ConfirmModal
         open={store.showConfirmRecover !== undefined}
