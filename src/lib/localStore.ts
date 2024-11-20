@@ -1,6 +1,6 @@
 import { TopicStat } from "../megaFeeds";
 import { convertToUser, userName } from "../stores/profile";
-import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -41,6 +41,7 @@ export type LocalStore = {
   dmLastConversation: string | undefined,
   dmLastRelation: UserRelation | undefined,
   premiumReminder: number,
+  dvms: PrimalDVM[] | undefined,
 };
 
 export type UploadTime = {
@@ -89,6 +90,7 @@ export const emptyStorage: LocalStore = {
   dmLastConversation: undefined,
   dmLastRelation: undefined,
   premiumReminder: 0,
+  dvms: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -597,6 +599,24 @@ export const readBookmarks = (pubkey: string | undefined) => {
   return store.bookmarks || [];
 };
 
+
+export const saveDVMs = (pubkey: string | undefined, dvms: PrimalDVM[]) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.dvms = [ ...dvms ];
+
+  setStorage(pubkey, store);
+};
+
+export const readDVMs = (pubkey: string | undefined) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey)
+
+  return store.dvms || [];
+};
 
 export const saveNostrStats = (stats: NostrStats) => {
   localStorage.setItem('nostrStats', JSON.stringify(stats))

@@ -298,9 +298,9 @@ const FeedMarketItem: Component<{
       <div class={styles.left}>
         <div class={styles.avatar}>
           <Avatar size="vs2" src={props.dvm?.picture || props.dvm?.image || ''} />
-          <Show when={props.metadata?.isPrimal && size() === 'list'}>
+          {/* <Show when={props.metadata?.isPrimal && size() === 'list'}>
             <div class={styles.smallPrimalLogo}></div>
-          </Show>
+          </Show> */}
         </div>
         <div class={styles.paid}>
           <Show

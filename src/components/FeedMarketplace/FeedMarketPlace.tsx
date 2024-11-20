@@ -16,6 +16,7 @@ import { useNavigate } from '@solidjs/router';
 import { account, explore } from '../../translations';
 import { useExploreContext } from '../../contexts/ExploreContext';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { readDVMs, saveDVMs } from '../../lib/localStore';
 
 export type MarketplaceStore = {
   dvms: PrimalDVM[],
@@ -60,6 +61,14 @@ const FeedMarketPlace: Component<{
   const fetchDVMs = () => {
     const subId = `explore_feeds_${APP_ID}`;
 
+    const storedDvms = readDVMs(account?.publicKey);
+
+    if (storedDvms && storedDvms.length > 0) {
+      updateStore('dvms', [...storedDvms])
+    }
+
+    let fetchedDVMs: PrimalDVM[] = [];
+
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
 
@@ -83,7 +92,8 @@ const FeedMarketPlace: Component<{
             primal_spec: dvmData.primal_spec,
           };
 
-          updateStore('dvms', store.dvms.length, () => ({ ...dvm }));
+          fetchedDVMs.push(dvm);
+
           return;
         }
 
@@ -129,6 +139,9 @@ const FeedMarketPlace: Component<{
         }
       },
       onEose: () => {
+
+        updateStore('dvms', () => ({ ...fetchedDVMs }));
+        saveDVMs(account?.publicKey, [...fetchedDVMs]);
         unsub();
       }
     });
