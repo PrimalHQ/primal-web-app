@@ -116,10 +116,10 @@ const PremiumCustomLegend: Component<{
         <div class={styles.legendStyleDescription}>
           <div>Don’t want to stand out?</div>
           <div>
-            If you disable the custom badge and avatar glow,
+            If you disable the custom badge and avatar ring,
           </div>
           <div>
-            your profile will look like any other profile on  Primal.
+            your profile will look like any other profile on Primal.
           </div>
         </div>
 

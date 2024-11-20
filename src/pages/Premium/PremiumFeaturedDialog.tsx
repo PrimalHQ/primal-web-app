@@ -1,5 +1,5 @@
 import { Tabs } from '@kobalte/core/tabs';
-import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import AdvancedSearchDialog from '../../components/AdvancedSearch/AdvancedSearchDialog';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import HelpTip from '../../components/HelpTip/HelpTip';
@@ -118,7 +118,7 @@ const faq = [
   },
   {
     question: 'Do I own my Primal Name indefinitely?',
-    answer: 'You have the right to use your Primal Name for the duration of your Primal Premium subscription. After the subscription expires, there is a grace period of 30 days during which your Primal Name will not be available to others to register. Primal Legend users have non-expiring subscriptions, so they can use their Primal Names indefinitely. Please note that all Primal Names are owned by Primal and rented to users. Primal reserves the right to revoke any name if we determine that the name is trademarked by somebody else, that there is a possible case of impersonation, or for any other case of abuse, as determined by Primal. Please refer to our __LINK__Terms_of_Service__LINK__ for details.',
+    answer: 'You have the right to use your Primal Name for the duration of your Primal Premium subscription. After the subscription expires, there is a grace period of 30 days during which your Primal Name will not be available to others to register. Primal Legend users have non-expiring subscriptions, so they can use their Primal Names indefinitely. Please note that all Primal Names are owned by Primal and rented to users. Primal reserves the right to revoke any name if we determine that the name is trademarked by somebody else, that there is a possible case of impersonation, or for any other case of abuse, as determined by Primal. Please refer to our <a data-link="terms">Terms_of_Service</a> for details.',
   },
   {
     question: 'Can I buy multiple Primal Names?',
@@ -150,7 +150,7 @@ const faq = [
   },
   {
     question: 'I’d like to support Primal. Can I do more?',
-    answer: 'At Primal, we don’t rely on advertising. We don’t monetize user data. We open source all our work to help the Nostr ecosystem flourish. If you wish to help us continue doing this work, please see how you can __LINK__support_us__LINK__. Thank you from the entire Primal Team! 🙏❤️',
+    answer: 'At Primal, we don’t rely on advertising. We don’t monetize user data. We open source all our work to help the Nostr ecosystem flourish. If you wish to help us continue doing this work, please see how you can <a data-link="support">support_us</a>. Thank you from the entire Primal Team! 🙏❤️',
   },
 ]
 
@@ -162,6 +162,36 @@ const PremiumFeaturesDialog: Component<{
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = createSignal<'features' | 'faq'>('features');
+
+  const onClick = (e: MouseEvent) => {
+    const t = e.target;
+
+    // @ts-ignore
+    const link = t?.getAttribute('data-link');
+
+    if (!link) return;
+
+    if (link === 'support') {
+      props.setOpen(false);
+      navigate('/premium/support');
+      return;
+    }
+
+    if (link === 'terms') {
+      props.setOpen(false);
+      // @ts-ignore
+      window.open(`${location.origin}/terms`, '_blank').focus();
+      return;
+    }
+  };
+
+  onMount(() => {
+    window.addEventListener('click', onClick);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('click', onClick);
+  })
 
   createEffect(() => {
     const open = props.open;
@@ -179,59 +209,6 @@ const PremiumFeaturesDialog: Component<{
     if (featureTik === 'false') return <></>;
 
     return <>{featureTik}</>;
-  }
-
-  const parseAnswer = (text: string) => {
-    const tokens = text.split(' ');
-
-    const getLinkLabel = (t: string) => {
-      if (!t.startsWith('__LINK__')) return ['', ''];
-      const s = t.split('__LINK__');
-
-      const label = s[1].replaceAll('_', ' ');
-      const suffix = s[2] || '';
-
-
-      return [label, suffix]
-    }
-
-    const goTo = (label: string) => {
-
-      if (label === 'support us') {
-        props.setOpen(false);
-        navigate('/premium/support');
-        return;
-      }
-
-      if (label === 'Terms of Service') {
-        // @ts-ignore
-        window.open(`${location.origin}/terms`, '_blank').focus();
-        return;
-      }
-
-      props.setOpen(false);
-      navigate('/home');
-    }
-
-    return (<>
-      <For each={tokens}>
-        {token => {
-          const [label, suffix] = getLinkLabel(token);
-
-          return (
-          <Switch
-            fallback={<>{token}&nbsp;</>}
-          >
-            <Match when={token.startsWith('__LINK__')}>
-              <>
-                <ButtonLink onClick={() => goTo(label)}>{label}</ButtonLink>
-                <>{suffix}</>&nbsp;
-              </>
-            </Match>
-          </Switch>
-        )}}
-      </For>
-    </>)
   }
 
   return (
@@ -305,8 +282,7 @@ const PremiumFeaturesDialog: Component<{
                       <div class={styles.question}>
                         {q.question}
                       </div>
-                      <div class={styles.answer}>
-                        {parseAnswer(q.answer)}
+                      <div class={styles.answer} innerHTML={q.answer}>
                       </div>
                     </div>
                   )}

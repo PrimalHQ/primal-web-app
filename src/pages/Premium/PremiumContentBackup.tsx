@@ -216,8 +216,6 @@ const PremiumContentBackup: Component<{
 
     const subId = `premium_broadcast_status_${APP_ID}`;
 
-    let prog = 0;
-
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         if (content.kind === Kind.BroadcastStatus) {
@@ -301,16 +299,12 @@ const PremiumContentBackup: Component<{
                 <td>{item.cnt.toLocaleString()}</td>
                 <td>{getKindName(item.kind)}</td>
                 <td class={styles.tdAction}>
-                  <Show
-                    when={!store.isBroadcasting}
-                    fallback={<div class="linkish">Broadcasting...</div>}
+                  <ButtonLink
+                    onClick={() => onBroadcast(item.kind)}
+                    disabled={store.isBroadcasting}
                   >
-                    <ButtonLink
-                      onClick={() => onBroadcast(item.kind)}
-                    >
-                      <div class={styles.broadcastIcon}></div>
-                    </ButtonLink>
-                  </Show>
+                    <div class={styles.broadcastIcon}></div>
+                  </ButtonLink>
                 </td>
                 <td class={styles.tdAction}>
                   <Show
@@ -331,16 +325,12 @@ const PremiumContentBackup: Component<{
             <td>{totalCount().toLocaleString()}</td>
             <td>All Events</td>
             <td class={styles.tdAction}>
-              <Show
-                when={!store.isBroadcasting}
-                fallback={<div class="linkish">Broadcasting...</div>}
+              <ButtonLink
+                onClick={() => onBroadcast(-1)}
+                disabled={store.isBroadcasting}
               >
-                <ButtonLink
-                  onClick={() => onBroadcast(-1)}
-                >
-                  <div class={styles.broadcastIcon}></div>
-                </ButtonLink>
-              </Show>
+                <div class={styles.broadcastIcon}></div>
+              </ButtonLink>
             </td>
             <td class={styles.tdAction}>
               <Show
