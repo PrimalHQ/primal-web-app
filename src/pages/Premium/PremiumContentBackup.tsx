@@ -1,4 +1,4 @@
-import { Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -25,17 +25,18 @@ export type BroadcastStatus = {
   running: boolean,
   status: string,
   progress: number,
-  message: string,
+  kinds: number[] | null,
 };
 
 export type ContentStore = {
   stats: ContentItem[],
   isDownloading: number | undefined,
-  isBroadcasting: boolean,
+  isBroadcasting: number | undefined,
   broadcastStatus: BroadcastStatus,
+  statusSubId: string,
 };
 
-export const kindNames = {
+export const kindNames: Record<number, string> = {
   0: 'Profile Metadata',
   1: 'Notes',
   3: 'Contacts',
@@ -71,7 +72,7 @@ export const emptyBroadcastStatus = () => ({
   running: false,
   status: '',
   progress: 0,
-  message: '',
+  kinds: null,
 })
 
 
@@ -86,13 +87,44 @@ const PremiumContentBackup: Component<{
   const [store, updateStore] = createStore<ContentStore>({
     stats: [],
     isDownloading: undefined,
-    isBroadcasting: false,
+    isBroadcasting: undefined,
     broadcastStatus: { ...emptyBroadcastStatus() },
+    statusSubId: '',
+  });
+
+  let unsubStatus = () => {};
+
+  onMount(() => {
+    startListeningForBroadcastStatus();
+  });
+
+  onCleanup(() => {
+    const ws = socket();
+    const pubkey = account?.publicKey;
+    const subId = store.statusSubId;
+
+    if (!ws || !pubkey) return;
+
+    stopListeningForContentBroadcastStaus(pubkey, subId, ws);
+    unsubStatus();
   });
 
   createEffect(() => {
     if (isConnected() &&  account?.isKeyLookupDone && account.publicKey) {
       getContentList(account.publicKey)
+    }
+  });
+
+  createEffect(() => {
+    const status = store.broadcastStatus;
+
+    if (status.running) {
+      const kind = status.kinds === null || status.kinds.length === 0 ?
+        -1 : status.kinds[0];
+
+      updateStore('isBroadcasting', () => kind);
+    } else {
+      updateStore('isBroadcasting', () => undefined);
     }
   });
 
@@ -189,7 +221,8 @@ const PremiumContentBackup: Component<{
 
     if (!ws || !pubkey) return;
 
-    updateStore('isBroadcasting', () => true);
+    updateStore('isBroadcasting', () => kind);
+    updateStore('broadcastStatus', (bs) => ({ ...bs, kinds: [kind] }));
 
     const subId = `premium_content_broadcast_${APP_ID}`;
 
@@ -198,8 +231,6 @@ const PremiumContentBackup: Component<{
       },
       onEose: () => {
         unsub();
-
-        startListeningForBroadcastStatus()
       }
     })
 
@@ -216,23 +247,18 @@ const PremiumContentBackup: Component<{
 
     const subId = `premium_broadcast_status_${APP_ID}`;
 
-    const unsub = subsTo(subId, {
+    updateStore('statusSubId', () => subId);
+
+    unsubStatus = subsTo(subId, {
       onEvent: (_, content) => {
         if (content.kind === Kind.BroadcastStatus) {
-          const stats = JSON.parse(content.content) as BroadcastStatus;
+          let stats = JSON.parse(content.content) as BroadcastStatus;
           const running = stats.running || false;
 
           if (!running) {
             if (stats.status = 'finished fine') {
               updateStore('broadcastStatus', (bs) => ({ ...bs, progress: 1.0 }));
             }
-
-            setTimeout(() => {
-              stopListeningForContentBroadcastStaus(pubkey, subId, ws);
-              updateStore('broadcastStatus', () => ({ ...emptyBroadcastStatus() }));
-              updateStore('isBroadcasting', () => false);
-            }, 100)
-            unsub();
           }
 
           updateStore('broadcastStatus', () => ({ ...stats }));
@@ -264,10 +290,9 @@ const PremiumContentBackup: Component<{
 
     cancelContentBroadcast(pubkey, subId, ws);
 
-    stopListeningForContentBroadcastStaus(pubkey, subId, ws);
+    // stopListeningForContentBroadcastStaus(pubkey, subId, ws);
     updateStore('broadcastStatus', () => ({ ...emptyBroadcastStatus() }));
-    updateStore('isBroadcasting', () => false);
-
+    updateStore('isBroadcasting', () => undefined);
   }
 
   const filteredStats = () => {
@@ -279,6 +304,23 @@ const PremiumContentBackup: Component<{
     if (!store.broadcastStatus.running) return 0;
 
     return Math.round(store.broadcastStatus.progress * 100);
+  }
+
+  const rebroadstingLabel = () => {
+    const status = store.broadcastStatus;
+    const kinds = status.kinds;
+
+    let label = 'Rebroadcasting';
+
+    if (kinds === null || kinds.length === 0) {
+      label += ' all events'
+    } else {
+      const kind = kinds[0];
+
+      label += ` ${kindNames[kind]}`;
+    }
+
+    return `${label}: ${activeProgress()}%`;
   }
 
   return (
@@ -299,12 +341,17 @@ const PremiumContentBackup: Component<{
                 <td>{item.cnt.toLocaleString()}</td>
                 <td>{getKindName(item.kind)}</td>
                 <td class={styles.tdAction}>
-                  <ButtonLink
-                    onClick={() => onBroadcast(item.kind)}
-                    disabled={store.isBroadcasting}
+                  <Show
+                    when={store.isBroadcasting !== item.kind}
+                    fallback={<div class="linkish">broadcasting...</div>}
                   >
-                    <div class={styles.broadcastIcon}></div>
-                  </ButtonLink>
+                    <ButtonLink
+                      onClick={() => onBroadcast(item.kind)}
+                      disabled={store.isBroadcasting !== undefined}
+                    >
+                      <div class={styles.broadcastIcon}></div>
+                    </ButtonLink>
+                  </Show>
                 </td>
                 <td class={styles.tdAction}>
                   <Show
@@ -351,7 +398,9 @@ const PremiumContentBackup: Component<{
       <Show when={store.isBroadcasting}>
         <Progress value={activeProgress()} class={styles.broadcastProgress}>
           <div class={styles.progressLabelContainer}>
-            <Progress.Label class={styles.progressLabel}>Rebroadcasting: {activeProgress()}%</Progress.Label>
+            <Progress.Label class={styles.progressLabel}>
+              {rebroadstingLabel()}
+            </Progress.Label>
           </div>
           <div class={styles.progressTrackContainer}>
             <Progress.Track class={styles.progressTrack}>
