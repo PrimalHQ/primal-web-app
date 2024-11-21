@@ -47,6 +47,7 @@ const EventPage: Component = () => {
 
   const resolveFromId = (id: string) => {
     const subId = `event_${APP_ID}`;
+
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         if (content.kind === Kind.LongForm) {
@@ -77,7 +78,7 @@ const EventPage: Component = () => {
             setEvId(() => 'NONE');
           }
 
-          setComponent(() => 'read');
+          setComponent(() => 'note');
           return;
         }
       },
