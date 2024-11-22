@@ -19,7 +19,7 @@ import { DMProvider } from './contexts/DMContext';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
-export const APP_ID = `web_dev_${version}_${Math.floor(Math.random()*10000000000)}`;
+export const APP_ID = `web_${version}_${Math.floor(Math.random()*10000000000)}`;
 
 const App: Component = () => {
 
