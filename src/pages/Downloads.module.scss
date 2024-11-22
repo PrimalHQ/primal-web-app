@@ -294,11 +294,57 @@
 
 @media only screen and (max-width: 720px) {
 
+  .appInfo {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .appInfoReverse {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .promoVideo {
+    border-radius: 0;
+    margin-inline: 0;
+  }
+
+  .downloadsExtra {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+
+    border: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+
+    .sclabel {
+      color: var(--text-secondary-2);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 40px;
+    }
+  }
+
+  .promoVideo {
+    // width: 600px;
+    height: 210px;
+  }
+
+
+
+
+
   .callToAction {
     display: none;
   }
 
   .downloadsContent {
+    width: 100%;
     flex-direction: column;
     align-items: center;
   }
@@ -307,57 +353,52 @@
     margin-bottom: 0;
   }
 
-  .linkHolder {
-    margin-top: 0;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    padding-inline: 28px;
-
-    >div {
-      width: 100%;
-      .desktopCTA {
-        display: none;
-      }
-
-      >a {
-        >img {
-          max-width: none;
-          width: 188px;
-          height: 63px;
-        }
-      }
-      width: 100%;
-      margin-bottom: 20px;
-    }
+  .appInfo {
 
     .appStore {
-      margin-inline: 20px;
-      .callToActionIOS {
-        display: flex;
-        .ctaTitle {
-          font-size: 24px;
-          font-weight: 600;
-          line-height: 24px;
-        }
+      background-color: var(--background-site);
+
+      .desktopCTA {
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 24px;
       }
+
+      .buidDetails {
+        font-size: 14px;
+        line-height: 14px;
+      }
+
       >a {
-        width: 188px;
-        height: 63px;
+        text-align: center;
+        width: 198px;
+        height: 60px;
+        img {
+          width: 100%;
+        }
       }
     }
 
     .playStore {
-      margin-top: 4px;
-      margin-bottom: 24px;
-      flex-direction: column;
-      align-items: center;
-      .callToActionAndroid {
-        display: flex;
-        .ctaTitle {
-          font-size: 24px;
-          font-weight: 600;
-          line-height: 24px;
+      background-color: var(--background-site);
+
+      .desktopCTA {
+        font-size: 24px;
+        font-weight: 600;
+        line-height: 24px;
+      }
+
+      .buidDetails {
+        font-size: 14px;
+        line-height: 14px;
+      }
+
+      >a {
+        text-align: center;
+        width: 198px;
+        height: 60px;
+        img {
+          width: 100%;
         }
       }
     }
