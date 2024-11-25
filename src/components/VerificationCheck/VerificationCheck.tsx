@@ -67,21 +67,27 @@ const VerificationCheck: Component<{
     return klass;
   }
 
+  const isLegend = () => legendConfig() !== undefined;
+
   onMount(() => {
     checkVerification();
   })
 
   return (
     <Show
-      when={isVerified()}
+      when={isVerified() || isLegend()}
       fallback={props.fallback}
     >
       <Show
         when={props.large}
         fallback={
-          <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
+          <div
+            id={props.id}
+            data-user={props.user?.pubkey}
+            class={styles.verificationIcon}
+          >
             <Show
-              when={isVerifiedByPrimal()}
+              when={isVerifiedByPrimal() || isLegend()}
               fallback={
                 <span class={styles.verifiedIcon} />
               }
@@ -93,9 +99,13 @@ const VerificationCheck: Component<{
           </div>
         }
       >
-        <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIconL}>
+        <div
+          id={props.id}
+          data-user={props.user?.pubkey}
+          class={styles.verificationIconL}
+        >
           <Show
-            when={isVerifiedByPrimal()}
+            when={isVerifiedByPrimal() || isLegend()}
             fallback={
               <span class={styles.verifiedIcon} />
             }
