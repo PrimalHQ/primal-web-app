@@ -1,30 +1,12 @@
-import { Component, Match, Show, Switch } from 'solid-js';
+import { Component, onMount, Show } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
-import { useIntl } from '@cookbook/solid-intl';
-import { premium as t } from '../../translations';
-
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
-
-import { appStoreLink, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
-import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
 
-import primalLogo from '../../assets/icons/logo_fire.svg';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
+import { createStore } from 'solid-js/store';
 
 const premiumRelay = 'wss://premium.primal.net/';
 
@@ -32,17 +14,35 @@ const PremiumRelay: Component<{
   data: PremiumStore,
 }> = (props) => {
   const account = useAccountContext();
-  const intl = useIntl()
-  const navigate = useNavigate();
 
   const isConnected = () => account?.relays.find(r => r.url === premiumRelay);
+
+  const [relayInfo, setRelayInfo] = createStore<any>({});
+
+  const fetchRelayVersion = async () => {
+    const response = await fetch('https://premium.primal.net', {
+      headers: {
+        'Accept': 'application/nostr+json',
+      }
+    });
+
+    const ri = await response.json() as { version: string };
+
+    setRelayInfo(() => ({ ...ri }));
+  };
+
+  onMount(() => {
+    fetchRelayVersion();
+  });
 
   return (
     <div class={styles.legendLayout}>
       <div class={styles.premiumRelayLayout}>
         <div class={styles.primalLogo}></div>
         <div class={styles.title}>Premium Relay</div>
-        <div class={styles.subtitle}>Running strfry.git version1.0.2</div>
+        <Show when={relayInfo.version}>
+          <div class={styles.subtitle}>Running strfry.git version {relayInfo.version}</div>
+        </Show>
         <div class={styles.separator}></div>
         <div class={styles.relayDescription}>
           The Primal Premium relay is a high-
