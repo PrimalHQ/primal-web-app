@@ -64,14 +64,12 @@ const NoteImage: Component<{
       return `${props.forceHeight}px`;
     }
 
-    if (!props.media || props.ignoreRatio) {
-      return '100%';
-    }
+    if (!props.media || props.ignoreRatio) return '100%';
 
     const img = props.media;
 
-    if (!img || ratio() <= 1.2) return '680px';
-
+    if (!img || ratio() <= 0.9) return '680px';
+    if (!img || ratio() <= 1.2) return 'auto';
 
     // width of the note over the ratio of the preview image
     const h = width() / ratio();
@@ -159,6 +157,7 @@ const NoteImage: Component<{
         data-image-group={props.imageGroup}
         data-cropped={true}
         data-thumb-src={thumbSrc()}
+        data-ratio={ratio()}
         target="_blank"
       >
         <img
@@ -167,7 +166,7 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          style={`width: ${willBeTooBig() ? undefined : `${width()}px`}; height: ${height()}`}
+          style={`${willBeTooBig() ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

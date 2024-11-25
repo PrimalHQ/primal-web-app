@@ -357,7 +357,7 @@ const Note: Component<{
               <ParsedNote
                 note={props.note}
                 width={Math.min(640, window.innerWidth)}
-                margins={12}
+                margins={42}
               />
             </div>
 
@@ -509,7 +509,7 @@ const Note: Component<{
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(566, window.innerWidth - 72)}
-                  margins={1}
+                  margins={16}
                   footerSize="short"
                 />
               </div>

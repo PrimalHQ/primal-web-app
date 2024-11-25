@@ -640,12 +640,19 @@ const ParsedNote: Component<{
         let h: number | undefined = undefined;
         let w: number | undefined = undefined;
 
+        let ratio = 1;
+        const margins = props.margins || 20;
+
         if (mVideo) {
-          const margins = props.margins || 20
-          const ratio = mVideo.w / mVideo.h;
-          h = ((noteWidth() - 2*margins) / ratio);
-          w = h > 680 ? 680 * ratio : noteWidth() - 2*margins;
-          h = h > 680 ? 680 : h;
+          ratio = mVideo.w / mVideo.h;
+
+          if (ratio < 1.2) {
+            h = 680;
+            w = h * ratio;
+          } else {
+            w = (noteWidth() - margins);
+            h = w / ratio;
+          }
         }
 
         let klass = mVideo ? 'w-cen' : 'w-max';
@@ -667,6 +674,7 @@ const ParsedNote: Component<{
           muted={true}
           loop={true}
           playsinline={true}
+          data-ratio={`${ratio}`}
         >
           <source src={token} type={item.meta?.videoType} />
         </video>;
