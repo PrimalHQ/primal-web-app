@@ -3,8 +3,7 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "../types/primal";
-import { mergeArrays } from "../utils";
-import { convertToUser, emptyUser } from "./profile";
+import { convertToUser } from "./profile";
 
 
 export const noActions = (id: string) => ({
@@ -159,14 +158,6 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
       mentionedUsers[t[1]] = convertToUser(page.users[t[1]], t[1]);
     }
 
-    // include senders of top zaps into mentioned users
-    for(let i=0; i<topZaps.length; i++) {
-      const topZap = topZaps[i];
-      if (mentionedUsers[topZap.pubkey]) continue;
-
-      mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey], topZap.pubkey);
-    }
-
     const mentionStat = page.noteStats[mentionId];
 
     const noteActions = (page.noteActions && page.noteActions[mentionId]) ?? noActions(mentionId);
@@ -283,6 +274,14 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
       mentionedUsers[id] = convertToUser(m, id);
     }
+  }
+
+  // include senders of top zaps into mentioned users
+  for(let i=0; i<topZaps.length; i++) {
+    const topZap = topZaps[i];
+    if (mentionedUsers[topZap.pubkey]) continue;
+
+    mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey], topZap.pubkey);
   }
 
   return {
