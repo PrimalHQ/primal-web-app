@@ -266,16 +266,17 @@
   width: 524px;
   position: relative;
   .userName {
-    // text-overflow: ellipsis;
-    // white-space: nowrap;
-    // overflow: hidden;
+    flex-shrink: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
     // max-width: 226px;
 
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
+    // overflow: hidden;
+    // display: -webkit-box;
+    // -webkit-line-clamp: 1;
+    // line-clamp: 1;
+    // -webkit-box-orient: vertical;
 
     color: var(--text-primary);
 
@@ -301,16 +302,17 @@
     }
   }
   .verification {
+    flex-shrink: 1;
     // max-width: 216px;
-    // text-overflow: ellipsis;
-    // white-space: nowrap;
-    // overflow: hidden;
-
+    text-overflow: ellipsis;
+    white-space: nowrap;
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
+
+    // overflow: hidden;
+    // display: -webkit-box;
+    // -webkit-line-clamp: 1;
+    // line-clamp: 1;
+    // -webkit-box-orient: vertical;
 
     color: var(--text-tertiary);
 
