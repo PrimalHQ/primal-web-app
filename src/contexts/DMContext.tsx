@@ -1,59 +1,45 @@
-import { createStore, reconcile, unwrap } from "solid-js/store";
-import { Kind, threadLenghtInMs } from "../constants";
+import { createStore } from "solid-js/store";
+import { Kind } from "../constants";
 import {
-  batch,
   createContext,
   createEffect,
   on,
-  onCleanup,
-  onMount,
   useContext
 } from "solid-js";
 import {
   isConnected,
-  readData,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
   subsTo
 } from "../sockets";
 import {
   ContextChildren,
   DirectMessage,
-  DirectMessageThread,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
-  NostrEvents,
   NostrMentionContent,
   NostrMessageEncryptedContent,
   NostrNoteActionsContent,
   NostrNoteContent,
   NostrStatsContent,
   NostrUserContent,
-  NostrWindow,
   NoteActions,
   PrimalArticle,
   PrimalNote,
   PrimalUser,
-  SenderMessageCount,
   UserRelation,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { getMessageCounts, getNewMessages, getOldMessages, markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
+import { markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
-import { convertToUser, emptyUser, userName } from "../stores/profile";
+import { convertToUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "../lib/nTools";
 import { convertToNotes } from "../stores/note";
-import { sanitize, sendEvent } from "../lib/notes";
+import { importEvents, sanitize, sendEvent } from "../lib/notes";
 import { decrypt, encrypt } from "../lib/nostrAPI";
-import { loadDmCoversations, loadLastDMRelation, loadMsgContacts, saveDmConversations, saveLastDMConversations, saveLastDMRelation, saveMsgContacts } from "../lib/localStore";
+import { saveLastDMConversations, saveLastDMRelation } from "../lib/localStore";
 import { useAppContext } from "./AppContext";
-import { useSettingsContext } from "./SettingsContext";
-import { calculateDMContactsOffset, calculateDMConversationOffset, calculateNotesOffset, handleSubscription, handleSubscriptionAsync } from "../utils";
+import { calculateDMContactsOffset, calculateDMConversationOffset, handleSubscriptionAsync } from "../utils";
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
 import { logError, logWarning } from "../lib/logger";
 import { fetchUserProfile } from "../handleNotes";
@@ -96,7 +82,7 @@ export type DMStore = {
     addContact: (user: PrimalUser) => void,
     getConversation: (contact: string | null, until: number) => void,
     getConversationNextPage: () => void,
-    sendMessage: (reciever: string, message: DirectMessage) => void,
+    sendMessage: (reciever: string, message: DirectMessage) => Promise<boolean>,
     resetAllMessages: () => Promise<boolean>,
     resetRelation: () => void,
   },
@@ -370,9 +356,6 @@ const actualDecrypt = (pubkey: string, message: string) => {
   });
 }
 
-let start = 0;
-let end = 0;
-
 const decryptMessages = async (contact: string, encrypted: NostrMessageEncryptedContent[],  then: (messages: DirectMessage[]) => void) => {
 
   let newMessages: DirectMessage[] = [];
@@ -610,12 +593,22 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    const { success } = await sendEvent(event, account.activeRelays, account?.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(event, account.activeRelays, account?.relaySettings, account?.proxyThroughPrimal || false);
 
-    if (success) {
-      const msg = { ...message, content: sanitize(message.content) };
-      addToConversation([msg]);
-      // updateStore('messageCountPerSender', receiver, 'latest_at', message.created_at);
+    if (success && note) {
+      const subId = `import_dm_${APP_ID}`;
+
+      const unsub = subsTo(subId, {
+        onEose: () => {
+          unsub();
+          const msg = { ...message, content: sanitize(message.content) };
+          addToConversation([msg]);
+
+          refreshContacts(store.lastConversationRelation);
+        }
+      });
+
+      importEvents([note], subId);
     }
 
     return success;
