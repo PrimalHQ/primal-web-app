@@ -24,6 +24,8 @@ import { TextField } from "@kobalte/core/text-field";
 import DirectMessagesComposer from "../components/DirectMessages/DirectMessagesComposer";
 import { Pagination } from "@kobalte/core/*";
 import Paginator from "../components/Paginator/Paginator";
+import { hexToNpub, npubToHex } from "../lib/keys";
+import { logError } from "../lib/logger";
 
 const DirectMessages: Component = () => {
 
@@ -48,7 +50,9 @@ const DirectMessages: Component = () => {
     let list = dms?.dmContacts[relation as UserRelation];
 
     if (list.length > 0) {
-      const first = list[0].pubkey;
+      const first = toNpub(list[0].pubkey);
+
+      if (first.length === 0) return;
 
       navigate(`/dms/${first}`);
       return;
@@ -58,7 +62,9 @@ const DirectMessages: Component = () => {
 
     list = dms?.dmContacts[relation as UserRelation];
 
-    const first = list[0].pubkey;
+    const first = toNpub(list[0].pubkey);
+
+    if (first.length === 0) return;
 
     navigate(`/dms/${first}`);
     // if (!isContactInTheList(dms.lastConversationContact?.pubkey, dms.lastConversationRelation)) {
@@ -91,8 +97,27 @@ const DirectMessages: Component = () => {
     await updateRelationOfContact(contact);
   }
 
+  const toNpub = (pubkey: string) => {
+    let npub = pubkey;
+
+    if (!npub.startsWith('npub')) {
+      try {
+        npub = hexToNpub(npub);
+      } catch (e) {
+        logError('Failed to decode npub: ', e);
+        return '';
+      }
+    }
+
+    return npub;
+  }
+
   const selectContact = (pubkey: string) => {
-    navigate(`/dms/${pubkey}`);
+    const npub = toNpub(pubkey);
+
+    if (npub.length === 0) return;
+
+    navigate(`/dms/${npub}`);
   }
 
   const setupPageState = async (contact: string) => {
@@ -120,11 +145,23 @@ const DirectMessages: Component = () => {
     dms?.actions.resetAllMessages();
   };
 
+  const isSelected = (pubkey: string) => {
+    const npub = toNpub(pubkey);
+
+    return [pubkey, npub].includes(params.contact);
+  }
+
   createEffect(on(() => [account?.isKeyLookupDone, params.contact], (next) => {
     const [ isDone, contact ] = next;
 
     if (isDone) {
-      setupPageState(contact as string);
+      let pubkey = (contact || '') as string;
+
+      if (pubkey.startsWith('npub')) {
+        pubkey = npubToHex(pubkey);
+      }
+
+      setupPageState(pubkey);
     }
   }));
 
@@ -203,7 +240,7 @@ const DirectMessages: Component = () => {
                         <DirectMessageContact
                           dmContact={contact}
                           onSelect={selectContact}
-                          isSelected={params.contact === contact.pubkey}
+                          isSelected={isSelected(contact.pubkey)}
                         />
                       )}
                     </For>

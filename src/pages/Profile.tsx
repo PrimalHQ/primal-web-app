@@ -764,7 +764,7 @@ const Profile: Component = () => {
 
               <Show when={account?.publicKey}>
                 <ButtonSecondary
-                  onClick={() => navigate(`/dms/${profile?.userProfile?.pubkey}`)}
+                  onClick={() => navigate(`/dms/${profile?.userProfile?.npub}`)}
                   shrink={true}
                 >
                   <div class={styles.messageIcon}></div>
