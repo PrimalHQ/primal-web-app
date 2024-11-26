@@ -556,6 +556,16 @@ const ParsedNote: Component<{
     const groupCount = item.tokens.length;
     const imageGroup = generatePrivateKey();
 
+    const imageError = (event: any) => {
+      // const image = event.target;
+
+      // image.style = '';
+      // image.width = 100;
+      // image.height = 100;
+
+      return true;
+    }
+
     // Remove bottom margin if media is the last thing in the note
     const lastClass = index === content.length-1 ?
       'noBottomMargin' : '';
@@ -584,6 +594,7 @@ const ParsedNote: Component<{
         width={noteWidth()}
         imageGroup={`${imageGroup}`}
         shortHeight={props.shorten}
+        onError={imageError}
       />
     }
 
@@ -593,7 +604,10 @@ const ParsedNote: Component<{
 
     setWordsDisplayed(w => w + 100);
 
-    return <div class={`imageGrid ${gridClass}`}>
+    return <div
+      class={`imageGrid ${gridClass}`}
+      style={`max-width: ${noteWidth() - (props.margins || 20)}px`}
+    >
       <For each={item.tokens}>
         {(token, index) => {
 
@@ -620,6 +634,7 @@ const ParsedNote: Component<{
             shortHeight={props.shorten}
             plainBorder={true}
             forceHeight={500}
+            onError={imageError}
           />
         }}
       </For>
