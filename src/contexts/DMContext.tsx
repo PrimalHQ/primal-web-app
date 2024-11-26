@@ -103,7 +103,7 @@ export const emptyDMStore: () => Omit<DMStore, 'actions'> = () => ({
   dmCount: 0,
   lastMessageCheck: 0,
   lastConversationContact: undefined,
-  lastConversationRelation: 'any',
+  lastConversationRelation: 'follows',
 
   encryptedMessages: [],
   messages: [],
