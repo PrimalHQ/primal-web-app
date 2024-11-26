@@ -14,6 +14,7 @@
   width: var(--center-col-w);
   margin-left: -16px;
 
+
   .caption {
     display: flex;
     align-items: center;
@@ -26,6 +27,14 @@
     line-height: 34px;
     color: var(--brand-text);
     text-transform: lowercase;
+
+    >div {
+      max-width: 100%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
   }
 
   .addToFeed {

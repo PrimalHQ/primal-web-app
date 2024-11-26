@@ -67,10 +67,15 @@ const Search: Component = () => {
       <PageCaption extended={true}>
         <div class={styles.searchHeader}>
           <div class={styles.caption}>
-            {intl.formatMessage(
-              tSearch.title,
-              { query: query() || '' },
-            )}
+            <div title={intl.formatMessage(
+                tSearch.title,
+                { query: query() || '' },
+              )}>
+              {intl.formatMessage(
+                tSearch.title,
+                { query: query() || '' },
+              )}
+            </div>
           </div>
           <div class={styles.addToFeed}>
             <SaveFeedDialog
