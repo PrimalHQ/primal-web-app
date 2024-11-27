@@ -60,7 +60,7 @@ import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
-import { handleSubscription } from "../utils";
+import { calculateReadsOffset, handleSubscription } from "../utils";
 
 let startTime = 0;
 let midTime = 0;
@@ -358,6 +358,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       updateStore('isFetching', () => true);
 
+      const off = offset || calculateReadsOffset(store.articles, store.paging['reads']);
+
       const { reads, paging } = await fetchMegaFeed(
         account?.publicKey,
         JSON.stringify(specification),
@@ -365,7 +367,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         {
           limit,
           until,
-          offset: offset || store.articles.map(n => n.published || 0),
+          offset: off,
         },
       );
 
