@@ -763,6 +763,17 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.encryptedMessages.push({ ...content });
   }
 
+  if (content.kind === Kind.WordCount) {
+    const count = JSON.parse(content.content) as { event_id: string, words: number };
+
+    if (!page.wordCount) {
+      page.wordCount = {};
+    }
+
+    page.wordCount[count.event_id] = count.words
+    return;
+  }
+
 };
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
