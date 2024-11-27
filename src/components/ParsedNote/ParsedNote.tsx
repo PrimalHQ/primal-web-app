@@ -661,7 +661,7 @@ const ParsedNote: Component<{
         if (mVideo) {
           ratio = mVideo.w / mVideo.h;
 
-          if (ratio < 1.2) {
+          if (ratio < 1) {
             h = 680;
             w = h * ratio;
           } else {
