@@ -166,7 +166,7 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          style={`${willBeTooBig() ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
+          style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>
