@@ -84,7 +84,7 @@ const Avatar: Component<{
       const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
 
       if (legendConfig) {
-        return legendConfig.custom_badge ? styles.legend : '';
+        return legendConfig.avatar_glow ? styles.legend : '';
       }
     }
 
