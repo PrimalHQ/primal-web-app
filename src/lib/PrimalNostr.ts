@@ -81,7 +81,7 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
 
 export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
   const getSec = async () => {
-    let sec: string = pk || readSecFromStorage() || tempNsec() || generatePrivateKey();
+    let sec: string = pk || readSecFromStorage() || tempNsec() || nip19.nsecEncode(generatePrivateKey());
 
     if (sec.startsWith(pinEncodePrefix)) {
       sec = await decryptWithPin(currentPin(), sec);

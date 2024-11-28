@@ -488,7 +488,14 @@ export function AccountProvider(props: { children: JSXElement }) {
     connectToRelays({ ...settings }, true);
   };
 
-  const setRelaySettings = (settings: NostrRelays, replace?: boolean) => {
+  const setRelaySettings = (stgns: NostrRelays, replace?: boolean) => {
+
+    let settings = { ...stgns };
+
+    if (Object.keys(settings).length === 0) {
+      settings = attachDefaultRelays(settings);
+    }
+
     if (replace) {
       for (let url in store.relaySettings) {
         if (settings[url]) {
@@ -505,6 +512,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       updateStore('relaySettings', () => ({...settings}));
+      connectToRelays(settings)
       saveRelaySettings(store.publicKey, settings);
       return true;
     }
@@ -1685,6 +1693,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('activeUser', () => ({...user, pubkey: content.pubkey}));
         setStoredProfile(user);
+        updateRelays()
       }
     }
   }
