@@ -9,27 +9,53 @@ import FollowButton from '../FollowButton/FollowButton';
 import MentionedPerson from './MentionedPerson';
 
 import styles from './PeopleList.module.scss';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const Repliers: Component<{
   people: PrimalUser[],
   label: string,
   id?: string,
+  singleFile?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
+  const app = useAppContext();
 
   const people = () => props.people;
 
   return (
     <div>
       <div class={styles.heading}>{props.label}</div>
-      <div id="trending_section" class={styles.trendingSection}>
-        <For each={people()}>
-          {
-            (person) => <div class="animated"><MentionedPerson person={person} noAbout={true} /></div>
-          }
-        </For>
-      </div>
+      <Show
+        when={props.singleFile}
+        fallback={
+          <div id="trending_section" class={styles.trendingUsers}>
+            <For each={people()}>
+              {
+                user => (
+                  <A
+                    href={app?.actions.profileLink(user.npub) || ''}
+                    class={styles.user}
+                    title={authorName(user)}
+                  >
+                    <Avatar user={user} size="vs" />
+                    <div class={styles.name}>{authorName(user)}</div>
+                  </A>
+                )
+              }
+            </For>
+          </div>
+        }
+      >
+        <div id="trending_section" class={styles.trendingSection}>
+          <For each={people()}>
+            {
+              user => (
+                <div class="animated"><MentionedPerson person={user} noAbout={true} /></div>
+              )
+            }
+          </For>
+        </div>
+      </Show>
     </div>
   );
 }

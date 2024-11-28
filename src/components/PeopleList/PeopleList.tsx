@@ -15,6 +15,7 @@ const PeopleList: Component<{
   mentionLabel?: string,
   id?: string,
   note?: PrimalNote,
+  singleFile?: boolean,
 }> = (props) => {
   const author = () => props.note?.user;
 
@@ -53,6 +54,7 @@ const PeopleList: Component<{
             <Repliers
               people={repliers()}
               label={props.label || ''}
+              singleFile={props.singleFile}
             />
           </Show>
         </Transition>
