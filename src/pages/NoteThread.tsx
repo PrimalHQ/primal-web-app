@@ -111,14 +111,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     const mentions = Object.values(pNote.mentionedUsers || {}).
       filter((u) => !authors.find(a => u.pubkey === a.pubkey));
 
-    const curatedMentions = mentions.filter(m => {
-      const mpks = pNote.msg.tags.filter(t => t[0] === 'p').map(t => t[1]);
-      const tzpk = (pNote.topZaps[0] || {}).pubkey;
-
-      return [ ...mpks, tzpk].includes(m.pubkey);
-    });
-
-    return [ ...authors, ...curatedMentions ];
+    return [ ...authors, ...mentions ];
   };
 
   const isFetching = () => threadContext?.isFetching;

@@ -21,7 +21,14 @@ const PeopleList: Component<{
   const mentioned = () => {
     if (!props.note) return [];
 
-    return props.people.filter(p => p.pubkey !== author()?.pubkey && (props.note?.mentionedUsers || {})[p.pubkey] !== undefined);
+    const mpks = props.note?.msg.tags.filter(t => t[0] === 'p').map(t => t[1]);
+    const tzpk = (props.note?.topZaps[0] || {}).pubkey;
+
+    const curatedMentions = props.people.filter(m => {
+      return [ ...mpks, tzpk].includes(m.pubkey);
+    });
+
+    return curatedMentions.filter(p => p.pubkey !== author()?.pubkey);
   };
 
   const repliers = () => {
