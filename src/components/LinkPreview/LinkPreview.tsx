@@ -40,6 +40,10 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
   const klass = () => {
     let k = styles.linkPreviewH;
 
+    if (!hasImage()) {
+      k += ` ${styles.noImage}`;
+    }
+
     if (props.bordered) {
       k += ` ${styles.bordered}`;
     }
@@ -75,6 +79,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
 
   }));
 
+  const hasImage = () => errorCount() < errorCountLimit && (image() || props.preview.images[0]);
+
   return (
     <a
       id={props.id}
@@ -82,7 +88,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       class={klass()}
       target="_blank"
     >
-      <Show when={errorCount() < errorCountLimit && (image() || props.preview.images[0])}>
+      <Show when={hasImage()}>
         <img
           class={styles.previewImage}
           src={image()?.media_url || props.preview.images[0]}

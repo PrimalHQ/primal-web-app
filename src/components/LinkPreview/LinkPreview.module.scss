@@ -33,6 +33,10 @@
   display: grid !important;
   grid-template-columns: 180px 1fr;
 
+  &.noImage {
+    display: flex !important;
+  }
+
   .previewImage {
     width: 130px;
     object-fit: cover;
