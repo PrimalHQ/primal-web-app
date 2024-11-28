@@ -22,6 +22,8 @@ const relayInit = (url: string) => {
   return relay;
 }
 
+const generateNsec = () => nip19.nsecEncode(generatePrivateKey())
+
 export {
   nip04,
   nip05,
@@ -29,6 +31,7 @@ export {
   nip57,
   utils,
   generatePrivateKey,
+  generateNsec,
   Relay,
   RelayFactory,
   relayInit,

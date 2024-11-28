@@ -1,4 +1,4 @@
-import { generatePrivateKey, getPublicKey, nip04, nip19, finalizeEvent, verifyEvent } from '../lib/nTools';
+import { generatePrivateKey, getPublicKey, nip04, nip19, finalizeEvent, verifyEvent, generateNsec } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
@@ -81,7 +81,7 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
 
 export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
   const getSec = async () => {
-    let sec: string = pk || readSecFromStorage() || tempNsec() || nip19.nsecEncode(generatePrivateKey());
+    let sec: string = pk || readSecFromStorage() || tempNsec() || generateNsec();
 
     if (sec.startsWith(pinEncodePrefix)) {
       sec = await decryptWithPin(currentPin(), sec);

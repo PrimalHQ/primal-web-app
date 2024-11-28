@@ -260,7 +260,7 @@ const ExploreFeeds: Component = () => {
                 </>
               }
               >
-              <>Remove this feed to your {addFeedDestination()} feed</>
+              <>Remove this feed from your {addFeedDestination()} feed</>
             </ButtonFlip>
           </div>
 

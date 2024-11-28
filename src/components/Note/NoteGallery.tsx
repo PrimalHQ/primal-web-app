@@ -1,12 +1,10 @@
-import { Component, createEffect, createMemo, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import { MediaVariant, PrimalNote } from '../../types/primal';
 
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
-import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
-import MentionedUserLink from './MentionedUserLink/MentionedUserLink';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 // @ts-ignore
 import PhotoSwipeDynamicCaption from 'photoswipe-dynamic-caption-plugin';
@@ -14,15 +12,12 @@ import PhotoSwipeDynamicCaption from 'photoswipe-dynamic-caption-plugin';
 import PhotoSwipeVideoPlugin from 'photoswipe-video-plugin';
 
 import NoteImage from '../NoteImage/NoteImage';
-import { generatePrivateKey } from '../../lib/nTools';
-import { imageOrVideoRegexG, imageRegexG, videoRegexG } from '../../constants';
+import { imageOrVideoRegexG } from '../../constants';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
 import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
-import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { humanizeTime, isDev } from '../../utils';
-import { logInfo } from '../../lib/logger';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -31,8 +26,6 @@ const NoteGallery: Component<{
   const intl = useIntl();
   const media = useMediaContext();
   const navigate = useNavigate();
-
-  const id = generatePrivateKey();
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: `#galleryimage_${props.note.id}`,

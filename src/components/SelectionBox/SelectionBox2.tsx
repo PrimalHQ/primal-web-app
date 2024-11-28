@@ -1,20 +1,16 @@
-import { useIntl } from "@cookbook/solid-intl";
 import { Select } from "@kobalte/core/select";
 
 // Import default styles. (All examples use this via a global import)
 import "@thisbeyond/solid-select/style.css";
 import { Component, createEffect, JSXElement, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
-import { placeholders } from "../../translations";
 import { SelectionOption } from "../../types/primal";
 
 import SelectionItem from "./SelectionItem";
 
 // Apply custom styling. See stylesheet below.
 import styles from  "./SelectionBox.module.scss";
-import { A } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import { generatePrivateKey } from "../../lib/nTools";
 
 
 const SelectionBox2: Component<{

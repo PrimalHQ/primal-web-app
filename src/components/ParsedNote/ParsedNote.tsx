@@ -50,7 +50,6 @@ import { actions } from '../../translations';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
-import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import { useAppContext } from '../../contexts/AppContext';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 

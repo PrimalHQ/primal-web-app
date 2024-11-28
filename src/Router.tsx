@@ -1,5 +1,5 @@
-import { Component, createEffect, createResource, lazy } from 'solid-js';
-import { Router, Route, Navigate, useLocation, cache } from "@solidjs/router";
+import { Component, lazy } from 'solid-js';
+import { Router, Route, Navigate, cache } from "@solidjs/router";
 
 import { PrimalWindow } from './types/primal';
 import { fetchKnownProfiles } from './lib/profile';
@@ -14,6 +14,7 @@ import { useMediaContext } from './contexts/MediaContext';
 import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
 import { useDMContext } from './contexts/DMContext';
+import { generateNsec } from './lib/nTools';
 
 const Home = lazy(() => import('./pages/Home'));
 const Reads = lazy(() => import('./pages/Reads'));
@@ -46,7 +47,7 @@ const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
-const Landing = lazy(() => import('./pages/Landing'));
+// const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 
 const Terms = lazy(() => import('./pages/Terms'));
@@ -85,6 +86,8 @@ const AppRouter: Component = () => {
   const notifications = useNotificationsContext();
   const search = useSearchContext();
 
+  const genNsec = () => generateNsec();
+
   if (isDev) {
     primalWindow.primal = {
       account,
@@ -97,6 +100,7 @@ const AppRouter: Component = () => {
       search,
       settings,
       thread,
+      genNsec,
     };
 
     primalWindow.onPrimalComponentMount = () => {};
