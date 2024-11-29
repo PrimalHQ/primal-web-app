@@ -30,7 +30,7 @@ import {
 import { APP_ID } from "../App";
 import { markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
 import { useAccountContext } from "./AccountContext";
-import { convertToUser } from "../stores/profile";
+import { convertToUser, emptyUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
 import { nip19 } from "../lib/nTools";
@@ -43,6 +43,7 @@ import { calculateDMContactsOffset, calculateDMConversationOffset, handleSubscri
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
 import { logError, logWarning } from "../lib/logger";
 import { fetchUserProfile } from "../handleNotes";
+import { hexToNpub } from "../lib/keys";
 
 
 export type DMCount = {
@@ -264,28 +265,45 @@ const getContactsNextPage = async (relation: UserRelation) => {
   setDmContacts(dmContacts, relation);
 }
 
+let atemptToSelect: string = '';
+
 const selectContact = async (pubkey: string) => {
   if (store.isFetchingMessages) return;
-
   if (!account?.publicKey) return;
+  if (atemptToSelect === pubkey) return;
+
+  atemptToSelect = pubkey;
 
   const relation = store.lastConversationRelation;
   let contact = store.dmContacts[relation].find(c => c.pubkey === pubkey);
 
   if (!contact) {
-    let user = await fetchUserProfile(account?.publicKey, pubkey, `dm_contact_info_${APP_ID}`);
+    try {
+      let user = await fetchUserProfile(account?.publicKey, pubkey, `dm_contact_info_${APP_ID}`);
 
-    addContact(user);
+      addContact(user);
 
-    contact = {
-      pubkey: user.pubkey,
-      user,
-      dmInfo: {
-        cnt: 0,
-        latest_at: 0,
-        latest_event_id: '',
+      contact = {
+        pubkey: user.pubkey,
+        user,
+        dmInfo: {
+          cnt: 0,
+          latest_at: 0,
+          latest_event_id: '',
+        }
       }
+    } catch (e) {
+      contact = {
+        pubkey,
+        user: { ...emptyUser(pubkey) },
+        dmInfo: {
+          cnt: 0,
+          latest_at: 0,
+          latest_event_id: '',
+        }
+      };
     }
+
   }
 
   await resetContactMessages(contact.pubkey, relation);
@@ -299,6 +317,7 @@ const selectContact = async (pubkey: string) => {
 
   await getConversation(pubkey);
 
+  atemptToSelect = '';
   // refreshContacts(relation);
 }
 

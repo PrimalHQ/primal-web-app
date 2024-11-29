@@ -45,9 +45,7 @@ const DirectMessages: Component = () => {
 
   const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
-    if (!firstTime && relation === dms.lastConversationRelation) return;
-
-    firstTime = false;
+    if (relation === dms.lastConversationRelation) return;
 
     dms.actions.setDmRelation2(relation as UserRelation);
 
@@ -66,7 +64,7 @@ const DirectMessages: Component = () => {
 
     list = dms?.dmContacts[relation as UserRelation];
 
-    const first = toNpub(list[0].pubkey);
+    const first = list.find(c => c.pubkey === dms.lastConversationContact?.pubkey)?.pubkey || toNpub(list[0].pubkey);
 
     if (first.length === 0) return;
 
