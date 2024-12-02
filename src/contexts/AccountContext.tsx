@@ -396,6 +396,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   const checkPremiumRemider = () => {
     if (['premium', 'premium-legend'].includes(store.membershipStatus.tier || '')) {
       updateStore('premiumReminder', () => false);
+      return;
     };
 
     const now = (new Date()).getTime();
