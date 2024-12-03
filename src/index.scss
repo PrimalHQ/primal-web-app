@@ -104,15 +104,15 @@
   --profile-card-animation-delay: 150ms;
   --profile-avatar-animation-delay: 350ms;
 
-  --legend-gold: linear-gradient(181deg, #FFB700 1.04%, #FFB700 48.65%, #CB721E 49.28%, #FA0 98.85%);
-  --legend-aqua: linear-gradient(181deg, #6BCCFF 1.14%, #6BCCFF 49.37%, #247FFF 50.47%, #6BCCFF 101.17%), linear-gradient(0deg, rgba(76, 14, 8, 0.20) 0%, rgba(76, 14, 8, 0.20) 100%), linear-gradient(181deg, #D0E1E6 1.14%, #D0E1E6 49.37%, #728990 52.3%, #D0E1E6 101.17%), #D9D9D9;
-  --legend-silver: linear-gradient(181deg, #CCC 1.1%, #CCC 48.71%, #777 49.34%, #CCC 98.9%), #CA077C;
-  --legend-purple: linear-gradient(135deg, #B300D3 15.94%, #4800FF 85.31%), linear-gradient(135deg, #01E0FF 4.5%, #0190F8 29.97%, #2555EE 58.06%, #4A05CA 86.5%), #F00;
-  --legend-purplehaze: linear-gradient(135deg, #FB00C4 0%, #04F7FC 100%), #FF6B30;
-  --legend-teal: linear-gradient(135deg, #40FCFF 16.5%, #007D9F 80.5%), #9D24FF;
-  --legend-brown: linear-gradient(135deg, #BB9971 21.39%, #5C3B22 77%), #21BDED;
-  --legend-blue: linear-gradient(135deg, #01E0FF 4.5%, #0190F8 29.97%, #2555EE 58.06%, #4A05CA 86.5%), #F00;
-  --legend-sunfire: linear-gradient(135deg, #FFA722 4.5%, #FA3C3C 29.97%, #F00492 58.06%, #620BA9 86.5%), linear-gradient(135deg, #B300D3 15.94%, #4800FF 85.31%), #08F;
+  --legend-gold: linear-gradient(180deg, #FFB700 0%, #FFB700 49%, #CB721E 50%, #FFB700 100%);
+  --legend-aqua: linear-gradient(180deg, #6BCCFF 0%, #6BCCFF 49%, #247FFF 50%, #6BCCFF 100%);
+  --legend-silver: linear-gradient(180deg, #CCC 0%, #CCC 49%, #777 50%, #CCC 100%);
+  --legend-purple: linear-gradient(135deg, #C803EC 15.94%, #5613FF 85.31%);
+  --legend-purplehaze: linear-gradient(135deg, #FB00C4 0%, #04F7FC 100%);
+  --legend-teal: linear-gradient(135deg, #40FCFF 20%, #007D9F 75%);
+  --legend-brown: linear-gradient(135deg, #BB9971 20%, #5C3B22 75%);
+  --legend-blue: linear-gradient(135deg, #01E0FF 4.5%, #0190F8 35%, #2555EE 75%);
+  --legend-sunfire: linear-gradient(135deg, #FFA722 4.5%, #FA3C3C 35%, #F00492 75%);
 
   --legend-glow-gold: #FFB700;
   --legend-glow-aqua: #6BCCFF;
