@@ -1,3 +1,100 @@
+@mixin highlight {
+  border-radius: 99999px;
+  overflow: hidden
+}
+
+.legend_GOLD {
+  @include highlight;
+  background: var(--legend-gold);
+}
+.legend_AQUA {
+  @include highlight;
+  background: var(--legend-aqua);
+}
+.legend_SILVER {
+  @include highlight;
+  background: var(--legend-silver);
+}
+.legend_PURPLE {
+  @include highlight;
+  background: var(--legend-purple);
+}
+.legend_PURPLEHAZE {
+  @include highlight;
+  background: var(--legend-purplehaze);
+}
+.legend_TEAL {
+  @include highlight;
+  background: var(--legend-teal);
+}
+.legend_BROWN {
+  @include highlight;
+  background: var(--legend-brown);
+}
+.legend_BLUE {
+  @include highlight;
+  background: var(--legend-blue);
+}
+.legend_SUNFIRE {
+  @include highlight;
+  background: var(--legend-sunfire);
+}
+
+.legend_glow_GOLD {
+  --glow-color: var(--legend-glow-gold);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
+}
+.legend_glow_AQUA {
+  --glow-color: var(--legend-glow-aqua);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
+}
+.legend_glow_SILVER {
+  --glow-color: var(--legend-glow-silver);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
+}
+.legend_glow_PURPLE {
+  --glow-color: var(--legend-glow-purple);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
+}
+.legend_glow_PURPLEHAZE {
+  --glow-color: var(--legend-glow-purplehaze);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
+}
+.legend_glow_TEAL {
+  --glow-color: var(--legend-glow-teal);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
+}
+.legend_glow_BROWN {
+  --glow-color: var(--legend-glow-brown);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
+}
+.legend_glow_BLUE {
+  --glow-color: var(--legend-glow-blue);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
+}
+.legend_glow_SUNFIRE {
+  --glow-color: var(--legend-glow-sunfire);
+  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
+  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
+  // box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
+}
+
 @mixin avatar {
   position: relative;
   background-color: var(--background-site);
@@ -57,6 +154,12 @@
       height: 16px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
+  }
 }
 
 .microAvatar {
@@ -76,11 +179,17 @@
   }
 
   &.legend {
-    padding: 2px;
+    padding: 1px;
     .missingBack {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
   }
 }
 
@@ -107,6 +216,12 @@
       height: 24px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
+  }
 }
 
 .xssAvatar {
@@ -131,6 +246,12 @@
       width: 22px;
       height: 22px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
   }
 }
 
@@ -157,6 +278,12 @@
       height: 28px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
+  }
 }
 
 .vvsAvatar {
@@ -182,6 +309,12 @@
       height: 32px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
+    box-shadow: 0px 0px 4px 0px var(--glow-color);
+  }
 }
 
 .vs2Avatar {
@@ -204,6 +337,12 @@
       width: 36px;
       height: 36px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    box-shadow: 0px 0px 6px 0px var(--glow-color);
   }
 }
 
@@ -228,6 +367,12 @@
       height: 38px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    box-shadow: 0px 0px 6px 0px var(--glow-color);
+  }
 }
 
 .smallAvatar {
@@ -250,6 +395,12 @@
       width: 40px;
       height: 40px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    box-shadow: 0px 0px 6px 0px var(--glow-color);
   }
 }
 
@@ -274,6 +425,12 @@
       height: 48px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
+    box-shadow: 0px 0px 6px 0px var(--glow-color);
+  }
 }
 
 .mlAvatar {
@@ -291,11 +448,17 @@
   }
 
   &.legend {
-    padding: 2px;
+    padding: 3px;
     .missingBack {
-      width: 56px;
-      height: 56px;
+      width: 54px;
+      height: 54px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 8px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 8px 0px var(--glow-color);
+    box-shadow: 0px 0px 8px 0px var(--glow-color);
   }
 }
 
@@ -319,6 +482,12 @@
       width: 58px;
       height: 58px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 8px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 8px 0px var(--glow-color);
+    box-shadow: 0px 0px 8px 0px var(--glow-color);
   }
 }
 
@@ -345,6 +514,12 @@
       height: 66px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 10px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 10px 0px var(--glow-color);
+    box-shadow: 0px 0px 10px 0px var(--glow-color);
+  }
 }
 
 .extraLargeAvatar {
@@ -370,6 +545,12 @@
       height: 74px;
     }
   }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 10px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 10px 0px var(--glow-color);
+    box-shadow: 0px 0px 10px 0px var(--glow-color);
+  }
 }
 
 .xxlAvatar {
@@ -394,6 +575,12 @@
       width: 112px;
       height: 112px;
     }
+  }
+
+  &.legendGlow {
+    -webkit-box-shadow: 0px 0px 12px 0px var(--glow-color);
+    -moz-box-shadow: 0px 0px 12px 0px var(--glow-color);
+    box-shadow: 0px 0px 12px 0px var(--glow-color);
   }
 }
 
@@ -530,92 +717,4 @@
   img {
     filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(300deg) blur(0.1rem);
   }
-}
-
-@mixin highlight {
-  border-radius: 99999px;
-  overflow: hidden
-}
-
-.legend_GOLD {
-  @include highlight;
-  background: var(--legend-gold);
-}
-.legend_AQUA {
-  @include highlight;
-  background: var(--legend-aqua);
-}
-.legend_SILVER {
-  @include highlight;
-  background: var(--legend-silver);
-}
-.legend_PURPLE {
-  @include highlight;
-  background: var(--legend-purple);
-}
-.legend_PURPLEHAZE {
-  @include highlight;
-  background: var(--legend-purplehaze);
-}
-.legend_TEAL {
-  @include highlight;
-  background: var(--legend-teal);
-}
-.legend_BROWN {
-  @include highlight;
-  background: var(--legend-brown);
-}
-.legend_BLUE {
-  @include highlight;
-  background: var(--legend-blue);
-}
-.legend_SUNFIRE {
-  @include highlight;
-  background: var(--legend-sunfire);
-}
-
-.legend_glow_GOLD {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
-}
-.legend_glow_AQUA {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
-}
-.legend_glow_SILVER {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
-}
-.legend_glow_PURPLE {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
-}
-.legend_glow_PURPLEHAZE {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
-}
-.legend_glow_TEAL {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
-}
-.legend_glow_BROWN {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
-}
-.legend_glow_BLUE {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
-}
-.legend_glow_SUNFIRE {
-  -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
-  -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
-  box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
 }

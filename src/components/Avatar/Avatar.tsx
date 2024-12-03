@@ -112,7 +112,7 @@ const Avatar: Component<{
         }
 
         if (showGlow) {
-          klass += ` ${styles[`legend_glow_${style}`]}`;
+          klass += ` ${styles.legendGlow} ${styles[`legend_glow_${style}`]}`;
         }
 
         return klass;
