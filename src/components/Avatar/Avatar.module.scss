@@ -5,100 +5,74 @@
 
 .legend_GOLD {
   @include highlight;
-  background: var(--legend-gold);
+  background: var(--legend-gold) !important;
 }
 .legend_AQUA {
   @include highlight;
-  background: var(--legend-aqua);
+  background: var(--legend-aqua) !important;
 }
 .legend_SILVER {
   @include highlight;
-  background: var(--legend-silver);
+  background: var(--legend-silver) !important;
 }
 .legend_PURPLE {
   @include highlight;
-  background: var(--legend-purple);
+  background: var(--legend-purple) !important;
 }
 .legend_PURPLEHAZE {
   @include highlight;
-  background: var(--legend-purplehaze);
+  background: var(--legend-purplehaze) !important;
 }
 .legend_TEAL {
   @include highlight;
-  background: var(--legend-teal);
+  background: var(--legend-teal) !important;
 }
 .legend_BROWN {
   @include highlight;
-  background: var(--legend-brown);
+  background: var(--legend-brown) !important;
 }
 .legend_BLUE {
   @include highlight;
-  background: var(--legend-blue);
+  background: var(--legend-blue) !important;
 }
 .legend_SUNFIRE {
   @include highlight;
-  background: var(--legend-sunfire);
+  background: var(--legend-sunfire) !important;
 }
 
 .legend_glow_GOLD {
   --glow-color: var(--legend-glow-gold);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-gold);
 }
 .legend_glow_AQUA {
   --glow-color: var(--legend-glow-aqua);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-aqua);
 }
 .legend_glow_SILVER {
   --glow-color: var(--legend-glow-silver);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-silver);
 }
 .legend_glow_PURPLE {
   --glow-color: var(--legend-glow-purple);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-purple);
 }
 .legend_glow_PURPLEHAZE {
   --glow-color: var(--legend-glow-purplehaze);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-purplehaze);
 }
 .legend_glow_TEAL {
   --glow-color: var(--legend-glow-teal);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-teal);
 }
 .legend_glow_BROWN {
   --glow-color: var(--legend-glow-brown);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-brown);
 }
 .legend_glow_BLUE {
   --glow-color: var(--legend-glow-blue);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-blue);
 }
 .legend_glow_SUNFIRE {
   --glow-color: var(--legend-glow-sunfire);
-  // -webkit-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
-  // -moz-box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
-  // box-shadow: 0px 0px 5px 0px var(--legend-glow-sunfire);
 }
 
 @mixin avatar {
   position: relative;
-  background-color: var(--background-site);
+  background: var(--background-site);
   border-radius: 50%;
+  padding: 1px;
 
   img {
     border-radius: 50%;
@@ -137,8 +111,8 @@
   height: 18px;
 
   .missingBack {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
   }
 
   .iconBackground {
@@ -147,19 +121,12 @@
     right: -6px;
   }
 
-  &.legend {
-    padding: 1px;
-    .missingBack {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
-  }
+  // &.legend {
+  //   .missingBack {
+  //     width: 16px;
+  //     height: 16px;
+  //   }
+  // }
 }
 
 .microAvatar {
@@ -168,6 +135,58 @@
   height: 22px;
 
   .missingBack {
+    width: 20px;
+    height: 20px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+
+  // &.legend {
+  //   padding: 1px;
+  //   .missingBack {
+  //     width: 20px;
+  //     height: 20px;
+  //   }
+  // }
+}
+
+.xxsAvatar {
+  @include avatar;
+  width: 28px;
+  height: 28px;
+
+  .missingBack {
+    width: 26px;
+    height: 26px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+
+  // &.legend {
+  //   padding: 2px;
+  //   .missingBack {
+  //     width: 24px;
+  //     height: 24px;
+  //   }
+  // }
+}
+
+.xssAvatar {
+  @include avatar;
+  width: 26px;
+  height: 26px;
+  padding: 2px;
+
+  .missingBack {
+    border: 1px solid var(--background-site);
     width: 22px;
     height: 22px;
   }
@@ -178,25 +197,20 @@
     right: -6px;
   }
 
-  &.legend {
-    padding: 1px;
-    .missingBack {
-      width: 20px;
-      height: 20px;
-    }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
-  }
+  // &.legend {
+  //   padding: 2px;
+  //   .missingBack {
+  //     width: 22px;
+  //     height: 22px;
+  //   }
+  // }
 }
 
-.xxsAvatar {
+.xsAvatar {
   @include avatar;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  padding: 2px;
 
   .missingBack {
     width: 28px;
@@ -210,55 +224,19 @@
   }
 
   &.legend {
-    padding: 2px;
     .missingBack {
-      width: 24px;
-      height: 24px;
+      border: 1px solid var(--background-site);
+      // width: 28px;
+      // height: 28px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
   }
 }
 
-.xssAvatar {
+.vvsAvatar {
   @include avatar;
-  width: 26px;
-  height: 26px;
-
-  .missingBack {
-    width: 26px;
-    height: 26px;
-  }
-
-  .iconBackground {
-    @include iconBackground;
-    bottom: -6px;
-    right: -6px;
-  }
-
-  &.legend {
-    padding: 2px;
-    .missingBack {
-      width: 22px;
-      height: 22px;
-    }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
-  }
-}
-
-.xsAvatar {
-  @include avatar;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
+  padding: 2px;
 
   .missingBack {
     width: 32px;
@@ -272,24 +250,43 @@
   }
 
   &.legend {
-    padding: 2px;
     .missingBack {
-      width: 28px;
-      height: 28px;
+      border: 1px solid var(--background-site);
+      // width: 32px;
+      // height: 32px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
   }
 }
 
-.vvsAvatar {
+.vs2Avatar {
   @include avatar;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
+  padding: 3px;
+
+  .missingBack {
+    width: 34px;
+    height: 34px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+  }
+
+  &.legend {
+    .missingBack {
+      border: 1px solid var(--background-site);
+      // width: 36px;
+      // height: 36px;
+    }
+  }
+}
+
+.vsAvatar {
+  @include avatar;
+  width: 42px;
+  height: 42px;
+  padding: 3px;
 
   .missingBack {
     width: 36px;
@@ -298,80 +295,14 @@
 
   .iconBackground {
     @include iconBackground;
-    bottom: -6px;
-    right: -6px;
   }
 
   &.legend {
-    padding: 2px;
     .missingBack {
-      width: 32px;
-      height: 32px;
+      border: 1px solid var(--background-site);
+      // width: 38px;
+      // height: 38px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 4px 0px var(--glow-color);
-    box-shadow: 0px 0px 4px 0px var(--glow-color);
-  }
-}
-
-.vs2Avatar {
-  @include avatar;
-  width: 40px;
-  height: 40px;
-
-  .missingBack {
-    width: 40px;
-    height: 40px;
-  }
-
-  .iconBackground {
-    @include iconBackground;
-  }
-
-  &.legend {
-    padding: 2px;
-    .missingBack {
-      width: 36px;
-      height: 36px;
-    }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    box-shadow: 0px 0px 6px 0px var(--glow-color);
-  }
-}
-
-.vsAvatar {
-  @include avatar;
-  width: 42px;
-  height: 42px;
-
-  .missingBack {
-    width: 42px;
-    height: 42px;
-  }
-
-  .iconBackground {
-    @include iconBackground;
-  }
-
-  &.legend {
-    padding: 2px;
-    .missingBack {
-      width: 38px;
-      height: 38px;
-    }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    box-shadow: 0px 0px 6px 0px var(--glow-color);
   }
 }
 
@@ -379,10 +310,11 @@
   @include avatar;
   width: 44px;
   height: 44px;
+  padding: 3px;
 
   .missingBack {
-    width: 44px;
-    height: 44px;
+    width: 38px;
+    height: 38px;
   }
 
   .iconBackground {
@@ -390,17 +322,11 @@
   }
 
   &.legend {
-    padding: 2px;
     .missingBack {
-      width: 40px;
-      height: 40px;
+      border: 1px solid var(--background-site);
+      // width: 40px;
+      // height: 40px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    box-shadow: 0px 0px 6px 0px var(--glow-color);
   }
 }
 
@@ -408,10 +334,11 @@
   @include avatar;
   width: 52px;
   height: 52px;
+  padding: 3px;
 
   .missingBack {
-    width: 52px;
-    height: 52px;
+    width: 46px;
+    height: 46px;
   }
 
   .iconBackground {
@@ -419,17 +346,11 @@
   }
 
   &.legend {
-    padding: 2px;
     .missingBack {
-      width: 48px;
-      height: 48px;
+      border: 1px solid var(--background-site);
+      // width: 48px;
+      // height: 48px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 6px 0px var(--glow-color);
-    box-shadow: 0px 0px 6px 0px var(--glow-color);
   }
 }
 
@@ -437,10 +358,11 @@
   @include avatar;
   width: 60px;
   height: 60px;
+  padding: 3px;
 
   .missingBack {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
   }
 
   .iconBackground {
@@ -448,17 +370,11 @@
   }
 
   &.legend {
-    padding: 3px;
     .missingBack {
-      width: 54px;
-      height: 54px;
+      border: 1px solid var(--background-site);
+      // width: 54px;
+      // height: 54px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 8px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 8px 0px var(--glow-color);
-    box-shadow: 0px 0px 8px 0px var(--glow-color);
   }
 }
 
@@ -466,10 +382,11 @@
   @include avatar;
   width: 64px;
   height: 64px;
+  padding: 3px;
 
   .missingBack {
-    width: 64px;
-    height: 64px;
+    width: 58px;
+    height: 58px;
   }
 
   .iconBackground {
@@ -477,17 +394,11 @@
   }
 
   &.legend {
-    padding: 3px;
     .missingBack {
-      width: 58px;
-      height: 58px;
+      border: 1px solid var(--background-site);
+      // width: 58px;
+      // height: 58px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 8px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 8px 0px var(--glow-color);
-    box-shadow: 0px 0px 8px 0px var(--glow-color);
   }
 }
 
@@ -495,10 +406,11 @@
   @include avatar;
   width: 72px;
   height: 72px;
+  padding: 3px;
 
   .missingBack {
-    width: 72px;
-    height: 72px;
+    width: 66px;
+    height: 66px;
   }
 
   .iconBackground {
@@ -508,17 +420,11 @@
   }
 
   &.legend {
-    padding: 3px;
     .missingBack {
-      width: 66px;
-      height: 66px;
+      border: 1px solid var(--background-site);
+      // width: 66px;
+      // height: 66px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 10px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 10px 0px var(--glow-color);
-    box-shadow: 0px 0px 10px 0px var(--glow-color);
   }
 }
 
@@ -526,10 +432,11 @@
   @include avatar;
   width: 80px;
   height: 80px;
+  padding: 4px;
 
   .missingBack {
-    width: 80px;
-    height: 80px;
+    width: 72px;
+    height: 72px;
   }
 
   .iconBackground {
@@ -539,17 +446,11 @@
   }
 
   &.legend {
-    padding: 3px;
     .missingBack {
-      width: 74px;
-      height: 74px;
+      border: 1px solid var(--background-site);
+      // width: 74px;
+      // height: 74px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 10px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 10px 0px var(--glow-color);
-    box-shadow: 0px 0px 10px 0px var(--glow-color);
   }
 }
 
@@ -557,10 +458,11 @@
   @include avatar;
   width: 120px;
   height: 120px;
+  padding: 6px;
 
   .missingBack {
-    width: 120px;
-    height: 120px;
+    width: 108px;
+    height: 108px;
   }
 
   .iconBackground {
@@ -570,17 +472,11 @@
   }
 
   &.legend {
-    padding: 4px;
     .missingBack {
-      width: 112px;
-      height: 112px;
+      border: 2px solid var(--background-site);
+      // width: 112px;
+      // height: 112px;
     }
-  }
-
-  &.legendGlow {
-    -webkit-box-shadow: 0px 0px 12px 0px var(--glow-color);
-    -moz-box-shadow: 0px 0px 12px 0px var(--glow-color);
-    box-shadow: 0px 0px 12px 0px var(--glow-color);
   }
 }
 
