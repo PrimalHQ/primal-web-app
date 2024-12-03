@@ -2,6 +2,7 @@ import { A } from '@solidjs/router';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
+  getParametrizedEvent,
   isAddrMention,
   isAppleMusic,
   isCustomEmoji,
@@ -30,8 +31,12 @@ import {
   Component, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
+  NostrEventContent,
+  NostrUserZaps,
   PrimalArticle,
   PrimalNote,
+  PrimalUser,
+  PrimalZap,
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
@@ -52,6 +57,13 @@ import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
+import { fetchArticles } from '../../handleNotes';
+import { APP_ID } from '../../App';
+import { getEvents } from '../../lib/feed';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { subsTo } from '../../sockets';
+import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
+import { parseBolt11 } from '../../utils';
 
 const groupGridLimit = 7;
 
@@ -158,6 +170,7 @@ const ParsedNote: Component<{
   const intl = useIntl();
   const media = useMediaContext();
   const app = useAppContext();
+  const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
@@ -662,7 +675,8 @@ const ParsedNote: Component<{
 
           if (ratio < 1) {
             h = 680;
-            w = h * ratio;
+            w = Math.min((noteWidth() - margins), h * ratio);
+            h = w / ratio;
           } else {
             w = (noteWidth() - margins);
             h = w / ratio;
@@ -913,6 +927,99 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const [unknownEvents, setUnknownEvents] = createStore<Record<string, NostrEventContent>>({});
+
+  const unknownMention = (nid: string) => {
+    setWordsDisplayed(w => w + 1);
+
+    const decoded = decodeIdentifier(nid);
+
+    const alt = () => {
+      // @ts-ignore
+      const a = ((unknownEvents[nid]?.tags || []).find(t => t[0] === 'alt') || [])[1];
+
+      return a;
+    }
+
+    if (decoded.type === 'nevent') {
+      const subId = `events_${APP_ID}`;
+      const data = decoded.data as nip19.EventPointer;
+
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content.id === data.id) {
+            setUnknownEvents((evs) => ({ ...evs, [nid]: { ...content } }))
+          }
+        },
+        onEose: () => {
+          unsub();
+        }
+      })
+
+      getEvents(account?.publicKey, [nid], subId);
+
+
+      return (
+        <Show
+          when={alt()}
+          fallback={
+            <div class={styles.unknownEvent}>
+              <div class={`${styles.icon} ${styles.bang}`}></div>
+              <div class={styles.label}>Mentioned event not found</div>
+            </div>
+          }
+        >
+          <div class={styles.unknownEvent}>
+            <div class={`${styles.icon} ${styles.file}`}></div>
+            <div class={styles.label}>{alt()}</div>
+          </div>
+        </Show>
+      );
+    }
+
+    if (decoded.type === 'naddr') {
+      const subId = `p_events_${APP_ID}`;
+      const data = decoded.data as nip19.AddressPointer;
+
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content.kind === data.kind) {
+            setUnknownEvents((evs) => ({ ...evs, [nid]: { ...content } }))
+          }
+        },
+        onEose: () => {
+          unsub();
+        }
+      })
+
+      getParametrizedEvent(data.pubkey, data.identifier, data.kind, subId);
+
+      return (
+        <Show
+          when={alt()}
+          fallback={
+            <div class={styles.unknownEvent}>
+              <div class={`${styles.icon} ${styles.bang}`}></div>
+              <div class={styles.label}>Mentioned event not found</div>
+            </div>
+          }
+        >
+          <div class={styles.unknownEvent}>
+            <div class={`${styles.icon} ${styles.file}`}></div>
+            <div class={styles.label}>{alt()}</div>
+          </div>
+        </Show>
+      )
+    }
+
+    return (
+      <div class={styles.unknownEvent}>
+        <div class={`${styles.icon} ${styles.bang}`}></div>
+        <div class={styles.label}>Mentioned event not found</div>
+      </div>
+    );
+  }
+
   const renderComunityMention = (item: NoteContent, index?: number) => {
 
     return <For each={item.tokens}>
@@ -935,38 +1042,38 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
-        const unknownMention = (nid: string) => {
-          setWordsDisplayed(w => w + 1);
-
-
-          return <A href={`/e/${nid}`}>{token}</A>
-        }
-
         const rn = rootNote();
         const decoded = decodeIdentifier(id);
-        const reEncoded = nip19.naddrEncode({
-          // @ts-ignore
-          kind: decoded.data.kind,
-          // @ts-ignore
-          pubkey: decoded.data.pubkey,
-          // @ts-ignore
-          identifier: decoded.data.identifier || '',
-        });
-        const mentionedArticles = rn.mentionedArticles;
 
-        if (decoded.type !== 'naddr' || !mentionedArticles || (props.embedLevel || 0) > 1) {
-          return unknownMention(reEncoded);
-        }
-
-
-        const mention = mentionedArticles[reEncoded];
-
-        if (!mention) {
+        if (decoded.type !== 'naddr') {
           return unknownMention(id);
         }
 
-        return renderLongFormMention(mention, index);
+        const data = decoded.data as nip19.AddressPointer;
 
+        const reEncoded = nip19.naddrEncode({
+          kind: data.kind,
+          pubkey: data.pubkey,
+          identifier: data.identifier || '',
+        });
+
+        if (data.kind === Kind.LongForm) {
+          const mentionedArticles = rn.mentionedArticles;
+
+          if (!mentionedArticles || (props.embedLevel || 0) > 1) {
+            return unknownMention(reEncoded);
+          }
+
+          const mention = mentionedArticles[reEncoded];
+
+          if (!mention) {
+            return unknownMention(id);
+          }
+
+          return renderLongFormMention(mention, index);
+        }
+
+        return unknownMention(id);
       }}
     </For>
   }
@@ -995,7 +1102,7 @@ const ParsedNote: Component<{
         let [_, id] = token.split(':');
 
         if (!id) {
-          return <>{token}</>;
+          return unknownMention(id);
         }
 
         let end = '';
@@ -1008,15 +1115,13 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
-        let link = <span>{token}</span>;
+        let link = unknownMention(id);
 
         try {
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+
           let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
-          const noteId = nip19.noteEncode(hex);
-
-          const path = `/e/${noteId}`;
 
           if (props.noLinks === 'links' || (props.embedLevel || 0) > 1) {
             return <span class='linkish'>{token}</span>;
@@ -1060,14 +1165,14 @@ const ParsedNote: Component<{
             if (!f) {
               f = mentionedHighlights && mentionedHighlights[hex];
             }
-            kind = f?.post.kind || f?.msg?.kind || f.event.kind || Kind.Text;
+            kind = f?.post.kind || f?.msg?.kind || f.event.kind; // || Kind.Text;
           }
 
           if ([Kind.Text].includes(kind || -1)) {
             if (!props.noLinks) {
               const ment = mentionedNotes && mentionedNotes[hex];
 
-              link = <A href={path}>{token}</A>;
+              link = unknownMention(id);
 
               if (ment) {
                 setWordsDisplayed(w => w + shortMentionInWords);
@@ -1107,7 +1212,7 @@ const ParsedNote: Component<{
               });
               const ment = mentionedArticles && mentionedArticles[reEncoded];
 
-              link = <A href={path}>{token}</A>;
+              link = unknownMention(id);
 
               if (ment) {
                 setWordsDisplayed(w => w + shortMentionInWords);
@@ -1126,13 +1231,76 @@ const ParsedNote: Component<{
             </div>;
           }
 
+          if (kind === Kind.Zap) {
+            const zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
+
+            if (zapContent) {
+              const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+              const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+
+              let zappedId = '';
+              let zappedKind: number = 0;
+
+              const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+              const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+
+              let zapSubject: PrimalArticle | PrimalUser | PrimalNote = mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]];
+
+              if (zapTagA) {
+                const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
+                zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+
+                const article = mentionedArticles[zappedId];
+
+                if (article) {
+                  zappedKind = Kind.LongForm;
+                  zapSubject = article;
+                } else {
+                  zappedKind = Kind.Metadata;
+                }
+              }
+              else if (zapTagE) {
+                zappedId = zapTagE[1];
+
+                const article = mentionedArticles[zappedId];
+                const note = mentionedNotes[zappedId];
+
+                if (article) {
+                  zappedKind = Kind.LongForm;
+                  zapSubject = article;
+                } else if (note) {
+                  zappedKind = Kind.Text;
+                  zapSubject = note;
+                } else {
+                  zappedKind = Kind.Metadata;
+                }
+              }
+
+              const zap: PrimalZap = {
+                id: zapContent.id || '',
+                message: zapEvent.content || '',
+                amount: parseBolt11(bolt11) || 0,
+                sender: mentionedUsers[zapEvent.pubkey],
+                reciver: mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]],
+                created_at: zapContent.created_at,
+                zappedId,
+                zappedKind,
+              };
+
+              link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+            }
+
+          }
+
         } catch (e) {
           logError('ERROR rendering note mention', e);
           setWordsDisplayed(w => w + 1);
-          link = <span class={styles.error}>{token}</span>;
+          link = unknownMention(id);
         }
 
-        return link;}}
+        return link;
+      }}
     </For>
   };
 

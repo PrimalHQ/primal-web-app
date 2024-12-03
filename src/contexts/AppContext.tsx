@@ -59,6 +59,7 @@ export type InvoiceInfo = {
 };
 
 export type AppContextStore = {
+  events: Record<number, NostrEventContent[]>,
   isInactive: boolean,
   appState: 'sleep' | 'waking' | 'woke',
   showReactionsModal: string | undefined,
@@ -104,6 +105,7 @@ export type AppContextStore = {
 }
 
 const initialData: Omit<AppContextStore, 'actions'> = {
+  events: {},
   isInactive: false,
   appState: 'woke',
   showReactionsModal: undefined,
@@ -309,6 +311,24 @@ const handleVerifiedUsersEvent = (content: NostrEventContent) => {
 
     updateStore('legendCustomization', (lc) => ({ ...lc, ...config }));
   }
+
+  const events = store.events[content.kind] || [];
+
+  if (events.length === 0) {
+    updateStore(
+      'events',
+      content.kind,
+      () => [{ ...content }],
+    );
+  } else if (!events.find((e: NostrEventContent) => e.id === content.id)) {
+    updateStore(
+      'events',
+      content.kind,
+      events.length,
+      () => ({ ...content }),
+    );
+  }
+
 }
 
 const onMessage = async (event: MessageEvent) => {

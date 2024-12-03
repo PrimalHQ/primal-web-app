@@ -14,7 +14,7 @@ import { useMediaContext } from './contexts/MediaContext';
 import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
 import { useDMContext } from './contexts/DMContext';
-import { generateNsec } from './lib/nTools';
+import { generateNsec, nip19 } from './lib/nTools';
 
 const Home = lazy(() => import('./pages/Home'));
 const Reads = lazy(() => import('./pages/Reads'));
@@ -101,6 +101,7 @@ const AppRouter: Component = () => {
       settings,
       thread,
       genNsec,
+      nip19,
     };
 
     primalWindow.onPrimalComponentMount = () => {};

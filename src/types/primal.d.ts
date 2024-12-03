@@ -37,6 +37,7 @@ export type NostrStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrNetStatsContent = {
@@ -44,6 +45,7 @@ export type NostrNetStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrLegendStatsContent = {
@@ -51,6 +53,7 @@ export type NostrLegendStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserStatsContent = {
@@ -58,6 +61,7 @@ export type NostrUserStatsContent = {
   content: string,
   pubkey: string,
   created_at: number,
+  id?: string,
 };
 
 export type NostrMentionContent = {
@@ -65,6 +69,7 @@ export type NostrMentionContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrOldestEventContent = {
@@ -72,6 +77,7 @@ export type NostrOldestEventContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrContactsContent = {
@@ -89,6 +95,7 @@ export type NostrMutedContent = {
   pubkey?: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
 };
 
 export type NostrScoredUsersContent = {
@@ -96,6 +103,7 @@ export type NostrScoredUsersContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationContent = {
@@ -103,6 +111,7 @@ export type NostrNotificationContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationLastSeenContent = {
@@ -110,6 +119,7 @@ export type NostrNotificationLastSeenContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationStatsContent = {
@@ -117,6 +127,7 @@ export type NostrNotificationStatsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNoteActionsContent = {
@@ -124,6 +135,7 @@ export type NostrNoteActionsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessageStatsContent = {
@@ -132,6 +144,7 @@ export type NostrMessageStatsContent = {
   content?: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessagePerSenderStatsContent = {
@@ -139,6 +152,7 @@ export type NostrMessagePerSenderStatsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessageEncryptedContent = {
@@ -153,36 +167,42 @@ export type NostrFeedRange = {
   kind: Kind.FeedRange,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrMediaInfo = {
   kind: Kind.MediaInfo,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrMediaUploaded = {
   kind: Kind.Uploaded,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrLinkMetadata = {
   kind: Kind.LinkMetadata,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrFilteringReason = {
   kind: Kind.FilteringReason,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserFollwerCounts = {
   kind: Kind.UserFollowerCounts,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserZaps = {
@@ -198,6 +218,7 @@ export type NostrSuggestedUsers = {
   kind: Kind.SuggestedUsersByCategory,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type PrimalUserRelays = {
@@ -205,6 +226,7 @@ export type PrimalUserRelays = {
   content: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
 };
 
 export type NostrBookmarks = {
@@ -212,6 +234,7 @@ export type NostrBookmarks = {
   content: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
 };
 
 export type NostrRelayHint = {
@@ -219,6 +242,7 @@ export type NostrRelayHint = {
   content: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
 };
 
 export type NostrZapInfo = {
@@ -226,6 +250,7 @@ export type NostrZapInfo = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  id?: string,
 };
 
 export type NostrQuoteStatsInfo = {
@@ -233,6 +258,7 @@ export type NostrQuoteStatsInfo = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  id?: string,
 };
 
 export type NostrWordCount = {
@@ -240,6 +266,7 @@ export type NostrWordCount = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  id?: string,
 };
 
 export type NostrTierList = {
@@ -247,6 +274,7 @@ export type NostrTierList = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  id?: string,
 };
 
 export type NostrTier = {
@@ -295,72 +323,84 @@ export type NostrDVMMetadata = {
   kind: Kind.DVMMetadata,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrTopicStats = {
   kind: Kind.NoteTopicStat,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrDVMFollowsActions = {
   kind: Kind.DVMFollowsActions,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserFollowerIncrease = {
   kind: Kind.UserFollowerIncrease,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrPrimalVanityNames = {
   kind: Kind.VerifiedUsersDict,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrPrimalExchangeRate = {
   kind: Kind.ExchangeRate,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrPrimalMediaStats = {
   kind: Kind.MediaStats,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrPrimalMediaList= {
   kind: Kind.MediaList,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrContactList= {
   kind: Kind.ContentStats,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrOrderHistory= {
   kind: Kind.OrderHistory,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrLegendCustomization= {
   kind: Kind.LegendCustomization,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrBroadcastStatus= {
   kind: Kind.BroadcastStatus,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrEventContent =

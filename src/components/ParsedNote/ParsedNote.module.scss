@@ -154,3 +154,39 @@
   -ms-box-orient: vertical;
   text-overflow: ellipsis;
 }
+
+.unknownEvent {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: var(--background-header-input);
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+
+
+  .icon {
+    width: 20px;
+    height: 20px;
+    background-color: var(--text-tertiary);
+
+    &.bang {
+      -webkit-mask: url(../../assets/icons/bang.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/bang.svg) no-repeat 0 / 100%;
+    }
+
+    &.file {
+      -webkit-mask: url(../../assets/icons/file.svg) no-repeat 0 / 100%;
+      mask: url(../../assets/icons/file.svg) no-repeat 0 / 100%;
+    }
+  }
+
+  .label {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 23px;
+  }
+}
