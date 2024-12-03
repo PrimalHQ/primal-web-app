@@ -17,7 +17,7 @@ const PremiumSidebarActive: Component<{
 }> = (props) => {
 
   const isExpired = () => {
-    if (props.data.membershipStatus.cohort_1 === 'Primal Legend') return false;
+    if (props.data.membershipStatus.tier === 'premium-legend') return false;
 
     const expiration = props.data.membershipStatus.expires_on || 0;
     const now = (new Date()).getTime() / 1_000;
@@ -26,7 +26,7 @@ const PremiumSidebarActive: Component<{
   }
 
   const isLegend = () => {
-    return props.data.membershipStatus.cohort_1 === 'Primal Legend';
+    return props.data.membershipStatus.tier === 'premium-legend';
   }
 
   return (

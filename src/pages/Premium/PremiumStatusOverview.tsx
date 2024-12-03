@@ -23,7 +23,7 @@ const PremiumStatusOverview: Component<{
   const navigate = useNavigate();
   const app = useAppContext();
 
-  const isLegend = () => props.data.membershipStatus.cohort_1 === 'Primal Legend';
+  const isLegend = () => props.data.membershipStatus.tier === 'premium-legend';
 
   const isExpired = () => {
     if (isLegend()) return false;
@@ -66,7 +66,7 @@ const PremiumStatusOverview: Component<{
         </div>
       </Show>
 
-      <Show when={props.data.membershipStatus.cohort_1 !== 'Primal Legend'}>
+      <Show when={props.data.membershipStatus.tier !== 'premium-legend'}>
         <Show
           when={isExpired()}
           fallback={
