@@ -693,8 +693,8 @@ const Premium: Component = () => {
   const premiumStep = () => {
     if (
       params.step === 'customize' &&
-      premiumData.membershipStatus.cohort_1 &&
-      premiumData.membershipStatus.cohort_1 !== 'Primal Legend'
+      premiumData.membershipStatus.tier &&
+      premiumData.membershipStatus.tier !== 'premium-legend'
     ) {
       return '';
     }

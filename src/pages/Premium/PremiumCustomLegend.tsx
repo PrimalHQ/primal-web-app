@@ -92,7 +92,7 @@ const PremiumCustomLegend: Component<{
         legendConfig={config}
       />
 
-      <Show when={props.data.membershipStatus.cohort_1 === 'Primal Legend'}>
+      <Show when={props.data.membershipStatus.tier === 'premium-legend'}>
 
         <div class={styles.legendStylePicker}>
           {styleOptions()}
