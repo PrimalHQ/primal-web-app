@@ -646,7 +646,7 @@ const Premium: Component = () => {
         navigate('/premium');
         return;
       }
-      getSubscriptionInfo();
+      // getSubscriptionInfo();
     }
     else if (premiumStep() === 'confirm') {
       if (premiumData.name.length === 0) {
@@ -920,7 +920,7 @@ const Premium: Component = () => {
                 />
 
                 <ButtonPremium
-                  onClick={() => setPremiumData('openSubscribe', () => true)}
+                  onClick={() => premiumData.selectedSubOption && setPremiumData('openSubscribe', () => true)}
                 >
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
