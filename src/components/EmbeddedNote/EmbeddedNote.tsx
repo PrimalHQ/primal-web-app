@@ -205,7 +205,7 @@ const EmbeddedNote: Component<{
               }
             >
               <span class={styles.userName}>
-                {verification()[0]}
+                {userName(props.note?.user)}
               </span>
               <VerificationCheck user={props.note?.user} />
               <span
