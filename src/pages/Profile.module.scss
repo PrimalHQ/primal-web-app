@@ -71,8 +71,8 @@
   z-index: var(--z-index-floater);
   .avatar {
     // border: solid 4px var(--background-site);
-    border-radius: 50%;
-    background-color: var(--background-site);
+    // border-radius: 50%;
+    // background-color: var(--background-site);
     // >div {
       // opacity: 0;
       // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
@@ -352,6 +352,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 4px;
 
   .text {
     color: var(--text-primary);
@@ -371,8 +372,8 @@
   }
 
   .vc {
-    width: 20px;
-    height: 20px;
+    // width: 20px;
+    // height: 20px;
   }
 }
 

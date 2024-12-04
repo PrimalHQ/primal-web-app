@@ -159,6 +159,7 @@ export enum Kind  {
   ContentStats=10_000_166,
   BroadcastStatus=10_000_167,
   LegendCustomization=10_000_168,
+  MembershipCohortInfo = 10_000_169,
 
   WALLET_OPERATION = 10_000_300,
   ExchangeRate = 10_000_305,

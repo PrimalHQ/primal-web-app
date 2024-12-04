@@ -68,6 +68,7 @@ import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowMo
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import { getKnownProfiles } from '../Router';
 import { scrollWindowTo } from '../lib/scroll';
+import PremiumCohortInfo from './Premium/PremiumCohortInfo';
 
 const Profile: Component = () => {
 
@@ -650,6 +651,14 @@ const Profile: Component = () => {
     return text.length < 50;
   }
 
+  const isVisibleLegend = () => {
+    return profile?.profileKey &&
+    app?.legendCustomization[profile.profileKey] &&
+    app?.memberCohortInfo[profile.profileKey] &&
+    app?.legendCustomization[profile.profileKey].style !== '' &&
+    app?.memberCohortInfo[profile.profileKey].tier === 'premium-legend';
+  }
+
   return (
     <>
       <PageTitle title={
@@ -717,14 +726,20 @@ const Profile: Component = () => {
                   width={640}
                   media={media?.actions.getMedia(banner() || '', 'o')}
                   mediaThumb={media?.actions.getMedia(banner() || '', 'm') || media?.actions.getMedia(banner() || '', 'o') || banner()}
+                  ignoreRatio={true}
                 />
               </Show>
             </div>
 
             <div class={`${styles.userImage} animated`}>
-              <div class={styles.avatar}>
+              <div class={`styles.avatar`}>
                 <div class={isSmallScreen() ? styles.phoneAvatar : styles.desktopAvatar}>
-                  <Avatar user={profile?.userProfile} size={isSmallScreen() ? "lg" : "xxl"} zoomable={true} />
+                  <Avatar
+                    user={profile?.userProfile}
+                    size={isSmallScreen() ? "lg" : "xxl"}
+                    zoomable={true}
+                    showBorderRing={!isVisibleLegend()}
+                  />
                 </div>
               </div>
             </div>
@@ -813,6 +828,14 @@ const Profile: Component = () => {
                             <VerificationCheck user={profile?.userProfile} large={true} />
                           </div>
                         </Show>
+
+                        <Show when={isVisibleLegend()}>
+                          <PremiumCohortInfo
+                            cohortInfo={app?.memberCohortInfo[profile?.profileKey]}
+                            legendConfig={app?.legendCustomization[profile?.profileKey]}
+                          />
+                        </Show>
+
                         <Show when={isFollowingYou()}>
                           <div class={styles.followsBadge}>
                             {intl.formatMessage(t.followsYou)}

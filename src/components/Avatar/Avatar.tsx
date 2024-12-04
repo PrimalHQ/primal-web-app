@@ -19,6 +19,7 @@ const Avatar: Component<{
   id?: string,
   showCheck?: boolean,
   zoomable?: boolean,
+  showBorderRing?: boolean,
   legendConfig?: LegendCustomizationConfig,
 }> = (props) => {
 
@@ -190,7 +191,7 @@ const Avatar: Component<{
   return (
     <div
       id={props.id}
-      class={`${avatarClass[selectedSize]} ${legendClass()} ${highlightClass()}`}
+      class={`${avatarClass[selectedSize]} ${legendClass()} ${highlightClass()} ${props.showBorderRing ? styles.borderRing : ''}`}
       data-user={props.user?.pubkey}
     >
       <Show

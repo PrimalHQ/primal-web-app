@@ -58,6 +58,12 @@ export type InvoiceInfo = {
   onCancel?: () => void,
 };
 
+export type CohortInfo = {
+  cohort_1: string,
+  cohort_2: string,
+  tier: string,
+};
+
 export type AppContextStore = {
   events: Record<number, NostrEventContent[]>,
   isInactive: boolean,
@@ -80,6 +86,7 @@ export type AppContextStore = {
   connectedRelays: Relay[],
   verifiedUsers: Record<string, string>,
   legendCustomization: Record<string, LegendCustomizationConfig>,
+  memberCohortInfo: Record<string, CohortInfo>,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -131,6 +138,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   connectedRelays: [],
   verifiedUsers: {},
   legendCustomization: {},
+  memberCohortInfo: {},
   subscribeToTier: () => {},
 };
 
@@ -299,7 +307,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-const handleVerifiedUsersEvent = (content: NostrEventContent) => {
+const handleVerifiedUsersEvent = (content: NostrEventContent, subId?: string) => {
   if (content.kind === Kind.VerifiedUsersDict) {
     const verifiedUsers: Record<string, string> = JSON.parse(content.content);
 
@@ -310,6 +318,12 @@ const handleVerifiedUsersEvent = (content: NostrEventContent) => {
     const config = JSON.parse(content.content) as Record<string, LegendCustomizationConfig>;
 
     updateStore('legendCustomization', (lc) => ({ ...lc, ...config }));
+  }
+
+  if (content.kind === Kind.MembershipCohortInfo) {
+    const config = JSON.parse(content.content) as Record<string, CohortInfo>;
+
+    updateStore('memberCohortInfo', (lc) => ({ ...lc, ...config }));
   }
 
   const events = store.events[content.kind] || [];
@@ -335,7 +349,7 @@ const onMessage = async (event: MessageEvent) => {
   const data = await readData(event);
   const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
-  const [type, _, content] = message;
+  const [type, subId, content] = message;
 
   if (type === 'EVENTS') {
     for (let i=0;i<content.length;i++) {
@@ -346,7 +360,7 @@ const onMessage = async (event: MessageEvent) => {
   }
 
   if (type === 'EVENT') {
-    handleVerifiedUsersEvent(content)
+    handleVerifiedUsersEvent(content, subId)
   }
 };
 

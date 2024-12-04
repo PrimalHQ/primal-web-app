@@ -403,6 +403,13 @@ export type NostrBroadcastStatus= {
   id?: string,
 };
 
+export type NostrMembershipCohortInfo= {
+  kind: Kind.MembershipCohortInfo,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -453,6 +460,7 @@ export type NostrEventContent =
   NostrOrderHistory |
   NostrLegendCustomization |
   NostrBroadcastStatus |
+  NostrMembershipCohortInfo |
   NostrTopicStats;
 
 export type NostrEvent = [
