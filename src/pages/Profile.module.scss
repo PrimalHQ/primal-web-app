@@ -331,6 +331,10 @@
     justify-content: flex-start;
     align-items: flex-start;
     gap: 8px;
+
+    .nipLine {
+      display: flex;
+    }
   }
   .columnRight {
     width: 40%;
@@ -482,6 +486,10 @@
     .nip05 {
       width: 100%;
       overflow: hidden;
+    }
+
+    .followsBadge {
+      min-width: 80px;
     }
   }
 }

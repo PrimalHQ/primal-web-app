@@ -515,106 +515,106 @@
 
 .nanoMissing {
   @include missing;
-  width: 18px;
-  height: 18px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .microMissing {
   @include missing;
-  width: 22px;
-  height: 22px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .xxsMissing {
   @include missing;
-  width: 28px;
-  height: 28px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .xssMissing {
   @include missing;
-  width: 26px;
-  height: 26px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .xsMissing {
   @include missing;
-  width: 32px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .vvsMissing {
   @include missing;
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .vs2Missing {
   @include missing;
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .vsMissing {
   @include missing;
-  width: 42px;
-  height: 42px;
+  width: 100%;
+  height: 100%;
   font-size: 10px;
 }
 
 .smallMissing {
   @include missing;
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
   font-size: 12px;
 }
 
 .midMissing {
   @include missing;
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
   font-size: 16px;
 }
 
 .mlMissing {
   @include missing;
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 100%;
   font-size: 16px;
 }
 
 .mllMissing {
   @include missing;
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  height: 100%;
   font-size: 16px;
 }
 
 .largeMissing {
   @include missing;
-  width: 68px;
-  height: 68px;
+  width: 100%;
+  height: 100%;
   font-size: 18px;
 }
 
 .extraLargeMissing {
   @include missing;
-  width: 76px;
-  height: 76px;
+  width: 100%;
+  height: 100%;
   font-size: 20px;
 }
 
 .xxlMissing {
   @include missing;
-  width: 120px;
-  height: 120px;
+  width: 100%;
+  height: 100%;
   font-size: 20px;
 }
 

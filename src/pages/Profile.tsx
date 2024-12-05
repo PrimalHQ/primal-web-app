@@ -643,20 +643,41 @@ const Profile: Component = () => {
     app?.actions.openAuthorSubscribeModal(profile?.userProfile, doSubscription);
   };
 
-  const shortProfileAbout = () => {
-    if (!profileAboutDiv) return true;
+  const shortProfileAbout = (text: string | undefined) => {
+    if (!profileAboutDiv || !text) return true;
 
-    const text = profileAboutDiv.innerText;
+    // const text = profileAboutDiv.innerText;
 
     return text.length < 50;
   }
 
   const isVisibleLegend = () => {
-    return profile?.profileKey &&
-    app?.legendCustomization[profile.profileKey] &&
-    app?.memberCohortInfo[profile.profileKey] &&
-    app?.legendCustomization[profile.profileKey].style !== '' &&
-    app?.memberCohortInfo[profile.profileKey].tier === 'premium-legend';
+    if (
+      !profile?.profileKey ||
+      !app?.memberCohortInfo[profile.profileKey]
+    ) return false;
+
+
+    if (
+      app?.memberCohortInfo[profile.profileKey].tier === 'premium-legend' &&
+      app?.legendCustomization[profile.profileKey] &&
+      app?.legendCustomization[profile.profileKey].style !== ''
+    ) return true;
+
+    if (
+      app?.memberCohortInfo[profile.profileKey].tier === 'premium' &&
+      (app?.memberCohortInfo[profile.profileKey].expires_on || 0) > Math.floor((new Date()).getTime() / 1_000)
+    ) return true;
+
+    return false;
+  }
+
+  const showAvatarBorder = () => {
+    return !profile?.profileKey ||
+      !app?.legendCustomization[profile.profileKey] ||
+      !app?.memberCohortInfo[profile.profileKey] ||
+      app?.legendCustomization[profile.profileKey].style === '' ||
+      app?.memberCohortInfo[profile.profileKey].tier !== 'premium-legend';
   }
 
   return (
@@ -738,7 +759,7 @@ const Profile: Component = () => {
                     user={profile?.userProfile}
                     size={isSmallScreen() ? "lg" : "xxl"}
                     zoomable={true}
-                    showBorderRing={!isVisibleLegend()}
+                    showBorderRing={showAvatarBorder()}
                   />
                 </div>
               </div>
@@ -816,7 +837,7 @@ const Profile: Component = () => {
 
             <div class={styles.profileCard}>
               <Switch>
-                <Match when={shortProfileAbout()}>
+                <Match when={shortProfileAbout(profile?.userProfile?.about)}>
                   <div class={styles.smallAbout}>
                     <div class={styles.columnLeft}>
                       <div class={`${styles.basicInfoName} animated`}>
@@ -835,6 +856,16 @@ const Profile: Component = () => {
                             legendConfig={app?.legendCustomization[profile?.profileKey]}
                           />
                         </Show>
+                      </div>
+
+                      <div class={styles.nipLine}>
+                        <Show when={profile?.userProfile?.nip05}>
+                          <div class={`${styles.verificationInfo} animated`}>
+                            <div class={styles.verified}>
+                                <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                            </div>
+                          </div>
+                        </Show>
 
                         <Show when={isFollowingYou()}>
                           <div class={styles.followsBadge}>
@@ -842,14 +873,6 @@ const Profile: Component = () => {
                           </div>
                         </Show>
                       </div>
-
-                      <Show when={profile?.userProfile?.nip05}>
-                        <div class={`${styles.verificationInfo} animated`}>
-                          <div class={styles.verified}>
-                              <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
-                          </div>
-                        </div>
-                      </Show>
 
                       <Show when={profile?.userProfile?.about}>
                         <div class={`${styles.profileAboutHolder} animated`}>
@@ -908,7 +931,7 @@ const Profile: Component = () => {
                     </div>
                   </div>
                 </Match>
-                <Match when={!shortProfileAbout()}>
+                <Match when={!shortProfileAbout(profile?.userProfile?.about)}>
                   <div class={styles.bigAbout}>
                     <div class={`${styles.basicInfo} animated`}>
                       <div class={styles.basicInfoName}>
@@ -920,10 +943,12 @@ const Profile: Component = () => {
                             <VerificationCheck user={profile?.userProfile} large={true} />
                           </div>
                         </Show>
-                        <Show when={isFollowingYou()}>
-                          <div class={styles.followsBadge}>
-                            {intl.formatMessage(t.followsYou)}
-                          </div>
+
+                        <Show when={isVisibleLegend()}>
+                          <PremiumCohortInfo
+                            cohortInfo={app?.memberCohortInfo[profile?.profileKey]}
+                            legendConfig={app?.legendCustomization[profile?.profileKey]}
+                          />
                         </Show>
                       </div>
 
@@ -942,6 +967,11 @@ const Profile: Component = () => {
                         <div class={styles.verified}>
                           <Show when={profile?.userProfile?.nip05}>
                             <div class={styles.nip05}>{nip05Verification(profile?.userProfile)}</div>
+                          </Show>
+                          <Show when={isFollowingYou()}>
+                            <div class={styles.followsBadge}>
+                              {intl.formatMessage(t.followsYou)}
+                            </div>
                           </Show>
                         </div>
 
