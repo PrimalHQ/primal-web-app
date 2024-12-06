@@ -36,6 +36,7 @@ const PremiumBecomeLegend: Component<{
   profile?: PrimalUser,
   onBuyLegend?: (amount: number) => void,
   getExchangeRate?: () => void,
+  isOG?: boolean,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();

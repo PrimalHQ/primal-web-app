@@ -26,7 +26,7 @@ const PremiumCohortInfo: Component<{
     }
 
     if (props.cohortInfo.tier === 'premium-legend') {
-      return '';
+      return '/premium/legend?og=legend';
     }
 
     return '';

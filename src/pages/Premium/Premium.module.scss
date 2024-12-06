@@ -123,6 +123,8 @@
   flex-direction: column;
   align-items: flex-start;
 
+  margin-top: 42px;
+
   .summaryItem {
     display: flex;
     width: 100%;
@@ -1348,6 +1350,15 @@
     line-height: 23px;
   }
 
+  .legendExplanation {
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 23px;
+  }
+
   .legendPerks {
     width: 300px;
     display: flex;
@@ -1376,7 +1387,7 @@
         margin-left: 3px;
         border: 2px solid #FFC830;
         border-radius: 99999px;
-        box-shadow: 0px 0px 16px #FFC830;
+        // box-shadow: 0px 0px 16px #FFC830;
 
         // height: 74px;
       }

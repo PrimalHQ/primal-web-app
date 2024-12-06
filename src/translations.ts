@@ -2412,6 +2412,16 @@ export const premium = {
       defaultMessage: 'Get access to new features before they are public.',
       description: 'Private Beta perk description',
     },
+    moreMediaSpace: {
+      id: 'pages.premium.labes.moreMediaSpace',
+      defaultMessage: 'Way More Storage',
+      description: 'More Media perk title',
+    },
+    moreMediaSpaceDescription: {
+      id: 'pages.premium.labes.moreMediaSpaceDescription',
+      defaultMessage: 'Get 100GB of Primal Premium media storage.',
+      description: 'More Media perk description',
+    },
     customLegendProfile: {
       id: 'pages.premium.labes.customLegendProfile',
       defaultMessage: 'Legendary Custom Profile',
@@ -2426,6 +2436,11 @@ export const premium = {
       id: 'pages.premium.labes.legendPageCaption',
       defaultMessage: 'Donate $1000 or more to gain:',
       description: 'Legend page caption',
+    },
+    legendPageExplanation: {
+      id: 'pages.premium.labes.legendPageExplanation',
+      defaultMessage: 'The Legend tier was created to recognize users who have made a significant contribution to Primal.',
+      description: 'Legend page explanation',
     },
     supportFirstLine: {
       id: 'pages.premium.labes.supportFirstLine',
@@ -2581,6 +2596,11 @@ export const premium = {
       defaultMessage: 'Become a Primal Legend',
       description: 'Title of the premium legend page',
     },
+    legendShort: {
+      id: 'pages.premium.legendShort',
+      defaultMessage: 'Primal Legend',
+      description: 'Short title of the premium legend page',
+    },
     relay: {
       id: 'pages.premium.relay',
       defaultMessage: 'Primal Relay',
@@ -2605,6 +2625,11 @@ export const premium = {
       id: 'pages.premium.og',
       defaultMessage: 'Primal OG',
       description: 'Title of the Primal OG page',
+    },
+    ogLegend: {
+      id: 'pages.premium.ogLegend',
+      defaultMessage: 'Primal Legend',
+      description: 'Title of the Primal Legend page',
     },
   },
   subOptions: {

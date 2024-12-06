@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -12,7 +12,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { premium as t } from '../../translations';
 
 import foreverPremium from '../../assets/images/forever.png';
-import privateBetaBuilds from '../../assets/images/beta.png';
+import moreMediaSpace from '../../assets/images/media.png';
 import customProfile from '../../assets/images/preston.png';
 import heart from '../../assets/images/heart.png';
 
@@ -20,16 +20,31 @@ import { appStoreLink, playstoreLink } from '../../constants';
 import { A, useNavigate } from '@solidjs/router';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
+import { PrimalUser } from '../../types/primal';
 
 
 const PremiumLegend: Component<{
   onExtendPremium?: () => void,
+  pubkey?: string | undefined,
+  user?: PrimalUser | undefined,
+  isOG?: boolean,
+  onBecomeLegendAction?: () => void,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();
 
+  const isGuest = () => !props.pubkey;
+
+  const hasNoMetadata = () => props.pubkey && !props.user;
+
   return (
     <div class={styles.legendLayout}>
+      <Show when={props.isOG}>
+        <div class={styles.legendExplanation}>
+          {intl.formatMessage(t.labels.legendPageExplanation)}
+        </div>
+      </Show>
+
       <div class={styles.legendCaption}>
         {intl.formatMessage(t.labels.legendPageCaption)}
       </div>
@@ -47,13 +62,13 @@ const PremiumLegend: Component<{
           </div>
         </div>
         <div class={styles.legendPerk}>
-          <img class={styles.privateBetaIcon} src={privateBetaBuilds}></img>
+          <img class={styles.privateBetaIcon} src={moreMediaSpace}></img>
           <div class={styles.perkInfo}>
             <div class={styles.perkTitle}>
-              {intl.formatMessage(t.labels.privateBetaBuilds)}
+              {intl.formatMessage(t.labels.moreMediaSpace)}
             </div>
             <div class={styles.perkDescription}>
-              {intl.formatMessage(t.labels.privateBetaBuildsDescription)}
+              {intl.formatMessage(t.labels.moreMediaSpaceDescription)}
             </div>
           </div>
         </div>
@@ -81,9 +96,19 @@ const PremiumLegend: Component<{
 
       <div class={styles.legendFooter}>
         <ButtonPremium
-          onClick={() => navigate('/premium/legendary')}
+          onClick={props.onBecomeLegendAction}
         >
-          {intl.formatMessage(t.actions.becomeLegend)}
+          <Switch>
+            <Match when={isGuest()}>
+              <>Create account</>
+            </Match>
+            <Match when={hasNoMetadata()}>
+              <>Edit profile</>
+            </Match>
+            <Match when={true}>
+              <>{intl.formatMessage(t.actions.becomeLegend)}</>
+            </Match>
+          </Switch>
         </ButtonPremium>
       </div>
     </div>

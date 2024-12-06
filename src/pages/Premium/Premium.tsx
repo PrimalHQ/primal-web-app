@@ -212,6 +212,25 @@ const Premium: Component = () => {
     navigate('/premium/name');
   };
 
+
+  const onBecomeLegendAction = () => {
+    if (!account?.publicKey) {
+      account?.actions.showGetStarted()
+      return;
+    }
+    if (!account?.activeUser) {
+      navigate('/settings/profile');
+      return;
+    }
+
+    if (premiumData.membershipStatus.tier !== 'premium') {
+      navigate('/premium/name?og=legend');
+      return;
+    }
+
+    navigate('/premium/legendary');
+  };
+
   const setName = (name: string) => {
     setPremiumData('errorMessage', () => '');
     setPremiumData('name', () => name);
@@ -280,7 +299,7 @@ const Premium: Component = () => {
     setPremiumData('nameAvailable', () => isAvailable);
 
     if (isAvailable) {
-      navigate('/premium/overview');
+      navigate(`/premium/overview${isOG() === 'legend' ? '?og=legend' : ''}`);
     } else {
       setPremiumData('errorMessage', () => intl.formatMessage(t.errors.nameUnavailable));
     }
@@ -764,7 +783,9 @@ const Premium: Component = () => {
           </Match>
 
           <Match when={premiumStep() === 'legend'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
+            <div class={styles.centerPageTitle}>
+              {!!isOG() ? intl.formatMessage(t.title.legendShort) : intl.formatMessage(t.title.legend)}
+            </div>
           </Match>
 
           <Match when={premiumStep() === 'legendary'}>
@@ -786,8 +807,11 @@ const Premium: Component = () => {
           <Match when={premiumStep() === 'content'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
           </Match>
-          <Match when={isOG()}>
+          <Match when={!!isOG() && isOG() !== 'legend'}>
             <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
+          </Match>
+          <Match when={!!isOG() && isOG() === 'legend'}>
+            <div class={`${styles.centerPageTitle}`}>{intl.formatMessage(t.title.og)}</div>
           </Match>
         </Switch>
       </PageCaption>
@@ -877,7 +901,13 @@ const Premium: Component = () => {
                   {intl.formatMessage(t.actions.back)}
                 </ButtonSecondary>
                 <ButtonPremium
-                  onClick={() => navigate('/premium/confirm')}
+                  onClick={() => {
+                    if (isOG() === 'legend') {
+                      navigate('/premium/legendary')
+                    } else {
+                      navigate('/premium/confirm')
+                    }
+                  }}
                 >
                   {intl.formatMessage(t.actions.next)}
                 </ButtonPremium>
@@ -944,6 +974,10 @@ const Premium: Component = () => {
 
             <Match when={premiumStep() === 'legend'}>
               <PremiumLegend
+                pubkey={account?.publicKey}
+                user={account?.activeUser}
+                isOG={!!isOG()}
+                onBecomeLegendAction={onBecomeLegendAction}
               />
             </Match>
 
@@ -956,6 +990,7 @@ const Premium: Component = () => {
                   setPremiumData('legendAmount', () => amount);
                   setPremiumData('openLegend', () => true);
                 }}
+                isOG={!!isOG()}
               />
             </Match>
 
