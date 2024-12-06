@@ -4,6 +4,10 @@
   font-size: 28px;
   font-weight: 300;
   line-height: 28px;
+
+  &.noTransform {
+    text-transform: none;
+  }
 }
 
 .premiumContent {
@@ -556,13 +560,21 @@
   align-items: center;
   width: 440px;
 
+  .ogCaption {
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 23px;
+  }
+
   .premiumHighlightInfo {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
     width: 100%;
-    margin-top: 70px;
+    margin-top: 32px;
 
     .highlights {
       display: flex;
@@ -1154,6 +1166,7 @@
 }
 
 .premiumActive {
+  text-decoration: none;
   .expiredPremium, .activePremium, .legendPremium {
     display: flex;
     justify-content: center;

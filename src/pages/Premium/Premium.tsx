@@ -8,7 +8,7 @@ import { premium as t, toast as tToast } from '../../translations';
 
 import styles from './Premium.module.scss';
 import Search from '../../components/Search/Search';
-import { useNavigate, useParams } from '@solidjs/router';
+import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
 import TextInput from '../../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, PrimalUser } from '../../types/primal';
@@ -134,6 +134,8 @@ const Premium: Component = () => {
   const navigate = useNavigate();
   const toast = useToastContext();
   const app = useAppContext();
+
+  const [queryParams, setQueryParams] = useSearchParams();
 
   let nameInput: HTMLInputElement | undefined;
   let renameInput: HTMLInputElement | undefined;
@@ -735,6 +737,10 @@ const Premium: Component = () => {
     }
   }
 
+  const isOG = () => {
+    return queryParams.og;
+  }
+
   return (
     <div>
       <PageTitle title={
@@ -779,6 +785,9 @@ const Premium: Component = () => {
 
           <Match when={premiumStep() === 'content'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
+          </Match>
+          <Match when={isOG()}>
+            <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
           </Match>
         </Switch>
       </PageCaption>
@@ -998,6 +1007,7 @@ const Premium: Component = () => {
                 onMore={() => setPremiumData('openFeatures', () => 'features')}
                 pubkey={account?.publicKey}
                 user={account?.activeUser}
+                isOG={!!isOG()}
               />
             </Match>
           </Switch>

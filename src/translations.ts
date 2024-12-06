@@ -2601,6 +2601,11 @@ export const premium = {
       defaultMessage: 'Content Backup',
       description: 'Title of the premium content backup page',
     },
+    og: {
+      id: 'pages.premium.og',
+      defaultMessage: 'Primal OG',
+      description: 'Title of the Primal OG page',
+    },
   },
   subOptions: {
     prices: {

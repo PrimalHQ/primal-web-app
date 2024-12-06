@@ -14,6 +14,7 @@ const PremiumHighlights: Component<{
   onMore?: () => void,
   pubkey?: string | undefined,
   user?: PrimalUser | undefined,
+  isOG?: boolean,
 }> = (props) => {
   const intl = useIntl();
 
@@ -23,6 +24,9 @@ const PremiumHighlights: Component<{
 
   return (
     <div class={styles.premiumHighlights}>
+      <div class={styles.ogCaption}>
+        The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.
+      </div>
       <div class={styles.premiumHighlightInfo}>
         <div class={styles.highlights}>
           <div class={styles.highlight}>
