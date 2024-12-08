@@ -256,10 +256,11 @@
       align-items: center;
       height: 40px;
       .avatar {
-        border: solid 2px var(--text-primary-button);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        // border: solid 2px var(--text-primary-button);
+        // border-radius: 50%;
+        // padding: 0;
+        // width: 28px;
+        // height: 28px;
         transition: margin-right 0.2s;
         margin-right: -9px;
       }

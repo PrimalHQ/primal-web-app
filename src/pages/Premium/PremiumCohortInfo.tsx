@@ -11,21 +11,30 @@ import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { LegendCustomizationConfig } from '../../lib/premium';
 import { CohortInfo } from '../../contexts/AppContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 
 const PremiumCohortInfo: Component<{
+  userCohort?: CohortInfo,
   cohortInfo: CohortInfo,
   legendConfig?: LegendCustomizationConfig | undefined,
 }> = (props) => {
   const intl = useIntl()
   const navigate = useNavigate();
+  const account = useAccountContext();
 
   const destination = () => {
-    if (props.cohortInfo.tier === 'premium') {
+    if (
+      props.cohortInfo.tier === 'premium' &&
+      !['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '')
+    ) {
       return '/premium?og=1';
     }
 
-    if (props.cohortInfo.tier === 'premium-legend') {
+    if (
+      props.cohortInfo.tier === 'premium-legend' &&
+      !['premium-legend'].includes(account?.membershipStatus.tier || '')
+    ) {
       return '/premium/legend?og=legend';
     }
 
