@@ -1185,7 +1185,7 @@
       font-size: 12px;
       font-weight: 700;
       line-height: 11px;
-      text-transform: uppercase;
+      // text-transform: uppercase;
     }
 
     .date {
@@ -1931,7 +1931,7 @@
   display: grid;
   grid-template-columns: repeat(5, 44px);
   gap: 24px;
-  margin-bottom: 40px;
+  margin-block: 40px;
 
   .legendStyleItem {
     display: flex;
