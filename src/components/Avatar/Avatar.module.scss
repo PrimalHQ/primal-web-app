@@ -185,12 +185,12 @@
   @include avatar;
   width: 26px;
   height: 26px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
     border: 1px solid var(--background-site);
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
   }
 
   .iconBackground {
