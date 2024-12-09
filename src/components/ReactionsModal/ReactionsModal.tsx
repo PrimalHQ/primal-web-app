@@ -462,7 +462,11 @@ const ReactionsModal: Component<{
                     onClick={props.onClose}
                   >
                     <div class={styles.likeIcon}></div>
-                    <Avatar src={admirer.picture} size="vs" />
+                    <Avatar
+                      user={admirer}
+                      src={admirer.picture}
+                      size="vs"
+                    />
                     <div class={styles.userName}>
                       <div class={styles.name}>
                         {userName(admirer)}
@@ -515,7 +519,11 @@ const ReactionsModal: Component<{
                       <div class={styles.zapIcon}></div>
                       <div class={styles.amount}>{zap.amount < 100_000 ? zap.amount.toLocaleString() : truncateNumber2(zap.amount)}</div>
                     </div>
-                    <Avatar src={zap.sender?.picture} size="vs" />
+                    <Avatar
+                      user={zap.sender}
+                      src={zap.sender?.picture}
+                      size="vs"
+                    />
                     <div class={styles.zapInfo}>
                       <div class={styles.userName}>
                         <div class={styles.name}>
@@ -569,7 +577,11 @@ const ReactionsModal: Component<{
                     onClick={props.onClose}
                   >
                     <div class={styles.repostIcon}></div>
-                    <Avatar src={reposter.picture} size="vs" />
+                    <Avatar
+                      user={reposter}
+                      src={reposter.picture}
+                      size="vs"
+                    />
                     <div class={styles.userName}>
                       <div class={styles.name}>
                         {userName(reposter)}
