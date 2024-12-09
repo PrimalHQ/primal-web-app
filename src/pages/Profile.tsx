@@ -852,7 +852,6 @@ const Profile: Component = () => {
 
                         <Show when={isVisibleLegend()}>
                           <PremiumCohortInfo
-                            userCohort={app?.memberCohortInfo[account?.publicKey]}
                             cohortInfo={app?.memberCohortInfo[profile?.profileKey]}
                             legendConfig={app?.legendCustomization[profile?.profileKey]}
                           />

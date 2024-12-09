@@ -15,7 +15,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 
 
 const PremiumCohortInfo: Component<{
-  userCohort?: CohortInfo,
+  userTier?: string,
   cohortInfo: CohortInfo,
   legendConfig?: LegendCustomizationConfig | undefined,
 }> = (props) => {
@@ -23,17 +23,19 @@ const PremiumCohortInfo: Component<{
   const navigate = useNavigate();
   const account = useAccountContext();
 
+  const tier = () => props.userTier || account?.membershipStatus.tier || '';
+
   const destination = () => {
     if (
       props.cohortInfo.tier === 'premium' &&
-      !['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '')
+      !['premium', 'premium-legend'].includes(tier())
     ) {
       return '/premium?og=1';
     }
 
     if (
       props.cohortInfo.tier === 'premium-legend' &&
-      !['premium-legend'].includes(account?.membershipStatus.tier || '')
+      !['premium-legend'].includes(tier())
     ) {
       return '/premium/legend?og=legend';
     }

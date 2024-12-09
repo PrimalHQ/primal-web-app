@@ -1,6 +1,6 @@
 import styles from  "./VerificationCheck.module.scss";
 
-import { Component, createEffect, createSignal, JSXElement, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSXElement, Match, onMount, Show, Switch } from "solid-js";
 import { PrimalUser } from "../../types/primal";
 import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
@@ -15,6 +15,7 @@ const VerificationCheck: Component<{
   fallback?: JSXElement,
   id?: string,
   legendConfig?: LegendCustomizationConfig,
+  mock?: boolean,
 }> = (props) => {
   const app = useAppContext();
 
@@ -74,35 +75,12 @@ const VerificationCheck: Component<{
   })
 
   return (
-    <Show
-      when={isVerified() || isLegend()}
-      fallback={props.fallback}
-    >
-      <Show
-        when={props.large}
-        fallback={
-          <div
-            id={props.id}
-            data-user={props.user?.pubkey}
-            class={styles.verificationIcon}
-          >
-            <Show
-              when={isVerifiedByPrimal() || isLegend()}
-              fallback={
-                <span class={styles.verifiedIcon} />
-              }
-            >
-              <div class={primalCheckKlass()}>
-                <div class={styles.checkIcon}></div>
-              </div>
-            </Show>
-          </div>
-        }
-      >
+    <Switch fallback={props.fallback}>
+      <Match when={isVerified() || isLegend()}>
         <div
           id={props.id}
           data-user={props.user?.pubkey}
-          class={styles.verificationIconL}
+          class={`${props.large ? styles.verificationIconL : styles.verificationIcon}`}
         >
           <Show
             when={isVerifiedByPrimal() || isLegend()}
@@ -115,8 +93,20 @@ const VerificationCheck: Component<{
             </div>
           </Show>
         </div>
-      </Show>
-    </Show>
+      </Match>
+      <Match when={props.mock}>
+        <div
+          id={props.id}
+          data-user={props.user?.pubkey}
+          class={`${props.large ? styles.verificationIconL : styles.verificationIcon}`}
+        >
+          <div class={primalCheckKlass()}>
+            <div class={styles.checkIcon}></div>
+          </div>
+        </div>
+      </Match>
+
+    </Switch>
   )
 }
 

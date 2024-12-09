@@ -392,6 +392,11 @@ const Premium: Component = () => {
           stopListeningForLegendPurchase(purchuseLegendSubId(membershipId), premiumSocket);
           purchuseMonitorUnsub();
           updateUserMetadata();
+          updateLegendConfig({
+            style: 'GOLD',
+            custom_badge: true,
+            avatar_glow: true,
+          })
           setPremiumData('openLegend', () => false);
           setPremiumData('openSuccess', () => true);
           setPremiumData('successMessage', () => intl.formatMessage(t.subOptions.success.legend));

@@ -1208,6 +1208,7 @@
   }
 
   .legendPremium {
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.50);
     &.legend_GOLD {
       background: var(--legend-gold);
     }
@@ -1526,7 +1527,6 @@
     line-height: 16px;
   }
 }
-
 
 .legendaryPay {
   width: 100%;

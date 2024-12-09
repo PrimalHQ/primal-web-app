@@ -13,6 +13,7 @@ import { PremiumStore } from './Premium';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import ButtonFlip2 from '../../components/Buttons/ButtonFlip2';
+import PremiumCohortInfo from './PremiumCohortInfo';
 
 const donations: [string, number][] = [
   ['USD', 1000],
@@ -78,23 +79,45 @@ const PremiumBecomeLegend: Component<{
     <div class={styles.premiumBecomeLegend}>
 
       <div class={styles.userInfo}>
-        <Avatar user={props.profile} size="xl" />
+        <Avatar
+          user={props.profile}
+          size="xl"
+          legendConfig={{
+            style: 'GOLD',
+            custom_badge: true,
+            avatar_glow: true,
+          }}
+        />
         <div class={styles.userName}>
           {displayName()}
           <VerificationCheck
             user={props.profile}
             large={true}
+            mock={true}
+            legendConfig={{
+              style: 'GOLD',
+              custom_badge: true,
+              avatar_glow: true,
+            }}
           />
         </div>
       </div>
 
       <div class={styles.premiumActive}>
-        <div class={styles.activePremium}>
-          <div class={styles.caption}>{'Primal Legend'}</div>
-          <div class={styles.date}>
-            <div>{`Class of ${(new Date()).getFullYear()}`}</div>
-          </div>
-        </div>
+        <PremiumCohortInfo
+          userTier={'premium-legend'}
+          cohortInfo={{
+            cohort_1: 'Legend',
+            cohort_2: `${(new Date()).getFullYear()}`,
+            tier: 'premium-legend',
+            expires_on: (new Date()).getTime() + 1_000,
+          }}
+          legendConfig={{
+            style: 'GOLD',
+            custom_badge: true,
+            avatar_glow: true,
+          }}
+        />
       </div>
 
       <TransactionAmount
