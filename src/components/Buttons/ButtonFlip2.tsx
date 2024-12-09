@@ -4,7 +4,7 @@ import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
 
-const ButtonFlip: Component<{
+const ButtonFlip2: Component<{
   id?: string,
   onClick?: (e: MouseEvent) => void,
   when?: boolean,
@@ -16,7 +16,7 @@ const ButtonFlip: Component<{
   dark?: boolean,
 }> = (props) => {
   const klass = () => {
-    let k = props.when ? styles.flipActive : styles.flipInactive;
+    let k = props.when ? styles.flipActive2 : styles.flipInactive2;
 
     if (props.light) {
       k += ` ${styles.light}`;
@@ -48,4 +48,4 @@ const ButtonFlip: Component<{
   )
 }
 
-export default hookForDev(ButtonFlip);
+export default hookForDev(ButtonFlip2);

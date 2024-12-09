@@ -5,7 +5,6 @@ import { hookForDev } from '../../lib/devTools';
 import { account as t, actions } from '../../translations';
 import { PrimalUser } from '../../types/primal';
 import ButtonFlip from '../Buttons/ButtonFlip';
-import ButtonFollow from '../Buttons/ButtonFlip';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FollowButton.module.scss';

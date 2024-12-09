@@ -1,35 +1,27 @@
-import { Component, createEffect, createSignal, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
 import { useIntl } from '@cookbook/solid-intl';
 import { premium as t } from '../../translations';
 
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
 
-import { appStoreLink, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
-import ButtonLink from '../../components/Buttons/ButtonLink';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PrimalUser } from '../../types/primal';
 import Avatar from '../../components/Avatar/Avatar';
-import { shortDate } from '../../lib/dates';
 import { userName } from '../../stores/profile';
 import { PremiumStore } from './Premium';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
-import AdvancedSearchSlider from '../../components/AdvancedSearch/AdvancedSearchSlider';
-import { subsTo, subTo } from '../../sockets';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
+import ButtonFlip2 from '../../components/Buttons/ButtonFlip2';
 
+const donations: [string, number][] = [
+  ['USD', 1000],
+  ['USD', 2500],
+  ['USD', 5000],
+  ['USD', 7500],
+  ['USD', 10000],
+  ['BTC', 1],
+];
 
 const PremiumBecomeLegend: Component<{
   data: PremiumStore,
@@ -39,7 +31,6 @@ const PremiumBecomeLegend: Component<{
   isOG?: boolean,
 }> = (props) => {
   const intl = useIntl()
-  const navigate = useNavigate();
 
   const rate = () => (props.data.exchangeRateUSD || 1) / 100_000_000;
   const [amount, setAmount] = createSignal(0);
@@ -72,14 +63,15 @@ const PremiumBecomeLegend: Component<{
     }
   }
 
-  const onSlide = (vals: number[]) => {
-    let a = vals[0];
+  const selectDonation = (donation: [string, number]) => {
+    let [c, a] = donation;
 
-    if (a > 99_999_999) {
-      a = 100_000_000;
+    if (c === 'USD') {
+      setAmount(() => Math.floor(a / rate()));
+      return;
     }
 
-    setAmount(Math.floor(a));
+    setAmount(Math.floor(a * 100_000_000));
   }
 
   return (
@@ -111,28 +103,30 @@ const PremiumBecomeLegend: Component<{
         amountBTC={subscription().amounts.sats / 100_000_000}
       />
 
-      <div class={styles.legendarySliderHolder}>
-        <AdvancedSearchSlider
-          value={[amount()]}
-          min={Math.floor(1_000 / rate())}
-          // min={Math.floor(5 / rate())}
-          max={100_000_000}
-          onSlide={onSlide}
-          hideInput={true}
-          step={1}
-        />
-        <div class={styles.legendarySliderLimits}>
-          <div>$1000</div>
-          <div>1BTC</div>
+      <div class={styles.donation}>
+        <div class={styles.donationCaption}>
+          Select donation amount
         </div>
+        <div class={styles.donationPicker}>
+          <For each={donations}>
+            {donation => (
+              <ButtonFlip2
+                onClick={() => selectDonation(donation)}
+                when={donation[0] === 'USD' ? subscription().amounts.usd === donation[1] : subscription().amounts.sats === donation[1] * 100_000_000}
+              >
+                {donation[0] === 'USD' ? '$' : ''}{donation[1].toLocaleString()}{donation[0] === 'BTC' ? ' BTC' : ''}
+              </ButtonFlip2>
+            )}
+          </For>
+        </div>
+      </div>
 
-        <div class={styles.legendaryPay}>
-          <ButtonPremium
-            onClick={() => props.onBuyLegend && props.onBuyLegend(subscription().amounts.usd)}
-          >
-            {intl.formatMessage(t.actions.payNow)}
-          </ButtonPremium>
-        </div>
+      <div class={styles.legendaryPay}>
+        <ButtonPremium
+          onClick={() => props.onBuyLegend && props.onBuyLegend(subscription().amounts.usd)}
+        >
+          {intl.formatMessage(t.actions.payNow)}
+        </ButtonPremium>
       </div>
 
     </div>

@@ -1466,7 +1466,7 @@
     justify-content: center;
     align-items: center;
     gap: 16px;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 
     .userName {
       display: flex;
@@ -1476,6 +1476,35 @@
       font-weight: 700;
       line-height: 24px;
       color: var(--text-primary);
+    }
+  }
+}
+
+.donation {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: 32px;
+
+  .donationCaption {
+    width: 100%;
+    color: var(--text-tertiary);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .donationPicker {
+    display: grid;
+    grid-template-columns: 95px 95px 95px;
+    grid-gap: 10px;
+
+    >button {
+      width: 100%;
     }
   }
 }
@@ -1496,14 +1525,15 @@
     font-weight: 600;
     line-height: 16px;
   }
+}
 
-  .legendaryPay {
+
+.legendaryPay {
+  width: 100%;
+  margin-top: 48px;
+
+  button {
     width: 100%;
-    margin-top: 48px;
-
-    button {
-      width: 100%;
-    }
   }
 }
 
