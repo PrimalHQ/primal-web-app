@@ -45,7 +45,10 @@ const DirectMessages: Component = () => {
 
   const changeRelation = async (relation: string) => {
     if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
-    if (relation === dms.lastConversationRelation) return;
+    if (
+      relation === dms.lastConversationRelation &&
+      dms?.dmContacts[relation as UserRelation].length > 0
+    ) return;
 
     dms.actions.setDmRelation2(relation as UserRelation);
 
