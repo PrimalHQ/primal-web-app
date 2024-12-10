@@ -34,6 +34,8 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
 import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
 import { Transition } from 'solid-transition-group';
+import { isIOS } from '../components/BannerIOS/BannerIOS';
+import { isAndroid } from '@kobalte/utils';
 
 
 const Home: Component = () => {
@@ -127,11 +129,18 @@ const Home: Component = () => {
   return (
     <div class={styles.homeContent}>
       <PageTitle title={intl.formatMessage(branding)} />
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
+
+      <Show when={!isIOS() && !isAndroid()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
+
+        <StickySidebar>
+          <HomeSidebar />
+        </StickySidebar>
+      </Show>
 
       <div class={styles.normalCentralHeader}>
         <HomeHeader
@@ -146,9 +155,6 @@ const Home: Component = () => {
         <HomeHeaderPhone />
       </div>
 
-      <StickySidebar>
-        <HomeSidebar />
-      </StickySidebar>
 
       <div class={styles.homeFeed}>
         <Transition name="slide-fade">

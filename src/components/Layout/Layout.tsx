@@ -29,6 +29,9 @@ import LoginModal from '../LoginModal/LoginModal';
 import { unwrap } from 'solid-js/store';
 import { followWarning, forgotPin } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
+import { isAndroid } from '@kobalte/utils';
+import LayoutPhone from './LayoutPhone';
+import LayoutDesktop from './LayoutDesktop';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -42,14 +45,6 @@ const Layout: Component<any> = (props) => {
   const app = useAppContext();
   const settings = useSettingsContext();
   const intl = useIntl();
-
-  let container: HTMLDivElement | undefined;
-
-  const [queryParams, setQueryParams] = useSearchParams();
-
-  const showBanner = () => {
-    return queryParams.mobilebanner !== 'false';
-  };
 
   createEffect(() => {
     const newNote = document.getElementById('new_note_input');
@@ -69,18 +64,6 @@ const Layout: Component<any> = (props) => {
       newNote?.classList.remove(styles.animatedShow);
       newNoteTextArea.value = '';
     }
-  });
-
-  const onResize = () => {
-    container?.style.setProperty('height', `${window.innerHeight}px`);
-  };
-
-  onMount(() => {
-    window.addEventListener('resize', onResize);
-  });
-
-  onCleanup(() => {
-    window.removeEventListener('resize', onResize);
   });
 
   const onNewNotePosted = (result: SendNoteResult) => {
@@ -107,20 +90,10 @@ const Layout: Component<any> = (props) => {
   });
 
   createEffect(() => {
-    if (location.pathname === '/') return;
-
     if (!account?.publicKey) {
       account?.actions.checkNostrKey();
     }
   });
-
-  const containerClass = () => {
-    if (isIOS() && showBanner()) return styles.containerIOS;
-
-    if (location.pathname.startsWith('/e/naddr')) return styles.containerLF;
-
-    return styles.container;
-  }
 
   return (
     <Show
@@ -143,178 +116,135 @@ const Layout: Component<any> = (props) => {
           <ZapAnimation src={zapMD} />
         </div>
         <div id="modal" class={styles.modal}></div>
-        <BannerIOS />
-        <div id="container" ref={container} class={containerClass()}>
-          <div class={styles.leftColumn}>
-            <div>
-              <div id="branding_holder" class={styles.leftHeader}>
-                <Branding isHome={isHome()} />
-              </div>
-
-              <div class={styles.leftContent}>
-                <NavMenu />
-                <Show when={location.pathname === '/new'}>
-                  <div class={styles.overlay}></div>
-                </Show>
-              </div>
-
-              <div class={styles.leftFooter}>
-                <Show when={location.pathname !== '/new'}>
-                  <ProfileWidget />
-                </Show>
-              </div>
-            </div>
-          </div>
+        <Show
+          when={isIOS() || isAndroid()}
+          fallback={
+            <LayoutDesktop onNewNotePosted={onNewNotePosted}>
+              {props.children}
+            </LayoutDesktop>
+          }
+        >
+          <LayoutPhone onNewNotePosted={onNewNotePosted}>
+            {props.children}
+          </LayoutPhone>
+        </Show>
 
 
-          <div class={styles.centerColumn}>
-            <Show when={account?.isKeyLookupDone}>
-              <div class={styles.centerContent}>
-                <div id="new_note_input" class={styles.headerFloater}>
-                  <NewNote onSuccess={onNewNotePosted}/>
-                </div>
+        <ReactionsModal
+          noteId={app?.showReactionsModal}
+          stats={app?.reactionStats}
+          onClose={() => app?.actions.closeReactionModal()}
+        />
 
-                <div>
-                  {props.children}
-                </div>
+        <CustomZap
+          open={app?.showCustomZapModal}
+          note={app?.customZap?.note}
+          profile={app?.customZap?.profile}
+          dvm={app?.customZap?.dvm}
+          onConfirm={app?.customZap?.onConfirm}
+          onSuccess={app?.customZap?.onSuccess}
+          onFail={app?.customZap?.onFail}
+          onCancel={app?.customZap?.onCancel}
+        />
 
-                <ReactionsModal
-                  noteId={app?.showReactionsModal}
-                  stats={app?.reactionStats}
-                  onClose={() => app?.actions.closeReactionModal()}
-                />
+        <LnQrCodeModal
+          open={app?.showLnInvoiceModal}
+          lnbc={app?.lnbc?.invoice || ''}
+          onPay={app?.lnbc?.onPay}
+          onClose={app?.lnbc?.onCancel}
+        />
 
-                <CustomZap
-                  open={app?.showCustomZapModal}
-                  note={app?.customZap?.note}
-                  profile={app?.customZap?.profile}
-                  dvm={app?.customZap?.dvm}
-                  onConfirm={app?.customZap?.onConfirm}
-                  onSuccess={app?.customZap?.onSuccess}
-                  onFail={app?.customZap?.onFail}
-                  onCancel={app?.customZap?.onCancel}
-                />
+        <CashuQrCodeModal
+          open={app?.showCashuInvoiceModal}
+          cashu={app?.cashu?.invoice || ''}
+          onPay={app?.cashu?.onPay}
+          onClose={app?.cashu?.onCancel}
+        />
 
-                <LnQrCodeModal
-                  open={app?.showLnInvoiceModal}
-                  lnbc={app?.lnbc?.invoice || ''}
-                  onPay={app?.lnbc?.onPay}
-                  onClose={app?.lnbc?.onCancel}
-                />
+        <ConfirmModal
+          open={app?.showConfirmModal}
+          title={app?.confirmInfo?.title}
+          description={app?.confirmInfo?.description}
+          confirmLabel={app?.confirmInfo?.confirmLabel}
+          abortLabel={app?.confirmInfo?.abortLabel}
+          onConfirm={app?.confirmInfo?.onConfirm}
+          onAbort={app?.confirmInfo?.onAbort}
+        />
 
-                <CashuQrCodeModal
-                  open={app?.showCashuInvoiceModal}
-                  cashu={app?.cashu?.invoice || ''}
-                  onPay={app?.cashu?.onPay}
-                  onClose={app?.cashu?.onCancel}
-                />
+        <SubscribeToAuthorModal
+          author={app?.subscribeToAuthor}
+          onClose={app?.actions.closeAuthorSubscribeModal}
+          onSubscribe={app?.subscribeToTier}
+        />
 
-                <ConfirmModal
-                  open={app?.showConfirmModal}
-                  title={app?.confirmInfo?.title}
-                  description={app?.confirmInfo?.description}
-                  confirmLabel={app?.confirmInfo?.confirmLabel}
-                  abortLabel={app?.confirmInfo?.abortLabel}
-                  onConfirm={app?.confirmInfo?.onConfirm}
-                  onAbort={app?.confirmInfo?.onAbort}
-                />
-
-                <SubscribeToAuthorModal
-                  author={app?.subscribeToAuthor}
-                  onClose={app?.actions.closeAuthorSubscribeModal}
-                  onSubscribe={app?.subscribeToTier}
-                />
-
-                <EnterPinModal
-                  open={(account?.showPin || '').length > 0}
-                  valueToDecrypt={account?.showPin}
-                  onSuccess={(sec: string) => {
-                    account?.actions.setSec(sec);
-                    account?.actions.setString('showPin', '');
-                  }}
-                  onAbort={() => account?.actions.setString('showPin', '')}
-                  onForgot={() => {
-                    account?.actions.setString('showPin', '');
-                    account?.actions.setFlag('showForgot', true);
-                  }}
-                />
-                <CreateAccountModal
-                  open={account?.showGettingStarted}
-                  onAbort={() => account?.actions.setFlag('showGettingStarted', false)}
-                  onLogin={() => {
-                    account?.actions.setFlag('showGettingStarted', false);
-                    account?.actions.setFlag('showLogin', true);
-                  }}
-                />
-                <LoginModal
-                  open={account?.showLogin}
-                  onAbort={() => account?.actions.setFlag('showLogin', false)}
-                />
-                <ConfirmModal
-                  open={account?.followData.openDialog}
-                  title={intl.formatMessage(followWarning.title)}
-                  description={intl.formatMessage(followWarning.description)}
-                  confirmLabel={intl.formatMessage(followWarning.confirm)}
-                  abortLabel={intl.formatMessage(followWarning.abort)}
-                  onConfirm={async () => {
-                    if (account?.publicKey) {
-                      const data = unwrap(account?.followData)
-                      await account.actions.resolveContacts(account?.publicKey, data.following, data.date, data.tags, data.relayInfo);
-                    }
-                    account?.actions.setFollowData({
-                      tags: [],
-                      date: 0,
-                      relayInfo: '',
-                      openDialog: false,
-                      following: [],
-                    });
-                  }}
-                  onAbort={() => {
-                    account?.actions.setFollowData({
-                      tags: [],
-                      date: 0,
-                      relayInfo: '',
-                      openDialog: false,
-                      following: [],
-                    });
-                  }}
-                />
-                <ConfirmModal
-                  open={account?.showForgot}
-                  title={intl.formatMessage(forgotPin.title)}
-                  description={intl.formatMessage(forgotPin.description)}
-                  confirmLabel={intl.formatMessage(forgotPin.confirm)}
-                  abortLabel={intl.formatMessage(forgotPin.abort)}
-                  onConfirm={async () => {
-                    account?.actions.logout();
-                    account?.actions.setFlag('showForgot', false);
-                  }}
-                  onAbort={() => {
-                    account?.actions.setFlag('showForgot', false);
-                  }}
-                />
-              </div>
-            </Show>
-          </div>
-
-
-          <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms') ? styles.messagesColumn : ''}`}>
-            <div>
-              <Show
-                when={!location.pathname.startsWith('/asearch')}
-              >
-                <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
-                  <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
-                  </div>
-                </div>
-              </Show>
-              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/asearch') ? styles.exploreHeader : ''}`}>
-                <div id="right_sidebar">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <EnterPinModal
+          open={(account?.showPin || '').length > 0}
+          valueToDecrypt={account?.showPin}
+          onSuccess={(sec: string) => {
+            account?.actions.setSec(sec);
+            account?.actions.setString('showPin', '');
+          }}
+          onAbort={() => account?.actions.setString('showPin', '')}
+          onForgot={() => {
+            account?.actions.setString('showPin', '');
+            account?.actions.setFlag('showForgot', true);
+          }}
+        />
+        <CreateAccountModal
+          open={account?.showGettingStarted}
+          onAbort={() => account?.actions.setFlag('showGettingStarted', false)}
+          onLogin={() => {
+            account?.actions.setFlag('showGettingStarted', false);
+            account?.actions.setFlag('showLogin', true);
+          }}
+        />
+        <LoginModal
+          open={account?.showLogin}
+          onAbort={() => account?.actions.setFlag('showLogin', false)}
+        />
+        <ConfirmModal
+          open={account?.followData.openDialog}
+          title={intl.formatMessage(followWarning.title)}
+          description={intl.formatMessage(followWarning.description)}
+          confirmLabel={intl.formatMessage(followWarning.confirm)}
+          abortLabel={intl.formatMessage(followWarning.abort)}
+          onConfirm={async () => {
+            if (account?.publicKey) {
+              const data = unwrap(account?.followData)
+              await account.actions.resolveContacts(account?.publicKey, data.following, data.date, data.tags, data.relayInfo);
+            }
+            account?.actions.setFollowData({
+              tags: [],
+              date: 0,
+              relayInfo: '',
+              openDialog: false,
+              following: [],
+            });
+          }}
+          onAbort={() => {
+            account?.actions.setFollowData({
+              tags: [],
+              date: 0,
+              relayInfo: '',
+              openDialog: false,
+              following: [],
+            });
+          }}
+        />
+        <ConfirmModal
+          open={account?.showForgot}
+          title={intl.formatMessage(forgotPin.title)}
+          description={intl.formatMessage(forgotPin.description)}
+          confirmLabel={intl.formatMessage(forgotPin.confirm)}
+          abortLabel={intl.formatMessage(forgotPin.abort)}
+          onConfirm={async () => {
+            account?.actions.logout();
+            account?.actions.setFlag('showForgot', false);
+          }}
+          onAbort={() => {
+            account?.actions.setFlag('showForgot', false);
+          }}
+        />
         <NoteContextMenu
           open={app?.showNoteContextMenu}
           onClose={app?.actions.closeContextMenu}

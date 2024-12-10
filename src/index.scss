@@ -225,60 +225,20 @@ body::after{
     url(./assets/icons/purple_ostrich.svg)
     url(./assets/icons/video.svg)
     url(./assets/icons/gallery.svg)
-    url(./assets/icons/lightning_white.svg);
-}
-
-.reply_icon {
-  -webkit-mask: url(./assets/icons/feed_reply.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
-}
-.reply_icon {
-  -webkit-mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_reply_fill.svg) no-repeat 0 / 100%;
-}
-.repost_icon {
-  -webkit-mask: url(./assets/icons/feed_repost.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
-}
-.repost_icon {
-  -webkit-mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_repost_fill.svg) no-repeat 0 / 100%;
-}
-.zap_icon {
-  -webkit-mask: url(./assets/icons/feed_zap.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
-}
-.zap_icon {
-  -webkit-mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_zap_fill.svg) no-repeat 0 / 100%;
-}
-.like_icon {
-  -webkit-mask: url(./assets/icons/feed_like.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
-}
-.like_icon {
-  -webkit-mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/feed_like_fill.svg) no-repeat 0 / 100%;
-}
-.attach_icon {
-  -webkit-mask: url(./assets/icons/attach_media.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/attach_media.svg) no-repeat 0 / 100%;
-}
-.emoji_icon {
-  -webkit-mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/emoji.svg) no-repeat 0 / 100%;
-}
-.latest_icon {
-  -webkit-mask: url(./assets/icons/latest.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/latest.svg) no-repeat 0 / 100%;
-}
-.heart_icon {
-  -webkit-mask: url(./assets/icons/heart.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/heart.svg) no-repeat 0 / 100%;
-}
-.weather_icon {
-  -webkit-mask: url(./assets/icons/weather.svg) no-repeat 0 / 100%;
-  mask: url(./assets/icons/weather.svg) no-repeat 0 / 100%;
+    url(./assets/icons/lightning_white.svg)
+    url(./assets/icons/feed_reply.svg)
+    url(./assets/icons/feed_reply_fill.svg)
+    url(./assets/icons/feed_repost.svg)
+    url(./assets/icons/feed_repost_fill.svg)
+    url(./assets/icons/feed_zap.svg)
+    url(./assets/icons/feed_zap_fill.svg)
+    url(./assets/icons/feed_like.svg)
+    url(./assets/icons/feed_like_fill.svg)
+    url(./assets/icons/attach_media.svg)
+    url(./assets/icons/emoji.svg)
+    url(./assets/icons/latest.svg)
+    url(./assets/icons/heart.svg)
+    url(./assets/icons/weather.svg);
 }
 
 .bordered {

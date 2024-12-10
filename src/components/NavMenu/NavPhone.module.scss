@@ -1,0 +1,110 @@
+.navMenu {
+  width: 100dvw;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  padding-inline: 8px;
+
+  > button {
+    margin-bottom: 0px;
+  }
+
+  .subMenuTrigger {
+    background: none;
+    margin: 0;
+    padding: 0;
+    outline: none;
+    border: none;
+    width: 44px;
+    height: 44px;
+
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 0 0 8px 8px;
+
+    &[aria-expanded="true"] {
+      background-color: var(--devider);
+    }
+  }
+}
+
+.subMenuContent {
+  background-color: var(--devider);
+  z-index: 100;
+  padding: 4px;
+  border-radius: 8px 8px 0 8px;
+
+  &:focus {
+    border: none;
+    outline: none;
+  }
+}
+
+.subMenuItem {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 0px;
+  display: flex;
+  gap: 12px;
+
+  color: var(--text-secondary);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.subMenuIcon {
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url('../../assets/icons/context.svg') no-repeat 0/100%;
+  mask: url('../../assets/icons/context.svg') no-repeat 0/100%;
+}
+
+@mixin iconNav($url, $color) {
+  width: 20px;
+  height: 20px;
+  background-color: $color;
+  -webkit-mask: $url no-repeat 0/100%;
+  mask: $url no-repeat 0/100%;
+}
+
+.homeIcon {
+  @include iconNav(url(../../assets/icons/nav/home.svg), var(--text-secondary));
+}
+.readsIcon {
+  @include iconNav(url(../../assets/icons/nav/long.svg), var(--text-secondary));
+}
+.exploreIcon {
+  @include iconNav(url(../../assets/icons/nav/explore.svg), var(--text-secondary));
+}
+.messagesIcon {
+  @include iconNav(url(../../assets/icons/nav/messages.svg), var(--text-secondary));
+}
+.notificationsIcon {
+  @include iconNav(url(../../assets/icons/nav/notifications.svg), var(--text-secondary));
+}
+.downloadIcon {
+  @include iconNav(url(../../assets/icons/nav/downloads.svg), var(--text-secondary));
+}
+.premiumIcon {
+  @include iconNav(url(../../assets/icons/nav/premium.svg), var(--text-secondary));
+}
+.settingsIcon {
+  @include iconNav(url(../../assets/icons/nav/settings.svg), var(--text-secondary));
+}
+.bookmarkIcon {
+  @include iconNav(url(../../assets/icons/nav/bookmarks.svg), var(--text-secondary));
+}

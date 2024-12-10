@@ -46,6 +46,13 @@
     }
   }
 
+  &.phoneNavLink {
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    justify-content: center;
+  }
+
   .homeIcon {
     @include iconNav(url(../../assets/icons/nav/home.svg), var(--text-secondary));
   }
@@ -187,6 +194,34 @@
     a {
       .label {
         display: none;
+      }
+    }
+
+    &.subMenu {
+      a {
+        >div {
+          background-color: var(--text-secondary);
+          border-radius: 8px;
+        }
+
+        .label {
+          display: flex;
+          color: var(--text-secondary);
+          background: none;
+          font-size: 17px;
+          font-weight: 400;
+          line-height: 20px;
+        }
+
+        &:focus {
+          >div {
+            background-color: var(--text-primary);
+          }
+
+          .label {
+            background: var(--text-primary);
+          }
+        }
       }
     }
   }

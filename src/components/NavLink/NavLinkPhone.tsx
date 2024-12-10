@@ -12,6 +12,7 @@ const NavLink: Component<{
   bubble?: () => number,
   hiddenOnSmallScreens?: boolean,
   isPhone?: boolean,
+  isSubMenu?: boolean,
 }> = (props) => {
   const location = useLocation();
 
@@ -37,7 +38,7 @@ const NavLink: Component<{
   }
 
     return (
-      <div id={props.id} class={`${styles.navLink} ${props.isPhone ? styles.phoneNavLink : ''}`}>
+      <div id={props.id} class={`${styles.navLink} ${props.isPhone ? styles.phoneNavLink : ''} ${props.isSubMenu ? styles.subMenu : ''}`}>
         <A
           href={props.to}
           activeClass={styles.active}
