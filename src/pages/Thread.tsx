@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, JSXElement, Match, onMount, Resource, Switch } from 'solid-js';
+import { batch, Component, createEffect, createSignal, JSXElement, Match, onMount, Resource, Switch } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Search from '../components/Search/Search';
@@ -20,7 +20,7 @@ import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { useNavigate, useParams } from '@solidjs/router';
+import { useLocation, useNavigate, useParams } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
 import { nip19 } from '../lib/nTools';
@@ -42,6 +42,7 @@ const EventPage: Component = () => {
   const params = useParams();
   const app = useAppContext();
   const navigate = useNavigate();
+  const loc = useLocation();
 
   const [evId, setEvId] = createSignal<string>('');
 
@@ -100,6 +101,7 @@ const EventPage: Component = () => {
     render(params.id, params.identifier);
   })
 
+
   const render = async (id: string | undefined, identifier: string | undefined) => {
     // const { id, identifier } = params;
 
@@ -127,14 +129,18 @@ const EventPage: Component = () => {
           return;
         }
 
-        setEvId(() => id);
-        setComponent(() => 'read');
+        batch(() => {
+          setComponent(() => 'read');
+          setEvId(() => id);
+        });
         return;
       }
 
       if (id.startsWith('note')) {
-        setEvId(() => id);
-        setComponent(() => 'note');
+        batch(() => {
+          setComponent(() => 'note');
+          setEvId(() => id);
+        });
         return;
       }
 

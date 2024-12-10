@@ -132,6 +132,8 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
   const wordCounts = page.wordCount || {};
   const topZaps = page.topZaps[note.id] || [];
 
+  const pageUsers = Object.entries(page.users).reduce((acc, [k, u]) => ({ ...acc, [k]: { ...convertToUser(u, k) }}), {})
+
   let mentionedNotes: Record<string, PrimalNote> = {};
   let mentionedUsers: Record<string, PrimalUser> = {};
   let mentionedHighlights: Record<string, any> = {};
@@ -184,7 +186,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         },
         content: mention.content,
         user: mentionedUsers[mention.pubkey],
-        mentionedUsers,
+        mentionedUsers: pageUsers,
         pubkey: mention.pubkey,
         id: mention.id,
         noteId: nip19.noteEncode(mention.id),
@@ -220,7 +222,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         coordinate,
         msg: mention,
         mentionedNotes,
-        mentionedUsers,
+        mentionedUsers: pageUsers,
         wordCount,
         noteActions,
         likes: stat?.likes || 0,
