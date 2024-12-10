@@ -205,7 +205,7 @@ const NoteContextMenu: Component<{
       icon: 'copy_raw_data',
     },
     {
-      label: intl.formatMessage(tActions.noteContext.breadcast),
+      label: intl.formatMessage(tActions.noteContext.broadcast),
       action: broadcastNote,
       icon: 'broadcast',
     },
@@ -218,8 +218,17 @@ const NoteContextMenu: Component<{
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
     const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isFollowed = account?.following.includes(note()?.post.pubkey);
 
     return [
+      {
+        label: isFollowed? intl.formatMessage(tActions.noteContext.unFollowAuthor): intl.formatMessage(tActions.noteContext.followAuthor),
+        action: () => {
+          isFollowed? account?.actions.removeFollow(note()?.post.pubkey) : account?.actions.addFollow(note()?.post.pubkey);
+          props.onClose()
+        },
+        icon: 'default_avatar',
+      },
       {
         label: isMuted ?  intl.formatMessage(tActions.noteContext.unmuteAuthor) : intl.formatMessage(tActions.noteContext.muteAuthor),
         action: () => {
@@ -268,7 +277,6 @@ const NoteContextMenu: Component<{
         }}
         onAbort={() => setConfirmMuteUser(false)}
       />
-
       <PrimalMenu
         id={`note_context_${note()?.id}`}
         items={noteContext()}
