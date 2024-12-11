@@ -187,7 +187,7 @@ const EditBox: Component<{
 
 
   const renderMessage = () => {
-    const text = DOMPurify.sanitize(parsedMessage());
+    const text = DOMPurify.sanitize(parsedMessage(), {ADD_TAGS: ['iframe']});
 
     if (!noteHasInvoice(text)) {
       return (
@@ -1269,6 +1269,7 @@ const EditBox: Component<{
         )
       )
     );
+
 
     parseNaddr(content);
     parseNpubLinks(content);
