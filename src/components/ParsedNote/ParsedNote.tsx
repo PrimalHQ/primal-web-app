@@ -1080,7 +1080,7 @@ const ParsedNote: Component<{
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
 
-    if(!mention) return <></>;
+    if(!mention || props.veryShort) return <></>;
 
     return (
       <div class={styles.articlePreview}>
@@ -1094,6 +1094,8 @@ const ParsedNote: Component<{
   };
 
   const renderNoteMention = (item: NoteContent, index?: number) => {
+
+    if (props.veryShort) return <></>;
 
     return <For each={item.tokens}>
       {(token) => {
