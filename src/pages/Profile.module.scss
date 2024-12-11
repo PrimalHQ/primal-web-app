@@ -480,12 +480,15 @@
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
+
   .verified {
     display: flex;
     align-items: center;
     .nip05 {
-      width: 100%;
+      max-width: 400px;
+      text-overflow: ellipsis;
       overflow: hidden;
+      white-space: nowrap;
     }
 
     .followsBadge {
