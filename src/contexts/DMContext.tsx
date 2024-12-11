@@ -140,15 +140,15 @@ export const DMProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { replace: boolean }) => {
-  const replace = opts?.replace || false;
+const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { update: 'add' | 'clear' | 'replace' }) => {
+  const replace = opts?.update || 'add';
 
   const existingContacts = store.dmContacts[relation];
   const existingPubkeys = existingContacts.map(c => c.pubkey);
 
-  let sorted = [];
+  let sorted: DMContact[] = [];
 
-  if (replace) {
+  if (replace === 'replace') {
     sorted = [ ...contacts ].
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
 
@@ -156,13 +156,16 @@ const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { r
 
     sorted = [ ...extra, ...sorted];
   }
-  else {
+  else if (replace === 'add') {
     const filtered = contacts.filter(c => !existingPubkeys.includes(c.pubkey));
 
     sorted = [...filtered].
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
 
     sorted = [...existingContacts, ...sorted]
+  } else {
+    sorted = [ ...contacts ].
+      sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
   }
 
   updateStore('dmContacts', relation, () => [ ...sorted ]);
@@ -199,7 +202,24 @@ const setDmRelation2 = (relation: UserRelation) => {
   saveLastDMRelation(account.publicKey, relation);
 
 
-  // getContacts(relation);
+  replaceContacts(relation);
+}
+
+const replaceContacts = async (relation: UserRelation) => {
+
+  const existing = store.dmContacts[relation] || [];
+
+  const { dmContacts, paging } = await fetchDMContacts(
+    account?.publicKey,
+    relation,
+    `dm_contacts_${relation}_${APP_ID}`,
+    {
+      limit: existing.length,
+    }
+  );
+
+  updateStore('contactsPaging', () => ({ ...paging }));
+  setDmContacts(dmContacts, relation, { update: 'clear' });
 }
 
 const refreshContacts = async (relation: UserRelation) => {
@@ -216,7 +236,7 @@ const refreshContacts = async (relation: UserRelation) => {
   );
 
   updateStore('contactsPaging', () => ({ ...paging }));
-  setDmContacts(dmContacts, relation, { replace: true });
+  setDmContacts(dmContacts, relation, { update: 'replace' });
 }
 
 const getContacts = async (relation: UserRelation) => {
@@ -238,7 +258,7 @@ const getContacts = async (relation: UserRelation) => {
   );
 
   updateStore('contactsPaging', () => ({ ...paging }));
-  return setDmContacts(dmContacts, relation, { replace: true });
+  return setDmContacts(dmContacts, relation, { update: 'replace' });
 }
 
 const getContactsNextPage = async (relation: UserRelation) => {
