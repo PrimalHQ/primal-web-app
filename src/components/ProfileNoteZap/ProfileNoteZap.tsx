@@ -96,7 +96,7 @@ const ProfileNoteZap: Component<{
           </div>
         </div>
 
-        <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.receiver}>
+        <A href={app?.actions.profileLink(userNpub(props.zap.reciver)) || ''} class={styles.receiver}>
           <Avatar size="vs2" user={props.zap.reciver} />
         </A>
       </div>
