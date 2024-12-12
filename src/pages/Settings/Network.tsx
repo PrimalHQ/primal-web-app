@@ -189,27 +189,6 @@ const Network: Component = () => {
       </PageCaption>
 
       <div class={styles.settingsContent}>
-        <div class={styles.settingsCaption}>
-          <CheckBox2
-            id='proxyEvents'
-            label=""
-            onChange={() => {settings?.actions.setProxyThroughPrimal(!account?.proxyThroughPrimal)}}
-            checked={account?.proxyThroughPrimal}
-          />
-          <span>{intl.formatMessage(t.network.proxyEvents)}</span>
-          <HelpTip zIndex={1_000}>
-            <span>
-              {intl.formatMessage(t.network.proxyDescription)}
-            </span>
-          </HelpTip>
-        </div>
-
-        <div class={styles.moderationDescription}>
-          {intl.formatMessage(t.network.proxyDescription)}
-        </div>
-      </div>
-
-      <div class={styles.settingsContent}>
         <div class={`${styles.bigCaption}`}>
           {intl.formatMessage(t.network.cachingService)}
         </div>
@@ -368,9 +347,31 @@ const Network: Component = () => {
             {intl.formatMessage(tErrors.invalidRelayUrl)}
           </div>
         </Show>
-
-        <div style="height: 48px"></div>
       </div>
+
+
+      <div class={styles.settingsContent}>
+        <div class={styles.settingsCaption}>
+          <CheckBox2
+            id='proxyEvents'
+            label=""
+            onChange={() => {settings?.actions.setProxyThroughPrimal(!account?.proxyThroughPrimal)}}
+            checked={account?.proxyThroughPrimal}
+          />
+          <span>{intl.formatMessage(t.network.proxyEvents)}</span>
+          <HelpTip zIndex={1_000}>
+            <span>
+              {intl.formatMessage(t.network.proxyDescription)}
+            </span>
+          </HelpTip>
+        </div>
+
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.network.proxyDescription)}
+        </div>
+      </div>
+
+      <div style="height: 64px"></div>
 
       <ConfirmModal
         open={confirmRemoveRelay().length > 0}
