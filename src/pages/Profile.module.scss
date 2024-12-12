@@ -363,12 +363,12 @@
     font-size: 20px;
     line-height: 23px;
     font-weight: 700;
+    max-width: 220px;
 
     overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    line-clamp: 1;
-    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .followsBadge {
