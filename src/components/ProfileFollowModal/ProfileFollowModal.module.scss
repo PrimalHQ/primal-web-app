@@ -7,6 +7,10 @@
   height: 552px;
   background-color: var(--background-input);
   border-radius: var(--border-radius-big);
+
+  @media only screen and (max-width: 720px) {
+    width: 100dvw;
+  }
 }
 
 .tabContent {
