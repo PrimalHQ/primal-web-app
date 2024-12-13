@@ -2,8 +2,9 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
-import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "../types/primal";
+import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
+import { parseBolt11 } from "../utils";
 
 
 export const noActions = (id: string) => ({
@@ -138,6 +139,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
   let mentionedUsers: Record<string, PrimalUser> = {};
   let mentionedHighlights: Record<string, any> = {};
   let mentionedArticles: Record<string, PrimalArticle> = {};
+  let mentionedZaps: Record<string, PrimalZap> = {};
 
   for (let i = 0;i<mentionIds.length;i++) {
     let mentionId = mentionIds[i];
@@ -270,6 +272,57 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         event: { ...mention },
       }
     }
+
+    if ([Kind.Zap].includes(mention.kind)) {
+
+      const bolt11 = (mention.tags.find(t => t[0] === 'bolt11') || [])[1];
+      const zapEvent = JSON.parse((mention.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+      const senderPubkey = zapEvent.pubkey as string;
+      const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+
+      let zappedId = '';
+      let zappedKind: number = 0;
+
+      const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+      const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+      const zapTagP = zapEvent.tags.find((t: string[]) => t[0] === 'p');
+
+      if (zapTagA) {
+        const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
+        zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+
+        const article = page.reads.find(a => a.id === zappedId);
+        zappedKind = article?.kind || 0;
+      }
+      else if (zapTagE) {
+        zappedId = zapTagE[1];
+
+        const article = page.reads.find(a => a.id === zappedId);
+        const note = page.notes.find(n => n.id === zappedId);
+
+        zappedKind = article?.kind || note?.kind || 0;
+      }
+      else if (zapTagP) {
+        zappedId = zapTagP[1];
+
+        zappedKind = Kind.Metadata;
+      }
+
+      const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
+      const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;
+
+      mentionedZaps[mentionId] = {
+        id: mention.id,
+        message: mention.content || '',
+        amount: parseBolt11(bolt11) || 0,
+        sender,
+        reciver,
+        created_at: mention.created_at,
+        zappedId,
+        zappedKind,
+      };
+    }
   }
 
   if (userMentionIds && userMentionIds.length > 0) {
@@ -294,6 +347,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     mentionedArticles,
     mentionedUsers,
     mentionedHighlights,
+    mentionedZaps,
   };
 }
 
@@ -390,6 +444,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       mentionedArticles,
       mentionedUsers,
       mentionedHighlights,
+      mentionedZaps,
     } = extractMentions(page, note);
 
     const newNote: PrimalNote = {
@@ -420,6 +475,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       mentionedUsers,
       mentionedHighlights,
       mentionedArticles,
+      mentionedZaps,
       replyTo: replyTo && replyTo[1],
       tags: note.tags,
       id: note.id,
@@ -472,6 +528,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedArticles,
       mentionedUsers,
       mentionedHighlights,
+      mentionedZaps,
     } = extractMentions(page, read);
 
     const published = read.tags.reduce<number>((acc, t) => {
@@ -503,6 +560,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedUsers,
       mentionedHighlights,
       mentionedArticles,
+      mentionedZaps,
       wordCount,
       noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
       likes: stat?.likes || 0,

@@ -25,13 +25,14 @@ import {
   isWebmVideo,
   isYouTube,
 } from '../../lib/notes';
-import { truncateNpub, userName } from '../../stores/profile';
+import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
   Component, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
   NostrEventContent,
+  NostrUserContent,
   NostrUserZaps,
   PrimalArticle,
   PrimalNote,
@@ -1151,6 +1152,11 @@ const ParsedNote: Component<{
             ...(props.note.mentionedUsers || {}),
           }
 
+          const mentionedZaps = {
+            ...(rn.mentionedZaps || {}),
+            ...(props.note.mentionedZaps || {}),
+          }
+
           if (kind === undefined) {
             let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
@@ -1234,64 +1240,94 @@ const ParsedNote: Component<{
           }
 
           if (kind === Kind.Zap) {
-            const zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
+            let zapObject = mentionedZaps[hex] as PrimalZap;
 
-            if (zapContent) {
-              const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
-              const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+            if (zapObject) {
 
-              let zappedId = '';
-              let zappedKind: number = 0;
+              let zapSubject;
 
-              const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
-              const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
-
-              let zapSubject: PrimalArticle | PrimalUser | PrimalNote = mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]];
-
-              if (zapTagA) {
-                const [kind, pubkey, identifier] = zapTagA[1].split(':');
-
-                zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
-
-                const article = mentionedArticles[zappedId];
-
-                if (article) {
-                  zappedKind = Kind.LongForm;
-                  zapSubject = article;
-                } else {
-                  zappedKind = Kind.Metadata;
-                }
+              if (zapObject.zappedKind === Kind.LongForm) {
+                zapSubject = mentionedArticles[zapObject.zappedId!];
               }
-              else if (zapTagE) {
-                zappedId = zapTagE[1];
-
-                const article = mentionedArticles[zappedId];
-                const note = mentionedNotes[zappedId];
-
-                if (article) {
-                  zappedKind = Kind.LongForm;
-                  zapSubject = article;
-                } else if (note) {
-                  zappedKind = Kind.Text;
-                  zapSubject = note;
-                } else {
-                  zappedKind = Kind.Metadata;
-                }
+              if (zapObject.zappedKind === Kind.Text) {
+                zapSubject = mentionedNotes[zapObject.zappedId!];
+              }
+              if (zapObject.zappedKind === Kind.Metadata) {
+                zapSubject = mentionedUsers[zapObject.zappedId!];
               }
 
-              const zap: PrimalZap = {
-                id: zapContent.id || '',
-                message: zapEvent.content || '',
-                amount: parseBolt11(bolt11) || 0,
-                sender: mentionedUsers[zapEvent.pubkey],
-                reciver: mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]],
-                created_at: zapContent.created_at,
-                zappedId,
-                zappedKind,
-              };
+              link = <ProfileNoteZap zap={zapObject} subject={zapSubject} />
+            } else {
+              let zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
 
-              link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+              if (zapContent) {
+                const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+                const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+
+                let zappedId = '';
+                let zappedKind: number = 0;
+
+                const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+                const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+
+                let zapSubject: PrimalArticle | PrimalUser | PrimalNote = mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]];
+
+                if (zapTagA) {
+                  const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
+                  zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+
+                  const article = mentionedArticles[zappedId];
+
+                  if (article) {
+                    zappedKind = Kind.LongForm;
+                    zapSubject = article;
+                  } else {
+                    zappedKind = Kind.Metadata;
+                  }
+                }
+                else if (zapTagE) {
+                  zappedId = zapTagE[1];
+
+                  const article = mentionedArticles[zappedId];
+                  const note = mentionedNotes[zappedId];
+
+                  if (article) {
+                    zappedKind = Kind.LongForm;
+                    zapSubject = article;
+                  } else if (note) {
+                    zappedKind = Kind.Text;
+                    zapSubject = note;
+                  } else {
+                    zappedKind = Kind.Metadata;
+                  }
+                }
+
+                const user = (pk: string) => {
+                  if (mentionedUsers[pk]) return mentionedUsers[pk];
+
+                  const usr = (app?.events[Kind.Metadata] || []).find(m => m.pubkey === pk) as NostrUserContent;
+
+                  if (usr) return convertToUser(usr, usr.pubkey)
+                }
+
+                const zap: PrimalZap = {
+                  id: zapContent.id || '',
+                  message: zapEvent.content || '',
+                  amount: parseBolt11(bolt11) || 0,
+                  sender: user(zapEvent.pubkey),
+                  reciver: user(zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]),
+                  created_at: zapContent.created_at,
+                  zappedId,
+                  zappedKind,
+                };
+
+
+                link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+              }
+
             }
+
 
           }
 

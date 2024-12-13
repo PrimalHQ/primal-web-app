@@ -329,6 +329,12 @@ const handleVerifiedUsersEvent = (content: NostrEventContent, subId?: string) =>
 
   const events = store.events[content.kind] || [];
 
+  if (content.kind === Kind.Mentions) {
+    const wrappedEvent = JSON.parse(content.content) as NostrEventContent;
+
+    content = { ...wrappedEvent };
+  }
+
   if (events.length === 0) {
     updateStore(
       'events',

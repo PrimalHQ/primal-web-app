@@ -167,6 +167,7 @@ export type NostrFeedRange = {
   kind: Kind.FeedRange,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -174,6 +175,7 @@ export type NostrMediaInfo = {
   kind: Kind.MediaInfo,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -181,6 +183,7 @@ export type NostrMediaUploaded = {
   kind: Kind.Uploaded,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -188,6 +191,7 @@ export type NostrLinkMetadata = {
   kind: Kind.LinkMetadata,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -195,6 +199,7 @@ export type NostrFilteringReason = {
   kind: Kind.FilteringReason,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -202,6 +207,7 @@ export type NostrUserFollwerCounts = {
   kind: Kind.UserFollowerCounts,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -218,6 +224,7 @@ export type NostrSuggestedUsers = {
   kind: Kind.SuggestedUsersByCategory,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -226,6 +233,7 @@ export type PrimalUserRelays = {
   content: string,
   created_at?: number,
   tags: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -234,6 +242,7 @@ export type NostrBookmarks = {
   content: string,
   created_at?: number,
   tags: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -242,6 +251,7 @@ export type NostrRelayHint = {
   content: string,
   created_at?: number,
   tags: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -250,6 +260,7 @@ export type NostrZapInfo = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -258,6 +269,7 @@ export type NostrQuoteStatsInfo = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -266,6 +278,7 @@ export type NostrWordCount = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -274,6 +287,7 @@ export type NostrTierList = {
   content: string,
   created_at?: number,
   tags?: string[][],
+  pubkey?: string,
   id?: string,
 };
 
@@ -282,6 +296,7 @@ export type NostrTier = {
   content: string,
   created_at?: number,
   id: string,
+  pubkey?: string,
   tags?: string[][],
 };
 
@@ -290,6 +305,7 @@ export type NostrSubscribe = {
   content: string,
   created_at?: number,
   id: string,
+  pubkey?: string,
   tags?: string[][],
 };
 
@@ -298,6 +314,7 @@ export type NostrUnsubscribe = {
   content: string,
   created_at?: number,
   id: string,
+  pubkey?: string,
   tags?: string[][],
 };
 
@@ -323,6 +340,7 @@ export type NostrDVMMetadata = {
   kind: Kind.DVMMetadata,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -330,6 +348,7 @@ export type NostrTopicStats = {
   kind: Kind.NoteTopicStat,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -337,6 +356,7 @@ export type NostrDVMFollowsActions = {
   kind: Kind.DVMFollowsActions,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -344,6 +364,7 @@ export type NostrUserFollowerIncrease = {
   kind: Kind.UserFollowerIncrease,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -351,6 +372,7 @@ export type NostrPrimalVanityNames = {
   kind: Kind.VerifiedUsersDict,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -358,6 +380,7 @@ export type NostrPrimalExchangeRate = {
   kind: Kind.ExchangeRate,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -365,6 +388,7 @@ export type NostrPrimalMediaStats = {
   kind: Kind.MediaStats,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -372,6 +396,7 @@ export type NostrPrimalMediaList= {
   kind: Kind.MediaList,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -379,6 +404,7 @@ export type NostrContactList= {
   kind: Kind.ContentStats,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -386,6 +412,7 @@ export type NostrOrderHistory= {
   kind: Kind.OrderHistory,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -393,6 +420,7 @@ export type NostrLegendCustomization= {
   kind: Kind.LegendCustomization,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -400,6 +428,7 @@ export type NostrBroadcastStatus= {
   kind: Kind.BroadcastStatus,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -407,6 +436,7 @@ export type NostrMembershipCohortInfo= {
   kind: Kind.MembershipCohortInfo,
   content: string,
   created_at?: number,
+  pubkey?: string,
   id?: string,
 };
 
@@ -758,6 +788,7 @@ export type PrimalNote = {
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
   mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
   replyTo?: string,
   id: string,
@@ -783,6 +814,7 @@ export type PrimalArticle = {
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedArticles?: Record<string, PrimalArticle>,
   mentionedUsers?: Record<string, PrimalUser>,
+  mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
   replyTo?: string,
   id: string,
