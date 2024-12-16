@@ -265,6 +265,10 @@
   justify-content: flex-start;
   width: 524px;
   position: relative;
+
+  @media only screen and (max-width: 720px) {
+    width: calc(100% - 70px);
+  }
   .userName {
     flex-shrink: 1;
     text-overflow: ellipsis;
@@ -319,6 +323,10 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 18px;
+
+    @media only screen and (max-width: 720px) {
+      max-width: 120px;
+    }
   }
 }
 
@@ -958,10 +966,6 @@
         overflow: hidden;
       }
     }
-  }
-
-  .authorInfo{
-    width: 100%;
   }
 
   .notePrimary {
