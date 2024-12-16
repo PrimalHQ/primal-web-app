@@ -12,10 +12,8 @@ import {
 import Note from '../components/Note/Note';
 import styles from './Home.module.scss';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
-import Loader from '../components/Loader/Loader';
 import Paginator from '../components/Paginator/Paginator';
 import HomeSidebar from '../components/HomeSidebar/HomeSidebar';
-import Branding from '../components/Branding/Branding';
 import HomeHeaderPhone from '../components/HomeHeaderPhone/HomeHeaderPhone';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { scrollWindowTo } from '../lib/scroll';
@@ -24,24 +22,19 @@ import { useHomeContext } from '../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { createStore } from 'solid-js/store';
 import { PrimalUser } from '../types/primal';
-import Avatar from '../components/Avatar/Avatar';
-import { userName } from '../stores/profile';
-import { useAccountContext } from '../contexts/AccountContext';
-import { feedNewPosts, placeholders, branding } from '../translations';
+import { branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
 import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
 import { Transition } from 'solid-transition-group';
-import { isIOS } from '../components/BannerIOS/BannerIOS';
-import { isAndroid } from '@kobalte/utils';
+import { isPhone } from '../utils';
 
 
 const Home: Component = () => {
 
   const context = useHomeContext();
-  const account = useAccountContext();
   const intl = useIntl();
   const app = useAppContext();
 
@@ -130,7 +123,7 @@ const Home: Component = () => {
     <div class={styles.homeContent}>
       <PageTitle title={intl.formatMessage(branding)} />
 
-      <Show when={!isIOS() && !isAndroid()}>
+      <Show when={!isPhone()}>
         <Wormhole
           to="search_section"
         >

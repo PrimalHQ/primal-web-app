@@ -2,6 +2,7 @@ import { format } from 'd3-format';
 import { subsTo } from './sockets';
 import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
 import { DMContact, PaginationInfo } from './megaFeeds';
+import { isAndroid } from '@kobalte/utils';
 
 let debounceTimer: number = 0;
 
@@ -381,3 +382,11 @@ export const msgHasCashu = (content: string) => {
 
 
 export const now = () => Math.floor((new Date()).getTime() / 1000);
+
+export const isIOS = () => {
+  return /(iPad|iPhone|iPod)/.test(navigator.userAgent);
+};
+
+export const isPhone = () => {
+  return isIOS() || isAndroid() || window.innerWidth <= 720;
+}

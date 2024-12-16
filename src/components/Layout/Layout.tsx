@@ -2,17 +2,12 @@ import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 
 
 import styles from './Layout.module.scss';
 
-import { useLocation, useParams, useSearchParams } from '@solidjs/router';
-import NavMenu from '../NavMenu/NavMenu';
-import ProfileWidget from '../ProfileWidget/ProfileWidget';
-import NewNote from '../NewNote/NewNote';
+import { useLocation, useParams} from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
 import { useProfileContext } from '../../contexts/ProfileContext';
-import Branding from '../Branding/Branding';
-import BannerIOS, { isIOS } from '../BannerIOS/BannerIOS';
 import ZapAnimation from '../ZapAnimation/ZapAnimation';
 import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
@@ -29,9 +24,9 @@ import LoginModal from '../LoginModal/LoginModal';
 import { unwrap } from 'solid-js/store';
 import { followWarning, forgotPin } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import { isAndroid } from '@kobalte/utils';
 import LayoutPhone from './LayoutPhone';
 import LayoutDesktop from './LayoutDesktop';
+import { isPhone } from '../../utils';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -117,7 +112,7 @@ const Layout: Component<any> = (props) => {
         </div>
         <div id="modal" class={styles.modal}></div>
         <Show
-          when={isIOS() || isAndroid()}
+          when={isPhone()}
           fallback={
             <LayoutDesktop onNewNotePosted={onNewNotePosted}>
               {props.children}

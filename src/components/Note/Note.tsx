@@ -6,7 +6,6 @@ import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
-import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
 import Avatar from '../Avatar/Avatar';
 import NoteAuthorInfo from './NoteAuthorInfo';
@@ -18,12 +17,10 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, veryLongDate } from '../../lib/dates';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { uuidv4 } from '../../utils';
+import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegex, addrRegexG, imageRegex, imageRegexEnd, imageRegexG, linebreakRegex, noteRegex, noteRegexLocal, profileRegexG, urlRegex, urlRegexG } from '../../constants';
-import { isIOS } from '../BannerIOS/BannerIOS';
-import { isAndroid } from '@kobalte/utils';
+import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 
 export type NoteReactionsState = {
   likes: number,
@@ -61,7 +58,6 @@ const Note: Component<{
   const threadContext = useThreadContext();
   const app = useAppContext();
   const account = useAccountContext();
-  const intl = useIntl();
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -402,7 +398,7 @@ const Note: Component<{
         </div>
       </Match>
 
-      <Match when={(isIOS() || isAndroid()) && noteType() === 'feed'}>
+      <Match when={isPhone() && noteType() === 'feed'}>
         <A
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}

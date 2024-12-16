@@ -1,7 +1,7 @@
 import { isAndroid } from '@kobalte/utils';
 import { Component, onMount } from 'solid-js';
-import { isIOS } from '../components/BannerIOS/BannerIOS';
 import { appStoreLink, playstoreLink } from '../constants';
+import { isIOS } from '../utils';
 
 const AppDownloadQr: Component = () => {
 

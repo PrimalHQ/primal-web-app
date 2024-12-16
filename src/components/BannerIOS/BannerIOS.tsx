@@ -5,10 +5,7 @@ import openWhite from '../../assets/icons/open_white.svg';
 import styles from './BannerIOS.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import { useSearchParams } from '@solidjs/router';
-
-export const isIOS = () => {
-  return /(iPad|iPhone|iPod)/.test(navigator.userAgent);
-};
+import { isIOS } from '../../utils';
 
 const BannerIOS: Component< { id?: string } > = (props) => {
   const [queryParams, setQueryParams] = useSearchParams();

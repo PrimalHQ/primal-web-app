@@ -1,7 +1,7 @@
-import { Component, createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './NoteThread.module.scss';
-import { useNavigate, useParams } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from '../types/primal';
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
@@ -10,23 +10,20 @@ import { nip19 } from '../lib/nTools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useAccountContext } from '../contexts/AccountContext';
-import { generateNote, sortByRecency } from '../stores/note';
+import { sortByRecency } from '../stores/note';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { placeholders as tPlaceholders, thread as t } from '../translations';
 import { userName } from '../stores/profile';
 import PageTitle from '../components/PageTitle/PageTitle';
 import NavHeader from '../components/NavHeader/NavHeader';
-import Loader from '../components/Loader/Loader';
-import { isIOS } from '../components/BannerIOS/BannerIOS';
-import { unwrap } from 'solid-js/store';
 import PrimaryNoteSkeleton from '../components/Skeleton/PrimaryNoteSkeleton';
 import ReplyToNoteSkeleton from '../components/Skeleton/ReplyToNoteSkeleton';
 import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
-import { subsTo } from '../sockets';
 import { fetchNotes } from '../handleNotes';
+import { isIOS } from '../utils';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
