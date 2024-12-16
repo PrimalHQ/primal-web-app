@@ -22,6 +22,8 @@ import { uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
 import { addrRegex, addrRegexG, imageRegex, imageRegexEnd, imageRegexG, linebreakRegex, noteRegex, noteRegexLocal, profileRegexG, urlRegex, urlRegexG } from '../../constants';
+import { isIOS } from '../BannerIOS/BannerIOS';
+import { isAndroid } from '@kobalte/utils';
 
 export type NoteReactionsState = {
   likes: number,
@@ -400,7 +402,7 @@ const Note: Component<{
         </div>
       </Match>
 
-      {/* <Match when={noteType() === 'feed'}>
+      <Match when={(isIOS() || isAndroid()) && noteType() === 'feed'}>
         <A
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
@@ -439,8 +441,8 @@ const Note: Component<{
             <ParsedNote
               note={props.note}
               shorten={props.shorten}
-              width={Math.min(640, window.innerWidth - 72)}
-              margins={20}
+              width={window.innerWidth}
+              margins={2}
             />
           </div>
 
@@ -460,7 +462,7 @@ const Note: Component<{
             size={size()}
           />
         </A>
-      </Match> */}
+      </Match>
 
       <Match when={noteType() === 'thread' || noteType() === 'feed'}>
         <A
