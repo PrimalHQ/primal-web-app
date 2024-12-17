@@ -9,6 +9,10 @@
   margin-left: 8px;
   margin-bottom: 0;
 
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 92px);
+  }
+
   &.phoneSearch {
     width: calc(100dvw - 92px);
   }
@@ -98,6 +102,10 @@
 
   &.phone {
     width: fit-content;
+  }
+
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 92px);
   }
 }
 

@@ -5,9 +5,14 @@
   height: 76px;
   padding-block: 20px;
 
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 92px);
+  }
+
   form {
     margin-left: 4px !important;
   }
+
 
   .exploreDVMFeedHeader {
     display: flex;
@@ -140,13 +145,20 @@
   column-gap: 12px;
   row-gap: 12px;
 
+  @media only screen and (max-width: 720px) {
+    display: flex;
+    flex-direction: column;
+    width: 100dvw;
+    padding-inline: 12px;
+  }
+
   .exploreTopic {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: flex-start;
     gap: 4px;
-    width: 294px;
+    width: 100%;
     padding-block: 12px;
     padding-inline: 16px;
     border-radius: 8px;
@@ -193,7 +205,9 @@
     }
 
     @media only screen and (max-width: 720px) {
-      grid-template-columns: 120px 120px 120px;
+      width: 100dvw;
+      padding-inline: 12px;
+      grid-template-columns: 1fr 1fr 1fr;
 
       img {
         object-fit: cover;
@@ -219,7 +233,9 @@
     grid-row-gap: 12px;
 
     @media only screen and (max-width: 720px) {
-      grid-template-columns: 100dvw;
+      width: 100dvw;
+      grid-template-columns: 100%;
+      padding-inline: 12px;
     }
 
     .explorePerson {

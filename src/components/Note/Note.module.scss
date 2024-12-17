@@ -1129,6 +1129,11 @@
   background-color: var(--devider);
   animation: skeleton-fade 2500ms linear infinite;
 
+  @media only screen and (max-width: 720px) {
+    width: calc((100dvw - 16px) / 3);
+    height: calc((100dvw - 16px) / 3);
+  }
+
   .videoIcon {
     display: inline-block;
     position: absolute;
@@ -1173,6 +1178,11 @@
   height: 148px;
   overflow: hidden;
   position: relative;
+
+  @media only screen and (max-width: 720px) {
+    width: calc((100dvw - 16px) / 3);
+    height: calc((100dvw - 16px) / 3);
+  }
 }
 
 .missingThumb {
