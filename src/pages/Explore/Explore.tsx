@@ -22,6 +22,11 @@ import { isConnected } from '../../sockets';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ExploreSidebar from '../../components/ExploreSidebar/ExploreSidebar';
 import ExploreHotTopics from '../../components/ExploreSidebar/ExploreHotTopics';
+import { isPhone } from '../../utils';
+import SelectBox from '../../components/SelectBox/SelectBox';
+import SelectionBox2 from '../../components/SelectionBox/SelectionBox2';
+import { SelectionOption } from '../../types/primal';
+import SelectionBox from '../../components/SelectionBox/SelectionBox';
 
 const Explore: Component = () => {
 
@@ -85,10 +90,46 @@ const Explore: Component = () => {
 
   const onChangeTab = (tab: string) => {
     // explore?.actions.selectTab(tab);
-
     window.location.hash = tab;
     updateTabContent(tab);
   }
+
+
+  const options:() => SelectionOption[] = () => {
+
+    return [
+      {
+        label: 'Feeds',
+        value: 'feeds',
+        description: 'DVM feeds',
+        id: 'feeds',
+      },
+      {
+        label: 'People',
+        value: 'people',
+        description: 'Explore People',
+        id: 'people',
+      },
+      {
+        label: 'Zaps',
+        value: 'zaps',
+        description: 'Explore Zaps',
+        id: 'zaps',
+      },
+      {
+        label: 'Media',
+        value: 'media',
+        description: 'Explore Media',
+        id: 'media',
+      },
+      {
+        label: 'Topics',
+        value: 'topics',
+        description: 'Explore Topics',
+        id: 'topics',
+      },
+    ];
+  };
 
     return (
       <>
@@ -110,65 +151,82 @@ const Explore: Component = () => {
           </div>
         </StickySidebar>
 
+          <div class={styles.explorePageTabs}>
+            <Tabs
+              value={hash()}
+              onChange={onChangeTab}
+              defaultValue={hash()}
+            >
+              <Show
+                when={!isPhone()}
+                fallback={
+                  <div class={styles.phoneTabSelector}>
+                    <SelectionBox2
+                      options={options()}
+                      onChange={(o: SelectionOption) => onChangeTab(o.value)}
+                      value={hash() || options()[0].value}
+                      initialValue={options()[0].value}
+                      isSelected={(o: SelectionOption) => o.value === hash()}
+                    />
+                    <div class={styles.right}>
+                      <A href={'/asearch'}>Advanced Search</A>
+                    </div>
+                  </div>
+                }
+              >
+                <Tabs.List class={styles.exploreTabs}>
+                  <div class={styles.left}>
+                    <Tabs.Trigger class={styles.exploreTab} value="feeds">
+                      <div class={styles.tabLabel}>
+                        Feeds
+                      </div>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger class={styles.exploreTab} value="people">
+                      <div class={styles.tabLabel}>
+                        People
+                      </div>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger class={styles.exploreTab} value="zaps">
+                      <div class={styles.tabLabel}>
+                        Zaps
+                      </div>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger class={styles.exploreTab} value="media">
+                      <div class={styles.tabLabel}>
+                        Media
+                      </div>
+                    </Tabs.Trigger>
+                    <Tabs.Trigger class={styles.exploreTab} value="topics">
+                      <div class={styles.tabLabel}>
+                        Topics
+                      </div>
+                    </Tabs.Trigger>
+                    <Tabs.Indicator class={styles.exploreTabIndicator} />
+                  </div>
+                  <div class={styles.right}>
+                    <A href={'/asearch'}>Advanced Search</A>
+                  </div>
+                </Tabs.List>
+              </Show>
 
-        <div class={styles.explorePageTabs}>
-          <Tabs
-            value={hash()}
-            onChange={onChangeTab}
-            defaultValue={hash()}
-          >
-            <Tabs.List class={styles.exploreTabs}>
-              <div class={styles.left}>
-                <Tabs.Trigger class={styles.exploreTab} value="feeds">
-                  <div class={styles.tabLabel}>
-                    Feeds
-                  </div>
-                </Tabs.Trigger>
-                <Tabs.Trigger class={styles.exploreTab} value="people">
-                  <div class={styles.tabLabel}>
-                    People
-                  </div>
-                </Tabs.Trigger>
-                <Tabs.Trigger class={styles.exploreTab} value="zaps">
-                  <div class={styles.tabLabel}>
-                    Zaps
-                  </div>
-                </Tabs.Trigger>
-                <Tabs.Trigger class={styles.exploreTab} value="media">
-                  <div class={styles.tabLabel}>
-                    Media
-                  </div>
-                </Tabs.Trigger>
-                <Tabs.Trigger class={styles.exploreTab} value="topics">
-                  <div class={styles.tabLabel}>
-                    Topics
-                  </div>
-                </Tabs.Trigger>
-                <Tabs.Indicator class={styles.exploreTabIndicator} />
-              </div>
-              <div class={styles.right}>
-                <A href={'/asearch'}>Advanced Search</A>
-              </div>
-            </Tabs.List>
 
-
-            <Tabs.Content class={styles.tabContent} value="feeds">
-              <FeedMarketPlace open={hash() === 'feeds'}/>
-            </Tabs.Content>
-            <Tabs.Content class={styles.tabContent} value="people">
-              <ExplorePeople />
-            </Tabs.Content>
-            <Tabs.Content class={styles.tabContent} value="zaps">
-              <ExploreZaps />
-            </Tabs.Content>
-            <Tabs.Content class={styles.tabContent} value="media">
-              <ExploreMedia />
-            </Tabs.Content>
-            <Tabs.Content class={styles.tabContent} value="topics">
-              <ExploreTopics />
-            </Tabs.Content>
-          </Tabs>
-        </div>
+              <Tabs.Content class={styles.tabContent} value="feeds">
+                <FeedMarketPlace open={hash() === 'feeds'}/>
+              </Tabs.Content>
+              <Tabs.Content class={styles.tabContent} value="people">
+                <ExplorePeople />
+              </Tabs.Content>
+              <Tabs.Content class={styles.tabContent} value="zaps">
+                <ExploreZaps />
+              </Tabs.Content>
+              <Tabs.Content class={styles.tabContent} value="media">
+                <ExploreMedia />
+              </Tabs.Content>
+              <Tabs.Content class={styles.tabContent} value="topics">
+                <ExploreTopics />
+              </Tabs.Content>
+            </Tabs>
+          </div>
       </>
     )
 }

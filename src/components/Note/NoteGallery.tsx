@@ -17,11 +17,12 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
 import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
-import { humanizeTime, isDev } from '../../utils';
+import { humanizeTime, isDev, isPhone } from '../../utils';
 
 const NoteGallery: Component<{
   note: PrimalNote,
   id?: string,
+  imgWidth?: number,
 }> = (props) => {
   const intl = useIntl();
   const media = useMediaContext();
@@ -197,7 +198,7 @@ const NoteGallery: Component<{
                     mediaThumb={image.imageThumb}
                     altSrc={image.imageThumb}
                     isDev={isDev()}
-                    width={210}
+                    width={isPhone() ? (props.imgWidth || 0) : 210}
                     shortHeight={true}
                     plainBorder={true}
                     caption={

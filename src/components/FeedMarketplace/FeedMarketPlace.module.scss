@@ -14,6 +14,10 @@
   width: 640px;
 
   overflow-y: hidden;
+
+  @media only screen and (max-width: 720px) {
+    width: 100dvw;
+  }
 }
 
 .booths {
@@ -29,6 +33,11 @@
   display: grid;
   grid-template-columns: 294px 294px;
   gap: 12px;
+
+  @media only screen and (max-width: 720px) {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .feedMarketPlaceItem {

@@ -77,7 +77,7 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
         <For each={galleryImages()}>
           {(note) => (
             <A href={`/e/${note.noteId}`} class={styles.missingImage}>
-              <NoteGallery note={note} />
+              <NoteGallery note={note} imgWidth={120} />
             </A>
           )}
         </For>

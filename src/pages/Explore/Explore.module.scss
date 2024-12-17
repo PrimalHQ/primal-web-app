@@ -121,6 +121,17 @@
   overflow-x: hidden;
   padding-top: 18px;
   padding-inline: 20px;
+
+  @media only screen and (max-width: 720px) {
+    padding-inline: 0;
+  }
+}
+
+.phoneTabSelector {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 12px;
 }
 
 .exploreTopics {
@@ -180,6 +191,17 @@
       width: 148px;
       height: 148px;
     }
+
+    @media only screen and (max-width: 720px) {
+      grid-template-columns: 120px 120px 120px;
+
+      img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+    }
   }
 }
 
@@ -196,10 +218,14 @@
     grid-column-gap: 12px;
     grid-row-gap: 12px;
 
+    @media only screen and (max-width: 720px) {
+      grid-template-columns: 100dvw;
+    }
+
     .explorePerson {
       text-decoration: none;
 
-      width: 294px;
+      width: 100%;
       height: 146px;
       border-radius: var(--border-radius-small);
       background-color: var(--background-header-input);
