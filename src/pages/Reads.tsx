@@ -45,7 +45,8 @@ import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
 import { Transition } from 'solid-transition-group';
 import { ToggleButton } from '@kobalte/core/toggle-button';
-import { isDev } from '../utils';
+import { isDev, isPhone } from '../utils';
+import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
 
 
 const Home: Component = () => {
@@ -225,17 +226,35 @@ const Home: Component = () => {
             }
           >
             <div class={styles.feed}>
-              <For each={context?.notes} >
-                {(note) => (
-                  <div class="animated">
-                    <ArticlePreview
-                      article={note}
-                      height={context?.articleHeights[note.naddr]}
-                      onRender={onArticleRendered}
-                    />
-                  </div>
-                )}
-              </For>
+              <Show
+                when={!isPhone()}
+                fallback={
+                  <For each={context?.notes} >
+                    {(note) => (
+                      <div class="animated">
+                        <ArticlePreviewPhone
+                          article={note}
+                          height={context?.articleHeights[note.naddr]}
+                          onRender={onArticleRendered}
+                          hideFooter={true}
+                        />
+                      </div>
+                    )}
+                  </For>
+                }
+              >
+                <For each={context?.notes} >
+                  {(note) => (
+                    <div class="animated">
+                      <ArticlePreview
+                        article={note}
+                        height={context?.articleHeights[note.naddr]}
+                        onRender={onArticleRendered}
+                      />
+                    </div>
+                  )}
+                </For>
+              </Show>
             </div>
           </Show>
         </Transition>

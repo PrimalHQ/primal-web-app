@@ -133,6 +133,11 @@
     justify-content: space-between;
     align-items: center;
     width: 608px;
+
+    @media only screen and (max-width: 720px) {
+      width: calc(100dvw - 92px);
+    }
+
   }
 
 
@@ -324,13 +329,21 @@
   background-color: var(--background-modal);
   top: 0;
   height: var(--header-height);
-  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: var(--z-index-header);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+}
+
+.readsHeaderPhone {
+  position: relative;
+  background-color: var(--background-modal);
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 @media only screen and (max-width: 720px) {

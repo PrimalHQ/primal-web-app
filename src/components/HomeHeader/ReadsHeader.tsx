@@ -10,6 +10,7 @@ import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import ReedSelect from '../FeedSelect/ReedSelect';
 import { useReadsContext } from '../../contexts/ReadsContext';
+import { isPhone } from '../../utils';
 
 const ReadsHeader: Component< {
   id?: string,
@@ -65,7 +66,7 @@ const ReadsHeader: Component< {
   });
 
   return (
-    <div id={props.id} class={styles.readsHeader}>
+    <div id={props.id} class={isPhone() ? styles.readsHeaderPhone : styles.readsHeader}>
       <div class={`${styles.bigFeedSelect} ${styles.readsFeed}`}>
         <ReedSelect big={true} />
 

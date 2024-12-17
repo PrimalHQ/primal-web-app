@@ -11,7 +11,7 @@ const NoteTopZapsCompact: Component<{
   note: PrimalNote,
   action: (zap: TopZap) => void,
   topZaps: TopZap[],
-  topZapLimit: number,
+  topZapLimit?: number,
   id?: string,
   hideMessage?: boolean,
 }> = (props) => {
@@ -22,7 +22,7 @@ const NoteTopZapsCompact: Component<{
   const topZaps = () => {
     const zaps = props.topZaps ? [...props.topZaps] : [ ...props.note.topZaps ];
 
-    const highlights = zaps.slice(0, props.topZapLimit);
+    const highlights = zaps.slice(0, (props.topZapLimit || 3));
 
     return highlights;
   }
