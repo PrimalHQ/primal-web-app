@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, Match, on, onCleanup, onMount, Switch } from 'solid-js';
+import { Component, createEffect, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
@@ -55,6 +55,7 @@ import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { triggerImportEvents } from '../../lib/notes';
 import { useAppContext } from '../../contexts/AppContext';
+import { isPhone } from '../../utils';
 
 export const satsInBTC = 100_000_000;
 
@@ -771,11 +772,13 @@ const Premium: Component = () => {
         intl.formatMessage(t.title.general)}
       />
 
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
+      <Show when={!isPhone()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
+      </Show>
 
       <PageCaption>
         <Switch

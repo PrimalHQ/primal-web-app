@@ -125,6 +125,10 @@
 
   margin-top: 42px;
 
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 20px);
+  }
+
   .summaryItem {
     display: flex;
     width: 100%;
@@ -688,6 +692,10 @@
   align-items: center;
   padding-top: 40px;
   width: 440px;
+
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 12px);
+  }
 
   .userInfo {
     display: flex;
@@ -1926,6 +1934,10 @@
   justify-content: center;
   align-items: center;
   width: 440px;
+
+  @media only screen and (max-width: 720px) {
+    width: 100dvw;
+  }
 
   .userInfo {
     display: flex;
