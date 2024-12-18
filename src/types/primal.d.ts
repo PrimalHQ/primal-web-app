@@ -440,6 +440,15 @@ export type NostrMembershipCohortInfo= {
   id?: string,
 };
 
+export type NostrBlossom= {
+  kind: Kind.Blossom,
+  content: string,
+  created_at?: number,
+  pubkey?: string,
+  id?: string,
+  tags?: string[],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -491,6 +500,7 @@ export type NostrEventContent =
   NostrLegendCustomization |
   NostrBroadcastStatus |
   NostrMembershipCohortInfo |
+  NostrBlossom |
   NostrTopicStats;
 
 export type NostrEvent = [

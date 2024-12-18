@@ -214,6 +214,7 @@ const NoteGallery: Component<{
                         </A>
                       </div>
                     }
+                    authorPk={props.note.pubkey}
                   />
                 </div>
               </Match>

@@ -608,6 +608,7 @@ const ParsedNote: Component<{
         imageGroup={`${imageGroup}`}
         shortHeight={props.shorten}
         onError={imageError}
+        authorPk={props.note.pubkey}
       />
     }
 
@@ -648,6 +649,7 @@ const ParsedNote: Component<{
             plainBorder={true}
             forceHeight={500}
             onError={imageError}
+            authorPk={props.note.pubkey}
           />
         }}
       </For>

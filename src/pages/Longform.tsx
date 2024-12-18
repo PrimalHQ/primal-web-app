@@ -1040,6 +1040,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                     media={articleMediaImage()}
                     mediaThumb={articleMediaThumb()}
                     width={640}
+                    authorPk={store.article?.pubkey}
                   />
                 </Show>
 

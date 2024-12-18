@@ -57,6 +57,7 @@ const DirectMessageConversation: Component<{
         >
           <DirectMessageParsedContent
             content={msg.content}
+            sender={msg.sender}
           />
         </div>
       );
@@ -105,6 +106,7 @@ const DirectMessageConversation: Component<{
             >
               <DirectMessageParsedContent
                 content={section}
+                sender={msg.sender}
               />
             </div>
           }>

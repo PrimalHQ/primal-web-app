@@ -7,7 +7,7 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { MediaEvent, MediaVariant, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
@@ -109,6 +109,7 @@ export type AppContextStore = {
     removeConnectedRelay: (relay: Relay) => void,
     profileLink: (pubkey: string | undefined) => string,
     setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
+    getUserBlossomUrls: (pubkey: string) => string[],
   },
 }
 
@@ -305,6 +306,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('legendCustomization', () => ({ [pubkey]: { ...config }}));
   }
 
+  const getUserBlossomUrls = (pubkey: string) => {
+    const blossom = store.events[Kind.Blossom].find(b => b.pubkey === pubkey) as NostrBlossom | undefined;
+
+    if (!blossom || !blossom.tags) return [];
+
+    return blossom.tags.reduce<string[]>((acc, t) => {
+      return t[0] === 'server' ? [ ...acc, t[1]] : acc;
+    }, []);
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -467,6 +478,7 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       removeConnectedRelay,
       profileLink,
       setLegendCustomization,
+      getUserBlossomUrls,
     }
   });
 

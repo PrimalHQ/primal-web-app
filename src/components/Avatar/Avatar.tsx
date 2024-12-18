@@ -214,6 +214,7 @@ const Avatar: Component<{
               onError={imgError}
               mediaThumb={imageThumb()}
               ignoreRatio={true}
+              authorPk={props.user?.pubkey}
             />
           </Show>
         </div>

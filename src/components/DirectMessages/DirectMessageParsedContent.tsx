@@ -35,6 +35,7 @@ const groupGridLimit = 7;
 const DirectMessageParsedContent: Component<{
   id?: string,
   content: string,
+  sender: string,
   ignoreMedia?: boolean,
   noLinks?: string,
   noPreviews?: boolean,
@@ -412,6 +413,7 @@ const DirectMessageParsedContent: Component<{
         mediaThumb={imageThumb}
         width={514}
         imageGroup={`${imageGroup}`}
+        authorPk={props.sender}
       />
     }
 
@@ -439,6 +441,7 @@ const DirectMessageParsedContent: Component<{
             imageGroup={`${imageGroup}`}
             plainBorder={true}
             forceHeight={500}
+            authorPk={props.sender}
           />
         }}
       </For>

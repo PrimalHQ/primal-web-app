@@ -683,6 +683,7 @@ const ProfileMobile: Component = () => {
             width={640}
             media={media?.actions.getMedia(banner() || '', 'o')}
             mediaThumb={media?.actions.getMedia(banner() || '', 'm') || media?.actions.getMedia(banner() || '', 'o') || banner()}
+            authorPk={profile?.profileKey}
           />
         </div>
       </Show>
@@ -707,6 +708,7 @@ const ProfileMobile: Component = () => {
                 media={media?.actions.getMedia(banner() || '', 'o')}
                 mediaThumb={media?.actions.getMedia(banner() || '', 'm') || media?.actions.getMedia(banner() || '', 'o') || banner()}
                 ignoreRatio={true}
+                authorPk={profile?.profileKey}
               />
             </Show>
           </div>

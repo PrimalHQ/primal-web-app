@@ -2,6 +2,7 @@ import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show
 import styles from "./NoteImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
+import { useAppContext } from "../../contexts/AppContext";
 
 const NoteImage: Component<{
   class?: string,
@@ -19,7 +20,9 @@ const NoteImage: Component<{
   caption?: JSXElement | string,
   ignoreRatio?: boolean,
   forceHeight?: number;
+  authorPk?: string,
 }> = (props) => {
+  const app = useAppContext();
   const imgId = generatePrivateKey();
 
   let imgVirtual: HTMLImageElement | undefined;
@@ -31,13 +34,39 @@ const NoteImage: Component<{
 
   const isCached = () => !props.isDev || props.media;
 
-  const onError = (event: any) => {
+  const onError = async (event: any) => {
     const image = event.target;
 
     if (image.src === props.altSrc || !props.altSrc || image.src.endsWith(props.altSrc)) {
       // @ts-ignore
       props.onError && props.onError(event);
       return true;
+    }
+
+    const userBlossoms = app?.actions.getUserBlossomUrls(props.authorPk || '');
+
+    if (userBlossoms) {
+      const reqs = userBlossoms.map(url => new Promise<string>((res, rej) => {
+        fetch(url, { method: 'HEAD'}).then((response) => {
+          if (response.headers.get('Content-Type')?.startsWith('image')) {
+            res(url);
+          } else {
+            rej('')
+          }
+        });
+      }));
+
+      const bServer = await Promise.any(reqs);
+
+      if (typeof bServer === 'string' && bServer.length > 0) {
+        const oSrc = src() || '';
+        const bSrc = oSrc.slice(oSrc.lastIndexOf('/'), oSrc.lastIndexOf('.'));
+        setSrc(() => `${bServer}/${bSrc}`);
+
+        image.onerror = "";
+        image.src = src();
+        return true;
+      }
     }
 
     setSrc(() => props.altSrc || '');
