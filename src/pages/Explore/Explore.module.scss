@@ -223,6 +223,11 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  @media only screen and (max-width: 720px) {
+    width: 100dvw;
+    padding-inline: 12px;
+  }
 }
 
 .explorePeople {

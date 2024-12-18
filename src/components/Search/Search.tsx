@@ -137,7 +137,6 @@ const Search: Component<{
 
     if (isPhone()) {
       k += ` ${styles.phoneSearch}`;
-      return k;
     }
 
     if (isFocused()) {

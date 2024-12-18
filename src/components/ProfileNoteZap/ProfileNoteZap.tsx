@@ -1,5 +1,5 @@
 import { A } from "@solidjs/router";
-import { Component, createSignal, onMount, Show } from "solid-js";
+import { Component, createSignal, Match, onMount, Show, Switch } from "solid-js";
 import { Kind } from "../../constants";
 import { useAppContext } from "../../contexts/AppContext";
 import { date } from "../../lib/dates";
@@ -10,6 +10,7 @@ import { userName } from "../../stores/profile";
 import { MenuItem, PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./ProfileNoteZap.module.scss";
+import { isPhone } from "../../utils";
 
 
 const ProfileNoteZap: Component<{
@@ -80,29 +81,59 @@ const ProfileNoteZap: Component<{
   }
 
   return (
-    <div class={styles.contentZap} data-zap-id={props.zap.id}>
-      <div class={styles.zapInfo}>
-        <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.sender}>
-          <Avatar size="vs2" user={props.zap.sender} />
-        </A >
-
-        <div class={styles.data}>
-          <div class={styles.amount}>
-            <div class={styles.zapIcon}></div>
-            <div class={styles.number}>{props.zap.amount.toLocaleString()}</div>
+    <Switch>
+      <Match when={isPhone()}>
+        <div class={styles.contentZapPhone} data-zap-id={props.zap.id}>
+          <div class={styles.zapSender}>
+            <Avatar size="xxs" user={props.zap.sender} />
+            <div class={styles.amount}>
+              <div class={styles.zapIcon}></div>
+              <div class={styles.number}>{props.zap.amount.toLocaleString()}</div>
+            </div>
+            <div class={styles.message}>
+              {props.zap.message}
+            </div>
           </div>
-          <div class={styles.message}>
-            {props.zap.message}
+
+          <div class={styles.zapReceiver}>
+            <div class={styles.leftSide}>
+              <A href={app?.actions.profileLink(userNpub(props.zap.reciver)) || ''} class={styles.receiver}>
+                <Avatar size="xxs" user={props.zap.reciver} />
+              </A>
+            </div>
+            <div class={styles.rightSide}>
+              {subject()}
+            </div>
           </div>
         </div>
+      </Match>
 
-        <A href={app?.actions.profileLink(userNpub(props.zap.reciver)) || ''} class={styles.receiver}>
-          <Avatar size="vs2" user={props.zap.reciver} />
-        </A>
-      </div>
+      <Match when={!isPhone()}>
+        <div class={styles.contentZap} data-zap-id={props.zap.id}>
+          <div class={styles.zapInfo}>
+            <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.sender}>
+              <Avatar size="vs2" user={props.zap.sender} />
+            </A >
 
-      {subject()}
-    </div>
+            <div class={styles.data}>
+              <div class={styles.amount}>
+                <div class={styles.zapIcon}></div>
+                <div class={styles.number}>{props.zap.amount.toLocaleString()}</div>
+              </div>
+              <div class={styles.message}>
+                {props.zap.message}
+              </div>
+            </div>
+
+            <A href={app?.actions.profileLink(userNpub(props.zap.reciver)) || ''} class={styles.receiver}>
+              <Avatar size="vs2" user={props.zap.reciver} />
+            </A>
+          </div>
+
+          {subject()}
+        </div>
+      </Match>
+    </Switch>
   )
 }
 

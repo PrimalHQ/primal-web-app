@@ -566,6 +566,11 @@
   align-items: center;
   width: 440px;
 
+  @media only screen and (max-width: 720px) {
+    width: 100dvw;
+    padding-inline: 12px;
+  }
+
   .ogCaption {
     color: var(--text-primary);
     text-align: center;

@@ -34,14 +34,6 @@
         gap: 4px;
         height: 16px;
 
-        .zapIcon {
-          width: 10px;
-          height: 14px;
-          background-color: var(--text-primary);
-          -webkit-mask: url(../../assets/icons/lightning_white.svg) no-repeat 0 / 100%;
-          mask: url(../../assets/icons/lightning_white.svg) no-repeat 0 / 100%;
-        }
-
         .number {
           color: var(--text-primary);
           font-size: 15px;
@@ -136,4 +128,142 @@
       padding-right: 20px;
     }
   }
+}
+
+.contentZapPhone {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 6px;
+  border-radius: 20px;
+  background-color: var(--background-header-input);
+
+  .zapSender {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+    border-radius: 99px;
+    background-color: var(--background-site);
+
+    .amount {
+      display: flex;
+      gap: 4px;
+      height: 16px;
+
+      .number {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 800;
+        line-height: 16px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .message {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  .zapReceiver {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 100%;
+
+    .leftSide {
+      width: 28px;
+    }
+  }
+
+  .subject {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: none !important;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 4px;
+
+      div {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 16px;
+        max-width: 260px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        -webkit-box-orient: vertical;
+      }
+
+      .bullet {
+        font-weight: 800;
+      }
+
+      .time {
+        font-weight: 400;
+      }
+    }
+
+    .body {
+      max-width: calc(100dvw - 58px);
+
+      color: var(--text-tertiary);
+
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+
+
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+
+      padding-right: 20px;
+    }
+  }
+}
+
+.zapIcon {
+  width: 10px;
+  height: 14px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/lightning_white.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/lightning_white.svg) no-repeat 0 / 100%;
 }
