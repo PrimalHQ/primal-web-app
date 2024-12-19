@@ -249,9 +249,6 @@ const SimpleArticlePreview: Component<{
             </div>
           </div>
           <div class={styles.tags}>
-            <div class={styles.estimate}>
-              {Math.ceil(props.article.wordCount / wordsPerMinute)} minute read
-            </div>
             <For each={props.article.tags?.slice(0, 3)}>
               {tag => (
                 <div class={styles.tag}>
@@ -282,28 +279,6 @@ const SimpleArticlePreview: Component<{
           </Show>
         </div>
       </div>
-
-      {/* <Show when={props.article.topZaps?.length > 0}>
-        <div class={styles.zaps}>
-          <NoteTopZapsCompact
-            note={props.article}
-            action={() => {}}
-            topZaps={props.article.topZaps}
-            topZapLimit={4}
-          />
-        </div>
-      </Show>
-
-      <div class={styles.footer}>
-        <ArticleFooter
-          note={props.article}
-          state={reactionsState}
-          updateState={updateReactionsState}
-          customZapInfo={customZapInfo()}
-          onZapAnim={addTopZapFeed}
-        />
-      </div> */}
-
     </div>
   );
 }
