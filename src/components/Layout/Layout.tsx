@@ -176,7 +176,7 @@ const Layout: Component<any> = (props) => {
           open={(account?.showPin || '').length > 0}
           valueToDecrypt={account?.showPin}
           onSuccess={(sec: string) => {
-            account?.actions.setSec(sec);
+            account?.actions.setSec(sec, true);
             account?.actions.setString('showPin', '');
           }}
           onAbort={() => account?.actions.setString('showPin', '')}

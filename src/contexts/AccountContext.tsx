@@ -117,7 +117,7 @@ export type AccountContextStore = {
     updateFilterList: (pubkey: string | undefined, content?: boolean, trending?: boolean) => void,
     addToAllowlist: (pubkey: string | undefined, then?: () => void) => void,
     removeFromAllowlist: (pubkey: string | undefined) => void,
-    setSec: (sec: string | undefined) => void,
+    setSec: (sec: string | undefined, force?: boolean) => void,
     logout: () => void,
     showGetStarted: () => void,
     saveEmoji: (emoji: EmojiOption) => void,
@@ -429,7 +429,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     clearSec();
   };
 
-  const setSec = (sec: string | undefined) => {
+  const setSec = (sec: string | undefined, force?: boolean) => {
     if (!sec) {
       logout();
       return;
@@ -442,7 +442,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       const pubkey = nostrGetPubkey(decoded.data);
 
-      if (pubkey !== store.publicKey) {
+      if (pubkey !== store.publicKey || force) {
         setPublicKey(pubkey);
       }
 
