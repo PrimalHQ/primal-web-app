@@ -36,8 +36,9 @@ const NoteImage: Component<{
 
   const onError = async (event: any) => {
     const image = event.target;
+    console.log('BLOSSOM ERROR: ', image.src, props.altSrc)
 
-    if (image.src === props.altSrc || !props.altSrc || image.src.endsWith(props.altSrc)) {
+    if (image.src === props.altSrc || image.src.endsWith(props.altSrc)) {
       // @ts-ignore
       props.onError && props.onError(event);
       return true;
@@ -47,16 +48,19 @@ const NoteImage: Component<{
     const userBlossoms = app?.actions.getUserBlossomUrls(props.authorPk || '') || [];
 
     // Image url from a Note
-    const originalSrc = src() || '';
+    const originalSrc = image.src || '';
 
     // extract the file hash
     const fileHash = originalSrc.slice(originalSrc.lastIndexOf('/') + 1)
 
+    console.log('BLOSSOM URLS: ', userBlossoms)
     // Send HEAD requests to each blossom server to check if the resource is there
     const reqs = userBlossoms.map(url =>
       new Promise<string>((resolve, reject) => {
         const separator = url.endsWith('/') ? '' : '/';
         const resourceUrl = `${url}${separator}${fileHash}`;
+
+        console.log('BLOSSOM TRY: ', resourceUrl)
 
         fetch(resourceUrl, { method: 'HEAD'}).
           then(response => {
@@ -64,10 +68,12 @@ const NoteImage: Component<{
             if (response.headers.get('Content-Type')?.startsWith('image')) {
               resolve(resourceUrl);
             } else {
+              console.log('BLOSSOM REJECT: ', resourceUrl)
               reject('')
             }
           }).
-          catch(() => {
+          catch((e) => {
+            console.log('BLOSSOM CATCH: ', resourceUrl, e)
             reject('');
           });
       })
@@ -77,6 +83,8 @@ const NoteImage: Component<{
       // Wait for at least one req to succeed
       const blossomUrl = await Promise.any(reqs);
 
+      console.log('BLOSSOM: ', blossomUrl)
+
       // If found, set image src to the blossom url
       if (blossomUrl.length > 0) {
         setSrc(() => blossomUrl);
@@ -85,7 +93,9 @@ const NoteImage: Component<{
         return true;
       }
     } catch {
+      console.log('BLOSSOM FAIL')
       setSrc(() => props.altSrc || '');
+      return true;
     }
   };
 
