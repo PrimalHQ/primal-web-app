@@ -110,6 +110,33 @@ const EventPage: Component = () => {
       return;
     }
 
+    if (identifier) {
+      const name = params.vanityName.toLowerCase();
+
+      if (!name) {
+        setComponent(() => 'not_found');
+        return;
+      }
+
+      const vanityProfile = await fetchKnownProfiles(name);
+
+      const pubkey = vanityProfile.names[name];
+      const kind = Kind.LongForm;
+
+      try {
+        const naddr = nip19.naddrEncode({ pubkey, kind, identifier });
+
+        setEvId(() => naddr);
+        setComponent(() => 'read');
+        return;
+      } catch (e) {
+        logError('Error encoding naddr: ', e);
+        setComponent(() => 'not_found');
+        return;
+      }
+
+    }
+
     if (id) {
       if (id.startsWith('naddr')) {
 
@@ -160,33 +187,6 @@ const EventPage: Component = () => {
 
       resolveFromId(id);
       return;
-    }
-
-    if (identifier) {
-      const name = params.vanityName.toLowerCase();
-
-      if (!name) {
-        setComponent(() => 'not_found');
-        return;
-      }
-
-      const vanityProfile = await fetchKnownProfiles(name);
-
-      const pubkey = vanityProfile.names[name];
-      const kind = Kind.LongForm;
-
-      try {
-        const naddr = nip19.naddrEncode({ pubkey, kind, identifier });
-
-        setEvId(() => naddr);
-        setComponent(() => 'read');
-        return;
-      } catch (e) {
-        logError('Error encoding naddr: ', e);
-        setComponent(() => 'not_found');
-        return;
-      }
-
     }
 
   };

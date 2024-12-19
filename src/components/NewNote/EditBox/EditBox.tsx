@@ -739,6 +739,7 @@ const EditBox: Component<{
           rep.relayHints[rep.id] :
           '';
 
+          // @ts-ignore
           const decoded = nip19.decode(rep.naddr);
 
           const data = decoded.data as nip19.AddressPointer;

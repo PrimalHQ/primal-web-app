@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { A, useParams } from "@solidjs/router";
-import { batch, Component, createEffect, For, Match, onMount, Show, Switch } from "solid-js";
+import { batch, Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind } from "../constants";
@@ -137,7 +137,13 @@ const Longform: Component< { naddr: string } > = (props) => {
   // @ts-ignore
   const [author, setAuthor] = createStore<PrimalUser>();
 
-  const naddr = () => props.naddr;
+  const [naddr, setNaddr] = createSignal<string>();
+
+  createEffect(() => {
+    setNaddr(() => props.naddr);
+  })
+
+
 
   let latestTopZap: string = '';
   let latestTopZapFeed: string = '';
@@ -193,11 +199,11 @@ const Longform: Component< { naddr: string } > = (props) => {
     pswpModule: () => import('photoswipe')
   });
 
-  onMount(() => {
+  createEffect(on(naddr, () => {
     clearArticle();
     fetchArticle();
     fetchHighlights();
-  });
+  }));
 
   createEffect(() => {
     if (store.article) {
@@ -456,7 +462,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
     const { users, notes, reads } = await fetchReadThread(
       account?.publicKey,
-      naddr(),
+      naddr() || '',
       `thread_read_${naddr()}_${APP_ID}`,
     );
 
@@ -1060,7 +1066,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                 />
 
                 <PrimalMarkdown
-                  noteId={props.naddr}
+                  noteId={naddr() || ''}
                   content={store.article?.content || ''}
                   readonly={true}
                   article={store.article}
