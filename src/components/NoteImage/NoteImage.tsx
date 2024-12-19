@@ -43,37 +43,50 @@ const NoteImage: Component<{
       return true;
     }
 
-    const userBlossoms = app?.actions.getUserBlossomUrls(props.authorPk || '');
+    // list of user's blossom servers from kind 10_063
+    const userBlossoms = app?.actions.getUserBlossomUrls(props.authorPk || '') || [];
 
-    if (userBlossoms) {
-      const reqs = userBlossoms.map(url => new Promise<string>((res, rej) => {
-        fetch(url, { method: 'HEAD'}).then((response) => {
-          if (response.headers.get('Content-Type')?.startsWith('image')) {
-            res(url);
-          } else {
-            rej('')
-          }
-        });
-      }));
+    // Image url from a Note
+    const originalSrc = src() || '';
 
-      const bServer = await Promise.any(reqs);
+    // extract the file hash
+    const fileHash = originalSrc.slice(originalSrc.lastIndexOf('/') + 1)
 
-      if (typeof bServer === 'string' && bServer.length > 0) {
-        const oSrc = src() || '';
-        const bSrc = oSrc.slice(oSrc.lastIndexOf('/'), oSrc.lastIndexOf('.'));
-        setSrc(() => `${bServer}/${bSrc}`);
+    // Send HEAD requests to each blossom server to check if the resource is there
+    const reqs = userBlossoms.map(url =>
+      new Promise<string>((resolve, reject) => {
+        const separator = url.endsWith('/') ? '' : '/';
+        const resourceUrl = `${url}${separator}${fileHash}`;
 
+        fetch(resourceUrl, { method: 'HEAD'}).
+          then(response => {
+            // Check to see if there is an image there
+            if (response.headers.get('Content-Type')?.startsWith('image')) {
+              resolve(resourceUrl);
+            } else {
+              reject('')
+            }
+          }).
+          catch(() => {
+            reject('');
+          });
+      })
+    );
+
+    try {
+      // Wait for at least one req to succeed
+      const blossomUrl = await Promise.any(reqs);
+
+      // If found, set image src to the blossom url
+      if (blossomUrl.length > 0) {
+        setSrc(() => blossomUrl);
         image.onerror = "";
-        image.src = src();
+        image.src = blossomUrl;
         return true;
       }
+    } catch {
+      setSrc(() => props.altSrc || '');
     }
-
-    setSrc(() => props.altSrc || '');
-
-    image.onerror = "";
-    image.src = src();
-    return true;
   };
 
   const ratio = () => {
