@@ -36,7 +36,6 @@ const NoteImage: Component<{
 
   const onError = async (event: any) => {
     const image = event.target;
-    console.log('BLOSSOM ERROR: ', image.src, props.altSrc)
 
     if (image.src === props.altSrc || image.src.endsWith(props.altSrc)) {
       // @ts-ignore
@@ -53,27 +52,22 @@ const NoteImage: Component<{
     // extract the file hash
     const fileHash = originalSrc.slice(originalSrc.lastIndexOf('/') + 1)
 
-    console.log('BLOSSOM URLS: ', userBlossoms)
     // Send HEAD requests to each blossom server to check if the resource is there
     const reqs = userBlossoms.map(url =>
       new Promise<string>((resolve, reject) => {
         const separator = url.endsWith('/') ? '' : '/';
         const resourceUrl = `${url}${separator}${fileHash}`;
 
-        console.log('BLOSSOM TRY: ', resourceUrl)
-
-        fetch(resourceUrl, { method: 'HEAD'}).
+        fetch(resourceUrl, { method: 'HEAD' }).
           then(response => {
             // Check to see if there is an image there
-            if (response.headers.get('Content-Type')?.startsWith('image')) {
+            if (response.status === 200) {
               resolve(resourceUrl);
             } else {
-              console.log('BLOSSOM REJECT: ', resourceUrl)
               reject('')
             }
           }).
           catch((e) => {
-            console.log('BLOSSOM CATCH: ', resourceUrl, e)
             reject('');
           });
       })
@@ -83,8 +77,6 @@ const NoteImage: Component<{
       // Wait for at least one req to succeed
       const blossomUrl = await Promise.any(reqs);
 
-      console.log('BLOSSOM: ', blossomUrl)
-
       // If found, set image src to the blossom url
       if (blossomUrl.length > 0) {
         setSrc(() => blossomUrl);
@@ -93,7 +85,6 @@ const NoteImage: Component<{
         return true;
       }
     } catch {
-      console.log('BLOSSOM FAIL')
       setSrc(() => props.altSrc || '');
       return true;
     }
