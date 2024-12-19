@@ -1,6 +1,6 @@
 import { A } from '@solidjs/router';
 import { batch, Component, createEffect, Match, onMount, Show, Switch } from 'solid-js';
-import { PrimalNote, TopZap, ZapOption } from '../../types/primal';
+import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
 
@@ -53,6 +53,7 @@ const Note: Component<{
   onClick?: () => void,
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
+  defaultParentAuthor?: PrimalUser,
 }> = (props) => {
 
   const threadContext = useThreadContext();
@@ -431,7 +432,7 @@ const Note: Component<{
             </div>
           </div>
 
-          <NoteReplyToHeader note={props.note} />
+          <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
           <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
             <ParsedNote
@@ -500,7 +501,7 @@ const Note: Component<{
                 />
               </div>
 
-              <NoteReplyToHeader note={props.note} />
+              <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
               <div class={styles.message}>
                 <ParsedNote
@@ -562,7 +563,7 @@ const Note: Component<{
                 time={props.note.post.created_at}
               />
 
-              <NoteReplyToHeader note={props.note} />
+              <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
               <div class={styles.message}>
                 <ParsedNote

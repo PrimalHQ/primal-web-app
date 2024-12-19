@@ -97,7 +97,7 @@ export const extractReplyTo = (tags: string[][]) => {
   for (let i=0; i<tags.length; i++) {
     const tag = tags[i];
 
-    if (tag[0] !== 'e') continue;
+    if (!['e', 'a'].includes(tag[0])) continue;
 
     if (tag[3] === 'mention') continue;
 
@@ -114,9 +114,13 @@ export const extractReplyTo = (tags: string[][]) => {
 
   if (!replyTo) {
     const eTags = tags.filter(t => t[0] === 'e' && t[3] !== 'mention');
+    const aTags = tags.filter(t => t[0] === 'a' && t[3] !== 'mention');
 
     if (eTags.length === 1) {
       replyTo = [...eTags[0]];
+    }
+    else if (eTags.length > 1){
+      replyTo = [...aTags[aTags.length - 1]];
     }
     else if (eTags.length > 1){
       replyTo = [...eTags[eTags.length - 1]];

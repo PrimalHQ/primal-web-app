@@ -19,6 +19,15 @@ const MentionedUserLink: Component<{
 
   const LinkComponent: Component<{ children: JSXElement }> = (p) => {
 
+    if (!props.user && props.npub) {
+      return <A
+        id={props.id}
+        class={styles.userMention}
+        href={app?.actions.profileLink(props.npub) || ''}
+      >
+        {p.children}
+      </A>;
+    }
     if (!props.user) {
       return <div
         id={props.id}
@@ -63,7 +72,7 @@ const MentionedUserLink: Component<{
 
   return (
     <LinkComponent>
-      @{userName(props.user) || 'UNKNOWN'}
+      @{userName(props.user) || props.npub || 'UNKNOWN'}
     </LinkComponent>
   );
 }

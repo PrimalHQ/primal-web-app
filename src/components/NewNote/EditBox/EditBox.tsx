@@ -731,7 +731,53 @@ const EditBox: Component<{
       let tags = referencesToTags(messageToSend, relayHints);
       const rep = props.replyToNote;
 
-      if (rep) {
+      // @ts-ignore
+      if (rep && rep.naddr) {
+        let rootTag = rep.msg.tags.find(t => t[0] === 'a' && t[3] === 'root');
+
+        const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?
+          rep.relayHints[rep.id] :
+          '';
+
+          const decoded = nip19.decode(rep.naddr);
+
+          const data = decoded.data as nip19.AddressPointer;
+
+          const coord = `${data.kind}:${data.pubkey}:${data.identifier}`;
+
+        // If the note has a root tag, that meens it is not a root note itself
+        // So we need to copy the `root` tag and add a `reply` tag
+        if (rootTag) {
+          const tagWithHint = rootTag.map((v, i) => i === 2 ?
+            rHints :
+            v,
+          );
+          tags.push([...tagWithHint]);
+          tags.push(['a', coord, rHints, 'reply']);
+        }
+        // Otherwise, add the note as the root tag for this reply
+        else {
+          tags.push([
+            'a',
+            coord,
+            rHints,
+            'root',
+          ]);
+        }
+
+        // Copy all `p` tags from the note we are repling to
+        const repPeople = rep.msg.tags.filter(t => t[0] === 'p');
+
+        tags = [...tags, ...(unwrap(repPeople))];
+
+        // If the author of the note is missing, add them
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.pubkey)) {
+          tags.push(['p', rep.pubkey]);
+        }
+      }
+
+      // @ts-ignore
+      if (rep && !rep.naddr) {
         let rootTag = rep.msg.tags.find(t => t[0] === 'e' && t[3] === 'root');
 
         const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?

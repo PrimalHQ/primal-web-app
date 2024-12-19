@@ -4,14 +4,14 @@ import { useAccountContext } from "../../contexts/AccountContext";
 import { hookForDev } from "../../lib/devTools";
 import { userName } from "../../stores/profile";
 import { actions as t } from "../../translations";
-import { PrimalNote, SendNoteResult } from "../../types/primal";
+import { PrimalArticle, PrimalNote, SendNoteResult } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import EditBox from "../NewNote/EditBox/EditBox";
 import styles from  "./ReplyToNote.module.scss";
 
 
 const ReplyToNote: Component<{
-  note: PrimalNote,
+  note: PrimalNote | PrimalArticle,
   onNotePosted?: (note: SendNoteResult) => void,
   id?: string,
 }> = (props) => {

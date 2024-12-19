@@ -51,7 +51,7 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
     const recs = articles.filter(a => a.id !== props.article.id);
     const indicies = getRandomIntegers(0, recs.length, 3);
 
-    setRecomended(() => indicies.map(i => recs[i]));
+    setRecomended(() => indicies.map(i => recs[i]).sort((a, b) => b.published - a.published));
 
     setIsFetchingArticles(() => false);
   }
