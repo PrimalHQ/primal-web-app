@@ -696,6 +696,9 @@
       border-radius: 8px;
       overflow: hidden;
       text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
       img {
         max-width: none;
@@ -703,7 +706,7 @@
         min-height: 123px;
         max-width: 173px;
         max-height: 123px;
-        object-fit: cover;
+        object-fit: contain;
       }
 
       .placeholderImage {
