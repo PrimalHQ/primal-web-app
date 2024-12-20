@@ -701,12 +701,13 @@
       align-items: center;
 
       img {
-        max-width: none;
-        min-width: 173px;
-        min-height: 123px;
-        max-width: 173px;
-        max-height: 123px;
-        object-fit: contain;
+        // max-width: none;
+        // min-width: 173px;
+        // min-height: 123px;
+        // max-width: 173px;
+        // max-height: 123px;
+        max-width: 140px;
+        object-fit: cover;
       }
 
       .placeholderImage {
