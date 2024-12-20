@@ -148,6 +148,7 @@ const ArticleHighlightActionMenu: Component<{
         content,
         tags: [
           ['p', props.article.pubkey],
+          ['p', account.publicKey],
           ['a', naddr],
           ['context', context],
         ],

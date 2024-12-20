@@ -39,10 +39,21 @@ const ReplyToHighlight: Component<{
     props.onCancel && props.onCancel();
   };
 
+  const hTags = (hl: any) => {
+    if (hl.tags.find((t: string[]) => t[0] === 'p' && t[1] === hl.pubkey)) {
+      return [...hl.tags];
+    }
+
+    return [...hl.tags, ['p', hl.pubkey]];
+  }
+
   const highlight = () => ({
     id: props.highlight.id,
     noteId: props.highlight.id,
-    msg: { ...props.highlight },
+    msg: {
+      ...props.highlight,
+      tags: hTags(props.highlight),
+    },
     user: props.author,
     pubkey: account?.publicKey,
   })
