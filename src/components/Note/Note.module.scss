@@ -956,13 +956,13 @@
 }
 
 @media only screen and (max-width: 720px) {
-  .note {
+  .noteThread {
     width: 100dvw;
     overflow: hidden;
 
     .content {
       .rightSide {
-        width: calc(100dvw - 42px - 24px);
+        width: calc(100dvw - 80px);
         overflow: hidden;
       }
     }
