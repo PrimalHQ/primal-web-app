@@ -82,10 +82,12 @@ const NoteImage: Component<{
         setSrc(() => blossomUrl);
         image.onerror = "";
         image.src = blossomUrl;
+        setIsImageLoaded(true);
         return true;
       }
     } catch {
       setSrc(() => props.altSrc || '');
+      setIsImageLoaded(true);
       return true;
     }
   };
