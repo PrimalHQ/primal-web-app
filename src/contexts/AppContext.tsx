@@ -307,7 +307,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
   }
 
   const getUserBlossomUrls = (pubkey: string) => {
-    const blossom = store.events[Kind.Blossom].find(b => b.pubkey === pubkey) as NostrBlossom | undefined;
+    const blossom = (store.events[Kind.Blossom] || []).find(b => b.pubkey === pubkey) as NostrBlossom | undefined;
 
     if (!blossom || !blossom.tags) return [];
 
