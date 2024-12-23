@@ -8,7 +8,7 @@ import { userName } from "../stores/profile";
 import { useDMContext } from "../contexts/DMContext";
 import DirectMessageContact from "../components/DirectMessages/DirectMessageContact";
 
-import styles from './DirectMessages.module.scss';
+import styles from "./DirectMessages.module.scss";
 import { Tabs } from "@kobalte/core/tabs";
 
 import { placeholders, messages as tMessages } from "../translations";
@@ -28,7 +28,6 @@ import { hexToNpub, npubToHex } from "../lib/keys";
 import { logError } from "../lib/logger";
 
 const DirectMessages: Component = () => {
-
   const params = useParams();
   const account = useAccountContext();
   const dms = useDMContext();
@@ -39,16 +38,17 @@ const DirectMessages: Component = () => {
     if (!dms) return [];
 
     return dms.dmContacts[relation] || [];
-  }
+  };
 
   let firstTime = true;
 
   const changeRelation = async (relation: string) => {
-    if (!dms || !['any', 'follows', 'other'].includes(relation)) return;
+    if (!dms || !["any", "follows", "other"].includes(relation)) return;
     if (
       relation === dms.lastConversationRelation &&
       dms?.dmContacts[relation as UserRelation].length > 0
-    ) return;
+    )
+      return;
 
     dms.actions.setDmRelation2(relation as UserRelation);
 
@@ -67,7 +67,9 @@ const DirectMessages: Component = () => {
 
     list = dms?.dmContacts[relation as UserRelation];
 
-    const first = list.find(c => c.pubkey === dms.lastConversationContact?.pubkey)?.pubkey || toNpub(list[0].pubkey);
+    const first =
+      list.find((c) => c.pubkey === dms.lastConversationContact?.pubkey)
+        ?.pubkey || toNpub(list[0].pubkey);
 
     if (first.length === 0) return;
 
@@ -77,45 +79,45 @@ const DirectMessages: Component = () => {
 
     //   first && dms.actions.selectContact(first)
     // }
-  }
+  };
 
   const isFollowing = (pubkey: string) => {
     if (!account?.following) return false;
 
     return account.following.includes(pubkey);
-  }
+  };
 
   const updateRelationOfContact = async (pubkey: string) => {
     if (!dms || !account || !account.following) return;
 
     if (isFollowing(pubkey)) {
-      return await changeRelation('follows');
+      return await changeRelation("follows");
     }
 
     if (!isFollowing(pubkey)) {
-      return await changeRelation('other');
+      return await changeRelation("other");
     }
   };
 
   const setupContact = async (contact: string) => {
     await dms?.actions.selectContact(contact);
     await updateRelationOfContact(contact);
-  }
+  };
 
   const toNpub = (pubkey: string) => {
     let npub = pubkey;
 
-    if (!npub.startsWith('npub')) {
+    if (!npub.startsWith("npub")) {
       try {
         npub = hexToNpub(npub);
       } catch (e) {
-        logError('Failed to decode npub: ', e);
-        return '';
+        logError("Failed to decode npub: ", e);
+        return "";
       }
     }
 
     return npub;
-  }
+  };
 
   const selectContact = (pubkey: string) => {
     const npub = toNpub(pubkey);
@@ -123,7 +125,7 @@ const DirectMessages: Component = () => {
     if (npub.length === 0) return;
 
     navigate(`/dms/${npub}`);
-  }
+  };
 
   const setupPageState = async (contact: string) => {
     const pubkey = account?.publicKey;
@@ -139,12 +141,12 @@ const DirectMessages: Component = () => {
         return;
       }
 
-      changeRelation(dms?.lastConversationRelation || 'follows')
+      changeRelation(dms?.lastConversationRelation || "follows");
       return;
     }
 
     setupContact(contact);
-  }
+  };
 
   const markAllAsRead = () => {
     dms?.actions.resetAllMessages();
@@ -154,31 +156,42 @@ const DirectMessages: Component = () => {
     const npub = toNpub(pubkey);
 
     return [pubkey, npub].includes(params.contact);
-  }
+  };
 
-  createEffect(on(() => [account?.isKeyLookupDone, params.contact], (next) => {
-    const [ isDone, contact ] = next;
+  createEffect(
+    on(
+      () => [account?.isKeyLookupDone, params.contact],
+      (next) => {
+        const [isDone, contact] = next;
 
-    if (isDone) {
-      let pubkey = (contact || '') as string;
+        if (isDone) {
+          let pubkey = (contact || "") as string;
 
-      if (pubkey.startsWith('npub')) {
-        pubkey = npubToHex(pubkey);
-      }
+          if (pubkey.startsWith("npub")) {
+            pubkey = npubToHex(pubkey);
+          }
 
-      setupPageState(pubkey);
-    }
-  }));
+          setupPageState(pubkey);
+        }
+      },
+    ),
+  );
 
-  createEffect(on(() => dms?.dmCount, (v, p) => {
-    if (!v || v === p) return;
+  createEffect(
+    on(
+      () => dms?.dmCount,
+      (v, p) => {
+        if (!v || v === p) return;
 
-    const count = v;
+        const count = v;
 
-    if (count > 0) {
-      dms?.actions.refreshContacts(dms.lastConversationRelation);
-    }
-  }, { defer: true }));
+        if (count > 0) {
+          dms?.actions.refreshContacts(dms.lastConversationRelation);
+        }
+      },
+      { defer: true },
+    ),
+  );
 
   return (
     <div class={styles.dmLayout}>
@@ -188,13 +201,9 @@ const DirectMessages: Component = () => {
         <PageCaption title={intl.formatMessage(tMessages.title)} />
       </div>
 
-      <Wormhole
-        to="search_section"
-      >
+      <Wormhole to="search_section">
         <Search
-          placeholder={
-            intl.formatMessage(placeholders.findUser)
-          }
+          placeholder={intl.formatMessage(placeholders.findUser)}
           onInputConfirm={() => {}}
           noLinks={true}
           hideDefault={true}
@@ -205,22 +214,17 @@ const DirectMessages: Component = () => {
       <div class={styles.dmContent}>
         <div class={styles.dmSidebar}>
           <Tabs
+            class={styles.dmRelationTabs}
             value={dms?.lastConversationRelation}
             onChange={changeRelation}
           >
             <div class={styles.dmControls}>
               <div>
                 <Tabs.List class={styles.dmContactsTabs}>
-                  <Tabs.Trigger
-                    class={styles.dmContactTab}
-                    value={'follows'}
-                  >
+                  <Tabs.Trigger class={styles.dmContactTab} value={"follows"}>
                     {intl.formatMessage(tMessages.follows)}
                   </Tabs.Trigger>
-                  <Tabs.Trigger
-                    class={styles.dmContactTab}
-                    value={'other'}
-                  >
+                  <Tabs.Trigger class={styles.dmContactTab} value={"other"}>
                     {intl.formatMessage(tMessages.other)}
                   </Tabs.Trigger>
 
@@ -237,11 +241,14 @@ const DirectMessages: Component = () => {
             </div>
 
             <div class={styles.dmContactsList}>
-              <For each={['follows', 'other']}>
-                {relation => (
-                  <Tabs.Content class={styles.dmContactsTabContent} value={relation}>
+              <For each={["follows", "other"]}>
+                {(relation) => (
+                  <Tabs.Content
+                    class={styles.dmContactsTabContent}
+                    value={relation}
+                  >
                     <For each={contacts(relation as UserRelation)}>
-                      {contact => (
+                      {(contact) => (
                         <DirectMessageContact
                           dmContact={contact}
                           onSelect={selectContact}
@@ -251,7 +258,11 @@ const DirectMessages: Component = () => {
                     </For>
                     <Paginator
                       isSmall={true}
-                      loadNextPage={() => dms?.actions.getContactsNextPage(relation as UserRelation)}
+                      loadNextPage={() =>
+                        dms?.actions.getContactsNextPage(
+                          relation as UserRelation,
+                        )
+                      }
                     />
                   </Tabs.Content>
                 )}
@@ -273,6 +284,6 @@ const DirectMessages: Component = () => {
       </div>
     </div>
   );
-}
+};
 
 export default DirectMessages;
