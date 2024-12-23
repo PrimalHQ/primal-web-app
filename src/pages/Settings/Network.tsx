@@ -251,8 +251,6 @@ const Network: Component = () => {
       </ButtonLink>
     </div>
 
-
-
       <div class={styles.settingsContent}>
         <div class={styles.bigCaption}>
           {intl.formatMessage(t.network.relays)}
@@ -304,7 +302,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsContentPaddingOnly}>
         <Show when={!isPrimalRelayInUserSettings()}>
-          <CheckBox2
+          <Checkbox
             id="primal_relay_check"
             checked={account?.connectToPrimaryRelays}
             onChange={() => onCheckPrimalRelay()}

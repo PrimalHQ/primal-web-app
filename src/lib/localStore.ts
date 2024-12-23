@@ -42,6 +42,7 @@ export type LocalStore = {
   dmLastRelation: UserRelation | undefined,
   premiumReminder: number,
   dvms: PrimalDVM[] | undefined,
+  usePrimalRelay: boolean | undefined,
 };
 
 export type UploadTime = {
@@ -91,6 +92,7 @@ export const emptyStorage: LocalStore = {
   dmLastRelation: undefined,
   premiumReminder: 0,
   dvms: undefined,
+  usePrimalRelay: false,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -175,6 +177,28 @@ export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRel
   store.relaySettings = { ...settings };
 
   setStorage(pubkey, store);
+}
+
+export const savePrimalRelaySettings = (pubkey: string | undefined, usePrimalRelay: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.usePrimalRelay = usePrimalRelay;
+
+  setStorage(pubkey, store);
+}
+
+export const readPrimalRelaySettings = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.usePrimalRelay || false;
 }
 
 export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
