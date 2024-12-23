@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 
 import {
   EventCoordinate,
@@ -30,6 +30,7 @@ import { getRandomIntegers } from '../../utils';
 import ArticleTotalZapsSkeleton from '../Skeleton/ArticleTotalZapsSkeleton';
 import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkeleton';
 import { Transition, TransitionGroup } from 'solid-transition-group';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: PrimalArticle }  > = (props) => {
@@ -56,71 +57,66 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
     setIsFetchingArticles(() => false);
   }
 
-  createEffect(() => {
+  createEffect(on(() => props.article?.naddr,() => {
     if (account?.isKeyLookupDone && props.user) {
       getArticles();
     }
-  });
+  }));
 
   return (
     <div id={props.id} class={styles.articleSidebar}>
       <TransitionGroup name="slide-fade">
-      <Show
-        when={account?.isKeyLookupDone && props.article}
-        fallback={
-          <>
-            <div class={styles.section}>
-              <ArticleTotalZapsSkeleton />
-            </div>
+        <Show
+          when={account?.isKeyLookupDone && props.article}
+          fallback={
+            <>
+              <div class={styles.section}>
+                <ArticleTotalZapsSkeleton />
+              </div>
 
-            <div class={styles.section}>
-              <ArticlePreviewSidebarSkeleton />
-              <ArticlePreviewSidebarSkeleton />
-              <ArticlePreviewSidebarSkeleton />
-            </div>
-          </>
-        }
-      >
-          <Show
-            when={!isFetchingArticles()}
-            fallback={
-              <>
-                BOJAN
-              </>
-            }
-          >
-            <div>
-              <Show when={props.article.satszapped > 0}>
-                <div class={`${styles.headingPicks} animated`}>
-                  Total zaps
-                </div>
-
-                <div class={`${styles.section} animated`}>
-                  <div class={styles.totalZaps}>
-                    <span class={styles.totalZapsIcon} />
-                    <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
-                    <span class={styles.unit}>sats</span>
+              <div class={styles.section}>
+                <ArticlePreviewSidebarSkeleton />
+                <ArticlePreviewSidebarSkeleton />
+                <ArticlePreviewSidebarSkeleton />
+              </div>
+            </>
+          }
+        >
+            <Show
+              when={recomended.length > 0}
+            >
+              <div>
+                <Show when={props.article.satszapped > 0}>
+                  <div class={`${styles.headingPicks} animated`}>
+                    Total zaps
                   </div>
-                </div>
-              </Show>
-              <Show
-                when={recomended.length > 0}
-              >
-                <div class={`${styles.headingReads} animated`}>
-                  More Reads from {userName(props.article.user)}
-                </div>
 
-                <div class={`${styles.section} animated`}>
-                  <For each={recomended}>
-                    {(note) => <ArticleShort article={note} short={true}/>}
-                  </For>
-                </div>
-              </Show>
-            </div>
-          </Show>
+                  <div class={`${styles.section} animated`}>
+                    <div class={styles.totalZaps}>
+                      <span class={styles.totalZapsIcon} />
+                      <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
+                      <span class={styles.unit}>sats</span>
+                    </div>
+                  </div>
+                </Show>
+                <Show
+                  when={!isFetchingArticles()}
+                >
+                  <div class={`${styles.headingReads} animated`}>
+                    More Reads from {userName(props.article.user)}
+                  </div>
 
-      </Show>
-        </TransitionGroup>
+                  <div class={`${styles.section} animated`}>
+                    <For each={recomended}>
+                      {(note) => <ArticleShort article={note} short={true}/>}
+                    </For>
+                  </div>
+                </Show>
+              </div>
+            </Show>
+
+        </Show>
+      </TransitionGroup>
     </div>
   );
 }
