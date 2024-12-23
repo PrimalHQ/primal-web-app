@@ -22,6 +22,7 @@ import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticleHighlight.module.scss';
+import ParsedNote from '../ParsedNote/ParsedNote';
 
 const topOffset = 64 + 8;
 
@@ -85,7 +86,7 @@ const ArticleHighlightComments: Component<{
       ret += `top: ${top()}px; `
     }
 
-    ret += `max-height: ${window.innerHeight - 104}px;`
+    ret += `max-height: ${window.innerHeight - top()}px;`
 
     return ret;
 
@@ -132,7 +133,9 @@ const ArticleHighlightComments: Component<{
                 <div class={styles.time}>{date(comment.msg.created_at || 0).label}</div>
               </div>
               <div class={styles.commentContent}>
-                {comment.content}
+                <ParsedNote
+                  note={comment}
+                />
               </div>
             </div>
           )}
