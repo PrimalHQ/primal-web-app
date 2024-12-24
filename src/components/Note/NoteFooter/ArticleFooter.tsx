@@ -23,6 +23,7 @@ import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import BookmarkArticle from '../../BookmarkNote/BookmarkArticle';
+import { readSecFromStorage } from '../../../lib/localStore';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -106,6 +107,14 @@ const ArticleFooter: Component<{
       return;
     }
 
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
     props.updateState('isRepostMenuVisible', () => false);
 
     const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
@@ -142,6 +151,14 @@ const ArticleFooter: Component<{
       return;
     }
 
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
     const success = await account.actions.addLike(props.note);
 
     if (success) {
@@ -160,6 +177,14 @@ const ArticleFooter: Component<{
       account?.actions.showGetStarted();
       props.updateState('isZapping', () => false);
       return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
     }
 
     if (!account.proxyThroughPrimal && account.relays.length === 0) {
@@ -192,6 +217,14 @@ const ArticleFooter: Component<{
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted();
       return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
     }
 
     if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {

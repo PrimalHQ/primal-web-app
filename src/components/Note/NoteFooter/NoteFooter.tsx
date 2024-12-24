@@ -22,6 +22,7 @@ import NoteFooterActionButton from './NoteFooterActionButton';
 import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
+import { readSecFromStorage } from '../../../lib/localStore';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -107,6 +108,14 @@ const NoteFooter: Component<{
       return;
     }
 
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
     if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
@@ -150,6 +159,14 @@ const NoteFooter: Component<{
       return;
     }
 
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
     if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(t.noRelaysConnected),
@@ -175,6 +192,14 @@ const NoteFooter: Component<{
       account?.actions.showGetStarted();
       props.updateState && props.updateState('isZapping', () => false);
       return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
     }
 
     if (!account.proxyThroughPrimal && account.relays.length === 0) {
@@ -207,6 +232,14 @@ const NoteFooter: Component<{
     if (!account?.hasPublicKey()) {
       account?.actions.showGetStarted();
       return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
     }
 
     if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {

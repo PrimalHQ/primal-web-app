@@ -146,6 +146,7 @@ export type AccountContextStore = {
       cb?: (remove: boolean, pubkey: string | undefined) => void,
     ) => Promise<void>,
     clearPremiumRemider: () => void,
+    setShowPin: (sec: string, cb?: () => void) => void,
   },
 }
 
@@ -706,6 +707,10 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   }
 
+  const setShowPin = (sec: string) => {
+    updateStore('showPin', () => sec);
+  }
+
   const setActiveUser = (user: PrimalUser) => {
     updateStore('activeUser', () => ({...user}));
   };
@@ -1092,6 +1097,14 @@ export function AccountProvider(props: { children: JSXElement }) {
       return;
     }
 
+    if (!store.sec || store.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
+      }
+    }
+
     const unsub = subsTo(`before_mute_${APP_ID}`, {
       onEvent: (_, content) => {
         if (content &&
@@ -1129,6 +1142,14 @@ export function AccountProvider(props: { children: JSXElement }) {
   const removeFromMuteList = (pubkey: string, then?: () => void) => {
     if (!store.publicKey || !store.muted || !store.muted.includes(pubkey)) {
       return;
+    }
+
+    if (!store.sec || store.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
+      }
     }
 
     const unsub = subsTo(`before_unmute_${APP_ID}`, {
@@ -1837,6 +1858,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     resolveContacts,
     replaceContactList,
     clearPremiumRemider,
+    setShowPin,
   },
 });
 

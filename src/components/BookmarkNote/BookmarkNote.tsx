@@ -9,16 +9,18 @@ import { getBookmarks, sendBookmarks } from '../../lib/profile';
 import { subsTo } from '../../sockets';
 import { PrimalNote } from '../../types/primal';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { bookmarks as tBookmarks } from '../../translations';
+import { bookmarks as tBookmarks, toast } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
-import { saveBookmarks } from '../../lib/localStore';
+import { readSecFromStorage, saveBookmarks } from '../../lib/localStore';
 import { triggerImportEvents } from '../../lib/notes';
+import { useToastContext } from '../Toaster/Toaster';
 
 const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boolean }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
+  const toaster = useToastContext();
 
   const [isBookmarked, setIsBookmarked] = createSignal(false);
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
@@ -46,6 +48,27 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
+      toaster?.sendWarning(
+        intl.formatMessage(toast.noRelaysConnected),
+      );
+      return;
+    }
+
+
     if (account && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
       const bookmarksToAdd = [...bookmarkTags, ['e', props.note.post.id]];
 

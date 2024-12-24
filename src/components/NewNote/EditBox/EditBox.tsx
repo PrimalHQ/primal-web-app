@@ -40,7 +40,7 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
-import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
+import { readNoteDraft, readNoteDraftUserRefs, readSecFromStorage, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
 import Lnbc from "../../Lnbc/Lnbc";
@@ -701,6 +701,14 @@ const EditBox: Component<{
   const postNote = async () => {
     if (!account || !account.hasPublicKey() || fileToUpload()) {
       return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
     }
 
     if (!account.proxyThroughPrimal && account.relays.length === 0) {

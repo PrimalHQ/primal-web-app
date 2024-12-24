@@ -6,7 +6,7 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { zapArticle, zapDVM, zapNote, zapProfile } from '../../lib/zap';
 import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
+import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount, toast as toastText } from '../../translations';
 import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
@@ -17,6 +17,7 @@ import TextInput from '../TextInput/TextInput';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './CustomZap.module.scss';
+import { readSecFromStorage } from '../../lib/localStore';
 
 const CustomZap: Component<{
   id?: string,
@@ -95,36 +96,40 @@ const CustomZap: Component<{
   };
 
   const submit = async () => {
-    if (account?.hasPublicKey()) {
-      props.onConfirm(selectedValue());
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
 
-      const note = props.note;
-
-      if (note) {
-        setTimeout(async () => {
-
-          const zappers: Record<string, Function> = {
-            [Kind.Text]: zapNote,
-            [Kind.LongForm]: zapArticle,
-            [Kind.LongFormShell]: zapArticle,
-          }
-
-          const success = await zappers[note.msg.kind](
-            note,
-            account.publicKey,
-            selectedValue().amount || 0,
-            selectedValue().message,
-            account.activeRelays,
-          );
-
-          handleZap(success);
-        }, lottieDuration());
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
         return;
       }
+    }
 
-      if (props.profile) {
-        const success = await zapProfile(
-          props.profile,
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(toastText.noRelaysConnected),
+      );
+      return;
+    }
+    props.onConfirm(selectedValue());
+
+    const note = props.note;
+
+    if (note) {
+      setTimeout(async () => {
+
+        const zappers: Record<string, Function> = {
+          [Kind.Text]: zapNote,
+          [Kind.LongForm]: zapArticle,
+          [Kind.LongFormShell]: zapArticle,
+        }
+
+        const success = await zappers[note.msg.kind](
+          note,
           account.publicKey,
           selectedValue().amount || 0,
           selectedValue().message,
@@ -132,28 +137,41 @@ const CustomZap: Component<{
         );
 
         handleZap(success);
-        return;
-      }
+      }, lottieDuration());
+      return;
+    }
 
-      const dvm = props.dvm;
-      const dvmUser = dvm?.user;
+    if (props.profile) {
+      const success = await zapProfile(
+        props.profile,
+        account.publicKey,
+        selectedValue().amount || 0,
+        selectedValue().message,
+        account.activeRelays,
+      );
 
-      if (dvm && dvmUser) {
-        setTimeout(async () => {
+      handleZap(success);
+      return;
+    }
 
-          const success = await zapDVM(
-            dvm,
-            dvmUser,
-            account.publicKey,
-            selectedValue().amount || 0,
-            selectedValue().message,
-            account.activeRelays,
-            );
+    const dvm = props.dvm;
+    const dvmUser = dvm?.user;
 
-            handleZap(success);
-          }, lottieDuration());
-        return;
-      }
+    if (dvm && dvmUser) {
+      setTimeout(async () => {
+
+        const success = await zapDVM(
+          dvm,
+          dvmUser,
+          account.publicKey,
+          selectedValue().amount || 0,
+          selectedValue().message,
+          account.activeRelays,
+          );
+
+          handleZap(success);
+        }, lottieDuration());
+      return;
     }
   };
 
