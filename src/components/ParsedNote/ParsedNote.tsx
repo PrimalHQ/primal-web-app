@@ -49,7 +49,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, primalUserRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -299,147 +299,6 @@ const ParsedNote: Component<{
       return;
     }
 
-    if (isUrl(token)) {
-      const index = token.indexOf('http');
-
-      if (index > 0) {
-        const prefix = token.slice(0, index);
-
-        const matched = (token.match(urlExtractRegex) || [])[0];
-
-        if (matched) {
-          const suffix = token.substring(matched.length + index, token.length);
-
-          parseToken(prefix);
-          parseToken(matched);
-          parseToken(suffix);
-          return;
-        } else {
-          parseToken(prefix);
-          parseToken(token.slice(index));
-          return;
-        }
-      }
-
-      if (!props.ignoreMedia) {
-        if (isImage(token)) {
-          removeLinebreaks('image');
-          isAfterEmbed = true;
-          lastSignificantContent = 'image';
-          updateContent(content, 'image', token);
-          return;
-        }
-
-        if (isMp4Video(token)) {
-          removeLinebreaks('video');
-          isAfterEmbed = true;
-          lastSignificantContent = 'video';
-          updateContent(content, 'video', token, { videoType: 'video/mp4'});
-          return;
-        }
-
-        if (isOggVideo(token)) {
-          removeLinebreaks('video');
-          isAfterEmbed = true;
-          lastSignificantContent = 'video';
-          updateContent(content, 'video', token, { videoType: 'video/ogg'});
-          return;
-        }
-
-        if (isWebmVideo(token)) {
-          removeLinebreaks('video');
-          isAfterEmbed = true;
-          lastSignificantContent = 'video';
-          updateContent(content, 'video', token, { videoType: 'video/webm'});
-          return;
-        }
-
-        if (isYouTube(token)) {
-          removeLinebreaks('youtube');
-          isAfterEmbed = true;
-          lastSignificantContent = 'youtube';
-          updateContent(content, 'youtube', token);
-          return;
-        }
-
-        if (isSpotify(token)) {
-          removeLinebreaks('spotify');
-          isAfterEmbed = true;
-          lastSignificantContent = 'spotify';
-          updateContent(content, 'spotify', token);
-          return;
-        }
-
-        if (isTwitch(token)) {
-          removeLinebreaks('twitch');
-          isAfterEmbed = true;
-          lastSignificantContent = 'twitch';
-          updateContent(content, 'twitch', token);
-          return;
-        }
-
-        if (isMixCloud(token)) {
-          removeLinebreaks('mixcloud');
-          isAfterEmbed = true;
-          lastSignificantContent = 'mixcloud';
-          updateContent(content, 'mixcloud', token);
-          return;
-        }
-
-        if (isSoundCloud(token)) {
-          removeLinebreaks('soundcloud');
-          isAfterEmbed = true;
-          lastSignificantContent = 'soundcloud';
-          updateContent(content, 'soundcloud', token);
-          return;
-        }
-
-        if (isAppleMusic(token)) {
-          removeLinebreaks('applemusic');
-          isAfterEmbed = true;
-          lastSignificantContent = 'applemusic';
-          updateContent(content, 'applemusic', token);
-          return;
-        }
-
-        if (isWavelake(token)) {
-          removeLinebreaks('wavelake');
-          isAfterEmbed = true;
-          lastSignificantContent = 'wavelake';
-          updateContent(content, 'wavelake', token);
-          return;
-        }
-      }
-
-      if (props.noLinks === 'text') {
-        lastSignificantContent = 'text';
-        updateContent(content, 'text', token);
-        return;
-      }
-
-      const preview = getLinkPreview(token);
-
-      const hasMinimalPreviewData = !props.noPreviews &&
-        preview &&
-        preview.url &&
-        ((!!preview.description && preview.description.length > 0) ||
-          !preview.images?.some((x:any) => x === '') ||
-          !!preview.title
-        );
-
-      if (hasMinimalPreviewData) {
-        removeLinebreaks('link');
-        updateContent(content, 'link', token, { preview });
-      } else {
-        updateContent(content, 'link', token);
-      }
-
-      lastSignificantContent = 'link';
-      isAfterEmbed = false;
-      totalLinks++;
-      return;
-    }
-
     if (isNoteMention(token)) {
       removeLinebreaks('notemention');
       lastSignificantContent = 'notemention';
@@ -503,6 +362,153 @@ const ParsedNote: Component<{
       updateContent(content, 'lnbc', token);
       return;
     }
+
+    if (isUrl(token)) {
+          const index = token.indexOf('http');
+
+          if (index > 0) {
+            const prefix = token.slice(0, index);
+
+            const matched = (token.match(urlExtractRegex) || [])[0];
+
+            if (matched) {
+              const suffix = token.substring(matched.length + index, token.length);
+
+              parseToken(prefix);
+              parseToken(matched);
+              parseToken(suffix);
+              return;
+            } else {
+              parseToken(prefix);
+              parseToken(token.slice(index));
+              return;
+            }
+          }
+
+          // if (primalUserRegex.test(token)) {
+          //   lastSignificantContent = 'usermention';
+          //   updateContent(content, 'usermention', token);
+          //   return;
+          // }
+
+          if (!props.ignoreMedia) {
+            if (isImage(token)) {
+              removeLinebreaks('image');
+              isAfterEmbed = true;
+              lastSignificantContent = 'image';
+              updateContent(content, 'image', token);
+              return;
+            }
+
+            if (isMp4Video(token)) {
+              removeLinebreaks('video');
+              isAfterEmbed = true;
+              lastSignificantContent = 'video';
+              updateContent(content, 'video', token, { videoType: 'video/mp4'});
+              return;
+            }
+
+            if (isOggVideo(token)) {
+              removeLinebreaks('video');
+              isAfterEmbed = true;
+              lastSignificantContent = 'video';
+              updateContent(content, 'video', token, { videoType: 'video/ogg'});
+              return;
+            }
+
+            if (isWebmVideo(token)) {
+              removeLinebreaks('video');
+              isAfterEmbed = true;
+              lastSignificantContent = 'video';
+              updateContent(content, 'video', token, { videoType: 'video/webm'});
+              return;
+            }
+
+            if (isYouTube(token)) {
+              removeLinebreaks('youtube');
+              isAfterEmbed = true;
+              lastSignificantContent = 'youtube';
+              updateContent(content, 'youtube', token);
+              return;
+            }
+
+            if (isSpotify(token)) {
+              removeLinebreaks('spotify');
+              isAfterEmbed = true;
+              lastSignificantContent = 'spotify';
+              updateContent(content, 'spotify', token);
+              return;
+            }
+
+            if (isTwitch(token)) {
+              removeLinebreaks('twitch');
+              isAfterEmbed = true;
+              lastSignificantContent = 'twitch';
+              updateContent(content, 'twitch', token);
+              return;
+            }
+
+            if (isMixCloud(token)) {
+              removeLinebreaks('mixcloud');
+              isAfterEmbed = true;
+              lastSignificantContent = 'mixcloud';
+              updateContent(content, 'mixcloud', token);
+              return;
+            }
+
+            if (isSoundCloud(token)) {
+              removeLinebreaks('soundcloud');
+              isAfterEmbed = true;
+              lastSignificantContent = 'soundcloud';
+              updateContent(content, 'soundcloud', token);
+              return;
+            }
+
+            if (isAppleMusic(token)) {
+              removeLinebreaks('applemusic');
+              isAfterEmbed = true;
+              lastSignificantContent = 'applemusic';
+              updateContent(content, 'applemusic', token);
+              return;
+            }
+
+            if (isWavelake(token)) {
+              removeLinebreaks('wavelake');
+              isAfterEmbed = true;
+              lastSignificantContent = 'wavelake';
+              updateContent(content, 'wavelake', token);
+              return;
+            }
+          }
+
+          if (props.noLinks === 'text') {
+            lastSignificantContent = 'text';
+            updateContent(content, 'text', token);
+            return;
+          }
+
+          const preview = getLinkPreview(token);
+
+          const hasMinimalPreviewData = !props.noPreviews &&
+            preview &&
+            preview.url &&
+            ((!!preview.description && preview.description.length > 0) ||
+              !preview.images?.some((x:any) => x === '') ||
+              !!preview.title
+            );
+
+          if (hasMinimalPreviewData) {
+            removeLinebreaks('link');
+            updateContent(content, 'link', token, { preview });
+          } else {
+            updateContent(content, 'link', token);
+          }
+
+          lastSignificantContent = 'link';
+          isAfterEmbed = false;
+          totalLinks++;
+          return;
+        }
 
     lastSignificantContent = 'text';
     updateContent(content, 'text', token);
@@ -1029,13 +1035,16 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        let [_, id] = token.split(':');
-
-        if (!id) {
-          return <>{token}</>;
-        }
-
+        let nostr = '';
+        let id = token;
+        let prefix = '';
         let end = '';
+
+        const idStart = token.search(addrRegex);
+
+        if (idStart > 0) {
+          id = token.slice(idStart);
+        }
 
         let match = specialCharsRegex.exec(id);
 
@@ -1104,13 +1113,20 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        let [_, id] = token.split(':');
+        let nostr = '';
+        let id = token;
+        let prefix = '';
+        let end = '';
 
-        if (!id) {
-          return unknownMention(id);
+        const idStart = token.search(noteRegex);
+
+        if (idStart > 0) {
+          id = token.slice(idStart);
         }
 
-        let end = '';
+        if (!id || id.length === 0) {
+          return unknownMention(id);
+        }
 
         let match = specialCharsRegex.exec(id);
 
@@ -1351,19 +1367,20 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 1);
 
-        let [nostr, id] = token.split(':');
+        let nostr = '';
+        let id = token;
+        let prefix = '';
+        let end = '';
 
-        if (!id) {
+        const idStart = token.search(profileRegex);
+
+        if (idStart > 0) {
+          id = token.slice(idStart);
+        }
+
+        if (!id || id.length === 0) {
           return <>{token}</>;
         }
-
-        let prefix = '';
-
-        if (nostr !== 'nostr') {
-          prefix = nostr.split('nostr')[0] || '';
-        }
-
-        let end = '';
 
         let match = specialCharsRegex.exec(id);
 
@@ -1389,6 +1406,14 @@ const ParsedNote: Component<{
           const path = app?.actions.profileLink(npub) || '';
 
           let user = mentionedUsers && mentionedUsers[hex];
+
+          if (!user) {
+            const metaD = app?.events[Kind.Metadata].find(md => md.pubkey === hex) as NostrUserContent | undefined;
+
+            if (metaD) {
+              user = convertToUser(metaD, metaD?.pubkey);
+            }
+          }
 
           const label = user ? userName(user) : truncateNpub(npub);
 

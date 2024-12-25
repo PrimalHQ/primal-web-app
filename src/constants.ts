@@ -266,6 +266,8 @@ export const notificationTypeNoteProps: Record<string, string> = {
 
 }
 
+export const primalUserRegex = /primal.net\/[a-zA-Z0-9\-\_]+/;
+
 export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 // export const magnetRegex = /(magnet:[\S]+)/i;
@@ -290,12 +292,12 @@ export const lnUnifiedRegex = /bitcoin:[a-zA-Z0-9]*(\?.*)lightning=([a-zA-Z0-9]*
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
 export const tagMentionRegex = /\#\[([0-9]*)\]/;
-export const noteRegex = /nostr:((note|nevent)1\w+)\b/g;
-export const noteRegexLocal = /nostr:((note|nevent)1\w+)\b/;
-export const profileRegex = /nostr:((npub|nprofile)1\w+)\b/;
-export const profileRegexG = /nostr:((npub|nprofile)1\w+)\b/g;
-export const addrRegex = /nostr:((naddr)1\w+)\b/;
-export const addrRegexG = /nostr:((naddr)1\w+)\b/g;
+export const noteRegex = /((note|nevent)1\w+)\b/g;
+export const noteRegexLocal = /((note|nevent)1\w+)\b/;
+export const profileRegex = /((npub|nprofile)1\w+)\b/;
+export const profileRegexG = /((npub|nprofile)1\w+)\b/g;
+export const addrRegex = /((naddr)1\w+)\b/;
+export const addrRegexG = /((naddr)1\w+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
 export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
