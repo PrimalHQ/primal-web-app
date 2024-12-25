@@ -194,6 +194,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   }
 
   const setTheme = (theme: PrimalTheme | null, temp?: boolean) => {
+    const forced = localStorage.getItem('forceTheme');
+
+    if (forced && ['sunrise', 'sunset', 'midnight', 'ice'].includes(forced)) {
+      updateStore('theme', () => forced);
+      return;
+    }
+
     if (!theme) {
       return;
     }
@@ -854,6 +861,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   onMount(() => {
+    const forced = localStorage.getItem('forceTheme');
+
+    if (forced && ['sunrise', 'sunset', 'midnight', 'ice'].includes(forced)) {
+      updateStore('theme', () => forced);
+      return;
+    }
+
     // Set global theme, this is done to avoid changing the theme
     // when waiting for pubkey (like when reloading a page).
     const storedTheme = localStorage.getItem('theme');
