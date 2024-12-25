@@ -1047,6 +1047,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                     mediaThumb={articleMediaThumb()}
                     width={640}
                     authorPk={store.article?.pubkey}
+                    ignoreRatio={true}
                   />
                 </Show>
 
