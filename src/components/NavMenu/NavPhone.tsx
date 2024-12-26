@@ -61,13 +61,13 @@ const NavPhone: Component< { id?: string } > = (props) => {
     {
       type: 'menu',
       links: [
-        {
-          type: 'link',
-          to: '/dms',
-          label: intl.formatMessage(t.messages),
-          icon: 'messagesIcon',
-          bubble: () => dms?.dmCount || 0,
-        },
+        // {
+        //   type: 'link',
+        //   to: '/dms',
+        //   label: intl.formatMessage(t.messages),
+        //   icon: 'messagesIcon',
+        //   bubble: () => dms?.dmCount || 0,
+        // },
         {
           type: 'link',
           to: '/bookmarks',
