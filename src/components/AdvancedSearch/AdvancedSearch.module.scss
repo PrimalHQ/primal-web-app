@@ -122,6 +122,10 @@
     border-radius: 18px;
     margin: 0;
 
+    @media only screen and (max-width: 720px) {
+      width: calc(100dvw - 32px);
+    }
+
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -441,6 +445,11 @@
 
 .selectBox {
   display: flex;
+
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 32px);
+  }
+
   .trigger {
     padding-block: 8px;
     padding-left: 16px;
