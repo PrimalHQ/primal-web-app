@@ -266,8 +266,6 @@ export const notificationTypeNoteProps: Record<string, string> = {
 
 }
 
-export const primalUserRegex = /primal.net\/[a-zA-Z0-9\-\_]+/;
-
 export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
 // export const odyseeRegex = /odysee\.com\/([a-zA-Z0-9]+)/;
 // export const magnetRegex = /(magnet:[\S]+)/i;
@@ -295,7 +293,7 @@ export const tagMentionRegex = /\#\[([0-9]*)\]/;
 export const noteRegex = /((note|nevent)1\w+)\b/g;
 export const noteRegexLocal = /((note|nevent)1\w+)\b/;
 export const profileRegex = /((npub|nprofile)1\w+)\b/;
-export const profileRegexG = /((npub|nprofile)1\w+)\b/g;
+export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
 export const addrRegex = /((naddr)1\w+)\b/;
 export const addrRegexG = /((naddr)1\w+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
@@ -310,6 +308,7 @@ export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|w
 
 export const eventRegexLocal = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/;
 export const eventRegexG = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/g;
+export const eventRegexNostrless = /((note|nevent|naddr)1\w+)\b/;
 
 export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
 

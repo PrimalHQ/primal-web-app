@@ -958,7 +958,14 @@ const EditBox: Component<{
   const subUserRef = (userId: string) => {
 
     const parsed = parsedMessage().replace(profileRegex, (url) => {
-      const [_, id] = url.split(':');
+
+      let id = url;
+
+      const idStart = url.search(profileRegex);
+
+      if (idStart > 0) {
+        id = url.slice(idStart);
+      }
 
       if (!id) {
         return url;
@@ -1087,10 +1094,16 @@ const EditBox: Component<{
   };
 
   const subNaddrRef = (noteId: string) => {
-
-
     const parsed = parsedMessage().replace(addrRegex, (url) => {
-      const [_, id] = url.split(':');
+
+      let id = url;
+
+      const idStart = url.search(addrRegex);
+
+      if (idStart > 0) {
+        id = url.slice(idStart);
+      }
+      // const [_, id] = url.split(':');
 
       if (!id || id !== noteId) {
         return url;
@@ -1268,12 +1281,20 @@ const EditBox: Component<{
   const subNoteRef = (noteId: string) => {
 
     const parsed = parsedMessage().replace(noteRegex, (url) => {
-      const [_, id] = url.split(':');
+      // const [_, id] = url.split(':');
 
+      let id = url;
+
+      const idStart = url.search(noteRegex);
+
+      if (idStart > 0) {
+        id = url.slice(idStart);
+      }
 
       if (!id || id !== noteId) {
         return url;
       }
+
       try {
         let note = noteRefs[id];
 

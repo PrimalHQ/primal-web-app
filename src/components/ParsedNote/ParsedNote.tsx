@@ -49,7 +49,7 @@ import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, primalUserRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -65,6 +65,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
+import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 
 const groupGridLimit = 7;
 
@@ -965,8 +966,7 @@ const ParsedNote: Component<{
         }
       })
 
-      getEvents(account?.publicKey, [nid], subId);
-
+      getEvents(account?.publicKey, [data.id], subId);
 
       return (
         <Show
@@ -1094,6 +1094,10 @@ const ParsedNote: Component<{
 
     if(!mention || props.veryShort) return <></>;
 
+    if (props.noLinks === 'links') {
+      return <SimpleArticlePreview article={mention} noLink={true} />
+    }
+
     return (
       <div class={styles.articlePreview}>
         <ArticleCompactPreview
@@ -1101,6 +1105,7 @@ const ParsedNote: Component<{
           hideFooter={true}
           hideContext={true}
           boredered={(props.embedLevel || 0) > 0}
+          noLinks={props.noLinks}
         />
       </div>);
   };

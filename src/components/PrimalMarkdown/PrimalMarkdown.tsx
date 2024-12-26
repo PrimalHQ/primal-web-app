@@ -16,7 +16,7 @@ import  styles from './PrimalMarkdown.module.scss';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { hexToNpub, npubToHex } from '../../lib/keys';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { eventRegexLocal, Kind, mdImageRegex, profileRegexG } from '../../constants';
+import { eventRegexG, eventRegexLocal, eventRegexNostrless, Kind, mdImageRegex, profileRegex, profileRegexG, specialCharsRegex } from '../../constants';
 import { NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 import { userName } from '../../stores/profile';
 import { A, useNavigate } from '@solidjs/router';
@@ -334,7 +334,26 @@ const PrimalMarkdown: Component<{
 
       const prepped = orig.replace(profileRegexG, (r: string) => {
 
-        const [_, npub] = r.split(':');
+        let npub = r;
+        let end = '';
+
+        const idStart = r.search(profileRegex);
+
+        if (idStart > 0) {
+          npub = r.slice(idStart);
+        }
+
+        if (!npub || npub.length === 0) {
+          return r;
+        }
+
+        let match = specialCharsRegex.exec(npub);
+
+        if (match) {
+          const i = match.index;
+          end = npub.slice(i);
+          npub = npub.slice(0, i);
+        }
 
         const id = npubToHex(npub);
 
@@ -354,10 +373,29 @@ const PrimalMarkdown: Component<{
     }
 
     if (token.type === 'event') {
-      let [_, noteId] = token.value.split(':');
+      let noteId = token.value;
+      let end = '';
+
+      const idStart = token.value.search(eventRegexNostrless);
+
+      if (idStart > 0) {
+        noteId = token.value.slice(idStart);
+      }
+
+      if (!noteId || noteId.length === 0) {
+        return <>{token.value}</>;
+      }
+
+      let match = specialCharsRegex.exec(noteId);
+
+      if (match) {
+        const i = match.index;
+        end = noteId.slice(i);
+        noteId = noteId.slice(0, i);
+      }
 
       if (noteId.startsWith('nevent')) {
-        const data = nip19.decode(noteId).data;
+        const data = nip19.decode(noteId).data as nip19.EventPointer;
         const note = (props.article?.mentionedNotes || {})[data.id];
 
         const kind = note.post.kind || note.msg.kind;
@@ -380,7 +418,7 @@ const PrimalMarkdown: Component<{
       }
 
       if (noteId.startsWith('note')) {
-        const id = nip19.decode(noteId).data;
+        const id = nip19.decode(noteId).data as string;
         const note = (props.article?.mentionedNotes || {})[id];
 
         return (

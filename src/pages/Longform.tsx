@@ -143,8 +143,6 @@ const Longform: Component< { naddr: string } > = (props) => {
     setNaddr(() => props.naddr);
   })
 
-
-
   let latestTopZap: string = '';
   let latestTopZapFeed: string = '';
   let articleContextMenu: HTMLDivElement | undefined;
@@ -656,9 +654,12 @@ const Longform: Component< { naddr: string } > = (props) => {
     const articles = convertToArticles(page, page.topZaps);
 
     const article = articles.find(a => {
-      if (a.noteId === naddr()) return true;
+      const addr = naddr();
 
-      const decode1 = decodeIdentifier(naddr());
+      if (!addr) return false;
+      if (a.noteId === addr) return true;
+
+      const decode1 = decodeIdentifier(addr);
       const decode2 = decodeIdentifier(a.naddr);
 
       const a1 = `${decode1.data.kind}_${decode1.data.pubkey}_${decode1.data.identifier}`;
