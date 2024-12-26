@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A, useNavigate } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
+import { Component, Match, Show, Switch } from 'solid-js';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 
 import { premium as t } from '../../translations';
@@ -11,6 +11,8 @@ import styles from './Premium.module.scss';
 import PremiumSummary from './PremiumSummary';
 import PremiumUserInfo from './PremiumUserInfo';
 import { useAppContext } from '../../contexts/AppContext';
+import { isIOS } from '../../utils';
+import { isAndroid } from '@kobalte/utils';
 
 
 const PremiumStatusOverview: Component<{
@@ -18,6 +20,7 @@ const PremiumStatusOverview: Component<{
   profile?: PrimalUser,
   updateUserMetadata: (option?: 'nip05' | 'lud16') => void,
   onExtendPremium?: () => void,
+  onManagePremium?: () => void,
 }> = (props) => {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -66,25 +69,27 @@ const PremiumStatusOverview: Component<{
         </div>
       </Show>
 
-      <Show when={props.data.membershipStatus.tier !== 'premium-legend'}>
-        <Show
-          when={isExpired()}
-          fallback={
-            <div class={styles.extendPlan}>
-              <ButtonPremium onClick={props.onExtendPremium}>
-                {intl.formatMessage(t.actions.extendPlan)}
-              </ButtonPremium>
-            </div>
-          }
-        >
-          <div class={styles.extendPlan}>
+      <div class={styles.extendPlan}>
+        <Switch>
+          <Match when={isIOS() || isAndroid()}>
+            <ButtonPremium onClick={props.onManagePremium}>
+              {intl.formatMessage(t.actions.managePremium)}
+            </ButtonPremium>
+          </Match>
+
+          <Match when={isExpired()}>
             <ButtonPremium onClick={props.onExtendPremium}>
               {intl.formatMessage(t.actions.renewPlan)}
             </ButtonPremium>
-          </div>
-        </Show>
-      </Show>
+          </Match>
 
+          <Match when={props.data.membershipStatus.tier === 'premium'}>
+            <ButtonPremium onClick={props.onExtendPremium}>
+              {intl.formatMessage(t.actions.extendPlan)}
+            </ButtonPremium>
+          </Match>
+        </Switch>
+      </div>
     </div>
   );
 }

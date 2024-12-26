@@ -56,6 +56,7 @@ import { useToastContext } from '../../components/Toaster/Toaster';
 import { triggerImportEvents } from '../../lib/notes';
 import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
+import PremiumManageModal from './PremiumManageModal';
 
 export const satsInBTC = 100_000_000;
 
@@ -91,6 +92,7 @@ export type PremiumStore = {
   openPromoCode: boolean,
   openRename: boolean,
   openRenew: boolean,
+  openManage: boolean,
   openOrderHistory: boolean,
   openFeatures: 'features' | 'faq' | undefined,
   openLegend: boolean,
@@ -157,6 +159,7 @@ const Premium: Component = () => {
     openPromoCode: false,
     openRename: false,
     openRenew: false,
+    openManage: false,
     openLegend: false,
     openOrderHistory: false,
     openFeatures: undefined,
@@ -738,6 +741,9 @@ const Premium: Component = () => {
         await getSubscriptionInfo();
         setPremiumData('openRenew', () => true);
         break;
+        case 'managePremium':
+        setPremiumData('openManage', () => true);
+        break;
       case 'orderHistory':
         setPremiumData('openOrderHistory', () => true);
         break;
@@ -1038,7 +1044,9 @@ const Premium: Component = () => {
                 data={premiumData}
                 profile={account?.activeUser}
                 updateUserMetadata={updateUserMetadata}
-                onExtendPremium={() => handlePremiumAction('extendSubscription')}/>
+                onExtendPremium={() => handlePremiumAction('extendSubscription')}
+                onManagePremium={() => handlePremiumAction('managePremium')}
+              />
             </Match>
 
             <Match when={
@@ -1148,6 +1156,14 @@ const Premium: Component = () => {
             setOpen={(v: boolean) => setPremiumData('openRenew', () => v)}
             data={premiumData}
             setData={setPremiumData}
+          />
+
+          <PremiumManageModal
+            open={premiumData.openManage}
+            setOpen={(v: boolean) => setPremiumData('openManage', () => v)}
+            data={premiumData}
+            setData={setPremiumData}
+            onSelect={handlePremiumAction}
           />
 
           <PremiumOrderHistoryModal

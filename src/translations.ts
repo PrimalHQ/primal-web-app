@@ -2559,6 +2559,11 @@ export const premium = {
       defaultMessage: 'Renew Your Subscription',
       description: 'Extend your subscription action on the premium page',
     },
+    managePremium: {
+      id: 'pages.premium.actions.managePremium',
+      defaultMessage: 'Manage Premium',
+      description: 'Manage your Premium Account',
+    },
   },
   title: {
     general: {

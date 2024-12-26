@@ -41,22 +41,22 @@ const PremiumSidebarActive: Component<{
         <ul>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('premiumRelay')}>
-              Premium Relay
+              <div>Premium Relay</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('mediaManagment')}>
-              Media Managment
+              <div>Media Managment</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('contactBackup')}>
-              Contact List Backup
+              <div>Contact List Backup</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('contentBackup')}>
-              Content Backup
+              <div>Content Backup</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
         </ul>
@@ -70,7 +70,7 @@ const PremiumSidebarActive: Component<{
         <ul>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('orderHistory')}>
-              Order history
+              <div>Order history</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <Show when={!isLegend()}>
@@ -78,29 +78,29 @@ const PremiumSidebarActive: Component<{
               <ButtonLink onClick={() => props.onSidebarAction('extendSubscription')}>
                 <Show
                   when={isExpired()}
-                  fallback="Extend your subscripton"
+                  fallback={<><div>Extend your subscripton</div> <div class={styles.chevronRight}></div></>}
                 >
-                  Renew your subscripton
+                  <div>Renew your subscripton</div> <div class={styles.chevronRight}></div>
                 </Show>
               </ButtonLink>
             </li>
           </Show>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('changeName')}>
-              Change your Primal name
+              <div>Change your Primal name</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <Show when={isLegend()}>
             <li>
               <ButtonLink onClick={() => props.onSidebarAction('customLegend')}>
-                Legendary Profile Customization
+                <div>Legendary Profile Customization</div> <div class={styles.chevronRight}></div>
               </ButtonLink>
             </li>
           </Show>
             <Show when={!isExpired() && !isLegend()}>
               <li>
                 <ButtonLink onClick={() => props.onSidebarAction('becomeLegend')}>
-                  Become a Legend
+                  <div>Become a Legend</div> <div class={styles.chevronRight}></div>
                 </ButtonLink>
               </li>
             </Show>
