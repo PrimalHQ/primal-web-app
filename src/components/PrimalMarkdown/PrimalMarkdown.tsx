@@ -29,9 +29,10 @@ import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
 import { useToastContext } from '../Toaster/Toaster';
 import MarkdownSlice from './MarkdownSlice';
-import { convertHtmlEntityToAngleBrackets } from '../../utils';
+import { convertHtmlEntityToAngleBrackets, isIOS } from '../../utils';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useAppContext } from '../../contexts/AppContext';
+import { isAndroid } from '@kobalte/utils';
 
 export type Coord = {
   x: number;
@@ -213,6 +214,7 @@ const PrimalMarkdown: Component<{
   };
 
   const showNewHighlightMenu = (text: string) => {
+    if (isIOS() || isAndroid()) return;
     const coord = getSelectionCoords(true);
 
     const r = viewer?.getBoundingClientRect();
@@ -361,7 +363,7 @@ const PrimalMarkdown: Component<{
 
         const name = user ? userName(user) : r;
 
-        return `[@${name}](${r} "${npub}")`;
+        return `[@${name}](${npub})`;
       })
 
       return <MarkdownSlice
@@ -506,15 +508,22 @@ const PrimalMarkdown: Component<{
   });
 
   const onMouseClick= (e: MouseEvent) => {
-    e.preventDefault();
     const el = e.target as HTMLElement;
 
     if (el.tagName === 'A') {
       const href = el.getAttribute('href') || '';
       const highlight = el.getAttribute('data-highlight') || '';
 
-      if (href.startsWith('nostr:')) {
-        const [__, id] = href?.split(':');
+      if (
+        href.includes('npub') ||
+        href.includes('note') ||
+        href.includes('nevent') ||
+        href.includes('naddr') ||
+        href.includes('nprofile')
+      ) {
+        e.preventDefault();
+        const index = href.search(/(npub|note|nevent|naddr|nprofile)/);
+        const id = href.slice(index);
 
         if (
           !id.startsWith('npub') &&
@@ -564,12 +573,14 @@ const PrimalMarkdown: Component<{
         return false;
       }
 
-      if (highlight) {
+      if (highlight && !(isIOS() || isAndroid())) {
+        e.preventDefault();
         showHighlightMenu(highlight);
         el.setAttribute('data-highlight-selected', 'true');
 
         return false;
       }
+
 
       return true;
     }
