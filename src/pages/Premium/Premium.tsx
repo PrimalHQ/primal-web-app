@@ -977,6 +977,11 @@ const Premium: Component = () => {
                 >
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
+
+                <div class={styles.disclaimer}>
+                  By clicking “Subscribe” you acknowledge that<br/>
+                  you agree to our <a href="https://primal.net/terms" target="__blank">Terms of Service</a>
+                </div>
               </div>
             </Match>
 

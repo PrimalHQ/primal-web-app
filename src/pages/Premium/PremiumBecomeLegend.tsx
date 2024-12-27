@@ -151,6 +151,10 @@ const PremiumBecomeLegend: Component<{
           {intl.formatMessage(t.actions.payNow)}
         </ButtonPremium>
       </div>
+      <div class={styles.disclaimer}>
+        By clicking “{intl.formatMessage(t.actions.payNow)}” you acknowledge that<br/>
+        you agree to our <a href="https://primal.net/terms" target="__blank">Terms of Service</a>
+      </div>
 
     </div>
   );

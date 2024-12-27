@@ -401,6 +401,15 @@
   }
 }
 
+
+.disclaimer {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
 .renewModal {
   display: flex;
   flex-direction: column;
@@ -1631,6 +1640,7 @@
 .legendaryPay {
   width: 100%;
   margin-top: 48px;
+  margin-bottom: 20px;
 
   button {
     width: 100%;
