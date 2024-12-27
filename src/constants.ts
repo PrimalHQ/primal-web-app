@@ -306,8 +306,8 @@ export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/g;
 export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/g;
 export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/;
 
-export const eventRegexLocal = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/;
-export const eventRegexG = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/g;
+export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/;
+export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/g;
 export const eventRegexNostrless = /((note|nevent|naddr)1\w+)\b/;
 
 export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
