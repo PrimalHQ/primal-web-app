@@ -172,7 +172,8 @@ body {
 }
 
 a {
-  color: var(--accent-links)
+  color: var(--accent-links);
+  text-decoration: none;
 }
 
 .linkish {
