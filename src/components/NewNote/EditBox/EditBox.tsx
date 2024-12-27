@@ -824,6 +824,21 @@ const EditBox: Component<{
         }
       }
 
+      const relayTags = account.relays.map(r => {
+        let t = ['r', r.url];
+
+        const settings = account.relaySettings[r.url];
+        if (settings && settings.read && !settings.write) {
+          t = [...t, 'read'];
+        }
+        if (settings && !settings.read && settings.write) {
+          t = [...t, 'write'];
+        }
+
+        return t;
+      });
+      tags = [...tags, ...relayTags];
+
       setIsPostingInProgress(true);
 
       const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
