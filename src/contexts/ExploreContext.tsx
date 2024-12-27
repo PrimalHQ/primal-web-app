@@ -340,7 +340,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
+      if (store.lastNote?.id !== message.id) {
         updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );

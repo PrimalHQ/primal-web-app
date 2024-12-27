@@ -2,6 +2,7 @@ import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "../lib/nTools";
 import { day, hour } from "../constants";
+import { noteIdToHex } from "./keys";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
   if (!pubkey) {
@@ -283,17 +284,7 @@ export const getFutureUserFeed = (
 
 export const getThread = (user_pubkey: string | undefined, postId: string, subid: string, until = 0, limit = 100) => {
 
-  const decoded = nip19.decode(postId).data;
-  let event_id = '';
-
-
-  if (typeof decoded === 'string') {
-    event_id = decoded;
-  }
-
-  if (typeof decoded !== 'string' && 'id' in decoded) {
-    event_id = decoded.id;
-  }
+  let event_id = noteIdToHex(postId);
 
   if (event_id.length === 0) {
     return;

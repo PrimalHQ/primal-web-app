@@ -24,6 +24,8 @@ import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import { fetchNotes } from '../handleNotes';
 import { isIOS } from '../utils';
+import { logWarning } from '../lib/logger';
+import { noteIdToHex } from '../lib/keys';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -35,26 +37,13 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
   let initialPostId = '';
 
-  const postId = () => {
-    const { noteId } = props;
-
-    if (noteId.startsWith('note')) {
-      return noteId;
-    }
-
-    if (noteId.startsWith('nevent')) {
-      // @ts-ignore
-      return nip19.noteEncode(nip19.decode(noteId).data.id);
-    }
-
-    return nip19.noteEncode(noteId);
-  };
+  const postId = () => noteIdToHex(props.noteId);
 
   const threadContext = useThreadContext();
 
   const primaryNote = createMemo(() => {
 
-    let note = threadContext?.notes.find(n => n.post.noteId === postId());
+    let note = threadContext?.notes.find(n => n.id === postId());
 
     // Return the note if found
     if (note) {
@@ -62,7 +51,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     }
 
     // Since there is no note see if this is a repost
-    note = threadContext?.notes.find(n => n.repost?.note.noteId === postId());
+    note = threadContext?.notes.find(n => n.repost?.note.id === postId());
 
     // If reposted note found redirect to it's thread
     note && navigate(`/e/${note?.post.noteId}`)

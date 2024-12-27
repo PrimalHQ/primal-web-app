@@ -19,6 +19,7 @@ import ParsedNote from '../ParsedNote/ParsedNote';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
+import { neventEncode } from 'nostr-tools/lib/types/nip19';
 
 const EmbeddedNote: Component<{
   note: PrimalNote | undefined,
@@ -64,7 +65,19 @@ const EmbeddedNote: Component<{
   });
 
   // @ts-ignore
-  const noteId = () => nip19.noteEncode(props.note?.post.id);
+  const noteId = () => {
+    const note = props.note;
+    if (!note) return '';
+
+    const eventPointer: nip19.EventPointer = {
+      id: note.id,
+      author: note.pubkey,
+      kind: note.msg.kind,
+      relays: note.msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+    };
+
+    return nip19.neventEncode(eventPointer)
+  }
 
   const navToThread = () => {
     threadContext?.actions.setPrimaryNote(props.note);

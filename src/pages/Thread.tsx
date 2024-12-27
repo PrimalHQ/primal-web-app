@@ -72,8 +72,14 @@ const EventPage: Component = () => {
         }
 
         if (content.kind === Kind.Text) {
+          const eventPointer: nip19.EventPointer ={
+            id: content.id,
+            author: content.pubkey,
+            kind: content.kind,
+            relays: content.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+          }
           try {
-            setEvId(() => nip19.noteEncode(content.id));
+            setEvId(() => nip19.neventEncode(eventPointer));
           } catch (e) {
             logWarning('Failed to decode note id: ', content.id)
             setEvId(() => 'NONE');

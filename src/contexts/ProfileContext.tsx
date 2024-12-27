@@ -722,7 +722,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     if ([Kind.Text, Kind.Repost, Kind.LongForm].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (store.lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
+      if (store.lastNote?.id !== message.id) {
         updateStore(scope, 'messages', (msgs) => [ ...msgs, message ]);
       }
 

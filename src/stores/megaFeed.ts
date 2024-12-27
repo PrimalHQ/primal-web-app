@@ -48,6 +48,13 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
   const userMeta = JSON.parse(user?.content || '{}');
   const stat = page?.noteStats[message.id];
 
+  const eventPointer: nip19.EventPointer ={
+    id: message.id,
+    author: message.pubkey,
+    kind: message.kind,
+    relays: message.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+  }
+
   return {
     user: {
       id: user?.id || '',
@@ -82,7 +89,7 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
       score: stat?.score || 0,
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
-      noteId: nip19.noteEncode(message.id),
+      noteId: nip19.neventEncode(eventPointer),
       noteActions: (page.noteActions && page.noteActions[message.id]) || noActions(message.id),
       relayHints: page.relayHints,
     },
@@ -172,11 +179,18 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
     if ([Kind.Text].includes(mention.kind)) {
 
+      const eventPointer: nip19.EventPointer ={
+        id: mention.id,
+        author: mention.pubkey,
+        kind: mention.kind,
+        relays: mention.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+      }
+
       mentionedNotes[mentionId] = {
         // @ts-ignore TODO: Investigate this typing
         post: {
           ...mention,
-          noteId: nip19.noteEncode(mention.id),
+          noteId: nip19.neventEncode(eventPointer),
           likes: mentionStat?.likes || 0,
           mentions: mentionStat?.mentions || 0,
           reposts: mentionStat?.reposts || 0,
@@ -195,7 +209,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         mentionedUsers: pageUsers,
         pubkey: mention.pubkey,
         id: mention.id,
-        noteId: nip19.noteEncode(mention.id),
+        noteId: nip19.neventEncode(eventPointer),
       };
     }
 
@@ -451,6 +465,13 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       mentionedZaps,
     } = extractMentions(page, note);
 
+    const eventPointer: nip19.EventPointer = {
+      id: note.id,
+      author: note.pubkey,
+      kind: note.kind,
+      relays: tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+    };
+
     const newNote: PrimalNote = {
       user: author,
       post: {
@@ -469,7 +490,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
         score: stat?.score || 0,
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
-        noteId: nip19.noteEncode(note.id),
+        noteId: nip19.neventEncode(eventPointer),
         noteActions: (page.noteActions && page.noteActions[note.id]) ?? noActions(note.id),
         relayHints: page.relayHints,
       },
@@ -483,7 +504,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       replyTo: replyTo && replyTo[1],
       tags: note.tags,
       id: note.id,
-      noteId: nip19.noteEncode(note.id),
+      noteId: nip19.neventEncode(eventPointer),
       pubkey: note.pubkey,
       topZaps,
       content: sanitize(note.content),

@@ -500,7 +500,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
-      if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
+      if (store.lastReply?.id !== message.id) {
         updateStore('page', 'messages',
           (msgs) => [ ...msgs, { ...message }]
         );
@@ -778,7 +778,7 @@ const Longform: Component< { naddr: string } > = (props) => {
         if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
           const message = content as NostrNoteContent;
 
-          if (store.lastReply?.noteId !== nip19.noteEncode(message.id)) {
+          if (store.lastReply?.id !== message.id) {
             updateStore('heighlightsPage', 'messages',
               (msgs) => [ ...msgs, { ...message }]
             );

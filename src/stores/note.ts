@@ -13,6 +13,13 @@ export const getRepostInfo: RepostInfo = (page, message) => {
   const userMeta = JSON.parse(user?.content || '{}');
   const stat = page?.postStats[message.id];
 
+  const eventPointer: nip19.EventPointer = {
+    id: message.id,
+    author: message.pubkey,
+    kind: message.kind,
+    relays: message.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+  };
+
   return {
     user: {
       id: user?.id || '',
@@ -47,7 +54,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
       score: stat?.score || 0,
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
-      noteId: nip19.noteEncode(message.id),
+      noteId: nip19.neventEncode(eventPointer),
       noteActions: (page.noteActions && page.noteActions[message.id]) || noActions(message.id),
       relayHints: page.relayHints,
     },
@@ -249,6 +256,13 @@ export const generateNote = (
     }
   }
 
+  const eventPointer: nip19.EventPointer = {
+    id: msg.id,
+    author: msg.pubkey,
+    kind: msg.kind,
+    relays: msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+  };
+
   return {
     user: { ...author },
     post: {
@@ -267,7 +281,7 @@ export const generateNote = (
       score: 0,
       score24h: 0,
       satszapped: 0,
-      noteId: nip19.noteEncode(msg.id),
+      noteId: nip19.neventEncode(eventPointer),
       noteActions: noActions(msg.id),
       relayHints: meta.relayHints,
     },
@@ -279,7 +293,7 @@ export const generateNote = (
     replyTo: replyTo && replyTo[1],
     tags: msg.tags,
     id: msg.id,
-    noteId: nip19.noteEncode(msg.id),
+    noteId: nip19.neventEncode(eventPointer),
     pubkey: msg.pubkey,
     topZaps: [],
     content: sanitize(msg.content),
@@ -398,11 +412,18 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             zapped: false,
           };
 
+          const eventPointer: nip19.EventPointer ={
+            id: m.id,
+            author: m.pubkey,
+            kind: m.kind,
+            relays: m.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+          }
+
           mentionedNotes[id] = {
             // @ts-ignore TODO: Investigate this typing
             post: {
               ...m,
-              noteId: nip19.noteEncode(m.id),
+              noteId: nip19.neventEncode(eventPointer),
               likes: mentionStat?.likes || 0,
               mentions: mentionStat?.mentions || 0,
               reposts: mentionStat?.reposts || 0,
@@ -421,7 +442,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             mentionedUsers,
             pubkey: m.pubkey,
             id: m.id,
-            noteId: nip19.noteEncode(m.id),
+            noteId: nip19.neventEncode(eventPointer),
           };
         }
 
@@ -520,6 +541,14 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       }
     }
 
+
+    const eventPointer: nip19.EventPointer ={
+      id: msg.id,
+      author: msg.pubkey,
+      kind: msg.kind,
+      relays: msg.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+    }
+
     return {
       user: {
         id: user?.id || '',
@@ -554,7 +583,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
         score: stat?.score || 0,
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
-        noteId: nip19.noteEncode(msg.id),
+        noteId: nip19.neventEncode(eventPointer),
         noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions(msg.id),
         relayHints: page.relayHints,
       },
@@ -567,7 +596,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       replyTo: replyTo && replyTo[1],
       tags: msg.tags,
       id: msg.id,
-      noteId: nip19.noteEncode(msg.id),
+      noteId: nip19.neventEncode(eventPointer),
       pubkey: msg.pubkey,
       topZaps: [ ...tz ],
       content: sanitize(msg.content),
@@ -649,11 +678,19 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             zapped: false,
           };
 
+
+          const eventPointer: nip19.EventPointer ={
+            id: m.id,
+            author: m.pubkey,
+            kind: m.kind,
+            relays: m.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+          }
+
           mentionedNotes[id] = {
             // @ts-ignore TODO: Investigate this typing
             post: {
               ...m,
-              noteId: nip19.noteEncode(m.id),
+              noteId: nip19.neventEncode(eventPointer),
               likes: mentionStat?.likes || 0,
               mentions: mentionStat?.mentions || 0,
               reposts: mentionStat?.reposts || 0,
@@ -668,7 +705,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             mentionedUsers,
             pubkey: m.pubkey,
             id: m.id,
-            noteId: nip19.noteEncode(m.id),
+            noteId: nip19.neventEncode(eventPointer),
           };
         }
 

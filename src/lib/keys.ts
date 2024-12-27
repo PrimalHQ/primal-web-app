@@ -47,3 +47,24 @@ export const decodeIdentifier = (id: string) => {
     }
   }
 }
+
+export const noteIdToHex = (noteId: string) => {
+  let id = noteId;
+
+  try {
+    const decoded = nip19.decode(noteId);
+
+    switch (decoded.type) {
+      case 'note':
+        id = decoded.data;
+        break;
+      case 'nevent':
+        id = decoded.data.id;
+        break;
+    }
+  } catch (e) {
+    console.log('Error decoding: ', noteId, e)
+  }
+
+  return id;
+}

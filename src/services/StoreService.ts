@@ -43,7 +43,14 @@ export const updatePage = (subId: string, content: NostrEventContent) => {
 
   if ([Kind.Text, Kind.Repost].includes(content.kind)) {
     const message = content as NostrNoteContent;
-    const messageId = nip19.noteEncode(message.id);
+    const eventPointer: nip19.EventPointer ={
+      id: message.id,
+      author: message.pubkey,
+      kind: message.kind,
+      relays: message.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+    }
+
+    const messageId = nip19.neventEncode(eventPointer);
 
     const isLastNote = message.kind === Kind.Text ?
       feed.lastNote?.post?.noteId === messageId :

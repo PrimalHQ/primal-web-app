@@ -1118,10 +1118,7 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        let nostr = '';
         let id = token;
-        let prefix = '';
-        let end = '';
 
         const idStart = token.search(noteRegex);
 
@@ -1493,8 +1490,17 @@ const ParsedNote: Component<{
           mentionedNotes[tag[1]]
         ) {
           const hex = tag[1];
-          const noteId = `nostr:${nip19.noteEncode(hex)}`;
-          const path = `/e/${nip19.noteEncode(hex)}`;
+          const mention = mentionedNotes[hex];
+
+          const eventPointer: nip19.EventPointer = {
+            id: mention.id,
+            author: mention.pubkey,
+            kind: mention.msg.kind,
+            relays: mention.msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+          };
+
+          const noteId = `nostr:${nip19.neventEncode(eventPointer)}`;
+          const path = `/e/${nip19.neventEncode(eventPointer)}`;
 
           let embeded = <span>{noteId}{end}</span>;
 

@@ -54,7 +54,7 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
       if ([Kind.Text, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 
@@ -237,7 +237,7 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
       if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 
@@ -421,7 +421,7 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
       if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 
@@ -592,7 +592,7 @@ export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string
       if ([Kind.LongForm, Kind.LongFormShell, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 
@@ -827,7 +827,7 @@ export const fetchUserGallery = (userPubkey: string | undefined, pubkey: string 
       if ([Kind.Text, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 
@@ -1019,7 +1019,7 @@ export const fetchNoteFeedBySpec = (pubkey: string | undefined, spec: string, su
       // if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
       //   const message = content as NostrNoteContent;
 
-      //   if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+      //   if (lastNote?.id !== message.id) {
       //     page.messages.push({...message});
       //   }
 
@@ -1189,7 +1189,7 @@ export const fetchReadsFeedBySpec = (pubkey: string | undefined, spec: string, s
       // if ([Kind.Text, Kind.Repost].includes(content.kind)) {
       //   const message = content as NostrNoteContent;
 
-      //   if (lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
+      //   if (lastNote?.id !== message.id) {
       //     page.messages.push({...message});
       //   }
 
@@ -1199,7 +1199,7 @@ export const fetchReadsFeedBySpec = (pubkey: string | undefined, spec: string, s
       if ([Kind.LongForm, Kind.LongFormShell, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.id !== message.id) {
           page.messages.push({...message});
         }
 

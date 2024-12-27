@@ -14,7 +14,7 @@ import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import { isDev, msgHasCashu, msgHasInvoice } from '../../utils';
-import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
 import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc } from '../../lib/notes';
@@ -755,10 +755,15 @@ const DirectMessageParsedContent: Component<{
     return <For each={item.tokens}>
       {(token) => {
 
-        let [_, id] = token.split(':');
+        let id = token;
 
+        const idStart = token.search(noteRegex);
 
-        if (!id) {
+        if (idStart > 0) {
+          id = token.slice(idStart);
+        }
+
+        if (!id || id.length === 0) {
           return <>{token}</>;
         }
 
@@ -778,7 +783,7 @@ const DirectMessageParsedContent: Component<{
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
           let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
-          const noteId = nip19.noteEncode(hex);
+          const noteId = nip19.neventEncode({ id: hex, kind,});
 
           const path = `/e/${noteId}`;
 

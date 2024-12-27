@@ -14,7 +14,7 @@ import { callCommand } from '@milkdown/utils';
 import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
 import  styles from './PrimalMarkdown.module.scss';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { hexToNpub, npubToHex } from '../../lib/keys';
+import { hexToNpub, noteIdToHex, npubToHex } from '../../lib/keys';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { eventRegexG, eventRegexLocal, eventRegexNostrless, Kind, mdImageRegex, profileRegex, profileRegexG, specialCharsRegex } from '../../constants';
 import { NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
@@ -33,6 +33,7 @@ import { convertHtmlEntityToAngleBrackets, isIOS } from '../../utils';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { isAndroid } from '@kobalte/utils';
+import { logError } from '../../lib/logger';
 
 export type Coord = {
   x: number;
@@ -396,14 +397,46 @@ const PrimalMarkdown: Component<{
         noteId = noteId.slice(0, i);
       }
 
+      if (noteId.startsWith('note')) {
+        const id = noteIdToHex(noteId);
+        const note = (props.article?.mentionedNotes || {})[id];
+
+        const eventPointer: nip19.EventPointer = {
+          id: note.id,
+          author: note.pubkey,
+          kind: note.msg.kind,
+          relays: note.msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+        };
+
+        if (noteId.startsWith('note1dyrd')) {
+          console.log('NOTE EVENT: ', note.content.slice(0, 20))
+        }
+
+        noteId = nip19.neventEncode(eventPointer);
+      }
+
       if (noteId.startsWith('nevent')) {
-        const data = nip19.decode(noteId).data as nip19.EventPointer;
-        const note = (props.article?.mentionedNotes || {})[data.id];
+        const hex = noteIdToHex(noteId);
+        const note = (props.article?.mentionedNotes || {})[hex];
 
         const kind = note.post.kind || note.msg.kind;
 
+
         if (kind === Kind.Text) {
-          noteId = nip19.noteEncode(data.id);
+          return (
+            <Show
+              when={note}
+              fallback={<A href={`/e/${noteId}`}>nostr:{noteId}</A>}
+            >
+              <div class={styles.embeddedNote}>
+                <EmbeddedNote
+                  class={styles.embeddedNote}
+                  note={note}
+                  mentionedUsers={note.mentionedUsers}
+                />
+              </div>
+            </Show>
+          );
         }
 
         if (kind === Kind.LongForm) {
@@ -417,26 +450,6 @@ const PrimalMarkdown: Component<{
         if (kind === undefined) {
           return <>{token.value}</>
         }
-      }
-
-      if (noteId.startsWith('note')) {
-        const id = nip19.decode(noteId).data as string;
-        const note = (props.article?.mentionedNotes || {})[id];
-
-        return (
-          <Show
-            when={note}
-            fallback={<A href={`/e/${noteId}`}>nostr:{noteId}</A>}
-          >
-            <div class={styles.embeddedNote}>
-              <EmbeddedNote
-                class={styles.embeddedNote}
-                note={note}
-                mentionedUsers={note.mentionedUsers}
-              />
-            </div>
-          </Show>
-        );
       }
 
       if (noteId.startsWith('naddr')) {
@@ -533,42 +546,51 @@ const PrimalMarkdown: Component<{
           !id.startsWith('nprofile')
         ) return false;
 
-        const decode = nip19.decode(id);
+        try {
+          const decode = nip19.decode(id);
 
-        switch (decode.type) {
-          case 'npub':
-            navigate(app?.actions.profileLink(id) || '');
-            break;
-          case 'note':
-            navigate(`/e/${id}`);
-            break;
-          case 'nprofile':
-            const npub = hexToNpub(decode.data.pubkey);
-            navigate(app?.actions.profileLink(npub) || '');
-            break;
-          case 'nevent':
-            if ([Kind.Text].includes(decode.data.kind)) {
-              const nId = nip19.noteEncode(decode.data.id);
-              navigate(`/e/${nId}`);
-            }
+          switch (decode.type) {
+            case 'npub':
+              navigate(app?.actions.profileLink(id) || '');
+              break;
+            case 'note':
+              const eventPointer: nip19.EventPointer = {
+                id: decode.data,
+              };
+              navigate(`/e/${nip19.neventEncode(eventPointer)}`);
+              break;
+            case 'nprofile':
+              const npub = hexToNpub(decode.data.pubkey);
+              navigate(app?.actions.profileLink(npub) || '');
+              break;
+            case 'nevent':
+              if ([Kind.Text].includes(decode.data.kind || -1)) {
+                navigate(`/e/${id}`);
+              }
 
-            if ([Kind.LongForm].includes(decode.data.kind)) {
-              // TODO HANDLE THIS CASE
-            }
+              if ([Kind.LongForm].includes(decode.data.kind || -1)) {
+                navigate(`/e/${id}`);
+              }
 
-            if ([Kind.Metadata].includes(decode.data.kind)) {
-              const nId = hexToNpub(decode.data.id);
-              navigate(app?.actions.profileLink(nId) || '');
-            }
-            break;
-          case 'naddr':
-            if ([Kind.Text, Kind.LongForm].includes(decode.data.kind)) {
-              navigate(`/e/${id}`);
-            }
-            break;
-          default:
-            break;
+              if ([Kind.Metadata].includes(decode.data.kind || -1)) {
+                const nId = hexToNpub(decode.data.id);
+                navigate(app?.actions.profileLink(nId) || '');
+              }
+              break;
+            case 'naddr':
+              if ([Kind.Text, Kind.LongForm].includes(decode.data.kind)) {
+                navigate(`/e/${id}`);
+              }
+              break;
+            default:
+              break;
+          }
         }
+        catch (e){
+          logError('Error resolving event path: ', e);
+        }
+
+
 
         return false;
       }
