@@ -17,6 +17,14 @@ export const getUserProfiles = (pubkeys: string[], subid: string) => {
   ]));
 }
 
+export const getUsersRelayInfo = (pubkeys: string[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_user_relays_2", { pubkeys }]},
+  ]));
+}
+
 export const getUserProfileInfo = (pubkey: string | undefined, user_pubkey: string | undefined, subid: string) => {
   if (!pubkey) {
     return;

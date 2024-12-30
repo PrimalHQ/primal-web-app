@@ -9,7 +9,7 @@ import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
-import { getUserProfiles } from "../../../lib/profile";
+import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
@@ -724,6 +724,30 @@ const EditBox: Component<{
       return;
     }
 
+    let userRelays = await (new Promise<Record<string, string[]>>(resolve => {
+      const uids = Object.values(userRefs).map(u => u.pubkey);
+      const subId = `users_relays_${APP_ID}`;
+
+      let relays: Record<string, string[]> = {};
+
+      const unsub = subsTo(subId, {
+        onEose: () => {
+          unsub();
+          resolve({ ...relays });
+        },
+        onEvent: (_, content) => {
+          if (content.kind !== Kind.UserRelays) return;
+
+          const pk = content.pubkey || 'UNKNOWN';
+          const rels = (content.tags || []).reduce<string[]>((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, []);
+          relays[pk] = [...rels];
+        },
+        onNotice: () => resolve({}),
+      })
+
+      getUsersRelayInfo(uids, subId);
+    }));
+
     const messageToSend = value.replace(editMentionRegex, (url) => {
 
       const [anythingBefore, mention] = url.split('@');
@@ -731,8 +755,17 @@ const EditBox: Component<{
       const [_, name] = mention.split('\`');
       const user = userRefs[name];
 
+      let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
+      const relays = userRelays[user.pubkey] || [];
+
+      if (relays.length > 0) {
+        pInfo.relays = [...relays];
+      }
+
+      const nprofile = nip19.nprofileEncode(pInfo);
+
       // @ts-ignore
-      return `${anythingBefore} nostr:${user.npub}`;
+      return `${anythingBefore} nostr:${nprofile} `;
     });
 
     if (account) {

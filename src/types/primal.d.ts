@@ -449,6 +449,15 @@ export type NostrBlossom= {
   tags?: string[],
 };
 
+export type NostrRelayList= {
+  kind: Kind.RelayList,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id?: string,
+  tags?: string[],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -501,6 +510,7 @@ export type NostrEventContent =
   NostrBroadcastStatus |
   NostrMembershipCohortInfo |
   NostrBlossom |
+  NostrRelayList |
   NostrTopicStats;
 
 export type NostrEvent = [
