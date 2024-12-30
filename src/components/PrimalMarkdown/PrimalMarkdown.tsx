@@ -397,23 +397,6 @@ const PrimalMarkdown: Component<{
         noteId = noteId.slice(0, i);
       }
 
-      if (noteId.startsWith('note')) {
-        const id = noteIdToHex(noteId);
-        const note = (props.article?.mentionedNotes || {})[id];
-
-        const eventPointer: nip19.EventPointer = {
-          id: note.id,
-          author: note.pubkey,
-          kind: note.msg.kind,
-          relays: note.msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
-        };
-
-        if (noteId.startsWith('note1dyrd')) {
-          console.log('NOTE EVENT: ', note.content.slice(0, 20))
-        }
-
-        noteId = nip19.neventEncode(eventPointer);
-      }
 
       if (noteId.startsWith('nevent')) {
         const hex = noteIdToHex(noteId);
@@ -421,22 +404,8 @@ const PrimalMarkdown: Component<{
 
         const kind = note.post.kind || note.msg.kind;
 
-
         if (kind === Kind.Text) {
-          return (
-            <Show
-              when={note}
-              fallback={<A href={`/e/${noteId}`}>nostr:{noteId}</A>}
-            >
-              <div class={styles.embeddedNote}>
-                <EmbeddedNote
-                  class={styles.embeddedNote}
-                  note={note}
-                  mentionedUsers={note.mentionedUsers}
-                />
-              </div>
-            </Show>
-          );
+          noteId = nip19.noteEncode(hex);
         }
 
         if (kind === Kind.LongForm) {
@@ -450,6 +419,26 @@ const PrimalMarkdown: Component<{
         if (kind === undefined) {
           return <>{token.value}</>
         }
+      }
+
+      if (noteId.startsWith('note')) {
+        const id = noteIdToHex(noteId);
+        const note = (props.article?.mentionedNotes || {})[id];
+
+        return (
+            <Show
+              when={note}
+              fallback={<A href={`/e/${noteId}`}>nostr:{noteId}</A>}
+            >
+              <div class={styles.embeddedNote}>
+                <EmbeddedNote
+                  class={styles.embeddedNote}
+                  note={note}
+                  mentionedUsers={note.mentionedUsers}
+                />
+              </div>
+            </Show>
+          );
       }
 
       if (noteId.startsWith('naddr')) {

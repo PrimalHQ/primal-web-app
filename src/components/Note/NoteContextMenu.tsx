@@ -94,10 +94,19 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
+
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(note().id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   const copyNoteLink = () => {
     if (!props.data) return;
 
-    let link = `e/${note().noteId}`;
+    let link = noteLinkId();
 
     if (note().noteId.startsWith('naddr')) {
       const vanityName = app?.verifiedUsers[note().pubkey];

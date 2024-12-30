@@ -69,14 +69,11 @@ const EmbeddedNote: Component<{
     const note = props.note;
     if (!note) return '';
 
-    const eventPointer: nip19.EventPointer = {
-      id: note.id,
-      author: note.pubkey,
-      kind: note.msg.kind,
-      relays: note.msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
-    };
-
-    return nip19.neventEncode(eventPointer)
+    try {
+      return nip19.noteEncode((note.id));
+    } catch (e) {
+      return '';
+    }
   }
 
   const navToThread = () => {

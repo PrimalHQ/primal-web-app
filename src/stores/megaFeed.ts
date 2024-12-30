@@ -5,6 +5,7 @@ import { sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
 import { parseBolt11 } from "../utils";
+import { logError } from "../lib/logger";
 
 
 export const noActions = (id: string) => ({
@@ -183,14 +184,22 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         id: mention.id,
         author: mention.pubkey,
         kind: mention.kind,
-        relays: mention.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+        relays: mention.tags.reduce((acc, t) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, [])
+      }
+
+      let noteId = mention.id;
+
+      try {
+        noteId = nip19.neventEncode(eventPointer);
+      } catch (e) {
+        logError('ERROR encoding nevent: ', eventPointer)
       }
 
       mentionedNotes[mentionId] = {
         // @ts-ignore TODO: Investigate this typing
         post: {
           ...mention,
-          noteId: nip19.neventEncode(eventPointer),
+          noteId,
           likes: mentionStat?.likes || 0,
           mentions: mentionStat?.mentions || 0,
           reposts: mentionStat?.reposts || 0,

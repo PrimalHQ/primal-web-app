@@ -12,6 +12,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import { useAppContext } from '../../contexts/AppContext';
+import { nip19 } from 'nostr-tools';
 
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: string }> = (props) => {
@@ -74,13 +75,22 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
 
   };
 
+
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(props.note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   return (
     <div id={props.id} class={styles.smallNote} data-note-id={props.note.post.noteId}>
       <A href={app?.actions.profileLink(props.note.user.npub) || ''} class={styles.avatar}>
         <Avatar user={props.note.user} size="xxs" />
       </A>
       <A
-        href={`/e/${props.note.post.noteId}`}
+        href={noteLinkId()}
         class={styles.content}
         onClick={() => navToThread(props.note)}
       >

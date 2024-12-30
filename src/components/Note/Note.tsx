@@ -21,6 +21,7 @@ import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
 import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
+import { nip19 } from 'nostr-tools';
 
 export type NoteReactionsState = {
   likes: number,
@@ -297,13 +298,21 @@ const Note: Component<{
     return isShort && !isReply;
   }
 
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(props.note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
         <A
           id={props.id}
           class={styles.noteNotificationLink}
-          href={`/e/${props.note?.post.noteId}`}
+          href={noteLinkId()}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -404,7 +413,7 @@ const Note: Component<{
         <A
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
-          href={`/e/${props.note?.post.noteId}`}
+          href={noteLinkId()}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -466,7 +475,7 @@ const Note: Component<{
         <A
           id={props.id}
           class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}
-          href={`/e/${props.note?.post.noteId}`}
+          href={noteLinkId()}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -540,7 +549,7 @@ const Note: Component<{
         <A
           id={props.id}
           class={`${styles.note} ${styles.reactionNote}`}
-          href={`/e/${props.note?.post.noteId}`}
+          href={noteLinkId()}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}

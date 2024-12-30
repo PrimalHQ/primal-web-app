@@ -15,6 +15,7 @@ import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
 import Paginator from '../../components/Paginator/Paginator';
 import { calculatePagingOffset } from '../../utils';
+import { nip19 } from 'nostr-tools';
 
 const ExploreMedia: Component<{ open?: boolean }> = (props) => {
 
@@ -70,13 +71,22 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   //   const isVideo = (videoRegex).test(note.content);
   //   return isImage || isVideo;
   // }
+  //
+
+  const noteLinkId = (note: PrimalNote) => {
+    try {
+      return `/e/${nip19.noteEncode(note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
 
   return (
     <div class={styles.exploreMedia}>
       <div class={styles.galleryGrid}>
         <For each={galleryImages()}>
           {(note) => (
-            <A href={`/e/${note.noteId}`} class={styles.missingImage}>
+            <A href={noteLinkId(note)} class={styles.missingImage}>
               <NoteGallery note={note} imgWidth={120} />
             </A>
           )}

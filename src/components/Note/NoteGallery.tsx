@@ -18,6 +18,7 @@ import { createStore } from 'solid-js/store';
 import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import { humanizeTime, isDev, isPhone } from '../../utils';
+import { nip19 } from 'nostr-tools';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -120,6 +121,14 @@ const NoteGallery: Component<{
 
   const isMissingThumbnal = (image: any) => !isDev() || image.noVideoThumbnail;
 
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(props.note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   return (
     <div
       id={`galleryimage_${props.note.id}`}
@@ -171,7 +180,7 @@ const NoteGallery: Component<{
                         </div>
                         <A
                           class={styles.noteLink}
-                          href={`/e/${props.note.noteId}`}
+                          href={noteLinkId()}
                         >
                           Go to note
                         </A>
@@ -208,7 +217,7 @@ const NoteGallery: Component<{
                         </div>
                         <A
                           class={styles.noteLink}
-                          href={`/e/${props.note.noteId}`}
+                          href={noteLinkId()}
                         >
                           Go to note
                         </A>

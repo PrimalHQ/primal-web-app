@@ -27,6 +27,7 @@ import { TransitionGroup } from "solid-transition-group";
 import ZapSkeleton from "../Skeleton/ZapSkeleton";
 import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton";
 import { scrollWindowTo } from "../../lib/scroll";
+import { nip19 } from "nostr-tools";
 
 
 const ProfileTabs: Component<{
@@ -261,6 +262,14 @@ const ProfileTabs: Component<{
   onCleanup(() => {
     window.removeEventListener('scroll', onScroll);
   });
+
+  const noteLinkId = (note: PrimalNote) => {
+    try {
+      return `/e/${nip19.noteEncode(note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
 
   return (
       <Tabs value={hash()} onChange={onChangeValue} defaultValue={hash()}>
@@ -611,7 +620,7 @@ const ProfileTabs: Component<{
                               <NoteGallery note={note} />
                             </Match>
                             <Match when={!hasImages(note)}>
-                              <A href={`/e/${note.noteId}`} class={styles.missingImage}>
+                              <A href={noteLinkId(note)} class={styles.missingImage}>
                                 <NoteGallery note={note} />
                               </A>
                             </Match>

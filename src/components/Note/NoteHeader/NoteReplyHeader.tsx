@@ -20,6 +20,7 @@ import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
 import { useAppContext } from '../../../contexts/AppContext';
+import { nip19 } from 'nostr-tools';
 
 const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?: string }> = (props) => {
 
@@ -69,8 +70,16 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(props.note.user)}));
   };
 
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(props.note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   const copyNoteLink = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/e/${props.note.post.noteId}`);
+    navigator.clipboard.writeText(`${window.location.origin}${noteLinkId()}`);
     setContext(false);
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };

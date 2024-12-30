@@ -7,6 +7,7 @@ import NoteFooter from '../NoteFooter/NoteFooter';
 import styles from './NotificationNote.module.scss';
 import { useThreadContext } from '../../../contexts/ThreadContext';
 import { hookForDev } from '../../../lib/devTools';
+import { nip19 } from 'nostr-tools';
 
 const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
@@ -16,11 +17,19 @@ const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) =
     threadContext?.actions.setPrimaryNote(note);
   };
 
+  const noteLinkId = () => {
+    try {
+      return `/e/${nip19.noteEncode(props.note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   return (
     <A
       id={props.id}
       class={styles.postLink}
-      href={`/e/${props.note?.post.noteId}`}
+      href={noteLinkId()}
       onClick={() => navToThread(props.note)}
       data-event={props.note.post.id}
       data-event-bech32={props.note.post.noteId}

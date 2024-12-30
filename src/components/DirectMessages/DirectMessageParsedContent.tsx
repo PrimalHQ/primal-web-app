@@ -783,7 +783,7 @@ const DirectMessageParsedContent: Component<{
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
           let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
-          const noteId = nip19.neventEncode({ id: hex, kind,});
+          const noteId = nip19.noteEncode(hex);
 
           const path = `/e/${noteId}`;
 

@@ -41,6 +41,15 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
   const threadContext = useThreadContext();
 
+
+  const noteLinkId = (note: PrimalNote) => {
+    try {
+      return `/e/${nip19.noteEncode(note.id)}`;
+    } catch(e) {
+      return '/404';
+    }
+  };
+
   const primaryNote = createMemo(() => {
 
     let note = threadContext?.notes.find(n => n.id === postId());
@@ -54,7 +63,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     note = threadContext?.notes.find(n => n.repost?.note.id === postId());
 
     // If reposted note found redirect to it's thread
-    note && navigate(`/e/${note?.post.noteId}`)
+    note && navigate(noteLinkId(note))
 
     return note;
   });

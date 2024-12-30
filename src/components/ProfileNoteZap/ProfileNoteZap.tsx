@@ -11,6 +11,7 @@ import { MenuItem, PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from "../.
 import Avatar from "../Avatar/Avatar";
 import styles from  "./ProfileNoteZap.module.scss";
 import { isPhone } from "../../utils";
+import { nip19 } from "nostr-tools";
 
 
 const ProfileNoteZap: Component<{
@@ -33,14 +34,22 @@ const ProfileNoteZap: Component<{
     let content = '';
     let time = 0;
     let link = '';
-    let name = ''
+    let name = '';
+
+    const noteLinkId = (note: PrimalNote) => {
+      try {
+        return `/e/${nip19.noteEncode(note.id)}`;
+      } catch(e) {
+        return '/404';
+      }
+    };
 
     if (props.subject.msg.kind === Kind.Text) {
       const sub = props.subject as PrimalNote;
 
       content = sub.content;
       time = props.zap.created_at || 0;
-      link = `/e/${sub.noteId}`;
+      link = noteLinkId(sub);
       name = userName(sub.user);
     }
 
