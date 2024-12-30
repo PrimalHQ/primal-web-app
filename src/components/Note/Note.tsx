@@ -64,7 +64,7 @@ const Note: Component<{
     if (props.quoteCount) {
       updateReactionsState('quoteCount', () => props.quoteCount || 0);
     }
-  })
+  });
 
   const noteType = () => props.noteType || 'feed';
 

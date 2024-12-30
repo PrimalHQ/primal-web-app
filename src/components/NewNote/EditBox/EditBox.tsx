@@ -3,7 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "../../../lib/nTools";
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG, eventRegexG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -1273,10 +1273,10 @@ const EditBox: Component<{
           if (newNote) {
             setNoteRefs((refs) => ({
               ...refs,
-              [newNote.noteId]: newNote
+              [newNote.id]: newNote
             }));
 
-            subNoteRef(newNote.noteId);
+            subNoteRef(newNote.id);
           } else {
             subNoteRef(id);
           }
@@ -1295,7 +1295,7 @@ const EditBox: Component<{
 
   const subNoteRef = (noteId: string) => {
 
-    const parsed = parsedMessage().replace(noteRegex, (url) => {
+    const parsed = parsedMessage().replace(eventRegexG, (url) => {
       // const [_, id] = url.split(':');
 
       let id = url;
@@ -1306,12 +1306,24 @@ const EditBox: Component<{
         id = url.slice(idStart);
       }
 
-      if (!id || id !== noteId) {
+      if (!id) {
         return url;
       }
 
       try {
-        let note = noteRefs[id];
+        let hex = '';
+
+        const decode = nip19.decode(id);
+
+        if (decode.type === 'nevent') {
+          hex = decode.data.id;
+        } else if (decode.type === 'note') {
+          hex = decode.data;
+        }
+
+        if (hex !== noteId) return url;
+
+        let note = noteRefs[hex];
 
         if (!note) {
           note = highlightRefs[id];
