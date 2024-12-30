@@ -1119,6 +1119,7 @@ const ParsedNote: Component<{
         if (isNoteTooLong()) return;
 
         let id = token;
+        let end = '';
 
         const idStart = token.search(noteRegex);
 
