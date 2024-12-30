@@ -130,7 +130,7 @@ const EventPage: Component = () => {
       const kind = Kind.LongForm;
 
       try {
-        const naddr = nip19.naddrEncode({ pubkey, kind, identifier });
+        const naddr = nip19.naddrEncode({ pubkey, kind, identifier: decodeURI(identifier) });
 
         setEvId(() => naddr);
         setComponent(() => 'read');
