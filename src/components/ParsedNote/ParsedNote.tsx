@@ -1615,9 +1615,15 @@ const ParsedNote: Component<{
           term = term.slice(0, i);
         }
 
-        const embeded = props.noLinks === 'text' ?
-          <span>#{term}</span> :
-          <A href={`/search/%23${term}`}>#{term}</A>;
+        let embeded = <></>;
+
+        if (props.noLinks === 'text') {
+          embeded = <span>#{term}</span>;
+        } else if (props.noLinks === 'links') {
+          embeded = <span class="linkish">#{term}</span>;
+        } else {
+          embeded = <A href={`/search/%23${term}`}>#{term}</A>;
+        }
 
         return <span class="whole"> {embeded}{end}</span>;
       }}
