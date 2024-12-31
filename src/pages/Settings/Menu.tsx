@@ -74,6 +74,11 @@ const Menu: Component = () => {
             <div class={styles.chevron}></div>
           </A>
         </Show>
+
+        <A href="/settings/devtools">
+          {intl.formatMessage(t.devTools)}
+          <div class={styles.chevron}></div>
+        </A>
       </div>
 
       <Show when={account?.sec}>

@@ -38,7 +38,7 @@
   }
   .label {
     margin-left: 6px;
-    color: hsl(240 6% 10%);
+    color: var(--text-secondary);
     font-size: 14px;
     user-select: none;
   }

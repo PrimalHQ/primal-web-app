@@ -123,6 +123,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 // ACTIONS --------------------------------------
 
   const updateSidebarQuery = (selection: SelectionOption) => {
+    console.log('SELECTION: ', selection)
     updateStore('sidebarQuery', () => ({ ...selection }))
   };
 

@@ -1664,6 +1664,11 @@ export const settings = {
     defaultMessage: 'Zaps',
     description: 'Title of the zaps section on the settings page',
   },
+  devTools: {
+    id: 'settings.sections.devTools',
+    defaultMessage: 'Dev Tools',
+    description: 'Title of the dev tools section on the settings page',
+  },
   notifications: {
     title: {
       id: 'pages.settings.sections.notifications',

@@ -42,6 +42,7 @@ const Account = lazy(() => import('./pages/Settings/Account'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
 const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
 const ReadsFeeds = lazy(() => import('./pages/Settings/ReadsFeeds'));
+const DevTools = lazy(() => import('./pages/Settings/DevTools'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
@@ -144,6 +145,7 @@ const AppRouter: Component = () => {
             <Route path="/muted" component={Muted} />
             <Route path="/network" component={Network} />
             <Route path="/filters" component={Moderation} />
+            <Route path="/devtools" component={DevTools} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />

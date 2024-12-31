@@ -171,10 +171,10 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     const subId = `posted_note_${APP_ID}`;
 
-
     const notes = await fetchNotes(account.publicKey, [result.note.id], subId);
 
-
+    console.log('NOTE: ', result.note);
+    console.log('NOTE: ', [...notes]);
     // const note = generateNote(result.note, account?.activeUser, modifiedMeta);
 
     threadContext?.actions.insertNote(notes[0]);
