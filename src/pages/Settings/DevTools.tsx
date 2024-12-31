@@ -12,6 +12,7 @@ import { storageName } from '../../lib/localStore';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
 const DevTools: Component = () => {
   const account = useAccountContext();
@@ -20,6 +21,8 @@ const DevTools: Component = () => {
   const [isDevMode, setIsDevMode] = createSignal<boolean>(localStorage.getItem('devMode') === 'true');
   const [isStorageAvailable, setIsStorageAvailable] = createSignal<boolean>(true);
   const [hasNsec, setHasNsec] = createSignal<boolean>(false);
+  const [confirmLSReset, setConfirmLSReset] = createSignal(false);
+  const [confirmNsecReset, setConfirmNsecReset] = createSignal(false);
 
   onMount(() => {
     checkLocalStorage();
@@ -76,7 +79,7 @@ const DevTools: Component = () => {
             <div class={styles.devToolsItem}>
               <div>Local Storage</div>
               <ButtonLink
-                onClick={clearLocalStore}
+                onClick={() => setConfirmLSReset(true)}
                 disabled={!isStorageAvailable()}
               >
                 Reset Local Storage
@@ -93,19 +96,38 @@ const DevTools: Component = () => {
             <Show when={hasNsec()}>
               <div class={styles.devToolsItem}>
                 <div>Remove Locally Stored nsec (logout)</div>
-                <ButtonLink onClick={() => {
-                  account?.actions.logout();
-                  setHasNsec(() => false);
-                  location.reload();
-                }} >
+                <ButtonLink onClick={() => setConfirmNsecReset(true)} >
                   Remove nsec
                 </ButtonLink>
               </div>
             </Show>
           </div>
-
         </div>
       </div>
+
+      <ConfirmModal
+        open={confirmLSReset()}
+        title="Reset Local Storage"
+        description="Are you sure you want to reset local storage?"
+        consfirmLabel="Yes"
+        abortLabel="No"
+        onConfirm={() => { clearLocalStore(); setConfirmLSReset(false); }}
+        onAbort={() => setConfirmLSReset(false)}
+      />
+      <ConfirmModal
+        open={confirmNsecReset()}
+        title="Remove Local Nsec"
+        description="If you are not using a nostr extension this action will have the the effect of logout. Are you sure you want to remove your locally stored nsec?"
+        consfirmLabel="Yes"
+        abortLabel="No"
+        onConfirm={() => {
+          account?.actions.logout();
+          setHasNsec(() => false);
+          setConfirmNsecReset(false);
+          location.reload();
+        }}
+        onAbort={() => setConfirmNsecReset(false)}
+      />
     </>
   )
 }
