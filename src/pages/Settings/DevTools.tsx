@@ -68,24 +68,42 @@ const DevTools: Component = () => {
       </PageCaption>
       <div class={styles.settingsContent}>
         <div style="display: flex; flex-direction: column; gap:12px;">
-          <ButtonLink
-            onClick={clearLocalStore}
-            disabled={!isStorageAvailable()}
-          >
-            Reset Local Storage
-          </ButtonLink>
-          <CheckBox2
-            checked={isDevMode()}
-            onChange={() => setIsDevMode((v) => !v)}
-            label="Dev Mode"
-          />
-          <Show when={hasNsec()}>
-            <ButtonPrimary onClick={() => {
-              account?.actions.logout();
-              setHasNsec(() => false);
-              location.reload();
-            }} >Logout/Remove Stored nsec</ButtonPrimary>
-          </Show>
+          <div class={styles.moderationDescription}>
+            These settings are for technically-savvy users. Please don’t change them unless you are a developer or a Nostr expert.
+          </div>
+
+          <div class={styles.devToolsList}>
+            <div class={styles.devToolsItem}>
+              <div>Local Storage</div>
+              <ButtonLink
+                onClick={clearLocalStore}
+                disabled={!isStorageAvailable()}
+              >
+                Reset Local Storage
+              </ButtonLink>
+            </div>
+            <div class={styles.devToolsItem}>
+              <div>Developer Mode</div>
+              <CheckBox2
+                checked={isDevMode()}
+                onChange={() => setIsDevMode((v) => !v)}
+                label="Enable Dev Mode"
+              />
+            </div>
+            <Show when={hasNsec()}>
+              <div class={styles.devToolsItem}>
+                <div>Remove Locally Stored nsec (logout)</div>
+                <ButtonLink onClick={() => {
+                  account?.actions.logout();
+                  setHasNsec(() => false);
+                  location.reload();
+                }} >
+                  Remove nsec
+                </ButtonLink>
+              </div>
+            </Show>
+          </div>
+
         </div>
       </div>
     </>

@@ -1061,3 +1061,25 @@
   font-weight: 400;
   line-height: 16px;
 }
+
+
+.devToolsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.devToolsItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--background-input);
+  padding-block: 14px;
+
+  >div {
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
