@@ -86,8 +86,8 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         }
       }
 
-
-      const opt = options()[0];
+      const opts = options();
+      const opt = opts.find(o =>  o.id === "global-trending_notes_24") || opts[0];
 
       selectFeed(opt);
       return opt;
