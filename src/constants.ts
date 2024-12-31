@@ -309,6 +309,7 @@ export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|w
 export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/;
 export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/g;
 export const eventRegexNostrless = /((note|nevent|naddr)1\w+)\b/;
+export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1\w+)\b/;
 
 export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
 

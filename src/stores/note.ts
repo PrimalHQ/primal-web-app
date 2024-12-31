@@ -1,6 +1,6 @@
 import { propTraps } from "@solid-primitives/props";
 import { nip19 } from "../lib/nTools";
-import { Kind } from "../constants";
+import { Kind, mentionRegexNostrless, noteRegex } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
 import { sanitize } from "../lib/notes";
@@ -949,7 +949,7 @@ type NoteStore = {
 export const referencesToTags = (value: string, relayHints: Record<string, string>) => {
   const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
   const regexMention =
-    /\bnostr:((note|npub|nevent|nprofile|naddr)1\w+)\b|#\[(\d+)\]/g;
+    /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1\w+)\b|#\[(\d+)\]/g;
 
   let refs: string[] = [];
   let tags: string[][] = [];
@@ -966,7 +966,14 @@ export const referencesToTags = (value: string, relayHints: Record<string, strin
   }
 
   refs.forEach((ref) => {
-    const decoded = nip19.decode(ref.split('nostr:')[1]);
+    let id = `${ref}`;
+
+    const idStart = ref.search(mentionRegexNostrless);
+
+    if (idStart > 0) {
+      id = ref.slice(idStart);
+    }
+    const decoded = nip19.decode(id);
 
     if (decoded.type === 'npub') {
       tags.push(['p', decoded.data, '', 'mention'])
