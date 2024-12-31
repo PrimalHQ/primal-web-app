@@ -677,6 +677,10 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('isKeyLookupDone', () => true);
       return;
     }
+    else {
+      updateStore('sec', () => undefined);
+      storeSec(undefined);
+    }
 
     try {
       const key = await getPublicKey();
