@@ -76,7 +76,7 @@ const EventPage: Component = () => {
             id: content.id,
             author: content.pubkey,
             kind: content.kind,
-            relays: content.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+            relays: content.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
           }
           try {
             setEvId(() => nip19.neventEncode(eventPointer));

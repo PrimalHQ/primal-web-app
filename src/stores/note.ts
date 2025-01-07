@@ -17,7 +17,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
     id: message.id,
     author: message.pubkey,
     kind: message.kind,
-    relays: message.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+    relays: message.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0,3),
   };
 
   return {
@@ -260,7 +260,7 @@ export const generateNote = (
     id: msg.id,
     author: msg.pubkey,
     kind: msg.kind,
-    relays: msg.tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+    relays: msg.tags.reduce((acc, t, i) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0,3),
   };
 
   return {
@@ -416,7 +416,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
           }
 
           mentionedNotes[id] = {
@@ -546,7 +546,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       id: msg.id,
       author: msg.pubkey,
       kind: msg.kind,
-      relays: msg.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+      relays: msg.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
     }
 
     return {
@@ -683,7 +683,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
           }
 
           mentionedNotes[id] = {

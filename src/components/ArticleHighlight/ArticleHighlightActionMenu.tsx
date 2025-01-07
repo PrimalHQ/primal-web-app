@@ -239,7 +239,7 @@ const ArticleHighlightActionMenu: Component<{
 
       const highlightId = nip19.neventEncode({
         id: note.id,
-        relays: account.activeRelays.map(r => r.url),
+        relays: account.activeRelays.map(r => r.url).slice(0,3),
         author: note.pubkey,
         kind: Kind.Highlight,
       });
@@ -253,7 +253,7 @@ const ArticleHighlightActionMenu: Component<{
 
     const highlightId = nip19.neventEncode({
       id: props.highlight.id,
-      relays: account.activeRelays.map(r => r.url),
+      relays: account.activeRelays.map(r => r.url).slice(0,3),
       author: props.highlight.pubkey,
       kind: Kind.Highlight,
     });

@@ -53,7 +53,7 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
     id: message.id,
     author: message.pubkey,
     kind: message.kind,
-    relays: message.tags.reduce((acc, t) => t[0] === 'r' ? [ ...acc, t[1]] : acc, [])
+    relays: message.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0, 3),
   }
 
   return {
@@ -184,7 +184,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         id: mention.id,
         author: mention.pubkey,
         kind: mention.kind,
-        relays: mention.tags.reduce((acc, t) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, [])
+        relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
       }
 
       let noteId = mention.id;
@@ -478,7 +478,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       id: note.id,
       author: note.pubkey,
       kind: note.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, [])
+      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 3),
     };
 
     const newNote: PrimalNote = {
@@ -522,7 +522,6 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
 
     notes.push(newNote);
   }
-
   return notes;
 };
 
