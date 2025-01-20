@@ -21,7 +21,8 @@ import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { isAndroid, isIOS } from '@kobalte/utils';
+import { isAndroid } from '@kobalte/utils';
+import { isIOS } from '../utils';
 
 const Downloads: Component = () => {
 
@@ -62,56 +63,58 @@ const Downloads: Component = () => {
 
   return (
     <div class={styles.downloadsContainer}>
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
+      <Show when={!isAndroid() && !isIOS()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
 
-      <StickySidebar>
-        <div class={styles.downloadsSidebar}>
+        <StickySidebar>
+          <div class={styles.downloadsSidebar}>
 
-          <div class={styles.title}>
-            {intl.formatMessage(t.links.title)}
+            <div class={styles.title}>
+              {intl.formatMessage(t.links.title)}
+            </div>
+            <div class={styles.list}>
+              <ExternalLink
+                darkIcon={gitHubLight}
+                lightIcon={gitHubDark}
+                label={intl.formatMessage(t.links.webApp)}
+                href='https://github.com/PrimalHQ/primal-web-app'
+              />
+
+              <ExternalLink
+                darkIcon={gitHubLight}
+                lightIcon={gitHubDark}
+                label={intl.formatMessage(t.links.iosApp)}
+                href='https://github.com/PrimalHQ/primal-ios-app'
+              />
+
+              <ExternalLink
+                darkIcon={gitHubLight}
+                lightIcon={gitHubDark}
+                label={intl.formatMessage(t.links.andApp)}
+                href='https://github.com/PrimalHQ/primal-android-app'
+              />
+
+              <ExternalLink
+                darkIcon={gitHubLight}
+                lightIcon={gitHubDark}
+                label={intl.formatMessage(t.links.cachingService)}
+                href='https://github.com/PrimalHQ/primal-caching-service'
+              />
+
+              <ExternalLink
+                darkIcon={gitHubLight}
+                lightIcon={gitHubDark}
+                label={intl.formatMessage(t.links.primalServer)}
+                href='https://github.com/PrimalHQ/primal-server'
+              />
+            </div>
           </div>
-          <div class={styles.list}>
-            <ExternalLink
-              darkIcon={gitHubLight}
-              lightIcon={gitHubDark}
-              label={intl.formatMessage(t.links.webApp)}
-              href='https://github.com/PrimalHQ/primal-web-app'
-            />
-
-            <ExternalLink
-              darkIcon={gitHubLight}
-              lightIcon={gitHubDark}
-              label={intl.formatMessage(t.links.iosApp)}
-              href='https://github.com/PrimalHQ/primal-ios-app'
-            />
-
-            <ExternalLink
-              darkIcon={gitHubLight}
-              lightIcon={gitHubDark}
-              label={intl.formatMessage(t.links.andApp)}
-              href='https://github.com/PrimalHQ/primal-android-app'
-            />
-
-            <ExternalLink
-              darkIcon={gitHubLight}
-              lightIcon={gitHubDark}
-              label={intl.formatMessage(t.links.cachingService)}
-              href='https://github.com/PrimalHQ/primal-caching-service'
-            />
-
-            <ExternalLink
-              darkIcon={gitHubLight}
-              lightIcon={gitHubDark}
-              label={intl.formatMessage(t.links.primalServer)}
-              href='https://github.com/PrimalHQ/primal-server'
-            />
-          </div>
-        </div>
-      </StickySidebar>
+        </StickySidebar>
+      </Show>
 
       <PageTitle title={intl.formatMessage(t.title)} />
 

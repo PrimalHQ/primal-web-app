@@ -306,6 +306,7 @@
   }
 
   .promoVideo {
+    width: 100dvw;
     border-radius: 0;
     margin-inline: 0;
   }
@@ -318,7 +319,7 @@
     padding: 0;
 
     border: none;
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
 
