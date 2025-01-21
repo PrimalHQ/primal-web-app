@@ -4,7 +4,7 @@ import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
-import { parseBolt11 } from "../utils";
+import { parseBolt11, selectRelayTags } from "../utils";
 import { logError } from "../lib/logger";
 
 
@@ -53,7 +53,7 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
     id: message.id,
     author: message.pubkey,
     kind: message.kind,
-    relays: message.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0, 3),
+    relays: selectRelayTags(message.tags),
   }
 
   return {
@@ -478,7 +478,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       id: note.id,
       author: note.pubkey,
       kind: note.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 3),
+      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
     };
 
     const newNote: PrimalNote = {
