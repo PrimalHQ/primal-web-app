@@ -4,7 +4,7 @@ import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
-import { Kind } from '../../constants';
+import { Kind, urlRegexG } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { ReactionStats, useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
@@ -25,6 +25,7 @@ import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReactionsModal.module.scss';
+import DOMPurify from 'dompurify';
 
 
 const ReactionsModal: Component<{
@@ -394,6 +395,12 @@ const ReactionsModal: Component<{
 
   const totalCount = () => props.stats.likes + (quoteCount() || props.stats.quotes || 0) + props.stats.reposts + props.stats.zaps;
 
+  const parseForLinks = (text: string) => {
+    const purified = DOMPurify.sanitize(text);
+
+    return purified.replace(urlRegexG, (url) => `<a href="${url}" target="_blank">${url}</a>`);
+  };
+
   return (
     <AdvancedSearchDialog
       open={props.noteId !== undefined}
@@ -531,8 +538,7 @@ const ReactionsModal: Component<{
                         </div>
                         <VerificationCheck user={zap} />
                       </div>
-                      <div class={styles.zapMessage}>
-                        {zap.message}
+                      <div class={styles.zapMessage} innerHTML={parseForLinks(zap.message)}>
                       </div>
                     </div>
                   </A>
