@@ -46,7 +46,7 @@ const PremiumSidebarActive: Component<{
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('mediaManagment')}>
-              <div>Media Managment</div> <div class={styles.chevronRight}></div>
+              <div>Media Management</div> <div class={styles.chevronRight}></div>
             </ButtonLink>
           </li>
           <li>
