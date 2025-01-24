@@ -739,7 +739,18 @@ const EditBox: Component<{
           if (content.kind !== Kind.UserRelays) return;
 
           const pk = content.pubkey || 'UNKNOWN';
-          const rels = (content.tags || []).reduce<string[]>((acc, t) => t[0] === 'r' ? [...acc, t[1]] : acc, []);
+
+          let rels: string[] = [];
+
+          for (let i = 0; i < (content.tags || []).length; i++) {
+            if (rels.length > 1) break;
+
+            const rel = content.tags[i];
+            if (rel[0] !== 'r' || rels.includes(rel[1])) continue;
+
+            rels.push(rel[1]);
+          }
+
           relays[pk] = [...rels];
         },
         onNotice: () => resolve({}),
