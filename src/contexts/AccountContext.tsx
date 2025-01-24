@@ -94,6 +94,8 @@ export type AccountContextStore = {
   activeRelays: Relay[],
   followData: FollowData,
   premiumReminder: boolean,
+  activeNWC:string[],
+  nwcList: string[][],
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -147,6 +149,9 @@ export type AccountContextStore = {
     ) => Promise<void>,
     clearPremiumRemider: () => void,
     setShowPin: (sec: string, cb?: () => void) => void,
+    setActiveNWC: (nwc: string[]) => void,
+    updateNWCList: (list: string[][]) => void,
+    insertIntoNWCList: (nwc: string[], index?: number) => void,
   },
 }
 
@@ -187,6 +192,8 @@ const initialData = {
   proxyThroughPrimal: false,
   proxySettingSet: false,
   premiumReminder: false,
+  activeNWC: [],
+  nwcList: [],
   followData: {
     tags: [],
     date: 0,
@@ -1624,6 +1631,10 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('relaySettings', () => ({ ...storage.relaySettings }));
 
+    let nwcActive = storage.nwcActive;
+
+    nwcActive && setActiveNWC(nwcActive);
+
     if (Object.keys(relaySettings).length > 0) {
       connectToRelays(relaySettings);
       return;
@@ -1632,7 +1643,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     if (store.isKeyLookupDone && store.publicKey) {
       relaySettings = { ...getStorage(store.publicKey).relaySettings };
 
-    connectToRelays(relaySettings);
+      connectToRelays(relaySettings);
       return;
     }
   });
@@ -1817,6 +1828,22 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('followData', () => ({ ...followData }));
   }
 
+  const setActiveNWC = (nwc: string[]) => {
+    updateStore('activeNWC', () => [...nwc]);
+  }
+
+  const updateNWCList = (list: string[][]) => {
+    updateStore('nwcList', () => [...list]);
+  }
+
+  const insertIntoNWCList = (nwc: string[], index?: number) => {
+    if (index === undefined || index < 0) {
+      updateStore('nwcList', store.nwcList.length, () => [...nwc]);
+      return;
+    }
+    updateStore('nwcList', index, () => [...nwc]);
+  }
+
 // STORES ---------------------------------------
 
 const [store, updateStore] = createStore<AccountContextStore>({
@@ -1863,6 +1890,9 @@ const [store, updateStore] = createStore<AccountContextStore>({
     replaceContactList,
     clearPremiumRemider,
     setShowPin,
+    setActiveNWC,
+    updateNWCList,
+    insertIntoNWCList,
   },
 });
 

@@ -57,6 +57,10 @@ const Menu: Component = () => {
             {intl.formatMessage(t.moderation.title)}
             <div class={styles.chevron}></div>
           </A>
+          <A href="/settings/nwc">
+            {intl.formatMessage(t.nwcSettings.title)}
+            <div class={styles.chevron}></div>
+          </A>
           <A href="/settings/notifications">
             {intl.formatMessage(t.notifications.title)}
             <div class={styles.chevron}></div>

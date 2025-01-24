@@ -34,8 +34,8 @@ import {
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
-import { saveAnimated, saveHomeFeeds, saveReadsFeeds, saveTheme } from "../lib/localStore";
-import { getDefaultSettings, getHomeSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
+import { saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveTheme } from "../lib/localStore";
+import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
 import { feedProfile, feedProfileDesription, settings as t } from "../translations";
@@ -681,6 +681,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const settingsSubId = `load_settings_${APP_ID}`;
     const settingsHomeSubId = `load_home_settings_${APP_ID}`;
     const settingsReadsSubId = `load_reads_settings_${APP_ID}`;
+    const settingsNWCSubId = `load_nwc_settings_${APP_ID}`;
 
     const unsubSettings = subsTo(settingsSubId, {
       onEvent: (_, content) => {
@@ -803,6 +804,28 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     pubkey && getReadsSettings(settingsReadsSubId);
+
+    let nwcList: string[][] = [];
+    let activeNWC: string[] = [];
+
+    const unsubNWCSettings = subsTo(settingsNWCSubId, {
+      onEvent: (_, content) => {
+        const nwcSettings = JSON.parse(content?.content || '{}');
+
+        nwcList = nwcSettings.nwcList;
+        activeNWC = nwcSettings.nwcActive;
+      },
+      onEose: () => {
+        if (store.readsFeeds.length === 0) {
+          getDefaultReadsFeeds();
+        }
+        saveNWC(pubkey, nwcList)
+        activeNWC.length > 0 && saveNWCActive(pubkey, activeNWC[0], activeNWC[1]);
+        unsubNWCSettings();
+      }
+    });
+
+    pubkey && getNWCSettings(settingsNWCSubId);
   }
 
   const refreshMobileReleases = () => {

@@ -1,12 +1,88 @@
 import { bech32 } from "@scure/base";
-import { nip57, Relay, utils } from "../lib/nTools";
+import { nip04, nip47, nip57, Relay, relayInit, utils } from "../lib/nTools";
 import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { Kind } from "../constants";
 import { NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from "../types/primal";
 import { logError } from "./logger";
-import { enableWebLn, sendPayment, signEvent } from "./nostrAPI";
+import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAPI";
+import { decodeNWCUri } from "./wallet";
+import { hexToBytes } from "../utils";
 
-export const zapNote = async (note: PrimalNote, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
+  const nwc = await decrypt(pubkey, nwcEnc);
+
+  const nwcConfig = decodeNWCUri(nwc);
+
+  const request = await nip47.makeNwcRequestEvent(nwcConfig.pubkey, hexToBytes(nwcConfig.secret), invoice)
+
+  if (nwcConfig.relays.length === 0) return false;
+
+  const relay = relayInit(nwcConfig.relays[0]);
+
+  try {
+    await relay.connect();
+
+    const result = await (new Promise((resolve) => {
+      const subInfo = relay.subscribe([{ kinds: [13194], authors: [nwcConfig.pubkey]}], {
+        onevent(event) {
+
+          const nwcInfo = event.content.split(' ');
+          if (nwcInfo.includes('pay_invoice')) {
+
+            const subReq = relay.subscribe([{
+              kinds: [23195],
+            }], {
+              async onevent(eventResponse) {
+                if (!eventResponse.tags.find(t => t[0] === 'e' && t[1] === request.id)) return;
+
+                const decoded = await nip04.decrypt(hexToBytes(nwcConfig.secret), nwcConfig.pubkey, eventResponse.content);
+                const content = JSON.parse(decoded);
+
+                if (content.error) {
+                  logError('Failed NWC payment: ', content.error);
+                  subReq.close();
+                  relay.close();
+                  resolve(false);
+                  return;
+                }
+
+                subReq.close();
+                relay.close();
+                resolve(true);
+
+              },
+              oneose() {
+                // subReq.close();
+              }
+            })
+
+            relay.publish(request);
+          }
+        },
+        oneose() {
+          // subInfo.close();
+        }
+      })
+    }));
+
+    return result;
+
+  }
+  catch (e) {
+    logError('Failed NWC payment init: ', e);
+    return false;
+  }
+
+};
+
+export const zapNote = async (
+  note: PrimalNote,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: Relay[],
+  nwc?: string[],
+) => {
   if (!sender) {
     return false;
   }
@@ -41,6 +117,10 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      return await zapOverNWC(sender, nwc[1], pr);
+    }
+
     await enableWebLn();
     await sendPayment(pr);
 
@@ -51,7 +131,14 @@ export const zapNote = async (note: PrimalNote, sender: string | undefined, amou
   }
 }
 
-export const zapArticle = async (note: PrimalArticle, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+export const zapArticle = async (
+  note: PrimalArticle,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: Relay[],
+  nwc?: string[],
+) => {
   if (!sender) {
     return false;
   }
@@ -92,6 +179,10 @@ export const zapArticle = async (note: PrimalArticle, sender: string | undefined
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      return await zapOverNWC(sender, nwc[1], pr);
+    }
+
     await enableWebLn();
     await sendPayment(pr);
 
@@ -102,7 +193,14 @@ export const zapArticle = async (note: PrimalArticle, sender: string | undefined
   }
 }
 
-export const zapProfile = async (profile: PrimalUser, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+export const zapProfile = async (
+  profile: PrimalUser,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: Relay[],
+  nwc?: string[],
+) => {
   if (!sender || !profile) {
     return false;
   }
@@ -135,6 +233,10 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      return await zapOverNWC(sender, nwc[1], pr);
+    }
+
     await enableWebLn();
     await sendPayment(pr);
 
@@ -145,7 +247,14 @@ export const zapProfile = async (profile: PrimalUser, sender: string | undefined
   }
 }
 
-export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient: PrimalUser, sender: string | undefined, relays: Relay[], exchangeRate?: Record<string, Record<string, number>>) => {
+export const zapSubscription = async (
+  subEvent: NostrRelaySignedEvent,
+  recipient: PrimalUser,
+  sender: string | undefined,
+  relays: Relay[],
+  exchangeRate?: Record<string, Record<string, number>>,
+  nwc?: string[],
+) => {
   if (!sender || !recipient) {
     return false;
   }
@@ -196,6 +305,10 @@ export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      return await zapOverNWC(sender, nwc[1], pr);
+    }
+
     await enableWebLn();
     await sendPayment(pr);
 
@@ -206,7 +319,15 @@ export const zapSubscription = async (subEvent: NostrRelaySignedEvent, recipient
   }
 }
 
-export const zapDVM = async (dvm: PrimalDVM, author: PrimalUser, sender: string | undefined, amount: number, comment = '', relays: Relay[]) => {
+export const zapDVM = async (
+  dvm: PrimalDVM,
+  author: PrimalUser,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: Relay[],
+  nwc?: string[],
+) => {
   if (!sender) {
     return false;
   }
@@ -246,6 +367,10 @@ export const zapDVM = async (dvm: PrimalDVM, author: PrimalUser, sender: string 
 
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
+
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      return await zapOverNWC(sender, nwc[1], pr);
+    }
 
     await enableWebLn();
     await sendPayment(pr);

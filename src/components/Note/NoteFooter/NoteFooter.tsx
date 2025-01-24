@@ -327,7 +327,14 @@ const NoteFooter: Component<{
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
-      const success = await zapNote(props.note, account.publicKey, amount, message, account.activeRelays);
+      const success = await zapNote(
+        props.note,
+        account.publicKey,
+        amount,
+        message,
+        account.activeRelays,
+        account.activeNWC,
+      );
 
       props.updateState && props.updateState('isZapping', () => false);
 

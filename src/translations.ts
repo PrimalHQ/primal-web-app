@@ -1537,6 +1537,13 @@ export const settings = {
       description: 'Caption indicating that there are no muted users on someone else\'s list',
     },
   },
+  nwcSettings: {
+    title: {
+      id: 'settings.nwcSettings.title',
+      defaultMessage: 'Connected Wallets',
+      description: 'Title of the nwc settings sub-page',
+    },
+  },
   network: {
     title: {
       id: 'settings.network.title',

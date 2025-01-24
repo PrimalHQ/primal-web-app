@@ -244,7 +244,6 @@ const Note: Component<{
   };
 
   const onContextMenuTrigger = () => {
-    console.log('NOTE: ', props.note)
     app?.actions.openContextMenu(
       props.note,
       noteContextMenu?.getBoundingClientRect(),

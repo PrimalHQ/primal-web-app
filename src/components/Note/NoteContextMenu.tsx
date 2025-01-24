@@ -97,9 +97,9 @@ const NoteContextMenu: Component<{
 
   const noteLinkId = () => {
     try {
-      return `/e/${nip19.noteEncode(note().id)}`;
+      return `e/${nip19.noteEncode(note().id)}`;
     } catch(e) {
-      return '/404';
+      return '404';
     }
   };
 
@@ -134,7 +134,6 @@ const NoteContextMenu: Component<{
 
   const copyNoteId = () => {
     if (!props.data) return;
-    console.log('COPY: ', note());
     navigator.clipboard.writeText(`${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));

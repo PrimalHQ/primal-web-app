@@ -398,3 +398,32 @@ export const selectRelayTags = (tags: string[][], limit = 2, onlyWritable = true
     (t[1].startsWith('wss://') ||
     t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []
   ).slice(0, limit);
+
+
+
+// We use optimized technique to convert hex string to byte array
+const asciis = { _0: 48, _9: 57, A: 65, F: 70, a: 97, f: 102 } as const;
+function asciiToBase16(ch: number): number | undefined {
+  if (ch >= asciis._0 && ch <= asciis._9) return ch - asciis._0; // '2' => 50-48
+  if (ch >= asciis.A && ch <= asciis.F) return ch - (asciis.A - 10); // 'B' => 66-(65-10)
+  if (ch >= asciis.a && ch <= asciis.f) return ch - (asciis.a - 10); // 'b' => 98-(97-10)
+  return;
+}
+
+export function hexToBytes(hex: string): Uint8Array {
+  if (typeof hex !== 'string') throw new Error('hex string expected, got ' + typeof hex);
+  const hl = hex.length;
+  const al = hl / 2;
+  if (hl % 2) throw new Error('hex string expected, got unpadded hex of length ' + hl);
+  const array = new Uint8Array(al);
+  for (let ai = 0, hi = 0; ai < al; ai++, hi += 2) {
+    const n1 = asciiToBase16(hex.charCodeAt(hi));
+    const n2 = asciiToBase16(hex.charCodeAt(hi + 1));
+    if (n1 === undefined || n2 === undefined) {
+      const char = hex[hi] + hex[hi + 1];
+      throw new Error('hex string expected, got non-hex character "' + char + '" at index ' + hi);
+    }
+    array[ai] = n1 * 16 + n2; // multiply first octet, e.g. 'a3' => 10*16+3 => 160 + 3 => 163
+  }
+  return array;
+}

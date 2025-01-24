@@ -163,6 +163,8 @@ export enum Kind  {
   MembershipCohortInfo = 10_000_169,
 
   WALLET_OPERATION = 10_000_300,
+  WALLET_NWC_ACTIVE = 10_000_802,
+  WALLET_NWC_CONNECTION = 10_000_803,
   ExchangeRate = 10_000_305,
 
   OrderHistory = 10_000_605,

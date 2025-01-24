@@ -1,0 +1,71 @@
+.nwcWallet {
+  padding: 12px 20px;
+  display: flex;
+  gap: 16px;
+  background-color: var(--background-sheet);
+  border-bottom: 1px solid var(--background-input);
+
+  .logo {
+    width: 32px;
+    height: 32px;
+  }
+
+  .walletInfos {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    .walletInfo {
+      flex-direction: column;
+
+      .walletName {
+        overflow: hidden;
+        color: var(--text-primary);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+
+      .walletDesc {
+        overflow: hidden;
+        color: var(--text-secondary);
+        text-overflow: ellipsis;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+      }
+    }
+
+    .walletRemove {
+
+    }
+  }
+
+  .walletAction {
+    .walletActive {
+      width: 100px;
+      height: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      color: var(--success-bright);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 14px;
+    }
+  }
+}
+
+.checkCircleIcon {
+  width: 16px;
+  height: 16px;
+
+  background-color: var(--success-bright);
+  -webkit-mask: url(../../assets/icons/check-circle-empty.svg) 0 / 100% no-repeat;
+  mask: url(../../assets/icons/check-circle-empty.svg) 0 / 100% no-repeat;
+}

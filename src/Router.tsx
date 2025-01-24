@@ -47,6 +47,7 @@ const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
+const NostrWalletConnect = lazy(() => import('./pages/Settings/NostrWalletConnect'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 // const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
@@ -145,6 +146,7 @@ const AppRouter: Component = () => {
             <Route path="/muted" component={Muted} />
             <Route path="/network" component={Network} />
             <Route path="/filters" component={Moderation} />
+            <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />

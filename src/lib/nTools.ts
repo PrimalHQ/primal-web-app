@@ -13,6 +13,7 @@ import {
   nip04,
   nip05,
   nip19,
+  nip47,
   nip57,
   utils,
 } from "nostr-tools";
@@ -28,6 +29,7 @@ export {
   nip04,
   nip05,
   nip19,
+  nip47,
   nip57,
   utils,
   generatePrivateKey,

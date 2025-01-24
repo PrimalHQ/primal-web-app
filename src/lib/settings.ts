@@ -173,3 +173,57 @@ export const getDefaultSettings = async (subid: string) => {
     {cache: ["get_default_app_settings", { client: "Primal-Web App" }]},
   ]))
 };
+
+
+export const getNWCSettings = async (subid: string) => {
+  const event = {
+    content: JSON.stringify({ subkey: "user-nwc" }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["get_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to get settings: ', reason);
+    return false;
+  }
+
+};
+
+export const setNWCSettings = async (subid: string, nwcSettings: { nwcList: string[][], nwcActive: string[]}) => {
+  const event = {
+    content: JSON.stringify({
+      subkey: "user-nwc",
+      settings: { ...nwcSettings },
+    }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["set_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to set settings: ', reason);
+    return false;
+  }
+
+};

@@ -82,7 +82,14 @@ const AuthorSubscribe: Component<{
     const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
 
     if (success && note) {
-      const isZapped = await zapSubscription(note, a, account.publicKey, account.activeRelays, exchangeRate);
+      const isZapped = await zapSubscription(
+        note,
+        a,
+        account.publicKey,
+        account.activeRelays,
+        exchangeRate,
+        account.activeNWC,
+      );
 
       if (!isZapped) {
         unsubscribe(note.id);

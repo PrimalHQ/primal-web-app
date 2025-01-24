@@ -8,7 +8,7 @@ import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
 import { truncateNumber } from '../../../lib/notifications';
-import { canUserReceiveZaps, zapArticle, zapNote } from '../../../lib/zap';
+import { canUserReceiveZaps, zapArticle } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md_2.json';
@@ -307,7 +307,14 @@ const ArticleFooter: Component<{
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
-      const success = await zapArticle(props.note, account.publicKey, amount, message, account.activeRelays);
+      const success = await zapArticle(
+        props.note,
+        account.publicKey,
+        amount,
+        message,
+        account.activeRelays,
+        account.activeNWC,
+      );
 
       props.updateState('isZapping', () => false);
 

@@ -134,6 +134,7 @@ const CustomZap: Component<{
           selectedValue().amount || 0,
           selectedValue().message,
           account.activeRelays,
+          account.activeNWC,
         );
 
         handleZap(success);
@@ -148,6 +149,7 @@ const CustomZap: Component<{
         selectedValue().amount || 0,
         selectedValue().message,
         account.activeRelays,
+        account.activeNWC,
       );
 
       handleZap(success);
