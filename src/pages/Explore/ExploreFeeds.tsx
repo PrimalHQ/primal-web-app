@@ -183,7 +183,7 @@ const ExploreFeeds: Component = () => {
     if (!dvm) return;
 
     const spec = store.dvm?.primal_spec ?? JSON.stringify({
-        dvm_id: dvm.id,
+        dvm_id: dvm.identifier,
         dvm_pubkey: dvm.pubkey,
         kind: store.metadata?.kind || 'notes',
       });
