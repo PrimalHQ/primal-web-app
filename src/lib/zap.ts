@@ -17,61 +17,71 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
 
   if (nwcConfig.relays.length === 0) return false;
 
-  const relay = relayInit(nwcConfig.relays[0]);
+  let promises: Promise<boolean>[] = [];
+  let relays: Relay[] = [];
+  let result: boolean = false;
 
   try {
-    await relay.connect();
+    for (let i = 0; i < nwcConfig.relays.length; i++) {
+      const relay = relayInit(nwcConfig.relays[i]);
 
-    const result = await (new Promise((resolve) => {
-      const subInfo = relay.subscribe([{ kinds: [13194], authors: [nwcConfig.pubkey]}], {
-        onevent(event) {
+      promises.push(new Promise(async (resolve) => {
+        await relay.connect();
 
-          const nwcInfo = event.content.split(' ');
-          if (nwcInfo.includes('pay_invoice')) {
+        relays.push(relay);
 
-            const subReq = relay.subscribe([{
-              kinds: [23195],
-            }], {
-              async onevent(eventResponse) {
-                if (!eventResponse.tags.find(t => t[0] === 'e' && t[1] === request.id)) return;
+        const subInfo = relay.subscribe(
+          [{ kinds: [13194], authors: [nwcConfig.pubkey] }],
+          {
+            onevent(event) {
+              const nwcInfo = event.content.split(' ');
+              if (nwcInfo.includes('pay_invoice')) {
 
-                const decoded = await nip04.decrypt(hexToBytes(nwcConfig.secret), nwcConfig.pubkey, eventResponse.content);
-                const content = JSON.parse(decoded);
+                const subReq = relay.subscribe(
+                  [{ kinds: [23195], ids: [request.id] }],
+                  {
+                    async onevent(eventResponse) {
+                      if (!eventResponse.tags.find(t => t[0] === 'e' && t[1] === request.id)) return;
 
-                if (content.error) {
-                  logError('Failed NWC payment: ', content.error);
-                  subReq.close();
-                  relay.close();
-                  resolve(false);
-                  return;
-                }
+                      const decoded = await nip04.decrypt(hexToBytes(nwcConfig.secret), nwcConfig.pubkey, eventResponse.content);
+                      const content = JSON.parse(decoded);
 
-                subReq.close();
-                relay.close();
-                resolve(true);
+                      if (content.error) {
+                        logError('Failed NWC payment: ', content.error);
+                        subReq.close();
+                        subInfo.close();
+                        resolve(false);
+                        return;
+                      }
 
-              },
-              oneose() {
-                // subReq.close();
+                      subReq.close();
+                      subInfo.close();
+                      resolve(true);
+
+                    },
+                  },
+                );
+
+                relay.publish(request);
               }
-            })
-
-            relay.publish(request);
-          }
-        },
-        oneose() {
-          // subInfo.close();
-        }
-      })
-    }));
-
-    return result;
-
+            },
+          },
+        );
+      }));
+    }
+    result = await Promise.any(promises);
   }
   catch (e) {
     logError('Failed NWC payment init: ', e);
-    return false;
+    result = false;
   }
+
+  for (let i = 0; i < relays.length; i++) {
+    const relay = relays[i];
+    relay.close();
+  }
+
+  return result;
 
 };
 
