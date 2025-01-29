@@ -2,6 +2,10 @@
   img {
     background-color: var(--background-input);
   }
+
+  video {
+    border: 1px solid var(--devider);
+  }
 }
 
 .mentionedUser {
@@ -44,6 +48,7 @@
         display: flex;
         align-items: center;
         width: auto;
+
         .userName {
           max-width: 150px;
           text-overflow: ellipsis;
@@ -52,12 +57,13 @@
         }
       }
 
-      .time{
+      .time {
         margin: 0px 2px;
         min-width: 40px;
         font-size: 14px;
         line-height: 16px;
         font-weight: 400;
+
         &::before {
           content: "|";
           padding: 0px 2px;
@@ -85,7 +91,7 @@
 }
 
 .bordered {
-  border:solid 1px var(--subtile-devider);
+  border: solid 1px var(--subtile-devider);
   border-radius: 8px;
   margin-block: 8px;
   overflow: hidden;

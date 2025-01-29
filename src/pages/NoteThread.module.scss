@@ -2,12 +2,15 @@
   position: relative;
   padding-bottom: 60px;
 }
+
 .parentsHolder {
-  padding-top: 72px;
+  padding-top: 48px;
 }
+
 .loader {
   padding-top: 72px;
 }
+
 .noContent {
   position: relative;
   color: var(--text-secondary);
@@ -44,6 +47,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
   p {
     font-weight: 700;
     font-size: 18px;

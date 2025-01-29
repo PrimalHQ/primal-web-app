@@ -1,4 +1,3 @@
-
 .verifiedIcon {
   width: 100%;
   height: 100%;
@@ -15,7 +14,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-inline: 4px;
+  margin: -2px 4px 0;
 }
 
 .verificationIconL {
@@ -55,27 +54,35 @@
   &.legend_GOLD {
     background: var(--legend-gold);
   }
+
   &.legend_AQUA {
     background: var(--legend-aqua);
   }
+
   &.legend_SILVER {
     background: var(--legend-silver);
   }
+
   &.legend_PURPLE {
     background: var(--legend-purple);
   }
+
   &.legend_PURPLEHAZE {
     background: var(--legend-purplehaze);
   }
+
   &.legend_TEAL {
     background: var(--legend-teal);
   }
+
   &.legend_BROWN {
     background: var(--legend-brown);
   }
+
   &.legend_BLUE {
     background: var(--legend-blue);
   }
+
   &.legend_SUNFIRE {
     background: var(--legend-sunfire);
   }

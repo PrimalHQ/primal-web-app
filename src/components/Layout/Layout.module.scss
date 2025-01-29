@@ -86,6 +86,7 @@
 
 .centerContent {
   width: var(--center-col-w);
+
   .headerFloater {
     position: fixed;
     opacity: 0;
@@ -118,6 +119,7 @@
 
   &.messagesColumn {
     height: 85px;
+
     >div {
       height: 85px;
       border-left: none;
@@ -140,6 +142,7 @@
   position: fixed;
   // background-color: var(--background-site);
   z-index: var(--z-index-header);
+  padding: 14px 0 0;
 
   >div {
     display: flex;
@@ -164,9 +167,11 @@
 
 .rightContent {
   margin-top: 92px;
+
   >div {
     margin-left: 24px;
   }
+
   &.exploreHeader {
     margin-top: 20px;
   }
@@ -181,8 +186,8 @@
   width: 0px;
   height: 0px;
   position: absolute;
-  top:0;
-  left:0;
+  top: 0;
+  left: 0;
 }
 
 @media only screen and (max-width: 1300px) {
@@ -221,6 +226,7 @@
 
   .rightColumn {
     width: 1px;
+
     >div {
       >div {
         display: none;
@@ -295,6 +301,7 @@
 
   .rightColumn {
     width: 1px;
+
     >div {
       >div {
         display: none;
