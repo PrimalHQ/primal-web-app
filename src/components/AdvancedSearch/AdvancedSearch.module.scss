@@ -2,14 +2,17 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 0.7;
   }
 }
+
 @keyframes overlayHide {
   from {
     opacity: 0.7;
   }
+
   to {
     opacity: 0;
   }
@@ -20,16 +23,19 @@
     opacity: 0;
     transform: scale(0.96);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
   }
 }
+
 @keyframes contentHide {
   from {
     opacity: 1;
     transform: scale(1);
   }
+
   to {
     opacity: 0;
     transform: scale(0.96);
@@ -169,7 +175,7 @@
       // width: calc(var(--search-input-width) - 60px);
       height: 36px;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 14px;
       line-height: 20px;
       padding: 0;
       margin-left: 10px;
@@ -186,7 +192,7 @@
 
       &::placeholder {
         color: var(--text-tertiary);
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 400;
         line-height: 20px;
       }
@@ -282,12 +288,14 @@
       height: 4px;
       width: 100%;
     }
+
     .fill {
       position: absolute;
       background-color: var(--accent);
       border-radius: 9999px;
       height: 100%;
     }
+
     .thumb {
       display: block;
       width: 20px;
@@ -297,9 +305,11 @@
       top: -8px;
       cursor: grab;
     }
+
     .thumb:hover {
       background-color: var(--text-secondary-2);
     }
+
     .thumb:focus {
       outline: none;
       background-color: var(--text-secondary-2);
@@ -433,6 +443,7 @@
 
 .selectBox {
   display: flex;
+
   .trigger {
     padding-block: 8px;
     padding-left: 16px;
@@ -521,6 +532,7 @@
     font-weight: 600;
     line-height: 20px;
   }
+
   textarea {
     background-color: var(--background-header-input);
     color: var(--text-secondary);
