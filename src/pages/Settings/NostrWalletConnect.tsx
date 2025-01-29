@@ -32,20 +32,12 @@ const NostrWalletConnect: Component = () => {
   const intl = useIntl();
   const account = useAccountContext();
 
-  // const [nwcList, updateNWCList] = createStore<string[][]>([]);
-
   const [openNewWallet, setOpenNewWallet] = createSignal(false);
   const [newNWC, setNewNWC] = createSignal('');
   const [newNWCLabel, setNewNWCLabel] = createSignal('');
-  const [isPrimalWalletActive, setIsPrimalWalletActive] = createSignal(false);
-  const [isPrimalWalletConnected, setIsPrimalWalletConnected] = createSignal(false);
 
   const [walletStatus, setWalletStatus] = createStore<Record<string, WalletStatus>>({
     'primal': 'inactive',
-  });
-
-  createEffect(() => {
-    console.log('STATUS: ', {...walletStatus})
   });
 
   createEffect(() => {
