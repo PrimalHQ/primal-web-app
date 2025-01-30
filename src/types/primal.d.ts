@@ -446,7 +446,7 @@ export type NostrBlossom= {
   created_at?: number,
   pubkey?: string,
   id?: string,
-  tags?: string[],
+  tags?: string[][],
 };
 
 export type NostrRelayList= {
@@ -455,7 +455,16 @@ export type NostrRelayList= {
   created_at?: number,
   pubkey: string,
   id?: string,
-  tags?: string[],
+  tags?: string[][],
+};
+
+export type NostrImageContent= {
+  kind: Kind.Image,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id?: string,
+  tags?: string[][],
 };
 
 export type NostrEventContent =
@@ -511,6 +520,7 @@ export type NostrEventContent =
   NostrMembershipCohortInfo |
   NostrBlossom |
   NostrRelayList |
+  NostrImageContent |
   NostrTopicStats;
 
 export type NostrEvent = [

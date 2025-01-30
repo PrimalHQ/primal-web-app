@@ -1,0 +1,22 @@
+.nostrImageWrapper {
+  background-color: var(--background-header-input);
+  padding: 16px 20px;
+  border-radius: 12px;
+
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    position: relative;
+  }
+}
+
+
+.nostrImage {
+  display: block;
+  object-fit: cover;
+  z-index: 22;
+  // max-width: 528px;
+}

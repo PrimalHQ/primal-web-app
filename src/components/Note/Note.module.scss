@@ -197,6 +197,7 @@
     .rightSide {
       display: flex;
       flex-direction: column;
+      width: calc(100% - 42px);
 
       .message {
         color: var(--text-primary);
@@ -296,6 +297,8 @@
     font-weight: 400;
     line-height: 18px;
     color: var(--text-tertiary);
+    padding-block: 0 !important;
+    margin-bottom: 0 !important;
 
     .ellipsisIcon {
       width: 11px;

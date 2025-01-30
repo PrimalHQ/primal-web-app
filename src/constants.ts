@@ -96,6 +96,7 @@ export enum Kind  {
   EventDeletion = 5,
   Repost = 6,
   Reaction = 7,
+  Image = 20,
   ChannelCreation = 40,
   ChannelMetadata = 41,
   ChannelMessage = 42,

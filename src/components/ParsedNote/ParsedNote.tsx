@@ -28,10 +28,11 @@ import {
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, onMount, Show,
+  Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
 } from 'solid-js';
 import {
   NostrEventContent,
+  NostrImageContent,
   NostrUserContent,
   NostrUserZaps,
   PrimalArticle,
@@ -66,6 +67,7 @@ import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
+import NostrImage from '../NostrImage/NostrImage';
 
 const groupGridLimit = 7;
 
@@ -957,7 +959,7 @@ const ParsedNote: Component<{
 
       const unsub = subsTo(subId, {
         onEvent: (_, content) => {
-          if (content.id === data.id) {
+          if (content.id === data.id && content.kind === Kind.Image) {
             setUnknownEvents((evs) => ({ ...evs, [nid]: { ...content } }))
           }
         },
@@ -966,23 +968,31 @@ const ParsedNote: Component<{
         }
       })
 
-      getEvents(account?.publicKey, [data.id], subId);
+      getEvents(account?.publicKey, [data.id], subId, true);
 
       return (
-        <Show
-          when={alt()}
-          fallback={
+        <Switch fallback={
+          <Show
+            when={alt()}
+            fallback={
+              <div class={styles.unknownEvent}>
+                <div class={`${styles.icon} ${styles.bang}`}></div>
+                <div class={styles.label}>Mentioned event not found</div>
+              </div>
+            }
+          >
             <div class={styles.unknownEvent}>
-              <div class={`${styles.icon} ${styles.bang}`}></div>
-              <div class={styles.label}>Mentioned event not found</div>
+              <div class={`${styles.icon} ${styles.file}`}></div>
+              <div class={styles.label}>{alt()}</div>
             </div>
-          }
-        >
-          <div class={styles.unknownEvent}>
-            <div class={`${styles.icon} ${styles.file}`}></div>
-            <div class={styles.label}>{alt()}</div>
-          </div>
-        </Show>
+          </Show>
+        }>
+          <Match when={unknownEvents[nid]?.kind === Kind.Image}>
+            <NostrImage
+              event={unknownEvents[nid] as NostrImageContent}
+            />
+          </Match>
+        </Switch>
       );
     }
 
