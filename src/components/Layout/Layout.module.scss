@@ -37,6 +37,8 @@
     grid-template-rows: var(--header-height) 1fr 82px;
     height: 100%;
     border-right: 1px solid var(--devider);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .leftHeader {
@@ -86,6 +88,7 @@
 
 .centerContent {
   width: var(--center-col-w);
+
   .headerFloater {
     position: fixed;
     opacity: 0;
@@ -118,6 +121,7 @@
 
   &.messagesColumn {
     height: 85px;
+
     >div {
       height: 85px;
       border-left: none;
@@ -164,9 +168,11 @@
 
 .rightContent {
   margin-top: 92px;
+
   >div {
     margin-left: 24px;
   }
+
   &.exploreHeader {
     margin-top: 20px;
   }
@@ -181,8 +187,8 @@
   width: 0px;
   height: 0px;
   position: absolute;
-  top:0;
-  left:0;
+  top: 0;
+  left: 0;
 }
 
 @media only screen and (max-width: 1300px) {
@@ -221,6 +227,7 @@
 
   .rightColumn {
     width: 1px;
+
     >div {
       >div {
         display: none;
@@ -295,6 +302,7 @@
 
   .rightColumn {
     width: 1px;
+
     >div {
       >div {
         display: none;

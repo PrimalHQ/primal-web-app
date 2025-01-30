@@ -1,3 +1,7 @@
+.navMenu {
+  padding: 0 0 12px;
+}
+
 .sideNav {
   display: flex;
   flex-direction: column;
@@ -13,7 +17,7 @@
 
   >button {
     margin: 0;
-    width: 100% ;
+    width: 100%;
   }
 
   .message {
@@ -53,7 +57,7 @@
     width: 100%;
     height: 48px;
 
-    > button {
+    >button {
       margin-bottom: 0px;
     }
   }
@@ -63,7 +67,8 @@
     bottom: 56px;
     left: calc(100vw - 48px);
 
-    .message, .action {
+    .message,
+    .action {
       display: none;
     }
   }
@@ -78,5 +83,5 @@
 
   background-color: var(--text-primary-button);
   -webkit-mask: url(../../assets/icons/post.svg) no-repeat 0 0 / 18px 18px;
-  mask: url(../../assets/icons/post.svg) no-repeat  0 0 / 18px 18px;
+  mask: url(../../assets/icons/post.svg) no-repeat 0 0 / 18px 18px;
 }
