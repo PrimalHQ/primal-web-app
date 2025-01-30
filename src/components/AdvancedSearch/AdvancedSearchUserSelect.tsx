@@ -135,7 +135,7 @@ const AdvancedSearchUserSelect: Component<{
         <DropdownMenu.Trigger class={styles.dropdownMenuTrigger}>
           <div class={styles.selctionLabel}>
             <Show when={props.userList.length === 0}>
-              Anyone
+              Bárki
             </Show>
           </div>
           <div class={styles.chevronIcon}></div>

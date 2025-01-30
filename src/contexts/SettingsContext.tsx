@@ -832,6 +832,31 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     fetchDefaultArticleFeeds(subId);
   }
 
+  const translateToHungarian = (text: string) => {
+    const translations: Record<string, string> = {
+      "Latest": "Legfrissebbek",
+      "Latest notes by your follows": "Legfrissebb bejegyzések az általad követettektől",
+      "Latest with Replies": "Legfrissebbek Válaszokkal",
+      "Latest notes and replies by your follows": "Legfrissebb bejegyzések és válaszok az általad követettektől",
+      "Trending 7d": "Népszerű (7 nap)",
+      "Global trending notes in the past 7 days": "Népszerű bejegyzések az elmúlt 7 napban",
+      "Trending 48h": "Népszerű (48 óra)",
+      "Global trending notes in the past 48 hours": "Népszerű bejegyzések az elmúlt 48 órában",
+      "Trending 24h": "Népszerű (24 óra)",
+      "Global trending notes in the past 24 hours": "Népszerű bejegyzések az elmúlt 24 órában",
+      "Trending 12h": "Népszerű (12 óra)",
+      "Global trending notes in the past 12 hours": "Népszerű bejegyzések az elmúlt 12 órában",
+      "Trending 4h": "Népszerű (4 óra)",
+      "Global trending notes in the past 4 hours": "Népszerű bejegyzések az elmúlt 4 órában",
+      "Trending 1h": "Népszerű (1 óra)",
+      "Global trending notes in the past 1 hour": "Népszerű bejegyzések az elmúlt 1 órában",
+      "Nostr Firehose": "Noszter Tűzfészek",
+      "Latest global notes; be careful!": "Legfrissebb bejegyzések világszerte, légy óvatos!",
+    };
+
+    return translations[text] || text;
+  };
+
   const getDefaultHomeFeeds = () => {
     const subId = `home_feeds_${APP_ID}`;
 
@@ -839,7 +864,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       onEvent: (_, content) => {
         const feeds = JSON.parse(content.content || '[]');
 
-        updateStore('homeFeeds', () => [...feeds]);
+        const translatedFeeds = feeds.map(feed => ({
+          ...feed,
+          name: translateToHungarian(feed.name),
+          description: translateToHungarian(feed.description),
+        }));
+
+        updateStore('homeFeeds', () => [...translatedFeeds]);
       },
       onEose: () => {
         unsub();

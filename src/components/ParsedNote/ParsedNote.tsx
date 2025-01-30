@@ -965,7 +965,7 @@ const ParsedNote: Component<{
           fallback={
             <div class={styles.unknownEvent}>
               <div class={`${styles.icon} ${styles.bang}`}></div>
-              <div class={styles.label}>Mentioned event not found</div>
+              <div class={styles.label}>Esemény nem található</div>
             </div>
           }
         >
@@ -1000,7 +1000,7 @@ const ParsedNote: Component<{
           fallback={
             <div class={styles.unknownEvent}>
               <div class={`${styles.icon} ${styles.bang}`}></div>
-              <div class={styles.label}>Mentioned event not found</div>
+              <div class={styles.label}>Esemény nem található</div>
             </div>
           }
         >
@@ -1015,7 +1015,7 @@ const ParsedNote: Component<{
     return (
       <div class={styles.unknownEvent}>
         <div class={`${styles.icon} ${styles.bang}`}></div>
-        <div class={styles.label}>Mentioned event not found</div>
+        <div class={styles.label}>Esemény nem található</div>
       </div>
     );
   }

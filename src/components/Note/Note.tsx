@@ -375,13 +375,13 @@ const Note: Component<{
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
               <span>
-                {veryLongDate(props.note.post?.created_at).replace('at', '·')}
+                {veryLongDate(props.note.post?.created_at)}
               </span>
               <button
                 class={styles.reactSummary}
                 onClick={() => openReactionModal()}
               >
-                <span class={styles.number}>{reactionSum()}</span> Reactions
+                <span class={styles.number}>{reactionSum()}</span> Reakció
               </button>
             </div>
 

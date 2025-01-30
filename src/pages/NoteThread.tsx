@@ -219,7 +219,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
         />
       </Wormhole>
 
-      <NavHeader title="Thread" />
+      <NavHeader title="Beszélgetés" />
 
       <Show when={account?.isKeyLookupDone}>
         <Transition name='slide-fade'>

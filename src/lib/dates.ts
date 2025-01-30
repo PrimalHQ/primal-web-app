@@ -3,7 +3,7 @@ export const shortDate = (timestamp: number | undefined) => {
     return '';
   }
   const date = new Date(timestamp * 1000);
-  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium'});
+  const dtf = new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium'});
 
   return dtf.format(date);
 };
@@ -13,7 +13,7 @@ export const longDate = (timestamp: number | undefined) => {
     return '';
   }
   const date = new Date(timestamp * 1000);
-  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short'});
+  const dtf = new Intl.DateTimeFormat('hu-HU', { dateStyle: 'medium', timeStyle: 'short'});
 
   return dtf.format(date);
 };
@@ -23,7 +23,7 @@ export const veryLongDate = (timestamp: number | undefined) => {
     return '';
   }
   const date = new Date(timestamp * 1000);
-  const dtf = new Intl.DateTimeFormat('en-US', { dateStyle: 'full', timeStyle: 'short'});
+  const dtf = new Intl.DateTimeFormat('hu-HU', { dateStyle: 'full', timeStyle: 'short'});
 
   return dtf.format(date);
 };
@@ -39,7 +39,7 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
   const month = day * 30;
   const year = month * 12;
 
-  const rtf = new Intl.RelativeTimeFormat('en', { style });
+  const rtf = new Intl.RelativeTimeFormat('hu', { style });
 
   const diff = today - postTimestamp;
 
@@ -73,7 +73,7 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
     return { date, label: rtf.format(-minutes, 'minutes').replace(' ago', '') };
   }
 
-  return { date, label: `${diff}s` };
+  return { date, label: `${diff} mp` };
 };
 
 export const dateFuture = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short', since?: number) => {
@@ -87,7 +87,7 @@ export const dateFuture = (postTimestamp: number, style: Intl.RelativeTimeFormat
   const month = day * 30;
   const year = month * 12;
 
-  const rtf = new Intl.RelativeTimeFormat('en', { style });
+  const rtf = new Intl.RelativeTimeFormat('hu', { style });
 
   const diff = postTimestamp - today;
 
@@ -121,5 +121,5 @@ export const dateFuture = (postTimestamp: number, style: Intl.RelativeTimeFormat
     return { date, label: rtf.format(-minutes, 'minutes').replace(' ago', '') };
   }
 
-  return { date, label: `${diff}s` };
+  return { date, label: `${diff} mp` };
 };

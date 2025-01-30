@@ -894,11 +894,11 @@ const Profile: Component = () => {
                       <div class={`${styles.followings} animated`}>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
                           <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
-                          <div class={styles.label}>following</div>
+                          <div class={styles.label}>követés</div>
                         </button>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
                           <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
-                          <div class={styles.label}>followers</div>
+                          <div class={styles.label}>követő</div>
                         </button>
                       </div>
 
@@ -915,7 +915,7 @@ const Profile: Component = () => {
 
                       <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
                         <div class={`${styles.commonFollows} animated`}>
-                          <div class={styles.label}>Followed by</div>
+                          <div class={styles.label}>Követik</div>
                           <div class={styles.avatars}>
                             <For each={profile?.commonFollowers.slice(0, 5)}>
                               {(follower, index) => (
@@ -955,11 +955,11 @@ const Profile: Component = () => {
                       <div class={styles.followings}>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'follows')}>
                           <div class={styles.number}>{(profile?.userStats?.follows_count || 0).toLocaleString()}</div>
-                          <div class={styles.label}>following</div>
+                          <div class={styles.label}>követés</div>
                         </button>
                         <button class={styles.stats} onClick={() => setFollowsModal(() => 'followers')}>
                           <div class={styles.number}>{(profile?.userStats?.followers_count || 0).toLocaleString()}</div>
-                          <div class={styles.label}>followers</div>
+                          <div class={styles.label}>követő</div>
                         </button>
                       </div>
                     </div>
@@ -1004,7 +1004,7 @@ const Profile: Component = () => {
 
                         <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
                           <div class={styles.commonFollows}>
-                            <div class={styles.label}>Followed by</div>
+                            <div class={styles.label}>Követik</div>
                             <div class={styles.avatars}>
                               <For each={profile?.commonFollowers.slice(0, 5)}>
                                 {(follower, index) => (
