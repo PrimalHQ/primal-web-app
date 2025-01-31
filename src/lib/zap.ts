@@ -8,6 +8,8 @@ import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAP
 import { decodeNWCUri } from "./wallet";
 import { hexToBytes } from "../utils";
 
+export let lastZapError: string = "";
+
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
   const nwc = await decrypt(pubkey, nwcEnc);
 
@@ -71,8 +73,9 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
     }
     result = await Promise.any(promises);
   }
-  catch (e) {
+  catch (e: any) {
     logError('Failed NWC payment init: ', e);
+    lastZapError = e;
     result = false;
   }
 

@@ -48,12 +48,7 @@ const NostrWalletConnect: Component = () => {
 
     const active = loadNWCActive(account.publicKey);
     if (active) {
-      if (active[0] === 'primal') {
-        connectToPrimalWallet();
-      }
-      else {
-        connectToNWCWallet(active[0], active[1]);
-      }
+      applyActiveWallet(active);
     }
   });
 
@@ -62,6 +57,22 @@ const NostrWalletConnect: Component = () => {
       checkActiveWallet(account.publicKey);
     }
   })
+
+  const applyActiveWallet = (wallet: string[]) => {
+    if (!account?.publicKey) return;
+
+    const pubkey = account.publicKey;
+
+    const [walletName, enc] = wallet;
+
+    const active = loadNWCActive(pubkey);
+
+    if (active && active.length > 0 && active[0] !== walletName) {
+      setWalletStatus(active[0], 'active');
+    }
+
+    setWalletStatus(walletName, () => 'connected');
+  }
 
   const checkActiveWallet = (pubkey: string) => {
       const walletSocket = new WebSocket('wss://wallet.primal.net/v1');

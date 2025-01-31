@@ -8,7 +8,7 @@ import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
 import { truncateNumber } from '../../../lib/notifications';
-import { canUserReceiveZaps, zapNote } from '../../../lib/zap';
+import { canUserReceiveZaps, lastZapError, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md_2.json';
@@ -346,6 +346,12 @@ const NoteFooter: Component<{
         });
 
         return;
+      } else {
+        app?.actions.openConfirmModal({
+          title: "Failed to zap",
+          description: lastZapError,
+          confirmLabel: "ok",
+        })
       }
 
       props.customZapInfo && props.customZapInfo.onFail({
