@@ -1,22 +1,7 @@
-import { useIntl } from '@cookbook/solid-intl';
-import { useNavigate } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, JSXElement, Show } from 'solid-js';
-import { useSearchContext } from '../../contexts/SearchContext';
-import { nip05Verification, userName } from '../../stores/profile';
-import { PrimalUser } from '../../types/primal';
-import { debounce } from '../../utils';
-import Avatar from '../Avatar/Avatar';
-import Loader from '../Loader/Loader';
-import { useToastContext } from '../Toaster/Toaster';
-import { placeholders, search as t } from '../../translations';
+import { Component, JSXElement } from 'solid-js';
 
 import styles from './AdvancedSearch.module.scss';
 import { hookForDev } from '../../lib/devTools';
-import { useProfileContext } from '../../contexts/ProfileContext';
-import { DropdownMenu } from '@kobalte/core/dropdown-menu';
-import SearchOption from '../Search/SearchOption';
-import { Slider } from '@kobalte/core/slider';
-import { TextField } from '@kobalte/core/text-field';
 import { Dialog } from '@kobalte/core/dialog';
 
 
@@ -54,7 +39,6 @@ const AdvancedSearchDialog: Component<{
         </div>
       </Dialog.Portal>
     </Dialog>
-
   )
 }
 

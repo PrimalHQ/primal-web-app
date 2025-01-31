@@ -802,6 +802,7 @@ const ProfileMobile: Component = () => {
 
                   <Show when={isVisibleLegend()}>
                     <PremiumCohortInfo
+                      user={profile?.userProfile}
                       cohortInfo={app?.memberCohortInfo[profile?.profileKey!]!}
                       legendConfig={app?.legendCustomization[profile?.profileKey!]}
                     />

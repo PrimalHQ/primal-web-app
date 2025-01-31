@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Component, Match, Switch, createSignal } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -12,9 +12,11 @@ import { PrimalUser } from '../../types/primal';
 import { LegendCustomizationConfig } from '../../lib/premium';
 import { CohortInfo } from '../../contexts/AppContext';
 import { useAccountContext } from '../../contexts/AccountContext';
+import LegendCard from '../../components/LegendCard/LegendCard';
 
 
 const PremiumCohortInfo: Component<{
+  user?: PrimalUser,
   userTier?: string,
   cohortInfo: CohortInfo,
   legendConfig?: LegendCustomizationConfig | undefined,
@@ -22,6 +24,8 @@ const PremiumCohortInfo: Component<{
   const intl = useIntl()
   const navigate = useNavigate();
   const account = useAccountContext();
+
+  const [showLegendCard, setShowLegendCard] = createSignal(false);
 
   const tier = () => props.userTier || account?.membershipStatus.tier || '';
 
@@ -44,14 +48,26 @@ const PremiumCohortInfo: Component<{
   }
 
   return (
-    <A href={destination()} class={styles.premiumActive}>
-      <div class={`${styles.legendPremium} ${styles[`legend_${props.legendConfig?.style}`]}`}>
-        <div class={styles.caption}>{props.cohortInfo.cohort_1 || ''}</div>
-        <div class={styles.date}>
-          <div>{props.cohortInfo.cohort_2}</div>
-        </div>
-      </div>
-    </A>
+    <div>
+      <LegendCard
+        user={props.user}
+        open={showLegendCard()}
+        setOpen={setShowLegendCard}
+        cohortInfo={props.cohortInfo}
+        legendConfig={props.legendConfig}
+        triggerClass={styles.premiumActive}
+        triggerContent={
+          <div class={styles.premiumActive}>
+            <div class={`${styles.legendPremium} ${styles[`legend_${props.legendConfig?.style}`]}`}>
+              <div class={styles.caption}>{props.cohortInfo.cohort_1 || ''}</div>
+              <div class={styles.date}>
+                <div>{props.cohortInfo.cohort_2}</div>
+              </div>
+            </div>
+          </div>
+        }
+      />
+    </div>
   );
 }
 

@@ -1278,6 +1278,11 @@
 
 .premiumActive {
   text-decoration: none;
+  background: none;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
   .expiredPremium, .activePremium, .legendPremium {
     display: flex;
     justify-content: center;
