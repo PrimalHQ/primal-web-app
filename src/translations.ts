@@ -1270,6 +1270,11 @@ export const profile = {
     defaultMessage: '{name} hasn\'t posted any replies',
     description: 'Label indicating that the profile has no replies',
   },
+  noMedia: {
+      id: 'profile.noMedia',
+      defaultMessage: '{name} hasn\'t posted any media',
+      description: 'Label indicating that the profile has no media',
+    },
   noFollowers: {
     id: 'profile.noFollowers',
     defaultMessage: '{name} has no followers',
