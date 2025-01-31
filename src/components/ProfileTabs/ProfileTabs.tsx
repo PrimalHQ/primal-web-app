@@ -601,7 +601,7 @@ const ProfileTabs: Component<{
                     <Show when={profile && profile.gallery.length === 0 && !profile.isFetchingGallery}>
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
-                          t.noReplies,
+                          t.noMedia,
                           { name: profile?.userProfile ? userName(profile?.userProfile) : props.profileKey },
                         )}
                       </div>
