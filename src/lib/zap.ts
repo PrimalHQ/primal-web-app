@@ -50,6 +50,7 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
 
                       if (content.error) {
                         logError('Failed NWC payment: ', content.error);
+                        console.error('Failed NWC payment: ', content.error);
                         subReq.close();
                         subInfo.close();
                         resolve(false);
@@ -75,6 +76,7 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
   }
   catch (e: any) {
     logError('Failed NWC payment init: ', e);
+    console.error('Failed NWC payment init: ', e)
     lastZapError = e;
     result = false;
   }
