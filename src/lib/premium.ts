@@ -17,9 +17,10 @@ export type LegendCustomizationConfig = {
   style: LegendCustomizationStyle,
   custom_badge: boolean,
   avatar_glow: boolean,
-  legend_since: number,
+  legend_since?: number,
   in_leaderboard: boolean,
-  current_shoutout: string,
+  current_shoutout?: string,
+  edited_shoutout?: string,
 };
 
 export const sendPremiumNameCheck = (name: string, pubkey: string | undefined, subId: string, socket: WebSocket) => {

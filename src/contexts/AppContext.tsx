@@ -63,6 +63,7 @@ export type CohortInfo = {
   cohort_2: string,
   tier: string,
   expires_on: number,
+  edited_shoutout?: string,
 };
 
 export type AppContextStore = {

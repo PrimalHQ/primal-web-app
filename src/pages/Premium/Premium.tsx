@@ -123,6 +123,7 @@ export type PremiumStatus = {
   cohort_2?: string,
   recurring?: boolean,
   renews_on?: number | null,
+  edited_shoutout?: string,
 };
 
 const availablePremiumOptions: PremiumOption[] = [
@@ -634,7 +635,15 @@ const Premium: Component = () => {
       }
     })
 
-    await setLegendCutumization(account.publicKey, config, subId, premiumSocket);
+    const configToSend: LegendCustomizationConfig = {
+      style: config.style,
+      custom_badge: config.custom_badge,
+      avatar_glow: config.avatar_glow,
+      in_leaderboard: config.in_leaderboard,
+      edited_shoutout: config.edited_shoutout || '',
+    };
+
+    await setLegendCutumization(account.publicKey, configToSend, subId, premiumSocket);
 
     app?.actions.setLegendCustomization(account.publicKey, config);
   }

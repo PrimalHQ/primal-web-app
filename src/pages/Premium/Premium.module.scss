@@ -2161,9 +2161,9 @@
 
   .optionLabel {
     color: var(--text-primary);
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 16px;
   }
 }
 
@@ -2174,6 +2174,12 @@
   font-weight: 400;
   line-height: 20px;
   margin-bottom: 26px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 
@@ -2254,5 +2260,74 @@
   }
   .progressFill[data-progress="complete"] {
     background-color: var(--success-bright);
+  }
+}
+
+.shoutoutTitle {
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.shoutoutPreview {
+  width: 305px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  background: var(--devider);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+
+.shoutoutReview {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.shoutoutDesc {
+  color: var(--text-secondary);
+  text-align: center;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 17px;
+  max-width: 305px;
+}
+
+.shoutoutTextField {
+  width: 305px;
+  min-height: 108px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--text-tertiary-2);
+}
+
+.shoutoutEditActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 305px;
+
+  .shoutoutChars {
+    color: var(--text-tertiary-2);
+    font-family: Nacelle;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+  }
+
+  .shoutoutEditButtons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
   }
 }
