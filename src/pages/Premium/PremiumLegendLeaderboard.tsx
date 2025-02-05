@@ -201,7 +201,7 @@ const PremiumLegendLeaderBoard: Component<{
             <div class={styles.lbItem}>
               <div class={styles.listLeft}>
                 <Show when={props.type === 'legend'}>
-                  <div class={styles.index}>{lb.index}S</div>
+                  <div class={styles.index}>{lb.index}</div>
                 </Show>
                 <div class={styles.name}>
                   <A href={app?.actions.profileLink(lb.pubkey) || ''} class={styles.avatar}>
