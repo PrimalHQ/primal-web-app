@@ -581,7 +581,7 @@
 }
 @keyframes slide-legend-info {
     0% {
-      opacity: 0.4;
+      opacity: 0;
       margin-top: 36px;
     }
     100% {
@@ -619,9 +619,9 @@
     margin-left: -5px;
 
     -webkit-animation: slide-legend-up 0.2s forwards;
-    -webkit-animation-delay: 0.1s;
+    -webkit-animation-delay: 0.3s;
     animation: slide-legend-up 0.2s forwards;
-    animation-delay: 0.1s;
+    animation-delay: 0.3s;
 
     &.sheetGray {
       background: #444;
@@ -674,9 +674,9 @@
     height: 225px;
 
     -webkit-animation: slide-legend-up 0.2s forwards;
-    -webkit-animation-delay: 0.2s;
+    -webkit-animation-delay: 0.4s;
     animation: slide-legend-up 0.2s forwards;
-    animation-delay: 0.2s;
+    animation-delay: 0.4s;
 
     &.sheetGray {
       background: #444;
@@ -787,9 +787,9 @@
     }
 
     -webkit-animation: slide-legend-down 0.2s forwards;
-    -webkit-animation-delay: 0.2s;
+    -webkit-animation-delay: 0.4s;
     animation: slide-legend-down 0.2s forwards;
-    animation-delay: 0.2s;
+    animation-delay: 0.4s;
   }
 }
 
@@ -807,9 +807,9 @@
   height: 620px;
 
   -webkit-animation: shine 0.6s forwards;
-  -webkit-animation-delay: 0.6s;
+  -webkit-animation-delay: 0.9s;
   animation: shine 0.6s forwards;
-  animation-delay: 0.6s;
+  animation-delay: 0.9s;
 }
 
 .legendCardContent {
@@ -826,9 +826,9 @@
   opacity: 0;
 
   -webkit-animation: zoom-spin 0.4s forwards;
-  -webkit-animation-delay: 0s;
+  -webkit-animation-delay: 0.3s;
   animation: zoom-spin 0.4s forwards;
-  animation-delay: 0s;
+  animation-delay: 0.3s;
 }
 
 .legendInfo {
@@ -838,11 +838,12 @@
   justify-content: flex-start;
   align-items: center;
   margin-top: 36px;
+  opacity: 0;
 
   -webkit-animation: slide-legend-info 0.4s forwards;
-  -webkit-animation-delay: 0s;
+  -webkit-animation-delay: 0.3s;
   animation: slide-legend-info 0.4s forwards;
-  animation-delay: 0s;
+  animation-delay: 0.3s;
 
   .userNameAndCheck {
     display: flex;
