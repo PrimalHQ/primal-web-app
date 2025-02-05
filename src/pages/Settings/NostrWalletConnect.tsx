@@ -47,7 +47,7 @@ const NostrWalletConnect: Component = () => {
     account.actions.updateNWCList(nwcs);
 
     const active = loadNWCActive(account.publicKey);
-    if (active) {
+    if (active && active.length > 0) {
       applyActiveWallet(active);
     }
   });
