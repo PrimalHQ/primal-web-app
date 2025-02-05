@@ -36,6 +36,8 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Mutelist = lazy(() => import('./pages/Mutelist'));
 const CreateAccount = lazy(() => import('./pages/CreateAccount'));
 const Premium = lazy(() => import('./pages/Premium/Premium'));
+const Legends = lazy(() => import('./pages/Premium/Legends'));
+const Premiums = lazy(() => import('./pages/Premium/Premiums'));
 
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Account = lazy(() => import('./pages/Settings/Account'));
@@ -167,6 +169,8 @@ const AppRouter: Component = () => {
             <Route path="/:query" component={AdvancedSearchResults} />
           </Route>
           <Route path="/premium/:step?" component={Premium} />
+          <Route path="/premiums" component={Premiums} />
+          <Route path="/legends" component={Legends} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} preload={getKnownProfiles} />
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />

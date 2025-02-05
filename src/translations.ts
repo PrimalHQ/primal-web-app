@@ -2608,10 +2608,15 @@ export const premium = {
       defaultMessage: 'Support Primal',
       description: 'Title of the premium support page',
     },
-    leaderboard: {
-      id: 'pages.premium.leaderboard',
+    premiums: {
+      id: 'pages.premium.premiums',
+      defaultMessage: 'Primal Premium Users',
+      description: 'Title of the premium leaderboards page',
+    },
+    legends: {
+      id: 'pages.premium.legends',
       defaultMessage: 'Primal Legends',
-      description: 'Title of the premium legends leaderboards page',
+      description: 'Title of the legends leaderboards page',
     },
     legend: {
       id: 'pages.premium.legend',

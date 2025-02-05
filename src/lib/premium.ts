@@ -839,12 +839,16 @@ export const fetchExchangeRate = (subId: string, socket: WebSocket, target_curre
   }
 };
 
-export const fetchLeaderboard = (subId: string, order_by: LeaderboardSort, until = 0, limit = 20, offset = 0) => {
+export const fetchLeaderboard = (subId: string, type: 'legend' | 'premium',  order_by: LeaderboardSort, until = 0, limit = 20, offset = 0) => {
 
   let payload = {
     order_by,
     limit,
   }
+
+  const ep = type === 'premium' ?
+    "membership_premium_leaderboard" :
+    "membership_legends_leaderboard"
 
   if (until > 0) {
     // @ts-ignore
@@ -859,7 +863,7 @@ export const fetchLeaderboard = (subId: string, order_by: LeaderboardSort, until
   const message = JSON.stringify([
     "REQ",
     subId,
-    {cache: ["membership_legends_leaderboard", {
+    {cache: [ep, {
       ...payload
     }]},
   ]);

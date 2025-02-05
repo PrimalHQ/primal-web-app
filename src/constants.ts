@@ -163,6 +163,7 @@ export enum Kind  {
   LegendCustomization=10_000_168,
   MembershipCohortInfo = 10_000_169,
   LegendLeaderboard=10_000_170,
+  PremiumLeaderboard=10_000_171,
 
   WALLET_OPERATION = 10_000_300,
   WALLET_NWC_ACTIVE = 10_000_802,

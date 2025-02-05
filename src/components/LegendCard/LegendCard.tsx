@@ -140,6 +140,7 @@ const LegendCard: Component< {
                     <Show when={isProfileLegend()}
                       fallback={
                         <button
+                            onClick={() => navigate('/premiums')}
                             class={`${styles.legendSeePremium} ${styleConf()}`}
                           >
                             See other {props.cohortInfo.cohort_1}s
@@ -147,7 +148,7 @@ const LegendCard: Component< {
                       }
                     >
                       <button
-                        onClick={() => navigate('/premium/leaderboard')}
+                        onClick={() => navigate('/legends')}
                         class={`${styles.legendSee} ${styleConf()}`}
                       >
                         See other Legends

@@ -802,8 +802,12 @@ const Premium: Component = () => {
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
           }
         >
-          <Match when={premiumStep() === 'leaderboard'}>
-            <div class={styles.pageTitle}>{intl.formatMessage(t.title.leaderboard)}</div>
+          <Match when={premiumStep() === 'legends'}>
+            <div class={styles.pageTitle}>{intl.formatMessage(t.title.legends)}</div>
+          </Match>
+
+          <Match when={premiumStep() === 'premiums'}>
+            <div class={styles.pageTitle}>{intl.formatMessage(t.title.premiums)}</div>
           </Match>
 
           <Match when={premiumStep() === 'support'}>
@@ -846,7 +850,7 @@ const Premium: Component = () => {
 
       <StickySidebar>
         <Switch>
-          <Match when={premiumStep() === 'leaderboard'}>
+          <Match when={premiumStep() === 'legends'}>
             <PremiumSidebarInactve
               altCaption="About Primal Legends"
               onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
@@ -868,16 +872,24 @@ const Premium: Component = () => {
       </StickySidebar>
 
 
-      <div class={`${styles.premiumContent} ${['leaderboard'].includes(premiumStep()) ? styles.noPadding : ''}`}>
+      <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''}`}>
         <div class={styles.premiumStepContent}>
           <Switch
             fallback={<Loader />}
           >
-            <Match when={premiumStep() === 'leaderboard'}>
+            <Match when={premiumStep() === 'legends'}>
               <PremiumLegendLeaderBoard
                 data={premiumData}
+                type="legend"
               />
             </Match>
+
+            <Match when={premiumStep() === 'premiums'}>
+                <PremiumLegendLeaderBoard
+                  data={premiumData}
+                  type="premium"
+                />
+              </Match>
 
             <Match when={premiumStep() === 'name'}>
               <div class={styles.nameStep}>

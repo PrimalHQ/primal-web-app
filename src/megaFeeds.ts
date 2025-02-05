@@ -60,6 +60,7 @@ export type LeaderboardInfo = {
   pubkey: string,
   donated_btc: number,
   last_donation: number,
+  premium_since: number,
 }
 
 export type MegaFeedResults = {
@@ -569,6 +570,7 @@ export const fetchDMConversationNew = (
 export const fetchLeaderboardThread = (
   subId: string,
   order: LeaderboardSort,
+  type: 'legend' | 'premium',
   paging?: FeedPaging,
 ) => {
   return new Promise<MegaFeedResults>((resolve) => {
@@ -598,7 +600,7 @@ export const fetchLeaderboardThread = (
       offset = paging.offset;
     }
 
-    fetchLeaderboard(subId, order, since, limit, offset);
+    fetchLeaderboard(subId, type, order, since, limit, offset);
   });
 }
 
@@ -853,12 +855,18 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     });
   }
 
-  if (content.kind === Kind.LegendLeaderboard) {
+  if ([Kind.LegendLeaderboard, Kind.PremiumLeaderboard].includes(content.kind)) {
     let leaderboard = JSON.parse(content.content || '[]');
 
-    leaderboard = leaderboard.map((l: any) => ({ ...l, donated_btc: parseFloat(l.donated_btc)}))
+    leaderboard = leaderboard.map((l: any) => ({
+      index: l.index,
+      pubkey: l.pubkey,
+      donated_btc: l.donated_btc ? parseFloat(l.donated_btc) : 0,
+      last_donation: l.last_donation || 0,
+      premium_since: l.premium_since || 0,
+    }));
 
-    page.leaderboard = [...leaderboard];
+    page.leaderboard = [ ...leaderboard ];
   }
 
 };
@@ -916,6 +924,18 @@ export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, 
 
     return f ? [...acc, {...f}] : acc;
   } , []);
+}
+
+
+export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: PaginationInfo) => {
+  return paging.elements.reduce<LeaderboardInfo[]>(
+    (acc, id) => {
+      let leader = lb.find(n => n.pubkey === id);
+
+      return leader ? [ ...acc, { ...leader } ] : acc;
+    },
+    [],
+  );
 }
 
 const convertToZapsMega = (page: MegaFeedPage) => {

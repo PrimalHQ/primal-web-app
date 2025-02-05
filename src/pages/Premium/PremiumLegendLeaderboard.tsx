@@ -33,7 +33,7 @@ import { TextField } from '@kobalte/core/text-field';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
-import { emptyPaging, fetchLeaderboardThread, LeaderboardInfo, PaginationInfo } from '../../megaFeeds';
+import { emptyPaging, fetchLeaderboardThread, filterAndSortLeaderboard, LeaderboardInfo, PaginationInfo } from '../../megaFeeds';
 import { PrimalUser } from '../../types/primal';
 import { userName } from '../../stores/profile';
 import PremiumCohortInfo from './PremiumCohortInfo';
@@ -52,7 +52,7 @@ export type LeaderboardStore = {
   paging: PaginationInfo,
 }
 
-export type LeaderboardSort = 'last_donation' | 'donated_btc';
+export type LeaderboardSort = 'last_donation' | 'donated_btc' | 'premium_since';
 
 const emptyLeaderboard = () => ({
   users: [],
@@ -63,12 +63,12 @@ const emptyLeaderboard = () => ({
 });
 
 const PremiumLegendLeaderBoard: Component<{
-  data: PremiumStore,
+  type: 'legend' | 'premium',
 }> = (props) => {
 
   const app = useAppContext();
 
-  const [tab, setTab] = createSignal<LeaderboardSort>('last_donation')
+  const [tab, setTab] = createSignal<LeaderboardSort>(props.type === 'legend' ? 'last_donation' : 'premium_since')
   const [leaderboardStore, setLeaderboardStore] = createStore<LeaderboardStore>({ ...emptyLeaderboard() });
 
   createEffect(() => {
@@ -85,13 +85,18 @@ const PremiumLegendLeaderBoard: Component<{
       memberCohortInfo,
       leaderboard,
       paging,
-    } = await fetchLeaderboardThread(subId, order, { limit: 20 });
+    } = await fetchLeaderboardThread(
+      subId,
+      order,
+      props.type,
+      { limit: 20 },
+    );
 
     setLeaderboardStore(() => ({
       users: [ ...users ],
       legendCustomization: { ...legendCustomization },
       memberCohortInfo: { ...memberCohortInfo },
-      leaderboard: [ ...leaderboard ],
+      leaderboard: [ ...filterAndSortLeaderboard(leaderboard, paging) ],
       paging: { ...paging },
     }));
   };
@@ -118,6 +123,7 @@ const PremiumLegendLeaderBoard: Component<{
     } = await fetchLeaderboardThread(
       subId,
       order,
+      props.type,
       {
         since,
         offset,
@@ -129,7 +135,7 @@ const PremiumLegendLeaderBoard: Component<{
       users: [ ...lb.users, ...users ],
       legendCustomization: { ...lb.legendCustomization, ...legendCustomization },
       memberCohortInfo: { ...lb.memberCohortInfo, ...memberCohortInfo },
-      leaderboard: [ ...lb.leaderboard, ...leaderboard ],
+      leaderboard: [ ...lb.leaderboard, ...filterAndSortLeaderboard(leaderboard, paging) ],
       paging: { ...paging },
     }));
   };
@@ -147,22 +153,42 @@ const PremiumLegendLeaderBoard: Component<{
   };
 
   const donation = (lb: LeaderboardInfo) => {
-    return lb.donated_btc * 100_000_000;
+    return lb.donated_btc;
   };
+
+  const sinceDate = (lb: LeaderboardInfo) => {
+    if (props.type === 'premium') return shortDate(lb.premium_since);
+
+    return shortDate(cohortInfo(lb.pubkey).legend_since);
+  }
 
   return (
     <div class={styles.leaderboardPage}>
-      <Tabs onChange={setTab}>
-        <Tabs.List class={styles.leaderboardTabs} >
-          <Tabs.Trigger class={styles.leaderboardTab} value="last_donation" >
-            Latest
-          </Tabs.Trigger>
-          <Tabs.Trigger class={styles.leaderboardTab} value="donated_btc" >
-            Contribution
-          </Tabs.Trigger>
-          <Tabs.Indicator class={styles.leaderboardTabIndicator} />
-        </Tabs.List>
-      </Tabs>
+      <Switch>
+        <Match when={props.type === 'legend'}>
+          <Tabs onChange={setTab}>
+            <Tabs.List class={styles.leaderboardTabs} >
+              <Tabs.Trigger class={styles.leaderboardTab} value="last_donation" >
+                Latest
+              </Tabs.Trigger>
+              <Tabs.Trigger class={styles.leaderboardTab} value="donated_btc" >
+                Contribution
+              </Tabs.Trigger>
+              <Tabs.Indicator class={styles.leaderboardTabIndicator} />
+            </Tabs.List>
+          </Tabs>
+        </Match>
+        <Match when={props.type === 'premium'}>
+          <Tabs onChange={setTab}>
+            <Tabs.List class={styles.leaderboardTabs} >
+              <Tabs.Trigger class={styles.leaderboardTab} value="premium_since" >
+                Latest
+              </Tabs.Trigger>
+              <Tabs.Indicator class={styles.leaderboardTabIndicator} />
+            </Tabs.List>
+          </Tabs>
+        </Match>
+      </Switch>
 
       <div class={styles.leaderboardTable}>
         <For
@@ -189,7 +215,7 @@ const PremiumLegendLeaderBoard: Component<{
                       />
                     </div>
                     <div class={styles.userSince}>
-                      Since: {shortDate(cohortInfo(lb.pubkey).legend_since)}
+                      Since: {sinceDate(lb)}
                     </div>
                   </div>
                 </div>
@@ -202,10 +228,13 @@ const PremiumLegendLeaderBoard: Component<{
                     legendConfig={legendConfig(lb.pubkey)}
                   />
                 </div>
-                <div class={styles.donation}>
-                  <div class={styles.value}>{donation(lb).toLocaleString()}</div>
-                  <div class={styles.unit}>stats</div>
-                </div>
+
+                <Show when={props.type === 'legend'}>
+                  <div class={styles.donation}>
+                    <div class={styles.value}>{donation(lb).toLocaleString()}</div>
+                    <div class={styles.unit}>stats</div>
+                  </div>
+                </Show>
               </div>
             </div>
           )}
