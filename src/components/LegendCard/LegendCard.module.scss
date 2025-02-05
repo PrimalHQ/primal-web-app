@@ -434,6 +434,7 @@
       font-weight: 400;
       line-height: 20px;
       margin: 0;
+      position: relative;
     }
 
   }
@@ -586,7 +587,7 @@
     }
     100% {
       opacity: 1;
-      margin-top: 26px;
+      margin-top: 16px;
     }
 }
 @keyframes zoom-spin {
@@ -615,7 +616,7 @@
     left: 340px;
     clip-path: polygon(0 0, 100% 0, 100% 100%);
     width: 340px;
-    height: 330px;
+    height: 294px;
     margin-left: -5px;
 
     -webkit-animation: slide-legend-up 0.2s forwards;
@@ -656,7 +657,7 @@
     }
 
     &.sheetBlue {
-      background-image: linear-gradient(135deg, #FB00C4 0%, #04F7FC 100%);
+      background-image: linear-gradient(135deg, #01E0FF 4.5%, #0190F8 35%, #2555EE 75%);
     }
 
     &.sheetSunfire {
@@ -669,9 +670,9 @@
     left: -340px;
     position: absolute;
     opacity: 0.25;
-    clip-path: polygon(0 0, 80% 0, 0 100%);
-    width: 335px;
-    height: 225px;
+    clip-path: polygon(0 0, 100% 0, 0 100%);
+    width: 198px;
+    height: 187px;
 
     -webkit-animation: slide-legend-up 0.2s forwards;
     -webkit-animation-delay: 0.4s;
@@ -734,8 +735,8 @@
     bottom: -168px;
     opacity: 0.25;
     clip-path: polygon(0 100%, 100% 100%, 0 0);
-    width: 168px;
-    height: 168px;
+    width: 163px;
+    height: 154px;
 
     &.sheetGray {
       background: #444;
@@ -815,7 +816,10 @@
 .legendCardContent {
   width: 335px;
   height: 540px;
-  padding-top: 46px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .avatar {
@@ -831,7 +835,7 @@
   animation-delay: 0.3s;
 }
 
-.legendInfo {
+.legendCardInfo {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -850,6 +854,7 @@
     justify-content: center;
     align-items: center;
     width: fit-content;
+    margin-top: 26px;
   }
 
   .legendCohort {
@@ -874,6 +879,16 @@
     line-height: 22px;
     max-width:263px;
   }
+}
+
+
+.legendActions {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 22px;
 
   .legendSee {
     color: #FFB701;
@@ -996,7 +1011,6 @@
       color: white;
     }
   }
-
 
   .legendSeePremium {
     color: var(--accent);

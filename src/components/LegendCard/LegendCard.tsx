@@ -72,104 +72,107 @@ const LegendCard: Component< {
 
   return (
     <Dialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
-        <Dialog.Trigger class={props.triggerClass}>
-          {props.triggerContent}
-        </Dialog.Trigger>
-        <Dialog.Portal>
-          <Dialog.Overlay class={styles.dialogOverlay} />
-          <div class={styles.dialog}>
-            <Dialog.Content class={styles.dialogContent} >
-              <div class={styles.legendBackground}>
-                <div class={`${styles.rightTopSheet} ${styleConf()}`}></div>
-                <div class={`${styles.bigSheet} ${styleConf()}`}></div>
-                <div class={`${styles.rightBottomSheet} ${styleConf()}`}></div>
-              </div>
-              <div class={styles.dialogHeader}>
-                <Dialog.Title class={styles.dialogTitle}>
-                </Dialog.Title>
-                <Dialog.CloseButton class={styles.dialogCloseButton}>
-                  <div class={styles.excludeIcon}></div>
-                </Dialog.CloseButton>
-              </div>
-              <Dialog.Description class={styles.dialogDescription}>
-                <div class={styles.legendCardContent}>
+      <Dialog.Trigger class={props.triggerClass}>
+        {props.triggerContent}
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay class={styles.dialogOverlay} />
+        <div class={styles.dialog}>
+          <Dialog.Content class={styles.dialogContent} >
+            <div class={styles.legendBackground}>
+              <div class={`${styles.rightTopSheet} ${styleConf()}`}></div>
+              <div class={`${styles.bigSheet} ${styleConf()}`}></div>
+              <div class={`${styles.rightBottomSheet} ${styleConf()}`}></div>
+            </div>
+            <div class={styles.dialogHeader}>
+              <Dialog.Title class={styles.dialogTitle}>
+              </Dialog.Title>
+              <Dialog.CloseButton class={styles.dialogCloseButton}>
+                <div class={styles.excludeIcon}></div>
+              </Dialog.CloseButton>
+            </div>
+            <Dialog.Description class={styles.dialogDescription}>
+              <div class={styles.legendCardContent}>
+
+                <div class={styles.legendCardInfo}>
                   <div class={styles.avatar}>
                     <Avatar user={props.user} size="xxl" />
                   </div>
-
-                  <div class={styles.legendInfo}>
-                    <div class={styles.userNameAndCheck}>
-                      <div class={styles.userName}>
-                        {userName(props.user)}
-                      </div>
-                      <VerificationCheck
-                        user={props.user}
-                        large={true}
-                      />
+                  <div class={styles.userNameAndCheck}>
+                    <div class={styles.userName}>
+                      {userName(props.user)}
                     </div>
-                    <div class={styles.nip05}>
-                      {nip05Verification(props.user)}
-                    </div>
-
-                    <div class={styles.legendCohort}>
-                      <PremiumCohortInfo
-                        cohortInfo={app?.memberCohortInfo[props.user?.pubkey!]!}
-                        legendConfig={app?.legendCustomization[props.user?.pubkey!]}
-                      />
-                    </div>
-
-                    <Show
-                      when={isProfileLegend()}
-                      fallback={
-                        <div class={styles.legendSince}>
-                          {props.cohortInfo.cohort_1} since {veryLongDate(props.cohortInfo?.premium_since || 0, true)}
-                        </div>
-                      }
-                    >
-                      <div class={styles.legendSince}>
-                        Legend since {veryLongDate(props.cohortInfo?.legend_since || 0, true)}
-                      </div>
-                    </Show>
-
-                    <Show when={isProfileLegend()}>
-                      <div class={styles.legendShoutout}>
-                        {props.legendConfig?.current_shoutout || ''}
-                      </div>
-                    </Show>
-
-                    <Show when={isProfileLegend()}
-                      fallback={
-                        <button
-                            onClick={() => navigate('/premiums')}
-                            class={`${styles.legendSeePremium} ${styleConf()}`}
-                          >
-                            See other {props.cohortInfo.cohort_1}s
-                          </button>
-                      }
-                    >
-                      <button
-                        onClick={() => navigate('/legends')}
-                        class={`${styles.legendSee} ${styleConf()}`}
-                      >
-                        See other Legends
-                      </button>
-                      <button
-                      class={`${styles.legendBecome} ${styleConf()}`}
-                      onClick={() => isUserLegend() ? navigate('/premium') : navigate('/premium/legend')}
-                      >
-                        Become a Legend
-                      </button>
-                    </Show>
+                    <VerificationCheck
+                      user={props.user}
+                      large={true}
+                    />
+                  </div>
+                  <div class={styles.nip05}>
+                    {nip05Verification(props.user)}
                   </div>
 
-                </div>
-              </Dialog.Description>
+                  <div class={styles.legendCohort}>
+                    <PremiumCohortInfo
+                      cohortInfo={app?.memberCohortInfo[props.user?.pubkey!]!}
+                      legendConfig={app?.legendCustomization[props.user?.pubkey!]}
+                    />
+                  </div>
 
-              <div class={`${styles.shineSheet} ${styleConf()}`}></div>
-            </Dialog.Content>
-          </div>
-        </Dialog.Portal>
-      </Dialog>
+                  <Show
+                    when={isProfileLegend()}
+                    fallback={
+                      <div class={styles.legendSince}>
+                        {props.cohortInfo.cohort_1} since {veryLongDate(props.cohortInfo?.premium_since || 0, true)}
+                      </div>
+                    }
+                  >
+                    <div class={styles.legendSince}>
+                      Legend since {veryLongDate(props.cohortInfo?.legend_since || 0, true)}
+                    </div>
+                  </Show>
+
+                  <Show when={isProfileLegend()}>
+                    <div class={styles.legendShoutout}>
+                      {props.legendConfig?.current_shoutout || ''}
+                    </div>
+                  </Show>
+                </div>
+
+                <div class={styles.legendActions}>
+                  <Show when={isProfileLegend()}
+                    fallback={
+                      <button
+                        onClick={() => navigate('/premiums')}
+                        class={`${styles.legendSeePremium} ${styleConf()}`}
+                      >
+                        See other {props.cohortInfo.cohort_1}s
+                      </button>
+                    }
+                  >
+                    <button
+                      onClick={() => navigate('/legends')}
+                      class={`${styles.legendSee} ${styleConf()}`}
+                    >
+                      See other Legends
+                    </button>
+                    <button
+                      class={`${styles.legendBecome} ${styleConf()}`}
+                      style={`${isUserLegend() ? 'visibility: hidden;' : ''}`}
+                      onClick={() => isUserLegend() ? navigate('/premium') : navigate('/premium/legend')}
+                    >
+                      Become a Legend
+                    </button>
+                  </Show>
+                </div>
+
+              </div>
+            </Dialog.Description>
+
+            <div class={`${styles.shineSheet} ${styleConf()}`}></div>
+          </Dialog.Content>
+        </div>
+      </Dialog.Portal>
+    </Dialog>
   )
 }
 

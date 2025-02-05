@@ -2610,7 +2610,7 @@ export const premium = {
     },
     premiums: {
       id: 'pages.premium.premiums',
-      defaultMessage: 'Primal Premium Users',
+      defaultMessage: 'Premium Users',
       description: 'Title of the premium leaderboards page',
     },
     legends: {

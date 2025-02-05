@@ -40,9 +40,10 @@ import PremiumCohortInfo from './PremiumCohortInfo';
 import Avatar from '../../components/Avatar/Avatar';
 import { shortDate } from '../../lib/dates';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
-import { calculateLeaderboardOffset } from '../../utils';
+import { calculateLeaderboardOffset, isIOS } from '../../utils';
 import Paginator from '../../components/Paginator/Paginator';
 import { Tabs } from '@kobalte/core/tabs';
+import { isAndroid } from '@kobalte/utils';
 
 export type LeaderboardStore = {
   users: PrimalUser[],
@@ -162,6 +163,8 @@ const PremiumLegendLeaderBoard: Component<{
     return shortDate(cohortInfo(lb.pubkey).legend_since);
   }
 
+  const isDesktop = () => !isAndroid() && !isIOS();
+
   return (
     <div class={styles.leaderboardPage}>
       <Switch>
@@ -197,7 +200,9 @@ const PremiumLegendLeaderBoard: Component<{
           {lb => (
             <div class={styles.lbItem}>
               <div class={styles.listLeft}>
-                <div class={styles.index}>{lb.index}</div>
+                <Show when={props.type === 'legend'}>
+                  <div class={styles.index}>{lb.index}S</div>
+                </Show>
                 <div class={styles.name}>
                   <A href={app?.actions.profileLink(lb.pubkey) || ''} class={styles.avatar}>
                     <Avatar
@@ -214,27 +219,45 @@ const PremiumLegendLeaderBoard: Component<{
                         user={user(lb.pubkey)}
                       />
                     </div>
-                    <div class={styles.userSince}>
-                      Since: {sinceDate(lb)}
-                    </div>
+                    <Switch>
+                      <Match when={props.type === 'legend'}>
+                        <div class={styles.userSince}>
+                          Since: {sinceDate(lb)}
+                        </div>
+                      </Match>
+                      <Match when={props.type === 'premium'}>
+                          <div class={styles.userSince}>
+                            {user(lb.pubkey)?.nip05}
+                          </div>
+                        </Match>
+                    </Switch>
                   </div>
                 </div>
               </div>
               <div class={styles.listRight}>
-                <div class={styles.cohort}>
-                  <PremiumCohortInfo
-                    user={user(lb.pubkey)}
-                    cohortInfo={cohortInfo(lb.pubkey)}
-                    legendConfig={legendConfig(lb.pubkey)}
-                  />
-                </div>
-
-                <Show when={props.type === 'legend'}>
-                  <div class={styles.donation}>
-                    <div class={styles.value}>{donation(lb).toLocaleString()}</div>
-                    <div class={styles.unit}>stats</div>
+                <Show when={isDesktop()}>
+                  <div class={styles.cohort}>
+                    <PremiumCohortInfo
+                      user={user(lb.pubkey)}
+                      cohortInfo={cohortInfo(lb.pubkey)}
+                      legendConfig={legendConfig(lb.pubkey)}
+                    />
                   </div>
                 </Show>
+
+                <Switch>
+                  <Match when={props.type === 'legend'}>
+                    <div class={styles.donation}>
+                      <div class={styles.value}>{donation(lb).toLocaleString()}</div>
+                      <div class={styles.unit}>stats</div>
+                    </div>
+                  </Match>
+                  <Match when={props.type === 'premium'}>
+                    <div class={styles.premiumSince}>
+                      Since: {sinceDate(lb)}
+                    </div>
+                  </Match>
+                </Switch>
               </div>
             </div>
           )}
