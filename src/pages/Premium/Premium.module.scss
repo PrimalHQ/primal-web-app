@@ -872,6 +872,40 @@
       }
     }
   }
+
+  .legendsSidebarDescription {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+
+    p, ul, li {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    ul {
+      padding-left: 6px;
+      list-style-position: outside;
+    }
+
+    b {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+
+    li {
+      list-style: disc;
+
+      .chevronRight {
+        display: none;
+      }
+    }
+  }
 }
 
 .managePremium {

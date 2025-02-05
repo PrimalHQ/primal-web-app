@@ -58,6 +58,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
 import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
+import PremiumSidebarLegends from './PremiumSidebarLegends';
 
 export type Legends = {
   lnUrl: string,
@@ -105,8 +106,7 @@ const Legends: Component = () => {
       </PageCaption>
 
       <StickySidebar>
-        <PremiumSidebarInactve
-          altCaption="About Primal Legends"
+        <PremiumSidebarLegends
           onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
         />
       </StickySidebar>
