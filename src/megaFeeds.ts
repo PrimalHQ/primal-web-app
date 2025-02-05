@@ -35,6 +35,9 @@ import { nip19 } from "nostr-tools";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
 import { getMessageCounts, getNewMessages, getOldMessages } from "./lib/messages";
+import { LeaderboardSort } from "./pages/Premium/PremiumLegendLeaderboard";
+import { LegendCustomizationConfig, fetchLeaderboard } from "./lib/premium";
+import { CohortInfo } from "./contexts/AppContext";
 
 export type PaginationInfo = {
   since: number,
@@ -52,6 +55,13 @@ export type DMContact = {
   dmInfo: SenderMessageCount,
 }
 
+export type LeaderboardInfo = {
+  index: number,
+  pubkey: string,
+  donated_btc: number,
+  last_donation: number,
+}
+
 export type MegaFeedResults = {
   users: PrimalUser[],
   notes: PrimalNote[],
@@ -62,6 +72,9 @@ export type MegaFeedResults = {
   page: MegaFeedPage,
   dmContacts: DMContact[],
   encryptedMessages: NostrMessageEncryptedContent[],
+  legendCustomization: Record<string, LegendCustomizationConfig>,
+  memberCohortInfo: Record<string, CohortInfo>,
+  leaderboard: LeaderboardInfo[],
 };
 
 export type FeedPaging = {
@@ -92,6 +105,9 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   elements: [],
   dmContacts: {},
   encryptedMessages: [],
+  legendCustomization: {},
+  memberCohortInfo: {},
+  leaderboard: [],
 });
 
 export const emptyPaging = () => ({ since: 0, until: 0, sortBy: 'created_at', elements: [] });
@@ -106,6 +122,9 @@ export const emptyMegaFeedResults = () => ({
   paging: { ...emptyPaging() },
   page: { ...emptyMegaFeedPage() },
   encryptedMessages: [],
+  legendCustomization: {},
+  memberCohortInfo: {},
+  leaderboard: [],
 });
 
 export const parseEmptyReposts = (page: MegaFeedPage) => {
@@ -547,6 +566,42 @@ export const fetchDMConversationNew = (
   });
 }
 
+export const fetchLeaderboardThread = (
+  subId: string,
+  order: LeaderboardSort,
+  paging?: FeedPaging,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults()});
+      }
+    });
+
+    const until = paging?.until || 0;
+    const since = paging?.since || 0;
+    const limit = paging?.limit || 0;
+
+    let offset = 0;
+
+    if (typeof paging?.offset === 'number') {
+      offset = paging.offset;
+    }
+
+    fetchLeaderboard(subId, order, since, limit, offset);
+  });
+}
+
 const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
@@ -572,6 +627,9 @@ const pageResolve = (page: MegaFeedPage) => {
   const topicStats = convertToTopicStatsMega(page);
   const dmContacts = convertToContactsMega(page);
   const encryptedMessages = [...page.encryptedMessages];
+  const legendCustomization = { ...page.legendCustomization };
+  const memberCohortInfo = { ...page.memberCohortInfo };
+  const leaderboard = [ ...page.leaderboard ];
 
   return {
     users,
@@ -581,6 +639,9 @@ const pageResolve = (page: MegaFeedPage) => {
     topicStats,
     dmContacts,
     encryptedMessages,
+    legendCustomization,
+    memberCohortInfo,
+    leaderboard,
     paging: {
       since: page.since,
       until: page.until,
@@ -772,6 +833,32 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
 
     page.wordCount[count.event_id] = count.words
     return;
+  }
+
+
+  if (content.kind === Kind.LegendCustomization) {
+    const config = JSON.parse(content.content) as Record<string, LegendCustomizationConfig>;
+
+    Object.entries(config).forEach(([pubkey, customization]) => {
+      page.legendCustomization[pubkey] = { ...customization }
+    });
+
+  }
+
+  if (content.kind === Kind.MembershipCohortInfo) {
+    const config = JSON.parse(content.content) as Record<string, CohortInfo>;
+
+    Object.entries(config).forEach(([pubkey, customization]) => {
+      page.memberCohortInfo[pubkey] = { ...customization }
+    });
+  }
+
+  if (content.kind === Kind.LegendLeaderboard) {
+    let leaderboard = JSON.parse(content.content || '[]');
+
+    leaderboard = leaderboard.map((l: any) => ({ ...l, donated_btc: parseFloat(l.donated_btc)}))
+
+    page.leaderboard = [...leaderboard];
   }
 
 };

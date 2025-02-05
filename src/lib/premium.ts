@@ -1,5 +1,6 @@
 import { Kind } from "../constants";
-import { subTo } from "../sockets";
+import { LeaderboardSort } from "../pages/Premium/PremiumLegendLeaderboard";
+import { sendMessage, subTo } from "../sockets";
 import { signEvent } from "./nostrAPI";
 
 export type LegendCustomizationStyle = '' |
@@ -17,7 +18,6 @@ export type LegendCustomizationConfig = {
   style: LegendCustomizationStyle,
   custom_badge: boolean,
   avatar_glow: boolean,
-  legend_since?: number,
   in_leaderboard: boolean,
   current_shoutout?: string,
   edited_shoutout?: string,
@@ -837,4 +837,32 @@ export const fetchExchangeRate = (subId: string, socket: WebSocket, target_curre
   } else {
     throw('no_socket');
   }
+};
+
+export const fetchLeaderboard = (subId: string, order_by: LeaderboardSort, until = 0, limit = 20, offset = 0) => {
+
+  let payload = {
+    order_by,
+    limit,
+  }
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    payload.offset = offset;
+  }
+
+  const message = JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["membership_legends_leaderboard", {
+      ...payload
+    }]},
+  ]);
+
+  sendMessage(message);
 };

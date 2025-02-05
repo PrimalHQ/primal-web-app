@@ -162,6 +162,7 @@ export enum Kind  {
   BroadcastStatus=10_000_167,
   LegendCustomization=10_000_168,
   MembershipCohortInfo = 10_000_169,
+  LegendLeaderboard=10_000_170,
 
   WALLET_OPERATION = 10_000_300,
   WALLET_NWC_ACTIVE = 10_000_802,

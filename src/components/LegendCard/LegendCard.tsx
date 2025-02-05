@@ -122,12 +122,12 @@ const LegendCard: Component< {
                       when={isProfileLegend()}
                       fallback={
                         <div class={styles.legendSince}>
-                          {props.cohortInfo.cohort_1} since {veryLongDate(props.legendConfig?.legend_since || 0, true)}
+                          {props.cohortInfo.cohort_1} since {veryLongDate(props.cohortInfo?.premium_since || 0, true)}
                         </div>
                       }
                     >
                       <div class={styles.legendSince}>
-                        Legend since {veryLongDate(props.legendConfig?.legend_since || 0, true)}
+                        Legend since {veryLongDate(props.cohortInfo?.legend_since || 0, true)}
                       </div>
                     </Show>
 
@@ -147,6 +147,7 @@ const LegendCard: Component< {
                       }
                     >
                       <button
+                        onClick={() => navigate('/premium/leaderboard')}
                         class={`${styles.legendSee} ${styleConf()}`}
                       >
                         See other Legends

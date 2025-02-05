@@ -1,7 +1,7 @@
 import { format } from 'd3-format';
 import { subsTo } from './sockets';
 import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
-import { DMContact, PaginationInfo } from './megaFeeds';
+import { DMContact, LeaderboardInfo, PaginationInfo } from './megaFeeds';
 import { isAndroid } from '@kobalte/utils';
 
 let debounceTimer: number = 0;
@@ -362,6 +362,30 @@ export const calculateDMContactsOffset = (contacts: DMContact[], paging: Paginat
 
     offset++;
   }
+
+  return offset;
+}
+
+export const calculateLeaderboardOffset = (leaders: LeaderboardInfo[], paging: PaginationInfo) => {
+  let offset = 0;
+
+  for (let i=leaders.length-1;i>=0;i--) {
+    const leader = leaders[i];
+
+    if (
+      paging.sortBy === 'donated_btc' &&
+      leader.donated_btc !== paging.since
+    ) break;
+
+    if (
+      paging.sortBy === 'last_donation' &&
+      leader.last_donation !== paging.since
+    ) break;
+
+    offset++;
+  }
+
+  console.log('OFFSET: ', offset, paging)
 
   return offset;
 }

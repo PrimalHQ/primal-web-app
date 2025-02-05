@@ -11,6 +11,7 @@ import styles from './Premium.module.scss';
 
 
 const PremiumSidebarInactve: Component<{
+  altCaption?: string,
   onOpenFAQ?: () => void,
 }> = (props) => {
 
@@ -18,7 +19,7 @@ const PremiumSidebarInactve: Component<{
 
     <div class={styles.premiumSidebar}>
     <div class={styles.premiumSidebarTitle}>
-      Why Get Primal Premium?
+      {props.altCaption || 'Why Get Primal Premium?'}
     </div>
 
     <div class={styles.premiumSidebarDescription}>

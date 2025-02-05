@@ -68,7 +68,6 @@ const PremiumCustomLegend: Component<{
     in_leaderboard: true,
     current_shoutout: '',
     edited_shoutout: '',
-    legend_since: 0,
   });
 
   let shoutoutText: HTMLTextAreaElement | undefined;

@@ -64,6 +64,8 @@ export type CohortInfo = {
   tier: string,
   expires_on: number,
   edited_shoutout?: string,
+  legend_since?: number,
+  premium_since?: number,
 };
 
 export type AppContextStore = {

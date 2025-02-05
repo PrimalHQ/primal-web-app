@@ -3,6 +3,9 @@ import { Relay } from "../lib/nTools";
 import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 import { Kind } from "../constants";
+import { CohortInfo } from "../contexts/AppContext";
+import { LegendCustomizationConfig } from "../lib/premium";
+import { LeaderboardInfo } from "../megaFeeds";
 
 export type TopZap = {
   id: string,
@@ -467,6 +470,15 @@ export type NostrImageContent= {
   tags?: string[][],
 };
 
+export type PrimalLeaderboard= {
+  kind: Kind.LegendLeaderboard,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id?: string,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -521,7 +533,8 @@ export type NostrEventContent =
   NostrBlossom |
   NostrRelayList |
   NostrImageContent |
-  NostrTopicStats;
+  NostrTopicStats |
+  PrimalLeaderboard;
 
 export type NostrEvent = [
   type: "EVENT",
@@ -624,6 +637,9 @@ export type MegaFeedPage = {
   wordCount: Record<string, number>,
   dmContacts: Record<string, SenderMessageCount>,
   encryptedMessages: NostrMessageEncryptedContent[],
+  memberCohortInfo: Record<string, CohortInfo>,
+  legendCustomization: Record<string, LegendCustomizationConfig>,
+  leaderboard: LeaderboardInfo[],
 };
 
 export type TrendingNotesStore = {

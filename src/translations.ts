@@ -2608,6 +2608,11 @@ export const premium = {
       defaultMessage: 'Support Primal',
       description: 'Title of the premium support page',
     },
+    leaderboard: {
+      id: 'pages.premium.leaderboard',
+      defaultMessage: 'Primal Legends',
+      description: 'Title of the premium legends leaderboards page',
+    },
     legend: {
       id: 'pages.premium.legend',
       defaultMessage: 'Become a Primal Legend',

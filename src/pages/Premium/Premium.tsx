@@ -57,6 +57,7 @@ import { triggerImportEvents } from '../../lib/notes';
 import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
+import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
 
 export const satsInBTC = 100_000_000;
 
@@ -801,6 +802,10 @@ const Premium: Component = () => {
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
           }
         >
+          <Match when={premiumStep() === 'leaderboard'}>
+            <div class={styles.pageTitle}>{intl.formatMessage(t.title.leaderboard)}</div>
+          </Match>
+
           <Match when={premiumStep() === 'support'}>
             <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
           </Match>
@@ -841,6 +846,12 @@ const Premium: Component = () => {
 
       <StickySidebar>
         <Switch>
+          <Match when={premiumStep() === 'leaderboard'}>
+            <PremiumSidebarInactve
+              altCaption="About Primal Legends"
+              onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+            />
+          </Match>
           <Match when={premiumData.membershipStatus.tier === 'free'}>
             <PremiumSidebarInactve
               onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
@@ -857,11 +868,17 @@ const Premium: Component = () => {
       </StickySidebar>
 
 
-      <div class={styles.premiumContent}>
+      <div class={`${styles.premiumContent} ${['leaderboard'].includes(premiumStep()) ? styles.noPadding : ''}`}>
         <div class={styles.premiumStepContent}>
           <Switch
             fallback={<Loader />}
           >
+            <Match when={premiumStep() === 'leaderboard'}>
+              <PremiumLegendLeaderBoard
+                data={premiumData}
+              />
+            </Match>
+
             <Match when={premiumStep() === 'name'}>
               <div class={styles.nameStep}>
                 <div class={styles.title}>
@@ -935,7 +952,6 @@ const Premium: Component = () => {
                   {intl.formatMessage(t.actions.next)}
                 </ButtonPremium>
               </div>
-
             </Match>
 
             <Match when={premiumStep() === 'confirm'}>
