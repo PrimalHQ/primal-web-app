@@ -117,6 +117,7 @@ export enum Kind  {
   CategorizedPeople = 30_000,
   LongForm = 30_023,
   Settings = 30_078,
+  LiveEvent = 30_311,
   DVM = 31_990,
   Tier = 37_001,
 

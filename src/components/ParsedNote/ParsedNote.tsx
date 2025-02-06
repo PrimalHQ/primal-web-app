@@ -941,7 +941,7 @@ const ParsedNote: Component<{
 
   const [unknownEvents, setUnknownEvents] = createStore<Record<string, NostrEventContent>>({});
 
-  const unknownMention = (nid: string) => {
+  const unknownMention = (nid: string, token: string) => {
     setWordsDisplayed(w => w + 1);
 
     const decoded = decodeIdentifier(nid);
@@ -992,6 +992,11 @@ const ParsedNote: Component<{
               event={unknownEvents[nid] as NostrImageContent}
             />
           </Match>
+          <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
+            <LinkPreview
+              preview={getLinkPreview(token)}
+            />
+          </Match>
         </Switch>
       );
     }
@@ -1014,20 +1019,28 @@ const ParsedNote: Component<{
       getParametrizedEvent(data.pubkey, data.identifier, data.kind, subId);
 
       return (
-        <Show
-          when={alt()}
-          fallback={
+        <Switch fallback={
+          <Show
+            when={alt()}
+            fallback={
+              <div class={styles.unknownEvent}>
+                <div class={`${styles.icon} ${styles.bang}`}></div>
+                <div class={styles.label}>Mentioned event not found</div>
+              </div>
+            }
+          >
             <div class={styles.unknownEvent}>
-              <div class={`${styles.icon} ${styles.bang}`}></div>
-              <div class={styles.label}>Mentioned event not found</div>
+              <div class={`${styles.icon} ${styles.file}`}></div>
+              <div class={styles.label}>{alt()}</div>
             </div>
-          }
-        >
-          <div class={styles.unknownEvent}>
-            <div class={`${styles.icon} ${styles.file}`}></div>
-            <div class={styles.label}>{alt()}</div>
-          </div>
-        </Show>
+          </Show>
+        }>
+          <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
+            <LinkPreview
+              preview={getLinkPreview(token)}
+            />
+          </Match>
+        </Switch>
       )
     }
 
@@ -1068,7 +1081,7 @@ const ParsedNote: Component<{
         const decoded = decodeIdentifier(id);
 
         if (decoded.type !== 'naddr') {
-          return unknownMention(id);
+          return unknownMention(id, token);
         }
 
         const data = decoded.data as nip19.AddressPointer;
@@ -1083,19 +1096,19 @@ const ParsedNote: Component<{
           const mentionedArticles = rn.mentionedArticles;
 
           if (!mentionedArticles || (props.embedLevel || 0) > 1) {
-            return unknownMention(reEncoded);
+            return unknownMention(reEncoded, token);
           }
 
           const mention = mentionedArticles[reEncoded];
 
           if (!mention) {
-            return unknownMention(id);
+            return unknownMention(id, token);
           }
 
           return renderLongFormMention(mention, index);
         }
 
-        return unknownMention(id);
+        return unknownMention(id, token);
       }}
     </For>
   }
@@ -1138,7 +1151,7 @@ const ParsedNote: Component<{
         }
 
         if (!id || id.length === 0) {
-          return unknownMention(id);
+          return unknownMention(id, token);
         }
 
         let match = specialCharsRegex.exec(id);
@@ -1149,7 +1162,7 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
-        let link = unknownMention(id);
+        let link = unknownMention(id, token);
 
         try {
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
@@ -1211,7 +1224,7 @@ const ParsedNote: Component<{
             if (!props.noLinks) {
               const ment = mentionedNotes && mentionedNotes[hex];
 
-              link = unknownMention(id);
+              link = unknownMention(id, token);
 
               if (ment) {
                 setWordsDisplayed(w => w + shortMentionInWords);
@@ -1251,7 +1264,7 @@ const ParsedNote: Component<{
               });
               const ment = mentionedArticles && mentionedArticles[reEncoded];
 
-              link = unknownMention(id);
+              link = unknownMention(id, token);
 
               if (ment) {
                 setWordsDisplayed(w => w + shortMentionInWords);
@@ -1365,7 +1378,7 @@ const ParsedNote: Component<{
         } catch (e) {
           logError('ERROR rendering note mention', e);
           setWordsDisplayed(w => w + 1);
-          link = unknownMention(id);
+          link = unknownMention(id, token);
         }
 
         return link;
