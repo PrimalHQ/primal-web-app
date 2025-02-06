@@ -67,7 +67,7 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-index-overlay);
-  background-color: var(--background-site);
+  background-color: #000000;
   opacity: 0.7;
 
   animation: overlayHide 100ms ease 50ms forwards;
@@ -88,7 +88,7 @@
   .dialogContent {
     position: relative;
     /* padding: 20px 24px; */
-    background-color: var(--background-input);
+    background-color: #222222;
     border-radius: var(--border-radius-big);
     overflow: hidden;
 
@@ -109,7 +109,7 @@
       .dialogCloseButton {
         height: 16px;
         width: 16px;
-        color: var(--text-secondary);
+        color: #aaaaaa;
         background: none;
         border: none;
         outline: none;
@@ -125,7 +125,7 @@
 
         &:hover {
           .excludeIcon {
-            background-color: var(--text-secondary);
+            background-color: #aaaaaa;
             -webkit-transition: background-color 200ms linear;
             -ms-transition: background-color 200ms linear;
             transition: background-color 200ms linear;
@@ -134,7 +134,7 @@
       }
 
       .dialogTitle {
-        color: var(--text-primary);
+        color: #ffffff;
         font-size: 18px;
         font-weight: 600;
         line-height: 20px;
@@ -143,7 +143,7 @@
     }
 
     .dialogDescription {
-      color: var(--text-secondary);
+      color: #aaaaaa;
       font-size: 16px;
       font-weight: 400;
       line-height: 20px;
@@ -435,7 +435,7 @@
     width: fit-content;
     margin-top: 26px;
 
-    color: var(--text-primary);
+    color: #ffffff;
     font-size: 22px;
     font-weight: 700;
     line-height: 24px;
@@ -463,7 +463,7 @@
   }
 
   .nip05 {
-    color: var(--text-primary);
+    color: #ffffff;
     text-align: center;
     font-size: 14px;
     font-weight: 400;
@@ -518,7 +518,7 @@
 
   .legendSince {
     margin-top: 48px;
-    color: var(--text-primary);
+    color: #ffffff;
     text-align: center;
     font-size: 16px;
     font-weight: 600;
@@ -547,7 +547,7 @@
 
   .legendShoutout {
     margin-top: 8px;
-    color: var(--text-secondary);
+    color: #aaaaaa;
     text-align: center;
     font-size: 15px;
     font-weight: 400;
