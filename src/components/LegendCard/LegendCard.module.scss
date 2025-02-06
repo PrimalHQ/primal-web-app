@@ -460,6 +460,13 @@
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
 
+    .userName {
+      max-width: 80%;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
   }
 
   .nip05 {
@@ -468,6 +475,11 @@
     font-size: 14px;
     font-weight: 400;
     line-height: 14px;
+
+    max-width: 80%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 
     opacity: 0;
 
