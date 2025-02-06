@@ -96,7 +96,7 @@ const LegendCard: Component< {
 
                 <div class={styles.legendCardInfo}>
                   <div class={styles.avatar}>
-                    <Avatar user={props.user} size="xxl" />
+                    <Avatar user={props.user} size="xxxl" />
                   </div>
                   <div class={styles.userNameAndCheck}>
                     <div class={styles.userName}>

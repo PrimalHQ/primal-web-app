@@ -580,23 +580,10 @@
 @keyframes slide-legend-down {
     100% { left: 0; bottom: 0 }
 }
-@keyframes slide-legend-info {
-    0% {
-      opacity: 0;
-      margin-top: 36px;
-    }
-    100% {
-      opacity: 1;
-      margin-top: 16px;
-    }
-}
 @keyframes zoom-spin {
   0% {
     opacity: 0;
-    transform: rotate(60deg) scale(0.1, 0.1);
-  }
-  20% {
-    opacity: 0;
+    transform: rotate(-45deg) scale(0, 0);
   }
   100% {
     opacity: 1;
@@ -619,10 +606,12 @@
     height: 294px;
     margin-left: -5px;
 
-    -webkit-animation: slide-legend-up 0.2s forwards;
+    -webkit-animation: slide-legend-up 0.44s forwards;
     -webkit-animation-delay: 0.3s;
-    animation: slide-legend-up 0.2s forwards;
+    animation: slide-legend-up 0.44s forwards;
     animation-delay: 0.3s;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
 
     &.sheetGray {
       background: #444;
@@ -674,10 +663,12 @@
     width: 198px;
     height: 187px;
 
-    -webkit-animation: slide-legend-up 0.2s forwards;
-    -webkit-animation-delay: 0.4s;
-    animation: slide-legend-up 0.2s forwards;
-    animation-delay: 0.4s;
+    -webkit-animation: slide-legend-up 0.44s forwards;
+    -webkit-animation-delay: 0.3s;
+    animation: slide-legend-up 0.44s forwards;
+    animation-delay: 0.3s;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
 
     &.sheetGray {
       background: #444;
@@ -787,10 +778,12 @@
       opacity: 0.15;
     }
 
-    -webkit-animation: slide-legend-down 0.2s forwards;
-    -webkit-animation-delay: 0.4s;
-    animation: slide-legend-down 0.2s forwards;
-    animation-delay: 0.4s;
+    -webkit-animation: slide-legend-down 0.44s forwards;
+    -webkit-animation-delay: 0.3s;
+    animation: slide-legend-down 0.44s forwards;
+    animation-delay: 0.3s;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
   }
 }
 
@@ -811,6 +804,8 @@
   -webkit-animation-delay: 0.9s;
   animation: shine 0.6s forwards;
   animation-delay: 0.9s;
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
 }
 
 .legendCardContent {
@@ -829,10 +824,12 @@
   transform: rotate(60deg) scale(0.6, 0.6);
   opacity: 0;
 
-  -webkit-animation: zoom-spin 0.4s forwards;
+  -webkit-animation: zoom-spin 0.44s forwards;
   -webkit-animation-delay: 0.3s;
-  animation: zoom-spin 0.4s forwards;
+  animation: zoom-spin 0.44s forwards;
   animation-delay: 0.3s;
+  -webkit-animation-timing-function: ease-out;
+  animation-timing-function: ease-out;
 }
 
 .legendCardInfo {
@@ -841,13 +838,6 @@
   width: 100%;
   justify-content: flex-start;
   align-items: center;
-  margin-top: 36px;
-  opacity: 0;
-
-  -webkit-animation: slide-legend-info 0.4s forwards;
-  -webkit-animation-delay: 0.3s;
-  animation: slide-legend-info 0.4s forwards;
-  animation-delay: 0.3s;
 
   .userNameAndCheck {
     display: flex;
@@ -855,10 +845,86 @@
     align-items: center;
     width: fit-content;
     margin-top: 26px;
+
+    color: var(--text-primary);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 24px;
+
+    opacity: 0;
+
+    @keyframes slide-legend-name {
+      0% {
+        opacity: 0;
+        margin-top: 66px;
+      }
+      100% {
+        opacity: 1;
+        margin-top: 26px;
+      }
+    }
+
+    -webkit-animation: slide-legend-name 0.44s forwards;
+    animation: slide-legend-name 0.44s forwards;
+    -webkit-animation-delay: 0.3s;
+    animation-delay: 0.3s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+
+  }
+
+  .nip05 {
+    color: var(--text-primary);
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+
+    opacity: 0;
+
+    @keyframes slide-legend-nip05 {
+      0% {
+        opacity: 0;
+        margin-top: 40px;
+      }
+      100% {
+        opacity: 1;
+        margin-top: 0;
+      }
+    }
+
+    -webkit-animation: slide-legend-nip05 0.44s forwards;
+    -webkit-animation-delay: 0.4s;
+    animation: slide-legend-nip05 0.44s forwards;
+    animation-delay: 0.4s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+
   }
 
   .legendCohort {
     margin-top: 12px;
+
+    opacity: 0;
+
+    @keyframes slide-legend-cohort {
+      0% {
+        opacity: 0;
+        margin-top: 52px;
+      }
+      100% {
+        opacity: 1;
+        margin-top: 12px;
+      }
+    }
+
+    -webkit-animation: slide-legend-cohort 0.44s forwards;
+    -webkit-animation-delay: 0.5s;
+    animation: slide-legend-cohort 0.44s forwards;
+    animation-delay: 0.5s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+
   }
 
   .legendSince {
@@ -868,6 +934,26 @@
     font-size: 16px;
     font-weight: 600;
     line-height: 23px;
+
+    opacity: 0;
+
+    @keyframes slide-legend-since {
+      0% {
+        opacity: 0;
+        margin-top: 88px;
+      }
+      100% {
+        opacity: 1;
+        margin-top: 48px;
+      }
+    }
+
+    -webkit-animation: slide-legend-since 0.44s forwards;
+    -webkit-animation-delay: 0.5s;
+    animation: slide-legend-since 0.44s forwards;
+    animation-delay: 0.5s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
   }
 
   .legendShoutout {
@@ -878,17 +964,57 @@
     font-weight: 400;
     line-height: 22px;
     max-width:263px;
+
+    opacity: 0;
+
+    @keyframes slide-legend-shoutout {
+      0% {
+        opacity: 0;
+        margin-top: 40px;
+      }
+      100% {
+        opacity: 1;
+        margin-top: 0px;
+      }
+    }
+
+    -webkit-animation: slide-legend-shoutout 0.44s forwards;
+    -webkit-animation-delay: 0.6s;
+    animation: slide-legend-shoutout 0.44s forwards;
+    animation-delay: 0.6s;
+    -webkit-animation-timing-function: ease-out;
+    animation-timing-function: ease-out;
+
   }
 }
 
+@keyframes slide-legend-actions {
+  0% {
+    opacity: 0;
+    margin-bottom: -40px;
+  }
+  100% {
+    opacity: 1;
+    margin-bottom: 20px;
+  }
+}
 
 .legendActions {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 20px;
   gap: 22px;
+
+  margin-bottom: -40px;
+  opacity: 0;;
+
+  -webkit-animation: slide-legend-actions 0.44s forwards;
+  -webkit-animation-delay: 0.66s;
+  animation: slide-legend-actions 0.44s forwards;
+  animation-delay: 0.66s;
+  -webkit-animation-timing-function: ease-out;
+  animation-timing-function: ease-out;
 
   .legendSee {
     color: #FFB701;

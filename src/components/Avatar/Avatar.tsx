@@ -13,7 +13,7 @@ import { LegendCustomizationConfig } from '../../lib/premium';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl" | "xxxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -46,6 +46,7 @@ const Avatar: Component<{
     lg: styles.largeAvatar,
     xl: styles.extraLargeAvatar,
     xxl: styles.xxlAvatar,
+    xxxl: styles.xxxlAvatar,
   };
 
   const missingClass = {
@@ -64,6 +65,7 @@ const Avatar: Component<{
     lg: styles.largeMissing,
     xl: styles.extraLargeMissing,
     xxl: styles.xxlMissing,
+    xxxl: styles.xxxlMissing,
   };
 
   const imgError = (event: any) => {
