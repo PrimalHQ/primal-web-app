@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, For, onCleanup, onMount, Show } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './NoteThread.module.scss';
 import { useNavigate } from '@solidjs/router';
@@ -24,6 +24,7 @@ import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import { fetchNotes } from '../handleNotes';
 import { isIOS } from '../utils';
+import { isAndroid } from '@kobalte/utils';
 import { logWarning } from '../lib/logger';
 import { noteIdToHex } from '../lib/keys';
 
@@ -122,12 +123,24 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
   let observer: IntersectionObserver | undefined;
 
+  onMount(() => {
+    window.scrollTo({ top: 0 });
+  });
+
   createEffect(() => {
     if (!primaryNote() || threadContext?.isFetching) return;
 
     const pn = document.getElementById('primary_note');
 
     if (!pn) return;
+
+    if (isIOS() || isAndroid()) {
+      // console.log('scroll')
+      // setTimeout(() => {
+      //   window.scrollTo({ top: 0 });
+      // }, 100);
+      return;
+    }
 
     setTimeout(() => {
       const threadHeader = 84;
@@ -141,8 +154,10 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
       pn.scrollIntoView({ block });
 
+
       if (block === 'start') {
         const moreScroll = threadHeader + (isIOS() ? iOSBanner : 0);
+        console.log('SCROLL: ', moreScroll)
         window.scrollBy({ top: -moreScroll });
       }
     }, 100);
@@ -200,7 +215,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       <Wormhole
         to="search_section"
       >
-        <Search />
+        <Show when={!isIOS() && !isAndroid()}>
+          <Search />
+        </Show>
       </Wormhole>
 
       <Wormhole to='right_sidebar'>
