@@ -89,7 +89,7 @@ const Premiums: Component = () => {
   return (
     <div>
       <PageTitle title={
-        intl.formatMessage(t.title.general)}
+        intl.formatMessage(t.title.premiums)}
       />
 
       <Show when={!isPhone()}>

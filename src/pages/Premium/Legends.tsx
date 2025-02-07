@@ -90,7 +90,7 @@ const Legends: Component = () => {
   return (
     <div>
       <PageTitle title={
-        intl.formatMessage(t.title.general)}
+        intl.formatMessage(t.title.legends)}
       />
 
       <Show when={!isPhone()}>
