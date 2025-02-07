@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, on, Show, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -72,10 +72,11 @@ const PremiumLegendLeaderBoard: Component<{
   const [tab, setTab] = createSignal<LeaderboardSort>(props.type === 'legend' ? 'last_donation' : 'premium_since')
   const [leaderboardStore, setLeaderboardStore] = createStore<LeaderboardStore>({ ...emptyLeaderboard() });
 
-  createEffect(() => {
+  createEffect(on(tab, (next, prev) => {
+    if (prev !== undefined && next === prev) return;
     setLeaderboardStore(() => ({ ...emptyLeaderboard() }));
     getLeaderboard(tab());
-  });
+  }));
 
   const getLeaderboard = async (order: LeaderboardSort) => {
     const subId = `leaderboard_${APP_ID}`;
