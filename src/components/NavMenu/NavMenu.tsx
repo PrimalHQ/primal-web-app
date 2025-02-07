@@ -81,10 +81,10 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
 
   const noReadsConfirm: ConfirmInfo = {
-    title: "Coming Soon",
-    description: "Primal does not have article creation capabilities yet. We recommend Highlighter to content creators. Would you like to try it?",
-    confirmLabel: "Yes, go to Highlighter",
-    abortLabel: "No Thanks",
+    title: "Hamarosan jön!",
+    description: "A Primal még nem rendelkezik cikkírási képességekkel. Tartalomkészítők számára a Highlightert ajánljuk. Szeretnéd kipróbálni?",
+    confirmLabel: "Igen, tovább a Highlighterre",
+    abortLabel: "Nem, köszönöm",
     onConfirm: () => {
       window.open('https://highlighter.com', '_blank')?.focus();
     },

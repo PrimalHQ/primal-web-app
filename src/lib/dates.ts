@@ -45,32 +45,32 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
 
   if ( diff > year) {
     const years = Math.floor(diff / year);
-    return { date, label: rtf.format(-years, 'years').replace(' ago', '') };
+    return { date, label: rtf.format(-years, 'years').replace('évvel ezelőtt', 'éve') };
   }
 
   if (diff > month) {
     const months = Math.floor(diff / month);
-    return { date, label: rtf.format(-months, 'months').replace(' ago', '') };
+    return { date, label: rtf.format(-months, 'months').replace('hónappal ezelőtt', 'hónapja') };
   }
 
   if (diff > week) {
     const weeks = Math.floor(diff / week);
-    return { date, label: rtf.format(-weeks, 'weeks').replace(' ago', '') };
+    return { date, label: rtf.format(-weeks, 'weeks').replace('héttel ezelőtt', 'hete') };
   }
 
   if (diff > day) {
     const days = Math.floor(diff / day);
-    return { date, label: rtf.format(-days, 'days').replace(' ago', '') };
+    return { date, label: rtf.format(-days, 'days').replace('nappal ezelőtt', 'napja') };
   }
 
   if (diff > hour) {
     const hours = Math.floor(diff / hour);
-    return { date, label: rtf.format(-hours, 'hours').replace(' ago', '') };
+    return { date, label: rtf.format(-hours, 'hours').replace('órával ezelőtt', 'órája') };
   }
 
   if (diff > minute) {
     const minutes = Math.floor(diff / minute);
-    return { date, label: rtf.format(-minutes, 'minutes').replace(' ago', '') };
+    return { date, label: rtf.format(-minutes, 'minutes').replace('perccel ezelőtt', 'perce') };
   }
 
   return { date, label: `${diff} mp` };

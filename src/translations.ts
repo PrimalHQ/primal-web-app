@@ -51,7 +51,7 @@ export const account = {
   },
   createNewDescription: {
     id: 'account.createNewDescription',
-    defaultMessage: 'Új vagy a Noszteren? Hozd létre a fiókodat most, és csatlakozz ehhez a varázslatos helyhez! Gyors és egyszerű!',
+    defaultMessage: 'Új vagy a Noszteren? Hozd létre a fiókodat most, és csatlakozz ehhez a varázslatos helyhez! Gyorsan és egyszerűen!',
     description: 'Label inviting users to join Nostr',
   },
   create: {
@@ -1190,7 +1190,7 @@ export const profile = {
   },
   jointDate: {
     id: 'profile.joinDate',
-    defaultMessage: 'Csatlakozott a Noszterhez ekkor: {date}',
+    defaultMessage: 'Csatlakozott a Noszterhez: {date}',
     description: 'Label indicating when the profile joined Nostr (oldest event)',
   },
   stats: {
@@ -2374,12 +2374,12 @@ export const reactionsModal = {
     },
     zaps: {
       id: 'reactionsModal.tabs.zaps',
-      defaultMessage: 'Zaps ({count})',
+      defaultMessage: 'Zappok ({count})',
       description: 'Zaps tab label in reactions modal',
     },
     reposts: {
       id: 'reactionsModal.tabs.reposts',
-      defaultMessage: 'Újra megosztások ({count})',
+      defaultMessage: 'Újramegosztások ({count})',
       description: 'Reposts tab label in reactions modal',
     },
     quotes: {

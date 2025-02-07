@@ -814,24 +814,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getMobileReleases(subid);
   };
 
-  const getDefaultReadsFeeds = () => {
-    const subId = `article_feeds_${APP_ID}`;
-
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        const feeds = JSON.parse(content.content || '[]');
-
-        updateStore('readsFeeds', () => [...feeds]);
-      },
-      onEose: () => {
-        unsub();
-        initReadsFeeds(account?.publicKey, store.readsFeeds);
-      },
-    });
-
-    fetchDefaultArticleFeeds(subId);
-  }
-
   const translateToHungarian = (text: string) => {
     const translations: Record<string, string> = {
       "Latest": "Legfrissebbek",
@@ -852,10 +834,76 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       "Global trending notes in the past 1 hour": "Népszerű bejegyzések az elmúlt 1 órában",
       "Nostr Firehose": "Noszter Tűzfészek",
       "Latest global notes; be careful!": "Legfrissebb bejegyzések világszerte, légy óvatos!",
+      "Nostr Reads": "Noszter Olvasnivalók",
+      "Latest reads from your network": "Legfrissebbek olvasnivalók a hálózatodból",
+      "All reads": "Minden olvasnivaló",
+      "Latest global reads": "Legfrissebb olvasnivalók világszerte",
+      "Art Reads": "Művészet",
+      "Art Topic Reads from Primal": "Művészeti témájú olvasnivalók a Primalból",
+      "Bitcoin Reads": "Bitcoin",
+      "Bitcoin Topic Reads from Primal": "Bitcoin témájú olvasnivalók a Primalból",
+      "Finance Reads": "Pénzügyek",
+      "Finance Topic Reads from Primal": "Pénzügyi témájú olvasnivalók a Primalból",
+      "Food Reads": "Táplálkozás",
+      "Food Topic Reads from Primal": "Táplálkozás témájú olvasnivalók a Primalból",
+      "Gaming Reads": "Játék – Gaming",
+      "Gaming Topic Reads from Primal": "Játék témájú olvasnivalók a Primalból",
+      "Human Rights Reads": "Emberi jogok",
+      "Human Rights Reads from Primal": "Emberi jogi témájú olvasnivalók a Primalból",
+      "Music Reads": "Zene",
+      "Music Topic Reads from Primal": "Zenei témájú olvasnivalók a Primalból",
+      "News Topic Reads": "Hírtémák",
+      "News Topic Reads from Primal": "Hírek, olvasnivalók a Primalból",
+      "Nostr Topic Reads from Primal": "Noszter témájú olvasnivalók a Primalból",
+      "Philosophy Reads": "Filozófia",
+      "Philosophy Topic Reads from Primal": "Filozófia témájú olvasnivalók a Primalból",
+      "Photography Reads": "Fotográfia",
+      "Photography Topic Reads from Primal": "Fényképezés témájú olvasnivalók a Primalból",
+      "Podcasts Reads": "Podcast-ok",
+      "Podcasts Topic Reads from Primal": "Podcast témájú olvasnivalók a Primalból",
+      "Sports Reads": "Sport",
+      "Sports Topic Reads from Primal": "Sport témájú olvasnivalók a Primalból",
+      "Technology Reads": "Technológia",
+      "Technology Topic Reads from Primal": "Technológia témájú olvasnivalók a Primalból",
+      "Travel Reads": "Utazás",
+      "Travel Topic Reads from Primal": "Utazás témájú olvasnivalók a Primalból",
     };
 
     return translations[text] || text;
   };
+
+  const getDefaultReadsFeeds = () => {
+    const subId = `article_feeds_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const feeds = JSON.parse(content.content || '[]');
+
+        const translatedFeeds = feeds.map(feed => {
+          if (feed.description === "Nostr Topic Reads from Primal") {
+            return {
+              ...feed,
+              name: "Noszter témájú olvasnivalók",
+              description: translateToHungarian(feed.description),
+            };
+          }
+          return {
+            ...feed,
+            name: translateToHungarian(feed.name),
+            description: translateToHungarian(feed.description),
+          };
+        });
+
+        updateStore('readsFeeds', () => [...translatedFeeds]);
+      },
+      onEose: () => {
+        unsub();
+        initReadsFeeds(account?.publicKey, store.readsFeeds);
+      },
+    });
+
+    fetchDefaultArticleFeeds(subId);
+  }
 
   const getDefaultHomeFeeds = () => {
     const subId = `home_feeds_${APP_ID}`;
