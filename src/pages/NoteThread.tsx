@@ -130,11 +130,8 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     if (!pn) return;
 
     setTimeout(() => {
-      const threadHeader = 84;
-      const iOSBanner = 54;
-
       const rect = pn.getBoundingClientRect();
-      const wh = window.innerHeight - threadHeader;
+      const wh = window.innerHeight;
 
       const block = rect.height < wh && parentNotes().length > 0 ?
         'end' : 'start';
@@ -142,8 +139,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       pn.scrollIntoView({ block });
 
       if (block === 'start') {
-        const moreScroll = threadHeader + (isIOS() ? iOSBanner : 0);
-        window.scrollBy({ top: -moreScroll });
+        window.scrollBy({ top: -84 });
       }
     }, 100);
   });
@@ -255,7 +251,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                     </p>
                   </div>
               }>
-                <div id="primary_note" class="animated">
+                <div id="primary_note" class={`${styles.primaryNote} animated`}>
                   <Note
                     note={primaryNote() as PrimalNote}
                     noteType="primary"
