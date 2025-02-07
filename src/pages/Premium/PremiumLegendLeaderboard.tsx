@@ -105,7 +105,7 @@ const PremiumLegendLeaderBoard: Component<{
 
 
   const getLeaderboardNextPage = async (order: LeaderboardSort) => {
-    if (leaderboardStore.paging.since === 0) return;
+    if (leaderboardStore.paging.since === undefined || leaderboardStore.paging.since === 0) return;
 
     const subId = `leaderboard_np_${APP_ID}`;
 
