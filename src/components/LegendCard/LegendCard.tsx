@@ -68,7 +68,10 @@ const LegendCard: Component< {
   })
 
   const isProfileLegend = () => props.cohortInfo.tier === 'premium-legend';
-  const isUserLegend = () => account?.publicKey && app?.memberCohortInfo[account?.publicKey].tier === 'premium-legend';
+  const isUserLegend = () => account?.publicKey &&
+    app?.memberCohortInfo &&
+    app?.memberCohortInfo[account?.publicKey] &&
+    app?.memberCohortInfo[account?.publicKey].tier === 'premium-legend';
 
   return (
     <Dialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>
