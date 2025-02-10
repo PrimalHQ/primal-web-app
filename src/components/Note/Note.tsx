@@ -383,7 +383,7 @@ const Note: Component<{
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
               <span>
-                {veryLongDate(props.note.post?.created_at).replace('at', '·')}
+                {veryLongDate(props.note.post?.created_at).replace(' at ', ' · ')}
               </span>
               <button
                 class={styles.reactSummary}
