@@ -1,6 +1,6 @@
 import { Kind } from "./constants";
 import { getArticleThread, getMegaFeed } from "./lib/feed";
-import { setLinkPreviews } from "./lib/notes";
+import { parseLinkPreviews, setLinkPreviews } from "./lib/notes";
 import { subsTo } from "./sockets";
 import { isRepostInCollection } from "./stores/note";
 import {
@@ -720,24 +720,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
   }
 
   if (content.kind === Kind.LinkMetadata) {
-    const metadata = JSON.parse(content.content);
-
-    const data = metadata.resources[0];
-    if (!data) {
-      return;
-    }
-
-    const preview = {
-      url: data.url,
-      title: data.md_title,
-      description: data.md_description,
-      mediaType: data.mimetype,
-      contentType: data.mimetype,
-      images: [data.md_image],
-      favicons: [data.icon_url],
-    };
-
-    setLinkPreviews(() => ({ [data.url]: preview }));
+    parseLinkPreviews(JSON.parse(content.content));
     return;
   }
 

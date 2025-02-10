@@ -9,7 +9,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { ReactionStats, useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, setLinkPreviews } from '../../lib/notes';
+import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, parseLinkPreviews, setLinkPreviews } from '../../lib/notes';
 import { truncateNumber2 } from '../../lib/notifications';
 import { subsTo } from '../../sockets';
 import { convertToNotes } from '../../stores/note';
@@ -337,24 +337,7 @@ const ReactionsModal: Component<{
         }
 
         if (content?.kind === Kind.LinkMetadata) {
-          const metadata = JSON.parse(content.content);
-
-          const data = metadata.resources[0];
-          if (!data) {
-            return;
-          }
-
-          const preview = {
-            url: data.url,
-            title: data.md_title,
-            description: data.md_description,
-            mediaType: data.mimetype,
-            contentType: data.mimetype,
-            images: [data.md_image],
-            favicons: [data.icon_url],
-          };
-
-          setLinkPreviews(() => ({ [data.url]: preview }));
+          parseLinkPreviews(JSON.parse(content.content));
           return;
         }
       },

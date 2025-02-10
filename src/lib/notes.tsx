@@ -51,6 +51,30 @@ export const addLinkPreviews = async (url: string) => {
   }
 };
 
+export const parseLinkPreviews = (previewKindContent: any) => {
+  if (previewKindContent.resources.length === 0) return;
+
+  for (let i = 0; i < previewKindContent.resources.length; i++) {
+    const data = previewKindContent.resources[i];
+
+    if (!data) {
+      continue;
+    }
+
+    const preview = {
+      url: data.url,
+      title: data.md_title,
+      description: data.md_description,
+      mediaType: data.mimetype,
+      contentType: data.mimetype,
+      images: [data.md_image],
+      favicons: [data.icon_url],
+    };
+
+    setLinkPreviews(() => ({ [data.url]: preview }));
+  }
+}
+
 export const isUrl = (url: string) => urlRegex.test(url);
 export const isHashtag = (url: string) => hashtagRegex.test(url);
 export const isLinebreak = (url: string) => linebreakRegex.test(url);

@@ -6,7 +6,7 @@ import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
-import { getHighlights, sendEvent, setLinkPreviews } from "../lib/notes";
+import { getHighlights, parseLinkPreviews, sendEvent, setLinkPreviews } from "../lib/notes";
 import { subsTo } from "../sockets";
 
 import styles from './Longform.module.scss';
@@ -561,24 +561,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     }
 
     if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
-      }
-
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
+      parseLinkPreviews(JSON.parse(content.content));
       return;
     }
 
@@ -839,24 +822,7 @@ const Longform: Component< { naddr: string } > = (props) => {
         }
 
         if (content.kind === Kind.LinkMetadata) {
-          const metadata = JSON.parse(content.content);
-
-          const data = metadata.resources[0];
-          if (!data) {
-            return;
-          }
-
-          const preview = {
-            url: data.url,
-            title: data.md_title,
-            description: data.md_description,
-            mediaType: data.mimetype,
-            contentType: data.mimetype,
-            images: [data.md_image],
-            favicons: [data.icon_url],
-          };
-
-          setLinkPreviews(() => ({ [data.url]: preview }));
+          parseLinkPreviews(JSON.parse(content.content));
           return;
         }
 

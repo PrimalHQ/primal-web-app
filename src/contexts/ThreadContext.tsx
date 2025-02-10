@@ -42,7 +42,7 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
-import { getEventQuoteStats, getEventZaps, setLinkPreviews } from "../lib/notes";
+import { getEventQuoteStats, getEventZaps, parseLinkPreviews, setLinkPreviews } from "../lib/notes";
 import { handleSubscription, parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
 
@@ -245,24 +245,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     }
 
     if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
-      }
-
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
+      parseLinkPreviews(JSON.parse(content.content));
       return;
     }
 

@@ -24,6 +24,7 @@ import {
   isWavelake,
   isWebmVideo,
   isYouTube,
+  linkPreviews,
 } from '../../lib/notes';
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
@@ -918,7 +919,7 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        if (item.meta && item.meta.preview && totalLinks < 2) {
+        if (item.meta && item.meta.preview) {
           setWordsDisplayed(w => w + shortMentionInWords);
           return (
             <LinkPreview

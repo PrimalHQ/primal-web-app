@@ -2,7 +2,7 @@ import { nip19 } from "./lib/nTools";
 import { Kind } from "./constants";
 import { getEvents, getMegaFeed, getUserArticleFeed, getUserFeed } from "./lib/feed";
 import { decodeIdentifier, hexToNpub } from "./lib/keys";
-import { getParametrizedEvents, setLinkPreviews } from "./lib/notes";
+import { getParametrizedEvents, parseLinkPreviews, setLinkPreviews } from "./lib/notes";
 import { getUserProfileInfo } from "./lib/profile";
 import { subsTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
@@ -92,24 +92,7 @@ export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId:
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -275,24 +258,7 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -459,24 +425,7 @@ export const fetchArticleThread = (pubkey: string | undefined, noteIds: string, 
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -630,24 +579,7 @@ export const fetchUserArticles = (userPubkey: string | undefined, pubkey: string
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -865,24 +797,7 @@ export const fetchUserGallery = (userPubkey: string | undefined, pubkey: string 
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -1057,24 +972,7 @@ export const fetchNoteFeedBySpec = (pubkey: string | undefined, spec: string, su
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
@@ -1237,24 +1135,7 @@ export const fetchReadsFeedBySpec = (pubkey: string | undefined, spec: string, s
       }
 
       if (content.kind === Kind.LinkMetadata) {
-        const metadata = JSON.parse(content.content);
-
-        const data = metadata.resources[0];
-        if (!data) {
-          return;
-        }
-
-        const preview = {
-          url: data.url,
-          title: data.md_title,
-          description: data.md_description,
-          mediaType: data.mimetype,
-          contentType: data.mimetype,
-          images: [data.md_image],
-          favicons: [data.icon_url],
-        };
-
-        setLinkPreviews(() => ({ [data.url]: preview }));
+        parseLinkPreviews(JSON.parse(content.content));
         return;
       }
 
