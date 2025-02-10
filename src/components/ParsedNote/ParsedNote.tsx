@@ -919,7 +919,7 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        if (item.meta && item.meta.preview) {
+        if (item.meta && item.meta.preview && totalLinks < 2) {
           setWordsDisplayed(w => w + shortMentionInWords);
           return (
             <LinkPreview
