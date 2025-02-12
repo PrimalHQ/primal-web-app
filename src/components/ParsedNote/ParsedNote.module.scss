@@ -14,7 +14,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* width: fit-content; */
   max-width: 60ch;
+  color: var(--accent-links);
 }
 
 .mentionedNote {

@@ -932,8 +932,8 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 1);
         return (
-          <span data-url={token}>
-            <a class={styles.bareLink} link href={token} target="_blank" >{token}</a>
+          <span class={styles.bareLink} data-url={token}>
+            <a link href={token} target="_blank" >{token}</a>
           </span>
         );
       }}
