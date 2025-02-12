@@ -9,6 +9,14 @@
   text-decoration: none;
 }
 
+.bareLink {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60ch;
+}
+
 .mentionedNote {
   border: solid 1px var(--subtile-devider);
   border-radius: 4px;
