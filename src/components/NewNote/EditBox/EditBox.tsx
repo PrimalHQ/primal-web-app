@@ -1153,7 +1153,7 @@ const EditBox: Component<{
   };
 
   const subNaddrRef = (noteId: string) => {
-    const parsed = parsedMessage().replace(addrRegex, (url) => {
+    const parsed = parsedMessage().replace(eventRegexG, (url) => {
 
       let id = url;
 
