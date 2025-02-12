@@ -3,7 +3,7 @@ import { A, useParams } from "@solidjs/router";
 import { batch, Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind } from "../constants";
+import { Kind, eventAddresRegex } from "../constants";
 import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
 import { getHighlights, parseLinkPreviews, sendEvent, setLinkPreviews } from "../lib/notes";
@@ -920,6 +920,10 @@ const Longform: Component< { naddr: string } > = (props) => {
     return store.users.filter(u => pubkeys.includes(u.pubkey));
   }
 
+  const isProperArticleOrigin = (origin: string | undefined) => {
+    // TODO DECODE EVENT ADDRESS TO GET TO THE CLIENT NAME
+    return origin && !eventAddresRegex.test(origin.trim());
+  }
 
   return (
     <>
@@ -989,7 +993,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                 <div class={styles.time}>
                   {shortDate(store.article?.published)}
                 </div>
-                <Show when={store.article?.client}>
+                <Show when={isProperArticleOrigin(store.article?.client)}>
                   <div class={styles.client}>
                     via {store.article?.client}
                   </div>

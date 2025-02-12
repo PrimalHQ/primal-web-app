@@ -486,7 +486,7 @@ const PrimalMarkdown: Component<{
           src={src}
           media={mediaImage}
           mediaThumb={mediaThumb}
-          width={640}
+          width={isIOS() || isAndroid() ? window.innerWidth : 640}
         />
       );
     }

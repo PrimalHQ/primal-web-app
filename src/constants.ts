@@ -322,6 +322,8 @@ export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
 
+  export const eventAddresRegex = /[0-9]+:[A-Za-z0-9]+:[A-Za-z0-9]+/;
+
 // How long, in words, should a short note be
 export const shortNoteWords = 200;
 export const shortNoteChars = 200;
