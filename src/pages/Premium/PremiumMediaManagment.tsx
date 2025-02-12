@@ -297,7 +297,7 @@ const PremiumMediaManagment: Component<{
 
       <div class={styles.mediaSatsHolder}>
         <div class={styles.mediaStorageStats}>
-          {(used() / 1_000_000_000).toFixed(2)} GB of {total() / 1_000_000_000} GB used
+          {(used() / 1_000_000_000).toFixed(2)} GB / {total() / 1_000_000_000} GB felhasználva
         </div>
 
         <div class={styles.mediaStatsBar} ref={totalBar} onMouseOver={onZoomIn} onMouseOut={onZoomOut}>
@@ -307,9 +307,9 @@ const PremiumMediaManagment: Component<{
           <div class={styles.spaceLeft}>
             <Show
               when={!store.zoomed}
-              fallback={<>{(used() / 1_000_000_000).toFixed(2)} GB used</>}
+              fallback={<>{(used() / 1_000_000_000).toFixed(2)} GB felhasználva</>}
             >
-              {freeSpace()} GB free
+              {freeSpace()} GB szabad
             </Show>
           </div>
         </div>
@@ -317,15 +317,15 @@ const PremiumMediaManagment: Component<{
         <div class={styles.mediaStatsLegend} title={`${media?.mediaStats.image.toLocaleString()} Bytes`}>
           <div class={styles.legendItemImages}>
             <div class={styles.dot}></div>
-            <div class={styles.label}>Images</div>
+            <div class={styles.label}>Képek</div>
           </div>
           <div class={styles.legendItemVideos} title={`${media?.mediaStats.video.toLocaleString()} Bytes`}>
             <div class={styles.dot}></div>
-            <div class={styles.label}>Videos</div>
+            <div class={styles.label}>Videók</div>
           </div>
           <div class={styles.legendItemOther} title={`${media?.mediaStats.other.toLocaleString()} Bytes`}>
             <div class={styles.dot}></div>
-            <div class={styles.label}>Other</div>
+            <div class={styles.label}>Egyéb</div>
           </div>
         </div>
       </div>
@@ -334,10 +334,10 @@ const PremiumMediaManagment: Component<{
         <table>
           <thead>
             <tr>
-              <th>File</th>
-              <th>Details</th>
-              <th>Copy</th>
-              <th>Delete</th>
+              <th>Fájl</th>
+              <th>Részletek</th>
+              <th>Másolás</th>
+              <th>Törlés</th>
             </tr>
           </thead>
 
@@ -396,7 +396,7 @@ const PremiumMediaManagment: Component<{
 
         <ConfirmModal
           open={store.showConfirmDelete.length > 0}
-          description="Are you sure you want to delete this media file? All notes referencing this media file will look broken."
+          description="Biztosan törölni szeretnéd ezt a médiafájlt? Minden olyan bejegyzés, amely erre a fájlra hivatkozik, hibásan fog megjelenni."
           onConfirm={() => {
             deleteMedia(account?.publicKey, store.showConfirmDelete);
             updateStore('showConfirmDelete', () => '');

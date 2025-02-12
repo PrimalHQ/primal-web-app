@@ -5,9 +5,6 @@ import packageJson from './package.json';
 
 export default defineConfig({
   plugins: [solidPlugin()],
-  preview: {
-    allowedHosts: ['primal.noszter.hu']
-  },
   server: {
     port: 3000,
   },

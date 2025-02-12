@@ -34,43 +34,43 @@ const PremiumSidebarActive: Component<{
     <div class={styles.premiumSidebar}>
 
       <div class={styles.premiumSidebarTitle}>
-        Nostr Tools
+        Noszter Eszközök
       </div>
 
       <div class={styles.premiumSidebarDescription}>
         <ul>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('premiumRelay')}>
-              Premium Relay
+              Prémium Relé
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('mediaManagment')}>
-              Media Managment
+              Média Kezelés
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('contactBackup')}>
-              Contact List Backup
+              Kapcsolati Lista Biztonsági Mentése
             </ButtonLink>
           </li>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('contentBackup')}>
-              Content Backup
+              Tartalom Biztonsági Mentése
             </ButtonLink>
           </li>
         </ul>
       </div>
 
       <div class={styles.premiumSidebarTitle}>
-        Primal Account
+        Primal Fiók
       </div>
 
       <div class={styles.premiumSidebarDescription}>
         <ul>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('orderHistory')}>
-              Order history
+              Rendelési előzmények
             </ButtonLink>
           </li>
           <Show when={!isLegend()}>
@@ -78,29 +78,29 @@ const PremiumSidebarActive: Component<{
               <ButtonLink onClick={() => props.onSidebarAction('extendSubscription')}>
                 <Show
                   when={isExpired()}
-                  fallback="Extend your subscripton"
+                  fallback="Előfizetés meghosszabbítása"
                 >
-                  Renew your subscripton
+                  Előfizetés megújítása
                 </Show>
               </ButtonLink>
             </li>
           </Show>
           <li>
             <ButtonLink onClick={() => props.onSidebarAction('changeName')}>
-              Change your Primal name
+              Primal név megváltoztatása
             </ButtonLink>
           </li>
           <Show when={isLegend()}>
             <li>
               <ButtonLink onClick={() => props.onSidebarAction('customLegend')}>
-                Legendary Profile Customization
+                Legendás Profil Testreszabás
               </ButtonLink>
             </li>
           </Show>
             <Show when={!isExpired() && !isLegend()}>
               <li>
                 <ButtonLink onClick={() => props.onSidebarAction('becomeLegend')}>
-                  Become a Legend
+                  Legyél Legenda
                 </ButtonLink>
               </li>
             </Show>
@@ -108,8 +108,8 @@ const PremiumSidebarActive: Component<{
       </div>
 
       <div class={styles.premiumSidebarDescription}>
-        Have a question?&nbsp;
-        <ButtonLink onClick={props.onOpenFAQ}>Check out our FAQ.</ButtonLink>
+        Van kérdés?&nbsp;
+        <ButtonLink onClick={props.onOpenFAQ}>Nézd meg a gyakori kérdéseket</ButtonLink>
       </div>
     </div>
   );

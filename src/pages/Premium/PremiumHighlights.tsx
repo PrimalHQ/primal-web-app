@@ -25,7 +25,7 @@ const PremiumHighlights: Component<{
   return (
     <div class={styles.premiumHighlights}>
       <div class={styles.ogCaption}>
-        The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.
+        A Primal OG szintet azért hozták létre, hogy elismerjék azokat a felhasználókat, akik az első években feliratkoztak a Primal Prémiumra.
       </div>
       <div class={styles.premiumHighlightInfo}>
         <div class={styles.highlights}>
@@ -33,12 +33,12 @@ const PremiumHighlights: Component<{
             <div class={styles.purpleCheckBig}></div>
             <div class={styles.perk}>
               <div class={styles.perkTitle}>
-                Primal Name
+                Primal Név
               </div>
               <ul class={styles.perkItems}>
-                <li>Verified nostr address</li>
-                <li>Bitcoin lightning address</li>
-                <li>VIP profile on primal.net</li>
+                <li>Ellenőrzött Noszter cím</li>
+                <li>Bitcoin lightning cím</li>
+                <li>VIP profil a primal.net-en</li>
               </ul>
             </div>
           </div>
@@ -48,14 +48,14 @@ const PremiumHighlights: Component<{
 
             <div class={styles.perk}>
               <div class={styles.perkTitle}>
-                Nostr Tools
+                Noszter Eszközök
               </div>
               <ul class={styles.perkItems}>
-                <li>Media hosting</li>
-                <li>Advanced search</li>
-                <li>Premium paid relay</li>
-                <li>Nostr account backup</li>
-                <ButtonLink onClick={props.onMore}>Much more...</ButtonLink>
+                <li>Média hoszting</li>
+                <li>Összetett keresés</li>
+                <li>Prémium előfizetéses relé</li>
+                <li>Noszter fiók biztonsági mentése</li>
+                <ButtonLink onClick={props.onMore}>Sok más...</ButtonLink>
               </ul>
             </div>
           </div>
@@ -64,26 +64,26 @@ const PremiumHighlights: Component<{
 
       <div class={styles.pricingSummary}>
         <div>
-          <div class={styles.price}>$7/month</div>
-          <div class={styles.duration}>3 months</div>
+          <div class={styles.price}>$7/hónap</div>
+          <div class={styles.duration}>3 hónap</div>
         </div>
-        <div class={styles.or}>or</div>
+        <div class={styles.or}>/</div>
         <div>
-          <div class={styles.price}>$6/month</div>
-          <div class={styles.duration}>12 months</div>
+          <div class={styles.price}>$6/hónap</div>
+          <div class={styles.duration}>12 hónap</div>
         </div>
       </div>
 
       <div class={styles.premiumStart}>
         <Switch>
           <Match when={isGuest()}>
-            <>Start by creating your Primal account:</>
+            <>Kezdd a Primal fiókod létrehozásával:</>
           </Match>
           <Match when={hasNoMetadata()}>
-            <>Start by editing your profile:</>
+            <>Kezdd a profilod szerkesztésével:</>
           </Match>
           <Match when={true}>
-            <>Start by reserving your Primal name:</>
+            <>Kezdd a Primal neved lefoglalásával:</>
           </Match>
         </Switch>
       </div>
@@ -93,10 +93,10 @@ const PremiumHighlights: Component<{
       >
         <Switch>
           <Match when={isGuest()}>
-            <>Create account</>
+            <>Fiók létrehozása</>
           </Match>
           <Match when={hasNoMetadata()}>
-            <>Edit profile</>
+            <>Profil szerkesztése</>
           </Match>
           <Match when={true}>
             <>{intl.formatMessage(t.actions.start)}</>

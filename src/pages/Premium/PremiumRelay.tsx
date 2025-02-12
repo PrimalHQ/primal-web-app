@@ -39,14 +39,13 @@ const PremiumRelay: Component<{
     <div class={styles.legendLayout}>
       <div class={styles.premiumRelayLayout}>
         <div class={styles.primalLogo}></div>
-        <div class={styles.title}>Premium Relay</div>
+        <div class={styles.title}>Prémium Rell</div>
         <Show when={relayInfo.version}>
-          <div class={styles.subtitle}>Running strfry.git version {relayInfo.version}</div>
+          <div class={styles.subtitle}>Futó strfry.git verzió {relayInfo.version}</div>
         </Show>
         <div class={styles.separator}></div>
         <div class={styles.relayDescription}>
-          The Primal Premium relay is a high-
-          performance Nostr relay that only accepts content from Primal Premium users. Posting to this relay improves your visibility on the Nostr network because it guarantees high signal and lack of spam to any Nostr user that reads from it.
+          A Primal Prémium relé egy nagy teljesítményű Noszter relé, amely kizárólag Primal Prémium felhasználók tartalmát fogadja el. Erre a relére posztolva növelheted a láthatóságodat a Noszter hálózaton, mivel garantálja a magas minőségű tartalmat és a spammentességet minden Noszter felhasználó számára, aki innen olvas.
         </div>
         <div class={styles.premiumRelayAddress}>
           <Show
@@ -64,14 +63,14 @@ const PremiumRelay: Component<{
             <ButtonPremium
               onClick={() => account?.actions.addRelay(premiumRelay)}
             >
-              Connect to Premium Relay
+              Kapcsolódás a Prémium Reléhez
             </ButtonPremium>
           }
         >
           <ButtonSecondary
             onClick={() => {}}
           >
-            Connected to Premium Relay
+            Kapcsolódva a Prémium Reléhez
           </ButtonSecondary>
         </Show>
       </div>

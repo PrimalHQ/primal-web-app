@@ -572,7 +572,7 @@ const PrimalMarkdown: Component<{
               props.onHighlightCreated && props.onHighlightCreated(hl, replaceId);
             }}
             onRemove={(id: string) => {
-              toast?.sendSuccess('Highlight removed');
+              toast?.sendSuccess('Kiemelés eltávolítva');
               hideHighlightMenu(id);
               props.onHighlightRemoved && props.onHighlightRemoved(id);
             }}
@@ -582,9 +582,9 @@ const PrimalMarkdown: Component<{
             }}
             onCopy={(id: string) => {
               if (!id) {
-                toast?.sendSuccess('Text copied');
+                toast?.sendSuccess('Szöveg másolva');
               } else {
-                toast?.sendSuccess('Highlight copied');
+                toast?.sendSuccess('Kiemelés másolva');
               }
 
               hideHighlightMenu(id);

@@ -76,7 +76,7 @@ const AdvancedSearchResults: Component = () => {
 
         <div class={styles.advancedSerchResultsHeader}>
           <div class={styles.caption}>
-            <div>search results</div>
+            <div>keresés eredmények</div>
           </div>
           <div class={styles.actions}>
 
@@ -117,7 +117,7 @@ const AdvancedSearchResults: Component = () => {
           </Match>
           <Match when={!search?.isFetchingContent && (search?.notes.length === 0 || search?.reads.length === 0)}>
             <div class={styles.noResults}>
-              No results found
+              Nincs találat
 
               <For each={search?.errors}>
                 {error => <div class={styles.error}>{error}</div>}
@@ -132,14 +132,14 @@ const AdvancedSearchResults: Component = () => {
           <div class={styles.moreSearchInfo}>
             <div>
               <div class={styles.moreSearchCaption}>
-                This is a Primal Premium feed.
+                Ez egy Primal Premium hírfolyam.
               </div>
               <div class={styles.moreSearchDescription}>
-                Buy a Subscription to become a Nostr power user and support our work:
+                Vásárolj előfizetést, hogy Noszter power user legyél és támogasd a munkánkat:
               </div>
             </div>
 
-            <A href='/premium' class={styles.premiumLink}>Get Primal Premium</A>
+            <A href='/premium' class={styles.premiumLink}>Legyél Primal Premium előfizető</A>
           </div>
         </Show>
       </div>

@@ -44,7 +44,7 @@ const PremiumSummary: Component<{
       <div class={styles.summaryItem}>
         <div class={styles.summaryName}>
           <div class={styles.verifIcon}></div>
-          <div>Verified nostr address</div>
+          <div>Ellenőrzött Noszter cím</div>
         </div>
         <div class={styles.summaryValueHolder}>
           <Show
@@ -56,7 +56,7 @@ const PremiumSummary: Component<{
                 </div>
                 <div class={styles.summaryAlternateValue}>
                   <div>{name()}@primal.net</div>
-                  <ButtonLink onClick={applyNip05}>apply</ButtonLink>
+                  <ButtonLink onClick={applyNip05}>alkalmaz</ButtonLink>
                 </div>
               </>
             }
@@ -71,7 +71,7 @@ const PremiumSummary: Component<{
       <div class={styles.summaryItem}>
         <div class={styles.summaryName}>
           <div class={styles.zapIcon}></div>
-          <div>Bitcoin lightning address</div>
+          <div>Bitcoin lightning cím</div>
         </div>
         <div class={styles.summaryValueHolder}>
           <Show
@@ -83,7 +83,7 @@ const PremiumSummary: Component<{
                 </div>
                 <div class={styles.summaryAlternateValue}>
                   <div>{name()}@primal.net</div>
-                  <ButtonLink onClick={applyLud16}>apply</ButtonLink>
+                  <ButtonLink onClick={applyLud16}>alkalmaz</ButtonLink>
                 </div>
               </>
             }
@@ -98,7 +98,7 @@ const PremiumSummary: Component<{
       <div class={styles.summaryItem}>
         <div class={styles.summaryName}>
           <div class={styles.linkIcon}></div>
-          <div>VIP profile on primal.net</div>
+          <div>VIP profil a primal.net-en</div>
         </div>
         <div>
           <span class={styles.summaryValue}>
@@ -111,7 +111,7 @@ const PremiumSummary: Component<{
         <div class={styles.summaryItem}>
           <div class={styles.summaryName}>
             <div class={styles.uploadIcon}></div>
-            <div>Media storage used</div>
+            <div>Felhasznált média tárhely</div>
           </div>
           <div>
             <span class={styles.summaryValue}>
@@ -123,11 +123,11 @@ const PremiumSummary: Component<{
         <div class={styles.summaryItem}>
           <div class={styles.summaryName}>
             <div class={styles.calendarIcon}></div>
-            <div>Subscription expires on</div>
+            <div>Előfizetés lejár</div>
           </div>
           <div>
             <span class={styles.summaryValue}>
-              {status().expires_on ? shortDate(status().expires_on || 0) : 'Never'}
+              {status().expires_on ? shortDate(status().expires_on || 0) : 'Soha'}
             </span>
           </div>
         </div>

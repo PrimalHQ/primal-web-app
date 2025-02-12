@@ -13,27 +13,27 @@ const ProfileTabsSkeleton: Component<{
       <div class={styles.profileTabsSkeleton}>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>notes</div>
+          <div class={styles.labelT}>bejegyzés</div>
         </div>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>replies</div>
+          <div class={styles.labelT}>válasz</div>
         </div>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>reads</div>
+          <div class={styles.labelT}>olvasnivaló</div>
         </div>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>media</div>
+          <div class={styles.labelT}>média</div>
         </div>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>zaps</div>
+          <div class={styles.labelT}>zap</div>
         </div>
         <div class={styles.tab}>
           <div class={styles.number}></div>
-          <div class={styles.labelT}>relays</div>
+          <div class={styles.labelT}>relé</div>
         </div>
       </div>
       <Switch fallback={

@@ -300,7 +300,7 @@ const ArticleHighlightActionMenu: Component<{
             onMouseDown={onNewHighlight}
           >
             <div class={styles.iconHighlight}></div>
-            <div class={styles.iconCaption}>Highlight</div>
+            <div class={styles.iconCaption}>Kiemel</div>
           </button>
         </Match>
       </Switch>
@@ -310,14 +310,14 @@ const ArticleHighlightActionMenu: Component<{
           onMouseDown={onQuote}
         >
           <div class={styles.iconHighlightQuote}></div>
-          <div class={styles.iconCaption}>Quote</div>
+          <div class={styles.iconCaption}>Idéz</div>
         </button>
         <button
           data-highlight-menu-option="comment"
           onMouseDown={onComment}
         >
           <div class={styles.iconHighlightComment}></div>
-          <div class={styles.iconCaption}>Comment</div>
+          <div class={styles.iconCaption}>Hozzászól</div>
         </button>
       </Show>
       <button
@@ -325,7 +325,7 @@ const ArticleHighlightActionMenu: Component<{
         data-highlight-menu-option="copy"
       >
         <div class={styles.iconHighlightCopy}></div>
-        <div class={styles.iconCaption}>Copy</div>
+        <div class={styles.iconCaption}>Másol</div>
       </button>
     </div>
   );

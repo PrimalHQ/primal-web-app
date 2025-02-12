@@ -457,7 +457,7 @@ const EditProfile: Component = () => {
             type='button'
             class={`${isMoreVisible() ? styles.shown : styles.hidden}`}
             onClick={() => setIsMoreVisible(!isMoreVisible()) }
-          >More</button>
+          >Több</button>
         </div>
 
         <div class={`${styles.moreInputs} ${isMoreVisible() ? styles.show : styles.hide}`}>

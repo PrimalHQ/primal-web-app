@@ -467,7 +467,7 @@ export const downloads = {
   },
   build: {
     id: 'downloads.build',
-    defaultMessage: 'Verziók',
+    defaultMessage: 'Verzió',
     description: 'Build label',
   },
   released: {
@@ -612,7 +612,7 @@ export const explore = {
     },
     zaps: {
       id: 'explore.stats.zaps',
-      defaultMessage: 'Zapp',
+      defaultMessage: 'Zap',
       description: 'Label for number of zaps stats',
     },
     btcZapped: {
@@ -785,7 +785,7 @@ export const note = {
   },
   reposted: {
     id: 'note.reposted',
-    defaultMessage: 'Újra megosztva',
+    defaultMessage: 'Újramegosztotta',
     description: 'Label indicating that the note is a repost',
   },
   repostedOthers: {
@@ -1165,7 +1165,7 @@ export const placeholders = {
 export const profile = {
   sidebarCaptionReads: {
     id: 'profile.sidebar.captionReads',
-    defaultMessage: 'Legutóbbi olvasottak',
+    defaultMessage: 'Legutóbbi cikkek',
     description: 'Caption for the profile page sidebar showing a list of latest reads by the profile',
   },
   sidebarCaptionNotes: {
@@ -1211,12 +1211,12 @@ export const profile = {
     },
     zaps: {
       id: 'profile.stats.zaps',
-      defaultMessage: 'Zappok',
+      defaultMessage: 'Zap',
       description: 'Label for zaps profile stat',
     },
     sats: {
       id: 'profile.stats.sats',
-      defaultMessage: 'Satok',
+      defaultMessage: 'Sat',
       description: 'Label for sats profile stat',
     },
     totalSats: {
@@ -1226,22 +1226,22 @@ export const profile = {
     },
     articles: {
       id: 'profile.stats.articles',
-      defaultMessage: 'Olvasnivalók',
+      defaultMessage: 'Olvasnivaló',
       description: 'Label for reads profile stat',
     },
     notes: {
       id: 'profile.stats.notes',
-      defaultMessage: 'Bejegyzések',
+      defaultMessage: 'Bejegyzés',
       description: 'Label for notes profile stat',
     },
     replies: {
       id: 'profile.stats.replies',
-      defaultMessage: 'Válaszok',
+      defaultMessage: 'Válasz',
       description: 'Label for replies profile stat',
     },
     relays: {
       id: 'profile.stats.relays',
-      defaultMessage: 'Relék',
+      defaultMessage: 'Relé',
       description: 'Label for sats profile relays',
     },
   },
@@ -2044,7 +2044,7 @@ export const toast = {
   },
   repostSuccess: {
     id: 'toast.repostSuccess',
-    defaultMessage: 'Sikeresen újra megosztva',
+    defaultMessage: 'Sikeresen újramegosztva',
     description: 'Toast message indicating successfull repost',
   },
   repostFailed: {
@@ -2399,7 +2399,7 @@ export const premium = {
     },
     foreverPremiumDescription: {
       id: 'pages.premium.labes.foreverPremiumDescription',
-      defaultMessage: 'A prémium előfizetés legendák számára soha nem jár le.',
+      defaultMessage: 'A prémium előfizetés a legendák számára soha nem jár le.',
       description: 'Forever Premium perk description',
     },
     privateBetaBuilds: {
@@ -2419,7 +2419,7 @@ export const premium = {
     },
     moreMediaSpaceDescription: {
       id: 'pages.premium.labes.moreMediaSpaceDescription',
-      defaultMessage: 'Szerezz 100GB Primal Premium média tárhelyet.',
+      defaultMessage: 'Szerezz 100GB Primal Prémium média tárhelyet.',
       description: 'More Media perk description',
     },
     customLegendProfile: {
@@ -2479,7 +2479,7 @@ export const premium = {
     },
     becomeLegend: {
       id: 'pages.premium.labes.becomeLegend',
-      defaultMessage: 'Légy legenda',
+      defaultMessage: 'Legyél legenda',
       description: 'Support page become legend caption',
     },
     becomeLegendDescription: {
@@ -2496,7 +2496,7 @@ export const premium = {
     },
     becomeLegend: {
       id: 'pages.premium.actions.becomeLegend',
-      defaultMessage: 'Légy Legendás Ferlhasználó most',
+      defaultMessage: 'Legyél Legendás felhasználó most',
       description: 'Action that takes user to the Become a Legend page',
     },
     getIOS: {
@@ -2563,7 +2563,7 @@ export const premium = {
   title: {
     general: {
       id: 'pages.premium.title',
-      defaultMessage: 'Primal Premium',
+      defaultMessage: 'Primal Prémium',
       description: 'Title of the premium page',
     },
     name: {
@@ -2593,7 +2593,7 @@ export const premium = {
     },
     legend: {
       id: 'pages.premium.legend',
-      defaultMessage: 'Légy Primal Legenda',
+      defaultMessage: 'Legyél Primal Legenda',
       description: 'Title of the premium legend page',
     },
     legendShort: {
@@ -2603,7 +2603,7 @@ export const premium = {
     },
     relay: {
       id: 'pages.premium.relay',
-      defaultMessage: 'Primal Relay',
+      defaultMessage: 'Primal Relé',
       description: 'Title of the premium relay page',
     },
     media: {
@@ -2618,7 +2618,7 @@ export const premium = {
     },
     content: {
       id: 'pages.premium.content',
-      defaultMessage: 'Tartalmi biztonsági mentés',
+      defaultMessage: 'Fiók biztonsági mentése',
       description: 'Title of the premium content backup page',
     },
     og: {
@@ -2665,12 +2665,12 @@ export const premium = {
       },
       m3: {
         id: 'pages.premium.success.m3',
-        defaultMessage: 'Feliratkoztál a Primal Premium-ra 3 hónapra.',
+        defaultMessage: 'Feliratkoztál a Primal Prémiumra 3 hónapra.',
         description: 'Payment success description for 3 month plan',
       },
       m12: {
         id: 'pages.premium.success.m12',
-        defaultMessage: 'Feliratkoztál a Primal Premium-ra 12 hónapra.',
+        defaultMessage: 'Feliratkoztál a Primal Prémiumra 12 hónapra.',
         description: 'Payment success description for 12 month plan',
       },
       legend: {
