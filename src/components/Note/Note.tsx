@@ -448,7 +448,7 @@ const Note: Component<{
               note={props.note}
               shorten={props.shorten}
               width={window.innerWidth}
-              margins={2}
+              margins={45}
             />
           </div>
 
@@ -517,7 +517,7 @@ const Note: Component<{
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(566, window.innerWidth - 72)}
-                  margins={16}
+                  margins={58}
                   footerSize="short"
                 />
               </div>
