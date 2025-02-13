@@ -503,13 +503,13 @@ const ParsedNote: Component<{
               return;
             }
 
-            if (isTidal(token)) {
-              removeLinebreaks('tidal');
-              isAfterEmbed = true;
-              lastSignificantContent = 'tidal';
-              updateContent(content, 'tidal', token);
-              return;
-            }
+            // if (isTidal(token)) {
+            //   removeLinebreaks('tidal');
+            //   isAfterEmbed = true;
+            //   lastSignificantContent = 'tidal';
+            //   updateContent(content, 'tidal', token);
+            //   return;
+            // }
           }
 
           if (props.noLinks === 'text') {
