@@ -14,10 +14,13 @@ import {
   isMp4Video,
   isNoteMention,
   isOggVideo,
+  isRumble,
   isSoundCloud,
   isSpotify,
   isTagMention,
+  isTidal,
   isTwitch,
+  isTwitchPlayer,
   isUnitifedLnAddress,
   isUrl,
   isUserMention,
@@ -444,6 +447,14 @@ const ParsedNote: Component<{
               return;
             }
 
+            if (isTwitchPlayer(token)) {
+              removeLinebreaks('twitchPlayer');
+              isAfterEmbed = true;
+              lastSignificantContent = 'twitchPlayer';
+              updateContent(content, 'twitchPlayer', token);
+              return;
+            }
+
             if (isTwitch(token)) {
               removeLinebreaks('twitch');
               isAfterEmbed = true;
@@ -481,6 +492,22 @@ const ParsedNote: Component<{
               isAfterEmbed = true;
               lastSignificantContent = 'wavelake';
               updateContent(content, 'wavelake', token);
+              return;
+            }
+
+            if (isRumble(token)) {
+              removeLinebreaks('rumble');
+              isAfterEmbed = true;
+              lastSignificantContent = 'rumble';
+              updateContent(content, 'rumble', token);
+              return;
+            }
+
+            if (isTidal(token)) {
+              removeLinebreaks('tidal');
+              isAfterEmbed = true;
+              lastSignificantContent = 'tidal';
+              updateContent(content, 'tidal', token);
               return;
             }
           }
@@ -882,6 +909,77 @@ const ParsedNote: Component<{
           style="width: 100%; maxWidth: 660; overflow: hidden; background: transparent;"
           sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
           src={convertedUrl}
+        ></iframe>;
+      }}
+    </For>
+  };
+
+  const renderTwitchPlayer = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <iframe
+          src={token}
+          frameborder="0"
+          // @ts-ignore
+          allowfullscreen="true"
+          scrolling="no"
+          height="378"
+          width="620">
+        </iframe>;
+      }}
+    </For>
+  };
+
+  const renderTidal = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <iframe
+          src={token}
+          width="508"
+          height="520"
+          allow="encrypted-media"
+          sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+          title="TIDAL Embed Player"
+        />;
+      }}
+    </For>
+  };
+
+  const renderRumble = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <iframe
+          class={`embeddedContent ${lastClass}`}
+          style="width: 100%; height: 300px;"
+          src={token}
+          allowfullscreen
+          // @ts-ignore
+          scrolling="no"
+          allow="encrypted-media;"
         ></iframe>;
       }}
     </For>
@@ -1699,10 +1797,13 @@ const ParsedNote: Component<{
       youtube: renderYouTube,
       spotify: renderSpotify,
       twitch: renderTwitch,
+      twitchPlayer: renderTwitchPlayer,
       mixcloud: renderMixCloud,
       soundcloud: renderSoundCloud,
       applemusic: renderAppleMusic,
       wavelake: renderWavelake,
+      rumble: renderRumble,
+      tidal: renderTidal,
       link: renderLinks,
       notemention: renderNoteMention,
       usermention: renderUserMention,

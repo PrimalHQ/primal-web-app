@@ -1,7 +1,7 @@
 import { Relay, relayInit } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
+import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
 import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, npubToHex } from "./keys";
@@ -95,11 +95,14 @@ export const isWebmVideo = (url: string) => ['.webm'].some(x => url.includes(x))
 export const isYouTube = (url: string) => youtubeRegex.test(url);
 export const isSpotify = (url: string) => spotifyRegex.test(url);
 export const isTwitch = (url: string) => twitchRegex.test(url);
+export const isTwitchPlayer = (url: string) => twitchPlayerRegex.test(url);
 export const isMixCloud = (url: string) => mixCloudRegex.test(url);
 export const isSoundCloud = (url: string) => soundCloudRegex.test(url);
 export const isAppleMusic = (url: string) => appleMusicRegex.test(url);
 export const isNostrNests = (url: string) => nostrNestsRegex.test(url);
 export const isWavelake = (url: string) => wavlakeRegex.test(url);
+export const isRumble = (url: string) => rumbleRegex.test(url);
+export const isTidal = (url: string) => tidalEmbedRegex.test(url);
 
 export const urlify = (
   text: string,
