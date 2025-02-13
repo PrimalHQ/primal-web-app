@@ -611,6 +611,10 @@
   background-color: var(--background-input);
 }
 
+.nip05 {
+  margin-right: 8px;
+}
+
 .followsBadge {
   background-color: var(--background-input);
   width: 80px;
@@ -624,7 +628,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: 8px;
+  /* margin-left: 8px; */
 }
 
 .phoneAvatar {
