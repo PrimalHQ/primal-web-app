@@ -1,6 +1,41 @@
 import { defaultFeeds } from "../constants";
-import { PrimalFeed } from "../types/primal";
-import { getStorage, saveFeeds } from "./localStore";
+import { PrimalArticleFeed, PrimalFeed } from "../types/primal";
+import { getStorage, saveFeeds, saveHomeFeeds, saveReadsFeeds } from "./localStore";
+
+export const initHomeFeeds = (pubkey: string | undefined, defaults: PrimalArticleFeed[]) => {
+  const storage = getStorage(pubkey);
+
+  if (!storage.homeFeeds || storage.homeFeeds.length === 0) {
+    saveHomeFeeds(pubkey, defaults);
+    return defaults;
+  }
+
+  return storage.homeFeeds;
+}
+
+export const loadHomeFeeds = (pubkey: string | undefined) => {
+  const storage = getStorage(pubkey);
+
+  return storage.homeFeeds || [];
+}
+
+
+export const initReadsFeeds = (pubkey: string | undefined, defaults: PrimalArticleFeed[]) => {
+  const storage = getStorage(pubkey);
+
+  if (!storage.readsFeeds || storage.readsFeeds.length === 0) {
+    saveReadsFeeds(pubkey, defaults);
+    return defaults;
+  }
+
+  return storage.readsFeeds;
+}
+
+export const loadReadsFeeds = (pubkey: string | undefined) => {
+  const storage = getStorage(pubkey);
+
+  return storage.readsFeeds || [];
+}
 
 
 export const initAvailableFeeds = (pubkey: string | undefined) => {

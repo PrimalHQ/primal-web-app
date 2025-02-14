@@ -3,14 +3,13 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  width: 156px;
+  width: 148px;
   height: 48px;
   border-radius: 24px;
   text-decoration: none;
   padding-inline: 6px;
   background-color: var(--background-sheet);
   border: none;
-  margin-left: 8px;
 
   &:hover {
     background-color: var(--background-input);
@@ -31,7 +30,7 @@
   font-weight: 700;
   line-height: 16px;
   color: var(--active-reply);
-  width: 90px;
+  width: 80px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
@@ -42,7 +41,7 @@
   line-height: 16px;
   font-weight: 400;
   color: var(--text-tertiary);
-  width: 92px;
+  width: 82px;
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;

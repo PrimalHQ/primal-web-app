@@ -1,0 +1,104 @@
+.LnQrCodeModal {
+  min-width: 472px;
+  color: var(--text-primary);
+  background-color: var(--background-input);
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+
+  .title {
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 20px;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .description {
+    color: var(--text-primary);
+
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    width: 100%;
+  }
+
+  .amount {
+    color: var(--text-primary);
+
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 24px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .separator {
+    width: 100%;
+    height: 1px;
+    border: 1px solid var(--subtile-devider);
+  }
+}
+
+.footer {
+  height: 36px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 20px;
+
+  .expiryDate {
+    color: var(--text-secondary);
+
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0.15px;
+  }
+  .expiredDate {
+    color: var(--text-tertiary);
+
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: 0.15px;
+  }
+
+  .payAction {
+    height: 36px;
+    min-width: 120px;
+    button {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.zapIcon {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  margin-right: 9px;
+  background: var(--sidebar-section-icon-gradient);
+  -webkit-mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+  mask: url(../../assets/icons/explore/zaps_hollow.svg) no-repeat 2px 0 / 19px 22px;
+}
+
+.hidden {
+  display: none;
+}

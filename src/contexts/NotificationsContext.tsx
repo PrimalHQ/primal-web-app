@@ -8,15 +8,18 @@ import {
 } from "solid-js";
 import {
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket,
-  subscribeTo
+  subsTo
 } from "../sockets";
 import {
   ContextChildren,
   NostrEOSE,
   NostrEvent,
+  NostrEventContent,
+  NostrEvents,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { getLastSeen, subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
@@ -98,28 +101,41 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleNotifStatsEvent = (content: NostrEventContent) => {
+    if (content?.kind === Kind.NotificationStats) {
+      const sum = Object.keys(content).reduce((acc, key) => {
+        if (key === 'pubkey' || key == 'kind') {
+          return acc;
+        }
+
+        // @ts-ignore
+        return acc + content[key];
+      }, 0);
+
+      if (sum !== store.notificationCount) {
+        updateStore('notificationCount', () => sum)
+      }
+
+      calculateDownloadCount();
+
+    }
+  }
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
     if (subId === notfiStatsSubId()) {
-      if (content?.kind === Kind.NotificationStats) {
-        const sum = Object.keys(content).reduce((acc, key) => {
-          if (key === 'pubkey' || key == 'kind') {
-            return acc;
-          }
-
-          // @ts-ignore
-          return acc + content[key];
-        }, 0);
-
-        if (sum !== store.notificationCount) {
-          updateStore('notificationCount', () => sum)
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleNotifStatsEvent(e);
         }
 
-        calculateDownloadCount();
-
+      }
+      if (type === 'EVENT') {
+        handleNotifStatsEvent(content);
       }
     }
   };
@@ -159,25 +175,25 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     if (pk) {
       const subid = `notif_ls_${APP_ID}`
 
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EVENT' && content?.kind === Kind.Timestamp) {
+      const unsub = subsTo(subid, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.Timestamp) {
 
-          const timestamp = parseInt(content.content);
+            const timestamp = parseInt(content.content);
 
-          if (!isNaN(timestamp)) {
-            setNotifSince(timestamp);
+            if (!isNaN(timestamp)) {
+              setNotifSince(timestamp);
+            }
+
+            unsub();
+            return;
           }
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EOSE') {
+        },
+        onEose: () => {
           if (!notifSince) {
             setNotifSince(0);
           }
-        }
-
+        },
       });
 
       getLastSeen(pk as string, subid);

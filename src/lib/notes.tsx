@@ -1,10 +1,10 @@
-// @ts-ignore Bad types in nostr-tools
-import { Relay } from "nostr-tools";
+import { Relay, relayInit } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, mixCloudRegex, nostrNestsRegex, noteRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
-import { sendMessage, subscribeTo } from "../sockets";
-import { MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalNote, SendNoteResult } from "../types/primal";
+import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
+import { sendMessage, subsTo } from "../sockets";
+import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, SendNoteResult } from "../types/primal";
+import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
@@ -23,7 +23,7 @@ export const setStoredLikes = (likes: string[]) => {
 };
 
 export const sanitize = (html: string) => {
-  return html.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+  return html ? html.replaceAll('<', '&lt;').replaceAll('>', '&gt;') : '';
 };
 
 export const [linkPreviews, setLinkPreviews] = createStore<Record<string, any>>({});
@@ -40,7 +40,7 @@ export const addLinkPreviews = async (url: string) => {
   try {
     const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
 
-    const preview = await fetch(`${origin}/link-preview?u=${encodeURI(url)}`);
+    const preview = await fetch(`${origin}/link-preview?u=${encodeURIComponent(url)}`);
     const data = await preview.json();
 
     return { url, description: data.description, title: data.title, images: [data.image], favicons: [data.icon_url] };
@@ -57,8 +57,11 @@ export const isLinebreak = (url: string) => linebreakRegex.test(url);
 export const isTagMention = (url: string) => tagMentionRegex.test(url);
 export const isNoteMention = (url: string) => noteRegexLocal.test(url);
 export const isUserMention = (url: string) => profileRegex.test(url);
+export const isAddrMention = (url: string) => addrRegex.test(url);
 export const isInterpunction = (url: string) => interpunctionRegex.test(url);
 export const isCustomEmoji = (url: string) => emojiRegex.test(url);
+export const isLnbc = (url: string) => lnRegex.test(url);
+export const isUnitifedLnAddress = (url: string) => lnUnifiedRegex.test(url);
 
 export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif', '.format=png'].some(x => url.includes(x));
 export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));
@@ -73,7 +76,6 @@ export const isSoundCloud = (url: string) => soundCloudRegex.test(url);
 export const isAppleMusic = (url: string) => appleMusicRegex.test(url);
 export const isNostrNests = (url: string) => nostrNestsRegex.test(url);
 export const isWavelake = (url: string) => wavlakeRegex.test(url);
-
 
 export const urlify = (
   text: string,
@@ -276,22 +278,28 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
 
 type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
-export const sendLike = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
     tags: [
-      ['e', note.post.id],
-      ['p', note.post.pubkey],
+      ['e', note.id],
+      ['p', note.pubkey],
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  // @ts-ignore
+  if (note.coordinate) {
+    // @ts-ignore
+    event.tags.push(['a', note.coordinate]);
+  }
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 
 }
 
-export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendRepost = async (note: PrimalNote, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -302,10 +310,97 @@ export const sendRepost = async (note: PrimalNote, relays: Relay[], relaySetting
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
-export const sendNote = async (text: string, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
+export const sendArticleRepost = async (note: PrimalArticle, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: JSON.stringify(note.msg),
+    kind: Kind.Repost,
+    tags: [
+      ['e', note.id],
+      ['a', note.coordinate],
+      ['p', note.pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+}
+
+export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+  let signedNote: NostrRelaySignedEvent | undefined;
+
+  try {
+    signedNote = await signEvent(event);
+    if (!signedNote) throw('event_not_signed');
+  } catch (reason) {
+    logError('Failed to send event: ', reason);
+    return { success: false , reasons: [reason]} as SendNoteResult;
+  }
+
+  // Relay hints from `e` tags
+  const hintRelayUrls = event.tags.reduce((acc, t) => {
+    if (
+      t[0] === 'e' &&
+      t[2] &&
+      t[2].length > 0 &&
+      !relays.find(r => r.url === t[2])
+    ) {
+      return [ ...acc, t[2] ];
+    }
+
+    return [...acc];
+  }, []);
+
+  let userRelays: Relay[] = relaySettings ?
+    relays.filter((relay) => (relaySettings[relay.url] || { read: true, write: true }).write) :
+    [...relays];
+
+  const publishRelays = new Set<string>([ ...userRelays.map(r => r.url), ...hintRelayUrls]);
+
+  const promise = new Promise<boolean>((resolve, reject) => {
+    if (!signedNote) {
+      reject("Note not signed");
+      return;
+    }
+
+    const subId = `publish_event_${signedNote.id}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: () => {
+        unsub();
+        resolve(true);
+      },
+      onNotice: () => {
+        unsub();
+        reject("Failed to publish note");
+      },
+      onEose: () => {
+        unsub();
+        reject('No publish confirmation')
+      }
+    })
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      { cache: ["broadcast_events", { events: [signedNote], relays: Array.from(publishRelays) }]}
+    ]));
+  });
+
+  try {
+    await Promise.race([promise]);
+
+    return { success: true, note: signedNote } as SendNoteResult;
+  }
+  catch (e) {
+    logError('Failed to publish the note: ', e);
+    return { success: false, reasons: [e], note: signedNote} as SendNoteResult;
+  }
+}
+
+export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const event = {
     content: text,
     kind: Kind.Text,
@@ -313,10 +408,10 @@ export const sendNote = async (text: string, relays: Relay[], tags: string[][], 
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
-export const sendContacts = async (tags: string[][], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendContacts = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.Contacts,
@@ -324,21 +419,25 @@ export const sendContacts = async (tags: string[][], date: number, content: stri
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const sendMuteList = async (muteList: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendMuteList = async (muteList: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content,
     kind: Kind.MuteList,
-    tags: muteList.map(c => ['p', c]),
+    tags: muteList,
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+export const broadcastEvent = async (event: NostrRelaySignedEvent, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+
+  if (shouldProxy) {
+    return await proxyEvent(event, relays, relaySettings);
+  }
 
   let responses = [];
   let reasons: string[] = [];
@@ -397,7 +496,12 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, relays: Relay
   }
 };
 
-export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings: NostrRelays | undefined, shouldProxy: boolean) => {
+
+  if (shouldProxy) {
+    return await proxyEvent(event, relays, relaySettings);
+  }
+
   let signedNote: NostrRelaySignedEvent | undefined;
 
   try {
@@ -411,8 +515,29 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   let responses = [];
   let reasons: string[] = [];
 
-  for (let i = 0;i < relays.length;i++) {
-    const relay = relays[i];
+  // Relay hints fromm `e` tags
+  const hintRelayUrls = event.tags.reduce((acc, t) => {
+    if (
+      t[0] === 'e' &&
+      t[2] &&
+      t[2].length > 0 &&
+      !relays.find(r => r.url === t[2])
+    ) {
+      return [ ...acc, t[2] ];
+    }
+
+    return [...acc];
+  }, []);
+
+  let relaysActual = [...relays];
+
+  if (relaysActual.length === 0) {
+    relaysActual = Object.keys(relaySettings || {});
+  }
+
+  for (let i = 0;i < relaysActual.length;i++) {
+
+    const relay = relaysActual[i];
 
     const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
 
@@ -428,7 +553,7 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
       }, 8_000);
 
       try {
-        logInfo('publishing to relay: ', relay)
+        logInfo('publishing to relay: ', relay, signedNote)
 
         await relay.publish(signedNote);
 
@@ -445,6 +570,30 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     }));
   }
 
+  for (let i = 0;i < hintRelayUrls.length;i++) {
+    const url = hintRelayUrls[i];
+
+    new Promise<string>(async (resolve, reject) => {
+      const relay = relayInit(url);
+      await relay.connect();
+
+      try {
+        logInfo('publishing to relay: ', relay)
+
+        await relay.publish(signedNote);
+
+        logInfo(`${relay.url} has accepted our event`);
+        resolve('success');
+
+      } catch (e) {
+        logError(`Failed publishing note to ${relay.url}: `, e);
+        reject('success');
+      }
+
+      relay.close();
+    });
+  }
+
   try {
     await Promise.any(responses);
 
@@ -458,9 +607,8 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
 
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {
 
-  const unsub = subscribeTo(subId, (type) => {
-
-    if (type === 'EOSE') {
+  const unsub = subsTo(subId, {
+    onEose: () => {
       unsub();
       then && then();
     }
@@ -471,9 +619,166 @@ export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: stri
 
 
 export const getEventReactions = (eventId: string, kind: number, subid: string, offset = 0) => {
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
+
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
+
+  let payload = {
+    kind,
+    limit: 20,
+    offset,
+  };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["event_actions", { event_id: eventId, kind, limit: 20, offset }]},
+    {cache: ["event_actions", { ...payload }]},
+  ]));
+};
+
+export const getEventQuotes = (eventId: string, subid: string, offset = 0, user_pubkey?: string | undefined) => {
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
+
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
+
+  let payload = {
+    limit: 20,
+    offset,
+  };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["note_mentions", { ...payload }]},
+  ]));
+};
+
+export const getEventZaps = (eventId: string, user_pubkey: string | undefined, subid: string, limit: number,  offset = 0) => {
+  let event_id: string | undefined = eventId;
+  let pubkey: string | undefined;
+  let identifier: string | undefined;
+
+  if (eventId.startsWith('note1')) {
+    event_id = npubToHex(eventId);
+  }
+
+  if (eventId.startsWith('naddr')) {
+    const decode = decodeIdentifier(event_id);
+
+    pubkey = decode.data.pubkey;
+    identifier = decode.data.identifier;
+    event_id = undefined;
+  }
+
+  let payload = {
+    limit,
+    offset
+  };
+
+  if (event_id) {
+    // @ts-ignore
+    payload.event_id = event_id;
+  } else {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+    // @ts-ignore
+    payload.identifier = identifier;
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["event_zaps_by_satszapped", { ...payload }]},
+  ]));
+};
+
+
+export const getEventQuoteStats = (eventId: string, subid: string) => {
+  const event_id = eventId.startsWith('note1') ? npubToHex(eventId) : eventId;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["note_mentions_count", { event_id }]},
+  ]));
+};
+
+
+export const getParametrizedEvent = (pubkey: string, identifier: string, kind: number, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["parametrized_replaceable_event", { pubkey, kind, identifier, extended_response: true }]},
+  ]));
+};
+
+
+export const getParametrizedEvents = (events: EventCoordinate[], subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["parametrized_replaceable_events", { events, extended_response: true }]},
+  ]));
+};
+
+
+export const getHighlights = (pubkey: string, identifier: string, kind: number, subid: string, user_pubkey: string | undefined) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_highlights", { pubkey, identifier, kind, user_pubkey }]},
   ]));
 };

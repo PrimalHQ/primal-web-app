@@ -33,11 +33,11 @@ const NostrStats: Component<{ stats: PrimalNetStats, id?: string }> = (props) =>
   return (
     <div id={props.id} class={styles.netstats}>
       {hookForDev(statDisplay)({ stat: props.stats.users, key: 'users' })}
-      {hookForDev(statDisplay)({ stat: props.stats.pubkeys, key: 'pubkeys' })}
+      {/* {hookForDev(statDisplay)({ stat: props.stats.pubkeys, key: 'pubkeys' })} */}
       {hookForDev(statDisplay)({ stat: props.stats.zaps, key: 'zaps' })}
       {hookForDev(statDisplay)({ stat: (props.stats.satszapped /100000000).toFixed(8), key: 'btcZapped' })}
       {hookForDev(statDisplay)({ stat: props.stats.pubnotes, key: 'pubnotes' })}
-      {hookForDev(statDisplay)({ stat: props.stats.reposts, key: 'reposts' })}
+      {/* {hookForDev(statDisplay)({ stat: props.stats.reposts, key: 'reposts' })} */}
       {hookForDev(statDisplay)({ stat: props.stats.reactions, key: 'reactions' })}
       {hookForDev(statDisplay)({ stat: props.stats.any, key: 'any' })}
     </div>

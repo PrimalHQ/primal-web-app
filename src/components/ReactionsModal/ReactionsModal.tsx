@@ -1,26 +1,31 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Tabs } from '@kobalte/core';
+import { Tabs } from '@kobalte/core/tabs';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
-import { ReactionStats } from '../../contexts/AppContext';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { ReactionStats, useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventReactions } from '../../lib/notes';
-import { truncateNumber, truncateNumber2 } from '../../lib/notifications';
-import { subscribeTo } from '../../sockets';
+import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, setLinkPreviews } from '../../lib/notes';
+import { truncateNumber2 } from '../../lib/notifications';
+import { subsTo } from '../../sockets';
+import { convertToNotes } from '../../stores/note';
 import { userName } from '../../stores/profile';
-import { actions as tActions, placeholders as tPlaceholders } from '../../translations';
+import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote } from '../../types/primal';
 import { parseBolt11 } from '../../utils';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
-import Modal from '../Modal/Modal';
+import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReactionsModal.module.scss';
+
 
 const ReactionsModal: Component<{
   id?: string,
@@ -30,18 +35,43 @@ const ReactionsModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
+  const account = useAccountContext();
+  const app = useAppContext();
 
-  const [selectedTab, setSelectedTab] = createSignal('likes');
+  const [selectedTab, setSelectedTab] = createSignal('default');
 
   const [likeList, setLikeList] = createStore<any[]>([]);
   const [zapList, setZapList] = createStore<any[]>([]);
   const [repostList, setRepostList] = createStore<any[]>([]);
+  const [quotesList, setQuotesList] = createStore<PrimalNote[]>([]);
+  const [quoteCount, setQuoteCount] = createSignal(0);
 
   const [isFetching, setIsFetching] = createSignal(false);
 
   let loadedLikes = 0;
   let loadedZaps = 0;
   let loadedReposts = 0;
+  let loadedQuotes = 0;
+
+  createEffect(() => {
+    const count = quoteCount();
+
+    if (count === 0 && props.stats.quotes > 0) {
+      setQuoteCount(props.stats.quotes);
+    }
+  })
+
+  createEffect(() => {
+    if (props.noteId && props.stats.openOn) {
+      setSelectedTab(props.stats.openOn);
+    }
+  });
+
+  createEffect(() => {
+    if (props.noteId) {
+      getQuoteCount();
+    }
+  });
 
   createEffect(() => {
     switch (selectedTab()) {
@@ -54,19 +84,46 @@ const ReactionsModal: Component<{
       case 'reposts':
         loadedReposts === 0 && getReposts();
         break;
+      case 'quotes':
+        loadedQuotes === 0 && getQuotes();
+        break;
     }
   });
+
+  createEffect(() => {
+    if (selectedTab() === 'default') {
+      if (props.stats.zaps > 0) {
+        setSelectedTab(() => 'zaps');
+        return;
+      }
+      if (props.stats.likes > 0) {
+        setSelectedTab(() => 'likes');
+        return;
+      }
+      if (props.stats.reposts > 0) {
+        setSelectedTab(() => 'reposts');
+        return;
+      }
+      if (props.stats.quotes > 0) {
+        setSelectedTab(() => 'quotes');
+        return;
+      }
+    }
+  })
 
   createEffect(() => {
     if (!props.noteId) {
       setLikeList(() => []);
       setZapList(() => []);
       setRepostList(() => []);
-      setSelectedTab(() => 'likes');
+      setSelectedTab(() => 'default');
+      setQuotesList(() => []);
+      setQuoteCount(() => 0);
 
       loadedLikes = 0;
       loadedZaps = 0;
       loadedReposts = 0;
+      loadedQuotes = 0;
     }
   });
 
@@ -77,15 +134,8 @@ const ReactionsModal: Component<{
 
     const users: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        setLikeList((likes) => [ ...likes, ...users ]);
-        loadedLikes = likeList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -97,10 +147,14 @@ const ReactionsModal: Component<{
           user.created_at = content.created_at;
 
           users.push(user);
-
-          return;
         }
-      }
+      },
+      onEose: () => {
+        setLikeList((likes) => [ ...likes, ...users ]);
+        loadedLikes = likeList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
@@ -115,21 +169,8 @@ const ReactionsModal: Component<{
     const users: Record<string, any> = {};
     const zaps: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        const zapData = zaps.map((zap => ({
-          ...zap,
-          amount: parseInt(zap.amount || '0'),
-          sender: users[zap.pubkey],
-        })));
-
-        setZapList((zapItems) => [ ...zapItems, ...zapData ]);
-        loadedZaps = zapList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -174,11 +215,24 @@ const ReactionsModal: Component<{
 
           return;
         }
-      }
+      },
+      onEose: () => {
+        const zapData = zaps.map((zap => ({
+          ...zap,
+          amount: parseInt(zap.amount || '0'),
+          sender: users[zap.pubkey],
+        })));
+
+        setZapList((zapItems) => [ ...zapItems, ...zapData ]);
+        loadedZaps = zapList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
-    getEventReactions(props.noteId, Kind.Zap, subId, offset);
+    getEventZaps(props.noteId, account?.publicKey, subId, 20, offset);
+    // getEventReactions(props.noteId, Kind.Zap, subId, offset);
   };
 
   const getReposts = (offset = 0) => {
@@ -188,15 +242,8 @@ const ReactionsModal: Component<{
 
     const users: any[] = [];
 
-    const unsub = subscribeTo(subId, (type,_, content) => {
-      if (type === 'EOSE') {
-        setRepostList((reposts) => [...reposts, ...users]);
-        loadedReposts = repostList.length;
-        setIsFetching(() => false);
-        unsub();
-      }
-
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.Metadata) {
           let user = JSON.parse(content.content);
 
@@ -208,55 +255,186 @@ const ReactionsModal: Component<{
           user.created_at = content.created_at;
 
           users.push(user);
-
-          return;
         }
-      }
+      },
+      onEose: () => {
+        setRepostList((reposts) => [...reposts, ...users]);
+        loadedReposts = repostList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
     });
 
     setIsFetching(() => true);
     getEventReactions(props.noteId, Kind.Repost, subId, offset);
   };
 
-  const totalCount = () => props.stats.likes + props.stats.quotes + props.stats.reposts + props.stats.zaps;
+  const getQuotes = (offset = 0) => {
+    if (!props.noteId) return;
+
+    const subId = `nr_q_${props.noteId}_${APP_ID}`;
+
+    let page: FeedPage = {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content?.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          page.users[user.pubkey] = { ...user };
+
+          return;
+        }
+        if (content?.kind === Kind.Text) {
+          const message = content as NostrNoteContent;
+
+          const isAlreadyInPage = page.messages.find(m => m.id === message.id);
+          const isAlreadyInTheList = quotesList.find(n => n.id === message.id);
+
+          if (isAlreadyInPage || isAlreadyInTheList) {
+            return;
+          }
+
+          page.messages.push(message);
+          return;
+        }
+
+        if (content?.kind === Kind.NoteStats) {
+          const statistic = content as NostrStatsContent;
+          const stat = JSON.parse(statistic.content);
+
+          page.postStats[stat.event_id] = { ...stat };
+          return;
+        }
+
+        if (content?.kind === Kind.Mentions) {
+          const mentionContent = content as NostrMentionContent;
+          const mention = JSON.parse(mentionContent.content);
+
+          if (!page.mentions) {
+            page.mentions = {};
+          }
+
+          page.mentions[mention.id] = { ...mention };
+          return;
+        }
+
+        if (content?.kind === Kind.NoteActions) {
+          const noteActionContent = content as NostrNoteActionsContent;
+          const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
+
+          page.noteActions[noteActions.event_id] = { ...noteActions };
+
+          return;
+        }
+
+        if (content?.kind === Kind.LinkMetadata) {
+          const metadata = JSON.parse(content.content);
+
+          const data = metadata.resources[0];
+          if (!data) {
+            return;
+          }
+
+          const preview = {
+            url: data.url,
+            title: data.md_title,
+            description: data.md_description,
+            mediaType: data.mimetype,
+            contentType: data.mimetype,
+            images: [data.md_image],
+            favicons: [data.icon_url],
+          };
+
+          setLinkPreviews(() => ({ [data.url]: preview }));
+          return;
+        }
+      },
+      onEose: () => {
+        const pageNotes = convertToNotes(page);
+
+        setQuotesList((notes) => [...notes, ...pageNotes]);
+        loadedQuotes = quotesList.length;
+        setIsFetching(() => false);
+        unsub();
+      },
+    });
+
+    setIsFetching(() => true);
+    getEventQuotes(props.noteId, subId, offset, account?.publicKey);
+  };
+
+  const getQuoteCount = () => {
+    if (!props.noteId) return;
+
+    const subId = `nr_qc_${props.noteId}_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content?.kind === Kind.NoteQuoteStats) {
+          const quoteStats = JSON.parse(content.content);
+
+          setQuoteCount(() => quoteStats.count || 0);
+        }
+      },
+      onEose: () => {
+        unsub();
+      },
+    });
+
+    getEventQuoteStats(props.noteId, subId);
+  }
+
+  const totalCount = () => props.stats.likes + (quoteCount() || props.stats.quotes || 0) + props.stats.reposts + props.stats.zaps;
 
   return (
-    <Modal
+    <AdvancedSearchDialog
       open={props.noteId !== undefined}
-      onClose={props.onClose}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      title={
+        <div class={styles.title}>
+          <div class={styles.caption}>
+            {intl.formatMessage(tActions.reactions, { count: totalCount() })}
+          </div>
+        </div>
+      }
+      triggerClass={styles.hidden}
     >
       <div id={props.id} class={styles.ReactionsModal}>
-        <div class={styles.header}>
-          <div class={styles.title}>
-            <div class={styles.caption}>
-              {intl.formatMessage(tActions.reactions, { count: totalCount() })}
-            </div>
-          </div>
-          <button class={styles.close} onClick={props.onClose}>
-          </button>
-        </div>
+        <Switch>
+          <Match when={!isFetching && totalCount() === 0}>
+            {intl.formatMessage(tPlaceholders.noReactionDetails)}
+          </Match>
+        </Switch>
 
         <div class={styles.description}>
-          <Tabs.Root value={selectedTab()} onChange={setSelectedTab}>
+          <Tabs value={selectedTab()} onChange={setSelectedTab}>
             <Tabs.List class={styles.tabs}>
-              <Show when={props.stats.likes > 0}>
-                <Tabs.Trigger class={styles.tab} value={'likes'} >
-                  Likes ({props.stats.likes})
-                </Tabs.Trigger>
-              </Show>
               <Show when={props.stats.zaps > 0}>
                 <Tabs.Trigger class={styles.tab} value={'zaps'} >
-                  Zaps ({props.stats.zaps})
+                 {intl.formatMessage(reactionsModal.tabs.zaps, { count: props.stats.zaps })}
+                </Tabs.Trigger>
+              </Show>
+              <Show when={props.stats.likes > 0}>
+                <Tabs.Trigger class={styles.tab} value={'likes'} >
+                 {intl.formatMessage(reactionsModal.tabs.likes, { count: props.stats.likes })}
                 </Tabs.Trigger>
               </Show>
               <Show when={props.stats.reposts > 0}>
                 <Tabs.Trigger class={styles.tab} value={'reposts'} >
-                  Reposts ({props.stats.reposts})
+                 {intl.formatMessage(reactionsModal.tabs.reposts, { count: props.stats.reposts })}
                 </Tabs.Trigger>
               </Show>
-              <Show when={props.stats.quotes > 0}>
+              <Show when={quoteCount() > 0}>
                 <Tabs.Trigger class={styles.tab} value={'quotes'} >
-                  Quotes ({props.stats.quotes})
+                 {intl.formatMessage(reactionsModal.tabs.quotes, { count: quoteCount() })}
                 </Tabs.Trigger>
               </Show>
 
@@ -268,13 +446,18 @@ const ReactionsModal: Component<{
                 each={likeList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noLikeDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noLikeDetails)}
+                    </Show>
                   </Show>
                 }
               >
                 {admirer =>
                   <A
-                    href={`/p/${admirer.npub}`}
+                    href={app?.actions.profileLink(admirer.npub) || ''}
                     class={styles.likeItem}
                     onClick={props.onClose}
                   >
@@ -295,7 +478,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = likeList.length;
                     if (len === 0) return;
-                    getLikes(len);
+                    getLikes(len+1);
                   }}
                   isSmall={true}
                 />
@@ -313,13 +496,18 @@ const ReactionsModal: Component<{
                 each={zapList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noZapDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noZapDetails)}
+                    </Show>
                   </Show>
                 }
               >
                 {zap =>
                   <A
-                    href={`/p/${zap.npub}`}
+                    href={app?.actions.profileLink(hexToNpub(zap.pubkey)) || ''}
                     class={styles.zapItem}
                     onClick={props.onClose}
                   >
@@ -348,7 +536,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = zapList.length;
                     if (len === 0) return;
-                    getZaps(len);
+                    getZaps(len+1);
                   }}
                   isSmall={true}
                 />
@@ -365,13 +553,18 @@ const ReactionsModal: Component<{
                 each={repostList}
                 fallback={
                   <Show when={!isFetching()}>
-                    {intl.formatMessage(tPlaceholders.noRepostDetails)}
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noRepostDetails)}
+                    </Show>
                   </Show>
                 }
               >
                 {reposter =>
                   <A
-                    href={`/p/${reposter.npub}`}
+                    href={app?.actions.profileLink(reposter.npub) || ''}
                     class={styles.repostItem}
                     onClick={props.onClose}
                   >
@@ -392,7 +585,7 @@ const ReactionsModal: Component<{
                   loadNextPage={() => {
                     const len = repostList.length;
                     if (len === 0) return;
-                    getReposts(len);
+                    getReposts(len+1);
                   }}
                   isSmall={true}
                 />
@@ -405,12 +598,41 @@ const ReactionsModal: Component<{
               </Show>
             </Tabs.Content>
             <Tabs.Content class={styles.tabContent} value={'quotes'}>
-              All the quotes
+              <For
+                each={quotesList}
+                fallback={
+                  <Show when={!isFetching()}>
+                    <Show
+                      when={totalCount() > 0}
+                      fallback={intl.formatMessage(tPlaceholders.noReactionDetails)}
+                    >
+                      {intl.formatMessage(tPlaceholders.noQuoteDetails)}
+                    </Show>
+                  </Show>
+                }
+              >
+                {quote => (
+                  <Note
+                    note={quote}
+                    shorten={true}
+                    noteType="reaction"
+                    onClick={props.onClose}
+                  />
+                )}
+              </For>
+              <Paginator
+                loadNextPage={() => {
+                  const len = quotesList.length;
+                  if (len === 0) return;
+                  getQuotes(len+1);
+                }}
+                isSmall={true}
+              />
             </Tabs.Content>
-          </Tabs.Root>
+          </Tabs>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

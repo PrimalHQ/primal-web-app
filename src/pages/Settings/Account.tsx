@@ -5,7 +5,7 @@ import ThemeChooser from '../../components/ThemeChooser/ThemeChooser';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import { useAccountContext } from '../../contexts/AccountContext';
 import Avatar from '../../components/Avatar/Avatar';
@@ -30,7 +30,7 @@ const Account: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.account.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.account.title)}</div>
       </PageCaption>
 

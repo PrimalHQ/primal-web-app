@@ -1,29 +1,20 @@
-import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, Show } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent, PrimalNote, PrimalRepost, PrimalUser } from '../../types/primal';
-import ParsedNote from '../ParsedNote/ParsedNote';
-import NoteFooter from './NoteFooter/NoteFooter';
-import NoteHeader from './NoteHeader/NoteHeader';
+import { Component, createEffect, createSignal } from 'solid-js';
+import { MenuItem, NostrRelaySignedEvent } from '../../types/primal';
 
 import styles from './Note.module.scss';
-import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, nip05Verification, truncateNpub, userName } from '../../stores/profile';
+import { authorName, userName } from '../../stores/profile';
 import { note as t, actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
-import NoteReplyHeader from './NoteHeader/NoteReplyHeader';
-import Avatar from '../Avatar/Avatar';
-import { date } from '../../lib/dates';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
 import { broadcastEvent } from '../../lib/notes';
-import { getScreenCordinates } from '../../utils';
-import { NoteContextMenuInfo } from '../../contexts/AppContext';
+import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
+import { nip19 } from 'nostr-tools';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -34,6 +25,7 @@ const NoteContextMenu: Component<{
   const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
+  const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -50,7 +42,10 @@ const NoteContextMenu: Component<{
     if(!context) return;
 
     if (!props.open) {
-      context.setAttribute('style',`top: -1024px; left: -1034px;`);
+      setTimeout(() => {
+        context?.setAttribute('style',`top: -1024px; left: -1034px;`);
+      }, 200)
+      return;
     }
 
     const docRect = document.documentElement.getBoundingClientRect();
@@ -69,12 +64,12 @@ const NoteContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.post.pubkey);
+    account?.actions.addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.post.pubkey);
+    account?.actions.removeFromMuteList(note()?.pubkey);
     props.onClose();
   };
 
@@ -86,21 +81,36 @@ const NoteContextMenu: Component<{
 
   const copyNoteLink = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${window.location.origin}/e/${note().post.noteId}`);
+
+    let link = `e/${note().noteId}`;
+
+    if (note().noteId.startsWith('naddr')) {
+      const vanityName = app?.verifiedUsers[note().pubkey];
+
+      if (vanityName) {
+        const decoded = nip19.decode(note().noteId);
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        link = `${vanityName}/${data.identifier}`;
+      }
+    }
+
+    navigator.clipboard.writeText(`${window.location.origin}/${link}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
 
   const copyNoteText = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().post.content}`);
+    navigator.clipboard.writeText(`${note().content}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };
 
   const copyNoteId = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().post.noteId}`);
+    navigator.clipboard.writeText(`${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
@@ -124,7 +134,7 @@ const NoteContextMenu: Component<{
       return;
     }
 
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
+    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
     props.onClose()
 
     if (success) {
@@ -137,7 +147,7 @@ const NoteContextMenu: Component<{
   const onClickOutside = (e: MouseEvent) => {
     if (
       !props.data ||
-      !document?.getElementById(`note_context_${note().post.id}`)?.contains(e.target as Node)
+      !document?.getElementById(`note_context_${note().id}`)?.contains(e.target as Node)
     ) {
       props.onClose()
     }
@@ -240,7 +250,7 @@ const NoteContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.post.pubkey ?
+  const noteContext = () => account?.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
       noteContextForEveryone;
 
@@ -268,10 +278,10 @@ const NoteContextMenu: Component<{
         onAbort={() => setConfirmMuteUser(false)}
       />
       <PrimalMenu
-        id={`note_context_${note()?.post.id}`}
+        id={`note_context_${note()?.id}`}
         items={noteContext()}
         hidden={!props.open}
-        position="note_footer"
+        position="note_context"
         orientation={orientation()}
       />
     </div>

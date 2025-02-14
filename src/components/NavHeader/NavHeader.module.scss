@@ -2,14 +2,14 @@
   position: fixed;
   display: flex;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: center;
   height: 72px;
   width: var(--central-content-width);
   margin: 0;
   padding: 0;
-  padding-top: 32px;
   background-color: var(--background-modal);
   z-index: var(--z-index-header);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 
   font-size: 16px;

@@ -1,8 +1,10 @@
-import { Component, createMemo, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './LinkPreview.module.scss';
+
+const errorCountLimit = 3;
 
 const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, isLast?: boolean }> = (props) => {
 
@@ -36,7 +38,11 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
   };
 
   const klass = () => {
-    let k = image() && ratio() <= 1.2 ? styles.linkPreviewH : styles.linkPreview;
+    let k = styles.linkPreviewH;
+
+    if (!hasImage()) {
+      k += ` ${styles.noImage}`;
+    }
 
     if (props.bordered) {
       k += ` ${styles.bordered}`;
@@ -49,6 +55,32 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
     return k;
   };
 
+  const [errorCount, setErrorCount] = createSignal(0);
+
+  const onError = (event: any) => {
+    if (errorCount() > errorCountLimit) return;
+    setErrorCount(v => v + 1);
+    const image = event.target;
+    image.onerror = '';
+    image.src = props.preview.images[0];
+    return true;
+  };
+
+  let title: HTMLDivElement | undefined;
+
+  const [isLongTitle, setIsLongTitle] = createSignal(false);
+
+  createEffect(on(() => props.preview.title, (v, p) => {
+    if (!v || v === p) return;
+
+    new ResizeObserver(() => {
+      setIsLongTitle(() => (title?.clientHeight || 0) > 25)
+    }).observe(title as Element);
+
+  }));
+
+  const hasImage = () => errorCount() < errorCountLimit && (image() || props.preview.images[0]);
+
   return (
     <a
       id={props.id}
@@ -56,28 +88,29 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       class={klass()}
       target="_blank"
     >
-      <Show when={image()}>
+      <Show when={hasImage()}>
         <img
           class={styles.previewImage}
-          src={image()?.media_url}
-          style={`width: 100%; height: ${height()}`}
+          src={image()?.media_url || props.preview.images[0]}
+          style={`width: 180px; height: 120px`}
+          onerror={onError}
         />
       </Show>
 
       <div class={styles.previewInfo}>
+        <Show when={props.preview.title}>
+          <div class={styles.previewTitle} ref={title}>{props.preview.title}</div>
+        </Show>
+
+        <Show when={props.preview.description}>
+          <div class={`${styles.previewDescription} ${isLongTitle() ? styles.short : ''}`}>{props.preview.description}</div>
+        </Show>
+
         <div class={styles.previewUrlLine}>
           <Show when={encodedUrl}>
             <div class={styles.previewUrl}>{encodedUrl}</div>
           </Show>
         </div>
-
-        <Show when={props.preview.title}>
-          <div class={styles.previewTitle}>{props.preview.title}</div>
-        </Show>
-
-        <Show when={props.preview.description}>
-          <div class={styles.previewDescription}>{props.preview.description}</div>
-        </Show>
       </div>
     </a>
   );

@@ -1,5 +1,4 @@
 .customZap {
-  position: fixed;
   width: 432px;
   color: var(--text-primary);
   background-color: var(--background-input);
@@ -7,57 +6,6 @@
 
   display: flex;
   flex-direction: column;
-  padding: 20px;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 24px;
-
-    .title {
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-
-      .caption {
-        font-weight: 800;
-        font-size: 18px;
-        line-height: 18px;
-        color: var(--text-secondary);
-
-        .amount {
-          color: var(--text-primary);
-        }
-
-        .units {
-          margin-left: 8px;
-          font-weight: 800;
-          font-size: 12px;
-          line-height: 20px;
-        }
-      }
-    }
-
-    .close {
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      box-shadow: none;
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      margin: 0px 0px;
-      background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
-
-      &:hover {
-        background-color: var(--text-primary);
-      }
-    }
-  }
 
   .description {
     color: var(--text-secondary);
@@ -192,4 +140,32 @@
     font-weight: 400;
     line-height: 20px;
   }
+}
+
+.title {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  .caption {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+
+    .amount {
+      color: var(--text-primary);
+    }
+
+    .units {
+      margin-left: 8px;
+      font-weight: 800;
+      font-size: 12px;
+      line-height: 20px;
+    }
+  }
+}
+
+.hidden {
+  display: none;
 }

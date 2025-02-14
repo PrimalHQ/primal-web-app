@@ -33,10 +33,7 @@ const Branding: Component<{ small?: boolean, isHome?: boolean }> = (props) => {
         }
       >
         <div class={styles.branding}>
-          <div class={styles.logo} />
-          <span>
-            {intl.formatMessage(branding)}
-          </span>
+          <div class={styles.logoBig} />
         </div>
       </Show>
     </button>

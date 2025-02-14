@@ -1,9 +1,12 @@
 import styles from  "./VerificationCheck.module.scss";
 
-import { Component, createSignal, JSXElement, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSXElement, Match, onMount, Show, Switch } from "solid-js";
 import { PrimalUser } from "../../types/primal";
 import { isAccountVerified } from "../../lib/profile";
 import { hookForDev } from "../../lib/devTools";
+import { userName } from "../../stores/profile";
+import { LegendCustomizationConfig } from "../../lib/premium";
+import { useAppContext } from "../../contexts/AppContext";
 
 
 const VerificationCheck: Component<{
@@ -11,7 +14,10 @@ const VerificationCheck: Component<{
   large?: boolean,
   fallback?: JSXElement,
   id?: string,
+  legendConfig?: LegendCustomizationConfig,
+  mock?: boolean,
 }> = (props) => {
+  const app = useAppContext();
 
   const [isVerified, setIsVerified] = createSignal(false);
 
@@ -30,48 +36,77 @@ const VerificationCheck: Component<{
     }
 
     isAccountVerified(nip05).then(profile => {
-      setIsVerified(profile && profile.pubkey === props.user?.pubkey);
+      if (profile) {
+        setIsVerified(() => profile.pubkey === props.user?.pubkey);
+        return;
+      }
+
+      setIsVerified(() => false);
     });
   }
+
+  const legendConfig = () => {
+    const pubkey = props.user?.pubkey;
+
+    if (!pubkey) return undefined;
+
+    return props.legendConfig || app?.legendCustomization[pubkey];
+  }
+
+  const primalCheckKlass = () => {
+    let klass = styles.verifiedIconPrimal;
+    const lc = legendConfig();
+
+    if (lc?.custom_badge) {
+      const style = lc.style;
+
+      if (style !== '') {
+        klass += ` ${styles[`legend_${style}`]}`
+      }
+    }
+
+    return klass;
+  }
+
+  const isLegend = () => legendConfig() !== undefined;
 
   onMount(() => {
     checkVerification();
   })
 
   return (
-    <Show
-      when={isVerified()}
-      fallback={props.fallback}
-    >
-      <Show
-        when={props.large}
-        fallback={
-          <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIcon}>
+    <Switch fallback={props.fallback}>
+      <Match when={isVerified() || isLegend()}>
+        <div
+          id={props.id}
+          data-user={props.user?.pubkey}
+          class={`${props.large ? styles.verificationIconL : styles.verificationIcon}`}
+        >
           <Show
-            when={isVerifiedByPrimal()}
+            when={isVerifiedByPrimal() || isLegend()}
             fallback={
               <span class={styles.verifiedIcon} />
             }
           >
-            <span class={styles.whiteCheck} />
-            <span class={styles.verifiedIconPrimal} />
+            <div class={primalCheckKlass()}>
+              <div class={styles.checkIcon}></div>
+            </div>
           </Show>
         </div>
-        }
-      >
-        <div id={props.id} data-user={props.user?.pubkey} class={styles.verificationIconL}>
-          <Show
-            when={isVerifiedByPrimal()}
-            fallback={
-              <span class={styles.verifiedIcon} />
-            }
-          >
-            <span class={styles.whiteCheckL} />
-            <span class={styles.verifiedIconPrimal} />
-          </Show>
+      </Match>
+      <Match when={props.mock}>
+        <div
+          id={props.id}
+          data-user={props.user?.pubkey}
+          class={`${props.large ? styles.verificationIconL : styles.verificationIcon}`}
+        >
+          <div class={primalCheckKlass()}>
+            <div class={styles.checkIcon}></div>
+          </div>
         </div>
-      </Show>
-    </Show>
+      </Match>
+
+    </Switch>
   )
 }
 

@@ -1,4 +1,4 @@
-import { ContentModeration, FeedPage, } from "./types/primal";
+import { ContentModeration, FeedPage, LnbcInvoice, } from "./types/primal";
 import logoFire from './assets/icons/logo_fire.svg';
 import logoIce from './assets/icons/logo_ice.svg';
 
@@ -13,6 +13,7 @@ export const emptyPage: FeedPage = {
   messages: [],
   postStats: {},
   noteActions: {},
+  topZaps: {},
 }
 
 export const nostrHighlights ='9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a';
@@ -101,13 +102,21 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
-  Zap = 9735,
+  Subscribe = 7_001,
+  Unsubscribe = 7_002,
+  Highlight = 9_802,
+  Zap = 9_735,
 
   MuteList = 10_000,
   RelayList = 10_002,
-  CategorizedPeople = 30_000,
+  Bookmarks = 10_003,
+  TierList = 17_000,
 
+  CategorizedPeople = 30_000,
+  LongForm = 30_023,
   Settings = 30_078,
+  DVM = 31_990,
+  Tier = 37_001,
 
   ACK = 10_000_098,
   NoteStats = 10_000_100,
@@ -130,11 +139,34 @@ export enum Kind  {
   Releases = 10_000_124,
   ImportResponse = 10_000_127,
   LinkMetadata = 10_000_128,
+  EventZapInfo = 10_000_129,
   FilteringReason = 10_000_131,
   UserFollowerCounts = 10_000_133,
   SuggestedUsersByCategory = 10_000_134,
   UploadChunk = 10_000_135,
   UserRelays=10_000_139,
+  RelayHint=10_000_141,
+  NoteQuoteStats=10_000_143,
+  WordCount=10_000_144,
+  FeaturedAuthors=10_000_148,
+  DVMFollowsActions=10_000_156,
+  UserFollowerIncrease=10_000_157,
+  VerifiedUsersDict=10_000_158,
+  DVMMetadata=10_000_159,
+  NoteTopicStat=10_000_160,
+  MediaStats=10_000_163,
+  MediaList=10_000_164,
+  ContentStats=10_000_166,
+  BroadcastStatus=10_000_167,
+  LegendCustomization=10_000_168,
+  MembershipCohortInfo = 10_000_169,
+
+  WALLET_OPERATION = 10_000_300,
+  ExchangeRate = 10_000_305,
+
+  OrderHistory = 10_000_605,
+
+  LongFormShell = 10_030_023,
 }
 
 export const relayConnectingTimeout = 1000;
@@ -194,8 +226,8 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'who_reposted_it',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'who_replied_to_it',
 
-  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_in',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_in',
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_by',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_by',
 
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'who_zapped_it',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'who_liked_it',
@@ -251,6 +283,8 @@ export const urlRegexG = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]
 export const urlExtractRegex = /https?:\/\/\S+\.[^()]+(?:\([^)]*\))*/;
 export const interpunctionRegex = /^(\.|,|;|\?|\!)$/;
 export const emojiRegex = /(?:\s|^)\:\w+\:/;
+export const lnRegex = /lnbc[a-zA-Z0-9]*/;
+export const lnUnifiedRegex = /bitcoin:[a-zA-Z0-9]*(\?.*)lightning=([a-zA-Z0-9]*)(&.*|$)/;
 
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
@@ -259,13 +293,31 @@ export const noteRegex = /nostr:((note|nevent)1\w+)\b/g;
 export const noteRegexLocal = /nostr:((note|nevent)1\w+)\b/;
 export const profileRegex = /nostr:((npub|nprofile)1\w+)\b/;
 export const profileRegexG = /nostr:((npub|nprofile)1\w+)\b/g;
+export const addrRegex = /nostr:((naddr)1\w+)\b/;
+export const addrRegexG = /nostr:((naddr)1\w+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
+export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
+export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
+export const imageRegexEnd = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)$/;
+export const videoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/;
+export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/g;
+
+export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/g;
+export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/;
+
+export const eventRegexLocal = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/;
+export const eventRegexG = /(?:\s|^)nostr:((note|nevent|naddr)1\w+)\b/g;
+
+export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
 
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
 
 // How long, in words, should a short note be
 export const shortNoteWords = 200;
+export const shortNoteChars = 200;
+
+export const wordsPerMinute = 238;
 
 // How long we would assume mentioned will be for purposes of shortening the note
 export const shortMentionInWords = 99;
@@ -383,4 +435,22 @@ export const threadLenghtInMs = 900;
 export const uploadLimit = {
   regular: 100,
   premium: 1024,
+  premiumLegend: 1024,
 }
+
+export const emptyInvoice: LnbcInvoice = {
+  paymentRequest: '',
+  sections: [],
+  expiry: 0,
+  route_hints: [],
+};
+
+export const supportedBookmarkTypes = ['a', 'e'];
+
+export const floatingPoints: Record<string,number> = {
+  sats: 0,
+  USD: 2,
+  _: 2,
+};
+
+export const sevenDays = 7 * 24 * 60 * 60 * 1_000;

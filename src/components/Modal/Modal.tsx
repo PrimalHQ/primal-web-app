@@ -1,6 +1,8 @@
 import { Component, createEffect, JSXElement, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
+import { Transition } from 'solid-transition-group';
 import { hookForDev } from '../../lib/devTools';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import styles from './Modal.module.scss';
 
@@ -9,44 +11,34 @@ const Modal: Component<{
   open?: boolean,
   id?: string,
   opaqueBackdrop?: boolean,
-  onClose?: (e: MouseEvent | KeyboardEvent) => void,
+  onClose?: (e?: MouseEvent | KeyboardEvent) => void,
 }> = (props) => {
 
-  const onKey = (e: KeyboardEvent) => {
-    e.stopPropagation();
-    if (e.code === 'Escape') {
-      props.onClose && props.onClose(e);
-      return;
-    }
-  };
+  // const onKey = (e: KeyboardEvent) => {
+  //   e.stopPropagation();
+  //   if (e.code === 'Escape') {
+  //     props.onClose && props.onClose(e);
+  //     return;
+  //   }
+  // };
 
-  createEffect(() => {
-    if (props.open) {
-      window.addEventListener('keyup', onKey);
-    }
-    else {
-      window.removeEventListener('keyup', onKey);
-    }
-  });
+  // createEffect(() => {
+  //   if (props.open) {
+  //     window.addEventListener('keyup', onKey);
+  //   }
+  //   else {
+  //     window.removeEventListener('keyup', onKey);
+  //   }
+  // });
 
   return (
-    <Show when={props.open}>
-      <Portal mount={document.getElementById("modal") as Node}>
-        <div
-          id={props.id}
-          class={`${styles.modal} ${props.opaqueBackdrop ? styles.opaque : ''}`}
-          onClick={(e: MouseEvent) => {
-            if (!(e.target as Element).classList.contains(styles.modal)) {
-              return;
-            }
-
-            props.onClose && props.onClose(e)
-          }}
-        >
-          {props.children}
-        </div>
-      </Portal>
-    </Show>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      triggerClass={styles.hidden}
+    >
+        {props.children}
+    </AdvancedSearchDialog>
   );
 }
 

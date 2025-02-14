@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
-import { nip19 } from 'nostr-tools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { nip19 } from '../lib/nTools';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -15,13 +15,13 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
 import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
-import { getLastSeen, getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
-import { subscribeTo } from '../sockets';
+import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
+import { subsTo } from '../sockets';
 import { convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
-import { Tabs } from "@kobalte/core";
+import { Tabs } from "@kobalte/core/tabs";
 
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -83,7 +83,14 @@ const Notifications: Component = () => {
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
     users: [],
-    page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+    },
     reposts: {},
   })
 
@@ -91,7 +98,15 @@ const Notifications: Component = () => {
     notes: [],
     users: {},
     userStats: {},
-    page: { messages: [], users: {}, postStats: {}, notifications: [], mentions: {}, noteActions: {} },
+    page: {
+      messages: [],
+      users: {},
+      postStats: {},
+      notifications: [],
+      mentions: {},
+      noteActions: {},
+      topZaps: {},
+    },
     reposts: {},
     notifications: [],
   })
@@ -121,18 +136,14 @@ const Notifications: Component = () => {
     if (account?.hasPublicKey() && publicKey() === account.publicKey) {
       const subid = `notif_sls_${APP_ID}`;
 
-      const unsub = subscribeTo(subid, async (type, _, content) => {
-        if (type === 'EOSE') {
+      const unsub = subsTo(subid, {
+        onEose: () => {
           unsub();
-          return;
-        }
-
-        if (type === 'NOTICE') {
+        },
+        onNotice: () => {
           logError('Error setting notifications lats seen');
           unsub();
-          return;
         }
-
       });
 
       setTimeout(() => {
@@ -148,11 +159,9 @@ const Notifications: Component = () => {
   const fetchNewNotifications = (pk: string, group: NotificationGroup) => {
     const subid = `notif_${APP_ID}`
 
-    const unsub = subscribeTo(subid, async (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content?.content) {
-          return;
-        }
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Notification) {
 
@@ -226,18 +235,14 @@ const Notifications: Component = () => {
           );
           return;
         }
-
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         setSortedNotifications(() => newNotifs);
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
         setAllSet(true);
         setNotifSince(timeNow());
         unsub();
-        return;
-      }
-
+      },
     });
 
     const since = queryParams.ignoreLastSeen ? 0 : notifSince;
@@ -285,8 +290,8 @@ const Notifications: Component = () => {
   const fetchOldNotifications = (until: number, group: NotificationGroup) => {
     const subid = `notif_old_${APP_ID}`
 
-    const unsub = subscribeTo(subid, async (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         if (!content?.content) {
           return;
         }
@@ -362,10 +367,8 @@ const Notifications: Component = () => {
           return;
         }
 
-      }
-
-      if (type === 'EOSE') {
-
+      },
+      onEose: () => {
         // Sort notifications
         const notifs = [...oldNotifications.page.notifications];
 
@@ -379,16 +382,14 @@ const Notifications: Component = () => {
         const pageUsers = oldNotifications.page.users;
 
         const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
-          return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key])}};
+          return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key], key)}};
         },  {});
 
         setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
 
         setfetchingOldNotifs(false);
         unsub();
-        return;
-      }
-
+      },
     });
 
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
@@ -431,7 +432,7 @@ const Notifications: Component = () => {
 
     return pks.map((pk) => {
       const user = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       return { ...user, ...userStats[pk]} as PrimalNotifUser;
@@ -592,7 +593,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -636,7 +637,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -680,7 +681,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -724,7 +725,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -772,7 +773,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -815,7 +816,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -859,7 +860,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -902,7 +903,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -950,7 +951,7 @@ const Notifications: Component = () => {
       const pk = note.user.pubkey;
 
       const rUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -993,7 +994,7 @@ const Notifications: Component = () => {
       const pk: string = note.user.pubkey;
 
       const rUser: PrimalUser = knownUsers.includes(pk) ?
-        convertToUser(users[pk]) :
+        convertToUser(users[pk], pk) :
         emptyUser(pk);
 
       const usrs = [{...rUser, ...userStats[pk]}];
@@ -1106,7 +1107,7 @@ const Notifications: Component = () => {
         />
       </StickySidebar>
 
-      <Tabs.Root
+      <Tabs
         value={notificationGroup()}
         onChange={(group: string) => {
           resetNotifContent();
@@ -1223,7 +1224,7 @@ const Notifications: Component = () => {
           }
         </For>
 
-      </Tabs.Root>
+      </Tabs>
     </div>
   );
 }

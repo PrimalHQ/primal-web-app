@@ -137,6 +137,11 @@ export const pin = {
 };
 
 export const actions = {
+  resetRelays: {
+    id: 'actions.resetRelays',
+    defaultMessage: 'Reset relays',
+    description: 'Reset relays label',
+  },
   seeMore: {
     id: 'actions.seeMore',
     defaultMessage: 'see more',
@@ -146,6 +151,11 @@ export const actions = {
     id: 'actions.newNote',
     defaultMessage: 'New Note',
     description: 'New note action label',
+  },
+  newArticle: {
+    id: 'actions.newArticle',
+    defaultMessage: 'New Article',
+    description: 'New article action label',
   },
   createPin: {
     id: 'actions.createPin',
@@ -449,7 +459,7 @@ export const actions = {
   reactions: {
     id: 'actions.reactions',
     defaultMessage: 'Reactions ({count})',
-    description: 'Label for zap',
+    description: 'Label for reactions',
   },
 };
 
@@ -492,13 +502,18 @@ export const downloads = {
   },
   callToActionAndroidTitle: {
     id: 'downloads.ctaAndroidTitle',
-    defaultMessage: 'Primal Android Beta',
+    defaultMessage: 'Primal Android',
     description: 'Title for the Android downloads\' page call-to-action',
   },
   callToActionAndroidDescription: {
     id: 'downloads.ctaAndroidDescription',
     defaultMessage: 'The app features easy onboarding, fast & snappy UI, ability to explore Nostr, and create & manage custom feeds',
     description: 'Description for the Android downloads\' page call-to-action',
+  },
+  callToActionQRTitle: {
+    id: 'downloads.ctaQRTitle',
+    defaultMessage: 'Scan to install app',
+    description: 'Title for the QR code downloads\' page call-to-action',
   },
   appStoreCaption: {
     id: 'downloads.appStoreCaption',
@@ -639,9 +654,15 @@ export const explore = {
 };
 
 export const feedProfile = {
-  id: 'feedName',
+  id: 'feedProfile',
   defaultMessage: '{name}\'s feed',
   description: 'Generic name for a feed created from a profile',
+};
+
+export const feedProfileDesription = {
+  id: 'feedProfileDesription',
+  defaultMessage: 'Notes feed of {name}',
+  description: 'Generic description for a feed created from a profile',
 };
 
 export const feedNewPosts = {
@@ -714,6 +735,11 @@ export const navBar = {
     defaultMessage: 'Home',
     description: 'Label for the nav bar item link to Home page',
   },
+  reads: {
+    id: 'navbar.reads',
+    defaultMessage: 'Reads',
+    description: 'Label for the nav bar item link to Reads page',
+  },
   explore: {
     id: 'navbar.explore',
     defaultMessage: 'Explore',
@@ -724,6 +750,11 @@ export const navBar = {
     defaultMessage: 'Messages',
     description: 'Label for the nav bar item link to Messages page',
   },
+  bookmarks: {
+    id: 'navbar.bookmarks',
+    defaultMessage: 'Bookmarks',
+    description: 'Label for the nav bar item link to Bookmarks page',
+  },
   notifications: {
     id: 'navbar.notifications',
     defaultMessage: 'Notifications',
@@ -733,6 +764,11 @@ export const navBar = {
     id: 'navbar.downloads',
     defaultMessage: 'Downloads',
     description: 'Label for the nav bar item link to Downloads page',
+  },
+  premium: {
+    id: 'navbar.premium',
+    defaultMessage: 'Premium',
+    description: 'Label for the nav bar item link to Premium page',
   },
   settings: {
     id: 'navbar.settings',
@@ -788,17 +824,17 @@ export const note = {
     },
     optionYes: {
       id: 'note.saveNoteDraft.yes',
-      defaultMessage: 'Yes',
+      defaultMessage: 'Save',
       description: 'Confirm saving not as draft',
     },
     optionNo: {
       id: 'note.saveNoteDraft.no',
-      defaultMessage: 'No',
+      defaultMessage: 'Discard',
       description: 'Decline saving not as draft',
     },
     optionCancel: {
       id: 'note.saveNoteDraft.cancel',
-      defaultMessage: 'Continue editing now',
+      defaultMessage: 'Continue Editing',
       description: 'Continue editing the note',
     },
   },
@@ -1002,6 +1038,23 @@ export const notifications = {
 };
 
 export const placeholders = {
+  missingNote: {
+    firstLine: {
+      id: 'placeholders.missingNote.firstLine',
+      defaultMessage: 'We can\'t seem to find this note.',
+      description: 'Placeholder when the note is missing',
+    },
+    secondLine: {
+      id: 'placeholders.missingNote.secondLine',
+      defaultMessage: 'It may have been deleted by the author.',
+      description: 'Placeholder when the note is missing',
+    },
+  },
+  noReactionDetails: {
+    id: 'placeholders.noReactionDetails',
+    defaultMessage: 'No details for rections found',
+    description: 'Placeholder when there are no reaction details in reactions modal',
+  },
   noLikeDetails: {
     id: 'placeholders.noLikeDetails',
     defaultMessage: 'No details for likes found',
@@ -1016,6 +1069,11 @@ export const placeholders = {
     id: 'placeholders.noRepostDetails',
     defaultMessage: 'No details for reposts found',
     description: 'Placeholder when there are no repost details in reactions modal',
+  },
+  noQuoteDetails: {
+    id: 'placeholders.noQuoteDetails',
+    defaultMessage: 'No details for quotes found',
+    description: 'Placeholder when there are no quote details in reactions modal',
   },
   addComment: {
     id: 'placeholders.addComment',
@@ -1040,6 +1098,11 @@ export const placeholders = {
   cachingPoolHelp: {
     id: 'placeholders.cachingPoolHelp',
     defaultMessage: 'Client will randomly connect to one of the caching services in this pool. This helps with fail-over if some of the services are down. You can add or remove services. If you wish to always connect to exatly one caching service, you should leave only one entry in this pool.',
+    description: 'text for caching pool help bubble',
+  },
+  resetRelaysHelp: {
+    id: 'placeholders.resetRelaysHelp',
+    defaultMessage: 'This action will disconnect you from any relays you are currently connected to and connect you to a set of recomended relays.',
     description: 'text for caching pool help bubble',
   },
   comingSoon: {
@@ -1110,9 +1173,14 @@ export const placeholders = {
 };
 
 export const profile = {
-  sidebarCaption: {
-    id: 'profile.sidebar.caption',
-    defaultMessage: 'Popular notes',
+  sidebarCaptionReads: {
+    id: 'profile.sidebar.captionReads',
+    defaultMessage: 'Latest Reads',
+    description: 'Caption for the profile page sidebar showing a list of latest reads by the profile',
+  },
+  sidebarCaptionNotes: {
+    id: 'profile.sidebar.captionNotes',
+    defaultMessage: 'Popular Notes',
     description: 'Caption for the profile page sidebar showing a list of trending notes by the profile',
   },
   sidebarNoNotes: {
@@ -1136,6 +1204,11 @@ export const profile = {
     description: 'Label indicating when the profile joined Nostr (oldest event)',
   },
   stats: {
+    gallery: {
+      id: 'profile.gallery',
+      defaultMessage: 'Media',
+      description: 'Label for gallery profile stat',
+    },
     follow: {
       id: 'profile.followStats',
       defaultMessage: 'Following',
@@ -1160,6 +1233,11 @@ export const profile = {
       id: 'profile.stats.totalSats',
       defaultMessage: 'Total',
       description: 'Label for total sats profile stat',
+    },
+    articles: {
+      id: 'profile.stats.articles',
+      defaultMessage: 'Reads',
+      description: 'Label for reads profile stat',
     },
     notes: {
       id: 'profile.stats.notes',
@@ -1192,6 +1270,11 @@ export const profile = {
     defaultMessage: '{name} hasn\'t posted any notes',
     description: 'Label indicating that the profile has no notes',
   },
+  noArticles: {
+    id: 'profile.noArticles',
+    defaultMessage: '{name} hasn\'t published any reads',
+    description: 'Label indicating that the profile has no reads',
+  },
   noReplies: {
     id: 'profile.noReplies',
     defaultMessage: '{name} hasn\'t posted any replies',
@@ -1209,7 +1292,7 @@ export const profile = {
   },
   noZaps: {
     id: 'profile.noZaps',
-    defaultMessage: 'No one zapped {name}',
+    defaultMessage: '{name} zapped no one',
     description: 'Label indicating that the profile has no zaps',
   },
   noRelays: {
@@ -1217,6 +1300,19 @@ export const profile = {
     defaultMessage: '{name} is on no relays',
     description: 'Label indicating that the profile has no relays',
   },
+  qrModal: {
+    pubkey: {
+      id: 'profile.qrModal.pubkey',
+      defaultMessage: 'Public key',
+      description: 'Public key tab title in profile qr code modal',
+    },
+    ln: {
+      id: 'profile.qrModal.ln',
+      defaultMessage: 'Lightning address',
+      description: 'Lightning address tab title in profile qr code modal',
+    },
+
+  }
 };
 
 export const search = {
@@ -1324,6 +1420,18 @@ export const settings = {
       id: 'settings.homeFeeds.caption',
       defaultMessage: 'Edit and order your home page feeds',
       description: 'Caption for home feed ordering',
+    },
+  },
+  readsFeeds: {
+    title: {
+      id: 'settings.readsFeeds.title',
+      defaultMessage: 'Reads Feeds',
+      description: 'Title of the reads feeds settings sub-page',
+    },
+    caption: {
+      id: 'settings.readsFeeds.caption',
+      defaultMessage: 'Edit and order your reads page feeds',
+      description: 'Caption for reads feed ordering',
     },
   },
   moderation: {
@@ -1485,6 +1593,16 @@ export const settings = {
       defaultMessage: 'Connect to a different caching service',
       description: 'Title of the alternative caching service section of the Network settings sub-page',
     },
+    proxyEvents: {
+      id: 'settings.filters.proxyEvents',
+      defaultMessage: 'Use Enhanced Privacy',
+      description: 'Caption for option to proy event publishing through Primal',
+    },
+    proxyDescription: {
+      id: 'settings.filters.proxyDescription',
+      defaultMessage: 'When enabled, your IP address will be visible to the caching service, but not to relays. Your content will be published to your specified relays using the caching service as a proxy. ',
+      description: 'Description of the proxy events settings sub-page',
+    },
   },
   relays: {
     id: 'settings.relays',
@@ -1511,9 +1629,14 @@ export const settings = {
     defaultMessage: 'Home page feeds',
     description: 'Title of the feeds section on the settings page',
   },
+  feedsAddNew: {
+    id: 'settings.feedsAddNew',
+    defaultMessage: 'Add New Feed',
+    description: 'Label for the button for adding new feed to the feeds list',
+  },
   feedsRestore: {
     id: 'settings.feedsRestore',
-    defaultMessage: 'restore defaults',
+    defaultMessage: 'Restore Default Feeds',
     description: 'Label for the button for restoring default feeds to the feeds list',
   },
   feedsRestoreConfirm: {
@@ -1822,8 +1945,13 @@ export const toastZapProfile = {
 
 export const thread = {
   sidebar: {
-    id: 'thread.sidebar.title',
-    defaultMessage: 'People in this thread',
+    id: 'thread.sidebar',
+    defaultMessage: 'Replying to this Note',
+    description: 'Title of the Thread page sidebar',
+  },
+  sidebarMentions: {
+    id: 'thread.sidebarMentions',
+    defaultMessage: 'People in this Note',
     description: 'Title of the Thread page sidebar',
   },
   pageTitle: {
@@ -1949,6 +2077,11 @@ export const toast = {
     defaultMessage: 'Author of this note cannot be zapped',
     description: 'Toast message indicating user cannot receieve a zap',
   },
+  zapDVMUnavailable: {
+    id: 'toast.zapDVMUnavailable',
+    defaultMessage: 'Author of this feed cannot be zapped',
+    description: 'Toast message indicating user cannot receieve a zap',
+  },
   updateProfileSuccess: {
     id: 'toast.updateProfileSuccess',
     defaultMessage: 'Profile updated successfully',
@@ -2068,7 +2201,7 @@ export const followWarning = {
   description: {
     id: 'followWarning.description',
     defaultMessage: 'If you continue, you will end up following just one nostr account. Are you sure you want to continue?',
-    description: 'Explanation of what happens when follow erro occurs',
+    description: 'Explanation of what happens when follow error occurs',
   },
   confirm: {
     id: 'followWarning.confirm',
@@ -2080,4 +2213,498 @@ export const followWarning = {
     defaultMessage: 'Abort',
     description: 'Abort forgot pin action',
   },
+};
+
+export const reads = {
+  pageTitle: {
+    id: 'reads.pageTitle',
+    defaultMessage: 'Reads',
+    description: 'Reads page title',
+  },
+};
+
+export const bookmarks = {
+  pageTitle: {
+    id: 'bookmarks.pageTitle',
+    defaultMessage: 'Bookmarks',
+    description: 'Bookmarks page title',
+  },
+  noBookmarks: {
+    id: 'bookmarks.noBookmarks',
+    defaultMessage: 'You don\'t have any bookmarks',
+    description: 'No bookmarks caption',
+  },
+  confirm: {
+    title: {
+      id: 'bookmarks.confirm.title',
+      defaultMessage: 'Saving First Bookmark',
+      description: 'Follow error modal title',
+    },
+    description: {
+      id: 'bookmarks.confirm.description',
+      defaultMessage: 'You are about to save your first public bookmark. These bookmarks can be seen by other nostr users. Do you wish to continue?',
+      description: 'Explanation of what happens when bookmark error occurs',
+    },
+    confirm: {
+      id: 'bookmarks.confirm.confirm',
+      defaultMessage: 'Save Bookmark',
+      description: 'Confirm forgot pin action',
+    },
+    abort: {
+      id: 'bookmarks.confirm.abort',
+      defaultMessage: 'Cancel',
+      description: 'Abort forgot pin action',
+    },
+    titleZero: {
+      id: 'bookmarks.confirm.title',
+      defaultMessage: 'Removing Last Bookmark',
+      description: 'Follow error modal title',
+    },
+    descriptionZero: {
+      id: 'bookmarks.confirm.description',
+      defaultMessage: 'You are about to remove your last public bookmark. Do you wish to continue?',
+      description: 'Explanation of what happens when bookmark error occurs',
+    },
+    confirmZero: {
+      id: 'bookmarks.confirm.confirm',
+      defaultMessage: 'Remove Bookmark',
+      description: 'Confirm forgot pin action',
+    },
+    abortZero: {
+      id: 'bookmarks.confirm.abort',
+      defaultMessage: 'Cancel',
+      description: 'Abort forgot pin action',
+    },
+  }
+}
+
+export const lnInvoice = {
+  pay: {
+    id: 'lnInvoice.pay',
+    defaultMessage: 'Pay',
+    description: 'Pay invoice action',
+  },
+  title: {
+    id: 'lnInvoice.title',
+    defaultMessage: 'Lightning Invoice',
+    description: 'Lightning Invoice title',
+  },
+  expired: {
+    id: 'lnInvoice.expired',
+    defaultMessage: 'Expired: {date} ago',
+    description: 'Expired time',
+  },
+  expires: {
+    id: 'lnInvoice.expires',
+    defaultMessage: 'Expires: in {date}',
+    description: 'Expires time',
+  },
+  confirm: {
+    title: {
+      id: 'lnInvoice.confirm.title',
+      defaultMessage: 'Are you sure?',
+      description: 'Lightning invoice pay confirmation',
+    },
+    description: {
+      id: 'lnInvoice.confirm.description',
+      defaultMessage: 'Pay {amount}',
+      description: 'Lightning Invoice confirm description',
+    },
+    confirmLabel: {
+      id: 'lnInvoice.confirm.confirmLabel',
+      defaultMessage: 'Yes, pay',
+      description: 'Lightning Invoice confirm button label',
+    },
+    abortLabel: {
+      id: 'lnInvoice.confirm.abortLabel',
+      defaultMessage: 'Cancel',
+      description: 'Lightning Invoice confirm button label',
+    },
+  },
+
+};
+
+export const cashuInvoice = {
+  redeem: {
+    id: 'cashuInvoice.redeem',
+    defaultMessage: 'Reedem',
+    description: 'Reedem ecash action',
+  },
+  pending: {
+    id: 'cashuInvoice.pending',
+    defaultMessage: 'Pending',
+    description: 'Pending ecash',
+  },
+  spent: {
+    id: 'cashuInvoice.spent',
+    defaultMessage: 'Spent',
+    description: 'Spent ecash',
+  },
+  title: {
+    id: 'cashuInvoice.title',
+    defaultMessage: 'Cashu Ecash',
+    description: 'Cashu Ecash title',
+  },
+  mint: {
+    id: 'cashuInvoice.mint',
+    defaultMessage: 'Mint: {url}',
+    description: 'Mint url',
+  },
+  confirm: {
+    title: {
+      id: 'cashuInvoice.confirm.title',
+      defaultMessage: 'Are you sure?',
+      description: 'Cashu invoice pay confirmation',
+    },
+    description: {
+      id: 'cashuInvoice.confirm.description',
+      defaultMessage: 'Redeem {amount}',
+      description: 'Cashu Invoice confirm description',
+    },
+    confirmLabel: {
+      id: 'cashuInvoice.confirm.confirmLabel',
+      defaultMessage: 'Yes, redeem',
+      description: 'Cashu Invoice confirm button label',
+    },
+    abortLabel: {
+      id: 'cashuInvoice.confirm.abortLabel',
+      defaultMessage: 'Cancel',
+      description: 'Cashu Invoice confirm button label',
+    },
+  },
+
+};
+
+export const reactionsModal = {
+  tabs: {
+    likes: {
+      id: 'reactionsModal.tabs.likes',
+      defaultMessage: 'Likes ({count})',
+      description: 'Likes tab label in reactions modal',
+    },
+    zaps: {
+      id: 'reactionsModal.tabs.zaps',
+      defaultMessage: 'Zaps ({count})',
+      description: 'Zaps tab label in reactions modal',
+    },
+    reposts: {
+      id: 'reactionsModal.tabs.reposts',
+      defaultMessage: 'Reposts ({count})',
+      description: 'Reposts tab label in reactions modal',
+    },
+    quotes: {
+      id: 'reactionsModal.tabs.quotes',
+      defaultMessage: 'Quotes ({count})',
+      description: 'Quotes tab label in reactions modal',
+    },
+  },
+};
+
+export const premium = {
+  labels: {
+    foreverPremium: {
+      id: 'pages.premium.labes.foreverPremium',
+      defaultMessage: 'Forever Premium',
+      description: 'Forever Premium perk title',
+    },
+    foreverPremiumDescription: {
+      id: 'pages.premium.labes.foreverPremiumDescription',
+      defaultMessage: 'Premium subscription never expires for legends.',
+      description: 'Forever Premium perk description',
+    },
+    privateBetaBuilds: {
+      id: 'pages.premium.labes.privateBetaBuilds',
+      defaultMessage: 'Private Beta Builds',
+      description: 'Private Beta Builds perk title',
+    },
+    privateBetaBuildsDescription: {
+      id: 'pages.premium.labes.privateBetaBuildsDescription',
+      defaultMessage: 'Get access to new features before they are public.',
+      description: 'Private Beta perk description',
+    },
+    moreMediaSpace: {
+      id: 'pages.premium.labes.moreMediaSpace',
+      defaultMessage: 'Way More Storage',
+      description: 'More Media perk title',
+    },
+    moreMediaSpaceDescription: {
+      id: 'pages.premium.labes.moreMediaSpaceDescription',
+      defaultMessage: 'Get 100GB of Primal Premium media storage.',
+      description: 'More Media perk description',
+    },
+    customLegendProfile: {
+      id: 'pages.premium.labes.customLegendProfile',
+      defaultMessage: 'Legendary Custom Profile',
+      description: 'Legendary Custom Profile perk title',
+    },
+    customLegendDescription: {
+      id: 'pages.premium.labes.customLegendDescription',
+      defaultMessage: 'Option to pick the color of your verified badge and set the glow around your avatar',
+      description: 'Legendary Custom Profile perk description',
+    },
+    legendPageCaption: {
+      id: 'pages.premium.labes.legendPageCaption',
+      defaultMessage: 'Donate $1000 or more to gain:',
+      description: 'Legend page caption',
+    },
+    legendPageExplanation: {
+      id: 'pages.premium.labes.legendPageExplanation',
+      defaultMessage: 'The Legend tier was created to recognize users who have made a significant contribution to Primal.',
+      description: 'Legend page explanation',
+    },
+    supportFirstLine: {
+      id: 'pages.premium.labes.supportFirstLine',
+      defaultMessage: 'Are you enjoying Primal?',
+      description: 'Support label first line',
+    },
+    supportSecondLine: {
+      id: 'pages.premium.labes.supportSecondLine',
+      defaultMessage: 'if so, see how you can ',
+      description: 'Support label second line',
+    },
+    supportCaption: {
+      id: 'pages.premium.labes.supportCaption',
+      defaultMessage: 'Be a part of the Nostr revolution and help us continue building for this ecosystem.',
+      description: 'Support page caption',
+    },
+    leaveStars: {
+      id: 'pages.premium.labes.leaveStars',
+      defaultMessage: 'Leave a 5 Star Review',
+      description: 'Support page 5 star review caption',
+    },
+    leaveStarsDescription: {
+      id: 'pages.premium.labes.leaveStarsDescription',
+      defaultMessage: 'App Store reviews really help improve the visibility of Nostr apps at this early stage.',
+      description: 'Support page 5 star review description',
+    },
+    extendSubscription: {
+      id: 'pages.premium.labes.extendSubscription',
+      defaultMessage: 'Extend Subscription',
+      description: 'Support page extend subscription caption',
+    },
+    extendSubscriptionDescription: {
+      id: 'pages.premium.labes.extendSubscriptionDescription',
+      defaultMessage: 'Extend your existing subscription to gain peace of mind and help fund Primal.',
+      description: 'Support page extend subscription description',
+    },
+    becomeLegend: {
+      id: 'pages.premium.labes.becomeLegend',
+      defaultMessage: 'Become a Legend',
+      description: 'Support page become legend caption',
+    },
+    becomeLegendDescription: {
+      id: 'pages.premium.labes.becomeLegendDescription',
+      defaultMessage: 'Donate $1000 or more to gain permanent membership and exclusive perks!',
+      description: 'Support page become legend description',
+    },
+  },
+  actions: {
+    payNow: {
+      id: 'pages.premium.actions.payNow',
+      defaultMessage: 'Pay Now',
+      description: 'Action to pay now',
+    },
+    becomeLegend: {
+      id: 'pages.premium.actions.becomeLegend',
+      defaultMessage: 'Become a Legend Now',
+      description: 'Action that takes user to the Become a Legend page',
+    },
+    getIOS: {
+      id: 'pages.premium.actions.getIOS',
+      defaultMessage: 'Go to iOS App',
+      description: 'Action that takes user to the iOS APP page',
+    },
+    getAndroid: {
+      id: 'pages.premium.actions.getAndroid',
+      defaultMessage: 'Go to Android App',
+      description: 'Action that takes user to the Android App page',
+    },
+    support: {
+      id: 'pages.premium.actions.support',
+      defaultMessage: 'support us',
+      description: 'Action that takes user to the support page',
+    },
+    start: {
+      id: 'pages.premium.actions.start',
+      defaultMessage: 'Find Primal Name',
+      description: 'Find primal name action on the premium page',
+    },
+    back: {
+      id: 'pages.premium.actions.back',
+      defaultMessage: 'Back',
+      description: 'To the previous step on the premium page',
+    },
+    next: {
+      id: 'pages.premium.actions.next',
+      defaultMessage: 'Next',
+      description: 'To the next step on the premium page',
+    },
+    subscribe: {
+      id: 'pages.premium.actions.subscribe',
+      defaultMessage: 'Subscribe',
+      description: 'Subscribe action on the premium page',
+    },
+    done: {
+      id: 'pages.premium.actions.done',
+      defaultMessage: 'Done',
+      description: 'Done action on the premium page',
+    },
+    rename: {
+      id: 'pages.premium.actions.rename',
+      defaultMessage: 'Rename',
+      description: 'To the rename step on the premium page',
+    },
+    changeName: {
+      id: 'pages.premium.actions.changeName',
+      defaultMessage: 'Change Your Primal Name',
+      description: 'Change Primal name action on the premium page',
+    },
+    extendPlan: {
+      id: 'pages.premium.actions.extendPlan',
+      defaultMessage: 'Extend Your Subscription',
+      description: 'Extend your subscription action on the premium page',
+    },
+    renewPlan: {
+      id: 'pages.premium.actions.renewPlan',
+      defaultMessage: 'Renew Your Subscription',
+      description: 'Extend your subscription action on the premium page',
+    },
+  },
+  title: {
+    general: {
+      id: 'pages.premium.title',
+      defaultMessage: 'Primal Premium',
+      description: 'Title of the premium page',
+    },
+    name: {
+      id: 'pages.premium.name',
+      defaultMessage: 'Choose a primal name',
+      description: 'Title of the premium find name page',
+    },
+    subscription: {
+      id: 'pages.premium.subscription',
+      defaultMessage: 'Congrats!',
+      description: 'Title of the premium subscription page',
+    },
+    subscriptionSubtitle: {
+      id: 'pages.premium.subscriptionSubtitle',
+      defaultMessage: 'Your Primal Name is available',
+      description: 'Subtitle of the premium subscription page',
+    },
+    rename: {
+      id: 'pages.premium.rename',
+      defaultMessage: 'Change your primal name',
+      description: 'Title of the premium rename page',
+    },
+    support: {
+      id: 'pages.premium.support',
+      defaultMessage: 'Support Primal',
+      description: 'Title of the premium support page',
+    },
+    legend: {
+      id: 'pages.premium.legend',
+      defaultMessage: 'Become a Primal Legend',
+      description: 'Title of the premium legend page',
+    },
+    legendShort: {
+      id: 'pages.premium.legendShort',
+      defaultMessage: 'Primal Legend',
+      description: 'Short title of the premium legend page',
+    },
+    relay: {
+      id: 'pages.premium.relay',
+      defaultMessage: 'Primal Relay',
+      description: 'Title of the premium relay page',
+    },
+    media: {
+      id: 'pages.premium.media',
+      defaultMessage: 'Media Managment',
+      description: 'Title of the premium media managment page',
+    },
+    contacts: {
+      id: 'pages.premium.contacts',
+      defaultMessage: 'Recover Follow List',
+      description: 'Title of the premium recover contacts page',
+    },
+    content: {
+      id: 'pages.premium.content',
+      defaultMessage: 'Content Backup',
+      description: 'Title of the premium content backup page',
+    },
+    og: {
+      id: 'pages.premium.og',
+      defaultMessage: 'Primal OG',
+      description: 'Title of the Primal OG page',
+    },
+    ogLegend: {
+      id: 'pages.premium.ogLegend',
+      defaultMessage: 'Primal Legend',
+      description: 'Title of the Primal Legend page',
+    },
+  },
+  subOptions: {
+    prices: {
+      m7: {
+        id: 'pages.premium.subOption.m7',
+        defaultMessage: '$7/month',
+        description: '$7 per month',
+      },
+      m6: {
+        id: 'pages.premium.subOption.m6',
+        defaultMessage: '$6/month',
+        description: '$6 per month',
+      },
+    },
+    durations: {
+      m3: {
+        id: 'pages.premium.duration.m3',
+        defaultMessage: '3 months',
+        description: '3 month duration',
+      },
+      m12: {
+        id: 'pages.premium.duration.m12',
+        defaultMessage: '12 months',
+        description: '12 month duration',
+      },
+    },
+    success: {
+      caption: {
+        id: 'pages.premium.success.caption',
+        defaultMessage: 'Success!',
+        description: 'Payment success caption',
+      },
+      m3: {
+        id: 'pages.premium.success.m3',
+        defaultMessage: 'You subscribed to Primal Premium for 3 months.',
+        description: 'Payment success description for 3 month plan',
+      },
+      m12: {
+        id: 'pages.premium.success.m12',
+        defaultMessage: 'You subscribed to Primal Premium for 12 months.',
+        description: 'Payment success description for 12 month plan',
+      },
+      legend: {
+        id: 'pages.premium.success.legend',
+        defaultMessage: 'You are now a Primal Legend.',
+        description: 'Payment success description for legends',
+      },
+    }
+  },
+  errors: {
+    nameTooShort: {
+      id: 'pages.premium.error.nameTooShort',
+      defaultMessage: 'Name needs to be at least 3 characters long',
+      description: 'Name is too short error',
+    },
+    nameUnavailable: {
+      id: 'pages.premium.error.nameUnavailable',
+      defaultMessage: 'Sorry, that name is currently unavailable',
+      description: 'Name is unavailable error',
+    },
+    nameNotChanged: {
+      id: 'pages.premium.error.nameNotChanged',
+      defaultMessage: 'Failed to change name',
+      description: 'Name is unavailable error',
+    },
+  }
 };

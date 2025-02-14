@@ -7,13 +7,14 @@ import { EmojiOption } from '../../types/primal';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
 import { useAccountContext } from '../../contexts/AccountContext';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const defaultTerm = 'face';
 
 const EmojiPickModal: Component<{
   id?: string,
   open: boolean,
-  onClose: (e: MouseEvent | KeyboardEvent) => void,
+  onClose: (e?: MouseEvent | KeyboardEvent) => void,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
 
@@ -56,9 +57,10 @@ const EmojiPickModal: Component<{
   };
 
   return (
-    <Modal
+    <AdvancedSearchDialog
       open={props.open}
-      onClose={props.onClose}
+      setOpen={(isOpen: boolean) => !isOpen && props.onClose && props.onClose()}
+      triggerClass={styles.hidden}
     >
       <div id={props.id} class={styles.zapEmojiChangeModal}>
         <EmojiPickHeader
@@ -78,7 +80,7 @@ const EmojiPickModal: Component<{
           }}
         />
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

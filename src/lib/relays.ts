@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { relayInit, Relay } from "nostr-tools";
+import { relayInit, Relay } from "../lib/nTools";
 import { relayConnectingTimeout } from "../constants";
 import { sendMessage } from "../sockets";
 import { NostrRelays } from "../types/primal";
@@ -23,42 +22,54 @@ type ConnectToRelay = (
   timeout: number,
   onConnect: (relay: Relay) => void,
   onFail: (relay: Relay, reasons: any) => void,
-) => void;
+  tryReconnecting: boolean,
+) => Promise<boolean>;
 
 export const connectToRelay: ConnectToRelay =
-  (relay, timeout, onConnect, onFail) => {
-    const tOut = setTimeout(() => {
-      relay.close();
-      onFail(relay, 'timeout');
-    }, timeout);
+  async (relay, timeout, onConnect, onFail, tryReconnecting) => {
+    // const tOut = setTimeout(() => {
+    //   relay.close();
+    //   onFail(relay, 'timeout');
+    // }, timeout);
 
-    relay.on('connect', () => {
-      logInfo('Connected to relay ', relay.url);
-      clearTimeout(tOut);
-      if (!reconnAttempts[relay.url]) {
-        reconnAttempts[relay.url] = 0
-      }
-      onConnect(relay);
-    })
+    // relay.on('connect', () => {
+    //   logInfo('Connected to relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   if (!reconnAttempts[relay.url]) {
+    //     reconnAttempts[relay.url] = 0
+    //   }
+    //   onConnect(relay);
+    // })
 
-    relay.on('disconnect', () => {
-      logInfo('Disconnected from relay ', relay.url);
-      clearTimeout(tOut);
-      relay.close();
-      onFail(relay, 'disconnect');
-    })
+    // relay.on('disconnect', () => {
+    //   logInfo('Disconnected from relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   relay.close();
+    //   onFail(relay, 'disconnect');
+    // })
 
-    relay.on('error', () => {
-      logError('Error connecting to relay ', relay.url);
-      clearTimeout(tOut);
-      relay.close();
-      onFail(relay, 'failed connection');
-    })
+    // relay.on('error', () => {
+    //   logError('Error connecting to relay ', relay.url);
+    //   clearTimeout(tOut);
+    //   relay.close();
+    //   onFail(relay, 'failed connection');
+    // })
+
+    relay.onclose = () => {
+      logInfo('Relay connection closed: ', relay);
+      onFail(relay, tryReconnecting ? 'disconnect' : 'close');
+    }
 
     try {
-      relay.connect();
+      logInfo('Connecting relay: ', relay);
+      await relay.connect();
+      logInfo('Connected to relay: ', relay);
+      onConnect(relay);
+      return true;
     } catch (e) {
       logError('Failed to initiate connection to relay ', e)
+      onFail(relay, 'failed connection');
+      return false;
     }
   };
 
@@ -66,6 +77,7 @@ export const connectRelays = async (
   relaySettings: NostrRelays,
   onConnect: (relay: Relay) => void,
   onFail: (relay: Relay, reasons: any) => void,
+  tryReconnecting = true,
 ) => {
 
   const urls = Object.keys(relaySettings);
@@ -74,9 +86,9 @@ export const connectRelays = async (
   for (let i=0; i < relays.length; i++) {
     const relay = relays[i];
 
-    if (relay.status === WebSocket.CLOSED) {
+    if (!relay.ws || relay.ws.readyState === WebSocket.CLOSED) {
       logInfo('Connecting to relay: ', relay.url);
-      connectToRelay(relay, relayConnectingTimeout, onConnect, onFail)
+      await connectToRelay(relay, relayConnectingTimeout, onConnect, onFail, tryReconnecting)
     }
   }
 };

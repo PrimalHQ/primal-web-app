@@ -1,25 +1,26 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useLocation } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
+import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { useMessagesContext } from '../../contexts/MessagesContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
-import FloatingNewPostButton from '../FloatingNewPostButton/FloatingNewPostButton';
 
 import styles from './NavMenu.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useMediaContext } from '../../contexts/MediaContext';
+import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
+import { useDMContext } from '../../contexts/DMContext';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
-  const messages = useMessagesContext();
+  const dms = useDMContext();
   const intl = useIntl();
   const loc = useLocation();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const links = [
     {
@@ -28,15 +29,25 @@ const NavMenu: Component< { id?: string } > = (props) => {
       icon: 'homeIcon',
     },
     {
+      to: '/reads',
+      label: intl.formatMessage(t.reads),
+      icon: 'readsIcon',
+    },
+    {
       to: '/explore',
       label: intl.formatMessage(t.explore),
       icon: 'exploreIcon',
     },
     {
-      to: '/messages',
+      to: '/dms',
       label: intl.formatMessage(t.messages),
       icon: 'messagesIcon',
-      bubble: () => messages?.messageCount || 0,
+      bubble: () => dms?.dmCount || 0,
+    },
+    {
+      to: '/bookmarks',
+      label: intl.formatMessage(t.bookmarks),
+      icon: 'bookmarkIcon',
     },
     {
       to: '/notifications',
@@ -52,21 +63,35 @@ const NavMenu: Component< { id?: string } > = (props) => {
       bubble: () => notifications?.downloadsCount || 0,
     },
     {
+      to: '/premium',
+      label: intl.formatMessage(t.premium),
+      icon: 'premiumIcon',
+      hiddenOnSmallScreens: true,
+      bubble: () => account?.premiumReminder ? 1 : 0,
+    },
+    {
       to: '/settings',
       label: intl.formatMessage(t.settings),
       icon: 'settingsIcon',
       hiddenOnSmallScreens: true,
       bubble: () => account?.sec ? 1 : 0,
     },
-    {
-      to: '/help',
-      label: intl.formatMessage(t.help),
-      icon: 'helpIcon',
-      hiddenOnSmallScreens: true,
-    },
   ];
 
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
+
+  const noReadsConfirm: ConfirmInfo = {
+    title: "Coming Soon",
+    description: "Primal does not have article creation capabilities yet. We recommend Highlighter to content creators. Would you like to try it?",
+    confirmLabel: "Yes, go to Highlighter",
+    abortLabel: "No Thanks",
+    onConfirm: () => {
+      window.open('https://highlighter.com', '_blank')?.focus();
+    },
+    onAbort: () => {
+      app?.actions.closeConfirmModal();
+    },
+  };
 
   return (
     <div id={props.id} class={styles.navMenu}>
@@ -84,26 +109,51 @@ const NavMenu: Component< { id?: string } > = (props) => {
           }
         </For>
       </nav>
-      <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages/')}>
+      <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages') && !loc.pathname.startsWith('/premium')}>
         <div class={styles.callToAction}>
-          <Show
-            when={isBigScreen()}
+          <Switch
             fallback={
-              <ButtonPrimary
-                id={props.id}
-                onClick={account?.actions?.showNewNoteForm}
+              <Show
+                when={isBigScreen()}
+                fallback={
+                  <ButtonPrimary
+                    id={props.id}
+                    onClick={account?.actions?.showNewNoteForm}
+                  >
+                    <div class={styles.postIcon}></div>
+                  </ButtonPrimary>
+                }
               >
-                <div class={styles.postIcon}></div>
-              </ButtonPrimary>
+                <ButtonPrimary
+                  id={props.id}
+                  onClick={account?.actions?.showNewNoteForm}
+                >
+                  {intl.formatMessage(tActions.newNote)}
+                </ButtonPrimary>
+              </Show>
             }
           >
-            <ButtonPrimary
-              id={props.id}
-              onClick={account?.actions?.showNewNoteForm}
-            >
-              {intl.formatMessage(tActions.newNote)}
-            </ButtonPrimary>
-          </Show>
+            <Match when={loc.pathname.startsWith('/reads') || loc.pathname.startsWith('/e/naddr')}>
+              <Show
+                when={isBigScreen()}
+                fallback={
+                  <ButtonPrimary
+                    id={props.id}
+                    onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                  >
+                    <div class={styles.postIcon}></div>
+                  </ButtonPrimary>
+                }
+              >
+                <ButtonPrimary
+                  id={props.id}
+                  onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                >
+                  {intl.formatMessage(tActions.newArticle)}
+                </ButtonPrimary>
+              </Show>
+            </Match>
+          </Switch>
         </div>
       </Show>
 

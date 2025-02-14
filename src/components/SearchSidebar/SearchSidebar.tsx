@@ -11,8 +11,10 @@ const SearchSidebar: Component<{ users: PrimalUser[] }> = (props) => {
 
   return (
     <>
-      <PeopleList people={props.users} label={
-        intl.formatMessage(t.sidebarCaption)}
+      <PeopleList
+        people={props.users}
+        label={intl.formatMessage(t.sidebarCaption)}
+        singleFile={true}
       />
     </>
   );

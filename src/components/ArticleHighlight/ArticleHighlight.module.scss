@@ -1,0 +1,192 @@
+.articleActionMenu {
+  height: 64px;
+  background-color: var(--background-input);
+  z-index: 99999;
+  position: absolute;
+  display: flex;
+  gap: 4px;
+  border-radius: var(--border-radius-small);
+  overflow: hidden;
+
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    background: none;
+    outline: none;
+    border: none;
+    padding: 8px;
+    margin: 0;
+    min-width: 68px;
+    border-radius: 0;
+
+    .iconCaption {
+      color: var(--text-primary);
+      text-align: center;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+    }
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+  }
+}
+
+.iconHighlight {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/highlight_create.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/highlight_create.svg) no-repeat 0/100%;
+}
+
+.iconHighlightQuote {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/highlight_quote.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/highlight_quote.svg) no-repeat 0/100%;
+}
+
+.iconHighlightComment {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/highlight_comment.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/highlight_comment.svg) no-repeat 0/100%;
+}
+
+.iconHighlightRemove {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/highlight_remove.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/highlight_remove.svg) no-repeat 0/100%;
+}
+
+.iconHighlightCopy {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/highlight_copy.svg) no-repeat 0/100%;
+  mask: url(../../assets/icons/copy.svg) no-repeat 0/100%;
+}
+
+.articleHighlightComments {
+  position: absolute;
+  // bottom: 20px;
+  left: 0;
+  padding: 0;
+  width: 308px;
+  // max-height: calc(100% - 200px);
+  overflow-y: scroll;
+  background-color: var(--background-input);
+  border-radius: 0 8px 8px 0;
+  z-index: var(--z-index-lifted);
+
+  &::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 20px;
+    gap: 6px;
+    width: 100%;
+
+    .author {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .iconHighlight {
+        margin: 4px;
+      }
+    }
+    .caption {
+      padding-left: 36px;
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+
+      .name {
+        font-weight: 700;
+      }
+    }
+  }
+
+  .highlightComment {
+    padding: 12px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid var(--subtile-devider);
+
+    &:first-child {
+      border-top: none;
+    }
+
+    .commentAuthor {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 16px;
+
+      .name {
+        margin-left: 8px;
+        font-weight: 700;
+        max-width: 160px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .time {
+        color: var(--text-tertiary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 16px;
+        margin-left: auto;
+      }
+    }
+
+    .commentContent {
+      padding-left: 36px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+}
+
+.suffix {
+  margin-left: 4px;
+}
+
+.dots {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+}

@@ -4,10 +4,11 @@
   align-items: center;
   border-radius: 18px;
   background-color: var(--background-header-input);
-  width: 300px;
+  width: var(--search-input-width);
   height: 36px;
   margin-left: 8px;
   margin-bottom: 0;
+
 
   &:hover {
     input {
@@ -20,7 +21,7 @@
   }
 
   input {
-    width: 240px;
+    width: calc(var(--search-input-width) - 60px);
     height: 36px;
     font-weight: 700;
     font-size: 16px;
@@ -56,6 +57,14 @@
     -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
     mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
   }
+
+  &.wide {
+    width: 600px;
+
+    input {
+      width: 100%;
+    }
+  }
 }
 
 .searchIconDark {
@@ -70,7 +79,7 @@
 
 .searchHolder {
   position: relative;
-  width: 316px;
+  width: calc(var(--search-input-width) + 16px);
   padding-top: 8px;
   padding-bottom: 8px;
   border-radius: 12px;
@@ -78,16 +87,27 @@
   &.focused {
     background-color: var(--background-input);
   }
+
+  &.wideHolder {
+    width: 608px;
+  }
 }
 
 .searchSuggestions {
   margin-top: 8px;
-  width: 316px;
+  width: calc(var(--search-input-width) + 16px);
   visibility: visible;
+  display: block;
 
   &.hidden {
+    display: none;
     visibility: hidden;
     height: 0;
+  }
+
+  &.wide {
+    margin-top: 28px;
+    width: 100%;
   }
 }
 

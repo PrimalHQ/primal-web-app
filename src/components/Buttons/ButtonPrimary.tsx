@@ -1,6 +1,6 @@
 import { Component, JSXElement, Match, Show, Switch } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { Button } from "@kobalte/core";
+import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
 
@@ -12,7 +12,7 @@ const ButtonPrimary: Component<{
   type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
   return (
-    <Button.Root
+    <Button
       id={props.id}
       class={styles.primary}
       onClick={props.onClick}
@@ -20,7 +20,7 @@ const ButtonPrimary: Component<{
       type={props.type}
     >
       {props.children}
-    </Button.Root>
+    </Button>
   )
 }
 

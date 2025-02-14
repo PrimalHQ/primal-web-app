@@ -1,14 +1,9 @@
-import { A } from '@solidjs/router';
-import { Component, createMemo, createSignal, Show } from 'solid-js';
-import { PrimalNote, PrimalRepost, PrimalUser } from '../../types/primal';
-import ParsedNote from '../ParsedNote/ParsedNote';
-import NoteFooter from './NoteFooter/NoteFooter';
-import NoteHeader from './NoteHeader/NoteHeader';
+import { Component, createMemo, Show } from 'solid-js';
+import { PrimalNote } from '../../types/primal';
+
 
 import styles from './Note.module.scss';
-import { useThreadContext } from '../../contexts/ThreadContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { authorName, nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import MentionedUserLink from './MentionedUserLink/MentionedUserLink';

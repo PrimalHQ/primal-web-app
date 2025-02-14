@@ -1,5 +1,4 @@
 .ReactionsModal {
-  position: fixed;
   width: 632px;
   color: var(--text-primary);
   background-color: var(--background-input);
@@ -7,53 +6,12 @@
 
   display: flex;
   flex-direction: column;
-  padding: 20px;
-
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 24px;
-
-    .title {
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-
-      .caption {
-        font-weight: 800;
-        font-size: 18px;
-        line-height: 18px;
-        color: var(--text-secondary);
-      }
-    }
-
-    .close {
-      border: none;
-      outline: none;
-      padding: 0;
-      margin: 0;
-      box-shadow: none;
-      width: 20px;
-      height: 20px;
-      display: inline-block;
-      margin: 0px 0px;
-      background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
-
-      &:hover {
-        background-color: var(--text-primary);
-      }
-    }
-  }
 
   .description {
     color: var(--text-secondary);
     font-size: 17px;
     font-weight: 600;
     line-height: 24px;
-
 
     .tabs {
       position: relative;
@@ -73,7 +31,7 @@
     .tab {
       position: relative;
       display: inline-block;
-      padding-inline: 14px;
+      padding-inline: 12px;
       padding-block: 2px;
       border: none;
       background: none;
@@ -107,13 +65,14 @@
       height: 440px;
       overflow-x: hidden;
       overflow-y: scroll;
+      padding-right: 8px;
       @keyframes fadeIn {
         from {
-            opacity:0;
+          opacity:0;
         }
 
         to {
-            opacity:1;
+          opacity:1;
         }
 
       }
@@ -235,7 +194,7 @@
       font-size: 15px;
       font-weight: 400;
       line-height: 18px;
-      max-width: 248px;
+      max-width: 448px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -285,4 +244,21 @@
       white-space: nowrap;
     }
   }
+}
+
+.title {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  .caption {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+  }
+}
+
+.hidden {
+  display: none;
 }

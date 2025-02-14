@@ -3,7 +3,7 @@ import { Component, createEffect, createSignal } from 'solid-js';
 import Modal from '../Modal/Modal';
 import { useToastContext } from '../Toaster/Toaster';
 
-import { nip19 } from 'nostr-tools';
+import { nip19 } from '../../lib/nTools';
 
 
 import { pin as tPin, actions as tActions } from '../../translations';
@@ -16,6 +16,7 @@ import { decryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
 import { logError } from '../../lib/logger';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { useAccountContext } from '../../contexts/AccountContext';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const EnterPinModal: Component<{
   id?: string,
@@ -82,14 +83,17 @@ const EnterPinModal: Component<{
   };
 
   return (
-    <Modal open={props.open} opaqueBackdrop={true}>
-      <div id={props.id} class={styles.modal}>
-        <button class={styles.xClose} onClick={props.onAbort}>
-          <div class={styles.iconClose}></div>
-        </button>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+      title={
         <div class={styles.title}>
           {intl.formatMessage(tPin.enterTitle)}
         </div>
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.modal}>
         <div class={styles.description}>
           {intl.formatMessage(tPin.enter)}
         </div>
@@ -119,7 +123,7 @@ const EnterPinModal: Component<{
           </ButtonSecondary>
         </div>
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

@@ -56,3 +56,115 @@
   margin-top: 34px;
   z-index: 10px;
 }
+
+.headingPicks {
+  @include heading();
+  font-weight: 600;
+  text-transform: capitalize;
+  height: fit-content;
+  margin-bottom: 12px;
+  padding-bottom: 0px;
+}
+
+.headingReads {
+  @include heading();
+  font-weight: 600;
+  text-transform: none;
+  height: fit-content;
+  margin-bottom: 12px;
+  padding-bottom: 0px;
+}
+
+.readsSidebar {
+  margin-left: -8px;
+
+  .section, .sectionTopPicks, .sectionTopics {
+    margin-bottom: 28px;
+
+    >a:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .sectionTopPicks {
+    min-height: 356px;
+  }
+
+  .sectionTopics {
+    min-height: 150px;
+  }
+
+  .topic {
+    display: inline-block;
+    background-color: var(--background-input);
+    padding: 6px 10px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    margin-right: 8px;
+  }
+}
+
+.articleSidebar {
+  .section, .sectionTopPicks, .sectionTopics {
+    margin-bottom: 28px;
+    max-height: calc(100vh - 240px);
+    overflow-y: scroll;
+    width: 260px;
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+
+    >a:last-child {
+      border-bottom: none;
+    }
+
+    .totalZaps {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+
+      .totalZapsIcon {
+        display: inline-block;
+        width: 18px;
+        height: 32px;
+        background: var(--active-zap);
+        -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0px 0 / 19px 32px;
+        mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0px 0 / 19px 32px;
+      }
+
+      .amount {
+        color: var(--text-primary);
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 32px;
+      }
+
+      .unit {
+        color: var(--text-primary);
+        font-size: 22px;
+        font-weight: 400;
+        line-height: 32px;
+      }
+    }
+  }
+
+  .topic {
+    display: inline-block;
+    background-color: var(--background-input);
+    padding: 6px 10px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    margin-right: 8px;
+  }
+}

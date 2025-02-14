@@ -4,9 +4,17 @@
   .logo {
     background-image: var(--logo);
     background-size: contain;
-    margin-right: 12px;
-    width: 40px;
-    height: 40px;
+    margin-right: 10px;
+    width: 35px;
+    height: 35px;
+  }
+
+  .logoBig {
+    background-image: var(--logo-big);
+    background-size: contain;
+    margin-right: 10px;
+    width: 124px;
+    height: 36px;
   }
 
   span {
@@ -28,12 +36,29 @@
     width: 36px;
     height: 36px;
   }
+
+  .logoBig {
+    background-image: var(--logo-big);
+    background-size: contain;
+    margin-right: 0px;
+    width: 124px;
+    height: 36px;
+  }
 }
 
 @media only screen and (max-width: 1300px) {
   .branding {
     .logo {
       margin-right: 0px;
+      width: 32px;
+      height: 32px;
+    }
+
+
+    .logoBig {
+      background-image: var(--logo);
+      background-size: contain;
+      margin-right: 10px;
       width: 32px;
       height: 32px;
     }

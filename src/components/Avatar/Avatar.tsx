@@ -8,44 +8,59 @@ import NoteImage from '../NoteImage/NoteImage';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './Avatar.module.scss';
+import { useAppContext } from '../../contexts/AppContext';
+import { LegendCustomizationConfig } from '../../lib/premium';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "xxs" | "xss" | "xs" | "vvs" | "vs" | "sm" | "md" | "lg" | "xl" | "xxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
   showCheck?: boolean,
   zoomable?: boolean,
+  showBorderRing?: boolean,
+  legendConfig?: LegendCustomizationConfig,
 }> = (props) => {
 
   const media = useMediaContext();
+  const app = useAppContext();
 
   const [isCached, setIsCached] = createSignal(false);
 
   const selectedSize = props.size || 'sm';
 
   const avatarClass = {
+    nano: styles.nanoAvatar,
+    micro: styles.microAvatar,
     xxs: styles.xxsAvatar,
     xss: styles.xssAvatar,
     xs: styles.xsAvatar,
     vvs: styles.vvsAvatar,
+    vs2: styles.vs2Avatar,
     vs: styles.vsAvatar,
     sm: styles.smallAvatar,
     md: styles.midAvatar,
+    ml: styles.mlAvatar,
+    mll: styles.mllAvatar,
     lg: styles.largeAvatar,
     xl: styles.extraLargeAvatar,
     xxl: styles.xxlAvatar,
   };
 
   const missingClass = {
+    nano: styles.nanoMissing,
+    micro: styles.microMissing,
     xxs: styles.xxsMissing,
     xss: styles.xssMissing,
     xs: styles.xsMissing,
     vvs: styles.vvsMissing,
+    vs2: styles.vs2Missing,
     vs: styles.vsMissing,
     sm: styles.smallMissing,
     md: styles.midMissing,
+    ml: styles.mlMissing,
+    mll: styles.mllMissing,
     lg: styles.largeMissing,
     xl: styles.extraLargeMissing,
     xxl: styles.xxlMissing,
@@ -54,9 +69,9 @@ const Avatar: Component<{
   const imgError = (event: any) => {
     const image = event.target;
 
-    let src = props.user?.picture || props.src;
+    let src: string = props.user?.picture || props.src || '';
 
-    if (image.src === src) {
+    if (image.src === src || image.src.endsWith(src)) {
       src = defaultAvatar;
     }
 
@@ -65,7 +80,46 @@ const Avatar: Component<{
     return true;
   }
 
+  const legendClass = () => {
+    if (props.user){
+      const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
+
+      if (legendConfig) {
+        return legendConfig.avatar_glow ? styles.legend : '';
+      }
+    }
+
+    return '';
+
+  }
+
   const highlightClass = () => {
+    if (props.user){
+      const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
+
+      if (legendConfig) {
+        const style = legendConfig.style
+
+        const showHighlight = style !== '' &&
+          legendConfig.avatar_glow;
+
+        const showGlow = style !== '' &&
+          legendConfig.avatar_glow;
+
+        let klass = '';
+
+        if (showHighlight) {
+          klass += `${styles.legend} ${styles[`legend_${style}`]}`;
+        }
+
+        if (showGlow) {
+          klass += ` ${styles.legendGlow} ${styles[`legend_glow_${style}`]}`;
+        }
+
+        return klass;
+      }
+    }
+
     if (props.highlightBorder) {
       return styles.highlightBorder;
     }
@@ -77,13 +131,18 @@ const Avatar: Component<{
     let size: MediaSize = 'm';
 
     switch (selectedSize) {
+      case 'nano':
+      case 'micro':
       case 'xxs':
       case 'xss':
       case 'xs':
       case 'vvs':
+      case 'vs2':
       case 'vs':
       case 'sm':
       case 'md':
+      case 'ml':
+      case 'mll':
       case 'lg':
         size = 's';
         break;
@@ -123,10 +182,16 @@ const Avatar: Component<{
     return media?.actions.getMedia(src, 'o');
   };
 
+  const imageThumb = () => {
+    const src = props.user?.picture || props.src || defaultAvatar;
+
+    return media?.actions.getMedia(src, 'm') || media?.actions.getMedia(src, 'o') || src;
+  };
+
   return (
     <div
       id={props.id}
-      class={`${avatarClass[selectedSize]} ${highlightClass()}`}
+      class={`${avatarClass[selectedSize]} ${legendClass()} ${highlightClass()} ${props.showBorderRing ? styles.borderRing : ''}`}
       data-user={props.user?.pubkey}
     >
       <Show
@@ -147,6 +212,8 @@ const Avatar: Component<{
               src={imageSrc()}
               altSrc={props.user?.picture || props.src}
               onError={imgError}
+              mediaThumb={imageThumb()}
+              ignoreRatio={true}
             />
           </Show>
         </div>

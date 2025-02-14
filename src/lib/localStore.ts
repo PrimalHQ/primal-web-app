@@ -1,5 +1,6 @@
-import { UserStats } from "../contexts/ProfileContext";
-import { EmojiOption, NostrRelays, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation } from "../types/primal";
+import { TopicStat } from "../megaFeeds";
+import { convertToUser, userName } from "../stores/profile";
+import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 
 export type LocalStore = {
   following: string[],
@@ -10,9 +11,12 @@ export type LocalStore = {
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
+  homeFeeds: PrimalArticleFeed[],
+  readsFeeds: PrimalArticleFeed[],
   theme: string,
   homeSidebarSelection: SelectionOption | undefined,
   userProfile: PrimalUser | undefined,
+  bookmarks: string[],
   recomended: {
     profiles: PrimalUser[],
     stats: Record<string, UserStats>,
@@ -21,11 +25,23 @@ export type LocalStore = {
     profiles: Record<UserRelation, Record<string, PrimalUser>>,
     counts: Record<string, SenderMessageCount>,
   },
+  dmConversations: {
+    profiles: Record<string, PrimalUser>,
+    counts: Record<string, SenderMessageCount>,
+  },
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
   uploadTime: Record<string, number>,
   selectedFeed: PrimalFeed | undefined,
+  selectedHomeFeed: PrimalArticleFeed | undefined,
+  selectedReadsFeed: PrimalArticleFeed | undefined,
+  selectedBookmarksFeed: string | undefined,
+  animated: boolean,
+  dmLastConversation: string | undefined,
+  dmLastRelation: UserRelation | undefined,
+  premiumReminder: number,
+  dvms: PrimalDVM[] | undefined,
 };
 
 export type UploadTime = {
@@ -53,8 +69,11 @@ export const emptyStorage: LocalStore = {
   relaySettings: {},
   likes: [],
   feeds: [],
+  homeFeeds: [],
+  readsFeeds: [],
   msgContacts: { profiles: { other: {}, follows: {}, any: {} }, counts: {} },
-  theme: 'sunset',
+  dmConversations: { profiles: {}, counts: {} },
+  theme: 'sunrise',
   homeSidebarSelection: undefined,
   userProfile: undefined,
   recomended: { profiles: [], stats: {} },
@@ -63,6 +82,15 @@ export const emptyStorage: LocalStore = {
   noteDraftUserRefs: {},
   uploadTime: defaultUploadTime,
   selectedFeed: undefined,
+  bookmarks: [],
+  animated: true,
+  selectedHomeFeed: undefined,
+  selectedReadsFeed: undefined,
+  selectedBookmarksFeed: undefined,
+  dmLastConversation: undefined,
+  dmLastRelation: undefined,
+  premiumReminder: 0,
+  dvms: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -172,6 +200,28 @@ export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {
   setStorage(pubkey, store);
 };
 
+export const saveHomeFeeds = (pubkey: string | undefined, feeds: PrimalArticleFeed[]) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.homeFeeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
+
+export const saveReadsFeeds = (pubkey: string | undefined, feeds: PrimalArticleFeed[]) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.readsFeeds = [ ...feeds ];
+
+  setStorage(pubkey, store);
+};
+
 export const saveTheme = (pubkey: string | undefined, theme: string) => {
   if (!pubkey) {
     return;
@@ -179,6 +229,17 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
   const store = getStorage(pubkey);
 
   store.theme = theme;
+
+  setStorage(pubkey, store);
+};
+
+export const saveAnimated = (pubkey: string | undefined, animated: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.animated = animated;
 
   setStorage(pubkey, store);
 };
@@ -343,6 +404,27 @@ export const readHomeSidebarSelection = (pubkey: string | undefined) => {
   return selection ? selection as SelectionOption : undefined;
 };
 
+export const savePremiumReminder = (pubkey: string | undefined, timestamp: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.premiumReminder = timestamp;
+
+  setStorage(pubkey, store);
+}
+
+export const readPremiumReminder = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return undefined;
+  }
+  const store = getStorage(pubkey)
+
+  return store.premiumReminder;
+};
+
 export const readSecFromStorage = () => {
   return localStorage.getItem('primalSec') || undefined;
 };
@@ -398,7 +480,6 @@ export const saveMsgContacts = (pubkey: string | undefined, contacts: Record<str
   setStorage(pubkey, store);
 }
 
-
 export const loadMsgContacts = (pubkey: string) => {
   const store = getStorage(pubkey)
 
@@ -406,20 +487,174 @@ export const loadMsgContacts = (pubkey: string) => {
 };
 
 
-export const fetchStoredFeed = (pubkey: string | undefined) => {
+export const saveDmConversations = (pubkey: string | undefined, contacts: Record<string, PrimalUser>, counts: Record<string, SenderMessageCount>) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  if (!store.dmConversations) {
+    store.dmConversations = { profiles: {}, counts: {} };
+  }
+
+  store.dmConversations.profiles = { ...store.dmConversations.profiles, ...contacts };
+  store.dmConversations.counts = { ...store.dmConversations.counts, ...counts };
+
+  setStorage(pubkey, store);
+}
+
+export const loadDmCoversations = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmConversations || { profiles: {}, counts: {} };
+};
+
+export const loadLastDMConversations = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmLastConversation;
+};
+
+export const saveLastDMConversations = (pubkey: string, contactPubkey: string) => {
+  const store = getStorage(pubkey)
+  store.dmLastConversation = contactPubkey;
+  setStorage(pubkey, store);
+};
+
+export const loadLastDMRelation = (pubkey: string) => {
+  const store = getStorage(pubkey)
+
+  return store.dmLastRelation;
+};
+
+export const saveLastDMRelation = (pubkey: string, relation: UserRelation) => {
+  const store = getStorage(pubkey)
+  store.dmLastRelation = relation;
+  setStorage(pubkey, store);
+};
+
+export const fetchStoredFeed = (pubkey: string | undefined, type: 'home' | 'reads') => {
   if (!pubkey) return undefined;
 
   const store = getStorage(pubkey)
 
-  return store.selectedFeed;
+  if (type === 'reads') {
+    return store.selectedReadsFeed;
+  }
+
+  return store.selectedHomeFeed;
 };
 
-export const saveStoredFeed = (pubkey: string | undefined, feed: PrimalFeed) => {
+export const saveStoredFeed = (pubkey: string | undefined, type: 'home' | 'reads', feed: PrimalArticleFeed) => {
   if (!pubkey) return;
 
   const store = getStorage(pubkey);
 
-  store.selectedFeed = { ...feed };
+  if (type === 'home') {
+    store.selectedHomeFeed = { ...feed };
+  }
+  else if (type === 'reads') {
+    store.selectedReadsFeed = { ...feed };
+  }
 
   setStorage(pubkey, store);
+};
+
+
+
+export const fetchBookmarksFeed = (pubkey: string | undefined) => {
+  if (!pubkey) return undefined;
+
+  const store = getStorage(pubkey)
+
+  return store.selectedBookmarksFeed;
+};
+
+export const saveBookmarksFeed = (pubkey: string | undefined, kind: string) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.selectedBookmarksFeed = kind;
+
+  setStorage(pubkey, store);
+};
+
+export const saveBookmarks = (pubkey: string | undefined, bookmarks: string[]) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.bookmarks = [ ...bookmarks ];
+
+  setStorage(pubkey, store);
+};
+
+export const readBookmarks = (pubkey: string | undefined) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey)
+
+  return store.bookmarks || [];
+};
+
+
+export const saveDVMs = (pubkey: string | undefined, dvms: PrimalDVM[]) => {
+  if (!pubkey) return;
+
+  const store = getStorage(pubkey);
+
+  store.dvms = [ ...dvms ];
+
+  setStorage(pubkey, store);
+};
+
+export const readDVMs = (pubkey: string | undefined) => {
+  if (!pubkey) return [];
+
+  const store = getStorage(pubkey)
+
+  return store.dvms || [];
+};
+
+export const saveNostrStats = (stats: NostrStats) => {
+  localStorage.setItem('nostrStats', JSON.stringify(stats))
+};
+
+export const loadNostrStats = () => {
+  const stats = localStorage.getItem('nostrStats') ||
+    JSON.stringify({
+      users: 0,
+      pubkeys: 0,
+      pubnotes: 0,
+      reactions: 0,
+      reposts: 0,
+      any: 0,
+      zaps: 0,
+      satszapped: 0,
+    });
+
+  return JSON.parse(stats) as NostrStats;
+};
+
+export const saveTrendingUsers = (users: PrimalUser[]) => {
+  localStorage.setItem('trendingUsers', JSON.stringify(users));
+};
+
+export const loadTrendingUsers = () => {
+  const stored = JSON.parse(localStorage.getItem('trendingUsers') || '[]');
+
+  return stored as PrimalUser[];
+};
+
+
+export const saveHotTopics = (topics: TopicStat[]) => {
+  localStorage.setItem('hotTopics', JSON.stringify(topics));
+};
+
+export const loadHotTopics = () => {
+  const stored = JSON.parse(localStorage.getItem('hotTopics') || '[]');
+
+  return stored as TopicStat[];
 };

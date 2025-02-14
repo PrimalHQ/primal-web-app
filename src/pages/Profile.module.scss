@@ -1,7 +1,17 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 .fullHeader {
   position: relative;
   background-color: var(--background-site);
-  padding-bottom: 4px;
+  padding-bottom: 8px;
 }
 
 .editProfileButton {
@@ -17,28 +27,59 @@
   height: 466px;
 }
 
+[data-animated="true"] {
+  .banner, .profileActions, .bigAbout, .smallAbout {
+    opacity: 0;
+    animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  }
+  .banner {
+    animation-delay: var(--profile-banner-animation-delay);
+  }
+  .avatar {
+    >div {
+      opacity: 0;
+      animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+      animation-delay: var(--profile-avatar-animation-delay);
+    }
+  }
+  .profileActions, .bigAbout, .smallAbout {
+    animation-delay: var(--profile-card-animation-delay);
+  }
+}
+
 .banner {
   width: 100%;
-  height: 214px;
+  height: 200px;
   overflow: hidden;
 
   img {
     width: 100%;
-    height: 214px;
+    height: 200px;
     object-fit: cover;
   }
+
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-banner-animation-delay);
 }
 
 .userImage {
   position: absolute;
-  top: 148px;
-  left: 15px;
-  overflow: hidden;
+  top: 140px;
+  left: 14px;
+  // overflow: hidden;
+  z-index: var(--z-index-floater);
   .avatar {
-    border: solid 4px var(--background-site);
-    border-radius: 50%;
-    background-color: var(--background-site);
+    // border: solid 4px var(--background-site);
+    // border-radius: 50%;
+    // background-color: var(--background-site);
+    // >div {
+      // opacity: 0;
+      // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+      // animation-delay: var(--profile-avatar-animation-delay);
+    // }
   }
+
 }
 
 .keyIcon {
@@ -82,15 +123,35 @@
 }
 
 .profileActions {
+  position: relative;
+  z-index: var(--z-index-header);
   display: flex;
   justify-content: right;
-  padding-top: 20px;
+  padding-top: 12px;
   padding-right: 8px;
   padding-bottom: 20px;
-  height: 76px;
-  >button, >div {
+  >div {
     margin-left: 8px;
+    height: 36px;
   }
+
+  button {
+    display: flex;
+    align-self: center;
+    justify-content: center;
+    margin-left: 8px;
+    height: 36px;
+  }
+
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
+}
+
+.profileAboutHolder {
+  display: flex;
+  justify-content: space-between;
+  padding-block: 0;
 }
 
 @mixin smallButton {
@@ -163,43 +224,43 @@
 }
 
 .zapIcon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   margin: 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/feed_zap.svg) no-repeat 0px / 20px;
-  mask: url(../assets/icons/feed_zap.svg) no-repeat 0px / 20px;
+  -webkit-mask: url(../assets/icons/feed_zap_2.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/feed_zap_2.svg) no-repeat 0px / 18px;
 }
 
 .qrIcon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: inline-block;
   margin: 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 20px;
-  mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 20px;
+  -webkit-mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 16px;
+  mask: url(../assets/icons/qr_code.svg) no-repeat 0px / 16px;
 }
 
 .contextIcon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   margin: 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/context.svg) no-repeat 0px / 20px;
-  mask: url(../assets/icons/context.svg) no-repeat 0px / 20px;
+  -webkit-mask: url(../assets/icons/context.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/context.svg) no-repeat 0px / 18px;
 }
 
 .messageIcon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: inline-block;
   margin: 0px;
   background-color: var(--text-primary);
-  -webkit-mask: url(../assets/icons/messages.svg) no-repeat 0px / 20px;
-  mask: url(../assets/icons/messages.svg) no-repeat 0px / 20px;
+  -webkit-mask: url(../assets/icons/messages.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/messages.svg) no-repeat 0px / 18px;
 }
 
 .addFeedIcon {
@@ -236,141 +297,256 @@
   color: white;
 }
 
+.profileCard {
+  padding-top: 8px;
+  padding-inline: 20px;
+}
 
-.profileVerification {
-  display: block;
-  margin-inline: 20px;
-  min-height: 52px;
-  margin-top: 14px;
+.bigAbout {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: flex-start;
+  align-items: stretch;
 
-  .basicInfo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
+}
 
-    .name {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      max-width: 60%;
+.smallAbout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
 
-      .text {
-        color: var(--text-primary);
-        font-size: 20px;
-        line-height: 20px;
-        font-weight: 700;
-        height: 26px;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-      }
+  // opacity: 0;
+  // animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+  // animation-delay: var(--profile-card-animation-delay);
 
-      .followsBadge {
-        min-width: 80px;
-      }
-
-      .vc {
-        width: 20px;
-      }
-    }
-
-    .joined {
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 16px;
-      text-align: right;
-      color: var(--text-tertiary-2);
-    }
-
-  }
-
-  .verificationInfo {
+  .columnLeft {
+    width: 60%;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     align-items: flex-start;
-    color: var(--text-tertiary-2);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 16px;
-    margin-top: 2px;
-    margin-bottom: 16px;
-    .verified {
+    gap: 8px;
+
+    .nipLine {
       display: flex;
-      align-items: center;
-      .nip05 {
-        width: 100%;
-        overflow: hidden;
-      }
     }
   }
-
-  .publicKey {
+  .columnRight {
+    width: 40%;
     display: flex;
-    height: 16px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 8px;
+  }
+}
+
+.basicInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.basicInfoName {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+
+  .text {
+    color: var(--text-primary);
+    font-size: 20px;
+    line-height: 23px;
+    font-weight: 700;
+
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+  }
+
+  .followsBadge {
+    min-width: 80px;
+  }
+
+  .vc {
+    // width: 20px;
+    // height: 20px;
+  }
+}
+
+.joined {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: right;
+  color: var(--text-tertiary-2);
+}
+
+.followings {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+
+  .stats {
+    display: flex;
+    justify-content: flex-end;
     align-items: center;
-    color: var(--text-tertiary-2);
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 16px;
+    gap: 4px;
+    width: fit-content;
 
-    .npub {
-      color: var(--text-tertiary-2);
-      text-align: left;
-      border: none;
-      margin: 0;
-      padding: 0;
-      background-color: unset;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-      font-weight: 400;
+    background: none;
+    margin: 0;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+    border: none;
+
+    .number {
+      color: var(--text-primary);
       font-size: 14px;
-      line-height: 16px;
-      display: flex;
+      font-weight: 600;
+      line-height: 20px;
+    }
+    .label {
+      color: var(--text-tertiary-2);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
 
-      .copyIcon {
-        background-color: var(--accent-2);
-      }
-
-      &:hover {
-        .copyIcon {
-          background-color: var(--text-primary);
-        }
-      }
-
-      &:focus {
-        outline: none;
-        box-shadow: none;
+    &:hover {
+      .label {
+        color: var(--text-secondary);
       }
     }
   }
+}
 
+.publicKey {
+  display: flex;
+  height: 16px;
+  align-items: center;
+  color: var(--text-tertiary-2);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 16px;
+
+  .npub {
+    color: var(--text-tertiary-2);
+    text-align: left;
+    border: none;
+    margin: 0;
+    padding: 0;
+    background-color: unset;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 16px;
+    display: flex;
+
+    .copyIcon {
+      background-color: var(--accent-2);
+    }
+
+    &:hover {
+      .copyIcon {
+        background-color: var(--text-primary);
+      }
+    }
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+
+
+.verificationInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-tertiary-2);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  .verified {
+    display: flex;
+    align-items: center;
+    .nip05 {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .followsBadge {
+      min-width: 80px;
+    }
+  }
 }
 
 .profileLinks {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-inline: 20px;
-  margin-block: 12px;
+}
 
-  .website {
-    font-weight: 400;
+.website {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  >a {
+    max-width: 350px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: normal;
+  }
+}
+
+.commonFollows {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  padding-right: 12px;
+
+  .label {
+    color: var(--text-tertiary-2);
     font-size: 14px;
-    line-height: 20px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .avatars {
     display: flex;
-    align-items: center;
-    >a {
-      max-width: 350px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      word-wrap: normal;
+    flex-direction: row-reverse;
+    .avatar {
+      margin-right: -10px;
+      transition: margin 150ms ease-in-out;
+      border-radius: 12px;
+      // border: 1px solid var(--background-site);
+    }
+
+    &:hover {
+      .avatar {
+        margin-right: 1px;
+      }
     }
   }
 }
 
 .profileAbout {
-  margin-inline: 20px;
   font-weight: 400;
   font-size: 14px;
   line-height: 20px;
@@ -439,7 +615,7 @@
 }
 .desktopAvatar {
   display: block;
-  min-height: 142px;
+  min-height: 128px;
 }
 .addToFeedButton {
   display: block;

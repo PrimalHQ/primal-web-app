@@ -7,25 +7,26 @@
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+
 .netstats {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   grid-column-gap: 24px;
   grid-row-gap: 24px;
 
   .netstat {
     .number {
-      font-size: 22px;
+      font-size: 15px;
       font-weight: 400;
-      line-height: 28px;
+      line-height: 20px;
       color: var(--text-primary);
     }
 
     .label {
-      font-size: 15px;
+      font-size: 12px;
       font-weight: 400;
-      line-height: 20px;
+      line-height: 16px;
       color: var(--text-tertiary);
       text-transform: lowercase;
     }

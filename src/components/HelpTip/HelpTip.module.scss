@@ -1,4 +1,16 @@
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .helpIcon {
+  display: inline-block;
   width: 16px;
   height: 16px;
   background-color: var(--text-tertiary);
@@ -15,7 +27,7 @@
   margin-inline: 8px;
   z-index: var(--z-index-lifted);
 
-  .content {
+  .content, .aboveContent {
     display: none;
     position: absolute;
     top: 22px;
@@ -30,13 +42,21 @@
     padding-inline: 14px;
     padding-block: 12px;
     border-radius: 8px;
+    animation: contentShow 200ms ease-out;
+    z-index: var(--z-index-lifted);
+  }
+
+  .aboveContent {
+    top: unset;
+    bottom: 22px;
+    left: 0px;
   }
 
   &:hover {
     .helpIcon {
       background-color: var(--text-secondary);
     }
-    .content {
+    .content, .aboveContent {
       display: block;
     }
   }

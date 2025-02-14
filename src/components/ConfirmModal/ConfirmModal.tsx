@@ -1,14 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { zapNote } from '../../lib/zap';
-import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
-import { PrimalNote } from '../../types/primal';
-import { debounce } from '../../utils';
+import { Component, Show } from 'solid-js';
 import Modal from '../Modal/Modal';
-import { useToastContext } from '../Toaster/Toaster';
 
 import { confirmDefaults as t } from '../../translations';
 
@@ -16,6 +8,7 @@ import styles from './ConfirmModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const ConfirmModal: Component<{
   id?: string,
@@ -23,7 +16,7 @@ const ConfirmModal: Component<{
   title?: string,
   description?: string,
   confirmLabel?: string,
-  abortLablel?: string
+  abortLabel?: string
   onConfirm?: () => void,
   onAbort?: () => void,
 }> = (props) => {
@@ -31,11 +24,18 @@ const ConfirmModal: Component<{
   const intl = useIntl();
 
   return (
-    <Modal open={props.open} onClose={props.onAbort}>
-      <div id={props.id} class={styles.feedsRestoreModal}>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+      title={
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}
         </div>
+      }
+      triggerClass={styles.hidden}
+    >
+      <div id={props.id} class={styles.feedsRestoreModal}>
+
         <div class={styles.feedConfirmationDescription}>
           {props.description}
         </div>
@@ -53,13 +53,12 @@ const ConfirmModal: Component<{
               onClick={props.onAbort}
               light={true}
             >
-              {props.abortLablel || intl.formatMessage(t.abort)}
+              {props.abortLabel || intl.formatMessage(t.abort)}
             </ButtonSecondary>
           </Show>
         </div>
       </div>
-
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

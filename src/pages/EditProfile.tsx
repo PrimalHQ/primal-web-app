@@ -24,6 +24,8 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import Uploader from '../components/Uploader/Uploader';
 import { triggerImportEvents } from '../lib/notes';
 import { APP_ID } from '../App';
+import { useSettingsContext } from '../contexts/SettingsContext';
+import { useAppContext } from '../contexts/AppContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -35,6 +37,8 @@ const EditProfile: Component = () => {
   const media = useMediaContext();
   const account = useAccountContext();
   const toast = useToastContext();
+  const settings = useSettingsContext();
+  const app = useAppContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -93,7 +97,6 @@ const EditProfile: Component = () => {
   const setProfile = (hex: string | undefined) => {
     profile?.actions.setProfileKey(hex);
     profile?.actions.clearNotes();
-    profile?.actions.fetchNotes(hex);
   }
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
@@ -224,11 +227,15 @@ const EditProfile: Component = () => {
 
     const oldProfile = profile?.userProfile || {};
 
-    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account.relays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.activeRelays, account.relaySettings);
 
     if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`);
-      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
+      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
+        note && profile?.actions.updateProfile(note.pubkey);
+        note && account.actions.updateAccountProfile(note.pubkey);
+        note && navigate(app?.actions.profileLink(note.pubkey) || '/home')
+        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
+      });
       return false;
     }
 
@@ -492,7 +499,7 @@ const EditProfile: Component = () => {
           </ButtonPrimary>
           <ButtonSecondary
             type='button'
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate(app?.actions.profileLink(account?.publicKey) || '')}
           >
             {intl.formatMessage(tActions.cancel)}
           </ButtonSecondary>

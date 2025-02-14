@@ -1,12 +1,15 @@
 import { A } from '@solidjs/router';
-import { hexToNpub } from '../../lib/keys';
+import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
+  getParametrizedEvent,
+  isAddrMention,
   isAppleMusic,
   isCustomEmoji,
   isHashtag,
   isImage,
   isInterpunction,
+  isLnbc,
   isMixCloud,
   isMp4Video,
   isNoteMention,
@@ -15,6 +18,7 @@ import {
   isSpotify,
   isTagMention,
   isTwitch,
+  isUnitifedLnAddress,
   isUrl,
   isUserMention,
   isWavelake,
@@ -27,27 +31,47 @@ import {
   Component, createSignal, For, JSXElement, onMount, Show,
 } from 'solid-js';
 import {
+  NostrEventContent,
+  NostrUserZaps,
+  PrimalArticle,
   PrimalNote,
+  PrimalUser,
+  PrimalZap,
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-// @ts-ignore Bad types in nostr-tools
-import { nip19, generatePrivateKey } from 'nostr-tools';
+import { nip19, generatePrivateKey } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
-import { createStore, unwrap } from 'solid-js/store';
-import { hashtagCharsRegex, linebreakRegex, shortMentionInWords, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { createStore } from 'solid-js/store';
+import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import Lnbc from '../Lnbc/Lnbc';
+import { logError } from '../../lib/logger';
+import { useAppContext } from '../../contexts/AppContext';
+import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
+import { fetchArticles } from '../../handleNotes';
+import { APP_ID } from '../../App';
+import { getEvents } from '../../lib/feed';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { subsTo } from '../../sockets';
+import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
+import { parseBolt11 } from '../../utils';
 
 const groupGridLimit = 7;
 
+export type NoteContent = {
+  type: string,
+  tokens: string[],
+  meta?: Record<string, any>,
+};
 
 export const groupGalleryImages = (noteHolder: HTMLDivElement | undefined) => {
 
@@ -132,19 +156,28 @@ const ParsedNote: Component<{
   noLinks?: 'links' | 'text',
   noPreviews?: boolean,
   shorten?: boolean,
+  veryShort?: boolean,
   isEmbeded?: boolean,
   width?: number,
+  margins?: number,
+  noLightbox?: boolean,
+  altEmbeds?: boolean,
+  embedLevel?: number,
+  rootNote?: PrimalNote,
+  footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
 }> = (props) => {
 
   const intl = useIntl();
   const media = useMediaContext();
+  const app = useAppContext();
+  const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
   const id = () => {
     // if (props.id) return props.id;
 
-    return `note_${props.note.post.noteId}`;
+    return `note_${props.note.noteId}`;
   }
 
   const noteWidth = () => props.width || 514;
@@ -153,15 +186,18 @@ const ParsedNote: Component<{
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: `#${id()}`,
-    children: `a.image_${props.note.post.noteId}`,
+    children: `a.image_${props.note.noteId}`,
     showHideAnimationType: 'zoom',
     initialZoomLevel: 'fit',
     secondaryZoomLevel: 2,
     maxZoomLevel: 3,
+    thumbSelector: `a.image_${props.note.noteId}`,
     pswpModule: () => import('photoswipe')
   });
 
   onMount(() => {
+    if (props.noLightbox) return;
+
     lightbox.init();
   });
 
@@ -173,9 +209,11 @@ const ParsedNote: Component<{
     return props.shorten && wordsDisplayed() > shortNoteWords;
   };
 
+  const rootNote = () => props.rootNote || props.note;
+
   const noteContent = () => {
-    const content = props.note.post.content;
-    const charLimit = 7 * shortNoteWords;
+    const content = props.note.content || '';
+    const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
 
@@ -195,13 +233,7 @@ const ParsedNote: Component<{
     setTokens(() => [...tokens]);
   }
 
-  type NoteContent = {
-    type: string,
-    tokens: string[],
-    meta?: Record<string, any>,
-  };
-
-  const removeLinebreaks = () => {
+  const removeLinebreaks = (type: string) => {
     if (lastSignificantContent === 'LB') {
       const lastIndex = content.length - 1;
       const lastGroup = content[lastIndex];
@@ -209,7 +241,11 @@ const ParsedNote: Component<{
       setContent(lastIndex, () => ({
         type: lastGroup.type,
         tokens: [],
-        meta: lastGroup.meta,
+        meta: {
+          ...lastGroup.meta,
+          removedBy: type,
+          removedTokens: [...lastGroup.tokens],
+        },
       }));
     }
   };
@@ -217,20 +253,24 @@ const ParsedNote: Component<{
   const [content, setContent] = createStore<NoteContent[]>([]);
 
   const updateContent = (contentArray: NoteContent[], type: string, token: string, meta?: Record<string, any>) => {
-    if (contentArray.length > 0 && contentArray[contentArray.length -1].type === type) {
+    const len = contentArray.length;
+    const index = contentArray.length -1
 
-      setContent(content.length -1, 'tokens' , (els) => [...els, token]);
+    if (len > 0 && contentArray[len -1].type === type) {
 
-      meta && setContent(content.length -1, 'meta' , () => ({ ...meta }));
+      setContent(index, 'tokens' , (els) => [...els, token]);
+
+      meta && setContent(index, 'meta' , () => ({ ...meta }));
 
       return;
     }
 
-    setContent(content.length, () => ({ type, tokens: [token], meta }));
+    setContent(len, () => ({ type, tokens: [token], meta }));
   }
 
   let lastSignificantContent = 'text';
   let isAfterEmbed = false;
+  let totalLinks = 0;
 
   const parseToken = (token: string) => {
     if (token === '__LB__') {
@@ -244,7 +284,7 @@ const ParsedNote: Component<{
     }
 
     if (token === '__SP__') {
-      if (!['image', 'video', 'link', 'LB'].includes(lastSignificantContent)) {
+      if (!['image', 'video', 'LB'].includes(lastSignificantContent)) {
         updateContent(content, 'text', ' ');
       }
       return;
@@ -281,70 +321,89 @@ const ParsedNote: Component<{
       }
 
       if (!props.ignoreMedia) {
-        removeLinebreaks();
-        isAfterEmbed = true;
-
         if (isImage(token)) {
+          removeLinebreaks('image');
+          isAfterEmbed = true;
           lastSignificantContent = 'image';
           updateContent(content, 'image', token);
           return;
         }
 
         if (isMp4Video(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/mp4'});
           return;
         }
 
         if (isOggVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/ogg'});
           return;
         }
 
         if (isWebmVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
           return;
         }
 
         if (isYouTube(token)) {
+          removeLinebreaks('youtube');
+          isAfterEmbed = true;
           lastSignificantContent = 'youtube';
           updateContent(content, 'youtube', token);
           return;
         }
 
         if (isSpotify(token)) {
+          removeLinebreaks('spotify');
+          isAfterEmbed = true;
           lastSignificantContent = 'spotify';
           updateContent(content, 'spotify', token);
           return;
         }
 
         if (isTwitch(token)) {
+          removeLinebreaks('twitch');
+          isAfterEmbed = true;
           lastSignificantContent = 'twitch';
           updateContent(content, 'twitch', token);
           return;
         }
 
         if (isMixCloud(token)) {
+          removeLinebreaks('mixcloud');
+          isAfterEmbed = true;
           lastSignificantContent = 'mixcloud';
           updateContent(content, 'mixcloud', token);
           return;
         }
 
         if (isSoundCloud(token)) {
+          removeLinebreaks('soundcloud');
+          isAfterEmbed = true;
           lastSignificantContent = 'soundcloud';
           updateContent(content, 'soundcloud', token);
           return;
         }
 
         if (isAppleMusic(token)) {
+          removeLinebreaks('applemusic');
+          isAfterEmbed = true;
           lastSignificantContent = 'applemusic';
           updateContent(content, 'applemusic', token);
           return;
         }
 
         if (isWavelake(token)) {
+          removeLinebreaks('wavelake');
+          isAfterEmbed = true;
           lastSignificantContent = 'wavelake';
           updateContent(content, 'wavelake', token);
           return;
@@ -357,16 +416,31 @@ const ParsedNote: Component<{
         return;
       }
 
-      removeLinebreaks();
-      isAfterEmbed = false;
-      lastSignificantContent = 'link';
+      const preview = getLinkPreview(token);
 
-      updateContent(content, 'link', token);
+      const hasMinimalPreviewData = !props.noPreviews &&
+        preview &&
+        preview.url &&
+        ((!!preview.description && preview.description.length > 0) ||
+          !preview.images?.some((x:any) => x === '') ||
+          !!preview.title
+        );
+
+      if (hasMinimalPreviewData) {
+        removeLinebreaks('link');
+        updateContent(content, 'link', token, { preview });
+      } else {
+        updateContent(content, 'link', token);
+      }
+
+      lastSignificantContent = 'link';
+      isAfterEmbed = false;
+      totalLinks++;
       return;
     }
 
     if (isNoteMention(token)) {
-      removeLinebreaks();
+      removeLinebreaks('notemention');
       lastSignificantContent = 'notemention';
       isAfterEmbed = true;
       updateContent(content, 'notemention', token);
@@ -376,6 +450,12 @@ const ParsedNote: Component<{
     if (isUserMention(token)) {
       lastSignificantContent = 'usermention';
       updateContent(content, 'usermention', token);
+      return;
+    }
+
+    if (isAddrMention(token)) {
+      lastSignificantContent = 'comunity';
+      updateContent(content, 'comunity', token);
       return;
     }
 
@@ -394,6 +474,32 @@ const ParsedNote: Component<{
     if (isCustomEmoji(token)) {
       lastSignificantContent = 'emoji';
       updateContent(content, 'emoji', token);
+      return;
+    }
+
+    if (isUnitifedLnAddress(token)) {
+      lastSignificantContent = 'lnbc';
+
+      const match = token.match(lnUnifiedRegex);
+
+      let lnbcToken = match?.find(m => m.startsWith('lnbc'));
+
+      if (lnbcToken) {
+        removeLinebreaks('lnbc');
+        updateContent(content, 'lnbc', lnbcToken);
+      }
+      else {
+        updateContent(content, 'text', token);
+      }
+
+      return;
+    }
+
+    if (isLnbc(token)) {
+      lastSignificantContent = 'lnbc';
+
+      removeLinebreaks('lnbc');
+      updateContent(content, 'lnbc', token);
       return;
     }
 
@@ -427,8 +533,12 @@ const ParsedNote: Component<{
   const renderLinebreak = (item: NoteContent) => {
     if (isNoteTooLong()) return;
 
+    let tokens = item.meta?.removedBy === 'link' && totalLinks > 1 ?
+      (item.meta?.removedTokens || []) :
+      item.tokens;
+
     // Allow max consecutive linebreak
-    const len = Math.min(2, item.tokens.length);
+    const len = Math.min(2, tokens.length);
 
     const lineBreaks = Array(len).fill(<br/>)
 
@@ -458,6 +568,16 @@ const ParsedNote: Component<{
     const groupCount = item.tokens.length;
     const imageGroup = generatePrivateKey();
 
+    const imageError = (event: any) => {
+      // const image = event.target;
+
+      // image.style = '';
+      // image.width = 100;
+      // image.height = 100;
+
+      return true;
+    }
+
     // Remove bottom margin if media is the last thing in the note
     const lastClass = index === content.length-1 ?
       'noBottomMargin' : '';
@@ -467,19 +587,26 @@ const ParsedNote: Component<{
 
       const token = item.tokens[0];
       let image = media?.actions.getMedia(token, 'o');
-      const url = image?.media_url || getMediaUrlDefault(token);
+      const url = image?.media_url || getMediaUrlDefault(token) || token;
+
+      let imageThumb =
+        media?.actions.getMedia(token, 'm') ||
+        media?.actions.getMedia(token, 'o') ||
+        token;
 
       // Images tell a 100 words :)
       setWordsDisplayed(w => w + 100);
 
       return <NoteImage
-        class={`noteimage image_${props.note.post.noteId} ${lastClass}`}
+        class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
         isDev={dev}
         media={image}
+        mediaThumb={imageThumb}
         width={noteWidth()}
-        imageGroup={imageGroup}
+        imageGroup={`${imageGroup}`}
         shortHeight={props.shorten}
+        onError={imageError}
       />
     }
 
@@ -489,26 +616,37 @@ const ParsedNote: Component<{
 
     setWordsDisplayed(w => w + 100);
 
-    return <div class={`imageGrid ${gridClass}`}>
+    return <div
+      class={`imageGrid ${gridClass}`}
+      style={`max-width: ${noteWidth() - (props.margins || 20)}px`}
+    >
       <For each={item.tokens}>
         {(token, index) => {
 
           let image = media?.actions.getMedia(token, 'o');
-          const url = image?.media_url || getMediaUrlDefault(token);
+          const url = image?.media_url || getMediaUrlDefault(token) || token;
+
+          let imageThumb =
+            media?.actions.getMedia(token, 'm') ||
+            media?.actions.getMedia(token, 'o') ||
+            token;
 
           if (props.shorten && index() > 11) {
             return <></>;
           }
 
           return <NoteImage
-            class={`noteimage_gallery image_${props.note.post.noteId} cell_${index()+1}`}
+            class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
             isDev={dev}
             media={image}
             width={514}
-            imageGroup={imageGroup}
+            mediaThumb={imageThumb}
+            imageGroup={`${imageGroup}`}
             shortHeight={props.shorten}
             plainBorder={true}
+            forceHeight={500}
+            onError={imageError}
           />
         }}
       </For>
@@ -529,11 +667,20 @@ const ParsedNote: Component<{
         let h: number | undefined = undefined;
         let w: number | undefined = undefined;
 
+        let ratio = 1;
+        const margins = props.margins || 20;
+
         if (mVideo) {
-          const ratio = mVideo.w / mVideo.h;
-          h = (noteWidth() / ratio);
-          w = h > 680 ? 680 * ratio : noteWidth();
-          h = h > 680 ? 680 : h;
+          ratio = mVideo.w / mVideo.h;
+
+          if (ratio < 1) {
+            h = 680;
+            w = Math.min((noteWidth() - margins), h * ratio);
+            h = w / ratio;
+          } else {
+            w = (noteWidth() - margins);
+            h = w / ratio;
+          }
         }
 
         let klass = mVideo ? 'w-cen' : 'w-max';
@@ -555,6 +702,7 @@ const ParsedNote: Component<{
           muted={true}
           loop={true}
           playsinline={true}
+          data-ratio={`${ratio}`}
         >
           <source src={token} type={item.meta?.videoType} />
         </video>;
@@ -758,32 +906,122 @@ const ParsedNote: Component<{
       {(token) => {
         if (isNoteTooLong()) return;
 
-        const preview = getLinkPreview(token);
-
-        const hasMinimalPreviewData = !props.noPreviews &&
-          preview &&
-          preview.url &&
-          ((!!preview.description && preview.description.length > 0) ||
-            !preview.images?.some((x:any) => x === '') ||
-            !!preview.title
-          );
-
-        if (hasMinimalPreviewData) {
+        if (item.meta && item.meta.preview && totalLinks < 2) {
           setWordsDisplayed(w => w + shortMentionInWords);
-          return <LinkPreview
-            preview={preview}
-            bordered={props.isEmbeded}
-            isLast={index === content.length-1}
-          />;
+          return (
+            <LinkPreview
+              preview={item.meta.preview}
+              bordered={props.isEmbeded}
+              isLast={index === content.length-1}
+            />
+          );
         }
 
         setWordsDisplayed(w => w + 1);
-        return <span data-url={token}><a link href={token} target="_blank" >{token}</a></span>;
+        return (
+          <span data-url={token}>
+            <a link href={token} target="_blank" >{token}</a>
+          </span>
+        );
       }}
     </For>
   };
 
-  const renderNoteMention = (item: NoteContent, index?: number) => {
+  const [unknownEvents, setUnknownEvents] = createStore<Record<string, NostrEventContent>>({});
+
+  const unknownMention = (nid: string) => {
+    setWordsDisplayed(w => w + 1);
+
+    const decoded = decodeIdentifier(nid);
+
+    const alt = () => {
+      // @ts-ignore
+      const a = ((unknownEvents[nid]?.tags || []).find(t => t[0] === 'alt') || [])[1];
+
+      return a;
+    }
+
+    if (decoded.type === 'nevent') {
+      const subId = `events_${APP_ID}`;
+      const data = decoded.data as nip19.EventPointer;
+
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content.id === data.id) {
+            setUnknownEvents((evs) => ({ ...evs, [nid]: { ...content } }))
+          }
+        },
+        onEose: () => {
+          unsub();
+        }
+      })
+
+      getEvents(account?.publicKey, [nid], subId);
+
+
+      return (
+        <Show
+          when={alt()}
+          fallback={
+            <div class={styles.unknownEvent}>
+              <div class={`${styles.icon} ${styles.bang}`}></div>
+              <div class={styles.label}>Mentioned event not found</div>
+            </div>
+          }
+        >
+          <div class={styles.unknownEvent}>
+            <div class={`${styles.icon} ${styles.file}`}></div>
+            <div class={styles.label}>{alt()}</div>
+          </div>
+        </Show>
+      );
+    }
+
+    if (decoded.type === 'naddr') {
+      const subId = `p_events_${APP_ID}`;
+      const data = decoded.data as nip19.AddressPointer;
+
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content.kind === data.kind) {
+            setUnknownEvents((evs) => ({ ...evs, [nid]: { ...content } }))
+          }
+        },
+        onEose: () => {
+          unsub();
+        }
+      })
+
+      getParametrizedEvent(data.pubkey, data.identifier, data.kind, subId);
+
+      return (
+        <Show
+          when={alt()}
+          fallback={
+            <div class={styles.unknownEvent}>
+              <div class={`${styles.icon} ${styles.bang}`}></div>
+              <div class={styles.label}>Mentioned event not found</div>
+            </div>
+          }
+        >
+          <div class={styles.unknownEvent}>
+            <div class={`${styles.icon} ${styles.file}`}></div>
+            <div class={styles.label}>{alt()}</div>
+          </div>
+        </Show>
+      )
+    }
+
+    return (
+      <div class={styles.unknownEvent}>
+        <div class={`${styles.icon} ${styles.bang}`}></div>
+        <div class={styles.label}>Mentioned event not found</div>
+      </div>
+    );
+  }
+
+  const renderComunityMention = (item: NoteContent, index?: number) => {
+
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -804,43 +1042,265 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
-        let link = <span>{token}</span>;
+        const rn = rootNote();
+        const decoded = decodeIdentifier(id);
+
+        if (decoded.type !== 'naddr') {
+          return unknownMention(id);
+        }
+
+        const data = decoded.data as nip19.AddressPointer;
+
+        const reEncoded = nip19.naddrEncode({
+          kind: data.kind,
+          pubkey: data.pubkey,
+          identifier: data.identifier || '',
+        });
+
+        if (data.kind === Kind.LongForm) {
+          const mentionedArticles = rn.mentionedArticles;
+
+          if (!mentionedArticles || (props.embedLevel || 0) > 1) {
+            return unknownMention(reEncoded);
+          }
+
+          const mention = mentionedArticles[reEncoded];
+
+          if (!mention) {
+            return unknownMention(id);
+          }
+
+          return renderLongFormMention(mention, index);
+        }
+
+        return unknownMention(id);
+      }}
+    </For>
+  }
+
+  const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
+
+    if(!mention) return <></>;
+
+    return (
+      <div class={styles.articlePreview}>
+        <ArticleCompactPreview
+          article={mention}
+          hideFooter={true}
+          hideContext={true}
+          boredered={(props.embedLevel || 0) > 0}
+        />
+      </div>);
+  };
+
+  const renderNoteMention = (item: NoteContent, index?: number) => {
+
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        let [_, id] = token.split(':');
+
+        if (!id) {
+          return unknownMention(id);
+        }
+
+        let end = '';
+
+        let match = specialCharsRegex.exec(id);
+
+        if (match) {
+          const i = match.index;
+          end = id.slice(i);
+          id = id.slice(0, i);
+        }
+
+        let link = unknownMention(id);
 
         try {
           const eventId = nip19.decode(id).data as string | nip19.EventPointer;
+
+          let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
-          const noteId = nip19.noteEncode(hex);
 
-          const path = `/e/${noteId}`;
-
-          if (props.noLinks === 'links') {
-            link = <span class='linkish'>@{token}</span>;
+          if (props.noLinks === 'links' || (props.embedLevel || 0) > 1) {
+            return <span class='linkish'>{token}</span>;
           }
 
-          if (!props.noLinks) {
-            const ment = props.note.mentionedNotes && props.note.mentionedNotes[hex];
+          const rn = rootNote();
 
-            link = <A href={path}>{token}</A>;
+          const mentionedNotes = {
+            ...(rn.mentionedNotes || {}),
+            ...(props.note.mentionedNotes || {}),
+          }
 
-            if (ment) {
-              setWordsDisplayed(w => w + shortMentionInWords);
+          const mentionedArticles = {
+            ...(rn.mentionedArticles || {}),
+            ...(props.note.mentionedArticles || {}),
+          }
 
-              link = <div>
-                <EmbeddedNote
-                  note={ment}
-                  mentionedUsers={props.note.mentionedUsers || {}}
-                  isLast={index === content.length-1}
-                />
-              </div>;
+          const mentionedHighlights = {
+            ...(rn.mentionedHighlights || {}),
+            ...(props.note.mentionedHighlights || {}),
+          }
+
+          const mentionedUsers = {
+            ...(rn.mentionedUsers || {}),
+            ...(props.note.mentionedUsers || {}),
+          }
+
+          if (kind === undefined) {
+            let f: any = mentionedNotes && mentionedNotes[hex];
+            if (!f) {
+              const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
+                kind: eventId.kind,
+                // @ts-ignore
+                pubkey: eventId.pubkey,
+                // @ts-ignore
+                identifier: eventId.identifier || '',
+              });
+              f = mentionedArticles && mentionedArticles[reEncoded];
+            }
+            if (!f) {
+              f = mentionedHighlights && mentionedHighlights[hex];
+            }
+            kind = f?.post.kind || f?.msg?.kind || f.event.kind; // || Kind.Text;
+          }
+
+          if ([Kind.Text].includes(kind || -1)) {
+            if (!props.noLinks) {
+              const ment = mentionedNotes && mentionedNotes[hex];
+
+              link = unknownMention(id);
+
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
+
+                if ([Kind.LongForm, Kind.LongFormShell].includes(ment.post.kind)) {
+                  // @ts-ignore
+                  link = renderLongFormMention(ment, index)
+                }
+                else {
+                  link = <div>
+                    <EmbeddedNote
+                      note={ment}
+                      mentionedUsers={mentionedUsers || {}}
+                      isLast={index === content.length-1}
+                      alternativeBackground={props.altEmbeds}
+                      footerSize={props.footerSize}
+                      hideFooter={true}
+                      embedLevel={props.embedLevel}
+                      rootNote={rn}
+                    />
+                  </div>;
+                }
+              }
             }
           }
 
+          if ([Kind.LongForm, Kind.LongFormShell].includes(kind || -1)) {
+
+            if (!props.noLinks) {
+              const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
+                kind: eventId.kind,
+                // @ts-ignore
+                pubkey: eventId.pubkey,
+                // @ts-ignore
+                identifier: eventId.identifier || '',
+              });
+              const ment = mentionedArticles && mentionedArticles[reEncoded];
+
+              link = unknownMention(id);
+
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
+
+                // @ts-ignore
+                link = renderLongFormMention(ment, index);
+              }
+            }
+          }
+
+          if (kind === Kind.Highlight) {
+            const ment = mentionedHighlights && mentionedHighlights[hex];
+
+            link = <div class={styles.mentionedHighlight}>
+              {ment?.event?.content}
+            </div>;
+          }
+
+          if (kind === Kind.Zap) {
+            const zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
+
+            if (zapContent) {
+              const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+              const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+
+              let zappedId = '';
+              let zappedKind: number = 0;
+
+              const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+              const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+
+              let zapSubject: PrimalArticle | PrimalUser | PrimalNote = mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]];
+
+              if (zapTagA) {
+                const [kind, pubkey, identifier] = zapTagA[1].split(':');
+
+                zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+
+                const article = mentionedArticles[zappedId];
+
+                if (article) {
+                  zappedKind = Kind.LongForm;
+                  zapSubject = article;
+                } else {
+                  zappedKind = Kind.Metadata;
+                }
+              }
+              else if (zapTagE) {
+                zappedId = zapTagE[1];
+
+                const article = mentionedArticles[zappedId];
+                const note = mentionedNotes[zappedId];
+
+                if (article) {
+                  zappedKind = Kind.LongForm;
+                  zapSubject = article;
+                } else if (note) {
+                  zappedKind = Kind.Text;
+                  zapSubject = note;
+                } else {
+                  zappedKind = Kind.Metadata;
+                }
+              }
+
+              const zap: PrimalZap = {
+                id: zapContent.id || '',
+                message: zapEvent.content || '',
+                amount: parseBolt11(bolt11) || 0,
+                sender: mentionedUsers[zapEvent.pubkey],
+                reciver: mentionedUsers[zapEvent.tags.find((t: string[]) => t[0] === 'p')[1]],
+                created_at: zapContent.created_at,
+                zappedId,
+                zappedKind,
+              };
+
+              link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+            }
+
+          }
+
         } catch (e) {
+          logError('ERROR rendering note mention', e);
           setWordsDisplayed(w => w + 1);
-          link = <span class={styles.error}>{token}</span>;
+          link = unknownMention(id);
         }
 
-        return link;}}
+        return link;
+      }}
     </For>
   };
 
@@ -851,10 +1311,16 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 1);
 
-        let [_, id] = token.split(':');
+        let [nostr, id] = token.split(':');
 
         if (!id) {
           return <>{token}</>;
+        }
+
+        let prefix = '';
+
+        if (nostr !== 'nostr') {
+          prefix = nostr.split('nostr')[0] || '';
         }
 
         let end = '';
@@ -867,38 +1333,45 @@ const ParsedNote: Component<{
           id = id.slice(0, i);
         }
 
+        const rn = rootNote();
+
+        const mentionedUsers = {
+          ...(rn.mentionedUsers || {}),
+          ...(props.note.mentionedUsers || {}),
+        }
+
         try {
           const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
 
           const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
           const npub = hexToNpub(hex);
 
-          const path = `/p/${npub}`;
+          const path = app?.actions.profileLink(npub) || '';
 
-          let user = props.note.mentionedUsers && props.note.mentionedUsers[hex];
+          let user = mentionedUsers && mentionedUsers[hex];
 
           const label = user ? userName(user) : truncateNpub(npub);
 
-          let link = <span>@{label}{end}</span>;
+          let link = <span>{prefix}@{label}{end}</span>;
 
           if (props.noLinks === 'links') {
-            link = <><span class='linkish'>@{label}</span>{end}</>;
+            link = <>{prefix}<span class='linkish'>@{label}</span>{end}</>;
           }
 
           if (!props.noLinks) {
             link = !user ?
-              <><A href={path}>@{label}</A>{end}</> :
-              <>{MentionedUserLink({ user })}{end}</>;
+              <>{prefix}<A href={path}>@{label}</A>{end}</> :
+              <>{prefix}{MentionedUserLink({ user })}{end}</>;
           }
           return link;
         } catch (e) {
-          return <span class={styles.error}> {token}</span>;
+          return <>{prefix}<span class={styles.error}>{token}</span></>;
         }
       }}
     </For>
   };
 
-  const renderTagMention = (item: NoteContent) => {
+  const renderTagMention = (item: NoteContent, index?: number) => {
     return <For each={item.tokens}>
       {(token) => {
         if (isNoteTooLong()) return;
@@ -917,14 +1390,37 @@ const ParsedNote: Component<{
 
         let r = parseInt(t.slice(2, t.length - 1));
 
-        const tag = props.note.post.tags[r];
+        const tag = props.note.msg.tags[r];
 
         if (tag === undefined || tag.length === 0) return;
 
+
+        const rn = rootNote();
+
+        const mentionedNotes = {
+          ...(rn.mentionedNotes || {}),
+          ...(props.note.mentionedNotes || {}),
+        }
+
+        const mentionedArticles = {
+          ...(rn.mentionedArticles || {}),
+          ...(props.note.mentionedArticles || {}),
+        }
+
+        const mentionedHighlights = {
+          ...(rn.mentionedHighlights || {}),
+          ...(props.note.mentionedHighlights || {}),
+        }
+
+        const mentionedUsers = {
+          ...(rn.mentionedUsers || {}),
+          ...(props.note.mentionedUsers || {}),
+        }
+
         if (
           tag[0] === 'e' &&
-          props.note.mentionedNotes &&
-          props.note.mentionedNotes[tag[1]]
+          mentionedNotes &&
+          mentionedNotes[tag[1]]
         ) {
           const hex = tag[1];
           const noteId = `nostr:${nip19.noteEncode(hex)}`;
@@ -937,7 +1433,7 @@ const ParsedNote: Component<{
           }
 
           if (!props.noLinks) {
-            const ment = props.note.mentionedNotes[hex];
+            const ment = mentionedNotes[hex];
 
             embeded = <><A href={path}>{noteId}</A>{end}</>;
 
@@ -947,7 +1443,9 @@ const ParsedNote: Component<{
               embeded = <div>
                 <EmbeddedNote
                   note={ment}
-                  mentionedUsers={props.note.mentionedUsers}
+                  mentionedUsers={mentionedUsers}
+                  hideFooter={true}
+                  embedLevel={props.embedLevel}
                 />
                 {end}
               </div>;
@@ -957,10 +1455,51 @@ const ParsedNote: Component<{
           return <span class="whole"> {embeded}</span>;
         }
 
-        if (tag[0] === 'p' && props.note.mentionedUsers && props.note.mentionedUsers[tag[1]]) {
-          const user = props.note.mentionedUsers[tag[1]];
+        if (
+          tag[0] === 'a' &&
+          mentionedArticles &&
+          mentionedArticles[tag[1]]
+        ) {
 
-          const path = `/p/${user.npub}`;
+          const [kind, pubkey, identifier] = tag[1].split(':');
+          const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+          const noteId = `nostr:${naddr}`;
+          let path = `/e/${naddr}`;
+
+          const vanityName = app?.verifiedUsers[pubkey];
+
+          if (vanityName) {
+            path = `/${vanityName}/${identifier}`;
+          }
+
+          let embeded = <span>{noteId}{end}</span>;
+
+          if (props.noLinks === 'links') {
+            embeded = <><span class='linkish'>{noteId}</span>{end}</>;
+          }
+
+          if (!props.noLinks) {
+            const ment = mentionedArticles[naddr];
+
+            embeded = <><A href={path}>{noteId}</A>{end}</>;
+
+            if (ment) {
+              setWordsDisplayed(w => w + shortMentionInWords - 1);
+
+              embeded = <div>
+                {renderLongFormMention(ment, index)}
+                {end}
+              </div>;
+            }
+          }
+
+          return <span class="whole"> {embeded}</span>;
+        }
+
+        if (tag[0] === 'p' && mentionedUsers && mentionedUsers[tag[1]]) {
+          const user = mentionedUsers[tag[1]];
+
+          const path = app?.actions.profileLink(user.npub) || '';
 
           const label = userName(user);
 
@@ -1017,7 +1556,7 @@ const ParsedNote: Component<{
 
         const emoji = token.split(':')[1];
 
-        const tag = props.note.post.tags.find(t => t[0] === 'emoji' && t[1] === emoji);
+        const tag = props.note.msg.tags.find(t => t[0] === 'emoji' && t[1] === emoji);
 
         if (tag === undefined || tag.length === 0) return <>{token}</>;
 
@@ -1030,7 +1569,20 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderLnbc = (item: NoteContent) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + 100);
+
+        return <Lnbc lnbc={token} />
+      }}
+    </For>
+  }
+
   const renderContent = (item: NoteContent, index: number) => {
+
 
     const renderers: Record<string, (item: NoteContent, index?: number) => JSXElement> = {
       linebreak: renderLinebreak,
@@ -1047,9 +1599,11 @@ const ParsedNote: Component<{
       link: renderLinks,
       notemention: renderNoteMention,
       usermention: renderUserMention,
+      comunity: renderComunityMention,
       tagmention: renderTagMention,
       hashtag: renderHashtag,
       emoji: renderEmoji,
+      lnbc: renderLnbc,
     }
 
     return renderers[item.type] ?
@@ -1062,11 +1616,11 @@ const ParsedNote: Component<{
   });
 
   return (
-    <div ref={thisNote} id={id()} class={styles.parsedNote} >
+    <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
-      <Show when={isNoteTooLong() || noteContent().length < props.note.post.content.length}>
+      <Show when={isNoteTooLong() || noteContent().length < (props.note.content?.length || 0)}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>

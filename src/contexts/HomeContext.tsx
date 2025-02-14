@@ -1,38 +1,30 @@
-import { nip19 } from "nostr-tools";
-import { createContext, createEffect, onCleanup, useContext } from "solid-js";
+import { createContext, createEffect, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind } from "../constants";
-import { getEvents, getExploreFeed, getFeed, getFutureExploreFeed, getFutureFeed } from "../lib/feed";
-import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
-import { setLinkPreviews } from "../lib/notes";
-import { getScoredUsers, searchContent } from "../lib/search";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan, isInTags, isRepostInCollection } from "../stores/note";
+import { minKnownProfiles } from "../constants";
 import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
-  NostrEventContent,
-  NostrMentionContent,
-  NostrNoteActionsContent,
   NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
-  NoteActions,
-  PrimalFeed,
+  PrimalArticleFeed,
   PrimalNote,
   SelectionOption,
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
-import { useSettingsContext } from "./SettingsContext";
+import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
+import { saveStoredFeed } from "../lib/localStore";
+import { calculateNotesOffset } from "../utils";
 
 type HomeContextStore = {
   notes: PrimalNote[],
+  futureNotes: PrimalNote[],
+  sidebarNotes: PrimalNote[],
+  paging: Record<string, PaginationInfo>,
   isFetching: boolean,
+  isFetchingSidebar: boolean,
+  sidebarQuery: SelectionOption | undefined,
   scrollTop: number,
-  selectedFeed: PrimalFeed | undefined,
+  selectedFeed: PrimalArticleFeed | undefined,
   page: FeedPage,
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
@@ -52,33 +44,37 @@ type HomeContextStore = {
     query: SelectionOption | undefined,
   },
   actions: {
-    saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
-    fetchNotes: (topic: string, subId: string, until?: number) => void,
+    fetchNotes: (topic: string, until?: number, includeIsFetching?: boolean) => void,
     fetchNextPage: () => void,
-    selectFeed: (feed: PrimalFeed | undefined) => void,
+    selectFeed: (feed: PrimalArticleFeed | undefined) => void,
     updateScrollTop: (top: number) => void,
-    updatePage: (content: NostrEventContent) => void,
-    savePage: (page: FeedPage) => void,
-    checkForNewNotes: (topic: string | undefined) => void,
+    checkForNewNotes: (spec: string) => void,
     loadFutureContent: () => void,
     doSidebarSearch: (query: string) => void,
     updateSidebarQuery: (selection: SelectionOption) => void,
     getFirstPage: () => void,
+    resetSelectedFeed: () => void,
+    refetchSelectedFeed: () => void,
   }
 }
 
 const initialHomeData = {
   notes: [],
+  futureNotes: [],
+  sidebarNotes: [],
   isFetching: false,
+  isFetchingSidebar: false,
   scrollTop: 0,
   selectedFeed: undefined,
+  sidebarQuery: undefined,
   page: {
     messages: [],
     users: {},
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
@@ -92,6 +88,7 @@ const initialHomeData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
     scope: '',
     timeframe: '',
@@ -105,269 +102,152 @@ const initialHomeData = {
       postStats: {},
       mentions: {},
       noteActions: {},
+      topZaps: {},
     },
     isFetching: false,
     query: undefined,
-  }
+  },
+  paging: {
+    notes: { ...emptyPaging() },
+    future: { ...emptyPaging() },
+    sidebar: { ...emptyPaging() },
+  },
 };
 
 export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
-  const settings = useSettingsContext();
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
 
   const updateSidebarQuery = (selection: SelectionOption) => {
-    updateStore('sidebar', 'query', () => ({ ...selection }));
+    updateStore('sidebarQuery', () => ({ ...selection }))
   };
 
-  const saveSidebarNotes = (newNotes: PrimalNote[]) => {
-    updateStore('sidebar', 'notes', () => [ ...newNotes.slice(0, 24) ]);
-    updateStore('sidebar', 'isFetching', () => false);
-  };
+  const doSidebarSearch = async (query: string) => {
+    updateStore('isFetchingSidebar', () => true);
+    const { notes, paging } = await fetchScoredContent(
+      account?.publicKey,
+      query,
+      `home_sidebar_${APP_ID}`,
+    );
 
-  const updateSidebarPage = (content: NostrEventContent) => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      updateStore('sidebar', 'page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
-      return;
-    }
-
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-
-      if (store.sidebar.page.messages.find(m => m.id === message.id)) {
-        return;
-      }
-
-      updateStore('sidebar', 'page', 'messages',
-        (msgs) => [ ...msgs, { ...message }]
-      );
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      updateStore('sidebar', 'page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      updateStore('sidebar', 'page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      updateStore('sidebar', 'page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
-      return;
-    }
-  };
-
-  const saveSidebarPage = (page: FeedPage) => {
-    const newPosts = convertToNotes(page);
-
-    saveSidebarNotes(newPosts);
-  };
-
-  const doSidebarSearch = (query: string) => {
-    const subid = `home_sidebar_${APP_ID}`;
-
-    updateStore('sidebar', 'isFetching', () => true);
-    updateStore('sidebar', 'notes', () => []);
-    updateStore('sidebar', 'page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} });
-
-    getScoredUsers(account?.publicKey, query, 10, subid);
+    updateStore('sidebarNotes', () => [ ...notes ]);
+    updateStore('paging', 'sidebar', () => ({ ...paging }));
+    updateStore('isFetchingSidebar', () => false);
   }
 
   const clearFuture = () => {
-    updateStore('future', () => ({
-      notes: [],
-      reposts: {},
-      page: {
-        messages: [],
-        users: {},
-        postStats: {},
-        mentions: {},
-        noteActions: {},
-      },
-      scope: '',
-      timeframe: '',
-      latest_at: 0,
-    }))
+    updateStore('futureNotes', () => []);
+    updateStore('paging', 'future', () => ({
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    }));
   }
 
-  const saveNotes = (newNotes: PrimalNote[], scope?: 'future') => {
-    if (scope) {
-      updateStore(scope, 'notes', (notes) => [ ...notes, ...newNotes ]);
-      return;
-    }
-    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
-    updateStore('isFetching', () => false);
-  };
+  const checkForNewNotes = async (spec: string) => {
+    if (store.paging.notes.sortBy !== 'created_at') return;
 
-  const checkForNewNotes = (topic: string | undefined) => {
-
-    if (!topic) {
+    if (store.futureNotes.length > 100) {
       return;
     }
 
-    if (store.future.notes.length > 100) {
-      return;
-    }
+    let since = store.paging.future.until || store.paging.notes.until || 0;
 
-    const [scope, timeframe] = topic.split(';');
+    const lastPageNotes = store.futureNotes.length > 0 ?
+      store.futureNotes :
+      store.notes.slice(0, 20);
 
-    if (scope !== store.future.scope || timeframe !== store.future.timeframe) {
-      clearFuture();
-      updateStore('future', 'scope', () => scope);
-      updateStore('future', 'timeframe', () => timeframe);
-    }
+    const offset = calculateNotesOffset(
+      lastPageNotes,
+      store.futureNotes.length > 0 ?
+        store.paging.future : store.paging.notes,
+    );
 
-    let since = 0;
-
-    if (store.notes[0]) {
-      since = store.notes[0].repost ?
-        store.notes[0].repost.note.created_at :
-        store.notes[0].post.created_at;
-    }
-
-    if (store.future.notes[0]) {
-      const lastFutureNote = unwrap(store.future.notes).sort((a, b) => b.post.created_at - a.post.created_at)[0];
-
-      since = lastFutureNote.repost ?
-        lastFutureNote.repost.note.created_at :
-        lastFutureNote.post.created_at;
-    }
-
-    updateStore('future', 'page', () =>({
-      messages: [],
-      users: {},
-      postStats: {},
-      mentions: {},
-      noteActions: {},
-    }))
-
-    if (scope && timeframe) {
-      if (timeframe !== 'latest') {
-        return;
-      }
-
-      getFutureExploreFeed(
-        account?.publicKey,
-        `home_future_${APP_ID}`,
-        scope,
-        timeframe,
+    const { notes, paging } = await fetchMegaFeed(
+      account?.publicKey,
+      spec,
+      `home_future_${APP_ID}`,
+      {
         since,
-      );
-      return;
-    }
+        limit: 100,
+        offset,
+      }
+    );
+    // const sortedNotes = filterAndSortNotes(notes, paging);
 
-    getFutureFeed(account?.publicKey, topic, `home_future_${APP_ID}`, since);
+    // Filter out duplicates
+    const ids = lastPageNotes.map(n => n.id);
+    const filtered = notes.filter(n => !ids.includes(n.id));
+
+    updateStore('paging', 'future', () => ({ ...paging }));
+    updateStore('futureNotes', (ns) => [ ...ns, ...filtered]);
   }
 
   const loadFutureContent = () => {
-    if (store.future.notes.length === 0) {
+    if (store.futureNotes.length === 0) {
       return;
     }
 
-    updateStore('notes', (notes) => [...store.future.notes, ...notes]);
+    updateStore('notes', (notes) => [...store.futureNotes, ...notes]);
     clearFuture();
   };
 
-  const fetchNotes = (topic: string, subId: string, until = 0, includeReplies?: boolean) => {
-    const [scope, timeframe] = topic.split(';');
+  const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
 
-    updateStore('isFetching', true);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+    updateStore('isFetching' , () => includeIsFetching);
 
-    if (scope && timeframe) {
+    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
-      if (scope === 'search') {
-        searchContent(account?.publicKey, `home_feed_${subId}`, decodeURI(timeframe));
-        return;
-      }
+    const offset = calculateNotesOffset(store.notes, store.paging.notes);
 
-      getExploreFeed(
-        account?.publicKey,
-        `home_feed_${subId}`,
-        scope,
-        timeframe,
+    const { notes, paging } = await fetchMegaFeed(
+      pubkey,
+      spec,
+      `home_feed_${APP_ID}`,
+      {
         until,
-      );
-      return;
-    }
+        limit: 20,
+        offset,
+      },
+    );
 
-    getFeed(account?.publicKey, topic, `home_feed_${subId}`, until, 20, includeReplies);
+    const sortedNotes = filterAndSortNotes(notes, paging);
+
+    updateStore('paging', 'notes', () => ({ ...paging }));
+    updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+    updateStore('isFetching', () => false);
+
   };
 
   const clearNotes = () => {
     updateStore('scrollTop', () => 0);
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
+    window.scrollTo({ top: 0 });
+
     updateStore('notes', () => []);
-    updateStore('reposts', () => undefined);
-    updateStore('lastNote', () => undefined);
+    updateStore('paging', 'notes', () => ({
+      since: 0,
+      until: 0,
+      sortBy: 'created_at',
+    }));
 
     clearFuture();
   };
 
-  const fetchNextPage = () => {
+  const fetchNextPage = (mainTopic?: string) => {
     if (store.isFetching) {
       return;
     }
-    const lastNote = store.notes[store.notes.length - 1];
 
-    if (!lastNote) {
-      return;
-    }
+    const spec = mainTopic || store.selectedFeed?.spec || '';
 
-    updateStore('lastNote', () => ({ ...lastNote }));
-
-    const topic = store.selectedFeed?.hex;
-    const includeReplies = store.selectedFeed?.includeReplies;
-
-    if (!topic) {
-      return;
-    }
-
-    const [scope, timeframe] = topic.split(';');
-
-    if (scope === 'search') {
-      return;
-    }
-
-    const pagCriteria = timeframe || 'latest';
-
-    const criteria = paginationPlan(pagCriteria);
-
-    const noteData: Record<string, any> =  lastNote.repost ?
-      lastNote.repost.note :
-      lastNote.post;
-
-    const until = noteData[criteria];
+    const until = store.paging['notes'].since || 0;
 
     if (until > 0) {
-      fetchNotes(topic, `${APP_ID}`, until, includeReplies);
+      fetchNotes(spec, until);
     }
   };
 
@@ -375,319 +255,37 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => top);
   };
 
-  let currentFeed: PrimalFeed | undefined;
+  let currentFeed: PrimalArticleFeed | undefined;
 
-  const selectFeed = (feed: PrimalFeed | undefined) => {
-    if (feed?.hex !== undefined && (feed.hex !== currentFeed?.hex || feed.includeReplies !== currentFeed?.includeReplies)) {
+  const selectFeed = (feed: PrimalArticleFeed | undefined, force?: boolean) => {
+    if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
-      saveStoredFeed(account?.publicKey, currentFeed);
-
       updateStore('selectedFeed', reconcile({...feed}));
+      saveStoredFeed(account?.publicKey, 'home', feed);
       clearNotes();
-      fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+      fetchNotes(feed.spec, 0);
     }
+  };
+
+  const refetchSelectedFeed = () => {
+    if (!store.selectedFeed) return;
+
+    clearNotes();
+    fetchNotes(store.selectedFeed.spec, 0);
+  }
+
+  const resetSelectedFeed = () => {
+    currentFeed = undefined;
+    updateStore('selectedFeed', () => undefined);
   };
 
   const getFirstPage = () => {
     const feed = store.selectedFeed;
-    if (!feed?.hex) return;
+    if (!feed?.spec) return;
 
     clearNotes();
-    fetchNotes(feed.hex , `${APP_ID}`, 0, feed.includeReplies);
+    fetchNotes(feed.spec, 0, false);
   };
-
-  const updatePage = (content: NostrEventContent, scope?: 'future') => {
-    if (content.kind === Kind.Metadata) {
-      const user = content as NostrUserContent;
-
-      if (scope) {
-        updateStore(scope, 'page', 'users',
-          (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-        );
-        return;
-      }
-
-      updateStore('page', 'users',
-        (usrs) => ({ ...usrs, [user.pubkey]: { ...user } })
-      );
-      return;
-    }
-
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
-      const message = content as NostrNoteContent;
-      const messageId = nip19.noteEncode(message.id);
-
-      const isRepost = message.kind === Kind.Repost;
-
-      if (scope) {
-        const isFirstNote = message.kind === Kind.Text ?
-          store.notes[0]?.post?.noteId === messageId :
-          store.notes[0]?.repost?.note.noteId === messageId;
-
-
-        const scopeNotes = store[scope].notes;
-
-        const isaAlreadyIn = message.kind === Kind.Text &&
-          scopeNotes &&
-          scopeNotes.find(n => n.post.noteId === messageId);
-
-        let isAlreadyReposted = isRepostInCollection(store[scope].page.messages, message);
-
-        // const isAlreadyFetched = message.kind === Kind.Text ?
-        //   store.future.notes[0]?.post?.noteId === messageId :
-        //   store.future.notes[0]?.repost?.note.noteId === messageId;
-
-        if (isFirstNote || isaAlreadyIn || isAlreadyReposted) return;
-
-        updateStore(scope, 'page', 'messages',
-          (msgs) => [ ...msgs, { ...message }]
-        );
-
-        return;
-      }
-
-      const isLastNote = message.kind === Kind.Text ?
-        store.lastNote?.post?.noteId === messageId :
-        store.lastNote?.repost?.note.noteId === messageId;
-
-      let isAlreadyReposted = isRepostInCollection(store.page.messages, message);
-
-      if (isLastNote || isAlreadyReposted) return;
-
-      updateStore('page', 'messages',
-        (msgs) => [ ...msgs, { ...message }]
-      );
-
-      return;
-    }
-
-    if (content.kind === Kind.NoteStats) {
-      const statistic = content as NostrStatsContent;
-      const stat = JSON.parse(statistic.content);
-
-      if (scope) {
-        updateStore(scope, 'page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-        );
-        return;
-      }
-      updateStore('page', 'postStats',
-        (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.Mentions) {
-      const mentionContent = content as NostrMentionContent;
-      const mention = JSON.parse(mentionContent.content);
-
-      if (scope) {
-        updateStore(scope, 'page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-        );
-        return;
-      }
-
-      updateStore('page', 'mentions',
-        (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.NoteActions) {
-      const noteActionContent = content as NostrNoteActionsContent;
-      const noteActions = JSON.parse(noteActionContent.content) as NoteActions;
-
-      if (scope) {
-        updateStore(scope, 'page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-        );
-        return;
-      }
-
-      updateStore('page', 'noteActions',
-        (actions) => ({ ...actions, [noteActions.event_id]: { ...noteActions } })
-      );
-      return;
-    }
-
-    if (content.kind === Kind.LinkMetadata) {
-      const metadata = JSON.parse(content.content);
-
-      const data = metadata.resources[0];
-      if (!data) {
-        return;
-      }
-
-      const preview = {
-        url: data.url,
-        title: data.md_title,
-        description: data.md_description,
-        mediaType: data.mimetype,
-        contentType: data.mimetype,
-        images: [data.md_image],
-        favicons: [data.icon_url],
-      };
-
-      setLinkPreviews(() => ({ [data.url]: preview }));
-      return;
-    }
-  };
-
-  const savePage = (page: FeedPage, scope?: 'future') => {
-    const topic = (store.selectedFeed?.hex || '').split(';');
-    const sortingFunction = sortingPlan(topic[1]);
-
-
-    const newPosts = sortingFunction(convertToNotes(page));
-
-    saveNotes(newPosts, scope);
-  };
-
-// SOCKET HANDLERS ------------------------------
-
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    const [type, subId, content] = message;
-
-    if (subId === `home_sidebar_${APP_ID}`) {
-      if (type === 'EOSE') {
-        saveSidebarPage(store.sidebar.page);
-        return;
-      }
-
-      if (!content) {
-        return;
-      }
-
-
-      if (type === 'EVENT') {
-        updateSidebarPage(content);
-        return;
-      }
-    }
-
-    if (subId === `home_feed_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
-        }
-
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `home_reposts_${APP_ID}`);
-
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-    }
-
-    if (subId === `home_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.page);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
-        return;
-      }
-    }
-
-    if (subId === `home_future_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.future.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.future.page, 'future');
-          return;
-        }
-
-        updateStore('future', 'reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `home_future_reposts_${APP_ID}`);
-
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content, 'future');
-        return;
-      }
-    }
-
-    if (subId === `home_future_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.future.page, 'future');
-        return;
-      }
-
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.future.reposts || {};
-        const parent = store.future.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('future', 'page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
-        return;
-      }
-    }
-
-
-  };
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    removeSocketListeners(
-      webSocket,
-      { message: onMessage, close: onSocketClose },
-    );
-  };
-
-// EFFECTS --------------------------------------
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
-  });
-
-  createEffect(() => {
-    if (account?.isKeyLookupDone && settings?.defaultFeed) {
-      const storedFeed = fetchStoredFeed(account.publicKey);
-      selectFeed(storedFeed || settings?.defaultFeed);
-    }
-  });
-
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
-  });
 
 
 // STORES ---------------------------------------
@@ -695,19 +293,18 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const [store, updateStore] = createStore<HomeContextStore>({
     ...initialHomeData,
     actions: {
-      saveNotes,
       clearNotes,
       fetchNotes,
       fetchNextPage,
       selectFeed,
       updateScrollTop,
-      updatePage,
-      savePage,
       checkForNewNotes,
       loadFutureContent,
       doSidebarSearch,
       updateSidebarQuery,
       getFirstPage,
+      resetSelectedFeed,
+      refetchSelectedFeed,
     },
   });
 

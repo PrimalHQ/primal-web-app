@@ -1,6 +1,6 @@
 import { Component, createSignal, JSXElement, Match, Show, Switch } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { Button } from "@kobalte/core";
+import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
 
@@ -10,7 +10,7 @@ const ButtonCopy: Component<{
   disabled?: boolean,
   label?: string,
   labelBeforeIcon?: boolean,
-  light?: boolean,
+  color?: 'light' | 'dark' | 'red' | 'link',
 }> = (props) => {
 
   const [copying, setCopying] = createSignal(false);
@@ -22,10 +22,21 @@ const ButtonCopy: Component<{
     setTimeout(() => setCopying(false), 2_000);
   }
 
+  const colorClass = () => {
+    const classes = {
+      light: styles.light,
+      dark: styles.dark,
+      red: styles.red,
+      link: styles.link,
+    };
+
+    return props.color ? classes[props.color] : styles.dark
+  }
+
   return (
-    <Button.Root
+    <Button
       id={props.id}
-      class={`${styles.copy} ${props.light ? styles.light : ''}`}
+      class={`${styles.copy} ${colorClass()}`}
       onClick={doCopy}
       disabled={props.disabled}
     >
@@ -43,7 +54,7 @@ const ButtonCopy: Component<{
       <Show when={!props.labelBeforeIcon}>
         <div>{props.label}</div>
       </Show>
-    </Button.Root>
+    </Button>
   )
 }
 

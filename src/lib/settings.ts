@@ -1,6 +1,6 @@
 import { Kind } from "../constants";
 import { sendMessage } from "../sockets";
-import { PrimalFeed } from "../types/primal";
+import { PrimalArticleFeed, PrimalFeed } from "../types/primal";
 import { signEvent } from "./nostrAPI";
 
 type PrimalSettings = {
@@ -54,6 +54,112 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
     return true;
   } catch (reason) {
     console.error('Failed to get settings: ', reason);
+    return false;
+  }
+
+};
+
+export const getHomeSettings = async (subid: string) => {
+  const event = {
+    content: JSON.stringify({ subkey: "user-home-feeds" }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["get_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to get settings: ', reason);
+    return false;
+  }
+
+};
+
+export const setHomeSettings = async (subid: string, feeds: PrimalArticleFeed[]) => {
+  const event = {
+    content: JSON.stringify({
+      subkey: "user-home-feeds",
+      settings: feeds,
+    }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["set_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to set settings: ', reason);
+    return false;
+  }
+
+};
+
+export const getReadsSettings = async (subid: string) => {
+  const event = {
+    content: JSON.stringify({ subkey: "user-reads-feeds" }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["get_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to get settings: ', reason);
+    return false;
+  }
+
+};
+
+export const setReadsSettings = async (subid: string, feeds: PrimalArticleFeed[]) => {
+  const event = {
+    content: JSON.stringify({
+      subkey: "user-reads-feeds",
+      settings: feeds,
+    }),
+    kind: Kind.Settings,
+    tags: [["d", "Primal-Web App"]],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  try {
+    const signedNote = await signEvent(event);
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subid,
+      {cache: ["set_app_subsettings", { event_from_user: signedNote }]},
+    ]));
+
+    return true;
+  } catch (reason) {
+    console.error('Failed to set settings: ', reason);
     return false;
   }
 

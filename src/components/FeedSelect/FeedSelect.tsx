@@ -1,4 +1,5 @@
-import { Component } from 'solid-js';
+import { A } from '@solidjs/router';
+import { Component, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -7,99 +8,96 @@ import { fetchStoredFeed } from '../../lib/localStore';
 import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
 import SelectBox from '../SelectBox/SelectBox';
 import SelectionBox from '../SelectionBox/SelectionBox';
+import SelectionBox2 from '../SelectionBox/SelectionBox2';
+import { isDev } from '../../utils';
 
-const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
+const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
   const settings = useSettingsContext();
 
-  const findFeed = (hex: string, includeReplies: string) => {
-    const ir = includeReplies === 'undefined' ? undefined :
-      includeReplies === 'true';
-
-    return settings?.availableFeeds.find(f => {
-      const isHex = f.hex === hex;
-      const isOpt = typeof ir === typeof f.includeReplies ?
-        f.includeReplies === ir :
-        false;
-
-      return isHex && isOpt;
-    });
-  };
+  const genId = (v: string) => Object.values(JSON.parse(v)).join('_')
 
   const selectFeed = (option: FeedOption) => {
+    if (!option) return;
 
-    const [hex, includeReplies] = option.value?.split('_') || [];
-    // const selector = document.getElementById('defocus');
+    const feed = {
+      spec: option.value || '',
+      name: option.label,
+      description: option.description || '',
+      enabled: true,
+    };
 
-    // selector?.focus();
-    // selector?.blur();
+    const selected = home?.selectedFeed;
 
-    if (hex && !isSelected(option)) {
-      const feed = findFeed(decodeURI(hex), includeReplies);
+    if (selected && selected.spec === feed.spec) return;
 
-      if (hex !== initialValue()?.value) {
-        home?.actions.clearNotes();
-        home?.actions.selectFeed(feed);
-      }
-      return;
-    }
-
+    home?.actions.clearNotes();
+    home?.actions.selectFeed(feed);
   };
 
   const isSelected = (option: FeedOption) => {
     const selected = home?.selectedFeed;
 
+    return selected && selected.spec === option.value;
 
-    if (selected?.hex && option.value) {
-      const t = option.value.split('_');
 
-      const isHex = encodeURI(selected.hex) == t[0];
-      const isOpt = t[1] === 'undefined' ?
-        selected.includeReplies === undefined :
-        selected.includeReplies?.toString() === t[1];
+    // if (selected?.hex && option.value) {
+    //   const t = option.value.split('_');
 
-      return isHex && isOpt;
-    }
+    //   const isHex = encodeURI(selected.hex) == t[0];
+    //   const isOpt = t[1] === 'undefined' ?
+    //     selected.includeReplies === undefined :
+    //     selected.includeReplies?.toString() === t[1];
 
-    return false;
+    //   return isHex && isOpt;
+    // }
+
+    // return false;
   }
 
   const options:() => SelectionOption[] = () => {
-    if (settings?.availableFeeds === undefined) {
-     return [];
-    }
+    if (!settings) return [];
 
-    return settings.availableFeeds.map(feed => ({
-      label: feed.name,
-      value: `${encodeURI(feed.hex || '')}_${feed.includeReplies}`,
-    }));
+
+    return settings?.homeFeeds.reduce<SelectionOption[]>((acc, f) => {
+      return f.enabled ? [ ...acc, {
+        label: f.name,
+        value: f.spec,
+        description: f.description,
+        id: genId(f.spec),
+      }] : [ ...acc ];
+    }, []);
   };
 
   const initialValue = () => {
-    const selected = home?.selectedFeed || fetchStoredFeed(account?.publicKey);
+    const selected = home?.selectedFeed;
 
     if (!selected) {
-      return {
-        label: '',
-        value: undefined,
-      };
+      let feed = fetchStoredFeed(account?.publicKey, 'home');
+
+      if (feed) {
+        return {
+          label: feed.name,
+          value: feed.spec || '',
+          description: feed.description,
+          id: genId(feed.spec),
+        }
+      }
+
+
+      const opt = options()[0];
+
+      selectFeed(opt);
+      return opt;
     }
 
-    const feed = settings?.availableFeeds.find(f =>
-      f.hex === selected.hex && f.includeReplies === selected.includeReplies
-    );
-
-    if (feed) {
-      const [scope, timeframe] = feed.hex?.split(';') || [];
-
-      const value = scope && timeframe ? `${scope};${timeframe}_${feed.includeReplies}` : `${encodeURI(feed.hex || '')}_${feed.includeReplies}`;
-
-      return {
-        label: feed.name,
-        value,
-      };
+    return {
+      label: selected.name,
+      value: selected.spec || '',
+      description: selected.description,
+      id: genId(selected.spec),
     }
   }
 
@@ -107,23 +105,31 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string}> = (props) => {
     if (!home?.selectedFeed)
       return initialValue();
 
-    const value = `${encodeURI(home.selectedFeed.hex || '')}_${home.selectedFeed.includeReplies}`;
-
     return {
       label: home.selectedFeed.name,
-      value,
+      value: home.selectedFeed.spec,
+      description: home.selectedFeed.description,
+      id: genId(home.selectedFeed.spec),
     };
   };
 
   return (
-    <SelectionBox
-      options={options()}
-      onChange={selectFeed}
-      initialValue={initialValue()}
-      value={selectedValue()}
-      isSelected={isSelected}
-      isPhone={props.isPhone}
-    />
+    <Show when={options().length > 0}>
+      <SelectionBox2
+        options={options()}
+        onChange={selectFeed}
+        initialValue={initialValue()}
+        value={selectedValue()}
+        isSelected={isSelected}
+        isPhone={props.isPhone}
+        big={props.big}
+        caption="Notes Feed"
+        captionAction={<A href="/settings/home_feeds">Edit Feeds</A>}
+      />
+      <Show when={isDev() && home?.selectedFeed?.spec.includes('advsearch')}>
+        <A href={`/asearch/${encodeURIComponent(JSON.parse(home?.selectedFeed?.spec || '{}').query)}`}>go to advanced search</A>
+      </Show>
+    </Show>
   );
 }
 

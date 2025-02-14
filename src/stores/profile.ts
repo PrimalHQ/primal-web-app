@@ -1,6 +1,7 @@
+import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { logError } from "../lib/logger";
-import { NostrUserContent, PrimalUser } from "../types/primal";
+import { NostrUserContent, PrimalUser, UserStats } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
   if (npub.length < 24) {
@@ -16,7 +17,8 @@ export const truncateName = (name: string, limit = 20) => {
   return `${name.slice(0, limit)}...`;
 };
 
-export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: NostrUserContent) => {
+export const convertToUser = (user: NostrUserContent, pubkey: string, stats?: Record<string, UserStats>) => {
+  if (!user) return emptyUser(pubkey);
 
   let userMeta: any = {};
 
@@ -42,7 +44,9 @@ export const convertToUser: (user: NostrUserContent) => PrimalUser = (user: Nost
     lud06: (userMeta.lud06 || '') as string,
     lud16: (userMeta.lud16 || '') as string,
     website: (userMeta.website || '') as string,
-  };
+    msg: { ...user },
+    userStats: stats ? { ...stats[user.pubkey] } : undefined,
+  } as PrimalUser;
 }
 
 export const emptyUser = (pubkey: string) => {
@@ -61,6 +65,14 @@ export const emptyUser = (pubkey: string) => {
     lud06: '',
     lud16: '',
     website: '',
+    msg: {
+      kind: Kind.Metadata,
+      content: '',
+      id: '',
+      pubkey,
+      sig: '',
+      tags: [],
+    }
   } as PrimalUser;
 };
 
@@ -68,10 +80,13 @@ export const userName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
-  const name = user.name ||
-    user.display_name ||
+
+  const npub = user.npub || hexToNpub(user.pubkey) || '';
+
+  const name = user.display_name ||
     user.displayName ||
-    user.npub;
+    user.name ||
+    truncateNpub(npub);
 
   return name ?
     name :
@@ -82,10 +97,12 @@ export const authorName = (user: PrimalUser | undefined) => {
   if (!user) {
     return '';
   }
+  const npub = user.npub || hexToNpub(user.pubkey) || '';
+
   const name = user.display_name ||
     user.displayName ||
     user.name ||
-    user.npub;
+    truncateNpub(npub);
 
   return name ?
     name :

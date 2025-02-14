@@ -1,55 +1,64 @@
-import { A } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
+import { Transition } from 'solid-transition-group';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
-import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
-import { PrimalUser } from '../../types/primal';
-import Avatar from '../Avatar/Avatar';
-import FollowButton from '../FollowButton/FollowButton';
+import { PrimalNote, PrimalUser } from '../../types/primal';
+import MentionedPeople from './MentionedPeople';
 
 import styles from './PeopleList.module.scss';
+import Repliers from './Repliers';
 
 
-const PeopleList: Component<{ people: PrimalUser[], label: string, id?: string }> = (props) => {
-  const people = () => props.people;
+const PeopleList: Component<{
+  people: PrimalUser[],
+  label?: string,
+  mentionLabel?: string,
+  id?: string,
+  note?: PrimalNote,
+  singleFile?: boolean,
+}> = (props) => {
+  const author = () => props.note?.user;
+
+  const mentioned = () => {
+    if (!props.note) return [];
+
+    const mpks = props.note?.msg.tags.filter(t => t[0] === 'p').map(t => t[1]);
+    const tzpk = (props.note?.topZaps[0] || {}).pubkey;
+
+    const curatedMentions = props.people.filter(m => {
+      return [ ...mpks, tzpk].includes(m.pubkey);
+    });
+
+    return curatedMentions.filter(p => p.pubkey !== author()?.pubkey);
+  };
+
+  const repliers = () => {
+    if (!props.note) return props.people;
+
+    return props.people.filter(p => p.pubkey !== author()?.pubkey && (props.note?.mentionedUsers || {})[p.pubkey] === undefined);
+  }
+
 
   return (
-    <div id={props.id} class={styles.stickyWrapper}>
-      <div class={styles.heading}>{props.label}</div>
-      <div id="trending_section" class={styles.trendingSection}>
-        <For each={people()}>
-          {
-            (person) =>
-              <A href={`/p/${person?.npub}`} class={styles.peopleList}>
-                <div class={styles.avatar}>
-                  <Avatar
-                    size="md"
-                    user={person}
-                  />
-                </div>
-                <div class={styles.content}>
-                  <div class={styles.name}>
-                    {authorName(person)}
-                  </div>
-                  <div class={styles.verification} title={person?.nip05}>
-                    <Show when={person?.nip05}>
-                      <span
-                        class={styles.verifiedBy}
-                        title={person?.nip05}
-                      >
-                        {nip05Verification(person)}
-                      </span>
-                    </Show>
-                  </div>
-                  <div class={styles.npub} title={person?.npub}>
-                    {truncateNpub(person?.npub)}
-                  </div>
-                </div>
-                <FollowButton person={person} />
-              </A>
-          }
-        </For>
+      <div id={props.id} class={styles.stickyWrapper}>
+        <Show when={author()}>
+          <MentionedPeople
+            mentioned={mentioned()}
+            author={author()}
+            label={props.mentionLabel || ''}
+          />
+        </Show>
+
+        <Transition name='slide-fade'>
+          <Show when={repliers().length > 0}>
+            <Repliers
+              people={repliers()}
+              label={props.label || ''}
+              singleFile={props.singleFile}
+            />
+          </Show>
+        </Transition>
       </div>
-    </div>
   );
 }
 

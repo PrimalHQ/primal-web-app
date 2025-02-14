@@ -3,6 +3,7 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   onMount,
   useContext
@@ -21,32 +22,44 @@ import {
   PrimalNote,
   PrimalUser,
   NostrEventContent,
+  PrimalArticle,
+  NostrEvents,
+  PrimalDVM,
 } from '../types/primal';
-import { Kind, pinEncodePrefix, relayConnectingTimeout } from "../constants";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket, subscribeTo, reset, subTo } from "../sockets";
+import { Kind, pinEncodePrefix, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
+import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
 import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19 } from "nostr-tools";
+import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
-import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readEmojiHistory, readSecFromStorage, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
+import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
+import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, savePremiumReminder, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
-import { generateKeys } from "../lib/PrimalNostr";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
 import CreateAccountModal from "../components/CreateAccountModal/CreateAccountModal";
 import LoginModal from "../components/LoginModal/LoginModal";
 import { logError, logInfo, logWarning } from "../lib/logger";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { useIntl } from "@cookbook/solid-intl";
-import { account as tAccount, followWarning, forgotPin } from "../translations";
+import { account as tAccount, bookmarks, followWarning, forgotPin, settings } from "../translations";
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
+import { useAppContext } from "./AppContext";
+import { handleSubscription } from "../utils";
+
+export type FollowData = {
+  tags: string[][],
+  date: number,
+  relayInfo: string,
+  openDialog: boolean,
+  following: string[],
+};
 
 export type AccountContextStore = {
   likes: string[],
   defaultRelays: string[],
   relays: Relay[],
+  suspendedRelays: Relay[],
   relaySettings: NostrRelays,
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
@@ -55,6 +68,7 @@ export type AccountContextStore = {
   followingSince: number,
   followInProgress: string,
   muted: string[],
+  mutedTags: string[][],
   mutedPrivate: string,
   mutedSince: number,
   hasPublicKey: () => boolean,
@@ -74,12 +88,19 @@ export type AccountContextStore = {
   showLogin: boolean,
   emojiHistory: EmojiOption[],
   membershipStatus: MembershipStatus,
+  bookmarks: string[],
+  proxyThroughPrimal: boolean,
+  proxySettingSet: boolean,
+  activeRelays: Relay[],
+  followData: FollowData,
+  premiumReminder: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
     setActiveUser: (user: PrimalUser) => void,
-    addLike: (note: PrimalNote) => Promise<boolean>,
+    addLike: (note: PrimalNote | PrimalArticle | PrimalDVM) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
+    updateAccountProfile: (pubkey: string) => void,
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     quoteNote: (noteId: string | undefined) => void,
@@ -101,6 +122,30 @@ export type AccountContextStore = {
     showGetStarted: () => void,
     saveEmoji: (emoji: EmojiOption) => void,
     checkNostrKey: () => void,
+    fetchBookmarks: () => void,
+    updateBookmarks: (bookmarks: string[]) => void,
+    resetRelays: (relays: Relay[]) => void,
+    setProxyThroughPrimal: (shouldProxy: boolean) => void,
+    updateRelays: () => void,
+    updateContactsList: () => void,
+    setFlag: (key: string, flag: boolean) => void,
+    setString: (key: string, string: string) => void,
+    setFollowData: (followData: FollowData) => void,
+    resolveContacts: (
+      pubkey: string,
+      following: string[],
+      date: number,
+      tags: string[][],
+      relayInfo: string,
+      cb?: (remove: boolean, pubkey: string) => void,
+    ) => Promise<void>,
+    replaceContactList: (
+      date: number,
+      tags: string[][],
+      relayInfo: string,
+      cb?: (remove: boolean, pubkey: string | undefined) => void,
+    ) => Promise<void>,
+    clearPremiumRemider: () => void,
   },
 }
 
@@ -108,6 +153,8 @@ const initialData = {
   likes: [],
   defaultRelays: [],
   relays: [],
+  activeRelays: [],
+  suspendedRelays: [],
   relaySettings: {},
   publicKey: undefined,
   activeUser: undefined,
@@ -116,6 +163,7 @@ const initialData = {
   followingSince: 0,
   followInProgress: '',
   muted: [],
+  mutedTags: [],
   mutedPrivate: '',
   mutedSince: 0,
   isKeyLookupDone: false,
@@ -134,12 +182,24 @@ const initialData = {
   showLogin: false,
   emojiHistory: [],
   membershipStatus: {},
+  bookmarks: [],
+  proxyThroughPrimal: false,
+  proxySettingSet: false,
+  premiumReminder: false,
+  followData: {
+    tags: [],
+    date: 0,
+    relayInfo: '',
+    openDialog: false,
+    following: [],
+  }
 };
 
 export const AccountContext = createContext<AccountContextStore>();
 
 export function AccountProvider(props: { children: JSXElement }) {
 
+  const app = useAppContext();
   const toast = useToastContext();
   const intl = useIntl();
 
@@ -153,11 +213,83 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   let membershipSocket: WebSocket | undefined;
 
-  onMount(() => {
-    setInterval(() => {
-      checkNostrChange();
-    }, 1_000);
-  });
+  // onMount(() => {
+  //   setInterval(() => {
+  //     checkNostrChange();
+  //   }, 1_000);
+  // });
+
+  const suspendRelays = () => {
+    if (store.relays.length === 0) {
+      const urls: string[] = Object.keys(store.relaySettings || {}).map(utils.normalizeURL);
+      const suspendedRelays = urls.map(relayInit);
+      updateStore('suspendedRelays', () => suspendedRelays);
+    }
+    else {
+      updateStore('suspendedRelays', () => store.relays);
+
+      for (let i=0; i<store.relays.length; i++) {
+        const relay = store.relays[i];
+        relay.close();
+      }
+    }
+
+    const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+    for (let i=0; i<priorityRelays.length; i++) {
+      const pr = priorityRelays[i];
+
+      if (!store.suspendedRelays.find(r => r.url === pr)) {
+        updateStore('suspendedRelays', store.suspendedRelays.length, () => relayInit(pr));
+      }
+    }
+
+    updateStore('relays', () => []);
+    updateStore('activeRelays', () => [...store.suspendedRelays]);
+  }
+
+  const reconnectSuspendedRelays = async () => {
+    const relaysToConnect = store.suspendedRelays.length > 0 ?
+    store.suspendedRelays.reduce((acc, r) => {
+      return {
+        ...acc,
+        [r.url]: { ...store.relaySettings[r.url] ?? { read: true, write: true} },
+      };
+    }, {}) :
+    store.relaySettings;
+
+    await connectToRelays(relaysToConnect);
+
+    updateStore('suspendedRelays', () => []);
+    updateStore('activeRelays', () => store.relays);
+  }
+
+  const setProxyThroughPrimal = async (shouldProxy: boolean) => {
+    updateStore('proxyThroughPrimal', () => shouldProxy);
+
+    if (!store.proxySettingSet) {
+      updateStore('proxySettingSet', () => true);
+    }
+
+    if (shouldProxy) {
+      suspendRelays();
+    }
+    else {
+      reconnectSuspendedRelays();
+    }
+  }
+
+
+  createEffect(on(() => app?.appState, (v, p) => {
+    if (v === 'sleep') {
+      suspendRelays();
+      return;
+    }
+
+    if (v === 'waking' && p === 'sleep') {
+      reconnectSuspendedRelays();
+    }
+  }))
 
   const checkNostrChange = async () => {
     if (location.pathname === '/') return;
@@ -187,12 +319,33 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfiles([key], `user_profile_${APP_ID}`);
+      updateAccountProfile(key);
     } catch (e: any) {
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
       logError('error fetching public key: ', e);
     }
+  };
+
+  const updateAccountProfile = (pubkey: string) => {
+    if (pubkey !== store.publicKey) return;
+
+    const subId = `user_profile_${APP_ID}`;
+
+    handleSubscription(
+      subId,
+      () => getUserProfiles([pubkey], subId),
+      handleUserProfileEvent,
+    );
+
+    // const unsub = subsTo(subId, {
+    //   onEvent: handleUserProfileEvent,
+    //   onEose: () => {
+    //     unsub();
+    //   },
+    // });
+
+    // getUserProfiles([pubkey], subId);
   };
 
   const openMembershipSocket = (onOpen: () => void) => {
@@ -231,12 +384,39 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (!gotEvent) {
             updateStore('membershipStatus', () => ({ tier: 'none' }));
           }
+
+          checkPremiumRemider()
         }
       });
 
       getMembershipStatus(store.publicKey, subId, membershipSocket);
     });
   };
+
+  const checkPremiumRemider = () => {
+    if (['premium', 'premium-legend'].includes(store.membershipStatus.tier || '')) {
+      updateStore('premiumReminder', () => false);
+      return;
+    };
+
+    const now = (new Date()).getTime();
+    const reminder = readPremiumReminder(store.publicKey) || 0;
+
+    if (now - reminder > sevenDays) {
+      updateStore('premiumReminder', () => true);
+    }
+  }
+
+  const clearPremiumRemider = () => {
+    const now = (new Date()).getTime();
+    updateStore('premiumReminder', () => false);
+
+    savePremiumReminder(store.publicKey, now);
+
+    setTimeout(() => {
+      checkPremiumRemider()
+    }, sevenDays)
+  }
 
   const showGetStarted = () => {
     updateStore('showGettingStarted', () => true);
@@ -275,7 +455,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       // Fetch it anyway, maybe there is an update
-      getUserProfiles([pubkey], `user_profile_${APP_ID}`);
+      updateAccountProfile(pubkey);
     }
   }
 
@@ -285,6 +465,10 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('publicKey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
       checkMembershipStatus();
+
+      const bks = readBookmarks(pubkey);
+      updateStore('bookmarks', () => [...bks]);
+      fetchBookmarks();
     }
     else {
       updateStore('publicKey', () => undefined);
@@ -298,7 +482,20 @@ export function AccountProvider(props: { children: JSXElement }) {
     return !!store.publicKey;
   };
 
-  const setRelaySettings = (settings: NostrRelays, replace?: boolean) => {
+  const resetRelays = (relays: Relay[]) => {
+    const settings = relays.reduce((acc, r) => ({ ...acc, [r.url]: { write: true, read: true }}), {});
+
+    setRelaySettings({ ...settings }, true);
+    connectToRelays({ ...settings }, true);
+  };
+
+  const setRelaySettings = (stgns: NostrRelays, replace?: boolean) => {
+
+    let settings = { ...stgns };
+
+    if (Object.keys(settings).length === 0) {
+      settings = attachDefaultRelays(settings);
+    }
 
     if (replace) {
       for (let url in store.relaySettings) {
@@ -310,13 +507,15 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         if (relay) {
           relay.close();
-          updateStore('relays', () => store.relays.filter(r => r.url !== url));
+          const filtered = store.relays.filter(r => r.url !== url);
+          updateStore('relays', () => filtered);
         }
       }
 
       updateStore('relaySettings', () => ({...settings}));
+      connectToRelays(settings)
       saveRelaySettings(store.publicKey, settings);
-      return;
+      return true;
     }
 
     const rs = store.relaySettings;
@@ -330,11 +529,12 @@ export function AccountProvider(props: { children: JSXElement }) {
     }, rs);
 
     if (Object.keys(toSave).length === 0) {
-      return;
+      return true;
     }
 
     updateStore('relaySettings', () => ({ ...toSave }));
-    saveRelaySettings(store.publicKey, toSave)
+    saveRelaySettings(store.publicKey, toSave);
+    return true;
   }
 
   const attachDefaultRelays = (relaySettings: NostrRelays) => {
@@ -347,10 +547,17 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('connectToPrimaryRelays', () => flag);
   }
 
-  const connectToRelays = (relaySettings: NostrRelays) => {
+  const connectToRelays = async (relaySettings: NostrRelays, sendRelayList?: boolean) => {
+
+    if (!store.proxySettingSet || store.proxyThroughPrimal) return;
 
     if (Object.keys(relaySettings).length === 0) {
-      getDefaultRelays(`default_relays_${APP_ID}`);
+      const defaultRelaysId = `default_relays_${APP_ID}`;
+      handleSubscription(
+        defaultRelaysId,
+        () => getDefaultRelays(defaultRelaysId),
+        handleDefaultRelaysEvent,
+      );
       return;
     }
 
@@ -367,6 +574,18 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     const onConnect = (connectedRelay: Relay) => {
+
+      // connectedRelay.onclose = () => {
+      //   console.log('Relay closed');
+      //   setTimeout(async () => {
+      //     await connectToRelay(connectedRelay, relayConnectingTimeout, onConnect, onFail, true);
+      //   }, 200)
+      // }
+
+      if (sendRelayList) {
+        sendRelays([connectedRelay], relaySettings, store.proxyThroughPrimal);
+      }
+
       if (store.relays.find(r => r.url === connectedRelay.url)) {
         return;
       }
@@ -376,7 +595,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         relayAtempts[connectedRelay.url] = 0;
       }, 3 * relayConnectingTimeout)
 
-      updateStore('relays', (rs) => [ ...rs, { ...connectedRelay } ]);
+      updateStore('relays', (rs) => [ ...rs, connectedRelay ]);
     };
 
     const onFail = (failedRelay: Relay, reasons: any) => {
@@ -392,20 +611,22 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
 
+      if (reasons === 'close') return;
+
       if ((relayAtempts[failedRelay.url] || 0) < relayAtemptLimit) {
         relayAtempts[failedRelay.url] = (relayAtempts[failedRelay.url] || 0) + 1;
 
         // Reconnect with a progressive delay
         setTimeout(() => {
           logInfo('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
-          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail);
+          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail, true);
         }, relayConnectingTimeout * relayAtempts[failedRelay.url]);
         return;
       }
       logWarning('Reached atempt limit ', failedRelay.url)
     };
 
-    connectRelays(relaysToConnect, onConnect, onFail);
+    await connectRelays(relaysToConnect, onConnect, onFail);
 
   };
 
@@ -419,6 +640,14 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     if (storedKey) {
       setPublicKey(storedKey);
+
+      // Read profile from storage
+      const storedUser = getStoredProfile(storedKey);
+
+      if (storedUser) {
+        // If it exists, set it as active user
+        updateStore('activeUser', () => ({...storedUser}));
+      }
     }
 
     if (nostr === undefined) {
@@ -457,18 +686,18 @@ export function AccountProvider(props: { children: JSXElement }) {
       else {
         if (key !== storedKey) {
           setPublicKey(key);
-        }
 
-        // Read profile from storage
-        const storedUser = getStoredProfile(key);
+          // Read profile from storage
+          const storedUser = getStoredProfile(key);
 
-        if (storedUser) {
-          // If it exists, set it as active user
-          updateStore('activeUser', () => ({...storedUser}));
+          if (storedUser) {
+            // If it exists, set it as active user
+            updateStore('activeUser', () => ({...storedUser}));
+          }
         }
 
         // Fetch it anyway, maybe there is an update
-        getUserProfiles([key], `user_profile_${APP_ID}`);
+        updateAccountProfile(key);
       }
     } catch (e: any) {
       setPublicKey(undefined);
@@ -489,15 +718,15 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('showNewNoteForm', () => false);
   };
 
-  const addLike = async (note: PrimalNote) => {
-    if (store.likes.includes(note.post.id)) {
+  const addLike = async (note: PrimalNote | PrimalArticle | PrimalDVM) => {
+    if (store.likes.includes(note.id)) {
       return false;
     }
 
-    const { success } = await sendLike(note, store.relays, store.relaySettings);
+    const { success } = await sendLike(note, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
     if (success) {
-      updateStore('likes', (likes) => [ ...likes, note.post.id]);
+      updateStore('likes', (likes) => [ ...likes, note.id]);
       saveLikes(store.publicKey, store.likes);
     }
 
@@ -513,34 +742,34 @@ export function AccountProvider(props: { children: JSXElement }) {
     // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
 
-    const unsub = subscribeTo(`before_add_relay_${APP_ID}`, (type, subId, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_add_relay_${APP_ID}`, {
+      onEvent: (_, content) => {
         const relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
 
         const relays = { ...store.relaySettings, ...relayInfo };
 
         setRelaySettings(relays, true);
-      }
-
-      if (type === 'EOSE') {
-
-        sendRelays(store.relays, store.relaySettings);
+      },
+      onEose: () => {
+        sendRelays(store.activeRelays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getRelays(store.publicKey, `before_add_relay_${APP_ID}`);
   };
 
   const removeRelay = (url: string) => {
-    const relay: Relay = store.relays.find(r => r.url === url);
+    const relay: Relay = store.relays.find(r => {
+      return r.url === url || `${r.url}/` === url;
+    });
 
     // if relay is connected, close it and remove it from the list of open relays
     if (relay) {
       relay.close();
-      updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+      const filtered = store.relays.filter(r => r.url !== url);
+      updateStore('relays', () => filtered);
     }
 
     // Add relay to the list of explicitly closed relays
@@ -554,8 +783,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     saveRelaySettings(store.publicKey, store.relaySettings);
 
-    const unsub = subscribeTo(`before_remove_relay_${APP_ID}`, (type, subId, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
+      onEvent: (_, content) => {
         let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
 
         delete relayInfo[url];
@@ -563,15 +792,13 @@ export function AccountProvider(props: { children: JSXElement }) {
         const relays = { ...store.relaySettings, ...relayInfo };
 
         setRelaySettings(relays, true);
-      }
+      },
+      onEose: () => {
 
-      if (type === 'EOSE') {
-
-        sendRelays(store.relays, store.relaySettings);
+        sendRelays(store.activeRelays, store.relaySettings, store.proxyThroughPrimal);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getRelays(store.publicKey, `before_remove_relay_${APP_ID}`);
@@ -600,6 +827,17 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const extractContacts = (content: NostrContactsContent) => {
+
+    if (content.created_at && content.created_at < store.followingSince) {
+      const storage = getStorage(store.publicKey);
+
+      return {
+        following: storage.following,
+        created_at: storage.followingSince || 0,
+        tags: store.contactsTags,
+        content: store.contactsContent,
+      };
+    }
 
     const following = content.tags.reduce((acc, t) => {
       return t[0] === 'p' ? [ ...acc, t[1] ] : acc;
@@ -636,28 +874,13 @@ export function AccountProvider(props: { children: JSXElement }) {
       return [ ...acc, pubkey ];
     }, []);
 
+    updateStore('mutedTags', () => [...tags]);
     updateStore('muted', (ml) => [ ...ml, ...muted]);
     updateStore('mutedPrivate', () => content.content);
     updateStore('mutedSince', () => mutedSince || 0);
 
     saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
   };
-
-  type FollowData = {
-    tags: string[][],
-    date: number,
-    relayInfo: string,
-    openDialog: boolean,
-    following: string[],
-  }
-
-  const [followData, setFollowData] = createStore<FollowData>({
-    tags: [],
-    date: 0,
-    relayInfo: '',
-    openDialog: false,
-    following: [],
-  });
 
   const resolveContacts = async (
     pubkey: string,
@@ -667,7 +890,7 @@ export function AccountProvider(props: { children: JSXElement }) {
     relayInfo: string,
     cb?: (remove: boolean, pubkey: string) => void,
   ) => {
-    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.relays, store.relaySettings);
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
     if (success && event) {
       updateStore('following', () => following);
@@ -682,6 +905,29 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   };
 
+  const replaceContactList = async (
+    date: number,
+    tags: string[][],
+    relayInfo: string,
+    cb?: (remove: boolean, pubkey: string | undefined) => void,
+  ) => {
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+    if (success && event) {
+      const following = event.tags.reduce<string[]>((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+
+      updateStore('following', () => following);
+      updateStore('followingSince', () => date);
+      updateStore('contactsTags', () => [...tags]);
+      updateStore('contactsContent', () => relayInfo);
+      saveFollowing(store.publicKey, following, date);
+
+      triggerImportEvents([event], `import_follow_contacts_${APP_ID}`, () => {
+        cb && cb(false, store.publicKey);
+      });
+    }
+  };
+
   const addFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
     if (!store.publicKey || store.following.includes(pubkey)) {
       return;
@@ -689,7 +935,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     updateStore('followInProgress', () => pubkey);
 
-    let contactsReceived = false;
+    // let contactsReceived = false;
 
     let contactData: ContactsData = {
       content: '',
@@ -700,14 +946,19 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let rawContacts: NostrEventContent[] = [];
 
-    const unsub = subscribeTo(`before_follow_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-        if (!contactsReceived) {
-          toast?.sendWarning(intl.formatMessage(tAccount.followFailed))
-          updateStore('followInProgress', () => '');
-          unsub();
-          return;
-        }
+    const unsub = subsTo(`before_follow_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        rawContacts.push(content);
+
+        logInfo('FOLLOW DATE CONTENT: ', content.created_at);
+        logInfo('FOLLOW DATE STORE: ', store.followingSince);
+        logInfo('FOLLOW DATE DIFF: ', (content.created_at || 0) - store.followingSince);
+
+        contactData = extractContacts(content);
+
+        logWarning('FOLLOW DATA PRE CHANGE: ', contactData);
 
         if (!contactData.following.includes(pubkey)) {
 
@@ -721,8 +972,9 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (following.length < 2 || tags.length < 2) {
             logWarning('FOLLOW ISSUE: ', `before_follow_${APP_ID}`);
             logWarning('FOLLOW CONTENT: ', rawContacts);
+            logWarning('FOLLOW DATA: ', contactData);
 
-            setFollowData(() => ({
+            updateStore('followData', () => ({
               openDialog: true,
               date,
               tags,
@@ -731,25 +983,19 @@ export function AccountProvider(props: { children: JSXElement }) {
             }));
           }
           else {
-            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
-
+      },
+      onEose: () => {
+        if (store.following.length === 0) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+          const tags = [['p', pubkey]];
+          resolveContacts(pubkey, [pubkey], date, tags, store.relays[0].url, cb);
+        }
         updateStore('followInProgress', () => '');
         unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content || content.kind !== Kind.Contacts) return;
-
-        rawContacts.push(content)
-        contactsReceived = true;
-
-        if (content.created_at && content.created_at >= store.followingSince) {
-          contactData = extractContacts(content);
-        }
-      }
+      },
     });
 
     getProfileContactList(store.publicKey, `before_follow_${APP_ID}`);
@@ -757,13 +1003,15 @@ export function AccountProvider(props: { children: JSXElement }) {
   }
 
   const removeFollow = (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => {
-    if (!store.publicKey || !store.following.includes(pubkey)) {
+    if (
+      !store.publicKey ||
+      !store.following.includes(pubkey) ||
+      store.publicKey === pubkey
+    ) {
       return;
     }
 
     updateStore('followInProgress', () => pubkey);
-
-    let contactsReceived = false;
 
     let contactData: ContactsData = {
       content: '',
@@ -774,14 +1022,19 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let rawContacts: NostrEventContent[] = [];
 
-    const unsub = subscribeTo(`before_unfollow_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-        if (!contactsReceived) {
-          toast?.sendWarning(intl.formatMessage(tAccount.unfollowFailed))
-          updateStore('followInProgress', () => '');
-          unsub();
-          return;
-        }
+    const unsub = subsTo(`before_unfollow_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (!content || content.kind !== Kind.Contacts) return;
+
+        rawContacts.push(content);
+
+        logInfo('FOLLOW DATE CONTENT: ', content.created_at);
+        logInfo('FOLLOW DATE STORE: ', store.followingSince);
+        logInfo('FOLLOW DATE DIFF: ', (content.created_at || 0) - store.followingSince);
+
+        contactData = extractContacts(content);
+
+        logWarning('FOLLOW DATA PRE CHANGE: ', contactData);
 
         if (contactData.following.includes(pubkey)) {
 
@@ -795,8 +1048,9 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (following.length < 2 || tags.length < 2) {
             logWarning('FOLLOW ISSUE: ', `before_unfollow_${APP_ID}`);
             logWarning('FOLLOW CONTENT: ', rawContacts);
+            logWarning('FOLLOW DATA: ', contactData);
 
-            setFollowData(() => ({
+            updateStore('followData', () => ({
               openDialog: true,
               date,
               tags,
@@ -805,25 +1059,15 @@ export function AccountProvider(props: { children: JSXElement }) {
             }));
           }
           else {
-            await resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
           }
         }
 
+      },
+      onEose: () => {
         updateStore('followInProgress', () => '');
         unsub();
-        return;
-      }
-
-      if (type === 'EVENT') {
-        if (!content || content.kind !== Kind.Contacts) return;
-
-        rawContacts.push(content)
-        contactsReceived = true;
-
-        if (content.created_at && content.created_at >= store.followingSince) {
-          contactData = extractContacts(content);
-        }
-      }
+      },
     });
 
     getProfileContactList(store.publicKey, `before_unfollow_${APP_ID}`);
@@ -839,14 +1083,24 @@ export function AccountProvider(props: { children: JSXElement }) {
       return;
     }
 
-    const unsub = subscribeTo(`before_mute_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(`before_mute_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (content &&
+          (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
+          content.created_at &&
+          content.created_at > store.mutedSince
+        ) {
+          updateMuted(content);
+        }
+      },
+      onEose: async () => {
         if (!store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...store.muted, pubkey];
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const tags = [ ...store.mutedTags, ['p', pubkey]];
+
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -857,16 +1111,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
-        content.created_at &&
-        content.created_at > store.mutedSince
-      ) {
-        updateMuted(content);
-      }
+      },
     });
 
     getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
@@ -877,14 +1122,24 @@ export function AccountProvider(props: { children: JSXElement }) {
       return;
     }
 
-    const unsub = subscribeTo(`before_unmute_${APP_ID}`, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(`before_unmute_${APP_ID}`, {
+      onEvent: (_, content) => {
+        if (content &&
+          ([Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) &&
+          content.created_at &&
+          content.created_at > store.followingSince
+        ) {
+          updateMuted(content as NostrMutedContent);
+        }
+      },
+      onEose: async () => {
         if (store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = store.muted.filter(m => m !== pubkey);
 
-          const { success, note } = await sendMuteList(muted, date, content?.content || '', store.relays, store.relaySettings);
+          const tags = store.mutedTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
@@ -896,15 +1151,6 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         then && then();
         unsub();
-        return;
-      }
-
-      if (content &&
-        ([Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) &&
-        content.created_at &&
-        content.created_at > store.followingSince
-      ) {
-        updateMuted(content as NostrMutedContent);
       }
     });
 
@@ -930,7 +1176,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
       if (relay) {
         relay.close();
-        updateStore('relays', () => store.relays.filter(r => r.url !== url));
+        const filtered = store.relays.filter(r => r.url !== url);
+        updateStore('relays', () => filtered);
       }
 
       // Add relay to the list of explicitly closed relays
@@ -939,7 +1186,6 @@ export function AccountProvider(props: { children: JSXElement }) {
       // Reset connection attempts
       relayAtempts[url] = 0;
     }
-
   };
 
   const updateFilterlists = (mutelists: NostrMutedContent) => {
@@ -1002,20 +1248,17 @@ export function AccountProvider(props: { children: JSXElement }) {
     let filterlists: Filterlist[] = [];
 
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-
-      if (type === 'EVENT') {
-        filterlists = updateFilterlists(response as NostrMutedContent);
-      }
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        filterlists = updateFilterlists(content as NostrMutedContent);
+      },
+      onEose: () => {
         if (store.publicKey && !filterlists.find(l => l.pubkey === store.publicKey)) {
           filterlists.unshift({ pubkey: store.publicKey, content: true, trending: true });
         }
         updateStore('mutelists', () => [...filterlists]);
         unsub();
-      }
-
+      },
     });
 
     getFilterlists(pubkey, subId);
@@ -1031,8 +1274,17 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     let filterlists: Filterlist[] = [...store.mutelists];
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.mutelistSince
+        ) {
+          filterlists = [...updateFilterlists(content)];
+        }
+      },
+      onEose: async () => {
         updateStore('mutelists', () => [...filterlists]);
 
         if (store.mutelists.find(m => m.pubkey === pubkey)) {
@@ -1043,30 +1295,21 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('mutelists', (mls) => [ ...mls, { pubkey, content: true, trending: true } ]);
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.mutelistSince
-      ) {
-        filterlists = [...updateFilterlists(content)];
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
 
   };
 
-  const removeFilterList = async (pubkey: string | undefined) => {
+  const removeFilterList = (pubkey: string | undefined) => {
     if (!pubkey || pubkey === store.publicKey) {
       return;
     }
@@ -1075,8 +1318,16 @@ export function AccountProvider(props: { children: JSXElement }) {
     const subId = `bmr_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [...store.mutelists];
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        filterlists = updateFilterlists(content);
+      }
+      },
+      onEose: async () => {
         updateStore('mutelists', () => [...filterlists]);
 
         const modified = store.mutelists.filter(m => m.pubkey !== pubkey);
@@ -1084,37 +1335,36 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('mutelists', () => [ ...modified ]);
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.mutelistSince
-      ) {
-        filterlists = updateFilterlists(content);
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
   };
 
-  const updateFilterList = async (pubkey: string | undefined, content = true, trending = true) => {
+  const updateFilterList = (pubkey: string | undefined, content = true, trending = true) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
     const subId = `bmu_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, c) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {if (content &&
+        content.kind === Kind.CategorizedPeople &&
+        content.created_at &&
+        content.created_at > store.mutelistSince
+      ) {
+        updateFilterlists(content);
+      }
+      },
+      onEose: async () => {
 
         if (!store.mutelists.find(m => m.pubkey === pubkey)) {
           unsub();
@@ -1128,23 +1378,14 @@ export function AccountProvider(props: { children: JSXElement }) {
           () => ({ content, trending }),
         );
 
-        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendFilterlists(store.mutelists, date, '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
         }
 
         unsub();
-        return;
-      }
-
-      if (c &&
-        c.kind === Kind.CategorizedPeople &&
-        c.created_at &&
-        c.created_at > store.mutelistSince
-      ) {
-        updateFilterlists(c);
-      }
+      },
     });
 
     getFilterlists(store.publicKey, subId);
@@ -1179,30 +1420,36 @@ export function AccountProvider(props: { children: JSXElement }) {
     const subId = `allowlist_${APP_ID}`;
 
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-
-      if (type === 'EVENT') {
-        updateAllowlist(response as NostrMutedContent);
-      }
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        updateAllowlist(content as NostrMutedContent);
+      },
+      onEose: () => {
         unsub();
       }
-
     });
 
     getAllowlist(pubkey, subId);
   };
 
-  const addToAllowlist = async (pubkey: string | undefined, then?: () => void) => {
+  const addToAllowlist = (pubkey: string | undefined, then?: () => void) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
     const subId = `baa_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.allowlistSince
+        ) {
+          updateAllowlist(content);
+        }
+      },
+      onEose: async () => {
 
         if (store.allowlist.includes(pubkey)) {
           return;
@@ -1212,7 +1459,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('allowlist', store.allowlist.length, () => pubkey);
 
-        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
@@ -1220,32 +1467,31 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         then && then();
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.allowlistSince
-      ) {
-        updateAllowlist(content);
-      }
+      },
     });
 
     getAllowlist(store.publicKey, subId);
 
   };
 
-  const removeFromAllowlist = async (pubkey: string | undefined) => {
+  const removeFromAllowlist = (pubkey: string | undefined) => {
     if (!pubkey) {
       return;
     }
     const random = generatePrivateKey();
-    const subId = `bar_${random}_${APP_ID}`;
+    const subId = `allow_list_remove_${random}_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, async (type, subId, content) => {
-      if (type === 'EOSE') {
-
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          content.kind === Kind.CategorizedPeople &&
+          content.created_at &&
+          content.created_at > store.allowlistSince
+        ) {
+          updateAllowlist(content);
+        }
+      },
+      onEose: async () => {
         if (!store.allowlist.includes(pubkey)) {
           return;
         }
@@ -1255,7 +1501,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
         updateStore('allowlist', () => [...newList]);
 
-        const { success, note } = await sendAllowList(store.allowlist, date, '', store.relays, store.relaySettings);
+        const { success, note } = await sendAllowList(store.allowlist, date, '', store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
@@ -1263,16 +1509,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
 
         unsub();
-        return;
-      }
-
-      if (content &&
-        content.kind === Kind.CategorizedPeople &&
-        content.created_at &&
-        content.created_at > store.allowlistSince
-      ) {
-        updateAllowlist(content);
-      }
+      },
     });
 
     getAllowlist(store.publicKey, subId);
@@ -1297,9 +1534,46 @@ export function AccountProvider(props: { children: JSXElement }) {
   };
 
   const checkNostrKey = () => {
+    if (store.publicKey) return;
     updateStore('isKeyLookupDone', () => false);
     fetchNostrKey();
   };
+
+  const fetchBookmarks = () => {
+    const bookmarksId = `user_bookmarks_${APP_ID}`;
+
+    handleSubscription(
+      bookmarksId,
+      () => getBookmarks(store.publicKey, bookmarksId),
+      handleUserBookmarksEvent,
+      handleUserBookmarksEose,
+    );
+  }
+
+  const updateBookmarks = (bookmarks: string[]) => {
+    updateStore('bookmarks', () => [...bookmarks]);
+  };
+
+  const updateRelays = () => {
+    const relaysId = `user_relays_${APP_ID}`;
+
+    handleSubscription(
+      relaysId,
+      () => getRelays(store.publicKey, relaysId),
+      handleUserRelaysEvent,
+    );
+  }
+
+  const updateContactsList = () => {
+
+    const contactsId = `user_contacts_${APP_ID}`;
+
+    handleSubscription(
+      contactsId,
+      () =>   getProfileContactList(store.publicKey, contactsId),
+      handleUserContactsEvent,
+    );
+  }
 
 // EFFECTS --------------------------------------
 
@@ -1323,7 +1597,8 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     if (store.isKeyLookupDone && store.publicKey) {
       relaySettings = { ...getStorage(store.publicKey).relaySettings };
-      connectToRelays(relaySettings);
+
+    connectToRelays(relaySettings);
       return;
     }
   });
@@ -1338,9 +1613,8 @@ export function AccountProvider(props: { children: JSXElement }) {
         updateStore('followingSince', () => storage.followingSince);
       }
 
-      getProfileContactList(store.publicKey, `user_contacts_${APP_ID}`);
-      getRelays(store.publicKey, `user_relays_${APP_ID}`);
-
+      updateContactsList();
+      updateRelays();
       updateStore('emojiHistory', () => readEmojiHistory(store.publicKey))
     }
   });
@@ -1355,36 +1629,43 @@ export function AccountProvider(props: { children: JSXElement }) {
         updateStore('mutedPrivate', () => storage.mutedPrivate);
       }
 
-      getProfileMuteList(store.publicKey, `mutelist_${APP_ID}`);
+      const mutelistId = `mutelist_${APP_ID}`;
+
+      handleSubscription(
+        mutelistId,
+        () => getProfileMuteList(store.publicKey, mutelistId),
+        handleMuteListEvent,
+      );
+
       getFilterLists(store.publicKey);
       getAllowList(store.publicKey);
     }
   });
 
   createEffect(() => {
-    connectedRelaysCopy = [...store.relays];
-    if (store.publicKey && store.relays.length > 0) {
-      getLikes(store.publicKey, store.relays, (likes: string[]) => {
+    setTimeout(() => {
+      connectedRelaysCopy = [...store.relays];
+      if (!store.publicKey || store.relays.length === 0 || !store.proxySettingSet || store.proxyThroughPrimal) return;
+
+      getLikes(store.publicKey, store.activeRelays, (likes: string[]) => {
         updateStore('likes', () => [...likes]);
         saveLikes(store.publicKey, likes);
       });
-    }
-  });
-
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
-    }
+    }, 100)
   });
 
   createEffect(() => {
     const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
 
     if (store.connectToPrimaryRelays) {
-      const relaySettings = rels.reduce((acc, r) => ({ ...acc, [r]: { read: true, write: true } }), {});
+      const aru = store.suspendedRelays.map(r => r.url) as string[];
+
+      const relaySettings = rels.
+        filter(u => !aru.includes(u) && !aru.includes(`${u}/`)).
+        reduce((acc, r) => ({
+          ...acc,
+          [r]: { read: true, write: true } ,
+        }), {});
 
       connectToRelays(relaySettings)
     }
@@ -1393,93 +1674,104 @@ export function AccountProvider(props: { children: JSXElement }) {
         const url = rels[i];
         const relay = store.relays.find(r => r.url === url);
 
+
         if (relay) {
           relay.close();
-          updateStore('relays', () => [...store.relays.filter(r => r.url !== url)]);
+          const filtered = store.relays.filter(r => r.url !== url);
+          updateStore('relays', () => filtered);
         }
       }
     }
   });
 
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
-    store.relays.forEach(relay => relay.close())
-  });
+// EVENT HANDLERS ------------------------------
 
-// SOCKET HANDLERS ------------------------------
 
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    webSocket.removeEventListener('message', onMessage);
-    webSocket.removeEventListener('close', onSocketClose);
-  };
-
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
-
-    const [type, subId, content] = message;
-
-    if (subId === `user_profile_${APP_ID}`) {
-      if (content?.content) {
+  const handleUserProfileEvent = (content: NostrEventContent) => {
+    if (content?.content) {
+      if (content.kind === Kind.Metadata) {
         const user = JSON.parse(content.content);
 
-        updateStore('activeUser', () => ({...user}));
+        updateStore('activeUser', () => ({...user, pubkey: content.pubkey}));
         setStoredProfile(user);
+        updateRelays()
       }
+    }
+  }
+
+  const handleUserContactsEvent = (content: NostrEventContent) => {
+    if (content && content.kind === Kind.Contacts) {
+      if (!content.created_at || content.created_at < store.followingSince) {
+        return;
+      }
+
+      updateContacts(content);
+    }
+  }
+
+  const handleUserRelaysEvent = (content: NostrEventContent) => {
+    if (content && content.kind === Kind.UserRelays) {
+      const relays = extractRelayConfigFromTags(content.tags);
+
+      setRelaySettings(relays, true);
+    }
+  }
+
+  const handleMuteListEvent = (content: NostrEventContent) => {
+    if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
+
+      if (!content.created_at || content.created_at < store.mutedSince) {
+        return;
+      }
+
+      updateMuted(content as NostrMutedContent);
+    }
+  }
+
+  const handleDefaultRelaysEvent = (content: NostrEventContent) => {
+    const resp = JSON.parse(content.content || '[]');
+
+    updateStore('defaultRelays', () => [...resp]);
+
+    const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
+
+    if (Object.keys(relaySettings).length > 0) {
+      connectToRelays(relaySettings);
+    }
+  }
+
+  const handleUserBookmarksEvent = (content: NostrEventContent) => {
+    if (!content || content.kind !== Kind.Bookmarks || !content.created_at || content.created_at < store.followingSince) {
       return;
     }
 
-    if (subId === `user_contacts_${APP_ID}`) {
-      if (content && content.kind === Kind.Contacts) {
-        if (!content.created_at || content.created_at < store.followingSince) {
-          return;
-        }
-
-        updateContacts(content);
+    const notes = content.tags.reduce((acc, t) => {
+      if (supportedBookmarkTypes.includes(t[0])) {
+        return [...acc, t[1]];
       }
-      return;
-    }
+      return [...acc];
+    }, []);
 
-    if (subId === `user_relays_${APP_ID}`) {
-      if (content && content.kind === Kind.UserRelays) {
-        const relays = extractRelayConfigFromTags(content.tags);
+    updateStore('bookmarks', () => [...notes]);
+  }
 
-        setRelaySettings(relays, true);
-      }
-      return;
-    }
+  const handleUserBookmarksEose = () => {
+    saveBookmarks(store.publicKey, store.bookmarks);
+  }
 
-    if (subId === `mutelist_${APP_ID}`) {
-      if (content && [Kind.MuteList, Kind.CategorizedPeople].includes(content.kind)) {
+  const setString = (key: string, string: string) => {
+    // @ts-ignore
+    updateStore(key, () => string);
+  }
 
-        if (!content.created_at || content.created_at < store.mutedSince) {
-          return;
-        }
+  const setFlag = (key: string, flag: boolean) => {
+    // @ts-ignore
+    updateStore(key, () => flag);
+  }
 
-        updateMuted(content as NostrMutedContent);
-      }
-      return;
-    }
-
-    if (subId === `default_relays_${APP_ID}`) {
-      if (type === 'EVENT') {
-        const resp = JSON.parse(content.content || '[]');
-
-        updateStore('defaultRelays', () => [...resp]);
-
-        const relaySettings: NostrRelays = resp.reduce((acc: NostrRelays, r: string) => ({ ...acc, [r]: { read: true, write: true }}), {});
-
-        if (Object.keys(relaySettings).length > 0) {
-          connectToRelays(relaySettings);
-        }
-      }
-    }
-
-  };
+  const setFollowData = (followData: FollowData) => {
+    updateStore('followData', () => ({ ...followData }));
+  }
 
 // STORES ---------------------------------------
 
@@ -1492,6 +1784,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setActiveUser,
     addLike,
     setPublicKey,
+    updateAccountProfile,
     addFollow,
     removeFollow,
     quoteNote,
@@ -1513,80 +1806,24 @@ const [store, updateStore] = createStore<AccountContextStore>({
     showGetStarted,
     saveEmoji,
     checkNostrKey,
+    fetchBookmarks,
+    updateBookmarks,
+    resetRelays,
+    setProxyThroughPrimal,
+    updateRelays,
+    updateContactsList,
+    setString,
+    setFlag,
+    setFollowData,
+    resolveContacts,
+    replaceContactList,
+    clearPremiumRemider,
   },
 });
 
   return (
     <AccountContext.Provider value={store}>
       {props.children}
-      <EnterPinModal
-        open={store.showPin.length > 0}
-        valueToDecrypt={store.showPin}
-        onSuccess={(sec: string) => {
-          setSec(sec);
-          updateStore('showPin', () => '');
-        }}
-        onAbort={() => updateStore('showPin', () => '')}
-        onForgot={() => {
-          updateStore('showPin', () => '');
-          updateStore('showForgot', () => true);
-        }}
-      />
-      <CreateAccountModal
-        open={store.showGettingStarted}
-        onAbort={() => updateStore('showGettingStarted', () => false)}
-        onLogin={() => {
-          updateStore('showGettingStarted', () => false);
-          updateStore('showLogin', () => true);
-        }}
-      />
-      <LoginModal
-        open={store.showLogin}
-        onAbort={() => updateStore('showLogin', () => false)}
-      />
-      <ConfirmModal
-        open={followData.openDialog}
-        title={intl.formatMessage(followWarning.title)}
-        description={intl.formatMessage(followWarning.description)}
-        confirmLabel={intl.formatMessage(followWarning.confirm)}
-        abortLablel={intl.formatMessage(followWarning.abort)}
-        onConfirm={async () => {
-          if (store.publicKey) {
-            const data = unwrap(followData)
-            await resolveContacts(store.publicKey, data.following, data.date, data.tags, data.relayInfo);
-          }
-          setFollowData(() => ({
-            tags: [],
-            date: 0,
-            relayInfo: '',
-            openDialog: false,
-            following: [],
-          }));
-        }}
-        onAbort={() => {
-          setFollowData(() => ({
-            tags: [],
-            date: 0,
-            relayInfo: '',
-            openDialog: false,
-            following: [],
-          }));
-        }}
-      />
-      <ConfirmModal
-        open={store.showForgot}
-        title={intl.formatMessage(forgotPin.title)}
-        description={intl.formatMessage(forgotPin.description)}
-        confirmLabel={intl.formatMessage(forgotPin.confirm)}
-        abortLablel={intl.formatMessage(forgotPin.abort)}
-        onConfirm={async () => {
-          logout();
-          updateStore('showForgot', () => false);
-        }}
-        onAbort={() => {
-          updateStore('showForgot', () => false);
-        }}
-      />
     </AccountContext.Provider>
   );
 }

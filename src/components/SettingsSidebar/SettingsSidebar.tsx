@@ -3,8 +3,7 @@ import { Component, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { settings as t } from '../../translations';
 
-// @ts-ignore Bad types in nostr-tools
-import { Relay, relayInit } from "nostr-tools";
+import { Relay, relayInit, utils } from "../../lib/nTools";
 
 import styles from './SettingsSidebar.module.scss';
 import { cacheServer, isConnected, socket } from '../../sockets';
@@ -18,13 +17,10 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
   const connectedRelays = () => account?.relays || [];
 
   const disconnectedRelays = () => {
-    const allRelayUrls = Object.keys(account?.relaySettings || {});
-    const connectedUrls = connectedRelays().map(r => r.url);
+    const allRelayUrls = Object.keys(account?.relaySettings || {}).map(utils.normalizeURL);
+    const connectedUrls = connectedRelays().map(r => utils.normalizeURL(r.url));
 
-    return allRelayUrls.reduce(
-      (acc: Relay[], url) => connectedUrls.includes(url) ? acc : [...acc, relayInit(url)],
-      [],
-    );
+    return allRelayUrls.filter(url => !connectedUrls.includes(url));
   };
 
   return (
@@ -38,7 +34,12 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
       <For each={connectedRelays()}>
         {relay => (
           <div class={styles.relayEntry}>
-            <div class={styles.connected}></div>
+            <Show
+              when={!account?.proxyThroughPrimal}
+              fallback={<div class={styles.suspended}></div>}
+            >
+              <div class={styles.connected}></div>
+            </Show>
             <span class={styles.relayUrl} title={relay.url}>
               {relay.url}
             </span>
@@ -46,11 +47,16 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
         )}
       </For>
       <For each={disconnectedRelays()}>
-        {relay => (
+        {relayUrl => (
           <div class={styles.relayEntry}>
-            <div class={styles.disconnected}></div>
-            <span class={styles.relayUrl} title={relay.url}>
-              {relay.url}
+            <Show
+              when={!account?.proxyThroughPrimal}
+              fallback={<div class={styles.suspended}></div>}
+            >
+              <div class={styles.disconnected}></div>
+            </Show>
+            <span class={styles.relayUrl} title={`${relayUrl}`}>
+              {`${relayUrl}`}
             </span>
           </div>
         )}

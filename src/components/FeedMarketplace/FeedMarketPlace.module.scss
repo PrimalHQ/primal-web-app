@@ -1,0 +1,309 @@
+.feedMarketplaceTitle {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.feedMarketplaceContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
+  width: 640px;
+
+  overflow-y: hidden;
+}
+
+.booths {
+  display: grid;
+  grid-template-columns: 294px 294px;
+  gap: 12px;
+
+  max-height: 600px;
+  overflow-y: scroll;
+}
+
+.boothsPage {
+  display: grid;
+  grid-template-columns: 294px 294px;
+  gap: 12px;
+}
+
+.feedMarketPlaceItem {
+  width: 100%;
+  // height: 134px;
+  padding-inline: 16px;
+  padding-top: 16px;
+  padding-bottom: 12px;
+
+  // border: 1px solid var(--subtile-devider);
+  border-radius: var(--border-radius-small);
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap:16px;
+  background: var(--background-header-input);
+  transition: background-color 300ms ease-in;
+
+  cursor: pointer;
+
+  &.header {
+    border-radius: 0;
+  }
+
+  .left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 40px;
+
+    .avatar {
+      position: relative;
+
+      .smallPrimalLogo {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+
+        display: block;
+        width: 16px;
+        height: 16px;
+        background-color: var(--background-header-input);
+        border: 2px solid var(--background-header-input);
+        border-radius: 99px;
+        background-image: url(../../assets/icons/logo_fire.svg);
+        background-size: cover;
+      }
+    }
+  }
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4px;
+    height: 100%;
+    width: 100%;
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 4px;
+
+      .title {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 20px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+
+      .about {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16px;
+
+        min-height: 58px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+
+    .createdBy {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+
+      .authorName {
+        color: var(--text-primary);
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+
+      .commonUsersList {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        align-items: center;
+        height: 24px;
+
+        .avatar {
+          margin-right: -10px;
+          transition: margin 150ms ease-in-out;
+          border-radius: 12px;
+          border: 1px solid var(--background-site);
+          text-decoration: none;
+
+          &:first-child {
+            margin-right: 1px;
+          }
+        }
+
+        // &:hover {
+        //   .avatar {
+        //     margin-right: 1px;
+        //   }
+        // }
+      }
+
+      .stats {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 16px;
+      }
+    }
+  }
+
+  &:hover {
+    background-color: var(--background-input);
+    transition: background-color 300ms ease-out;
+  }
+
+  &.dark {
+    border: 1px solid var(--subtile-devider);
+    background: none;
+
+    &:hover {
+      background-color: var(--background-header-input);
+      transition: background-color 300ms ease-out;
+    }
+
+  }
+}
+
+
+.likeIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/heart.svg) no-repeat 0px 0 / 16px 16px;
+  mask: url(../../assets/icons/heart.svg) no-repeat 0px 0 / 16px 16px;
+}
+
+.zapIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-right: 9px;
+  background: var(--text-tertiary-2);
+  -webkit-mask: url(../../assets/icons/feed_zap_2.svg) no-repeat 0 / 16px;
+  mask: url(../../assets/icons/feed_zap_2.svg) no-repeat 0 / 16px;
+}
+
+.feedMarketplaceFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+  .instruction {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+    letter-spacing: 0.28px;
+  }
+}
+
+.feedMarketplacePreview {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
+  width: 640px;
+
+  &.previewInDialog {
+    width: 640px;
+    height: 600px;
+    overflow-y: scroll;
+  }
+
+  .dvmCaption {
+    width: 100%;
+  }
+
+  .dvmList {
+    width: 100%;
+    background-color: var(--background-site);
+  }
+}
+
+.feedMarketplacePreviewFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.paidToken {
+  color: var(--text-primary-button);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 8px;
+
+  background-color: var(--active-zap);
+  border-radius: 20px;
+  display: flex;
+  width: 40px;
+  padding: 5px 7px;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.freeToken {
+  color: var(--background-site);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 8px;
+
+  background-color: var(--text-secondary);
+  border-radius: 20px;
+  display: flex;
+  width: 40px;
+  padding: 5px 7px;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.primalLogo {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url(../../assets/icons/logo_fire.svg);
+  background-size: cover;
+}

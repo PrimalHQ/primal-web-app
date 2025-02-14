@@ -32,6 +32,8 @@ import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAppContext } from '../contexts/AppContext';
+import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
+import { Transition } from 'solid-transition-group';
 
 
 const Home: Component = () => {
@@ -59,12 +61,12 @@ const Home: Component = () => {
   });
 
   createEffect(() => {
-    if ((context?.future.notes.length || 0) > 99 || app?.isInactive) {
+    if ((context?.futureNotes.length || 0) > 99 || app?.isInactive) {
       clearInterval(checkNewNotesTimer);
       return;
     }
 
-    const hex = context?.selectedFeed?.hex;
+    const spec = context?.selectedFeed?.spec || '';
 
     if (checkNewNotesTimer) {
       clearInterval(checkNewNotesTimer);
@@ -76,12 +78,12 @@ const Home: Component = () => {
     const timeout = 25_000 + Math.random() * 10_000;
 
     checkNewNotesTimer = setInterval(() => {
-      context?.actions.checkForNewNotes(hex);
+      context?.actions.checkForNewNotes(spec);
     }, timeout);
   });
 
   createEffect(() => {
-    const count = context?.future.notes.length || 0;
+    const count = context?.futureNotes.length || 0;
     if (count === 0) {
       return
     }
@@ -91,7 +93,7 @@ const Home: Component = () => {
     }
 
     if (newPostAuthors.length < 3) {
-      const users = context?.future.notes.map(note => note.user) || [];
+      const users = context?.futureNotes.map(note => note.user) || [];
 
       const uniqueUsers = users.reduce<PrimalUser[]>((acc, user) => {
         const isDuplicate = acc.find(u => u.pubkey === user.pubkey);
@@ -148,29 +150,42 @@ const Home: Component = () => {
         <HomeSidebar />
       </StickySidebar>
 
-      <Show
-        when={context?.notes && context.notes.length > 0}
-      >
-        <div class={styles.feed}>
-          <For each={context?.notes} >
-            {note => <Note note={note} shorten={true} />}
-          </For>
-        </div>
-      </Show>
+      <div class={styles.homeFeed}>
+        <Transition name="slide-fade">
+          <Show
+            when={context?.notes && context.notes.length > 0}
+            fallback={
+              <div>
+                <For each={new Array(5)}>
+                  {() => <FeedNoteSkeleton />}
+                </For>
+              </div>
+            }
+          >
+            <div class={styles.feed}>
+              <For each={context?.notes} >
+                {note => (
+                  <div class="animated">
+                    <Note note={note} shorten={true} />
+                  </div>
+                )}
+              </For>
+            </div>
+          </Show>
+        </Transition>
+      </div>
 
       <Switch>
         <Match
           when={!isPageLoading() && context?.notes && context?.notes.length === 0}
         >
           <div class={styles.noContent}>
-            <Loader />
           </div>
         </Match>
         <Match
           when={isPageLoading()}
         >
           <div class={styles.noContent}>
-            <Loader />
           </div>
         </Match>
       </Switch>

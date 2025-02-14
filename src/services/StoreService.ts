@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { emptyPage, Kind } from "../constants";

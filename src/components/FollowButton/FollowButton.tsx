@@ -5,7 +5,6 @@ import { hookForDev } from '../../lib/devTools';
 import { account as t, actions } from '../../translations';
 import { PrimalUser } from '../../types/primal';
 import ButtonFlip from '../Buttons/ButtonFlip';
-import ButtonFollow from '../Buttons/ButtonFlip';
 import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FollowButton.module.scss';
@@ -14,7 +13,9 @@ import styles from './FollowButton.module.scss';
 const FollowButton: Component<{
   person: PrimalUser | undefined,
   large?: boolean,
+  flexible?: boolean,
   id?: string,
+  light?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
 }> = (props) => {
 
@@ -46,7 +47,9 @@ const FollowButton: Component<{
   }
 
   const klass = () => {
-    return props.large ? styles.large : styles.small;
+    if (props.large) return styles.large;
+    if (props.flexible) return styles.flexible;
+    return styles.small;
   }
 
   return (
@@ -56,6 +59,7 @@ const FollowButton: Component<{
           onClick={onFollow}
           disabled={account?.followInProgress !== ''}
           when={isFollowed()}
+          light={props.light}
           fallback={intl.formatMessage(t.follow)}
         >
           {intl.formatMessage(t.unfollow)}

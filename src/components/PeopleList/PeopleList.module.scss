@@ -5,7 +5,7 @@
   width: 100%;
   height: 44px;
   z-index: 5;
-  padding-bottom: 22px;
+  padding-block: 22px;
   display:flex;
   flex-direction: row;
   align-items: center;
@@ -25,12 +25,54 @@
   }
 }
 
+.authorSection {
+  // position: -webkit-sticky;
+  // position: sticky;
+  // top: 0px;
+  // padding-top: 44px;
+}
+
 .trendingSection {
   // position: -webkit-sticky;
   // position: sticky;
   // top: 0px;
   // padding-top: 44px;
   margin-bottom: 228px
+}
+
+.trendingUsers {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+
+  .user {
+    width: 75px;
+    height: 85px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.5s;
+
+    &:hover {
+      opacity: 1;
+      transition: opacity 0.5s;
+    }
+
+    .name {
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+      margin-top: 10px;
+      width: 72px;
+      font-size: 12px;
+      line-height: 12px;
+      font-weight: 400;
+      color: var(--text-primary);
+    }
+  }
 }
 
 .stickyWrapper {
@@ -48,25 +90,42 @@
   @include heading();
 }
 
+@mixin followButton {
+  grid-area: follow;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  button {
+    width: 72px;
+    height: 28px;
+    background: var(--brand-gradient);
+    border-radius: 6px;
+    padding: 0px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    margin: 0px;
+  }
+
+}
+
 .peopleList {
   margin-bottom: 16px;
-  display: grid;
-  grid-template-columns: 52px 148px 72px;
-  grid-template-rows: 1fr;
-  grid-template-areas: "avatar content follow";
-  grid-column-gap: 14px;
+  display: flex;
+  gap: 8px;
   text-decoration: none;
   align-items: center;
+  width: 300px;
 
   .avatar {
     grid-area: avatar;
     display: grid;
     justify-items: center;
-    height: 52px;
+    height: 44px;
 
     .avatarImg {
-      width: 52px;
-      height: 52px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
     }
   }
@@ -75,13 +134,16 @@
     grid-area: content;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
+    gap: 4px;
+    flex-grow: 1;
 
     .name {
       color: var(--text-primary);
-      font-weight: 400;
-      font-size: 12px;
-      line-height: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 16px;
+      max-width: 168px;
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
@@ -117,6 +179,22 @@
       overflow: hidden;
     }
 
+    .about {
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 400;
+      color: var(--text-tertiary-2);
+
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 3;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      -moz-box-orient: vertical;
+      -ms-box-orient: vertical;
+      text-overflow: ellipsis;
+    }
+
     &:hover {
       .message, .name, .time {
         color: var(--text-primary);
@@ -125,25 +203,6 @@
 
       cursor: pointer;
     }
-  }
-
-  @mixin followButton {
-    grid-area: follow;
-    align-items: center;
-    display: flex;
-    align-items: center;
-    button {
-      width: 72px;
-      height: 28px;
-      background: var(--brand-gradient);
-      border-radius: 6px;
-      padding: 0px;
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 16px;
-      margin: 0px;
-    }
-
   }
 
   .follow {
@@ -165,6 +224,118 @@
       text-decoration: underline;
       color: var(--text-primary);
     }
+  }
+}
+
+
+.mentionedPerson {
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  gap: 8px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--devider);
+
+  text-decoration: none;
+
+
+  .header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .content {
+      grid-area: content;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      flex-grow: 1;
+
+      .name {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 18px;
+        max-width: 168px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .verification {
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 18px;
+        color: var(--text-tertiary-2);
+        max-width: 168px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .verifiedName {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 700;
+        color: var(--text-tertiary-2);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .npub {
+        font-size: 12px;
+        line-height: 16px;
+        font-weight: 400;
+        color: var(--text-tertiary-2);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+    }
+
+    .follow {
+      @include followButton;
+    }
+
+    .unfollow {
+      @include followButton;
+      button {
+        background-color: var(--background-card);
+        background: linear-gradient(var(--background-card), var(--background-card)) padding-box,
+                      var(--brand-gradient) border-box;
+        border: 1px solid transparent;
+      }
+    }
+  }
+
+  .about {
+    width: 300px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 18px;
+    color: var(--text-tertiary-2);
+
+    overflow: hidden;
+    display: -webkit-box;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    -moz-box-orient: vertical;
+    -ms-box-orient: vertical;
+    text-overflow: ellipsis;
+  }
+
+  &:hover:not(:has(button:hover)) {
+    .content {
+      .name {
+        color: var(--text-primary);
+        text-decoration: underline;
+      }
+    }
+
+    cursor: pointer;
   }
 }
 

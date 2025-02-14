@@ -6,6 +6,19 @@
   grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
 }
 
+.containerLF {
+  --center-col-w: 680px;
+  --right-col-w: 308px;
+  --search-input-width: 260px;
+  --central-content-width: 680px;
+
+  width: var(--full-site-w);
+  margin: 0px auto;
+
+  display: grid;
+  grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
+}
+
 .containerIOS {
   z-index: 1;
   margin-top: 54px;
@@ -37,7 +50,8 @@
     position: relative;
     display: grid;
     height: 100%;
-    padding-top: 30px;
+    padding-top: 22px;
+    padding-right: 24px;
     justify-content: left;
 
     .overlay {
@@ -67,17 +81,17 @@
 }
 
 .centerHeader {
-  width: 600px;
+  width: var(--center-col-w);
 }
 
 .centerContent {
-  width: 600px;
+  width: var(--center-col-w);
   .headerFloater {
     position: fixed;
     opacity: 0;
     pointer-events: none;
-    width: 600px;
-    z-index: var(--z-index-floater);
+    width: var(--center-col-w);
+    z-index: var(--z-index-floater-2);
 
     &.animatedShow {
       opacity: 1;
@@ -149,9 +163,12 @@
 }
 
 .rightContent {
-  margin-top: 112px;
+  margin-top: 92px;
   >div {
     margin-left: 24px;
+  }
+  &.exploreHeader {
+    margin-top: 20px;
   }
 }
 
@@ -171,7 +188,7 @@
 @media only screen and (max-width: 1300px) {
   .container {
     width: 1032px;
-    grid-template-columns: 48px 600px 332px;
+    grid-template-columns: 48px var(--center-col-w) 332px;
   }
 
   .leftColumn {
@@ -199,7 +216,7 @@
 @media only screen and (max-width: 1087px) {
   .container {
     width: 720px;
-    grid-template-columns: 48px 600px 1px;
+    grid-template-columns: 48px var(--center-col-w) 1px;
   }
 
   .rightColumn {
@@ -235,6 +252,7 @@
 
     .headerFloater {
       width: 100%;
+      z-index: var(--z-index-floater-2);
     }
   }
 

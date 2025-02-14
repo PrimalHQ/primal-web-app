@@ -1,3 +1,45 @@
+@keyframes inTop {
+  from {
+    visibility: visible;
+    opacity: 0;
+    transform: translateY(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+@keyframes outTop {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes inBottom {
+  0% {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+@keyframes outBottom {
+  0% { opacity: 1;}
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
 .contextMenuOptions {
   position: absolute;
   top: 18px;
@@ -8,22 +50,33 @@
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
+  overflow: hidden;
+  height: fit-content;
+  opacity: 0;
+  visibility: hidden;
 
   &.noteFooter {
     top: 26px;
     left: unset;
-    right: 0px;
+    right: 52px;
   }
   &.profile {
     top: 46px;
     left: 4px;
     right: unset;
   }
-  &.hidden {
-    height: 1px;
-    overflow: hidden;
-    visibility: hidden;
+
+  &.noteContext {
+    top: 18px;
+    left: unset;
+    right: -4px;
   }
+
+  animation: outTop 150ms ease-in forwards;
+}
+
+.contextMenuOptions[data-open="true"] {
+  animation: inTop 150ms ease-out forwards;
 }
 
 .contextMenuOptionsUp {
@@ -36,18 +89,27 @@
   border-radius: 8px;
   z-index: var(--z-index-header);
   width: max-content;
+  height: fit-content;
+  opacity: 0;
 
   &.noteFooter {
-    bottom: 46px;
+    bottom: 28px;
     left: unset;
-    right: 0px;
+    right: 52px;
   }
   &.profile {
     bottom: 46px;
     left: 4px;
     right: unset;
   }
-  &.hidden {
-    visibility: hidden;
+  &.noteContext {
+    bottom: 42px;
+    left: unset;
+    right: -4px;
   }
+  animation: outBottom 150ms ease-in forwards;
+}
+
+.contextMenuOptionsUp[data-open="true"] {
+  animation: inBottom 150ms ease-out forwards;
 }

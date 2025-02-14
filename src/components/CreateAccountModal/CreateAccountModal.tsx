@@ -1,14 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { zapNote } from '../../lib/zap';
-import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption } from '../../translations';
-import { PrimalNote } from '../../types/primal';
-import { debounce } from '../../utils';
+import { Component } from 'solid-js';
 import Modal from '../Modal/Modal';
-import { useToastContext } from '../Toaster/Toaster';
 
 import { account as t, actions as tActions } from '../../translations';
 
@@ -17,6 +9,7 @@ import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonLink from '../Buttons/ButtonLink';
 import { useNavigate } from '@solidjs/router';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const CreateAccountModal: Component<{
   id?: string,
@@ -34,14 +27,17 @@ const CreateAccountModal: Component<{
   };
 
   return (
-    <Modal open={props.open} onClose={props.onAbort}>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+      title={
+      <div class={styles.title}>
+        {intl.formatMessage(tActions.getStarted)}
+      </div>
+      }
+      triggerClass={styles.hidden}
+    >
       <div id={props.id} class={styles.modal}>
-        <button class={styles.xClose} onClick={props.onAbort}>
-          <div class={styles.iconClose}></div>
-        </button>
-        <div class={styles.title}>
-          {intl.formatMessage(tActions.getStarted)}
-        </div>
         <div class={styles.description}>
           {intl.formatMessage(t.createNewDescription)}
         </div>
@@ -60,7 +56,7 @@ const CreateAccountModal: Component<{
         </div>
       </div>
 
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

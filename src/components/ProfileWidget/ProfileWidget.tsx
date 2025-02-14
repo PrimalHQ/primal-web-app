@@ -8,17 +8,19 @@ import { hexToNpub } from '../../lib/keys';
 import styles from './ProfileWidget.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
+import { useAppContext } from '../../contexts/AppContext';
 
 const ProfileWidget: Component<{ id?: string }> = (props) => {
 
-  const account = useAccountContext()
+  const account = useAccountContext();
+  const app = useAppContext();
 
   const activeUser = () => account?.activeUser;
 
   return (
     <div id={props.id}>
       <Show when={account?.hasPublicKey()}>
-        <A href="/profile" class={styles.userProfile}>
+        <A href={app?.actions.profileLink(account?.publicKey) || ''} class={styles.userProfile}>
           <div class={styles.avatar}>
             <Avatar
               size="vvs"

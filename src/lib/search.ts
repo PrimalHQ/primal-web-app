@@ -40,6 +40,31 @@ export const searchContent = (user_pubkey: string | undefined, subid: string, qu
   ]));
 }
 
+export const advancedSearchContent = (user_pubkey: string | undefined, subid: string, query: string, limit = 20, until = 0, offset = 0) => {
+  let payload = { specification: ["advanced_search", {query: cleanQuery(query)}], limit };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (offset > 0) {
+    // @ts-ignore
+    payload.offset = offset;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["advanced_feed", payload]},
+  ]));
+}
+
 export const searchFutureContent = (subid: string, query: string, since:number, limit = 100) => {
 
   let payload: SearchPayload = { query: cleanQuery(query), limit, since };
@@ -73,5 +98,45 @@ export const getScoredUsers = (user_pubkey: string | undefined, selector: string
     "REQ",
     subid,
     {cache: ['scored', { user_pubkey, selector }]},
+  ]));
+};
+
+export const getRecomendedArticleIds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['get_recommended_reads']},
+  ]));
+};
+
+export const getAdvancedFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['get_advanced_feeds']},
+  ]));
+};
+
+export const getFeedItems = (subid: string, specification: any, user_pubkey: string | undefined, limit = 20, until = 0, offset = 0) => {
+  let payload = {
+    specification,
+    limit,
+  };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  // @ts-ignore
+  if (until > 0) payload.until = until;
+
+  // @ts-ignore
+  if (offset > 0) payload.offset = offset;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ['advanced_feed', payload]},
   ]));
 };

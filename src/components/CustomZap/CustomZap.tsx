@@ -1,16 +1,18 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { defaultZap, defaultZapOptions } from '../../constants';
+import { defaultZap, defaultZapOptions, Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { zapNote, zapProfile } from '../../lib/zap';
+import { zapArticle, zapDVM, zapNote, zapProfile } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
-import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
+import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import { debounce } from '../../utils';
+import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
+import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
 import TextInput from '../TextInput/TextInput';
 import { useToastContext } from '../Toaster/Toaster';
 
@@ -21,6 +23,7 @@ const CustomZap: Component<{
   open?: boolean,
   note?: PrimalNote,
   profile?: PrimalUser,
+  dvm?: PrimalDVM,
   onConfirm: (zapOption?: ZapOption) => void,
   onSuccess: (zapOption?: ZapOption) => void,
   onFail: (zapOption?: ZapOption) => void,
@@ -33,7 +36,6 @@ const CustomZap: Component<{
   const settings = useSettingsContext();
 
   const [selectedValue, setSelectedValue] = createSignal(settings?.availableZapOptions[0] || defaultZapOptions[0]);
-  const [comment, setComment] = createSignal(defaultZapOptions[0].message || '');
 
   createEffect(() => {
     setSelectedValue(settings?.availableZapOptions[0] || defaultZapOptions[0])
@@ -48,11 +50,15 @@ const CustomZap: Component<{
     const amount = parseInt(value.replaceAll(',', ''));
 
     if (isNaN(amount)) {
-      setSelectedValue(() => ({ amount: 0 }))
+      setSelectedValue((v) => ({ ...v, amount: 0 }))
     };
 
-    setSelectedValue(()=> ({ amount }));
+    setSelectedValue((v)=> ({ ...v, amount }));
   };
+
+  const updateComment = (message: string) => {
+    setSelectedValue((v) => ({ ...v, message }))
+  }
 
   const truncateNumber = (amount: number) => {
     const t = 1000;
@@ -92,52 +98,112 @@ const CustomZap: Component<{
     if (account?.hasPublicKey()) {
       props.onConfirm(selectedValue());
 
-      let success = false;
+      const note = props.note;
 
-      if (props.note) {
-        success = await zapNote(
-          props.note,
-          account.publicKey,
-          selectedValue().amount || 0,
-          comment(),
-          account.relays,
-        );
-      }
-      else if (props.profile) {
-        success = await zapProfile(
-          props.profile,
-          account.publicKey,
-          selectedValue().amount || 0,
-          comment(),
-          account.relays,
-        );
-      }
+      if (note) {
+        setTimeout(async () => {
 
-      if (success) {
-        props.onSuccess(selectedValue());
+          const zappers: Record<string, Function> = {
+            [Kind.Text]: zapNote,
+            [Kind.LongForm]: zapArticle,
+            [Kind.LongFormShell]: zapArticle,
+          }
+
+          const success = await zappers[note.msg.kind](
+            note,
+            account.publicKey,
+            selectedValue().amount || 0,
+            selectedValue().message,
+            account.activeRelays,
+          );
+
+          handleZap(success);
+        }, lottieDuration());
         return;
       }
 
-      toast?.sendWarning(
-        intl.formatMessage(toastZapFail),
-      );
+      if (props.profile) {
+        const success = await zapProfile(
+          props.profile,
+          account.publicKey,
+          selectedValue().amount || 0,
+          selectedValue().message,
+          account.activeRelays,
+        );
 
-      props.onFail(selectedValue())
+        handleZap(success);
+        return;
+      }
+
+      const dvm = props.dvm;
+      const dvmUser = dvm?.user;
+
+      if (dvm && dvmUser) {
+        setTimeout(async () => {
+
+          const success = await zapDVM(
+            dvm,
+            dvmUser,
+            account.publicKey,
+            selectedValue().amount || 0,
+            selectedValue().message,
+            account.activeRelays,
+            );
+
+            handleZap(success);
+          }, lottieDuration());
+        return;
+      }
     }
   };
 
+  const handleZap = (success = false) => {
+    if (success) {
+      props.onSuccess(selectedValue());
+      return;
+    }
+
+    toast?.sendWarning(
+      intl.formatMessage(toastZapFail),
+    );
+
+    props.onFail(selectedValue());
+  };
+
+  let md = false;
+
   return (
-    <Modal open={props.open} onClose={() => props.onCancel({ amount: 0, message: '' })}>
-      <div id={props.id} class={styles.customZap}>
-        <div class={styles.header}>
-          <div class={styles.title}>
-            <div class={styles.caption}>
-              {intl.formatMessage(tActions.zap)}
-            </div>
+    <AdvancedSearchDialog
+      open={props.open}
+      setOpen={(isOpen: boolean) => {
+        if (isOpen) return;
+
+        if (md) {
+          md = false;
+        }
+        else {
+          props.onCancel({ amount: 0, message: '' });
+        }
+      }}
+      title={
+        <div class={styles.title}>
+          <div class={styles.caption}>
+            {intl.formatMessage(tActions.zap)}
           </div>
-          <button class={styles.close} onClick={() => props.onCancel({ amount: 0, message: '' })}>
-          </button>
         </div>
+      }
+      triggerClass={styles.hidden}
+    >
+      <div
+        id={props.id}
+        class={styles.customZap}
+        onMouseUp={() => md = false}
+        onMouseDown={() => md = true}
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
 
         <div class={styles.description}>
           {intl.formatMessage(zapCustomOption,{
@@ -156,8 +222,7 @@ const CustomZap: Component<{
               <button
                 class={`${styles.zapOption} ${isSelected(value) ? styles.selected : ''}`}
                 onClick={() => {
-                  setComment(value.message || '')
-                  setSelectedValue(value);
+                  setSelectedValue(() => ({...value}));
                 }}
               >
                 <div>
@@ -190,9 +255,9 @@ const CustomZap: Component<{
 
         <TextInput
           type="text"
-          value={comment()}
+          value={selectedValue().message || ''}
           placeholder={intl.formatMessage(tPlaceholders.addComment)}
-          onChange={setComment}
+          onChange={updateComment}
           noExtraSpace={true}
         />
 
@@ -209,7 +274,7 @@ const CustomZap: Component<{
         </div>
 
       </div>
-    </Modal>
+    </AdvancedSearchDialog>
   );
 }
 

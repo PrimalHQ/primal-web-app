@@ -1,6 +1,6 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { day, hour } from "../constants";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
@@ -27,11 +27,12 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
     return;
   }
 
-  const start = until === 0 ? 'since' : 'until';
+  const time = until === 0 ? Math.ceil((new Date()).getTime()/1_000 ): until;
 
-  let payload = { limit, [start]: until, pubkey };
+  let payload = { limit, until: time, pubkey };
 
   if (user_pubkey) {
+    // @ts-ignore dynamic property
     payload.user_pubkey = user_pubkey;
   }
   if (include_replies) {
@@ -45,6 +46,133 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
     {cache: ["feed", payload]},
   ]));
 }
+
+export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, since = 0, offset = 0) => {
+
+  let payload = { spec, limit, offset };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+}
+
+export const getFutureMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, since: number) => {
+
+  let payload: { since: number, spec: string, user_pubkey?: string, limit: number } =
+    { since, spec, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+};
+
+export const getArticlesFeed2 = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20) => {
+
+
+  const start = until === 0 ? 'since' : 'until';
+
+  let payload = { spec, limit, [start]: until };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+}
+
+export const getArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, until = 0, limit = 20, topic?: string) => {
+  // if (!pubkey) {
+  //   return;
+  // }
+
+  const start = until === 0 ? 'since' : 'until';
+
+  let payload = { limit, [start]: until };
+
+  if (pubkey && pubkey?.length > 0) {
+    // @ts-ignore
+    payload.pubkey = pubkey;
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (topic) {
+    // @ts-ignore
+    payload.topic = topic;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
+  ]));
+}
+
+export const getFutureArticlesFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload: { since: number, pubkey: string, user_pubkey?: string, limit: number } =
+    { since, pubkey, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
+  ]));
+};
+
+export const getFutureArticlesFeed2 = (user_pubkey: string | undefined, spec: string, subid: string, since: number) => {
+
+  let payload: { since: number, spec: string, user_pubkey?: string, limit: number } =
+    { since, spec, limit: 100 };
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["mega_feed_directive", payload]},
+  ]));
+};
 
 export const getEvents = (user_pubkey: string | undefined, eventIds: string[], subid: string, extendResponse?: boolean) => {
 
@@ -67,23 +195,65 @@ export const getEvents = (user_pubkey: string | undefined, eventIds: string[], s
 
 };
 
-export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies', until = 0, limit = 20) => {
+export const getUserFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies' | 'bookmarks' | 'user_media_thumbnails', kind: number | undefined, until = 0, limit = 20, offset = 0) => {
   if (!pubkey) {
     return;
   }
 
-  const start = until === 0 ? 'since' : 'until';
-
-  let payload = { pubkey, limit, notes, [start]: until } ;
+  let payload: {
+    pubkey: string,
+    limit: number,
+    notes: 'authored' | 'replies' | 'bookmarks' | 'user_media_thumbnails',
+    user_pubkey?: string,
+    until?: number,
+    offset?: number,
+    kinds?: number[],
+  } = { pubkey, limit, notes } ;
 
   if (user_pubkey) {
     payload.user_pubkey = user_pubkey;
   }
 
+  if (kind) {
+    payload.kinds = [kind];
+  }
+
+  if (until > 0) payload.until = until;
+
+  if (offset > 0) payload.offset = offset;
+
   sendMessage(JSON.stringify([
     "REQ",
     subid,
     {cache: ["feed", payload]},
+  ]));
+}
+export const getUserArticleFeed = (user_pubkey: string | undefined, pubkey: string | undefined, subid: string, notes: 'authored' | 'replies' | 'bookmarks', until = 0, limit = 20, offset = 0) => {
+  if (!pubkey) {
+    return;
+  }
+
+  let payload: {
+    pubkey: string,
+    limit: number,
+    notes: 'authored' | 'replies' | 'bookmarks',
+    user_pubkey?: string,
+    until?: number,
+    offset?: number,
+  } = { pubkey, limit, notes } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  if (until > 0) payload.until = until;
+
+  if (offset > 0) payload.offset = offset;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_feed", payload]},
   ]));
 }
 
@@ -140,6 +310,23 @@ export const getThread = (user_pubkey: string | undefined, postId: string, subid
     "REQ",
     subid,
     {cache: ["thread_view", payload]},
+  ]));
+}
+
+export const getArticleThread = (user_pubkey: string | undefined, pubkey: string, identifier: string, kind: number, subid: string, until = 0, limit = 100) => {
+
+
+  let payload:  { user_pubkey?: string, limit: number, pubkey: string, kind: number, identifier: string, until?: number } =
+    { pubkey, identifier, kind , limit } ;
+
+  if (user_pubkey) {
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["long_form_content_thread_view", payload]},
   ]));
 }
 
@@ -255,3 +442,87 @@ export const getMostZapped4h = (
     ]},
   ]));
 };
+
+export const getReadsTopics = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_reads_topics"]},
+  ]));
+};
+
+
+export const getFeaturedAuthors = (
+  subid: string,
+) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_featured_authors"]},
+  ]));
+};
+
+export const getAuthorSubscriptionTiers = (
+  pubkey: string | undefined,
+  subid: string,
+) => {
+  if (!pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["creator_paid_tiers", { pubkey }]},
+  ]));
+};
+
+
+export const fetchDefaultArticleFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_reads_feeds"]},
+  ]));
+}
+
+
+
+export const fetchDefaultHomeFeeds = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_home_feeds"]},
+  ]));
+}
+
+
+export const fetchDVMFeeds = (user_pubkey: string | undefined, subId: string, kind?: 'notes' | 'reads') => {
+  const payload = kind ? { kind } : {};
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["get_featured_dvm_feeds", { ...payload }]},
+  ]));
+}
+
+export const fetchDVM = (user_pubkey: string | undefined, subId: string, identifier: string, pubkey: string) => {
+  const payload = { identifier, pubkey };
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["dvm_feed_info", { ...payload }]},
+  ]));
+}

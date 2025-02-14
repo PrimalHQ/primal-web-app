@@ -14,6 +14,9 @@ import styles from './Search.module.scss';
 import SearchOption from './SearchOption';
 import { hookForDev } from '../../lib/devTools';
 import { useProfileContext } from '../../contexts/ProfileContext';
+import { sanitize } from '../../lib/notes';
+import DOMPurify from 'dompurify';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const Search: Component<{
@@ -23,6 +26,7 @@ const Search: Component<{
   hideDefault?: boolean,
   placeholder?: string,
   id?: string,
+  fullWidth?: boolean,
 }> = (props) => {
 
   const toaster = useToastContext();
@@ -30,11 +34,12 @@ const Search: Component<{
   const navigate = useNavigate();
   const intl = useIntl();
   const profile = useProfileContext();
+  const app = useAppContext();
 
   const [query, setQuery] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
 
-  const queryUrl = () => query().replaceAll('#', '%23');
+  const queryUrl = () => DOMPurify.sanitize(query().replaceAll('#', '%23'));
 
   let input: HTMLInputElement | undefined;
 
@@ -45,7 +50,7 @@ const Search: Component<{
 
     const data = new FormData(form);
 
-    const q = data.get('searchQuery') as string || '';
+    const q = DOMPurify.sanitize(data.get('searchQuery') as string || '');
 
     if (q.length > 0) {
       if (props.onInputConfirm) {
@@ -74,7 +79,7 @@ const Search: Component<{
         return;
       }
 
-      setQuery(value || '');
+      setQuery(DOMPurify.sanitize(value) || '');
     }, 500);
   };
 
@@ -113,9 +118,9 @@ const Search: Component<{
   });
 
   return (
-    <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''}`}>
+    <div id={props.id} class={`${styles.searchHolder} ${isFocused() ? styles.focused : ''} ${props.fullWidth ? styles.wideHolder : ''}`}>
       <form
-        class={styles.search}
+        class={`${styles.search} ${props.fullWidth ? styles.wide : ''}`}
         onsubmit={onSearch}
         autocomplete="off"
       >
@@ -136,7 +141,7 @@ const Search: Component<{
         />
       </form>
 
-      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''} ${props.fullWidth ? styles.wide : ''}`}>
         <Show
           when={!props.hideDefault}
         >
@@ -161,7 +166,7 @@ const Search: Component<{
         </Show>
       </div>
 
-      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''}`}>
+      <div class={`${styles.searchSuggestions} ${!isFocused() ? styles.hidden : ''} ${props.fullWidth ? styles.wide : ''}`}>
         <Show when={search?.isFetchingUsers && query().length > 0}>
           <div class={styles.loadingOverlay}>
             <div>
@@ -173,7 +178,7 @@ const Search: Component<{
         <For each={search?.users}>
           {(user) => (
             <SearchOption
-              href={props.noLinks ? undefined : `/p/${user.npub}`}
+              href={props.noLinks ? undefined : app?.actions.profileLink(user.npub) || ''}
               title={userName(user)}
               description={nip05Verification(user)}
               icon={<Avatar user={user} size="vvs" />}

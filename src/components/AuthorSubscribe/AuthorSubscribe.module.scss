@@ -1,0 +1,200 @@
+.authorSubscribeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 8px;
+  background: var(--background-header-input);
+  width: 300px;
+  padding: 16px;
+
+  .userInfo {
+    display: flex;
+    gap: 8px;
+    text-decoration: none;
+
+    .userData {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      overflow: hidden;
+
+      .userName {
+        display: flex;
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 18px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+
+      .nip05 {
+        color: var(--text-tertiary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 16px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .userPitch {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 22px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+
+  }
+
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+
+    >button {
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 16px;
+      padding-inline: 16px;
+      width: 100%;
+    }
+  }
+}
+
+.authorPlaceholder {
+  width: 300px;
+  height: 120px;
+  border-radius: var(--border-radius-small);
+  background-color: var(--background-header-input);
+}
+
+.authorFeaturCard {
+  width: 300px;
+  height: 120px;
+  border-radius: var(--border-radius-small);
+  display: flex;
+  gap: 14px;
+  justify-content: flex-start;
+  align-items: center;
+  overflow: hidden;
+  background-color: var(--background-header-input);
+  text-decoration: none;
+
+  .imageHolder {
+    display: block;
+    width: 92px !important;
+    height: 120px;
+    padding: 0;
+
+    .image {
+      width: 92px;
+      height: 120px;
+      object-fit: cover;
+    }
+  }
+
+
+  .userInfo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    padding-block: 12px;
+    margin-right: 12px;
+    overflow: hidden;
+    gap: 2px;
+
+    .userBasicData {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 2px;
+
+      .userName {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 18px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 152px;
+      }
+      .nip05 {
+        overflow: hidden;
+        color: var(--text-tertiary);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16px;
+        max-width: 182px;
+      }
+    }
+
+    .userAdditionalData {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 2px;
+
+      .userAbout {
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 16px;
+        max-width: 182px;
+
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+
+        &.extended {
+          -webkit-line-clamp: 3;
+          line-clamp: 3;
+        }
+      }
+
+      .userStats {
+        display: flex;
+        gap: 2px;
+        max-width: 182px;
+
+        .number {
+          color: var(--text-tertiary);
+          text-overflow: ellipsis;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 16px;
+        }
+        .unit {
+          color: var(--text-tertiary);
+          text-overflow: ellipsis;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 16px;
+        }
+      }
+    }
+  }
+}

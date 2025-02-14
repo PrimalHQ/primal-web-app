@@ -1,0 +1,87 @@
+.transactionAmount {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .clickableContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0px;
+    background: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    cursor: pointer;
+
+    .primaryAmount {
+      display: flex;
+      margin: 12px;
+
+      .amountPrefix {
+        width: auto;
+        color: var(--text-tertiary);
+        font-size: 28px;
+        font-weight: 500;
+        line-height: 22px;
+        align-self: flex-start;
+      }
+
+      .amount {
+        color: var(--text-primary);
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 36px;
+        margin-inline: 6px;
+      }
+
+      .amountPostfix {
+        width: auto;
+        color: var(--text-tertiary);
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 14px;
+        align-self: flex-end;
+      }
+    }
+
+    .secondaryAmount {
+      display: flex;
+
+      .amountPrefix {
+        width: auto;
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      .amount {
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 16px;
+      }
+
+      .amountPostfix {
+        width: auto;
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 16px;
+        margin-inline: 4px;
+      }
+
+      .exchageButton {
+        margin: 0px;
+        background: none;
+        border: none;
+        box-shadow: none;
+        outline: none;
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}

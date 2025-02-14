@@ -1,26 +1,44 @@
-@mixin iconNav {
-  width: 24px;
-  height: 24px;
-  background-color: var(--text-secondary);
+@mixin iconNav($url, $color) {
+  width: 20px;
+  height: 20px;
+  background-color: $color;
+  -webkit-mask: $url no-repeat 0/100%;
+  mask: $url no-repeat 0/100%;
 }
 
 .navLink {
   position: relative;
-  margin: 0px 0px 36px 0px;
+  margin: 0px 0px 26px 0px;
   padding: 0px;
   background: none;
   border: none;
   border-radius: 0px;
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  width: 152px;
+
+  &:last-child {
+    margin-bottom: 36px;
+  }
 
   a {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+
+    >div {
+      background-color: var(--text-secondary);
+    }
+
     .label {
-      margin-left: 16px;
-      font-size: 18px;
-      font-weight: 600;
-      line-height: 20px;
       display: flex;
+      color: var(--text-secondary);
+      background: none;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 20px;
     }
 
     &:focus {
@@ -28,80 +46,77 @@
     }
   }
 
-  p {
-    display: inline;
-    text-transform: uppercase;
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: 800;
+  .homeIcon {
+    @include iconNav(url(../../assets/icons/nav/home.svg), var(--text-secondary));
   }
-}
-
-.homeIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/home.svg) no-repeat center;
-  mask: url(../../assets/icons/home.svg) no-repeat center;
-}
-
-.exploreIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/search.svg) no-repeat center;
-  mask: url(../../assets/icons/search.svg) no-repeat center;
-}
-.messagesIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat center;
-  mask: url(../../assets/icons/messages.svg) no-repeat center;
-}
-.notificationsIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/notifications.svg) no-repeat center;
-  mask: url(../../assets/icons/notifications.svg) no-repeat center;
-}
-.downloadIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/download.svg) no-repeat center;
-  mask: url(../../assets/icons/download.svg) no-repeat center;
-}
-.settingsIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/settings.svg) no-repeat center;
-  mask: url(../../assets/icons/settings.svg) no-repeat center;
-}
-.helpIcon {
-  @include iconNav;
-  -webkit-mask: url(../../assets/icons/help.svg) no-repeat center;
-  mask: url(../../assets/icons/help.svg) no-repeat center;
-}
-
-.active {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-  background: none;
-
-  >div {
-    background-color: var(--text-primary);
+  .readsIcon {
+    @include iconNav(url(../../assets/icons/nav/long.svg), var(--text-secondary));
+  }
+  .exploreIcon {
+    @include iconNav(url(../../assets/icons/nav/explore.svg), var(--text-secondary));
+  }
+  .messagesIcon {
+    @include iconNav(url(../../assets/icons/nav/messages.svg), var(--text-secondary));
+  }
+  .notificationsIcon {
+    @include iconNav(url(../../assets/icons/nav/notifications.svg), var(--text-secondary));
+  }
+  .downloadIcon {
+    @include iconNav(url(../../assets/icons/nav/downloads.svg), var(--text-secondary));
+  }
+  .premiumIcon {
+    @include iconNav(url(../../assets/icons/nav/premium.svg), var(--text-secondary));
+  }
+  .settingsIcon {
+    @include iconNav(url(../../assets/icons/nav/settings.svg), var(--text-secondary));
+  }
+  .bookmarkIcon {
+    @include iconNav(url(../../assets/icons/nav/bookmarks.svg), var(--text-secondary));
   }
 
-  .label {
-    color: var(--text-primary);
-    background: none;
+
+  &:hover, a.active {
+    .label {
+      color: var(--text-primary);
+      background: none;
+      // font-weight: 600;
+    }
+
+    .homeIcon {
+      @include iconNav(url(../../assets/icons/nav/home_selected.svg), var(--text-primary));
+    }
+    .readsIcon {
+      @include iconNav(url(../../assets/icons/nav/long_selected.svg), var(--text-primary));
+    }
+    .exploreIcon {
+      @include iconNav(url(../../assets/icons/nav/explore.svg), var(--text-primary));
+    }
+    .messagesIcon {
+      @include iconNav(url(../../assets/icons/nav/messages_selected.svg), var(--text-primary));
+    }
+    .notificationsIcon {
+      @include iconNav(url(../../assets/icons/nav/notifications_selected.svg), var(--text-primary));
+    }
+    .downloadIcon {
+      @include iconNav(url(../../assets/icons/nav/downloads_selected.svg), var(--text-primary));
+    }
+    .premiumIcon {
+      @include iconNav(url(../../assets/icons/nav/premium.svg), var(--text-primary));
+    }
+    .settingsIcon {
+      @include iconNav(url(../../assets/icons/nav/settings_selected.svg), var(--text-primary));
+    }
+    .bookmarkIcon {
+      @include iconNav(url(../../assets/icons/nav/bookmarks_selected.svg), var(--text-primary));
+    }
   }
-}
 
-.inactive {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-end;
-
-  >div {
-    background-color: var(--text-secondary);
-  }
-
-  .label {
-    color: var(--text-secondary);
-    background: none;
+  a.active {
+    .label {
+      color: var(--text-primary);
+      background: none;
+      font-weight: 400;
+    }
   }
 }
 
@@ -109,10 +124,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 18px;
+  min-width: 18px;
   height: 18px;
 
   margin-left: 2px;
+  margin-top: -8px;
 
   font-family: 'Roboto Condensed';
   font-weight: 500;
@@ -130,8 +146,9 @@
   }
 
   &.tripleSize {
-    width: 26px;
+    width: 28px;
     padding-left: 2px;
+    margin-left: 0px;
   }
 }
 
@@ -147,6 +164,8 @@
   .bubble {
     width: 8px;
     height: 8px;
+    min-width: 8px;
+    position: relative;
     >div {
       display: none;
     }

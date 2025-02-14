@@ -114,13 +114,10 @@ const HomeHeader: Component< {
             {intl.formatMessage(t.noteCallToAction)}
           </div>
         </button>
+        <div class={styles.separator}></div>
       </Show>
       <div class={styles.bigFeedSelect}>
-        <Show
-          when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}
-        >
-          <FeedSelect />
-        </Show>
+        <FeedSelect big={false} />
 
         <Show
           when={props.hasNewPosts()}
@@ -157,7 +154,7 @@ const HomeHeader: Component< {
             </div>
           </Show>
 
-          <Show when={settings?.availableFeeds && settings?.availableFeeds.length > 0 && home?.selectedFeed}>
+          <Show when={settings?.homeFeeds && settings?.homeFeeds.length > 0 && home?.selectedFeed}>
             <div class={styles.smallRight}>
               <FeedSelect />
             </div>
@@ -186,7 +183,7 @@ const HomeHeader: Component< {
                     class={styles.avatar}
                     title={userName(user)}
                   >
-                    <Avatar user={user} size="xss" />
+                    <Avatar user={user} size="xs" />
                   </div>
                 )}
               </For>

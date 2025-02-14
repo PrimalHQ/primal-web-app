@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { Relay, Event, nip05, nip19 } from "nostr-tools";
+import { Relay, nip05, nip19 } from "../lib/nTools";
 import { unwrap } from "solid-js/store";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
@@ -75,14 +74,14 @@ export const getProfileFollowerList = (pubkey: string | undefined, subid: string
 }
 
 
-export const getProfileZapList = (pubkey: string | undefined, subid: string, until = 0, offset = 0, extended = false) => {
+export const getProfileZapList = (pubkey: string | undefined, subid: string, until = 0, offset = 0, limit = 20, extended = false) => {
   if (!pubkey) {
     return;
   }
 
   let payload = {
-    receiver: pubkey,
-    limit: 20,
+    sender: pubkey,
+    limit,
     offset,
   };
 
@@ -94,7 +93,7 @@ export const getProfileZapList = (pubkey: string | undefined, subid: string, unt
   sendMessage(JSON.stringify([
     "REQ",
     subid,
-    {cache: ["user_zaps_by_satszapped", payload]},
+    {cache: ["user_zaps_sent", payload]},
   ]));
 }
 
@@ -133,6 +132,20 @@ export const getProfileScoredNotes = (pubkey: string | undefined, user_pubkey: s
     {cache: ["user_profile_scored_content", { pubkey, limit, user_pubkey }]},
   ]));
 }
+
+export const getCommonFollowers = (pubkey: string | undefined, user_pubkey: string | undefined, subId: string, limit = 5) => {
+  if (!pubkey || !user_pubkey) {
+    return;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["user_profile_followed_by", { pubkey, limit, user_pubkey }]},
+  ]));
+}
+
+
 
 export const getTrendingUsers = (subid: string, user_pubkey: string | undefined) => {
   sendMessage(JSON.stringify([
@@ -173,26 +186,31 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 
     relays.forEach(relay => {
 
-      const sub = relay.sub([
+      // if (!relay.subscribe) return;
+
+
+      const sub = relay.subscribe(
+        [
+          {
+            kinds: [Kind.Reaction],
+            authors: [pubkey],
+          },
+        ],
         {
-          kinds: [Kind.Reaction],
-          authors: [pubkey],
+          onevent(event: any) {
+            const e = event.tags.find((t: string[]) => t[0] === 'e');
+
+            e && e[1] && likes.add(e[1]);
+          },
+          oneose() {
+            const likeArray = Array.from(likes);
+
+            callback(likeArray);
+
+            sub.close();
+          },
         },
-      ]);
-
-      sub.on('event', (event: Event) => {
-        const e = event.tags.find((t: string[]) => t[0] === 'e');
-
-        e && e[1] && likes.add(e[1]);
-      })
-
-      sub.on('eose', () => {
-        const likeArray = Array.from(likes);
-
-        callback(likeArray);
-
-        sub.unsub();
-      })
+      );
     });
 
   } catch (e) {
@@ -203,15 +221,37 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
-    const content = await fetch(`${window.location.origin}/.well-known/nostr.json?name=${name}`);
+    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+
+    const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
 
     return await content.json();
   } catch (e) {
-    logError('Failed to fetch known users: ', e);
+    logError('Failed to fetch known users: ', vanityName, e);
 
     return { ...minKnownProfiles };
   }
 };
+
+export const isVerifiedByPrimal = async (user: PrimalUser | undefined) => {
+  const nip05 = user?.nip05;
+
+  const isVerified = await checkVerification(user);
+
+  return isVerified && nip05 && nip05.endsWith && nip05.endsWith('primal.net');
+}
+
+export const checkVerification: (user: PrimalUser | undefined) => Promise<boolean> = (user: PrimalUser | undefined) => {
+  const nip05 = user?.nip05;
+
+  if (!user || !nip05) {
+    return new Promise((resolve) => false)
+  }
+
+  return isAccountVerified(nip05).then(profile => {
+    return profile && profile.pubkey === user?.pubkey
+  });
+}
 
 export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {
   if (!domain) return null;
@@ -228,7 +268,7 @@ export const isAccountVerified: (domain: string | undefined) => Promise<nip19.Pr
 };
 
 
-export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(metaData),
     kind: Kind.Metadata,
@@ -236,7 +276,7 @@ export const sendProfile = async (metaData: any, relays: Relay[], relaySettings?
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
 export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
@@ -279,7 +319,7 @@ export const getFilterlists = (pubkey: string | undefined, subid: string, extend
   ]));
 };
 
-export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const tags = filterLists.reduce((acc, fl) => {
     let s = [];
     if (fl.content) s.push('content');
@@ -300,7 +340,7 @@ export const sendFilterlists = async (filterLists: Filterlist[], date: number, c
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
 export const getAllowlist = (pubkey: string | undefined, subid: string, extended?: boolean) => {
@@ -315,7 +355,7 @@ export const getAllowlist = (pubkey: string | undefined, subid: string, extended
   ]));
 };
 
-export const sendAllowList = async (allowlist: string[], date: number, content: string, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendAllowList = async (allowlist: string[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const tags = allowlist.reduce((acc, pk) => {
     return [...acc, ['p', pk]];
   }, [['d', 'allowlist']]);
@@ -327,7 +367,7 @@ export const sendAllowList = async (allowlist: string[], date: number, content: 
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
 export const getSuggestions = async (subid: string) => {
@@ -351,7 +391,7 @@ export const getRelays = async (pubkey: string | undefined, subid: string) => {
 };
 
 
-export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays) => {
+export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, shouldProxy: boolean) => {
   const tags = Object.entries(relaySettings).reduce<string[][]>((acc, [url, config]) => {
     if (config.read && config.write) {
       return [ ...acc, ['r', url]];
@@ -361,7 +401,7 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays) =>
       return acc;
     }
 
-    const permission = config.read ? 'read' : 'write';
+    const permission: string = config.read ? 'read' : 'write';
 
     return [ ...acc, ['r', url, permission]];
   }, []);
@@ -373,7 +413,28 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays) =>
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings);
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+};
+
+export const sendBookmarks = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content,
+    kind: Kind.Bookmarks,
+    tags: [...tags],
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+};
+
+export const getBookmarks = async (pubkey: string | undefined, subid: string) => {
+  if (!pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_bookmarks", { pubkey }]},
+  ]));
 };
 
 export const extractRelayConfigFromTags = (tags: string[][]) => {
@@ -393,4 +454,102 @@ export const extractRelayConfigFromTags = (tags: string[][]) => {
     return { ...acc, [tag[1]]: config };
 
   }, {});
+};
+
+
+export const getExplorePeople = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 10, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_people", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreZaps = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 20, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  // if (user_pubkey) {
+  //   // @ts-ignore
+  //   payload.user_pubkey = user_pubkey
+  // }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_zaps", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreMedia = async (subid: string, user_pubkey: string | undefined, until: number, limit: number, since: number, offset: number) => {
+
+  let payload:any = { limit: limit || 20, offset: offset || 0 };
+
+  if (until > 0) {
+    // @ts-ignore
+    payload.until = until;
+  }
+
+  if (since > 0) {
+    // @ts-ignore
+    payload.since = since
+  }
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey;
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_media", { ...payload }]},
+  ]));
+};
+
+
+export const getExploreTopics = async (subid: string, user_pubkey: string | undefined) => {
+
+  let payload = {};
+
+  if (user_pubkey) {
+    // @ts-ignore
+    payload.user_pubkey = user_pubkey
+  }
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["explore_topics"]},
+  ]));
 };

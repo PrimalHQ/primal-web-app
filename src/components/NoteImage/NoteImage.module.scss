@@ -2,6 +2,7 @@
   display: block;
   object-fit: cover;
   z-index: 22;
+  // max-width: 528px;
 }
 
 .shortHeight {
@@ -10,7 +11,7 @@
 
 .placeholderImage {
   display: block;
-  width: 524px;
-  height: 680px;
-  background-color: var(--background-site);
+  width: 100%;
+  height: 100%;
+  background-color: var(--devider);
 }

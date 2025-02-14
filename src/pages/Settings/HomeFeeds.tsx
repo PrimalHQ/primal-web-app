@@ -4,12 +4,14 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import FeedSorter from '../../components/FeedSorter/FeedSorter';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
+import FeedMarketPlace from '../../components/FeedMarketplace/FeedMarketPlace';
+import FeedMarketPlaceDialog from '../../components/FeedMarketplace/FeedMarketPlaceDialog';
 
 const HomeFeeds: Component = () => {
 
@@ -17,9 +19,10 @@ const HomeFeeds: Component = () => {
   const settings = useSettingsContext();
 
   const [isRestoringFeeds, setIsRestoringFeeds] = createSignal(false);
+  const [openMarketplace, setOpenMarketplace] = createSignal(false);
 
   const onRestoreFeeds = () => {
-    settings?.actions.restoreDefaultFeeds();
+    settings?.actions.restoreHomeFeeds();
     setIsRestoringFeeds(false);
   };
 
@@ -28,34 +31,57 @@ const HomeFeeds: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.homeFeeds.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.homeFeeds.title)}</div>
       </PageCaption>
 
-      <div class={styles.settingsContent}>
-        <div class={styles.feedCaption}>
-          <div class={styles.settingsCaption}>
-          {intl.formatMessage(t.homeFeeds.caption)}
-          </div>
+      <div class={styles.settingsContentFull}>
+        <div class={styles.feedSettings}>
+          <FeedSorter
+            feedType="home"
+            feeds={settings?.homeFeeds || []}
+            actions={{
+              remove: settings?.actions.removeFeed,
+              move: settings?.actions.moveFeed,
+              rename: settings?.actions.renameFeed,
+              enable: settings?.actions.enableFeed,
+            }}
+          />
+        </div>
+
+        <div class={styles.separator}></div>
+
+        <div class={styles.feedManage}>
+          <ButtonLink
+            onClick={() => setOpenMarketplace(() => true)}
+          >
+            {intl.formatMessage(t.feedsAddNew)}
+          </ButtonLink>
 
           <ButtonLink
             onClick={() => setIsRestoringFeeds(true)}
           >
             {intl.formatMessage(t.feedsRestore)}
           </ButtonLink>
-
-          <ConfirmModal
-            open={isRestoringFeeds()}
-            description={intl.formatMessage(t.feedsRestoreConfirm)}
-            onConfirm={onRestoreFeeds}
-            onAbort={() => setIsRestoringFeeds(false)}
-          ></ConfirmModal>
-        </div>
-
-        <div class={styles.feedSettings}>
-          <FeedSorter />
         </div>
       </div>
+
+      <ConfirmModal
+        open={isRestoringFeeds()}
+        description={intl.formatMessage(t.feedsRestoreConfirm)}
+        onConfirm={onRestoreFeeds}
+        onAbort={() => setIsRestoringFeeds(false)}
+      ></ConfirmModal>
+
+      <FeedMarketPlaceDialog
+        open={openMarketplace()}
+        setOpen={setOpenMarketplace}
+        type="notes"
+        onAddFeed={(feed) => {
+          settings?.actions.addFeed(feed, 'home');
+          setOpenMarketplace(() => false);
+        }}
+      />
     </div>
   )
 }

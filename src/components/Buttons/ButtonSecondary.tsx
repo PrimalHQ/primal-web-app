@@ -1,6 +1,6 @@
 import { Component, JSXElement, Match, Show, Switch } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { Button } from "@kobalte/core";
+import { Button } from "@kobalte/core/button";
 
 import styles from './Buttons.module.scss';
 
@@ -27,7 +27,7 @@ const ButtonSecondary: Component<{
   }
 
   return (
-    <Button.Root
+    <Button
       id={props.id}
       class={klass()}
       onClick={props.onClick}
@@ -35,7 +35,7 @@ const ButtonSecondary: Component<{
       type={props.type || "button"}
     >
       {props.children}
-    </Button.Root>
+    </Button>
   );
 }
 

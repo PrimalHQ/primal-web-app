@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A, Link } from '@solidjs/router';
+import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
@@ -11,11 +11,12 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { contentScope, Kind, specialAlgos, trendingScope } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useAppContext } from '../../contexts/AppContext';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hexToNpub, npubToHex } from '../../lib/keys';
 import { getUserProfiles } from '../../lib/profile';
-import { subscribeTo } from '../../sockets';
+import { subsTo } from '../../sockets';
 import { convertToUser, nip05Verification, userName } from '../../stores/profile';
 import { settings as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import { NostrUserContent, PrimalUser } from '../../types/primal';
@@ -28,6 +29,7 @@ const Moderation: Component = () => {
   const account = useAccountContext();
   const settings = useSettingsContext();
   const search = useSearchContext();
+  const app = useAppContext();
 
   let searchFilteredAccount: HTMLInputElement | undefined;
   let allowlistInput: HTMLInputElement | undefined;
@@ -83,24 +85,17 @@ const Moderation: Component = () => {
 
     if (userMutelists.length > 0) {
       const subId = `user_mutelist_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
-
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
-
-            const u = convertToUser(user);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
-            return;
           }
+        },
+        onEose: () => {
+          unsub();
         }
       });
 
@@ -113,26 +108,23 @@ const Moderation: Component = () => {
     const rand = Math.floor(Math.random()*10_000);
 
     if (allowList.length > 0) {
-      const subId = `user_allowlist_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const subId = `user_allowlist_${rand}_${APP_ID}`;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-            const u = convertToUser(user);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
-            return;
           }
-        }
+
+        },
+        onEose: () => {
+          unsub();
+        },
       });
 
       getUserProfiles(allowList || [], subId)
@@ -145,25 +137,21 @@ const Moderation: Component = () => {
 
     if (reasons.length > 0) {
       const subId = `user_reasons_${rand}_${APP_ID}`
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EOSE') {
-            unsub();
-            return;
-        }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
-        if (type === 'EVENT') {
-          if (!response) {
-            return;
-          }
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
 
-          if (response.kind === Kind.Metadata) {
-            const user = response as NostrUserContent;
-
-            const u = convertToUser(user);
+            const u = convertToUser(user, content.pubkey);
             setUsers(() => ({ [u.pubkey]: { ...u } }));
             return;
           }
-        }
+        },
+        onEose: () => {
+          unsub();
+        },
       });
 
       getUserProfiles(reasons, subId)
@@ -175,7 +163,7 @@ const Moderation: Component = () => {
       <PageTitle title={`${intl.formatMessage(t.moderation.title)} ${intl.formatMessage(t.title)}`} />
 
       <PageCaption>
-        <Link href='/settings' >{intl.formatMessage(t.index.title)}</Link>:&nbsp;
+        <A href='/settings' >{intl.formatMessage(t.index.title)}</A>:&nbsp;
         <div>{intl.formatMessage(t.moderation.title)}</div>
       </PageCaption>
 
@@ -258,7 +246,7 @@ const Moderation: Component = () => {
             {mutelist => (
               <div class={styles.filterListItem}>
                 <div class={styles.filterListName} title={mutelist.pubkey}>
-                  <A href={`/p/${users[mutelist.pubkey || '']?.npub}`} class={styles.avatar}>
+                  <A href={app?.actions.profileLink(mutelist.pubkey) || ''} class={styles.avatar}>
                     <Avatar
                       user={users[mutelist.pubkey || '']}
                       size='xs'
@@ -384,7 +372,7 @@ const Moderation: Component = () => {
                   fallback={(
                     <div class={styles.filterListItem}>
                       <div class={styles.filterListName} title={reason}>
-                        <A href={`/p/${users[reason || '']?.npub}`} class={styles.avatar}>
+                        <A href={app?.actions.profileLink(reason) || ''} class={styles.avatar}>
                           <Avatar
                             user={users[reason || '']}
                             size='xs'

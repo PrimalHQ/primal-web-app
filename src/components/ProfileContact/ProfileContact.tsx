@@ -14,20 +14,25 @@ import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
 import { A } from '@solidjs/router';
 import { humanizeNumber } from '../../lib/stats';
+import { useAccountContext } from '../../contexts/AccountContext';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const ProfileContact: Component<{
   profile: PrimalUser | undefined,
   profileStats: any,
+  light?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
   id?: string,
 }> = (props) => {
 
   const intl = useIntl();
+  const account = useAccountContext();
+  const app = useAppContext();
 
   return (
     <div id={props.id} class={styles.profileContact}>
-      <A href={`/p/${props.profile?.npub}`} class={styles.info}>
+      <A href={app?.actions.profileLink(props.profile?.npub) || ''} class={styles.info}>
         <div class={styles.personal}>
           <Avatar src={props.profile?.picture} size="sm" />
 
@@ -57,7 +62,12 @@ const ProfileContact: Component<{
             </div>
           </div>
         </Show>
-        <FollowButton person={props.profile} postAction={props.postAction} />
+        <Show
+          when={account?.publicKey !== props.profile?.pubkey || !account?.following.includes(props.profile?.pubkey || '')}
+          fallback={<div class={styles.placeholderDiv}></div>}
+        >
+          <FollowButton person={props.profile} postAction={props.postAction} light={props.light} />
+        </Show>
       </div>
     </div>
   );

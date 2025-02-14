@@ -1,13 +1,13 @@
-import { Component, createEffect, createSignal, JSX,  onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey } from "nostr-tools";
+import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
 
 const NoteImage: Component<{
   class?: string,
   imageGroup?: string,
   media?: MediaVariant,
+  mediaThumb?: MediaVariant | string,
   width?: number,
   src?: string,
   altSrc?: string,
@@ -16,6 +16,9 @@ const NoteImage: Component<{
   onImageLoaded?: (url: string | undefined) => void,
   shortHeight?: boolean,
   plainBorder?: boolean,
+  caption?: JSXElement | string,
+  ignoreRatio?: boolean,
+  forceHeight?: number;
 }> = (props) => {
   const imgId = generatePrivateKey();
 
@@ -26,16 +29,14 @@ const NoteImage: Component<{
 
   const [src, setSrc] = createSignal<string | undefined>();
 
-  // const src = () => props.media?.media_url || props.src;
-
   const isCached = () => !props.isDev || props.media;
 
   const onError = (event: any) => {
     const image = event.target;
 
-    if (image.src === props.altSrc || !props.altSrc) {
+    if (image.src === props.altSrc || !props.altSrc || image.src.endsWith(props.altSrc)) {
       // @ts-ignore
-      props.onError(event);
+      props.onError && props.onError(event);
       return true;
     }
 
@@ -56,20 +57,25 @@ const NoteImage: Component<{
       2;
   };
 
-  // const height = () => {
-  //   if (!props.media) {
-  //     return '100%';
-  //   }
+  const width = () => props.width || 538;
 
-  //   const img = props.media;
+  const height = () => {
+    if (props.forceHeight) {
+      return `${props.forceHeight}px`;
+    }
 
-  //   if (!img || ratio() <= 1.2) return 'auto';
+    if (!props.media || props.ignoreRatio) return '100%';
 
-  //   // width of the note over the ratio of the preview image
-  //   const h = props.width || 524 / ratio();
+    const img = props.media;
 
-  //   return `${h}px`;
-  // };
+    if (!img || ratio() <= 0.9) return '680px';
+    if (!img || ratio() <= 1.2) return 'auto';
+
+    // width of the note over the ratio of the preview image
+    const h = width() / ratio();
+
+    return `${h}px`;
+  };
 
   const zoomW = () => {
 
@@ -90,17 +96,33 @@ const NoteImage: Component<{
   };
 
   const willBeTooBig = () => {
-    const maxW = props.width || 524;
+    const maxW = width();
 
     const h = maxW / ratio();
 
     return h > 680;
   };
 
+  const thumbSrc = () => {
+    if (props.mediaThumb) {
+      return typeof props.mediaThumb === 'string' ?
+        props.mediaThumb :
+        props.mediaThumb.media_url;
+    }
+
+    return src();
+
+    // if (!s || !s.includes('media-cache')) return s;
+
+    // const thumb = s.replace('s=o', 's=s');
+
+    // return thumb;
+  }
+
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
   onMount(() => {
-    // if we have media info, shortcut image dimenzion calc
+    // if we have media info, shortcut image dimension calc
     if (props.media) {
       setIsImageLoaded(true);
     }
@@ -120,7 +142,7 @@ const NoteImage: Component<{
 
   createEffect(() => {
     isImageLoaded() && props.onImageLoaded && props.onImageLoaded(src());
-  })
+  });
 
   return (
     <Show
@@ -134,15 +156,19 @@ const NoteImage: Component<{
         data-pswp-height={zoomH()}
         data-image-group={props.imageGroup}
         data-cropped={true}
+        data-thumb-src={thumbSrc()}
+        data-ratio={ratio()}
+        target="_blank"
       >
         <img
-          id={imgId}
+          id={`${imgId}`}
           ref={imgActual}
-          src={src()}
+          src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          width={willBeTooBig() ? undefined : `${props.width || 524}px`}
+          style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
         />
+        <div class="pswp-caption-content">{props.caption}</div>
       </a>
     </Show>
   );

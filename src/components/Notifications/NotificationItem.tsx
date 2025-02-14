@@ -33,6 +33,8 @@ import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 import { notificationsNew as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import Note from '../Note/Note';
+import { useAppContext } from '../../contexts/AppContext';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -79,6 +81,7 @@ const avatarDisplayLimit = 12;
 const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
+  const app = useAppContext();
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
 
@@ -157,7 +160,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
             <For each={displayedUsers()}>
               {(user) => (
                 <A
-                  href={`/p/${user.npub}`} class={styles.avatar}
+                  href={app?.actions.profileLink(user.npub) || ''} class={styles.avatar}
                   title={userName(user)}
                 >
                   <Avatar user={user} size="xs" />
@@ -183,9 +186,10 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
         >
           <div class={styles.reference}>
             <Show when={props.note}>
-              <NotificationNote
+              <Note
                 // @ts-ignore
                 note={props.note}
+                noteType="notification"
               />
             </Show>
           </div>

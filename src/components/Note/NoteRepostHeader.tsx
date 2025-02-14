@@ -7,6 +7,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { authorName } from '../../stores/profile';
 import { note as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const NoteRepostHeader: Component<{
@@ -14,6 +15,7 @@ const NoteRepostHeader: Component<{
   id?: string,
 }> = (props) => {
   const intl = useIntl();
+  const app = useAppContext();
 
   const repost = () => props.note?.repost;
 
@@ -29,7 +31,7 @@ const NoteRepostHeader: Component<{
     <div class={styles.repostedBy}>
       <div class={styles.repostIcon}></div>
       <span>
-        <A href={`/p/${repost()?.user.npub}`} >
+        <A href={app?.actions.profileLink(repost()?.user.npub) || ''} >
           {reposterName()}
           {intl.formatMessage(
             t.repostedOthers,

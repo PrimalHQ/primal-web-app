@@ -1,5 +1,6 @@
 @mixin preview {
   width: 100%;
+  height: 120px;
   text-decoration: none;
   color: var(--text-tertiary);
   font-size: 14px;
@@ -29,8 +30,12 @@
 .linkPreviewH {
   @include preview();
 
-  display: grid;
-  grid-template-columns: 130px 1fr;
+  display: grid !important;
+  grid-template-columns: 180px 1fr;
+
+  &.noImage {
+    display: flex !important;
+  }
 
   .previewImage {
     width: 130px;
@@ -38,26 +43,40 @@
   }
 
   .previewInfo {
-    padding-block: 8px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
 
   .previewUrlLine {
-    padding-top: 0;
+    margin-top: 8px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
   }
 
   .previewTitle {
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
   .previewDescription {
+    margin-top: 4px;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
+
+    &.short {
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+    }
   }
+
 }
 
 .previewInfo {
@@ -74,8 +93,11 @@
 }
 
 .previewTitle {
-  font-weight: 700;
   color: var(--text-primary);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .previewUrlLine {
@@ -84,6 +106,12 @@
   justify-content: flex-start;
   align-items: center;
   padding-block: 0;
+
+  color: var(--text-tertiary-2);
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 16px;
 
   >img {
     width: 24px;
@@ -96,5 +124,12 @@
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
+
+  color: var(--text-secondary-2);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px;
 }

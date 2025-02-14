@@ -1,41 +1,55 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
+import { FeedType } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { PrimalFeed } from '../../types/primal';
+import { PrimalArticleFeed } from '../../types/primal';
+import Checkbox from '../Checkbox/Checkbox';
+import CheckBox2 from '../Checkbox/CheckBox2';
 
 import styles from './FeedSorter.module.scss';
 
+const lockedFeeds = ['primal'];
 
-const FeedSorter: Component<{ id?: string }> = (props) => {
+export type FeedSorterActions = {
+  remove?: (feed: PrimalArticleFeed, feedType: FeedType) => void,
+  move?: (from: number, to: number, feedType: FeedType) => void,
+  rename?: (feed: PrimalArticleFeed, newName: string, feedType: FeedType) => void,
+  enable?: (feed: PrimalArticleFeed, enabled: boolean, feedType: FeedType) => void,
+}
+
+const FeedSorter: Component<{
+  id?: string,
+  feedType: 'home' | 'reads',
+  feeds: PrimalArticleFeed[],
+  actions: FeedSorterActions,
+
+}> = (props) => {
 
   let sorter: any;
-
-  const settings = useSettingsContext();
   const account = useAccountContext();
 
   const [editMode, setEditMode] = createSignal('');
 
   const [newName, setNewName] = createSignal('');
 
-  const availableFeeds = () => {
-    return settings?.availableFeeds || [];
+  const constructId = (feed: PrimalArticleFeed) => {
+    return feed.spec;
+  }
+
+  const removeFeed = (feed: PrimalArticleFeed) => {
+    props.actions.remove && props.actions.remove(feed, props.feedType);
   };
 
-  const removeFeed = (feed: PrimalFeed) => {
-    settings?.actions.removeAvailableFeed(feed);
-  };
-
-  const editFeed = (feed: PrimalFeed) => {
-    const id = `${feed.hex}_${feed.includeReplies}`;
+  const editFeed = (feed: PrimalArticleFeed) => {
+    const id = `${constructId(feed)}`;
     setEditMode(() => id);
     setNewName(() => feed.name);
     const input = document.getElementById(`input_${id}`);
     input && input.focus();
   };
 
-  const updateFeedName = (feed: PrimalFeed) => {
-    settings?.actions.renameAvailableFeed(feed, newName());
+  const updateFeedName = (feed: PrimalArticleFeed) => {
+    props.actions.rename && props.actions.rename(feed, newName(), props.feedType);
     setEditMode('');
   }
 
@@ -92,7 +106,7 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
           const oldIndex = current.getAttribute('data-index');
           const newIndex = i.getAttribute('data-index');
 
-          settings?.actions.moveAvailableFeed(oldIndex, newIndex);
+          props.actions.move && props.actions.move(oldIndex, newIndex, props.feedType);
 
           for (let it of items) {
             it.classList.remove(styles.draggedBefore);
@@ -105,48 +119,72 @@ const FeedSorter: Component<{ id?: string }> = (props) => {
   }
 
   createEffect(() => {
-    if (sorter && availableFeeds().length > 0) {
+    if (sorter && props.feeds.length > 0) {
       sortList(sorter);
     }
   });
 
+  const isLockedFeed = (feed: PrimalArticleFeed) => lockedFeeds.includes(feed.feedkind || '');
+
   return (
     <div id={props.id} class={styles.feedSorter} ref={sorter}>
-      <Show when={availableFeeds().length > 0}>
-        <For each={availableFeeds()}>
+      <Show when={props.feeds.length > 0}>
+        <For each={props.feeds}>
           {(feed, index) => (
-            <div class={styles.feedItem} data-value={feed.hex} data-index={index()}>
+            <div class={styles.feedItem} data-value={feed.spec} data-index={index()}>
               <Show
-                when={editMode() === `${feed.hex}_${feed.includeReplies}`}
+                when={editMode() === constructId(feed)}
                 fallback={
                   <>
+                    <div class={styles.feedInfo}>
+                      <div class={styles.feedName}>{feed.name}</div>
+                      <div class={styles.feedDescription}>{feed.description}</div>
+                    </div>
                     <Show when={account?.hasPublicKey()}>
-                      <div class={styles.sortControls}>
-                        <div class={styles.dragIcon}></div>
-                      </div>
-                      <div class={styles.manageControls}>
-                        <button
-                          class={styles.mngButton}
-                          onClick={() => editFeed(feed)}
-                        >
-                          <div class={styles.editButton}></div>
-                        </button>
-                        <button
-                          class={styles.mngButton}
-                          onClick={() => removeFeed(feed)}
-                          disabled={!!account?.publicKey && feed.hex === account.publicKey}
-                        >
-                          <div class={styles.deleteButton}></div>
-                        </button>
+                      <div class={styles.controls}>
+                        <div class={styles.manageControls}>
+                          <Show when={isLockedFeed(feed)}>
+                            <div class={styles.feedEnabled}>
+                              <CheckBox2
+                                onChange={(v: boolean) => {
+                                  props.actions.enable && props.actions.enable(feed, v, props.feedType);
+                                }}
+                                checked={feed.enabled}
+                              />
+                            </div>
+                          </Show>
+
+                          <Show when={!isLockedFeed(feed)}>
+                            <button
+                              class={styles.mngButton}
+                              onClick={() => editFeed(feed)}
+                              disabled={isLockedFeed(feed)}
+                            >
+                              <div class={styles.editButton}></div>
+                            </button>
+                            <button
+                              class={styles.mngButton}
+                              onClick={() => removeFeed(feed)}
+                              disabled={isLockedFeed(feed)}
+                            >
+                              <div class={styles.deleteButton}></div>
+                            </button>
+                          </Show>
+                          <button
+                            class={styles.sortButton}
+                            onClick={() => {}}
+                          >
+                            <div class={styles.dragIcon}></div>
+                          </button>
+                        </div>
                       </div>
                     </Show>
-                    <div class={styles.feedName}>{feed.name}</div>
                   </>
                 }
               >
                 <div class={styles.feedEdit}>
                   <input
-                    id={`input_${feed.hex}_${feed.includeReplies}`}
+                    id={`input_${constructId(feed)}`}
                     class={styles.feedNameInput}
                     value={newName()}
                     // @ts-ignore

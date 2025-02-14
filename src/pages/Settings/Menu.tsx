@@ -4,7 +4,7 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { Link, useNavigate } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 
@@ -22,7 +22,7 @@ const Menu: Component = () => {
 
       <div class={styles.subpageLinks}>
         <Show when={account?.sec != undefined}>
-          <Link href="/settings/account">
+          <A href="/settings/account">
             <div class={styles.caption}>
               {intl.formatMessage(t.account.title)}
               <div class={styles.bubble}>
@@ -30,44 +30,49 @@ const Menu: Component = () => {
               </div>
             </div>
             <div class={styles.chevron}></div>
-          </Link>
+          </A>
         </Show>
 
-        <Link href="/settings/appearance">
+        <A href="/settings/appearance">
           {intl.formatMessage(t.appearance.title)}
           <div class={styles.chevron}></div>
-        </Link>
+        </A>
 
-        <Link href="/settings/feeds">
+        <A href="/settings/home_feeds">
           {intl.formatMessage(t.homeFeeds.title)}
           <div class={styles.chevron}></div>
-        </Link>
+        </A>
+
+        <A href="/settings/reads_feeds">
+          {intl.formatMessage(t.readsFeeds.title)}
+          <div class={styles.chevron}></div>
+        </A>
 
         <Show when={account?.hasPublicKey()}>
-          <Link href="/settings/muted">
+          <A href="/settings/muted">
             {intl.formatMessage(t.muted.title)}
             <div class={styles.chevron}></div>
-          </Link>
-          <Link href="/settings/filters">
+          </A>
+          <A href="/settings/filters">
             {intl.formatMessage(t.moderation.title)}
             <div class={styles.chevron}></div>
-          </Link>
-          <Link href="/settings/notifications">
+          </A>
+          <A href="/settings/notifications">
             {intl.formatMessage(t.notifications.title)}
             <div class={styles.chevron}></div>
-          </Link>
+          </A>
         </Show>
 
-        <Link href="/settings/network">
+        <A href="/settings/network">
           {intl.formatMessage(t.network.title)}
           <div class={styles.chevron}></div>
-        </Link>
+        </A>
 
         <Show when={account?.hasPublicKey()}>
-          <Link href="/settings/zaps">
+          <A href="/settings/zaps">
             {intl.formatMessage(t.zaps)}
             <div class={styles.chevron}></div>
-          </Link>
+          </A>
         </Show>
       </div>
 

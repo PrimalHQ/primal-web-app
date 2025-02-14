@@ -1,5 +1,4 @@
-// @ts-ignore Bad types in nostr-tools
-import { generatePrivateKey, getPublicKey, nip04, getSignature, getEventHash, validateEvent, verifySignature, nip19 } from 'nostr-tools';
+import { generatePrivateKey, getPublicKey, nip04, nip19, finalizeEvent, verifyEvent, generateNsec } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
@@ -82,7 +81,7 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
 
 export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
   const getSec = async () => {
-    let sec: string = pk || readSecFromStorage() || tempNsec() || generatePrivateKey();
+    let sec: string = pk || readSecFromStorage() || tempNsec() || generateNsec();
 
     if (sec.startsWith(pinEncodePrefix)) {
       sec = await decryptWithPin(currentPin(), sec);
@@ -128,19 +127,23 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     const sec = await getSec();
     if (!sec) throw('sign-no-nsec');
 
-    const pubkey: string = await gPk();
+    // const pubkey: string = await gPk();
 
-    let evt = { ...event, pubkey };
+    let evt = finalizeEvent({ ...event }, sec);
 
-    // @ts-ignore
-    evt.id = getEventHash(evt);
-    // @ts-ignore
-    evt.sig = getSignature(evt, sec);
+    const isVerified = verifyEvent(evt);
 
-    const isValid = validateEvent(evt);
-    const isVerified = verifySignature(evt);
+    // let evt = { ...event, pubkey };
 
-    if (!isValid) throw('event-not-valid');
+    // // @ts-ignore
+    // evt.id = getEventHash(evt);
+    // // @ts-ignore
+    // evt.sig = getSignature(evt, sec);
+
+    // const isValid = validateEvent(evt);
+    // const isVerified = verifySignature(evt);
+
+    // if (!isValid) throw('event-not-valid');
     if (!isVerified) throw('event-sig-not-verified');
 
     return evt as NostrRelaySignedEvent;

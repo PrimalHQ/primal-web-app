@@ -1,5 +1,4 @@
 .modal {
-  position: fixed;
   width: 440px;
   color: var(--text-primary);
   background-color: var(--background-input);
@@ -7,39 +6,6 @@
 
   display: flex;
   flex-direction: column;
-  padding: 24px;
-
-  .xClose {
-    background: none;
-    border: none;
-    margin: 0;
-    padding: 0;
-    width: fit-content;
-
-    position: absolute;
-    top: 18px;
-    right: 18px;
-
-    .iconClose {
-      width: 14px;
-      height: 14px;
-      display: inline-block;
-      margin: 0px 0px;
-      background-color: var(--text-secondary);
-      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
-      mask: url(../../assets/icons/close.svg) no-repeat center;
-    }
-
-    &:hover {
-      .iconClose {
-        background-color: var(--text-primary);
-      }
-    }
-
-    &:focus {
-      box-shadow: none;
-    }
-  }
 
   .title {
     font-size: 18px;
@@ -83,4 +49,8 @@
     line-height: 20px;
   }
 
+}
+
+.hidden {
+  display: none;
 }

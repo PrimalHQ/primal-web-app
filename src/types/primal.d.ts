@@ -1,13 +1,19 @@
 import { MessageDescriptor } from "@cookbook/solid-intl";
-// @ts-ignore Bad types in nostr-tools
-import { Relay } from "nostr-tools";
+import { Relay } from "../lib/nTools";
 import { JSX } from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 import { Kind } from "../constants";
 
+export type TopZap = {
+  id: string,
+  amount: number,
+  pubkey: string,
+  message: string,
+  eventId: string,
+}
 
 export type NostrNoteContent = {
-  kind: Kind.Text | Kind.Repost,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
   content: string,
   id: string,
   created_at?: number,
@@ -31,6 +37,7 @@ export type NostrStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrNetStatsContent = {
@@ -38,6 +45,7 @@ export type NostrNetStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrLegendStatsContent = {
@@ -45,6 +53,7 @@ export type NostrLegendStatsContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserStatsContent = {
@@ -52,6 +61,7 @@ export type NostrUserStatsContent = {
   content: string,
   pubkey: string,
   created_at: number,
+  id?: string,
 };
 
 export type NostrMentionContent = {
@@ -59,6 +69,7 @@ export type NostrMentionContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrOldestEventContent = {
@@ -66,6 +77,7 @@ export type NostrOldestEventContent = {
   content: string,
   pubkey?: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrContactsContent = {
@@ -74,6 +86,7 @@ export type NostrContactsContent = {
   pubkey?: string,
   created_at?: number,
   tags: string[][],
+  id: string,
 };
 
 export type NostrMutedContent = {
@@ -82,6 +95,7 @@ export type NostrMutedContent = {
   pubkey?: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
 };
 
 export type NostrScoredUsersContent = {
@@ -89,6 +103,7 @@ export type NostrScoredUsersContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationContent = {
@@ -96,6 +111,7 @@ export type NostrNotificationContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationLastSeenContent = {
@@ -103,6 +119,7 @@ export type NostrNotificationLastSeenContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNotificationStatsContent = {
@@ -110,6 +127,7 @@ export type NostrNotificationStatsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrNoteActionsContent = {
@@ -117,6 +135,7 @@ export type NostrNoteActionsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessageStatsContent = {
@@ -125,6 +144,7 @@ export type NostrMessageStatsContent = {
   content?: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessagePerSenderStatsContent = {
@@ -132,6 +152,7 @@ export type NostrMessagePerSenderStatsContent = {
   content: string,
   created_at?: number,
   pubkey?: string,
+  id?: string,
 };
 
 export type NostrMessageEncryptedContent = {
@@ -146,36 +167,42 @@ export type NostrFeedRange = {
   kind: Kind.FeedRange,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrMediaInfo = {
   kind: Kind.MediaInfo,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrMediaUploaded = {
   kind: Kind.Uploaded,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrLinkMetadata = {
   kind: Kind.LinkMetadata,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrFilteringReason = {
   kind: Kind.FilteringReason,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserFollwerCounts = {
   kind: Kind.UserFollowerCounts,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type NostrUserZaps = {
@@ -191,6 +218,7 @@ export type NostrSuggestedUsers = {
   kind: Kind.SuggestedUsersByCategory,
   content: string,
   created_at?: number,
+  id?: string,
 };
 
 export type PrimalUserRelays = {
@@ -198,6 +226,188 @@ export type PrimalUserRelays = {
   content: string,
   created_at?: number,
   tags: string[][],
+  id?: string,
+};
+
+export type NostrBookmarks = {
+  kind: Kind.Bookmarks,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+  id?: string,
+};
+
+export type NostrRelayHint = {
+  kind: Kind.RelayHint,
+  content: string,
+  created_at?: number,
+  tags: string[][],
+  id?: string,
+};
+
+export type NostrZapInfo = {
+  kind: Kind.EventZapInfo,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+  id?: string,
+};
+
+export type NostrQuoteStatsInfo = {
+  kind: Kind.NoteQuoteStats,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+  id?: string,
+};
+
+export type NostrWordCount = {
+  kind: Kind.WordCount,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+  id?: string,
+};
+
+export type NostrTierList = {
+  kind: Kind.TierList,
+  content: string,
+  created_at?: number,
+  tags?: string[][],
+  id?: string,
+};
+
+export type NostrTier = {
+  kind: Kind.Tier,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrSubscribe = {
+  kind: Kind.Subscribe,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrUnsubscribe = {
+  kind: Kind.Unsubscribe,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrHighlight = {
+  kind: Kind.Highlight,
+  pubkey: string,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrDVM = {
+  kind: Kind.DVM,
+  pubkey: string,
+  content: string,
+  created_at?: number,
+  id: string,
+  tags?: string[][],
+};
+
+export type NostrDVMMetadata = {
+  kind: Kind.DVMMetadata,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrTopicStats = {
+  kind: Kind.NoteTopicStat,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrDVMFollowsActions = {
+  kind: Kind.DVMFollowsActions,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrUserFollowerIncrease = {
+  kind: Kind.UserFollowerIncrease,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrPrimalVanityNames = {
+  kind: Kind.VerifiedUsersDict,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrPrimalExchangeRate = {
+  kind: Kind.ExchangeRate,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrPrimalMediaStats = {
+  kind: Kind.MediaStats,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrPrimalMediaList= {
+  kind: Kind.MediaList,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrContactList= {
+  kind: Kind.ContentStats,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrOrderHistory= {
+  kind: Kind.OrderHistory,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrLegendCustomization= {
+  kind: Kind.LegendCustomization,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrBroadcastStatus= {
+  kind: Kind.BroadcastStatus,
+  content: string,
+  created_at?: number,
+  id?: string,
+};
+
+export type NostrMembershipCohortInfo= {
+  kind: Kind.MembershipCohortInfo,
+  content: string,
+  created_at?: number,
+  id?: string,
 };
 
 export type NostrEventContent =
@@ -227,17 +437,52 @@ export type NostrEventContent =
   NostrUserFollwerCounts |
   NostrUserZaps |
   NostrSuggestedUsers |
-  PrimalUserRelays;
+  PrimalUserRelays |
+  NostrBookmarks |
+  NostrRelayHint |
+  NostrZapInfo |
+  NostrQuoteStatsInfo |
+  NostrTierList |
+  NostrTier |
+  NostrSubscribe |
+  NostrUnsubscribe |
+  NostrWordCount |
+  NostrHighlight |
+  NostrDVM |
+  NostrDVMMetadata |
+  NostrDVMFollowsActions |
+  NostrUserFollowerIncrease |
+  NostrPrimalVanityNames |
+  NostrPrimalExchangeRate |
+  NostrPrimalMediaStats |
+  NostrPrimalMediaList |
+  NostrContactList |
+  NostrOrderHistory |
+  NostrLegendCustomization |
+  NostrBroadcastStatus |
+  NostrMembershipCohortInfo |
+  NostrTopicStats;
 
 export type NostrEvent = [
   type: "EVENT",
   subkey: string,
   content: NostrEventContent,
 ];
+export type NostrEvents = [
+  type: "EVENTS",
+  subkey: string,
+  content: NostrEventContent[],
+];
 
 export type NostrEOSE = [
   type: "EOSE",
   subkey: string,
+];
+
+export type NostrNotice = [
+  type: "NOTICE",
+  subkey: string,
+  reason: string,
 ];
 
 export type NoteActions = {
@@ -285,8 +530,40 @@ export type FeedPage = {
   postStats: NostrPostStats,
   mentions?: Record<string, NostrNoteContent>,
   noteActions: Record<string, NoteActions>,
+  relayHints?: Record<string, string>,
+  topZaps: Record<string, TopZap[]>,
   since?: number,
   until?: number,
+  sortBy?: string,
+  wordCount?: Record<string, number>,
+  elements?: string[],
+};
+
+export type TopicStats = Record<string, number>;
+
+export type MegaFeedPage = {
+  users: {
+    [pubkey: string]: NostrUserContent,
+  },
+  notes: NostrNoteContent[],
+  reads: NostrNoteContent[],
+  noteStats: NostrPostStats,
+  zaps: NostrUserZaps[],
+  topicStats: TopicStats,
+  mentions: Record<string, NostrNoteContent>,
+  noteActions: Record<string, NoteActions>,
+  relayHints: Record<string, string>,
+  topZaps: Record<string, TopZap[]>,
+  since: number,
+  until: number,
+  sortBy: string,
+  elements: string[],
+  userStats: Record<string, UserStats>,
+  userFollowerCounts: Record<string, number>,
+  userFollowerIncrease: Record<string, { increase: number, ratio: number, count: number}>,
+  wordCount: Record<string, number>,
+  dmContacts: Record<string, SenderMessageCount>,
+  encryptedMessages: NostrMessageEncryptedContent[],
 };
 
 export type TrendingNotesStore = {
@@ -393,6 +670,45 @@ export type NostrMessage = [
   },
 ];
 
+export type PrimalDVM = {
+  id: string,
+  name: string,
+  about: string,
+  amount: string,
+  primalVerifiedRequired: boolean,
+  pubkey: string,
+  supportedKinds: string[],
+  identifier: string,
+  picture?: string,
+  image?: string,
+  user?: PrimalUser,
+  primal_spec?: string,
+  coordinate?: string,
+}
+export type DVMStats = { likes: number, satszapped: number };
+
+export type DVMMetadata = { kind: 'reads' | 'notes', isPrimal: boolean};
+
+
+export type UserStats = {
+  pubkey: string,
+  follows_count: number,
+  followers_count: number,
+  note_count: number,
+  reply_count: number,
+  time_joined: number,
+  total_zap_count: number,
+  total_satszapped: number,
+  relay_count: number,
+  media_count: number,
+  long_form_note_count?: number,
+  followers_increase?: {
+    increase: number,
+    ratio: number,
+    count: number,
+  },
+};
+
 export type PrimalUser = {
   id: string,
   pubkey: string,
@@ -409,6 +725,8 @@ export type PrimalUser = {
   lud16: string,
   website: string,
   tags: string[][],
+  userStats?: UserStats,
+  msg: NostrUserContent,
 };
 
 export type PrimalNoteData = {
@@ -418,6 +736,7 @@ export type PrimalNoteData = {
   tags: string[][],
   content: string,
   sig: string,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
   likes: number,
   mentions: number,
   reposts: number,
@@ -428,6 +747,7 @@ export type PrimalNoteData = {
   satszapped: number,
   noteId: string,
   noteActions: NoteActions,
+  relayHints?: Record<string, string>,
 }
 
 export type PrimalNote = {
@@ -437,7 +757,52 @@ export type PrimalNote = {
   msg: NostrNoteContent,
   mentionedNotes?: Record<string, PrimalNote>,
   mentionedUsers?: Record<string, PrimalUser>,
+  mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedHighlights?: Record<string, any>,
   replyTo?: string,
+  id: string,
+  pubkey: string,
+  noteId: string,
+  tags: string[][],
+  topZaps: TopZap[],
+  content: string,
+  relayHints?: Record<string, string>,
+};
+
+
+export type PrimalArticle = {
+  title: string,
+  summary: string,
+  image: string,
+  tags: string[],
+  published: number,
+  content: string,
+  user: PrimalUser,
+  topZaps: TopZap[],
+  repost?: PrimalRepost,
+  mentionedNotes?: Record<string, PrimalNote>,
+  mentionedArticles?: Record<string, PrimalArticle>,
+  mentionedUsers?: Record<string, PrimalUser>,
+  mentionedHighlights?: Record<string, any>,
+  replyTo?: string,
+  id: string,
+  pubkey: string,
+  naddr: string,
+  noteId: string,
+  coordinate: string,
+  msg: NostrNoteContent,
+  wordCount: number,
+  noteActions: NoteActions,
+  likes: number,
+  mentions: number,
+  reposts: number,
+  replies: number,
+  zaps: number,
+  score: number,
+  score24h: number,
+  satszapped: number,
+  client?: string,
+  relayHints?: Record<string, string>,
 };
 
 export type PrimalFeed = {
@@ -445,6 +810,14 @@ export type PrimalFeed = {
   npub?: string,
   hex?: string,
   includeReplies?: boolean,
+};
+
+export type PrimalArticleFeed = {
+  name: string,
+  spec: string,
+  description: string,
+  enabled: boolean,
+  feedkind?: string,
 };
 
 export type PrimalScopeFeed = {
@@ -480,6 +853,8 @@ export type PrimalLegend = {
 export type FeedOption = {
   label: string,
   value: string | undefined,
+  description?: string,
+  deafault?: boolean,
 };
 
 export type PrimalRepost = {
@@ -488,15 +863,19 @@ export type PrimalRepost = {
 };
 
 export type PrimalZap = {
-  sender?: PrimalUser,
-  reciver?: PrimalUser,
+  sender?: PrimalUser | string,
+  reciver?: PrimalUser | string,
   created_at?: number,
   amount: number,
   message: string,
   id: string,
+  zappedId?: string,
+  zappedKind?: number,
 };
 
 export type RepostInfo = (page: FeedPage, message: NostrNoteContent) => PrimalRepost;
+
+export type MegaRepostInfo = (page: MegaFeedPage, message: NostrNoteContent) => PrimalRepost;
 
 export type ExploreFeedPayload = {
   timeframe: string,
@@ -591,11 +970,13 @@ export type MediaVariant = {
   h: number,
   mt: string,
   media_url: string,
+  dur?: number,
 }
 
 export type MediaEvent = {
   event_id: string,
   resources: { url: string, variants: MediaVariant[] }[],
+  thumbnails?: Record<string, string>,
 }
 
 export type ScopeDescriptor = {
@@ -645,8 +1026,11 @@ export type UserCategory = {
 export type SelectionOption = {
   label: string,
   value: string,
+  description?: string,
+  default?: boolean,
   disabled?: boolean,
   separator?: boolean,
+  id?: string,
 }
 
 export type NotificationGroup = 'all' | 'zaps' | 'replies' | 'mentions' | 'reposts';
@@ -674,4 +1058,57 @@ export type MembershipStatus = {
   primal_vip_profile?: string,
   used_storage?: number,
   expires_on?: number,
+};
+
+export type LncbSectionNetwork = {
+  name: 'lightning_network',
+  letters: 'ln',
+};
+
+export type LnbcSection = {
+  name: string,
+  letters: string,
+  tag?: string,
+  value?: any
+};
+
+export type LnbcRouteHint = {
+  pubkey: string,
+  short_channel_id: string,
+  fee_base_msat: number,
+  fee_proportional_millionths: number,
+  cltv_expiry_delta: number,
+}
+
+export type LnbcInvoice = {
+  paymentRequest: string,
+  sections: LnbcSection[],
+  expiry: number,
+  route_hints: LnbcRouteHint[],
+};
+
+export type PageRange = {
+  since: number,
+  until: number,
+  order_by: string,
+};
+
+export type EventCoordinate = { pubkey: string, identifier: string, kind: number };
+
+export type NostrStats = {
+  users: number,
+  pubkeys: number,
+  pubnotes: number,
+  reactions: number,
+  reposts: number,
+  any: number,
+  zaps: number,
+  satszapped: number,
+};
+
+export type FeedRange = {
+  order_by: string,
+  since: number,
+  until: number,
+  elements: string[],
 };

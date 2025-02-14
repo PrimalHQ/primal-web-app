@@ -1,4 +1,4 @@
-import { A, Link, useParams } from '@solidjs/router';
+import { A, useParams } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
@@ -6,19 +6,18 @@ import Avatar from '../components/Avatar/Avatar';
 import PageCaption from '../components/PageCaption/PageCaption';
 import { algoNpub, Kind, specialAlgos } from '../constants';
 import { hexToNpub, npubToHex } from '../lib/keys';
-import { getCategorizedList, getFilterlists, getProfileMuteList, getUserProfileInfo, getUserProfiles } from '../lib/profile';
-import { subscribeTo } from '../sockets';
+import { getCategorizedList, getProfileMuteList, getUserProfileInfo } from '../lib/profile';
+import { subsTo } from '../sockets';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
-import { NostrUserContent, PrimalUser } from '../types/primal';
+import { PrimalUser } from '../types/primal';
 
 import { settings as t } from '../translations';
 
 import styles from './Settings/Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../components/Toaster/Toaster';
-import Branding from '../components/Branding/Branding';
-import Wormhole from '../components/Wormhole/Wormhole';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { useAppContext } from '../contexts/AppContext';
 
 const lists: Record<string, string> = {
   primal_nsfw: 'nsfw_list',
@@ -30,6 +29,7 @@ const Mutelist: Component = () => {
 
   const intl = useIntl();
   const toast = useToastContext();
+  const app = useAppContext();
 
   const [mutedUsers, setMutedUsers] = createStore<Record<string,PrimalUser>>({});
   const [mutedPubkeys, setMutedPubkeys] = createStore<string[]>([]);
@@ -45,23 +45,22 @@ const Mutelist: Component = () => {
     let pubkeys: string[] = [];
     let users: Record<string, PrimalUser> = {};
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-      if (type === 'EVENT') {
-        if (response && [Kind.CategorizedPeople, Kind.MuteList].includes(response?.kind || 0)) {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content && [Kind.CategorizedPeople, Kind.MuteList].includes(content?.kind || 0)) {
           // @ts-ignore
-          pubkeys = response.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+          pubkeys = content.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
         }
-        if (response?.kind === Kind.Metadata) {
-          users[response.pubkey] = convertToUser(response);
+        if (content?.kind === Kind.Metadata) {
+          users[content.pubkey] = convertToUser(content, content.pubkey);
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         setMutedPubkeys(() => [...pubkeys]);
         setMutedUsers(() => ({ ...users }));
         setIsFetching(false);
         unsub();
-      }
+      },
     });
 
     if (specialAlgos.includes(id)) {
@@ -79,14 +78,13 @@ const Mutelist: Component = () => {
     const subId = `profile_${random}_${APP_ID}`;
     let user: PrimalUser | undefined;
 
-    const unsub = subscribeTo(subId, (type, _, response) => {
-      if (type === 'EVENT') {
-        if (response?.kind === Kind.Metadata) {
-          user = convertToUser(response);
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content?.kind === Kind.Metadata) {
+          user = convertToUser(content, content.pubkey);
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         setAuthor(user);
         unsub();
       }
@@ -162,20 +160,20 @@ const Mutelist: Component = () => {
               <Show
                 when={user(pubkey)}
                 fallback={
-                  <Link class={styles.userInfo} href={`/p/${hexToNpub(pubkey)}`}>
+                  <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                     <div class={styles.userName}>
                       <div class={styles.verification}>{hexToNpub(pubkey)}</div>
                     </div>
-                  </Link>
+                  </A>
                 }
               >
-                <Link class={styles.userInfo} href={`/p/${user(pubkey).npub}`}>
+                <A class={styles.userInfo} href={app?.actions.profileLink(pubkey) || ''}>
                   <Avatar user={user(pubkey)} size='sm' />
                   <div class={styles.userName}>
                     <div class={styles.title}>{userName(user(pubkey))}</div>
                     <div class={styles.verification}>{nip05Verification(user(pubkey))}</div>
                   </div>
-                </Link>
+                </A>
               </Show>
             </div>
           )}

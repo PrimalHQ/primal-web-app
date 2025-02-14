@@ -12,19 +12,21 @@ import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions, note as tNote } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import CustomZap from '../../CustomZap/CustomZap';
-import { broadcastEvent, sendNote } from '../../../lib/notes';
+import { broadcastEvent } from '../../../lib/notes';
 import { useAccountContext } from '../../../contexts/AccountContext';
 import { reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
+import { useAppContext } from '../../../contexts/AppContext';
 
 const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?: string }> = (props) => {
 
   const intl = useIntl();
   const toaster = useToastContext();
   const account = useAccountContext();
+  const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -102,7 +104,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
       return;
     }
 
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account?.relays, account?.relaySettings);
+    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
     setContext(false);
 
     if (success) {
@@ -208,7 +210,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
             title={props.note?.user?.npub}
           >
             <A
-              href={`/p/${props.note.user.npub}`}
+              href={app?.actions.profileLink(props.note.user.npub) || ''}
             >
               <Avatar
                 user={props.note?.user}
@@ -251,7 +253,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
                 {intl.formatMessage(tNote.reply)}
               </span>&nbsp;
               <A
-                href={`/p/${rootAuthor()?.npub}`}
+                href={app?.actions.profileLink(rootAuthor()?.npub) || ''}
                 class={styles.author}
               >
                 {userName(rootAuthor())}

@@ -30,10 +30,11 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { sendContacts, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
-import { subscribeTo } from '../sockets';
+import { subsTo } from '../sockets';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
 import Uploader from '../components/Uploader/Uploader';
+import { useSettingsContext } from '../contexts/SettingsContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -43,6 +44,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const account = useAccountContext();
   const search = useSearchContext();
   const toast = useToastContext();
+  const settings = useSettingsContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -202,30 +204,38 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       }
     });
 
-    const { success } = await sendProfile({ ...metadata }, account.relays, relaySettings);
+    const { success } = await sendProfile({ ...metadata }, account?.proxyThroughPrimal || false, account.relays, relaySettings);
 
     if (success) {
       await (new Promise((res) => setTimeout(() => res(true), 100)));
 
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
-      pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
+      pubkey && account.actions.updateAccountProfile(pubkey);
+      // pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
-      const tags = followed.map(pk => ['p', pk]);
+      let tags = followed.map(pk => ['p', pk]);
       const date = Math.floor((new Date()).getTime() / 1000);
 
-      const sendResult = await sendContacts(tags, date, '', account.relays, relaySettings);
+      if (pubkey) {
+        // Follow himself
+        tags.push(['p', pubkey]);
+      }
+
+      const sendResult = await sendContacts(tags, date, '', account.proxyThroughPrimal, account.relays, relaySettings);
 
       if (sendResult.success && sendResult.note) {
         triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
-          getProfileContactList(account?.publicKey, `user_contacts_${APP_ID}`);
+          account.actions.updateContactsList()
+          // getProfileContactList(pubkey, `user_contacts_${APP_ID}`);
         });
       }
 
-      const relayResult = await sendRelays(account.relays, relaySettings);
+      const relayResult = await sendRelays(account.relays, relaySettings, account.proxyThroughPrimal);
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {
-          getRelays(account?.publicKey, `user_relays_${APP_ID}`);
+          // getRelays(pubkey, `user_relays_${APP_ID}`);
+          account.actions.updateRelays()
         });
       }
 
@@ -286,8 +296,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const getSugestedUsers = () => {
     const subId = `get_suggested_users_${APP_ID}`;
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
         if (content?.kind === Kind.SuggestedUsersByCategory) {
           const list = JSON.parse(content.content);
           let groups: Record<string, string[]> = {};
@@ -304,16 +314,15 @@ const CreateAccount: Component = () => {  const intl = useIntl();
 
         if (content?.kind === Kind.Metadata) {
           const userData = content as NostrUserContent;
-          const user = convertToUser(userData);
+          const user = convertToUser(userData, content.pubkey);
 
           !followed.includes(user.pubkey) && setFollowed(followed.length, user.pubkey);
           setSuggestedData('users', () => ({ [user.pubkey]: { ...user }}))
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         unsub();
-      }
+      },
     });
 
     getSuggestions(subId);
@@ -322,6 +331,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   onMount(() => {
     const { sec, pubkey } = generateKeys(true);
 
+    // @ts-ignore
     const nsec = hexToNsec(sec);
 
     account?.actions.setSec(nsec);

@@ -1,13 +1,15 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getExploreFeed } from "../lib/feed";
 import { useAccountContext } from "./AccountContext";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import { Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
+  onMount,
   useContext
 } from "solid-js";
 import {
@@ -16,28 +18,67 @@ import {
   stopListeningForNostrStats
 } from "../lib/stats";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket
 } from "../sockets";
 import {
   ContextChildren,
+  DVMMetadata,
+  DVMStats,
   FeedPage,
+  MegaFeedPage,
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrEvents,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
+  NostrStats,
   NostrStatsContent,
   NostrUserContent,
   NoteActions,
+  PrimalArticle,
+  PrimalDVM,
   PrimalNote,
+  PrimalUser,
+  PrimalZap,
+  TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
+import { handleSubscription, parseBolt11 } from "../utils";
+import { filterAndSortNotes, filterAndSortUsers, filterAndSortZaps, PaginationInfo, TopicStat } from "../megaFeeds";
+import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
 
 export type ExploreContextStore = {
+  previewDVM: PrimalDVM | undefined,
+  previewDVMStats: DVMStats | undefined,
+  previewDVMMetadata: DVMMetadata | undefined,
+  previewDVMAuthor: PrimalUser | undefined,
+  previewDVMActions: NoteActions | undefined,
+  previewDVMUsers: Record<string, PrimalUser>,
+  previewDVMFollows: string[],
+
+  explorePeople: PrimalUser[],
+  peoplePaging: PaginationInfo,
+
+  exploreZaps: PrimalZap[],
+  zapPaging: PaginationInfo,
+  zapSubjects: {
+    notes: PrimalNote[],
+    reads: PrimalArticle[],
+    users: PrimalUser[],
+  },
+
+  exploreMedia: PrimalNote[],
+  mediaPaging: PaginationInfo,
+  exploreTopics: TopicStat[],
+
+
   notes: PrimalNote[],
   scope: string,
   timeframe: string,
@@ -46,16 +87,8 @@ export type ExploreContextStore = {
   lastNote: PrimalNote | undefined,
   reposts: Record<string, string> | undefined,
   isNetStatsStreamOpen: boolean,
-  stats: {
-    users: number,
-    pubkeys: number,
-    pubnotes: number,
-    reactions: number,
-    reposts: number,
-    any: number,
-    zaps: number,
-    satszapped: number,
-  },
+  selectedTab: string,
+  stats: NostrStats,
   legend: {
     your_follows: number,
     your_inner_network: number,
@@ -71,20 +104,63 @@ export type ExploreContextStore = {
     openNetStatsStream: () => void,
     closeNetStatsStream: () => void,
     fetchLegendStats: (pubkey?: string) => void,
+
+    selectTab: (tab: string) => void,
+    setPreviewDVM: (
+      dvm: PrimalDVM,
+      stats: DVMStats | undefined,
+      metadata: DVMMetadata | undefined,
+      author: PrimalUser | undefined,
+      actions: NoteActions | undefined,
+      users: Record<string, PrimalUser> | undefined,
+      followers: string[] | undefined,
+    ) => void,
+    setExplorePeople: (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => void,
+    setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
+    setExploreMedia: (notes: PrimalNote[], paging: PaginationInfo) => void,
+    setExploreTopics: (topics: TopicStat[]) => void,
   }
 }
 
 export const initialExploreData = {
+  previewDVM: undefined,
+  previewDVMStats: undefined,
+  previewDVMMetadata: undefined,
+  previewDVMAuthor: undefined,
+  previewDVMActions: undefined,
+  previewDVMUsers: {},
+  previewDVMFollows: [],
+
+
+  explorePeople: [],
+  peoplePaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
+
+  exploreZaps: [],
+  zapPaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
+  zapSubjects: {
+    notes: [],
+    reads: [],
+    users: [],
+  },
+
+  exploreMedia: [],
+  mediaPaging: { since: 0, until: 0, sortBy: 'created_at', elements: [] },
+
+  exploreTopics: [],
+
+
   notes: [],
   isFetching: false,
   scope: 'global',
   timeframe: 'latest',
+  selectedTab: 'feeds',
   page: {
     messages: [],
     users: {},
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
@@ -113,7 +189,73 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
 
+  onMount(() => {
+    const stats = loadNostrStats();
+    const topics = loadHotTopics();
+
+    updateStore('stats', () => ({ ...stats }));
+    updateStore('exploreTopics', () => [...topics])
+  })
+
 // ACTIONS --------------------------------------
+
+  const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
+
+    const sorted = filterAndSortUsers(users, paging, page);
+
+    updateStore('explorePeople', (usrs) => [ ...usrs, ...sorted]);
+    updateStore('peoplePaging', () => ({ ...paging }));
+  }
+
+  const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
+
+    const zapsToAdd = filterAndSortZaps(zaps, paging);
+
+    updateStore('exploreZaps', (zps) => [...zps, ...zapsToAdd]);
+    updateStore('zapPaging', () => ({ ...paging }));
+    updateStore('zapSubjects', (s) => ({
+      notes: [ ...s.notes, ...subjects.notes],
+      reads: [ ...s.reads, ...subjects.reads],
+      users: [ ...s.users, ...subjects.users],
+    }));
+  }
+
+  const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
+
+    const notesToAdd = filterAndSortNotes(notes, paging);
+
+    updateStore('exploreMedia', (nts) => [...nts, ...notesToAdd]);
+    updateStore('mediaPaging', () => ({ ...paging }));
+  }
+
+  const setExploreTopics = (topics: TopicStat[]) => {
+    updateStore('exploreTopics', () => [...topics]);
+    saveHotTopics(topics);
+  }
+
+  const setPreviewDVM = (
+    dvm: PrimalDVM,
+    stats: DVMStats | undefined,
+    metadata: DVMMetadata | undefined,
+    author: PrimalUser | undefined,
+    actions: NoteActions | undefined,
+    users: Record<string, PrimalUser> | undefined,
+    followers: string[] | undefined,
+  ) => {
+    batch(() => {
+      updateStore('previewDVM', () => (dvm ? {...dvm} : undefined));
+      updateStore('previewDVMStats', () => (stats ? {...stats} : undefined));
+      updateStore('previewDVMMetadata', () => (metadata ? {...metadata} : undefined));
+      updateStore('previewDVMAuthor', () => (author ? {...author} : undefined));
+      updateStore('previewDVMActions', () => (actions ? {...actions} : undefined));
+      updateStore('previewDVMUsers', () => (users ? {...users} : {}));
+      updateStore('previewDVMFollows', () => (followers ? [...followers] : []));
+    })
+  }
+
+  const selectTab = (tab: string) => {
+    updateStore('selectedTab', () => tab);
+  }
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
@@ -132,14 +274,23 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       updateStore('scope', () => scope);
       updateStore('timeframe', () => timeframe);
 
-      getExploreFeed(
-        account?.publicKey || '',
-        `explore_${APP_ID}`,
-        scope,
-        timeframe,
-        until,
-        limit,
-      );
+      const exploreId = `explore_${APP_ID}`;
+
+      handleSubscription(
+        exploreId,
+        () => getExploreFeed(
+          account?.publicKey || '',
+          exploreId,
+          scope,
+          timeframe,
+          until,
+          limit,
+        ),
+        handleExploreEvent,
+        handleExploreEose,
+      )
+
+
       return;
     }
   }
@@ -227,12 +378,61 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       );
       return;
     }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      const oldZaps = store.page.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('page', 'topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('page', 'topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
   };
 
   const savePage = (page: FeedPage) => {
     const sort = sortingPlan(store.timeframe);
 
-    const newPosts = sort(convertToNotes(page));
+    const newPosts = sort(convertToNotes(page, page.topZaps));
 
     saveNotes(newPosts);
   };
@@ -255,62 +455,74 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleExploreEvent = (content: NostrEventContent) => {
+    updatePage(content);
+  }
+  const handleExploreEose = () => {
+    const reposts = parseEmptyReposts(store.page);
+    const ids = Object.keys(reposts);
+
+    if (ids.length === 0) {
+      savePage(store.page);
+      return;
+    }
+
+    updateStore('reposts', () => reposts);
+
+    const exploreRepostsIds = `explore_reposts_${APP_ID}`;
+
+    handleSubscription(
+      exploreRepostsIds,
+      () => getEvents(account?.publicKey, ids, exploreRepostsIds),
+      handleExploreRepostEvent,
+      handleExploreRepostEose,
+    );
+
+  }
+
+  const handleExploreRepostEvent = (content: NostrEventContent) => {
+    const repostId = (content as NostrNoteContent).id;
+    const reposts = store.reposts || {};
+    const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+    if (parent) {
+      updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
+    }
+  }
+
+  const handleExploreRepostEose = () => {
+    savePage(store.page);
+  }
+
+  const handleExploreStatsEvent = (content: NostrEventContent) => {
+    const stats = JSON.parse(content.content || '{}');
+
+    if (content.kind === Kind.NetStats) {
+      updateStore('stats', () => ({ ...stats }));
+      saveNostrStats(stats);
+    }
+
+    if (content.kind === Kind.LegendStats) {
+      updateStore('legend', () => ({ ...stats }));
+    }
+  }
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
 
     const [type, subId, content] = message;
 
-    if (subId === `explore_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
+    if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId)) {
+      if (type === 'EVENTS') {
+        for (let i=0;i<content.length;i++) {
+          const e = content[i];
+          handleExploreStatsEvent(e);
         }
-
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `explore_reposts_${APP_ID}`);
-
-        return;
       }
 
       if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-    }
-
-    if ([`netstats_${APP_ID}`, `legendstats_${APP_ID}`].includes(subId) && content?.content) {
-      const stats = JSON.parse(content.content);
-
-      if (content.kind === Kind.NetStats) {
-        updateStore('stats', () => ({ ...stats }));
-      }
-
-      if (content.kind === Kind.LegendStats) {
-        updateStore('legend', () => ({ ...stats }));
-      }
-    }
-
-    if (subId === `explore_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.page);
-        return;
-      }
-
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
-
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
-        return;
+        handleExploreStatsEvent(content);
       }
     }
   };
@@ -356,6 +568,13 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       openNetStatsStream,
       closeNetStatsStream,
       fetchLegendStats,
+
+      selectTab,
+      setPreviewDVM,
+      setExplorePeople,
+      setExploreZaps,
+      setExploreMedia,
+      setExploreTopics,
     },
   });
 

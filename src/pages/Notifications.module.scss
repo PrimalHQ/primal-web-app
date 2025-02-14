@@ -6,7 +6,7 @@
 
 .oldNotifications {
   position: relative;
-  padding-right: 2px;
+  // padding-right: 2px;
 }
 
 .loader {
@@ -18,7 +18,7 @@
   position: fixed;
   top: 140px;
   left: calc(calc(100vw - var(--full-site-w)) / 2 + var(--left-col-w));
-  width: 600px;
+  width: var(--center-col-w);
   z-index: 20;
   display: flex;
   justify-content: center;
@@ -61,28 +61,6 @@
   }
 
 }
-
-@media only screen and (max-width: 1300px) {
-  .newContentNotification {
-    left: calc(calc(100vw - 1032px) / 2 + 48px + 32px);
-  }
-}
-
-@media only screen and (max-width: 1087px) {
-  .newContentNotification {
-    left: calc(calc(100vw - 720px) / 2 + 48px + 32px);
-  }
-}
-
-@media only screen and (max-width: 720px) {
-  .newContentNotification {
-    left: 0;
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-
 
 .notificationTabs {
   position: relative;
@@ -147,4 +125,28 @@
   height: 74px;
   border-radius: 0 0 8px 8px;
   padding-top: 22px;
+}
+
+@media only screen and (max-width: 1300px) {
+  .newContentNotification {
+    left: calc(calc(100vw - 1032px) / 2 + 48px + 32px);
+  }
+}
+
+@media only screen and (max-width: 1087px) {
+  .newContentNotification {
+    left: calc(calc(100vw - 720px) / 2 + 48px + 32px);
+  }
+}
+
+@media only screen and (max-width: 720px) {
+  .newContentNotification {
+    left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .notificationTabContent {
+    width: 100%;
+  }
 }

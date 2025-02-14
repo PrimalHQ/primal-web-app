@@ -34,12 +34,18 @@
   --active-zap: #ffa02f;
   --active-liked: #f800c1;
   --active-reposted: #66e205;
+  --active-bookmarked: #0C7DD8;
   --background-modal: #00000070;
+
+  --highlight: #2E3726;
+  --highlight-selected: #516440;
+  --text-highlight: #FFFFFF;
 
   --profile-indicator-border: var(--background-site);
 
   --check-image: url('./assets/icons/check.svg');
   --logo: url('./assets/icons/logo_fire.svg');
+  --logo-big: url('./assets/icons/logo_fire_big.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -61,6 +67,7 @@
   --icon-network-popular: url('./assets/icons/network_popular.svg');
   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
+  --reads-placeholder-image: url('./assets/images/reads_image_dark.png');
 
   select {
     background-color: var(--background-site);
@@ -104,12 +111,18 @@
   --active-zap: #ffa02f;
   --active-liked: #f800c1;
   --active-reposted: #66e205;
+  --active-bookmarked: #0C7DD8;
   --background-modal: #00000070;
+
+  --highlight: #2E3726;
+  --highlight-selected: #516440;
+  --text-highlight: #FFFFFF;
 
   --profile-indicator-border: var(--background-site);
 
   --check-image: url('./assets/icons/check.svg');
   --logo: url('./assets/icons/logo_ice.svg');
+  --logo-big: url('./assets/icons/logo_ice_big.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -131,6 +144,7 @@
   --icon-network-popular: url('./assets/icons/network_popular.svg');
   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
+  --reads-placeholder-image: url('./assets/images/reads_image_dark.png');
 
   select {
     background-color: var(--background-site);
@@ -173,12 +187,18 @@
   --active-zap: #ffa02f;
   --active-liked: #CA079F;
   --active-reposted: #52CE0A;
+  --active-bookmarked: #0C7DD8;
   --background-modal: #f5f5f570;
+
+  --highlight: #E8F3E8;
+  --highlight-selected: #A3D0A2;
+  --text-highlight: #111111;
 
   --profile-indicator-border: var(--accent);
 
   --check-image: url('./assets/icons/check.svg');
   --logo: url('./assets/icons/logo_fire.svg');
+  --logo-big: url('./assets/icons/logo_fire_big_l.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -200,6 +220,7 @@
   --icon-network-popular: url('./assets/icons/network_popular.svg');
   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
+  --reads-placeholder-image: url('./assets/images/reads_image_light.png');
 
   select {
     background-color: var(--background-site);
@@ -243,12 +264,18 @@
   --active-zap: #ffa02f;
   --active-liked: #CA079F;
   --active-reposted: #52CE0A;
+  --active-bookmarked: #0C7DD8;
   --background-modal: #f5f5f570;
+
+  --highlight: #E8F3E8;
+  --highlight-selected: #A3D0A2;
+  --text-highlight: #111111;
 
   --profile-indicator-border: var(--accent);
 
   --check-image: url('./assets/icons/check.svg');
   --logo: url('./assets/icons/logo_ice.svg');
+  --logo-big: url('./assets/icons/logo_ice_big_l.svg');
   --icon-follows: url('./assets/icons/follows.svg');
   --icon-tribe: url('./assets/icons/tribe.svg');
   --icon-global: url('./assets/icons/global.svg');
@@ -270,6 +297,7 @@
   --icon-network-popular: url('./assets/icons/network_popular.svg');
   --icon-network-trending: url('./assets/icons/network_trending.svg');
 
+  --reads-placeholder-image: url('./assets/images/reads_image_light.png');
 
   select {
     background-color: var(--background-site);

@@ -19,12 +19,16 @@ const SelectionItem: Component<SelectBaseItemComponentProps<any>> = (props) => {
       <Show
         when={!props.item.rawValue.separator}
       >
-        <div class={styles.indicatorWrapper}>
-          <Select.ItemIndicator>
-            <div class={styles.checkIcon} />
-          </Select.ItemIndicator>
-        </div>
-        <Select.ItemLabel>{props.item.rawValue.label}</Select.ItemLabel>
+        <Select.ItemLabel>
+          <div class={styles.label}>
+            {props.item.rawValue.label}
+          </div>
+          <Show when={props.item.rawValue.description && props.item.rawValue.description.length > 0}>
+            <div class={styles.description}>
+              {props.item.rawValue.description || ''}
+            </div>
+          </Show>
+        </Select.ItemLabel>
       </Show>
     </Select.Item>
   );

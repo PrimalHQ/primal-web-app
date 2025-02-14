@@ -2,7 +2,7 @@
   background-color: black;
   color: #bfbfbf;
   max-width: 840px;
-  min-width: 600px;
+  min-width: var(--center-col-w);
   margin-inline: auto;
   min-height: 100vh;
   padding-inline: 20px;

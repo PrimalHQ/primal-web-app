@@ -1,4 +1,4 @@
-import { nip19 } from "nostr-tools";
+import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getThread } from "../lib/feed";
 import {
@@ -15,7 +15,9 @@ import {
   useContext
 } from "solid-js";
 import {
+  decompressBlob,
   isConnected,
+  readData,
   refreshSocketListeners,
   removeSocketListeners,
   socket
@@ -26,6 +28,7 @@ import {
   NostrEOSE,
   NostrEvent,
   NostrEventContent,
+  NostrEvents,
   NostrMediaInfo,
   NostrMentionContent,
   NostrNoteActionsContent,
@@ -35,10 +38,13 @@ import {
   NoteActions,
   PrimalNote,
   PrimalUser,
+  TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { useAccountContext } from "./AccountContext";
-import { setLinkPreviews } from "../lib/notes";
+import { getEventQuoteStats, getEventZaps, setLinkPreviews } from "../lib/notes";
+import { handleSubscription, parseBolt11 } from "../utils";
+import { getUserProfiles } from "../lib/profile";
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
@@ -46,9 +52,13 @@ export type ThreadContextStore = {
   notes: PrimalNote[],
   users: PrimalUser[],
   isFetching: boolean,
+  isFetchingTopZaps: boolean,
   page: FeedPage,
   reposts: Record<string, string> | undefined,
   lastNote: PrimalNote | undefined,
+  topZaps: Record<string, TopZap[]>,
+  quoteCount: number,
+  highlights: any[],
   actions: {
     saveNotes: (newNotes: PrimalNote[]) => void,
     clearNotes: () => void,
@@ -58,6 +68,9 @@ export type ThreadContextStore = {
     updatePage: (content: NostrEventContent) => void,
     savePage: (page: FeedPage) => void,
     setPrimaryNote: (context: PrimalNote | undefined) => void,
+    fetchTopZaps: (noteId: string) => void,
+    fetchUsers: (pubkeys: string[]) => void,
+    insertNote: (note: PrimalNote) => void,
   }
 }
 
@@ -69,15 +82,20 @@ export const initialData = {
   users: [],
   replyNotes: [],
   isFetching: false,
+  isFetchingTopZaps: false,
   page: {
     messages: [],
     users: {},
     postStats: {},
     mentions: {},
     noteActions: {},
+    topZaps: {},
   },
   reposts: {},
   lastNote: undefined,
+  topZaps: {},
+  quoteCount: 0,
+  highlights: [],
 };
 
 
@@ -93,24 +111,47 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     const oldNotesIds = store.notes.map(n => n.post.id);
     const reallyNewNotes = newNotes.filter(n => !oldNotesIds.includes(n.post.id));
 
-    updateStore('notes', (notes) => [ ...notes, ...reallyNewNotes ]);
+    updateStore('notes', (notes) => [ ...reallyNewNotes, ...notes ]);
     updateStore('isFetching', () => false);
   };
 
   const fetchNotes = (noteId: string, until = 0, limit = 100) => {
     clearNotes();
     updateStore('noteId', noteId)
-    getThread(account?.publicKey, noteId, `thread_${APP_ID}`);
+
+    const threadId = `thread_${APP_ID}`;
+
+    handleSubscription(
+      threadId,
+      () => getThread(account?.publicKey, noteId, threadId),
+      handleThreadEvent,
+      handleThreadEose,
+    )
+
+    fetchTopZaps(noteId);
+    fetchNoteQuoteStats(noteId);
     updateStore('isFetching', () => true);
   }
 
+  const insertNote = (note: PrimalNote) => {
+    updateStore('notes', (nts) => [ { ...note }, ...nts]);
+  }
+
   const updateNotes = (noteId: string, until = 0, limit = 100) => {
-    getThread(account?.publicKey, noteId, `thread_${APP_ID}`, until, limit);
-    // updateStore('isFetching', () => true);
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
+
+    const threadDiffId = `thread_diff_${APP_ID}`;
+
+    handleSubscription(
+      threadDiffId,
+      () => getThread(account?.publicKey, noteId, threadDiffId, until, limit),
+      handleThreadEvent,
+      handleThreadEose,
+    );
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
+    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
     updateStore('notes', () => []);
     updateStore('reposts', () => undefined);
     updateStore('lastNote', () => undefined);
@@ -133,7 +174,16 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     }
   };
 
-  const updatePage = (content: NostrEventContent) => {
+  const updatePage = (content: NostrEventContent) => {if (content.kind === Kind.WordCount) {
+    const count = JSON.parse(content.content) as { event_id: string, words: number };
+
+
+    updateStore('page', 'wordCount',
+      () => ({ [count.event_id]: count.words })
+    );
+    return;
+  }
+
     if (content.kind === Kind.Metadata) {
       const user = content as NostrUserContent;
 
@@ -168,6 +218,15 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     if (content.kind === Kind.Mentions) {
       const mentionContent = content as NostrMentionContent;
       const mention = JSON.parse(mentionContent.content);
+
+      if (mention.kind === Kind.LongFormShell) {
+        const naddr = `${mention.kind}:${mention.pubkey}:${(mention.tags.find((t: string[]) => t[0] === 'd') || [])[1]}`;
+
+        updateStore('page', 'mentions',
+          (mentions) => ({ ...mentions, [naddr]: { ...mention } })
+        );
+        return;
+      }
 
       updateStore('page', 'mentions',
         (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
@@ -206,11 +265,104 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       setLinkPreviews(() => ({ [data.url]: preview }));
       return;
     }
+
+    if (content.kind === Kind.RelayHint) {
+      const hints = JSON.parse(content.content);
+      updateStore('page', 'relayHints', (rh) => ({ ...rh, ...hints }));
+    }
+
+    if (content?.kind === Kind.Zap) {
+      const zapTag = content.tags.find(t => t[0] === 'description');
+
+      if (!zapTag) return;
+
+      const zapInfo = JSON.parse(zapTag[1] || '{}');
+
+      let amount = '0';
+
+      let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
+
+      if (bolt11Tag) {
+        try {
+          amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        } catch (e) {
+          const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+
+          amount = amountTag ? amountTag[1] : '0';
+        }
+      }
+
+      const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+
+      const zap: TopZap = {
+        id: zapInfo.id,
+        amount: parseInt(amount || '0'),
+        pubkey: zapInfo.pubkey,
+        message: zapInfo.content,
+        eventId,
+      };
+
+      const oldZaps = store.topZaps[eventId];
+
+      if (oldZaps === undefined) {
+        updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
+        return;
+      }
+
+      if (oldZaps.find(i => i.id === zap.id)) {
+        return;
+      }
+
+      const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+      updateStore('topZaps', eventId, () => [ ...newZaps ]);
+
+      return;
+    }
+
+    // if (content.kind === Kind.EventZapInfo) {
+    //   const zapInfo = JSON.parse(content.content)
+
+    //   const eventId = zapInfo.event_id || 'UNKNOWN';
+
+    //   if (eventId === 'UNKNOWN') return;
+
+    //   const zap: TopZap = {
+    //     id: zapInfo.zap_receipt_id,
+    //     amount: parseInt(zapInfo.amount_sats || '0'),
+    //     pubkey: zapInfo.sender,
+    //     message: zapInfo.content,
+    //     eventId,
+    //   };
+
+    //   const oldZaps = store.topZaps[eventId];
+
+    //   if (oldZaps === undefined) {
+    //     updateStore('topZaps', () => ({ [eventId]: [{ ...zap }]}));
+    //     return;
+    //   }
+
+    //   if (oldZaps.find(i => i.id === zap.id)) {
+    //     return;
+    //   }
+
+    //   const newZaps = [ ...oldZaps, { ...zap }].sort((a, b) => b.amount - a.amount);
+
+    //   updateStore('topZaps', eventId, () => [ ...newZaps ]);
+
+    //   return;
+    // }
+
+    if (content.kind === Kind.NoteQuoteStats) {
+      const quoteStats = JSON.parse(content.content);
+
+      updateStore('quoteCount', () => quoteStats.count || 0);
+    }
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = sortByRecency(convertToNotes(page));
-    const users = Object.values(page.users).map(convertToUser);
+    const newPosts = sortByRecency(convertToNotes(page, store.topZaps));
+    const users = Object.values(page.users).map((u) => convertToUser(u, u.pubkey));
 
     updateStore('users', () => [ ...users ]);
     saveNotes(newPosts);
@@ -220,82 +372,102 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     updateStore('primaryNote', () => ({ ...context }));
   };
 
+  const fetchTopZaps = (noteId: string) => {
+    updateStore('isFetchingTopZaps', () => true);
+
+    const threadZapsId = `thread_zapps_${APP_ID}`;
+
+    handleSubscription(
+      threadZapsId,
+      () => getEventZaps(noteId, account?.publicKey, threadZapsId, 10, 0),
+      handleThreadZapsEvent,
+      handleThreadZapsEose,
+    );
+  };
+
+  const fetchUsers = (pubkeys: string[]) => {
+    const threadPKId = `thread_pk_${APP_ID}`;
+
+    handleSubscription(
+      threadPKId,
+      () => getUserProfiles(pubkeys, threadPKId),
+      handleThreadPKEvent,
+      handleThreadPKEose,
+    );
+  };
+
+  const fetchNoteQuoteStats = (noteId: string) => {
+    const threadQuoteStatsId = `thread_quote_stats_${APP_ID}`;
+
+    handleSubscription(
+      threadQuoteStatsId,
+      () => getEventQuoteStats(noteId, threadQuoteStatsId),
+      handleThreadPKEvent,
+      handleThreadPKEose,
+    );
+  }
+
 // SOCKET HANDLERS ------------------------------
 
-  const onMessage = (event: MessageEvent) => {
-    const message: NostrEvent | NostrEOSE = JSON.parse(event.data);
+  const handleThreadEvent = (content: NostrEventContent) => {
+    updatePage(content);
+  }
+  const handleThreadEose = () => {
+    const reposts = parseEmptyReposts(store.page);
+    const ids = Object.keys(reposts);
 
-    const [type, subId, content] = message;
-
-    if (subId === `thread_${APP_ID}`) {
-      if (type === 'EOSE') {
-        const reposts = parseEmptyReposts(store.page);
-        const ids = Object.keys(reposts);
-
-        if (ids.length === 0) {
-          savePage(store.page);
-          return;
-        }
-
-        updateStore('reposts', () => reposts);
-
-        getEvents(account?.publicKey, ids, `thread_reposts_${APP_ID}`);
-
-        return;
-      }
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
+    if (ids.length === 0) {
+      savePage(store.page);
+      return;
     }
 
-    if (subId === `thread_reposts_${APP_ID}`) {
-      if (type === 'EOSE') {
-        savePage(store.page);
-        return;
-      }
+    updateStore('reposts', () => reposts);
 
-      if (type === 'EVENT') {
-        const repostId = (content as NostrNoteContent).id;
-        const reposts = store.reposts || {};
-        const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+    const threadRepostId = `thread_reposts_${APP_ID}`;
 
-        if (parent) {
-          updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
-        }
-
-        return;
-      }
-    }
-  };
-
-  const onSocketClose = (closeEvent: CloseEvent) => {
-    const webSocket = closeEvent.target as WebSocket;
-
-    removeSocketListeners(
-      webSocket,
-      { message: onMessage, close: onSocketClose },
+    handleSubscription(
+      threadRepostId,
+      () => getEvents(account?.publicKey, ids, threadRepostId),
+      handleThreadRepostEvent,
+      handleThreadRepostEose,
     );
-  };
+  }
 
-// EFFECTS --------------------------------------
+  const handleThreadRepostEvent = (content: NostrEventContent) => {
 
-  createEffect(() => {
-    if (isConnected()) {
-      refreshSocketListeners(
-        socket(),
-        { message: onMessage, close: onSocketClose },
-      );
+    const repostId = (content as NostrNoteContent).id;
+    const reposts = store.reposts || {};
+    const parent = store.page.messages.find(m => m.id === reposts[repostId]);
+
+    if (parent) {
+      updateStore('page', 'messages', (msg) => msg.id === parent.id, 'content', () => JSON.stringify(content));
     }
-  });
+  }
+  const handleThreadRepostEose = () => {
+    savePage(store.page);
+  }
+  const handleThreadZapsEvent = (content: NostrEventContent) => {
 
-  onCleanup(() => {
-    removeSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
-  });
+    updatePage(content);
+  }
+  const handleThreadZapsEose = () => {
+    savePage(store.page);
+    updateStore('isFetchingTopZaps', () => false);
+  }
+  const handleThreadPKEvent = (content: NostrEventContent) => {
+
+    updatePage(content);
+  }
+  const handleThreadPKEose = () => {
+    savePage(store.page);
+  }
+  const handleThreadQuoteStatsEvent = (content: NostrEventContent) => {
+
+    updatePage(content);
+  }
+  const handleThreadQuoteStatsEose = () => {
+    savePage(store.page);
+  }
 
 // STORES ---------------------------------------
 
@@ -336,6 +508,9 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       updatePage,
       savePage,
       setPrimaryNote,
+      fetchTopZaps,
+      fetchUsers,
+      insertNote,
     },
   });
 

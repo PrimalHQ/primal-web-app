@@ -21,9 +21,9 @@ import { APP_ID } from "../App";
 import { getUserProfiles } from "../lib/profile";
 import { searchContent, searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
-import { sortByRecency, convertToNotes } from "../stores/note";
-import { subscribeTo } from "../sockets";
-import { nip19 } from "nostr-tools";
+import { convertToNotes } from "../stores/note";
+import { subsTo } from "../sockets";
+import { nip19 } from "../lib/nTools";
 import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
 
@@ -53,6 +53,7 @@ export type SearchContextStore = {
   reposts: Record<string, string> | undefined,
   mentionedNotes: Record<string, NostrNoteContent>,
   filteringReasons: string[],
+  advancedSearchCommand: string,
   actions: {
     findUsers: (query: string, pubkey?: string) => void,
     findUserByNupub: (npub: string) => void,
@@ -61,6 +62,7 @@ export type SearchContextStore = {
     setContentQuery: (query: string) => void,
     getRecomendedUsers: (profiles?: PrimalUser[]) => void,
     findFilteredUserByNpub: (npub: string) => void,
+    setAdvancedSearchCommand: (cmd: string) => void,
   },
 }
 
@@ -73,10 +75,11 @@ const initialData = {
   notes: [],
   isFetchingUsers: false,
   isFetchingContent: false,
-  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} },
+  page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
   reposts: {},
   mentionedNotes: {},
   filteringReasons: [],
+  advancedSearchCommand: '',
 };
 
 export const SearchContext = createContext<SearchContextStore>();
@@ -110,28 +113,23 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subId, (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
-          return;
+          users.push(convertToUser(user, content.pubkey));
         }
 
         if (content.kind === Kind.UserScore) {
           const scores = JSON.parse(content.content);
 
           updateStore('scores', () => ({ ...scores }));
-          return;
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
 
         if (users.length > 0) {
           updateStore('users', () => [users[0]]);
@@ -140,8 +138,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         updateStore('isFetchingUsers', () => false);
 
         unsub();
-        return;
-      }
+      },
     });
 
     getUserProfiles([hex], subId);
@@ -152,28 +149,23 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
-        if (!content) {
-          return;
-        }
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
 
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
-          return;
+          users.push(convertToUser(user, content.pubkey));
         }
 
         if (content.kind === Kind.UserScore) {
           const scores = JSON.parse(content.content);
 
           updateStore('scores', () => ({ ...scores }));
-          return;
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
 
         let sorted: PrimalUser[] = [];
 
@@ -190,8 +182,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         updateStore('isFetchingUsers', () => false);
 
         unsub();
-        return;
-      }
+      },
     });
 
 
@@ -205,8 +196,8 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         if (!content) {
           return;
         }
@@ -214,7 +205,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 
@@ -224,9 +215,8 @@ export function SearchProvider(props: { children: JSX.Element }) {
           updateStore('scores', () => ({ ...scores }));
           return;
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         const sorted = users.sort((a, b) => {
           const aScore = store.scores[a.pubkey];
           const bScore = store.scores[b.pubkey];
@@ -240,7 +230,6 @@ export function SearchProvider(props: { children: JSX.Element }) {
         unsub();
         return;
       }
-
     });
 
     const pubkey = query.length > 0 ? undefined : publicKey;
@@ -254,8 +243,8 @@ export function SearchProvider(props: { children: JSX.Element }) {
 
     let users: PrimalUser[] = [];
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-      if (type === 'EVENT') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
         if (!content) {
           return;
         }
@@ -263,7 +252,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         if (content.kind === Kind.Metadata) {
           const user = content as NostrUserContent;
 
-          users.push(convertToUser(user));
+          users.push(convertToUser(user, content.pubkey));
           return;
         }
 
@@ -273,9 +262,8 @@ export function SearchProvider(props: { children: JSX.Element }) {
           updateStore('contentScores', () => ({ ...scores }));
           return;
         }
-      }
-
-      if (type === 'EOSE') {
+      },
+      onEose: () => {
         const sorted = users.sort((a, b) => {
           const aScore = store.scores[a.pubkey];
           const bScore = store.scores[b.pubkey];
@@ -286,9 +274,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         updateStore('contentUsers', () => sorted.slice(0, 10));
 
         unsub();
-        return;
-      }
-
+      },
     });
 
     const pubkey = query.length > 0 ? undefined : publicKey;
@@ -313,7 +299,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
       return;
     }
 
-    if ([Kind.Text, Kind.Repost].includes(content.kind)) {
+    if ([Kind.LongForm, Kind.LongFormShell, Kind.Text, Kind.Repost].includes(content.kind)) {
       const message = content as NostrNoteContent;
 
       updateStore('page', 'messages',
@@ -355,7 +341,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
   };
 
   const savePage = (page: FeedPage) => {
-    const newPosts = sortByRecency(convertToNotes(page));
+    const newPosts = convertToNotes(page);
 
     saveNotes(newPosts);
   };
@@ -363,24 +349,14 @@ export function SearchProvider(props: { children: JSX.Element }) {
   const findContent = (query: string) => {
     const subid = `search_content_${APP_ID}`;
 
-    const unsub = subscribeTo(subid, (type, _, content) => {
-
-      if (type === 'EOSE') {
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        updatePage(content);
+      },
+      onEose: () => {
         savePage(store.page);
         unsub();
-        return;
-      }
-
-      if (!content) {
-        return;
-      }
-
-
-      if (type === 'EVENT') {
-        updatePage(content);
-        return;
-      }
-
+      },
     });
 
     updateStore('isFetchingContent', () => true);
@@ -401,37 +377,39 @@ export function SearchProvider(props: { children: JSX.Element }) {
     if (pubkey.length > 0) {
       const subId = `search_filtered_users_${APP_ID}`;
 
-      const unsub = subscribeTo(subId, (type, _, response) => {
-        if (type === 'EVENT') {
-          if (response?.kind === Kind.FilteringReason) {
-            const content: { action: 'block' | 'allow', pubkey?: string, group?: string } = JSON.parse(response.content);
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (content?.kind === Kind.FilteringReason) {
+            const filterConfig: { action: 'block' | 'allow', pubkey?: string, group?: string } = JSON.parse(content.content);
 
-            if (content.action === 'allow') {
+            if (filterConfig.action === 'allow') {
               return;
             }
 
-            if (content.pubkey) {
-              reasons.push(content.pubkey);
+            if (filterConfig.pubkey) {
+              reasons.push(filterConfig.pubkey);
               return
             }
 
-            if (content.group) {
-              reasons.push(content.group);
+            if (filterConfig.group) {
+              reasons.push(filterConfig.group);
               return
             }
           }
-        }
-
-        if (type === 'EOSE') {
+        },
+        onEose: () => {
           updateStore('filteringReasons', () => [...reasons]);
           unsub();
-        }
+        },
       });
 
       searchFilteredUsers(pubkey, account?.publicKey, subId);
     }
   }
 
+  const setAdvancedSearchCommand = (cmd: string) => {
+    updateStore('advancedSearchCommand', () => cmd);
+  }
 
 
 // EFFECTS --------------------------------------
@@ -451,6 +429,7 @@ const [store, updateStore] = createStore<SearchContextStore>({
     setContentQuery,
     getRecomendedUsers,
     findFilteredUserByNpub,
+    setAdvancedSearchCommand,
   },
 });
 

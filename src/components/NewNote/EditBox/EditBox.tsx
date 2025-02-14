@@ -1,19 +1,19 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Router, useLocation } from "@solidjs/router";
-import { nip19 } from "nostr-tools";
-import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { nip19 } from "../../../lib/nTools";
+import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles } from "../../../lib/profile";
-import { subscribeTo } from "../../../sockets";
-import { convertToNotes, referencesToTags } from "../../../stores/note";
+import { subsTo } from "../../../sockets";
+import { convertToArticles, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
 import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -43,21 +43,30 @@ import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal"
 import { readNoteDraft, readNoteDraftUserRefs, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
 import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
+import Lnbc from "../../Lnbc/Lnbc";
+import { decodeIdentifier } from "../../../lib/keys";
+import { useSettingsContext } from "../../../contexts/SettingsContext";
+import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
+import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
+import DOMPurify from "dompurify";
+import { useAppContext } from "../../../contexts/AppContext";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
 
 const EditBox: Component<{
   id?: string,
-  replyToNote?: PrimalNote,
+  replyToNote?: PrimalNote | PrimalArticle,
   onClose?: () => void,
-  onSuccess?: (note: SendNoteResult) => void,
+  onSuccess?: (note: SendNoteResult, meta: any) => void,
   open?: boolean,
   idPrefix?: string,
+  context?: string,
 } > = (props) => {
 
   const intl = useIntl();
   const media = useMediaContext();
+  const app = useAppContext();
 
   const instanceId = uuidv4();
 
@@ -65,6 +74,7 @@ const EditBox: Component<{
   const account = useAccountContext();
   const toast = useToastContext();
   const profile = useProfileContext();
+  const settings = useSettingsContext();
 
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
@@ -90,18 +100,38 @@ const EditBox: Component<{
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
+  const [articleRefs, setArticleRefs] = createStore<Record<string, PrimalArticle>>({});
+  const [highlightRefs, setHighlightRefs] = createStore<Record<string, any>>({});
 
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
   const [referencedNotes, setReferencedNotes] = createStore<Record<string, FeedPage>>();
+  const [referencedArticles, setReferencedArticles] = createStore<Record<string, FeedPage>>();
 
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
 
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
+  const [relayHints, setRelayHints] = createStore<Record<string, string>>({});
+
   const location = useLocation();
 
   let currentPath = location.pathname;
+
+
+  const noteHasInvoice = (text: string) => {
+    const r =/(\s+|\r\n|\r|\n|^)lnbc[a-zA-Z0-9]+/;
+    const test = r.test(text);
+
+    return test
+  };
+
+  const noteHasCashu = (text: string) => {
+    const r =/(\s+|\r\n|\r|\n|^)cashuA[a-zA-Z0-9]+/;
+    const test = r.test(text);
+
+    return test
+  };
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
     var savedValue = elm.value
@@ -154,6 +184,75 @@ const EditBox: Component<{
       emojiPositionOptions();
     }
   });
+
+
+  const renderMessage = () => {
+    const text = DOMPurify.sanitize(parsedMessage());
+
+    if (!noteHasInvoice(text)) {
+      return (
+        <div
+          class={styles.editor}
+          ref={textPreview}
+          innerHTML={text}
+        ></div>
+      );
+    };
+
+    let sections: string[] = [];
+
+    let content = text.replace(linebreakRegex, ' __LB__ ').replaceAll('<br>', ' __LB__ ').replace(/\s+/g, ' __SP__ ');
+
+    let tokens: string[] = content.split(/[\s]+/);
+
+    let sectionIndex = 0;
+
+    tokens.forEach((tok) => {
+      const t = DOMPurify.sanitize(tok);
+      if (t.startsWith('lnbc')) {
+        if (sections[sectionIndex]) sectionIndex++;
+
+        sections[sectionIndex] = t;
+
+        sectionIndex++;
+      }
+      else {
+        let c = t;
+        const prev = sections[sectionIndex] || '';
+
+        if (t === '__SP__') {
+          c = prev.length === 0 ? '' : ' ';
+        }
+
+        if (t === '__LB__') {
+          c = prev.length === 0 ? '' : ' <br/>';
+        }
+
+        sections[sectionIndex] = prev + c;
+      }
+    });
+
+    return (
+      <div
+        class={styles.editor}
+        ref={textPreview}
+      >
+        <For each={sections}>
+          {section => (
+            <Switch fallback={
+              <div
+                innerHTML={section}
+              ></div>
+            }>
+              <Match when={section.startsWith('lnbc')}>
+                <Lnbc lnbc={section} inactive={true} />
+              </Match>
+            </Switch>
+          )}
+        </For>
+      </div>
+    );
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (!textArea) {
@@ -474,7 +573,7 @@ const EditBox: Component<{
   const addQuote = (quote: string | undefined) => {
     setMessage((msg) => {
       if (!textArea || !quote) return msg;
-      let position = textArea.selectionStart;
+      let position = textArea.selectionStart + 2;
 
       const isEmptyMessage = msg.length === 0;
 
@@ -494,12 +593,13 @@ const EditBox: Component<{
       textArea.selectionEnd = position;
       return newMsg;
     });
+
   };
 
   createEffect(() => {
     if (props.open) {
-      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.post.noteId);
-      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.post.noteId);
+      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.noteId);
+      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.noteId);
 
       setUserRefs(reconcile(draftUserRefs));
 
@@ -529,8 +629,8 @@ const EditBox: Component<{
     if (message().length === 0) return;
 
     // save draft just in case there is an unintended interuption
-    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
   });
 
   const onEscape = (e: KeyboardEvent) => {
@@ -578,8 +678,8 @@ const EditBox: Component<{
       return;
     }
 
-    saveNoteDraft(account?.publicKey, '', props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, '', props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.noteId);
     clearEditor();
   };
 
@@ -591,8 +691,8 @@ const EditBox: Component<{
   };
 
   const persistNote = (note: string) => {
-    saveNoteDraft(account?.publicKey, note, props.replyToNote?.post.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.post.noteId);
+    saveNoteDraft(account?.publicKey, note, props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
     clearEditor();
   };
 
@@ -603,7 +703,7 @@ const EditBox: Component<{
       return;
     }
 
-    if (account.relays.length === 0) {
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
       toast?.sendWarning(
         intl.formatMessage(tToast.noRelaysConnected),
       );
@@ -628,49 +728,62 @@ const EditBox: Component<{
     });
 
     if (account) {
-      let tags = referencesToTags(messageToSend);
+      let tags = referencesToTags(messageToSend, relayHints);
       const rep = props.replyToNote;
 
       if (rep) {
-        const rootTag = rep.post.tags.find(t => t[0] === 'e' && t[3] === 'root');
+        let rootTag = rep.msg.tags.find(t => t[0] === 'e' && t[3] === 'root');
+
+        const rHints = (rep.relayHints && rep.relayHints[rep.id]) ?
+          rep.relayHints[rep.id] :
+          '';
 
         // If the note has a root tag, that meens it is not a root note itself
         // So we need to copy the `root` tag and add a `reply` tag
         if (rootTag) {
-          tags.push([...rootTag]);
-          tags.push(['e', rep.post.id, '', 'reply']);
+          const tagWithHint = rootTag.map((v, i) => i === 2 ?
+            rHints :
+            v,
+          );
+          tags.push([...tagWithHint]);
+          tags.push(['e', rep.id, rHints, 'reply']);
         }
         // Otherwise, add the note as the root tag for this reply
         else {
-          tags.push(['e', rep.post.id, '', 'root']);
+          tags.push([
+            'e',
+            rep.id,
+            rHints,
+            'root',
+          ]);
         }
 
         // Copy all `p` tags from the note we are repling to
-        const repPeople = rep.post.tags.filter(t => t[0] === 'p');
+        const repPeople = rep.msg.tags.filter(t => t[0] === 'p');
 
         tags = [...tags, ...(unwrap(repPeople))];
 
         // If the author of the note is missing, add them
-        if (!tags.find(t => t[0] === 'p' && t[1] === rep.post.pubkey)) {
-          tags.push(['p', rep.post.pubkey]);
+        if (!tags.find(t => t[0] === 'p' && t[1] === rep.pubkey)) {
+          tags.push(['p', rep.pubkey]);
         }
       }
 
       setIsPostingInProgress(true);
 
-      const { success, reasons, note } = await sendNote(messageToSend, account.relays, tags, account.relaySettings);
+      const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
 
       if (success) {
 
         const importId = `import_note_${APP_ID}`;
 
-        const unsub = subscribeTo(importId, (type, _, response) => {
-          if (type === 'EOSE') {
+        const unsub = subsTo(importId, {
+          onEose: () => {
             if (note) {
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-              props.onSuccess && props.onSuccess({ success, reasons, note });
+              props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
               setIsPostingInProgress(false);
-              saveNoteDraft(account.publicKey, '', rep?.post.noteId)
+              saveNoteDraft(account.publicKey, '', rep?.noteId)
               clearEditor();
             }
             unsub();
@@ -805,8 +918,8 @@ const EditBox: Component<{
         const user = userRefs[userId];
 
         const link = user ?
-          <a href={`${window.location.origin}/p/${user.npub}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}/p/${id}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
+          <a href={`${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`} target="_blank" class='linkish'>@{userName(user)}</a> :
+          <a href={`${window.location.origin}${app?.actions.profileLink(id) || ''}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
 
         // @ts-ignore
         return link.outerHTML || url;
@@ -817,6 +930,131 @@ const EditBox: Component<{
 
     setParsedMessage(parsed);
 
+  };
+
+  const [addrRefs, setAddrRef] = createStore<Record<string, any>>({});
+
+  const parseNaddr = (text: string) => {
+    let refs = [];
+    let match;
+
+    while((match = addrRegexG.exec(text)) !== null) {
+      refs.push(match[1]);
+    }
+
+    refs.forEach(id => {
+      if (articleRefs[id]) {
+        setTimeout(() => {
+          subNaddrRef(id);
+        }, 0);
+        return;
+      }
+
+      const addr = decodeIdentifier(id);
+
+      if (addr.type !== 'naddr') {
+        return;
+      }
+
+      // @ts-ignore
+      const { pubkey, kind, identifier } = addr.data;
+
+      const subId = `naddr_${id}_${APP_ID}`;
+
+      setReferencedArticles(id, { messages: [], users: {}, postStats: {}, mentions: {} })
+
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+
+          if (!content) return;
+
+          if (content.kind === Kind.Metadata) {
+            const user = content as NostrUserContent;
+
+            setReferencedArticles(id, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+            return;
+          }
+
+          if ([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
+            const message = content as NostrNoteContent;
+
+            setReferencedArticles(id, 'messages',
+              (msgs) => [ ...msgs, { ...message }]
+            );
+
+            return;
+          }
+
+          if (content.kind === Kind.NoteStats) {
+            const statistic = content as NostrStatsContent;
+            const stat = JSON.parse(statistic.content);
+
+            setReferencedArticles(id, 'postStats',
+              (stats) => ({ ...stats, [stat.event_id]: { ...stat } })
+            );
+            return;
+          }
+
+          if (content.kind === Kind.Mentions) {
+            const mentionContent = content as NostrMentionContent;
+            const mention = JSON.parse(mentionContent.content);
+
+            setReferencedArticles(id, 'mentions',
+              (mentions) => ({ ...mentions, [mention.id]: { ...mention } })
+            );
+            return;
+          }
+
+          if (content.kind === Kind.RelayHint) {
+            const hints = JSON.parse(content.content) as Record<string, string>;
+            setRelayHints(() => ({ ...hints }))
+          }
+        },
+        onEose: () => {
+          const newNote = convertToArticles(referencedArticles[id])[0];
+
+          setArticleRefs((refs) => ({
+            ...refs,
+            [newNote.noteId]: newNote
+          }));
+
+          subNaddrRef(newNote.noteId);
+
+          unsub();
+        },
+      });
+
+      getParametrizedEvent(pubkey, identifier, kind, subId);
+      // getEvents(account?.publicKey, [hex], `nn_${id}`, true);
+
+    });
+
+  };
+
+  const subNaddrRef = (noteId: string) => {
+
+
+    const parsed = parsedMessage().replace(addrRegex, (url) => {
+      const [_, id] = url.split(':');
+
+      if (!id || id !== noteId) {
+        return url;
+      }
+      try {
+        const article = articleRefs[id];
+
+        const link = <div class={styles.highlight}><SimpleArticlePreview article={article} noLink={true} /></div>;
+
+        // @ts-ignore
+        return link.outerHTML || url;
+      } catch (e) {
+        logError('Bad Note reference: ', e);
+        return `<span class="${styles.error}">${url}</span>`;
+      }
+
+    });
+
+    setParsedMessage(parsed);
   };
 
   const parseNpubLinks = (text: string) => {
@@ -835,50 +1073,40 @@ const EditBox: Component<{
         return;
       }
 
+      const subId = `nu_${id}_${APP_ID}`
       const eventId = nip19.decode(id).data as string | nip19.ProfilePointer;
       const hex = typeof eventId === 'string' ? eventId : eventId.pubkey;
 
       // setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
 
-      const unsub = subscribeTo(`nu_${id}`, (type, subId, content) =>{
-        if (type === 'EOSE') {
-        //   // const newNote = convertToNotes(referencedNotes[subId])[0];
-
-        //   // setNoteRefs((refs) => ({
-        //   //   ...refs,
-        //   //   [newNote.post.noteId]: newNote
-        //   // }));
-
-          subUserRef(hex);
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
-          if (!content) {
-            return;
-          }
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
+          if (!content) return;
 
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
 
-            const u = convertToUser(user)
+            const u = convertToUser(user, content.pubkey)
 
             setUserRefs(() => ({ [u.pubkey]: u }));
 
             // setReferencedNotes(subId, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
             return;
           }
+
+        },
+        onEose: () => {
+          subUserRef(hex);
+
+          unsub();
         }
       });
 
-
-      getUserProfiles([hex], `nu_${id}`);
+      getUserProfiles([hex], subId);
 
     });
 
-  }
+  };
 
   const parseNoteLinks = (text: string) => {
     let refs = [];
@@ -896,27 +1124,15 @@ const EditBox: Component<{
         return;
       }
 
+      const subId = `nn_${id}_${APP_ID}`;
+      const event = nip19.decode(id);
       const eventId = nip19.decode(id).data as string | nip19.EventPointer;
       const hex = typeof eventId === 'string' ? eventId : eventId.id;
 
-      setReferencedNotes(`nn_${id}`, { messages: [], users: {}, postStats: {}, mentions: {} })
+      setReferencedNotes(subId, { messages: [], users: {}, postStats: {}, mentions: {} })
 
-      const unsub = subscribeTo(`nn_${id}`, (type, subId, content) =>{
-        if (type === 'EOSE') {
-          const newNote = convertToNotes(referencedNotes[subId])[0];
-
-          setNoteRefs((refs) => ({
-            ...refs,
-            [newNote.post.noteId]: newNote
-          }));
-
-          subNoteRef(newNote.post.noteId);
-
-          unsub();
-          return;
-        }
-
-        if (type === 'EVENT') {
+      const unsub = subsTo(subId, {
+        onEvent: (_, content) => {
           if (!content) {
             return;
           }
@@ -925,6 +1141,11 @@ const EditBox: Component<{
             const user = content as NostrUserContent;
 
             setReferencedNotes(subId, 'users', (usrs) => ({ ...usrs, [user.pubkey]: { ...user } }));
+            return;
+          }
+
+          if (content.kind === Kind.Highlight) {
+            setHighlightRefs(id, () => ({ ...content }));
             return;
           }
 
@@ -957,11 +1178,33 @@ const EditBox: Component<{
             );
             return;
           }
-        }
+
+          if (content.kind === Kind.RelayHint) {
+            const hints = JSON.parse(content.content) as Record<string, string>;
+            setRelayHints(() => ({ ...hints }))
+          }
+        },
+        onEose: () => {
+          const newNote = convertToNotes(referencedNotes[subId])[0];
+
+          if (newNote) {
+            setNoteRefs((refs) => ({
+              ...refs,
+              [newNote.noteId]: newNote
+            }));
+
+            subNoteRef(newNote.noteId);
+          } else {
+            subNoteRef(id);
+          }
+
+
+
+          unsub();
+        },
       });
 
-
-      getEvents(account?.publicKey, [hex], `nn_${id}`, true);
+      getEvents(account?.publicKey, [hex], subId, true);
 
     });
 
@@ -972,22 +1215,35 @@ const EditBox: Component<{
     const parsed = parsedMessage().replace(noteRegex, (url) => {
       const [_, id] = url.split(':');
 
+
       if (!id || id !== noteId) {
         return url;
       }
       try {
-        const note = noteRefs[id]
+        let note = noteRefs[id];
+
+        if (!note) {
+          note = highlightRefs[id];
+
+          const link = note ?
+            <div>
+              <ArticleHighlight highlight={note} />
+            </div> : <span class="linkish">{url}</span>;
+
+          // @ts-ignore
+          return link.outerHTML || url;
+        }
 
         const link = note ?
           <div>
             <TranslatorProvider>
-              <Router>
                 <EmbeddedNote
                   note={note}
                   mentionedUsers={note.mentionedUsers || {}}
                   includeEmbeds={true}
+                  hideFooter={true}
+                  noLinks="links"
                 />
-              </Router>
             </TranslatorProvider>
           </div> :
           <span class="linkish">{url}</span>;
@@ -1002,7 +1258,6 @@ const EditBox: Component<{
     });
 
     setParsedMessage(parsed);
-
   };
 
 
@@ -1015,6 +1270,7 @@ const EditBox: Component<{
       )
     );
 
+    parseNaddr(content);
     parseNpubLinks(content);
     parseNoteLinks(content);
 
@@ -1046,13 +1302,11 @@ const EditBox: Component<{
       const p = await parseForReferece(msg);
       setParsedMessage(p);
     }, 500);
-
-
   })
 
   createEffect(() => {
     if (query().length === 0) {
-      search?.actions.getRecomendedUsers();
+      search?.actions.getRecomendedUsers(profile?.profileHistory.profiles || []);
       return;
     }
 
@@ -1263,6 +1517,11 @@ const EditBox: Component<{
             readOnly={fileToUpload() !== undefined}
           >
           </textarea>
+          <Show when={props.context}>
+            <div class={styles.context}>
+              {props.context}
+            </div>
+          </Show>
           <div
             class={styles.previewCaption}>
             {intl.formatMessage(tNote.newPreview)}
@@ -1272,11 +1531,7 @@ const EditBox: Component<{
           class={styles.editorScroll}
           id={`${prefix()}new_note_text_preview`}
         >
-          <div
-            class={styles.editor}
-            ref={textPreview}
-            innerHTML={parsedMessage()}
-          ></div>
+          {renderMessage()}
           <div class={styles.uploader}>
             <Uploader
               publicKey={account?.publicKey}
@@ -1302,7 +1557,7 @@ const EditBox: Component<{
                 resetUpload();
               }}
               onSuccsess={(url:string) => {
-                insertAtCursor(`${url} `);
+                insertAtCursor(` ${url} `);
                 resetUpload();
               }}
             />
