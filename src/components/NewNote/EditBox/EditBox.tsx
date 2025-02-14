@@ -710,7 +710,7 @@ const EditBox: Component<{
       return;
     }
 
-    const value = message();
+    const value = message().trimEnd();
 
     if (value.trim() === '') {
       return;
