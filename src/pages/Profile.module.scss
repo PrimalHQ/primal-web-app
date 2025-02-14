@@ -1,3 +1,18 @@
+.skeletonHolder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: 100%;
+
+  /* background-color: white;
+  opacity: 0.4; */
+
+  &.ios {
+    top: 54px;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

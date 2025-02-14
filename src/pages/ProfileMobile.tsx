@@ -46,6 +46,8 @@ import { subsTo } from '../sockets';
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import PremiumCohortInfo from './Premium/PremiumCohortInfo';
+import ProfileCardPhoneSkeleton from '../components/Skeleton/Phone/ProfileCardPhoneSkeleton';
+import { isIOS } from '../utils';
 
 const ProfileMobile: Component = () => {
 
@@ -697,7 +699,11 @@ const ProfileMobile: Component = () => {
 
       <Show
         when={isProfileLoaded()}
-        fallback={<ProfileCardSkeleton tab={tabHash()} />}
+        fallback={
+          <div class={`${styles.skeletonHolder} ${isIOS() ? styles.ios : ''}`}>
+            <ProfileCardPhoneSkeleton tab={tabHash()} />
+          </div>
+        }
       >
         <div id="central_header" class={styles.fullHeaderPhone}>
           <div id="profile_banner" class={`${styles.banner} ${flagBannerForWarning()} animated`}>
