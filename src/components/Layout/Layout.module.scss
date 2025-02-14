@@ -306,6 +306,7 @@
     height: calc(100dvh - 48px);
     width: 100%;
     overflow: scroll;
+    position: relative;
   }
 
   &.containerIOS {
@@ -328,6 +329,9 @@
     width: 100dvw;
     background-color: var(--background-site);
     color: var(--text-primary);
+    position: fixed;
+    bottom: 0;
+    left: 0;
   }
 
 }
