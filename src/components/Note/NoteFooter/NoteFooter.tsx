@@ -351,6 +351,8 @@ const NoteFooter: Component<{
           title: "Failed to zap",
           description: lastZapError,
           confirmLabel: "ok",
+          abortLabel: "Cancel",
+          onAbort: app?.actions.closeConfirmModal,
         })
       }
 
