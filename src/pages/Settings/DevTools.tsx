@@ -10,7 +10,6 @@ import Checkbox from '../../components/Checkbox/Checkbox';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { storageName } from '../../lib/localStore';
 import { useAccountContext } from '../../contexts/AccountContext';
-import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import CheckBox2 from '../../components/Checkbox/CheckBox2';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
@@ -61,6 +60,11 @@ const DevTools: Component = () => {
     window.location.reload();
   };
 
+  const clearAllStorage = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
     <>
       <PageTitle title={`${intl.formatMessage(t.devTools)} ${intl.formatMessage(t.title)}`} />
@@ -85,6 +89,7 @@ const DevTools: Component = () => {
                 Reset Local Storage
               </ButtonLink>
             </div>
+
             <div class={styles.devToolsItem}>
               <div>Developer Mode</div>
               <CheckBox2
@@ -93,11 +98,23 @@ const DevTools: Component = () => {
                 label="Enable Dev Mode"
               />
             </div>
+
             <Show when={hasNsec()}>
               <div class={styles.devToolsItem}>
                 <div>Remove Locally Stored nsec (logout)</div>
                 <ButtonLink onClick={() => setConfirmNsecReset(true)} >
                   Remove nsec
+                </ButtonLink>
+              </div>
+            </Show>
+
+            <Show when={isDevMode()}>
+              <div class={styles.devToolsItem}>
+                <div>Local Storage</div>
+                <ButtonLink
+                  onClick={clearAllStorage}
+                >
+                  Clear Local Storage
                 </ButtonLink>
               </div>
             </Show>
