@@ -525,6 +525,86 @@
   }
 }
 
+
+.moreDonateModal {
+  @extend .subscribeModal;
+  padding: 0;
+
+  .amountInput {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+    gap: 16px;
+
+    .altValue {
+      color: var(--text-tertiary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+
+  .paymentOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .radio {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .radioControl {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 20px;
+      width: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--text-tertiary-2);
+      background-color: var(--background-site);
+
+      [data-checked] {
+        height: 12px;
+        width: 12px;
+        border-radius: 5px;
+        background-color: var(--accent);
+      }
+
+      &[data-checked][data-invalid] {
+        border-color: hsl(0 72% 51%);
+        background-color: hsl(0 72% 51%);
+      }
+    }
+
+    .radioInput:focus-visible + .radio__control {
+      outline: 2px solid hsl(200 98% 39%);
+      outline-offset: 2px;
+    }
+
+    .radioLabel {
+      margin-left: 6px;
+      user-select: none;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
 .successModal {
   @extend .subscribeModal;
   padding: 0;
@@ -1399,6 +1479,44 @@
   font-weight: 400;
   line-height: 20px;
   margin-bottom: 20px;
+}
+
+.legendContribution {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 20px;
+  gap: 8px;
+
+  .current {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+
+    .label {
+      color: var(--text-secondary);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    .value {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+  }
+
+  .legendsDonateMore {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
 }
 
 .supportLayout {

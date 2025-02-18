@@ -12,15 +12,20 @@ const PremiumLegendModal: Component<{
   open?: boolean,
   setOpen: (v: boolean) => void,
   onOpen?: () => void,
-  onClose: () => void,
+  onClose?: () => void,
   allowSubscriptionChange?: boolean,
   subscription: PrimalPremiumSubscription,
+  caption?: string,
 }> = (props) => {
+
+  let wasOpen = false;
 
   createEffect(() => {
     if (props.open) {
+      wasOpen = true;
       props.onOpen && props.onOpen();
-    } else {
+    } else if (wasOpen) {
+      wasOpen = false;
       props.onClose && props.onClose();
     }
   })
@@ -32,7 +37,7 @@ const PremiumLegendModal: Component<{
       triggerClass="hidden"
       title={
         <div>
-          Become a Primal Legend Now
+          {props.caption || 'Become a Primal Legend Now'}
         </div>
       }
     >

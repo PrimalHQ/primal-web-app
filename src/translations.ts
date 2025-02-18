@@ -2705,6 +2705,11 @@ export const premium = {
         defaultMessage: 'You are now a Primal Legend.',
         description: 'Payment success description for legends',
       },
+      donation: {
+        id: 'pages.premium.success.donation',
+        defaultMessage: 'Thank you, Legend!',
+        description: 'Payment success description for additional donations by legends',
+      },
     }
   },
   errors: {

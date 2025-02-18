@@ -157,7 +157,7 @@ export const stopListeningForPremiumPurchase = (subId: string, socket: WebSocket
 };
 
 
-export const getLegendQRCode = async (pubkey: string | undefined, name: string, amount_usd: number, subId: string, socket: WebSocket) => {
+export const getLegendQRCode = async (pubkey: string | undefined, name: string, amount_usd: number, subId: string, socket: WebSocket, onchain = true) => {
   if (!pubkey) return;
 
   const event = {
@@ -169,6 +169,7 @@ export const getLegendQRCode = async (pubkey: string | undefined, name: string, 
       product_id: 'legend-premium',
       receiver_pubkey: pubkey,
       amount_usd: `${amount_usd}`,
+      onchain,
     }),
   };
 
