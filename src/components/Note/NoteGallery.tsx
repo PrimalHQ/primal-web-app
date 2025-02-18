@@ -19,6 +19,7 @@ import { A, useNavigate } from '@solidjs/router';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import { humanizeTime, isDev, isPhone } from '../../utils';
 import { nip19 } from 'nostr-tools';
+import NoteImageSmall from '../NoteImage/NoteImageSmall';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -200,7 +201,7 @@ const NoteGallery: Component<{
                     <div class={styles.galleryIcon}></div>
                   </Show>
 
-                  <NoteImage
+                  <NoteImageSmall
                     class={`galleryimage image_${props.note.post.noteId} cell_${1}`}
                     src={image.url}
                     media={image.image}
