@@ -70,7 +70,7 @@ const EmbeddedNote: Component<{
     if (!note) return '';
 
     try {
-      return nip19.noteEncode((note.id));
+      return note.noteId;
     } catch (e) {
       return '';
     }

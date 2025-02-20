@@ -924,7 +924,7 @@ export const fetchNoteFeedBySpec = (pubkey: string | undefined, spec: string, su
       if ([Kind.Text, Kind.Repost].includes(content.kind)) {
         const message = content as NostrNoteContent;
 
-        if (lastNote?.post?.noteId !== nip19.noteEncode(message.id)) {
+        if (lastNote?.post?.id !== message.id) {
           page.messages.push({...message});
         }
 

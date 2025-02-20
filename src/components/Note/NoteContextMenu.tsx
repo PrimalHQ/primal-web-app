@@ -97,7 +97,7 @@ const NoteContextMenu: Component<{
 
   const noteLinkId = () => {
     try {
-      return `e/${nip19.noteEncode(note().id)}`;
+      return `e/${note().noteId}`;
     } catch(e) {
       return '404';
     }

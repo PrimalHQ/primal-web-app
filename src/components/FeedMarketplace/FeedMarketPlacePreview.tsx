@@ -2,10 +2,8 @@ import { batch, Component, createEffect, For, Match, on, Switch } from 'solid-js
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { fetchNoteFeedBySpec, fetchReadsFeedBySpec } from '../../handleNotes';
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../../megaFeeds';
 import { DVMMetadata, NoteActions, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from '../../types/primal';
-import { calculatePagingOffset } from '../../utils';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';

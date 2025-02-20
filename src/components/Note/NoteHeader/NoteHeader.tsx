@@ -68,7 +68,7 @@ const NoteHeader: Component<{
 
   const noteLinkId = () => {
       try {
-        return `/e/${nip19.noteEncode(props.note.id)}`;
+        return `/e/${props.note.noteId}`;
       } catch(e) {
         return '/404';
       }

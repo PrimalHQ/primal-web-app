@@ -20,7 +20,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
+import { addrRegexG, imageRegexG, Kind, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { nip19 } from 'nostr-tools';
 
 export type NoteReactionsState = {
@@ -299,7 +299,7 @@ const Note: Component<{
 
   const noteLinkId = () => {
     try {
-      return `/e/${nip19.noteEncode(props.note.id)}`;
+      return `/e/${props.note.noteId}`;
     } catch(e) {
       return '/404';
     }

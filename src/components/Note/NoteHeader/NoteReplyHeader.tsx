@@ -72,7 +72,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
 
   const noteLinkId = () => {
     try {
-      return `/e/${nip19.noteEncode(props.note.id)}`;
+      return `/e/${props.note.noteId}`;
     } catch(e) {
       return '/404';
     }

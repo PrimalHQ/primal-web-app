@@ -38,7 +38,7 @@ const ProfileNoteZap: Component<{
 
     const noteLinkId = (note: PrimalNote) => {
       try {
-        return `/e/${nip19.noteEncode(note.id)}`;
+        return `/e/${note.noteId}`;
       } catch(e) {
         return '/404';
       }

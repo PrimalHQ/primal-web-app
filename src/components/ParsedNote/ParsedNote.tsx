@@ -1623,7 +1623,7 @@ const ParsedNote: Component<{
           };
 
           const noteId = `nostr:${nip19.neventEncode(eventPointer)}`;
-          const path = `/e/${nip19.noteEncode(mention.id)}`;
+          const path = `/e/${mention.noteId}`;
 
           let embeded = <span>{noteId}{end}</span>;
 
