@@ -19,7 +19,7 @@ import { shortDate } from "../lib/dates";
 
 import PrimalMarkdown from "../components/PrimalMarkdown/PrimalMarkdown";
 import NoteTopZaps from "../components/Note/NoteTopZaps";
-import { parseBolt11, uuidv4 } from "../utils";
+import { isPhone, parseBolt11, uuidv4 } from "../utils";
 import Note, { NoteReactionsState } from "../components/Note/Note";
 import { getAuthorSubscriptionTiers } from "../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
@@ -927,23 +927,25 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   return (
     <>
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
-      <Wormhole to='right_sidebar'>
-          <ArticleSidebar
-            user={store.article?.user}
-            article={store.article}
-          />
-          <ArticleHighlightComments
-            highlight={store.selectedHighlight}
-            comments={store.heightlightReplies}
-            author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
-            getCoAuthors={selectedHighlightCoAuthors}
-          />
-      </Wormhole>
+      <Show when={!isPhone()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
+        <Wormhole to='right_sidebar'>
+            <ArticleSidebar
+              user={store.article?.user}
+              article={store.article}
+            />
+            <ArticleHighlightComments
+              highlight={store.selectedHighlight}
+              comments={store.heightlightReplies}
+              author={store.users.find(u => u.pubkey === store.selectedHighlight.pubkey)}
+              getCoAuthors={selectedHighlightCoAuthors}
+            />
+        </Wormhole>
+      </Show>
       <Transition name="slide-fade">
         <Show
           when={store.article}

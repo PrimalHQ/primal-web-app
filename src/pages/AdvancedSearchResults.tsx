@@ -15,6 +15,7 @@ import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
 import { setAdvSearchState } from './AdvancedSearch';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
 import { useAccountContext } from '../contexts/AccountContext';
+import { isPhone } from '../utils';
 
 
 const AdvancedSearchResults: Component = () => {
@@ -95,13 +96,15 @@ const AdvancedSearchResults: Component = () => {
           </div>
         </div>
 
-      <StickySidebar>
-        <AdvancedSearchCommadTextField
-          command={queryString()}
-          onCommandChange={setQueryString}
-          submitCommandChange={submitCommandChange}
-        />
-      </StickySidebar>
+      <Show when={!isPhone()}>
+        <StickySidebar>
+          <AdvancedSearchCommadTextField
+            command={queryString()}
+            onCommandChange={setQueryString}
+            submitCommandChange={submitCommandChange}
+          />
+        </StickySidebar>
+      </Show>
 
       <div class={styles.list}>
         <Switch>

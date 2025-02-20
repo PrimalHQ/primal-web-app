@@ -47,6 +47,7 @@ import { Transition } from 'solid-transition-group';
 import { ToggleButton } from '@kobalte/core/toggle-button';
 import { isDev, isPhone } from '../utils';
 import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
+import ArticlePreviewPhoneSkeleton from '../components/Skeleton/ArticlePreviewPhoneSkeleton';
 
 
 const Home: Component = () => {
@@ -171,7 +172,9 @@ const Home: Component = () => {
       <Wormhole
         to="search_section"
       >
-        <Search />
+        <Show when={!isPhone()}>
+          <Search />
+        </Show>
       </Wormhole>
 
       <PageCaption title={intl.formatMessage(reads.pageTitle)}>
@@ -209,9 +212,11 @@ const Home: Component = () => {
         </Show>
       </PageCaption>
 
-      <StickySidebar>
-        <ReadsSidebar />
-      </StickySidebar>
+      <Show when={!isPhone()}>
+        <StickySidebar>
+          <ReadsSidebar />
+        </StickySidebar>
+      </Show>
 
       <div class={styles.readsFeed}>
         <Transition name="slide-fade">
@@ -220,7 +225,9 @@ const Home: Component = () => {
             fallback={
               <div>
                 <For each={new Array(5)}>
-                  {() => <ArticlePreviewSkeleton />}
+                  {() => isPhone() ?
+                    <ArticlePreviewPhoneSkeleton /> :
+                    <ArticlePreviewSkeleton />}
                 </For>
               </div>
             }

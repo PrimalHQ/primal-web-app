@@ -22,7 +22,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
-import { isIOS } from '../utils';
+import { isIOS, isPhone } from '../utils';
 
 const Downloads: Component = () => {
 
@@ -63,7 +63,7 @@ const Downloads: Component = () => {
 
   return (
     <div class={styles.downloadsContainer}>
-      <Show when={!isAndroid() && !isIOS()}>
+      <Show when={!isPhone()}>
         <Wormhole
           to="search_section"
         >

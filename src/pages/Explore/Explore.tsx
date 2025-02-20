@@ -141,15 +141,17 @@ const Explore: Component = () => {
           </div>
         </PageCaption>
 
-        <StickySidebar>
-          <div class={styles.exploreSide}>
-            <NostrStats stats={explore?.stats}/>
+        <Show when={!isPhone()}>
+          <StickySidebar>
+            <div class={styles.exploreSide}>
+              <NostrStats stats={explore?.stats}/>
 
-            <ExploreHotTopics />
+              <ExploreHotTopics />
 
-            <ExploreSidebar />
-          </div>
-        </StickySidebar>
+              <ExploreSidebar />
+            </div>
+          </StickySidebar>
+        </Show>
 
           <div class={styles.explorePageTabs}>
             <Tabs

@@ -25,6 +25,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
 import { useAppContext } from '../contexts/AppContext';
 import { useAccountContext } from '../contexts/AccountContext';
+import { isPhone } from '../utils';
 
 export type SearchState = {
   includes: string,
@@ -562,13 +563,15 @@ const AdvancedSearch: Component = () => {
 
       <PageCaption title="Advanced Search" />
 
-      <StickySidebar>
-        <AdvancedSearchCommadTextField
-          command={advSearchState.command}
-          onCommandChange={onCommandChange}
-          submitCommandChange={submitCommandChange}
-        />
-      </StickySidebar>
+      <Show when={!isPhone()}>
+        <StickySidebar>
+          <AdvancedSearchCommadTextField
+            command={advSearchState.command}
+            onCommandChange={onCommandChange}
+            submitCommandChange={submitCommandChange}
+          />
+        </StickySidebar>
+      </Show>
 
       <div class={styles.advancedSearchPage}>
         <form onSubmit={submitSearch}>

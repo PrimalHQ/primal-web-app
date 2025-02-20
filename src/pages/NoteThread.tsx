@@ -23,7 +23,7 @@ import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import { fetchNotes } from '../handleNotes';
-import { isIOS } from '../utils';
+import { isIOS, isPhone } from '../utils';
 import { logWarning } from '../lib/logger';
 import { noteIdToHex } from '../lib/keys';
 
@@ -192,21 +192,22 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
   return (
     <div>
       <PageTitle title={pageTitle()} />
+      <Show when={!isPhone()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
 
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
-
-      <Wormhole to='right_sidebar'>
-        <PeopleList
-          note={primaryNote()}
-          people={people()}
-          label={intl.formatMessage(t.sidebar)}
-          mentionLabel={intl.formatMessage(t.sidebarMentions)}
-        />
-      </Wormhole>
+        <Wormhole to='right_sidebar'>
+          <PeopleList
+            note={primaryNote()}
+            people={people()}
+            label={intl.formatMessage(t.sidebar)}
+            mentionLabel={intl.formatMessage(t.sidebarMentions)}
+          />
+        </Wormhole>
+      </Show>
 
       <NavHeader title="Thread" />
 
