@@ -128,6 +128,7 @@ const AppRouter: Component = () => {
           <Route path="/reads/:topic?" component={Reads} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
+          <Route path="/a/:id" component={Thread} />
           <Route path="/explore">
             <Route path="/" component={Explore} />
             <Route path="/feed/:id" component={ExploreFeeds} />
