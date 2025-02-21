@@ -56,6 +56,11 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
     relays: selectRelayTags(message.tags),
   }
 
+  const eventPointerShort: nip19.EventPointer ={
+      id: message.id,
+      kind: message.kind,
+    }
+
   return {
     user: {
       id: user?.id || '',
@@ -91,6 +96,7 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
       score24h: stat?.score24h || 0,
       satszapped: stat?.satszapped || 0,
       noteId: nip19.neventEncode(eventPointer),
+      noteIdShort: nip19.neventEncode(eventPointerShort),
       noteActions: (page.noteActions && page.noteActions[message.id]) || noActions(message.id),
       relayHints: page.relayHints,
     },
@@ -187,10 +193,17 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
       }
 
+      const eventPointerShort: nip19.EventPointer ={
+        id: mention.id,
+        kind: mention.kind,
+      }
+
       let noteId = mention.id;
+      let noteIdShort = mention.id;
 
       try {
         noteId = nip19.neventEncode(eventPointer);
+        noteIdShort = nip19.neventEncode(eventPointerShort);
       } catch (e) {
         logError('ERROR encoding nevent: ', eventPointer)
       }
@@ -200,6 +213,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         post: {
           ...mention,
           noteId,
+          noteIdShort,
           likes: mentionStat?.likes || 0,
           mentions: mentionStat?.mentions || 0,
           reposts: mentionStat?.reposts || 0,
@@ -218,7 +232,8 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         mentionedUsers: pageUsers,
         pubkey: mention.pubkey,
         id: mention.id,
-        noteId: nip19.neventEncode(eventPointer),
+        noteId,
+        noteIdShort,
       };
     }
 
@@ -481,6 +496,11 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
     };
 
+    const eventPointerShort: nip19.EventPointer = {
+      id: note.id,
+      kind: note.kind,
+    };
+
     const newNote: PrimalNote = {
       user: author,
       post: {
@@ -500,6 +520,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
         score24h: stat?.score24h || 0,
         satszapped: stat?.satszapped || 0,
         noteId: nip19.neventEncode(eventPointer),
+        noteIdShort: nip19.neventEncode(eventPointerShort),
         noteActions: (page.noteActions && page.noteActions[note.id]) ?? noActions(note.id),
         relayHints: page.relayHints,
       },
@@ -514,6 +535,7 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
       tags: note.tags,
       id: note.id,
       noteId: nip19.neventEncode(eventPointer),
+      noteIdShort: nip19.neventEncode(eventPointerShort),
       pubkey: note.pubkey,
       topZaps,
       content: sanitize(note.content),

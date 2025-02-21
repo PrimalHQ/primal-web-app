@@ -832,6 +832,7 @@ export type PrimalNoteData = {
   score24h: number,
   satszapped: number,
   noteId: string,
+  noteIdShort: string,
   noteActions: NoteActions,
   relayHints?: Record<string, string>,
 }
@@ -850,6 +851,7 @@ export type PrimalNote = {
   id: string,
   pubkey: string,
   noteId: string,
+  noteIdShort: string,
   tags: string[][],
   topZaps: TopZap[],
   content: string,

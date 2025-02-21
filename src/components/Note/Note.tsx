@@ -299,7 +299,7 @@ const Note: Component<{
 
   const noteLinkId = () => {
     try {
-      return `/e/${props.note.noteId}`;
+      return `/e/${props.note.noteIdShort}`;
     } catch(e) {
       return '/404';
     }

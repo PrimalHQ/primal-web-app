@@ -70,7 +70,7 @@ const EmbeddedNote: Component<{
     if (!note) return '';
 
     try {
-      return note.noteId;
+      return note.noteIdShort;
     } catch (e) {
       return '';
     }

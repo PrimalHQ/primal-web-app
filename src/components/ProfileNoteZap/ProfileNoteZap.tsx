@@ -49,7 +49,7 @@ const ProfileNoteZap: Component<{
 
       content = sub.content;
       time = props.zap.created_at || 0;
-      link = noteLinkId(sub);
+      link = `/e/${sub.noteIdShort}`;
       name = userName(sub.user);
     }
 

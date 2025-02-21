@@ -265,7 +265,7 @@ const ProfileTabs: Component<{
 
   const noteLinkId = (note: PrimalNote) => {
     try {
-      return `/e/${note.noteId}`;
+      return `/e/${note.noteIdShort}`;
     } catch(e) {
       return '/404';
     }

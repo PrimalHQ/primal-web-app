@@ -19,7 +19,7 @@ const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) =
 
   const noteLinkId = () => {
     try {
-      return `/e/${props.note.noteId}`;
+      return `/e/${props.note.noteIdShort}`;
     } catch(e) {
       return '/404';
     }
