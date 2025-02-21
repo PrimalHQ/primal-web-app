@@ -1663,7 +1663,7 @@ const ParsedNote: Component<{
           const [kind, pubkey, identifier] = tag[1].split(':');
           const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
           const noteId = `nostr:${naddr}`;
-          let path = `/e/${naddr}`;
+          let path = `/a/${naddr}`;
 
           const vanityName = app?.verifiedUsers[pubkey];
 

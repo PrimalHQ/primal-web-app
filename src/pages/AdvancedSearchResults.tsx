@@ -91,7 +91,7 @@ const AdvancedSearchResults: Component = () => {
             <ButtonLink
               onClick={() => navigate('/search', { state: { query: queryString() } })}
             >
-              Back to Advanced search
+              Advanced Search
             </ButtonLink>
           </div>
         </div>

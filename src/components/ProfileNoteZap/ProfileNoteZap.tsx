@@ -36,14 +36,6 @@ const ProfileNoteZap: Component<{
     let link = '';
     let name = '';
 
-    const noteLinkId = (note: PrimalNote) => {
-      try {
-        return `/e/${note.noteId}`;
-      } catch(e) {
-        return '/404';
-      }
-    };
-
     if (props.subject.msg.kind === Kind.Text) {
       const sub = props.subject as PrimalNote;
 
@@ -57,7 +49,7 @@ const ProfileNoteZap: Component<{
       const sub = props.subject as PrimalArticle;
       content = sub.title;
       time = props.zap.created_at || 0;
-      link = `/e/${sub.noteId}`;
+      link = `/a/${sub.noteId}`;
       name = userName(sub.user);
     }
 

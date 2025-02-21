@@ -706,7 +706,7 @@ const DirectMessageParsedContent: Component<{
         }
 
         const unknownMention = (nid: string) => {
-          return <A href={`/e/${nid}`}>{token}</A>
+          return <A href={`/a/${nid}`}>{token}</A>
         }
 
         const decoded = decodeIdentifier(id);

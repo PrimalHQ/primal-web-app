@@ -38,7 +38,7 @@ const LayoutDesktop: Component<{
   });
 
   const containerClass = () => {
-    if (location.pathname.startsWith('/e/naddr')) return styles.containerLF;
+    if (location.pathname.startsWith('/e/naddr') || location.pathname.startsWith('/a/naddr')) return styles.containerLF;
 
     return styles.container;
   }

@@ -568,7 +568,7 @@ const PrimalMarkdown: Component<{
               break;
             case 'naddr':
               if ([Kind.Text, Kind.LongForm].includes(decode.data.kind)) {
-                navigate(`/e/${id}`);
+                navigate(`/a/${id}`);
               }
               break;
             default:

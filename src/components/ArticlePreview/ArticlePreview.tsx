@@ -330,7 +330,7 @@ const ArticlePreview: Component<{
   const articleUrl = () => {
     const vanityName = app?.verifiedUsers[props.article.pubkey];
 
-    if (!vanityName) return `/e/${props.article.naddr}`;
+    if (!vanityName) return `/a/${props.article.naddr}`;
 
     const decoded = nip19.decode(props.article.naddr);
 
