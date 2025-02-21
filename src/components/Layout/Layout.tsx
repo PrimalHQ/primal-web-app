@@ -1,8 +1,8 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import { useLocation, useParams} from '@solidjs/router';
+import { useBeforeLeave, useLocation, useParams} from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
@@ -40,6 +40,12 @@ const Layout: Component<any> = (props) => {
   const app = useAppContext();
   const settings = useSettingsContext();
   const intl = useIntl();
+
+  createEffect(on(() => location.pathname, (path, prev) => {
+    if (path !== prev) {
+      app?.actions.closeContextMenu();
+    }
+  }));
 
   createEffect(() => {
     const newNote = document.getElementById('new_note_input');
