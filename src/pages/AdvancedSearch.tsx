@@ -554,7 +554,7 @@ const AdvancedSearch: Component = () => {
 
     search?.actions.setAdvancedSearchCommand(cmd);
 
-    navigate(`/asearch/${encodeURIComponent(cmd)}`);
+    navigate(`/search/${encodeURIComponent(cmd)}`);
   }
 
   return (

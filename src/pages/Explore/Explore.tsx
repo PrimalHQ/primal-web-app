@@ -171,7 +171,7 @@ const Explore: Component = () => {
                       isSelected={(o: SelectionOption) => o.value === hash()}
                     />
                     <div class={styles.right}>
-                      <A href={'/asearch'}>Advanced Search</A>
+                      <A href={'/search'}>Advanced Search</A>
                     </div>
                   </div>
                 }
@@ -206,7 +206,7 @@ const Explore: Component = () => {
                     <Tabs.Indicator class={styles.exploreTabIndicator} />
                   </div>
                   <div class={styles.right}>
-                    <A href={'/asearch'}>Advanced Search</A>
+                    <A href={'/search'}>Advanced Search</A>
                   </div>
                 </Tabs.List>
               </Show>

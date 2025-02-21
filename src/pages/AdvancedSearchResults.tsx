@@ -68,7 +68,7 @@ const AdvancedSearchResults: Component = () => {
       return false;
     }
 
-    navigate(`/asearch/${encodeURIComponent(queryString())}`);
+    navigate(`/search/${encodeURIComponent(queryString())}`);
   }
 
   return (
@@ -89,7 +89,7 @@ const AdvancedSearchResults: Component = () => {
             />
 
             <ButtonLink
-              onClick={() => navigate('/asearch', { state: { query: queryString() } })}
+              onClick={() => navigate('/search', { state: { query: queryString() } })}
             >
               Back to Advanced search
             </ButtonLink>

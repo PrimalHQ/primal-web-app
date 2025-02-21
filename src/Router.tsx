@@ -157,7 +157,7 @@ const AppRouter: Component = () => {
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?" component={Profile} />
           <Route path="/help" component={Help} />
-          <Route path="/search/:query" component={Search} />
+          {/* <Route path="/search/:query" component={Search} /> */}
           {/* <Route path="/rest" component={Explore} /> */}
           <Route path="/mutelist/:npub" component={Mutelist} />
           <Route path="/new" component={CreateAccount} />
@@ -165,7 +165,7 @@ const AppRouter: Component = () => {
             <Route path="/" component={Feeds} />
             <Route path="/:query" component={Feed} />
           </Route>
-          <Route path="/asearch">
+          <Route path="/search">
             <Route path="/" component={AdvancedSearch} />
             <Route path="/:query" component={AdvancedSearchResults} />
           </Route>

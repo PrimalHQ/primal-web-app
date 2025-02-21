@@ -93,14 +93,14 @@ const LayoutDesktop: Component<{
           <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms') ? styles.messagesColumn : ''}`}>
             <div>
               <Show
-                when={!location.pathname.startsWith('/asearch')}
+                when={!location.pathname.startsWith('/search')}
               >
                 <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
                   <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
                   </div>
                 </div>
               </Show>
-              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/asearch') ? styles.exploreHeader : ''}`}>
+              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/search') ? styles.exploreHeader : ''}`}>
                 <div id="right_sidebar">
                 </div>
               </div>

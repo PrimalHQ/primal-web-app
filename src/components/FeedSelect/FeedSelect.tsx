@@ -127,7 +127,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         captionAction={<A href="/settings/home_feeds">Edit Feeds</A>}
       />
       <Show when={isDev() && home?.selectedFeed?.spec.includes('advsearch')}>
-        <A href={`/asearch/${encodeURIComponent(JSON.parse(home?.selectedFeed?.spec || '{}').query)}`}>go to advanced search</A>
+        <A href={`/search/${encodeURIComponent(JSON.parse(home?.selectedFeed?.spec || '{}').query)}`}>go to advanced search</A>
       </Show>
     </Show>
   );
