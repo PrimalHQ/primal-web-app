@@ -150,7 +150,7 @@ const AuthorSubscribe: Component<{
                     {humanizeNumber(props.author?.userStats?.followers_count || 0)}
                   </div>
                   <div class={styles.unit}>
-                    followers
+                    követő
                   </div>
                 </div>
               </Show>

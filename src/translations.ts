@@ -971,8 +971,8 @@ export const notificationsSidebar = {
     id: 'notificationsSidebar.zapNumber',
     defaultMessage: `{number, plural,
       =0 {}
-      one {zapp}
-      other {zapp}}`,
+      one {zap}
+      other {zap}}`,
     description: 'Sidebar zaps stats description on the notification page',
   },
   statsNumber: {
@@ -1206,7 +1206,7 @@ export const profile = {
     },
     followers: {
       id: 'profile.stats.followers',
-      defaultMessage: 'Követők',
+      defaultMessage: 'Követő',
       description: 'Label for followers profile stat',
     },
     zaps: {
@@ -1308,7 +1308,7 @@ export const profile = {
 export const search = {
   followers: {
     id: 'search.followers',
-    defaultMessage: 'Követők',
+    defaultMessage: 'Követő',
     description: 'Followers label for user search results',
   },
   invalid: {

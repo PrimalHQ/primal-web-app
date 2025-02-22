@@ -104,7 +104,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
                       {humanizeNumber(user.userStats?.followers_count || 0)}
                     </div>
                     <div class={styles.unit}>
-                      followers
+                      követő
                     </div>
                   </Show>
                   <Show when={user.userStats?.followers_increase?.increase}>

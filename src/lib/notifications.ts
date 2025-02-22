@@ -135,15 +135,15 @@ export const truncateNumber = (amount: number, from?: 1 | 2 | 3 | 4) => {
   }
 
   if (amount < Math.pow(t, 2)) {
-    return `${Math.floor(amount / t).toLocaleString()}K`;
+    return `${Math.floor(amount / t).toLocaleString("hu-HU")}E`;
   }
 
   if (amount < Math.pow(t, 3)) {
-    return `${Math.floor(amount / Math.pow(t, 2)).toLocaleString()}M`
+    return `${Math.floor(amount / Math.pow(t, 2)).toLocaleString("hu-HU")}M`
   }
 
   if (amount < Math.pow(t, 4)) {
-    return `${Math.floor(amount / Math.pow(t, 3)).toLocaleString()}B`
+    return `${Math.floor(amount / Math.pow(t, 3)).toLocaleString("hu-HU")}B`
   }
 
   return `1T+`;
@@ -161,7 +161,7 @@ export const truncateNumber2 = (amount: number, from?: 1 | 2 | 3 | 4) => {
   }
 
   if (amount < Math.pow(t, 2)) {
-    return `${(amount / t).toFixed(1)}K`;
+    return `${(amount / t).toFixed(1)}E`;
   }
 
   if (amount < Math.pow(t, 3)) {
