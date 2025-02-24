@@ -15,7 +15,7 @@ import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
-import { getScreenCordinates } from '../../../utils';
+import { getScreenCordinates, isPhone } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
@@ -35,6 +35,7 @@ const NoteFooter: Component<{
   customZapInfo?: CustomZapInfo,
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
+  noteType?: 'primary',
 }> = (props) => {
 
   const account = useAccountContext();
@@ -389,7 +390,6 @@ const NoteFooter: Component<{
       ref={footerDiv}
       onClick={(e) => e.preventDefault() }
     >
-
       <Show when={props.state.showZapAnim}>
         <ZapAnimation
           id={`note-med-zap-${props.note.post.id}`}
@@ -407,6 +407,7 @@ const NoteFooter: Component<{
         label={props.state.replies === 0 ? '' : truncateNumber(props.state.replies, 2)}
         title={props.state.replies.toLocaleString()}
         large={props.large}
+        noteType={props.noteType}
       />
 
       <NoteFooterActionButton
@@ -422,6 +423,7 @@ const NoteFooter: Component<{
         hidden={props.state.hideZapIcon}
         title={props.state.satsZapped.toLocaleString()}
         large={props.large}
+        noteType={props.noteType}
       />
 
       <NoteFooterActionButton
@@ -432,6 +434,7 @@ const NoteFooter: Component<{
         label={props.state.likes === 0 ? '' : truncateNumber(props.state.likes, 2)}
         title={props.state.likes.toLocaleString()}
         large={props.large}
+        noteType={props.noteType}
       />
 
       <button
@@ -448,9 +451,11 @@ const NoteFooter: Component<{
             class={`${styles.icon} ${props.large ? styles.large : ''}`}
             style={'visibility: visible'}
           ></div>
-          <div class={styles.statNumber}>
-            {props.state.reposts === 0 ? '' : truncateNumber(props.state.reposts, 2)}
-          </div>
+          <Show when={!isPhone() || props.noteType !== 'primary'}>
+            <div class={styles.statNumber}>
+              {props.state.reposts === 0 ? '' : truncateNumber(props.state.reposts, 2)}
+            </div>
+          </Show>
           <PrimalMenu
             id={`repost_menu_${props.note.post.id}`}
             items={repostMenuItems}

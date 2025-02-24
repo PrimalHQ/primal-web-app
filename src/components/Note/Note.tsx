@@ -379,18 +379,67 @@ const Note: Component<{
             </div>
 
             <div
-              class={styles.time}
+              class={styles.timePrimary}
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
               <span>
                 {veryLongDate(props.note.post?.created_at).replace(' at ', ' · ')}
               </span>
-              <button
-                class={styles.reactSummary}
-                onClick={() => openReactionModal()}
+
+              <Show
+                when={isPhone()}
+                fallback={
+                  <button
+                    class={styles.reactSummary}
+                    onClick={() => openReactionModal()}
+                  >
+                    <span class={styles.number}>{reactionSum()}</span> Reactions
+                  </button>
+                }
               >
-                <span class={styles.number}>{reactionSum()}</span> Reactions
-              </button>
+                <div class={styles.reactionSpread}>
+                  <Show when={reactionsState.replies > 0}>
+                    <button
+                      class={styles.reactSummaryPhone}
+                      onClick={() => openReactionModal('replies')}
+                    >
+                      <span class={styles.number}>{reactionsState.replies}</span> Replies
+                    </button>
+                  </Show>
+                  <Show when={reactionsState.zapCount > 0}>
+                    <button
+                      class={styles.reactSummaryPhone}
+                      onClick={() => openReactionModal('zaps')}
+                    >
+                      <span class={styles.number}>{reactionsState.zapCount}</span> Zaps
+                    </button>
+                  </Show>
+                  <Show when={reactionsState.likes > 0}>
+                    <button
+                      class={styles.reactSummaryPhone}
+                      onClick={() => openReactionModal('likes')}
+                    >
+                      <span class={styles.number}>{reactionsState.likes}</span> Likes
+                    </button>
+                  </Show>
+                  <Show when={reactionsState.reposts > 0}>
+                    <button
+                      class={styles.reactSummaryPhone}
+                      onClick={() => openReactionModal('reposts')}
+                    >
+                      <span class={styles.number}>{reactionsState.reposts}</span> Reposts
+                    </button>
+                  </Show>
+                  <Show when={reactionsState.quoteCount > 0}>
+                    <button
+                      class={styles.reactSummaryPhone}
+                      onClick={() => openReactionModal('quotes')}
+                    >
+                      <span class={styles.number}>{reactionsState.quoteCount}</span> Quotes
+                    </button>
+                  </Show>
+                </div>
+              </Show>
             </div>
 
             <div class={styles.footer}>
@@ -402,6 +451,7 @@ const Note: Component<{
                 size="wide"
                 large={true}
                 onZapAnim={addTopZap}
+                noteType="primary"
               />
             </div>
           </div>
