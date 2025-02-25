@@ -498,11 +498,11 @@
   @include avatar;
   width: 128px;
   height: 128px;
-  padding: 6px;
+  padding: 4px;
 
   .missingBack {
-    width: 116px;
-    height: 116px;
+    width: 120px;
+    height: 120px;
   }
 
   .iconBackground {
@@ -513,7 +513,8 @@
 
   &.legend {
     .missingBack {
-      border: 1px solid var(--background-site);
+      background: none;
+      /* border: 1px solid var(--background-site); */
       // width: 112px;
       // height: 112px;
     }
