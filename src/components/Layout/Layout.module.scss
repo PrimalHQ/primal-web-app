@@ -310,7 +310,7 @@
   }
 
   &.containerIOS {
-    margin-top: 54px;
+    /* margin-top: 54px; */
     // z-index: 1;
     // width: 100%;
     // grid-template-columns: 98%;
@@ -319,7 +319,7 @@
     // background-color: var(--background-site);
 
     .phoneContent {
-      height: calc(100dvh - 54px - 48px);
+      /* height: calc(100dvh - 54px - 48px); */
     }
   }
 

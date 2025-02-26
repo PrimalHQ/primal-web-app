@@ -924,28 +924,30 @@ const Premium: Component = () => {
         </Switch>
       </PageCaption>
 
-      <StickySidebar>
-        <Switch>
-          <Match when={premiumStep() === 'legends'}>
-            <PremiumSidebarInactve
-              altCaption="About Primal Legends"
-              onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
-            />
-          </Match>
-          <Match when={premiumData.membershipStatus.tier === 'free'}>
-            <PremiumSidebarInactve
-              onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
-            />
-          </Match>
-          <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus.tier || '')}>
-            <PremiumSidebarActive
-              data={premiumData}
-              onSidebarAction={handlePremiumAction}
-              onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
-            />
-          </Match>
-        </Switch>
-      </StickySidebar>
+      <Show when={!isPhone()}>
+        <StickySidebar>
+            <Switch>
+              <Match when={premiumStep() === 'legends'}>
+                <PremiumSidebarInactve
+                  altCaption="About Primal Legends"
+                  onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+                />
+              </Match>
+              <Match when={premiumData.membershipStatus.tier === 'free'}>
+                <PremiumSidebarInactve
+                  onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+                />
+              </Match>
+              <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus.tier || '')}>
+                <PremiumSidebarActive
+                  data={premiumData}
+                  onSidebarAction={handlePremiumAction}
+                  onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+                />
+              </Match>
+            </Switch>
+        </StickySidebar>
+      </Show>
 
 
       <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''}`}>

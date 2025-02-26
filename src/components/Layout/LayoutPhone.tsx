@@ -85,7 +85,6 @@ const LayoutPhone: Component<{
       </>}
     >
       <>
-        <BannerIOS />
         <div id="container" ref={container} class={containerClass()}>
           <Show when={account?.isKeyLookupDone}>
             <div class={styles.phoneContent}>
