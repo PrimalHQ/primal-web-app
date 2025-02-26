@@ -30,6 +30,8 @@
   // position: sticky;
   // top: 0px;
   // padding-top: 44px;
+  max-height: calc(100dvh - 150px);
+  overflow-y: scroll;
 }
 
 .trendingSection {

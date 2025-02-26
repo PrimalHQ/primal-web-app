@@ -7,6 +7,7 @@ import MentionedPeople from './MentionedPeople';
 
 import styles from './PeopleList.module.scss';
 import Repliers from './Repliers';
+import { useAppContext } from '../../contexts/AppContext';
 
 
 const PeopleList: Component<{
@@ -16,7 +17,10 @@ const PeopleList: Component<{
   id?: string,
   note?: PrimalNote,
   singleFile?: boolean,
+  sortBy?: string,
 }> = (props) => {
+  const app = useAppContext();
+
   const author = () => props.note?.user;
 
   const mentioned = () => {
@@ -38,6 +42,27 @@ const PeopleList: Component<{
     return props.people.filter(p => p.pubkey !== author()?.pubkey && (props.note?.mentionedUsers || {})[p.pubkey] === undefined);
   }
 
+  const sortedPeople = () => {
+    if (repliers().length === 0) return [];
+    if (!props.sortBy) return repliers();
+
+    let sorted: PrimalUser[] = [ ...repliers() ];
+
+    if (props.sortBy === 'legend') {
+      sorted = sorted.toSorted((a, b) => {
+        const aIsLegend = (app?.memberCohortInfo[a.pubkey])?.tier === 'premium-legend';
+        const bIsLegend = (app?.memberCohortInfo[b.pubkey])?.tier === 'premium-legend';
+
+        if (aIsLegend) return -1;
+        if (bIsLegend) return 1;
+
+        return 0;
+      });
+    }
+
+
+    return sorted;
+  }
 
   return (
       <div id={props.id} class={styles.stickyWrapper}>
@@ -50,9 +75,9 @@ const PeopleList: Component<{
         </Show>
 
         <Transition name='slide-fade'>
-          <Show when={repliers().length > 0}>
+          <Show when={sortedPeople().length > 0}>
             <Repliers
-              people={repliers()}
+              people={sortedPeople()}
               label={props.label || ''}
               singleFile={props.singleFile}
             />

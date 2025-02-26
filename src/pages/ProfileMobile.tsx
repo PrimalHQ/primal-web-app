@@ -666,6 +666,26 @@ const ProfileMobile: Component = () => {
       app?.memberCohortInfo[profile.profileKey].tier !== 'premium-legend';
   }
 
+
+  const commonFollowers = () => {
+    if (!profile?.commonFollowers || profile.commonFollowers.length === 0) return [];
+
+    let sorted: PrimalUser[] = profile.commonFollowers;
+
+    let re = sorted.toSorted((a, b) => {
+      const aIsLegend = (app?.memberCohortInfo[a.pubkey])?.tier === 'premium-legend';
+      const bIsLegend = (app?.memberCohortInfo[b.pubkey])?.tier === 'premium-legend';
+
+      let ret = 1;
+
+      if (aIsLegend && !bIsLegend) ret = -1;
+
+      return ret;
+    });
+
+    return re.slice(0, 5).reverse();
+  }
+
   return (
     <>
       <PageTitle title={
@@ -866,10 +886,10 @@ const ProfileMobile: Component = () => {
                     </Show>
                   </div>
 
-                  <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+                  <Show when={commonFollowers().length > 0}>
                     <div class={`${styles.commonFollows} ${styles.phone}`}>
                       <div class={styles.avatars}>
-                        <For each={profile?.commonFollowers.slice(0, 5)}>
+                        <For each={commonFollowers()}>
                           {(follower, index) => (
                             <A href={app?.actions.profileLink(follower.npub) || ''} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                               <Avatar size="xxs" user={follower} />
@@ -881,7 +901,7 @@ const ProfileMobile: Component = () => {
                         <span style="margin-right: 4px;">
                           Followed by
                         </span>
-                        <For each={profile?.commonFollowers.slice(0, 5).reverse()}>
+                        <For each={commonFollowers()}>
                           {(follower, index) => (
                             <span>
                               <Show when={index() > 0}><>, </></Show>
@@ -889,7 +909,7 @@ const ProfileMobile: Component = () => {
                             </span>
                           )}
                         </For>
-                        <Show when={(profile?.commonFollowers.length || 0) > 5}>
+                        <Show when={(commonFollowers().length || 0) > 5}>
                           <span>...</span>
                         </Show>
                       </div>

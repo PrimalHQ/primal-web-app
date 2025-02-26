@@ -205,6 +205,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
             people={people()}
             label={intl.formatMessage(t.sidebar)}
             mentionLabel={intl.formatMessage(t.sidebarMentions)}
+            sortBy="legend"
           />
         </Wormhole>
       </Show>

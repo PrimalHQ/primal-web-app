@@ -672,6 +672,25 @@ const ProfileDesktop: Component = () => {
       app?.memberCohortInfo[profile.profileKey].tier !== 'premium-legend';
   }
 
+  const commonFollowers = () => {
+    if (!profile?.commonFollowers || profile.commonFollowers.length === 0) return [];
+
+    let sorted: PrimalUser[] = profile.commonFollowers;
+
+    let re = sorted.toSorted((a, b) => {
+      const aIsLegend = (app?.memberCohortInfo[a.pubkey])?.tier === 'premium-legend';
+      const bIsLegend = (app?.memberCohortInfo[b.pubkey])?.tier === 'premium-legend';
+
+      let ret = 1;
+
+      if (aIsLegend && !bIsLegend) ret = -1;
+
+      return ret;
+    });
+
+    return re.slice(0, 5).reverse();
+  }
+
   return (
     <>
       <PageTitle title={
@@ -908,11 +927,11 @@ const ProfileDesktop: Component = () => {
                         </div>
                       </Show>
 
-                      <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+                      <Show when={commonFollowers().length > 0}>
                         <div class={`${styles.commonFollows} animated`}>
                           <div class={styles.label}>Followed by</div>
                           <div class={styles.avatars}>
-                            <For each={profile?.commonFollowers.slice(0, 5)}>
+                            <For each={commonFollowers()}>
                               {(follower, index) => (
                                 <A href={app?.actions.profileLink(follower.npub) || ''} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                                   <Avatar size="nano" user={follower} />
@@ -998,11 +1017,11 @@ const ProfileDesktop: Component = () => {
                           </Show>
                         </div>
 
-                        <Show when={profile?.commonFollowers && profile.commonFollowers.length > 0}>
+                        <Show when={commonFollowers().length > 0}>
                           <div class={styles.commonFollows}>
                             <div class={styles.label}>Followed by</div>
                             <div class={styles.avatars}>
-                              <For each={profile?.commonFollowers.slice(0, 5)}>
+                              <For each={commonFollowers()}>
                                 {(follower, index) => (
                                   <A href={app?.actions.profileLink(follower.npub) || ''} class={styles.avatar} style={`z-index: ${1 + index()}`}>
                                     <Avatar size="nano" user={follower} />

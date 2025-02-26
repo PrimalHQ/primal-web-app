@@ -32,7 +32,7 @@ const MentionedPeople: Component<{
             when={props.author || props.mentioned.length > 0}
             fallback={<ThreadPeopleSkeleton />}
           >
-            <div id="trending_section" class={`${styles.authorSection}`}>
+            <div id="trending_section" class={styles.authorSection}>
               <div class="animated">
                 <MentionedPerson
                   person={author()}
