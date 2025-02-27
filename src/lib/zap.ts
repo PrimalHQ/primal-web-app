@@ -415,11 +415,18 @@ export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  
       return null;
     }
 
-    let res = await fetch(lnurl)
-    let body = await res.json()
+    try {
+      let res = await fetch(lnurl)
+      let body = await res.json()
 
-    if (body.allowsNostr && body.nostrPubkey) {
-      return body.callback;
+      if (body.allowsNostr && body.nostrPubkey) {
+        return body.callback;
+      }
+    }
+    catch (e) {
+      logError('LNURL: ', lnurl)
+      logError('Error fetching lnurl: ', e);
+      return null;
     }
   } catch (err) {
     logError('Error zapping: ', err);

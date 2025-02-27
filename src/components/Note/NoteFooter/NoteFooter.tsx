@@ -350,8 +350,10 @@ const NoteFooter: Component<{
       } else {
         app?.actions.openConfirmModal({
           title: "Failed to zap",
-          description: lastZapError,
+          description: lastZapError || "",
           confirmLabel: "ok",
+          onConfirm: app.actions.closeConfirmModal,
+          onAbort: app.actions.closeConfirmModal,
         })
       }
 
