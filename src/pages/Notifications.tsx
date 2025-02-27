@@ -26,7 +26,7 @@ import { Tabs } from "@kobalte/core/tabs";
 import styles from './Notifications.module.scss';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
-import { timeNow } from '../utils';
+import { isPhone, timeNow } from '../utils';
 import { logError } from '../lib/logger';
 
 
@@ -1076,11 +1076,19 @@ const Notifications: Component = () => {
         intl.formatMessage(t.title)}
       />
 
-      <Wormhole
-        to="search_section"
-      >
-        <Search />
-      </Wormhole>
+      <Show when={!isPhone()}>
+        <Wormhole
+          to="search_section"
+        >
+          <Search />
+        </Wormhole>
+        <StickySidebar>
+          <NotificationsSidebar
+            notifications={sortedNotifications}
+            getUsers={getUsers}
+          />
+        </StickySidebar>
+      </Show>
 
       <PageCaption title={intl.formatMessage(t.title)} />
 
@@ -1099,13 +1107,6 @@ const Notifications: Component = () => {
           </button>
         </div>
       </Show>
-
-      <StickySidebar>
-        <NotificationsSidebar
-          notifications={sortedNotifications}
-          getUsers={getUsers}
-        />
-      </StickySidebar>
 
       <Tabs
         value={notificationGroup()}

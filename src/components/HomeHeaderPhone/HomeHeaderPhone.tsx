@@ -59,21 +59,11 @@ const HomeHeaderPhone: Component< { id?: string } > = (props) => {
   });
 
   return (
-    <div id={props.id} class={styles.fullHeader} ref={smallHeader}>
+    <div id={props.id} class={styles.readsHeaderPhone} ref={smallHeader}>
       <div class={styles.phoneHeader}>
-        <div class={styles.logo}>
-          <Branding small={true} />
-        </div>
         <Show when={home?.selectedFeed}>
-          <FeedSelect isPhone={true} />
+          <FeedSelect isPhone={true} big={true} />
         </Show>
-      </div>
-      <div
-        ref={border}
-        class={styles.smallHeaderBottomBorder}
-      >
-        <div class={styles.leftCorner}></div>
-        <div class={styles.rightCorner}></div>
       </div>
     </div>
   );

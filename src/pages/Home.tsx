@@ -30,6 +30,7 @@ import { useAppContext } from '../contexts/AppContext';
 import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { isPhone } from '../utils';
+import PageCaption from '../components/PageCaption/PageCaption';
 
 
 const Home: Component = () => {
@@ -144,9 +145,11 @@ const Home: Component = () => {
         />
       </div>
 
-      <div class={styles.phoneCentralHeader}>
-        <HomeHeaderPhone />
-      </div>
+      <Show when={isPhone()}>
+        <PageCaption>
+          <HomeHeaderPhone />
+        </PageCaption>
+      </Show>
 
 
       <div class={styles.homeFeed}>
@@ -161,7 +164,7 @@ const Home: Component = () => {
               </div>
             }
           >
-            <div class={styles.feed}>
+            <div class={isPhone() ? styles.readsFeed : ''}>
               <For each={context?.notes} >
                 {note => (
                   <div class="animated">
