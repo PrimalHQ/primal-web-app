@@ -8,6 +8,7 @@ import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { signEvent } from "./nostrAPI";
+import { ArticleEdit } from "../pages/ReadsEditor";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -433,6 +434,28 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
     kind: Kind.Text,
     tags,
     created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+}
+
+
+export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
+  const time = Math.floor((new Date()).getTime() / 1000);
+
+  const event = {
+    content: articleData.content,
+    kind: Kind.LongForm,
+    tags: [
+      ["title", articleData.title],
+      ["summary", articleData.summary],
+      ["image", articleData.image],
+      ["published_at", `${time}`],
+      ["d", articleData.title.toLowerCase().replace(" ", "-")],
+      ["t", articleData.tags.join(" ")],
+      ...tags,
+    ],
+    created_at: time,
   };
 
   return await sendEvent(event, relays, relaySettings, shouldProxy);

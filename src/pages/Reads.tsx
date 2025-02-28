@@ -50,7 +50,7 @@ import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhon
 import ArticlePreviewPhoneSkeleton from '../components/Skeleton/ArticlePreviewPhoneSkeleton';
 
 
-const Home: Component = () => {
+const Reads: Component = () => {
 
   const context = useReadsContext();
   const account = useAccountContext();
@@ -286,4 +286,4 @@ const Home: Component = () => {
   )
 }
 
-export default Home;
+export default Reads;

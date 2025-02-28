@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { useLocation } from '@solidjs/router';
+import { useLocation, useNavigate } from '@solidjs/router';
 import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
@@ -21,6 +21,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const loc = useLocation();
   const media = useMediaContext();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   const links = [
     {
@@ -139,7 +140,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 fallback={
                   <ButtonPrimary
                     id={props.id}
-                    onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                    onClick={() => navigate('/reads/edit')}
                   >
                     <div class={styles.postIcon}></div>
                   </ButtonPrimary>
@@ -147,7 +148,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
               >
                 <ButtonPrimary
                   id={props.id}
-                  onClick={() => app?.actions.openConfirmModal(noReadsConfirm)}
+                  onClick={() => navigate('/reads/edit')}
                 >
                   {intl.formatMessage(tActions.newArticle)}
                 </ButtonPrimary>
