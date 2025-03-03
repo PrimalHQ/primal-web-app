@@ -297,7 +297,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     if (verifiedUser) return `/${verifiedUser}`;
 
     try {
-      const npub = nip19.npubEncode(pk);
+      const npub = nip19.nprofileEncode({ pubkey: pk });
       return `/p/${npub}`;
     } catch (e) {
       return `/p/${pk}`;

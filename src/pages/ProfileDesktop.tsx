@@ -54,6 +54,7 @@ import { TransitionGroup } from 'solid-transition-group';
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import PremiumCohortInfo from './Premium/PremiumCohortInfo';
+import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
 
 const ProfileDesktop: Component = () => {
 
@@ -119,6 +120,10 @@ const ProfileDesktop: Component = () => {
 
     if (params.npub?.startsWith('npub')) {
       hex = nip19.decode(params.npub).data as string;
+    }
+
+    if (params.npub?.startsWith('nprofile')) {
+      hex = (nip19.decode(params.npub).data as ProfilePointer).pubkey! as string;
     }
 
     setHex(() => hex);
