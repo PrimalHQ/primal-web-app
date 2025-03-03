@@ -19,7 +19,7 @@
   width: 640px;
   height: 64px;
   >div {
-    position:fixed;
+    /* position:fixed; */
     display: flex;
     gap: 8px;
     width: 640px;
@@ -426,11 +426,40 @@
   transform: rotate(90deg);
 }
 
+.titleInput {
+  textarea {
+    background-color: var(--background-site);
+    color: var(--text-primary);
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 52px;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    width: 100%;
+    margin: 0;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+}
+
 .summary {
+  display: flex;
+  gap: 12px;
   width: 100%;
+
+  .border {
+    display: block;
+    min-width: 4px;
+    border-radius: 2px;
+    background-color: var(--subtile-devider);
+  }
 }
 
 .summaryInput {
+  width: 100%;
   label {
     color: var(--text-secondary);
     font-size: 18px;
@@ -438,17 +467,62 @@
     line-height: 20px;
   }
   textarea {
-    background-color: var(--background-header-input);
-    color: var(--text-secondary);
+    background-color: var(--background-site);
+    color: var(--text-primary);
     font-size: 16px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 22px;
     border-radius: 12px;
-    padding: 12px 16px;
+    padding: 0;
     width: 100%;
     margin: 0;
-    min-height: 36px;
-    max-height: 66vh;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+}
+
+.tags {
+  width: 100%;
+  .tagList {
+    display: flex;
+    gap: 4px;
+
+    .tag {
+      display: inline-block;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+      background-color: var(--background-input);
+      padding: 6px 10px;
+      border-radius: 12px;
+      width: fit-content;
+      margin-block: 4px;
+      margin-right: 6px;
+      cursor: pointer;
+    }
+  }
+
+  .tagsInput {
+    input {
+      background-color: var(--background-site);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+      border: 1px solid var(--devider);
+      border-radius: 12px;
+      padding: 8px;
+      width: 100%;
+      height: fit-content;
+      margin: 0;
+
+      &::placeholder {
+        color: var(--text-tertiary);
+      }
+    }
   }
 }
 
@@ -527,4 +601,22 @@
   padding: 20px;
   width: 100%;
   border-top: 1px solid var(--devider);
+}
+
+.sectionButton {
+  background: none;
+  color: var(--text-secondary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+  border: none;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 8px;
+
+  &.open {
+    color: var(--text-primary);
+  }
 }

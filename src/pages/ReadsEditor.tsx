@@ -1,4 +1,4 @@
-import { Component, createEffect, createResource, createSignal, onCleanup, onMount, Show, Suspense } from 'solid-js'
+import { Component, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, Suspense } from 'solid-js'
 import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx } from '@milkdown/core';
 import createFuzzySearch from '@nozbe/microfuzz';
 
@@ -45,6 +45,7 @@ import { importEvents, sendArticle } from '../lib/notes';
 import { subsTo } from '../sockets';
 import { APP_ID } from '../App';
 import { useNavigate } from '@solidjs/router';
+import Wormhole from '../components/Wormhole/Wormhole';
 
 
 export type ArticleEdit = {
@@ -82,7 +83,7 @@ const ReadsEditor: Component = () => {
 
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
-  const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata']);
+  const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content']);
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
@@ -195,9 +196,8 @@ const ReadsEditor: Component = () => {
   }
 
   createEffect(() => {
-    if (accordionSection()[0] === 'content' && !editor()) {
+    if (accordionSection().includes('content')) {
       setTimeout(() => {
-        console.log('INIT: ', mdEditor, editor())
         initEditor();
       }, 10)
     }
@@ -317,174 +317,230 @@ const ReadsEditor: Component = () => {
 
   return (
     <div class={styles.editorPage}>
-      <Accordion value={accordionSection()} onChange={setAccordionSection} collapsible>
-       	<Accordion.Item class={styles.accordionItem} value="metadata">
-        		<Accordion.Header>
-         			<Accordion.Trigger class={styles.accordionTrigger}>
-                <div>
-                  Metadata
-                </div>
-                <Show
-                  when={accordionSection()[0] === 'metadata'}
-                  fallback={<div class={styles.chevronDown}></div>}
-                >
-                  <div class={styles.chevronUp}></div>
-                </Show>
-              </Accordion.Trigger>
-        		</Accordion.Header>
-        		<Accordion.Content>
-              <div class={styles.metadata}>
-                <TextInput
-                  label="Title"
-                  type="text"
-                  value={article.title}
-                  onChange={v => setArticle('title', () => v)}
-                  noExtraSpace={true}
+
+      <Wormhole to='right_sidebar'>
+        <div class={styles.sidebar}>
+          <button
+            class={`${styles.sectionButton} ${accordionSection().includes('metadata') ? styles.open : ''}`}
+            onClick={() => {
+              if (accordionSection().includes('metadata')) {
+                setAccordionSection((as) => as.filter(s => s !== 'metadata'));
+                return;
+              }
+
+              setAccordionSection((as) => [...as, 'metadata']);
+            }}
+          >
+            Metadata
+          </button>
+
+          <button
+            class={`${styles.sectionButton} ${accordionSection().includes('content') ? styles.open : ''}`}
+            onClick={() => {
+              if (accordionSection().includes('content')) {
+                setAccordionSection((as) => as.filter(s => s !== 'content'));
+                return;
+              }
+
+              setAccordionSection((as) => [...as, 'content']);
+            }}
+          >
+            Content
+          </button>
+        </div>
+      </Wormhole>
+
+      <Show when={accordionSection().includes('metadata')}>
+        <div class={styles.metadata}>
+          <TextField
+            class={styles.titleInput}
+            value={article.title}
+            onKeyDown={(e) => {
+              if (e.code === 'Enter') {
+                e.preventDefault();
+              }
+            }}
+            onChange={(v) => {
+              setArticle('title', () => v);
+            }}
+          >
+            <TextField.TextArea
+              rows={1}
+              autoResize={true}
+              placeholder="Article Title"
+            />
+          </TextField>
+          <Uploader
+            hideLabel={false}
+            publicKey={account?.publicKey}
+            nip05={account?.activeUser?.nip05}
+            openSockets={openUploadSockets()}
+            file={fileToUpload()}
+            onFail={() => {
+              toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                file: fileToUpload()?.name,
+              }));
+              resetUploadTitleImage();
+            }}
+            onRefuse={(reason: string) => {
+              if (reason === 'file_too_big_100') {
+                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+              }
+              if (reason === 'file_too_big_1024') {
+                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+              }
+              resetUploadTitleImage();
+            }}
+            onCancel={() => {
+              resetUploadTitleImage();
+            }}
+            onSuccsess={(url:string) => {
+              setArticle('image', () => url);
+              resetUploadTitleImage();
+            }}
+          />
+
+          <Show
+            when={article.image.length > 0}
+            fallback={
+              <div class={styles.noTitleImagePlaceholder}>
+                <input
+                  id="upload-avatar"
+                  type="file"
+                  onChange={() => onUploadTitleImage(titleImageUpload)}
+                  ref={titleImageUpload}
+                  hidden={true}
+                  accept="image/*"
                 />
-                  <Uploader
-                    hideLabel={false}
-                    publicKey={account?.publicKey}
-                    nip05={account?.activeUser?.nip05}
-                    openSockets={openUploadSockets()}
-                    file={fileToUpload()}
-                    onFail={() => {
-                      toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                        file: fileToUpload()?.name,
-                      }));
-                      resetUploadTitleImage();
-                    }}
-                    onRefuse={(reason: string) => {
-                      if (reason === 'file_too_big_100') {
-                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-                      }
-                      if (reason === 'file_too_big_1024') {
-                        toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-                      }
-                      resetUploadTitleImage();
-                    }}
-                    onCancel={() => {
-                      resetUploadTitleImage();
-                    }}
-                    onSuccsess={(url:string) => {
-                      setArticle('image', () => url);
-                      resetUploadTitleImage();
-                    }}
-                  />
-
-                  <Show
-                    when={article.image.length > 0}
-                    fallback={
-                      <div class={styles.noTitleImagePlaceholder}>
-                        <input
-                          id="upload-avatar"
-                          type="file"
-                          onChange={() => onUploadTitleImage(titleImageUpload)}
-                          ref={titleImageUpload}
-                          hidden={true}
-                          accept="image/*"
-                        />
-                        <label for="upload-avatar">
-                          Add Title Image
-                        </label>
-                      </div>
-                    }
-                  >
-                    <div class={styles.uploadButton}>
-                      <label for="upload-avatar">
-                        <Show
-                          when={article.image.length > 0}
-                          fallback={<>Add Title Image</>}
-                        >
-                          Chage Title Image
-                        </Show>
-                      </label>
-                      <input
-                        id="upload-avatar"
-                        type="file"
-                        onChange={() => onUploadTitleImage(titleImageUpload)}
-                        ref={titleImageUpload}
-                        hidden={true}
-                        accept="image/*"
-                      />
-                      <img class={styles.titleImage}  src={article.image} />
-                    </div>
-                  </Show>
-
-                <div class={styles.summary}>
-                  <TextField
-                    class={styles.summaryInput}
-                    value={article.summary}
-                    onChange={v => setArticle('summary', () => v)}
-                  >
-                    <TextField.Label>Summary</TextField.Label>
-                    <TextField.TextArea
-                      autoResize={true}
-                    />
-                  </TextField>
-                </div>
-
+                <label for="upload-avatar">
+                  Add Title Image
+                </label>
               </div>
-            </Accordion.Content>
-       	</Accordion.Item>
-
-
-       	<Accordion.Item class={styles.accordionItem} value="content">
-      		<Accordion.Header>
-       			<Accordion.Trigger class={styles.accordionTrigger}>
-              <div>
-                Content
-              </div>
-              <Show
-                when={accordionSection()[0] === 'content'}
-                fallback={<div class={styles.chevronDown}></div>}
-              >
-                <div class={styles.chevronUp}></div>
-              </Show>
-            </Accordion.Trigger>
-      		</Accordion.Header>
-      		<Accordion.Content>
-            <div class={styles.toolbar}>
-              <div>
-                <button
-                  id="undoBtn"
-                  class={styles.mdToolButton}
-                  onClick={undo}
+            }
+          >
+            <div class={styles.uploadButton}>
+              <label for="upload-avatar">
+                <Show
+                  when={article.image.length > 0}
+                  fallback={<>Add Title Image</>}
                 >
-                  <div class={styles.undoIcon}></div>
-                </button>
-                <button
-                  id="redoBtn"
-                  class={styles.mdToolButton}
-                  onClick={redo}
-                >
-                  <div class={styles.redoIcon}></div>
-                </button>
-                <button
-                  id="boldBtn"
-                  class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
-                  onClick={bold}
-                >
-                  <div class={styles.boldIcon}></div>
-                </button>
-                <button
-                  id="italicBtn"
-                  class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
-                  onClick={italic}
-                >
-                  <div class={styles.italicIcon}></div>
-                </button>
-              </div>
+                  Chage Title Image
+                </Show>
+              </label>
+              <input
+                id="upload-avatar"
+                type="file"
+                onChange={() => onUploadTitleImage(titleImageUpload)}
+                ref={titleImageUpload}
+                hidden={true}
+                accept="image/*"
+              />
+              <img class={styles.titleImage}  src={article.image} />
             </div>
+          </Show>
+
+          <div class={styles.summary}>
+            <div class={styles.border}></div>
+            <TextField
+              class={styles.summaryInput}
+              value={article.summary}
+              onChange={v => setArticle('summary', () => v)}
+            >
+              <TextField.TextArea
+                rows={1}
+                autoResize={true}
+                placeholder="Article Summary"
+              />
+            </TextField>
+          </div>
+
+          <div class={styles.tags}>
             <div
-              class={styles.editor}
-              ref={mdEditor}
-              onClick={() => {
-                // focusEditor();
+              class={styles.tagList}
+            >
+              <For each={article.tags}>
+                {tag => (
+                  <div
+                    class={styles.tag}
+                    onClick={() => {
+                      const filtered = article.tags.filter(t => t !== tag);
+                      setArticle('tags', () => [...filtered]);
+                    }}
+                  >
+                    {tag}
+                  </div>
+                )}
+              </For>
+            </div>
+
+            <TextField
+              class={styles.tagsInput}
+              onKeyDown={(e: KeyboardEvent) => {
+                if (e.code !== 'Enter') return;
+
+                // @ts-ignore
+                const value = e.target?.value || '';
+
+                if (value.length < 1 || article.tags.includes(value)) return;
+
+                const tags = value.split(',').map((x: string) => x.trim());
+                setArticle('tags', (ts) => [...ts, ...tags]);
+                e.target.value = ''
               }}
-            ></div>
-          </Accordion.Content>
-       	</Accordion.Item>
-      </Accordion>
+            >
+              <TextField.Input
+                placeholder="Tags..."
+              />
+            </TextField>
+          </div>
+
+        </div>
+      </Show>
+
+      <Show when={accordionSection().includes('content')}>
+    		<div>
+          <div class={styles.toolbar}>
+            <div>
+              <button
+                id="undoBtn"
+                class={styles.mdToolButton}
+                onClick={undo}
+              >
+                <div class={styles.undoIcon}></div>
+              </button>
+              <button
+                id="redoBtn"
+                class={styles.mdToolButton}
+                onClick={redo}
+              >
+                <div class={styles.redoIcon}></div>
+              </button>
+              <button
+                id="boldBtn"
+                class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
+                onClick={bold}
+              >
+                <div class={styles.boldIcon}></div>
+              </button>
+              <button
+                id="italicBtn"
+                class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
+                onClick={italic}
+              >
+                <div class={styles.italicIcon}></div>
+              </button>
+            </div>
+          </div>
+          <div
+            class={styles.editor}
+            ref={mdEditor}
+            onClick={() => {
+              // focusEditor();
+            }}
+          ></div>
+        </div>
+      </Show>
+
 
       <div class={styles.postingControls}>
         <ButtonPrimary
