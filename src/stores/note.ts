@@ -421,7 +421,6 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
           const eventPointerShort: nip19.EventPointer ={
             id: m.id,
-            kind: m.kind,
           }
 
           const noteId = nip19.neventEncode(eventPointer);
@@ -561,7 +560,6 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
     const eventPointerShort: nip19.EventPointer ={
       id: msg.id,
-      kind: msg.kind,
     }
 
     const noteId = nip19.neventEncode(eventPointer);
@@ -707,7 +705,6 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
           const eventPointerShort: nip19.EventPointer ={
             id: m.id,
-            kind: m.kind,
           }
 
           const noteId = nip19.neventEncode(eventPointer);

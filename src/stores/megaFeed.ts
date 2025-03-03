@@ -58,7 +58,6 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
 
   const eventPointerShort: nip19.EventPointer ={
       id: message.id,
-      kind: message.kind,
     }
 
   return {
@@ -195,7 +194,6 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
       const eventPointerShort: nip19.EventPointer ={
         id: mention.id,
-        kind: mention.kind,
       }
 
       let noteId = mention.id;
@@ -498,7 +496,6 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
 
     const eventPointerShort: nip19.EventPointer = {
       id: note.id,
-      kind: note.kind,
     };
 
     const newNote: PrimalNote = {
