@@ -119,6 +119,8 @@ const ReadsEditor: Component = () => {
   })
 
   const initEditor = async () => {
+    if (editor()) return;
+
     try {
       const e = await Editor.make()
       .config((ctx) => {
@@ -188,6 +190,8 @@ const ReadsEditor: Component = () => {
       // insert(cont)(e.ctx);
       // setHtml(() => getHTML()(e.ctx));
 
+      // e.action(replaceAll(article.content))
+
       setEditor(() => e);
 
     } catch (err) {
@@ -195,12 +199,8 @@ const ReadsEditor: Component = () => {
     }
   }
 
-  createEffect(() => {
-    if (accordionSection().includes('content')) {
-      setTimeout(() => {
-        initEditor();
-      }, 10)
-    }
+  onMount(() => {
+    initEditor();
   });
 
   onCleanup(() => editor()?.destroy());
@@ -331,22 +331,47 @@ const ReadsEditor: Component = () => {
               setAccordionSection((as) => [...as, 'metadata']);
             }}
           >
+            <Show
+              when={accordionSection().includes('metadata')}
+              fallback={<span>Show</span>}
+            >
+              <span>Hide</span>
+            </Show>
             Metadata
           </button>
 
-          <button
-            class={`${styles.sectionButton} ${accordionSection().includes('content') ? styles.open : ''}`}
-            onClick={() => {
-              if (accordionSection().includes('content')) {
-                setAccordionSection((as) => as.filter(s => s !== 'content'));
-                return;
-              }
+          <Show when={!accordionSection().includes('metadata')}>
+            <div class={styles.metadataPreview}>
+              <Show when={article.title.length > 0}>
+                <div class={styles.titlePreview}>
+                  {article.title}
+                </div>
+              </Show>
 
-              setAccordionSection((as) => [...as, 'content']);
-            }}
-          >
-            Content
-          </button>
+              <Show when={article.image.length > 0}>
+                <img
+                  class={styles.titleImagePreview}
+                  src={article.image}
+                />
+              </Show>
+
+              <Show when={article.summary.length > 0}>
+                <div class={styles.summaryPreview}>
+                  {article.summary}
+                </div>
+              </Show>
+
+              <Show when={article.tags.length > 0}>
+                <div class={styles.tagPreview}>
+                  <div class={styles.tagList}>
+                    <For each={article.tags}>
+                      {tag => <div class={styles.tag}>{tag}</div>}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+            </div>
+          </Show>
         </div>
       </Wormhole>
 
@@ -485,6 +510,7 @@ const ReadsEditor: Component = () => {
 
                 const tags = value.split(',').map((x: string) => x.trim());
                 setArticle('tags', (ts) => [...ts, ...tags]);
+                // @ts-ignore
                 e.target.value = ''
               }}
             >
@@ -497,56 +523,54 @@ const ReadsEditor: Component = () => {
         </div>
       </Show>
 
-      <Show when={accordionSection().includes('content')}>
-    		<div>
-          <div class={styles.toolbar}>
-            <div>
-              <button
-                id="undoBtn"
-                class={styles.mdToolButton}
-                onClick={undo}
-              >
-                <div class={styles.undoIcon}></div>
-              </button>
-              <button
-                id="redoBtn"
-                class={styles.mdToolButton}
-                onClick={redo}
-              >
-                <div class={styles.redoIcon}></div>
-              </button>
-              <button
-                id="boldBtn"
-                class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
-                onClick={bold}
-              >
-                <div class={styles.boldIcon}></div>
-              </button>
-              <button
-                id="italicBtn"
-                class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
-                onClick={italic}
-              >
-                <div class={styles.italicIcon}></div>
-              </button>
-            </div>
+      <div class={styles.contentEditor}>
+        <div class={styles.toolbar}>
+          <div>
+            <button
+              id="undoBtn"
+              class={styles.mdToolButton}
+              onClick={undo}
+            >
+              <div class={styles.undoIcon}></div>
+            </button>
+            <button
+              id="redoBtn"
+              class={styles.mdToolButton}
+              onClick={redo}
+            >
+              <div class={styles.redoIcon}></div>
+            </button>
+            <button
+              id="boldBtn"
+              class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
+              onClick={bold}
+            >
+              <div class={styles.boldIcon}></div>
+            </button>
+            <button
+              id="italicBtn"
+              class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
+              onClick={italic}
+            >
+              <div class={styles.italicIcon}></div>
+            </button>
           </div>
-          <div
-            class={styles.editor}
-            ref={mdEditor}
-            onClick={() => {
-              // focusEditor();
-            }}
-          ></div>
         </div>
-      </Show>
+        <div
+          class={styles.editor}
+          ref={mdEditor}
+          onClick={() => {
+            // focusEditor();
+          }}
+        ></div>
+      </div>
 
 
       <div class={styles.postingControls}>
         <ButtonPrimary
           onClick={postArticle}
         >
-          Post
+          Publish Article
         </ButtonPrimary>
       </div>
     </div>

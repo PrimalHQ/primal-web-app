@@ -472,7 +472,7 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 22px;
-    border-radius: 12px;
+    border-radius: 0;
     padding: 0;
     width: 100%;
     margin: 0;
@@ -488,6 +488,7 @@
   .tagList {
     display: flex;
     gap: 4px;
+    flex-wrap: wrap;
 
     .tag {
       display: inline-block;
@@ -566,7 +567,7 @@
 .titleImage {
   width: 100%;
   max-height: 598px;
-
+  border-radius: 12px;
 }
 
 .accordionTrigger {
@@ -606,9 +607,9 @@
 .sectionButton {
   background: none;
   color: var(--text-secondary);
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 600;
-  line-height: 20px;
+  line-height: 16px;
   border: none;
 
   display: flex;
@@ -618,5 +619,55 @@
 
   &.open {
     color: var(--text-primary);
+  }
+
+  span {
+    margin-right: 4px;
+  }
+}
+
+.metadataPreview {
+  padding-left: 8px;
+  .titlePreview {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 20px;
+  }
+
+  .titleImagePreview {
+    max-height: 200px;
+    border-radius: 12px;
+  }
+
+  .summaryPreview {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 26px;
+  }
+
+  .tagPreview {
+    width: 200px;
+    .tagList {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+
+      .tag {
+        display: inline-block;
+        color: var(--text-secondary);
+        font-size: 8px;
+        font-weight: 400;
+        line-height: 10px;
+        background-color: var(--background-input);
+        padding: 6px 10px;
+        border-radius: 12px;
+        width: fit-content;
+        margin-block: 2px;
+        margin-right: 4px;
+        cursor: pointer;
+      }
+    }
   }
 }
