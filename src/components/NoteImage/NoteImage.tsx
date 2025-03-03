@@ -113,7 +113,7 @@ const NoteImage: Component<{
 
     const img = props.media;
 
-    if (!img || ratio() <= 0.9) return '680px';
+    if (!img || ratio() <= 0.8) return '680px';
     if (!img || ratio() <= 1.2) return 'auto';
 
     // width of the note over the ratio of the preview image

@@ -364,7 +364,7 @@ const Note: Component<{
             <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
               <ParsedNote
                 note={props.note}
-                width={Math.min(640, window.innerWidth)}
+                width={Math.min(598, window.innerWidth)}
                 margins={42}
               />
             </div>
@@ -566,7 +566,7 @@ const Note: Component<{
                 <ParsedNote
                   note={props.note}
                   shorten={props.shorten}
-                  width={Math.min(566, window.innerWidth - 72)}
+                  width={Math.min(508, window.innerWidth - 72)}
                   margins={58}
                   footerSize="short"
                 />

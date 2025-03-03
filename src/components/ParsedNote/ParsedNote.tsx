@@ -188,7 +188,7 @@ const ParsedNote: Component<{
     return `note_${props.note.noteId}`;
   }
 
-  const noteWidth = () => props.width || 514;
+  const noteWidth = () => props.width || 508;
 
   let thisNote: HTMLDivElement | undefined;
 
