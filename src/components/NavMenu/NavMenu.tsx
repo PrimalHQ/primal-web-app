@@ -140,7 +140,10 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 fallback={
                   <ButtonPrimary
                     id={props.id}
-                    onClick={() => navigate('/reads/edit')}
+                    onClick={() => {
+                      app?.actions.openConfirmModal(noReadsConfirm);
+                      // navigate('/reads/edit');
+                    }}
                   >
                     <div class={styles.postIcon}></div>
                   </ButtonPrimary>
@@ -148,7 +151,10 @@ const NavMenu: Component< { id?: string } > = (props) => {
               >
                 <ButtonPrimary
                   id={props.id}
-                  onClick={() => navigate('/reads/edit')}
+                  onClick={() => {
+                    app?.actions.openConfirmModal(noReadsConfirm);
+                    // navigate('/reads/edit');
+                  }}
                 >
                   {intl.formatMessage(tActions.newArticle)}
                 </ButtonPrimary>
