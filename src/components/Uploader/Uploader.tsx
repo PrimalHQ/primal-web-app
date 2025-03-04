@@ -34,15 +34,16 @@ type UploadState = {
 }
 
 const Uploader: Component<{
+  uploadId?: string,
   publicKey?: string,
   nip05?: string,
   openSockets?: boolean,
   hideLabel?: boolean,
   file: File | undefined,
-  onFail?: (reason: string) => void,
-  onRefuse?: (reason: string) => void,
-  onCancel?: () => void,
-  onSuccsess?: (url: string) => void,
+  onFail?: (reason: string, uploadId?: string) => void,
+  onRefuse?: (reason: string, uploadId?: string) => void,
+  onCancel?: (uploadId?: string) => void,
+  onSuccsess?: (url: string, uploadId?: string) => void,
 }> = (props) => {
   const account = useAccountContext();
 
@@ -184,7 +185,7 @@ const Uploader: Component<{
 
   const failUpload = () => {
     resetUpload(true);
-    props.onFail && props.onFail('');
+    props.onFail && props.onFail('', props.uploadId);
   };
 
   const onUploadCompleted = async (soc: WebSocket, file: File) => {
@@ -218,7 +219,7 @@ const Uploader: Component<{
 
 
           setTimeout(() => {
-            props.onSuccsess && props.onSuccsess(up.content);
+            props.onSuccsess && props.onSuccsess(up.content, props.uploadId);
             resetUpload(true);
           }, 500)
           return;
@@ -322,7 +323,7 @@ const Uploader: Component<{
 
   const uploadFile = (file: File) => {
     if (file.size >= MB * uploadState.uploadLimit) {
-      props.onRefuse && props.onRefuse(`file_too_big_${uploadState.uploadLimit}`);
+      props.onRefuse && props.onRefuse(`file_too_big_${uploadState.uploadLimit}`, props.uploadId);
       resetUpload(true);
       return;
     }
@@ -400,7 +401,7 @@ const Uploader: Component<{
           <ButtonGhost
             onClick={() => {
               resetUpload();
-              props.onCancel && props.onCancel();
+              props.onCancel && props.onCancel(props.uploadId);
             }}
             disabled={uploadState.progress > 100}
           >

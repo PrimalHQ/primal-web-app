@@ -1,11 +1,12 @@
-import { Component, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, Suspense } from 'solid-js'
-import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx } from '@milkdown/core';
+import { batch, Component, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, Suspense } from 'solid-js'
+import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx, commandsCtx } from '@milkdown/core';
 import createFuzzySearch from '@nozbe/microfuzz';
 
 import {
   commonmark,
   toggleStrongCommand,
   toggleEmphasisCommand,
+  insertImageCommand,
 } from '@milkdown/preset-commonmark';
 
 import {
@@ -36,6 +37,7 @@ import {
   settings as tSettings,
   toast as tToast,
   upload as tUpload,
+  upload,
 } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
@@ -64,6 +66,9 @@ const emptyArticleEdit = (): ArticleEdit => ({
   tags: [],
 });
 
+const titleImageUploadId = 'title_image';
+const contentImageUploadId = 'content_image';
+
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
   const toast = useToastContext();
@@ -86,15 +91,24 @@ const ReadsEditor: Component = () => {
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content']);
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
+  const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
 
+  let contentFileUpload: HTMLInputElement | undefined;
   let titleImageUpload: HTMLInputElement | undefined;
 
-  const resetUploadTitleImage = () => {
-    if (titleImageUpload) {
+  const resetUpload = (uploadId?: string) => {
+    const id = fileUploadContext();
+
+    if (id !== uploadId) return;
+
+    if (titleImageUpload && id === titleImageUploadId) {
       titleImageUpload.value = '';
     }
 
-    setFileToUpload(undefined);
+    batch(() => {
+      setFileToUpload(undefined);
+      setFileUploadContext(undefined);
+    })
   };
 
   const onUploadTitleImage = (fileUpload: HTMLInputElement | undefined) => {
@@ -105,9 +119,28 @@ const ReadsEditor: Component = () => {
 
     const file = fileUpload.files ? fileUpload.files[0] : null;
 
-    if (file) {
+    if (!file) return;
+
+    batch(() => {
       setFileToUpload(file);
+      setFileUploadContext(titleImageUploadId);
+    })
+  }
+
+  const onUploadContentImage = () => {
+
+    if (!contentFileUpload) {
+      return;
     }
+
+    const file = contentFileUpload.files ? contentFileUpload.files[0] : null;
+
+    if (!file) return;
+
+    batch(() => {
+      setFileToUpload(file);
+      setFileUploadContext(contentImageUploadId);
+    })
   }
 
   onMount(() => {
@@ -319,6 +352,46 @@ const ReadsEditor: Component = () => {
     <div class={styles.editorPage}>
 
       <Wormhole to='right_sidebar'>
+        <Uploader
+          uploadId={fileUploadContext()}
+          hideLabel={false}
+          publicKey={account?.publicKey}
+          nip05={account?.activeUser?.nip05}
+          openSockets={openUploadSockets()}
+          file={fileToUpload()}
+          onFail={(_, uploadId?: string) => {
+            toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+              file: fileToUpload()?.name,
+            }));
+            resetUpload(uploadId);
+          }}
+          onRefuse={(reason: string, uploadId?: string) => {
+            if (reason === 'file_too_big_100') {
+              toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+            }
+            if (reason === 'file_too_big_1024') {
+              toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+            }
+            resetUpload(uploadId);
+          }}
+          onCancel={(uploadId?: string) => {
+            resetUpload(uploadId);
+          }}
+          onSuccsess={(url:string, uploadId?: string) => {
+            if (uploadId === titleImageUploadId) {
+              setArticle('image', () => url);
+            }
+
+            if (uploadId === contentImageUploadId) {
+              const ed = editor();
+              if (!ed) return;
+              ed.action(callCommand(insertImageCommand.key, { src: url }));
+            }
+
+            resetUpload(uploadId);
+          }}
+        />
+
         <div class={styles.sidebar}>
           <button
             class={`${styles.sectionButton} ${accordionSection().includes('metadata') ? styles.open : ''}`}
@@ -395,35 +468,6 @@ const ReadsEditor: Component = () => {
               placeholder="Article Title"
             />
           </TextField>
-          <Uploader
-            hideLabel={false}
-            publicKey={account?.publicKey}
-            nip05={account?.activeUser?.nip05}
-            openSockets={openUploadSockets()}
-            file={fileToUpload()}
-            onFail={() => {
-              toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                file: fileToUpload()?.name,
-              }));
-              resetUploadTitleImage();
-            }}
-            onRefuse={(reason: string) => {
-              if (reason === 'file_too_big_100') {
-                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-              }
-              if (reason === 'file_too_big_1024') {
-                toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-              }
-              resetUploadTitleImage();
-            }}
-            onCancel={() => {
-              resetUploadTitleImage();
-            }}
-            onSuccsess={(url:string) => {
-              setArticle('image', () => url);
-              resetUploadTitleImage();
-            }}
-          />
 
           <Show
             when={article.image.length > 0}
@@ -554,6 +598,21 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.italicIcon}></div>
             </button>
+            <div
+              id="attachBtn"
+              class={styles.mdToolButton}
+            >
+              <input
+                id="upload-content"
+                type="file"
+                onChange={onUploadContentImage}
+                ref={contentFileUpload}
+                hidden={true}
+                accept="image/*,video/*,audio/*"
+              />
+              <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
+              </label>
+            </div>
           </div>
         </div>
         <div

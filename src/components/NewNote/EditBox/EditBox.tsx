@@ -1536,7 +1536,7 @@ const EditBox: Component<{
     // Get cursor position to determine insertion point
     let cursor = textArea.selectionStart;
 
-    // Get index of the token and inster user's handle
+    // Get index of the token and insert user's handle
     const index = msg.slice(0, cursor).lastIndexOf('@');
     const value = msg.slice(0, index) + `@\`${name}\`` + msg.slice(cursor);
 

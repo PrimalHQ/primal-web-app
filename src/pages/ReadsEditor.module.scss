@@ -238,6 +238,9 @@
     margin-top: 0;
     margin-bottom: 20px;
     overflow: hidden;
+    border-radius: 12px;
+    max-height: 598px;
+    object-fit: cover;
   }
 
   img + sup {
@@ -402,6 +405,17 @@
   background-color: var(--text-secondary);
   -webkit-mask: url(../assets/icons/toolbar_table.svg) no-repeat center;
   mask: url(../assets/icons/toolbar_table.svg) no-repeat center;
+}
+
+.attachIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/attach_media.svg) no-repeat center;
+  mask: url(../assets/icons/attach_media.svg) no-repeat center;
+  cursor: pointer;
 }
 
 .chevronUp {
