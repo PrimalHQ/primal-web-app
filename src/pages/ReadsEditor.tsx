@@ -6,8 +6,13 @@ import {
   commonmark,
   toggleStrongCommand,
   toggleEmphasisCommand,
-  insertImageCommand,
+  toggleLinkCommand,
   wrapInHeadingCommand,
+  toggleInlineCodeCommand,
+  wrapInBlockquoteCommand,
+  wrapInBulletListCommand,
+  wrapInOrderedListCommand,
+  insertImageCommand,
 } from '@milkdown/preset-commonmark';
 
 import {
@@ -51,6 +56,7 @@ import { useNavigate } from '@solidjs/router';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Select } from '@kobalte/core/select';
 import AdvancedSearchSelectBox from '../components/AdvancedSearch/AdvancedSearchSelect';
+import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 
 
 export type ArticleEdit = {
@@ -97,6 +103,11 @@ const ReadsEditor: Component = () => {
   const [isBoldSelected, setIsBoldSelected] = createSignal(false);
   const [isItalicActive, setIsItalicActive] = createSignal(false);
   const [isItalicSelected, setIsItalicSelected] = createSignal(false);
+  const [isLinkActive, setIsLinkActive] = createSignal(false);
+  const [isLinkSelected, setIsLinkSelected] = createSignal(false);
+  const [isCodeActive, setIsCodeActive] = createSignal(false);
+  const [isCodeSelected, setIsCodeSelected] = createSignal(false);
+
   const [headingLevel, setHeadingLevel] = createSignal(0);
   const [selection, setSelection] = createSignal('');
 
@@ -196,15 +207,19 @@ const ReadsEditor: Component = () => {
               return false;
             }
 
-            // console.log('NODE: ', node)
-            // console.log('POS: ', pos)
-            // console.log('PARENT: ', parent)
-            // console.log('INDEX: ', index)
+            console.log('NODE: ', node)
+            console.log('POS: ', pos)
+            console.log('PARENT: ', parent)
+            console.log('INDEX: ', index)
 
             return false;
           })
 
           setIsBoldSelected(false);
+          setIsItalicSelected(false);
+          setIsLinkSelected(false);
+          setIsCodeSelected(false);
+
           if (range <= 0) {
             setSelection('');
             return;
@@ -214,6 +229,21 @@ const ReadsEditor: Component = () => {
 
           if (doc.rangeHasMark(selection.from, selection.to, schema.marks['strong'])) {
             setIsBoldSelected(true)
+            return;
+          }
+
+          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['emphasis'])) {
+            setIsItalicSelected(true)
+            return;
+          }
+
+          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['link'])) {
+            setIsLinkSelected(true)
+            return;
+          }
+
+          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['inlineCode'])) {
+            setIsCodeSelected(true)
             return;
           }
 
@@ -290,6 +320,17 @@ const ReadsEditor: Component = () => {
           setIsItalicSelected(v => !v) :
           setIsItalicActive(v => !v);
         break;
+      case 'code':
+        selection().length > 0 ?
+          setIsCodeSelected(v => !v) :
+          setIsCodeActive(v => !v);
+        break;
+      case 'link':
+        selection().length > 0 ?
+          setIsLinkSelected(v => !v) :
+          setIsLinkActive(v => !v);
+        break;
+
     }
   }
 
@@ -297,22 +338,65 @@ const ReadsEditor: Component = () => {
     editor()?.action(callCommand(undoCommand.key));
     focusEditor();
   }
+
   const redo = () => {
     editor()?.action(callCommand(redoCommand.key));
     focusEditor();
   }
+
   const bold = () => {
     toggleToolbar('bold');
 
     editor()?.action(callCommand(toggleStrongCommand.key));
     focusEditor();
   }
+
   const italic = (e: MouseEvent) => {
     toggleToolbar('italic');
 
     editor()?.action(callCommand(toggleEmphasisCommand.key));
     focusEditor();
   }
+
+  const code = (e: MouseEvent) => {
+    toggleToolbar('code');
+
+    editor()?.action(callCommand(toggleInlineCodeCommand.key));
+    focusEditor();
+  }
+
+  const quote = (e: MouseEvent) => {
+    toggleToolbar('quote');
+
+    editor()?.action(callCommand(wrapInBlockquoteCommand.key));
+    focusEditor();
+  }
+
+  const bulletList = (e: MouseEvent) => {
+    toggleToolbar('bulletList');
+
+    editor()?.action(callCommand(wrapInBulletListCommand.key));
+    focusEditor();
+  }
+
+  const orderedList = (e: MouseEvent) => {
+    toggleToolbar('orderedList');
+
+    editor()?.action(callCommand(wrapInOrderedListCommand.key));
+    focusEditor();
+  }
+
+  const link = (e: MouseEvent) => {
+    // toggleToolbar('link');
+
+    if (!editorMarkdown()) {
+
+    }
+
+    editor()?.action(callCommand(toggleLinkCommand.key));
+    focusEditor();
+  }
+
   const heading = (hLevel: string) => {
     const level = headingLevels.indexOf(hLevel) || 0;
 
@@ -325,6 +409,7 @@ const ReadsEditor: Component = () => {
     setHeadingLevel(level);
     focusEditor();
   }
+
   const table = () => {
     editor()?.action(callCommand(insertTableCommand.key));
     focusEditor();
@@ -661,6 +746,46 @@ const ReadsEditor: Component = () => {
               <div class={styles.italicIcon}></div>
             </button>
 
+            <button
+              id="codeBtn"
+              class={`${styles.mdToolButton} ${isCodeActive() || isCodeSelected() ? styles.selected : ''}`}
+              onClick={code}
+            >
+              <div class={styles.codeIcon}></div>
+            </button>
+
+            <button
+              id="quoteBtn"
+              class={`${styles.mdToolButton}`}
+              onClick={quote}
+            >
+              <div class={styles.quoteIcon}></div>
+            </button>
+
+            <button
+              id="bulletListBtn"
+              class={`${styles.mdToolButton}`}
+              onClick={bulletList}
+            >
+              <div class={styles.bulletListIcon}></div>
+            </button>
+
+            <button
+              id="orderedListBtn"
+              class={`${styles.mdToolButton}`}
+              onClick={orderedList}
+            >
+              <div class={styles.orderedListIcon}></div>
+            </button>
+
+            <button
+              id="linkBtn"
+              class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
+              onClick={link}
+            >
+              <div class={styles.linkIcon}></div>
+            </button>
+
             <div
               id="attachBtn"
               class={styles.mdToolButton}
@@ -679,14 +804,14 @@ const ReadsEditor: Component = () => {
           </div>
           <button
             id="editorMode"
-            class={`${styles.mdToolButton} ${editorMarkdown() ? styles.selected : ''}`}
+            class={`${styles.mdToolButton}`}
             onClick={() => setEditorMarkdown(v => !v)}
           >
             <Show
               when={editorMarkdown()}
-              fallback={<>Markdown</>}
+              fallback={<div class={styles.eyeSlashIcon}></div>}
             >
-              <>Preview</>
+              <div class={styles.eyeIcon}></div>
             </Show>
           </button>
         </div>
@@ -720,6 +845,7 @@ const ReadsEditor: Component = () => {
           Publish Article
         </ButtonPrimary>
       </div>
+
     </div>
   )
 }

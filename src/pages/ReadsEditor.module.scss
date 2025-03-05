@@ -400,6 +400,56 @@
   mask: url(../assets/icons/toolbar_italic.svg) no-repeat center;
 }
 
+.linkIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/link.svg) no-repeat center;
+  mask: url(../assets/icons/link.svg) no-repeat center;
+}
+
+.codeIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_code.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_code.svg) no-repeat center;
+}
+
+.quoteIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_quote.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_quote.svg) no-repeat center;
+}
+
+.bulletListIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_ul.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_ul.svg) no-repeat center;
+}
+
+.orderedListIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_ol.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_ol.svg) no-repeat center;
+}
+
 .tableIcon {
   width: 16px;
   height: 16px;
@@ -441,6 +491,28 @@
   -webkit-mask: url(../assets/icons/chevron_right.svg) no-repeat center;
   mask: url(../assets/icons/chevron_right.svg) no-repeat center;
   transform: rotate(90deg);
+}
+
+.eyeIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_eye.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_eye.svg) no-repeat center;
+  cursor: pointer;
+}
+
+.eyeSlashIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_eye_slash.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_eye_slash.svg) no-repeat center;
+  cursor: pointer;
 }
 
 .titleInput {
