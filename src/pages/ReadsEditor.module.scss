@@ -18,6 +18,10 @@
   border-bottom: 1px solid var(--devider);
   width: 640px;
   height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 20px;
   >div {
     /* position:fixed; */
     display: flex;
@@ -26,7 +30,6 @@
     height: 64px;
     justify-content: flex-start;
     align-items: center;
-    padding-inline: 20px;
   }
 }
 
@@ -684,4 +687,96 @@
       }
     }
   }
+}
+
+.selectBox {
+  display: flex;
+
+  @media only screen and (max-width: 720px) {
+    width: calc(100dvw - 32px);
+  }
+
+  .trigger {
+    padding-block: 8px;
+    padding-left: 16px;
+    padding-right: 12px;
+    border: none;
+    border-radius: 99px;
+    outline: none;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background-color: var(--background-header-input);
+
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+    }
+
+
+    width: 442px;
+
+    &.shortTrigger {
+      width: fit-content;
+      min-width: 68px;
+      text-align: center;
+    }
+  }
+}
+
+.selectContent {
+  background-color: var(--background-input);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 2px;
+
+  li {
+    list-style: none;
+  }
+}
+
+.selectItem {
+  border: none;
+  outline: none;
+  padding: 10px 12px;
+  margin: 0;
+  border-radius: 8px;
+
+  color: var(--text-primary);
+
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+
+  .checkIcon {
+    width: 14px;
+    height: 14px;
+    background-color: var(--text-primary);
+  }
+
+  >div {
+    padding-left: 30px;
+  }
+
+  >div[data-selected] {
+    padding-left: 4px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &:hover {
+    background-color: var(--subtile-devider);
+  }
+}
+
+.hiddenEditor {
+  display:none;
 }

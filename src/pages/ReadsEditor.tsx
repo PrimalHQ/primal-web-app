@@ -1,5 +1,5 @@
 import { batch, Component, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, Suspense } from 'solid-js'
-import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx, commandsCtx } from '@milkdown/core';
+import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx } from '@milkdown/core';
 import createFuzzySearch from '@nozbe/microfuzz';
 
 import {
@@ -7,6 +7,7 @@ import {
   toggleStrongCommand,
   toggleEmphasisCommand,
   insertImageCommand,
+  wrapInHeadingCommand,
 } from '@milkdown/preset-commonmark';
 
 import {
@@ -48,6 +49,8 @@ import { subsTo } from '../sockets';
 import { APP_ID } from '../App';
 import { useNavigate } from '@solidjs/router';
 import Wormhole from '../components/Wormhole/Wormhole';
+import { Select } from '@kobalte/core/select';
+import AdvancedSearchSelectBox from '../components/AdvancedSearch/AdvancedSearchSelect';
 
 
 export type ArticleEdit = {
@@ -65,6 +68,16 @@ const emptyArticleEdit = (): ArticleEdit => ({
   content: '',
   tags: [],
 });
+
+const headingLevels = [
+  'Normal',
+  'Heading 1',
+  'Heading 2',
+  'Heading 3',
+  'Heading 4',
+  'Heading 5',
+  'Heading 6',
+];
 
 const titleImageUploadId = 'title_image';
 const contentImageUploadId = 'content_image';
@@ -84,7 +97,11 @@ const ReadsEditor: Component = () => {
   const [isBoldSelected, setIsBoldSelected] = createSignal(false);
   const [isItalicActive, setIsItalicActive] = createSignal(false);
   const [isItalicSelected, setIsItalicSelected] = createSignal(false);
+  const [headingLevel, setHeadingLevel] = createSignal(0);
   const [selection, setSelection] = createSignal('');
+
+  const [editorMarkdown, setEditorMarkdown] = createSignal(false);
+  const [markdownContent, setMarkdownContent] = createSignal<string>('')
 
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
@@ -149,7 +166,11 @@ const ReadsEditor: Component = () => {
 
   onCleanup(() => {
     setOpenUploadSockets(false);
-  })
+  });
+
+  createEffect(() => {
+
+  });
 
   const initEditor = async () => {
     if (editor()) return;
@@ -164,6 +185,24 @@ const ReadsEditor: Component = () => {
         slistener.selection((_, selection, doc) => {
           const schema = ctx.get(schemaCtx);
           const range = selection.to - selection.from;
+          doc.nodesBetween(selection.from, selection.to, (node, pos, parent, index) => {
+            if (node.type.name === 'heading') {
+              setHeadingLevel(node.attrs['level']);
+              return false;
+            }
+
+            if (node.type.name === 'paragraph') {
+              setHeadingLevel(0);
+              return false;
+            }
+
+            // console.log('NODE: ', node)
+            // console.log('POS: ', pos)
+            // console.log('PARENT: ', parent)
+            // console.log('INDEX: ', index)
+
+            return false;
+          })
 
           setIsBoldSelected(false);
           if (range <= 0) {
@@ -180,13 +219,14 @@ const ReadsEditor: Component = () => {
 
           // temp2.rangeHasMark(temp1.from, temp1.to, temp3.marks['strong'])
         });
+
         listener.updated((ctx, current, prev) => {
-          // console.log("UPDATE: ", ctx)
         });
 
         listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
           if (markdown !== prevMarkdown) {
             setArticle('content', () => markdown)
+            setMarkdownContent(() => markdown);
           }
         });
       })
@@ -271,6 +311,18 @@ const ReadsEditor: Component = () => {
     toggleToolbar('italic');
 
     editor()?.action(callCommand(toggleEmphasisCommand.key));
+    focusEditor();
+  }
+  const heading = (hLevel: string) => {
+    const level = headingLevels.indexOf(hLevel) || 0;
+
+    editor()?.action(
+      callCommand(
+        wrapInHeadingCommand.key, level,
+      )
+    );
+
+    setHeadingLevel(level);
     focusEditor();
   }
   const table = () => {
@@ -577,6 +629,7 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.undoIcon}></div>
             </button>
+
             <button
               id="redoBtn"
               class={styles.mdToolButton}
@@ -584,6 +637,14 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.redoIcon}></div>
             </button>
+
+            <AdvancedSearchSelectBox
+              value={headingLevels[headingLevel()]}
+              options={headingLevels}
+              onChange={heading}
+              short={true}
+            />
+
             <button
               id="boldBtn"
               class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
@@ -591,6 +652,7 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.boldIcon}></div>
             </button>
+
             <button
               id="italicBtn"
               class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
@@ -598,6 +660,7 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.italicIcon}></div>
             </button>
+
             <div
               id="attachBtn"
               class={styles.mdToolButton}
@@ -614,14 +677,39 @@ const ReadsEditor: Component = () => {
               </label>
             </div>
           </div>
+          <button
+            id="editorMode"
+            class={`${styles.mdToolButton} ${editorMarkdown() ? styles.selected : ''}`}
+            onClick={() => setEditorMarkdown(v => !v)}
+          >
+            <Show
+              when={editorMarkdown()}
+              fallback={<>Markdown</>}
+            >
+              <>Preview</>
+            </Show>
+          </button>
         </div>
         <div
-          class={styles.editor}
+          class={`${styles.editor} ${editorMarkdown() ? styles.hiddenEditor : ''}`}
           ref={mdEditor}
           onClick={() => {
             // focusEditor();
           }}
         ></div>
+
+        <div class={`${editorMarkdown() ? '' : styles.hiddenEditor}`}>
+          <textarea
+            value={markdownContent()}
+            class={`${styles.editor}`}
+            onChange={e => {
+              const ed = editor();
+              if (!ed) return;
+              replaceAll(e.target.value)(ed.ctx);
+            }}
+          ></textarea>
+
+        </div>
       </div>
 
 
