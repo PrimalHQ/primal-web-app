@@ -1,7 +1,10 @@
-import { InitReady, prosePluginsCtx } from "@milkdown/core";
+import { InitReady, createCmdKey, prosePluginsCtx } from "@milkdown/core";
 import { Plugin, PluginKey, Transaction } from "@milkdown/prose/state";
 import { Ctx, createSlice } from "@milkdown/ctx";
 import { debounce, debounceFn } from "../utils";
+import { $command, insert } from "@milkdown/utils";
+import { setBlockType } from "@milkdown/prose/commands";
+import { linkSchema } from "@milkdown/preset-commonmark";
 
 type SelectionFn = (
   ctx: Ctx,
@@ -69,3 +72,14 @@ export const selectionListener = (ctx: Ctx) => {
     ctx.update(prosePluginsCtx, (x) => x.concat(plugin));
   };
 };
+
+export const AddLink = createCmdKey<number>();
+export const addLinkCommand = $command(
+  "AddLink",
+  (ctx) =>
+    (href = '', title = '', label = '') =>
+      () => {
+        insert(`[${title}](${href} ${label})`);
+        return true;
+      },
+);

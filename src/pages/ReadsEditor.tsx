@@ -28,7 +28,7 @@ import { logError } from '../lib/logger';
 
 import styles from './ReadsEditor.module.scss'
 import ButtonGhost from '../components/Buttons/ButtonGhost';
-import { selectionCtx, selectionListener } from '../lib/markdown';
+import { AddLink, addLinkCommand, selectionCtx, selectionListener } from '../lib/markdown';
 import TextInput from '../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { TextField } from '@kobalte/core/text-field';
@@ -121,6 +121,8 @@ const ReadsEditor: Component = () => {
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
   const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
 
+  const [enterLink, setEnterLink] = createSignal(false);
+
   let contentFileUpload: HTMLInputElement | undefined;
   let titleImageUpload: HTMLInputElement | undefined;
 
@@ -180,7 +182,12 @@ const ReadsEditor: Component = () => {
   });
 
   createEffect(() => {
-
+    if (enterLink()) {
+      setTimeout(() => {
+        const input = document.getElementById('link_url') as HTMLInputElement | null;
+        input?.focus();
+      }, 10)
+    }
   });
 
   const initEditor = async () => {
@@ -325,11 +332,11 @@ const ReadsEditor: Component = () => {
           setIsCodeSelected(v => !v) :
           setIsCodeActive(v => !v);
         break;
-      case 'link':
-        selection().length > 0 ?
-          setIsLinkSelected(v => !v) :
-          setIsLinkActive(v => !v);
-        break;
+      // case 'link':
+      //   selection().length > 0 ?
+      //     setIsLinkSelected(v => !v) :
+      //     setIsLinkActive(v => !v);
+      //   break;
 
     }
   }
@@ -386,15 +393,24 @@ const ReadsEditor: Component = () => {
     focusEditor();
   }
 
-  const link = (e: MouseEvent) => {
+  const link = (href: string, title: string) => {
     // toggleToolbar('link');
+
+    const ed = editor();
+
+    if (!ed) return;
 
     if (!editorMarkdown()) {
 
     }
 
+    insert(`[${title}](${href})`)(ed.ctx);
+
     editor()?.action(callCommand(toggleLinkCommand.key));
-    focusEditor();
+
+    setTimeout(() => {
+      focusEditor();
+    }, 100)
   }
 
   const heading = (hLevel: string) => {
@@ -781,7 +797,15 @@ const ReadsEditor: Component = () => {
             <button
               id="linkBtn"
               class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
-              onClick={link}
+              onClick={() => {
+                // link('url', 'title', 'label')
+                if (isLinkSelected()) {
+                  editor()?.action(callCommand(toggleLinkCommand.key));
+                  return;
+                }
+
+                setEnterLink(true);
+              }}
             >
               <div class={styles.linkIcon}></div>
             </button>
@@ -846,6 +870,28 @@ const ReadsEditor: Component = () => {
         </ButtonPrimary>
       </div>
 
+      <AdvancedSearchDialog
+        triggerClass="hidden"
+        open={enterLink()}
+        setOpen={setEnterLink}
+        title="Add link"
+      >
+        <div class={styles.addLinkDialog}>
+          <input id="link_url" placeholder="link url" class={styles.textInput} />
+          <input id="link_label" placeholder="link label" class={styles.textInput} />
+          <ButtonPrimary
+            onClick={() => {
+              const url = (document.getElementById('link_url') as HTMLInputElement | null)?.value || '';
+              const label = (document.getElementById('link_label') as HTMLInputElement | null)?.value || '';
+
+              link(url, label);
+              setEnterLink(false);
+            }}
+          >
+            Add Link
+          </ButtonPrimary>
+        </div>
+      </AdvancedSearchDialog>
     </div>
   )
 }

@@ -515,6 +515,31 @@
   cursor: pointer;
 }
 
+.addLinkDialog {
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+input.textInput {
+  background-color: var(--background-header-input);
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 20px;
+  border-radius: 12px;
+  border: none;
+  width: 100%;
+  padding: 12px 16px;
+  width: 100%;
+  margin: 0;
+
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+}
+
 .titleInput {
   textarea {
     background-color: var(--background-site);
