@@ -296,6 +296,8 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const getSugestedUsers = () => {
     const subId = `get_suggested_users_${APP_ID}`;
 
+    let foll: string[] = [];
+
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         if (content?.kind === Kind.SuggestedUsersByCategory) {
@@ -316,15 +318,20 @@ const CreateAccount: Component = () => {  const intl = useIntl();
           const userData = content as NostrUserContent;
           const user = convertToUser(userData, content.pubkey);
 
-          !followed.includes(user.pubkey) && setFollowed(followed.length, user.pubkey);
+          if (!followed.includes(user.pubkey)) {
+            foll.push(user.pubkey);
+            // setFollowed(followed.length, user.pubkey);
+          }
           setSuggestedData('users', () => ({ [user.pubkey]: { ...user }}))
         }
       },
       onEose: () => {
         unsub();
+        setFollowed(() => [...foll]);
       },
     });
 
+    console.log('GET SUGGESTIONS');
     getSuggestions(subId);
   };
 
