@@ -833,9 +833,9 @@ const ReadsEditor: Component = () => {
           >
             <Show
               when={editorMarkdown()}
-              fallback={<div class={styles.eyeSlashIcon}></div>}
+              fallback={<div class={styles.markdownIcon}></div>}
             >
-              <div class={styles.eyeIcon}></div>
+              <div class={`${styles.markdownIcon} ${styles.active}`}></div>
             </Show>
           </button>
         </div>

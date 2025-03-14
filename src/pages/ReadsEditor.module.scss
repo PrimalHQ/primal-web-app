@@ -515,6 +515,21 @@
   cursor: pointer;
 }
 
+.markdownIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_markdown.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_markdown.svg) no-repeat center;
+  cursor: pointer;
+
+  &.active {
+    background-color: var(--text-primary);
+  }
+}
+
 .addLinkDialog {
   width: 600px;
   display: flex;
@@ -534,6 +549,10 @@ input.textInput {
   padding: 12px 16px;
   width: 100%;
   margin: 0;
+
+  &:focus {
+    box-shadow: none;
+  }
 
   &::placeholder {
     color: var(--text-tertiary);
