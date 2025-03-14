@@ -40,6 +40,63 @@ const sidebarOptions = [
   {
     label: '',
     value: '',
+    id: 'separator_trending',
+    disabled: true,
+    separator: true,
+  },
+
+  {
+    label: 'GM Trending 24h',
+    value: 'gm_trending_24h',
+    id: 'gm_trending_24h',
+  },
+  {
+    label: 'GM Trending 12h',
+    value: 'gm_trending_12h',
+    id: 'gm_trending_12h',
+  },
+  {
+    label: 'GM Trending 4h',
+    value: 'gm_trending_4h',
+    id: 'gm_trending_4h',
+  },
+  {
+    label: 'GM Trending 1h',
+    value: 'gm_trending_1h',
+    id: 'gm_trending_1h',
+  },
+  {
+    label: '',
+    value: '',
+    id: 'separator_gm_trending',
+    disabled: true,
+    separator: true,
+  },
+
+  {
+    label: 'Classic Trending 24h',
+    value: 'classic_trending_24h',
+    id: 'classic_trending_24h',
+  },
+  {
+    label: 'Classic Trending 12h',
+    value: 'classic_trending_12h',
+    id: 'classic_trending_12h',
+  },
+  {
+    label: 'Classic Trending 4h',
+    value: 'classic_trending_4h',
+    id: 'classic_trending_4h',
+  },
+  {
+    label: 'Classic Trending 1h',
+    value: 'classic_trending_1h',
+    id: 'classic_trending_1h',
+  },
+  {
+    label: '',
+    value: '',
+    id: 'separator_classic_trnding',
     disabled: true,
     separator: true,
   },

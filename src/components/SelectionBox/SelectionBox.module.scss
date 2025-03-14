@@ -139,6 +139,11 @@
   animation: contentHide 150ms ease-in forwards;
   z-index: var(--z-index-lifted);
 
+  >ul {
+    overflow-y: scroll;
+    max-height: calc(100dvh - 126px);
+  }
+
   .caption {
     display: flex;
     justify-content: space-between;
