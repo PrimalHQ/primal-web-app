@@ -180,6 +180,10 @@ a {
   color: var(--accent-links);
 }
 
+.linkish_editor {
+  color: var(--accent-links) !important;
+}
+
 .redBorder {
   border: 2px solid red;
 }

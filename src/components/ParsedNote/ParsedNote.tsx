@@ -1269,6 +1269,12 @@ const ParsedNote: Component<{
           let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
 
+          console.log('MENTION: ', kind, id);
+
+          if (kind === undefined) {
+            kind = Kind.LongForm;
+          }
+
           if (props.noLinks === 'links' || (props.embedLevel || 0) > 1) {
             return <span class='linkish'>{token}</span>;
           }
@@ -1355,9 +1361,9 @@ const ParsedNote: Component<{
             if (!props.noLinks) {
               const reEncoded = nip19.naddrEncode({
                 // @ts-ignore
-                kind: eventId.kind,
+                kind,
                 // @ts-ignore
-                pubkey: eventId.pubkey,
+                pubkey: eventId.pubkey || '',
                 // @ts-ignore
                 identifier: eventId.identifier || '',
               });

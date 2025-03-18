@@ -1,12 +1,105 @@
-import { minKnownProfiles } from "../constants";
-import { sendMessage } from "../sockets";
+import { APP_ID } from "../App";
+import { Kind, minKnownProfiles } from "../constants";
+import { recomendedUsers } from "../contexts/SearchContext";
+import { sendMessage, subsTo } from "../sockets";
+import { convertToUser } from "../stores/profile";
+import { NostrUserContent, PrimalUser } from "../types/primal";
 import { sanitize } from "./notes";
+import { getUserProfiles } from "./profile";
 
 type SearchPayload = { query: string, limit: number, pubkey?: string, since?: number, until?: number, user_pubkey?: string };
 
 export const cleanQuery = (query: string) => {
   return sanitize(query);
 }
+
+
+export const fetchRecomendedUsersAsync = async (profiles?: PrimalUser[]) => {
+  return new Promise<PrimalUser[]>((resolve) => {
+    const subid = `recomended_users_${APP_ID}`;
+
+    let users: PrimalUser[] = [];
+    let scores: Record<string, number> = {};
+
+    const unsub = subsTo(subid, {
+      onEvent: (_, content) => {
+        if (!content) return;
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          users.push(convertToUser(user, content.pubkey));
+        }
+
+        if (content.kind === Kind.UserScore) {
+          scores = JSON.parse(content.content);
+        }
+      },
+      onEose: () => {
+
+        let sorted: PrimalUser[] = [];
+
+        users.forEach((user) => {
+          const index = recomendedUsers.indexOf(user.pubkey);
+          sorted[index] = { ...user };
+        });
+
+        if (profiles) {
+          sorted = [...profiles, ...sorted].slice(0, 9);
+        }
+
+        users = [...sorted];
+
+        resolve(users);
+        unsub();
+      },
+    });
+
+    getUserProfiles(recomendedUsers, subid);
+  })
+};
+
+export const fetchUserSearch = (pubkey: string | undefined, subId: string, query: string, limit = 10) => {
+  return new Promise<PrimalUser[]>((resolve, reject) => {
+
+    let users: PrimalUser[] = [];
+    let scores: Record<string, number> = {};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+
+        if (content.kind === Kind.Metadata) {
+          const user = content as NostrUserContent;
+
+          users.push(convertToUser(user, content.pubkey));
+          return;
+        }
+
+        if (content.kind === Kind.UserScore) {
+          scores = JSON.parse(content.content);
+          return;
+        }
+      },
+      onEose: () => {
+        unsub();
+
+        const sorted = users.sort((a, b) => {
+          const aScore = scores[a.pubkey];
+          const bScore = scores[b.pubkey];
+
+          return bScore - aScore;
+        });
+
+        users = sorted.slice(0, 10);
+
+        resolve(users);
+      },
+    });
+
+    searchUsers(pubkey, subId, query);
+  });
+};
 
 
 export const searchUsers = (pubkey: string | undefined, subid: string, query: string, limit = 10) => {

@@ -380,6 +380,16 @@
   mask: url(../assets/icons/toolbar_redo.svg) no-repeat center;
 }
 
+.atIcon {
+ width: 16px;
+ height: 16px;
+ display: inline-block;
+ margin: 0px 0px;
+ background-color: var(--text-secondary);
+ -webkit-mask: url(../assets/icons/toolbar_at.svg) no-repeat center;
+ mask: url(../assets/icons/toolbar_at.svg) no-repeat center;
+}
+
 .boldIcon {
   width: 16px;
   height: 16px;
@@ -399,6 +409,17 @@
   -webkit-mask: url(../assets/icons/toolbar_italic.svg) no-repeat center;
   mask: url(../assets/icons/toolbar_italic.svg) no-repeat center;
 }
+
+.strikeIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/toolbar_strikethrough.svg) no-repeat center;
+  mask: url(../assets/icons/toolbar_strikethrough.svg) no-repeat center;
+}
+
 
 .linkIcon {
   width: 16px;

@@ -37,13 +37,26 @@ import Uploader from '../components/Uploader/Uploader';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useToastContext } from '../components/Toaster/Toaster';
 
+// import { SolidEditorContent, SolidEditor } from "@vrite/tiptap-solid";
+
+import { Editor as EditorTT, getMarkType, mergeAttributes } from '@tiptap/core';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Mention from '@tiptap/extension-mention';
+import Image from '@tiptap/extension-image';
+
+import { createTiptapEditor } from 'solid-tiptap';
+import { Markdown } from 'tiptap-markdown';
+
+import tippy, { Instance } from 'tippy.js';
+
 
 import {
   actions as tActions,
   settings as tSettings,
   toast as tToast,
   upload as tUpload,
-  upload,
+  search as tSearch,
 } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
@@ -57,6 +70,23 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import { Select } from '@kobalte/core/select';
 import AdvancedSearchSelectBox from '../components/AdvancedSearch/AdvancedSearchSelect';
 import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
+import SearchOption from '../components/Search/SearchOption';
+import { nip05Verification, userName } from '../stores/profile';
+import Avatar from '../components/Avatar/Avatar';
+import { useSearchContext } from '../contexts/SearchContext';
+import { getCaretCoordinates } from '../lib/textArea';
+import { debounce } from '../utils';
+import { useProfileContext } from '../contexts/ProfileContext';
+import { PrimalUser } from '../types/primal';
+import { userMention } from '../markdownPlugins/userMentionPlugin';
+import { fetchRecomendedUsersAsync, fetchUserSearch } from '../lib/search';
+import { useAppContext } from '../contexts/AppContext';
+import { nip19 } from '../lib/nTools';
+import { getUsersRelayInfo } from '../lib/profile';
+import { NProfileExtension } from '../markdownPlugins/nProfileMention';
+import ReadsMentionDialog from '../components/ReadsMentionDialog/ReadsMentionDialog';
+import { referencesToTags } from '../stores/note';
+import ReadsLinkDialog from '../components/ReadsMentionDialog/ReadsLinkDialog';
 
 
 export type ArticleEdit = {
@@ -90,11 +120,15 @@ const contentImageUploadId = 'content_image';
 
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
+  const app = useAppContext();
+  const search = useSearchContext();
   const toast = useToastContext();
   const intl = useIntl();
   const navigate = useNavigate();
+  const profile = useProfileContext();
 
   let mdEditor: HTMLDivElement | undefined;
+  let mdEditorInput: HTMLDivElement | undefined;
 
   const [editor, setEditor] = createSignal<Editor>();
   const [html, setHtml] = createSignal('');
@@ -103,6 +137,8 @@ const ReadsEditor: Component = () => {
   const [isBoldSelected, setIsBoldSelected] = createSignal(false);
   const [isItalicActive, setIsItalicActive] = createSignal(false);
   const [isItalicSelected, setIsItalicSelected] = createSignal(false);
+  const [isStrikeActive, setIsStrikeActive] = createSignal(false);
+  const [isStrikeSelected, setIsStrikeSelected] = createSignal(false);
   const [isLinkActive, setIsLinkActive] = createSignal(false);
   const [isLinkSelected, setIsLinkSelected] = createSignal(false);
   const [isCodeActive, setIsCodeActive] = createSignal(false);
@@ -122,9 +158,240 @@ const ReadsEditor: Component = () => {
   const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
 
   const [enterLink, setEnterLink] = createSignal(false);
+  const [enterMention, setEnterMention] = createSignal(false);
+
+  const [isMentioning, setIsMentioning] = createSignal(false);
+  let mentionOptions: HTMLDivElement | undefined;
+  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
+  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
 
   let contentFileUpload: HTMLInputElement | undefined;
   let titleImageUpload: HTMLInputElement | undefined;
+
+
+  // TIPTAP----------------------------------
+
+  let tiptapEditor: HTMLDivElement | undefined;
+
+  let users: PrimalUser[] = [];
+  let userRelays: Record<string, string[]> = {};
+
+  const [suggestedUsers, setSuggestedUsers] = createStore<PrimalUser[]>([]);
+  const [selectedUser, setSelectedUser] = createSignal<PrimalUser>();
+  const [searchQuery, setSearchQuery] = createSignal('');
+
+  const getUserRelays = async () => await (new Promise<Record<string, string[]>>(resolve => {
+    const uids = Object.values(users).map(u => u.pubkey);
+    const subId = `users_relays_${APP_ID}`;
+
+    let relays: Record<string, string[]> = {};
+
+    const unsub = subsTo(subId, {
+      onEose: () => {
+        unsub();
+        resolve({ ...relays });
+      },
+      onEvent: (_, content) => {
+        if (content.kind !== Kind.UserRelays) return;
+
+        const pk = content.pubkey || 'UNKNOWN';
+
+        let rels: string[] = [];
+
+        for (let i = 0; i < (content.tags || []).length; i++) {
+          if (rels.length > 1) break;
+
+          const rel = content.tags[i];
+          if (rel[0] !== 'r' || rels.includes(rel[1])) continue;
+
+          rels.push(rel[1]);
+        }
+
+        relays[pk] = [...rels];
+      },
+      onNotice: () => resolve({}),
+    })
+
+    getUsersRelayInfo(uids, subId);
+  }));
+
+  const addMentionToEditor = (user: PrimalUser, relays: string[]) => {
+    const editor = editorTipTap();
+    if (!editor) return;
+
+    let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
+
+    if (relays.length > 0) {
+      pInfo.relays = [...relays];
+    }
+
+    const nprofile = nip19.nprofileEncode(pInfo);
+
+    editor
+      .chain()
+      .focus()
+      .insertNProfile({ nprofile, user, relays})
+      .insertContent({ type: 'text', text: ' ' })
+      .run()
+  }
+
+  const editorTipTap = createTiptapEditor(() => ({
+    element: tiptapEditor!,
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        defaultProtocol: 'https',
+        protocols: ['http', 'https'],
+      }),
+      Image,
+      Markdown,
+      NProfileExtension,
+      Mention.configure({
+        suggestion: {
+          char: '@',
+          command: ({ editor, range, props }) => {
+            const user = props.user as PrimalUser | undefined;
+
+            let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
+            const relays = userRelays[user.pubkey] || [];
+
+            if (relays.length > 0) {
+              pInfo.relays = [...relays];
+            }
+
+            const nprofile = nip19.nprofileEncode(pInfo);
+
+            const delRange = {
+              from: range.from,
+              to: range.from + searchQuery().length,
+            };
+
+            setSearchQuery(() => '');
+
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ ...delRange })
+              .insertNProfileAt(range, { nprofile, user, relays})
+              .insertContent({ type: 'text', text: ' ' })
+              .run()
+
+          //   window.getSelection()?.collapseToEnd()
+          },
+          items: async ({ editor, query}) => {
+            users = query.length < 2 ?
+              await fetchRecomendedUsersAsync() :
+              await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
+
+            userRelays = await getUserRelays();
+            setSuggestedUsers(() => [...users]);
+
+            return users;
+          },
+          render: () => {
+            let component
+            let popup: Instance[] = [];
+
+            return {
+              onStart: props => {
+
+                component = <div>
+                  <For each={suggestedUsers}>
+                    {(user, index) => (
+                      <SearchOption
+                        id={`reads_suggested_user_${index()}`}
+                        title={userName(user)}
+                        description={nip05Verification(user)}
+                        icon={<Avatar user={user} size="xs" />}
+                        statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+                        statLabel={intl.formatMessage(tSearch.followers)}
+                        // @ts-ignore
+                        onClick={() => {
+                          setSelectedUser(() => user);
+                          props.command({ user })
+                        }}
+                        highlighted={highlightedUser() === index()}
+                      />
+                    )}
+                  </For>
+                </div>
+
+                popup = tippy('#tiptapEditor', {
+                  getReferenceClientRect: props.clientRect,
+                  content: component,
+                  showOnCreate: true,
+                  interactive: true,
+                  trigger: 'manual',
+                  placement: 'bottom-start',
+                })
+              },
+              onUpdate: (props) => {
+                setSearchQuery(() => props.query || '');
+              },
+
+              onKeyDown(props) {
+                if (props.event.key === 'Escape') {
+                  popup[0].hide();
+
+                  return true;
+                }
+
+                if (props.event.key === 'ArrowDown') {
+                  setHighlightedUser(i => {
+                    if (!search?.users || search.users.length === 0) {
+                      return 0;
+                    }
+
+                    return i < search.users.length ? i + 1 : 0;
+                  });
+
+                  return true;
+                }
+
+                if (props.event.key === 'ArrowUp') {
+                  setHighlightedUser(i => {
+                    if (!search?.users || search.users.length === 0) {
+                      return 0;
+                    }
+
+                    return i > 0 ? i - 1 : search.users.length;
+                  });
+                  return true;
+                }
+
+
+                if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
+                  const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
+
+                  console.log('sel: ', sel)
+                  sel && sel.click();
+
+                  return true;
+                }
+
+                // @ts-ignore
+                return component?.ref?.onKeyDown(props)
+              },
+              onExit: () => {
+                popup[0].destroy();
+              }
+            }
+          },
+        },
+      }),
+    ],
+    content: '',
+    onSelectionUpdate({ editor: ed }) {
+      setIsBoldActive(() => ed.isActive('bold'));
+      setIsItalicActive(() => ed.isActive('italic'));
+      setIsStrikeActive(() => ed.isActive('strike'));
+      setIsCodeActive(() => ed.isActive('code'));
+    },
+  }));
+
+  // ----------------------------------------
 
   const resetUpload = (uploadId?: string) => {
     const id = fileUploadContext();
@@ -190,131 +457,6 @@ const ReadsEditor: Component = () => {
     }
   });
 
-  const initEditor = async () => {
-    if (editor()) return;
-
-    try {
-      const e = await Editor.make()
-      .config((ctx) => {
-        const listener = ctx.get(listenerCtx);
-
-        const slistener = ctx.get(selectionCtx);
-
-        slistener.selection((_, selection, doc) => {
-          const schema = ctx.get(schemaCtx);
-          const range = selection.to - selection.from;
-          doc.nodesBetween(selection.from, selection.to, (node, pos, parent, index) => {
-            if (node.type.name === 'heading') {
-              setHeadingLevel(node.attrs['level']);
-              return false;
-            }
-
-            if (node.type.name === 'paragraph') {
-              setHeadingLevel(0);
-              return false;
-            }
-
-            console.log('NODE: ', node)
-            console.log('POS: ', pos)
-            console.log('PARENT: ', parent)
-            console.log('INDEX: ', index)
-
-            return false;
-          })
-
-          setIsBoldSelected(false);
-          setIsItalicSelected(false);
-          setIsLinkSelected(false);
-          setIsCodeSelected(false);
-
-          if (range <= 0) {
-            setSelection('');
-            return;
-          }
-
-          setSelection(() => doc.textBetween(selection.from, selection.to));
-
-          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['strong'])) {
-            setIsBoldSelected(true)
-            return;
-          }
-
-          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['emphasis'])) {
-            setIsItalicSelected(true)
-            return;
-          }
-
-          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['link'])) {
-            setIsLinkSelected(true)
-            return;
-          }
-
-          if (doc.rangeHasMark(selection.from, selection.to, schema.marks['inlineCode'])) {
-            setIsCodeSelected(true)
-            return;
-          }
-
-          // temp2.rangeHasMark(temp1.from, temp1.to, temp3.marks['strong'])
-        });
-
-        listener.updated((ctx, current, prev) => {
-        });
-
-        listener.markdownUpdated((ctx, markdown, prevMarkdown) => {
-          if (markdown !== prevMarkdown) {
-            setArticle('content', () => markdown)
-            setMarkdownContent(() => markdown);
-          }
-        });
-      })
-      .config((ctx) => {
-        ctx.set(rootCtx, mdEditor);
-
-        // ctx.update(editorViewOptionsCtx, prev => ({
-        //   ...prev,
-        //   editable: () => true,
-        // }))
-      })
-      .use(selectionListener)
-      .use(listener)
-      .use(commonmark)
-      .use(gfm)
-      // .use(userMention)
-      .use(history)
-      .create();
-
-      const milk = document.querySelector(".ProseMirror, .editor") as HTMLTextAreaElement | null;
-
-      if (milk) {
-        milk.style.minHeight = "50dvh";
-      }
-
-      // const regex = /(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
-
-      // const cont = props.content.replace(regex, (e) => {
-      //   const arr = e.split('@');
-
-      //   return `${arr[0]}&#8203;@${arr[1]}`;
-      // });
-
-      // insert(cont)(e.ctx);
-      // setHtml(() => getHTML()(e.ctx));
-
-      // e.action(replaceAll(article.content))
-
-      setEditor(() => e);
-
-    } catch (err) {
-      logError('Failed init milkdown editor: ', err);
-    }
-  }
-
-  onMount(() => {
-    initEditor();
-  });
-
-  onCleanup(() => editor()?.destroy());
-
   const toggleToolbar = (button: string) => {
     switch (button) {
       case 'bold':
@@ -326,6 +468,11 @@ const ReadsEditor: Component = () => {
         selection().length > 0 ?
           setIsItalicSelected(v => !v) :
           setIsItalicActive(v => !v);
+        break;
+      case 'strike':
+        selection().length > 0 ?
+          setIsStrikeSelected(v => !v) :
+          setIsStrikeActive(v => !v);
         break;
       case 'code':
         selection().length > 0 ?
@@ -342,88 +489,94 @@ const ReadsEditor: Component = () => {
   }
 
   const undo = () => {
-    editor()?.action(callCommand(undoCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().undo().run();
   }
 
   const redo = () => {
-    editor()?.action(callCommand(redoCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().redo().run();
   }
 
   const bold = () => {
     toggleToolbar('bold');
-
-    editor()?.action(callCommand(toggleStrongCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().toggleBold().run();
   }
 
   const italic = (e: MouseEvent) => {
     toggleToolbar('italic');
+    editorTipTap()?.chain().focus().toggleItalic().run();
+  }
 
-    editor()?.action(callCommand(toggleEmphasisCommand.key));
-    focusEditor();
+  const strike = (e: MouseEvent) => {
+    toggleToolbar('strike');
+    editorTipTap()?.chain().focus().toggleStrike().run();
   }
 
   const code = (e: MouseEvent) => {
     toggleToolbar('code');
-
-    editor()?.action(callCommand(toggleInlineCodeCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().toggleCode().run();
   }
 
   const quote = (e: MouseEvent) => {
     toggleToolbar('quote');
-
-    editor()?.action(callCommand(wrapInBlockquoteCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().toggleBlockquote().run();
   }
 
   const bulletList = (e: MouseEvent) => {
     toggleToolbar('bulletList');
-
-    editor()?.action(callCommand(wrapInBulletListCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().toggleBulletList().run();
   }
 
   const orderedList = (e: MouseEvent) => {
     toggleToolbar('orderedList');
-
-    editor()?.action(callCommand(wrapInOrderedListCommand.key));
-    focusEditor();
+    editorTipTap()?.chain().focus().toggleOrderedList().run();
   }
 
   const link = (href: string, title: string) => {
     // toggleToolbar('link');
 
-    const ed = editor();
+    const editor = editorTipTap();
 
-    if (!ed) return;
+    if (!editor) return;
 
-    if (!editorMarkdown()) {
-
+    if (href === '') {
+      editor.
+        chain().
+        focus().
+        extendMarkRange('link').
+        unsetLink().
+        run();
+      return
     }
 
-    insert(`[${title}](${href})`)(ed.ctx);
+    editor.
+      chain().
+      focus().
+      extendMarkRange('link').
+      setLink({ href }).
+      command(({ tr }) => {
+        title && tr.insertText(title)
+        return true
+      }).
+      insertContent({ type: 'text', text: ' '}).
+      run();
 
-    editor()?.action(callCommand(toggleLinkCommand.key));
-
-    setTimeout(() => {
-      focusEditor();
-    }, 100)
+    editor.commands.unsetMark('link');
   }
 
   const heading = (hLevel: string) => {
     const level = headingLevels.indexOf(hLevel) || 0;
-
-    editor()?.action(
-      callCommand(
-        wrapInHeadingCommand.key, level,
-      )
-    );
-
     setHeadingLevel(level);
-    focusEditor();
+
+    if (level === 0) {
+      editorTipTap()?.chain().focus().setParagraph().run();
+      return;
+    }
+
+    if (level > 0 && level < 7) {
+      // @ts-ignore
+      editorTipTap()?.chain().focus().setHeading({ level }).run();
+      return;
+    }
   }
 
   const table = () => {
@@ -441,7 +594,9 @@ const ReadsEditor: Component = () => {
   }
 
   const postArticle = async () => {
-    if (!account || !account.hasPublicKey() || fileToUpload()) {
+    const editor = editorTipTap();
+
+    if (!account || !account.hasPublicKey() || fileToUpload() || !editor) {
       return;
     }
 
@@ -460,7 +615,10 @@ const ReadsEditor: Component = () => {
       return;
     }
 
-    let tags: string[][] = [];
+    const content = editor.storage.markdown.getMarkdown();
+
+    let relayHints = {}
+    let tags: string[][] = referencesToTags(content, relayHints);;
 
     const relayTags = account.relays.map(r => {
       let t = ['r', r.url];
@@ -478,7 +636,12 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
-    const { success, reasons, note } = await sendArticle(article, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
+    const articleToPost = {
+      ...article,
+      content,
+    }
+
+    const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
 
     if (success) {
 
@@ -500,6 +663,8 @@ const ReadsEditor: Component = () => {
       return;
     }
   }
+
+  // INPUT REACTIONS ----------------------------------
 
   return (
     <div class={styles.editorPage}>
@@ -536,9 +701,22 @@ const ReadsEditor: Component = () => {
             }
 
             if (uploadId === contentImageUploadId) {
-              const ed = editor();
+              const ed = editorTipTap();
               if (!ed) return;
-              ed.action(callCommand(insertImageCommand.key, { src: url }));
+
+              ed.
+                chain().
+                focus().
+                setImage({
+                  src: url,
+                  title: 'image',
+                  alt: 'image alternative',
+                }).
+                run();
+
+              // Move cursor one space to the right to avoid overwriting the image.
+              const el = document.querySelector('.tiptap.ProseMirror');
+              el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
             }
 
             resetUpload(uploadId);
@@ -727,6 +905,7 @@ const ReadsEditor: Component = () => {
               id="undoBtn"
               class={styles.mdToolButton}
               onClick={undo}
+              title="undo"
             >
               <div class={styles.undoIcon}></div>
             </button>
@@ -735,6 +914,7 @@ const ReadsEditor: Component = () => {
               id="redoBtn"
               class={styles.mdToolButton}
               onClick={redo}
+              title="redo"
             >
               <div class={styles.redoIcon}></div>
             </button>
@@ -750,6 +930,7 @@ const ReadsEditor: Component = () => {
               id="boldBtn"
               class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
               onClick={bold}
+              title="bold"
             >
               <div class={styles.boldIcon}></div>
             </button>
@@ -758,14 +939,26 @@ const ReadsEditor: Component = () => {
               id="italicBtn"
               class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
               onClick={italic}
+              title="italic"
             >
               <div class={styles.italicIcon}></div>
             </button>
 
             <button
+              id="strikeBtn"
+              class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
+              onClick={strike}
+              title="strike"
+            >
+              <div class={styles.strikeIcon}></div>
+            </button>
+
+
+            <button
               id="codeBtn"
               class={`${styles.mdToolButton} ${isCodeActive() || isCodeSelected() ? styles.selected : ''}`}
               onClick={code}
+              title="code block"
             >
               <div class={styles.codeIcon}></div>
             </button>
@@ -774,6 +967,7 @@ const ReadsEditor: Component = () => {
               id="quoteBtn"
               class={`${styles.mdToolButton}`}
               onClick={quote}
+              title="quote section"
             >
               <div class={styles.quoteIcon}></div>
             </button>
@@ -782,6 +976,7 @@ const ReadsEditor: Component = () => {
               id="bulletListBtn"
               class={`${styles.mdToolButton}`}
               onClick={bulletList}
+              title="bullet list"
             >
               <div class={styles.bulletListIcon}></div>
             </button>
@@ -790,6 +985,7 @@ const ReadsEditor: Component = () => {
               id="orderedListBtn"
               class={`${styles.mdToolButton}`}
               onClick={orderedList}
+              title="ordered list"
             >
               <div class={styles.orderedListIcon}></div>
             </button>
@@ -798,21 +994,38 @@ const ReadsEditor: Component = () => {
               id="linkBtn"
               class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
               onClick={() => {
-                // link('url', 'title', 'label')
-                if (isLinkSelected()) {
-                  editor()?.action(callCommand(toggleLinkCommand.key));
+                const editor = editorTipTap();
+                if (!editor) return;
+
+                let linak = editor.getAttributes('link').href;
+
+                if (linak) {
+                  editor.chain().unsetLink().run();
                   return;
                 }
 
                 setEnterLink(true);
               }}
+              title="link"
             >
               <div class={styles.linkIcon}></div>
+            </button>
+
+            <button
+              id="mentionBtn"
+              class={`${styles.mdToolButton}`}
+              onClick={() => {
+                setEnterMention(true);
+              }}
+              title="mention"
+            >
+              <div class={styles.atIcon}></div>
             </button>
 
             <div
               id="attachBtn"
               class={styles.mdToolButton}
+              title="image"
             >
               <input
                 id="upload-content"
@@ -828,8 +1041,12 @@ const ReadsEditor: Component = () => {
           </div>
           <button
             id="editorMode"
-            class={`${styles.mdToolButton}`}
-            onClick={() => setEditorMarkdown(v => !v)}
+            class={`${styles.mdToolButton} ${editorMarkdown() ? styles.selected : ''}`}
+            onClick={() => {
+              setEditorMarkdown(v => !v)
+              setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+            }}
+            title={editorMarkdown() ? 'wysiwyg mode' : 'markdown mode'}
           >
             <Show
               when={editorMarkdown()}
@@ -840,11 +1057,9 @@ const ReadsEditor: Component = () => {
           </button>
         </div>
         <div
-          class={`${styles.editor} ${editorMarkdown() ? styles.hiddenEditor : ''}`}
-          ref={mdEditor}
-          onClick={() => {
-            // focusEditor();
-          }}
+          id="tiptapEditor"
+          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''}`} ref={tiptapEditor}
+          onClick={() => editorTipTap()?.chain().focus().run()}
         ></div>
 
         <div class={`${editorMarkdown() ? '' : styles.hiddenEditor}`}>
@@ -857,7 +1072,6 @@ const ReadsEditor: Component = () => {
               replaceAll(e.target.value)(ed.ctx);
             }}
           ></textarea>
-
         </div>
       </div>
 
@@ -870,28 +1084,24 @@ const ReadsEditor: Component = () => {
         </ButtonPrimary>
       </div>
 
-      <AdvancedSearchDialog
-        triggerClass="hidden"
+      <ReadsLinkDialog
         open={enterLink()}
         setOpen={setEnterLink}
-        title="Add link"
-      >
-        <div class={styles.addLinkDialog}>
-          <input id="link_url" placeholder="link url" class={styles.textInput} />
-          <input id="link_label" placeholder="link label" class={styles.textInput} />
-          <ButtonPrimary
-            onClick={() => {
-              const url = (document.getElementById('link_url') as HTMLInputElement | null)?.value || '';
-              const label = (document.getElementById('link_label') as HTMLInputElement | null)?.value || '';
+        editor={editorTipTap()}
+        onSubmit={(url: string, label:string) => {
+          link(url, label);
+          setEnterLink(false);
+        }}
+      />
 
-              link(url, label);
-              setEnterLink(false);
-            }}
-          >
-            Add Link
-          </ButtonPrimary>
-        </div>
-      </AdvancedSearchDialog>
+      <ReadsMentionDialog
+        open={enterMention()}
+        setOpen={setEnterMention}
+        onSubmit={(user: PrimalUser, relays: string[]) => {
+          addMentionToEditor(user, relays);
+          setEnterMention(false);
+        }}
+      />
     </div>
   )
 }
