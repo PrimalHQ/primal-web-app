@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, Suspense } from 'solid-js'
+import { batch, Component, createEffect, createResource, createSignal, For, JSXElement, onCleanup, onMount, Show, Suspense } from 'solid-js'
 import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx } from '@milkdown/core';
 import createFuzzySearch from '@nozbe/microfuzz';
 
@@ -44,6 +44,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Mention from '@tiptap/extension-mention';
 import Image from '@tiptap/extension-image';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
 
 import { createTiptapEditor } from 'solid-tiptap';
 import { Markdown } from 'tiptap-markdown';
@@ -248,11 +249,26 @@ const ReadsEditor: Component = () => {
       Image,
       Markdown,
       NProfileExtension,
+      BubbleMenu.configure({
+        pluginKey: 'bubbleMenuOne',
+        element: document.getElementById('bubble_menu_one'),
+        shouldShow: ({ editor, view, state, oldState, from, to }) => {
+          return (to - from) > 0 && (
+            editor.isActive('paragraph') ||
+            editor.isActive('bold') ||
+            editor.isActive('italic') ||
+            editor.isActive('strike') ||
+            editor.isActive('code')
+          );
+        },
+      }),
       Mention.configure({
         suggestion: {
           char: '@',
           command: ({ editor, range, props }) => {
-            const user = props.user as PrimalUser | undefined;
+            const user = selectedUser();
+
+            if (!user) return;
 
             let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
             const relays = userRelays[user.pubkey] || [];
@@ -291,7 +307,7 @@ const ReadsEditor: Component = () => {
             return users;
           },
           render: () => {
-            let component
+            let component: JSXElement | undefined;
             let popup: Instance[] = [];
 
             return {
@@ -310,7 +326,7 @@ const ReadsEditor: Component = () => {
                         // @ts-ignore
                         onClick={() => {
                           setSelectedUser(() => user);
-                          props.command({ user })
+                          props.command({ id: user.pubkey, label: user.name})
                         }}
                         highlighted={highlightedUser() === index()}
                       />
@@ -1102,6 +1118,47 @@ const ReadsEditor: Component = () => {
           setEnterMention(false);
         }}
       />
+
+      <div id='bubble_menu_one' class={styles.bubbleMenu}>
+
+        <button
+          id="boldBtnBubble"
+          class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
+          onClick={bold}
+          title="bold"
+        >
+          <div class={styles.boldIcon}></div>
+        </button>
+
+        <button
+          id="italicBtnBubble"
+          class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
+          onClick={italic}
+          title="italic"
+        >
+          <div class={styles.italicIcon}></div>
+        </button>
+
+        <button
+          id="strikeBtnBubble"
+          class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
+          onClick={strike}
+          title="strike"
+        >
+          <div class={styles.strikeIcon}></div>
+        </button>
+
+
+        <button
+          id="codeBtnBubble"
+          class={`${styles.mdToolButton} ${isCodeActive() || isCodeSelected() ? styles.selected : ''}`}
+          onClick={code}
+          title="code block"
+        >
+          <div class={styles.codeIcon}></div>
+        </button>
+
+      </div>
     </div>
   )
 }

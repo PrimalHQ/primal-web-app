@@ -917,3 +917,16 @@ input.textInput {
 .hiddenEditor {
   display:none;
 }
+
+.bubbleMenu {
+  background-color: var(--background-header-input);
+
+  max-width: 640px;
+  overflow-x: scroll;
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 12px;
+  border-radius: 8px;
+}

@@ -46,6 +46,7 @@
     "@solidjs/router": "0.14.10",
     "@thisbeyond/solid-select": "0.13.0",
     "@tiptap/core": "^2.5.9",
+    "@tiptap/extension-bubble-menu": "^2.11.5",
     "@tiptap/extension-image": "^2.11.5",
     "@tiptap/extension-link": "^2.11.5",
     "@tiptap/extension-mention": "^2.11.5",
