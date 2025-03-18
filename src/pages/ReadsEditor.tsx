@@ -404,6 +404,7 @@ const ReadsEditor: Component = () => {
       setIsItalicActive(() => ed.isActive('italic'));
       setIsStrikeActive(() => ed.isActive('strike'));
       setIsCodeActive(() => ed.isActive('code'));
+      setIsLinkActive(() => ed.isActive('link'));
     },
   }));
 
@@ -495,11 +496,11 @@ const ReadsEditor: Component = () => {
           setIsCodeSelected(v => !v) :
           setIsCodeActive(v => !v);
         break;
-      // case 'link':
-      //   selection().length > 0 ?
-      //     setIsLinkSelected(v => !v) :
-      //     setIsLinkActive(v => !v);
-      //   break;
+      case 'link':
+        selection().length > 0 ?
+          setIsLinkSelected(v => !v) :
+          setIsLinkActive(v => !v);
+        break;
 
     }
   }
@@ -548,7 +549,7 @@ const ReadsEditor: Component = () => {
   }
 
   const link = (href: string, title: string) => {
-    // toggleToolbar('link');
+    toggleToolbar('link');
 
     const editor = editorTipTap();
 
@@ -1158,6 +1159,26 @@ const ReadsEditor: Component = () => {
           <div class={styles.codeIcon}></div>
         </button>
 
+        <button
+          id="linkBtn"
+          class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
+          onClick={() => {
+            const editor = editorTipTap();
+            if (!editor) return;
+
+            let linak = editor.getAttributes('link').href;
+
+            if (linak) {
+              editor.chain().unsetLink().run();
+              return;
+            }
+
+            setEnterLink(true);
+          }}
+          title="link"
+        >
+          <div class={styles.linkIcon}></div>
+        </button>
       </div>
     </div>
   )
