@@ -59,7 +59,7 @@ const Search: Component<{
         props.onInputConfirm(q);
       }
       else {
-        navigate(`/search/${q.replaceAll('#', '%23')}`);
+        navigate(`/search/${urlSafe.replaceAll('#', '%23')}`);
       }
       onBlur();
       resetQuery();
