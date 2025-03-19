@@ -141,8 +141,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   <ButtonPrimary
                     id={props.id}
                     onClick={() => {
-                      // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/reads/edit');
+                      app?.actions.openConfirmModal(noReadsConfirm);
+                      // navigate('/reads/edit');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -152,8 +152,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 <ButtonPrimary
                   id={props.id}
                   onClick={() => {
-                    // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/reads/edit');
+                    app?.actions.openConfirmModal(noReadsConfirm);
+                    // navigate('/reads/edit');
                   }}
                 >
                   {intl.formatMessage(tActions.newArticle)}
