@@ -52,6 +52,8 @@ const Search: Component<{
 
     const q = DOMPurify.sanitize(data.get('searchQuery') as string || '');
 
+    const urlSafe = encodeURIComponent(q);
+
     if (q.length > 0) {
       if (props.onInputConfirm) {
         props.onInputConfirm(q);

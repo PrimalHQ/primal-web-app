@@ -381,7 +381,6 @@ const ReadsEditor: Component = () => {
                 if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
                   const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
 
-                  console.log('sel: ', sel)
                   sel && sel.click();
 
                   return true;

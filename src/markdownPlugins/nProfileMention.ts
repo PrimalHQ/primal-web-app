@@ -5,7 +5,31 @@ import type { MarkdownSerializerState } from 'prosemirror-markdown'
 import { nip19 } from '../lib/nTools'
 import { PrimalUser } from '../types/primal'
 import { userName } from '../stores/profile'
+import { fetchUserProfile } from '../handleFeeds'
+import { APP_ID } from '../App'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
+
+export const findMissingUser = async (nprofile: string) => {
+  const decode = nip19.decode(nprofile);
+
+  let pubkey = '';
+
+  if (decode.type === 'npub') {
+    pubkey = decode.data;
+  }
+
+  if (decode.type === 'nprofile') {
+    pubkey = decode.data.pubkey;
+  }
+
+  if (pubkey.length === 0) return;
+
+  const user = await fetchUserProfile(undefined, pubkey, `user_missing_${APP_ID}`);
+
+  const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
+  mention && (mention.innerHTML = `@${userName(user)}`);
+}
+
 
 export type NProfileAttributes = {
   type: 'nprofile' | 'npub'
@@ -25,10 +49,6 @@ export const makeNProfileAttrs = (
   userRelays: string[],
   options?: any,
 ): NProfileAttributes => {
-  let name = ''
-  if (user) {
-    name = userName(user);
-  }
 
 
   const bech32 = input.replace(/^nostr:/, '')
@@ -36,6 +56,14 @@ export const makeNProfileAttrs = (
   // const relays = getNip19Relays({ type, data } as unknown as DecodeResult, options)
   console.log('INPUT: ', bech32, data)
   let relays: string[] = [];
+
+  let name = bech32;
+  if (user) {
+    name = userName(user);
+  }
+  else {
+    findMissingUser(name);
+  }
 
   switch (type) {
     case 'npub':
