@@ -211,7 +211,7 @@ const ReadsMentionDialog: Component<{
 
           <input
             id="search_users"
-            placeholder="link url"
+            placeholder={activeTab() === 'users' ? 'search for users by name or npub' : 'search for notes'}
             class={styles.textInput}
             onInput={onInput}
             ref={searchInput}
