@@ -11,7 +11,7 @@ import { parseBolt11 } from "./utils";
 
 export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {
   return new Promise<PrimalNote[]>((resolve, reject) => {
-    if (!pubkey) reject('Missing pubkey');
+    // if (!pubkey) reject('Missing pubkey');
 
     let page: FeedPage = {
       users: {},

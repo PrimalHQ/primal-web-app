@@ -1,4 +1,4 @@
-import { A } from '@solidjs/router';
+// import { A } from '@solidjs/router';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
@@ -1269,7 +1269,6 @@ const ParsedNote: Component<{
           let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
           const hex = typeof eventId === 'string' ? eventId : eventId.id;
 
-
           if (props.noLinks === 'links' || (props.embedLevel || 0) > 1) {
             return <span class='linkish'>{token}</span>;
           }
@@ -1551,7 +1550,7 @@ const ParsedNote: Component<{
 
           if (!props.noLinks) {
             link = !user ?
-              <>{prefix}<A href={path}>@{label}</A>{end}</> :
+              <>{prefix}<a href={path}>@{label}</a>{end}</> :
               <>{prefix}{MentionedUserLink({ user })}{end}</>;
           }
           return link;
@@ -1635,7 +1634,7 @@ const ParsedNote: Component<{
           if (!props.noLinks) {
             const ment = mentionedNotes[hex];
 
-            embeded = <><A href={path}>{noteId}</A>{end}</>;
+            embeded = <><a href={path}>{noteId}</a>{end}</>;
 
             if (ment) {
               setWordsDisplayed(w => w + shortMentionInWords - 1);
@@ -1681,7 +1680,7 @@ const ParsedNote: Component<{
           if (!props.noLinks) {
             const ment = mentionedArticles[naddr];
 
-            embeded = <><A href={path}>{noteId}</A>{end}</>;
+            embeded = <><a href={path}>{noteId}</a>{end}</>;
 
             if (ment) {
               setWordsDisplayed(w => w + shortMentionInWords - 1);
@@ -1711,7 +1710,7 @@ const ParsedNote: Component<{
 
           if (!props.noLinks) {
             link = user ?
-              <><A href={path}>@{label}</A>{end}</> :
+              <><a href={path}>@{label}</a>{end}</> :
               <>{MentionedUserLink({ user })}{end}</>;
           }
           return <span> {link}</span>;
@@ -1745,7 +1744,7 @@ const ParsedNote: Component<{
         } else if (props.noLinks === 'links') {
           embeded = <span class="linkish">#{term}</span>;
         } else {
-          embeded = <A href={`/search/%23${term}`}>#{term}</A>;
+          embeded = <a href={`/search/%23${term}`}>#{term}</a>;
         }
 
         return <span class="whole"> {embeded}{end}</span>;

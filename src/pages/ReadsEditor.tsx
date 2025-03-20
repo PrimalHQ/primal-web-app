@@ -78,7 +78,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { getCaretCoordinates } from '../lib/textArea';
 import { debounce } from '../utils';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { PrimalUser } from '../types/primal';
+import { PrimalNote, PrimalUser } from '../types/primal';
 import { userMention } from '../markdownPlugins/userMentionPlugin';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from '../lib/search';
 import { useAppContext } from '../contexts/AppContext';
@@ -88,6 +88,7 @@ import { NProfileExtension } from '../markdownPlugins/nProfileMention';
 import ReadsMentionDialog from '../components/ReadsMentionDialog/ReadsMentionDialog';
 import { referencesToTags } from '../stores/note';
 import ReadsLinkDialog from '../components/ReadsMentionDialog/ReadsLinkDialog';
+import { NEventExtension } from '../markdownPlugins/nEventMention';
 
 
 export type ArticleEdit = {
@@ -236,6 +237,20 @@ const ReadsEditor: Component = () => {
       .run()
   }
 
+  const addNoteToEditor = (note: PrimalNote) => {
+      const editor = editorTipTap();
+      if (!editor) return;
+
+
+      const nevent = note.noteId;
+
+      editor
+        .chain()
+        .focus()
+        .insertNEvent({ nevent })
+        .run()
+    }
+
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions: [
@@ -249,6 +264,7 @@ const ReadsEditor: Component = () => {
       Image,
       Markdown,
       NProfileExtension,
+      NEventExtension,
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
         element: document.getElementById('bubble_menu_one'),
@@ -293,8 +309,6 @@ const ReadsEditor: Component = () => {
               .insertNProfileAt(range, { nprofile, user, relays})
               .insertContent({ type: 'text', text: ' ' })
               .run()
-
-          //   window.getSelection()?.collapseToEnd()
           },
           items: async ({ editor, query}) => {
             users = query.length < 2 ?
@@ -1113,8 +1127,12 @@ const ReadsEditor: Component = () => {
       <ReadsMentionDialog
         open={enterMention()}
         setOpen={setEnterMention}
-        onSubmit={(user: PrimalUser, relays: string[]) => {
+        onAddUser={(user: PrimalUser, relays: string[]) => {
           addMentionToEditor(user, relays);
+          setEnterMention(false);
+        }}
+        onAddNote={(note: PrimalNote) => {
+          addNoteToEditor(note);
           setEnterMention(false);
         }}
       />

@@ -1,8 +1,10 @@
 .readsMentionDialog {
   width: 600px;
+  height: 702px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow-y: scroll;
 }
 
 input.textInput {
@@ -44,3 +46,66 @@ input.textInput {
     width: 100%;
   }
 }
+
+
+.tabs {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding-inline: 8px;
+    width: 100%;
+    border-radius: 0;
+    padding-top: 22px;
+    border-bottom: 1px solid var(--devider);
+    border-top: none;
+    margin-bottom: 20px;
+  }
+
+  .tab {
+    position: relative;
+    display: inline-block;
+    padding-inline: 14px;
+    padding-block: 2px;
+    border: none;
+    background: none;
+    width: fit-content;
+    height: 28px;
+    margin: 0;
+    margin-bottom: 12px;
+
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 14px;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  .tabIndicator {
+    position: absolute;
+    height: 4px;
+    top: 54px;
+    left: 0;
+    border-radius: 2px 2px 0px 0px;
+    background: var(--accent);
+    transition: all 250ms;
+  }
+
+  .tabContent {
+    @keyframes fadeIn {
+      from {
+          opacity:0;
+      }
+
+      to {
+          opacity:1;
+      }
+
+    }
+    animation: fadeIn 1s;
+  }

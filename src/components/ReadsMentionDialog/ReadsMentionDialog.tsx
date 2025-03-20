@@ -36,19 +36,25 @@ import { useSearchContext } from '../../contexts/SearchContext';
 import SearchOption from '../Search/SearchOption';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import { getUsersRelayInfo } from '../../lib/profile';
+import { useAdvancedSearchContext } from '../../contexts/AdvancedSearchContext';
 
+const contentKinds: Record<string, number> = {
+  notes: 1,
+}
 
 const ReadsMentionDialog: Component<{
   id?: string,
   open: boolean,
   setOpen?: (v: boolean) => void,
-  onSubmit: (user: PrimalUser, relays: string[]) => void,
+  onAddUser: (user: PrimalUser, relays: string[]) => void,
+  onAddNote: (note: PrimalNote) => void,
 }> = (props) => {
 
   const intl = useIntl();
   const account = useAccountContext();
   const app = useAppContext();
   const search = useSearchContext();
+  const advsearch = useAdvancedSearchContext();
   const profile = useProfileContext();
 
   const [query, setQuery] = createSignal('');
@@ -57,14 +63,47 @@ const ReadsMentionDialog: Component<{
 
   let userRelays: Record<string, string[]> = {};
 
+  const [activeTab, setActiveTab] = createSignal('users');
+
   createEffect(() => {
-    if (query().length === 0) {
+    if (props.open && activeTab()) {
+      setTimeout(() => {
+        searchInput?.focus();
+      }, 100)
+    }
+  });
+
+  createEffect(on(query, (q, prev) => {
+    if (q === prev) return;
+
+    const tab = activeTab();
+    if (tab === 'users') {
+      searchUsers(q);
+      return;
+    }
+
+    searchContent(q, tab);
+  }));
+
+  const searchUsers = (q: string) => {
+    if (q.length === 0) {
       search?.actions.getRecomendedUsers(profile?.profileHistory.profiles || []);
       return;
     }
 
-    search?.actions.findUsers(query());
-  });
+    search?.actions.findUsers(q);
+  }
+
+  const searchContent = (q: string, tab: string) => {
+    if (q.length === 0) {
+      advsearch?.actions.clearSearch();
+      return;
+    }
+
+    const kind = contentKinds[tab] || 1;
+    const term = `kind:${kind} ${q} pas:1`;
+    advsearch?.actions.findContent(term);
+  }
 
   createEffect(on(() => search?.users, (users, prev) => {
     if (!users) return;
@@ -142,7 +181,12 @@ const ReadsMentionDialog: Component<{
   };
 
   const selectUser = (user: PrimalUser) => {
-    props.onSubmit(user, userRelays[user.pubkey]);
+    props.onAddUser(user, userRelays[user.pubkey]);
+    resetQuery();
+  }
+
+  const selectNote = (note: PrimalNote) => {
+    props.onAddNote && props.onAddNote(note);
     resetQuery();
   }
 
@@ -153,37 +197,59 @@ const ReadsMentionDialog: Component<{
       setOpen={props.setOpen}
       title="Add mention"
     >
-    <div class={styles.readsMentionDialog}>
-      <input
-        id="search_users"
-        placeholder="link url"
-        class={styles.textInput}
-        onInput={onInput}
-        ref={searchInput}
-      />
+      <div class={styles.readsMentionDialog}>
+        <Tabs value={activeTab()} onChange={setActiveTab}>
+          <Tabs.List class={styles.tabs}>
+            <Tabs.Trigger class={styles.tab} value="users">
+              People
+            </Tabs.Trigger>
+            <Tabs.Trigger class={styles.tab} value="notes">
+              Notes
+            </Tabs.Trigger>
+            <Tabs.Indicator class={styles.tabIndicator} />
+          </Tabs.List>
 
-      <div>
-        <For each={search?.users}>
-          {(user) => (
-            <SearchOption
-              title={userName(user)}
-              description={nip05Verification(user)}
-              icon={<Avatar user={user} size="vvs" />}
-              statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-              statLabel={intl.formatMessage(tSearch.followers)}
-              onClick={() => selectUser(user)}
-            />
-          )}
-        </For>
+          <input
+            id="search_users"
+            placeholder="link url"
+            class={styles.textInput}
+            onInput={onInput}
+            ref={searchInput}
+          />
+
+          <Tabs.Content value="users">
+            <div>
+              <For each={search?.users}>
+                {(user) => (
+                  <SearchOption
+                    title={userName(user)}
+                    description={nip05Verification(user)}
+                    icon={<Avatar user={user} size="vvs" />}
+                    statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+                    statLabel={intl.formatMessage(tSearch.followers)}
+                    onClick={() => selectUser(user)}
+                  />
+                )}
+              </For>
+            </div>
+          </Tabs.Content>
+
+          <Tabs.Content value="notes">
+            <div>
+              <For each={advsearch?.notes.slice(0, 10)} >
+                {note => (
+                  <Note
+                    note={note}
+                    shorten={true}
+                    onClick={() => selectNote(note)}
+                  />
+                )}
+              </For>
+            </div>
+          </Tabs.Content>
+
+        </Tabs>
       </div>
-
-      <ButtonPrimary
-        onClick={() => {
-        }}
-      >
-        Add Mention
-      </ButtonPrimary>
-    </div>
     </AdvancedSearchDialog>
   );
 }

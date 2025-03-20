@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A } from '@solidjs/router';
+// import { A } from '@solidjs/router';
 import { nip19 } from '../../lib/nTools';
 import { batch, Component, createMemo, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -20,8 +20,9 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
 import { neventEncode } from 'nostr-tools/lib/types/nip19';
+import { TranslatorProvider } from '../../contexts/TranslatorContext';
 
-const EmbeddedNote: Component<{
+export type EmbeddedNoteProps = {
   note: PrimalNote | undefined,
   mentionedUsers?: Record<string, PrimalUser>,
   includeEmbeds?: boolean,
@@ -33,10 +34,19 @@ const EmbeddedNote: Component<{
   embedLevel?: number,
   rootNote?: PrimalNote,
   noLinks?: 'text' | 'links',
-}> = (props) => {
+};
+
+export const renderEmbeddedNote = (props: EmbeddedNoteProps) => (
+  <div>
+    <TranslatorProvider>
+      <EmbeddedNote {...props} />
+    </TranslatorProvider>
+  </div> as HTMLDivElement
+  ).innerHTML;
+
+const EmbeddedNote: Component<EmbeddedNoteProps> = (props) => {
 
   const threadContext = useThreadContext();
-  const intl = useIntl();
   const app = useAppContext();
   const account = useAccountContext();
 
@@ -109,7 +119,7 @@ const EmbeddedNote: Component<{
     }
 
     return (
-      <A
+      <a
         href={`/e/${noteId()}`}
         class={klass()}
         onClick={() => navToThread()}
@@ -117,7 +127,7 @@ const EmbeddedNote: Component<{
         data-event-bech32={noteId()}
       >
         {children}
-      </A>
+      </a>
     );
   };
 

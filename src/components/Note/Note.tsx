@@ -1,4 +1,4 @@
-import { A } from '@solidjs/router';
+// import { A } from '@solidjs/router';
 import { batch, Component, createEffect, Match, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
@@ -22,6 +22,8 @@ import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
 import { addrRegexG, imageRegexG, Kind, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { nip19 } from 'nostr-tools';
+import AppRouter from '../../Router';
+import { TranslatorProvider } from '../../contexts/TranslatorContext';
 
 export type NoteReactionsState = {
   likes: number,
@@ -45,7 +47,7 @@ export type NoteReactionsState = {
   quoteCount: number,
 };
 
-const Note: Component<{
+export type NoteProps = {
   note: PrimalNote,
   id?: string,
   parent?: boolean,
@@ -55,7 +57,17 @@ const Note: Component<{
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
-}> = (props) => {
+}
+
+export const renderNote = (props: NoteProps) => (
+  <div>
+    <TranslatorProvider>
+      <Note {...props} />
+    </TranslatorProvider>
+  </div> as HTMLDivElement
+  ).innerHTML;
+
+const Note: Component<NoteProps> = (props) => {
 
   const threadContext = useThreadContext();
   const app = useAppContext();
@@ -308,10 +320,10 @@ const Note: Component<{
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
-        <A
+        <a
           id={props.id}
           class={styles.noteNotificationLink}
-          href={noteLinkId()}
+          href={!props.onClick ? noteLinkId() : ''}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -336,7 +348,7 @@ const Note: Component<{
               </div>
             </div>
           </div>
-        </A>
+        </a>
       </Match>
 
       <Match when={noteType() === 'primary'}>
@@ -459,10 +471,10 @@ const Note: Component<{
       </Match>
 
       <Match when={isPhone() && noteType() === 'feed'}>
-        <A
+        <a
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
-          href={noteLinkId()}
+          href={!props.onClick ? noteLinkId() : ''}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -474,9 +486,9 @@ const Note: Component<{
             </Show>
           </div>
           <div class={styles.userHeader}>
-            <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
+            {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
               <Avatar user={props.note.user} size="xs" />
-            </A>
+            {/* </A> */}
 
             <NoteAuthorInfo
               author={props.note.user}
@@ -517,14 +529,14 @@ const Note: Component<{
             onZapAnim={addTopZapFeed}
             size={size()}
           />
-        </A>
+        </a>
       </Match>
 
       <Match when={noteType() === 'thread' || noteType() === 'feed'}>
-        <A
+        <a
           id={props.id}
           class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}
-          href={noteLinkId()}
+          href={!props.onClick ? noteLinkId() : ''}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -537,9 +549,9 @@ const Note: Component<{
           </div>
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
+              {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
                 <Avatar user={props.note.user} size="vs" />
-              </A>
+              {/* </A> */}
               <Show
                 when={props.parent}
               >
@@ -591,14 +603,14 @@ const Note: Component<{
               </div>
             </div>
           </div>
-        </A>
+        </a>
       </Match>
 
       <Match when={noteType() === 'reaction'}>
-        <A
+        <a
           id={props.id}
           class={`${styles.note} ${styles.reactionNote}`}
-          href={noteLinkId()}
+          href={!props.onClick ? noteLinkId() : ''}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -606,9 +618,9 @@ const Note: Component<{
         >
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              <A href={app?.actions.profileLink(props.note.user.npub) || ''}>
+              <a href={app?.actions.profileLink(props.note.user.npub) || ''}>
                 <Avatar user={props.note.user} size="vs" />
-              </A>
+              </a>
               <Show
                 when={props.parent}
               >
@@ -636,7 +648,7 @@ const Note: Component<{
               </div>
             </div>
           </div>
-        </A>
+        </a>
       </Match>
     </Switch>
   );

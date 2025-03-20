@@ -53,8 +53,6 @@ export const makeNProfileAttrs = (
 
   const bech32 = input.replace(/^nostr:/, '')
   const { type, data } = nip19.decode(bech32);
-  // const relays = getNip19Relays({ type, data } as unknown as DecodeResult, options)
-  console.log('INPUT: ', bech32, data)
   let relays: string[] = [];
 
   let name = bech32;
@@ -168,9 +166,9 @@ export const NProfileExtension = Node.create({
         ({ commands }) =>
           commands.insertContentAt(range, makeNProfileNode(nprofile, user, relays, this.options), { updateSelection: false }),
       insertNProfile:
-          ({ nprofile, user, relays }) =>
-          ({ commands }) =>
-            commands.insertContent(makeNProfileNode(nprofile, user, relays, this.options), { updateSelection: false }),
+        ({ nprofile, user, relays }) =>
+        ({ commands }) =>
+          commands.insertContent(makeNProfileNode(nprofile, user, relays, this.options), { updateSelection: false }),
     }
   },
 
