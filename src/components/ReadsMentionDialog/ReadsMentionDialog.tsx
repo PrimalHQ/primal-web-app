@@ -20,7 +20,7 @@ import {
   reactionsModal,
   search as tSearch,
 } from '../../translations';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser } from '../../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalArticleFeed, PrimalNote, PrimalUser } from '../../types/primal';
 import { debounce, parseBolt11, previousWord } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
@@ -39,9 +39,11 @@ import { getUsersRelayInfo } from '../../lib/profile';
 import { useAdvancedSearchContext } from '../../contexts/AdvancedSearchContext';
 import tippy, { Instance } from 'tippy.js';
 import { nip19 } from '../../lib/nTools';
+import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 
 const contentKinds: Record<string, number> = {
   notes: 1,
+  reads: 30023,
 }
 
 const ReadsMentionDialog: Component<{
@@ -50,6 +52,7 @@ const ReadsMentionDialog: Component<{
   setOpen?: (v: boolean) => void,
   onAddUser: (user: PrimalUser, relays: string[]) => void,
   onAddNote: (note: PrimalNote) => void,
+  onAddRead: (read: PrimalArticle) => void,
 }> = (props) => {
 
   const intl = useIntl();
@@ -280,6 +283,11 @@ const ReadsMentionDialog: Component<{
     resetQuery();
   }
 
+  const selectRead = (note: PrimalArticle) => {
+    props.onAddRead && props.onAddRead(note);
+    resetQuery();
+  }
+
   return (
     <AdvancedSearchDialog
       triggerClass="hidden"
@@ -295,6 +303,9 @@ const ReadsMentionDialog: Component<{
             </Tabs.Trigger>
             <Tabs.Trigger class={styles.tab} value="notes">
               Notes
+            </Tabs.Trigger>
+            <Tabs.Trigger class={styles.tab} value="reads">
+              Reads
             </Tabs.Trigger>
             <Tabs.Indicator class={styles.tabIndicator} />
           </Tabs.List>
@@ -335,6 +346,22 @@ const ReadsMentionDialog: Component<{
                     note={note}
                     shorten={true}
                     onClick={() => selectNote(note)}
+                  />
+                )}
+              </For>
+            </div>
+          </Tabs.Content>
+
+          <Tabs.Content value="reads">
+            <div>
+              <For each={advsearch?.reads.slice(0, 10)} >
+                {read => (
+                  <ArticleCompactPreview
+                    article={read}
+                    onClick={() => {
+                      selectRead(read)
+                    }}
+                    noLinks="links"
                   />
                 )}
               </For>

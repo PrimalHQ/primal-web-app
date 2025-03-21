@@ -1226,7 +1226,7 @@ const ParsedNote: Component<{
           article={mention}
           hideFooter={true}
           hideContext={true}
-          boredered={(props.embedLevel || 0) > 0}
+          bordered={(props.embedLevel || 0) > 0}
           noLinks={props.noLinks}
         />
       </div>);

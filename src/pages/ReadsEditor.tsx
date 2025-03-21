@@ -78,7 +78,7 @@ import { useSearchContext } from '../contexts/SearchContext';
 import { getCaretCoordinates } from '../lib/textArea';
 import { debounce } from '../utils';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { PrimalNote, PrimalUser } from '../types/primal';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
 import { userMention } from '../markdownPlugins/userMentionPlugin';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from '../lib/search';
 import { useAppContext } from '../contexts/AppContext';
@@ -89,6 +89,7 @@ import ReadsMentionDialog from '../components/ReadsMentionDialog/ReadsMentionDia
 import { referencesToTags } from '../stores/note';
 import ReadsLinkDialog from '../components/ReadsMentionDialog/ReadsLinkDialog';
 import { NEventExtension } from '../markdownPlugins/nEventMention';
+import { NAddrExtension } from '../markdownPlugins/nAddrMention';
 
 
 export type ArticleEdit = {
@@ -238,18 +239,30 @@ const ReadsEditor: Component = () => {
   }
 
   const addNoteToEditor = (note: PrimalNote) => {
-      const editor = editorTipTap();
-      if (!editor) return;
+    const editor = editorTipTap();
+    if (!editor) return;
 
+    const nevent = note.noteId;
 
-      const nevent = note.noteId;
+    editor
+      .chain()
+      .focus()
+      .insertNEvent({ nevent })
+      .run()
+  }
 
-      editor
-        .chain()
-        .focus()
-        .insertNEvent({ nevent })
-        .run()
-    }
+  const addReadToEditor = (read: PrimalArticle) => {
+    const editor = editorTipTap();
+    if (!editor) return;
+
+    const naddr = read.noteId;
+
+    editor
+      .chain()
+      .focus()
+      .insertNAddr({ naddr })
+      .run()
+  }
 
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
@@ -265,6 +278,7 @@ const ReadsEditor: Component = () => {
       Markdown,
       NProfileExtension,
       NEventExtension,
+      NAddrExtension,
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
         element: document.getElementById('bubble_menu_one'),
@@ -1133,6 +1147,10 @@ const ReadsEditor: Component = () => {
         }}
         onAddNote={(note: PrimalNote) => {
           addNoteToEditor(note);
+          setEnterMention(false);
+        }}
+        onAddRead={(read: PrimalArticle) => {
+          addReadToEditor(read);
           setEnterMention(false);
         }}
       />

@@ -455,6 +455,7 @@ const PrimalMarkdown: Component<{
               article={mention}
               bordered={true}
               hideFooter={true}
+              onClick={navigate}
             />
           </div>
         );

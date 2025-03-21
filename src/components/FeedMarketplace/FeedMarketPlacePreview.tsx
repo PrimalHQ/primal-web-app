@@ -9,6 +9,7 @@ import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import styles from './FeedMarketPlace.module.scss';
 import FeedMarketItem from './FeedMarketPlaceItem';
+import { useNavigate } from '@solidjs/router';
 
 type FeedPreviewStore = {
   notes: PrimalNote[],
@@ -28,6 +29,7 @@ const FeedMarketPlacePreview: Component<{
   isInDialog?: boolean,
 }> = (props) => {
   const account = useAccountContext();
+  const navigate = useNavigate();
 
   const [store, updateStore] = createStore<FeedPreviewStore>({
     notes: [],
@@ -137,6 +139,7 @@ const FeedMarketPlacePreview: Component<{
             <For each={store.reads}>
               {article => <ArticlePreview
                 article={article}
+                onClick={navigate}
               />}
             </For>
           </Match>

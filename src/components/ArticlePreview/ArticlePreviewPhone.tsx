@@ -38,7 +38,7 @@ const ArticlePreviewPhone: Component<{
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
   hideFooter?: boolean,
   hideContext?: boolean,
-  boredered?: boolean,
+  bordered?: boolean,
 }> = (props) => {
 
   const app = useAppContext();
@@ -343,7 +343,7 @@ const ArticlePreviewPhone: Component<{
   return (
     <A
       ref={articlePreview}
-      class={`${styles.articlePhone} ${props.boredered ? styles.bordered : ''}`}
+      class={`${styles.articlePhone} ${props.bordered ? styles.bordered : ''}`}
       href={articleUrl()}
       style={props.height ? `height: ${props.height}px` : ''}
     >

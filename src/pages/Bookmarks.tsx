@@ -21,6 +21,7 @@ import { calculateNotesOffset, calculateReadsOffset, parseBolt11 } from '../util
 import styles from './Bookmarks.module.scss';
 import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../megaFeeds';
+import { useNavigate } from '@solidjs/router';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
@@ -43,6 +44,7 @@ let since: number = 0;
 const Bookmarks: Component = () => {
   const account = useAccountContext();
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const pageSize = 20;
 
@@ -183,7 +185,7 @@ const Bookmarks: Component = () => {
                 <Match when={kind() === 'reads'}>
                   <For each={store.reads}>
                     {(read) =>
-                      <div class="animated"><ArticlePreview article={read} /></div>
+                      <div class="animated"><ArticlePreview article={read} onClick={navigate} /></div>
                     }
                   </For>
                 </Match>

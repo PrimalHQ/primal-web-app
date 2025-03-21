@@ -1,6 +1,6 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Tabs } from "@kobalte/core/tabs";
-import { A, useLocation } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 import { Component, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { imageOrVideoRegex, Kind, profileContactListPage } from "../../constants";
@@ -41,6 +41,7 @@ const ProfileTabs: Component<{
   const account = useAccountContext();
   const media = useMediaContext();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const hash = () => {
     return (location.hash.length > 1) ? location.hash.substring(1) : 'notes';
@@ -401,7 +402,7 @@ const ProfileTabs: Component<{
                     <div>
                       <For each={profile?.articles}>
                         {article => (
-                          <div class="animated"><ArticlePreview article={article} /></div>
+                          <div class="animated"><ArticlePreview article={article} onClick={navigate} /></div>
                         )}
                       </For>
                       <Paginator

@@ -264,7 +264,7 @@
   }
 
   a {
-    &:not(.embeddedNote) {
+    &:not(.embeddedNote), &:not(.arttt) {
       color: var(--accent-links);
     }
 

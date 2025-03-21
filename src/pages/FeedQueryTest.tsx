@@ -1,5 +1,5 @@
 import { paragraphSchema } from '@milkdown/preset-commonmark';
-import { A, useParams } from '@solidjs/router';
+import { A, useNavigate, useParams } from '@solidjs/router';
 import { Component, createEffect, For, Match, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../App';
@@ -22,6 +22,7 @@ export type FeedRange = { order_by: string, since: number, until: number };
 const FeedsQueryTest: Component = () => {
   const params = useParams();
   const account = useAccountContext();
+  const navigate = useNavigate();
 
   const [feed, setFeed] = createStore<SearchFeed>({
     id: '',
@@ -133,7 +134,7 @@ const FeedsQueryTest: Component = () => {
                     <Note note={item} noteType="feed" />
                   </Match>
                   <Match when={feed.category === 'reads'}>
-                    <ArticlePreview article={item} />
+                    <ArticlePreview article={item} onClick={navigate} />
                   </Match>
                 </Switch>)
               }

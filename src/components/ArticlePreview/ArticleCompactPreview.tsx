@@ -33,8 +33,9 @@ const ArticleCompactPreview: Component<{
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
   hideFooter?: boolean,
   hideContext?: boolean,
-  boredered?: boolean,
+  bordered?: boolean,
   noLinks?: string,
+  onClick?: () => {},
 }> = (props) => {
 
   const app = useAppContext();
@@ -342,6 +343,7 @@ const ArticleCompactPreview: Component<{
       return (
         <div
           class={styles.articleCompact}
+          onClick={() => props.onClick && props.onClick()}
         >
           {children}
         </div>

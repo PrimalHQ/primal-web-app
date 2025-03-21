@@ -39,7 +39,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 import ReedSelect from '../components/FeedSelect/ReedSelect';
 import ReadsHeader from '../components/HomeHeader/ReadsHeader';
-import { A, useParams } from '@solidjs/router';
+import { A, useNavigate, useParams } from '@solidjs/router';
 import { APP_ID } from '../App';
 import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
@@ -57,6 +57,7 @@ const Reads: Component = () => {
   const intl = useIntl();
   const app = useAppContext();
   const params = useParams();
+  const navigate = useNavigate();
 
   const isPageLoading = () => context?.isFetching;
 
@@ -257,6 +258,7 @@ const Reads: Component = () => {
                         article={note}
                         height={context?.articleHeights[note.naddr]}
                         onRender={onArticleRendered}
+                        onClick={navigate}
                       />
                     </div>
                   )}

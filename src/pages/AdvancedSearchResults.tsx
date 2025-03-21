@@ -110,7 +110,7 @@ const AdvancedSearchResults: Component = () => {
         <Switch>
           <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
             <For each={search?.reads} >
-              {article => <ArticlePreview article={article} />}
+              {article => <ArticlePreview article={article} onClick={navigate} />}
             </For>
           </Match>
           <Match when={[Kind.Text].includes(kind())}>
