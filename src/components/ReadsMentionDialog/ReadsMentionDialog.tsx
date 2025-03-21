@@ -46,6 +46,12 @@ const contentKinds: Record<string, number> = {
   reads: 30023,
 }
 
+const placeholders = {
+  users: 'search for users by name or npub',
+  notes: 'search for notes',
+  reads: 'search for reads',
+}
+
 const ReadsMentionDialog: Component<{
   id?: string,
   open: boolean,
@@ -177,6 +183,51 @@ const ReadsMentionDialog: Component<{
   }));
 
   const [suggestedTerm, setSuggestedTerm] = createSignal('');
+  const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+
+  const onKeyDown = (event: KeyboardEvent) => {
+    if (!pop?.state.isShown) return;
+
+    if (event.key === 'Escape') {
+      pop?.hide();
+      return true;
+    }
+
+    if (event.key === 'ArrowDown') {
+      setHighlightedUser(i => {
+        if (!search?.users || search.users.length === 0) {
+          return 0;
+        }
+
+        return i < search.users.length ? i + 1 : 0;
+      });
+
+      return true;
+    }
+
+    if (event.key === 'ArrowUp') {
+      setHighlightedUser(i => {
+        if (!search?.users || search.users.length === 0) {
+          return 0;
+        }
+
+        return i > 0 ? i - 1 : search.users.length;
+      });
+      return true;
+    }
+
+
+    if (['Enter', 'Space', 'Comma', 'Tab'].includes(event.code)) {
+      const sel = document.getElementById(`mention_suggested_user_${highlightedUser()}`);
+
+      sel && sel.click();
+
+      return true;
+    }
+
+    // @ts-ignore
+    return component?.ref?.onKeyDown(props)
+  };
 
   let pop: Instance | undefined;
 
@@ -190,7 +241,7 @@ const ReadsMentionDialog: Component<{
             <For each={search?.users}>
               {(user, index) => (
                 <SearchOption
-                  id={`reads_suggested_user_${index()}`}
+                  id={`mention_suggested_user_${index()}`}
                   title={userName(user)}
                   description={nip05Verification(user)}
                   icon={<Avatar user={user} size="xs" />}
@@ -209,7 +260,7 @@ const ReadsMentionDialog: Component<{
                     searchInput.focus();
                     searchInput.dispatchEvent(new Event('input', { bubbles: true }));
                   }}
-                  highlighted={false}
+                  highlighted={highlightedUser() === index()}
                 />
               )}
             </For>
@@ -223,16 +274,10 @@ const ReadsMentionDialog: Component<{
           appendTo: 'parent',
           sticky: 'reference',
           onShow(instance) {
-            console.log('SHOW')
-          },
-          onShown(instance) {
-            console.log('SHOWN')
+            document.addEventListener('keydown', onKeyDown);
           },
           onHide(instance) {
-            console.log('HIDE')
-          },
-          onHidden(instance) {
-            console.log('HIDDEN')
+            document.removeEventListener('keydown', onKeyDown);
           },
         });
       }, 10)
@@ -313,7 +358,7 @@ const ReadsMentionDialog: Component<{
           <div>
             <input
               id="search_users"
-              placeholder={activeTab() === 'users' ? 'search for users by name or npub' : 'search for notes'}
+              placeholder={placeholders[activeTab()] || ''}
               class={styles.textInput}
               onInput={onInput}
               ref={searchInput}
