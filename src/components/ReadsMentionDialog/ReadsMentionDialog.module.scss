@@ -7,6 +7,10 @@
   overflow-y: scroll;
 }
 
+.suggest {
+  background-color: var(--background-header-input);
+}
+
 input.textInput {
   background-color: var(--background-header-input);
   color: var(--text-primary);

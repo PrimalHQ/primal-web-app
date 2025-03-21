@@ -466,3 +466,12 @@ export function hexToBytes(hex: string): Uint8Array {
   }
   return array;
 }
+
+export const previousWord = (input: HTMLInputElement) => {
+  const carret = input.selectionStart || 0;
+  if (carret === 0) return '';
+
+  const words = input.value.slice(0, carret).split(' ');
+
+  return words.length > 0 ? words[words.length - 1] : '';
+}

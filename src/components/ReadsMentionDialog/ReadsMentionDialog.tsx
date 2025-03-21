@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core/tabs';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Match, on, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind, urlRegexG } from '../../constants';
@@ -21,7 +21,7 @@ import {
   search as tSearch,
 } from '../../translations';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote, PrimalUser } from '../../types/primal';
-import { debounce, parseBolt11 } from '../../utils';
+import { debounce, parseBolt11, previousWord } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
@@ -37,6 +37,8 @@ import SearchOption from '../Search/SearchOption';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import { getUsersRelayInfo } from '../../lib/profile';
 import { useAdvancedSearchContext } from '../../contexts/AdvancedSearchContext';
+import tippy, { Instance } from 'tippy.js';
+import { nip19 } from '../../lib/nTools';
 
 const contentKinds: Record<string, number> = {
   notes: 1,
@@ -95,13 +97,28 @@ const ReadsMentionDialog: Component<{
   }
 
   const searchContent = (q: string, tab: string) => {
-    if (q.length === 0) {
+    if (q.length === 0 || !searchInput) {
       advsearch?.actions.clearSearch();
       return;
     }
 
+    const lastWord = previousWord(searchInput);
+
+    if (
+      lastWord.startsWith('from:') ||
+      lastWord.startsWith('to:') ||
+      lastWord.startsWith('zappedby:')
+    ) {
+      pop?.show();
+      filterUsers(lastWord, searchInput);
+      return;
+    } else {
+      pop?.state.isShown && pop.hide();
+    }
+
     const kind = contentKinds[tab] || 1;
     const term = `kind:${kind} ${q} pas:1`;
+    advsearch?.actions.clearSearch();
     advsearch?.actions.findContent(term);
   }
 
@@ -156,6 +173,79 @@ const ReadsMentionDialog: Component<{
     getUsersRelayInfo(uids, subId);
   }));
 
+  const [suggestedTerm, setSuggestedTerm] = createSignal('');
+
+  let pop: Instance | undefined;
+
+  createEffect(() => {
+    if (props.open) {
+      setTimeout(() => {
+        if (!searchInput) return;
+
+        let component = (
+          <div class={styles.suggest}>
+            <For each={search?.users}>
+              {(user, index) => (
+                <SearchOption
+                  id={`reads_suggested_user_${index()}`}
+                  title={userName(user)}
+                  description={nip05Verification(user)}
+                  icon={<Avatar user={user} size="xs" />}
+                  statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+                  statLabel={intl.formatMessage(tSearch.followers)}
+                  // @ts-ignore
+                  onClick={() => {
+                    if (!searchInput) return;
+                    pop?.hide()
+                    let v = searchInput.value;
+                    const filter = suggestedTerm().split(':')[0] || '';
+
+                    // const nprofile = nip19.nprofileEncode({ pubkey: user.pubkey });
+
+                    searchInput.value = v.replace(suggestedTerm(), `${filter}:${user.npub} `);
+                    searchInput.focus();
+                    searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+                  }}
+                  highlighted={false}
+                />
+              )}
+            </For>
+          </div>);
+        pop = tippy(document.getElementById('search_users'), {
+          content: component,
+          // showOnCreate: true,
+          interactive: true,
+          trigger: 'manual',
+          placement: 'bottom-start',
+          appendTo: 'parent',
+          sticky: 'reference',
+          onShow(instance) {
+            console.log('SHOW')
+          },
+          onShown(instance) {
+            console.log('SHOWN')
+          },
+          onHide(instance) {
+            console.log('HIDE')
+          },
+          onHidden(instance) {
+            console.log('HIDDEN')
+          },
+        });
+      }, 10)
+    }
+    else {
+      pop?.destroy();
+    }
+  })
+
+
+  const filterUsers = (term: string, input: HTMLInputElement) => {
+    const q = term.split(':')[1] || '';
+    search?.actions.findUsers(q);
+    setSuggestedTerm(() => term);
+  }
+
   const onInput = (e: InputEvent) => {
     debounce(() => {
       if (!search) return;
@@ -209,13 +299,16 @@ const ReadsMentionDialog: Component<{
             <Tabs.Indicator class={styles.tabIndicator} />
           </Tabs.List>
 
-          <input
-            id="search_users"
-            placeholder={activeTab() === 'users' ? 'search for users by name or npub' : 'search for notes'}
-            class={styles.textInput}
-            onInput={onInput}
-            ref={searchInput}
-          />
+          <div>
+            <input
+              id="search_users"
+              placeholder={activeTab() === 'users' ? 'search for users by name or npub' : 'search for notes'}
+              class={styles.textInput}
+              onInput={onInput}
+              ref={searchInput}
+              autocomplete="off"
+            />
+          </div>
 
           <Tabs.Content value="users">
             <div>
