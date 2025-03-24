@@ -386,8 +386,8 @@
  display: inline-block;
  margin: 0px 0px;
  background-color: var(--text-secondary);
- -webkit-mask: url(../assets/icons/toolbar_at.svg) no-repeat center;
- mask: url(../assets/icons/toolbar_at.svg) no-repeat center;
+ -webkit-mask: url(../assets/icons/lf_editor_toolbar/mention.svg) no-repeat center;
+ mask: url(../assets/icons/lf_editor_toolbar/mention.svg) no-repeat center;
 }
 
 .boldIcon {
@@ -396,8 +396,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_bold.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_bold.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/bold.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/bold.svg) no-repeat center;
 }
 
 .italicIcon {
@@ -406,8 +406,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_italic.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_italic.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/Italic.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/Italic.svg) no-repeat center;
 }
 
 .strikeIcon {
@@ -416,10 +416,19 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_strikethrough.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_strikethrough.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/strike.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/strike.svg) no-repeat center;
 }
 
+.ulineIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/uline.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/uline.svg) no-repeat center;
+}
 
 .linkIcon {
   width: 16px;
@@ -427,8 +436,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/link.svg) no-repeat center;
-  mask: url(../assets/icons/link.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/link.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/link.svg) no-repeat center;
 }
 
 .codeIcon {
@@ -457,8 +466,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_ul.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_ul.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/bullet.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/bullet.svg) no-repeat center;
 }
 
 .orderedListIcon {
@@ -467,8 +476,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_ol.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_ol.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/ordered.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/ordered.svg) no-repeat center;
 }
 
 .tableIcon {
@@ -477,8 +486,8 @@
   display: inline-block;
   margin: 0px 0px;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/toolbar_table.svg) no-repeat center;
-  mask: url(../assets/icons/toolbar_table.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/table.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/table.svg) no-repeat center;
 }
 
 .attachIcon {
@@ -487,8 +496,8 @@
   margin: 0;
   display: inline-block;
   background-color: var(--text-secondary);
-  -webkit-mask: url(../assets/icons/attach_media.svg) no-repeat center;
-  mask: url(../assets/icons/attach_media.svg) no-repeat center;
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
   cursor: pointer;
 }
 
@@ -512,6 +521,17 @@
   -webkit-mask: url(../assets/icons/chevron_right.svg) no-repeat center;
   mask: url(../assets/icons/chevron_right.svg) no-repeat center;
   transform: rotate(90deg);
+}
+
+.modeIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/lf_editor_toolbar/mode.svg) no-repeat center;
+  mask: url(../assets/icons/lf_editor_toolbar/mode.svg) no-repeat center;
+  cursor: pointer;
 }
 
 .eyeIcon {

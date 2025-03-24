@@ -45,6 +45,13 @@ import Link from '@tiptap/extension-link';
 import Mention from '@tiptap/extension-mention';
 import Image from '@tiptap/extension-image';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
+import Underline from '@tiptap/extension-underline';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
+import Gapcursor from '@tiptap/extension-gapcursor';
+
 
 import { createTiptapEditor } from 'solid-tiptap';
 import { Markdown } from 'tiptap-markdown';
@@ -90,6 +97,8 @@ import { referencesToTags } from '../stores/note';
 import ReadsLinkDialog from '../components/ReadsMentionDialog/ReadsLinkDialog';
 import { NEventExtension } from '../markdownPlugins/nEventMention';
 import { NAddrExtension } from '../markdownPlugins/nAddrMention';
+import ReadsEditorBlockSelector, { blockSelectorOptions, SelectorOption } from '../components/ReadsEditor/ReadsEditorBlockSelector';
+import ReadsEditorTableSelector from '../components/ReadsEditor/ReadsEditorTableSelector';
 
 
 export type ArticleEdit = {
@@ -142,6 +151,8 @@ const ReadsEditor: Component = () => {
   const [isItalicSelected, setIsItalicSelected] = createSignal(false);
   const [isStrikeActive, setIsStrikeActive] = createSignal(false);
   const [isStrikeSelected, setIsStrikeSelected] = createSignal(false);
+  const [isUlineActive, setIsUlineActive] = createSignal(false);
+  const [isUlineSelected, setIsUlineSelected] = createSignal(false);
   const [isLinkActive, setIsLinkActive] = createSignal(false);
   const [isLinkSelected, setIsLinkSelected] = createSignal(false);
   const [isCodeActive, setIsCodeActive] = createSignal(false);
@@ -276,9 +287,17 @@ const ReadsEditor: Component = () => {
       }),
       Image,
       Markdown,
+      Underline,
       NProfileExtension,
       NEventExtension,
       NAddrExtension,
+      Table.configure({
+        resizable: true,
+      }),
+      Gapcursor,
+      TableRow,
+      TableHeader,
+      TableCell,
       BubbleMenu.configure({
         pluginKey: 'bubbleMenuOne',
         element: document.getElementById('bubble_menu_one'),
@@ -287,8 +306,8 @@ const ReadsEditor: Component = () => {
             editor.isActive('paragraph') ||
             editor.isActive('bold') ||
             editor.isActive('italic') ||
-            editor.isActive('strike') ||
-            editor.isActive('code')
+            editor.isActive('underline') ||
+            editor.isActive('strike')
           );
         },
       }),
@@ -518,6 +537,11 @@ const ReadsEditor: Component = () => {
           setIsStrikeSelected(v => !v) :
           setIsStrikeActive(v => !v);
         break;
+      case 'uline':
+        selection().length > 0 ?
+          setIsUlineSelected(v => !v) :
+          setIsUlineActive(v => !v);
+        break;
       case 'code':
         selection().length > 0 ?
           setIsCodeSelected(v => !v) :
@@ -555,12 +579,17 @@ const ReadsEditor: Component = () => {
     editorTipTap()?.chain().focus().toggleStrike().run();
   }
 
-  const code = (e: MouseEvent) => {
+  const uline = (e: MouseEvent) => {
+    toggleToolbar('uline');
+    editorTipTap()?.chain().focus().toggleUnderline().run();
+  }
+
+  const code = () => {
     toggleToolbar('code');
     editorTipTap()?.chain().focus().toggleCode().run();
   }
 
-  const quote = (e: MouseEvent) => {
+  const quote = () => {
     toggleToolbar('quote');
     editorTipTap()?.chain().focus().toggleBlockquote().run();
   }
@@ -607,8 +636,8 @@ const ReadsEditor: Component = () => {
     editor.commands.unsetMark('link');
   }
 
-  const heading = (hLevel: string) => {
-    const level = headingLevels.indexOf(hLevel) || 0;
+  const heading = (option: SelectorOption) => {
+    const level = option?.index || 0;
     setHeadingLevel(level);
 
     if (level === 0) {
@@ -621,20 +650,18 @@ const ReadsEditor: Component = () => {
       editorTipTap()?.chain().focus().setHeading({ level }).run();
       return;
     }
+
+    if (level === 7) {
+      code();
+    }
+
+    if (level === 8) {
+      quote();
+    }
   }
 
-  const table = () => {
-    editor()?.action(callCommand(insertTableCommand.key));
-    focusEditor();
-  }
-
-  const focusEditor = () => {
-    const milk = document.querySelector(".ProseMirror, .editor") as HTMLTextAreaElement | null;
-
-    if (!milk) return;
-
-    milk.focus();
-    // milk.setSelectionRange(milk.value.length, milk.value.length);
+  const table = (rows: number, cols: number) => {
+    editorTipTap()?.chain().focus().insertTable({rows, cols, withHeaderRow: false}).run();
   }
 
   const postArticle = async () => {
@@ -828,7 +855,7 @@ const ReadsEditor: Component = () => {
           <TextField
             class={styles.titleInput}
             value={article.title}
-            onKeyDown={(e) => {
+            onKeyDown={(e: KeyboardEvent) => {
               if (e.code === 'Enter') {
                 e.preventDefault();
               }
@@ -945,27 +972,10 @@ const ReadsEditor: Component = () => {
       <div class={styles.contentEditor}>
         <div class={styles.toolbar}>
           <div>
-            <button
-              id="undoBtn"
-              class={styles.mdToolButton}
-              onClick={undo}
-              title="undo"
-            >
-              <div class={styles.undoIcon}></div>
-            </button>
 
-            <button
-              id="redoBtn"
-              class={styles.mdToolButton}
-              onClick={redo}
-              title="redo"
-            >
-              <div class={styles.redoIcon}></div>
-            </button>
-
-            <AdvancedSearchSelectBox
-              value={headingLevels[headingLevel()]}
-              options={headingLevels}
+            <ReadsEditorBlockSelector
+              value={blockSelectorOptions[headingLevel()]}
+              options={blockSelectorOptions}
               onChange={heading}
               short={true}
             />
@@ -989,31 +999,21 @@ const ReadsEditor: Component = () => {
             </button>
 
             <button
+              id="ulineBtn"
+              class={`${styles.mdToolButton} ${isUlineActive() || isUlineSelected() ? styles.selected : ''}`}
+              onClick={uline}
+              title="underline"
+            >
+              <div class={styles.ulineIcon}></div>
+            </button>
+
+            <button
               id="strikeBtn"
               class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
               onClick={strike}
               title="strike"
             >
               <div class={styles.strikeIcon}></div>
-            </button>
-
-
-            <button
-              id="codeBtn"
-              class={`${styles.mdToolButton} ${isCodeActive() || isCodeSelected() ? styles.selected : ''}`}
-              onClick={code}
-              title="code block"
-            >
-              <div class={styles.codeIcon}></div>
-            </button>
-
-            <button
-              id="quoteBtn"
-              class={`${styles.mdToolButton}`}
-              onClick={quote}
-              title="quote section"
-            >
-              <div class={styles.quoteIcon}></div>
             </button>
 
             <button
@@ -1033,6 +1033,10 @@ const ReadsEditor: Component = () => {
             >
               <div class={styles.orderedListIcon}></div>
             </button>
+
+            <ReadsEditorTableSelector
+              onSelect={table}
+            />
 
             <button
               id="linkBtn"
@@ -1094,9 +1098,9 @@ const ReadsEditor: Component = () => {
           >
             <Show
               when={editorMarkdown()}
-              fallback={<div class={styles.markdownIcon}></div>}
+              fallback={<div class={styles.modeIcon}></div>}
             >
-              <div class={`${styles.markdownIcon} ${styles.active}`}></div>
+              <div class={`${styles.modeIcon} ${styles.active}`}></div>
             </Show>
           </button>
         </div>
@@ -1176,22 +1180,21 @@ const ReadsEditor: Component = () => {
         </button>
 
         <button
+          id="ulineBtnBubble"
+          class={`${styles.mdToolButton} ${isUlineActive() || isUlineSelected() ? styles.selected : ''}`}
+          onClick={uline}
+          title="underline"
+        >
+          <div class={styles.ulineIcon}></div>
+        </button>
+
+        <button
           id="strikeBtnBubble"
           class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
           onClick={strike}
           title="strike"
         >
           <div class={styles.strikeIcon}></div>
-        </button>
-
-
-        <button
-          id="codeBtnBubble"
-          class={`${styles.mdToolButton} ${isCodeActive() || isCodeSelected() ? styles.selected : ''}`}
-          onClick={code}
-          title="code block"
-        >
-          <div class={styles.codeIcon}></div>
         </button>
 
         <button
