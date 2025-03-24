@@ -867,7 +867,7 @@ const ReadsEditor: Component = () => {
             <TextField.TextArea
               rows={1}
               autoResize={true}
-              placeholder="Article Title"
+              placeholder="Title"
             />
           </TextField>
 
@@ -884,7 +884,7 @@ const ReadsEditor: Component = () => {
                   accept="image/*"
                 />
                 <label for="upload-avatar">
-                  Add Title Image
+                  Add hero Image
                 </label>
               </div>
             }
@@ -893,9 +893,9 @@ const ReadsEditor: Component = () => {
               <label for="upload-avatar">
                 <Show
                   when={article.image.length > 0}
-                  fallback={<>Add Title Image</>}
+                  fallback={<>Add hero Image</>}
                 >
-                  Chage Title Image
+                  Chage hero Image
                 </Show>
               </label>
               <input

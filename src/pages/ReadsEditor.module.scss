@@ -54,11 +54,11 @@
   }
 
   &.selected, &:hover {
-    background-color: var(--subtile-devider);
+    background-color: var(--background-input);
     color: var(--text-primary);
 
     >div {
-      background-color: var(--text-primary);
+      background-color: var(--text-secondary);
     }
   }
 }
@@ -719,7 +719,7 @@ input.textInput {
 
 .noTitleImagePlaceholder {
   width: 100%;
-  height: 598px;
+  height: 300px;
   border: 1px solid var(--devider);
   border-radius: 12px;
 
