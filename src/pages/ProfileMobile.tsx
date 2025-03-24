@@ -111,8 +111,16 @@ const ProfileMobile: Component = () => {
 
     let hex = params.npub || account?.publicKey;
 
-    if (params.npub?.startsWith('npub')) {
-      hex = nip19.decode(params.npub).data as string;
+    if (params.npub?.startsWith('npub') || params.npub?.startsWith('nprofile')) {
+      const decode = nip19.decode(params.npub);
+
+      if (decode.type === 'npub') {
+        hex = decode.data;
+      }
+
+      if (decode.type === 'nprofile') {
+        hex = decode.data.pubkey;
+      }
     }
 
     setHex(() => hex);
