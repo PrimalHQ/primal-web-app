@@ -353,7 +353,7 @@ const NoteFooter: Component<{
           description: lastZapError || "",
           confirmLabel: "ok",
           onConfirm: app.actions.closeConfirmModal,
-          onAbort: app.actions.closeConfirmModal,
+          // onAbort: app.actions.closeConfirmModal,
         })
       }
 
