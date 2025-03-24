@@ -206,12 +206,18 @@
     background-color: var(--text-secondary);
   }
 
-  &.selected, &:hover {
+  &.selected, &:hover, &[data-expanded] {
     background-color: var(--background-input);
     color: var(--text-primary);
 
     >div {
       background-color: var(--text-secondary);
+    }
+  }
+
+  &[data-expanded] {
+    .chevronIcon {
+      rotate: 180deg;
     }
   }
 }
