@@ -1,4 +1,4 @@
-import { Component, createSignal, JSXElement, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createSignal, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
@@ -89,23 +89,46 @@ const LayoutDesktop: Component<{
             </Show>
           </div>
 
-
-          <div class={`${styles.rightColumn} ${location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms') ? styles.messagesColumn : ''}`}>
-            <div>
-              <Show
-                when={!location.pathname.startsWith('/search')}
-              >
-                <div class={`${styles.rightHeader} ${location.pathname.startsWith('/messages') ? styles.messagesHeader : ''}`}>
-                  <div id="search_section" class={location.pathname.startsWith('/messages') ? styles.messagesSearch : ''}>
+          <Switch>
+            <Match when={location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms')}>
+              <div class={`${styles.rightColumn} ${styles.messagesColumn}`}>
+                <div>
+                  <div class={`${styles.rightHeader} ${styles.messagesHeader}`}>
+                    <div id="search_section" class={styles.messagesSearch}>
+                    </div>
+                  </div>
+                  <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/search') ? styles.exploreHeader : ''}`}>
+                    <div id="right_sidebar">
+                    </div>
                   </div>
                 </div>
-              </Show>
-              <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ||location.pathname.startsWith('/search') ? styles.exploreHeader : ''}`}>
-                <div id="right_sidebar">
+              </div>
+            </Match>
+            <Match when={location.pathname.startsWith('/search') || location.pathname.startsWith('/reads/edit')}>
+              <div class={`${styles.rightColumn}`}>
+                <div>
+                  <div class={`${styles.rightContent} ${styles.exploreHeader}`}>
+                    <div id="right_sidebar">
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </Match>
+            <Match when={true}>
+              <div class={`${styles.rightColumn}`}>
+                <div>
+                  <div class={`${styles.rightHeader}`}>
+                    <div id="search_section">
+                    </div>
+                  </div>
+                  <div class={`${styles.rightContent} ${location.pathname.startsWith('/explore') ? styles.exploreHeader : ''}`}>
+                    <div id="right_sidebar">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Match>
+          </Switch>
         </div>
         <NoteContextMenu
           open={app?.showNoteContextMenu}

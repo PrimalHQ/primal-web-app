@@ -664,8 +664,9 @@ input.textInput {
     gap: 4px;
     flex-wrap: wrap;
     border: 1px solid var(--background-input);
-    border-radius: 99px;
+    border-radius: 16px;
     width: 100%;
+    padding-inline: 4px;
 
     .tag {
       display: inline-block;
@@ -692,6 +693,7 @@ input.textInput {
       font-weight: 400;
       line-height: 12px;
       border: none;
+      border-radius: 99px;
       padding: 8px;
       min-width: 100%;
       height: fit-content;
@@ -958,4 +960,98 @@ input.textInput {
   align-items: center;
   padding-inline: 12px;
   border-radius: 8px;
+}
+
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  .sidebarOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    .caption {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+
+  .sidebarTools {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    .caption {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .toolButton {
+      border-radius: 99px;
+      background: var(--background-input);
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 10px 16px;
+      width: 272px;
+
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 15px;
+    }
+  }
+
+  .sidebarPublish {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    .caption {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .status {
+      margin-top: -12px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .toolButton {
+      border-radius: 99px;
+      background: var(--background-input);
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 10px 16px;
+      width: 272px;
+
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 15px;
+    }
+    .toolPrimaryButton {
+      border-radius: 99px;
+      background: var(--accent);
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 10px 16px;
+      width: 272px;
+
+      color: var(--text-primary-button);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 15px;
+    }
+  }
+
+
 }

@@ -99,6 +99,7 @@ import { NEventExtension } from '../markdownPlugins/nEventMention';
 import { NAddrExtension } from '../markdownPlugins/nAddrMention';
 import ReadsEditorBlockSelector, { blockSelectorOptions, SelectorOption } from '../components/ReadsEditor/ReadsEditorBlockSelector';
 import ReadsEditorTableSelector from '../components/ReadsEditor/ReadsEditorTableSelector';
+import CheckBox2 from '../components/Checkbox/CheckBox2';
 
 
 export type ArticleEdit = {
@@ -166,7 +167,7 @@ const ReadsEditor: Component = () => {
 
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
-  const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content']);
+  const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
   const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
@@ -381,6 +382,7 @@ const ReadsEditor: Component = () => {
                   </For>
                 </div>
 
+                // @ts-ignore
                 popup = tippy('#tiptapEditor', {
                   getReferenceClientRect: props.clientRect,
                   content: component,
@@ -707,9 +709,13 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
-    const articleToPost = {
+    let articleToPost = {
       ...article,
       content,
+    };
+
+    if (!accordionSection().includes('hero_image')) {
+      articleToPost.image = '';
     }
 
     const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
@@ -741,79 +747,77 @@ const ReadsEditor: Component = () => {
     <div class={styles.editorPage}>
 
       <Wormhole to='right_sidebar'>
-        <Uploader
-          uploadId={fileUploadContext()}
-          hideLabel={false}
-          publicKey={account?.publicKey}
-          nip05={account?.activeUser?.nip05}
-          openSockets={openUploadSockets()}
-          file={fileToUpload()}
-          onFail={(_, uploadId?: string) => {
-            toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-              file: fileToUpload()?.name,
-            }));
-            resetUpload(uploadId);
-          }}
-          onRefuse={(reason: string, uploadId?: string) => {
-            if (reason === 'file_too_big_100') {
-              toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-            }
-            if (reason === 'file_too_big_1024') {
-              toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-            }
-            resetUpload(uploadId);
-          }}
-          onCancel={(uploadId?: string) => {
-            resetUpload(uploadId);
-          }}
-          onSuccsess={(url:string, uploadId?: string) => {
-            if (uploadId === titleImageUploadId) {
-              setArticle('image', () => url);
-            }
-
-            if (uploadId === contentImageUploadId) {
-              const ed = editorTipTap();
-              if (!ed) return;
-
-              ed.
-                chain().
-                focus().
-                setImage({
-                  src: url,
-                  title: 'image',
-                  alt: 'image alternative',
-                }).
-                run();
-
-              // Move cursor one space to the right to avoid overwriting the image.
-              const el = document.querySelector('.tiptap.ProseMirror');
-              el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
-            }
-
-            resetUpload(uploadId);
-          }}
-        />
-
         <div class={styles.sidebar}>
-          <button
-            class={`${styles.sectionButton} ${accordionSection().includes('metadata') ? styles.open : ''}`}
-            onClick={() => {
-              if (accordionSection().includes('metadata')) {
-                setAccordionSection((as) => as.filter(s => s !== 'metadata'));
-                return;
-              }
+          <div class={styles.sidebarOptions}>
+            <div class={styles.caption}>Options</div>
+            <CheckBox2
+              onChange={(checked: boolean) => {
+                if (!checked) {
+                  setAccordionSection((as) => as.filter(s => s !== 'metadata'));
+                  return;
+                }
 
-              setAccordionSection((as) => [...as, 'metadata']);
-            }}
-          >
-            <Show
-              when={accordionSection().includes('metadata')}
-              fallback={<span>Show</span>}
+                setAccordionSection((as) => [...as, 'metadata']);
+              }}
+              checked={accordionSection().includes('metadata')}
+              label="Show article metadata"
+            />
+            <CheckBox2
+              onChange={(checked: boolean) => {
+                if (!checked) {
+                  setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
+                  return;
+                }
+
+                setAccordionSection((as) => [...as, 'hero_image']);
+              }}
+              checked={accordionSection().includes('hero_image')}
+              label="Use hero image"
+            />
+          </div>
+          <div class={styles.sidebarTools}>
+            <div class={styles.caption}>Editor Tools</div>
+
+            <button
+              class={styles.toolButton}
+              onClick={() => { }}
             >
-              <span>Hide</span>
-            </Show>
-            Metadata
-          </button>
+              Preview Article
+            </button>
+
+            <button
+              class={styles.toolButton}
+              onClick={() => { }}
+            >
+              Import External Content
+            </button>
+            <button
+              class={styles.toolButton}
+              onClick={() => { }}
+            >
+              Enable Proposal Mode
+            </button>
+          </div>
+          <div class={styles.sidebarPublish}>
+            <div class={styles.caption}>{'Save & Publish'}</div>
+            <div class={styles.status}>
+              Unsaved changes.
+            </div>
+
+            <button
+              class={styles.toolButton}
+              onClick={() => { }}
+            >
+              Save Draft Privately
+            </button>
+
+            <button
+              class={styles.toolPrimaryButton}
+              onClick={() => { }}
+            >
+              Continue to Publish Article
+            </button>
+          </div>
 
           <Show when={!accordionSection().includes('metadata')}>
             <div class={styles.metadataPreview}>
@@ -871,10 +875,87 @@ const ReadsEditor: Component = () => {
             />
           </TextField>
 
-          <Show
-            when={article.image.length > 0}
-            fallback={
-              <div class={styles.noTitleImagePlaceholder}>
+          <Show when={accordionSection().includes('hero_image')}>
+            <Uploader
+              uploadId={fileUploadContext()}
+              hideLabel={false}
+              publicKey={account?.publicKey}
+              nip05={account?.activeUser?.nip05}
+              openSockets={openUploadSockets()}
+              file={fileToUpload()}
+              onFail={(_, uploadId?: string) => {
+                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                  file: fileToUpload()?.name,
+                }));
+                resetUpload(uploadId);
+              }}
+              onRefuse={(reason: string, uploadId?: string) => {
+                if (reason === 'file_too_big_100') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                }
+                if (reason === 'file_too_big_1024') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                }
+                resetUpload(uploadId);
+              }}
+              onCancel={(uploadId?: string) => {
+                resetUpload(uploadId);
+              }}
+              onSuccsess={(url:string, uploadId?: string) => {
+                if (uploadId === titleImageUploadId) {
+                  setArticle('image', () => url);
+                }
+
+                if (uploadId === contentImageUploadId) {
+                  const ed = editorTipTap();
+                  if (!ed) return;
+
+                  ed.
+                    chain().
+                    focus().
+                    setImage({
+                      src: url,
+                      title: 'image',
+                      alt: 'image alternative',
+                    }).
+                    run();
+
+                  // Move cursor one space to the right to avoid overwriting the image.
+                  const el = document.querySelector('.tiptap.ProseMirror');
+                  el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
+                }
+
+                resetUpload(uploadId);
+              }}
+            />
+
+            <Show
+              when={article.image.length > 0}
+              fallback={
+                <div class={styles.noTitleImagePlaceholder}>
+                  <input
+                    id="upload-avatar"
+                    type="file"
+                    onChange={() => onUploadTitleImage(titleImageUpload)}
+                    ref={titleImageUpload}
+                    hidden={true}
+                    accept="image/*"
+                  />
+                  <label for="upload-avatar">
+                    Add hero Image
+                  </label>
+                </div>
+              }
+            >
+              <div class={styles.uploadButton}>
+                <label for="upload-avatar">
+                  <Show
+                    when={article.image.length > 0}
+                    fallback={<>Add hero Image</>}
+                  >
+                    Chage hero Image
+                  </Show>
+                </label>
                 <input
                   id="upload-avatar"
                   type="file"
@@ -883,32 +964,11 @@ const ReadsEditor: Component = () => {
                   hidden={true}
                   accept="image/*"
                 />
-                <label for="upload-avatar">
-                  Add hero Image
-                </label>
+                <img class={styles.titleImage}  src={article.image} />
               </div>
-            }
-          >
-            <div class={styles.uploadButton}>
-              <label for="upload-avatar">
-                <Show
-                  when={article.image.length > 0}
-                  fallback={<>Add hero Image</>}
-                >
-                  Chage hero Image
-                </Show>
-              </label>
-              <input
-                id="upload-avatar"
-                type="file"
-                onChange={() => onUploadTitleImage(titleImageUpload)}
-                ref={titleImageUpload}
-                hidden={true}
-                accept="image/*"
-              />
-              <img class={styles.titleImage}  src={article.image} />
-            </div>
+            </Show>
           </Show>
+
 
           <div class={styles.summary}>
             <div class={styles.border}></div>
@@ -1130,13 +1190,13 @@ const ReadsEditor: Component = () => {
       </div>
 
 
-      <div class={styles.postingControls}>
+      {/* <div class={styles.postingControls}>
         <ButtonPrimary
           onClick={postArticle}
         >
           Publish Article
         </ButtonPrimary>
-      </div>
+      </div> */}
 
       <ReadsLinkDialog
         open={enterLink()}
