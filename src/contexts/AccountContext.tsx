@@ -1129,14 +1129,15 @@ export function AccountProvider(props: { children: JSXElement }) {
       onEose: async () => {
         if (!store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
-          const muted = [...store.muted, pubkey];
+          const muted = [...unwrap(store.muted), pubkey];
 
-          const tags = [ ...store.mutedTags, ['p', pubkey]];
+          const tags = [ ...unwrap(store.mutedTags), ['p', pubkey]];
 
           const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
           if (success) {
             updateStore('muted', () => muted);
+            updateStore('mutedTags', () => tags);
             updateStore('mutedSince', () => date);
             saveMuted(store.publicKey, muted, date);
             note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
@@ -1184,6 +1185,7 @@ export function AccountProvider(props: { children: JSXElement }) {
 
           if (success) {
             updateStore('muted', () => muted);
+            updateStore('mutedTags', () => tags);
             updateStore('mutedSince', () => date);
             saveMuted(store.publicKey, muted, date);
             note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
