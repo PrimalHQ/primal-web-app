@@ -942,28 +942,34 @@ const ReadsEditor: Component = () => {
                   </div>
                 )}
               </For>
+              <TextField
+                class={styles.tagsInput}
+                onKeyDown={(e: KeyboardEvent) => {
+                  // @ts-ignore
+                  const value = e.target?.value || '';
+
+                  if (e.code === 'Backspace' && value.length === 0) {
+                    // Remove last tag
+                    const filtered = article.tags.slice(0, -1);
+                    setArticle('tags', () => [...filtered]);
+                  }
+
+                  if (e.code !== 'Enter') return;
+
+                  if (value.length < 1 || article.tags.includes(value)) return;
+
+                  const tags = value.split(',').map((x: string) => x.trim());
+                  setArticle('tags', (ts) => [...ts, ...tags]);
+                  // @ts-ignore
+                  e.target.value = ''
+                }}
+              >
+                <TextField.Input
+                  placeholder="Add tags..."
+                />
+              </TextField>
             </div>
 
-            <TextField
-              class={styles.tagsInput}
-              onKeyDown={(e: KeyboardEvent) => {
-                if (e.code !== 'Enter') return;
-
-                // @ts-ignore
-                const value = e.target?.value || '';
-
-                if (value.length < 1 || article.tags.includes(value)) return;
-
-                const tags = value.split(',').map((x: string) => x.trim());
-                setArticle('tags', (ts) => [...ts, ...tags]);
-                // @ts-ignore
-                e.target.value = ''
-              }}
-            >
-              <TextField.Input
-                placeholder="Tags..."
-              />
-            </TextField>
           </div>
 
         </div>
