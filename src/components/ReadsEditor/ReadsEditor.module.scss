@@ -275,3 +275,221 @@
    background-color: var(--text-secondary);
   }
 }
+
+
+.toolbar {
+  position: relative;
+  border-bottom: 1px solid var(--devider);
+  width: 640px;
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 20px;
+  >div {
+    /* position:fixed; */
+    display: flex;
+    gap: 8px;
+    width: 640px;
+    height: 64px;
+    justify-content: flex-start;
+    align-items: center;
+  }
+}
+
+.mdToolButton {
+  background: none;
+  color: var(--text-secondary);
+  width: fit-content;
+  height: fit-content;
+
+  font-size: 16px;
+  line-height: 16px;
+  font-weight: 600;
+
+  border: none;
+  /* border: 1px solid var(--subtile-devider); */
+  border-radius: 8px;
+  margin: 0;
+  padding: 8px;
+
+  >div {
+    background-color: var(--text-secondary);
+  }
+
+  &.selected, &:hover {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+
+    >div {
+      background-color: var(--text-secondary);
+    }
+  }
+}
+
+.bubbleMenu {
+  background-color: var(--background-header-input);
+
+  max-width: 640px;
+  overflow-x: scroll;
+  height: 64px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 12px;
+  border-radius: 8px;
+}
+
+.atIcon {
+ width: 16px;
+ height: 16px;
+ display: inline-block;
+ margin: 0px 0px;
+ background-color: var(--text-secondary);
+ -webkit-mask: url(../../assets/icons/lf_editor_toolbar/mention.svg) no-repeat center;
+ mask: url(../../assets/icons/lf_editor_toolbar/mention.svg) no-repeat center;
+}
+
+.boldIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/bold.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/bold.svg) no-repeat center;
+}
+
+.italicIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/Italic.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/Italic.svg) no-repeat center;
+}
+
+.strikeIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/strike.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/strike.svg) no-repeat center;
+}
+
+.ulineIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/uline.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/uline.svg) no-repeat center;
+}
+
+.linkIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/link.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/link.svg) no-repeat center;
+}
+
+.codeIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/toolbar_code.svg) no-repeat center;
+  mask: url(../../assets/icons/toolbar_code.svg) no-repeat center;
+}
+
+.quoteIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/toolbar_quote.svg) no-repeat center;
+  mask: url(../../assets/icons/toolbar_quote.svg) no-repeat center;
+}
+
+.bulletListIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/bullet.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/bullet.svg) no-repeat center;
+}
+
+.orderedListIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/ordered.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/ordered.svg) no-repeat center;
+}
+
+.tableIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/table.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/table.svg) no-repeat center;
+}
+
+.attachIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  cursor: pointer;
+}
+
+.chevronUp {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center;
+  mask: url(../../assets/icons/chevron_right.svg) no-repeat center;
+  transform: rotate(-90deg);
+}
+
+.chevronDown {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center;
+  mask: url(../../assets/icons/chevron_right.svg) no-repeat center;
+  transform: rotate(90deg);
+}
+
+.modeIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/mode.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/mode.svg) no-repeat center;
+  cursor: pointer;
+}

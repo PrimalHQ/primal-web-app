@@ -1,45 +1,12 @@
-import { batch, Component, createEffect, createResource, createSignal, For, JSXElement, onCleanup, onMount, Show, Suspense } from 'solid-js'
-import { editorViewOptionsCtx, Editor, rootCtx, schemaCtx } from '@milkdown/core';
-import createFuzzySearch from '@nozbe/microfuzz';
-
-import {
-  commonmark,
-  toggleStrongCommand,
-  toggleEmphasisCommand,
-  toggleLinkCommand,
-  wrapInHeadingCommand,
-  toggleInlineCodeCommand,
-  wrapInBlockquoteCommand,
-  wrapInBulletListCommand,
-  wrapInOrderedListCommand,
-  insertImageCommand,
-} from '@milkdown/preset-commonmark';
-
-import {
-  gfm,
-  insertTableCommand,
-} from '@milkdown/preset-gfm';
-import { listener, listenerCtx } from "@milkdown/plugin-listener";
-
-import { callCommand, getMarkdown,   replaceAll, insert, getHTML, outline } from '@milkdown/utils';
-import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
-import DOMPurify from 'dompurify';
-import { logError } from '../lib/logger';
+import { batch, Component, createEffect, createSignal, For, JSXElement, onCleanup, onMount, Show } from 'solid-js'
 
 import styles from './ReadsEditor.module.scss'
-import ButtonGhost from '../components/Buttons/ButtonGhost';
-import { AddLink, addLinkCommand, selectionCtx, selectionListener } from '../lib/markdown';
-import TextInput from '../components/TextInput/TextInput';
 import { createStore } from 'solid-js/store';
 import { TextField } from '@kobalte/core/text-field';
-import { Accordion } from '@kobalte/core/accordion';
 import Uploader from '../components/Uploader/Uploader';
 import { useAccountContext } from '../contexts/AccountContext';
 import { useToastContext } from '../components/Toaster/Toaster';
 
-// import { SolidEditorContent, SolidEditor } from "@vrite/tiptap-solid";
-
-import { Editor as EditorTT, getMarkType, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Mention from '@tiptap/extension-mention';
@@ -52,22 +19,17 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import Gapcursor from '@tiptap/extension-gapcursor';
 
-
 import { createTiptapEditor } from 'solid-tiptap';
 import { Markdown } from 'tiptap-markdown';
 
 import tippy, { Instance } from 'tippy.js';
 
-
 import {
-  actions as tActions,
-  settings as tSettings,
   toast as tToast,
   upload as tUpload,
   search as tSearch,
 } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import { readSecFromStorage } from '../lib/localStore';
 import { Kind } from '../constants';
 import { importEvents, sendArticle } from '../lib/notes';
@@ -75,31 +37,21 @@ import { subsTo } from '../sockets';
 import { APP_ID } from '../App';
 import { useNavigate } from '@solidjs/router';
 import Wormhole from '../components/Wormhole/Wormhole';
-import { Select } from '@kobalte/core/select';
-import AdvancedSearchSelectBox from '../components/AdvancedSearch/AdvancedSearchSelect';
-import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 import SearchOption from '../components/Search/SearchOption';
 import { nip05Verification, userName } from '../stores/profile';
 import Avatar from '../components/Avatar/Avatar';
 import { useSearchContext } from '../contexts/SearchContext';
-import { getCaretCoordinates } from '../lib/textArea';
-import { debounce } from '../utils';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
-import { userMention } from '../markdownPlugins/userMentionPlugin';
+import { PrimalUser } from '../types/primal';
 import { fetchRecomendedUsersAsync, fetchUserSearch } from '../lib/search';
-import { useAppContext } from '../contexts/AppContext';
 import { nip19 } from '../lib/nTools';
 import { getUsersRelayInfo } from '../lib/profile';
 import { NProfileExtension } from '../markdownPlugins/nProfileMention';
-import ReadsMentionDialog from '../components/ReadsMentionDialog/ReadsMentionDialog';
 import { referencesToTags } from '../stores/note';
-import ReadsLinkDialog from '../components/ReadsMentionDialog/ReadsLinkDialog';
 import { NEventExtension } from '../markdownPlugins/nEventMention';
 import { NAddrExtension } from '../markdownPlugins/nAddrMention';
-import ReadsEditorBlockSelector, { blockSelectorOptions, SelectorOption } from '../components/ReadsEditor/ReadsEditorBlockSelector';
-import ReadsEditorTableSelector from '../components/ReadsEditor/ReadsEditorTableSelector';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
+import ReadsEditorToolbar from '../components/ReadsEditor/ReadsEditorToolbar';
 
 
 export type ArticleEdit = {
@@ -118,49 +70,16 @@ const emptyArticleEdit = (): ArticleEdit => ({
   tags: [],
 });
 
-const headingLevels = [
-  'Normal',
-  'Heading 1',
-  'Heading 2',
-  'Heading 3',
-  'Heading 4',
-  'Heading 5',
-  'Heading 6',
-];
-
 const titleImageUploadId = 'title_image';
 const contentImageUploadId = 'content_image';
 
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
-  const app = useAppContext();
   const search = useSearchContext();
   const toast = useToastContext();
   const intl = useIntl();
   const navigate = useNavigate();
   const profile = useProfileContext();
-
-  let mdEditor: HTMLDivElement | undefined;
-  let mdEditorInput: HTMLDivElement | undefined;
-
-  const [editor, setEditor] = createSignal<Editor>();
-  const [html, setHtml] = createSignal('');
-
-  const [isBoldActive, setIsBoldActive] = createSignal(false);
-  const [isBoldSelected, setIsBoldSelected] = createSignal(false);
-  const [isItalicActive, setIsItalicActive] = createSignal(false);
-  const [isItalicSelected, setIsItalicSelected] = createSignal(false);
-  const [isStrikeActive, setIsStrikeActive] = createSignal(false);
-  const [isStrikeSelected, setIsStrikeSelected] = createSignal(false);
-  const [isUlineActive, setIsUlineActive] = createSignal(false);
-  const [isUlineSelected, setIsUlineSelected] = createSignal(false);
-  const [isLinkActive, setIsLinkActive] = createSignal(false);
-  const [isLinkSelected, setIsLinkSelected] = createSignal(false);
-  const [isCodeActive, setIsCodeActive] = createSignal(false);
-  const [isCodeSelected, setIsCodeSelected] = createSignal(false);
-
-  const [headingLevel, setHeadingLevel] = createSignal(0);
-  const [selection, setSelection] = createSignal('');
 
   const [editorMarkdown, setEditorMarkdown] = createSignal(false);
   const [markdownContent, setMarkdownContent] = createSignal<string>('')
@@ -172,15 +91,8 @@ const ReadsEditor: Component = () => {
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
   const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
 
-  const [enterLink, setEnterLink] = createSignal(false);
-  const [enterMention, setEnterMention] = createSignal(false);
-
-  const [isMentioning, setIsMentioning] = createSignal(false);
-  let mentionOptions: HTMLDivElement | undefined;
-  let mentionCursorPosition = { top: 0, left: 0, height: 0 };
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
 
-  let contentFileUpload: HTMLInputElement | undefined;
   let titleImageUpload: HTMLInputElement | undefined;
 
 
@@ -229,52 +141,6 @@ const ReadsEditor: Component = () => {
 
     getUsersRelayInfo(uids, subId);
   }));
-
-  const addMentionToEditor = (user: PrimalUser, relays: string[]) => {
-    const editor = editorTipTap();
-    if (!editor) return;
-
-    let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
-
-    if (relays.length > 0) {
-      pInfo.relays = [...relays];
-    }
-
-    const nprofile = nip19.nprofileEncode(pInfo);
-
-    editor
-      .chain()
-      .focus()
-      .insertNProfile({ nprofile, user, relays})
-      .insertContent({ type: 'text', text: ' ' })
-      .run()
-  }
-
-  const addNoteToEditor = (note: PrimalNote) => {
-    const editor = editorTipTap();
-    if (!editor) return;
-
-    const nevent = note.noteId;
-
-    editor
-      .chain()
-      .focus()
-      .insertNEvent({ nevent })
-      .run()
-  }
-
-  const addReadToEditor = (read: PrimalArticle) => {
-    const editor = editorTipTap();
-    if (!editor) return;
-
-    const naddr = read.noteId;
-
-    editor
-      .chain()
-      .focus()
-      .insertNAddr({ naddr })
-      .run()
-  }
 
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
@@ -447,13 +313,14 @@ const ReadsEditor: Component = () => {
       }),
     ],
     content: '',
-    onSelectionUpdate({ editor: ed }) {
-      setIsBoldActive(() => ed.isActive('bold'));
-      setIsItalicActive(() => ed.isActive('italic'));
-      setIsStrikeActive(() => ed.isActive('strike'));
-      setIsCodeActive(() => ed.isActive('code'));
-      setIsLinkActive(() => ed.isActive('link'));
-    },
+    // onSelectionUpdate({ editor: ed }) {
+    //   updateFormatControls(() => ({
+    //     isBoldActive: ed.isActive('bold'),
+    //     isItalicActive: ed.isActive('italic'),
+    //     isStrikeActive: ed.isActive('strike'),
+    //     isUlineActive: ed.isActive('underline'),
+    //   }))
+    // },
   }));
 
   // ----------------------------------------
@@ -489,16 +356,7 @@ const ReadsEditor: Component = () => {
     })
   }
 
-  const onUploadContentImage = () => {
-
-    if (!contentFileUpload) {
-      return;
-    }
-
-    const file = contentFileUpload.files ? contentFileUpload.files[0] : null;
-
-    if (!file) return;
-
+  const onUploadContent = (file: File) => {
     batch(() => {
       setFileToUpload(file);
       setFileUploadContext(contentImageUploadId);
@@ -512,159 +370,6 @@ const ReadsEditor: Component = () => {
   onCleanup(() => {
     setOpenUploadSockets(false);
   });
-
-  createEffect(() => {
-    if (enterLink()) {
-      setTimeout(() => {
-        const input = document.getElementById('link_url') as HTMLInputElement | null;
-        input?.focus();
-      }, 10)
-    }
-  });
-
-  const toggleToolbar = (button: string) => {
-    switch (button) {
-      case 'bold':
-        selection().length > 0 ?
-          setIsBoldSelected(v => !v) :
-          setIsBoldActive(v => !v);
-        break;
-      case 'italic':
-        selection().length > 0 ?
-          setIsItalicSelected(v => !v) :
-          setIsItalicActive(v => !v);
-        break;
-      case 'strike':
-        selection().length > 0 ?
-          setIsStrikeSelected(v => !v) :
-          setIsStrikeActive(v => !v);
-        break;
-      case 'uline':
-        selection().length > 0 ?
-          setIsUlineSelected(v => !v) :
-          setIsUlineActive(v => !v);
-        break;
-      case 'code':
-        selection().length > 0 ?
-          setIsCodeSelected(v => !v) :
-          setIsCodeActive(v => !v);
-        break;
-      case 'link':
-        selection().length > 0 ?
-          setIsLinkSelected(v => !v) :
-          setIsLinkActive(v => !v);
-        break;
-
-    }
-  }
-
-  const undo = () => {
-    editorTipTap()?.chain().focus().undo().run();
-  }
-
-  const redo = () => {
-    editorTipTap()?.chain().focus().redo().run();
-  }
-
-  const bold = () => {
-    toggleToolbar('bold');
-    editorTipTap()?.chain().focus().toggleBold().run();
-  }
-
-  const italic = (e: MouseEvent) => {
-    toggleToolbar('italic');
-    editorTipTap()?.chain().focus().toggleItalic().run();
-  }
-
-  const strike = (e: MouseEvent) => {
-    toggleToolbar('strike');
-    editorTipTap()?.chain().focus().toggleStrike().run();
-  }
-
-  const uline = (e: MouseEvent) => {
-    toggleToolbar('uline');
-    editorTipTap()?.chain().focus().toggleUnderline().run();
-  }
-
-  const code = () => {
-    toggleToolbar('code');
-    editorTipTap()?.chain().focus().toggleCode().run();
-  }
-
-  const quote = () => {
-    toggleToolbar('quote');
-    editorTipTap()?.chain().focus().toggleBlockquote().run();
-  }
-
-  const bulletList = (e: MouseEvent) => {
-    toggleToolbar('bulletList');
-    editorTipTap()?.chain().focus().toggleBulletList().run();
-  }
-
-  const orderedList = (e: MouseEvent) => {
-    toggleToolbar('orderedList');
-    editorTipTap()?.chain().focus().toggleOrderedList().run();
-  }
-
-  const link = (href: string, title: string) => {
-    toggleToolbar('link');
-
-    const editor = editorTipTap();
-
-    if (!editor) return;
-
-    if (href === '') {
-      editor.
-        chain().
-        focus().
-        extendMarkRange('link').
-        unsetLink().
-        run();
-      return
-    }
-
-    editor.
-      chain().
-      focus().
-      extendMarkRange('link').
-      setLink({ href }).
-      command(({ tr }) => {
-        title && tr.insertText(title)
-        return true
-      }).
-      insertContent({ type: 'text', text: ' '}).
-      run();
-
-    editor.commands.unsetMark('link');
-  }
-
-  const heading = (option: SelectorOption) => {
-    const level = option?.index || 0;
-    setHeadingLevel(level);
-
-    if (level === 0) {
-      editorTipTap()?.chain().focus().setParagraph().run();
-      return;
-    }
-
-    if (level > 0 && level < 7) {
-      // @ts-ignore
-      editorTipTap()?.chain().focus().setHeading({ level }).run();
-      return;
-    }
-
-    if (level === 7) {
-      code();
-    }
-
-    if (level === 8) {
-      quote();
-    }
-  }
-
-  const table = (rows: number, cols: number) => {
-    editorTipTap()?.chain().focus().insertTable({rows, cols, withHeaderRow: false}).run();
-  }
 
   const postArticle = async () => {
     const editor = editorTipTap();
@@ -1036,140 +741,16 @@ const ReadsEditor: Component = () => {
       </Show>
 
       <div class={styles.contentEditor}>
-        <div class={styles.toolbar}>
-          <div>
+        <ReadsEditorToolbar
+          editor={editorTipTap()}
+          onFileUpload={onUploadContent}
+          wysiwygMode={!editorMarkdown()}
+          toggleEditorMode={() => {
+            setEditorMarkdown(v => !v)
+            setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+          }}
+        />
 
-            <ReadsEditorBlockSelector
-              value={blockSelectorOptions[headingLevel()]}
-              options={blockSelectorOptions}
-              onChange={heading}
-              short={true}
-            />
-
-            <button
-              id="boldBtn"
-              class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
-              onClick={bold}
-              title="bold"
-            >
-              <div class={styles.boldIcon}></div>
-            </button>
-
-            <button
-              id="italicBtn"
-              class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
-              onClick={italic}
-              title="italic"
-            >
-              <div class={styles.italicIcon}></div>
-            </button>
-
-            <button
-              id="ulineBtn"
-              class={`${styles.mdToolButton} ${isUlineActive() || isUlineSelected() ? styles.selected : ''}`}
-              onClick={uline}
-              title="underline"
-            >
-              <div class={styles.ulineIcon}></div>
-            </button>
-
-            <button
-              id="strikeBtn"
-              class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
-              onClick={strike}
-              title="strike"
-            >
-              <div class={styles.strikeIcon}></div>
-            </button>
-
-            <button
-              id="bulletListBtn"
-              class={`${styles.mdToolButton}`}
-              onClick={bulletList}
-              title="bullet list"
-            >
-              <div class={styles.bulletListIcon}></div>
-            </button>
-
-            <button
-              id="orderedListBtn"
-              class={`${styles.mdToolButton}`}
-              onClick={orderedList}
-              title="ordered list"
-            >
-              <div class={styles.orderedListIcon}></div>
-            </button>
-
-            <ReadsEditorTableSelector
-              onSelect={table}
-            />
-
-            <button
-              id="linkBtn"
-              class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
-              onClick={() => {
-                const editor = editorTipTap();
-                if (!editor) return;
-
-                let linak = editor.getAttributes('link').href;
-
-                if (linak) {
-                  editor.chain().unsetLink().run();
-                  return;
-                }
-
-                setEnterLink(true);
-              }}
-              title="link"
-            >
-              <div class={styles.linkIcon}></div>
-            </button>
-
-            <button
-              id="mentionBtn"
-              class={`${styles.mdToolButton}`}
-              onClick={() => {
-                setEnterMention(true);
-              }}
-              title="mention"
-            >
-              <div class={styles.atIcon}></div>
-            </button>
-
-            <div
-              id="attachBtn"
-              class={styles.mdToolButton}
-              title="image"
-            >
-              <input
-                id="upload-content"
-                type="file"
-                onChange={onUploadContentImage}
-                ref={contentFileUpload}
-                hidden={true}
-                accept="image/*,video/*,audio/*"
-              />
-              <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
-              </label>
-            </div>
-          </div>
-          <button
-            id="editorMode"
-            class={`${styles.mdToolButton} ${editorMarkdown() ? styles.selected : ''}`}
-            onClick={() => {
-              setEditorMarkdown(v => !v)
-              setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
-            }}
-            title={editorMarkdown() ? 'wysiwyg mode' : 'markdown mode'}
-          >
-            <Show
-              when={editorMarkdown()}
-              fallback={<div class={styles.modeIcon}></div>}
-            >
-              <div class={`${styles.modeIcon} ${styles.active}`}></div>
-            </Show>
-          </button>
-        </div>
         <div
           id="tiptapEditor"
           class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''}`} ref={tiptapEditor}
@@ -1181,108 +762,9 @@ const ReadsEditor: Component = () => {
             value={markdownContent()}
             class={`${styles.editor}`}
             onChange={e => {
-              const ed = editor();
-              if (!ed) return;
-              replaceAll(e.target.value)(ed.ctx);
             }}
           ></textarea>
         </div>
-      </div>
-
-
-      {/* <div class={styles.postingControls}>
-        <ButtonPrimary
-          onClick={postArticle}
-        >
-          Publish Article
-        </ButtonPrimary>
-      </div> */}
-
-      <ReadsLinkDialog
-        open={enterLink()}
-        setOpen={setEnterLink}
-        editor={editorTipTap()}
-        onSubmit={(url: string, label:string) => {
-          link(url, label);
-          setEnterLink(false);
-        }}
-      />
-
-      <ReadsMentionDialog
-        open={enterMention()}
-        setOpen={setEnterMention}
-        onAddUser={(user: PrimalUser, relays: string[]) => {
-          addMentionToEditor(user, relays);
-          setEnterMention(false);
-        }}
-        onAddNote={(note: PrimalNote) => {
-          addNoteToEditor(note);
-          setEnterMention(false);
-        }}
-        onAddRead={(read: PrimalArticle) => {
-          addReadToEditor(read);
-          setEnterMention(false);
-        }}
-      />
-
-      <div id='bubble_menu_one' class={styles.bubbleMenu}>
-
-        <button
-          id="boldBtnBubble"
-          class={`${styles.mdToolButton} ${isBoldActive() || isBoldSelected() ? styles.selected : ''}`}
-          onClick={bold}
-          title="bold"
-        >
-          <div class={styles.boldIcon}></div>
-        </button>
-
-        <button
-          id="italicBtnBubble"
-          class={`${styles.mdToolButton} ${isItalicActive() || isItalicSelected() ? styles.selected : ''}`}
-          onClick={italic}
-          title="italic"
-        >
-          <div class={styles.italicIcon}></div>
-        </button>
-
-        <button
-          id="ulineBtnBubble"
-          class={`${styles.mdToolButton} ${isUlineActive() || isUlineSelected() ? styles.selected : ''}`}
-          onClick={uline}
-          title="underline"
-        >
-          <div class={styles.ulineIcon}></div>
-        </button>
-
-        <button
-          id="strikeBtnBubble"
-          class={`${styles.mdToolButton} ${isStrikeActive() || isStrikeSelected() ? styles.selected : ''}`}
-          onClick={strike}
-          title="strike"
-        >
-          <div class={styles.strikeIcon}></div>
-        </button>
-
-        <button
-          id="linkBtn"
-          class={`${styles.mdToolButton} ${isLinkActive() || isLinkSelected() ? styles.selected : ''}`}
-          onClick={() => {
-            const editor = editorTipTap();
-            if (!editor) return;
-
-            let linak = editor.getAttributes('link').href;
-
-            if (linak) {
-              editor.chain().unsetLink().run();
-              return;
-            }
-
-            setEnterLink(true);
-          }}
-          title="link"
-        >
-          <div class={styles.linkIcon}></div>
-        </button>
       </div>
     </div>
   )
