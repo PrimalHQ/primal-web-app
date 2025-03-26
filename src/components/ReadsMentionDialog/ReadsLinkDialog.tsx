@@ -37,6 +37,8 @@ import SearchOption from '../Search/SearchOption';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import { getUsersRelayInfo } from '../../lib/profile';
 import { Editor } from '@tiptap/core';
+import { TextField } from '@kobalte/core/text-field';
+import ButtonSecondary from '../Buttons/ButtonSecondary';
 
 
 const ReadsLinkDialog: Component<{
@@ -83,25 +85,38 @@ const ReadsLinkDialog: Component<{
       title="Add link"
     >
       <div class={styles.addLinkDialog}>
+        <label for="link_url">Text to display:</label>
         <input
           id="link_url"
-          placeholder="link url"
           class={styles.textInput}
           value={state.url}
           onInput={(e) => setState(() => ({ url: e.target.value}))}
         />
-        <input
+
+        <label for="link_label">Address:</label>
+        <TextField
           id="link_label"
-          placeholder="link label"
           class={styles.textInput}
           value={state.title}
-          onInput={(e) => setState(() => ({ title: e.target.value}))}
-        />
-        <ButtonPrimary
-          onClick={() => props.onSubmit(state.url, state.title)}
+          onChange={(title) => setState(() => ({ title }))}
         >
-          Add Link
-        </ButtonPrimary>
+         	<TextField.TextArea autoResize rows={1} />
+        </TextField>
+
+        <div class={styles.actions}>
+          <ButtonSecondary
+            onClick={() => props.setOpen && props.setOpen(false)}
+            light={true}
+            shrink={true}
+          >
+            Cancel
+          </ButtonSecondary>
+          <ButtonPrimary
+            onClick={() => props.onSubmit(state.url, state.title)}
+          >
+            Insert
+          </ButtonPrimary>
+        </div>
       </div>
     </AdvancedSearchDialog>
   );
