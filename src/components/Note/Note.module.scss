@@ -27,6 +27,11 @@
   &.reactionNote {
     background: none;
     border-bottom: 1px solid var(--subtile-devider);
+
+    .content {
+      display: flex;
+      gap: 8px;
+    }
   }
 
   .userHeader {

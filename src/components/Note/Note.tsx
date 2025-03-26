@@ -53,7 +53,7 @@ export type NoteProps = {
   parent?: boolean,
   shorten?: boolean,
   noteType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread'
-  onClick?: () => void,
+  onClick?: (note?: PrimalNote) => void,
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
@@ -84,7 +84,7 @@ const Note: Component<NoteProps> = (props) => {
   const repost = () => props.note.repost;
 
   const navToThread = (note: PrimalNote) => {
-    props.onClick && props.onClick();
+    props.onClick && props.onClick(note);
     threadContext?.actions.setPrimaryNote(note);
   };
 
@@ -618,9 +618,9 @@ const Note: Component<NoteProps> = (props) => {
         >
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              <a href={app?.actions.profileLink(props.note.user.npub) || ''}>
+              <div>
                 <Avatar user={props.note.user} size="vs" />
-              </a>
+              </div>
               <Show
                 when={props.parent}
               >

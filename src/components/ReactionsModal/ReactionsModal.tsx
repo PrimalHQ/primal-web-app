@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core/tabs';
-import { A } from '@solidjs/router';
+import { A, useNavigate } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
@@ -38,6 +38,7 @@ const ReactionsModal: Component<{
   const intl = useIntl();
   const account = useAccountContext();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   const [selectedTab, setSelectedTab] = createSignal('default');
 
@@ -617,7 +618,12 @@ const ReactionsModal: Component<{
                     note={quote}
                     shorten={true}
                     noteType="reaction"
-                    onClick={props.onClose}
+                    onClick={(note: PrimalNote) => {
+                      if (note) {
+                        navigate(`/e/${note.noteIdShort}`)
+                      }
+                      props.onClose && props.onClose();
+                    }}
                   />
                 )}
               </For>
