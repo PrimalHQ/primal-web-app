@@ -26,7 +26,7 @@
     "@cashu/cashu-ts": "0.9.0",
     "@cookbook/solid-intl": "0.1.2",
     "@jukben/emoji-search": "3.0.0",
-    "@kobalte/core": "0.13.3",
+    "@kobalte/core": "0.13.9",
     "@milkdown/core": "7.3.6",
     "@milkdown/ctx": "7.3.6",
     "@milkdown/plugin-emoji": "7.3.6",

@@ -52,7 +52,7 @@ export type NoteProps = {
   id?: string,
   parent?: boolean,
   shorten?: boolean,
-  noteType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread'
+  noteType?: 'feed' | 'primary' | 'notification' | 'reaction' | 'thread' | 'suggestion',
   onClick?: (note?: PrimalNote) => void,
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
@@ -644,6 +644,56 @@ const Note: Component<NoteProps> = (props) => {
                   margins={12}
                   noLightbox={true}
                   altEmbeds={true}
+                />
+              </div>
+            </div>
+          </div>
+        </a>
+      </Match>
+
+
+      <Match when={noteType() === 'suggestion'}>
+        <a
+          id={props.id}
+          class={`${styles.noteSuggestion}`}
+          href={!props.onClick ? noteLinkId() : ''}
+          onClick={() => navToThread(props.note)}
+          data-event={props.note.post.id}
+          data-event-bech32={props.note.post.noteId}
+          draggable={false}
+        >
+          <div class={styles.header}>
+            <Show when={repost()}>
+              <NoteRepostHeader note={props.note} />
+            </Show>
+          </div>
+          <div class={styles.content}>
+            <div class={styles.leftSide}>
+              {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
+                <Avatar user={props.note.user} size="vs" />
+              {/* </A> */}
+              <Show
+                when={props.parent}
+              >
+                <div class={styles.ancestorLine}></div>
+              </Show>
+            </div>
+
+            <div class={styles.rightSide}>
+              <NoteAuthorInfo
+                author={props.note.user}
+                time={props.note.post.created_at}
+              />
+
+              <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
+
+              <div class={styles.message}>
+                <ParsedNote
+                  note={props.note}
+                  shorten={props.shorten}
+                  width={Math.min(508, window.innerWidth - 72)}
+                  margins={58}
+                  footerSize="short"
                 />
               </div>
             </div>

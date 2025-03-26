@@ -1,5 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core/tabs';
+import { Search } from '@kobalte/core/search';
 import { A } from '@solidjs/router';
 import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
@@ -40,6 +41,8 @@ import { useAdvancedSearchContext } from '../../contexts/AdvancedSearchContext';
 import tippy, { Instance } from 'tippy.js';
 import { nip19 } from '../../lib/nTools';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
+import ArticlePreview from '../ArticlePreview/ArticlePreview';
+import ArticlePreviewSuggestion from '../ArticlePreview/ArticlePreviewSuggestion';
 
 const contentKinds: Record<string, number> = {
   notes: 1,
@@ -47,9 +50,9 @@ const contentKinds: Record<string, number> = {
 }
 
 const placeholders = {
-  users: 'search for users by name or npub',
-  notes: 'search for notes',
-  reads: 'search for reads',
+  users: 'Search users by name or npub...',
+  notes: 'Search notes by text or id...',
+  reads: 'Search reads by text or address...',
 }
 
 const ReadsMentionDialog: Component<{
@@ -78,8 +81,11 @@ const ReadsMentionDialog: Component<{
 
   createEffect(() => {
     if (props.open && activeTab()) {
+      setQuery(() => '')
       setTimeout(() => {
-        searchInput?.focus();
+        if (!searchInput) return;
+        setQuery(() => searchInput?.value || '')
+        searchInput.focus();
       }, 100)
     }
   });
@@ -294,12 +300,12 @@ const ReadsMentionDialog: Component<{
     setSuggestedTerm(() => term);
   }
 
-  const onInput = (e: InputEvent) => {
-    debounce(() => {
+  const onInput = (value: string) => {
+    // debounce(() => {
       if (!search) return;
 
       // @ts-ignore
-      const value = e.target?.value;
+      // const value = e.target?.value;
 
       if (value.startsWith('npub') || value.startsWith('nprofile')) {
         search.actions.findUserByNupub(value);
@@ -307,7 +313,7 @@ const ReadsMentionDialog: Component<{
       }
 
       setQuery(DOMPurify.sanitize(value) || '');
-    }, 500);
+    // }, 500);
   };
 
   const resetQuery = () => {
@@ -356,63 +362,93 @@ const ReadsMentionDialog: Component<{
           </Tabs.List>
 
           <div>
-            <input
+            <Search
+              options={[]}
+              onInputChange={onInput}
+              debounceOptionsMillisecond={300}
+              placeholder={placeholders[activeTab()] || ''}
+            >
+              <Search.Control class={styles.textInput}>
+                <Search.Indicator
+                  class={styles.searchIndicator}
+                  // loadingComponent={
+                  //   <Search.Icon>
+                  //     <div class={styles.searchLoader}></div>
+                  //   </Search.Icon>
+                  // }
+                >
+                  <Search.Icon>
+                    <div class={styles.searchIcon}></div>
+                  </Search.Icon>
+                </Search.Indicator>
+                <Search.Input
+                  id="search_users"
+                  ref={searchInput}
+                />
+              </Search.Control>
+            </Search>
+
+            {/* <input
               id="search_users"
               placeholder={placeholders[activeTab()] || ''}
               class={styles.textInput}
               onInput={onInput}
               ref={searchInput}
               autocomplete="off"
-            />
+            /> */}
           </div>
 
-          <Tabs.Content value="users">
-            <div>
-              <For each={search?.users}>
-                {(user) => (
-                  <SearchOption
-                    title={userName(user)}
-                    description={nip05Verification(user)}
-                    icon={<Avatar user={user} size="vvs" />}
-                    statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-                    statLabel={intl.formatMessage(tSearch.followers)}
-                    onClick={() => selectUser(user)}
-                  />
-                )}
-              </For>
-            </div>
-          </Tabs.Content>
+          <div class={styles.searchResults}>
+            <Tabs.Content value="users">
+              <div>
+                <For each={search?.users}>
+                  {(user) => (
+                    <SearchOption
+                      title={userName(user)}
+                      description={nip05Verification(user)}
+                      icon={<Avatar user={user} size="vvs" />}
+                      statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+                      statLabel={intl.formatMessage(tSearch.followers)}
+                      onClick={() => selectUser(user)}
+                    />
+                  )}
+                </For>
+              </div>
+            </Tabs.Content>
 
-          <Tabs.Content value="notes">
-            <div>
-              <For each={advsearch?.notes.slice(0, 10)} >
-                {note => (
-                  <Note
-                    note={note}
-                    shorten={true}
-                    onClick={() => selectNote(note)}
-                  />
-                )}
-              </For>
-            </div>
-          </Tabs.Content>
+            <Tabs.Content value="notes">
+              <div class={styles.noteList}>
+                <For each={advsearch?.notes.slice(0, 10)} >
+                  {note => (
+                    <Note
+                      note={note}
+                      shorten={true}
+                      onClick={() => selectNote(note)}
+                      noteType="suggestion"
+                    />
+                  )}
+                </For>
+              </div>
+            </Tabs.Content>
 
-          <Tabs.Content value="reads">
-            <div>
-              <For each={advsearch?.reads.slice(0, 10)} >
-                {read => (
-                  <ArticleCompactPreview
-                    article={read}
-                    onClick={() => {
-                      selectRead(read)
-                    }}
-                    noLinks="links"
-                  />
-                )}
-              </For>
-            </div>
-          </Tabs.Content>
-
+            <Tabs.Content value="reads">
+              <div class={styles.noteList}>
+                <For each={advsearch?.reads.slice(0, 10)} >
+                  {read => (
+                    <ArticlePreviewSuggestion
+                      article={read}
+                      onClick={() => {
+                        selectRead(read)
+                      }}
+                      noLinks="links"
+                      hideFooter={true}
+                      hideContext={true}
+                    />
+                  )}
+                </For>
+              </div>
+            </Tabs.Content>
+          </div>
         </Tabs>
       </div>
     </AdvancedSearchDialog>

@@ -4,7 +4,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-y: scroll;
 }
 
 .suggest {
@@ -32,7 +31,48 @@
   }
 }
 
-input.textInput {
+.searchIndicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+
+  width: 35px;
+  height: 35px;
+}
+
+.searchLoader {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-block;
+  border-top: 3px solid var(--text-tertiary);
+  border-right: 3px solid transparent;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.searchIcon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
+  mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* input.textInput {
   background-color: var(--background-header-input);
 
   color: var(--text-primary);
@@ -54,9 +94,40 @@ input.textInput {
   &::placeholder {
     color: var(--text-tertiary);
   }
-}
+} */
 
 .textInput {
+  display: flex;
+  background-color: var(--background-header-input);
+  border-radius: 18px;
+  padding-left: 4px;
+
+  input {
+    background-color: var(--background-header-input);
+
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+
+    border-radius: 18px;
+    border: none;
+    width: 600px;
+    height: 35px;
+    padding-block: 16px;
+    padding-left: 0;
+    padding-right: 8px;
+    margin: 0;
+
+    &:focus {
+      box-shadow: none;
+    }
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+  }
+
   textarea {
     background-color: var(--background-header-input);
 
@@ -100,65 +171,79 @@ input.textInput {
   }
 }
 
+.searchResults {
+  margin-top: 12px;
+  width: 614px;
+  height: 560px;
+  overflow-y: scroll;
+  padding-right: 8px;
+}
+
+.noteList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+}
 
 .tabs {
-    position: relative;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    padding-inline: 8px;
-    width: 100%;
-    border-radius: 0;
-    padding-top: 22px;
-    border-bottom: 1px solid var(--devider);
-    border-top: none;
-    margin-bottom: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-inline: 8px;
+  width: 100%;
+  border-radius: 0;
+  padding-top: 22px;
+  border-bottom: 1px solid var(--devider);
+  border-top: none;
+  margin-bottom: 20px;
+}
+
+.tab {
+  position: relative;
+  display: inline-block;
+  padding-inline: 14px;
+  padding-block: 2px;
+  border: none;
+  background: none;
+  width: fit-content;
+  height: 28px;
+  margin: 0;
+  margin-bottom: 12px;
+
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
   }
+}
 
-  .tab {
-    position: relative;
-    display: inline-block;
-    padding-inline: 14px;
-    padding-block: 2px;
-    border: none;
-    background: none;
-    width: fit-content;
-    height: 28px;
-    margin: 0;
-    margin-bottom: 12px;
+.tabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 54px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
 
-    color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 14px;
-
-    &:focus {
-      outline: none;
-      box-shadow: none;
+.tabContent {
+  @keyframes fadeIn {
+    from {
+        opacity:0;
     }
-  }
 
-  .tabIndicator {
-    position: absolute;
-    height: 4px;
-    top: 54px;
-    left: 0;
-    border-radius: 2px 2px 0px 0px;
-    background: var(--accent);
-    transition: all 250ms;
-  }
-
-  .tabContent {
-    @keyframes fadeIn {
-      from {
-          opacity:0;
-      }
-
-      to {
-          opacity:1;
-      }
-
+    to {
+        opacity:1;
     }
-    animation: fadeIn 1s;
+
   }
+  animation: fadeIn 1s;
+}

@@ -263,6 +263,134 @@
   }
 }
 
+.noteSuggestion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 20px;
+  margin: 0px;
+
+  text-decoration: none;
+  color: unset;
+  background-color: var(--background-header-input);
+  border: 1px solid var(--background-input);
+  border-radius: 8px;
+
+  -webkit-user-select: text;
+  -moz-select: text;
+  -ms-select: text;
+  user-select: text;
+
+  width: 100%;
+
+  &:hover {
+    border: 1px solid var(--subtile-devider);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .repostedBy {
+      padding-bottom: 8px;
+      display: flex;
+      >span {
+        >a {
+          margin-inline: 5px;
+          color: var(--text-tertiary);
+          text-decoration: none;
+        }
+        color: var(--text-tertiary);
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: 400;
+        >span {
+          text-transform: lowercase;
+        }
+      }
+    }
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+
+    .leftSide {
+      width: 42px;
+      margin-right: 8px;
+
+      .ancestorLine {
+        border-left: 1px solid var(--devider);
+        height: calc(100% - 12px);
+        margin-left: 21px;
+      }
+    }
+
+    .rightSide {
+      display: flex;
+      flex-direction: column;
+      width: calc(100% - 42px);
+
+      .message {
+        color: var(--text-primary);
+        word-break: break-word;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        width: 100%;
+        overflow: hidden;
+
+        &.bigFont {
+          font-size: 24px;
+          font-weight: 400;
+          line-height: 32px;
+        }
+      }
+
+      .replyingTo {
+        display: flex;
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 6px;
+        max-width: 518px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        .label {
+          color: var(--text-primary);
+        }
+        a {
+          max-width: 440px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+        .author {
+          display: inline-block;
+          color: var(--accent-links);
+          text-decoration: none;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .upRightFloater {
+    position: absolute;
+    top: 0px;
+    right: 8px;
+  }
+}
 .authorInfo {
   display: flex;
   justify-content: flex-start;

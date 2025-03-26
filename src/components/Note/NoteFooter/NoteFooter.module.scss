@@ -105,6 +105,16 @@
     }
   }
 
+  &.very_short {
+    grid-template-columns: 123px 123px 123px 123px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
   &.normal {
     width: 100%;
   }
