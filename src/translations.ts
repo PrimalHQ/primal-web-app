@@ -1277,7 +1277,7 @@ export const profile = {
   },
   noFollows: {
     id: 'profile.noFollows',
-    defaultMessage: 'No one is following {name}',
+    defaultMessage: '{name} isn\'t following anyone',
     description: 'Label indicating that the profile has no followers',
   },
   noZaps: {
