@@ -57,6 +57,7 @@ const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Support = lazy(() => import('./pages/Support'));
+const Csae = lazy(() => import('./pages/Csae'));
 
 const Feeds = lazy(() => import('./pages/FeedsTest'));
 const Feed = lazy(() => import('./pages/FeedQueryTest'));
@@ -121,6 +122,7 @@ const AppRouter: Component = () => {
       <Router>
         <Route path="/app-download-qr" component={AppDownloadQr} />
         <Route path="/terms" component={Terms} />
+        <Route path="/csae-policy" component={Csae} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >

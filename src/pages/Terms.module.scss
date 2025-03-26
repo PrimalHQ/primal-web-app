@@ -49,6 +49,16 @@
     margin-inline: 0;
     margin-block: 12px;
   }
+
+  ul {
+    padding-left: 2rem;
+    li {
+      color: #bfbfbf;
+      font-size: 16px;
+      margin-inline: 0;
+      margin-block: 12px;
+    }
+  }
 }
 
 @media only screen and (max-width: 720px) {
