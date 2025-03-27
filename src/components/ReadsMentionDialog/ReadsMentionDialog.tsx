@@ -43,6 +43,8 @@ import { nip19 } from '../../lib/nTools';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticlePreviewSuggestion from '../ArticlePreview/ArticlePreviewSuggestion';
+import ArticlePreviewSuggestionSkeleton from '../Skeleton/ArticlePreviewSuggestionSkeleton';
+import NoteSuggestionSkeleton from '../Skeleton/NoteSuggestionSkeleton';
 
 const contentKinds: Record<string, number> = {
   notes: 1,
@@ -418,34 +420,52 @@ const ReadsMentionDialog: Component<{
 
             <Tabs.Content value="notes">
               <div class={styles.noteList}>
-                <For each={advsearch?.notes.slice(0, 10)} >
-                  {note => (
-                    <Note
-                      note={note}
-                      shorten={true}
-                      onClick={() => selectNote(note)}
-                      noteType="suggestion"
-                    />
-                  )}
-                </For>
+                <Show
+                  when={!advsearch?.isFetchingContent}
+                  fallback={
+                    <For each={Array.from({ length: 10 }, (_, i) => i)}>
+                      {() => (<NoteSuggestionSkeleton />)}
+                    </For>
+                  }
+                >
+                  <For each={advsearch?.notes.slice(0, 10)} >
+                    {note => (
+                      <Note
+                        note={note}
+                        shorten={true}
+                        onClick={() => selectNote(note)}
+                        noteType="suggestion"
+                      />
+                    )}
+                  </For>
+                </Show>
               </div>
             </Tabs.Content>
 
             <Tabs.Content value="reads">
               <div class={styles.noteList}>
-                <For each={advsearch?.reads.slice(0, 10)} >
-                  {read => (
-                    <ArticlePreviewSuggestion
-                      article={read}
-                      onClick={() => {
-                        selectRead(read)
-                      }}
-                      noLinks="links"
-                      hideFooter={true}
-                      hideContext={true}
-                    />
-                  )}
-                </For>
+                <Show
+                  when={!advsearch?.isFetchingContent}
+                  fallback={
+                    <For each={Array.from({ length: 10 }, (_, i) => i)}>
+                      {() => (<ArticlePreviewSuggestionSkeleton />)}
+                    </For>
+                  }
+                >
+                  <For each={advsearch?.reads.slice(0, 10)} >
+                    {read => (
+                      <ArticlePreviewSuggestion
+                        article={read}
+                        onClick={() => {
+                          selectRead(read)
+                        }}
+                        noLinks="links"
+                        hideFooter={true}
+                        hideContext={true}
+                      />
+                    )}
+                  </For>
+                </Show>
               </div>
             </Tabs.Content>
           </div>

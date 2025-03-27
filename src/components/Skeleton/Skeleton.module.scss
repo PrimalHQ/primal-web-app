@@ -94,6 +94,91 @@
   }
 }
 
+.articlePreviewSuggestionSkeleton {
+  width: 600px;
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 10px;
+
+  border-radius: 8px;
+  background-color: var(--background-header-input);
+
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 11px;
+      background-color: var(--devider);
+    }
+
+    .userInfo {
+      width: 158px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+    }
+  }
+
+  .body {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+
+    .text {
+      width: 382px;
+      height: 125px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+
+    .image {
+      width: 175px;
+      height: 125px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+
+  .topZaps {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .zaps {
+      width: 160px;
+      height: 14px;
+      border-radius: 7px;
+      background-color: var(--devider);
+    }
+  }
+
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .stat {
+      width: 20px;
+      height: 20px;
+      border-radius: 10px;
+      background-color: var(--devider);
+    }
+  }
+}
+
 .articlePreviewPhoneSkeleton {
   width: 100dvw;
   padding: 20px;
@@ -737,6 +822,47 @@
     .contentSN {
       width: 264px;
       height: 34px;
+      border-radius: 8px;
+      background-color: var(--devider);
+    }
+  }
+}
+
+
+.noteSuggestionSkeleton {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 20px;
+
+  background-color: var(--background-header-input);
+
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .avatarSN {
+    width: 38px;
+    height: 38px;
+    border-radius: 99px;
+    background-color: var(--devider);
+  }
+
+  .shortNote {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+
+    .headerSN {
+      width: 340px;
+      height: 20px;
+      border-radius: 6px;
+      background-color: var(--devider);
+    }
+
+    .contentSN {
+      width: 480px;
+      height: 80px;
       border-radius: 8px;
       background-color: var(--devider);
     }
