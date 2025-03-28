@@ -10,6 +10,7 @@ import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import { nip19 } from '../../lib/nTools';
 import ReadsEditorTableSelector from './ReadsEditorTableSelector';
 import ReadsEditorBubbleMenu from './ReadsEditorBubbleMenu';
+import ReadsImageDialog from '../ReadsMentionDialog/ReadsImageDialog';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -20,6 +21,7 @@ export type FormatControls = {
   isCodeActive: boolean,
   enterLink: boolean,
   enterMention: boolean,
+  enterImage: boolean,
   headingLevel: number,
 };
 
@@ -42,6 +44,7 @@ const ReadsEditorToolbar: Component<{
     isCodeActive: false,
     enterLink: false,
     enterMention: false,
+    enterImage: false,
     headingLevel: 0,
   });
 
@@ -128,6 +131,36 @@ const ReadsEditorToolbar: Component<{
   }
 
   const link = (href: string, title: string) => {
+    const editor = props.editor;
+
+    if (!editor) return;
+
+    if (href === '') {
+      editor.
+        chain().
+        focus().
+        extendMarkRange('link').
+        unsetLink().
+        run();
+      return
+    }
+
+    editor.
+      chain().
+      focus().
+      extendMarkRange('link').
+      setLink({ href }).
+      command(({ tr }) => {
+        title && tr.insertText(title)
+        return true
+      }).
+      insertContent({ type: 'text', text: ' '}).
+      run();
+
+    editor.commands.unsetMark('link');
+  }
+
+  const image = (href: string, title: string) => {
     const editor = props.editor;
 
     if (!editor) return;
@@ -335,7 +368,18 @@ const ReadsEditorToolbar: Component<{
             <div class={styles.atIcon}></div>
           </button>
 
-          <div
+          <button
+            id="attachBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterImage', () => true);
+            }}
+            title="image"
+          >
+            <div class={styles.attachIcon}></div>
+          </button>
+
+          {/* <div
             id="attachBtn"
             class={styles.mdToolButton}
             title="image"
@@ -350,7 +394,7 @@ const ReadsEditorToolbar: Component<{
             />
             <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
             </label>
-          </div>
+          </div> */}
         </div>
         <button
           id="editorMode"
@@ -387,6 +431,17 @@ const ReadsEditorToolbar: Component<{
           updateFormatControls('enterLink', () => false);
         }}
       />
+
+      <ReadsImageDialog
+        open={formatControls.enterImage}
+        setOpen={(v: boolean) => updateFormatControls('enterImage', () => v)}
+        editor={props.editor}
+        onSubmit={(alt: string, label:string) => {
+          image(alt, label);
+          updateFormatControls('enterImage', () => false);
+        }}
+      />
+
 
       <ReadsMentionDialog
         open={formatControls.enterMention}

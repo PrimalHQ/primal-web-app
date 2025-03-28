@@ -1,5 +1,5 @@
 
-import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range, textblockTypeInputRule, wrappingInputRule } from '@tiptap/core'
+import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, PasteRuleMatch, Range, textblockTypeInputRule, wrappingInputRule } from '@tiptap/core'
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model'
 import type { MarkdownSerializerState } from 'prosemirror-markdown'
 import { nip19 } from '../lib/nTools'
@@ -38,7 +38,9 @@ export const findMissingEvent = async (nevent: string) => {
 
   const events = await fetchNotes(undefined, [id], `event_missing_${APP_ID}`);
 
-  const mention = document.querySelector(`div[type=${decode.type}][bech32=${nevent}]`);
+  const mention = document.querySelector(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
+
+  console.log('MENTION: ', mention)
 
   if (mention && events[0]) {
     const el = renderEmbeddedNote({
@@ -49,7 +51,7 @@ export const findMissingEvent = async (nevent: string) => {
       noLinks: "links",
     })
 
-    mention.classList.remove('temp_editor');
+    mention.classList.remove('nevent-node');
     mention.innerHTML = el;
   }
 
@@ -79,7 +81,7 @@ export const makeNEventAttrs = (
     bech32 = bech32.split(':')[1];
   }
 
-  const { type, data } = nip19.decode(bech32.trim())
+  const { type, data } = nip19.decode(bech32)
   const relays: string[] = [];
 
   switch (type) {
@@ -102,7 +104,8 @@ export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[0-9a-z]+)/g
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nevent: {
-      setNostrContent: (content: string) => ReturnType,
+      applyNostrPasteRules: (text: string) => ReturnType,
+      // setNostrContent: (content: string) => ReturnType,
       insertNEvent: (options: { nevent: string }) => ReturnType,
       insertNEventAt: (range: Range, options: { nevent: string }) => ReturnType
     }
@@ -116,22 +119,56 @@ export const NEventExtension = Node.create({
   draggable: true,
   priority: 1000,
 
-  addNodeView() {
-    return ({ editor, node, getPos, HTMLAttributes, decorations, extension }) => {
+  addNodeView(): NodeViewRenderer {
+    return ({ node, editor, getPos, HTMLAttributes, decorations, extension }) => {
       const dom = document.createElement('div');
+      dom.classList.add('nevent-node');
 
+      // Create a paragraph for the content
+      // const contentP = document.createElement('p');
+      // contentP.classList.add('nevent-node');
+
+      // Set attributes on the main div
       Object.entries(node.attrs).forEach(([attr, value]) => {
-        dom.setAttribute(attr, value)
+        dom.setAttribute(`data-${attr}`, String(value));
       });
 
-      dom.classList.add('temp_editor');
-      dom.innerText = `${node.attrs.bech32}`;
+      // Set the text content
+      dom.innerText = node.attrs.bech32;
+
+      // Append paragraph to the main div
+      // dom.appendChild(contentP);
 
       findMissingEvent(node.attrs.bech32);
 
       return {
         dom,
+        // Optionally add update method if needed
+        update: (newNode) => {
+          if (newNode.type.name !== this.name) return false;
+
+          // Update attributes
+          Object.entries(newNode.attrs).forEach(([attr, value]) => {
+            dom.setAttribute(`data-${attr}`, String(value));
+          });
+
+          // Update content
+          dom.innerText = newNode.attrs.bech32;
+
+          return true;
+        }
       }
+    }
+  },
+
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
+          state.write('nostr:' + node.attrs.bech32)
+        },
+        parse: {},
+      },
     }
   },
 
@@ -150,31 +187,63 @@ export const NEventExtension = Node.create({
     return ['div', mergeAttributes(HTMLAttributes, { 'data-type': this.name })]
   },
 
-  renderText(props) {
-    return 'nostr:' + props.node.attrs.bech32
-  },
+  renderText({ node }) {
+      return `nostr:${node.attrs.bech32}`
+    },
 
-  parseHTML() {
-    return [{ tag: `div[data-type="${this.name}"]` }]
-  },
-
-  addStorage() {
-    return {
-      markdown: {
-        serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32)
-        },
-        parse: {},
-      },
-    }
-  },
+    // Modify parseHTML to work with both div and the specific data attribute
+    parseHTML() {
+      return [
+        { tag: `div[data-type="${this.name}"]` },
+        { tag: `div.nevent-node` }
+      ]
+    },
 
   addCommands() {
     return {
-      setNostrContent:
-        (content) =>
-        ({ commands, tr }) =>
-          commands.insertContentAt({from: 0, to: tr.doc.content.size }, content, { updateSelection: false, applyPasteRules: true }),
+
+      applyNostrPasteRules:
+        (text) =>
+        ({ tr, state, dispatch }) => {
+          const matches = Array.from(text.matchAll(EVENT_REGEX));
+
+          if (matches.length === 0) return false;
+
+          if (dispatch) {
+            matches.forEach(match => {
+              try {
+                const attrs = makeNEventAttrs(match[2], this.options);
+                const node = state.schema.nodes[this.name].create(attrs);
+
+                const start = match.index || 0;
+                const end = start + match[0].length;
+
+                tr.replaceWith(start, end, node);
+              } catch (e) {
+                console.error('Error applying Nostr paste rule:', e);
+              }
+            });
+          }
+
+          return true;
+        },
+      // setNostrContent:
+      //   (content) =>
+      //   ({ commands, tr }) => {
+      //     // Modify the insertion method
+      //     return commands.setContent(
+      //       [
+      //         {
+      //           type: 'doc',
+      //           content: [
+      //             makeNEventNode(content),
+      //             { type: 'paragraph', content: [{ type: 'text', text: ' ' }] }
+      //           ]
+      //         }
+      //       ],
+      //       { updateSelection: false }
+      //     )
+      //   },
       insertNEvent:
         ({ nevent }) =>
         ({ commands }) =>

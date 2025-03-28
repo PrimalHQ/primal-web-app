@@ -53,7 +53,7 @@ import { NAddrExtension } from '../markdownPlugins/nAddrMention';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorToolbar from '../components/ReadsEditor/ReadsEditorToolbar';
 import { Fragment } from '@tiptap/pm/model';
-import { createNodeFromContent } from '@tiptap/core';
+import { createNodeFromContent, Editor } from '@tiptap/core';
 
 
 export type ArticleEdit = {
@@ -316,6 +316,10 @@ const ReadsEditor: Component = () => {
       }),
     ],
     content: '',
+    onCreate({ editor }) {
+      setEditorContent(editor, 'nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08');
+      // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
+    }
     // onUpdate() {
     //   console.log('update');
     // },
@@ -331,6 +335,10 @@ const ReadsEditor: Component = () => {
     //   }))
     // },
   }));
+
+  const setEditorContent = (editor: Editor, content: string) => {
+    editor.chain().setContent(content).applyNostrPasteRules(content).focus().run();
+  }
 
   // ----------------------------------------
 
@@ -763,18 +771,20 @@ const ReadsEditor: Component = () => {
               setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
             }
             else {
-              const oldHTML = editor.getHTML();
-              editor.commands.setContent('');
+              setEditorContent(editor, 'nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08')
+
+              // const oldHTML = editor.getHTML();
+              // editor.commands.setContent('');
 
               // nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08
 
-              try {
-                const content = `${editorPlainText?.value || ''} `;
-                editor.chain().focus().setNostrContent(content).run();
-              } catch (e) {
-                console.log('ERROR: ', e);
-                editor.commands.setContent(oldHTML);
-              }
+              // try {
+              //   const content = `${editorPlainText?.value || ''} `;
+              //   editor.chain().focus().setNostrContent(content).run();
+              // } catch (e) {
+              //   console.log('ERROR: ', e);
+              //   editor.commands.setContent(oldHTML);
+              // }
             }
           }}
         />

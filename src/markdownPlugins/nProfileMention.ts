@@ -38,6 +38,7 @@ export type NProfileAttributes = {
   relays: string[],
   name: string,
 }
+
 export const createPasteRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
   data: T,

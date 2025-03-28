@@ -31,6 +31,60 @@
   }
 }
 
+.addImageDialog {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  >div, .inputHolder {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+
+    .actions {
+      display:flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      margin-top: 8px;
+
+      >button {
+        width: 100px;
+      }
+    }
+  }
+
+  .uploadHolder {
+    width: 220px;
+    height: 145px;
+    background-color: var(--background-header-input);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+
+    .uploadPlaceholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+  }
+
+  .inputHolder {
+    label {
+      margin: 0;
+    }
+    input {
+      width: 332px;
+    }
+  }
+}
+
 .searchIndicator {
   display: flex;
   justify-content: center;
@@ -72,7 +126,7 @@
   }
 }
 
-/* input.textInput {
+input.textInput {
   background-color: var(--background-header-input);
 
   color: var(--text-primary);
@@ -94,7 +148,7 @@
   &::placeholder {
     color: var(--text-tertiary);
   }
-} */
+}
 
 .textInput {
   display: flex;
@@ -246,4 +300,22 @@
 
   }
   animation: fadeIn 1s;
+}
+
+.attachIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: inline-block;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
+  cursor: pointer;
+}
+
+.attachLabel {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 12px;
 }
