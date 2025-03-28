@@ -52,6 +52,8 @@ import { NEventExtension } from '../markdownPlugins/nEventMention';
 import { NAddrExtension } from '../markdownPlugins/nAddrMention';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorToolbar from '../components/ReadsEditor/ReadsEditorToolbar';
+import { Fragment } from '@tiptap/pm/model';
+import { createNodeFromContent } from '@tiptap/core';
 
 
 export type ArticleEdit = {
@@ -99,6 +101,7 @@ const ReadsEditor: Component = () => {
   // TIPTAP----------------------------------
 
   let tiptapEditor: HTMLDivElement | undefined;
+  let editorPlainText: HTMLTextAreaElement | undefined;
 
   let users: PrimalUser[] = [];
   let userRelays: Record<string, string[]> = {};
@@ -313,6 +316,12 @@ const ReadsEditor: Component = () => {
       }),
     ],
     content: '',
+    // onUpdate() {
+    //   console.log('update');
+    // },
+    // onPaste(e: ClipboardEvent) {
+    //   console.log('PASTE', e)
+    // }
     // onSelectionUpdate({ editor: ed }) {
     //   updateFormatControls(() => ({
     //     isBoldActive: ed.isActive('bold'),
@@ -746,8 +755,27 @@ const ReadsEditor: Component = () => {
           onFileUpload={onUploadContent}
           wysiwygMode={!editorMarkdown()}
           toggleEditorMode={() => {
-            setEditorMarkdown(v => !v)
-            setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+            setEditorMarkdown(v => !v);
+            const editor = editorTipTap();
+            if (!editor) return;
+
+            if (editorMarkdown()) {
+              setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+            }
+            else {
+              const oldHTML = editor.getHTML();
+              editor.commands.setContent('');
+
+              // nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08
+
+              try {
+                const content = `${editorPlainText?.value || ''} `;
+                editor.chain().focus().setNostrContent(content).run();
+              } catch (e) {
+                console.log('ERROR: ', e);
+                editor.commands.setContent(oldHTML);
+              }
+            }
           }}
         />
 
@@ -761,7 +789,9 @@ const ReadsEditor: Component = () => {
           <textarea
             value={markdownContent()}
             class={`${styles.editor}`}
+            ref={editorPlainText}
             onChange={e => {
+              setMarkdownContent(() => e.target.value || '');
             }}
           ></textarea>
         </div>

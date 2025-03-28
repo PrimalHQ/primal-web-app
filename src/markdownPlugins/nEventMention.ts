@@ -1,5 +1,5 @@
 
-import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range, textblockTypeInputRule } from '@tiptap/core'
+import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range, textblockTypeInputRule, wrappingInputRule } from '@tiptap/core'
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model'
 import type { MarkdownSerializerState } from 'prosemirror-markdown'
 import { nip19 } from '../lib/nTools'
@@ -14,6 +14,12 @@ import { fetchNotes } from '../handleNotes'
 import Note, { renderNote } from '../components/Note/Note'
 import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
+
+export const createInputRuleMatch = <T extends Record<string, unknown>>(
+  match: RegExpMatchArray,
+  data: T,
+): InputRuleMatch => ({ index: match.index!, replaceWith: match[2], text: match[0], match, data })
+
 
 export const findMissingEvent = async (nevent: string) => {
   const decode = nip19.decode(nevent);
@@ -67,8 +73,13 @@ export const makeNEventAttrs = (
   event: PrimalNote | PrimalZap | undefined,
   options?: any,
 ): NEventAttributes => {
-  const bech32 = input.replace(/^nostr:/, '')
-  const { type, data } = nip19.decode(bech32)
+  let bech32 = input;
+
+  if (bech32.startsWith('nostr:')) {
+    bech32 = bech32.split(':')[1];
+  }
+
+  const { type, data } = nip19.decode(bech32.trim())
   const relays: string[] = [];
 
   switch (type) {
@@ -91,6 +102,7 @@ export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[0-9a-z]+)/g
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nevent: {
+      setNostrContent: (content: string) => ReturnType,
       insertNEvent: (options: { nevent: string }) => ReturnType,
       insertNEventAt: (range: Range, options: { nevent: string }) => ReturnType
     }
@@ -113,7 +125,7 @@ export const NEventExtension = Node.create({
       });
 
       dom.classList.add('temp_editor');
-      dom.innerHTML = `${node.attrs.bech32}`;
+      dom.innerText = `${node.attrs.bech32}`;
 
       findMissingEvent(node.attrs.bech32);
 
@@ -159,6 +171,10 @@ export const NEventExtension = Node.create({
 
   addCommands() {
     return {
+      setNostrContent:
+        (content) =>
+        ({ commands, tr }) =>
+          commands.insertContentAt({from: 0, to: tr.doc.content.size }, content, { updateSelection: false, applyPasteRules: true }),
       insertNEvent:
         ({ nevent }) =>
         ({ commands }) =>
@@ -169,6 +185,32 @@ export const NEventExtension = Node.create({
           commands.insertContentAt(range, makeNEventNode(nevent, this.options), { updateSelection: false }),
     }
   },
+
+  // addInputRules() {
+  //   return [
+  //     wrappingInputRule({
+  //       type: this.type,
+  //       find: (text: string) => {
+  //         console.log('FIND: ', text)
+  //         let match = text.match(EVENT_REGEX);
+
+  //         if (match) {
+  //           return createInputRuleMatch(match, makeNEventAttrs(match[2], this.options))
+  //         }
+
+  //           // for (const match of text.matchAll(EVENT_REGEX)) {
+  //           //   try {
+  //           //   } catch (e) {
+  //           //     continue
+  //           //   }
+  //           // }
+
+  //           // return matches
+  //       },
+  //       // find: EVENT_REGEX,
+  //     }),
+  //   ]
+  // },
 
   addPasteRules() {
     return [
@@ -182,6 +224,7 @@ export const NEventExtension = Node.create({
             try {
               matches.push(createPasteRuleMatch(match, makeNEventAttrs(match[2], this.options)))
             } catch (e) {
+              console.log('ERROR PASTE: ', e)
               continue
             }
           }
