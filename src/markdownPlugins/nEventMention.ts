@@ -38,11 +38,9 @@ export const findMissingEvent = async (nevent: string) => {
 
   const events = await fetchNotes(undefined, [id], `event_missing_${APP_ID}`);
 
-  const mention = document.querySelector(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
+  const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
-  console.log('MENTION: ', mention)
-
-  if (mention && events[0]) {
+  if (mentions.length > 0 && events[0]) {
     const el = renderEmbeddedNote({
       note: events[0],
       mentionedUsers: events[0].mentionedUsers,
@@ -51,8 +49,11 @@ export const findMissingEvent = async (nevent: string) => {
       noLinks: "links",
     })
 
-    mention.classList.remove('nevent-node');
-    mention.innerHTML = el;
+    mentions.forEach(mention => {
+      mention.classList.remove('nevent-node');
+      mention.innerHTML = el;
+    })
+
   }
 
   // Move cursor one space to the right to avoid overwriting the note.
@@ -216,7 +217,7 @@ export const NEventExtension = Node.create({
                 const node = state.schema.nodes[this.name].create(attrs);
 
                 const start = match.index || 0;
-                const end = start + match[0].length;
+                const end = start + match[0].length + 1;
 
                 tr.replaceWith(start, end, node);
               } catch (e) {

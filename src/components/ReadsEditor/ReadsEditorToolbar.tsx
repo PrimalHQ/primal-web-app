@@ -160,34 +160,21 @@ const ReadsEditorToolbar: Component<{
     editor.commands.unsetMark('link');
   }
 
-  const image = (href: string, title: string) => {
+  const image = (src: string, title: string, alt: string) => {
     const editor = props.editor;
 
-    if (!editor) return;
-
-    if (href === '') {
-      editor.
-        chain().
-        focus().
-        extendMarkRange('link').
-        unsetLink().
-        run();
-      return
-    }
+    if (!editor || src.length === 0) return;
 
     editor.
       chain().
       focus().
-      extendMarkRange('link').
-      setLink({ href }).
-      command(({ tr }) => {
-        title && tr.insertText(title)
-        return true
-      }).
-      insertContent({ type: 'text', text: ' '}).
+      setImage({ src, title, alt }).
       run();
 
-    editor.commands.unsetMark('link');
+    // Move cursor one space to the right to avoid overwriting the image.
+    const el = document.querySelector('.tiptap.ProseMirror');
+    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
   }
 
   const heading = (option: SelectorOption) => {
@@ -436,8 +423,8 @@ const ReadsEditorToolbar: Component<{
         open={formatControls.enterImage}
         setOpen={(v: boolean) => updateFormatControls('enterImage', () => v)}
         editor={props.editor}
-        onSubmit={(alt: string, label:string) => {
-          image(alt, label);
+        onSubmit={(url: string, title:string, alt: string) => {
+          image(url, title, alt);
           updateFormatControls('enterImage', () => false);
         }}
       />

@@ -57,6 +57,13 @@
     }
   }
 
+  .uploadPreview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 220px;
+  }
+
   .uploadHolder {
     width: 220px;
     height: 145px;
@@ -72,6 +79,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+    }
+
+    img {
+      width: 220px;
+      height: 145px;
+      object-fit: contain;
     }
   }
 

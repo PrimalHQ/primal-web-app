@@ -945,10 +945,6 @@ input.textInput {
   }
 }
 
-.hiddenEditor {
-  display:none;
-}
-
 .bubbleMenu {
   background-color: var(--background-header-input);
 
@@ -1003,6 +999,11 @@ input.textInput {
       font-size: 14px;
       font-weight: 600;
       line-height: 15px;
+
+      &.selected {
+        border: 1px solid var(--text-tertiary);
+        background: var(--background-header-input);
+      }
     }
   }
 

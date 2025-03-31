@@ -49,7 +49,7 @@ const ReadsImageDialog: Component<{
   open: boolean,
   editor: Editor | undefined,
   setOpen?: (v: boolean) => void,
-  onSubmit: (url: string, title: string) => void,
+  onSubmit: (url: string, title: string, alt: string) => void,
 }> = (props) => {
 
   const intl = useIntl();
@@ -72,12 +72,12 @@ const ReadsImageDialog: Component<{
     if (props.open) {
       const sel = e.state.selection;
       const title = e.state.doc.textBetween(sel.from, sel.to);
-      const url = e.getAttributes('link').href || '';
+      const image = e.getAttributes('link').href || '';
 
-      setState(() => ({ title, url }))
+      setState(() => ({ title, image }))
     }
     else {
-      setState(() => ({ url: '', title: '' }));
+      setState(() => ({ image: '', title: '', alt: '' }));
     }
 
   })
@@ -114,32 +114,35 @@ const ReadsImageDialog: Component<{
       title="Insert Image"
     >
       <div class={styles.addImageDialog}>
-        <div
-          class={styles.uploadHolder}
-          onClick={() => contentFileUpload?.click()}
-        >
-          <Show
-            when={state.image.length > 0}
-            fallback={
-              <div class={styles.uploadPlaceholder}>
-                <div class={styles.attachIcon}></div>
-                <div class={styles.attachLabel}>
-                  upload image
-                </div>
-              </div>
-            }
+        <div class={styles.uploadPreview}>
+          <div
+            class={styles.uploadHolder}
+            onClick={() => contentFileUpload?.click()}
           >
-            <img src={state.image} />
-          </Show>
+            <Show
+              when={state.image.length > 0}
+              fallback={
+                <div class={styles.uploadPlaceholder}>
+                  <div class={styles.attachIcon}></div>
+                  <div class={styles.attachLabel}>
+                    upload image
+                  </div>
+                </div>
+              }
+            >
+              <img src={state.image} />
+            </Show>
 
-          <input
-            id="upload-content"
-            type="file"
-            onChange={uploadFile}
-            ref={contentFileUpload}
-            hidden={true}
-            accept="image/*,video/*,audio/*"
-          />
+            <input
+              id="upload-content"
+              type="file"
+              onChange={uploadFile}
+              ref={contentFileUpload}
+              hidden={true}
+              accept="image/*,video/*,audio/*"
+            />
+          </div>
+
           <Uploader
             uploadId="upload_content_image"
             hideLabel={false}
@@ -171,7 +174,6 @@ const ReadsImageDialog: Component<{
               resetUpload();
             }}
           />
-
         </div>
         <div class={styles.inputHolder}>
           <label for="input_title">Image title:</label>
@@ -192,14 +194,19 @@ const ReadsImageDialog: Component<{
 
           <div class={styles.actions}>
             <ButtonSecondary
-              onClick={() => props.setOpen && props.setOpen(false)}
+              onClick={() => {
+                props.setOpen && props.setOpen(false);
+              }}
               light={true}
               shrink={true}
             >
               Cancel
             </ButtonSecondary>
             <ButtonPrimary
-              onClick={() => props.onSubmit(state.alt, state.title)}
+              disabled={state.image.length === 0}
+              onClick={() => {
+                props.onSubmit(state.image, state.title, state.alt)
+              }}
             >
               Insert
             </ButtonPrimary>
