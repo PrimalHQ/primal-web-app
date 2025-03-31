@@ -31,6 +31,7 @@ const ArticleShort: Component<{
   article: PrimalArticle,
   short?: boolean,
   shorter?: boolean,
+  noBorder?: boolean,
 }> = (props) => {
   const media = useMediaContext();
   const app = useAppContext();
@@ -94,7 +95,7 @@ const ArticleShort: Component<{
 
   return (
     <A
-      class={styles.articleShort}
+      class={`${styles.articleShort} ${props.noBorder ? styles.noBorder : ''}`}
       href={articleUrl()}
       data-event={props.article.id}
     >

@@ -1056,3 +1056,33 @@ input.textInput {
 
 
 }
+
+
+.feedPreview {
+  padding: 12px 0px;
+
+  .caption {
+    color: var(--brand-text);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    padding-top: 16px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+  }
+
+  .phonePreview {
+    width: 375px;
+    border: 1px solid var(--background-input);
+    border-radius: 8px;
+    margin-left: 20px;
+  }
+
+  .sidebarPreview {
+    width: 324px;
+    border: 1px solid var(--background-input);
+    border-radius: 8px;
+    margin-left: 20px;
+    padding-inline: 12px;
+  }
+}

@@ -39,6 +39,7 @@ const ArticlePreviewPhone: Component<{
   hideFooter?: boolean,
   hideContext?: boolean,
   bordered?: boolean,
+  noBorder?: boolean,
 }> = (props) => {
 
   const app = useAppContext();
@@ -343,7 +344,7 @@ const ArticlePreviewPhone: Component<{
   return (
     <A
       ref={articlePreview}
-      class={`${styles.articlePhone} ${props.bordered ? styles.bordered : ''}`}
+      class={`${styles.articlePhone} ${props.bordered ? styles.bordered : ''} ${props.noBorder ? styles.noBorder : ''}`}
       href={articleUrl()}
       style={props.height ? `height: ${props.height}px` : ''}
     >

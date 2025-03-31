@@ -1,7 +1,7 @@
-import { Component, For, JSXElement, Show, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, For, JSXElement, Setter, Show, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './ReadsEditor.module.scss';
-import { createStore } from 'solid-js/store';
+import { SetStoreFunction, createStore } from 'solid-js/store';
 import { Editor } from '@tiptap/core';
 import { PrimalUser } from '../../types/primal';
 import { nip19 } from '../../lib/nTools';
@@ -52,6 +52,7 @@ import {
   search as tSearch,
 } from '../../translations';
 import ReadsEditorToolbar from './ReadsEditorToolbar';
+import { ArticleEdit, emptyArticleEdit } from '../../pages/ReadsEditor';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -66,21 +67,6 @@ export type FormatControls = {
   headingLevel: number,
 };
 
-export type ArticleEdit = {
-  title: string,
-  image: string,
-  summary: string,
-  content: string,
-  tags: string[],
-}
-
-export const emptyArticleEdit = (): ArticleEdit => ({
-  title: '',
-  image: '',
-  summary: '',
-  content: '',
-  tags: [],
-});
 
 const titleImageUploadId = 'title_image';
 const contentImageUploadId = 'content_image';
@@ -88,6 +74,10 @@ const contentImageUploadId = 'content_image';
 const ReadsEditorEditor: Component<{
   id?: string,
   accordionSection: string[],
+  markdownContent: string,
+  setMarkdownContent: Setter<string>,
+  article: ArticleEdit,
+  setArticle: SetStoreFunction<ArticleEdit>,
 }> = (props) => {
   const account = useAccountContext();
   const search = useSearchContext();
@@ -97,9 +87,9 @@ const ReadsEditorEditor: Component<{
   const profile = useProfileContext();
 
   const [editorMarkdown, setEditorMarkdown] = createSignal(false);
-  const [markdownContent, setMarkdownContent] = createSignal<string>('')
+  // const [markdownContent, setMarkdownContent] = createSignal<string>('')
 
-  const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
+  // const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
@@ -331,12 +321,12 @@ const ReadsEditorEditor: Component<{
     ],
     content: '',
     onCreate({ editor }) {
-      // setEditorContent(editor, 'nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08');
+      setEditorContent(editor, props.markdownContent);
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
-    }
-    // onUpdate() {
-    //   console.log('update');
-    // },
+    },
+    onUpdate() {
+    props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown());
+    },
     // onPaste(e: ClipboardEvent) {
     //   console.log('PASTE', e)
     // }
@@ -446,7 +436,7 @@ const ReadsEditorEditor: Component<{
     tags = [...tags, ...relayTags];
 
     let articleToPost = {
-      ...article,
+      ...props.article,
       content,
     };
 
@@ -465,7 +455,7 @@ const ReadsEditorEditor: Component<{
           unsub();
           if (note) {
             toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-            setArticle(() => emptyArticleEdit());
+            props.setArticle(() => emptyArticleEdit());
             navigate('/reads');
           }
         }
@@ -484,14 +474,14 @@ const ReadsEditorEditor: Component<{
         <div class={styles.metadata}>
           <TextField
             class={styles.titleInput}
-            value={article.title}
+            value={props.article.title}
             onKeyDown={(e: KeyboardEvent) => {
               if (e.code === 'Enter') {
                 e.preventDefault();
               }
             }}
             onChange={(v) => {
-              setArticle('title', () => v);
+              props.setArticle('title', () => v);
             }}
           >
             <TextField.TextArea
@@ -529,7 +519,7 @@ const ReadsEditorEditor: Component<{
               }}
               onSuccsess={(url:string, uploadId?: string) => {
                 if (uploadId === titleImageUploadId) {
-                  setArticle('image', () => url);
+                  props.setArticle('image', () => url);
                 }
 
                 if (uploadId === contentImageUploadId) {
@@ -556,7 +546,7 @@ const ReadsEditorEditor: Component<{
             />
 
             <Show
-              when={article.image.length > 0}
+              when={props.article.image.length > 0}
               fallback={
                 <div class={styles.noTitleImagePlaceholder}>
                   <input
@@ -576,7 +566,7 @@ const ReadsEditorEditor: Component<{
               <div class={styles.uploadButton}>
                 <label for="upload-avatar">
                   <Show
-                    when={article.image.length > 0}
+                    when={props.article.image.length > 0}
                     fallback={<>Add hero Image</>}
                   >
                     Chage hero Image
@@ -590,7 +580,7 @@ const ReadsEditorEditor: Component<{
                   hidden={true}
                   accept="image/*"
                 />
-                <img class={styles.titleImage}  src={article.image} />
+                <img class={styles.titleImage}  src={props.article.image} />
               </div>
             </Show>
           </Show>
@@ -600,8 +590,8 @@ const ReadsEditorEditor: Component<{
             <div class={styles.border}></div>
             <TextField
               class={styles.summaryInput}
-              value={article.summary}
-              onChange={v => setArticle('summary', () => v)}
+              value={props.article.summary}
+              onChange={v => props.setArticle('summary', () => v)}
             >
               <TextField.TextArea
                 rows={1}
@@ -615,13 +605,13 @@ const ReadsEditorEditor: Component<{
             <div
               class={styles.tagList}
             >
-              <For each={article.tags}>
+              <For each={props.article.tags}>
                 {tag => (
                   <div
                     class={styles.tag}
                     onClick={() => {
-                      const filtered = article.tags.filter(t => t !== tag);
-                      setArticle('tags', () => [...filtered]);
+                      const filtered = props.article.tags.filter(t => t !== tag);
+                      props.setArticle('tags', () => [...filtered]);
                     }}
                   >
                     {tag}
@@ -636,16 +626,16 @@ const ReadsEditorEditor: Component<{
 
                   if (e.code === 'Backspace' && value.length === 0) {
                     // Remove last tag
-                    const filtered = article.tags.slice(0, -1);
-                    setArticle('tags', () => [...filtered]);
+                    const filtered = props.article.tags.slice(0, -1);
+                    props.setArticle('tags', () => [...filtered]);
                   }
 
                   if (e.code !== 'Enter') return;
 
-                  if (value.length < 1 || article.tags.includes(value)) return;
+                  if (value.length < 1 || props.article.tags.includes(value)) return;
 
                   const tags = value.split(',').map((x: string) => x.trim());
-                  setArticle('tags', (ts) => [...ts, ...tags]);
+                  props.setArticle('tags', (ts) => [...ts, ...tags]);
                   // @ts-ignore
                   e.target.value = ''
                 }}
@@ -672,7 +662,7 @@ const ReadsEditorEditor: Component<{
             if (!editor) return;
 
             if (editorMarkdown()) {
-              setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+              props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
             }
             else {
               editor.commands.setContent('');
@@ -703,11 +693,11 @@ const ReadsEditorEditor: Component<{
 
         <div class={`${editorMarkdown() ? '' : styles.hiddenEditor}`}>
           <textarea
-            value={markdownContent()}
+            value={props.markdownContent}
             class={`${styles.editor}`}
             ref={editorPlainText}
             onChange={e => {
-              setMarkdownContent(() => e.target.value || '');
+              props.setMarkdownContent(() => e.target.value || '');
             }}
           ></textarea>
         </div>

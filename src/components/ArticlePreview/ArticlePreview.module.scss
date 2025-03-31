@@ -224,6 +224,10 @@
   width: 100%;
   border-bottom: 1px solid var(--devider);
 
+  &.noBorder {
+    border: none;
+  }
+
   &:focus {
     background: none;
   }
@@ -556,6 +560,10 @@
   padding-inline: 20px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--devider);
+
+  &.noBorder {
+    border: none;
+  }
 
   &.bordered {
     border: 1px solid var(--subtile-devider);
