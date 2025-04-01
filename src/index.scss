@@ -980,3 +980,12 @@ button:focus {
   }
 
 }
+
+
+.fixed_editor_toolbar {
+  position: fixed !important;
+  z-index: 10;
+  top: 0;
+  /* left: 0; */
+  background-color: var(--background-site);
+}

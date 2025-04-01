@@ -140,6 +140,33 @@ const ReadsEditor: Component = () => {
     return previewArticle;
   }
 
+  const onScroll = () => {
+    const tb = document.getElementById('editor_toolbar') as HTMLDivElement | undefined;
+    const md = document.getElementById('editor_metadata') as HTMLDivElement | undefined;
+
+    if (!tb) return;
+
+    const h = md ? md.getBoundingClientRect().height : 0;
+
+    const isMetadataHidden = !accordionSection().includes('metadata');
+    const isToolbarAtTheTop = window.scrollY > h;
+
+    if (isMetadataHidden || isToolbarAtTheTop) {
+      tb.classList.add('fixed_editor_toolbar');
+    }
+    else {
+      tb.classList.remove('fixed_editor_toolbar');
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener('scroll', onScroll);
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('scroll', onScroll)
+  })
+
   return (
     <div class={styles.editorPage}>
 

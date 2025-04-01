@@ -255,7 +255,7 @@ const ReadsEditorToolbar: Component<{
   return (
     <div>
 
-      <div class={styles.toolbar}>
+      <div class={styles.toolbar} id='editor_toolbar'>
         <div>
 
           <ReadsEditorBlockSelector
@@ -264,6 +264,8 @@ const ReadsEditorToolbar: Component<{
             onChange={heading}
             short={true}
           />
+
+          <div class={styles.separator}></div>
 
           <button
             id="boldBtn"
@@ -301,6 +303,8 @@ const ReadsEditorToolbar: Component<{
             <div class={styles.strikeIcon}></div>
           </button>
 
+          <div class={styles.separator}></div>
+
           <button
             id="bulletListBtn"
             class={`${styles.mdToolButton}`}
@@ -318,6 +322,8 @@ const ReadsEditorToolbar: Component<{
           >
             <div class={styles.orderedListIcon}></div>
           </button>
+
+          <div class={styles.separator}></div>
 
           <ReadsEditorTableSelector
             onSelect={table}
@@ -382,20 +388,22 @@ const ReadsEditorToolbar: Component<{
             <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
             </label>
           </div> */}
+          <div class={styles.separator}></div>
         </div>
-        <button
-          id="editorMode"
-          class={`${styles.mdToolButton} ${!props.wysiwygMode ? styles.selected : ''}`}
-          onClick={props.toggleEditorMode}
-          title={!props.wysiwygMode ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
-        >
-          <Show
-            when={props.wysiwygMode}
-            fallback={<div class={styles.modeIcon}></div>}
+
+          <button
+            id="editorMode"
+            class={`${styles.mdToolButton} ${!props.wysiwygMode ? styles.selected : ''}`}
+            onClick={props.toggleEditorMode}
+            title={!props.wysiwygMode ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
           >
-            <div class={`${styles.modeIcon} ${styles.active}`}></div>
-          </Show>
-        </button>
+            <Show
+              when={props.wysiwygMode}
+              fallback={<div class={styles.modeIcon}></div>}
+            >
+              <div class={`${styles.modeIcon} ${styles.active}`}></div>
+            </Show>
+          </button>
       </div>
 
       <ReadsEditorBubbleMenu

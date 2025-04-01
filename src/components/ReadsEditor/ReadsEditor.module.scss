@@ -279,29 +279,42 @@
 
 .toolbar {
   position: relative;
+  border-top: 1px solid var(--devider);
   border-bottom: 1px solid var(--devider);
   width: 640px;
   height: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-inline: 20px;
+  padding-left: 12px;
+  padding-right: 12px;
+
   >div {
     /* position:fixed; */
     display: flex;
-    gap: 8px;
+    gap: 5px;
     width: 640px;
     height: 64px;
     justify-content: flex-start;
     align-items: center;
+
+    .separator {
+      width: 5px;
+      height: 32px;
+      display: block;
+      margin: 0px 0px;
+      background-color: var(--devider);
+      -webkit-mask: url(../../assets/icons/lf_editor_toolbar/separator.svg) no-repeat center;
+      mask: url(../../assets/icons/lf_editor_toolbar/separator.svg) no-repeat center;
+    }
   }
 }
 
 .mdToolButton {
   background: none;
   color: var(--text-secondary);
-  width: fit-content;
-  height: fit-content;
+  width: 32px;
+  height: 32px;
 
   font-size: 16px;
   line-height: 16px;
@@ -312,6 +325,10 @@
   border-radius: 8px;
   margin: 0;
   padding: 8px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   >div {
     background-color: var(--text-secondary);
@@ -496,6 +513,10 @@
 
 
 .readsEditor {
+  .metadataWrapper {
+    margin-bottom: 16px;
+  }
+
   .metadata {
     width: 100%;
     min-height: 200px;
@@ -504,7 +525,7 @@
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 12px;
+    gap: 20px;
 
     .uploadButton {
       display: flex;
@@ -558,8 +579,7 @@
         line-height: 52px;
         border: none;
         width: 100%;
-        padding: 12px 16px;
-        width: 100%;
+        padding: 0;
         margin: 0;
 
         &::placeholder {
@@ -599,68 +619,69 @@
         padding: 0;
         width: 100%;
         margin: 0;
+        display: block;
 
         &::placeholder {
           color: var(--text-tertiary);
         }
       }
     }
+  }
 
-    .tags {
+  .tags {
+    width: 100%;
+    padding-inline: 12px;
+    .tagList {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      border: 1px solid var(--background-input);
+      border-radius: 16px;
       width: 100%;
-      .tagList {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-        border: 1px solid var(--background-input);
-        border-radius: 16px;
-        width: 100%;
-        padding-inline: 4px;
+      padding-inline: 4px;
 
-        .tag {
-          display: inline-block;
-          color: var(--text-secondary);
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 12px;
-          background-color: var(--background-input);
-          padding: 6px 10px;
-          border-radius: 12px;
-          width: fit-content;
-          margin-block: 4px;
-          cursor: pointer;
-        }
-      }
-
-      .tagsInput {
-        flex: 1;
-        min-width: 100px;
-        input {
-          background-color: var(--background-site);
-          color: var(--text-secondary);
-          font-size: 12px;
-          font-weight: 400;
-          line-height: 12px;
-          border: none;
-          border-radius: 99px;
-          padding: 8px;
-          min-width: 100%;
-          height: fit-content;
-          margin: 0;
-
-          &:focus {
-            border: none;
-            outline: none;
-            box-shadow: none;
-          }
-
-          &::placeholder {
-            color: var(--text-tertiary);
-          }
-        }
+      .tag {
+        display: inline-block;
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+        background-color: var(--background-input);
+        padding: 6px 10px;
+        border-radius: 12px;
+        width: fit-content;
+        margin-block: 4px;
+        cursor: pointer;
       }
     }
 
+    .tagsInput {
+      flex: 1;
+      min-width: 100px;
+      input {
+        background-color: var(--background-site);
+        color: var(--text-secondary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+        border: none;
+        border-radius: 99px;
+        padding: 8px;
+        min-width: 100%;
+        height: fit-content;
+        margin: 0;
+
+        &:focus {
+          border: none;
+          outline: none;
+          box-shadow: none;
+        }
+
+        &::placeholder {
+          color: var(--text-tertiary);
+        }
+      }
+    }
   }
 
   .editor {

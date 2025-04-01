@@ -609,8 +609,7 @@ input.textInput {
     line-height: 52px;
     border: none;
     width: 100%;
-    padding: 12px 16px;
-    width: 100%;
+    padding-block: 12px;
     margin: 0;
 
     &::placeholder {

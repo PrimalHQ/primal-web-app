@@ -471,84 +471,108 @@ const ReadsEditorEditor: Component<{
   return (
     <div class={styles.readsEditor}>
       <Show when={accordionSection().includes('metadata')}>
-        <div class={styles.metadata}>
-          <TextField
-            class={styles.titleInput}
-            value={props.article.title}
-            onKeyDown={(e: KeyboardEvent) => {
-              if (e.code === 'Enter') {
-                e.preventDefault();
-              }
-            }}
-            onChange={(v) => {
-              props.setArticle('title', () => v);
-            }}
-          >
-            <TextField.TextArea
-              rows={1}
-              autoResize={true}
-              placeholder="Title"
-            />
-          </TextField>
-
-          <Show when={accordionSection().includes('hero_image')}>
-            <Uploader
-              uploadId={fileUploadContext()}
-              hideLabel={false}
-              publicKey={account?.publicKey}
-              nip05={account?.activeUser?.nip05}
-              openSockets={openUploadSockets()}
-              file={fileToUpload()}
-              onFail={(_, uploadId?: string) => {
-                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                  file: fileToUpload()?.name,
-                }));
-                resetUpload(uploadId);
-              }}
-              onRefuse={(reason: string, uploadId?: string) => {
-                if (reason === 'file_too_big_100') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+        <div class={styles.metadataWrapper} id="editor_metadata">
+          <div class={styles.metadata}>
+            <TextField
+              class={styles.titleInput}
+              value={props.article.title}
+              onKeyDown={(e: KeyboardEvent) => {
+                if (e.code === 'Enter') {
+                  e.preventDefault();
                 }
-                if (reason === 'file_too_big_1024') {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-                }
-                resetUpload(uploadId);
               }}
-              onCancel={(uploadId?: string) => {
-                resetUpload(uploadId);
+              onChange={(v) => {
+                props.setArticle('title', () => v);
               }}
-              onSuccsess={(url:string, uploadId?: string) => {
-                if (uploadId === titleImageUploadId) {
-                  props.setArticle('image', () => url);
+            >
+              <TextField.TextArea
+                rows={1}
+                autoResize={true}
+                placeholder="Title"
+              />
+            </TextField>
+
+            <Show when={accordionSection().includes('hero_image')}>
+              <Uploader
+                uploadId={fileUploadContext()}
+                hideLabel={false}
+                publicKey={account?.publicKey}
+                nip05={account?.activeUser?.nip05}
+                openSockets={openUploadSockets()}
+                file={fileToUpload()}
+                onFail={(_, uploadId?: string) => {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                    file: fileToUpload()?.name,
+                  }));
+                  resetUpload(uploadId);
+                }}
+                onRefuse={(reason: string, uploadId?: string) => {
+                  if (reason === 'file_too_big_100') {
+                    toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                  }
+                  if (reason === 'file_too_big_1024') {
+                    toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                  }
+                  resetUpload(uploadId);
+                }}
+                onCancel={(uploadId?: string) => {
+                  resetUpload(uploadId);
+                }}
+                onSuccsess={(url:string, uploadId?: string) => {
+                  if (uploadId === titleImageUploadId) {
+                    props.setArticle('image', () => url);
+                  }
+
+                  if (uploadId === contentImageUploadId) {
+                    const ed = editorTipTap();
+                    if (!ed) return;
+
+                    ed.
+                      chain().
+                      focus().
+                      setImage({
+                        src: url,
+                        title: 'image',
+                        alt: 'image alternative',
+                      }).
+                      run();
+
+                    // Move cursor one space to the right to avoid overwriting the image.
+                    const el = document.querySelector('.tiptap.ProseMirror');
+                    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
+                  }
+
+                  resetUpload(uploadId);
+                }}
+              />
+
+              <Show
+                when={props.article.image.length > 0}
+                fallback={
+                  <div class={styles.noTitleImagePlaceholder}>
+                    <input
+                      id="upload-avatar"
+                      type="file"
+                      onChange={() => onUploadTitleImage(titleImageUpload)}
+                      ref={titleImageUpload}
+                      hidden={true}
+                      accept="image/*"
+                    />
+                    <label for="upload-avatar">
+                      Add hero Image
+                    </label>
+                  </div>
                 }
-
-                if (uploadId === contentImageUploadId) {
-                  const ed = editorTipTap();
-                  if (!ed) return;
-
-                  ed.
-                    chain().
-                    focus().
-                    setImage({
-                      src: url,
-                      title: 'image',
-                      alt: 'image alternative',
-                    }).
-                    run();
-
-                  // Move cursor one space to the right to avoid overwriting the image.
-                  const el = document.querySelector('.tiptap.ProseMirror');
-                  el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
-                }
-
-                resetUpload(uploadId);
-              }}
-            />
-
-            <Show
-              when={props.article.image.length > 0}
-              fallback={
-                <div class={styles.noTitleImagePlaceholder}>
+              >
+                <div class={styles.uploadButton}>
+                  <label for="upload-avatar">
+                    <Show
+                      when={props.article.image.length > 0}
+                      fallback={<>Add hero Image</>}
+                    >
+                      Chage hero Image
+                    </Show>
+                  </label>
                   <input
                     id="upload-avatar"
                     type="file"
@@ -557,48 +581,26 @@ const ReadsEditorEditor: Component<{
                     hidden={true}
                     accept="image/*"
                   />
-                  <label for="upload-avatar">
-                    Add hero Image
-                  </label>
+                  <img class={styles.titleImage}  src={props.article.image} />
                 </div>
-              }
-            >
-              <div class={styles.uploadButton}>
-                <label for="upload-avatar">
-                  <Show
-                    when={props.article.image.length > 0}
-                    fallback={<>Add hero Image</>}
-                  >
-                    Chage hero Image
-                  </Show>
-                </label>
-                <input
-                  id="upload-avatar"
-                  type="file"
-                  onChange={() => onUploadTitleImage(titleImageUpload)}
-                  ref={titleImageUpload}
-                  hidden={true}
-                  accept="image/*"
-                />
-                <img class={styles.titleImage}  src={props.article.image} />
-              </div>
+              </Show>
             </Show>
-          </Show>
 
 
-          <div class={styles.summary}>
-            <div class={styles.border}></div>
-            <TextField
-              class={styles.summaryInput}
-              value={props.article.summary}
-              onChange={v => props.setArticle('summary', () => v)}
-            >
-              <TextField.TextArea
-                rows={1}
-                autoResize={true}
-                placeholder="Article Summary"
-              />
-            </TextField>
+            <div class={styles.summary}>
+              <div class={styles.border}></div>
+              <TextField
+                class={styles.summaryInput}
+                value={props.article.summary}
+                onChange={v => props.setArticle('summary', () => v)}
+              >
+                <TextField.TextArea
+                  rows={1}
+                  autoResize={true}
+                  placeholder="Article Summary"
+                />
+              </TextField>
+            </div>
           </div>
 
           <div class={styles.tags}>
@@ -645,9 +647,7 @@ const ReadsEditorEditor: Component<{
                 />
               </TextField>
             </div>
-
           </div>
-
         </div>
       </Show>
 
