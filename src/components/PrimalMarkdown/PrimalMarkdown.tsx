@@ -78,6 +78,7 @@ const PrimalMarkdown: Component<{
   readonly?:  boolean,
   noteId: string,
   article: PrimalArticle | undefined,
+  ignoreHighlights?: boolean,
   highlights?: any[],
   onHighlightSelected?: (highlight: any) => void,
   onHighlightCreated?: (highlight: any, replaceId?: string) => void,
@@ -189,6 +190,7 @@ const PrimalMarkdown: Component<{
   };
 
   const onMouseUp = (e: MouseEvent) => {
+    if (props.ignoreHighlights) return;
     // @ts-ignore
     const isHighlightMenuOption = e.target?.parentElement.getAttribute('data-highlight-menu-option') !== null;
 

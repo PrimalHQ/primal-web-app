@@ -242,6 +242,7 @@ const ReadsEditorPreview: Component< {
               content={props.article?.content || ''}
               readonly={true}
               article={props.article}
+              ignoreHighlights={true}
             />
 
             <div class={styles.tags}>
