@@ -622,7 +622,7 @@ export const explore = {
     },
     pubnotes: {
       id: 'explore.stats.pubnotes',
-      defaultMessage: 'Nyilvános bejegyzés',
+      defaultMessage: 'Bejegyzés',
       description: 'Label for number of public notes stats',
     },
     reposts: {
@@ -637,7 +637,7 @@ export const explore = {
     },
     any: {
       id: 'explore.stats.any',
-      defaultMessage: 'Minden esemény',
+      defaultMessage: 'Esemény',
       description: 'Label for number of all stats',
     },
   }
@@ -930,7 +930,7 @@ export const notificationsSidebar = {
     defaultMessage: `{number, plural,
       =0 {}
       one {említés}
-      other {említés}} of you`,
+      other {említés}}`,
     description: 'Sidebar mentions you stats description on the notification page',
   },
   mentionsYourPost: {
