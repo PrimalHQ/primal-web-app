@@ -999,6 +999,7 @@ export const referencesToTags = (value: string, relayHints: Record<string, strin
     if (idStart > 0) {
       id = ref.slice(idStart);
     }
+
     const decoded = nip19.decode(id);
 
     if (decoded.type === 'npub') {

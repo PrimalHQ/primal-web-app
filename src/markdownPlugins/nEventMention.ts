@@ -13,6 +13,7 @@ import { getEvents } from '../lib/feed'
 import { fetchNotes } from '../handleNotes'
 import Note, { renderNote } from '../components/Note/Note'
 import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote'
+import { setReadMentions } from '../pages/ReadsEditor'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
 
 export const createInputRuleMatch = <T extends Record<string, unknown>>(
@@ -41,6 +42,8 @@ export const findMissingEvent = async (nevent: string) => {
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
   if (mentions.length > 0 && events[0]) {
+    setReadMentions('notes', () => ({ [id]: { ...events[0] } }));
+
     const el = renderEmbeddedNote({
       note: events[0],
       mentionedUsers: events[0].mentionedUsers,
@@ -190,15 +193,15 @@ export const NEventExtension = Node.create({
 
   renderText({ node }) {
       return `nostr:${node.attrs.bech32}`
-    },
+  },
 
-    // Modify parseHTML to work with both div and the specific data attribute
-    parseHTML() {
-      return [
-        { tag: `div[data-type="${this.name}"]` },
-        { tag: `div.nevent-node` }
-      ]
-    },
+  // Modify parseHTML to work with both div and the specific data attribute
+  parseHTML() {
+    return [
+      { tag: `div[data-type="${this.name}"]` },
+      { tag: `div.nevent-node` }
+    ]
+  },
 
   addCommands() {
     return {

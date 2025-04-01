@@ -36,6 +36,7 @@ const ArticleFooter: Component<{
   customZapInfo: CustomZapInfo,
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
+  isPhoneView?: boolean,
 }> = (props) => {
 
   const account = useAccountContext();
@@ -365,7 +366,7 @@ const ArticleFooter: Component<{
   return (
     <div
       id={props.id}
-      class={`${styles.footer} ${styles[size()]}`}
+      class={`${styles.footer} ${styles[size()]} ${props.isPhoneView ? styles.phoneView : ''}`}
       ref={footerDiv}
       onClick={(e) => {e.preventDefault();}}
     >

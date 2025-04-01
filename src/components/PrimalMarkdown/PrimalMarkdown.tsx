@@ -404,9 +404,9 @@ const PrimalMarkdown: Component<{
 
         const kind = note.post.kind || note.msg.kind;
 
-        // if (kind === Kind.Text) {
-        //   noteId = nip19.noteEncode(hex);
-        // }
+        if (kind === Kind.Text) {
+          noteId = nip19.noteEncode(hex);
+        }
 
         if (kind === Kind.LongForm) {
           noteId = nip19.naddrEncode({

@@ -7,6 +7,7 @@ import { PrimalUser } from '../types/primal'
 import { userName } from '../stores/profile'
 import { fetchUserProfile } from '../handleFeeds'
 import { APP_ID } from '../App'
+import { setReadMentions } from '../pages/ReadsEditor'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
 
 export const findMissingUser = async (nprofile: string) => {
@@ -25,6 +26,8 @@ export const findMissingUser = async (nprofile: string) => {
   if (pubkey.length === 0) return;
 
   const user = await fetchUserProfile(undefined, pubkey, `user_missing_${APP_ID}`);
+
+  setReadMentions('users', () => ({ [pubkey]: { ...user } }));
 
   const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
   mention && (mention.innerHTML = `@${userName(user)}`);
@@ -59,6 +62,7 @@ export const makeNProfileAttrs = (
   let name = bech32;
   if (user) {
     name = userName(user);
+    setReadMentions('users', () => ({ [user.pubkey]: { ...user } }));
   }
   else {
     findMissingUser(name);

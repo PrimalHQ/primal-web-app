@@ -125,6 +125,23 @@
     justify-content: flex-end;
     align-items: center;
   }
+
+  &.phoneView {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .stat{
+      min-width: 0px;
+      padding-right: 12px;
+      margin-right: 0;
+    }
+
+    .context {
+      display: none;
+    }
+  }
 }
 
 .stat {
@@ -243,6 +260,7 @@
   position: absolute;
   z-index: 20;
 }
+
 
 @media only screen and (max-width: 720px) {
   .footer {

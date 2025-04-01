@@ -4,7 +4,7 @@ import styles from './ReadsEditor.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
-import { PrimalArticle } from '../types/primal';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -13,6 +13,7 @@ import { nip19 } from '../lib/nTools';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
 import ArticleShort from '../components/ArticlePreview/ArticleShort';
+import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -31,6 +32,20 @@ export const emptyArticleEdit = (): ArticleEdit => ({
   content: '',
   tags: [],
 });
+
+export type ReadMentions = {
+  users: Record<string, PrimalUser>,
+  notes: Record<string, PrimalNote>,
+  reads: Record<string, PrimalArticle>,
+};
+
+export const emptyReadsMentions = () => ({
+  users: {},
+  notes: {},
+  reads: {},
+})
+
+export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyReadsMentions());
 
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
@@ -104,8 +119,16 @@ const ReadsEditor: Component = () => {
         pubkey,
         sig: 'signature',
         tags: [],
-      }
+      },
+      mentionedNotes: readMentions.notes,
+      mentionedArticles: readMentions.reads,
+      mentionedUsers: readMentions.users,
+      // mentionedZaps: Record<string, PrimalZap>,
+      // mentionedHighlights: Record<string, any>,
     };
+
+    // console.log('PREVIEW: ', previewArticle.mentionedUsers)
+    // console.log('STATE: ', readMentions.notes)
 
     return previewArticle;
   }
@@ -214,11 +237,20 @@ const ReadsEditor: Component = () => {
         </Match>
 
         <Match when={editorPreviewMode() === 'browser'}>
-          <div>Browser preview</div>
+          <div>
+            <ReadsEditorPreview
+              article={genereatePreviewArticle()}
+            />
+          </div>
         </Match>
 
         <Match when={editorPreviewMode() === 'phone'}>
-          <div>Phone preview</div>
+          <div class={styles.phonePreview} >
+            <ReadsEditorPreview
+              article={genereatePreviewArticle()}
+              isPhoneView={true}
+            />
+          </div>
         </Match>
 
         <Match when={editorPreviewMode() === 'feed'}>

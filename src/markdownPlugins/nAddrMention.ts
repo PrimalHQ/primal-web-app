@@ -15,6 +15,7 @@ import Note, { renderNote } from '../components/Note/Note'
 import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote'
 import { Kind } from '../constants'
 import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview'
+import { setReadMentions } from '../pages/ReadsEditor'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
 
 export const findMissingEvent = async (naddr: string) => {
@@ -37,6 +38,7 @@ export const findMissingEvent = async (naddr: string) => {
   const mention = document.querySelector(`div[type=${decode.type}][bech32=${naddr}]`);
 
   if (mention && events[0]) {
+    setReadMentions('reads', () => ({ [naddr]: { ...events[0] } }));
     const el = renderArticlePreview({
       article: events[0],
       bordered: true,

@@ -13,7 +13,6 @@ import {
 
 import { callCommand, getMarkdown, replaceAll, insert, getHTML, outline } from '@milkdown/utils';
 import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
-import { userMention } from './plugins/userMention';
 import { profileRegex } from '../../constants';
 import { PrimalArticle } from '../../types/primal';
 import { userName } from '../../stores/profile';
