@@ -495,7 +495,7 @@ const ReadsEditorEditor: Component<{
             <Show when={accordionSection().includes('hero_image')}>
               <Uploader
                 uploadId={fileUploadContext()}
-                hideLabel={false}
+                hideLabel={true}
                 publicKey={account?.publicKey}
                 nip05={account?.activeUser?.nip05}
                 openSockets={openUploadSockets()}
@@ -564,24 +564,29 @@ const ReadsEditorEditor: Component<{
                   </div>
                 }
               >
-                <div class={styles.uploadButton}>
-                  <label for="upload-avatar">
-                    <Show
-                      when={props.article.image.length > 0}
-                      fallback={<>Add hero Image</>}
-                    >
-                      Chage hero Image
-                    </Show>
-                  </label>
+                <div
+                  class={styles.uploadButton}
+                >
+                  <div
+                    class={styles.uploadOverlay}
+                    onClick={() => {
+                      document.getElementById('upload-title-image')?.click();
+                    }}
+                  >
+                    Chage hero Image
+                  </div>
                   <input
-                    id="upload-avatar"
+                    id="upload-title-image"
                     type="file"
                     onChange={() => onUploadTitleImage(titleImageUpload)}
                     ref={titleImageUpload}
                     hidden={true}
                     accept="image/*"
                   />
-                  <img class={styles.titleImage}  src={props.article.image} />
+                  <img
+                    class={styles.titleImage}
+                    src={props.article.image}
+                  />
                 </div>
               </Show>
             </Show>

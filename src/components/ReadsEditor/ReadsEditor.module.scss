@@ -511,6 +511,25 @@
   cursor: pointer;
 }
 
+@keyframes fadeInUploadHover {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.75;
+  }
+}
+
+@keyframes fadeOutUploadHover {
+  0% {
+    opacity: 0.75;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
 
 .readsEditor {
   .metadataWrapper {
@@ -528,18 +547,45 @@
     gap: 20px;
 
     .uploadButton {
+      position: relative;
+      width: fit-content;
+      height: fit-content;
+
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       justify-content: flex-start;
       gap: 0;
 
-      label {
+      .uploadOverlay {
+        position: absolute;
         color: var(--text-secondary);
         font-size: 18px;
         font-weight: 600;
         line-height: 20px;
         cursor: pointer;
+        background-color: var(--background-site);
+        width: 100%;
+        height: 100%;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        opacity: 0;
+        -webkit-animation: fadeOutUploadHover 0.3s ease-out;
+        -moz-animation: fadeOutUploadHover 0.3s ease-out;
+        -o-animation: fadeOutUploadHover 0.3s ease-out;
+        animation: fadeOutUploadHover 0.3s ease-out;
+
+        &:hover {
+          opacity: 0.75;
+
+          -webkit-animation: fadeInUploadHover 0.3s ease-out;
+          -moz-animation: fadeInUploadHover 0.3s ease-out;
+          -o-animation: fadeInUploadHover 0.3s ease-out;
+          animation: fadeInUploadHover 0.3s ease-out;
+        }
       }
     }
 
@@ -566,6 +612,7 @@
 
     .titleImage {
       width: 100%;
+      min-height: 300px;
       max-height: 598px;
       border-radius: 12px;
     }
