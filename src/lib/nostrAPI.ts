@@ -155,6 +155,35 @@ export const decrypt = async (pubkey: string, message: string) => {
   }
 };
 
+
+export const encrypt44 = async (pubkey: string, message: string) => {
+  try {
+    return await enqueueNostr<string>(async (nostr) => {
+      try {
+        return await nostr.nip44.encrypt(pubkey, message);
+      } catch(reason) {
+        throw(reason);
+      }
+    });
+  } catch (reason) {
+    throw(reason);
+  }
+};
+
+export const decrypt44 = async (pubkey: string, message: string) => {
+  try {
+    return await enqueueNostr<string>(async (nostr) => {
+      try {
+        return await nostr.nip44.decrypt(pubkey, message);
+      } catch(reason) {
+        throw(reason);
+      }
+    });
+  } catch (reason) {
+    throw(reason);
+  }
+};
+
 export const enableWebLn = async () => {
   try {
     return await enqueueWebLn<void>(async (webln) => {

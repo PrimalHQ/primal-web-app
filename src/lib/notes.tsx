@@ -304,7 +304,7 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
   ]));
 };
 
-type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
+export type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
 export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
@@ -439,7 +439,6 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
-
 export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
@@ -460,6 +459,27 @@ export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean
 
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
+
+// export const sendDraft = async (ev: NostrEvent, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+//   const time = Math.floor((new Date()).getTime() / 1000);
+
+//   const event = {
+//     content: articleData.content,
+//     kind: Kind.LongForm,
+//     tags: [
+//       ["title", articleData.title],
+//       ["summary", articleData.summary],
+//       ["image", articleData.image],
+//       ["published_at", `${time}`],
+//       ["d", articleData.title.toLowerCase().replace(" ", "-")],
+//       ["t", articleData.tags.join(" ")],
+//       ...tags,
+//     ],
+//     created_at: time,
+//   };
+
+//   return await sendEvent(event, relays, relaySettings, shouldProxy);
+// }
 
 export const sendContacts = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {

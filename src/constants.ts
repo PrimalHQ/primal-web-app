@@ -118,6 +118,8 @@ export enum Kind  {
   LongForm = 30_023,
   Settings = 30_078,
   LiveEvent = 30_311,
+
+  Draft = 31_234,
   DVM = 31_990,
   Tier = 37_001,
 

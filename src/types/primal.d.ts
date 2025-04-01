@@ -721,6 +721,10 @@ export type NostrExtension = {
     encrypt: (pubkey: string, message: string) => Promise<string>,
     decrypt: (pubkey: string, message: string) => Promise<string>,
   },
+  nip44: {
+    encrypt: (pubkey: string, message: string) => Promise<string>,
+    decrypt: (pubkey: string, message: string) => Promise<string>,
+  },
 };
 
 export type WebLnExtension = {
