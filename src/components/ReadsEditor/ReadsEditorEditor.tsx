@@ -172,19 +172,19 @@ const ReadsEditorEditor: Component<{
       TableRow,
       TableHeader,
       TableCell,
-      BubbleMenu.configure({
-        pluginKey: 'bubbleMenuOne',
-        element: document.getElementById('bubble_menu_one'),
-        shouldShow: ({ editor, view, state, oldState, from, to }) => {
-          return (to - from) > 0 && (
-            editor.isActive('paragraph') ||
-            editor.isActive('bold') ||
-            editor.isActive('italic') ||
-            editor.isActive('underline') ||
-            editor.isActive('strike')
-          );
-        },
-      }),
+      // BubbleMenu.configure({
+      //   pluginKey: 'bubbleMenuOne',
+      //   element: document.getElementById('bubble_menu_one'),
+      //   shouldShow: ({ editor, view, state, oldState, from, to }) => {
+      //     return (to - from) > 0 && (
+      //       editor.isActive('paragraph') ||
+      //       editor.isActive('bold') ||
+      //       editor.isActive('italic') ||
+      //       editor.isActive('underline') ||
+      //       editor.isActive('strike')
+      //     );
+      //   },
+      // }),
       Mention.configure({
         suggestion: {
           char: '@',

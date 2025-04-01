@@ -406,7 +406,7 @@ const ReadsEditorToolbar: Component<{
           </button>
       </div>
 
-      <ReadsEditorBubbleMenu
+      {/* <ReadsEditorBubbleMenu
         editor={props.editor}
         store={formatControls}
         commands={{
@@ -415,7 +415,7 @@ const ReadsEditorToolbar: Component<{
           uline,
           strike,
         }}
-      />
+      /> */}
 
       <ReadsLinkDialog
         open={formatControls.enterLink}
