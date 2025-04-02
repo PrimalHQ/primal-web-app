@@ -64,6 +64,7 @@ const Feed = lazy(() => import('./pages/FeedQueryTest'));
 const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
 const AdvancedSearchResults = lazy(() => import('./pages/AdvancedSearchResults'));
 const ReadsEditor = lazy(() => import('./pages/ReadsEditor'));
+const ReadsMy = lazy(() => import('./pages/ReadsMy'));
 
 const primalWindow = window as PrimalWindow;
 
@@ -128,6 +129,7 @@ const AppRouter: Component = () => {
         <Route path="/" component={Layout} >
           <Route path="/" component={() => <Navigate href="/home" />} />
           <Route path="/home" component={Home} />
+          <Route path="/reads/my" component={ReadsMy} />
           <Route path="/reads/edit" component={ReadsEditor} />
           <Route path="/reads/:topic?" component={Reads} />
           <Route path="/thread/:id" component={Thread} />

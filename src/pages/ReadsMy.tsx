@@ -1,0 +1,209 @@
+import { batch, Component, createEffect, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js'
+
+import styles from './ReadsMy.module.scss'
+import Wormhole from '../components/Wormhole/Wormhole';
+import CheckBox2 from '../components/Checkbox/CheckBox2';
+import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
+import { createStore } from 'solid-js/store';
+import { referencesToTags } from '../stores/note';
+import { useAccountContext } from '../contexts/AccountContext';
+import { Kind, wordsPerMinute } from '../constants';
+import { nip19 } from '../lib/nTools';
+import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
+import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
+import ArticleShort from '../components/ArticlePreview/ArticleShort';
+import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
+import { nip44 } from 'nostr-tools';
+import { decrypt44, encrypt44 } from '../lib/nostrAPI';
+import { NostrEvent, sendEvent } from '../lib/notes';
+import { useToastContext } from '../components/Toaster/Toaster';
+import { A, useNavigate } from '@solidjs/router';
+import ReadsHeader from '../components/HomeHeader/ReadsHeader';
+import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
+import PageCaption from '../components/PageCaption/PageCaption';
+import PageTitle from '../components/PageTitle/PageTitle';
+import StickySidebar from '../components/StickySidebar/StickySidebar';
+import { branding, readsMy } from '../translations';
+import { isPhone } from '../utils';
+import { useIntl } from '@cookbook/solid-intl';
+import Search from '../components/Search/Search';
+import ButtonPrimary from '../components/Buttons/ButtonPrimary';
+import { Tabs } from '@kobalte/core/tabs';
+import { useProfileContext } from '../contexts/ProfileContext';
+import { TransitionGroup } from 'solid-transition-group';
+import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
+import Paginator from '../components/Paginator/Paginator';
+import ArticleOverview from '../components/ArticlePreview/ArticleOverview';
+import ArticleOverviewSkeleton from '../components/Skeleton/ArticleOverviewSkeleton';
+
+
+const ReadsMy: Component = () => {
+  const account = useAccountContext();
+  const profile = useProfileContext();
+  const toast = useToastContext();
+  const intl = useIntl();
+  const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = createSignal('published');
+
+  onMount(() => {
+    profile?.actions.clearNotes();
+    profile?.actions.clearArticles();
+    profile?.actions.clearGallery();
+    profile?.actions.clearZaps();
+    profile?.actions.clearReplies();
+    updateTabContent('published');
+  });
+
+  const onChangeTab = (value: string) => {
+    setActiveTab(() => value);
+
+    updateTabContent(value);
+  };
+
+  const updateTabContent = (value: string) => {
+    if (!profile || !account) return;
+
+    switch(value) {
+      case 'published':
+        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'reads');
+        break;
+        case 'drafts':
+        break;
+    }
+  }
+
+  return (
+    <div class={styles.readsMyPage}>
+      <PageTitle title={intl.formatMessage(readsMy.pageCaption)} />
+
+      <Wormhole
+        to="search_section"
+      >
+        <Show when={!isPhone()}>
+          <Search />
+        </Show>
+      </Wormhole>
+
+      <PageCaption>
+        <div class={styles.pageHeader}>
+          <div>
+            {intl.formatMessage(readsMy.pageCaption)}
+          </div>
+          <ButtonPrimary
+            onClick={() => navigate('/reads/edit')}
+          >
+            New Article
+          </ButtonPrimary>
+        </div>
+      </PageCaption>
+
+      <Show when={!isPhone()}>
+        <StickySidebar>
+          <ReadsSidebar />
+        </StickySidebar>
+      </Show>
+
+      <div class={styles.pageContent}>
+        <Tabs value={activeTab()} onChange={onChangeTab}>
+          <Tabs.List class={styles.profileTabs}>
+            <Tabs.Trigger class={styles.profileTab} value="published">
+              Published (0)
+            </Tabs.Trigger>
+            <Tabs.Trigger class={styles.profileTab} value="drafts">
+              Drafts (0)
+            </Tabs.Trigger>
+            <Tabs.Indicator class={styles.profileTabIndicator} />
+          </Tabs.List>
+
+
+          <Tabs.Content class={styles.tabContent} value="published">
+            <div class={styles.profileNotes}>
+
+              <TransitionGroup name="slide-fade">
+                <div>
+                  <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                    <div>
+                      <For each={new Array(10)}>
+                        {() => <ArticleOverviewSkeleton />}
+                      </For>
+                    </div>
+                  </Show>
+                </div>
+
+                <div>
+                  <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                    <div class={styles.mutedProfile}>
+                      {intl.formatMessage(readsMy.noPublishedArticle)}
+                    </div>
+                  </Show>
+                </div>
+
+                <Show when={profile && profile.articles.length > 0}>
+                  <div>
+                    <For each={profile?.articles}>
+                      {article => (
+                        <div class="animated"><ArticleOverview article={article} /></div>
+                      )}
+                    </For>
+                    <Paginator
+                      loadNextPage={() => {
+                        profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
+                      }}
+                      isSmall={true}
+                    />
+                  </div>
+                </Show>
+              </TransitionGroup>
+            </div>
+          </Tabs.Content>
+
+
+          <Tabs.Content class={styles.tabContent} value="drafts">
+            <div class={styles.profileNotes}>
+
+              <TransitionGroup name="slide-fade">
+                <div>
+                  <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                    <div>
+                      <For each={new Array(10)}>
+                        {() => <ArticleOverviewSkeleton />}
+                      </For>
+                    </div>
+                  </Show>
+                </div>
+
+                <div>
+                  <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                    <div class={styles.mutedProfile}>
+                      {intl.formatMessage(readsMy.noPublishedArticle)}
+                    </div>
+                  </Show>
+                </div>
+
+                <Show when={profile && profile.articles.length > 0}>
+                  <div>
+                    <For each={profile?.articles}>
+                      {article => (
+                        <div class="animated"><ArticleOverview article={article} /></div>
+                      )}
+                    </For>
+                    <Paginator
+                      loadNextPage={() => {
+                        profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
+                      }}
+                      isSmall={true}
+                    />
+                  </div>
+                </Show>
+              </TransitionGroup>
+            </div>
+          </Tabs.Content>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
+
+export default ReadsMy;

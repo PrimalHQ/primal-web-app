@@ -11,6 +11,7 @@ const ButtonSecondary: Component<{
   disabled?: boolean,
   shrink?: boolean,
   light?: boolean,
+  noPadding?: boolean,
   type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
 
@@ -22,6 +23,9 @@ const ButtonSecondary: Component<{
 
     if (props.light)
     cls += ` ${styles.light}`;
+
+    if (props.noPadding)
+      cls += ` ${styles.noPadding}`;
 
     return cls;
   }

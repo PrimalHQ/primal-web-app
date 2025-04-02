@@ -602,6 +602,7 @@ export type NostrPostStats = {
     satszapped: number,
     score: number,
     score24h: number,
+    bookmarks: number,
   },
 };
 
@@ -887,6 +888,7 @@ export type PrimalArticle = {
   msg: NostrNoteContent,
   wordCount: number,
   noteActions: NoteActions,
+  bookmarks: number,
   likes: number,
   mentions: number,
   reposts: number,

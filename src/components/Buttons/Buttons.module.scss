@@ -32,6 +32,10 @@
   width: fit-content;
   height: 36px;
 
+  &.noPadding {
+    padding-inline: 0px;
+  }
+
   &.light {
     background-color: var(--subtile-devider);
   }

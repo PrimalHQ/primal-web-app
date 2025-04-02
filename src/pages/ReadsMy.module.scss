@@ -1,0 +1,59 @@
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-right: 20px;
+}
+
+
+
+.profileTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  padding-inline: 20px;
+}
+
+.profileTab {
+  position: relative;
+  display: inline-block;
+  border: none;
+  background: none;
+  width: fit-content;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 12px;
+
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.pageContent {
+  margin-top: 20px;
+}
+
+.profileTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 22px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
+
+.tabContent {
+  border-top: 1px solid var(--devider);
+}

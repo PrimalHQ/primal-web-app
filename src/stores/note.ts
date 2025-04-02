@@ -772,6 +772,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             mentionedUsers,
             wordCount,
             noteActions,
+            bookmarks: stat?.bookmarks || 0,
             likes: stat?.likes || 0,
             mentions: stat?.mentions || 0,
             reposts: stat?.reposts || 0,

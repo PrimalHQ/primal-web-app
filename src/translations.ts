@@ -152,9 +152,9 @@ export const actions = {
     defaultMessage: 'New Note',
     description: 'New note action label',
   },
-  newArticle: {
+  myArticles: {
     id: 'actions.newArticle',
-    defaultMessage: 'New Article',
+    defaultMessage: 'My Articles',
     description: 'New article action label',
   },
   createPin: {
@@ -2730,3 +2730,17 @@ export const premium = {
     },
   }
 };
+
+export const readsMy = {
+  pageCaption: {
+    id: 'pages.readsMy.pageCaption',
+    defaultMessage: 'My Articles',
+    description: 'My reads page caption',
+  },
+  noPublishedArticle: {
+    id: 'pages.readsMy.noPublishedArticle',
+    defaultMessage: 'No articles published',
+    description: 'No published articles label',
+  },
+
+}

@@ -615,6 +615,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedZaps,
       wordCount,
       noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
+      bookmarks: stat.bookmarks || 0,
       likes: stat?.likes || 0,
       mentions: stat?.mentions || 0,
       reposts: stat?.reposts || 0,

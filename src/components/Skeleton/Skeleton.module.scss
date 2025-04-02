@@ -94,6 +94,40 @@
   }
 }
 
+
+.articleOverviewSkeleton {
+
+  display: flex;
+  width: 100%;
+  height: 98px;
+  padding: 20px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 16px;
+
+  border-bottom: 1px solid var(--devider);
+
+  animation: skeleton-fade 2500ms linear infinite;
+
+  .image {
+    width: 80px;
+    height: 56px;
+    object-fit: cover;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: var(--devider);
+    border: 1px solid var(--devider);
+  }
+
+  .info {
+    display: block;
+    width: 100%;
+    height: 56px;
+    border-radius: 4px;
+    background-color: var(--devider);
+  }
+}
+
 .articlePreviewSuggestionSkeleton {
   width: 600px;
   padding: 20px;

@@ -26,6 +26,7 @@ import AppRouter from '../../Router';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 
 export type NoteReactionsState = {
+  bookmarks?: number,
   likes: number,
   liked: boolean,
   reposts: number,

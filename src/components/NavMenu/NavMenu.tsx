@@ -12,6 +12,7 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
 import { useDMContext } from '../../contexts/DMContext';
+import ButtonSecondary from '../Buttons/ButtonSecondary';
 
 const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
@@ -134,6 +135,34 @@ const NavMenu: Component< { id?: string } > = (props) => {
               </Show>
             }
           >
+            <Match when={loc.pathname.startsWith('/reads/')}>
+              <Show
+                when={isBigScreen()}
+                fallback={
+                  <ButtonSecondary
+                    id={props.id}
+                    onClick={() => {
+                      // app?.actions.openConfirmModal(noReadsConfirm);
+                      navigate('/reads/my');
+                    }}
+                  >
+                    <div class={styles.postIcon}></div>
+                  </ButtonSecondary>
+                }
+              >
+                <ButtonSecondary
+                  id={props.id}
+                  onClick={() => {
+                    // app?.actions.openConfirmModal(noReadsConfirm);
+                    navigate('/reads/my');
+                  }}
+                  noPadding={true}
+                >
+                  {intl.formatMessage(tActions.myArticles)}
+                </ButtonSecondary>
+              </Show>
+            </Match>
+
             <Match when={loc.pathname.startsWith('/reads') || loc.pathname.startsWith('/e/naddr') || loc.pathname.startsWith('/a/naddr')}>
               <Show
                 when={isBigScreen()}
@@ -142,7 +171,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                     id={props.id}
                     onClick={() => {
                       // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/reads/edit');
+                      navigate('/reads/my');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -153,10 +182,10 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   id={props.id}
                   onClick={() => {
                     // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/reads/edit');
+                    navigate('/reads/my');
                   }}
                 >
-                  {intl.formatMessage(tActions.newArticle)}
+                  {intl.formatMessage(tActions.myArticles)}
                 </ButtonPrimary>
               </Show>
             </Match>
