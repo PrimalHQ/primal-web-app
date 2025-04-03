@@ -701,14 +701,18 @@ const ReadsEditorEditor: Component<{
         ></div>
 
         <div class={`${editorMarkdown() ? '' : styles.hiddenEditor}`}>
-          <textarea
+          <TextField
             value={props.markdownContent}
-            class={`${styles.editor}`}
-            ref={editorPlainText}
-            onChange={e => {
-              props.setMarkdownContent(() => e.target.value || '');
+            onChange={value => {
+              props.setMarkdownContent(() => value || '');
             }}
-          ></textarea>
+          >
+            <TextField.TextArea
+              class={styles.editorPlain}
+              ref={editorPlainText}
+              autoResize={true}
+            />
+          </TextField>
         </div>
       </div>
     </div>
