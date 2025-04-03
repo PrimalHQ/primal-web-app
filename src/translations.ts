@@ -1697,6 +1697,11 @@ export const settings = {
       defaultMessage: 'A note your note was mentioned in was:',
       description: 'Title of the notification settings sub-section for notes your note was mentioned in',
     },
+    additionalNotifs: {
+      id: 'settings.sections.notifications.additionalNotifs',
+      defaultMessage: 'Additional Settings:',
+      description: 'Title of the notification settings sub-section for additional settings',
+    },
   },
   profile: {
     title: {

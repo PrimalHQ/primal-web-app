@@ -38,6 +38,11 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     settings?.actions.updateNotificationSettings(setting, !currentValue);
   };
 
+  const onChangeAdditional = (setting: string) => {
+    const currentValue = settings?.notificationAdditionalSettings[setting];
+    settings?.actions.updateNotificationAdditionalSettings(setting, !currentValue);
+  };
+
   const basicNotifications = [
     'NEW_USER_FOLLOWED_YOU',
     'YOUR_POST_WAS_ZAPPED',
@@ -62,6 +67,10 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     'POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO',
   ];
 
+  const additionalNotifications = [
+    'ignore_events_with_too_many_mentions',
+  ];
+
   const notificationLabels: Record<string, string> = {
     NEW_USER_FOLLOWED_YOU: 'new user followed you',
 
@@ -82,6 +91,8 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: 'liked',
     POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: 'reposted',
     POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: 'replied to',
+
+    ignore_events_with_too_many_mentions: 'Ignore notes with more than 10 mentions',
   }
 
   const icons: Record<string, string> = {
@@ -161,6 +172,25 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
                 id={notif}
                 checked={settings?.notificationSettings[notif]}
                 onChange={() => onChange(notif)}
+                label={notificationLabels[notif]}
+                icon={icons[notif]}
+              />
+            </li>
+          )}
+        </For>
+      </ul>
+
+      <div class={styles.caption}>
+        {intl.formatMessage(t.notifications.additionalNotifs)}
+      </div>
+      <ul>
+        <For each={additionalNotifications}>
+          {(notif) => (
+            <li>
+              <Checkbox
+                id={notif}
+                checked={settings?.notificationAdditionalSettings[notif]}
+                onChange={() => onChangeAdditional(notif)}
                 label={notificationLabels[notif]}
                 icon={icons[notif]}
               />

@@ -363,6 +363,10 @@ export const defaultNotificationSettings: Record<string, boolean> = {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
 };
 
+export const defaultNotificationAdditionalSettings: Record<string, boolean> = {
+  ignore_events_with_too_many_mentions: true,
+};
+
 export const emojiSearchLimit = 0;
 
 export const today = (new Date()).getTime();
