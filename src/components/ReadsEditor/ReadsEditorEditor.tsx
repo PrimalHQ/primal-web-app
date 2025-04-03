@@ -341,7 +341,11 @@ const ReadsEditorEditor: Component<{
   }));
 
   const setEditorContent = (editor: Editor, content: string) => {
-    editor.chain().setContent(content).applyNostrPasteRules(content).focus().run();
+    editor.chain().
+      setContent(content).
+      applyNostrPasteRules(content).
+      applyNProfilePasteRules(content).
+      focus().run();
   }
 
   // ----------------------------------------

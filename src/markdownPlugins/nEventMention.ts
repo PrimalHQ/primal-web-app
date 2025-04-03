@@ -37,7 +37,7 @@ export const findMissingEvent = async (nevent: string) => {
 
   if (id.length === 0) return;
 
-  const events = await fetchNotes(undefined, [id], `event_missing_${APP_ID}`);
+  const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`);
 
   const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
@@ -205,7 +205,6 @@ export const NEventExtension = Node.create({
 
   addCommands() {
     return {
-
       applyNostrPasteRules:
         (text) =>
         ({ tr, state, dispatch }) => {
@@ -214,19 +213,21 @@ export const NEventExtension = Node.create({
           if (matches.length === 0) return false;
 
           if (dispatch) {
-            matches.forEach(match => {
-              try {
-                const attrs = makeNEventAttrs(match[2], this.options);
-                const node = state.schema.nodes[this.name].create(attrs);
+            matches
+              .sort((a, b) => (b.index || 0) - (a.index || 0))
+              .forEach(match => {
+                try {
+                  const attrs = makeNEventAttrs(match[2], this.options);
+                  const node = state.schema.nodes[this.name].create(attrs);
 
-                const start = match.index || 0;
-                const end = start + match[0].length + 1;
+                  const start = match.index || 0;
+                  const end = start + match[0].length + 1;
 
-                tr.replaceWith(start, end, node);
-              } catch (e) {
-                console.error('Error applying Nostr paste rule:', e);
-              }
-            });
+                  tr.replaceWith(start, end, node);
+                } catch (e) {
+                  console.error('Error applying Nostr regex conversion:', e);
+                }
+              });
           }
 
           return true;
@@ -289,22 +290,62 @@ export const NEventExtension = Node.create({
     return [
       nodePasteRule({
         type: this.type,
-        getAttributes: (match) => match.data,
-        find: (text) => {
-          const matches = []
+        getAttributes: (match) => {
+          const bech32 = match.data?.bech32;
+          if (!bech32) return {};
 
-          for (const match of text.matchAll(EVENT_REGEX)) {
+          try {
+            return makeNEventAttrs(bech32, this.options);
+          } catch (e) {
+            console.error('Error in paste rule attributes:', e);
+            return {};
+          }
+        },
+        find: (text) => {
+          const matches = [];
+          const regex = new RegExp(EVENT_REGEX); // Create new instance for safety
+          let match;
+
+          while ((match = regex.exec(text)) !== null) {
             try {
-              matches.push(createPasteRuleMatch(match, makeNEventAttrs(match[2], this.options)))
+              matches.push({
+                index: match.index,
+                text: match[0],
+                replaceWith: match[0], // Keep full match for conversion
+                match,
+                data: makeNEventAttrs(match[2], this.options)
+              });
             } catch (e) {
-              console.log('ERROR PASTE: ', e)
-              continue
+              console.error('ERROR in paste rule matching:', e);
             }
           }
 
-          return matches
+          return matches;
         },
       }),
     ]
   },
+
+  // addPasteRules() {
+  //   return [
+  //     nodePasteRule({
+  //       type: this.type,
+  //       getAttributes: (match) => match.data,
+  //       find: (text) => {
+  //         const matches = []
+
+  //         for (const match of text.matchAll(EVENT_REGEX)) {
+  //           try {
+  //             matches.push(createPasteRuleMatch(match, makeNEventAttrs(match[2], this.options)))
+  //           } catch (e) {
+  //             console.log('ERROR PASTE: ', e)
+  //             continue
+  //           }
+  //         }
+
+  //         return matches
+  //       },
+  //     }),
+  //   ]
+  // },
 })

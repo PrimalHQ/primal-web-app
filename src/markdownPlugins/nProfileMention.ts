@@ -7,7 +7,8 @@ import { PrimalUser } from '../types/primal'
 import { userName } from '../stores/profile'
 import { fetchUserProfile } from '../handleFeeds'
 import { APP_ID } from '../App'
-import { setReadMentions } from '../pages/ReadsEditor'
+import { readMentions, setReadMentions } from '../pages/ReadsEditor'
+import { unwrap } from 'solid-js/store'
 // import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
 
 export const findMissingUser = async (nprofile: string) => {
@@ -25,12 +26,18 @@ export const findMissingUser = async (nprofile: string) => {
 
   if (pubkey.length === 0) return;
 
-  const user = await fetchUserProfile(undefined, pubkey, `user_missing_${APP_ID}`);
 
-  setReadMentions('users', () => ({ [pubkey]: { ...user } }));
+  let user = unwrap(readMentions.users[pubkey]);
 
-  const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
-  mention && (mention.innerHTML = `@${userName(user)}`);
+  if (!user) {
+    user = await fetchUserProfile(undefined, pubkey, `user_missing_${nprofile}_${APP_ID}`);
+    setReadMentions('users', () => ({ [pubkey]: { ...user } }));
+  }
+
+  setTimeout(() => {
+    const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
+    mention && (mention.innerHTML = `@${userName(user)}`);
+  }, 0);
 }
 
 
@@ -50,7 +57,7 @@ export const createPasteRuleMatch = <T extends Record<string, unknown>>(
 export const makeNProfileAttrs = (
   input: string,
   user: PrimalUser | undefined,
-  userRelays: string[],
+  userRelays?: string[],
   options?: any,
 ): NProfileAttributes => {
 
@@ -96,6 +103,7 @@ export const PROFILE_REGEX = /(?<![\w./:?=])(nostr:)?(np(ub|rofile)1[0-9a-z]+)/g
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     nprofile: {
+      applyNProfilePasteRules: (text: string) => ReturnType,
       insertNProfile: (
         options: {
           user: PrimalUser | undefined,
@@ -166,6 +174,33 @@ export const NProfileExtension = Node.create({
 
   addCommands() {
     return {
+      applyNProfilePasteRules:
+        (text) =>
+        ({ tr, state, dispatch }) => {
+          const matches = Array.from(text.matchAll(PROFILE_REGEX));
+
+          if (matches.length === 0) return false;
+
+          if (dispatch) {
+            matches
+              .sort((a, b) => (b.index || 0) - (a.index || 0))
+              .forEach(match => {
+                try {
+                  const attrs = makeNProfileAttrs(match[2], undefined, this.options);
+                  const node = state.schema.nodes[this.name].create(attrs);
+
+                  const start = match.index || 0;
+                  const end = start + match[0].length + 1;
+
+                  tr.replaceWith(start, end, node);
+                } catch (e) {
+                  console.error('Error applying Nostr regex conversion:', e);
+                }
+              });
+          }
+
+          return true;
+        },
       insertNProfileAt:
         (range, { nprofile, user, relays }) =>
         ({ commands }) =>
@@ -181,21 +216,60 @@ export const NProfileExtension = Node.create({
     return [
       nodePasteRule({
         type: this.type,
-        getAttributes: (match) => match.data,
-        find: (text) => {
-          const matches = []
+        getAttributes: (match) => {
+          const bech32 = match.data?.bech32;
+          if (!bech32) return {};
 
-          for (const match of text.matchAll(PROFILE_REGEX)) {
+          try {
+            return makeNProfileAttrs(bech32, undefined, this.options);
+          } catch (e) {
+            console.error('Error in paste rule attributes:', e);
+            return {};
+          }
+        },
+        find: (text) => {
+          const matches = [];
+          const regex = new RegExp(PROFILE_REGEX); // Create new instance for safety
+          let match;
+
+          while ((match = regex.exec(text)) !== null) {
             try {
-              matches.push(createPasteRuleMatch(match, makeNProfileAttrs(match[2], undefined, [], this.options)))
+              matches.push({
+                index: match.index,
+                text: match[0],
+                replaceWith: match[0], // Keep full match for conversion
+                match,
+                data: makeNProfileAttrs(match[2], undefined, this.options)
+              });
             } catch (e) {
-              continue
+              console.error('ERROR in paste rule matching:', e);
             }
           }
 
-          return matches
+          return matches;
         },
       }),
     ]
   },
+  // addPasteRules() {
+  //   return [
+  //     nodePasteRule({
+  //       type: this.type,
+  //       getAttributes: (match) => match.data,
+  //       find: (text) => {
+  //         const matches = []
+
+  //         for (const match of text.matchAll(PROFILE_REGEX)) {
+  //           try {
+  //             matches.push(createPasteRuleMatch(match, makeNProfileAttrs(match[2], undefined, [], this.options)))
+  //           } catch (e) {
+  //             continue
+  //           }
+  //         }
+
+  //         return matches
+  //       },
+  //     }),
+  //   ]
+  // },
 })
