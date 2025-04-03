@@ -11,6 +11,31 @@ import { FeedPage, FeedRange, NostrEventContent, NostrMentionContent, NostrNoteA
 import { parseBolt11 } from "./utils";
 import { getFeedItems } from "./lib/search";
 import { PaginationInfo } from "./megaFeeds";
+import { getArticlesStats } from "./lib/stats";
+
+export type ArticlesStats = { articles: number, drafts: number, satszapped: number };
+
+export const fetchArticlesStats = (pubkey: string, subId: string) => {
+  return new Promise<ArticlesStats>((resolve, reject) => {
+
+    let stats: ArticlesStats = { articles: 0, drafts: 0, satszapped: 0}
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === Kind.ArticlesStats) {
+          stats = JSON.parse(content.content || `{ articles: 0, drafts: 0, satszapped: 0}`);
+        }
+      },
+      onEose: () => {
+        unsub();
+
+        resolve(stats);
+      },
+    });
+
+    getArticlesStats(pubkey, subId);
+  });
+}
 
 export const fetchNotesFeed = (pubkey: string | undefined, specification: any, subId: string, limit = 20, until = 0, offset = 0) => {
   return new Promise<PrimalNote[]>((resolve, reject) => {

@@ -178,7 +178,7 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
             Updated: {shortDate(props.article.published)}
           </div>
           <div class={styles.separator}></div>
-          <a href="/reads/edit">
+          <a href={`/reads/edit/${props.article.naddr}`}>
             Edit
           </a>
         </div>

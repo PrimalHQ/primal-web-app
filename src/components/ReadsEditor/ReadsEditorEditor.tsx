@@ -99,6 +99,12 @@ const ReadsEditorEditor: Component<{
 
   let titleImageUpload: HTMLInputElement | undefined;
 
+  createEffect(() => {
+    const editor = editorTipTap();
+    if (!editor) return;
+
+    setEditorContent(editor, props.article.content)
+  });
 
   // TIPTAP----------------------------------
 

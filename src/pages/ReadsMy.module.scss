@@ -57,3 +57,12 @@
 .tabContent {
   border-top: 1px solid var(--devider);
 }
+
+.noPublished {
+  padding-block: 48px;
+  color: var(--text-tertiary);
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}

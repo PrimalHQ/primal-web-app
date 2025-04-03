@@ -18,6 +18,9 @@ import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
 import { NostrEvent, sendEvent } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
+import { useParams } from '@solidjs/router';
+import { fetchArticles } from '../handleNotes';
+import { APP_ID } from '../App';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -54,6 +57,7 @@ export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyRe
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
   const toast = useToastContext();
+  const params = useParams();
 
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
@@ -115,6 +119,7 @@ const ReadsEditor: Component = () => {
       mentions: 0,
       replies: 0,
       reposts: 0,
+      bookmarks: 0,
       zaps: 0,
       score: 0,
       score24h: 0,
@@ -133,9 +138,6 @@ const ReadsEditor: Component = () => {
       // mentionedZaps: Record<string, PrimalZap>,
       // mentionedHighlights: Record<string, any>,
     };
-
-    // console.log('PREVIEW: ', previewArticle.mentionedUsers)
-    // console.log('STATE: ', readMentions.notes)
 
     return previewArticle;
   }
@@ -159,8 +161,28 @@ const ReadsEditor: Component = () => {
     }
   }
 
+  const loadArticle = async () => {
+    const id = params.id;
+
+    if (!id) return;
+
+    const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
+
+    const r = reads[0];
+    if(!r) return
+
+    setArticle(() => ({
+      title: r.title,
+      image: r.image,
+      summary: r.summary,
+      content: r.content,
+      tags: [ ...r.tags ],
+    }));
+  }
+
   onMount(() => {
     window.addEventListener('scroll', onScroll);
+    loadArticle();
   });
 
   onCleanup(() => {

@@ -36,6 +36,8 @@ import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleto
 import Paginator from '../components/Paginator/Paginator';
 import ArticleOverview from '../components/ArticlePreview/ArticleOverview';
 import ArticleOverviewSkeleton from '../components/Skeleton/ArticleOverviewSkeleton';
+import { ArticlesStats, fetchArticlesStats } from '../handleFeeds';
+import { APP_ID } from '../App';
 
 
 const ReadsMy: Component = () => {
@@ -46,6 +48,11 @@ const ReadsMy: Component = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = createSignal('published');
+  const [articleStats, setArticleStats] = createSignal<ArticlesStats>({
+    articles: 0,
+    drafts: 0,
+    satszapped: 0,
+  });
 
   onMount(() => {
     profile?.actions.clearNotes();
@@ -54,7 +61,16 @@ const ReadsMy: Component = () => {
     profile?.actions.clearZaps();
     profile?.actions.clearReplies();
     updateTabContent('published');
+    getCounts()
   });
+
+  const getCounts = async () => {
+    const pubkey = account?.publicKey;
+    if (!pubkey) return;
+    const stats = await fetchArticlesStats(pubkey, `article_stats_${APP_ID}`)
+
+    setArticleStats(() => ({ ...stats }));
+  }
 
   const onChangeTab = (value: string) => {
     setActiveTab(() => value);
@@ -109,10 +125,10 @@ const ReadsMy: Component = () => {
         <Tabs value={activeTab()} onChange={onChangeTab}>
           <Tabs.List class={styles.profileTabs}>
             <Tabs.Trigger class={styles.profileTab} value="published">
-              Published (0)
+              Published ({articleStats().articles})
             </Tabs.Trigger>
             <Tabs.Trigger class={styles.profileTab} value="drafts">
-              Drafts (0)
+              Drafts ({articleStats().drafts})
             </Tabs.Trigger>
             <Tabs.Indicator class={styles.profileTabIndicator} />
           </Tabs.List>
@@ -134,8 +150,11 @@ const ReadsMy: Component = () => {
 
                 <div>
                   <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
-                    <div class={styles.mutedProfile}>
-                      {intl.formatMessage(readsMy.noPublishedArticle)}
+                    <div class={styles.noPublished}>
+                      <div class={styles.caption}>
+                        {intl.formatMessage(readsMy.noPublishedArticle)}
+                      </div>
+                      <a href={'/reads/edit'}>Create your first article now!</a>
                     </div>
                   </Show>
                 </div>
@@ -186,7 +205,9 @@ const ReadsMy: Component = () => {
                   <div>
                     <For each={profile?.articles}>
                       {article => (
-                        <div class="animated"><ArticleOverview article={article} /></div>
+                        <div class="animated">
+                          <ArticleOverview article={article} />
+                        </div>
                       )}
                     </For>
                     <Paginator

@@ -479,6 +479,15 @@ export type NostrLiveEvent= {
   tags?: string[][],
 };
 
+export type ArticleStatsEvent= {
+  kind: Kind.ArticlesStats,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id?: string,
+  tags?: string[][],
+};
+
 export type PrimalLeaderboard= {
   kind: Kind.LegendLeaderboard,
   content?: string,
@@ -544,6 +553,7 @@ export type NostrEventContent =
   NostrImageContent |
   NostrTopicStats |
   NostrLiveEvent |
+  ArticleStatsEvent |
   PrimalLeaderboard;
 
 export type NostrEvent = [

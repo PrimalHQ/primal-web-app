@@ -23,6 +23,14 @@ export const getLegendStats = (pubkey: string | undefined, subId: string) => {
   ]));
 }
 
+export const getArticlesStats = (pubkey: string | undefined, subId: string) => {
+  pubkey && sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {"cache":["articles_stats",{ pubkey }]},
+  ]));
+}
+
 export const humanizeNumber = (number: number, veryShort = false) => {
 
   const bottomLimit = veryShort ? 1000 : 10000;
