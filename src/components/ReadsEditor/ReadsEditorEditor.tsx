@@ -160,7 +160,12 @@ const ReadsEditorEditor: Component<{
         protocols: ['http', 'https'],
       }),
       Image,
-      Markdown,
+      Markdown.configure({
+        // html: true,
+        // breaks: true,
+        // transformPastedText: true,
+        // transformCopiedText: true,
+      }),
       Underline,
       NProfileExtension,
       NEventExtension,
@@ -345,6 +350,7 @@ const ReadsEditorEditor: Component<{
       setContent(content).
       applyNostrPasteRules(content).
       applyNProfilePasteRules(content).
+      applyNAddrPasteRules(content).
       focus().run();
   }
 

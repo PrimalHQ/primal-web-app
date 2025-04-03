@@ -1,20 +1,13 @@
 
-import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, PasteRuleMatch, Range, textblockTypeInputRule, wrappingInputRule } from '@tiptap/core'
-import type { Node as ProsemirrorNode } from '@tiptap/pm/model'
-import type { MarkdownSerializerState } from 'prosemirror-markdown'
-import { nip19 } from '../lib/nTools'
-import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from '../types/primal'
-import { userName } from '../stores/profile'
-import { fetchUserProfile } from '../handleFeeds'
-import { APP_ID } from '../App'
-import { createPasteRuleMatch } from './nProfileMention'
-import { EventPointer } from 'nostr-tools/lib/types/nip19'
-import { getEvents } from '../lib/feed'
-import { fetchNotes } from '../handleNotes'
-import Note, { renderNote } from '../components/Note/Note'
-import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote'
-import { setReadMentions } from '../pages/ReadsEditor'
-// import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
+import { InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
+import type { MarkdownSerializerState } from 'prosemirror-markdown';
+import { nip19 } from '../lib/nTools';
+import { PrimalNote, PrimalZap } from '../types/primal';
+import { APP_ID } from '../App';
+import { fetchNotes } from '../handleNotes';
+import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote';
+import { setReadMentions } from '../pages/ReadsEditor';
 
 export const createInputRuleMatch = <T extends Record<string, unknown>>(
   match: RegExpMatchArray,
@@ -128,10 +121,6 @@ export const NEventExtension = Node.create({
       const dom = document.createElement('div');
       dom.classList.add('nevent-node');
 
-      // Create a paragraph for the content
-      // const contentP = document.createElement('p');
-      // contentP.classList.add('nevent-node');
-
       // Set attributes on the main div
       Object.entries(node.attrs).forEach(([attr, value]) => {
         dom.setAttribute(`data-${attr}`, String(value));
@@ -169,7 +158,7 @@ export const NEventExtension = Node.create({
     return {
       markdown: {
         serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32)
+          state.write('nostr:' + node.attrs.bech32 + ' ')
         },
         parse: {},
       },
@@ -192,7 +181,7 @@ export const NEventExtension = Node.create({
   },
 
   renderText({ node }) {
-      return `nostr:${node.attrs.bech32}`
+    return `nostr:${node.attrs.bech32}`
   },
 
   // Modify parseHTML to work with both div and the specific data attribute
@@ -232,59 +221,16 @@ export const NEventExtension = Node.create({
 
           return true;
         },
-      // setNostrContent:
-      //   (content) =>
-      //   ({ commands, tr }) => {
-      //     // Modify the insertion method
-      //     return commands.setContent(
-      //       [
-      //         {
-      //           type: 'doc',
-      //           content: [
-      //             makeNEventNode(content),
-      //             { type: 'paragraph', content: [{ type: 'text', text: ' ' }] }
-      //           ]
-      //         }
-      //       ],
-      //       { updateSelection: false }
-      //     )
-      //   },
       insertNEvent:
         ({ nevent }) =>
         ({ commands }) =>
-          commands.insertContent(makeNEventNode(nevent, this.options), { updateSelection: false }),
+          commands.insertContent([makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
       insertNEventAt:
         (range, { nevent }) =>
         ({ commands }) =>
-          commands.insertContentAt(range, makeNEventNode(nevent, this.options), { updateSelection: false }),
+          commands.insertContentAt(range, [makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
     }
   },
-
-  // addInputRules() {
-  //   return [
-  //     wrappingInputRule({
-  //       type: this.type,
-  //       find: (text: string) => {
-  //         console.log('FIND: ', text)
-  //         let match = text.match(EVENT_REGEX);
-
-  //         if (match) {
-  //           return createInputRuleMatch(match, makeNEventAttrs(match[2], this.options))
-  //         }
-
-  //           // for (const match of text.matchAll(EVENT_REGEX)) {
-  //           //   try {
-  //           //   } catch (e) {
-  //           //     continue
-  //           //   }
-  //           // }
-
-  //           // return matches
-  //       },
-  //       // find: EVENT_REGEX,
-  //     }),
-  //   ]
-  // },
 
   addPasteRules() {
     return [
@@ -325,27 +271,4 @@ export const NEventExtension = Node.create({
       }),
     ]
   },
-
-  // addPasteRules() {
-  //   return [
-  //     nodePasteRule({
-  //       type: this.type,
-  //       getAttributes: (match) => match.data,
-  //       find: (text) => {
-  //         const matches = []
-
-  //         for (const match of text.matchAll(EVENT_REGEX)) {
-  //           try {
-  //             matches.push(createPasteRuleMatch(match, makeNEventAttrs(match[2], this.options)))
-  //           } catch (e) {
-  //             console.log('ERROR PASTE: ', e)
-  //             continue
-  //           }
-  //         }
-
-  //         return matches
-  //       },
-  //     }),
-  //   ]
-  // },
 })

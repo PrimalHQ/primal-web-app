@@ -1,15 +1,14 @@
 
-import { mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range } from '@tiptap/core'
-import type { Node as ProsemirrorNode } from '@tiptap/pm/model'
-import type { MarkdownSerializerState } from 'prosemirror-markdown'
-import { nip19 } from '../lib/nTools'
-import { PrimalUser } from '../types/primal'
-import { userName } from '../stores/profile'
-import { fetchUserProfile } from '../handleFeeds'
-import { APP_ID } from '../App'
-import { readMentions, setReadMentions } from '../pages/ReadsEditor'
-import { unwrap } from 'solid-js/store'
-// import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
+import { mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range } from '@tiptap/core';
+import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
+import type { MarkdownSerializerState } from 'prosemirror-markdown';
+import { nip19 } from '../lib/nTools';
+import { PrimalUser } from '../types/primal';
+import { userName } from '../stores/profile';
+import { fetchUserProfile } from '../handleFeeds';
+import { APP_ID } from '../App';
+import { readMentions, setReadMentions } from '../pages/ReadsEditor';
+import { unwrap } from 'solid-js/store';
 
 export const findMissingUser = async (nprofile: string) => {
   const decode = nip19.decode(nprofile);

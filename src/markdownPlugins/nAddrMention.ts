@@ -1,22 +1,14 @@
 
-import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, PasteRuleMatch, Range, textblockTypeInputRule } from '@tiptap/core'
-import type { Node as ProsemirrorNode } from '@tiptap/pm/model'
-import type { MarkdownSerializerState } from 'prosemirror-markdown'
-import { nip19 } from '../lib/nTools'
-import { PrimalArticle, PrimalNote, PrimalUser, PrimalZap } from '../types/primal'
-import { userName } from '../stores/profile'
-import { fetchUserProfile } from '../handleFeeds'
-import { APP_ID } from '../App'
-import { createPasteRuleMatch } from './nProfileMention'
-import { EventPointer } from 'nostr-tools/lib/types/nip19'
-import { getEvents } from '../lib/feed'
-import { fetchArticles, fetchNotes } from '../handleNotes'
-import Note, { renderNote } from '../components/Note/Note'
-import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote'
-import { Kind } from '../constants'
-import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview'
-import { setReadMentions } from '../pages/ReadsEditor'
-// import { createPasteRuleMatch, parseRelayAttribute } from '../helpers/utils'
+import { mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
+import type { MarkdownSerializerState } from 'prosemirror-markdown';
+import { nip19 } from '../lib/nTools';
+import { PrimalNote, PrimalZap } from '../types/primal';
+import { APP_ID } from '../App';
+import { fetchArticles, fetchNotes } from '../handleNotes';
+import { Kind } from '../constants';
+import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview';
+import { setReadMentions } from '../pages/ReadsEditor';
 
 export const findMissingEvent = async (naddr: string) => {
   const decode = nip19.decode(naddr);
@@ -33,11 +25,11 @@ export const findMissingEvent = async (naddr: string) => {
 
   if (identifier.length === 0) return;
 
-  const events = await fetchArticles([naddr], `reads_missing_${APP_ID}`);
+  const events = await fetchArticles([naddr], `reads_missing_${naddr}_${APP_ID}`);
 
-  const mention = document.querySelector(`div[type=${decode.type}][bech32=${naddr}]`);
+  const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${naddr}]`);
 
-  if (mention && events[0]) {
+  if (mentions.length > 0 && events[0]) {
     setReadMentions('reads', () => ({ [naddr]: { ...events[0] } }));
     const el = renderArticlePreview({
       article: events[0],
@@ -46,8 +38,10 @@ export const findMissingEvent = async (naddr: string) => {
       noLinks: true,
     })
 
-    mention.classList.remove('temp_editor');
-    mention.innerHTML = el;
+    mentions.forEach(mention => {
+      mention.classList.remove('naddr-node');
+      mention.innerHTML = el;
+    })
   }
 
   // Move cursor one space to the right to avoid overwriting the note.
@@ -92,6 +86,7 @@ export const NADDR_REGEX = /(?<![\w./:?=])(nostr:)?(naddr1[0-9a-z]+)/g
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     naddr: {
+      applyNAddrPasteRules: (text: string) => ReturnType,
       insertNAddr: (options: { naddr: string }) => ReturnType,
       insertNAddrAt: (range: Range, options: { naddr: string }) => ReturnType
     }
@@ -105,22 +100,52 @@ export const NAddrExtension = Node.create({
   draggable: true,
   priority: 1000,
 
-  addNodeView() {
-    return ({ editor, node, getPos, HTMLAttributes, decorations, extension }) => {
+  addNodeView(): NodeViewRenderer {
+    return ({ node, editor, getPos, HTMLAttributes, decorations, extension }) => {
       const dom = document.createElement('div');
+      dom.classList.add('naddr-node');
 
+      // Set attributes on the main div
       Object.entries(node.attrs).forEach(([attr, value]) => {
-        dom.setAttribute(attr, value)
+        dom.setAttribute(`data-${attr}`, String(value));
       });
 
-      dom.classList.add('temp_editor');
-      dom.innerHTML = `${node.attrs.bech32}`;
+      // Set the text content
+      dom.innerText = node.attrs.bech32;
+
+      // Append paragraph to the main div
+      // dom.appendChild(contentP);
 
       findMissingEvent(node.attrs.bech32);
 
       return {
         dom,
+        // Optionally add update method if needed
+        update: (newNode) => {
+          if (newNode.type.name !== this.name) return false;
+
+          // Update attributes
+          Object.entries(newNode.attrs).forEach(([attr, value]) => {
+            dom.setAttribute(`data-${attr}`, String(value));
+          });
+
+          // Update content
+          dom.innerText = newNode.attrs.bech32;
+
+          return true;
+        }
       }
+    }
+  },
+
+  addStorage() {
+    return {
+      markdown: {
+        serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
+          state.write('nostr:' + node.attrs.bech32 + ' ')
+        },
+        parse: {},
+      },
     }
   },
 
@@ -144,22 +169,41 @@ export const NAddrExtension = Node.create({
   },
 
   parseHTML() {
-    return [{ tag: `div[data-type="${this.name}"]` }]
-  },
-
-  addStorage() {
-    return {
-      markdown: {
-        serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32)
-        },
-        parse: {},
-      },
-    }
+    return [
+      { tag: `div[data-type="${this.name}"]` },
+      { tag: `div.nevent-node` }
+    ]
   },
 
   addCommands() {
     return {
+      applyNAddrPasteRules:
+        (text) =>
+        ({ tr, state, dispatch }) => {
+          const matches = Array.from(text.matchAll(NADDR_REGEX));
+
+          if (matches.length === 0) return false;
+
+          if (dispatch) {
+            matches
+              .sort((a, b) => (b.index || 0) - (a.index || 0))
+              .forEach(match => {
+                try {
+                  const attrs = makeNAddrAttrs(match[2], this.options);
+                  const node = state.schema.nodes[this.name].create(attrs);
+
+                  const start = match.index || 0;
+                  const end = start + match[0].length + 1;
+
+                  tr.replaceWith(start, end, node);
+                } catch (e) {
+                  console.error('Error applying Nostr regex conversion:', e);
+                }
+              });
+          }
+
+          return true;
+        },
       insertNAddr:
         ({ naddr }) =>
         ({ commands }) =>
@@ -171,25 +215,66 @@ export const NAddrExtension = Node.create({
     }
   },
 
+
   addPasteRules() {
     return [
       nodePasteRule({
         type: this.type,
-        getAttributes: (match) => match.data,
-        find: (text) => {
-          const matches = []
+        getAttributes: (match) => {
+          const bech32 = match.data?.bech32;
+          if (!bech32) return {};
 
-          for (const match of text.matchAll(NADDR_REGEX)) {
+          try {
+            return makeNAddrAttrs(bech32, this.options);
+          } catch (e) {
+            console.error('Error in paste rule attributes:', e);
+            return {};
+          }
+        },
+        find: (text) => {
+          const matches = [];
+          const regex = new RegExp(NADDR_REGEX); // Create new instance for safety
+          let match;
+
+          while ((match = regex.exec(text)) !== null) {
             try {
-              matches.push(createPasteRuleMatch(match, makeNAddrAttrs(match[2], this.options)))
+              matches.push({
+                index: match.index,
+                text: match[0],
+                replaceWith: match[0], // Keep full match for conversion
+                match,
+                data: makeNAddrAttrs(match[2], this.options)
+              });
             } catch (e) {
-              continue
+              console.error('ERROR in paste rule matching:', e);
             }
           }
 
-          return matches
+          return matches;
         },
       }),
     ]
   },
+
+  // addPasteRules() {
+  //   return [
+  //     nodePasteRule({
+  //       type: this.type,
+  //       getAttributes: (match) => match.data,
+  //       find: (text) => {
+  //         const matches = []
+
+  //         for (const match of text.matchAll(NADDR_REGEX)) {
+  //           try {
+  //             matches.push(createPasteRuleMatch(match, makeNAddrAttrs(match[2], this.options)))
+  //           } catch (e) {
+  //             continue
+  //           }
+  //         }
+
+  //         return matches
+  //       },
+  //     }),
+  //   ]
+  // },
 })
