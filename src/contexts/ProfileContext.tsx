@@ -152,7 +152,7 @@ export type ProfileContextStore = {
     fetchZapList: (pubkey: string | undefined) => void,
     fetchNextZapsPage: () => void,
     resetProfile: () => void,
-    getProfileMegaFeed: (pubkey: string | undefined, tab: string, until?: number, limit?: number) => void,
+    getProfileMegaFeed: (pubkey: string | undefined, tab: string, until?: number, limit?: number, offset?: number, minwords?: number) => void,
     getProfileMegaFeedNextPage: (pubkey: string | undefined, tab: string) => void,
     addProfileToHistory: (user: PrimalUser) => void,
     clearProfile: () => void,
@@ -287,7 +287,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0) => {
+  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0, minwords = 100) => {
     if (!pubkey) return;
 
     if (tab === 'notes') {
@@ -354,6 +354,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         kind:'reads',
         notes: 'authored',
         pubkey,
+        minwords,
       };
 
       updateStore('isFetching', () => true);
@@ -407,7 +408,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingGallery', () => false);
       return;
     }
+
+
   }
+
   const getProfileMegaFeedNextPage = async (pubkey: string | undefined, tab: string) => {
     if (!pubkey) return;
 

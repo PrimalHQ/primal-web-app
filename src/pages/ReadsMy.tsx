@@ -83,7 +83,7 @@ const ReadsMy: Component = () => {
 
     switch(value) {
       case 'published':
-        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'reads');
+        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
         break;
         case 'drafts':
         break;
