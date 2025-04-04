@@ -889,6 +889,17 @@ export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInf
   );
 }
 
+export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalDraft[]>(
+    (acc, id) => {
+      const read = drafts.find(n => n.id === id);
+
+      return read ? [ ...acc, { ...read } ] : acc;
+    },
+    [],
+  );
+}
+
 export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => {
   return paging.elements.reduce<PrimalZap[]>(
     (acc, id) => {

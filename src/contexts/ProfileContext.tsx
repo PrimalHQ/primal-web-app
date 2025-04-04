@@ -60,7 +60,7 @@ import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, filterAndSortDrafts, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
 import { decrypt44 } from "../lib/nostrAPI";
 
@@ -413,10 +413,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         draft.plain = await decrypt44(pubkey, draft.content);
       }
 
-      // const sortedReads = filterAndSortReads(reads, paging);
+      const sortedDrafts = drafts.filter(d => !store.drafts.find(sd => sd.id === d.id));
 
       updateStore('paging', 'drafts', () => ({ ...paging }));
-      updateStore('drafts', (ns) => [ ...ns, ...drafts]);
+      updateStore('drafts', (ns) => [ ...ns, ...sortedDrafts]);
       updateStore('isFetching', () => false);
       return;
     }
