@@ -397,6 +397,7 @@ const Note: Component<NoteProps> = (props) => {
               class={styles.timePrimary}
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
+              {/* TODO: fetch the kind 31990 event and link to its website */}
               {client && <span>{`${client} · `}</span>}
 
               <span>
