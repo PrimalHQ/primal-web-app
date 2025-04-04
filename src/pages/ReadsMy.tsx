@@ -178,6 +178,16 @@ const ReadsMy: Component = () => {
     return `/${vanityName}/${data.identifier}`;
   }
 
+  const onImageError = (event: any) => {
+    const image = event.target;
+
+    let src: string = account?.activeUser?.picture || '';
+
+    image.onerror = "";
+    image.src = src;
+    return true;
+  };
+
   return (
     <div class={styles.readsMyPage}>
       <PageTitle title={intl.formatMessage(readsMy.pageCaption)} />
@@ -247,7 +257,7 @@ const ReadsMy: Component = () => {
                     </div>
                   </div>
                   <div class={styles.image}>
-                    <img src={topZappedArticle()?.image} />
+                    <img src={topZappedArticle()?.image} onerror={onImageError}/>
                   </div>
                 </div>
               </div>
@@ -278,7 +288,7 @@ const ReadsMy: Component = () => {
                     </div>
                   </div>
                   <div class={styles.image}>
-                    <img src={topEngagedArticle()?.image} />
+                    <img src={topEngagedArticle()?.image} onerror={onImageError} />
                   </div>
                 </div>
               </div>

@@ -112,38 +112,16 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
     return m;
   }
 
-  const authorAvatar = () => {
-    const url = props.article.user.picture;
-    setMissingChacheImage(() => false);
-
-    let m = media?.actions.getMediaUrl(url, 's');
-
-    if (!m) {
-      m = media?.actions.getMediaUrl(url, 'm');
-    }
-
-    if (!m) {
-      m = media?.actions.getMediaUrl(url, 'o');
-    }
-
-    if (!m) {
-      m = url;
-      setMissingChacheImage(() => true);
-    }
-
-    return m;
-  }
-
   const onImageLoaded = () => {};
 
   const onImageError = (event: any) => {
     const image = event.target;
 
-    let src: string = authorAvatar();
+    let src: string = account?.activeUser?.picture || '';
 
-    if (image.src === src || image.src.endsWith(src)) {
-      src = ['sunrise_wave', 'ice_wave'].includes(settings?.theme || '') ? defaultAvatarLight : defaultAvatarDark;
-    }
+    // if (image.src === src || image.src.endsWith(src)) {
+    //   src = ['sunrise_wave', 'ice_wave'].includes(settings?.theme || '') ? defaultAvatarLight : defaultAvatarDark;
+    // }
 
     image.onerror = "";
     image.src = src;
@@ -171,14 +149,26 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
       </div>
       <div class={styles.rightColumn}>
         <div class={styles.header}>
-          <div class={styles.published}>
-            Published: {shortDate(props.article.published)}
-          </div>
-          <div class={styles.separator}></div>
-          <div class={styles.updated}>
-            Updated: {shortDate(props.article.published)}
-          </div>
-          <div class={styles.separator}></div>
+          <Show when={props.article.published}>
+            <div class={styles.published}>
+              Published: {shortDate(props.article.published)}
+            </div>
+          </Show>
+
+          <Show when={props.article.published && props.article.msg.created_at }>
+            <div class={styles.separator}></div>
+          </Show>
+
+          <Show when={props.article.msg.created_at }>
+            <div class={styles.updated}>
+              Updated: {shortDate(props.article.msg.created_at)}
+            </div>
+          </Show>
+
+          <Show when={props.article.published || props.article.msg.created_at }>
+            <div class={styles.separator}></div>
+          </Show>
+
           <a href={`/reads/edit/${props.article.naddr}`}>
             Edit
           </a>
