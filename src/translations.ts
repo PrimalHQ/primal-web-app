@@ -441,6 +441,43 @@ export const actions = {
       description: 'Label for quoting note from context menu',
     },
   },
+  articleOverviewContext: {
+    edit: {
+      id: 'actions.articleOverviewContext.edit',
+      defaultMessage: 'Edit Article',
+      description: 'Label for editing an article',
+    },
+    quoteArticle: {
+      id: 'actions.articleOverviewContext.quoteArticle',
+      defaultMessage: 'Quote Article',
+      description: 'Label for quoting article from context menu',
+    },
+    shareArticle: {
+      id: 'actions.articleOverviewContext.shareArticle',
+      defaultMessage: 'Share Article',
+      description: 'Label for sharing article from context menu',
+    },
+    copyId: {
+      id: 'actions.articleOverviewContext.copyId',
+      defaultMessage: 'Copy Event ID',
+      description: 'Label for copying article from context menu',
+    },
+    copyRawEvent: {
+      id: 'actions.articleOverviewContext.copyRawEvent',
+      defaultMessage: 'Copy Raw Event',
+      description: 'Label for copying raw event from context menu',
+    },
+    unpublish: {
+      id: 'actions.articleOverviewContext.unpublish',
+      defaultMessage: 'Unpublish',
+      description: 'Label for copying raw event from context menu',
+    },
+    delete: {
+      id: 'actions.articleOverviewContext.delete',
+      defaultMessage: 'Delete',
+      description: 'Label for copying raw event from context menu',
+    },
+  },
   zap: {
     id: 'actions.zap',
     defaultMessage: 'Zap',
@@ -2745,6 +2782,11 @@ export const readsMy = {
   noPublishedArticle: {
     id: 'pages.readsMy.noPublishedArticle',
     defaultMessage: 'No articles published',
+    description: 'No published articles label',
+  },
+  noDrafts: {
+    id: 'pages.readsMy.noDrafts',
+    defaultMessage: 'You don\'t have any drafts',
     description: 'No published articles label',
   },
 

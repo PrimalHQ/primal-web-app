@@ -370,9 +370,12 @@ const ReadsMy: Component = () => {
                 </div>
 
                 <div>
-                  <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
-                    <div class={styles.mutedProfile}>
-                      {intl.formatMessage(readsMy.noPublishedArticle)}
+                  <Show when={profile && profile.drafts.length === 0 && !profile.isFetching}>
+                    <div class={styles.noPublished}>
+                      <div class={styles.caption}>
+                        {intl.formatMessage(readsMy.noDrafts)}
+                      </div>
+                      <a href={'/reads/edit'}>Start drafting a new article now!</a>
                     </div>
                   </Show>
                 </div>

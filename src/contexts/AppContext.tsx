@@ -78,6 +78,8 @@ export type AppContextStore = {
   customZap: CustomZapInfo | undefined,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showArticleOverviewContextMenu: boolean,
+  articleOverviewContextMenuInfo: NoteContextMenuInfo | undefined,
   showLnInvoiceModal: boolean,
   lnbc: InvoiceInfo | undefined,
   showCashuInvoiceModal: boolean,
@@ -99,6 +101,8 @@ export type AppContextStore = {
     resetCustomZap: () => void,
     openContextMenu: (note: PrimalNote | PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
     closeContextMenu: () => void,
+    openArticleOverviewContextMenu: (note: PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    closeArticleOverviewContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
     closeLnbcModal: () => void,
     openCashuModal: (cashu: string, onPay: () => void) => void,
@@ -132,6 +136,8 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   customZap: undefined,
   showNoteContextMenu: false,
   noteContextMenuInfo: undefined,
+  showArticleOverviewContextMenu: false,
+  articleOverviewContextMenuInfo: undefined,
   showLnInvoiceModal: false,
   lnbc: undefined,
   showCashuInvoiceModal: false,
@@ -208,6 +214,21 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showNoteContextMenu', () => true);
   };
 
+  const openArticleOverviewContextMenu = (
+    note: PrimalArticle,
+    position: DOMRect | undefined,
+    openCustomZap: () => void,
+    openReactions: () => void,
+  ) => {
+    updateStore('articleOverviewContextMenuInfo', reconcile({
+      note,
+      position,
+      openCustomZap,
+      openReactions,
+    }))
+    updateStore('showArticleOverviewContextMenu', () => true);
+  };
+
   const openLnbcModal = (lnbc: string, onPay: () => void) => {
     updateStore('showLnInvoiceModal', () => true);
     updateStore('lnbc', () => ({
@@ -249,6 +270,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const closeContextMenu = () => {
     updateStore('showNoteContextMenu', () => false);
+  };
+
+  const closeArticleOverviewContextMenu = () => {
+    updateStore('showArticleOverviewContextMenu', () => false);
   };
 
   const getCashuMint = (url: string) => {
@@ -468,6 +493,8 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       resetCustomZap,
       openContextMenu,
       closeContextMenu,
+      openArticleOverviewContextMenu,
+      closeArticleOverviewContextMenu,
       openLnbcModal,
       closeLnbcModal,
       openConfirmModal,

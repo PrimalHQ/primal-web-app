@@ -27,6 +27,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import LayoutPhone from './LayoutPhone';
 import LayoutDesktop from './LayoutDesktop';
 import { isPhone } from '../../utils';
+import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -44,6 +45,7 @@ const Layout: Component<any> = (props) => {
   createEffect(on(() => location.pathname, (path, prev) => {
     if (path !== prev) {
       app?.actions.closeContextMenu();
+      app?.actions.closeArticleOverviewContextMenu();
     }
   }));
 
@@ -246,10 +248,17 @@ const Layout: Component<any> = (props) => {
             account?.actions.setFlag('showForgot', false);
           }}
         />
+
         <NoteContextMenu
           open={app?.showNoteContextMenu}
           onClose={app?.actions.closeContextMenu}
           data={app?.noteContextMenuInfo}
+        />
+
+        <ArticleOverviewContextMenu
+          open={app?.showArticleOverviewContextMenu}
+          onClose={app?.actions.closeArticleOverviewContextMenu}
+          data={app?.articleOverviewContextMenuInfo}
         />
       </>
     </Show>

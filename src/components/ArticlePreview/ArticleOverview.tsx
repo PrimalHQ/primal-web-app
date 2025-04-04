@@ -80,7 +80,7 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
   };
 
   const onContextMenuTrigger = () => {
-    app?.actions.openContextMenu(
+    app?.actions.openArticleOverviewContextMenu(
       props.article,
       articleContextMenu?.getBoundingClientRect(),
       () => {},
