@@ -1,7 +1,7 @@
 import { sendMessage } from "../sockets";
 import { ExploreFeedPayload } from "../types/primal";
 import { nip19 } from "../lib/nTools";
-import { day, hour } from "../constants";
+import { Kind, day, hour } from "../constants";
 import { noteIdToHex } from "./keys";
 
 export const getFutureFeed = (user_pubkey: string | undefined, pubkey: string |  undefined, subid: string, since: number) => {
@@ -48,7 +48,32 @@ export const getFeed = (user_pubkey: string | undefined, pubkey: string |  undef
   ]));
 }
 
+export const getDrafts = (pubkey: string | undefined, subId: string, until = 0, limit = 20, since = 0, offset = 0) => {
+  let pl = { limit, offset, pubkey, kind: Kind.LongForm };
+
+    if (until > 0) {
+      // @ts-ignore
+      pl.until = until;
+    }
+
+    if (since > 0) {
+      // @ts-ignore
+      pl.since = since
+    }
+
+    sendMessage(JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["drafts", pl]},
+      ]));
+};
+
 export const getMegaFeed = (user_pubkey: string | undefined, spec: string, subid: string, until = 0, limit = 20, since = 0, offset = 0) => {
+
+  if (spec.includes('"kind":"drafts"')) {
+    getDrafts(user_pubkey, subid, until, limit, since, offset);
+    return;
+  }
 
   let payload = { spec, limit, offset };
 

@@ -752,8 +752,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             updateStore('notificationAdditionalSettings', () => ({ ...defaultNotificationAdditionalSettings }));
           }
 
-          console.log('SETTINGS: ', store.notificationAdditionalSettings)
-
           updateStore('applyContentModeration', () => applyContentModeration === false ? false : true);
 
           if (Array.isArray(contentModeration) && contentModeration.length === 0) {

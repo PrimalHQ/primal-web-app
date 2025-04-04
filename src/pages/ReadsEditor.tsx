@@ -16,10 +16,10 @@ import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { NostrEvent, sendEvent } from '../lib/notes';
+import { NostrEvent, sendEvent, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useParams } from '@solidjs/router';
-import { fetchArticles } from '../handleNotes';
+import { fetchArticles, fetchDrafts } from '../handleNotes';
 import { APP_ID } from '../App';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -164,20 +164,51 @@ const ReadsEditor: Component = () => {
   const loadArticle = async () => {
     const id = params.id;
 
-    if (!id) return;
+    if (!id || !account?.publicKey) return;
 
-    const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
+    if (id.startsWith('naddr1')) {
+      const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
 
-    const r = reads[0];
-    if(!r) return
+      const r = reads[0];
+      if(!r) return
 
-    setArticle(() => ({
-      title: r.title,
-      image: r.image,
-      summary: r.summary,
-      content: r.content,
-      tags: [ ...r.tags ],
-    }));
+      setArticle(() => ({
+        title: r.title,
+        image: r.image,
+        summary: r.summary,
+        content: r.content,
+        tags: [ ...r.tags ],
+      }));
+
+      return;
+    }
+
+    if (id.startsWith(`ndraft1`)) {
+      const eid = id.split('ndraft1')[1];
+
+      const events = await fetchDrafts(account?.publicKey, [eid], `drafts_edit+${APP_ID}`);
+
+      let draft = events[0];
+
+      if (!draft) return;
+
+      const rJson = await decrypt44(account?.publicKey, draft.content);
+
+      const r = JSON.parse(rJson);
+
+      const tgs: string[][] = (r.tags || []);
+
+      setArticle(() => ({
+        title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
+        summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
+        image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
+        tags: tgs.filter((t: string[]) => t[0] === 't').map((t: string[]) => t[1]),
+        content: r.content || '',
+      }));
+
+      return;
+    }
+
   }
 
   onMount(() => {
@@ -301,10 +332,11 @@ const ReadsEditor: Component = () => {
                   // other fields
                 }
 
-                const { success } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
+                const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
 
-                if (success) {
+                if (success && note) {
                   toast?.sendSuccess('Draft saved');
+                  triggerImportEvents([note], `draft_import_${APP_ID}`)
                 }
                 else {
                   toast?.sendWarning('Draft saving failed');

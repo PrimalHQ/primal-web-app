@@ -331,7 +331,6 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       },
     });
 
-    console.log('GET SUGGESTIONS');
     getSuggestions(subId);
   };
 

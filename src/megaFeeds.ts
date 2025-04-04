@@ -15,6 +15,7 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalArticle,
+  PrimalDraft,
   PrimalNote,
   PrimalUser,
   PrimalZap,
@@ -25,7 +26,7 @@ import {
   UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
-import { convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
+import { convertToDraftsMega, convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
@@ -67,6 +68,7 @@ export type MegaFeedResults = {
   users: PrimalUser[],
   notes: PrimalNote[],
   reads: PrimalArticle[],
+  drafts: PrimalDraft[],
   zaps: PrimalZap[],
   topicStats: TopicStat[],
   paging: PaginationInfo,
@@ -89,6 +91,7 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   users: {},
   notes: [],
   reads: [],
+  drafts: [],
   zaps: [],
   topicStats: {},
   noteStats: {},
@@ -117,6 +120,7 @@ export const emptyMegaFeedResults = () => ({
   users: [],
   notes: [],
   reads: [],
+  drafts: [],
   zaps: [],
   topicStats: [],
   dmContacts: [],
@@ -604,7 +608,7 @@ export const fetchLeaderboardThread = (
   });
 }
 
-const pageResolve = (page: MegaFeedPage) => {
+export const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
   // we need to add the content manualy
@@ -625,6 +629,7 @@ const pageResolve = (page: MegaFeedPage) => {
   const users = convertToUsersMega(page);
   const notes = convertToNotesMega(page);
   const reads = convertToReadsMega(page);
+  const drafts = convertToDraftsMega(page);
   const zaps = convertToZapsMega(page);
   const topicStats = convertToTopicStatsMega(page);
   const dmContacts = convertToContactsMega(page);
@@ -637,6 +642,7 @@ const pageResolve = (page: MegaFeedPage) => {
     users,
     notes,
     reads,
+    drafts,
     zaps,
     topicStats,
     dmContacts,
@@ -654,7 +660,7 @@ const pageResolve = (page: MegaFeedPage) => {
   };
 }
 
-const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
+export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
   if (content.kind === Kind.FeedRange) {
     const feedRange: FeedRange = JSON.parse(content.content || '{}');
 
@@ -694,6 +700,13 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.reads.push({ ...message });
     return;
   }
+
+  if ([Kind.Draft].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      page.drafts.push({ ...message });
+      return;
+    }
 
   if (content.kind === Kind.NoteStats) {
     const statistic = content as NostrStatsContent;

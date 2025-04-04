@@ -35,6 +35,7 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalArticle,
+  PrimalDraft,
   PrimalNote,
   PrimalUser,
   PrimalZap,
@@ -61,6 +62,7 @@ import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
+import { decrypt44 } from "../lib/nostrAPI";
 
 let startTime = 0;
 let midTime = 0;
@@ -73,6 +75,7 @@ export type ProfileContextStore = {
   fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
   articles: PrimalArticle[],
+  drafts: PrimalDraft[],
   notes: PrimalNote[],
   replies: PrimalNote[],
   zaps: PrimalZap[],
@@ -190,6 +193,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     fetchedUserStats: false,
     knownProfiles: { names: {} },
     articles: [],
+    drafts: [],
     notes: [],
     replies: [],
     gallery: [],
@@ -275,6 +279,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       reads: { ...emptyPaging() },
       gallery: { ...emptyPaging() },
       replies: { ...emptyPaging() },
+      drafts: { ...emptyPaging() },
     },
     scrollTop: {
       reads: 0,
@@ -379,6 +384,43 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetching', () => false);
       return;
     }
+
+    if (tab === 'drafts') {
+      const specification = {
+        id: 'feed',
+        kind: 'drafts',
+        notes: 'authored',
+        pubkey,
+      };
+
+      updateStore('isFetching', () => true);
+
+      const off = offset || calculateReadsOffset(store.articles, store.paging['drafts']);
+
+      const { drafts, paging } = await fetchMegaFeed(
+        account?.publicKey,
+        JSON.stringify(specification),
+        `profile_drafts_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: off,
+        },
+      );
+
+      for (let i = 0; i < drafts.length; i++) {
+        let draft = drafts[i];
+        draft.plain = await decrypt44(pubkey, draft.content);
+      }
+
+      // const sortedReads = filterAndSortReads(reads, paging);
+
+      updateStore('paging', 'drafts', () => ({ ...paging }));
+      updateStore('drafts', (ns) => [ ...ns, ...drafts]);
+      updateStore('isFetching', () => false);
+      return;
+    }
+
 
     if (tab === 'media') {
       const specification = {

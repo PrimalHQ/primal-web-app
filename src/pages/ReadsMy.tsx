@@ -5,7 +5,7 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
 import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
 import { Kind, wordsPerMinute } from '../constants';
@@ -86,8 +86,65 @@ const ReadsMy: Component = () => {
         profile.articles.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
         break;
         case 'drafts':
+        profile.drafts.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'drafts', 0, 20, 0, 0);
         break;
     }
+  }
+
+  const processedDrafts = () => {
+    if (!account || !account.activeUser || !account.publicKey) return [];
+
+    const drafts = profile?.drafts || [];
+
+    let processed: PrimalArticle[] = [];
+
+    for (let i = 0; i < drafts.length; i++) {
+      const draft = drafts[i];
+
+      const cont = (JSON.parse(draft.plain) || '{}');
+
+      const tgs: string[][] = (cont.tags || []);
+
+      const article: PrimalArticle = {
+        id: cont.id || '',
+        title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
+        summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
+        image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
+        tags: tgs.filter((t: string[]) => t[0] === 't').map((t: string[]) => t[1]),
+        published: 0,
+        content: cont.content || '',
+        user: account.activeUser,
+        topZaps: [],
+        pubkey: account.publicKey,
+        noteId: `ndraft1${draft.id || 'none'}`,
+        naddr: `ndraft1${draft.id || 'none'}`,
+        coordinate: '',
+        wordCount: Math.floor((cont.content || '').split(' ').length / wordsPerMinute),
+        noteActions: {
+          event_id: cont.id || '',
+          liked: false,
+          replied: false,
+          reposted: false,
+          zapped: false,
+        },
+        bookmarks: 0,
+        likes: 0,
+        mentions: 0,
+        reposts: 0,
+        replies: 0,
+        zaps: 0,
+        score: 0,
+        score24h: 0,
+        satszapped: 0,
+        client: draft.client,
+        relayHints: {},
+        msg: { ...draft.msg },
+      }
+
+      processed.push(article)
+    }
+
+    return processed;
   }
 
   return (
@@ -201,18 +258,18 @@ const ReadsMy: Component = () => {
                   </Show>
                 </div>
 
-                <Show when={profile && profile.articles.length > 0}>
+                <Show when={profile && profile.drafts.length > 0}>
                   <div>
-                    <For each={profile?.articles}>
+                    <For each={processedDrafts()}>
                       {article => (
                         <div class="animated">
-                          <ArticleOverview article={article} />
+                          <ArticleOverview article={article} hideStats={true} />
                         </div>
                       )}
                     </For>
                     <Paginator
                       loadNextPage={() => {
-                        profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
+                        profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'drafts');
                       }}
                       isSmall={true}
                     />

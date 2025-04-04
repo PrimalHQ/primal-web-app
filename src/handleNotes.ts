@@ -6,8 +6,33 @@ import { getParametrizedEvents, parseLinkPreviews, setLinkPreviews } from "./lib
 import { getUserProfileInfo } from "./lib/profile";
 import { subsTo } from "./sockets";
 import { convertToArticles, convertToNotes } from "./stores/note";
-import { EventCoordinate, FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
+import { EventCoordinate, FeedPage, MegaFeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, TopZap, UserStats } from "./types/primal";
 import { parseBolt11 } from "./utils";
+import { convertToDraftsMega } from "./stores/megaFeed";
+import { emptyMegaFeedPage, pageResolve, updateFeedPage } from "./megaFeeds";
+
+export const fetchDrafts = (pubkey: string | undefined, ids: string[], subId: string) => {
+  return new Promise<PrimalDraft[]>((resolve, reject) => {
+    // if (!pubkey) reject('Missing pubkey');
+
+    let page: MegaFeedPage = emptyMegaFeedPage();
+
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (!content) return;
+        updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        const feed = pageResolve(page);
+        resolve(feed.drafts);
+      }
+    });
+
+    getEvents(pubkey, [...ids], subId, true);
+  });
+};
 
 export const fetchNotes = (pubkey: string | undefined, noteIds: string[], subId: string) => {
   return new Promise<PrimalNote[]>((resolve, reject) => {

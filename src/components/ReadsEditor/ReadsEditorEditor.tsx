@@ -675,6 +675,7 @@ const ReadsEditorEditor: Component<{
       <div class={styles.contentEditor}>
         <ReadsEditorToolbar
           editor={editorTipTap()}
+          textArea={editorPlainText}
           onFileUpload={onUploadContent}
           wysiwygMode={!editorMarkdown()}
           toggleEditorMode={() => {
@@ -689,19 +690,6 @@ const ReadsEditorEditor: Component<{
               editor.commands.setContent('');
               const content = editorPlainText?.value || '';
               setEditorContent(editor, content);
-
-              // const oldHTML = editor.getHTML();
-              // editor.commands.setContent('');
-
-              // nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08
-
-              // try {
-              //   const content = `${editorPlainText?.value || ''} `;
-              //   editor.chain().focus().setNostrContent(content).run();
-              // } catch (e) {
-              //   console.log('ERROR: ', e);
-              //   editor.commands.setContent(oldHTML);
-              // }
             }
           }}
         />

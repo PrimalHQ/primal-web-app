@@ -28,6 +28,7 @@ export type FormatControls = {
 const ReadsEditorToolbar: Component<{
   id?: string,
   editor: Editor | undefined,
+  textArea: HTMLTextAreaElement | undefined
   onFileUpload: (file: File) => void,
   wysiwygMode: boolean,
   toggleEditorMode: () => void,
@@ -91,8 +92,26 @@ const ReadsEditorToolbar: Component<{
 
 
   const bold = () => {
-    props.editor?.chain().focus().toggleBold().run();
-    updateFormatControls('isBoldActive', v => !v);
+    if (props.wysiwygMode) {
+      props.editor?.chain().focus().toggleBold().run();
+      updateFormatControls('isBoldActive', v => !v);
+      return;
+    }
+
+    const ta = props.textArea;
+
+    if (!ta) return;
+
+    const s = ta.selectionStart || 0;
+
+    const pre = ta.value.slice(0, s) || '';
+    const post = ta.value.slice(s+1) || '';
+
+    const content = `${pre}**${post}`;
+
+    ta.value = content;
+    ta.selectionStart = s;
+
   }
 
   const italic = () => {

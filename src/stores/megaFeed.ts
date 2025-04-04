@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { sanitize } from "../lib/notes";
-import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalNote, PrimalUser, PrimalZap, TopZap, UserStats } from "../types/primal";
+import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
 import { parseBolt11, selectRelayTags } from "../utils";
 import { logError } from "../lib/logger";
@@ -267,6 +267,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         mentionedUsers: pageUsers,
         wordCount,
         noteActions,
+        bookmarks: stat?.bookmarks || 0,
         likes: stat?.likes || 0,
         mentions: stat?.mentions || 0,
         reposts: stat?.reposts || 0,
@@ -656,4 +657,33 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
   }
 
   return reads;
+};
+
+export const convertToDraftsMega = (page: MegaFeedPage) => {
+  if (page === undefined) {
+    return [];
+  }
+
+  let i = 0;
+
+  let drafts: PrimalDraft[] = [];
+
+  for (i=0;i<page.drafts.length;i++) {
+    const draft = page.drafts[i];
+
+    const newDraft: PrimalDraft = {
+      id: draft.id,
+      kind: draft.kind,
+      content: draft.content,
+      plain: '',
+      client: (draft.tags.find(t => t[0] === 'client') || ['cilent', 'unknown'])[1],
+      pubkey: draft.pubkey,
+      created_at: draft.created_at || 0,
+      msg: { ...draft },
+    }
+
+    drafts.push(newDraft);
+  }
+
+  return drafts;
 };

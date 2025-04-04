@@ -16,7 +16,7 @@ export type TopZap = {
 }
 
 export type NostrNoteContent = {
-  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell | Kind.Draft,
   content: string,
   id: string,
   created_at?: number,
@@ -641,6 +641,7 @@ export type MegaFeedPage = {
   },
   notes: NostrNoteContent[],
   reads: NostrNoteContent[],
+  drafts: NostrNoteContent[],
   noteStats: NostrPostStats,
   zaps: NostrUserZaps[],
   topicStats: TopicStats,
@@ -873,7 +874,6 @@ export type PrimalNote = {
   relayHints?: Record<string, string>,
 };
 
-
 export type PrimalArticle = {
   title: string,
   summary: string,
@@ -910,6 +910,17 @@ export type PrimalArticle = {
   client?: string,
   relayHints?: Record<string, string>,
 };
+
+export type PrimalDraft = {
+  id: string,
+  kind: number,
+  content: string,
+  plain: string,
+  client: string,
+  pubkey: string,
+  created_at: number,
+  msg: NostrNoteContent,
+}
 
 export type PrimalFeed = {
   name: string,

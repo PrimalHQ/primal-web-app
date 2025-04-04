@@ -32,6 +32,7 @@ export type ArticleProps = {
   id?: string,
   article: PrimalArticle,
   onClick?: (article: PrimalArticle) => void,
+  hideStats?: boolean,
 };
 
 
@@ -187,53 +188,55 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
           {props.article.title}
         </div>
 
-        <div class={styles.stats}>
-          <div class={styles.stat}>
-            <div class={styles.value}>
-              {reactionsState.bookmarks}
+        <Show when={!props.hideStats}>
+          <div class={styles.stats}>
+            <div class={styles.stat}>
+              <div class={styles.value}>
+                {reactionsState.bookmarks}
+              </div>
+              <div class={styles.label}>
+                Bookmarks
+              </div>
             </div>
-            <div class={styles.label}>
-              Bookmarks
-            </div>
-          </div>
 
-          <div class={styles.stat}>
-            <div class={styles.value}>
-              {reactionsState.replies}
+            <div class={styles.stat}>
+              <div class={styles.value}>
+                {reactionsState.replies}
+              </div>
+              <div class={styles.label}>
+                Comments
+              </div>
             </div>
-            <div class={styles.label}>
-              Comments
-            </div>
-          </div>
 
-          <div class={styles.stat}>
-            <div class={styles.value}>
-              {reactionsState.replies}
+            <div class={styles.stat}>
+              <div class={styles.value}>
+                {reactionsState.replies}
+              </div>
+              <div class={styles.label}>
+                Reactions
+              </div>
             </div>
-            <div class={styles.label}>
-              Reactions
-            </div>
-          </div>
 
-          <div class={styles.stat}>
-            <div class={styles.value}>
-              {reactionsState.reposts}
+            <div class={styles.stat}>
+              <div class={styles.value}>
+                {reactionsState.reposts}
+              </div>
+              <div class={styles.label}>
+                Reposts
+              </div>
             </div>
-            <div class={styles.label}>
-              Reposts
-            </div>
-          </div>
 
-          <div class={styles.stat}>
-            <div class={styles.value}>
-              {reactionsState.zapCount}
+            <div class={styles.stat}>
+              <div class={styles.value}>
+                {reactionsState.zapCount}
+              </div>
+              <div class={styles.label}>
+                Zaps
+              </div>
             </div>
-            <div class={styles.label}>
-              Zaps
-            </div>
-          </div>
 
-        </div>
+          </div>
+        </Show>
       </div>
     </div>
   );
