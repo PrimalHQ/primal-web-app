@@ -36,14 +36,17 @@ import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleto
 import Paginator from '../components/Paginator/Paginator';
 import ArticleOverview from '../components/ArticlePreview/ArticleOverview';
 import ArticleOverviewSkeleton from '../components/Skeleton/ArticleOverviewSkeleton';
-import { ArticlesStats, fetchArticlesStats } from '../handleFeeds';
+import { ArticlesStats, fetchArticlesStats, fetchTopArticle } from '../handleFeeds';
 import { APP_ID } from '../App';
+import { shortDate } from '../lib/dates';
+import { useAppContext } from '../contexts/AppContext';
 
 
 const ReadsMy: Component = () => {
   const account = useAccountContext();
   const profile = useProfileContext();
   const toast = useToastContext();
+  const app = useAppContext();
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -54,6 +57,9 @@ const ReadsMy: Component = () => {
     satszapped: 0,
   });
 
+  const [topZappedArticle, setTopZappedArticle] = createSignal<PrimalArticle>();
+  const [topEngagedArticle, setTopEngagedArticle] = createSignal<PrimalArticle>();
+
   onMount(() => {
     profile?.actions.clearNotes();
     profile?.actions.clearArticles();
@@ -62,7 +68,19 @@ const ReadsMy: Component = () => {
     profile?.actions.clearReplies();
     updateTabContent('published');
     getCounts()
+    getTopArticles();
   });
+
+  const getTopArticles = async () => {
+    const pubkey = account?.publicKey;
+    if (!pubkey) return;
+
+    const topZapped = await fetchTopArticle(pubkey, 'satszapped', `top_zapped_${APP_ID}`);
+    const topEngaged = await fetchTopArticle(pubkey, 'interactions', `top_engaged_${APP_ID}`);
+
+    setTopZappedArticle(() => ({ ...topZapped }));
+    setTopEngagedArticle(() => ({ ...topEngaged }));
+  };
 
   const getCounts = async () => {
     const pubkey = account?.publicKey;
@@ -83,10 +101,10 @@ const ReadsMy: Component = () => {
 
     switch(value) {
       case 'published':
-        profile.articles.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
+        profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
         break;
         case 'drafts':
-        profile.drafts.length === 0 && profile.actions.getProfileMegaFeed(account.publicKey, 'drafts', 0, 20, 0, 0);
+        profile.actions.getProfileMegaFeed(account.publicKey, 'drafts', 0, 20, 0, 0);
         break;
     }
   }
@@ -147,6 +165,19 @@ const ReadsMy: Component = () => {
     return processed;
   }
 
+
+  const articleUrl = (art: PrimalArticle) => {
+    const vanityName = app?.verifiedUsers[art.pubkey];
+
+    if (!vanityName) return `/a/${art.naddr}`;
+
+    const decoded = nip19.decode(art.naddr);
+
+    const data = decoded.data as nip19.AddressPointer;
+
+    return `/${vanityName}/${data.identifier}`;
+  }
+
   return (
     <div class={styles.readsMyPage}>
       <PageTitle title={intl.formatMessage(readsMy.pageCaption)} />
@@ -174,7 +205,85 @@ const ReadsMy: Component = () => {
 
       <Show when={!isPhone()}>
         <StickySidebar>
-          <ReadsSidebar />
+          <div class={styles.sidebarSection}>
+            <Show when={articleStats().satszapped > 0}>
+              <div class={styles.sidebarGroup}>
+                <div class={styles.caption}>
+                  Total Zaps
+                </div>
+                <div class={styles.totalZaps}>
+                  <div class={styles.zapIcon}></div>
+                  <div class={styles.zapAmount}>
+                    <div class={styles.zapNumber}>
+                      {articleStats().satszapped.toLocaleString()}
+                    </div>
+                    <div class={styles.sats}>sats</div>
+                  </div>
+                </div>
+              </div>
+            </Show>
+
+            <Show when={topZappedArticle()}>
+              <div class={styles.sidebarGroup}>
+                <div class={styles.caption}>
+                  Top article by zaps
+                </div>
+                <div class={styles.topArticle} onClick={() => navigate(articleUrl(topZappedArticle()!))}>
+                  <div class={styles.info}>
+                    <div class={styles.title}>
+                      {topZappedArticle()?.title}
+                    </div>
+                    <div class={styles.footer}>
+                      <div class={styles.date}>
+                        {shortDate(topZappedArticle()?.published)}
+                      </div>
+                      <div class={styles.dot}>•</div>
+                      <div class={styles.stat}>
+                        <div class={styles.number}>
+                          {topZappedArticle()?.satszapped.toLocaleString()}
+                        </div>
+                        <div class={styles.unit}>Sats</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class={styles.image}>
+                    <img src={topZappedArticle()?.image} />
+                  </div>
+                </div>
+              </div>
+            </Show>
+
+            <Show when={topEngagedArticle()}>
+              <div class={styles.sidebarGroup}>
+                <div class={styles.caption}>
+                  Top article by engagement
+                </div>
+
+                <div class={styles.topArticle} onClick={() => navigate(articleUrl(topEngagedArticle()!))}>
+                  <div class={styles.info}>
+                    <div class={styles.title}>
+                      {topEngagedArticle()?.title}
+                    </div>
+                    <div class={styles.footer}>
+                      <div class={styles.date}>
+                        {shortDate(topEngagedArticle()?.published)}
+                      </div>
+                      <div class={styles.dot}>•</div>
+                      <div class={styles.stat}>
+                        <div class={styles.number}>
+                          {topEngagedArticle()?.replies.toLocaleString()}
+                        </div>
+                        <div class={styles.unit}>Comments</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class={styles.image}>
+                    <img src={topEngagedArticle()?.image} />
+                  </div>
+                </div>
+              </div>
+            </Show>
+          </div>
         </StickySidebar>
       </Show>
 

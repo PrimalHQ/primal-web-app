@@ -82,6 +82,8 @@ const ArticleShort: Component<{
   }
 
   const articleUrl = () => {
+    if (!props.article) return;
+
     const vanityName = app?.verifiedUsers[props.article.pubkey];
 
     if (!vanityName) return `/a/${props.article.naddr}`;

@@ -66,3 +66,131 @@
   font-weight: 400;
   line-height: 20px;
 }
+
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  .sidebarGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .caption {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+
+    .totalZaps {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 4px;
+
+      .zapIcon {
+        width: 15px;
+        height: 22px;
+        display: inline-block;
+        background: var(--active-zap);
+        -webkit-mask: url(../assets/icons/feed_zap_fill_2.svg) no-repeat 2px 0 / 15px 22px;
+        mask: url(../assets/icons/feed_zap_fill_2.svg) no-repeat 2px 0 / 15px 22px;
+      }
+
+      .zapAmount {
+        display: flex;
+        gap: 6px;
+
+        .zapNumber {
+          color: var(--text-primary);
+          font-size: 28px;
+          font-weight: 700;
+          line-height: 32px;
+        }
+
+        .sats {
+          color: var(--text-primary);
+          font-size: 22px;
+          font-weight: 400;
+          line-height: 32px;
+        }
+      }
+    }
+  }
+
+}
+
+.topArticle {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  cursor: pointer;
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 56px;
+
+    .title {
+      color: var(--text-primary);
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 20px;
+    }
+
+    .footer {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+
+      .date {
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+
+      .dot {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 20px;
+      }
+
+      .stat {
+        display: flex;
+        gap: 4px;
+
+
+        .number {
+          color: var(--text-primary);
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 20px;
+        }
+        .unit {
+          color: var(--text-tertiary);
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 20px;
+        }
+      }
+    }
+  }
+
+  .image {
+    >img {
+      width: 80px;
+      height: 56px;
+      object-fit: cover;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+  }
+}
