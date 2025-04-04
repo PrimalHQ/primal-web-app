@@ -96,6 +96,7 @@ export type AccountContextStore = {
   premiumReminder: boolean,
   activeNWC:string[],
   nwcList: string[][],
+  discloseClient: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -128,6 +129,7 @@ export type AccountContextStore = {
     updateBookmarks: (bookmarks: string[]) => void,
     resetRelays: (relays: Relay[]) => void,
     setProxyThroughPrimal: (shouldProxy: boolean) => void,
+    setDiscloseClient: (shouldDisclose: boolean) => void,
     updateRelays: () => void,
     updateContactsList: () => void,
     setFlag: (key: string, flag: boolean) => void,
@@ -194,6 +196,7 @@ const initialData = {
   premiumReminder: false,
   activeNWC: [],
   nwcList: [],
+  discloseClient: true,
   followData: {
     tags: [],
     date: 0,
@@ -287,6 +290,9 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   }
 
+  const setDiscloseClient = (shouldDisclose: boolean) => {
+    updateStore('discloseClient', () => shouldDisclose);
+  }
 
   createEffect(on(() => app?.appState, (v, p) => {
     if (v === 'sleep') {
@@ -1883,6 +1889,7 @@ const [store, updateStore] = createStore<AccountContextStore>({
     updateBookmarks,
     resetRelays,
     setProxyThroughPrimal,
+    setDiscloseClient,
     updateRelays,
     updateContactsList,
     setString,

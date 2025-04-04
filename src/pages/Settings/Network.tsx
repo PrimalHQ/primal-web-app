@@ -369,6 +369,27 @@ const Network: Component = () => {
         </div>
       </div>
 
+      <div class={styles.settingsContent}>
+        <div class={styles.settingsCaption}>
+          <CheckBox2
+            id='discloseClient'
+            label=""
+            onChange={() => {settings?.actions.setDiscloseClient(!account?.discloseClient)}}
+            checked={account?.discloseClient}
+          />
+          <span>{intl.formatMessage(t.network.discloseClient)}</span>
+          <HelpTip zIndex={1_000}>
+            <span>
+              {intl.formatMessage(t.network.discloseClientDescription)}
+            </span>
+          </HelpTip>
+        </div>
+
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.network.discloseClientDescription)}
+        </div>
+      </div>
+
       <div style="height: 64px"></div>
 
       <ConfirmModal

@@ -1600,6 +1600,16 @@ export const settings = {
       defaultMessage: 'When enabled, your IP address will be visible to the caching service, but not to relays. Your content will be published to your specified relays using the caching service as a proxy. ',
       description: 'Description of the proxy events settings sub-page',
     },
+    discloseClient: {
+      id: 'settings.filters.discloseClient',
+      defaultMessage: 'Disclose Client',
+      description: 'Caption for option to disclose client',
+    },
+    discloseClientDescription: {
+      id: 'settings.filters.discloseClientDescription',
+      defaultMessage: 'When enabled, events that you publish will reference Primal as the client.',
+      description: 'Description of the disclose client settings sub-page',
+    },
   },
   relays: {
     id: 'settings.relays',
