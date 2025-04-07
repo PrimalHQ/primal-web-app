@@ -4,7 +4,7 @@ import styles from './ReadsEditor.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
-import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
+import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -16,11 +16,16 @@ import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { NostrEvent, sendEvent, triggerImportEvents } from '../lib/notes';
+import { importEvents, NostrEvent, sendArticle, sendEvent, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
-import { useParams } from '@solidjs/router';
+import { useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
 import { APP_ID } from '../App';
+import ReadsPublishDialog from '../components/ReadsMentionDialog/ReadsPublishDialog';
+import { readSecFromStorage } from '../lib/localStore';
+import { useIntl } from '@cookbook/solid-intl';
+import { toast as tToast } from '../translations';
+import { subsTo } from '../sockets';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -57,12 +62,16 @@ export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyRe
 const ReadsEditor: Component = () => {
   const account = useAccountContext();
   const toast = useToastContext();
+  const intl = useIntl();
   const params = useParams();
+  const navigate = useNavigate();
 
   const [accordionSection, setAccordionSection] = createSignal<string[]>(['metadata', 'content', 'hero_image']);
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
+
+  const [showPublishArticle, setShowPublishArticle] = createSignal(false);
 
   const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
 
@@ -211,6 +220,99 @@ const ReadsEditor: Component = () => {
 
   }
 
+
+
+  const postArticle = async (promote: boolean) => {
+    if (!account || !account.hasPublicKey()) {
+      return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
+    if (!account.proxyThroughPrimal && account.relays.length === 0) {
+      toast?.sendWarning(
+        intl.formatMessage(tToast.noRelaysConnected),
+      );
+      return;
+    }
+
+    const content = markdownContent();
+
+    let relayHints = {}
+    let tags: string[][] = referencesToTags(content, relayHints);;
+
+    const relayTags = account.relays.map(r => {
+      let t = ['r', r.url];
+
+      const settings = account.relaySettings[r.url];
+      if (settings && settings.read && !settings.write) {
+        t = [...t, 'read'];
+      }
+      if (settings && !settings.read && settings.write) {
+        t = [...t, 'write'];
+      }
+
+      return t;
+    });
+
+    tags = [...tags, ...relayTags];
+
+    let articleToPost = {
+      ...article,
+      content,
+    };
+
+    if (!accordionSection().includes('hero_image')) {
+      articleToPost.image = '';
+    }
+
+    const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
+
+    if (success && note) {
+
+      const importId = `import_article_${APP_ID}`;
+
+      const unsub = subsTo(importId, {
+        onEose: () => {
+          unsub();
+          if (note) {
+            toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+            setArticle(() => emptyArticleEdit());
+            if (promote) {
+              setTimeout(() => {
+                quoteArticle(note);
+              }, 1_000);
+            }
+            navigate('/reads/my');
+          }
+        }
+      });
+
+      importEvents([note], importId);
+
+      return;
+    }
+  }
+
+  const quoteArticle = (postedEvent: NostrRelaySignedEvent) => {
+    if (!account) return;
+
+    const naddr = nip19.naddrEncode({
+        pubkey: postedEvent.pubkey,
+        kind: postedEvent.kind,
+        identifier: (postedEvent.tags.find(t => t[0] === 'd') || [])[1] || '',
+      });
+
+      account.actions.quoteNote(`nostr:${naddr}`);
+      account.actions.showNewNoteForm();
+  }
+
   onMount(() => {
     window.addEventListener('scroll', onScroll);
     loadArticle();
@@ -348,7 +450,7 @@ const ReadsEditor: Component = () => {
 
             <button
               class={styles.toolPrimaryButton}
-              onClick={() => { }}
+              onClick={() => {setShowPublishArticle(true)}}
             >
               Continue to Publish Article
             </button>
@@ -417,6 +519,14 @@ const ReadsEditor: Component = () => {
           </div>
         </Match>
       </Switch>
+
+      <ReadsPublishDialog
+        article={genereatePreviewArticle()}
+        articleEdit={article}
+        open={showPublishArticle()}
+        setOpen={setShowPublishArticle}
+        onPublish={postArticle}
+      />
     </div>
   )
 }
