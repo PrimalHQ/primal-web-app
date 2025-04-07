@@ -976,7 +976,7 @@ type NoteStore = {
 export const referencesToTags = (value: string, relayHints: Record<string, string>) => {
   const regexHashtag = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/ig;
   const regexMention =
-    /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1\w+)\b|#\[(\d+)\]/g;
+    /\b(nostr:)?((note|npub|nevent|nprofile|naddr)1['qpzry9x8gf2tvdw0s3jn54khce6mua7l']+)\b|#\[(\d+)\]/g;
 
   let refs: string[] = [];
   let tags: string[][] = [];

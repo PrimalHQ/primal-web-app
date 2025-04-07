@@ -430,8 +430,8 @@ const decryptMessages = async (contact: string, encrypted: NostrMessageEncrypted
 
 
 const parseForMentions = async (messages: DirectMessage[]) => {
-  const noteRegex = /\bnostr:((note|nevent)1\w+)\b|#\[(\d+)\]/g;
-  const userRegex = /\bnostr:((npub|nprofile)1\w+)\b|#\[(\d+)\]/g;
+  const noteRegex = /\bnostr:((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b|#\[(\d+)\]/g;
+  const userRegex = /\bnostr:((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b|#\[(\d+)\]/g;
 
   let noteRefs = [];
   let userRefs = [];

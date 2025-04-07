@@ -81,7 +81,7 @@ export const makeNAddrNode = (bech32: string, options?: any) => ({
   attrs: makeNAddrAttrs(bech32, options),
 })
 
-export const NADDR_REGEX = /(?<![\w./:?=])(nostr:)?(naddr1[0-9a-z]+)/g
+export const NADDR_REGEX = /(?<![\w./:?=])(nostr:)?(naddr1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {

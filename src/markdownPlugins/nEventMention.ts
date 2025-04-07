@@ -96,7 +96,7 @@ export const makeNEventNode = (bech32: string, options?: any) => ({
   attrs: makeNEventAttrs(bech32, options),
 })
 
-export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[0-9a-z]+)/g
+export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {

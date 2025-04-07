@@ -302,12 +302,12 @@ export const lnUnifiedRegex = /bitcoin:[a-zA-Z0-9]*(\?.*)lightning=([a-zA-Z0-9]*
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
 export const tagMentionRegex = /\#\[([0-9]*)\]/;
-export const noteRegex = /((note|nevent)1\w+)\b/g;
-export const noteRegexLocal = /((note|nevent)1\w+)\b/;
-export const profileRegex = /((npub|nprofile)1\w+)\b/;
-export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
-export const addrRegex = /((naddr)1\w+)\b/;
-export const addrRegexG = /((naddr)1\w+)\b/g;
+export const noteRegex = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const noteRegexLocal = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegex = /((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegexG = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const addrRegex = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const addrRegexG = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
 export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
@@ -318,10 +318,10 @@ export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/g;
 export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/g;
 export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/;
 
-export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/;
-export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/g;
-export const eventRegexNostrless = /((note|nevent|naddr)1\w+)\b/;
-export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1\w+)\b/;
+export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const eventRegexNostrless = /((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 
 export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
 

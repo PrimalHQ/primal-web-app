@@ -776,7 +776,7 @@ const EditBox: Component<{
       const nprofile = nip19.nprofileEncode(pInfo);
 
       // @ts-ignore
-      return `${anythingBefore} nostr:${nprofile} `;
+      return `${anythingBefore} nostr:${nprofile}`;
     });
 
     if (account) {
@@ -1538,7 +1538,7 @@ const EditBox: Component<{
 
     // Get index of the token and insert user's handle
     const index = msg.slice(0, cursor).lastIndexOf('@');
-    const value = msg.slice(0, index) + `@\`${name}\`` + msg.slice(cursor);
+    const value = msg.slice(0, index) + `@\`${name}\` ` + msg.slice(cursor);
 
     // Reset query, update message and text area value
     setQuery('');
@@ -1548,7 +1548,7 @@ const EditBox: Component<{
     textArea.focus();
 
     // Calculate new cursor position
-    cursor = value.slice(0, cursor).lastIndexOf('@') + name.length + 3;
+    cursor = value.slice(0, cursor).lastIndexOf('@') + name.length + 4;
     textArea.selectionEnd = cursor;
 
 
