@@ -142,8 +142,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   <ButtonSecondary
                     id={props.id}
                     onClick={() => {
-                      app?.actions.openConfirmModal(noReadsConfirm);
-                      // navigate('/reads/my');
+                      // app?.actions.openConfirmModal(noReadsConfirm);
+                      navigate('/reads/my');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -153,8 +153,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 <ButtonSecondary
                   id={props.id}
                   onClick={() => {
-                    app?.actions.openConfirmModal(noReadsConfirm);
-                    // navigate('/reads/my');
+                    // app?.actions.openConfirmModal(noReadsConfirm);
+                    navigate('/reads/my');
                   }}
                   noPadding={true}
                 >
@@ -170,8 +170,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   <ButtonPrimary
                     id={props.id}
                     onClick={() => {
-                      app?.actions.openConfirmModal(noReadsConfirm);
-                      // navigate('/reads/my');
+                      // app?.actions.openConfirmModal(noReadsConfirm);
+                      navigate('/reads/my');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -181,8 +181,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 <ButtonPrimary
                   id={props.id}
                   onClick={() => {
-                    app?.actions.openConfirmModal(noReadsConfirm);
-                    // navigate('/reads/my');
+                    // app?.actions.openConfirmModal(noReadsConfirm);
+                    navigate('/reads/my');
                   }}
                 >
                   {intl.formatMessage(tActions.myArticles)}
