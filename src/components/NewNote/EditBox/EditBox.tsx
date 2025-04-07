@@ -776,7 +776,7 @@ const EditBox: Component<{
       const nprofile = nip19.nprofileEncode(pInfo);
 
       // @ts-ignore
-      return `${anythingBefore} nostr:${nprofile}`;
+      return `${anythingBefore}nostr:${nprofile}`;
     });
 
     if (account) {
