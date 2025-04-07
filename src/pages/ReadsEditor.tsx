@@ -189,6 +189,8 @@ const ReadsEditor: Component = () => {
         tags: [ ...r.tags ],
       }));
 
+      setMarkdownContent(r.content);
+
       return;
     }
 
@@ -214,6 +216,8 @@ const ReadsEditor: Component = () => {
         tags: tgs.filter((t: string[]) => t[0] === 't').map((t: string[]) => t[1]),
         content: r.content || '',
       }));
+
+      setMarkdownContent(r.content);
 
       return;
     }
