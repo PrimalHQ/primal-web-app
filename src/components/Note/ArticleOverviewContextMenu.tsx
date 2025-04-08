@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -11,12 +11,13 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent } from '../../lib/notes';
+import { broadcastEvent, sendDeleteEvent, sendDraft, triggerImportEvents } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
+import { Kind } from '../../constants';
 
 const ArticleOverviewContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -33,6 +34,8 @@ const ArticleOverviewContextMenu: Component<{
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
+  const [confirmUnpublishArticle, setConfirmUnpublishArticle] = createSignal(false);
+  const [confirmDeleteArticle, setConfirmDeleteArticle] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -114,9 +117,66 @@ const ArticleOverviewContextMenu: Component<{
     account?.actions?.showNewNoteForm();
   }
 
-  const unpublishArticle = () => { };
+  const unpublishArticle = async () => {
+    const user = account?.activeUser;
+    if (!props.data || !user) return;
+    const article = props.data.note as PrimalArticle;
 
-  const deleteArticle = () => { };
+    const { success: deleted, note: deletedArticle } = await sendDeleteEvent(
+      user.pubkey,
+      article.coordinate,
+      Kind.LongForm,
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
+
+    if (!deleted || !deletedArticle) return;
+
+    let imports = [deletedArticle];
+
+    const { success, note: draft } = await sendDraft(
+      user,
+      {
+        title: article.title,
+        image: article.image,
+        summary: article.summary,
+        content: article.content,
+        tags: [...article.tags],
+      },
+      article.content,
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
+
+    if (success && draft) {
+      imports.push(draft);
+    }
+
+    triggerImportEvents(imports, `unpublish_import_${APP_ID}`);
+    props.onClose()
+  };
+
+  const deleteArticle = async () => {
+    const user = account?.activeUser;
+    if (!props.data || !user) return;
+    const article = props.data.note as PrimalArticle;
+
+    const { success, note } = await sendDeleteEvent(
+      user.pubkey,
+      article.coordinate,
+      Kind.LongForm,
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
+
+    if (!success || !note) return;
+
+    triggerImportEvents([note], `delete_import_${APP_ID}`);
+    props.onClose()
+  };
 
   const copyNoteLink = () => {
     if (!props.data) return;
@@ -254,13 +314,13 @@ const ArticleOverviewContextMenu: Component<{
     },
     {
       label: intl.formatMessage(tActions.articleOverviewContext.unpublish),
-      action: unpublishArticle,
+      action: () => setConfirmUnpublishArticle(true),
       icon: 'unpublish',
       warning: true,
     },
     {
-      label: intl.formatMessage(tActions.articleOverviewContext.copyRawEvent),
-      action: deleteArticle,
+      label: intl.formatMessage(tActions.articleOverviewContext.delete),
+      action: () => setConfirmDeleteArticle(true),
       icon: 'delete',
       warning: true,
     },
@@ -325,6 +385,28 @@ const ArticleOverviewContextMenu: Component<{
         hidden={!props.open}
         position="note_context"
         orientation={orientation()}
+      />
+
+      <ConfirmModal
+        open={confirmUnpublishArticle()}
+        title="Unpublish article?"
+        description="This will delete the public version of the article and save a private draft. Do you want to continue?"
+        onConfirm={() => {
+          unpublishArticle();
+          setConfirmUnpublishArticle(false);
+        }}
+        onAbort={() => setConfirmUnpublishArticle(false)}
+      />
+
+      <ConfirmModal
+        open={confirmDeleteArticle()}
+        title="Delete article?"
+        description="This will issue a “request delete” command to the relays where the article was published. Do you want to continue? "
+        onConfirm={() => {
+          deleteArticle();
+          setConfirmDeleteArticle(false);
+        }}
+        onAbort={() => setConfirmDeleteArticle(false)}
       />
     </div>
   )

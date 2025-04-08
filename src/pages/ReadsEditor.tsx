@@ -16,7 +16,7 @@ import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { importEvents, NostrEvent, sendArticle, sendEvent, triggerImportEvents } from '../lib/notes';
+import { importEvents, NostrEvent, sendArticle, sendDraft, sendEvent, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
@@ -368,41 +368,18 @@ const ReadsEditor: Component = () => {
   }
 
   const saveDraft = async () => {
-    const pk = account?.publicKey;
-    if (!pk || !account) return;
-    const time = Math.floor((new Date()).getTime() / 1000);
-    const a: NostrEvent = {
-      content: markdownContent(),
-      kind: Kind.LongForm,
-      tags: [
-        ["title", article.title],
-        ["summary", article.summary],
-        ["image", article.image],
-        ["t", article.tags.join(" ")],
-        ["d", generateIdentifier()],
-        ['client', 'primal-web'],
-      ],
-      created_at: time,
-    };
+    const user = account?.activeUser;
+    if (!user) return;
 
-    const e = await encrypt44(pk, JSON.stringify(a));
-    // const d = await decrypt44(pk, e);
 
-    const draft: NostrEvent = {
-      kind: Kind.Draft,
-      created_at: Math.floor((new Date()).getTime() / 1_000),
-      tags: [
-        ['d', generateIdentifier()],
-        ['k', `${Kind.LongForm}`],
-        ['client', 'primal-web'],
-        // ["e", "<anchor event event id>", "<relay-url>"],
-        // ["a", "<anchor event address>", "<relay-url>"],
-      ],
-      content: e,
-      // other fields
-    }
-
-    const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
+    const { success, note } = await sendDraft(
+      user,
+      article,
+      markdownContent(),
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
 
     if (success && note) {
       toast?.sendSuccess('Draft saved');
@@ -416,6 +393,55 @@ const ReadsEditor: Component = () => {
     else {
       toast?.sendWarning('Draft saving failed');
     }
+
+    // const pk = account?.publicKey;
+    // if (!pk || !account) return;
+    // const time = Math.floor((new Date()).getTime() / 1000);
+    // const a: NostrEvent = {
+    //   content: markdownContent(),
+    //   kind: Kind.LongForm,
+    //   tags: [
+    //     ["title", article.title],
+    //     ["summary", article.summary],
+    //     ["image", article.image],
+    //     ["t", article.tags.join(" ")],
+    //     ["d", generateIdentifier()],
+    //     ['client', 'primal-web'],
+    //   ],
+    //   created_at: time,
+    // };
+
+    // const e = await encrypt44(pk, JSON.stringify(a));
+    // // const d = await decrypt44(pk, e);
+
+    // const draft: NostrEvent = {
+    //   kind: Kind.Draft,
+    //   created_at: Math.floor((new Date()).getTime() / 1_000),
+    //   tags: [
+    //     ['d', generateIdentifier()],
+    //     ['k', `${Kind.LongForm}`],
+    //     ['client', 'primal-web'],
+    //     // ["e", "<anchor event event id>", "<relay-url>"],
+    //     // ["a", "<anchor event address>", "<relay-url>"],
+    //   ],
+    //   content: e,
+    //   // other fields
+    // }
+
+    // const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
+
+    // if (success && note) {
+    //   toast?.sendSuccess('Draft saved');
+    //   triggerImportEvents([note], `draft_import_${APP_ID}`);
+
+    //   setLastSaved(() => ({
+    //     ...article,
+    //     mdContent: markdownContent(),
+    //   }));
+    // }
+    // else {
+    //   toast?.sendWarning('Draft saving failed');
+    // }
   };
 
   return (

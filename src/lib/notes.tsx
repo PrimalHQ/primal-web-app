@@ -3,11 +3,11 @@ import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
-import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, SendNoteResult } from "../types/primal";
+import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, npubToHex } from "./keys";
 import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
-import { signEvent } from "./nostrAPI";
+import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 
 const getLikesStorageKey = () => {
@@ -459,6 +459,85 @@ export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean
 
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
+
+
+export const generateIdentifier = (title: string) => title.toLowerCase().split(' ').join('-')
+
+
+export const sendDeleteEvent = async (
+  pubkey: string,
+  eventId: string,
+  kind: number,
+  relays: Relay[],
+  relaySettings: NostrRelays | undefined,
+  shouldProxy: boolean,
+): Promise<SendNoteResult> => {
+  const isCoordinate = eventId.split(':').length === 3;
+
+  const tagLabel = isCoordinate ? 'a' : 'e';
+
+  const ev: NostrEvent & { pubkey: string } = {
+    kind: Kind.EventDeletion,
+    pubkey,
+    tags: [
+      [tagLabel, eventId],
+      ["k", `${kind}`],
+    ],
+    content: "Deleted by the author",
+    created_at: Math.floor((new Date()).getTime() / 1_000),
+  };
+
+  const response = await sendEvent(ev, relays, relaySettings, shouldProxy);
+
+  return response;
+};
+
+export const sendDraft = async (
+  user: PrimalUser,
+  article: ArticleEdit,
+  mdContent: string,
+  relays: Relay[],
+  relaySettings: NostrRelays | undefined,
+  shouldProxy: boolean,
+): Promise<SendNoteResult> => {
+  const pk = user.pubkey;
+  const identifier = generateIdentifier(article.title);
+  const time = Math.floor((new Date()).getTime() / 1000);
+  const a: NostrEvent = {
+    content: mdContent,
+    kind: Kind.LongForm,
+    tags: [
+      ["title", article.title],
+      ["summary", article.summary],
+      ["image", article.image],
+      ["t", article.tags.join(" ")],
+      ["d", identifier],
+      ['client', 'primal-web'],
+    ],
+    created_at: time,
+  };
+
+  const e = await encrypt44(pk, JSON.stringify(a));
+  // const d = await decrypt44(pk, e);
+
+  const draft: NostrEvent = {
+    kind: Kind.Draft,
+    created_at: Math.floor((new Date()).getTime() / 1_000),
+    tags: [
+      ['d', identifier],
+      ['k', `${Kind.LongForm}`],
+      ['client', 'primal-web'],
+      // ["e", "<anchor event event id>", "<relay-url>"],
+      // ["a", "<anchor event address>", "<relay-url>"],
+    ],
+    content: e,
+    // other fields
+  }
+
+  const response = await sendEvent(draft, relays, relaySettings, shouldProxy);
+
+  return response;
+};
 
 // export const sendDraft = async (ev: NostrEvent, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
 //   const time = Math.floor((new Date()).getTime() / 1000);
