@@ -33,6 +33,7 @@ export type ArticleProps = {
   article: PrimalArticle,
   onClick?: (article: PrimalArticle) => void,
   hideStats?: boolean,
+  isDraft?: boolean,
 };
 
 
@@ -80,6 +81,17 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
   };
 
   const onContextMenuTrigger = () => {
+    if (props.isDraft) {
+      app?.actions.openArticleDraftContextMenu(
+        props.article,
+        articleContextMenu?.getBoundingClientRect(),
+        () => {},
+        openReactionModal,
+      );
+
+      return;
+    }
+
     app?.actions.openArticleOverviewContextMenu(
       props.article,
       articleContextMenu?.getBoundingClientRect(),

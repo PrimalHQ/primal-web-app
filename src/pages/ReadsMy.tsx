@@ -124,7 +124,7 @@ const ReadsMy: Component = () => {
       const tgs: string[][] = (cont.tags || []);
 
       const article: PrimalArticle = {
-        id: cont.id || '',
+        id: draft.id || '',
         title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
         summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
         image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
@@ -385,7 +385,7 @@ const ReadsMy: Component = () => {
                     <For each={processedDrafts()}>
                       {article => (
                         <div class="animated">
-                          <ArticleOverview article={article} hideStats={true} />
+                          <ArticleOverview article={article} hideStats={true} isDraft={true} />
                         </div>
                       )}
                     </For>

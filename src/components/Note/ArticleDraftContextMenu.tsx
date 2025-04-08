@@ -19,7 +19,7 @@ import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 
-const ArticleOverviewContextMenu: Component<{
+const ArticleDraftContextMenu: Component<{
   data: NoteContextMenuInfo,
   open: boolean,
   onClose: () => void,
@@ -34,8 +34,7 @@ const ArticleOverviewContextMenu: Component<{
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
-  const [confirmUnpublishArticle, setConfirmUnpublishArticle] = createSignal(false);
-  const [confirmDeleteArticle, setConfirmDeleteArticle] = createSignal(false);
+  const [confirmDeleteDraft, setConfirmDeleteDraft] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -117,56 +116,15 @@ const ArticleOverviewContextMenu: Component<{
     account?.actions?.showNewNoteForm();
   }
 
-  const unpublishArticle = async () => {
-    const user = account?.activeUser;
-    if (!props.data || !user) return;
-    const article = props.data.note as PrimalArticle;
-
-    const { success: deleted, note: deletedArticle } = await sendDeleteEvent(
-      user.pubkey,
-      article.coordinate,
-      Kind.LongForm,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
-    );
-
-    if (!deleted || !deletedArticle) return;
-
-    let imports = [deletedArticle];
-
-    const { success, note: draft } = await sendDraft(
-      user,
-      {
-        title: article.title,
-        image: article.image,
-        summary: article.summary,
-        content: article.content,
-        tags: [...article.tags],
-      },
-      article.content,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
-    );
-
-    if (success && draft) {
-      imports.push(draft);
-    }
-
-    triggerImportEvents(imports, `unpublish_import_${APP_ID}`);
-    props.onClose()
-  };
-
-  const deleteArticle = async () => {
+  const deleteDraft = async () => {
     const user = account?.activeUser;
     if (!props.data || !user) return;
     const article = props.data.note as PrimalArticle;
 
     const { success, note } = await sendDeleteEvent(
       user.pubkey,
-      article.coordinate,
-      Kind.LongForm,
+      article.id,
+      Kind.Draft,
       account.activeRelays,
       account.relaySettings,
       account.proxyThroughPrimal,
@@ -178,38 +136,10 @@ const ArticleOverviewContextMenu: Component<{
     props.onClose()
   };
 
-  const copyNoteLink = () => {
-    if (!props.data) return;
-
-    let link = noteLinkId();
-
-    if (note().noteId.startsWith('naddr')) {
-      const vanityName = app?.verifiedUsers[note().pubkey];
-
-      if (vanityName) {
-        const decoded = nip19.decode(note().noteId);
-
-        const data = decoded.data as nip19.AddressPointer;
-
-        link = `${vanityName}/${data.identifier}`;
-      }
-    }
-
-    navigator.clipboard.writeText(`${window.location.origin}/${link}`);
-    props.onClose()
-    toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
-  };
-
-  const copyNoteText = () => {
-    if (!props.data) return;
-    navigator.clipboard.writeText(`${note().content}`);
-    props.onClose()
-    toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
-  };
-
   const copyNoteId = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().noteId}`);
+    console.log('ID: ', note())
+    navigator.clipboard.writeText(`${note().id}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
@@ -219,48 +149,6 @@ const ArticleOverviewContextMenu: Component<{
     navigator.clipboard.writeText(`${JSON.stringify(note().msg)}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteRawDataCoppied));
-  };
-
-  const copyUserNpub = () => {
-    if (!props.data) return;
-    navigator.clipboard.writeText(`${note().user.npub}`);
-    props.onClose()
-    toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
-  };
-
-  const broadcastNote = async () => {
-    if (!account || !props.data) {
-      return;
-    }
-
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
-        const sec = readSecFromStorage();
-        if (sec) {
-          account.actions.setShowPin(sec);
-          return;
-        }
-      }
-
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toaster?.sendWarning(
-        intl.formatMessage(toast.noRelaysConnected),
-      );
-      return;
-    }
-
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
-    props.onClose()
-
-    if (success) {
-      toaster?.sendSuccess(intl.formatMessage(tToast.noteBroadcastSuccess));
-      return;
-    }
-    toaster?.sendWarning(intl.formatMessage(tToast.noteBroadcastFail));
   };
 
   const onClickOutside = (e: MouseEvent) => {
@@ -293,16 +181,6 @@ const ArticleOverviewContextMenu: Component<{
       icon: 'edit',
     },
     {
-      label: intl.formatMessage(tActions.articleOverviewContext.quoteArticle),
-      action: quoteArticle,
-      icon: 'quote',
-    },
-    {
-      label: intl.formatMessage(tActions.articleOverviewContext.shareArticle),
-      action: copyNoteLink,
-      icon: 'copy_note_link',
-    },
-    {
       label: intl.formatMessage(tActions.articleOverviewContext.copyId),
       action: copyNoteId,
       icon: 'highlight_copy',
@@ -313,14 +191,8 @@ const ArticleOverviewContextMenu: Component<{
       icon: 'copy_raw_data',
     },
     {
-      label: intl.formatMessage(tActions.articleOverviewContext.unpublish),
-      action: () => setConfirmUnpublishArticle(true),
-      icon: 'unpublish',
-      warning: true,
-    },
-    {
       label: intl.formatMessage(tActions.articleOverviewContext.delete),
-      action: () => setConfirmDeleteArticle(true),
+      action: () => setConfirmDeleteDraft(true),
       icon: 'delete',
       warning: true,
     },
@@ -388,28 +260,17 @@ const ArticleOverviewContextMenu: Component<{
       />
 
       <ConfirmModal
-        open={confirmUnpublishArticle()}
-        title="Unpublish article?"
-        description="This will delete the public version of the article and save a private draft. Do you want to continue?"
-        onConfirm={() => {
-          unpublishArticle();
-          setConfirmUnpublishArticle(false);
-        }}
-        onAbort={() => setConfirmUnpublishArticle(false)}
-      />
-
-      <ConfirmModal
-        open={confirmDeleteArticle()}
+        open={confirmDeleteDraft()}
         title="Delete article?"
         description="This will issue a “request delete” command to the relays where the article was published. Do you want to continue? "
         onConfirm={() => {
-          deleteArticle();
-          setConfirmDeleteArticle(false);
+          deleteDraft();
+          setConfirmDeleteDraft(false);
         }}
-        onAbort={() => setConfirmDeleteArticle(false)}
+        onAbort={() => setConfirmDeleteDraft(false)}
       />
     </div>
   )
 }
 
-export default hookForDev(ArticleOverviewContextMenu);
+export default hookForDev(ArticleDraftContextMenu);

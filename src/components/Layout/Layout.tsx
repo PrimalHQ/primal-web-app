@@ -28,6 +28,7 @@ import LayoutPhone from './LayoutPhone';
 import LayoutDesktop from './LayoutDesktop';
 import { isPhone } from '../../utils';
 import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
+import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -46,6 +47,7 @@ const Layout: Component<any> = (props) => {
     if (path !== prev) {
       app?.actions.closeContextMenu();
       app?.actions.closeArticleOverviewContextMenu();
+      app?.actions.closeArticleDraftContextMenu();
     }
   }));
 
@@ -259,6 +261,12 @@ const Layout: Component<any> = (props) => {
           open={app?.showArticleOverviewContextMenu}
           onClose={app?.actions.closeArticleOverviewContextMenu}
           data={app?.articleOverviewContextMenuInfo}
+        />
+
+        <ArticleDraftContextMenu
+          open={app?.showArticleDraftContextMenu}
+          onClose={app?.actions.closeArticleDraftContextMenu}
+          data={app?.articleDraftContextMenuInfo}
         />
       </>
     </Show>

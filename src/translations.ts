@@ -447,6 +447,11 @@ export const actions = {
       defaultMessage: 'Edit Article',
       description: 'Label for editing an article',
     },
+    editDraft: {
+      id: 'actions.articleOverviewContext.editDraft',
+      defaultMessage: 'Edit Draft',
+      description: 'Label for editing a draft',
+    },
     quoteArticle: {
       id: 'actions.articleOverviewContext.quoteArticle',
       defaultMessage: 'Quote Article',
@@ -454,7 +459,7 @@ export const actions = {
     },
     shareArticle: {
       id: 'actions.articleOverviewContext.shareArticle',
-      defaultMessage: 'Share Article',
+      defaultMessage: 'Copy Article link',
       description: 'Label for sharing article from context menu',
     },
     copyId: {
@@ -474,7 +479,7 @@ export const actions = {
     },
     delete: {
       id: 'actions.articleOverviewContext.delete',
-      defaultMessage: 'Delete',
+      defaultMessage: 'Request Delete',
       description: 'Label for copying raw event from context menu',
     },
   },
