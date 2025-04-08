@@ -225,6 +225,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
+    deleteItem: (id: string) => void,
   ) => {
     updateStore('articleOverviewContextMenuInfo', reconcile({
       note,

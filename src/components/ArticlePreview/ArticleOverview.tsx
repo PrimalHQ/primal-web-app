@@ -25,6 +25,7 @@ import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
 import ButtonLink from '../Buttons/ButtonLink';
+import { useNavigate } from '@solidjs/router';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -43,6 +44,7 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
+  const navigate = useNavigate();
 
   let articleContextMenu: HTMLDivElement | undefined;
 
@@ -140,9 +142,30 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
     return true;
   };
 
+
+  const articleUrl = () => {
+    const vanityName = app?.verifiedUsers[props.article.pubkey];
+
+    if (!vanityName) return `/a/${props.article.naddr}`;
+
+    const decoded = nip19.decode(props.article.naddr);
+
+    const data = decoded.data as nip19.AddressPointer;
+
+    return `/${vanityName}/${data.identifier}`;
+  }
+
   return (
     <div
       class={styles.articleOverview}
+      onClick={() => {
+        if (props.isDraft) {
+          navigate(`/reads/edit/${props.article.naddr}`);
+          return
+        };
+
+        navigate(articleUrl())
+      }}
     >
       <div class={styles.upRightFloater}>
         <NoteContextTrigger

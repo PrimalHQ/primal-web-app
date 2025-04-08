@@ -155,7 +155,8 @@ const ArticleOverviewContextMenu: Component<{
     }
 
     triggerImportEvents(imports, `unpublish_import_${APP_ID}`);
-    props.onClose()
+    props.onClose();
+    window.location.reload();
   };
 
   const deleteArticle = async () => {
@@ -175,7 +176,8 @@ const ArticleOverviewContextMenu: Component<{
     if (!success || !note) return;
 
     triggerImportEvents([note], `delete_import_${APP_ID}`);
-    props.onClose()
+    props.onClose();
+    window.location.reload();
   };
 
   const copyNoteLink = () => {

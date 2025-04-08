@@ -134,6 +134,7 @@ const ArticleDraftContextMenu: Component<{
 
     triggerImportEvents([note], `delete_import_${APP_ID}`);
     props.onClose()
+    window.location.reload();
   };
 
   const copyNoteId = () => {
