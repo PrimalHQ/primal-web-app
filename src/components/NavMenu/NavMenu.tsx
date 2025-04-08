@@ -143,7 +143,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                     id={props.id}
                     onClick={() => {
                       // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/reads/my');
+                      navigate('/myarticles');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -154,7 +154,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   id={props.id}
                   onClick={() => {
                     // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/reads/my');
+                    navigate('/myarticles');
                   }}
                   noPadding={true}
                 >
@@ -171,7 +171,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                     id={props.id}
                     onClick={() => {
                       // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/reads/my');
+                      navigate('/myarticles');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -182,7 +182,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   id={props.id}
                   onClick={() => {
                     // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/reads/my');
+                    navigate('/myarticles');
                   }}
                 >
                   {intl.formatMessage(tActions.myArticles)}

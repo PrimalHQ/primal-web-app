@@ -293,7 +293,7 @@ const ReadsEditor: Component = () => {
                 quoteArticle(note);
               }, 1_000);
             }
-            navigate('/reads/my');
+            navigate('/myarticles');
           }
         }
       });
