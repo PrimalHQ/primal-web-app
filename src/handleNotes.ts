@@ -205,7 +205,7 @@ export const fetchArticles = (noteIds: string[], subId: string) => {
     const events = noteIds.reduce<EventCoordinate[]>((acc, id) => {
       const d = decodeIdentifier(id);
 
-      if (!d.data || d.type !== 'naddr') return acc;
+      if (!d.data || d.type !== 'naddr' || typeof d.data === 'string') return acc;
 
       const { pubkey, identifier, kind } = d.data;
 

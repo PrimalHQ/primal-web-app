@@ -492,6 +492,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             mentionedUsers,
             wordCount,
             noteActions,
+            bookmarks: stat?.bookmarks || 0,
             likes: stat?.likes || 0,
             mentions: stat?.mentions || 0,
             reposts: stat?.reposts || 0,
@@ -857,6 +858,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       mentionedArticles,
       wordCount,
       noteActions: (page.noteActions && page.noteActions[msg.id]) ?? noActions(msg.id),
+      bookmarks: stat?.bookmarks || 0,
       likes: stat?.likes || 0,
       mentions: stat?.mentions || 0,
       reposts: stat?.reposts || 0,
@@ -871,7 +873,8 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
     msg.tags.forEach(tag => {
       switch (tag[0]) {
         case 't':
-          article.tags.push(tag[1]);
+          const ts = tag[1].split(' ');
+          article.tags.push(...ts);
           break;
         case 'title':
           article.title = tag[1];

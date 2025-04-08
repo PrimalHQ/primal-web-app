@@ -71,6 +71,8 @@ const ReadsEditor: Component = () => {
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
 
+  const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string }>({ ...emptyArticleEdit(), mdContent: ''});
+
   const [showPublishArticle, setShowPublishArticle] = createSignal(false);
 
   const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
@@ -191,6 +193,8 @@ const ReadsEditor: Component = () => {
 
       setMarkdownContent(r.content);
 
+      setLastSaved(() => ({ ...article, mdContent: markdownContent() }));
+
       return;
     }
 
@@ -208,23 +212,31 @@ const ReadsEditor: Component = () => {
       const r = JSON.parse(rJson);
 
       const tgs: string[][] = (r.tags || []);
+      const tags = tgs.
+        reduce<string[]>((acc, t) => {
+          if (t[0] === 't' && t[1].length > 0) {
+            return [...acc, ...t[1].split(' ')]
+          }
+
+          return [...acc];
+        }, []);
 
       setArticle(() => ({
         title: (tgs.find(t => t[0] === 'title') || ['title', ''])[1],
         summary: (tgs.find(t => t[0] === 'summary') || ['summary', ''])[1],
         image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
-        tags: tgs.filter((t: string[]) => t[0] === 't').map((t: string[]) => t[1]),
+        tags,
         content: r.content || '',
       }));
 
       setMarkdownContent(r.content);
 
+      setLastSaved(() => ({ ...article, mdContent: markdownContent() }));
+
       return;
     }
 
   }
-
-
 
   const postArticle = async (promote: boolean) => {
     if (!account || !account.hasPublicKey()) {
@@ -324,7 +336,78 @@ const ReadsEditor: Component = () => {
 
   onCleanup(() => {
     window.removeEventListener('scroll', onScroll)
-  })
+  });
+
+  const isUnsaved = () => {
+    const {
+      title,
+      image,
+      summary,
+      content,
+      tags,
+      mdContent,
+    } = lastSaved;
+
+    const changed = title !== article.title ||
+      image !== article.image ||
+      summary !== article.summary ||
+      content !== article.content ||
+      tags.some(t => !article.tags.includes(t)) ||
+      mdContent !== markdownContent();
+
+    return changed;
+  }
+
+  const saveDraft = async () => {
+    const pk = account?.publicKey;
+    if (!pk || !account) return;
+    const time = Math.floor((new Date()).getTime() / 1000);
+    const a: NostrEvent = {
+      content: markdownContent(),
+      kind: Kind.LongForm,
+      tags: [
+        ["title", article.title],
+        ["summary", article.summary],
+        ["image", article.image],
+        ["t", article.tags.join(" ")],
+        ["d", generateIdentifier()],
+        ['client', 'primal-web'],
+      ],
+      created_at: time,
+    };
+
+    const e = await encrypt44(pk, JSON.stringify(a));
+    // const d = await decrypt44(pk, e);
+
+    const draft: NostrEvent = {
+      kind: Kind.Draft,
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+      tags: [
+        ['d', generateIdentifier()],
+        ['k', `${Kind.LongForm}`],
+        ['client', 'primal-web'],
+        // ["e", "<anchor event event id>", "<relay-url>"],
+        // ["a", "<anchor event address>", "<relay-url>"],
+      ],
+      content: e,
+      // other fields
+    }
+
+    const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
+
+    if (success && note) {
+      toast?.sendSuccess('Draft saved');
+      triggerImportEvents([note], `draft_import_${APP_ID}`);
+
+      setLastSaved(() => ({
+        ...article,
+        mdContent: markdownContent(),
+      }));
+    }
+    else {
+      toast?.sendWarning('Draft saving failed');
+    }
+  };
 
   return (
     <div class={styles.editorPage}>
@@ -397,57 +480,23 @@ const ReadsEditor: Component = () => {
           </div>
           <div class={styles.sidebarPublish}>
             <div class={styles.caption}>{'Save & Publish'}</div>
-            <div class={styles.status}>
-              Unsaved changes.
-            </div>
+            <Show
+              when={isUnsaved()}
+              fallback={
+                <div class={styles.status}>
+                  Draft saved
+                </div>
+              }
+            >
+              <div class={styles.status}>
+                Unsaved changes
+              </div>
+            </Show>
 
             <button
               class={styles.toolButton}
-              onClick={async () => {
-                const pk = account?.publicKey;
-                if (!pk || !account) return;
-                const time = Math.floor((new Date()).getTime() / 1000);
-                const a: NostrEvent = {
-                  content: markdownContent(),
-                  kind: Kind.LongForm,
-                  tags: [
-                    ["title", article.title],
-                    ["summary", article.summary],
-                    ["image", article.image],
-                    ["t", article.tags.join(" ")],
-                    ["d", generateIdentifier()],
-                    ['client', 'primal-web'],
-                  ],
-                  created_at: time,
-                };
-
-                const e = await encrypt44(pk, JSON.stringify(a));
-                // const d = await decrypt44(pk, e);
-
-                const draft: NostrEvent = {
-                  kind: Kind.Draft,
-                  created_at: Math.floor((new Date()).getTime() / 1_000),
-                  tags: [
-                    ['d', generateIdentifier()],
-                    ['k', `${Kind.LongForm}`],
-                    ['client', 'primal-web'],
-                    // ["e", "<anchor event event id>", "<relay-url>"],
-                    // ["a", "<anchor event address>", "<relay-url>"],
-                  ],
-                  content: e,
-                  // other fields
-                }
-
-                const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
-
-                if (success && note) {
-                  toast?.sendSuccess('Draft saved');
-                  triggerImportEvents([note], `draft_import_${APP_ID}`)
-                }
-                else {
-                  toast?.sendWarning('Draft saving failed');
-                }
-              }}
+              onClick={saveDraft}
+              disabled={!isUnsaved()}
             >
               Save Draft Privately
             </button>
