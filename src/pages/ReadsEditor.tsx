@@ -18,7 +18,7 @@ import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
 import { importEvents, NostrEvent, sendArticle, sendEvent, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
-import { useNavigate, useParams } from '@solidjs/router';
+import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
 import { APP_ID } from '../App';
 import ReadsPublishDialog from '../components/ReadsMentionDialog/ReadsPublishDialog';
@@ -26,6 +26,7 @@ import { readSecFromStorage } from '../lib/localStore';
 import { useIntl } from '@cookbook/solid-intl';
 import { toast as tToast } from '../translations';
 import { subsTo } from '../sockets';
+import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -74,6 +75,7 @@ const ReadsEditor: Component = () => {
   const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string }>({ ...emptyArticleEdit(), mdContent: ''});
 
   const [showPublishArticle, setShowPublishArticle] = createSignal(false);
+  const [showleavePage, setShowleavePage] = createSignal<BeforeLeaveEventArgs>();
 
   const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
 
@@ -338,6 +340,13 @@ const ReadsEditor: Component = () => {
     window.removeEventListener('scroll', onScroll)
   });
 
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (isUnsaved()) {
+      e.preventDefault();
+      setShowleavePage(e);
+    }
+  })
+
   const isUnsaved = () => {
     const {
       title,
@@ -579,6 +588,23 @@ const ReadsEditor: Component = () => {
         open={showPublishArticle()}
         setOpen={setShowPublishArticle}
         onPublish={postArticle}
+      />
+
+      <ConfirmModal
+        open={showleavePage() !== undefined}
+        title="Unsaved changes"
+        description="Do you wish to save changes as a draft?"
+        confirmLabel="Save"
+        abortLabel="Leave without saving"
+        onConfirm={async () => {
+          await saveDraft();
+          showleavePage()?.retry(true);
+          setShowleavePage(undefined);
+        }}
+        onAbort={() => {
+          showleavePage()?.retry(true);
+          setShowleavePage(undefined);
+        }}
       />
     </div>
   )
