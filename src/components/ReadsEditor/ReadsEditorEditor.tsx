@@ -261,6 +261,7 @@ const ReadsEditorEditor: Component<{
                           props.command({ id: user.pubkey, label: user.name})
                         }}
                         highlighted={highlightedUser() === index()}
+                        hasBackground={true}
                       />
                     )}
                   </For>

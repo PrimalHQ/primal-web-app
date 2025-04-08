@@ -20,6 +20,7 @@ const SearchOption: Component<{
   narrow?: boolean,
   onClick?: (e?: MouseEvent) => void,
   highlighted?: boolean,
+  hasBackground?: boolean,
   id?: string,
 }> = (props) => {
 
@@ -27,7 +28,8 @@ const SearchOption: Component<{
     const klass = () => `${styles.userResult}
       ${props.underline ? styles.underline : ''}
       ${props.highlighted ? styles.highlight : ''}
-      ${props.narrow ? styles.narrow : ''}`;
+      ${props.narrow ? styles.narrow : ''}
+      ${props.hasBackground ? styles.hasBackground : ''}`;
 
     return (
       <Show
