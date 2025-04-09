@@ -40,6 +40,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import Gapcursor from '@tiptap/extension-gapcursor';
+import CodeBlock from '@tiptap/extension-code-block';
 
 import { createTiptapEditor } from 'solid-tiptap';
 import { Markdown } from 'tiptap-markdown';
@@ -166,9 +167,10 @@ const ReadsEditorEditor: Component<{
         protocols: ['http', 'https'],
       }),
       Image,
+      CodeBlock,
       Markdown.configure({
         // html: true,
-        // breaks: true,
+        breaks: true,
         // transformPastedText: true,
         // transformCopiedText: true,
       }),

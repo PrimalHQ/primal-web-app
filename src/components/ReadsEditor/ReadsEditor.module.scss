@@ -949,7 +949,7 @@
       font-weight: 400;
       line-height: 28px;
       padding-left: 12px;
-      padding-bottom: 0;
+      padding-block: 0;
       margin-top: 0;
       margin-bottom: 20px;
       border-left: 4px solid var(--text-tertiary);
@@ -1000,6 +1000,8 @@
       font-style: normal;
       font-weight: 400;
       line-height: 28px;
+      border-radius: 12px;
+      padding: 20px;
     }
 
     ins {

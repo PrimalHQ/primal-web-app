@@ -1,5 +1,5 @@
 import { Select } from '@kobalte/core/select';
-import { Component, Show, createSignal } from 'solid-js';
+import { Component, Show, createEffect, createSignal } from 'solid-js';
 
 import styles from './ReadsEditor.module.scss';
 

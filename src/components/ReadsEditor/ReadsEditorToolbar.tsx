@@ -68,11 +68,20 @@ const ReadsEditorToolbar: Component<{
       let headingLevel = [1, 2, 3, 4, 5, 6].
         find(level => ed.isActive('heading', { level })) || 0;
 
+      if (headingLevel === 0 && ed.isActive('codeBlock')) {
+        headingLevel = 7;
+      }
+
+      if (headingLevel === 0 && ed.isActive('blockquote')) {
+        headingLevel = 8;
+      }
+
       updateFormatControls(() => ({
         isBoldActive: ed.isActive('bold'),
         isItalicActive: ed.isActive('italic'),
         isStrikeActive: ed.isActive('strike'),
         isUlineActive: ed.isActive('underline'),
+        isCodeActive: ed.isActive('codeBlock'),
         headingLevel
       }))
     })
@@ -130,7 +139,7 @@ const ReadsEditorToolbar: Component<{
   }
 
   const code = () => {
-    props.editor?.chain().focus().toggleCode().run();
+    props.editor?.chain().focus().toggleCodeBlock().run();
     updateFormatControls('isCodeActive', v => !v);
   }
 
@@ -196,9 +205,13 @@ const ReadsEditorToolbar: Component<{
 
   }
 
+
   const heading = (option: SelectorOption) => {
     const level = option?.index || 0;
-    updateFormatControls('headingLevel', () => level);
+
+    if (!props.editor?.isActive('codeBlock')) {
+      updateFormatControls('headingLevel', () => level);
+    }
 
     if (level === 0) {
       props.editor?.chain().focus().setParagraph().run();
