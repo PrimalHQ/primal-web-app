@@ -272,7 +272,7 @@ const ReadsEditorToolbar: Component<{
 
 
   return (
-    <div>
+    <>
 
       <div class={styles.toolbar} id='editor_toolbar'>
         <div>
@@ -425,17 +425,6 @@ const ReadsEditorToolbar: Component<{
           </button>
       </div>
 
-      {/* <ReadsEditorBubbleMenu
-        editor={props.editor}
-        store={formatControls}
-        commands={{
-          bold,
-          italic,
-          uline,
-          strike,
-        }}
-      /> */}
-
       <ReadsLinkDialog
         open={formatControls.enterLink}
         setOpen={(v: boolean) => updateFormatControls('enterLink', () => v)}
@@ -473,7 +462,7 @@ const ReadsEditorToolbar: Component<{
           updateFormatControls('enterMention', () => false);
         }}
       />
-    </div>
+    </>
   );
 }
 

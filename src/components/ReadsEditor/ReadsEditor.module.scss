@@ -761,6 +761,10 @@
     background-color: var(--background-site);
     cursor: text;
 
+    &.topMargin {
+      margin-top: 64px;
+    }
+
     [role="textbox"] {
       width: 100%;
       height: 100%;

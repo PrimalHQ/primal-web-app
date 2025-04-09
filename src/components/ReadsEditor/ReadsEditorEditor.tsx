@@ -621,7 +621,7 @@ const ReadsEditorEditor: Component<{
 
         <div
           id="tiptapEditor"
-          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''}`} ref={tiptapEditor}
+          class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`} ref={tiptapEditor}
           onClick={() => editorTipTap()?.chain().focus().run()}
         ></div>
 

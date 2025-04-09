@@ -334,6 +334,20 @@ const ReadsEditor: Component = () => {
       account.actions.showNewNoteForm();
   }
 
+  createEffect(() => {
+    const tb = document.getElementById('editor_toolbar') as HTMLDivElement | undefined;
+    if (!tb) return;
+
+    const isMetadataHidden = !accordionSection().includes('metadata');
+
+    if (isMetadataHidden) {
+      tb.classList.add('fixed_editor_toolbar');
+    }
+    else {
+      tb.classList.remove('fixed_editor_toolbar');
+    }
+  })
+
   onMount(() => {
     window.addEventListener('scroll', onScroll);
     loadArticle();
