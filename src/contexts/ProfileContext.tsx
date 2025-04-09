@@ -121,6 +121,7 @@ export type ProfileContextStore = {
   isFetchingFollowers: boolean,
   isFetchingZaps: boolean,
   isFetchingRelays: boolean,
+  isFetchingDrafts: boolean,
   isAboutParsed: boolean,
   profileStats: Record<string, number>,
   relays: NostrRelays,
@@ -142,6 +143,7 @@ export type ProfileContextStore = {
     clearZaps: () => void,
     clearArticles: () => void,
     clearGallery: () => void,
+    clearDrafts: () => void,
     setProfileKey: (profileKey?: string) => void,
     refreshNotes: () => void,
     checkForNewNotes: (pubkey: string | undefined) => void,
@@ -204,6 +206,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     isProfileFollowing: false,
     isFetchingZaps: false,
     isFetchingGallery: false,
+    isFetchingDrafts: false,
     page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
     repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
     reposts: {},
@@ -393,7 +396,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey,
       };
 
-      updateStore('isFetching', () => true);
+      updateStore('isFetchingDrafts', () => true);
 
       const off = offset || calculateReadsOffset(store.articles, store.paging['drafts']);
 
@@ -417,7 +420,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       updateStore('paging', 'drafts', () => ({ ...paging }));
       updateStore('drafts', (ns) => [ ...ns, ...sortedDrafts]);
-      updateStore('isFetching', () => false);
+      updateStore('isFetchingDrafts', () => false);
       return;
     }
 
@@ -668,6 +671,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     updateStore('lastArticle', () => undefined);
 
     //resetScroll();
+  };
+
+  const clearDrafts = () => {
+    updateStore('drafts', () => []);
   };
 
   const clearReplies = () => {
@@ -1080,6 +1087,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     clearGallery();
     clearReplies();
     clearZaps();
+    clearDrafts();
     resetProfile();
   }
 
@@ -1108,6 +1116,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearArticles,
       clearGallery,
       clearReplies,
+      clearDrafts,
       setProfileKey,
       refreshNotes,
       checkForNewNotes,

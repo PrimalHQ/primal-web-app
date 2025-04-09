@@ -18,7 +18,7 @@ import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
 import { NostrEvent, sendEvent } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
-import { A, useNavigate } from '@solidjs/router';
+import { A, useNavigate, useParams } from '@solidjs/router';
 import ReadsHeader from '../components/HomeHeader/ReadsHeader';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -49,8 +49,9 @@ const ReadsMy: Component = () => {
   const app = useAppContext();
   const intl = useIntl();
   const navigate = useNavigate();
+  const params = useParams();
 
-  const [activeTab, setActiveTab] = createSignal('published');
+  const [activeTab, setActiveTab] = createSignal('');
   const [articleStats, setArticleStats] = createSignal<ArticlesStats>({
     articles: 0,
     drafts: 0,
@@ -90,20 +91,33 @@ const ReadsMy: Component = () => {
     setArticleStats(() => ({ ...stats }));
   }
 
+  const hash = () => {
+    return (location.hash.length > 1) ? location.hash.substring(1) : '';
+  }
+
   const onChangeTab = (value: string) => {
-    setActiveTab(() => value);
+    navigate(`/myarticles/${value}`)
+    // setActiveTab(() => value);
 
     updateTabContent(value);
   };
+
+  onMount(() => {
+    const value = params.tab || 'published';
+
+    updateTabContent(value);
+  });
 
   const updateTabContent = (value: string) => {
     if (!profile || !account) return;
 
     switch(value) {
       case 'published':
+        profile.actions.clearArticles();
         profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
         break;
         case 'drafts':
+        profile.actions.clearDrafts();
         profile.actions.getProfileMegaFeed(account.publicKey, 'drafts', 0, 20, 0, 0);
         break;
     }
@@ -298,7 +312,7 @@ const ReadsMy: Component = () => {
       </Show>
 
       <div class={styles.pageContent}>
-        <Tabs value={activeTab()} onChange={onChangeTab}>
+        <Tabs value={params.tab || 'published'} onChange={onChangeTab}>
           <Tabs.List class={styles.profileTabs}>
             <Tabs.Trigger class={styles.profileTab} value="published">
               Published ({articleStats().articles})
@@ -360,7 +374,7 @@ const ReadsMy: Component = () => {
 
               <TransitionGroup name="slide-fade">
                 <div>
-                  <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                  <Show when={profile && profile.isFetchingDrafts && profile.drafts.length === 0}>
                     <div>
                       <For each={new Array(10)}>
                         {() => <ArticleOverviewSkeleton />}
@@ -370,7 +384,7 @@ const ReadsMy: Component = () => {
                 </div>
 
                 <div>
-                  <Show when={profile && profile.drafts.length === 0 && !profile.isFetching}>
+                  <Show when={profile && profile.drafts.length === 0 && !profile.isFetchingDrafts}>
                     <div class={styles.noPublished}>
                       <div class={styles.caption}>
                         {intl.formatMessage(readsMy.noDrafts)}

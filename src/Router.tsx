@@ -129,9 +129,9 @@ const AppRouter: Component = () => {
         <Route path="/" component={Layout} >
           <Route path="/" component={() => <Navigate href="/home" />} />
           <Route path="/home" component={Home} />
-          <Route path="/myarticles" component={ReadsMy} />
           <Route path="/reads/edit/:id?" component={ReadsEditor} />
           <Route path="/reads/:topic?" component={Reads} />
+          <Route path="/myarticles/:tab?" component={ReadsMy} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
           <Route path="/a/:id" component={Thread} />

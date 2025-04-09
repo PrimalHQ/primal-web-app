@@ -135,7 +135,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
               </Show>
             }
           >
-            <Match when={loc.pathname.startsWith('/reads/')}>
+            <Match when={loc.pathname.startsWith('/myarticles') || loc.pathname.startsWith('/reads/edit')}>
               <Show
                 when={isBigScreen()}
                 fallback={

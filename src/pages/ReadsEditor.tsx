@@ -77,6 +77,8 @@ const ReadsEditor: Component = () => {
   const [showPublishArticle, setShowPublishArticle] = createSignal(false);
   const [showleavePage, setShowleavePage] = createSignal<BeforeLeaveEventArgs>();
 
+  const [isPublishing, setIsPublishing] = createSignal(false);
+
   const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
 
   const genereatePreviewArticle = (): PrimalArticle | undefined => {
@@ -290,6 +292,7 @@ const ReadsEditor: Component = () => {
       articleToPost.image = '';
     }
 
+    setIsPublishing(true);
     const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
 
     if (success && note) {
@@ -341,10 +344,12 @@ const ReadsEditor: Component = () => {
   });
 
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (isUnsaved()) {
+    if (isUnsaved() && !isPublishing()) {
       e.preventDefault();
       setShowleavePage(e);
     }
+
+    setIsPublishing(false);
   })
 
   const isUnsaved = () => {
