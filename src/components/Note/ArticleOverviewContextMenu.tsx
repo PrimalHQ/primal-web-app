@@ -155,8 +155,10 @@ const ArticleOverviewContextMenu: Component<{
     }
 
     triggerImportEvents(imports, `unpublish_import_${APP_ID}`);
+
+    // Used here just as a signal, not for actually custom zaps
+    props.data.openCustomZap && props.data.openCustomZap();
     props.onClose();
-    window.location.reload();
   };
 
   const deleteArticle = async () => {
@@ -176,8 +178,10 @@ const ArticleOverviewContextMenu: Component<{
     if (!success || !note) return;
 
     triggerImportEvents([note], `delete_import_${APP_ID}`);
+
+    // Used here just as a signal, not for actually custom zaps
+    props.data.openCustomZap && props.data.openCustomZap();
     props.onClose();
-    window.location.reload();
   };
 
   const copyNoteLink = () => {

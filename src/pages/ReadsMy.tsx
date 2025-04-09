@@ -353,7 +353,14 @@ const ReadsMy: Component = () => {
                   <div>
                     <For each={profile?.articles}>
                       {article => (
-                        <div class="animated"><ArticleOverview article={article} /></div>
+                        <div class="animated">
+                          <ArticleOverview
+                            article={article}
+                            onRefresh={(draft: PrimalArticle) => {
+                              profile?.actions.removeEvent(draft.id, 'articles');
+                            }}
+                          />
+                        </div>
                       )}
                     </For>
                     <Paginator
@@ -399,7 +406,14 @@ const ReadsMy: Component = () => {
                     <For each={processedDrafts()}>
                       {article => (
                         <div class="animated">
-                          <ArticleOverview article={article} hideStats={true} isDraft={true} />
+                          <ArticleOverview
+                            article={article}
+                            hideStats={true}
+                            isDraft={true}
+                            onRefresh={(draft: PrimalArticle) => {
+                              profile?.actions.removeEvent(draft.id, 'drafts');
+                            }}
+                          />
                         </div>
                       )}
                     </For>

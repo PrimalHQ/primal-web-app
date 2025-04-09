@@ -35,6 +35,7 @@ export type ArticleProps = {
   onClick?: (article: PrimalArticle) => void,
   hideStats?: boolean,
   isDraft?: boolean,
+  onRefresh?: (article: PrimalArticle) => void,
 };
 
 
@@ -87,7 +88,9 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
       app?.actions.openArticleDraftContextMenu(
         props.article,
         articleContextMenu?.getBoundingClientRect(),
-        () => {},
+        () => {
+          props.onRefresh && props.onRefresh(props.article);
+        },
         openReactionModal,
       );
 
@@ -97,7 +100,9 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
     app?.actions.openArticleOverviewContextMenu(
       props.article,
       articleContextMenu?.getBoundingClientRect(),
-      () => {},
+      () => {
+        props.onRefresh && props.onRefresh(props.article);
+      },
       openReactionModal,
     );
   }

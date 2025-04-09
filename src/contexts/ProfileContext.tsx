@@ -63,6 +63,7 @@ import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
 import { emptyPaging, fetchMegaFeed, filterAndSortDrafts, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
 import { decrypt44 } from "../lib/nostrAPI";
+import { updatePage } from "../services/StoreService";
 
 let startTime = 0;
 let midTime = 0;
@@ -164,6 +165,7 @@ export type ProfileContextStore = {
     updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
     resetScroll: () => void,
     updateProfile: (pubkey: string) => void,
+    removeEvent: (id: string, kind: 'articles' | 'drafts') => void,
   }
 }
 
@@ -455,6 +457,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
 
 
+  }
+
+  const removeEvent = (id: string, kind: 'articles' | 'drafts') => {
+    updateStore(kind, (drs) => drs.filter(d => d.id !== id));
   }
 
   const getProfileMegaFeedNextPage = async (pubkey: string | undefined, tab: string) => {
@@ -1136,6 +1142,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateScrollTop,
       resetScroll,
       updateProfile,
+      removeEvent,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,
