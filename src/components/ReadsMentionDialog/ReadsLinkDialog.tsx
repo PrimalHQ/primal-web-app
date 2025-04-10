@@ -85,20 +85,20 @@ const ReadsLinkDialog: Component<{
       title="Add link"
     >
       <div class={styles.addLinkDialog}>
-        <label for="link_url">Text to display:</label>
+        <label for="link_label">Text to display:</label>
         <input
-          id="link_url"
-          class={styles.textInput}
-          value={state.url}
-          onInput={(e) => setState(() => ({ url: e.target.value}))}
-        />
-
-        <label for="link_label">Address:</label>
-        <TextField
           id="link_label"
           class={styles.textInput}
           value={state.title}
-          onChange={(title) => setState(() => ({ title }))}
+          onInput={(e) => setState(() => ({ title: e.target.value}))}
+        />
+
+        <label for="link_url">Address:</label>
+        <TextField
+          id="link_url"
+          class={styles.textInput}
+          value={state.url}
+          onChange={(url) => setState(() => ({ url }))}
         >
          	<TextField.TextArea autoResize rows={1} />
         </TextField>

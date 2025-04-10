@@ -133,7 +133,7 @@ export const NProfileExtension = Node.create({
     return {
       markdown: {
         serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32)
+          state.write(` nostr:${node.attrs.bech32} `);
         },
         parse: {},
       },
@@ -168,7 +168,7 @@ export const NProfileExtension = Node.create({
   },
 
   renderText(props) {
-    return 'nostr:' + props.node.attrs.bech32
+    return ` nostr:${props.node.attrs.bech32} `;
   },
 
   addCommands() {

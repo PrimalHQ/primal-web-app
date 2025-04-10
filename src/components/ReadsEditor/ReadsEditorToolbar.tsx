@@ -182,10 +182,14 @@ const ReadsEditorToolbar: Component<{
         title && tr.insertText(title)
         return true
       }).
-      insertContent({ type: 'text', text: ' '}).
       run();
 
-    editor.commands.unsetMark('link');
+    editor.
+      chain().
+      focus().
+      unsetMark('link').
+      insertContent({ type: 'text', text: ' '}).
+      run();
   }
 
   const image = (src: string, title: string, alt: string) => {

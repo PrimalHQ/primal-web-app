@@ -169,10 +169,10 @@ const ReadsEditorEditor: Component<{
       Image,
       CodeBlock,
       Markdown.configure({
-        // html: true,
+        html: true,
         breaks: true,
-        // transformPastedText: true,
-        // transformCopiedText: true,
+        transformPastedText: true,
+        transformCopiedText: true,
       }),
       Underline,
       NProfileExtension,
