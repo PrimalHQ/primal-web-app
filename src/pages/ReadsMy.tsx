@@ -67,7 +67,7 @@ const ReadsMy: Component = () => {
     profile?.actions.clearGallery();
     profile?.actions.clearZaps();
     profile?.actions.clearReplies();
-    updateTabContent('published');
+    // updateTabContent('published');
     getCounts()
     getTopArticles();
   });
