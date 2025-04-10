@@ -170,7 +170,7 @@ const ReadsEditorEditor: Component<{
       CodeBlock,
       Markdown.configure({
         html: true,
-        breaks: true,
+        breaks: false,
         transformPastedText: true,
         transformCopiedText: true,
       }),
@@ -635,7 +635,7 @@ const ReadsEditorEditor: Component<{
             }}
           >
             <TextField.TextArea
-              class={styles.editorPlain}
+              class={`${styles.editorPlain}  ${accordionSection().includes('metadata') ? '' : styles.topMargin}`}
               ref={editorPlainText}
               autoResize={true}
             />

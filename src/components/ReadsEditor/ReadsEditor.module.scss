@@ -737,7 +737,7 @@
     padding-block: 12px;
     padding-inline: 20px;
     width: 100%;
-    min-height: 50dvh;
+    min-height: calc(100dvh - 64px - 510px);
     max-height: unset;
     margin: 0;
 
@@ -749,6 +749,11 @@
     font-weight: 400;
     line-height: 22px;
     background-color: var(--background-header-input);
+
+    &.topMargin {
+      margin-top: 64px;
+      min-height: calc(100dvh - 64px);
+    }
   }
 
   .editor {
