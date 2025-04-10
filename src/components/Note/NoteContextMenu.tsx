@@ -16,6 +16,7 @@ import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
+import { useNavigate } from '@solidjs/router';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -27,6 +28,7 @@ const NoteContextMenu: Component<{
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
@@ -285,9 +287,26 @@ const NoteContextMenu: Component<{
     ];
   };
 
+  const noteContextForMe: () => MenuItem[] = () => {
+    // if (!note() || (note().user.pubkey !== account?.publicKey)) return [];
+
+    if (!(note()?.noteId || '').startsWith('naddr1')) return [];
+
+    return [
+      {
+        label: intl.formatMessage(tActions.noteContext.editArticle),
+        action: () => {
+          props.onClose();
+          navigate(`/reads/edit/${note().noteId}`);
+        },
+        icon: 'edit',
+      },
+    ];
+  };
+
   const noteContext = () => account?.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
-      noteContextForEveryone;
+      [ ...noteContextForMe(), ...noteContextForEveryone];
 
   let context: HTMLDivElement | undefined;
 
