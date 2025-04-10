@@ -111,7 +111,7 @@ const ReadsPublishDialog: Component<{
           >
             Publish
           </ButtonPrimary>
-        C</div>
+        </div>
       </div>
     </AdvancedSearchDialog>
   );

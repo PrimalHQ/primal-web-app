@@ -451,7 +451,7 @@ export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean
       ["image", articleData.image],
       ["published_at", `${time}`],
       ["d", articleData.title.toLowerCase().replace(" ", "-")],
-      ["t", articleData.tags.join(" ")],
+      ...articleData.tags.map(t => [ 't', t]),
       ...tags,
     ],
     created_at: time,

@@ -219,7 +219,7 @@ const ReadsEditor: Component = () => {
       const tags = tgs.
         reduce<string[]>((acc, t) => {
           if (t[0] === 't' && t[1].length > 0) {
-            return [...acc, ...t[1].split(' ')]
+            return [...acc, ...t[1]]
           }
 
           return [...acc];
