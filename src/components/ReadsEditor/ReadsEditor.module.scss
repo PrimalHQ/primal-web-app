@@ -282,7 +282,7 @@
   border-top: 1px solid var(--devider);
   border-bottom: 1px solid var(--devider);
   width: 640px;
-  height: 64px;
+  height: 52px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -294,7 +294,7 @@
     display: flex;
     gap: 5px;
     width: 640px;
-    height: 64px;
+    height: 52px;
     justify-content: flex-start;
     align-items: center;
 
@@ -619,6 +619,7 @@
 
     .titleInput {
       textarea {
+        display: block;
         background-color: var(--background-site);
         color: var(--text-primary);
         font-size: 44px;
@@ -751,7 +752,7 @@
     background-color: var(--background-header-input);
 
     &.topMargin {
-      margin-top: 64px;
+      margin-top: 52px;
       min-height: calc(100dvh - 64px);
     }
   }
@@ -767,7 +768,7 @@
     cursor: text;
 
     &.topMargin {
-      margin-top: 64px;
+      margin-top: 52px;
     }
 
     [role="textbox"] {
