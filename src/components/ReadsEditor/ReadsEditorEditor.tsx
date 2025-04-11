@@ -198,140 +198,140 @@ const ReadsEditorEditor: Component<{
       //     );
       //   },
       // }),
-      Mention.configure({
-        suggestion: {
-          char: '@',
-          command: ({ editor, range, props }) => {
-            const user = selectedUser();
+      // Mention.configure({
+      //   suggestion: {
+      //     char: '@',
+      //     command: ({ editor, range, props }) => {
+      //       const user = selectedUser();
 
-            if (!user) return;
+      //       if (!user) return;
 
-            let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
-            const relays = userRelays[user.pubkey] || [];
+      //       let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
+      //       const relays = userRelays[user.pubkey] || [];
 
-            if (relays.length > 0) {
-              pInfo.relays = [...relays];
-            }
+      //       if (relays.length > 0) {
+      //         pInfo.relays = [...relays];
+      //       }
 
-            const nprofile = nip19.nprofileEncode(pInfo);
+      //       const nprofile = nip19.nprofileEncode(pInfo);
 
-            const delRange = {
-              from: range.from,
-              to: range.from + searchQuery().length,
-            };
+      //       const delRange = {
+      //         from: range.from,
+      //         to: range.from + searchQuery().length,
+      //       };
 
-            setSearchQuery(() => '');
+      //       setSearchQuery(() => '');
 
-            editor
-              .chain()
-              .focus()
-              .deleteRange({ ...delRange })
-              .insertNProfileAt(range, { nprofile, user, relays})
-              .insertContent({ type: 'text', text: ' ' })
-              .run()
-          },
-          items: async ({ editor, query}) => {
-            users = query.length < 2 ?
-              await fetchRecomendedUsersAsync() :
-              await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
+      //       editor
+      //         .chain()
+      //         .focus()
+      //         .deleteRange({ ...delRange })
+      //         .insertNProfileAt(range, { nprofile, user, relays})
+      //         .insertContent({ type: 'text', text: ' ' })
+      //         .run()
+      //     },
+      //     items: async ({ editor, query}) => {
+      //       users = query.length < 2 ?
+      //         await fetchRecomendedUsersAsync() :
+      //         await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
 
-            userRelays = await getUserRelays();
-            setSuggestedUsers(() => [...users]);
+      //       userRelays = await getUserRelays();
+      //       setSuggestedUsers(() => [...users]);
 
-            return users;
-          },
-          render: () => {
-            let component: JSXElement | undefined;
-            let popup: Instance[] = [];
+      //       return users;
+      //     },
+      //     render: () => {
+      //       let component: JSXElement | undefined;
+      //       let popup: Instance[] = [];
 
-            return {
-              onStart: props => {
+      //       return {
+      //         onStart: props => {
 
-                component = <div>
-                  <For each={suggestedUsers}>
-                    {(user, index) => (
-                      <SearchOption
-                        id={`reads_suggested_user_${index()}`}
-                        title={userName(user)}
-                        description={nip05Verification(user)}
-                        icon={<Avatar user={user} size="xs" />}
-                        statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-                        statLabel={intl.formatMessage(tSearch.followers)}
-                        // @ts-ignore
-                        onClick={() => {
-                          setSelectedUser(() => user);
-                          props.command({ id: user.pubkey, label: user.name})
-                        }}
-                        highlighted={highlightedUser() === index()}
-                        hasBackground={true}
-                      />
-                    )}
-                  </For>
-                </div>
+      //           component = <div>
+      //             <For each={suggestedUsers}>
+      //               {(user, index) => (
+      //                 <SearchOption
+      //                   id={`reads_suggested_user_${index()}`}
+      //                   title={userName(user)}
+      //                   description={nip05Verification(user)}
+      //                   icon={<Avatar user={user} size="xs" />}
+      //                   statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
+      //                   statLabel={intl.formatMessage(tSearch.followers)}
+      //                   // @ts-ignore
+      //                   onClick={() => {
+      //                     setSelectedUser(() => user);
+      //                     props.command({ id: user.pubkey, label: user.name})
+      //                   }}
+      //                   highlighted={highlightedUser() === index()}
+      //                   hasBackground={true}
+      //                 />
+      //               )}
+      //             </For>
+      //           </div>
 
-                // @ts-ignore
-                popup = tippy('#tiptapEditor', {
-                  getReferenceClientRect: props.clientRect,
-                  content: component,
-                  showOnCreate: true,
-                  interactive: true,
-                  trigger: 'manual',
-                  placement: 'bottom-start',
-                })
-              },
-              onUpdate: (props) => {
-                setSearchQuery(() => props.query || '');
-              },
+      //           // @ts-ignore
+      //           popup = tippy('#tiptapEditor', {
+      //             getReferenceClientRect: props.clientRect,
+      //             content: component,
+      //             showOnCreate: true,
+      //             interactive: true,
+      //             trigger: 'manual',
+      //             placement: 'bottom-start',
+      //           })
+      //         },
+      //         onUpdate: (props) => {
+      //           setSearchQuery(() => props.query || '');
+      //         },
 
-              onKeyDown(props) {
-                if (props.event.key === 'Escape') {
-                  popup[0].hide();
+      //         onKeyDown(props) {
+      //           if (props.event.key === 'Escape') {
+      //             popup[0].hide();
 
-                  return true;
-                }
+      //             return true;
+      //           }
 
-                if (props.event.key === 'ArrowDown') {
-                  setHighlightedUser(i => {
-                    if (!search?.users || search.users.length === 0) {
-                      return 0;
-                    }
+      //           if (props.event.key === 'ArrowDown') {
+      //             setHighlightedUser(i => {
+      //               if (!search?.users || search.users.length === 0) {
+      //                 return 0;
+      //               }
 
-                    return i < search.users.length ? i + 1 : 0;
-                  });
+      //               return i < search.users.length ? i + 1 : 0;
+      //             });
 
-                  return true;
-                }
+      //             return true;
+      //           }
 
-                if (props.event.key === 'ArrowUp') {
-                  setHighlightedUser(i => {
-                    if (!search?.users || search.users.length === 0) {
-                      return 0;
-                    }
+      //           if (props.event.key === 'ArrowUp') {
+      //             setHighlightedUser(i => {
+      //               if (!search?.users || search.users.length === 0) {
+      //                 return 0;
+      //               }
 
-                    return i > 0 ? i - 1 : search.users.length;
-                  });
-                  return true;
-                }
+      //               return i > 0 ? i - 1 : search.users.length;
+      //             });
+      //             return true;
+      //           }
 
 
-                if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
-                  const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
+      //           if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
+      //             const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
 
-                  sel && sel.click();
+      //             sel && sel.click();
 
-                  return true;
-                }
+      //             return true;
+      //           }
 
-                // @ts-ignore
-                return component?.ref?.onKeyDown(props)
-              },
-              onExit: () => {
-                popup[0].destroy();
-              }
-            }
-          },
-        },
-      }),
+      //           // @ts-ignore
+      //           return component?.ref?.onKeyDown(props)
+      //         },
+      //         onExit: () => {
+      //           popup[0].destroy();
+      //         }
+      //       }
+      //     },
+      //   },
+      // }),
     ],
     content: '',
     onCreate({ editor }) {
