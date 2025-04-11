@@ -358,6 +358,10 @@ const ReadsMy: Component = () => {
                             article={article}
                             onRefresh={(draft: PrimalArticle) => {
                               profile?.actions.removeEvent(draft.id, 'articles');
+                              setArticleStats((a) => ({
+                                ...a,
+                                atricles: a.articles - 1,
+                              }));
                             }}
                           />
                         </div>
@@ -412,6 +416,10 @@ const ReadsMy: Component = () => {
                             isDraft={true}
                             onRefresh={(draft: PrimalArticle) => {
                               profile?.actions.removeEvent(draft.id, 'drafts');
+                              setArticleStats((a) => ({
+                                ...a,
+                                drafts: a.drafts - 1,
+                              }));
                             }}
                           />
                         </div>
