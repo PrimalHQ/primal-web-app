@@ -160,7 +160,10 @@ const ReadsEditor: Component = () => {
     return previewArticle;
   }
 
+  let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+
   const onScroll = () => {
+    const scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
     // const tb = document.getElementById('editor_toolbar') as HTMLDivElement | undefined;
     const md = document.getElementById('editor_metadata') as HTMLDivElement | undefined;
 
@@ -168,8 +171,13 @@ const ReadsEditor: Component = () => {
 
     const h = md ? md.getBoundingClientRect().height : 0;
 
+    const isScrollingDown = scrollTop > lastScrollTop;
+    lastScrollTop = scrollTop;
+
+    const treshold = isScrollingDown ? h + 5 : h;
+
     const isMetadataHidden = !accordionSection().includes('metadata');
-    const isToolbarAtTheTop = window.scrollY > h;
+    const isToolbarAtTheTop = window.scrollY > treshold;
 
     if (isMetadataHidden || isToolbarAtTheTop) {
       setFixedToolbar(true);

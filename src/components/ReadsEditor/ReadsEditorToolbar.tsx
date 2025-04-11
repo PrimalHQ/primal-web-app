@@ -440,7 +440,7 @@ const ReadsEditorToolbar: Component<{
             </Show>
           </button>
       </div>
-      <div class={styles.toolbar} id='editor_toolbar'>
+      <div class={`${styles.toolbar}  ${props.fixed ? styles.invisibleToolbar : ''}`} id='editor_toolbar'>
         <div>
           <ReadsEditorBlockSelector
             value={blockSelectorOptions[formatControls.headingLevel]}
