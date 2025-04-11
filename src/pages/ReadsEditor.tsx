@@ -27,6 +27,7 @@ import { useIntl } from '@cookbook/solid-intl';
 import { toast as tToast } from '../translations';
 import { subsTo } from '../sockets';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
+import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -635,19 +636,21 @@ const ReadsEditor: Component = () => {
         onPublish={postArticle}
       />
 
-      <ConfirmModal
+      <ReadsLeaveDialog
         open={showleavePage() !== undefined}
+        setOpen={(v: boolean) => v === false && setShowleavePage(undefined)}
         title="Unsaved changes"
         description="Do you wish to save changes as a draft?"
-        confirmLabel="Save"
-        abortLabel="Leave without saving"
-        onConfirm={async () => {
+        onSave={async () => {
           await saveDraft();
           showleavePage()?.retry(true);
           setShowleavePage(undefined);
         }}
-        onAbort={() => {
+        onLeave={() => {
           showleavePage()?.retry(true);
+          setShowleavePage(undefined);
+        }}
+        onReturn={() => {
           setShowleavePage(undefined);
         }}
       />
