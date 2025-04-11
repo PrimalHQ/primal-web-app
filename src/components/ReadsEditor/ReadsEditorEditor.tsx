@@ -57,6 +57,7 @@ import { ArticleEdit, emptyArticleEdit } from '../../pages/ReadsEditor';
 import UploaderBlossom, { UploadState } from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
 import ButtonGhost from '../Buttons/ButtonGhost';
+import { MarkdownPlugin } from '../../markdownPlugins/markdownTransorm';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -164,6 +165,12 @@ const ReadsEditorEditor: Component<{
     getUsersRelayInfo(uids, subId);
   }));
 
+  const [md, setMarkdown] = createSignal('');
+
+  createEffect(() => {
+    console.log('MAKDOWN: ', md());
+  })
+
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions: [
@@ -176,12 +183,12 @@ const ReadsEditorEditor: Component<{
       }),
       Image,
       CodeBlock,
-      Markdown.configure({
-        html: true,
-        breaks: false,
-        transformPastedText: true,
-        transformCopiedText: true,
-      }),
+      // Markdown.configure({
+      //   html: true,
+      //   breaks: false,
+      //   transformPastedText: true,
+      //   transformCopiedText: true,
+      // }),
       Underline,
       NProfileExtension,
       NEventExtension,
@@ -193,6 +200,12 @@ const ReadsEditorEditor: Component<{
       TableRow,
       TableHeader,
       TableCell,
+      MarkdownPlugin.configure({
+        exportOnUpdate: true,
+        onMarkdownUpdate: (md) => {
+          setMarkdown(md);
+        }
+      }),
       // BubbleMenu.configure({
       //   pluginKey: 'bubbleMenuOne',
       //   element: document.getElementById('bubble_menu_one'),
@@ -715,8 +728,23 @@ const ReadsEditorEditor: Component<{
           textArea={editorPlainText}
           onFileUpload={onUploadContent}
           wysiwygMode={!editorMarkdown()}
-          toggleEditorMode={toggleEditorMode}
           fixed={props.fixedToolbar}
+          toggleEditorMode={() => {
+            setEditorMarkdown(v => !v);
+            const editor = editorTipTap();
+            if (!editor) return;
+
+            console.log(editor.getJSON())
+
+            if (editorMarkdown()) {
+              props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+            }
+            else {
+              editor.commands.setContent('');
+              const content = editorPlainText?.value || '';
+              setEditorContent(editor, content);
+            }
+          }}
         />
 
         <div

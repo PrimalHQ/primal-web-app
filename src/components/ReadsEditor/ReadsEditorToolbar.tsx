@@ -208,6 +208,10 @@ const ReadsEditorToolbar: Component<{
     const el = document.querySelector('.tiptap.ProseMirror');
     el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
 
+    editor.chain().insertContent('<p>a</p>').run();
+    editor.chain().insertContent('<p>b</p>').run();
+
+    // editor.chain().selectParentNode().createParagraphNear().run();
   }
 
 
