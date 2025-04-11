@@ -580,9 +580,22 @@ const ReadsEditorEditor: Component<{
                     props.setArticle('tags', () => [...filtered]);
                   }
 
+                  if (['Tab'].includes(e.code)) {
+                    console.log(('TAB Entered'))
+                    if (value.length > 0) {
+                      const tags = value.split(',').map((x: string) => x.trim());
+                      props.setArticle('tags', (ts) => [...ts, ...tags]);
+
+                      // @ts-ignore
+                      e.target.value = ''
+                    }
+                    return;
+                  }
+
                   if (!['Enter', 'Comma'].includes(e.code)) {
                     return;
                   }
+
                   e.preventDefault();
 
                   if (value.length < 1 || props.article.tags.includes(value)) return;
@@ -590,7 +603,7 @@ const ReadsEditorEditor: Component<{
                   const tags = value.split(',').map((x: string) => x.trim());
                   props.setArticle('tags', (ts) => [...ts, ...tags]);
                   // @ts-ignore
-                  e.target.value = ''
+                  e.target.value = '';
                 }}
               >
                 <TextField.Input

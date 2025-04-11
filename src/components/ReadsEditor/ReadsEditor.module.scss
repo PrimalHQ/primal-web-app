@@ -688,6 +688,7 @@
       border-radius: 16px;
       width: 100%;
       padding: 2px;
+      padding-inline: 3px;
       justify-content: flex-start;
       align-items: center;
 
@@ -718,8 +719,10 @@
         border: none;
         border-radius: 99px;
         padding: 6px;
+        padding-block: 0px;
         min-width: 100%;
         height: fit-content;
+        min-height: 24px;
         margin: 0;
 
         &:focus {
