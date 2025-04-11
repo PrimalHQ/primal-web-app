@@ -427,7 +427,7 @@ export const actions = {
     },
     editArticle: {
       id: 'actions.noteContext.editArticle',
-      defaultMessage: 'Edit',
+      defaultMessage: 'Edit Article',
       description: 'Label for edit article from context menu',
     },
     reportAuthor: {
