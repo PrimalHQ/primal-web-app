@@ -32,6 +32,7 @@ const ReadsEditorToolbar: Component<{
   onFileUpload: (file: File) => void,
   wysiwygMode: boolean,
   toggleEditorMode: () => void,
+  fixed?: boolean,
 }> = (props) => {
 
   let contentFileUpload: HTMLInputElement | undefined;
@@ -290,10 +291,157 @@ const ReadsEditorToolbar: Component<{
 
   return (
     <>
+      <div class={`${styles.toolbar} fixed_editor_toolbar ${props.fixed ? '' : styles.invisibleToolbar}`} id='editor_toolbar_fixed'>
+        <div>
+          <ReadsEditorBlockSelector
+            value={blockSelectorOptions[formatControls.headingLevel]}
+            options={blockSelectorOptions}
+            onChange={heading}
+            short={true}
+          />
 
+          <div class={styles.separator}></div>
+
+          <button
+            id="boldBtn"
+            class={`${styles.mdToolButton} ${formatControls.isBoldActive ? styles.selected : ''}`}
+            onClick={bold}
+            title="bold"
+          >
+            <div class={styles.boldIcon}></div>
+          </button>
+
+          <button
+            id="italicBtn"
+            class={`${styles.mdToolButton} ${formatControls.isItalicActive ? styles.selected : ''}`}
+            onClick={italic}
+            title="italic"
+          >
+            <div class={styles.italicIcon}></div>
+          </button>
+
+          <button
+            id="ulineBtn"
+            class={`${styles.mdToolButton} ${formatControls.isUlineActive ? styles.selected : ''}`}
+            onClick={uline}
+            title="underline"
+          >
+            <div class={styles.ulineIcon}></div>
+          </button>
+
+          <button
+            id="strikeBtn"
+            class={`${styles.mdToolButton} ${formatControls.isStrikeActive ? styles.selected : ''}`}
+            onClick={strike}
+            title="strike"
+          >
+            <div class={styles.strikeIcon}></div>
+          </button>
+
+          <div class={styles.separator}></div>
+
+          <button
+            id="bulletListBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={bulletList}
+            title="bullet list"
+          >
+            <div class={styles.bulletListIcon}></div>
+          </button>
+
+          <button
+            id="orderedListBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={orderedList}
+            title="ordered list"
+          >
+            <div class={styles.orderedListIcon}></div>
+          </button>
+
+          <div class={styles.separator}></div>
+
+          <ReadsEditorTableSelector
+            onSelect={table}
+          />
+
+          <button
+            id="linkBtn"
+            class={`${styles.mdToolButton} ${formatControls.isLinkActive ? styles.selected : ''}`}
+            onClick={() => {
+              const editor = props.editor;
+              if (!editor) return;
+
+              let linak = editor.getAttributes('link').href;
+
+              if (linak) {
+                editor.chain().unsetLink().run();
+                return;
+              }
+
+              updateFormatControls('enterLink', () => true);
+            }}
+            title="link"
+          >
+            <div class={styles.linkIcon}></div>
+          </button>
+
+          <button
+            id="mentionBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterMention', () => true);
+            }}
+            title="mention"
+          >
+            <div class={styles.atIcon}></div>
+          </button>
+
+          <button
+            id="attachBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterImage', () => true);
+            }}
+            title="image"
+          >
+            <div class={styles.attachIcon}></div>
+          </button>
+
+          {/* <div
+            id="attachBtn"
+            class={styles.mdToolButton}
+            title="image"
+          >
+            <input
+              id="upload-content"
+              type="file"
+              onChange={onUploadContentImage}
+              ref={contentFileUpload}
+              hidden={true}
+              accept="image/*,video/*,audio/*"
+            />
+            <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
+            </label>
+          </div> */}
+          <div class={styles.separator}></div>
+        </div>
+
+          <button
+            id="editorMode"
+            class={`${styles.mdToolButton} ${!props.wysiwygMode ? styles.selected : ''}`}
+            onClick={props.toggleEditorMode}
+            title={!props.wysiwygMode ? 'switch to wysiwyg mode' : 'switch to plain text mode'}
+          >
+            <Show
+              when={props.wysiwygMode}
+              fallback={<div class={styles.modeIcon}></div>}
+            >
+              <div class={`${styles.modeIcon} ${styles.active}`}></div>
+            </Show>
+          </button>
+      </div>
       <div class={styles.toolbar} id='editor_toolbar'>
         <div>
-
           <ReadsEditorBlockSelector
             value={blockSelectorOptions[formatControls.headingLevel]}
             options={blockSelectorOptions}

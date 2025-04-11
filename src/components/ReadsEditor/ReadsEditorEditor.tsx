@@ -79,6 +79,7 @@ const ReadsEditorEditor: Component<{
   setMarkdownContent: Setter<string>,
   article: ArticleEdit,
   setArticle: SetStoreFunction<ArticleEdit>,
+  fixedToolbar: boolean,
 }> = (props) => {
   const account = useAccountContext();
   const search = useSearchContext();
@@ -363,6 +364,21 @@ const ReadsEditorEditor: Component<{
       focus().run();
   }
 
+  const toggleEditorMode = () => {
+    setEditorMarkdown(v => !v);
+    const editor = editorTipTap();
+    if (!editor) return;
+
+    if (editorMarkdown()) {
+      props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+    }
+    else {
+      editor.commands.setContent('');
+      const content = editorPlainText?.value || '';
+      setEditorContent(editor, content);
+    }
+  }
+
   // ----------------------------------------
 
   const resetUpload = (uploadId?: string) => {
@@ -581,7 +597,6 @@ const ReadsEditorEditor: Component<{
                   }
 
                   if (['Tab'].includes(e.code)) {
-                    console.log(('TAB Entered'))
                     if (value.length > 0) {
                       const tags = value.split(',').map((x: string) => x.trim());
                       props.setArticle('tags', (ts) => [...ts, ...tags]);
@@ -607,7 +622,20 @@ const ReadsEditorEditor: Component<{
                 }}
               >
                 <TextField.Input
-                  placeholder="Enter tags (separated by commas)"
+                  placeholder={props.article.tags.length === 0 ? 'Enter tags (separated by commas)' : ''}
+
+                  onBlur={(e: FocusEvent) => {
+                    // @ts-ignore
+                    const value = e.target?.value || '';
+
+                    if (value.length > 0) {
+                      const tags = value.split(',').map((x: string) => x.trim());
+                      props.setArticle('tags', (ts) => [...ts, ...tags]);
+
+                      // @ts-ignore
+                      e.target.value = ''
+                    }
+                  }}
                 />
               </TextField>
             </div>
@@ -621,20 +649,8 @@ const ReadsEditorEditor: Component<{
           textArea={editorPlainText}
           onFileUpload={onUploadContent}
           wysiwygMode={!editorMarkdown()}
-          toggleEditorMode={() => {
-            setEditorMarkdown(v => !v);
-            const editor = editorTipTap();
-            if (!editor) return;
-
-            if (editorMarkdown()) {
-              props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
-            }
-            else {
-              editor.commands.setContent('');
-              const content = editorPlainText?.value || '';
-              setEditorContent(editor, content);
-            }
-          }}
+          toggleEditorMode={toggleEditorMode}
+          fixed={props.fixedToolbar}
         />
 
         <div

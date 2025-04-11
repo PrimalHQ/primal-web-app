@@ -80,6 +80,8 @@ const ReadsEditor: Component = () => {
 
   const [isPublishing, setIsPublishing] = createSignal(false);
 
+  const [fixedToolbar, setFixedToolbar] = createSignal(false);
+
   const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
 
   const genereatePreviewArticle = (): PrimalArticle | undefined => {
@@ -159,10 +161,10 @@ const ReadsEditor: Component = () => {
   }
 
   const onScroll = () => {
-    const tb = document.getElementById('editor_toolbar') as HTMLDivElement | undefined;
+    // const tb = document.getElementById('editor_toolbar') as HTMLDivElement | undefined;
     const md = document.getElementById('editor_metadata') as HTMLDivElement | undefined;
 
-    if (!tb) return;
+    // if (!tb) return;
 
     const h = md ? md.getBoundingClientRect().height : 0;
 
@@ -170,10 +172,12 @@ const ReadsEditor: Component = () => {
     const isToolbarAtTheTop = window.scrollY > h;
 
     if (isMetadataHidden || isToolbarAtTheTop) {
-      tb.classList.add('fixed_editor_toolbar');
+      setFixedToolbar(true);
+      // tb.classList.add('fixed_editor_toolbar');
     }
     else {
-      tb.classList.remove('fixed_editor_toolbar');
+      setFixedToolbar(false);
+      // tb.classList.remove('fixed_editor_toolbar');
     }
   }
 
@@ -574,6 +578,7 @@ const ReadsEditor: Component = () => {
             setMarkdownContent={setMarkdownContent}
             article={article}
             setArticle={setArticle}
+            fixedToolbar={fixedToolbar()}
           />
         </Match>
 
