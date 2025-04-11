@@ -88,15 +88,15 @@ const ReadsLeaveDialog: Component<{
           <ButtonSecondary
             onClick={() => props.onLeave && props.onLeave()}
             light={true}
-            shrink={true}
+            shrink={false}
           >
-            Don't save
+            Discard changes
           </ButtonSecondary>
 
           <ButtonPrimary
             onClick={() => props.onSave && props.onSave()}
           >
-            Save
+            Save Draft
           </ButtonPrimary>
         </div>
       </div>

@@ -580,7 +580,10 @@ const ReadsEditorEditor: Component<{
                     props.setArticle('tags', () => [...filtered]);
                   }
 
-                  if (e.code !== 'Enter') return;
+                  if (!['Enter', 'Comma'].includes(e.code)) {
+                    return;
+                  }
+                  e.preventDefault();
 
                   if (value.length < 1 || props.article.tags.includes(value)) return;
 
@@ -591,7 +594,7 @@ const ReadsEditorEditor: Component<{
                 }}
               >
                 <TextField.Input
-                  placeholder="Add tags..."
+                  placeholder="Enter tags (separated by commas)"
                 />
               </TextField>
             </div>
