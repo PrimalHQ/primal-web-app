@@ -4,7 +4,7 @@ import { Component, createEffect, createMemo, createSignal, For, Show } from 'so
 import { NotificationType } from '../../constants';
 import { trimVerification } from '../../lib/profile';
 import { truncateNpub, userName } from '../../stores/profile';
-import { PrimalNote, PrimalNotifUser } from '../../types/primal';
+import { PrimalArticle, PrimalNote, PrimalNotification, PrimalNotifUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './NotificationItem.module.scss';
@@ -29,12 +29,20 @@ import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post
 import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
+
+import postHighlighted from '../../assets/icons/notifications/post_highlighted.svg';
+import postBookmarked from '../../assets/icons/notifications/post_bookmarked.svg';
+import postReacted from '../../assets/icons/notifications/post_reacted.svg';
+
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 import { notificationsNew as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import Note from '../Note/Note';
 import { useAppContext } from '../../contexts/AppContext';
+import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
+import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
+import { likes } from './NotificationItemOld';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -58,6 +66,9 @@ const typeIcons: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]:mentionedPostReposted,
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: mentionedPostReplied,
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlighted,
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
+  [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
 }
 
 type NotificationItemProps = {
@@ -65,8 +76,11 @@ type NotificationItemProps = {
   type: NotificationType,
   users?: PrimalNotifUser[],
   note?: PrimalNote,
+  read?: PrimalArticle,
+  highlight?: any,
   iconInfo?: string,
   iconTooltip?: string,
+  notification?: PrimalNotification,
 };
 
 const uniqueifyUsers = (users: PrimalNotifUser[]) => {
@@ -84,6 +98,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   const app = useAppContext();
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
+  const [reactionIcon, setReactionIcon] = createSignal<string>('');
 
   const sortedUsers = createMemo(() => {
     if (!props.users || props.users.length === 0) {
@@ -142,14 +157,46 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   }
 
   createEffect(() => {
-    setTypeIcon(typeIcons[props.type])
+    const t = props.type;
+    let icon = typeIcons[t];
+
+    if (t !== NotificationType.YOUR_POST_WAS_LIKED) {
+      setTypeIcon(icon);
+      return;
+    }
+
+    console.log('notif: ', props.notification?.reaction)
+
+    const r = props.notification?.reaction || '+';
+
+    if (!r) {
+      setReactionIcon(likes[0])
+      return;
+    }
+
+    const e = likes.find(l => l === r);
+
+    if (e) {
+      setReactionIcon(e !== '+' ? e : likes[0]);
+      return;
+    }
+
+    setReactionIcon(r);
+
   });
 
   return (
     <div id={props.id} class={styles.notifItem}>
       <div class={styles.newBubble}></div>
       <div class={styles.notifType}>
-        <img src={typeIcon()} alt="notification icon" />
+        <Show
+          when={props.type === NotificationType.YOUR_POST_WAS_LIKED}
+          fallback={
+            <img src={typeIcon()} alt="notification icon" />
+          }
+        >
+          <div>{reactionIcon()}</div>
+        </Show>
         <div class={styles.iconInfo} title={props.iconTooltip}>
           {props.iconInfo}
         </div>
@@ -181,6 +228,26 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           </div>
           <div class={styles.restUsers}>{typeDescription()}</div>
         </div>
+
+        <Show
+          when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(props.type)}
+        >
+          <div class={styles.reference}>
+            <Show when={props.read && props.highlight}>
+              <ArticleHighlight
+                highlight={props.highlight}
+              />
+              <ArticleCompactPreview
+                article={props.read}
+                hideFooter={true}
+                hideContext={true}
+                bordered={true}
+                noLinks={true}
+              />
+            </Show>
+          </div>
+        </Show>
+
         <Show
           when={![NotificationType.NEW_USER_FOLLOWED_YOU, NotificationType.USER_UNFOLLOWED_YOU].includes(props.type)}
         >

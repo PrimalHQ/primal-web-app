@@ -30,7 +30,6 @@ import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
 
-
 import postHighlighted from '../../assets/icons/notifications/post_highlighted.svg';
 import postBookmarked from '../../assets/icons/notifications/post_bookmarked.svg';
 import postReacted from '../../assets/icons/notifications/post_reacted.svg';
@@ -83,12 +82,38 @@ type NotificationItemProps = {
   notification: PrimalNotification,
 };
 
+export const likes = [
+  "❤️",
+  "🧡",
+  "💛",
+  "💚",
+  "💙",
+  "💜",
+  "🤎",
+  "🖤",
+  "🤍",
+  "💖",
+  "💗",
+  "💓",
+  "💞",
+  "💕",
+  "💝",
+  "💟",
+  "❣️",
+  "💌",
+  "💘",
+  "💑",
+  "🤙",
+  "+",
+];
+
 const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
   const app = useAppContext();
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
+  const [reactionIcon, setReactionIcon] = createSignal<string>('');
 
   const type = () => props.notification.type
 
@@ -126,7 +151,30 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
   }
 
   createEffect(() => {
-    setTypeIcon(typeIcons[type()])
+    const t = type();
+    let icon = typeIcons[t];
+
+    if (t !== NotificationType.YOUR_POST_WAS_LIKED) {
+      setTypeIcon(icon);
+      return;
+    }
+
+    const r = props.notification.reaction;
+
+    if (!r) {
+      setReactionIcon(likes[0])
+      return;
+    }
+
+    const e = likes.find(l => l === r);
+
+    if (e) {
+      setReactionIcon(e !== '+' ? e : likes[0]);
+      return;
+    }
+
+    setReactionIcon(r);
+
   });
 
 
@@ -150,7 +198,14 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
   return (
     <div id={props.id} class={styles.notifItem}>
       <div class={styles.notifType}>
-        <img src={typeIcon()} alt="notification icon" />
+        <Show
+          when={props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}
+          fallback={
+            <img src={typeIcon()} alt="notification icon" />
+          }
+        >
+          <div>{reactionIcon()}</div>
+        </Show>
         <Show when={isZapType()}>
           <div class={styles.iconInfo} title={`${props.notification.satszapped} sats`}>
             {truncateNumber(props.notification.satszapped || 0)}
@@ -189,7 +244,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
                 hideContext={true}
                 bordered={true}
                 noLinks={true}
-              />`
+              />
             </Show>
           </div>
         </Show>

@@ -46,11 +46,11 @@ const ArticleHighlight: Component<{
 
   return (
     <em
-      data-highlight={props.highlight.id}
+      data-highlight={props.highlight?.id}
       class="article_highlight"
       onClick={onOver}
     >
-      {props.highlight.content}
+      {props.highlight?.content || 'N/A'}
     </em>
   );
 }

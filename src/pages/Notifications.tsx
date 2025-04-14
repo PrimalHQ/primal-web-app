@@ -66,8 +66,10 @@ const Notifications: Component = () => {
 
   type NotificationStore = {
     notes: PrimalNote[],
+    reads: PrimalArticle[],
+    highlights: any[],
     users: PrimalUser[],
-    page: FeedPage,
+    page: FeedPage & { highlights: any[]},
     reposts: Record<string, string> | undefined,
   }
 
@@ -84,6 +86,8 @@ const Notifications: Component = () => {
 
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
+    reads: [],
+    highlights: [],
     users: [],
     page: {
       messages: [],
@@ -92,6 +96,7 @@ const Notifications: Component = () => {
       mentions: {},
       noteActions: {},
       topZaps: {},
+      highlights: [],
     },
     reposts: {},
   })
@@ -172,7 +177,6 @@ const Notifications: Component = () => {
 
           const notif = JSON.parse(content.content) as PrimalNotification;
 
-          console.log('NOTIF TYPES NEW: ', notif.type)
           if (newNotifs[notif.type]) {
             newNotifs[notif.type].push(notif);
           }
@@ -215,7 +219,7 @@ const Notifications: Component = () => {
         if ([Kind.LongForm].includes(content.kind)) {
           const message = content as NostrNoteContent;
 
-          setOldNotifications('page', 'messages',
+          setRelatedNotes('page', 'messages',
             (msgs) => [ ...msgs, { ...message }]
           );
 
@@ -225,7 +229,8 @@ const Notifications: Component = () => {
         if ([Kind.Highlight].includes(content.kind)) {
           const message = content as NostrNoteContent;
 
-          setOldNotifications('page', 'highlights',
+          console.log('NOTIF HIGHLIGHT: ', message)
+          setRelatedNotes('page', 'highlights',
             (msgs) => [ ...msgs, { ...message }]
           );
 
@@ -264,7 +269,15 @@ const Notifications: Component = () => {
       },
       onEose: () => {
         setSortedNotifications(() => newNotifs);
+
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
+
+        // Convert related highlights
+        setRelatedNotes('highlights', (h) => [...h, ...relatedNotes.page.highlights])
+
+        // Convert related articles
+        setRelatedNotes('reads', () => [...convertToArticles(relatedNotes.page)])
+
         setAllSet(true);
         setNotifSince(timeNow());
         unsub();
@@ -542,13 +555,14 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    return <For each={keys}>
-      {key => {
+    return <For each={notifs}>
+      {notif => {
         return (
         <NotificationItem
           type={type}
-          users={getUsers(grouped[key], type)}
-          note={relatedNotes.notes.find(n => n.post.id === key)}
+          notification={notif}
+          users={getUsers(grouped[notif.your_post || ''], type)}
+          note={relatedNotes.notes.find(n => n.post.id === notif.your_post)}
         />
       )}}
     </For>
@@ -1069,6 +1083,92 @@ const Notifications: Component = () => {
     </For>
   };
 
+
+  const articleWasHighlighted = () => {
+    const type = NotificationType.YOUR_POST_WAS_HIGHLIGHTED;
+    const notifs = sortedNotifications[type] || [];
+
+    const reads = relatedNotes.reads;
+    const highlights = relatedNotes.highlights;
+
+    if (reads.length === 0 || highlights.length === 0) {
+      return;
+    }
+
+    const knownUsers = Object.keys(users);
+
+    const rUsers: Record<string, PrimalNotifUser[]> = reads.reduce((acc, read) => {
+      const pk = read.user.pubkey;
+
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk], pk) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [read.id]: usrs};
+
+    }, {});
+
+    return <For each={notifs}>
+      {notif => {
+        return (
+          <NotificationItem
+            type={type}
+            users={rUsers[notif.your_post || '']}
+            read={reads.find(n => n.id === notif.your_post)}
+            highlight={highlights.find(n => n.id === notif.highlight)}
+          />
+        )}
+      }
+    </For>
+  };
+
+
+  const postWasBookmarked = () => {
+    const type = NotificationType.YOUR_POST_WAS_BOOKMARKED;
+    const notifs = sortedNotifications[type] || [];
+
+    const grouped = groupBy(notifs, 'your_post');
+
+    const keys = Object.keys(grouped);
+
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+
+    if (notes.length === 0) {
+      return;
+    }
+
+    const knownUsers = Object.keys(users);
+
+    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
+      const pk: string = note.user.pubkey;
+
+      const rUser: PrimalUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk], pk) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [note.post.id]: usrs};
+
+    }, {});
+
+
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
+          />
+        )}
+      }
+    </For>
+  };
+
+
   const [lastNotification, setLastNotification] = createSignal<PrimalNotification>();
 
   const fetchMoreNotifications = () => {
@@ -1212,6 +1312,10 @@ const Notifications: Component = () => {
 
             {youWereMentioned()}
             {yourPostWasMentioned()}
+
+            {articleWasHighlighted()}
+            {postWasBookmarked()}
+
 
             {postYouWereMentionedInWasZapped()}
             {postYouWereMentionedInWasRepliedTo()}

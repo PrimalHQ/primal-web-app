@@ -1034,6 +1034,8 @@ export type PrimalNotification = {
   pubkey: string,
   created_at: number,
   type: number,
+  highlight?: string,
+  reaction?: string,
   your_post?: string,
   follower?: string,
   you_were_mentioned_in?: string,
