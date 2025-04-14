@@ -4,7 +4,7 @@ import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { NotificationType, notificationTypeNoteProps, notificationTypeUserProps } from '../../constants';
 import { trimVerification } from '../../lib/profile';
 import { userName } from '../../stores/profile';
-import { PrimalNote, PrimalNotification, PrimalUser } from '../../types/primal';
+import { PrimalArticle, PrimalNote, PrimalNotification, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './NotificationItem.module.scss';
@@ -29,12 +29,21 @@ import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post
 import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
+
+
+import postHighlighted from '../../assets/icons/notifications/post_highlighted.svg';
+import postBookmarked from '../../assets/icons/notifications/post_bookmarked.svg';
+import postReacted from '../../assets/icons/notifications/post_reacted.svg';
+
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import { truncateNumber } from '../../lib/notifications';
 import { notificationsOld as t } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import Note from '../Note/Note';
 import { useAppContext } from '../../contexts/AppContext';
+import ArticlePreview from '../ArticlePreview/ArticlePreview';
+import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
+import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -58,11 +67,17 @@ const typeIcons: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]:mentionedPostReposted,
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: mentionedPostReplied,
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlighted,
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
+  [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
+
 }
 
 type NotificationItemProps = {
   id?: string,
   notes: PrimalNote[],
+  reads: PrimalArticle[],
+  highlights: any[],
   users: Record<string, PrimalUser>,
   userStats: Record<string, { followers_count: number }>,
   notification: PrimalNotification,
@@ -82,6 +97,20 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     // @ts-ignore
     const id = props.notification[prop];
     return props.notes.find(n => n.post.id === id)
+  };
+
+  const article = () => {
+    const prop = notificationTypeNoteProps[type()];
+    // @ts-ignore
+    const id = props.notification[prop];
+    return props.reads.find(n => n.id === id)
+  };
+
+  const highlight = () => {
+    const prop = notificationTypeNoteProps[type()];
+    // @ts-ignore
+    const id = props.notification.highlight;
+    return props.highlights.find(n => n.id === id)
   };
 
   const user = () => {
@@ -146,6 +175,24 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
           </div>
           <div class={styles.restUsers}>{typeDescription()}</div>
         </div>
+        <Show
+          when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(type())}
+        >
+          <div class={styles.reference}>
+            <Show when={article()}>
+              <ArticleHighlight
+                highlight={highlight()}
+              />
+              <ArticleCompactPreview
+                article={article()}
+                hideFooter={true}
+                hideContext={true}
+                bordered={true}
+                noLinks={true}
+              />`
+            </Show>
+          </div>
+        </Show>
         <Show
           when={![NotificationType.NEW_USER_FOLLOWED_YOU, NotificationType.USER_UNFOLLOWED_YOU].includes(type())}
         >

@@ -17,9 +17,9 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
 import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subsTo } from '../sockets';
-import { convertToNotes } from '../stores/note';
+import { convertToArticles, convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalArticle, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
 import { Tabs } from "@kobalte/core/tabs";
 
@@ -73,9 +73,11 @@ const Notifications: Component = () => {
 
   type OldNotificationStore = {
     notes: PrimalNote[],
+    reads: PrimalArticle[],
+    highlights: any[],
     users: Record<string, PrimalUser>,
     userStats: Record<string, { followers_count: number }>,
-    page: FeedPage & { notifications: PrimalNotification[]},
+    page: FeedPage & { notifications: PrimalNotification[], highlights: any[]},
     reposts: Record<string, string> | undefined,
     notifications: PrimalNotification[],
   }
@@ -96,6 +98,8 @@ const Notifications: Component = () => {
 
   const [oldNotifications, setOldNotifications] = createStore<OldNotificationStore>({
     notes: [],
+    reads: [],
+    highlights: [],
     users: {},
     userStats: {},
     page: {
@@ -106,6 +110,7 @@ const Notifications: Component = () => {
       mentions: {},
       noteActions: {},
       topZaps: {},
+      highlights: [],
     },
     reposts: {},
     notifications: [],
@@ -167,6 +172,7 @@ const Notifications: Component = () => {
 
           const notif = JSON.parse(content.content) as PrimalNotification;
 
+          console.log('NOTIF TYPES NEW: ', notif.type)
           if (newNotifs[notif.type]) {
             newNotifs[notif.type].push(notif);
           }
@@ -200,6 +206,26 @@ const Notifications: Component = () => {
           const message = content as NostrNoteContent;
 
           setRelatedNotes('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.LongForm].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.Highlight].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'highlights',
             (msgs) => [ ...msgs, { ...message }]
           );
 
@@ -337,6 +363,26 @@ const Notifications: Component = () => {
           return;
         }
 
+        if ([Kind.LongForm].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.Highlight].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'highlights',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
         if (content.kind === Kind.NoteStats) {
           const statistic = content as NostrStatsContent;
           const stat = JSON.parse(statistic.content);
@@ -378,6 +424,12 @@ const Notifications: Component = () => {
 
         // Convert related notes
         setOldNotifications('notes', (notes) => [...notes, ...convertToNotes(oldNotifications.page)])
+
+        // Convert related highlights
+        setOldNotifications('highlights', (high) => [...high, ...oldNotifications.page.highlights])
+
+        // Convert related articles
+        setOldNotifications('reads', (reads) => [...reads, ...convertToArticles(oldNotifications.page)])
 
         const pageUsers = oldNotifications.page.users;
 
@@ -1186,6 +1238,8 @@ const Notifications: Component = () => {
                       users={oldNotifications.users}
                       userStats={oldNotifications.userStats}
                       notes={oldNotifications.notes}
+                      reads={oldNotifications.reads}
+                      highlights={oldNotifications.highlights}
                     />
                   )}
                 </For>

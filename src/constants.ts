@@ -201,6 +201,10 @@ export enum NotificationType {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED = 202,//
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED = 203,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO = 204,
+
+  YOUR_POST_WAS_HIGHLIGHTED=301,
+  YOUR_POST_WAS_BOOKMARKED=302,
+  YOUR_POST_HAD_REACTION=303,
 };
 
 export const typeIcons: Record<string, string> = {
@@ -224,6 +228,10 @@ export const typeIcons: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'mentioned_post_liked.svg',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'mentioned_post_reposted.svg',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'mentioned_post_replied.svg',
+
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'post_highlighted.svg',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'post_bookmarked.svg',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'post_reacted.svg',
 
 }
 
@@ -249,6 +257,9 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'who_reposted_it',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'who_replied_to_it',
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'who_highlighted_it',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'who_bookmarked_it',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'who_reacted',
 }
 
 export const notificationTypeNoteProps: Record<string, string> = {
@@ -272,6 +283,10 @@ export const notificationTypeNoteProps: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'reply',
+
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'your_post',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'your_post',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'your_post',
 
 }
 

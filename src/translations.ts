@@ -898,6 +898,10 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'liked a note your note was mentioned in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a note your note was mentioned in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a note your note was mentioned in',
+
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'highlighted your article',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'bookmarked your note',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'reacted to your note',
 }
 
 export const notificationsNew: Record<number, MessageDescriptor> = Object.values(NotificationType).reduce((acc, type) => ({
@@ -1071,6 +1075,11 @@ export const notifications = {
     id: 'pages.notifications.reposts',
     defaultMessage: 'Reposts',
     description: 'Title of the Reposts notifications tab',
+  },
+  reactions: {
+    id: 'pages.notifications.reactions',
+    defaultMessage: 'Reactions',
+    description: 'Title of the Reactions notifications tab',
   },
 };
 
