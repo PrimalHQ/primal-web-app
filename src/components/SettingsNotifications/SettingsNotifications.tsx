@@ -36,6 +36,11 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
   const onChange = (setting: string) => {
     const currentValue = settings?.notificationSettings[setting];
     settings?.actions.updateNotificationSettings(setting, !currentValue);
+
+    if (setting === 'YOUR_POST_WAS_LIKED') {
+      settings?.actions.updateNotificationAdditionalSettings(`YOUR_POST_WAS_HIGHLIGHTED`, !currentValue);
+      settings?.actions.updateNotificationAdditionalSettings(`YOUR_POST_WAS_BOOKMARKED`, !currentValue);
+    }
   };
 
   const onChangeAdditional = (setting: string) => {
