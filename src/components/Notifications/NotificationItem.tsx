@@ -45,6 +45,7 @@ import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import { likes } from './NotificationItemOld';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { date } from '../../lib/dates';
+import { truncateNumber } from '../../lib/notifications';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -83,6 +84,7 @@ type NotificationItemProps = {
   iconInfo?: string,
   iconTooltip?: string,
   notification?: PrimalNotification,
+  sats?: number,
 };
 
 const uniqueifyUsers = (users: PrimalNotifUser[]) => {
@@ -152,10 +154,19 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   });
 
   const typeDescription = () => {
-    if (props.type === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
-      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION]);
+    const opts = {
+      number: numberOfUsers() - 1,
     }
-    return intl.formatMessage(t[props.type]);
+    if (props.type === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
+      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION], opts);
+    }
+
+    if (props.type === NotificationType.YOUR_POST_WAS_ZAPPED && props.sats) {
+      const zapMessage = intl.formatMessage(t[NotificationType.YOUR_POST_WAS_ZAPPED], opts);
+      return `${zapMessage} for a total of ${truncateNumber(props.sats)} zaps`;
+    }
+
+    return intl.formatMessage(t[props.type], opts);
   }
 
   const time = () => {

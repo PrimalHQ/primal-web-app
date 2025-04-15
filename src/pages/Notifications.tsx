@@ -1002,6 +1002,7 @@ const Notifications: Component = () => {
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
             notification={notifs[0]}
+            sats={sats}
           />
         )}
       }
