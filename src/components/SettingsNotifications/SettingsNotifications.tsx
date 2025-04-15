@@ -8,7 +8,7 @@ import postLiked from '../../assets/icons/notifications/post_liked.svg';
 import postReposted from '../../assets/icons/notifications/post_reposted.svg';
 import postReplied from '../../assets/icons/notifications/post_replied.svg';
 
-import mention from '../../assets/icons/notifications/mention.svg';
+import mention from '../../assets/icons/notifications/mention.png';
 import mentionedPost from '../../assets/icons/notifications/mentioned_post.svg';
 
 import mentionZapped from '../../assets/icons/notifications/mention_zapped.svg';
@@ -50,7 +50,6 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     'YOUR_POST_WAS_REPOSTED',
     'YOUR_POST_WAS_REPLIED_TO',
     'YOU_WERE_MENTIONED_IN_POST',
-    'YOUR_POST_WAS_MENTIONED_IN_POST',
   ];
 
   const yourMentionNotifications = [
@@ -69,17 +68,19 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
   const additionalNotifications = [
     'ignore_events_with_too_many_mentions',
+    'only_show_dm_notifications_from_users_i_follow',
+    'only_show_reactions_from_users_i_follow',
   ];
 
   const notificationLabels: Record<string, string> = {
-    NEW_USER_FOLLOWED_YOU: 'new user followed you',
+    NEW_USER_FOLLOWED_YOU: 'New Followers',
 
-    YOUR_POST_WAS_ZAPPED: 'your note was zapped',
-    YOUR_POST_WAS_LIKED: 'your note was liked',
-    YOUR_POST_WAS_REPOSTED: 'your note was reposted',
-    YOUR_POST_WAS_REPLIED_TO: 'your note was replied to',
+    YOUR_POST_WAS_ZAPPED: 'Zaps',
+    YOUR_POST_WAS_LIKED: 'Reactions',
+    YOUR_POST_WAS_REPOSTED: 'Reposts',
+    YOUR_POST_WAS_REPLIED_TO: 'Replies',
 
-    YOU_WERE_MENTIONED_IN_POST: 'you were mentioned in a note',
+    YOU_WERE_MENTIONED_IN_POST: 'Mentions',
     YOUR_POST_WAS_MENTIONED_IN_POST: 'your note was mentioned in a note',
 
     POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: 'zapped',
@@ -93,6 +94,8 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
     POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: 'replied to',
 
     ignore_events_with_too_many_mentions: 'Ignore notes with more than 10 mentions',
+    only_show_dm_notifications_from_users_i_follow: 'Only show DM notifications from users I follow',
+    only_show_reactions_from_users_i_follow: 'Only show reactions from users I follow',
   }
 
   const icons: Record<string, string> = {
@@ -127,45 +130,6 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
       <ul>
         <For each={basicNotifications}>
-          {(notif) => (
-            <li>
-              <Checkbox
-                id={notif}
-                checked={settings?.notificationSettings[notif]}
-                onChange={() => onChange(notif)}
-                label={notificationLabels[notif]}
-                icon={icons[notif]}
-              />
-            </li>
-          )}
-        </For>
-      </ul>
-
-      <div class={styles.caption}>
-        {intl.formatMessage(t.notifications.yourMentions)}
-      </div>
-
-      <ul>
-        <For each={yourMentionNotifications}>
-          {(notif) => (
-            <li>
-              <Checkbox
-                id={notif}
-                checked={settings?.notificationSettings[notif]}
-                onChange={() => onChange(notif)}
-                label={notificationLabels[notif]}
-                icon={icons[notif]}
-              />
-            </li>
-          )}
-        </For>
-      </ul>
-
-      <div class={styles.caption}>
-        {intl.formatMessage(t.notifications.yourPostMentions)}
-      </div>
-      <ul>
-        <For each={yourPostMentionNotifications}>
           {(notif) => (
             <li>
               <Checkbox

@@ -1740,7 +1740,7 @@ export const settings = {
     },
     core: {
       id: 'settings.sections.notifications.core',
-      defaultMessage: 'Core notifications:',
+      defaultMessage: 'Show notifications for:',
       description: 'Title of the notification settings sub-section for core notifications',
     },
     yourMentions: {
@@ -1755,7 +1755,7 @@ export const settings = {
     },
     additionalNotifs: {
       id: 'settings.sections.notifications.additionalNotifs',
-      defaultMessage: 'Additional Settings:',
+      defaultMessage: 'Notification preferences:',
       description: 'Title of the notification settings sub-section for additional settings',
     },
   },
