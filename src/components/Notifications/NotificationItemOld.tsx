@@ -114,6 +114,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
   const [reactionIcon, setReactionIcon] = createSignal<string>('');
+  const [isLike, setIsLike] = createSignal(false);
 
   const type = () => props.notification.type
 
@@ -146,6 +147,9 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
   };
 
   const typeDescription = () => {
+    if (type() === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
+      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION]);
+    }
     return intl.formatMessage(t[type()]);
 
   }
@@ -162,7 +166,8 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     const r = props.notification.reaction;
 
     if (!r) {
-      setReactionIcon(likes[0])
+      setReactionIcon(likes[0]);
+      setIsLike(true);
       return;
     }
 
@@ -170,10 +175,12 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
     if (e) {
       setReactionIcon(e !== '+' ? e : likes[0]);
+      setIsLike(true);
       return;
     }
 
     setReactionIcon(r);
+    setIsLike(false);
 
   });
 

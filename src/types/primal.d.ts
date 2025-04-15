@@ -1031,6 +1031,7 @@ export type VanityProfiles = { names: Record<string, string> };
 export type PrimalNotifUser = PrimalUser & { followers_count: number };
 
 export type PrimalNotification = {
+  id: string,
   pubkey: string,
   created_at: number,
   type: number,
@@ -1046,6 +1047,9 @@ export type PrimalNotification = {
   who_zapped_it?: string,
   who_reposted_it?: string,
   who_replied_to_it?: string,
+  who_highlighted_it?: string,
+  who_bookmarked_it?: string,
+  who_reacted?: string,
   satszapped?: number,
 };
 

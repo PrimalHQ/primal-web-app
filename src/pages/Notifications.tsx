@@ -1097,8 +1097,10 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers: Record<string, PrimalNotifUser[]> = reads.reduce((acc, read) => {
-      const pk = read.user.pubkey;
+    const rUsers = notifs.reduce<Record<string, PrimalNotifUser[]>>((acc, notif) => {
+      const pk = notif.who_highlighted_it;
+
+      if (!pk) return acc;
 
       const rUser = knownUsers.includes(pk) ?
         convertToUser(users[pk], pk) :
@@ -1106,7 +1108,7 @@ const Notifications: Component = () => {
 
       const usrs = [{...rUser, ...userStats[pk]}];
 
-      return { ...acc, [read.id]: usrs};
+      return { ...acc, [notif.id]: usrs};
 
     }, {});
 
@@ -1115,7 +1117,7 @@ const Notifications: Component = () => {
         return (
           <NotificationItem
             type={type}
-            users={rUsers[notif.your_post || '']}
+            users={rUsers[notif.id || '']}
             read={reads.find(n => n.id === notif.your_post)}
             highlight={highlights.find(n => n.id === notif.highlight)}
           />
@@ -1141,8 +1143,10 @@ const Notifications: Component = () => {
 
     const knownUsers = Object.keys(users);
 
-    const rUsers: Record<string, PrimalNotifUser[]> = notes.reduce((acc, note) => {
-      const pk: string = note.user.pubkey;
+    const rUsers: Record<string, PrimalNotifUser[]> = notifs.reduce((acc, notif) => {
+      const pk: string = notif.who_bookmarked_it;
+
+      if (!pk) return acc;
 
       const rUser: PrimalUser = knownUsers.includes(pk) ?
         convertToUser(users[pk], pk) :
@@ -1150,7 +1154,7 @@ const Notifications: Component = () => {
 
       const usrs = [{...rUser, ...userStats[pk]}];
 
-      return { ...acc, [note.post.id]: usrs};
+      return { ...acc, [notif.your_post || 'none']: usrs};
 
     }, {});
 
@@ -1200,6 +1204,8 @@ const Notifications: Component = () => {
 
     setOldNotifications('notifications', (old) => [ ...sorted, ...old ]);
     setOldNotifications('notes', (old) => [ ...relatedNotes.notes, ...old ]);
+    setOldNotifications('reads', (old) => [ ...relatedNotes.reads, ...old ]);
+    setOldNotifications('highlights', (old) => [ ...relatedNotes.highlights, ...old ]);
     setOldNotifications('reposts', () => ({ ...relatedNotes.reposts }));
 
     const users = relatedNotes.users.reduce((acc, u) => ({ ...acc, [u.pubkey]: u }), {});
