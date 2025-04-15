@@ -881,13 +881,13 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: 'followed you',
   [NotificationType.USER_UNFOLLOWED_YOU]: 'unfollowed you',
 
-  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your note',
-  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your note',
-  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your note',
-  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your note',
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your',
 
-  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a note',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your note',
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your',
 
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'zapped a note you were mentioned in',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'liked a note you were mentioned in',
@@ -899,9 +899,9 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a note your note was mentioned in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a note your note was mentioned in',
 
-  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'highlighted your article',
-  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'bookmarked your note',
-  [NotificationType.YOUR_POST_HAD_REACTION]: 'reacted to your note',
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'highlighted your',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'bookmarked your',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'reacted to your',
 }
 
 export const notificationsNew: Record<number, MessageDescriptor> = Object.values(NotificationType).reduce((acc, type) => ({

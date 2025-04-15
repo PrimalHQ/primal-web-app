@@ -207,6 +207,17 @@ export enum NotificationType {
   YOUR_POST_HAD_REACTION=303,
 };
 
+export const mentionedNotifTypes = [
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED,
+];
+
+
 export const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: 'user_followed.svg',
   [NotificationType.USER_UNFOLLOWED_YOU]: 'user_unfollowed.svg',

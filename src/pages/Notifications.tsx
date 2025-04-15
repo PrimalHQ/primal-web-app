@@ -563,6 +563,7 @@ const Notifications: Component = () => {
           notification={notif}
           users={getUsers(grouped[notif.your_post || ''], type)}
           note={relatedNotes.notes.find(n => n.post.id === notif.your_post)}
+          read={relatedNotes.reads.find(n => n.id === notif.your_post)}
         />
       )}}
     </For>
@@ -968,8 +969,9 @@ const Notifications: Component = () => {
     const keys = Object.keys(grouped);
 
     const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+    const reads = relatedNotes.notes.filter(n => keys.includes(n.id));
 
-    if (notes.length === 0) {
+    if (notes.length === 0 && reads.length === 0) {
       return;
     }
 
@@ -999,6 +1001,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={reads.find(n => n.id === key)}
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
             notification={notifs[0]}

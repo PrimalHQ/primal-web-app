@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js';
-import { NotificationType } from '../../constants';
+import { Component, createEffect, createMemo, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { mentionedNotifTypes, NotificationType } from '../../constants';
 import { trimVerification } from '../../lib/profile';
 import { truncateNpub, userName } from '../../stores/profile';
 import { PrimalArticle, PrimalNote, PrimalNotification, PrimalNotifUser } from '../../types/primal';
@@ -153,20 +153,33 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   });
 
+
   const typeDescription = () => {
     const opts = {
       number: numberOfUsers() - 1,
     }
+    let label = intl.formatMessage(t[props.type], opts);
+
+    if ([
+      NotificationType.NEW_USER_FOLLOWED_YOU,
+      NotificationType.USER_UNFOLLOWED_YOU,
+      ...mentionedNotifTypes,
+    ]. includes(props.type)) {
+      return label;
+    }
+
+    const reference = props.note ? 'note' : 'article';
+
     if (props.type === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
-      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION], opts);
+      return `${intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION], opts)} ${reference}`;
     }
 
     if (props.type === NotificationType.YOUR_POST_WAS_ZAPPED && props.sats) {
       const zapMessage = intl.formatMessage(t[NotificationType.YOUR_POST_WAS_ZAPPED], opts);
-      return `${zapMessage} for a total of ${truncateNumber(props.sats)} zaps`;
+      return `${zapMessage} ${reference} for a total of ${truncateNumber(props.sats)} zaps`;
     }
 
-    return intl.formatMessage(t[props.type], opts);
+    return `${label} ${reference}`
   }
 
   const time = () => {
@@ -251,20 +264,63 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           <div class={styles.description}>
             <div class={styles.firstUser}>
               <span class={styles.firstUserName}>{firstUserName()}</span>
-              <VerificationCheck user={sortedUsers()[0]} />
+              <div class={styles.verification}>
+                <VerificationCheck user={sortedUsers()[0]} />
+              </div>
             </div>
             <div class={styles.restUsers}>{typeDescription()}</div>
           </div>
         </div>
 
-        <Show
-          when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(props.type)}
-        >
-          <div class={styles.reference}>
-            <Show when={props.read && props.highlight}>
-              <ArticleHighlight
-                highlight={props.highlight}
+
+        <Switch>
+          <Match
+            when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(props.type)}
+          >
+            <div class={styles.reference}>
+              <Show when={props.read && props.highlight}>
+                <ArticleHighlight
+                  highlight={props.highlight}
+                />
+                <ArticleCompactPreview
+                  article={props.read}
+                  hideFooter={true}
+                  hideContext={true}
+                  bordered={true}
+                  noLinks={true}
+                />
+              </Show>
+            </div>
+          </Match>
+
+          <Match
+            when={
+              ![
+                NotificationType.NEW_USER_FOLLOWED_YOU,
+                NotificationType.USER_UNFOLLOWED_YOU,
+              ].includes(props.type) &&
+              props.note
+            }
+          >
+            <div class={styles.reference}>
+              <Note
+                // @ts-ignore
+                note={props.note}
+                noteType="notification"
               />
+            </div>
+          </Match>
+
+          <Match
+            when={
+              ![
+                NotificationType.NEW_USER_FOLLOWED_YOU,
+                NotificationType.USER_UNFOLLOWED_YOU,
+              ].includes(props.type) &&
+              props.read
+            }
+          >
+            <div class={styles.reference}>
               <ArticleCompactPreview
                 article={props.read}
                 hideFooter={true}
@@ -272,23 +328,9 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
                 bordered={true}
                 noLinks={true}
               />
-            </Show>
-          </div>
-        </Show>
-
-        <Show
-          when={![NotificationType.NEW_USER_FOLLOWED_YOU, NotificationType.USER_UNFOLLOWED_YOU].includes(props.type)}
-        >
-          <div class={styles.reference}>
-            <Show when={props.note}>
-              <Note
-                // @ts-ignore
-                note={props.note}
-                noteType="notification"
-              />
-            </Show>
-          </div>
-        </Show>
+            </div>
+          </Match>
+        </Switch>
       </div>
     </div>
   );

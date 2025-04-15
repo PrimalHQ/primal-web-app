@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, Show } from 'solid-js';
-import { NotificationType, notificationTypeNoteProps, notificationTypeUserProps } from '../../constants';
+import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
+import { mentionedNotifTypes, NotificationType, notificationTypeNoteProps, notificationTypeUserProps } from '../../constants';
 import { trimVerification } from '../../lib/profile';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, PrimalNote, PrimalNotification, PrimalUser } from '../../types/primal';
@@ -127,6 +127,13 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     return props.notes.find(n => n.post.id === id)
   };
 
+  const read = () => {
+    const prop = notificationTypeNoteProps[type()];
+    // @ts-ignore
+    const id = props.notification[prop];
+    return props.reads.find(n => n.id === id)
+  };
+
   const article = () => {
     const prop = notificationTypeNoteProps[type()];
     // @ts-ignore
@@ -149,16 +156,28 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
   };
 
   const typeDescription = () => {
+    let label = intl.formatMessage(t[type()]);
+
+    if ([
+      NotificationType.NEW_USER_FOLLOWED_YOU,
+      NotificationType.USER_UNFOLLOWED_YOU,
+      ...mentionedNotifTypes,
+    ]. includes(type())) {
+      return label;
+    }
+
+    const reference = note() ? 'note' : 'article';
+
     if (type() === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
-      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION]);
+      return `${intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION])} ${reference}`;
     }
 
     if (type() === NotificationType.YOUR_POST_WAS_ZAPPED && props.notification.satszapped) {
       const zapMessage = intl.formatMessage(t[NotificationType.YOUR_POST_WAS_ZAPPED]);
-      return `${zapMessage} for a total of ${truncateNumber(props.notification.satszapped)} zaps`;
+      return `${zapMessage} ${reference} for a total of ${truncateNumber(props.notification.satszapped)} zaps`;
     }
 
-    return intl.formatMessage(t[type()]);
+    return `${label} ${reference}`
   }
 
   createEffect(() => {
@@ -219,7 +238,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
 
   return (
-    <div id={props.id} class={styles.notifItem}>
+    <div id={props.id} class={styles.notifItem} data-notif={props.notification.id}>
       <div class={styles.notifType}>
         <Show
           when={props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}
@@ -251,42 +270,71 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
           <div class={styles.description}>
             <div class={styles.firstUser}>
               <span class={styles.firstUserName}>{userName(user())}</span>
-              <VerificationCheck user={user()} />
+              <div class={styles.verification}>
+                <VerificationCheck user={user()} />
+              </div>
             </div>
             <div class={styles.restUsers}>{typeDescription()}</div>
           </div>
         </div>
-        <Show
-          when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(type())}
-        >
-          <div class={styles.reference}>
-            <Show when={article()}>
-              <ArticleHighlight
-                highlight={highlight()}
-              />
-              <ArticleCompactPreview
-                article={article()}
-                hideFooter={true}
-                hideContext={true}
-                bordered={true}
-                noLinks={true}
-              />
-            </Show>
-          </div>
-        </Show>
-        <Show
-          when={![NotificationType.NEW_USER_FOLLOWED_YOU, NotificationType.USER_UNFOLLOWED_YOU].includes(type())}
-        >
-          <div class={styles.reference}>
-            <Show when={note()}>
+        <Switch>
+          <Match
+            when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(type())}
+          >
+            <div class={styles.reference}>
+              <Show when={article()}>
+                <ArticleHighlight
+                  highlight={highlight()}
+                />
+                <ArticleCompactPreview
+                  article={article()}
+                  hideFooter={true}
+                  hideContext={true}
+                  bordered={true}
+                  noLinks={true}
+                />
+              </Show>
+            </div>
+          </Match>
+
+          <Match
+            when={
+              ![
+                NotificationType.NEW_USER_FOLLOWED_YOU,
+                NotificationType.USER_UNFOLLOWED_YOU,
+              ].includes(type()) &&
+              note()
+            }
+          >
+            <div class={styles.reference}>
               <Note
                 // @ts-ignore
                 note={note()}
                 noteType="notification"
               />
-            </Show>
-          </div>
-        </Show>
+            </div>
+          </Match>
+
+          <Match
+            when={
+              ![
+                NotificationType.NEW_USER_FOLLOWED_YOU,
+                NotificationType.USER_UNFOLLOWED_YOU,
+              ].includes(type()) &&
+              read()
+            }
+          >
+            <div class={styles.reference}>
+              <ArticleCompactPreview
+                article={read()}
+                hideFooter={true}
+                hideContext={true}
+                bordered={true}
+                noLinks={true}
+              />
+            </div>
+          </Match>
+        </Switch>
       </div>
     </div>
   );
