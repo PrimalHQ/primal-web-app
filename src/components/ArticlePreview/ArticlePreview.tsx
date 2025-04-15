@@ -37,6 +37,7 @@ export type ArticleProps = {
   bordered?: boolean,
   noLinks?: boolean,
   onClick?: (url: string) => void,
+  notif?: boolean,
 };
 
 export const renderArticlePreview = (props: ArticleProps) => (
@@ -349,8 +350,8 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
   return (
     <div
       ref={articlePreview}
-      class={`${styles.article} ${props.bordered ? styles.bordered : ''}`}
-      onClick={() => props.onClick(articleUrl())}
+      class={`${styles.article} ${props.bordered ? styles.bordered : ''} ${props.notif ? styles.notif : ''}`}
+      onClick={() => props.onClick && props.onClick(articleUrl())}
       style={props.height ? `height: ${props.height}px` : ''}
     >
       <Show when={!props.hideContext}>
@@ -436,7 +437,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
       </Show>
 
       <Show when={!props.hideFooter}>
-        <div class={styles.footer}>
+        <div class={`${props.notif ? styles.footerNotif : styles.footer}`}>
           <ArticleFooter
             note={props.article}
             state={reactionsState}

@@ -286,12 +286,13 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
                 <ArticleHighlight
                   highlight={highlight()}
                 />
-                <ArticleCompactPreview
+                <ArticlePreview
                   article={article()}
-                  hideFooter={true}
+                  hideFooter={false}
                   hideContext={true}
-                  bordered={true}
+                  bordered={false}
                   noLinks={true}
+                  notif={true}
                 />
               </Show>
             </div>
@@ -325,12 +326,13 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
             }
           >
             <div class={styles.reference}>
-              <ArticleCompactPreview
+              <ArticlePreview
                 article={read()}
-                hideFooter={true}
+                hideFooter={false}
                 hideContext={true}
-                bordered={true}
+                bordered={false}
                 noLinks={true}
+                notif={true}
               />
             </div>
           </Match>

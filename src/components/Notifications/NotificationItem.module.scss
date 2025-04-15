@@ -1,7 +1,7 @@
 .notifItem {
   position: relative;
   display: grid;
-  grid-template-columns: 44px 1fr;
+  grid-template-columns: 44px 1fr 12px;
 
   padding-top: 12px;
   padding-bottom: 17px;
@@ -100,7 +100,7 @@
 .newBubble {
   position: absolute;
   top: 8px;
-  right: 8px;
+  right: 20px;
 
   display: flex;
   justify-content: center;

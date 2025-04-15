@@ -46,6 +46,7 @@ import { likes } from './NotificationItemOld';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { date } from '../../lib/dates';
 import { truncateNumber } from '../../lib/notifications';
+import ArticlePreview from '../ArticlePreview/ArticlePreview';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -282,12 +283,13 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
                 <ArticleHighlight
                   highlight={props.highlight}
                 />
-                <ArticleCompactPreview
+                <ArticlePreview
                   article={props.read}
-                  hideFooter={true}
+                  hideFooter={false}
                   hideContext={true}
-                  bordered={true}
+                  bordered={false}
                   noLinks={true}
+                  notif={true}
                 />
               </Show>
             </div>
@@ -321,12 +323,13 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
             }
           >
             <div class={styles.reference}>
-              <ArticleCompactPreview
+              <ArticlePreview
                 article={props.read}
-                hideFooter={true}
+                hideFooter={false}
                 hideContext={true}
-                bordered={true}
+                bordered={false}
                 noLinks={true}
+                notif={true}
               />
             </div>
           </Match>

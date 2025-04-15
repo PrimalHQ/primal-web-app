@@ -585,6 +585,7 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             notification={notifs[0]}
           />
         )}
@@ -608,6 +609,7 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             notification={notifs[0]}
           />
         )}
@@ -634,6 +636,7 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
             notification={notifs[0]}
@@ -680,6 +683,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             notification={notifs[0]}
           />
         )}
@@ -725,6 +729,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             notification={notifs[0]}
           />
         )}

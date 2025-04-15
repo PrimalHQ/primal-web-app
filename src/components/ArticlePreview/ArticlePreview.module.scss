@@ -17,6 +17,12 @@
     padding: 12px 12px 0 12px;
   }
 
+  &.notif {
+    border-bottom: none;
+    /* border-radius: 8px;
+    background: var(--background-header-input); */
+  }
+
   &:focus {
     background: none;
   }
@@ -198,6 +204,15 @@
       }
     }
 
+  }
+
+  .footerNotif {
+    >div {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
   }
 
   .zaps {
