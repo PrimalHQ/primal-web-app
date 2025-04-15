@@ -43,6 +43,8 @@ import { useAppContext } from '../../contexts/AppContext';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import { date } from '../../lib/dates';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -151,7 +153,6 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
       return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION]);
     }
     return intl.formatMessage(t[type()]);
-
   }
 
   createEffect(() => {
@@ -201,6 +202,15 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     ].includes(type())
   };
 
+  const time = () => {
+    const tm = props.notification?.created_at;
+
+    if (!tm) return '';
+
+    return date(tm).label;
+
+  }
+
 
   return (
     <div id={props.id} class={styles.notifItem}>
@@ -220,22 +230,25 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
         </Show>
       </div>
       <div class={styles.notifContent}>
-        <div class={styles.avatars}>
-          <A
-            href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
-            title={userName(user())}
-          >
-            <Avatar user={user()} size="xs" />
-          </A>
+        <div class={styles.time}>
+          {time()}
         </div>
-        <div class={styles.description}>
-          <div class={styles.firstUser}>
-          <span class={styles.firstUserName}>{userName(user())}</span>
-            <Show when={trimVerification(user()?.nip05)}>
-              <span class={styles.verifiedIcon} />
-            </Show>
+        <div class={styles.notifHeader}>
+          <div class={styles.avatars}>
+            <A
+              href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
+              title={userName(user())}
+            >
+              <Avatar user={user()} size="xs" />
+            </A>
           </div>
-          <div class={styles.restUsers}>{typeDescription()}</div>
+          <div class={styles.description}>
+            <div class={styles.firstUser}>
+              <span class={styles.firstUserName}>{userName(user())}</span>
+              <VerificationCheck user={user()} />
+            </div>
+            <div class={styles.restUsers}>{typeDescription()}</div>
+          </div>
         </div>
         <Show
           when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(type())}

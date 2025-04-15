@@ -1047,7 +1047,7 @@
   border-radius: 6px;
   display: block;
   transition: 0.2s padding;
-  margin-top: 6px;
+  /* margin-top: 6px; */
 
   .noteNotifications {
     background-color: var(--background-site);
@@ -1067,7 +1067,7 @@
 
       .message {
         grid-area: message;
-        color: var(--text-primary);
+        color: var(--text-secondary);
         word-break: break-word;
         font-size: 16px;
         line-height: 24px;

@@ -43,6 +43,8 @@ import { useAppContext } from '../../contexts/AppContext';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import { likes } from './NotificationItemOld';
+import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import { date } from '../../lib/dates';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -90,7 +92,7 @@ const uniqueifyUsers = (users: PrimalNotifUser[]) => {
   }, []);
 }
 
-const avatarDisplayLimit = 12;
+const avatarDisplayLimit = 6;
 
 const NotificationItem: Component<NotificationItemProps> = (props) => {
 
@@ -99,6 +101,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
   const [reactionIcon, setReactionIcon] = createSignal<string>('');
+  const [isLike, setIsLike] = createSignal(false);
 
   const sortedUsers = createMemo(() => {
     if (!props.users || props.users.length === 0) {
@@ -149,10 +152,18 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
   });
 
   const typeDescription = () => {
+    if (props.type === NotificationType.YOUR_POST_WAS_LIKED && !isLike()) {
+      return intl.formatMessage(t[NotificationType.YOUR_POST_HAD_REACTION]);
+    }
+    return intl.formatMessage(t[props.type]);
+  }
 
-    return intl.formatMessage(t[props.type], {
-      number: numberOfUsers() - 1,
-    });
+  const time = () => {
+    const tm = props.notification?.created_at;
+
+    if (!tm) return '';
+
+    return date(tm).label;
 
   }
 
@@ -165,12 +176,11 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
       return;
     }
 
-    console.log('notif: ', props.notification?.reaction)
-
     const r = props.notification?.reaction || '+';
 
     if (!r) {
       setReactionIcon(likes[0])
+      setIsLike(true);
       return;
     }
 
@@ -178,16 +188,19 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     if (e) {
       setReactionIcon(e !== '+' ? e : likes[0]);
+      setIsLike(true);
       return;
     }
 
     setReactionIcon(r);
+    setIsLike(false);
 
   });
 
   return (
     <div id={props.id} class={styles.notifItem}>
       <div class={styles.newBubble}></div>
+
       <div class={styles.notifType}>
         <Show
           when={props.type === NotificationType.YOUR_POST_WAS_LIKED}
@@ -201,32 +214,36 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           {props.iconInfo}
         </div>
       </div>
+
       <div class={styles.notifContent}>
-        <div class={styles.avatars}>
-          <Show when={numberOfUsers() > 0}>
-            <For each={displayedUsers()}>
-              {(user) => (
-                <A
-                  href={app?.actions.profileLink(user.npub) || ''} class={styles.avatar}
-                  title={userName(user)}
-                >
-                  <Avatar user={user} size="xs" />
-                </A>
-              )}
-            </For>
-          </Show>
-          <Show when={numberOfUsers() > avatarDisplayLimit - 1}>
-            <NotificationAvatar number={remainingUsers()} size="xs" />
-          </Show>
+        <div class={styles.time}>
+          {time()}
         </div>
-        <div class={styles.description}>
-          <div class={styles.firstUser}>
-            <span class={styles.firstUserName}>{firstUserName()}</span>
-            <Show when={firstUserVerification()}>
-              <span class={styles.verifiedIcon} />
+        <div class={styles.notifHeader}>
+          <div class={styles.avatars}>
+            <Show when={numberOfUsers() > 0}>
+              <For each={displayedUsers()}>
+                {(user) => (
+                  <A
+                    href={app?.actions.profileLink(user.npub) || ''} class={styles.avatar}
+                    title={userName(user)}
+                  >
+                    <Avatar user={user} size="xs" />
+                  </A>
+                )}
+              </For>
+            </Show>
+            <Show when={numberOfUsers() > avatarDisplayLimit - 1}>
+              <NotificationAvatar number={remainingUsers()} size="xs" />
             </Show>
           </div>
-          <div class={styles.restUsers}>{typeDescription()}</div>
+          <div class={styles.description}>
+            <div class={styles.firstUser}>
+              <span class={styles.firstUserName}>{firstUserName()}</span>
+              <VerificationCheck user={sortedUsers()[0]} />
+            </div>
+            <div class={styles.restUsers}>{typeDescription()}</div>
+          </div>
         </div>
 
         <Show
