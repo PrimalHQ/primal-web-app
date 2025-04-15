@@ -1403,6 +1403,8 @@ const Notifications: Component = () => {
                         users={oldNotifications.users}
                         userStats={oldNotifications.userStats}
                         notes={oldNotifications.notes}
+                        reads={oldNotifications.reads}
+                        highlights={oldNotifications.highlights}
                       />
                     )}
                   </For>
