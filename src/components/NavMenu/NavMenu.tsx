@@ -142,8 +142,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   <ButtonSecondary
                     id={props.id}
                     onClick={() => {
-                      // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/myarticles');
+                      app?.actions.openConfirmModal(noReadsConfirm);
+                      // navigate('/myarticles');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -153,8 +153,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 <ButtonSecondary
                   id={props.id}
                   onClick={() => {
-                    // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/myarticles');
+                    app?.actions.openConfirmModal(noReadsConfirm);
+                    // navigate('/myarticles');
                   }}
                   noPadding={true}
                 >
@@ -170,8 +170,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                   <ButtonPrimary
                     id={props.id}
                     onClick={() => {
-                      // app?.actions.openConfirmModal(noReadsConfirm);
-                      navigate('/myarticles');
+                      app?.actions.openConfirmModal(noReadsConfirm);
+                      // navigate('/myarticles');
                     }}
                   >
                     <div class={styles.postIcon}></div>
@@ -181,8 +181,8 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 <ButtonPrimary
                   id={props.id}
                   onClick={() => {
-                    // app?.actions.openConfirmModal(noReadsConfirm);
-                    navigate('/myarticles');
+                    app?.actions.openConfirmModal(noReadsConfirm);
+                    // navigate('/myarticles');
                   }}
                 >
                   {intl.formatMessage(tActions.myArticles)}
