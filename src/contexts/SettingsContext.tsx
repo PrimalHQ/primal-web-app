@@ -86,6 +86,7 @@ export type SettingsContextStore = {
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
     refreshMobileReleases: () => void,
     setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
+    setDiscloseClient: (shouldDisclose: boolean, temp?: boolean) => void,
     getDefaultReadsFeeds: () => void,
     getDefaultHomeFeeds: () => void,
     restoreReadsFeeds: () => void,
@@ -143,6 +144,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
     account?.actions.setProxyThroughPrimal(shouldProxy);
+
+    !temp && saveSettings();
+  }
+
+  const setDiscloseClient = (shouldDisclose: boolean, temp?: boolean) => {
+    account?.actions.setDiscloseClient(shouldDisclose);
 
     !temp && saveSettings();
   }
@@ -626,7 +633,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       notificationsAdditional,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
-      proxyThroughPrimal: account?.proxyThroughPrimal || false,
+      proxyThroughPrimal: account?.proxyThroughPrimal ?? false,
+      discloseClient: account?.discloseClient ?? true,
       animated: store.isAnimated,
     };
 
@@ -731,6 +739,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             applyContentModeration,
             contentModeration,
             proxyThroughPrimal,
+            discloseClient,
           } = JSON.parse(content.content || '{}');
 
           theme && setThemeByName(theme, true);
@@ -790,6 +799,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
 
           account?.actions.setProxyThroughPrimal(proxyThroughPrimal);
+          account?.actions.setDiscloseClient(discloseClient);
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -996,6 +1006,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       modifyContentModeration,
       refreshMobileReleases,
       setProxyThroughPrimal,
+      setDiscloseClient,
       getDefaultReadsFeeds,
       getDefaultHomeFeeds,
       restoreReadsFeeds,

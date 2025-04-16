@@ -645,6 +645,8 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, shouldProxy: 
   }
 };
 
+// TODO: Refactor this function to accept an account object instead of relays, relaySettings, shouldProxy.
+// TODO: Move "client" tag insertion from EditBox into here.
 export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySettings: NostrRelays | undefined, shouldProxy: boolean) => {
 
   if (shouldProxy) {

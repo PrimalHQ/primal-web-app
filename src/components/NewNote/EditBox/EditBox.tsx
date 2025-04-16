@@ -883,6 +883,10 @@ const EditBox: Component<{
       });
       tags = [...tags, ...relayTags];
 
+      // TODO: Move this into `sendEvent` so it will be applied to all events.
+      // TODO: Add Primal's app handler addr according to NIP-89: https://github.com/nostr-protocol/nips/blob/master/89.md#client-tag
+      tags.push(['client', 'Primal']);
+
       setIsPostingInProgress(true);
 
       const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);

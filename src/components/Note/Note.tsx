@@ -318,6 +318,8 @@ const Note: Component<NoteProps> = (props) => {
     }
   };
 
+  const client = props.note.tags.find(([name]) => name === 'client')?.[1];
+
   return (
     <Switch>
       <Match when={noteType() === 'notification'}>
@@ -395,6 +397,9 @@ const Note: Component<NoteProps> = (props) => {
               class={styles.timePrimary}
               title={date(props.note.post?.created_at).date.toLocaleString()}
             >
+              {/* TODO: fetch the kind 31990 event and link to its website */}
+              {client && <span>{`${client} · `}</span>}
+
               <span>
                 {veryLongDate(props.note.post?.created_at).replace(' at ', ' · ')}
               </span>
