@@ -239,16 +239,17 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
     const r = props.notification.reaction || '+';
 
+
     const e = likes.find(l => l === r);
 
     if (e) {
       setReactionIcon(e);
-      setIsLike(true);
+      setIsLike(false);
       return;
     }
 
     setReactionIcon(r);
-    setIsLike(false);
+    setIsLike(true);
 
   });
 
@@ -298,7 +299,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
               href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
               title={userName(user())}
             >
-              <Avatar user={user()} size="xs" />
+              <Avatar user={user()} size="vvs" />
             </A>
           </Match>
         </Switch>
@@ -322,7 +323,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
                 href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
                 title={userName(user())}
               >
-                <Avatar user={user()} size="xs" />
+                <Avatar user={user()} size="vvs" />
               </A>
             </div>
           </Show>

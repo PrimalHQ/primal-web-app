@@ -255,12 +255,12 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     if (e) {
       setReactionIcon(e);
-      setIsLike(true);
+      setIsLike(false);
       return;
     }
 
     setReactionIcon(r);
-    setIsLike(false);
+    setIsLike(true);
 
   });
 
@@ -284,7 +284,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
               href={app?.actions.profileLink(displayedUsers()[0]?.npub) || ''} class={styles.avatar}
               title={userName(displayedUsers()[0])}
             >
-              <Avatar user={displayedUsers()[0]} size="xs" />
+              <Avatar user={displayedUsers()[0]} size="vvs" />
             </A>
           </Match>
         </Switch>
@@ -308,13 +308,13 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
                       href={app?.actions.profileLink(user.npub) || ''} class={styles.avatar}
                       title={userName(user)}
                     >
-                      <Avatar user={user} size="xs" />
+                      <Avatar user={user} size="vvs" />
                     </A>
                   )}
                 </For>
               </Show>
               <Show when={numberOfUsers() > avatarDisplayLimit - 1}>
-                <NotificationAvatar number={remainingUsers()} size="xs" />
+                <NotificationAvatar number={remainingUsers()} size="vvs" />
               </Show>
             </div>
           </Show>
