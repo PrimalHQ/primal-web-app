@@ -295,7 +295,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
             <img src={postLiked} alt="notification icon" />
           </Match>
 
-          <Match when={!isLike() && props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}>
+          <Match when={props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}>
             <div>{reactionIcon()}</div>
           </Match>
 
