@@ -35,12 +35,25 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
 
   const onChange = (setting: string) => {
     const currentValue = settings?.notificationSettings[setting];
-    settings?.actions.updateNotificationSettings(setting, !currentValue);
 
     if (setting === 'YOUR_POST_WAS_LIKED') {
-      settings?.actions.updateNotificationAdditionalSettings(`YOUR_POST_WAS_HIGHLIGHTED`, !currentValue);
-      settings?.actions.updateNotificationAdditionalSettings(`YOUR_POST_WAS_BOOKMARKED`, !currentValue);
+      settings?.actions.updateNotificationSettingsBulk({
+        YOUR_POST_WAS_LIKED: !currentValue,
+        YOUR_POST_WAS_HIGHLIGHTED: !currentValue,
+        YOUR_POST_WAS_BOOKMARKED: !currentValue,
+      });
+      return;
     }
+
+    if (setting === 'YOU_WERE_MENTIONED_IN_POST') {
+      settings?.actions.updateNotificationSettingsBulk({
+        YOU_WERE_MENTIONED_IN_POST: !currentValue,
+        YOUR_POST_WAS_MENTIONED_IN_POST: !currentValue,
+      });
+      return;
+    }
+
+    settings?.actions.updateNotificationSettings(setting, !currentValue);
   };
 
   const onChangeAdditional = (setting: string) => {

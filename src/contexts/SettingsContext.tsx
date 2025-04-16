@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -79,6 +79,7 @@ export type SettingsContextStore = {
     setZapOptions: (option: ZapOption, index: number, temp?: boolean) => void,
     resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
+    updateNotificationSettingsBulk: (entries: Record<string, boolean>, temp?: boolean) => void,
     updateNotificationAdditionalSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
     setApplyContentModeration: (flag: boolean) => void,
@@ -517,6 +518,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     updateReadsFeeds(list);
   };
 
+  const updateNotificationSettingsBulk = (entries: Record<string, boolean>, temp?: boolean) => {
+    const update = Object.entries(entries).reduce<Record<string, boolean>>((acc, [key, value]) => {
+      return { ...acc, [key]: value };
+    }, {})
+    updateStore('notificationSettings', () => ({ ...update }));
+
+
+    !temp && saveSettings();
+  };
+
   const updateNotificationSettings = (key: string, value: boolean, temp?: boolean) => {
     updateStore('notificationSettings', () => ({ [key]: value }));
 
@@ -596,6 +607,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const saveSettings = (then?: () => void) => {
+    let notificationsAdditional = { ...store.notificationAdditionalSettings };
+
+    for (let notifType in NotificationType) {
+      if (notificationsAdditional[notifType] !== undefined) {
+        delete notificationsAdditional[notifType];
+      }
+    }
+
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
@@ -604,7 +623,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       defaultZapAmount: store.defaultZapAmountOld,
       zapOptions: store.zapOptionsOld,
       notifications: store.notificationSettings,
-      notificationsAdditional: store.notificationAdditionalSettings,
+      notificationsAdditional,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
       proxyThroughPrimal: account?.proxyThroughPrimal || false,
@@ -971,6 +990,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setZapOptions,
       resetZapOptionsToDefault,
       updateNotificationSettings,
+      updateNotificationSettingsBulk,
       updateNotificationAdditionalSettings,
       setApplyContentModeration,
       modifyContentModeration,
