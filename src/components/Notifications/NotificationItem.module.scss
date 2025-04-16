@@ -13,6 +13,10 @@
     align-items: center;
     justify-content: flex-start;
     padding-block: 6px;
+
+    &.replyAvatar {
+      padding-top: 0;
+    }
   }
 
   .iconInfo {
@@ -33,6 +37,7 @@
       align-items: center;
       gap: 8px;
       width: 80%;
+      min-height: 32px;
       flex-wrap: wrap;
 
       .avatars {
@@ -134,4 +139,8 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 14px;
+}
+
+.avatarPlaceholder {
+  height: 32px;
 }

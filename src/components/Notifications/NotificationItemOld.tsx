@@ -11,28 +11,43 @@ import styles from './NotificationItem.module.scss';
 
 import userFollow from '../../assets/icons/notifications/user_followed.svg';
 import userUnFollow from '../../assets/icons/notifications/user_unfollowed.svg';
-
 import postZapped from '../../assets/icons/notifications/post_zapped.svg';
 import postLiked from '../../assets/icons/notifications/post_liked.svg';
 import postReposted from '../../assets/icons/notifications/post_reposted.svg';
 import postReplied from '../../assets/icons/notifications/post_replied.svg';
-
 import mention from '../../assets/icons/notifications/mention.svg';
 import mentionedPost from '../../assets/icons/notifications/mentioned_post.svg';
-
 import mentionZapped from '../../assets/icons/notifications/mention_zapped.svg';
 import mentionLiked from '../../assets/icons/notifications/mention_liked.svg';
 import mentionReposted from '../../assets/icons/notifications/mention_reposted.svg';
 import mentionReplied from '../../assets/icons/notifications/mention_replied.svg';
-
 import mentionedPostZapped from '../../assets/icons/notifications/mentioned_post_zapped.svg';
 import mentionedPostLiked from '../../assets/icons/notifications/mentioned_post_liked.svg';
 import mentionedPostReposted from '../../assets/icons/notifications/mentioned_post_reposted.svg';
 import mentionedPostReplied from '../../assets/icons/notifications/mentioned_post_replied.svg';
-
 import postHighlighted from '../../assets/icons/notifications/post_highlighted.svg';
 import postBookmarked from '../../assets/icons/notifications/post_bookmarked.svg';
 import postReacted from '../../assets/icons/notifications/post_reacted.svg';
+
+import userFollowLight from '../../assets/icons/notifications/light/user_followed.svg';
+import userUnFollowLight from '../../assets/icons/notifications/light/user_unfollowed.svg';
+import postZappedLight from '../../assets/icons/notifications/light/post_zapped.svg';
+import postLikedLight from '../../assets/icons/notifications/light/post_liked.svg';
+import postRepostedLight from '../../assets/icons/notifications/light/post_reposted.svg';
+import postRepliedLight from '../../assets/icons/notifications/light/post_replied.svg';
+import mentionLight from '../../assets/icons/notifications/light/mention.svg';
+import mentionedPostLight from '../../assets/icons/notifications/light/mentioned_post.svg';
+import mentionZappedLight from '../../assets/icons/notifications/light/mention_zapped.svg';
+import mentionLikedLight from '../../assets/icons/notifications/light/mention_liked.svg';
+import mentionRepostedLight from '../../assets/icons/notifications/light/mention_reposted.svg';
+import mentionRepliedLight from '../../assets/icons/notifications/light/mention_replied.svg';
+import mentionedPostZappedLight from '../../assets/icons/notifications/light/mentioned_post_zapped.svg';
+import mentionedPostLikedLight from '../../assets/icons/notifications/light/mentioned_post_liked.svg';
+import mentionedPostRepostedLight from '../../assets/icons/notifications/light/mentioned_post_reposted.svg';
+import mentionedPostRepliedLight from '../../assets/icons/notifications/light/mentioned_post_replied.svg';
+import postHighlightedLight from '../../assets/icons/notifications/light/post_highlighted.svg';
+import postBookmarkedLight from '../../assets/icons/notifications/light/post_bookmarked.svg';
+import postReactedLight from '../../assets/icons/notifications/light/post_reacted.svg';
 
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import { truncateNumber } from '../../lib/notifications';
@@ -45,6 +60,7 @@ import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { date } from '../../lib/dates';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -71,8 +87,36 @@ const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlighted,
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
-
 }
+
+
+const typeIconsLight: Record<string, string> = {
+  [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollowLight,
+  [NotificationType.USER_UNFOLLOWED_YOU]: userUnFollowLight,
+
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: postZappedLight,
+  [NotificationType.YOUR_POST_WAS_LIKED]: postLikedLight,
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: postRepostedLight,
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: postRepliedLight,
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: mentionLight,
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: mentionedPostLight,
+
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: mentionZappedLight,
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: mentionLikedLight,
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED]: mentionRepostedLight,
+  [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO]: mentionRepliedLight,
+
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED]: mentionedPostZappedLight,
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: mentionedPostLikedLight,
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]:mentionedPostRepostedLight,
+  [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: mentionedPostRepliedLight,
+
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlightedLight,
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarkedLight,
+  [NotificationType.YOUR_POST_HAD_REACTION]: postReactedLight,
+}
+
 
 type NotificationItemProps = {
   id?: string,
@@ -106,13 +150,13 @@ export const likes = [
   "💘",
   "💑",
   "🤙",
-  "+",
 ];
 
 const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   const intl = useIntl();
   const app = useAppContext();
+  const settings = useSettingsContext();
 
   const [typeIcon, setTypeIcon] = createSignal<string>('');
   const [reactionIcon, setReactionIcon] = createSignal<string>('');
@@ -180,27 +224,25 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     return `${label} ${reference}`
   }
 
+  const isLight = () => {
+    return ['sunrise', 'ice'].includes(settings?.theme || 'sunset');
+  }
+
   createEffect(() => {
     const t = type();
-    let icon = typeIcons[t];
+    let icon = isLight() ? typeIconsLight[t] : typeIcons[t];
 
     if (t !== NotificationType.YOUR_POST_WAS_LIKED) {
       setTypeIcon(icon);
       return;
     }
 
-    const r = props.notification.reaction;
-
-    if (!r) {
-      setReactionIcon(likes[0]);
-      setIsLike(true);
-      return;
-    }
+    const r = props.notification.reaction || '+';
 
     const e = likes.find(l => l === r);
 
     if (e) {
-      setReactionIcon(e !== '+' ? e : likes[0]);
+      setReactionIcon(e);
       setIsLike(true);
       return;
     }
@@ -232,22 +274,35 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
     if (!tm) return '';
 
-    return date(tm).label;
+    return date(tm, 'narrow').label;
 
   }
 
 
   return (
     <div id={props.id} class={styles.notifItem} data-notif={props.notification.id}>
-      <div class={styles.notifType}>
-        <Show
-          when={props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}
-          fallback={
-            <img src={typeIcon()} alt="notification icon" />
-          }
-        >
-          <div>{reactionIcon()}</div>
-        </Show>
+      <div class={`${styles.notifType} ${props.notification.type === NotificationType.YOUR_POST_WAS_REPLIED_TO ? styles.replyAvatar : ''}`}>
+        <Switch fallback={
+          <img src={typeIcon()} alt="notification icon" />
+        }>
+          <Match when={isLike()}>
+            <img src={postLiked} alt="notification icon" />
+          </Match>
+
+          <Match when={!isLike() && props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}>
+            <div>{reactionIcon()}</div>
+          </Match>
+
+          <Match when={props.notification.type === NotificationType.YOUR_POST_WAS_REPLIED_TO}>
+            <A
+              href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
+              title={userName(user())}
+            >
+              <Avatar user={user()} size="xs" />
+            </A>
+          </Match>
+        </Switch>
+
         <Show when={isZapType()}>
           <div class={styles.iconInfo} title={`${props.notification.satszapped} sats`}>
             {truncateNumber(props.notification.satszapped || 0)}
@@ -259,14 +314,19 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
           {time()}
         </div>
         <div class={styles.notifHeader}>
-          <div class={styles.avatars}>
-            <A
-              href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
-              title={userName(user())}
-            >
-              <Avatar user={user()} size="xs" />
-            </A>
-          </div>
+          <Show
+            when={props.notification.type !== NotificationType.YOUR_POST_WAS_REPLIED_TO}
+          >
+            <div class={styles.avatars}>
+              <A
+                href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
+                title={userName(user())}
+              >
+                <Avatar user={user()} size="xs" />
+              </A>
+            </div>
+          </Show>
+
           <div class={styles.description}>
             <div class={styles.firstUser}>
               <span class={styles.firstUserName}>{userName(user())}</span>
