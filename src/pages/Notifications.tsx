@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -312,6 +312,10 @@ const Notifications: Component = () => {
     setSortedNotifications({})
 
   };
+
+  onMount(() => {
+    notifications?.actions.resetNotificationCounter();
+  });
 
   onCleanup(() => {
     setLastNotification(undefined);

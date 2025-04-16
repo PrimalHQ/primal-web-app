@@ -251,6 +251,12 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     const r = props.notification?.reaction || '+';
 
+    if (r === '+') {
+      setReactionIcon('');
+      setIsLike(true);
+      return;
+    }
+
     const e = likes.find(l => l === r);
 
     if (e) {
@@ -271,7 +277,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
         <Switch fallback={
           <img src={typeIcon()} alt="notification icon" />
         }>
-          <Match when={isLike()}>
+          <Match when={isLike() && reactionIcon() === ''}>
             <img src={postLiked} alt="notification icon" />
           </Match>
 
