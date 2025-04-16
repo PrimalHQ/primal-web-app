@@ -115,6 +115,16 @@
     }
   }
 
+  &.notif {
+    grid-template-columns: 139px 139px 139px 133px auto;
+
+    .bookmarkFoot {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 100%;
+    }
+  }
+
   &.normal {
     width: 100%;
   }

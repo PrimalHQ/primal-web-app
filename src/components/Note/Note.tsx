@@ -344,7 +344,7 @@ const Note: Component<NoteProps> = (props) => {
                   state={reactionsState}
                   updateState={updateReactionsState}
                   customZapInfo={customZapInfo()}
-                  size="short"
+                  size="notif"
                 />
               </div>
             </div>

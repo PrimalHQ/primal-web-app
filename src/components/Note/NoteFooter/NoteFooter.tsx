@@ -28,7 +28,7 @@ export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
 const NoteFooter: Component<{
   note: PrimalNote,
-  size?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'very_short',
+  size?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'very_short' | 'notif',
   id?: string,
   state: NoteReactionsState,
   updateState?: SetStoreFunction<NoteReactionsState>,
