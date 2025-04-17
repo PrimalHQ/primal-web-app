@@ -1,0 +1,113 @@
+.zapSettings {
+  display: flex;
+  flex-direction: column;
+
+  .defaultZaps {
+    margin-bottom: 20px;
+  }
+  .zapOptions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .zapInput {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.caption {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.zapInput {
+  width: 100%;
+  height: 36px;
+  background-color: var(--background-header-input);
+  border: none;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  .optEmoji {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 36px;
+    border-radius: 18px 0 0 18px;
+    margin: 0;
+    padding-bottom: 0;
+    padding-top: 4px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+      outline: none;
+      box-shadow: none;
+    }
+  }
+
+  input {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 36px;
+    text-align: center;
+    margin: 0;
+    padding-bottom: 0;
+    padding-top: 4px;
+    padding-inline: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    color: var(--text-primary);
+    background: none;
+    border: none;
+
+    &.defAmount {
+      border-radius: 18px 0 0 18px;
+    }
+    &.defMessage {
+      border-radius: 0 18px 18px 0;
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+
+    &.optAmount {
+      border-radius: 0;
+    }
+    &.optMessage {
+      border-radius: 0 18px 18px 0;
+      width: 100%;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    &:focus, &:hover {
+      background-color: var(--subtile-devider);
+      outline: none;
+      box-shadow: none;
+    }
+  }
+}
+
+
+.restoreZaps {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 36px;
+}

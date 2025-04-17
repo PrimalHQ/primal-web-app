@@ -1,6 +1,6 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { Kind, NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
@@ -66,6 +66,7 @@ export type SettingsContextStore = {
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
   mobileReleases: MobileReleases,
+  mirrorBlossom: boolean,
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -102,6 +103,7 @@ export type SettingsContextStore = {
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
+    toggleMirroring: (flag: boolean) => void,
   }
 }
 
@@ -126,6 +128,7 @@ export const initialData = {
     ios: { date: `${iosRD}`, version: iosVersion },
     android: { date: `${andRD}`, version: andVersion },
   },
+  mirrorBlossom: false,
 };
 
 export type FeedType = 'home' | 'reads';
@@ -140,6 +143,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
+
+  const toggleMirroring = (flag: boolean) => {
+    updateStore('mirrorBlossom', () => flag);
+  }
 
   const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
     account?.actions.setProxyThroughPrimal(shouldProxy);
@@ -1009,6 +1016,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       isFeedAdded,
 
       setAnimation,
+
+      toggleMirroring,
     },
   });
 

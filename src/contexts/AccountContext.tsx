@@ -25,10 +25,11 @@ import {
   PrimalArticle,
   NostrEvents,
   PrimalDVM,
+  NostrBlossom,
 } from '../types/primal';
 import { Kind, pinEncodePrefix, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
-import { sendContacts, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
+import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
@@ -96,6 +97,8 @@ export type AccountContextStore = {
   premiumReminder: boolean,
   activeNWC:string[],
   nwcList: string[][],
+  blossomServers: string[],
+  mirrorBlossom: boolean,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -152,6 +155,9 @@ export type AccountContextStore = {
     setActiveNWC: (nwc: string[]) => void,
     updateNWCList: (list: string[][]) => void,
     insertIntoNWCList: (nwc: string[], index?: number) => void,
+    addBlossomServers: (url: string) => void,
+    removeBlossomServers: (url: string) => void,
+    setBlossomServers: (urls: string[]) => void,
   },
 }
 
@@ -194,6 +200,8 @@ const initialData = {
   premiumReminder: false,
   activeNWC: [],
   nwcList: [],
+  blossomServers: [],
+  mirrorBlossom: false,
   followData: {
     tags: [],
     date: 0,
@@ -1846,6 +1854,64 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('nwcList', index, () => [...nwc]);
   }
 
+  createEffect(() => {
+    if (!store.publicKey) return;
+
+    fetchBlossomServers(store.publicKey);
+  })
+
+  const fetchBlossomServers = (pubkey: string) => {
+    const settingsBlossomSubId = `blossom_${APP_ID}`;
+    const unsubBlossomSettings = subsTo(settingsBlossomSubId, {
+      onEvent: (_, content) => {
+        const servers = ((content as NostrBlossom).tags || []).reduce((acc, t) => {
+          if (t[0] !== 'server') return acc;
+
+          return [...acc, t[1]];
+        }, []);
+
+        setBlossomServers(servers);
+      },
+      onEose: () => {
+        unsubBlossomSettings();
+      }
+    });
+
+    getReplacableEvent(pubkey, Kind.Blossom, settingsBlossomSubId);
+
+  }
+
+  const addBlossomServers = (url: string) => {
+    if (store.blossomServers.includes(url)) {
+      updateStore('blossomServers', (servers) => [url, ...servers.filter(s => s !== url)]);
+      updateBlossomEvent();
+      return;
+    }
+
+    updateStore('blossomServers', (servers) => [url, ...servers]);
+    updateBlossomEvent();
+  }
+
+  const removeBlossomServers = (url: string) => {
+    if (!store.blossomServers.includes(url)) return;
+
+    updateStore('blossomServers', (servers) => servers.filter(s => s !== url));
+    updateBlossomEvent();
+  }
+
+  const setBlossomServers = (urls: string[]) => {
+    updateStore('blossomServers', () => [ ...urls ]);
+    // updateBlossomEvent();
+  }
+
+  const updateBlossomEvent = async () => {
+    const { success } = await sendBlossomEvent(store.blossomServers, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+    if (!success) {
+      toast?.sendWarning('Failed to send server list')
+    }
+  }
+
 // STORES ---------------------------------------
 
 const [store, updateStore] = createStore<AccountContextStore>({
@@ -1895,6 +1961,9 @@ const [store, updateStore] = createStore<AccountContextStore>({
     setActiveNWC,
     updateNWCList,
     insertIntoNWCList,
+    addBlossomServers,
+    removeBlossomServers,
+    setBlossomServers,
   },
 });
 

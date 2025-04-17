@@ -35,6 +35,7 @@ import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
 import Uploader from '../components/Uploader/Uploader';
 import { useSettingsContext } from '../contexts/SettingsContext';
+import UploaderBlossom from '../components/Uploader/UploaderBlossom';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -499,10 +500,9 @@ const CreateAccount: Component = () => {  const intl = useIntl();
             >
               <div class={styles.uploadActions}>
                 <div class={styles.uploader}>
-                  <Uploader
+                  <UploaderBlossom
                     hideLabel={true}
                     publicKey={account?.publicKey}
-                    openSockets={openSockets()}
                     file={fileToUpload()}
                     onFail={() => {
                       toast?.sendWarning(intl.formatMessage(tUpload.fail, {

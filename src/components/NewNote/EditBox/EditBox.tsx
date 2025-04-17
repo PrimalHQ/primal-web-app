@@ -50,6 +50,7 @@ import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
 import { useAppContext } from "../../../contexts/AppContext";
+import UploaderBlossom from "../../Uploader/UploaderBlossom";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -1681,7 +1682,34 @@ const EditBox: Component<{
         >
           {renderMessage()}
           <div class={styles.uploader}>
-            <Uploader
+            <UploaderBlossom
+              publicKey={account?.publicKey}
+              nip05={account?.activeUser?.nip05}
+              file={fileToUpload()}
+              onFail={() => {
+                toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                  file: fileToUpload()?.name,
+                }));
+                resetUpload();
+              }}
+              onRefuse={(reason: string) => {
+                if (reason === 'file_too_big_100') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                }
+                if (reason === 'file_too_big_1024') {
+                  toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                }
+                resetUpload();
+              }}
+              onCancel={() => {
+                resetUpload();
+              }}
+              onSuccsess={(url:string) => {
+                insertAtCursor(` ${url} `);
+                resetUpload();
+              }}
+            />
+            {/* <Uploader
               publicKey={account?.publicKey}
               nip05={account?.activeUser?.nip05}
               openSockets={props.open}
@@ -1708,7 +1736,7 @@ const EditBox: Component<{
                 insertAtCursor(` ${url} `);
                 resetUpload();
               }}
-            />
+            /> */}
           </div>
         </div>
       </div>

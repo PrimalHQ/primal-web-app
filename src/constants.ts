@@ -501,3 +501,5 @@ export const floatingPoints: Record<string,number> = {
 };
 
 export const sevenDays = 7 * 24 * 60 * 60 * 1_000;
+
+export const primalBlossom = 'https://blossom.primal.net';

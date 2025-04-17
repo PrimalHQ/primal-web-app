@@ -341,6 +341,17 @@ export const sendRepost = async (note: PrimalNote, shouldProxy: boolean, relays:
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
+export const sendBlossomEvent = async (list: string[], shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: '',
+    kind: Kind.Blossom,
+    tags: list.map(url => ['server', url]),
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+}
+
 export const sendArticleRepost = async (note: PrimalArticle, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: JSON.stringify(note.msg),
@@ -920,6 +931,15 @@ export const getParametrizedEvents = (events: EventCoordinate[], subid: string) 
     "REQ",
     subid,
     {cache: ["parametrized_replaceable_events", { events, extended_response: true }]},
+  ]));
+};
+
+
+export const getReplacableEvent = (pubkey: string, kind: number, subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["replaceable_event", { pubkey, kind, }]},
   ]));
 };
 

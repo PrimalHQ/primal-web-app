@@ -26,6 +26,7 @@ import { triggerImportEvents } from '../lib/notes';
 import { APP_ID } from '../App';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useAppContext } from '../contexts/AppContext';
+import UploaderBlossom from '../components/Uploader/UploaderBlossom';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -301,11 +302,10 @@ const EditProfile: Component = () => {
 
         <div class={styles.uploadActions}>
           <div class={styles.uploader}>
-            <Uploader
+            <UploaderBlossom
               hideLabel={true}
               publicKey={account?.publicKey}
               nip05={account?.activeUser?.nip05}
-              openSockets={openSockets()}
               file={fileToUpload()}
               onFail={() => {
                 toast?.sendWarning(intl.formatMessage(tUpload.fail, {

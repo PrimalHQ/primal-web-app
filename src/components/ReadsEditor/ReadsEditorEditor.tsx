@@ -54,6 +54,7 @@ import {
 } from '../../translations';
 import ReadsEditorToolbar from './ReadsEditorToolbar';
 import { ArticleEdit, emptyArticleEdit } from '../../pages/ReadsEditor';
+import UploaderBlossom from '../Uploader/UploaderBlossom';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -452,12 +453,11 @@ const ReadsEditorEditor: Component<{
             </TextField>
 
             <Show when={accordionSection().includes('hero_image')}>
-              <Uploader
+              <UploaderBlossom
                 uploadId={fileUploadContext()}
                 hideLabel={true}
                 publicKey={account?.publicKey}
                 nip05={account?.activeUser?.nip05}
-                openSockets={openUploadSockets()}
                 file={fileToUpload()}
                 onFail={(_, uploadId?: string) => {
                   toast?.sendWarning(intl.formatMessage(tUpload.fail, {

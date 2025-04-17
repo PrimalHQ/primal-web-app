@@ -327,6 +327,11 @@ export const actions = {
     defaultMessage: 'Restore default caching service',
     description: 'Label for restore default caching service',
   },
+  restoreBlossomServer: {
+    id: 'actions.restoreBlossomServer',
+    defaultMessage: 'restore default media server',
+    description: 'Label for restore default blossom server',
+  },
   profileContext: {
     copyPubkey: {
       id: 'actions.profileContext.copyPubkey',
@@ -1216,6 +1221,11 @@ export const placeholders = {
     defaultMessage: 'wss://cachingservice.url',
     description: 'Placholder relay url input',
   },
+  blossomServerUrl: {
+    id: 'placeholders.blossomServerUrl',
+    defaultMessage: 'enter blossom server url...',
+    description: 'Placholder server url input',
+  },
 };
 
 export const profile = {
@@ -1600,6 +1610,18 @@ export const settings = {
       description: 'Title of the nwc settings sub-page',
     },
   },
+  blossomPage: {
+    mediaServer: {
+      id: 'settings.blossom.mediaServer',
+      defaultMessage: 'Media Server',
+      description: 'Title of the media server',
+    },
+    switchServer: {
+      id: 'settings.blossom.switchServer',
+      defaultMessage: 'Switch media server',
+      description: 'Title of the switching media server section of the Blossom settings sub-page',
+    },
+  },
   network: {
     title: {
       id: 'settings.network.title',
@@ -1726,6 +1748,11 @@ export const settings = {
     id: 'settings.sections.zaps',
     defaultMessage: 'Zaps',
     description: 'Title of the zaps section on the settings page',
+  },
+  blossom: {
+    id: 'settings.sections.blossom',
+    defaultMessage: 'Media Uploads',
+    description: 'Title of the blossom section on the settings page',
   },
   devTools: {
     id: 'settings.sections.devTools',
@@ -2175,6 +2202,11 @@ export const errors = {
     defaultMessage: 'Invalid url',
     description: 'Error text for invalid url',
   },
+  invalidServerUrl: {
+      id: 'placeholders.invalidServerUrl',
+      defaultMessage: 'Invalid url',
+      description: 'Error text for invalid url',
+    },
 };
 
 export const unknown = {

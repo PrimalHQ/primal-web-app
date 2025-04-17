@@ -42,6 +42,7 @@ import { TextField } from '@kobalte/core/text-field';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Uploader from '../Uploader/Uploader';
 import { useToastContext } from '../Toaster/Toaster';
+import UploaderBlossom from '../Uploader/UploaderBlossom';
 
 
 const ReadsImageDialog: Component<{
@@ -143,12 +144,11 @@ const ReadsImageDialog: Component<{
             />
           </div>
 
-          <Uploader
+          <UploaderBlossom
             uploadId="upload_content_image"
             hideLabel={false}
             publicKey={account?.publicKey}
             nip05={account?.activeUser?.nip05}
-            openSockets={true}
             file={fileToUpload()}
             onFail={() => {
               toast?.sendWarning(intl.formatMessage(tUpload.fail, {

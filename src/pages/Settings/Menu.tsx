@@ -83,6 +83,14 @@ const Menu: Component = () => {
             <div class={styles.chevron}></div>
           </A>
         </Show>
+
+
+        <Show when={account?.hasPublicKey()}>
+          <A href="/settings/blossom">
+            {intl.formatMessage(t.blossom)}
+            <div class={styles.chevron}></div>
+          </A>
+        </Show>
       </div>
 
       <Show when={account?.sec}>

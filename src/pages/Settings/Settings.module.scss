@@ -19,6 +19,13 @@
   }
 }
 
+.label {
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
 .resetRelays {
   margin-top: 12px;
   padding-inline: 20px;
