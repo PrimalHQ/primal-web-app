@@ -49,6 +49,13 @@ const Menu: Component = () => {
         </A>
 
         <Show when={account?.hasPublicKey()}>
+          <A href="/settings/blossom">
+            {intl.formatMessage(t.blossom)}
+            <div class={styles.chevron}></div>
+          </A>
+        </Show>
+
+        <Show when={account?.hasPublicKey()}>
           <A href="/settings/muted">
             {intl.formatMessage(t.muted.title)}
             <div class={styles.chevron}></div>
@@ -80,14 +87,6 @@ const Menu: Component = () => {
         <Show when={account?.hasPublicKey()}>
           <A href="/settings/zaps">
             {intl.formatMessage(t.zaps)}
-            <div class={styles.chevron}></div>
-          </A>
-        </Show>
-
-
-        <Show when={account?.hasPublicKey()}>
-          <A href="/settings/blossom">
-            {intl.formatMessage(t.blossom)}
             <div class={styles.chevron}></div>
           </A>
         </Show>
