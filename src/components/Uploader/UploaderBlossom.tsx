@@ -15,9 +15,10 @@ import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getReplacableEvent } from '../../lib/notes';
 
-import { BlossomClient, SignedEvent } from "blossom-client-sdk";
+import { BlossomClient, SignedEvent, BlobDescriptor } from "blossom-client-sdk";
 import { signEvent } from '../../lib/nostrAPI';
-import { logInfo } from '../../lib/logger';
+import { logInfo, logWarning } from '../../lib/logger';
+import { useToastContext } from '../Toaster/Toaster';
 
 const MB = 1024 * 1024;
 
@@ -28,6 +29,7 @@ type UploadState = {
   uploadLimit: number,
   file?: File,
   xhr?: XMLHttpRequest,
+  auth?: SignedEvent,
 }
 
 const UploaderBlossom: Component<{
@@ -43,6 +45,7 @@ const UploaderBlossom: Component<{
 
 }> = (props) => {
   const account = useAccountContext();
+  const toaster = useToastContext();
 
   let progressFill: HTMLDivElement | undefined;
 
@@ -69,8 +72,15 @@ const UploaderBlossom: Component<{
   }
 
   const xhrOnLoad = (e: ProgressEvent) => {
-    const response = JSON.parse(uploadState.xhr?.responseText || '{}');
-    props.onSuccsess && props.onSuccsess(response.url, props.uploadId)
+    if ((uploadState.xhr?.status || 200) < 300) {
+      const response = JSON.parse(uploadState.xhr?.responseText || '{}');
+      props.onSuccsess && props.onSuccsess(response.url, props.uploadId);
+      mirrorUpload(response);
+      resetUpload();
+      return;
+    }
+
+    toaster?.sendWarning(uploadState.xhr?.statusText || 'Error while uploading. Check your media server settings.');
     resetUpload();
   }
 
@@ -80,7 +90,8 @@ const UploaderBlossom: Component<{
   }
 
   const xhrOnAbort = (e: ProgressEvent) => {
-    logInfo('upload aborted: ', uploadState.file?.name)
+    logInfo('upload aborted: ', uploadState.file?.name);
+    clearXHR();
   }
 
   const resetUpload = (skipCancel?: boolean) => {
@@ -90,8 +101,42 @@ const UploaderBlossom: Component<{
       id: undefined,
       progress: 0,
       uploadLimit: uploadLimit.regular,
+      auth: undefined,
     }));
   };
+
+  const mirrorUpload = async (blob: BlobDescriptor) => {
+    const mirrors = account?.blossomServers.slice(1) || [];
+    if (mirrors.length === 0) return;
+
+    // reuse the same auth for mirroring
+    let auth = uploadState.auth;
+
+    if (!auth) {
+      auth = await BlossomClient.createUploadAuth(signEvent, uploadState.file, { message: 'media upload mirroring'});
+      setUploadState('auth', () => ({ ...auth }));
+    }
+
+    for (let server of mirrors) {
+      try {
+        BlossomClient.mirrorBlob(server, blob, { auth });
+      } catch {
+        logWarning('Failed to mirror to: ', server)
+      }
+    }
+
+  };
+
+  const clearXHR = () => {
+    const xhr = uploadState.xhr;
+    if (!xhr) return;
+
+    xhr.removeEventListener("load", xhrOnLoad);
+    xhr.removeEventListener("error", xhrOnError);
+    xhr.removeEventListener("abort", xhrOnAbort);
+
+    setUploadState('xhr', () => undefined);
+  }
 
   const calcUploadLimit = (membershipTier: string | undefined, size: number) => {
     let limit = uploadLimit.regular;
@@ -138,11 +183,14 @@ const UploaderBlossom: Component<{
     const xhr = uploadState.xhr;
     if (!xhr) return;
 
-    const auth = await BlossomClient.createUploadAuth(signEvent, file);
+    const auth = await BlossomClient.createUploadAuth(signEvent, file, { message: 'media upload'});
+    setUploadState('auth', () => ({ ...auth }));
 
     const encodedAuthHeader = encodeAuthorizationHeader(auth);
 
-    xhr.open('PUT', `${url}/upload`, true);
+    const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}/upload`;
+
+    xhr.open('PUT', uploadUrl, true);
     xhr.setRequestHeader("Authorization", encodedAuthHeader);
     xhr.setRequestHeader('Content-Type', file.type);
     xhr.upload.addEventListener("progress", xhrOnProgress);
