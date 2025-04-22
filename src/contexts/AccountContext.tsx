@@ -1187,9 +1187,9 @@ export function AccountProvider(props: { children: JSXElement }) {
       onEose: async () => {
         if (store.muted.includes(pubkey)) {
           const date = Math.floor((new Date()).getTime() / 1000);
-          const muted = store.muted.filter(m => m !== pubkey);
+          const muted = unwrap(store.muted).filter(m => m !== pubkey);
 
-          const tags = store.mutedTags.filter(t => t[0] !== 'p' || t[1] !== pubkey);
+          const tags = unwrap(store.mutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
           const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
