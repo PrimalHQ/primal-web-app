@@ -27,7 +27,7 @@ import {
   PrimalDVM,
   NostrBlossom,
 } from '../types/primal';
-import { Kind, pinEncodePrefix, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
+import { Kind, pinEncodePrefix, primalBlossom, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
 import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
@@ -46,7 +46,7 @@ import { account as tAccount, bookmarks, followWarning, forgotPin, settings } fr
 import { getMembershipStatus } from "../lib/membership";
 import ConfirmModal from "../components/ConfirmModal/ConfirmModal";
 import { useAppContext } from "./AppContext";
-import { handleSubscription } from "../utils";
+import { areUrlsSame, handleSubscription } from "../utils";
 
 export type FollowData = {
   tags: string[][],
@@ -156,8 +156,10 @@ export type AccountContextStore = {
     updateNWCList: (list: string[][]) => void,
     insertIntoNWCList: (nwc: string[], index?: number) => void,
     addBlossomServers: (url: string) => void,
+    appendBlossomServers: (url: string) => void,
     removeBlossomServers: (url: string) => void,
     setBlossomServers: (urls: string[]) => void,
+    removeBlossomMirrors: () => void,
   },
 }
 
@@ -1881,14 +1883,30 @@ export function AccountProvider(props: { children: JSXElement }) {
 
   }
 
-  const addBlossomServers = (url: string) => {
-    if (store.blossomServers.includes(url)) {
-      updateStore('blossomServers', (servers) => [url, ...servers.filter(s => s !== url)]);
+  const addBlossomServers = (url: string, append?: boolean) => {
+    if (append) {
+      appendBlossomServers(url);
+      return;
+    }
+
+    if (store.blossomServers.find(u => areUrlsSame(u, url))) {
+      updateStore('blossomServers', (servers) => [url, ...servers.filter(s => !areUrlsSame(s, url))]);
       updateBlossomEvent();
       return;
     }
 
     updateStore('blossomServers', (servers) => [url, ...servers]);
+    updateBlossomEvent();
+  }
+
+  const appendBlossomServers = (url: string) => {
+    if (store.blossomServers.find(u => areUrlsSame(u, url))) {
+      updateStore('blossomServers', (servers) => [...servers.filter(s => !areUrlsSame(s, url)), url]);
+      updateBlossomEvent();
+      return;
+    }
+
+    updateStore('blossomServers', (servers) => [...servers, url]);
     updateBlossomEvent();
   }
 
@@ -1899,17 +1917,25 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateBlossomEvent();
   }
 
+  const removeBlossomMirrors = () => {
+    const main = store.blossomServers[0] || primalBlossom;
+    updateStore('blossomServers', () => [main]);
+    updateBlossomEvent();
+  }
+
   const setBlossomServers = (urls: string[]) => {
     updateStore('blossomServers', () => [ ...urls ]);
     // updateBlossomEvent();
   }
 
   const updateBlossomEvent = async () => {
-    const { success } = await sendBlossomEvent(store.blossomServers, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+    const { success, note } = await sendBlossomEvent(store.blossomServers, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
-    if (!success) {
-      toast?.sendWarning('Failed to send server list')
+    if (!success || !note) {
+      toast?.sendWarning('Failed to send server list');
+      return;
     }
+    triggerImportEvents([note], `import_blossom_list_${APP_ID}`);
   }
 
 // STORES ---------------------------------------
@@ -1962,8 +1988,10 @@ const [store, updateStore] = createStore<AccountContextStore>({
     updateNWCList,
     insertIntoNWCList,
     addBlossomServers,
+    appendBlossomServers,
     removeBlossomServers,
     setBlossomServers,
+    removeBlossomMirrors,
   },
 });
 

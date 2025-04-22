@@ -1616,10 +1616,30 @@ export const settings = {
       defaultMessage: 'Media Server',
       description: 'Title of the media server',
     },
+    mediaMirrors: {
+        id: 'settings.blossom.mediaMirrors',
+        defaultMessage: 'Media Morrors',
+        description: 'Title of the media mirrors',
+      },
+    mediaMirrorsDescription: {
+      id: 'settings.blossom.mediaMirrorsDescription',
+      defaultMessage: 'You can enable one or more media mirror servers. When enabled, your uploads to the primary media server will be automatically copied to the mirror(s).',
+      description: 'Description for blossom media mirrors',
+    },
     switchServer: {
       id: 'settings.blossom.switchServer',
       defaultMessage: 'Switch media server',
       description: 'Title of the switching media server section of the Blossom settings sub-page',
+    },
+    addMirror: {
+      id: 'settings.blossom.addMirror',
+      defaultMessage: 'Add media mirror server',
+      description: 'Title of the adding media mirror server section of the Blossom settings sub-page',
+    },
+    suggestedMirrors: {
+      id: 'settings.blossom.suggestedMirrors',
+      defaultMessage: 'Suggested media mirror servers',
+      description: 'Title of the suggested media mirror server list section of the Blossom settings sub-page',
     },
   },
   network: {

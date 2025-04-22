@@ -110,3 +110,11 @@ export const getDefaultRelays = (subid: string) => {
     {cache: ["get_default_relays"]},
   ]))
 };
+
+export const getDefaultBlossomServers = (subid: string) => {
+  sendMessage(JSON.stringify([
+    "REQ",
+    subid,
+    {cache: ["get_recommended_blossom_servers"]},
+  ]))
+};

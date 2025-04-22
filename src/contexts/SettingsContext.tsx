@@ -42,6 +42,7 @@ import { feedProfile, feedProfileDesription, settings as t } from "../translatio
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
+import { getDefaultBlossomServers } from "../lib/relays";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -66,7 +67,7 @@ export type SettingsContextStore = {
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
   mobileReleases: MobileReleases,
-  mirrorBlossom: boolean,
+  recomendedBlossomServers: string[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
@@ -103,7 +104,7 @@ export type SettingsContextStore = {
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
-    toggleMirroring: (flag: boolean) => void,
+    getRecomendedBlossomServers: () => void,
   }
 }
 
@@ -128,7 +129,7 @@ export const initialData = {
     ios: { date: `${iosRD}`, version: iosVersion },
     android: { date: `${andRD}`, version: andVersion },
   },
-  mirrorBlossom: false,
+  recomendedBlossomServers: [],
 };
 
 export type FeedType = 'home' | 'reads';
@@ -144,9 +145,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const toggleMirroring = (flag: boolean) => {
-    updateStore('mirrorBlossom', () => flag);
-  }
+  const getRecomendedBlossomServers = () => {
+    const subId = `recommended_blossom_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const list = JSON.parse(content.content || '[]') as string[];
+        updateStore('recomendedBlossomServers', () => [ ...list ]);
+      },
+      onEose: () => {
+        unsub();
+      },
+    })
+
+    getDefaultBlossomServers(subId);
+  };
 
   const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
     account?.actions.setProxyThroughPrimal(shouldProxy);
@@ -705,6 +718,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultSettings(subid);
     getDefaultHomeFeeds();
     getDefaultReadsFeeds();
+    getRecomendedBlossomServers();
   };
 
   const loadSettings = (pubkey: string | undefined, then?: () => void) => {
@@ -872,6 +886,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     pubkey && getNWCSettings(settingsNWCSubId);
+
+    getRecomendedBlossomServers();
   }
 
   const refreshMobileReleases = () => {
@@ -1017,7 +1033,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       setAnimation,
 
-      toggleMirroring,
+      getRecomendedBlossomServers,
     },
   });
 

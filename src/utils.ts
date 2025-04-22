@@ -6,6 +6,20 @@ import { isAndroid } from '@kobalte/utils';
 
 let debounceTimer: number = 0;
 
+export const areUrlsSame = (a: string, b: string) => {
+  if (a === b) return true;
+
+  let trimA = a;
+  let trimB = b;
+
+
+  if (a.endsWith('/')) trimA = a.slice(0, -1);
+  if (b.endsWith('/')) trimB = b.slice(0, -1);
+
+  return trimA === trimB;
+}
+
+
 export const debounce = (callback: TimerHandler, time: number) => {
   if (debounceTimer) {
     window.clearTimeout(debounceTimer);

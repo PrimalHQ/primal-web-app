@@ -1,4 +1,4 @@
-import { Component, Show, createSignal } from 'solid-js';
+import { Component, For, Show, createEffect, createSignal, on, onMount } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -16,15 +16,34 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { logError } from '../../lib/logger';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { primalBlossom } from '../../constants';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import Checkbox from '../../components/Checkbox/Checkbox';
+import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
+import MirrorSorter from '../../components/FeedSorter/MirrorSorter';
+import { APP_ID } from '../../App';
+import { subsTo } from '../../sockets';
+import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
 const Blossom: Component = () => {
 
   const account = useAccountContext();
+  const settings = useSettingsContext();
   const intl = useIntl();
 
   let switchSeverInput: HTMLInputElement | undefined;
+  let addMirrorInput: HTMLInputElement | undefined;
 
-  const [invalidCachingService, setInvalidCachingService] = createSignal(false);
+  const [invalidServerUrl, setInvalidServerUrl] = createSignal(false);
+  const [hasMirrors, setHasMirrors] = createSignal(false);
+  const [confirmNoMirrors, setConfirmNoMirrors] = createSignal(false);
+
+  createEffect(on(() => account?.blossomServers, (bServers) => {
+    if (!bServers || hasMirrors()) return;
+
+    const list = bServers.slice(1) || [];
+    setHasMirrors(() => list.length > 0);
+  }))
 
   const onSwitchServerInput = () => {
     if (!switchSeverInput || switchSeverInput.value === '') {
@@ -39,12 +58,42 @@ const Blossom: Component = () => {
 
       switchSeverInput.value = '';
       account?.actions.addBlossomServers(url.href);
-      setInvalidCachingService(false);
+      setInvalidServerUrl(false);
     } catch (e) {
       logError('invalid caching service input', e);
-      setInvalidCachingService(true);
+      setInvalidServerUrl(true);
     }
   }
+
+  const onAddMirrorInput = () => {
+      if (!addMirrorInput || addMirrorInput.value === '') {
+        return;
+      }
+
+      try {
+        const url = new URL(addMirrorInput.value);
+        if (!url.origin.startsWith('https://')) {
+          throw(new Error('must be a https'))
+        }
+
+        addMirrorInput.value = '';
+        account?.actions.appendBlossomServers(url.href);
+        setInvalidServerUrl(false);
+      } catch (e) {
+        logError('invalid caching service input', e);
+        setInvalidServerUrl(true);
+      }
+    }
+
+  const mirrorServers = () => {
+    return account?.blossomServers.slice(1) || [];
+  }
+
+  const reommendedNirrors = () => {
+    const activeMirrors = account?.blossomServers || [];
+
+    return (settings?.recomendedBlossomServers || []).filter(s => !activeMirrors.includes(s));
+  };
 
   return (
     <>
@@ -65,7 +114,7 @@ const Blossom: Component = () => {
 
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
             {intl.formatMessage(t.blossomPage.switchServer)}
-        d</div>
+        </div>
 
         <div
           class={styles.relayInput}
@@ -82,7 +131,7 @@ const Blossom: Component = () => {
           </button>
         </div>
 
-        <Show when={invalidCachingService()}>
+        <Show when={invalidServerUrl()}>
           <div class={styles.invalidInput}>
             {intl.formatMessage(tErrors.invalidRelayUrl)}
           </div>
@@ -95,6 +144,112 @@ const Blossom: Component = () => {
         >
           {intl.formatMessage(tActions.restoreBlossomServer)}
         </ButtonLink>
+
+      </div>
+
+      <div class={styles.settingsContentBorderless}>
+        <div class={`${styles.bigCaption}`}>
+          {intl.formatMessage(t.blossomPage.mediaMirrors)}
+        </div>
+
+        <CheckBox2
+          id={'toggleMirror'}
+          onChange={() => {
+            if (mirrorServers().length > 0) {
+              setConfirmNoMirrors(true);
+              return;
+            }
+
+            setHasMirrors(v => !v);
+          }}
+          checked={hasMirrors()}
+          label="Enable media mirrors"
+        />
+
+        <div class={styles.moderationDescription}>
+          {intl.formatMessage(t.blossomPage.mediaMirrorsDescription)}
+        </div>
+
+        <Show when={hasMirrors()}>
+          <For each={mirrorServers()}>
+            {mirror => (
+              <div class={styles.mirrorServer}>
+                <div class={styles.label}>
+                  {mirror}
+                </div>
+                <div class={styles.actions}>
+                  <ButtonSecondary
+                    onClick={() => account?.actions.addBlossomServers(mirror)}
+                    shrink={true}
+                  >
+                    set as media server
+                  </ButtonSecondary>
+                  <ButtonSecondary
+                    onClick={() => account?.actions.removeBlossomServers(mirror)}
+                    shrink={true}
+                  >
+                    remove
+                  </ButtonSecondary>
+                </div>
+              </div>
+            )}
+          </For>
+
+          <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
+              {intl.formatMessage(t.blossomPage.addMirror)}
+          </div>
+
+          <div
+            class={styles.relayInput}
+          >
+            <div class={styles.webIcon}></div>
+            <input
+              ref={addMirrorInput}
+              type="text"
+              placeholder={intl.formatMessage(tPlaceholders.blossomServerUrl)}
+              onChange={() => onAddMirrorInput()}
+            />
+            <button onClick={() => onAddMirrorInput()}>
+              <div class={styles.connectIcon}></div>
+            </button>
+          </div>
+
+          <div class={`${styles.settingsCaptionDarker} ${styles.secondCaption}`}>
+            {intl.formatMessage(t.blossomPage.suggestedMirrors)}
+          </div>
+
+          <For each={reommendedNirrors()}>
+            {mirror => (
+              <div class={styles.mirrorServer}>
+                <div class={styles.label}>
+                  {mirror}
+                </div>
+                <div class={styles.actions}>
+                  <ButtonSecondary
+                    onClick={() => account?.actions.appendBlossomServers(mirror)}
+                    shrink={true}
+                  >
+                    add this media mirror server
+                  </ButtonSecondary>
+                </div>
+              </div>
+            )}
+          </For>
+        </Show>
+
+        <ConfirmModal
+          open={confirmNoMirrors()}
+          title="Remove Media Mirrors?"
+          description="Are you sure? This will remove your mirror media servers."
+          confirmLabel="Yes"
+          abortLabel="No"
+          onConfirm={() => {
+            account?.actions.removeBlossomMirrors();
+            setHasMirrors(false);
+            setConfirmNoMirrors(false);
+          }}
+          onAbort={() => setConfirmNoMirrors(false)}
+        />
       </div>
     </>
   )

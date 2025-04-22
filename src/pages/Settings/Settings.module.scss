@@ -56,6 +56,16 @@
   align-items: center;
 }
 
+.settingsCaptionDarker {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+}
+
 .settingsDescription {
   color: var(--text-tertiary);
   font-size: 14px;
@@ -88,6 +98,12 @@
 
 .settingsContentPaddingOnly {
   padding-inline: 20px;
+}
+
+.rightFloater {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
 .settingsAccountCaption {
@@ -1174,4 +1190,36 @@
   gap: 16px;
   width: 100%;
   margin-top: 20px;
+}
+
+.mirrorServer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--background-input);
+
+  .address {
+
+  }
+
+  .actions {
+    display: flex;
+    gap: 12px;
+    >button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 28px;
+      padding-inline: 12px;
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 18px;
+
+      &:hover {
+        background-color: var(--subtile-devider);
+      }
+    }
+  }
+
 }
