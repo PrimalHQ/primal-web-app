@@ -26,6 +26,13 @@
   line-height: 18px;
 }
 
+.blossomMainServer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2px;
+}
+
 .resetRelays {
   margin-top: 12px;
   padding-inline: 20px;
@@ -1199,8 +1206,11 @@
   padding-block: 8px;
   border-bottom: 1px solid var(--background-input);
 
-  .address {
-
+  .label {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2px;
   }
 
   .actions {
@@ -1222,4 +1232,28 @@
     }
   }
 
+}
+
+.connected {
+  background-color: #66E205;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.disconnected {
+  background-color: #E20505;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.suspended {
+  background-color: var(--text-secondary);
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  margin-right: 8px;
 }

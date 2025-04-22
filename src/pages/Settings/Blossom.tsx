@@ -24,6 +24,8 @@ import MirrorSorter from '../../components/FeedSorter/MirrorSorter';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import { createStore } from 'solid-js/store';
+import { checkBlossomServer } from '../../utils';
 
 const Blossom: Component = () => {
 
@@ -38,12 +40,28 @@ const Blossom: Component = () => {
   const [hasMirrors, setHasMirrors] = createSignal(false);
   const [confirmNoMirrors, setConfirmNoMirrors] = createSignal(false);
 
+  const [serverAvailability, setServerAvailability] = createStore<Record<string, boolean>>({});
+
   createEffect(on(() => account?.blossomServers, (bServers) => {
     if (!bServers || hasMirrors()) return;
 
     const list = bServers.slice(1) || [];
     setHasMirrors(() => list.length > 0);
   }))
+
+  createEffect(on(() => account?.blossomServers, (bServers) => {
+    // Check server availability
+    if (!bServers) return;
+
+    checkServers(bServers);
+  }))
+
+  const checkServers = (servers: string[]) => {
+    for (let i = 0; i < servers.length;i++) {
+      const url = servers[i];
+      checkBlossomServer(url).then(available => setServerAvailability(() => ({ [url]: available })));
+    }
+  }
 
   const onSwitchServerInput = () => {
     if (!switchSeverInput || switchSeverInput.value === '') {
@@ -92,7 +110,11 @@ const Blossom: Component = () => {
   const reommendedNirrors = () => {
     const activeMirrors = account?.blossomServers || [];
 
-    return (settings?.recomendedBlossomServers || []).filter(s => !activeMirrors.includes(s));
+    const recomended =  (settings?.recomendedBlossomServers || []).filter(s => !activeMirrors.includes(s));
+
+    checkServers(recomended);
+
+    return recomended;
   };
 
   return (
@@ -108,7 +130,13 @@ const Blossom: Component = () => {
           {intl.formatMessage(t.blossomPage.mediaServer)}
         </div>
 
-        <div class={styles.label}>
+        <div class={`${styles.label} ${styles.blossomMainServer}`}>
+          <Show
+            when={account?.blossomServers[0] || primalBlossom}
+            fallback={<div class={styles.suspended}></div>}
+          >
+            <div class={styles.connected}></div>
+          </Show>
           {account?.blossomServers[0] || primalBlossom}
         </div>
 
@@ -175,6 +203,12 @@ const Blossom: Component = () => {
             {mirror => (
               <div class={styles.mirrorServer}>
                 <div class={styles.label}>
+                  <Show
+                    when={serverAvailability[mirror]}
+                    fallback={<div class={styles.suspended}></div>}
+                  >
+                    <div class={styles.connected}></div>
+                  </Show>
                   {mirror}
                 </div>
                 <div class={styles.actions}>
@@ -222,6 +256,12 @@ const Blossom: Component = () => {
             {mirror => (
               <div class={styles.mirrorServer}>
                 <div class={styles.label}>
+                  <Show
+                    when={serverAvailability[mirror]}
+                    fallback={<div class={styles.suspended}></div>}
+                  >
+                    <div class={styles.connected}></div>
+                  </Show>
                   {mirror}
                 </div>
                 <div class={styles.actions}>

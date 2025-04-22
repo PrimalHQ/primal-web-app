@@ -3,6 +3,8 @@ import { subsTo } from './sockets';
 import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
 import { DMContact, LeaderboardInfo, PaginationInfo } from './megaFeeds';
 import { isAndroid } from '@kobalte/utils';
+import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "blossom-client-sdk";
+import { signEvent } from './lib/nostrAPI';
 
 let debounceTimer: number = 0;
 
@@ -488,4 +490,20 @@ export const previousWord = (input: HTMLInputElement) => {
   const words = input.value.slice(0, carret).split(' ');
 
   return words.length > 0 ? words[words.length - 1] : '';
+}
+
+export const encodeAuthorizationHeader = (uploadAuth: SignedEvent) => {
+  return "Nostr " + btoa(unescape(encodeURIComponent(JSON.stringify(uploadAuth))));
+}
+
+export const checkBlossomServer = async (url: string) => {
+  // const encodedAuthHeader = encodeAuthorizationHeader(auth);
+  const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}`;
+
+  const blossomCheck = await fetchWithTimeout(uploadUrl, {
+    method: "GET",
+    timeout: 3_000,
+  });
+
+  return blossomCheck.status === 200;
 }

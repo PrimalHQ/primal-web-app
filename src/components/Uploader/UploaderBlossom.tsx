@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, onCleanup, onMount, Show } from 'solid-js';
 import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
@@ -7,7 +7,7 @@ import { createStore } from 'solid-js/store';
 import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUploaded } from '../../types/primal';
 import { readUploadTime, saveUploadTime } from '../../lib/localStore';
 import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from '../../lib/media';
-import { sha256, uuidv4 } from '../../utils';
+import { encodeAuthorizationHeader, sha256, uuidv4 } from '../../utils';
 import { Kind, primalBlossom, uploadLimit } from '../../constants';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { useAccountContext } from '../../contexts/AccountContext';
@@ -15,7 +15,7 @@ import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { getReplacableEvent } from '../../lib/notes';
 
-import { BlossomClient, SignedEvent, BlobDescriptor } from "blossom-client-sdk";
+import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "blossom-client-sdk";
 import { signEvent } from '../../lib/nostrAPI';
 import { logInfo, logWarning } from '../../lib/logger';
 import { useToastContext } from '../Toaster/Toaster';
@@ -59,9 +59,6 @@ const UploaderBlossom: Component<{
     return account?.blossomServers[0] || primalBlossom;
   }
 
-  const encodeAuthorizationHeader = (uploadAuth: SignedEvent) => {
-    return "Nostr " + btoa(unescape(encodeURIComponent(JSON.stringify(uploadAuth))));
-  }
 
   const xhrOnProgress = (e: ProgressEvent) => {
     if (e.lengthComputable) {
@@ -100,6 +97,7 @@ const UploaderBlossom: Component<{
       file: undefined,
       id: undefined,
       progress: 0,
+      xhr: undefined,
       uploadLimit: uploadLimit.regular,
       auth: undefined,
     }));
@@ -183,16 +181,72 @@ const UploaderBlossom: Component<{
     const xhr = uploadState.xhr;
     if (!xhr) return;
 
-    const auth = await BlossomClient.createUploadAuth(signEvent, file, { message: 'media upload'});
-    setUploadState('auth', () => ({ ...auth }));
+    try {
+      const auth = await BlossomClient.createUploadAuth(signEvent, file, { message: 'media upload' });
 
-    const encodedAuthHeader = encodeAuthorizationHeader(auth);
+      setUploadState('auth', () => ({ ...auth }));
 
-    const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}/upload`;
+      const encodedAuthHeader = encodeAuthorizationHeader(auth);
 
+      const mediaUrl = url.endsWith('/') ? `${url}media` : `${url}/media`;
+      const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}/upload`;
+
+      const fileSha = await sha256(file);
+
+      let headers = {
+        "X-SHA-256": fileSha,
+        "Authorization": encodedAuthHeader,
+        'Content-Type': file.type,
+      }
+
+      let checkHeaders: Record<string, string> = {
+        ...headers,
+        "X-Content-Length": `${file.size}`,
+      };
+
+      if (file.type) checkHeaders["X-Content-Type"] = file.type;
+
+      const mediaCheck = await fetchWithTimeout(mediaUrl, {
+        method: "HEAD",
+        headers: checkHeaders,
+        timeout: 3_000,
+      });
+
+      if (mediaCheck.status === 200) {
+        sendFile(xhr, mediaUrl, file, headers);
+        return;
+      }
+
+      const uploadCheck = await fetchWithTimeout(uploadUrl, {
+        method: "HEAD",
+        headers: checkHeaders,
+        timeout: 3_000,
+      });
+
+      if (uploadCheck.status === 200) {
+        sendFile(xhr, uploadUrl, file, headers);
+        return;
+      }
+
+      // toaster?.sendWarning(`Failed to upload to ${url}`);
+      resetUpload();
+      props.onFail && props.onFail(`Failed to upload to ${url}`);
+    } catch (e) {
+      resetUpload();
+      props.onCancel && props.onCancel();
+    }
+  }
+
+  const sendFile = (xhr: XMLHttpRequest, uploadUrl: string, file: File, headers: Record<string, string>) => {
     xhr.open('PUT', uploadUrl, true);
-    xhr.setRequestHeader("Authorization", encodedAuthHeader);
-    xhr.setRequestHeader('Content-Type', file.type);
+
+    const headerNames = Object.keys(headers);
+
+    for (let i = 0; i < headerNames.length; i++) {
+      const name = headerNames[i];
+      xhr.setRequestHeader(name, headers[name]);
+    }
+
     xhr.upload.addEventListener("progress", xhrOnProgress);
     xhr.addEventListener("load", xhrOnLoad);
     xhr.addEventListener("error", xhrOnError);
@@ -201,11 +255,11 @@ const UploaderBlossom: Component<{
     xhr.send(file);
   }
 
-  createEffect(() => {
-    if (props.file !== undefined) {
-      uploadFile(props.file);
+  createEffect(on(() => props.file, (file) => {
+    if (file !== undefined) {
+      uploadFile(file);
     }
-  })
+  }))
 
   return (
     <div>
