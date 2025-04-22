@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, on, Show } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -33,32 +33,44 @@ const Muted: Component = () => {
 
   const user = (pubkey: string) => mutedUsers[pubkey] || { pubkey, npub: hexToNpub(pubkey) };
 
-  createEffect(() => {
-    if (account && account.isKeyLookupDone) {
+  createEffect(on(() => account?.muted, (muted, prev) => {
+    if (!muted || muted.length === 0) return;
 
-      let pubkeys: string[] = [];
-      let users: Record<string, PrimalUser> = {};
+    let diff: boolean = prev === undefined;
 
-      const unsub = subsTo(mutedMetadataSubId, {
-        onEvent: (_, content) => {
-          if (content && [Kind.MuteList].includes(content?.kind || 0)) {
-            // @ts-ignore
-            pubkeys = content.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
-          }
-          if (content?.kind === Kind.Metadata) {
-            users[content.pubkey] = convertToUser(content, content.pubkey);
-          }
-        },
-        onEose: () => {
-          setMutedUsers(() => ({ ...users }));
-          setIsFetching(false);
-          unsub();
-        },
-      });
-
-      getUserProfiles(account.muted, mutedMetadataSubId);
+    if (!diff) {
+      diff = muted.length !== (prev!.length || 0);
     }
-  });
+
+    if (!diff) {
+      diff = muted.some((pk) => !prev!.includes(pk));
+    }
+
+    if (!diff) return;
+
+    let pubkeys: string[] = [];
+    let users: Record<string, PrimalUser> = {};
+
+    const unsub = subsTo(mutedMetadataSubId, {
+      onEvent: (_, content) => {
+        if (content && [Kind.MuteList].includes(content?.kind || 0)) {
+          // @ts-ignore
+          pubkeys = content.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+        }
+        if (content?.kind === Kind.Metadata) {
+          users[content.pubkey] = convertToUser(content, content.pubkey);
+        }
+      },
+      onEose: () => {
+        console.log('USERS: ', users)
+        setMutedUsers(() => ({ ...users }));
+        setIsFetching(false);
+        unsub();
+      },
+    });
+
+    getUserProfiles(muted, mutedMetadataSubId);
+  }));
 
   const unMuteUser = (user: PrimalUser) => {
     account?.actions.removeFromMuteList(user.pubkey);
