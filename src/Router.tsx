@@ -159,7 +159,7 @@ const AppRouter: Component = () => {
             <Route path="/filters" component={Moderation} />
             <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
-            <Route path="/blossom" component={Blossom} />
+            <Route path="/uploads" component={Blossom} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />

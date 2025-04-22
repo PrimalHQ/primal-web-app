@@ -49,7 +49,7 @@ const Menu: Component = () => {
         </A>
 
         <Show when={account?.hasPublicKey()}>
-          <A href="/settings/blossom">
+          <A href="/settings/uploads">
             {intl.formatMessage(t.blossom)}
             <div class={styles.chevron}></div>
           </A>
