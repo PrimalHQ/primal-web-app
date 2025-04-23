@@ -317,6 +317,7 @@
   line-height: 20px;
   text-transform: uppercase;
   text-align: center;
+  padding-block: 20px;
 }
 
 .mutedUser {
@@ -1256,4 +1257,63 @@
   height: 6px;
   border-radius: 2px;
   margin-right: 8px;
+}
+
+
+.settingsTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-inline: 8px;
+  // background-color: var(--background-card);
+  width: 100%;
+  border-radius: 0;
+  padding-top: 14px;
+  border-bottom: 1px solid var(--devider);
+  border-top: none;
+}
+
+.settingsTab {
+  position: relative;
+  display: inline-block;
+  padding-inline: 14px;
+  padding-block: 2px;
+  border: none;
+  background: none;
+  width: fit-content;
+  height: 40px;
+  margin: 0;
+  margin-bottom: 12px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.settingsTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 62px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
+
+.label {
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.wordInput {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin: 20px;
 }

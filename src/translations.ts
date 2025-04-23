@@ -297,6 +297,11 @@ export const actions = {
     defaultMessage: 'Add {name} to your mute list?',
     description: 'Label for mute user confirmation',
   },
+  muteThreadConfirm: {
+    id: 'actions.muteUserConfirm',
+    defaultMessage: 'Mute this thread?',
+    description: 'Label for mute user confirmation',
+  },
   unmute: {
     id: 'actions.unmute',
     defaultMessage: 'unmute',
@@ -429,6 +434,16 @@ export const actions = {
       id: 'actions.noteContext.unmuteAuthor',
       defaultMessage: 'Unmute user',
       description: 'Label for unmuting user from context menu',
+    },
+    muteThread: {
+      id: 'actions.noteContext.muteThread',
+      defaultMessage: 'Mute Thread',
+      description: 'Label for muting thread from context menu',
+    },
+    unmuteThread: {
+      id: 'actions.noteContext.unmuteThread',
+      defaultMessage: 'Unmute Thread',
+      description: 'Label for unmuting thread from context menu',
     },
     editArticle: {
       id: 'actions.noteContext.editArticle',
@@ -1589,12 +1604,27 @@ export const settings = {
   muted: {
     title: {
       id: 'settings.muted.title',
-      defaultMessage: 'Muted Accounts',
+      defaultMessage: 'Muted',
       description: 'Title of the muted accounts settings sub-page',
     },
-    empty: {
-      id: 'settings.muted.empty',
+    emptyUsers: {
+      id: 'settings.muted.emptyUsers',
       defaultMessage: 'No muted users',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyWords: {
+      id: 'settings.muted.emptyWords',
+      defaultMessage: 'No muted words',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyHashtags: {
+      id: 'settings.muted.emptyHashtags',
+      defaultMessage: 'No muted hashtags',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyThreads: {
+      id: 'settings.muted.emptyThreads',
+      defaultMessage: 'No muted threads',
       description: 'Caption indicating that there are no muted users',
     },
     emptyOther: {

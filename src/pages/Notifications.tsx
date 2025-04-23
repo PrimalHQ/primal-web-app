@@ -229,7 +229,6 @@ const Notifications: Component = () => {
         if ([Kind.Highlight].includes(content.kind)) {
           const message = content as NostrNoteContent;
 
-          console.log('NOTIF HIGHLIGHT: ', message)
           setRelatedNotes('page', 'highlights',
             (msgs) => [ ...msgs, { ...message }]
           );

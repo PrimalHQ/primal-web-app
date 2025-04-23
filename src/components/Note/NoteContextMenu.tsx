@@ -33,6 +33,7 @@ const NoteContextMenu: Component<{
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
+  const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -73,6 +74,16 @@ const NoteContextMenu: Component<{
 
   const doUnmuteUser = () => {
     account?.actions.removeFromMuteList(note()?.pubkey);
+    props.onClose();
+  };
+
+  const doMuteThread = () => {
+    account?.actions.addToMuteList(note()?.id, 'thread');
+    props.onClose();
+  };
+
+  const doUnmuteThread = () => {
+    account?.actions.removeFromMuteList(note()?.id, 'thread');
     props.onClose();
   };
 
@@ -213,54 +224,67 @@ const NoteContextMenu: Component<{
       note().user.nip05.endsWith('primal.net');
   }
 
-  const noteContextForEveryone: MenuItem[] = [
-    {
-      label: intl.formatMessage(tActions.noteContext.reactions),
-      action: () => {
-        props.data?.openReactions && props.data?.openReactions();
-        props.onClose()
+  const noteContextForEveryone: () => MenuItem[] = () => {
+    const isMuted = account?.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
+
+    return [
+      {
+        label: isMuted ? intl.formatMessage(tActions.noteContext.unmuteThread) : intl.formatMessage(tActions.noteContext.muteThread),
+        action: () => {
+          isMuted ? doUnmuteThread() : setConfirmMuteThread(true);
+          props.onClose()
+        },
+        icon: 'mute_thread',
+        warning: true,
       },
-      icon: 'heart',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.zap),
-      action: () => {
-        props.data?.openCustomZap && props.data?.openCustomZap();
-        props.onClose()
+      {
+        label: intl.formatMessage(tActions.noteContext.reactions),
+        action: () => {
+          props.data?.openReactions && props.data?.openReactions();
+          props.onClose()
+        },
+        icon: 'heart',
       },
-      icon: 'feed_zap',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyLink),
-      action: copyNoteLink,
-      icon: 'copy_note_link',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyText),
-      action: copyNoteText,
-      icon: 'copy_note_text',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyId),
-      action: copyNoteId,
-      icon: 'copy_note_id',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyRaw),
-      action: copyRawData,
-      icon: 'copy_raw_data',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.breadcast),
-      action: broadcastNote,
-      icon: 'broadcast',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyPubkey),
-      action: copyUserNpub,
-      icon: 'copy_pubkey',
-    },
-  ];
+      {
+        label: intl.formatMessage(tActions.noteContext.zap),
+        action: () => {
+          props.data?.openCustomZap && props.data?.openCustomZap();
+          props.onClose()
+        },
+        icon: 'feed_zap',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyLink),
+        action: copyNoteLink,
+        icon: 'copy_note_link',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyText),
+        action: copyNoteText,
+        icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyId),
+        action: copyNoteId,
+        icon: 'copy_note_id',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyRaw),
+        action: copyRawData,
+        icon: 'copy_raw_data',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.breadcast),
+        action: broadcastNote,
+        icon: 'broadcast',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyPubkey),
+        action: copyUserNpub,
+        icon: 'copy_pubkey',
+      },
+    ];
+  };
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
     const isMuted = account?.muted.includes(note()?.user.pubkey);
@@ -305,8 +329,8 @@ const NoteContextMenu: Component<{
   };
 
   const noteContext = () => account?.publicKey !== note()?.pubkey ?
-      [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
-      [ ...noteContextForMe(), ...noteContextForEveryone];
+      [ ...noteContextForEveryone(), ...noteContextForOtherPeople()] :
+      [ ...noteContextForMe(), ...noteContextForEveryone()];
 
   let context: HTMLDivElement | undefined;
 
@@ -330,6 +354,16 @@ const NoteContextMenu: Component<{
           setConfirmMuteUser(false);
         }}
         onAbort={() => setConfirmMuteUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteThread()}
+        description={intl.formatMessage(tActions.muteThreadConfirm)}
+        onConfirm={() => {
+          doMuteThread();
+          setConfirmMuteThread(false);
+        }}
+        onAbort={() => setConfirmMuteThread(false)}
       />
 
       <PrimalMenu

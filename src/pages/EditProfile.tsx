@@ -226,7 +226,35 @@ const EditProfile: Component = () => {
       }
     });
 
-    const oldProfile = profile?.userProfile || {};
+    const userProfile: Record<string, any> = JSON.parse(profile?.userProfile?.msg?.content || '{}');
+
+    let oldProfile: Record<string, any> = userProfile ? {
+      'name': userProfile.name,
+      'about': userProfile.about,
+      'lud16': userProfile.lud16,
+      'nip05': userProfile.nip05,
+      'picture': userProfile.picture,
+    } : {};
+
+    if (userProfile.display_name) {
+      oldProfile.display_name = userProfile.display_name
+    }
+
+    if (userProfile.website) {
+      oldProfile.website = userProfile.website
+    }
+
+    if (userProfile.banner) {
+      oldProfile.banner = userProfile.banner
+    }
+
+    if (userProfile.bot) {
+      oldProfile.bot = userProfile.bot
+    }
+
+    if (userProfile.bithday) {
+      oldProfile.bithday = userProfile.bithday
+    }
 
     const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.activeRelays, account.relaySettings);
 

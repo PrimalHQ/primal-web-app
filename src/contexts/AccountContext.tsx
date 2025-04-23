@@ -109,8 +109,8 @@ export type AccountContextStore = {
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     removeFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
     quoteNote: (noteId: string | undefined) => void,
-    addToMuteList: (pubkey: string) => void,
-    removeFromMuteList: (pubkey: string, then?: () => void) => void,
+    addToMuteList: (pubkey: string, muteKind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => void,
+    removeFromMuteList: (pubkey: string, muteKind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => void,
     addRelay: (url: string) => void,
     removeRelay: (url: string) => void,
     setConnectToPrimaryRelays: (flag: boolean) => void,
@@ -1113,8 +1113,8 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('quotedNote', () => noteId);
   }
 
-  const addToMuteList = (pubkey: string) => {
-    if (!store.publicKey || !store.muted || store.muted.includes(pubkey)) {
+  const addToMuteList = (pubkey: string, kind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success: boolean) => void) => {
+    if (!store.publicKey /*|| !store.muted || store.muted.includes(pubkey) */) {
       return;
     }
 
@@ -1125,6 +1125,8 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
     }
+
+    const muteKind = kind || 'user';
 
     const unsub = subsTo(`before_mute_${APP_ID}`, {
       onEvent: (_, content) => {
@@ -1137,7 +1139,11 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
       },
       onEose: async () => {
-        if (!store.muted.includes(pubkey)) {
+        unsub();
+
+        if (muteKind === 'user') {
+          if (!store.muted.includes(pubkey)) return;
+
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...unwrap(store.muted), pubkey];
 
@@ -1152,17 +1158,39 @@ export function AccountProvider(props: { children: JSXElement }) {
             saveMuted(store.publicKey, muted, date);
             note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
           }
+
+          then && then(success);
         }
 
-        unsub();
+        if (['word', 'hashtag', 'thread'].includes(muteKind)) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+
+          const flags: Record<string, string> = {
+            word: 'word',
+            hashtag: 't',
+            thread: 'e',
+          }
+
+          const tags = [ ...unwrap(store.mutedTags), [flags[muteKind], pubkey]];
+
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+          if (success) {
+            updateStore('mutedTags', () => tags);
+            updateStore('mutedSince', () => date);
+            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+          }
+
+          then && then(success);
+        }
       },
     });
 
     getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
   };
 
-  const removeFromMuteList = (pubkey: string, then?: () => void) => {
-    if (!store.publicKey || !store.muted || !store.muted.includes(pubkey)) {
+  const removeFromMuteList = (pubkey: string, kind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => {
+    if (!store.publicKey /* || !store.muted || !store.muted.includes(pubkey)*/ ) {
       return;
     }
 
@@ -1173,6 +1201,8 @@ export function AccountProvider(props: { children: JSXElement }) {
         return;
       }
     }
+
+    const muteKind = kind || 'user';
 
     const unsub = subsTo(`before_unmute_${APP_ID}`, {
       onEvent: (_, content) => {
@@ -1185,7 +1215,11 @@ export function AccountProvider(props: { children: JSXElement }) {
         }
       },
       onEose: async () => {
-        if (store.muted.includes(pubkey)) {
+        unsub();
+
+        if (muteKind === 'user') {
+          if (!store.muted.includes(pubkey)) return;
+
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = unwrap(store.muted).filter(m => m !== pubkey);
 
@@ -1200,15 +1234,37 @@ export function AccountProvider(props: { children: JSXElement }) {
             saveMuted(store.publicKey, muted, date);
             note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
           }
+
+          then && then(success);
         }
 
-        then && then();
-        unsub();
+        if (['word', 'hashtag', 'thread'].includes(muteKind)) {
+          const date = Math.floor((new Date()).getTime() / 1000);
+
+          const flags: Record<string, string> = {
+            word: 'word',
+            hashtag: 't',
+            thread: 'e',
+          }
+
+          const tags = unwrap(store.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey);
+
+          const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+          if (success) {
+            updateStore('mutedTags', () => tags);
+            updateStore('mutedSince', () => date);
+            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+          }
+
+          then && then(success);
+        }
       }
     });
 
     getProfileMuteList(store.publicKey, `before_unmute_${APP_ID}`);
   };
+
 
   const changeCachingService = (url?: string) => {
     if (!url) {
