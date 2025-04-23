@@ -284,7 +284,7 @@ const ProfileDesktop: Component = () => {
       return;
     }
 
-    account.actions.removeFromMuteList(profile.profileKey, () => setProfile(profile.profileKey));
+    account.actions.removeFromMuteList(profile.profileKey, 'user', () => setProfile(profile.profileKey));
   };
 
   const isFollowingMute = (pk: string | undefined) => {

@@ -1114,6 +1114,7 @@ export function AccountProvider(props: { children: JSXElement }) {
   }
 
   const addToMuteList = (pubkey: string, kind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success: boolean) => void) => {
+
     if (!store.publicKey /*|| !store.muted || store.muted.includes(pubkey) */) {
       return;
     }
@@ -1128,7 +1129,9 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     const muteKind = kind || 'user';
 
-    const unsub = subsTo(`before_mute_${APP_ID}`, {
+    const subId = `before_mute_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         if (content &&
           (content.kind === Kind.MuteList || content.kind === Kind.CategorizedPeople) &&
@@ -1142,7 +1145,7 @@ export function AccountProvider(props: { children: JSXElement }) {
         unsub();
 
         if (muteKind === 'user') {
-          if (!store.muted.includes(pubkey)) return;
+          if (store.muted.includes(pubkey)) return;
 
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...unwrap(store.muted), pubkey];
@@ -1186,7 +1189,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       },
     });
 
-    getProfileMuteList(store.publicKey, `before_mute_${APP_ID}`);
+    getProfileMuteList(store.publicKey, subId);
   };
 
   const removeFromMuteList = (pubkey: string, kind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => {

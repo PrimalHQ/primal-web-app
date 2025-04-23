@@ -75,7 +75,7 @@ const ProfileTabs: Component<{
       return;
     }
 
-    account.actions.removeFromMuteList(pk, () => {
+    account.actions.removeFromMuteList(pk, 'user', () => {
       props.setProfile && props.setProfile(pk);
       onChangeValue(currentTab());
     });
