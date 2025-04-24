@@ -266,7 +266,7 @@ const Note: Component<NoteProps> = (props) => {
       },
       openReactionModal,
       () => {
-        props.onRemove && props.onRemove(props.article.noteId);
+        props.onRemove && props.onRemove(props.note.noteId);
       },
     );
   }

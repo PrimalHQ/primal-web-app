@@ -1,5 +1,5 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { A, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import { batch, Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
@@ -46,6 +46,7 @@ import ArticleSkeleton from "../components/Skeleton/ArticleSkeleton";
 import { useMediaContext } from "../contexts/MediaContext";
 import { Transition } from "solid-transition-group";
 import { fetchReadThread } from "../megaFeeds";
+import { useToastContext } from "../components/Toaster/Toaster";
 
 export type LongFormData = {
   title: string,
@@ -128,6 +129,8 @@ const Longform: Component< { naddr: string } > = (props) => {
   const settings = useSettingsContext();
   const params = useParams();
   const intl = useIntl();
+  const toast = useToastContext();
+  const navigate = useNavigate();
 
   // const [article, setArticle] = createStore<LongFormData>({...emptyArticle});
   const [store, updateStore] = createStore<LongformThreadStore>({ ...emptyStore })
@@ -700,6 +703,10 @@ const Longform: Component< { naddr: string } > = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        toast?.sendSuccess('Delete request sent');
+        navigate('/reads');
+      },
     );
   }
 

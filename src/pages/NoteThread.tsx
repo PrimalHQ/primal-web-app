@@ -26,12 +26,14 @@ import { fetchNotes } from '../handleNotes';
 import { isIOS, isPhone } from '../utils';
 import { logWarning } from '../lib/logger';
 import { noteIdToHex } from '../lib/keys';
+import { useToastContext } from '../components/Toaster/Toaster';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
   const account = useAccountContext();
   const intl = useIntl();
   const navigate = useNavigate();
+  const toast = useToastContext();
 
   let repliesHolder: HTMLDivElement | undefined;
 
@@ -261,6 +263,10 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                     note={primaryNote() as PrimalNote}
                     noteType="primary"
                     quoteCount={threadContext?.quoteCount}
+                    onRemove={(id: string) => {
+                      toast?.sendSuccess('Delete request sent');
+                      navigate('/home');
+                    }}
                   />
                   <Show when={account?.hasPublicKey()}>
                     <ReplyToNote
