@@ -472,11 +472,9 @@ const Note: Component<NoteProps> = (props) => {
       </Match>
 
       <Match when={isPhone() && noteType() === 'feed'}>
-        <a
+        <div
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
-          href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
           draggable={false}
@@ -486,7 +484,10 @@ const Note: Component<NoteProps> = (props) => {
               <NoteRepostHeader note={props.note} />
             </Show>
           </div>
-          <div class={styles.userHeader}>
+          <a
+            class={styles.userHeader}
+            href={app?.actions.profileLink(props.note.user.npub) || ''}
+          >
             {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
               <Avatar user={props.note.user} size="xs" />
             {/* </A> */}
@@ -502,18 +503,22 @@ const Note: Component<NoteProps> = (props) => {
                 onClick={onContextMenuTrigger}
               />
             </div>
-          </div>
+          </a>
 
           <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
-          <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
+          <a
+            class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}
+            href={!props.onClick ? noteLinkId() : ''}
+            onClick={() => navToThread(props.note)}
+          >
             <ParsedNote
               note={props.note}
               shorten={props.shorten}
               width={window.innerWidth}
               margins={45}
             />
-          </div>
+          </a>
 
           <NoteTopZapsCompact
             note={props.note}
@@ -530,15 +535,13 @@ const Note: Component<NoteProps> = (props) => {
             onZapAnim={addTopZapFeed}
             size={size()}
           />
-        </a>
+        </div>
       </Match>
 
       <Match when={noteType() === 'thread' || noteType() === 'feed'}>
-        <a
+        <div
           id={props.id}
           class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}
-          href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
           draggable={false}
@@ -550,9 +553,9 @@ const Note: Component<NoteProps> = (props) => {
           </div>
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
+              <a href={app?.actions.profileLink(props.note.user.npub) || ''}>
                 <Avatar user={props.note.user} size="vs" />
-              {/* </A> */}
+              </a>
               <Show
                 when={props.parent}
               >
@@ -561,10 +564,14 @@ const Note: Component<NoteProps> = (props) => {
             </div>
 
             <div class={styles.rightSide}>
-              <NoteAuthorInfo
-                author={props.note.user}
-                time={props.note.post.created_at}
-              />
+              <a
+                href={app?.actions.profileLink(props.note.user.npub) || ''}
+              >
+                <NoteAuthorInfo
+                  author={props.note.user}
+                  time={props.note.post.created_at}
+                />
+              </a>
 
               <div class={styles.upRightFloater}>
                 <NoteContextTrigger
@@ -575,7 +582,11 @@ const Note: Component<NoteProps> = (props) => {
 
               <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
-              <div class={styles.message}>
+              <a
+                class={styles.message}
+                href={!props.onClick ? noteLinkId() : ''}
+                onClick={() => navToThread(props.note)}
+              >
                 <ParsedNote
                   note={props.note}
                   shorten={props.shorten}
@@ -583,7 +594,7 @@ const Note: Component<NoteProps> = (props) => {
                   margins={58}
                   footerSize="short"
                 />
-              </div>
+              </a>
 
               <NoteTopZapsCompact
                 note={props.note}
@@ -604,7 +615,7 @@ const Note: Component<NoteProps> = (props) => {
               </div>
             </div>
           </div>
-        </a>
+        </div>
       </Match>
 
       <Match when={noteType() === 'reaction'}>
