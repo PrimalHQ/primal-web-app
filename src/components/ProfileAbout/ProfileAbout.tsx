@@ -96,6 +96,14 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
         }
       }
 
+      const lastChar = token[token.length - 1];
+
+      if (isInterpunction(lastChar)) {
+        parseAboutToken(token.slice(0, -1));
+        parseAboutToken(lastChar);
+        return;
+      }
+
       lastSignificantContent = 'link';
       updateAboutContent('link', token);
       return;
