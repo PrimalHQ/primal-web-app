@@ -364,7 +364,14 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
       </Show>
 
       <div class={styles.header}>
-        <div class={styles.userInfo}>
+        <div
+          class={styles.userInfo}
+          onClick={(e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            props.onClick && props.onClick(app?.actions.profileLink(props.article.user.npub) || '');
+          }}
+        >
           <Avatar user={props.article.user} size="micro"/>
           <div class={styles.userName}>{userName(props.article.user)}</div>
           <VerificationCheck user={props.article.user} />

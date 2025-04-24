@@ -85,6 +85,7 @@ const ArticleFooter: Component<{
 
   const showRepostMenu = (e: MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     props.updateState('isRepostMenuVisible', () => true);
   };
 
@@ -137,7 +138,10 @@ const ArticleFooter: Component<{
     }
   };
 
-  const doReply = () => {};
+  const doReply = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const doLike = async (e: MouseEvent) => {
     e.preventDefault();
@@ -392,7 +396,10 @@ const ArticleFooter: Component<{
 
       <ArticleFooterActionButton
         note={props.note}
-        onClick={(e: MouseEvent) => e.preventDefault()}
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         onMouseDown={startZap}
         onMouseUp={commitZap}
         onTouchStart={startZap}

@@ -148,6 +148,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
       <ButtonGhost
         onClick={(e: MouseEvent) => {
           e.preventDefault();
+          e.stopPropagation();
 
           doBookmark(isBookmarked());
 

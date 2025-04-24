@@ -168,6 +168,7 @@ const Layout: Component<any> = (props) => {
 
         <ConfirmModal
           open={app?.showConfirmModal}
+          setOpen={app?.actions.closeConfirmModal}
           title={app?.confirmInfo?.title}
           description={app?.confirmInfo?.description}
           confirmLabel={app?.confirmInfo?.confirmLabel}
