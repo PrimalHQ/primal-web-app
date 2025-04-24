@@ -129,6 +129,7 @@ type NotificationItemProps = {
 };
 
 export const likes = [
+  "🤙",
   "❤️",
   "🧡",
   "💛",
@@ -149,7 +150,6 @@ export const likes = [
   "💌",
   "💘",
   "💑",
-  "🤙",
 ];
 
 const NotificationItemOld: Component<NotificationItemProps> = (props) => {
@@ -253,11 +253,17 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
       return;
     }
 
+    // Emoji not found
+    if (r.startsWith(':') && r.endsWith(':')) {
+      setReactionIcon(likes[0]);
+      setIsLike(false);
+      return;
+    }
+
     setReactionIcon(r);
     setIsLike(false);
 
   });
-
 
   const isReply = () => {
     return [
