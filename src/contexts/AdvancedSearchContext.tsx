@@ -64,6 +64,7 @@ export type AdvancedSearchContextStore = {
     findFilteredUserByNpub: (npub: string) => void,
     clearSearch: () => void,
     setSearchCommand: (command: string) => void,
+    removeEvent: (id: string, kind: 'reads' | 'notes') => void,
   },
 }
 
@@ -92,6 +93,10 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'reads' | 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.id !== id));
+  }
 
   const findUserByNupub = (npub: string) => {
     const subId = `find_npub_${APP_ID}`;
@@ -385,6 +390,7 @@ const [store, updateStore] = createStore<AdvancedSearchContextStore>({
     findFilteredUserByNpub,
     clearSearch,
     setSearchCommand,
+    removeEvent,
   },
 });
 

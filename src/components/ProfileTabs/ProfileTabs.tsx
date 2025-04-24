@@ -402,7 +402,15 @@ const ProfileTabs: Component<{
                     <div>
                       <For each={profile?.articles}>
                         {article => (
-                          <div class="animated"><ArticlePreview article={article} onClick={navigate} /></div>
+                          <div class="animated">
+                            <ArticlePreview
+                              article={article}
+                              onClick={navigate}
+                              onRemove={(id: string) => {
+                                profile?.actions.removeEvent(id, 'articles');
+                              }}
+                            />
+                          </div>
                         )}
                       </For>
                       <Paginator
@@ -474,7 +482,15 @@ const ProfileTabs: Component<{
                     <div>
                       <For each={profile?.notes}>
                         {note => (
-                          <div class="animated"><Note note={note} shorten={true} /></div>
+                          <div class="animated">
+                            <Note
+                              note={note}
+                              shorten={true}
+                              onRemove={(id: string) => {
+                                profile?.actions.removeEvent(id, 'notes');
+                              }}
+                            />
+                          </div>
                         )}
                       </For>
                       <Paginator
@@ -546,7 +562,15 @@ const ProfileTabs: Component<{
                     <div>
                       <For each={profile?.replies}>
                         {reply => (
-                          <div class="animated"><Note note={reply} shorten={true} /></div>
+                          <div class="animated">
+                            <Note
+                              note={reply}
+                              shorten={true}
+                              onRemove={(id: string) => {
+                                profile?.actions.removeEvent(id, 'replies');
+                              }}
+                            />
+                          </div>
                         )}
                       </For>
                       <Paginator

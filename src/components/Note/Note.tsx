@@ -58,6 +58,7 @@ export type NoteProps = {
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
+  onRemove?: (id: string) => void,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -264,6 +265,9 @@ const Note: Component<NoteProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

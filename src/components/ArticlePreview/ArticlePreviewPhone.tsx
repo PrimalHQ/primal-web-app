@@ -40,6 +40,7 @@ const ArticlePreviewPhone: Component<{
   hideContext?: boolean,
   bordered?: boolean,
   noBorder?: boolean,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
@@ -219,6 +220,9 @@ const ArticlePreviewPhone: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

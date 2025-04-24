@@ -920,6 +920,7 @@ export type PrimalDraft = {
   pubkey: string,
   created_at: number,
   msg: NostrNoteContent,
+  noteId: string,
 }
 
 export type PrimalFeed = {

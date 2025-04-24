@@ -168,7 +168,13 @@ const Home: Component = () => {
               <For each={context?.notes} >
                 {note => (
                   <div class="animated">
-                    <Note note={note} shorten={true} />
+                    <Note
+                      note={note}
+                      shorten={true}
+                      onRemove={(id: string) => {
+                        context?.actions.removeEvent(id, 'notes');
+                      }}
+                    />
                   </div>
                 )}
               </For>

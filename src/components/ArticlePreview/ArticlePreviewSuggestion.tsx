@@ -212,6 +212,9 @@ const ArticlePreviewSuggestion: Component<ArticleProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

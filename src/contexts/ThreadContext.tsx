@@ -71,6 +71,7 @@ export type ThreadContextStore = {
     fetchTopZaps: (noteId: string) => void,
     fetchUsers: (pubkeys: string[]) => void,
     insertNote: (note: PrimalNote) => void,
+    removeEvent: (id: string, kind: 'notes') => void,
   }
 }
 
@@ -106,6 +107,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
+  }
 
   const saveNotes = (newNotes: PrimalNote[]) => {
     const oldNotesIds = store.notes.map(n => n.post.id);
@@ -494,6 +499,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       fetchTopZaps,
       fetchUsers,
       insertNote,
+      removeEvent,
     },
   });
 

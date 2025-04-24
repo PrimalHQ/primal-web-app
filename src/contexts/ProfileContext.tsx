@@ -165,7 +165,7 @@ export type ProfileContextStore = {
     updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
     resetScroll: () => void,
     updateProfile: (pubkey: string) => void,
-    removeEvent: (id: string, kind: 'articles' | 'drafts') => void,
+    removeEvent: (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies') => void,
   }
 }
 
@@ -416,6 +416,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       for (let i = 0; i < drafts.length; i++) {
         let draft = drafts[i];
         draft.plain = await decrypt44(pubkey, draft.content);
+        draft.noteId = `ndraft1${draft.id}`
       }
 
       const sortedDrafts = drafts.filter(d => !store.drafts.find(sd => sd.id === d.id));
@@ -455,12 +456,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingGallery', () => false);
       return;
     }
-
-
   }
 
-  const removeEvent = (id: string, kind: 'articles' | 'drafts') => {
-    updateStore(kind, (drs) => drs.filter(d => d.id !== id));
+  const removeEvent = (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
   }
 
   const getProfileMegaFeedNextPage = async (pubkey: string | undefined, tab: string) => {

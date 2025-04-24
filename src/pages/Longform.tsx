@@ -1150,7 +1150,16 @@ const Longform: Component< { naddr: string } > = (props) => {
 
             <div>
               <For each={store.replies}>
-                {reply => <Note note={reply} noteType='thread' shorten={true} size="xwide" defaultParentAuthor={store.article?.user} />}
+                {reply => <Note
+                  note={reply}
+                  noteType='thread'
+                  shorten={true}
+                  size="xwide"
+                  defaultParentAuthor={store.article?.user}
+                  onRemove={(id: string) => {
+                    updateStore('replies', (rs) => rs.filter(r => r.noteId !== id));
+                  }}
+                />}
               </For>
             </div>
           </div>

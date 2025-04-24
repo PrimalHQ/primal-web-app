@@ -35,7 +35,8 @@ const ArticleCompactPreview: Component<{
   hideContext?: boolean,
   bordered?: boolean,
   noLinks?: string,
-  onClick?: () => {},
+  onClick?: () => void,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
@@ -216,6 +217,9 @@ const ArticleCompactPreview: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

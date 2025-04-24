@@ -119,6 +119,7 @@ export type ExploreContextStore = {
     setExploreZaps: (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => void,
     setExploreMedia: (notes: PrimalNote[], paging: PaginationInfo) => void,
     setExploreTopics: (topics: TopicStat[]) => void,
+    removeEvent: (id: string, kind: 'notes') => void,
   }
 }
 
@@ -198,6 +199,10 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   })
 
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
+  }
 
   const setExplorePeople = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
 
@@ -575,6 +580,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       setExploreZaps,
       setExploreMedia,
       setExploreTopics,
+      removeEvent,
     },
   });
 

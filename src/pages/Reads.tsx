@@ -10,7 +10,6 @@ import {
   Show,
   Switch
 } from 'solid-js';
-import Note from '../components/Note/Note';
 import styles from './Home.module.scss';
 import HomeHeader from '../components/HomeHeader/HomeHeader';
 import Loader from '../components/Loader/Loader';
@@ -245,6 +244,9 @@ const Reads: Component = () => {
                           height={context?.articleHeights[note.naddr]}
                           onRender={onArticleRendered}
                           hideFooter={true}
+                          onRemove={(id: string) => {
+                            context?.actions.removeEvent(id);
+                          }}
                         />
                       </div>
                     )}
@@ -259,6 +261,9 @@ const Reads: Component = () => {
                         height={context?.articleHeights[note.naddr]}
                         onRender={onArticleRendered}
                         onClick={navigate}
+                        onRemove={(id: string) => {
+                          context?.actions.removeEvent(id);
+                        }}
                       />
                     </div>
                   )}

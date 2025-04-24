@@ -27,6 +27,7 @@ const SimpleArticlePreview: Component<{
   article: PrimalArticle,
   height?: number,
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
@@ -204,6 +205,9 @@ const SimpleArticlePreview: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

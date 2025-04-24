@@ -41,6 +41,7 @@ export type NoteContextMenuInfo = {
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
+  onDelete?: (id: string) => void,
 };
 
 export type ConfirmInfo = {
@@ -101,11 +102,29 @@ export type AppContextStore = {
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
     resetCustomZap: () => void,
-    openContextMenu: (note: PrimalNote | PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    openContextMenu: (
+      note: PrimalNote | PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZap: () => void,
+      openReaction: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
     closeContextMenu: () => void,
-    openArticleOverviewContextMenu: (note: PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    openArticleOverviewContextMenu: (
+      note: PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZap: () => void,
+      openReaction: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
     closeArticleOverviewContextMenu: () => void,
-    openArticleDraftContextMenu: (note: PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    openArticleDraftContextMenu: (
+      note: PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZapModal: () => void,
+      openReactionModal: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
     closeArticleDraftContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
     closeLnbcModal: () => void,
@@ -210,12 +229,14 @@ export const AppProvider = (props: { children: JSXElement }) => {
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
+    onDelete: (id: string) => void,
   ) => {
     updateStore('noteContextMenuInfo', reconcile({
       note,
       position,
       openCustomZap,
       openReactions,
+      onDelete,
     }))
     updateStore('showNoteContextMenu', () => true);
   };
@@ -225,13 +246,14 @@ export const AppProvider = (props: { children: JSXElement }) => {
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
-    deleteItem: (id: string) => void,
+    onDelete: (id: string) => void,
   ) => {
     updateStore('articleOverviewContextMenuInfo', reconcile({
       note,
       position,
       openCustomZap,
       openReactions,
+      onDelete,
     }))
     updateStore('showArticleOverviewContextMenu', () => true);
   };
@@ -241,12 +263,14 @@ export const AppProvider = (props: { children: JSXElement }) => {
       position: DOMRect | undefined,
       openCustomZap: () => void,
       openReactions: () => void,
+      onDelete: (id: string) => void,
     ) => {
       updateStore('articleDraftContextMenuInfo', reconcile({
         note,
         position,
         openCustomZap,
         openReactions,
+        onDelete,
       }))
       updateStore('showArticleDraftContextMenu', () => true);
     };
@@ -340,6 +364,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     let pk = `${pubkey}`;
 
     if (pk.startsWith('npub')) {
+      // @ts-ignore
       pk = nip19.decode(pk).data;
     }
 

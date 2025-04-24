@@ -177,7 +177,14 @@ const Bookmarks: Component = () => {
                 <Match when={kind() === 'notes'}>
                   <For each={store.notes}>
                     {(note) =>
-                      <div class="animated"><Note note={note} /></div>
+                      <div class="animated">
+                        <Note
+                          note={note}
+                          onRemove={(id: string) => {
+                            updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
+                          }}
+                        />
+                      </div>
                     }
                   </For>
                 </Match>
@@ -185,7 +192,15 @@ const Bookmarks: Component = () => {
                 <Match when={kind() === 'reads'}>
                   <For each={store.reads}>
                     {(read) =>
-                      <div class="animated"><ArticlePreview article={read} onClick={navigate} /></div>
+                      <div class="animated">
+                        <ArticlePreview
+                          article={read}
+                          onClick={navigate}
+                          onRemove={(id: string) => {
+                            updateStore('reads', (rs) => rs.filter(r => r.noteId !== id))
+                          }}
+                        />
+                      </div>
                     }
                   </For>
                 </Match>

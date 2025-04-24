@@ -131,10 +131,22 @@ const FeedsQueryTest: Component = () => {
               {item => (
                 <Switch>
                   <Match when={feed.category === 'notes'}>
-                    <Note note={item} noteType="feed" />
+                    <Note
+                      note={item}
+                      noteType="feed"
+                      // @ts-ignore
+                      setItems((rs) => rs.filter(r => r.noteId !== id))
+                    />
                   </Match>
                   <Match when={feed.category === 'reads'}>
-                    <ArticlePreview article={item} onClick={navigate} />
+                    <ArticlePreview
+                      article={item}
+                      onClick={navigate}
+                      onRemove={(id: string) => {
+                        // @ts-ignore
+                        setItems((rs) => rs.filter(r => r.noteId !== id))
+                      }}
+                    />
                   </Match>
                 </Switch>)
               }

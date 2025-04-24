@@ -179,8 +179,7 @@ const ArticleOverviewContextMenu: Component<{
 
     triggerImportEvents([note], `delete_import_${APP_ID}`);
 
-    // Used here just as a signal, not for actually custom zaps
-    props.data.openCustomZap && props.data.openCustomZap();
+    props.data.onDelete && props.data.onDelete(article.noteId);
     props.onClose();
   };
 

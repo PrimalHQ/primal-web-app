@@ -37,6 +37,7 @@ export type ArticleProps = {
   bordered?: boolean,
   noLinks?: boolean,
   onClick?: (url: string) => void,
+  onRemove?: (id: string) => void,
   notif?: boolean,
 };
 
@@ -224,6 +225,9 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

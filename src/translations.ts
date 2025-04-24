@@ -292,6 +292,11 @@ export const actions = {
     defaultMessage: 'Report user {name}?',
     description: 'Label for report user confirmation',
   },
+  requestNoteDelete: {
+    id: 'actions.requestNoteDelete',
+    defaultMessage: 'Send ?',
+    description: 'Label for report user confirmation',
+  },
   muteUserConfirm: {
     id: 'actions.muteUserConfirm',
     defaultMessage: 'Add {name} to your mute list?',
@@ -427,12 +432,12 @@ export const actions = {
     },
     muteAuthor: {
       id: 'actions.noteContext.muteAuthor',
-      defaultMessage: 'Mute user',
+      defaultMessage: 'Mute User',
       description: 'Label for muting user from context menu',
     },
     unmuteAuthor: {
       id: 'actions.noteContext.unmuteAuthor',
-      defaultMessage: 'Unmute user',
+      defaultMessage: 'Unmute User',
       description: 'Label for unmuting user from context menu',
     },
     muteThread: {
@@ -452,17 +457,22 @@ export const actions = {
     },
     reportAuthor: {
       id: 'actions.noteContext.reportAuthor',
-      defaultMessage: 'Report user',
+      defaultMessage: 'Report User',
       description: 'Label for reporting user from context menu',
     },
     repostNote: {
       id: 'actions.noteContext.repostNote',
-      defaultMessage: 'Repost note',
+      defaultMessage: 'Repost Note',
       description: 'Label for reposting note from context menu',
+    },
+    requestDelete: {
+      id: 'actions.noteContext.requestDelete',
+      defaultMessage: 'Request Delete',
+      description: 'Label for edit article from context menu',
     },
     quoteNote: {
       id: 'actions.noteContext.quoteNote',
-      defaultMessage: 'Quote note',
+      defaultMessage: 'Quote Note',
       description: 'Label for quoting note from context menu',
     },
   },

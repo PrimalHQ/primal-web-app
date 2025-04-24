@@ -110,12 +110,24 @@ const AdvancedSearchResults: Component = () => {
         <Switch>
           <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
             <For each={search?.reads} >
-              {article => <ArticlePreview article={article} onClick={navigate} />}
+              {article => <ArticlePreview
+                article={article}
+                onClick={navigate}
+                onRemove={(id: string) => {
+                  search?.actions.removeEvent(id, 'reads');
+                }}
+              />}
             </For>
           </Match>
           <Match when={[Kind.Text].includes(kind())}>
             <For each={search?.notes} >
-              {note => <Note note={note} shorten={true} />}
+              {note => <Note
+                note={note}
+                shorten={true}
+                onRemove={(id: string) => {
+                  search?.actions.removeEvent(id, 'notes');
+                }}
+              />}
             </For>
           </Match>
           <Match when={!search?.isFetchingContent && (search?.notes.length === 0 || search?.reads.length === 0)}>

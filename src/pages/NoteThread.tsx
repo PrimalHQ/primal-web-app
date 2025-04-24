@@ -235,6 +235,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         parent={true}
                         shorten={true}
                         noteType="thread"
+                        onRemove={(id: string) => {
+                          threadContext?.actions.removeEvent(id, 'notes');
+                        }}
                       />
                     </div>
                   }
@@ -276,6 +279,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         note={note}
                         shorten={true}
                         noteType="thread"
+                        onRemove={(id: string) => {
+                          threadContext?.actions.removeEvent(id, 'notes');
+                        }}
                       />
                     </div>
                   }

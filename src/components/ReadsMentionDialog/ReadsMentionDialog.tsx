@@ -435,6 +435,9 @@ const ReadsMentionDialog: Component<{
                         shorten={true}
                         onClick={() => selectNote(note)}
                         noteType="suggestion"
+                        onRemove={(id: string) => {
+                          advsearch?.actions.removeEvent(id, 'notes');
+                        }}
                       />
                     )}
                   </For>

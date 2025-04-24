@@ -356,8 +356,9 @@ const ReadsMy: Component = () => {
                         <div class="animated">
                           <ArticleOverview
                             article={article}
-                            onRefresh={(draft: PrimalArticle) => {
-                              profile?.actions.removeEvent(draft.id, 'articles');
+                            onRemove={(id: string) => {
+                              console.log('REMOVE: ', id);
+                              profile?.actions.removeEvent(id, 'articles');
                               setArticleStats((a) => ({
                                 ...a,
                                 atricles: a.articles - 1,
@@ -414,8 +415,8 @@ const ReadsMy: Component = () => {
                             article={article}
                             hideStats={true}
                             isDraft={true}
-                            onRefresh={(draft: PrimalArticle) => {
-                              profile?.actions.removeEvent(draft.id, 'drafts');
+                            onRemove={(id: string) => {
+                              profile?.actions.removeEvent(id, 'drafts');
                               setArticleStats((a) => ({
                                 ...a,
                                 drafts: a.drafts - 1,

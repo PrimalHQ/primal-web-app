@@ -25,7 +25,6 @@ import { debounce, parseBolt11 } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
 import Loader from '../Loader/Loader';
-import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 

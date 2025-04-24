@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -11,12 +11,13 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent } from '../../lib/notes';
+import { broadcastEvent, sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
+import { Kind } from '../../constants';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -34,6 +35,7 @@ const NoteContextMenu: Component<{
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
+  const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -166,6 +168,29 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
+  const doRequestDelete = async () => {
+    const user = account?.activeUser;
+    const noteToDelete = note();
+
+    if (!props.data || !user || !noteToDelete) return;
+
+    const { success, note: deleteEvent } = await sendDeleteEvent(
+      user.pubkey,
+      noteToDelete.id,
+      Kind.Text,
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
+
+    if (!success || !deleteEvent) return;
+
+    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
+
+    props.data.onDelete && props.data.onDelete(noteToDelete.noteId);
+    props.onClose();
+  };
+
   const broadcastNote = async () => {
     if (!account || !props.data) {
       return;
@@ -225,18 +250,8 @@ const NoteContextMenu: Component<{
   }
 
   const noteContextForEveryone: () => MenuItem[] = () => {
-    const isMuted = account?.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
 
     return [
-      {
-        label: isMuted ? intl.formatMessage(tActions.noteContext.unmuteThread) : intl.formatMessage(tActions.noteContext.muteThread),
-        action: () => {
-          isMuted ? doUnmuteThread() : setConfirmMuteThread(true);
-          props.onClose()
-        },
-        icon: 'mute_thread',
-        warning: true,
-      },
       {
         label: intl.formatMessage(tActions.noteContext.reactions),
         action: () => {
@@ -288,6 +303,7 @@ const NoteContextMenu: Component<{
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
     const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isMutedThread = account?.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
 
     return [
       {
@@ -297,6 +313,15 @@ const NoteContextMenu: Component<{
           props.onClose()
         },
         icon: 'mute_user',
+        warning: true,
+      },
+      {
+        label: isMutedThread ? intl.formatMessage(tActions.noteContext.unmuteThread) : intl.formatMessage(tActions.noteContext.muteThread),
+        action: () => {
+          isMutedThread ? doUnmuteThread() : setConfirmMuteThread(true);
+          props.onClose()
+        },
+        icon: 'mute_thread',
         warning: true,
       },
       {
@@ -328,9 +353,26 @@ const NoteContextMenu: Component<{
     ];
   };
 
+
+  const requestDeleteContextMenu: () => MenuItem[] = () => {
+    // if (!note() || (note().user.pubkey !== account?.publicKey)) return [];
+
+    return [
+      {
+        label: intl.formatMessage(tActions.noteContext.requestDelete),
+        action: () => {
+          setConfirmRequestDelete(true);
+          props.onClose();
+        },
+        icon: 'delete',
+        warning: true,
+      },
+    ];
+  };
+
   const noteContext = () => account?.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone(), ...noteContextForOtherPeople()] :
-      [ ...noteContextForMe(), ...noteContextForEveryone()];
+      [ ...noteContextForMe(), ...noteContextForEveryone(), ...requestDeleteContextMenu()];
 
   let context: HTMLDivElement | undefined;
 
@@ -364,6 +406,17 @@ const NoteContextMenu: Component<{
           setConfirmMuteThread(false);
         }}
         onAbort={() => setConfirmMuteThread(false)}
+      />
+
+      <ConfirmModal
+        open={confirmRequestDelete()}
+        title="Delete note?"
+        description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
+        onConfirm={() => {
+          doRequestDelete();
+          setConfirmRequestDelete(false);
+        }}
+        onAbort={() => setConfirmRequestDelete(false)}
       />
 
       <PrimalMenu

@@ -20,7 +20,7 @@ import { shortDate } from "../../lib/dates";
 import PrimalMarkdown from "../../components/PrimalMarkdown/PrimalMarkdown";
 import NoteTopZaps from "../../components/Note/NoteTopZaps";
 import { isPhone, parseBolt11, uuidv4 } from "../../utils";
-import Note, { NoteReactionsState } from "../../components/Note/Note";
+import { NoteReactionsState } from "../../components/Note/Note";
 import { getAuthorSubscriptionTiers } from "../../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../../components/NoteImage/NoteImage";

@@ -130,11 +130,6 @@ const LayoutDesktop: Component<{
             </Match>
           </Switch>
         </div>
-        <NoteContextMenu
-          open={app?.showNoteContextMenu}
-          onClose={app?.actions.closeContextMenu}
-          data={app?.noteContextMenuInfo}
-        />
       </>
     </Show>
   )

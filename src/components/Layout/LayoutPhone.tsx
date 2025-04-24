@@ -99,11 +99,6 @@ const LayoutPhone: Component<{
             </div>
           </Show>
         </div>
-        <NoteContextMenu
-          open={app?.showNoteContextMenu}
-          onClose={app?.actions.closeContextMenu}
-          data={app?.noteContextMenuInfo}
-        />
       </>
     </Show>
   )

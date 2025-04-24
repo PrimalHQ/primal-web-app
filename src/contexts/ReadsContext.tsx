@@ -78,6 +78,7 @@ type ReadsContextStore = {
     setTopics: (topicks: string[]) => void,
     setFeaturedAuthor: (author: PrimalUser) => void,
     refetchSelectedFeed: () => void,
+    removeEvent: (id: string) => void,
   }
 }
 
@@ -150,6 +151,10 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+const removeEvent = (id: string) => {
+  updateStore('notes', (drs) => drs.filter(d => d.id !== id));
+}
 
   const setTopics = (topics: string[]) => {
     updateStore('topics', () => [ ...topics ]);
@@ -348,6 +353,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       setTopics,
       setFeaturedAuthor,
       refetchSelectedFeed,
+      removeEvent,
     },
   });
 

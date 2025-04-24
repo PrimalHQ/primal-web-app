@@ -35,7 +35,7 @@ export type ArticleProps = {
   onClick?: (article: PrimalArticle) => void,
   hideStats?: boolean,
   isDraft?: boolean,
-  onRefresh?: (article: PrimalArticle) => void,
+  onRemove?: (id: string) => void,
 };
 
 
@@ -85,13 +85,15 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
 
   const onContextMenuTrigger = () => {
     if (props.isDraft) {
+      console.log('DRAFT: ', props.article)
       app?.actions.openArticleDraftContextMenu(
         props.article,
         articleContextMenu?.getBoundingClientRect(),
-        () => {
-          props.onRefresh && props.onRefresh(props.article);
-        },
+        () => {},
         openReactionModal,
+        () => {
+          props.onRemove && props.onRemove(props.article.noteId);
+        },
       );
 
       return;
@@ -100,10 +102,11 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
     app?.actions.openArticleOverviewContextMenu(
       props.article,
       articleContextMenu?.getBoundingClientRect(),
-      () => {
-        props.onRefresh && props.onRefresh(props.article);
-      },
+      () => {},
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

@@ -105,7 +105,13 @@ const Search: Component = () => {
             }
           >
             <For each={search?.notes} >
-              {note => <Note note={note} shorten={true} />}
+              {note => <Note
+                note={note}
+                shorten={true}
+                onRemove={(id: string) => {
+                  search?.actions.removeEvent(id, 'notes');
+                }}
+              />}
             </For>
           </Show>
         </Show>

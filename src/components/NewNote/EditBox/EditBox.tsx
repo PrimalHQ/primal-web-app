@@ -1171,7 +1171,9 @@ const EditBox: Component<{
       try {
         const article = articleRefs[id];
 
-        const link = <div class={styles.highlight}><SimpleArticlePreview article={article} noLink={true} /></div>;
+        const link = <div class={styles.highlight}>
+          <SimpleArticlePreview article={article} noLink={true} />
+        </div>;
 
         // @ts-ignore
         return link.outerHTML || url;

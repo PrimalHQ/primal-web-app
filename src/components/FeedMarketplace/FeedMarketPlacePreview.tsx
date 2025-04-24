@@ -132,6 +132,9 @@ const FeedMarketPlacePreview: Component<{
                 note={note}
                 shorten={true}
                 noteType={'feed'}
+                onRemove={(id: string) => {
+                  updateStore('notes', (ns) => ns.filter(n => n.noteId !== id));
+                }}
               />}
             </For>
           </Match>

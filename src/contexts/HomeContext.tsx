@@ -56,6 +56,7 @@ type HomeContextStore = {
     getFirstPage: () => void,
     resetSelectedFeed: () => void,
     refetchSelectedFeed: () => void,
+    removeEvent: (id: string, kind: 'notes') => void,
   }
 }
 
@@ -121,6 +122,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const account = useAccountContext();
 
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
+  }
 
   const updateSidebarQuery = (selection: SelectionOption) => {
     updateStore('sidebarQuery', () => ({ ...selection }))
@@ -305,6 +310,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       getFirstPage,
       resetSelectedFeed,
       refetchSelectedFeed,
+      removeEvent,
     },
   });
 
