@@ -1604,7 +1604,7 @@ export const settings = {
   muted: {
     title: {
       id: 'settings.muted.title',
-      defaultMessage: 'Muted',
+      defaultMessage: 'Muted Content',
       description: 'Title of the muted accounts settings sub-page',
     },
     emptyUsers: {
