@@ -1265,6 +1265,7 @@ const EditBox: Component<{
             return;
           }
 
+
           if (content.kind === Kind.Metadata) {
             const user = content as NostrUserContent;
 
@@ -1365,8 +1366,6 @@ const EditBox: Component<{
         } else if (decode.type === 'note') {
           hex = decode.data;
         }
-
-        if (hex !== noteId) return url;
 
         let note = noteRefs[hex];
 
