@@ -184,7 +184,7 @@ const ArticleDraftContextMenu: Component<{
     {
       label: intl.formatMessage(tActions.articleOverviewContext.copyId),
       action: copyNoteId,
-      icon: 'highlight_copy',
+      icon: 'copy_note_id',
     },
     {
       label: intl.formatMessage(tActions.articleOverviewContext.copyRawEvent),
