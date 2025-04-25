@@ -284,8 +284,9 @@ const Blossom: Component = () => {
           confirmLabel="Yes"
           abortLabel="No"
           onConfirm={() => {
-            account?.actions.removeBlossomMirrors();
-            setHasMirrors(false);
+            account?.actions.removeBlossomMirrors(() => {
+              setHasMirrors(false);
+            });
             setConfirmNoMirrors(false);
           }}
           onAbort={() => setConfirmNoMirrors(false)}

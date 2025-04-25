@@ -1658,7 +1658,7 @@ export const settings = {
     },
     mediaMirrors: {
         id: 'settings.blossom.mediaMirrors',
-        defaultMessage: 'Media Morrors',
+        defaultMessage: 'Media Mirrors',
         description: 'Title of the media mirrors',
       },
     mediaMirrorsDescription: {

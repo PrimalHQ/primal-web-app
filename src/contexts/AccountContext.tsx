@@ -159,7 +159,7 @@ export type AccountContextStore = {
     appendBlossomServers: (url: string) => void,
     removeBlossomServers: (url: string) => void,
     setBlossomServers: (urls: string[]) => void,
-    removeBlossomMirrors: () => void,
+    removeBlossomMirrors: (then?: () => void) => void,
   },
 }
 
@@ -1976,10 +1976,10 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateBlossomEvent();
   }
 
-  const removeBlossomMirrors = () => {
+  const removeBlossomMirrors = (then?: () => void) => {
     const main = store.blossomServers[0] || primalBlossom;
     updateStore('blossomServers', () => [main]);
-    updateBlossomEvent();
+    updateBlossomEvent(then);
   }
 
   const setBlossomServers = (urls: string[]) => {
@@ -1987,14 +1987,14 @@ export function AccountProvider(props: { children: JSXElement }) {
     // updateBlossomEvent();
   }
 
-  const updateBlossomEvent = async () => {
+  const updateBlossomEvent = async (then?: () => void) => {
     const { success, note } = await sendBlossomEvent(store.blossomServers, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
     if (!success || !note) {
       toast?.sendWarning('Failed to send server list');
       return;
     }
-    triggerImportEvents([note], `import_blossom_list_${APP_ID}`);
+    triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
   }
 
 // STORES ---------------------------------------
