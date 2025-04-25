@@ -334,12 +334,6 @@ const ParsedNote: Component<{
       //   return;
       // }
 
-      if (userMentionUrlRegex.test(token)) {
-        lastSignificantContent = 'usermention';
-        updateContent(content, 'usermention', token);
-        return;
-      }
-
       if (!props.ignoreMedia) {
         if (isImage(token)) {
           removeLinebreaks('image');
@@ -452,6 +446,13 @@ const ParsedNote: Component<{
         //   updateContent(content, 'tidal', token);
         //   return;
         // }
+      }
+
+
+      if (userMentionUrlRegex.test(token)) {
+        lastSignificantContent = 'usermention';
+        updateContent(content, 'usermention', token);
+        return;
       }
 
       if (props.noLinks === 'text') {
