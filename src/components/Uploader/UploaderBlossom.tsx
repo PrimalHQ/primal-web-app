@@ -72,6 +72,8 @@ const UploaderBlossom: Component<{
     if ((uploadState.xhr?.status || 200) < 300) {
       const response = JSON.parse(uploadState.xhr?.responseText || '{}');
       props.onSuccsess && props.onSuccsess(response.url, props.uploadId);
+
+      console.log('RESPONSE: ', response)
       mirrorUpload(response);
       resetUpload();
       return;
@@ -107,13 +109,8 @@ const UploaderBlossom: Component<{
     const mirrors = account?.blossomServers.slice(1) || [];
     if (mirrors.length === 0) return;
 
-    // reuse the same auth for mirroring
-    let auth = uploadState.auth;
-
-    if (!auth) {
-      auth = await BlossomClient.createUploadAuth(signEvent, uploadState.file, { message: 'media upload mirroring'});
-      setUploadState('auth', () => ({ ...auth }));
-    }
+    let auth = await BlossomClient.createUploadAuth(signEvent, uploadState.file, { message: 'media upload mirroring'});
+    setUploadState('auth', () => ({ ...auth }));
 
     for (let server of mirrors) {
       try {
