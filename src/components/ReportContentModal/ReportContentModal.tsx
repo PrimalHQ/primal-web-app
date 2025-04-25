@@ -52,6 +52,9 @@ const ReportContentModal: Component<{
     >
       <div id={props.id} class={styles.reportContent}>
         <div class={styles.modalBody}>
+          <div class={styles.description}>
+            All reports posted will be publically visible.
+          </div>
           <For each={reportReasons}>
             {reason => (
               <CheckBox2
