@@ -27,6 +27,8 @@ import { actions as tActions } from '../../translations';
 import CheckBox2 from '../Checkbox/CheckBox2';
 import { sendContentReport, triggerImportEvents } from '../../lib/notes';
 import { useToastContext } from '../Toaster/Toaster';
+import RadioBox, { RadioBoxOption } from '../Checkbox/RadioBox';
+import { titleCase } from '../../utils';
 
 const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'];
 
@@ -55,16 +57,12 @@ const ReportContentModal: Component<{
           <div class={styles.description}>
             All reports posted will be publically visible.
           </div>
-          <For each={reportReasons}>
-            {reason => (
-              <CheckBox2
-                onChange={(v: boolean) => setSelectedReason(() => v ? reason : undefined)}
-                checked={selectedReason() === reason}
-              >
-                <div class={styles.reasonCheck}>{reason}</div>
-              </CheckBox2>
-            )}
-          </For>
+          <RadioBox
+            onChange={(option: RadioBoxOption) => {
+              setSelectedReason(() => option.value)
+            }}
+            options={reportReasons.map(value => ({ value, label: titleCase(value) }))}
+          />
         </div>
 
         <div class={styles.footer}>

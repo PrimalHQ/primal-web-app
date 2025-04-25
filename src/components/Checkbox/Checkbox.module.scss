@@ -53,3 +53,55 @@
   -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
 }
+
+
+.radioGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .radioGroupLabel {
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+
+  .radioItems {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .radioItem {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .radioControl {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px;
+    width: 20px;
+    border-radius: 10px;
+    border: 2px solid var(--text-primary);
+    background: none;
+
+    &[data-checked][data-invalid] {
+      border: 2px solid var(--warning-bright);
+    }
+  }
+  .radioIndicator {
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+    background-color: var(--text-primary);
+  }
+  .radioLabel {
+    margin-left: 6px;
+    color: var(--text-primary);
+    font-size: 14px;
+    user-select: none;
+  }
+}
