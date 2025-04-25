@@ -268,12 +268,12 @@ const NoteContextMenu: Component<{
           props.data?.openCustomZap && props.data?.openCustomZap();
           props.onClose()
         },
-        icon: 'feed_zap',
+        icon: 'feed_zap_2',
       },
       {
         label: intl.formatMessage(tActions.noteContext.copyLink),
         action: copyNoteLink,
-        icon: 'copy_note_link',
+        icon: 'copy_note_link_2',
       },
       {
         label: intl.formatMessage(tActions.noteContext.copyText),
