@@ -73,7 +73,6 @@ const UploaderBlossom: Component<{
       const response = JSON.parse(uploadState.xhr?.responseText || '{}');
       props.onSuccsess && props.onSuccsess(response.url, props.uploadId);
 
-      console.log('RESPONSE: ', response)
       mirrorUpload(response);
       resetUpload();
       return;
@@ -84,6 +83,7 @@ const UploaderBlossom: Component<{
   }
 
   const xhrOnError = (e: ProgressEvent) => {
+    const response = JSON.parse(uploadState.xhr?.responseText || '{}');
     resetUpload();
     props.onFail && props.onFail('', props.uploadId);
   }
@@ -203,26 +203,36 @@ const UploaderBlossom: Component<{
 
       if (file.type) checkHeaders["X-Content-Type"] = file.type;
 
-      const mediaCheck = await fetchWithTimeout(mediaUrl, {
-        method: "HEAD",
-        headers: checkHeaders,
-        timeout: 3_000,
-      });
+      try {
 
-      if (mediaCheck.status === 200) {
-        sendFile(xhr, mediaUrl, file, headers);
-        return;
+        const mediaCheck = await fetchWithTimeout(mediaUrl, {
+          method: "HEAD",
+          headers: checkHeaders,
+          timeout: 3_000,
+        });
+
+        if (mediaCheck.status === 200) {
+          sendFile(xhr, mediaUrl, file, headers);
+          return;
+        }
+
+      } catch (e) {
+        logWarning('Failed media upload check: ', e);
       }
 
-      const uploadCheck = await fetchWithTimeout(uploadUrl, {
-        method: "HEAD",
-        headers: checkHeaders,
-        timeout: 3_000,
-      });
+      try {
+        const uploadCheck = await fetchWithTimeout(uploadUrl, {
+          method: "HEAD",
+          headers: checkHeaders,
+          timeout: 3_000,
+        });
 
-      if (uploadCheck.status === 200) {
-        sendFile(xhr, uploadUrl, file, headers);
-        return;
+        if (uploadCheck.status === 200) {
+          sendFile(xhr, uploadUrl, file, headers);
+          return;
+        }
+      } catch (e) {
+        logWarning('Failed media upload check: ', e);
       }
 
       // toaster?.sendWarning(`Failed to upload to ${url}`);
