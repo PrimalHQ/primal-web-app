@@ -83,7 +83,6 @@ const UploaderBlossom: Component<{
   }
 
   const xhrOnError = (e: ProgressEvent) => {
-    const response = JSON.parse(uploadState.xhr?.responseText || '{}');
     resetUpload();
     props.onFail && props.onFail('', props.uploadId);
   }

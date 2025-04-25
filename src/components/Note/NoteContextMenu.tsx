@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalArticle, PrimalNote } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -18,6 +18,7 @@ import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
+import ReportContentModal from '../ReportContentModal/ReportContentModal';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -33,6 +34,7 @@ const NoteContextMenu: Component<{
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
+  const [confirmReportContent, setConfirmReportContent] = createSignal<PrimalNote | PrimalArticle>();
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
@@ -324,11 +326,21 @@ const NoteContextMenu: Component<{
         icon: 'mute_thread',
         warning: true,
       },
+      // {
+      //   label: intl.formatMessage(tActions.noteContext.reportAuthor),
+      //   action: () => {
+      //     setConfirmReportUser(true);
+      //     props.onClose()
+      //   },
+      //   icon: 'report',
+      //   warning: true,
+      // },
       {
-        label: intl.formatMessage(tActions.noteContext.reportAuthor),
+        label: intl.formatMessage(tActions.noteContext.reportContent),
         action: () => {
-          setConfirmReportUser(true);
-          props.onClose()
+          const n = note();
+          n && setConfirmReportContent(() => ({ ...n }));
+          props.onClose();
         },
         icon: 'report',
         warning: true,
@@ -386,6 +398,11 @@ const NoteContextMenu: Component<{
           setConfirmReportUser(false);
         }}
         onAbort={() => setConfirmReportUser(false)}
+      />
+
+      <ReportContentModal
+        note={confirmReportContent()}
+        onClose={() => setConfirmReportContent(undefined)}
       />
 
       <ConfirmModal

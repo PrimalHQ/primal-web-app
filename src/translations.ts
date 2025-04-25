@@ -287,6 +287,16 @@ export const actions = {
     defaultMessage: 'edit profile',
     description: 'Edit profile action label',
   },
+  reportContentConfirmTitle: {
+    id: 'actions.reportContentConfirmTitle',
+    defaultMessage: 'Report abuse?',
+    description: 'Title for report content confirmation',
+  },
+  reportContentConfirmDesc: {
+    id: 'actions.reportContentConfirmDesc',
+    defaultMessage: 'All reports will be publicly visible.',
+    description: 'Description for report content confirmation',
+  },
   reportUserConfirm: {
     id: 'actions.reportUserConfirm',
     defaultMessage: 'Report user {name}?',
@@ -458,6 +468,11 @@ export const actions = {
     reportAuthor: {
       id: 'actions.noteContext.reportAuthor',
       defaultMessage: 'Report User',
+      description: 'Label for reporting user from context menu',
+    },
+    reportContent: {
+      id: 'actions.noteContext.reportContent',
+      defaultMessage: 'Report Content',
       description: 'Label for reporting user from context menu',
     },
     repostNote: {

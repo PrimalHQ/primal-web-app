@@ -306,6 +306,22 @@ export const importEvents = (events: NostrRelaySignedEvent[], subid: string) => 
 
 export type NostrEvent = { content: string, kind: number, tags: string[][], created_at: number };
 
+
+export const sendContentReport = async (noteId: string, pubkey: string, reason: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content: '',
+    kind: Kind.ReportContent,
+    tags: [
+      ['e', noteId, reason],
+      ['p', pubkey],
+    ],
+    created_at: Math.floor((new Date()).getTime() / 1000),
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+
+}
+
 export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
   const event = {
     content: '+',
