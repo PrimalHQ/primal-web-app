@@ -135,7 +135,7 @@ const FeedsQueryTest: Component = () => {
                       note={item}
                       noteType="feed"
                       // @ts-ignore
-                      setItems((rs) => rs.filter(r => r.noteId !== id))
+                      // setItems((rs) => rs.filter(r => r.noteId !== id))
                     />
                   </Match>
                   <Match when={feed.category === 'reads'}>
@@ -144,7 +144,7 @@ const FeedsQueryTest: Component = () => {
                       onClick={navigate}
                       onRemove={(id: string) => {
                         // @ts-ignore
-                        setItems((rs) => rs.filter(r => r.noteId !== id))
+                        // setItems((rs) => rs.filter(r => r.noteId !== id))
                       }}
                     />
                   </Match>
