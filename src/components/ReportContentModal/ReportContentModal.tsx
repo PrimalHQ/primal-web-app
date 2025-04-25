@@ -26,6 +26,7 @@ import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import { actions as tActions } from '../../translations';
 import CheckBox2 from '../Checkbox/CheckBox2';
 import { sendContentReport, triggerImportEvents } from '../../lib/notes';
+import { useToastContext } from '../Toaster/Toaster';
 
 const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'];
 
@@ -38,6 +39,7 @@ const ReportContentModal: Component<{
 
   const account = useAccountContext();
   const intl = useIntl();
+  const toast = useToastContext();
 
   const [selectedReason, setSelectedReason] = createSignal<string>();
 
@@ -88,6 +90,7 @@ const ReportContentModal: Component<{
 
                   if (success && event) {
                     triggerImportEvents([event], `import_report_${APP_ID}`);
+                    toast?.sendSuccess(`Content reported as ${selectedReason()}`)
                   }
                 }
                 props.onClose();

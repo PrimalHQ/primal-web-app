@@ -412,32 +412,32 @@ export const actions = {
     },
     copyLink: {
       id: 'actions.noteContext.copyLink',
-      defaultMessage: 'Copy note link',
+      defaultMessage: 'Copy Note Link',
       description: 'Label for copy note link from context menu',
     },
     copyText: {
       id: 'actions.noteContext.copytext',
-      defaultMessage: 'Copy note text',
+      defaultMessage: 'Copy Note Text',
       description: 'Label for copy note text from context menu',
     },
     copyId: {
       id: 'actions.noteContext.copyId',
-      defaultMessage: 'Copy note ID',
+      defaultMessage: 'Copy Note ID',
       description: 'Label for copy note ID from context menu',
     },
     copyRaw: {
       id: 'actions.noteContext.copyRaw',
-      defaultMessage: 'Copy raw data',
+      defaultMessage: 'Copy Raw Data',
       description: 'Label for copy note raw data from context menu',
     },
     copyPubkey: {
       id: 'actions.noteContext.copyPubkey',
-      defaultMessage: 'Copy user public key',
+      defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
     },
     breadcast: {
       id: 'actions.noteContext.breadcast',
-      defaultMessage: 'Broadcast note',
+      defaultMessage: 'Broadcast Note',
       description: 'Label for note broadcast from context menu',
     },
     muteAuthor: {

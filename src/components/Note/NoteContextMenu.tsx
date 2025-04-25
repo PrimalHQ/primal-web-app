@@ -290,11 +290,11 @@ const NoteContextMenu: Component<{
         action: copyRawData,
         icon: 'copy_raw_data',
       },
-      {
-        label: intl.formatMessage(tActions.noteContext.breadcast),
-        action: broadcastNote,
-        icon: 'broadcast',
-      },
+      // {
+      //   label: intl.formatMessage(tActions.noteContext.breadcast),
+      //   action: broadcastNote,
+      //   icon: 'broadcast',
+      // },
       {
         label: intl.formatMessage(tActions.noteContext.copyPubkey),
         action: copyUserNpub,
