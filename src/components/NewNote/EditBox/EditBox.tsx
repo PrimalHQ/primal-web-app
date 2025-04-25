@@ -3,7 +3,7 @@ import { Router, useLocation } from "@solidjs/router";
 import { nip19 } from "../../../lib/nTools";
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG, eventRegexG } from "../../../constants";
+import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG, eventRegexG, profileRegexEdit, profileRegexEditG } from "../../../constants";
 import { useAccountContext } from "../../../contexts/AccountContext";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
@@ -51,6 +51,7 @@ import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
 import { useAppContext } from "../../../contexts/AppContext";
 import UploaderBlossom from "../../Uploader/UploaderBlossom";
+import ParsedNote from "../../ParsedNote/ParsedNote";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -1017,11 +1018,11 @@ const EditBox: Component<{
 
   const subUserRef = (userId: string) => {
 
-    const parsed = parsedMessage().replace(profileRegex, (url) => {
+    const parsed = parsedMessage().replace(profileRegexEdit, (url) => {
 
       let id = url;
 
-      const idStart = url.search(profileRegex);
+      const idStart = url.search(profileRegexEdit);
 
       if (idStart > 0) {
         id = url.slice(idStart);
@@ -1191,14 +1192,20 @@ const EditBox: Component<{
     let refs = [];
     let match;
 
-    while((match = profileRegexG.exec(text)) !== null) {
+    while((match = profileRegexEditG.exec(text)) !== null) {
       refs.push(match[1]);
     }
 
-    refs.forEach(id => {
+    refs.forEach(ref => {
+      let id = ref;
+
+      if (ref.startsWith('nostr:')) {
+        id = ref.split(':')[1];
+      }
+
       if (userRefs[id]) {
         setTimeout(() => {
-          subUserRef(id);
+          subUserRef(ref);
         }, 0);
         return;
       }
@@ -1638,6 +1645,69 @@ const EditBox: Component<{
 
   let progressFill: HTMLDivElement | undefined;
 
+  const notePreview = () => {
+    if (!account?.activeUser || !account?.publicKey) return;
+
+    const created_at = Math.floor((new Date()).getTime() / 1_000);
+
+    const post = {
+      id: 'new note',
+      pubkey: account.publicKey,
+      created_at,
+      tags: [],
+      content: message(),
+      sig: 'signature',
+      kind: Kind.Text,
+      likes: 0,
+      mentions: 0,
+      reposts: 0,
+      replies: 0,
+      zaps: 0,
+      score: 0,
+      score24h: 0,
+      satszapped: 0,
+      noteId: 'noteId',
+      noteIdShort: 'NoteIdShort',
+      noteActions: {
+        event_id: 'eventId',
+        liked: false,
+        replied: false,
+        reposted: false,
+        zapped: false,
+      },
+    }
+
+    const msg = {
+      kind: Kind.Text,
+      content: message(),
+      id: 'new note',
+      created_at,
+      pubkey: account.publicKey,
+      sig: 'signature',
+      tags: [],
+    };
+
+    const n: PrimalNote = {
+      user: account.activeUser,
+      post,
+      msg,
+      mentionedNotes: noteRefs,
+      mentionedUsers: userRefs,
+      mentionedArticles: articleRefs,
+      mentionedHighlights: highlightRefs,
+      replyTo: props.replyToNote?.id,
+      id: post.id,
+      pubkey: post.pubkey || '',
+      noteId: post.noteId,
+      noteIdShort: post.noteIdShort,
+      tags: post.tags,
+      topZaps: [],
+      content: post.content,
+    }
+
+    return n;
+  }
+
   return (
     <div
       id={props.id}
@@ -1707,6 +1777,14 @@ const EditBox: Component<{
               }}
               onSuccsess={(url:string) => {
                 insertAtCursor(` ${url} `);
+
+                onExpandableTextareaInput(new InputEvent('input'));
+
+                if (textArea) {
+                  textArea.focus();
+                  let position = (textArea.selectionEnd || 0);
+                  textArea.selectionEnd = position;
+                }
                 resetUpload();
               }}
             />

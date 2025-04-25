@@ -334,6 +334,12 @@ export const noteRegex = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/
 export const noteRegexLocal = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 export const profileRegex = /((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 export const profileRegexG = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const profileRegexEdit = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegexEditG = /(?:\s|^)((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+
+export const userMentionUrlRegex = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(?!png|jpg|jpeg|webp|gif|format=png|mp4|mov|ogg|webm)\b/
+export const primalUserRegex = /(http(s?):\/\/)([/|.|\w|\s|-])*\/(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+\b/
+
 export const addrRegex = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 export const addrRegexG = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
