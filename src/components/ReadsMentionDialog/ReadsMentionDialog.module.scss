@@ -31,6 +31,27 @@
   }
 }
 
+.readsPublishDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 640px;
+
+  .actions {
+    display:flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+
+    >button {
+      width: 100px;
+    }
+  }
+}
+
 .leaveDialog {
   display: flex;
   flex-direction: column;

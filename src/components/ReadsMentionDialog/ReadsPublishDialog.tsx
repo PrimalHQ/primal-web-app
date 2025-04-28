@@ -74,7 +74,7 @@ const ReadsPublishDialog: Component<{
       setOpen={props.setOpen}
       title="Publish Article"
     >
-      <div class={styles.addLinkDialog}>
+      <div class={styles.readsPublishDialog}>
         <Show when={false}>
           <TextField
             id="link_label"
