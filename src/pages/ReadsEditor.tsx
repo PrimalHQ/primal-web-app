@@ -28,6 +28,7 @@ import { toast as tToast } from '../translations';
 import { subsTo } from '../sockets';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
+import PageTitle from '../components/PageTitle/PageTitle';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -478,6 +479,10 @@ const ReadsEditor: Component = () => {
 
   return (
     <div class={styles.editorPage}>
+
+      <PageTitle
+        title={article.title ? `Editing ${article.title}` : `New Article`}
+      />
 
       <Wormhole to='right_sidebar'>
         <div class={styles.sidebar}>
