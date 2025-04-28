@@ -810,6 +810,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             }
           });
 
+
           mentionedArticles[article.naddr] = { ...article };
         }
 
@@ -873,8 +874,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
     msg.tags.forEach(tag => {
       switch (tag[0]) {
         case 't':
-          const ts = tag[1].split(' ');
-          article.tags.push(...ts);
+          article.tags.push(tag[1]);
           break;
         case 'title':
           article.title = tag[1];

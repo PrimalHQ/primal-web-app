@@ -530,6 +530,7 @@ export const sendDraft = async (
   const pk = user.pubkey;
   const identifier = generateIdentifier(article.title);
   const time = Math.floor((new Date()).getTime() / 1000);
+  const tags = article.tags.map((t) => ['t', t]);
   const a: NostrEvent = {
     content: mdContent,
     kind: Kind.LongForm,
@@ -537,9 +538,9 @@ export const sendDraft = async (
       ["title", article.title],
       ["summary", article.summary],
       ["image", article.image],
-      ["t", article.tags.join(" ")],
       ["d", identifier],
       ['client', 'primal-web'],
+      ...tags,
     ],
     created_at: time,
   };
