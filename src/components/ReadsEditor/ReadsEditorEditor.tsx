@@ -1,4 +1,4 @@
-import { Component, For, JSXElement, Setter, Show, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, For, JSXElement, Match, Setter, Show, Switch, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './ReadsEditor.module.scss';
 import { SetStoreFunction, createStore } from 'solid-js/store';
@@ -54,7 +54,9 @@ import {
 } from '../../translations';
 import ReadsEditorToolbar from './ReadsEditorToolbar';
 import { ArticleEdit, emptyArticleEdit } from '../../pages/ReadsEditor';
-import UploaderBlossom from '../Uploader/UploaderBlossom';
+import UploaderBlossom, { UploadState } from '../Uploader/UploaderBlossom';
+import { Progress } from '@kobalte/core/progress';
+import ButtonGhost from '../Buttons/ButtonGhost';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -99,6 +101,10 @@ const ReadsEditorEditor: Component<{
   const [fileUploadContext, setFileUploadContext] = createSignal<string | undefined>();
 
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
+
+  const [isUploading, setIsUploading] = createSignal(false);
+  const [cancelUploading, setCancelUploading] = createSignal<() => void>();
+  const [imageLoaded, setImageLoaded] = createSignal(false);
 
   let titleImageUpload: HTMLInputElement | undefined;
 
@@ -394,6 +400,8 @@ const ReadsEditorEditor: Component<{
     batch(() => {
       setFileToUpload(undefined);
       setFileUploadContext(undefined);
+      setIsUploading(false);
+      setCancelUploading(undefined);
     })
   };
 
@@ -453,6 +461,88 @@ const ReadsEditorEditor: Component<{
             </TextField>
 
             <Show when={accordionSection().includes('hero_image')}>
+              <Switch>
+                <Match
+                  when={isUploading()}
+                >
+                  <div
+                    class={styles.uploadingOverlay}
+                    onClick={() => {
+                      const canc = cancelUploading();
+                      resetUpload(titleImageUploadId);
+                      canc && canc();
+                    }}
+                  >
+                    <div>Cancel Upload</div>
+                    <div class={styles.closeBtn}>
+                      <div class={styles.closeIcon}></div>
+                    </div>
+                  </div>
+                </Match>
+
+                <Match
+                  when={props.article.image.length > 0}
+                >
+                  <div
+                    class={styles.uploadButton}
+                  >
+                    <Show when={imageLoaded()}>
+                      <div
+                        class={styles.uploadOverlay}
+                        onClick={() => {
+                          document.getElementById('upload-title-image')?.click();
+                        }}
+                      >
+                        <div
+                          class={styles.closeBtn}
+                          onClick={(e: MouseEvent) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            props.setArticle('image', () => '');
+                            setImageLoaded(false);
+                            document.getElementById('upload-title-image')?.click();
+                          }}
+                        >
+                          <div class={styles.closeIcon}></div>
+                        </div>
+                        <div>Chage hero Image</div>
+                      </div>
+                    </Show>
+                    <input
+                      id="upload-title-image"
+                      type="file"
+                      onChange={() => onUploadTitleImage(titleImageUpload)}
+                      ref={titleImageUpload}
+                      hidden={true}
+                      accept="image/*"
+                    />
+                    <img
+                      class={styles.titleImage}
+                      src={props.article.image}
+                      onload={() => setImageLoaded(true)}
+                    />
+                  </div>
+                </Match>
+
+                <Match
+                  when={props.article.image.length === 0}
+                >
+                  <div class={styles.noTitleImagePlaceholder}>
+                    <input
+                      id="upload-avatar"
+                      type="file"
+                      onChange={() => onUploadTitleImage(titleImageUpload)}
+                      ref={titleImageUpload}
+                      hidden={true}
+                      accept="image/*"
+                    />
+                    <label for="upload-avatar">
+                      Add hero Image
+                    </label>
+                  </div>
+                </Match>
+              </Switch>
+
               <UploaderBlossom
                 uploadId={fileUploadContext()}
                 hideLabel={true}
@@ -503,62 +593,26 @@ const ReadsEditorEditor: Component<{
 
                   resetUpload(uploadId);
                 }}
-              />
+                onStart={(_, cancelUpload) => {
+                  setIsUploading(true);
+                  setImageLoaded(false);
+                  setCancelUploading(() => cancelUpload);
+                }}
+                progressBar={(uploadState, resetUploadState) => {
 
-              <Show
-                when={props.article.image.length > 0}
-                fallback={
-                  <div class={styles.noTitleImagePlaceholder}>
-                    <input
-                      id="upload-avatar"
-                      type="file"
-                      onChange={() => onUploadTitleImage(titleImageUpload)}
-                      ref={titleImageUpload}
-                      hidden={true}
-                      accept="image/*"
-                    />
-                    <label for="upload-avatar">
-                      Add hero Image
-                    </label>
-                  </div>
-                }
-              >
-                <div
-                  class={styles.uploadButton}
-                >
-                  <div
-                    class={styles.uploadOverlay}
-                    onClick={() => {
-                      document.getElementById('upload-title-image')?.click();
-                    }}
-                  >
-                    <div
-                      class={styles.closeBtn}
-                      onClick={(e: MouseEvent) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        props.setArticle('image', () => '');
-                        document.getElementById('upload-title-image')?.click();
-                      }}
-                    >
-                      <div class={styles.closeIcon}></div>
-                    </div>
-                    <div>Chage hero Image</div>
-                  </div>
-                  <input
-                    id="upload-title-image"
-                    type="file"
-                    onChange={() => onUploadTitleImage(titleImageUpload)}
-                    ref={titleImageUpload}
-                    hidden={true}
-                    accept="image/*"
-                  />
-                  <img
-                    class={styles.titleImage}
-                    src={props.article.image}
-                  />
-                </div>
-              </Show>
+                  return (
+                    <Progress value={uploadState.progress} class={styles.uploadProgress}>
+                      <div class={styles.progressTrackContainer}>
+                        <Progress.Track class={styles.progressTrack}>
+                          <Progress.Fill
+                            class={`${styles.progressFill}`}
+                          />
+                        </Progress.Track>
+                      </div>
+                    </Progress>
+                  );
+                }}
+              />
             </Show>
 
             <div class={styles.summary}>

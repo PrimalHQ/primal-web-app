@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, on, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, JSXElement, on, onCleanup, onMount, Show } from 'solid-js';
 import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
@@ -22,7 +22,7 @@ import { useToastContext } from '../Toaster/Toaster';
 
 const MB = 1024 * 1024;
 
-type UploadState = {
+export type UploadState = {
   isUploading: boolean,
   progress: number,
   id?: string,
@@ -42,7 +42,8 @@ const UploaderBlossom: Component<{
   onRefuse?: (reason: string, uploadId?: string) => void,
   onCancel?: (uploadId?: string) => void,
   onSuccsess?: (url: string, uploadId?: string) => void,
-
+  onStart?: (uploadId: string | undefined, cancelUpload: () => void) => void,
+  progressBar?: (state: UploadState, resetUpload: () => void) => JSXElement,
 }> = (props) => {
   const account = useAccountContext();
   const toaster = useToastContext();
@@ -92,7 +93,7 @@ const UploaderBlossom: Component<{
     clearXHR();
   }
 
-  const resetUpload = (skipCancel?: boolean) => {
+  const resetUpload = () => {
     setUploadState(() => ({
       isUploading: false,
       file: undefined,
@@ -108,7 +109,7 @@ const UploaderBlossom: Component<{
     const mirrors = account?.blossomServers.slice(1) || [];
     if (mirrors.length === 0) return;
 
-    let auth = await BlossomClient.createUploadAuth(signEvent, uploadState.file, { message: 'media upload mirroring'});
+    let auth = await BlossomClient.createUploadAuth(signEvent, blob.sha256, { message: 'media upload mirroring'});
     setUploadState('auth', () => ({ ...auth }));
 
     for (let server of mirrors) {
@@ -259,6 +260,10 @@ const UploaderBlossom: Component<{
     xhr.addEventListener("abort", xhrOnAbort);
 
     xhr.send(file);
+    props.onStart && props.onStart(uploadState.id, () => {
+      uploadState.xhr?.abort();
+      resetUpload();
+    });
   }
 
   createEffect(on(() => props.file, (file) => {
@@ -269,37 +274,42 @@ const UploaderBlossom: Component<{
 
   return (
     <Show when={uploadState.id}>
-      <Progress value={uploadState.progress} class={styles.uploadProgress}>
-        <Show when={!props.hideLabel}>
-          <div class={styles.progressLabelContainer}>
-            <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
-          </div>
-        </Show>
-        <div class={styles.progressTrackContainer}>
-          <Progress.Track class={styles.progressTrack}>
-            <Progress.Fill
-              ref={progressFill}
-              class={`${styles.progressFill}`}
-            />
-          </Progress.Track>
+      <Show
+        when={!props.progressBar}
+        fallback={<>{props.progressBar!({...uploadState }, resetUpload)}</>}
+      >
+        <Progress value={uploadState.progress} class={styles.uploadProgress}>
+          <Show when={!props.hideLabel}>
+            <div class={styles.progressLabelContainer}>
+              <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
+            </div>
+          </Show>
+          <div class={styles.progressTrackContainer}>
+            <Progress.Track class={styles.progressTrack}>
+              <Progress.Fill
+                ref={progressFill}
+                class={`${styles.progressFill}`}
+              />
+            </Progress.Track>
 
-          <ButtonGhost
-            onClick={() => {
-              uploadState.xhr?.abort();
-              resetUpload();
-              props.onCancel && props.onCancel(props.uploadId);
-            }}
-            disabled={uploadState.progress >= 100}
-          >
-            <Show
-              when={(uploadState.progress < 100)}
-              fallback={<div class={styles.iconCheck}></div>}
+            <ButtonGhost
+              onClick={() => {
+                uploadState.xhr?.abort();
+                resetUpload();
+                props.onCancel && props.onCancel(props.uploadId);
+              }}
+              disabled={uploadState.progress >= 100}
             >
-              <div class={styles.iconClose}></div>
-            </Show>
-          </ButtonGhost>
-        </div>
-      </Progress>
+              <Show
+                when={(uploadState.progress < 100)}
+                fallback={<div class={styles.iconCheck}></div>}
+              >
+                <div class={styles.iconClose}></div>
+              </Show>
+            </ButtonGhost>
+          </div>
+        </Progress>
+      </Show>
     </Show>
   );
 }

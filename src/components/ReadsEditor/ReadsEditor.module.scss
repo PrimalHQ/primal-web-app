@@ -1090,3 +1090,90 @@
   -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
   mask: url(../../assets/icons/close.svg) no-repeat center;
 }
+
+.uploadingOverlay {
+  width: 100%;
+  height: 260px;
+  position: relative;
+  cursor: pointer;
+
+  color: var(--text-tertiary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+  background-color: var(--background-site);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: black;
+    border-radius: 99px;
+  }
+}
+
+.uploadProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+
+  .progressLabelContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+  .progressLabel,
+  .progressValue {
+    color: var(--text-tertiary-2);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .progressTrackContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .iconClose {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    .iconCheck {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--success-bright);
+      -webkit-mask: url(../../assets/icons/check.svg) no-repeat center;
+      mask: url(../../assets/icons/check.svg) no-repeat center;
+    }
+  }
+  .progressTrack {
+    width: 100%;
+    height: 2px;
+    background-color: var(--background-input);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progressFill {
+    background-color: var(--accent);
+    height: 2px;
+    border-radius: 1px;
+    width: var(--kb-progress-fill-width);
+    transition: width 250ms linear;
+  }
+  /* .progressFill[data-progress="complete"] {
+    background-color: var(--success-bright);
+  } */
+}
