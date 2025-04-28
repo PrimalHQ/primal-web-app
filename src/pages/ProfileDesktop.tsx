@@ -94,8 +94,6 @@ const ProfileDesktop: Component = () => {
     return (location.hash.length > 1) ? location.hash.substring(1) : 'notes';
   }
 
-  let profileAboutDiv: HTMLDivElement | undefined;
-
   const [getHex, setHex] = createSignal<string>();
 
   const resolveHex = async (vanityName: string | undefined) => {
@@ -641,9 +639,7 @@ const ProfileDesktop: Component = () => {
   };
 
   const shortProfileAbout = (text: string | undefined) => {
-    if (!profileAboutDiv || !text) return true;
-
-    // const text = profileAboutDiv.innerText;
+    if (!text) return true;
 
     return text.length < 50;
   }
@@ -849,7 +845,7 @@ const ProfileDesktop: Component = () => {
               </Show>
             </div>
 
-            <div ref={profileAboutDiv} class="hidden">
+            <div class="hidden">
               <ProfileAbout about={profile?.userProfile?.about} />
             </div>
 
@@ -895,9 +891,7 @@ const ProfileDesktop: Component = () => {
 
                       <Show when={profile?.userProfile?.about}>
                         <div class={`${styles.profileAboutHolder} animated`}>
-                          <div ref={profileAboutDiv}>
-                            <ProfileAbout about={profile?.userProfile?.about} />
-                          </div>
+                          <ProfileAbout about={profile?.userProfile?.about} />
                         </div>
                       </Show>
 
@@ -1007,10 +1001,7 @@ const ProfileDesktop: Component = () => {
                         </Show>
                     </div>
                     <div class={`${styles.profileAboutHolder} animated`}>
-                      <div ref={profileAboutDiv}>
-                        <ProfileAbout about={profile?.userProfile?.about} />
-                      </div>
-
+                      <ProfileAbout about={profile?.userProfile?.about} />
                     </div>
                     <div class="animated">
                       <div class={styles.profileLinks}>
