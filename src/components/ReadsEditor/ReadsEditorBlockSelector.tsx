@@ -24,7 +24,7 @@ export const blockSelectorOptions: SelectorOption[] = [
 const ReadsEditorBlockSelector: Component<{
   value: SelectorOption
   options: SelectorOption[],
-  onChange: (selection: SelectorOption) => void,
+  onChange: (selection: SelectorOption | null) => void,
   short?: boolean,
 }> = (props) => {
 

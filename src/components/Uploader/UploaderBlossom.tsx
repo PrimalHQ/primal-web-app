@@ -268,41 +268,39 @@ const UploaderBlossom: Component<{
   }))
 
   return (
-    <div>
-      <Show when={uploadState.id}>
-        <Progress value={uploadState.progress} class={styles.uploadProgress}>
-          <Show when={!props.hideLabel}>
-            <div class={styles.progressLabelContainer}>
-              <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
-            </div>
-          </Show>
-          <div class={styles.progressTrackContainer}>
-            <Progress.Track class={styles.progressTrack}>
-              <Progress.Fill
-                ref={progressFill}
-                class={`${styles.progressFill}`}
-              />
-            </Progress.Track>
-
-            <ButtonGhost
-              onClick={() => {
-                uploadState.xhr?.abort();
-                resetUpload();
-                props.onCancel && props.onCancel(props.uploadId);
-              }}
-              disabled={uploadState.progress >= 100}
-            >
-              <Show
-                when={(uploadState.progress < 100)}
-                fallback={<div class={styles.iconCheck}></div>}
-              >
-                <div class={styles.iconClose}></div>
-              </Show>
-            </ButtonGhost>
+    <Show when={uploadState.id}>
+      <Progress value={uploadState.progress} class={styles.uploadProgress}>
+        <Show when={!props.hideLabel}>
+          <div class={styles.progressLabelContainer}>
+            <Progress.Label class={styles.progressLabel}>{uploadState.file?.name || ''}</Progress.Label>
           </div>
-        </Progress>
-      </Show>
-    </div>
+        </Show>
+        <div class={styles.progressTrackContainer}>
+          <Progress.Track class={styles.progressTrack}>
+            <Progress.Fill
+              ref={progressFill}
+              class={`${styles.progressFill}`}
+            />
+          </Progress.Track>
+
+          <ButtonGhost
+            onClick={() => {
+              uploadState.xhr?.abort();
+              resetUpload();
+              props.onCancel && props.onCancel(props.uploadId);
+            }}
+            disabled={uploadState.progress >= 100}
+          >
+            <Show
+              when={(uploadState.progress < 100)}
+              fallback={<div class={styles.iconCheck}></div>}
+            >
+              <div class={styles.iconClose}></div>
+            </Show>
+          </ButtonGhost>
+        </div>
+      </Progress>
+    </Show>
   );
 }
 

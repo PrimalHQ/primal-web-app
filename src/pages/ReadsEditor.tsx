@@ -29,6 +29,7 @@ import { subsTo } from '../sockets';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
 import PageTitle from '../components/PageTitle/PageTitle';
+import { date, longDate } from '../lib/dates';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -74,7 +75,7 @@ const ReadsEditor: Component = () => {
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
 
-  const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string }>({ ...emptyArticleEdit(), mdContent: ''});
+  const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string, time: number }>({ ...emptyArticleEdit(), mdContent: '', time: 0, });
 
   const [showPublishArticle, setShowPublishArticle] = createSignal(false);
   const [showleavePage, setShowleavePage] = createSignal<BeforeLeaveEventArgs>();
@@ -211,7 +212,7 @@ const ReadsEditor: Component = () => {
 
       setMarkdownContent(r.content);
 
-      setLastSaved(() => ({ ...article, mdContent: markdownContent() }));
+      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: r.published }));
 
       return;
     }
@@ -249,7 +250,7 @@ const ReadsEditor: Component = () => {
 
       setMarkdownContent(r.content);
 
-      setLastSaved(() => ({ ...article, mdContent: markdownContent() }));
+      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: draft.created_at }));
 
       return;
     }
@@ -421,6 +422,7 @@ const ReadsEditor: Component = () => {
       setLastSaved(() => ({
         ...article,
         mdContent: markdownContent(),
+        time: note.created_at,
       }));
     }
     else {
@@ -552,18 +554,27 @@ const ReadsEditor: Component = () => {
           </div>
           <div class={styles.sidebarPublish}>
             <div class={styles.caption}>{'Save & Publish'}</div>
-            <Show
-              when={isUnsaved()}
-              fallback={
+            <Switch>
+              <Match when={article.title.length === 0}>
                 <div class={styles.status}>
-                  Draft saved
+                  Enter article title before you can save
                 </div>
-              }
-            >
-              <div class={styles.status}>
-                Unsaved changes
-              </div>
-            </Show>
+              </Match>
+
+              <Match when={!isUnsaved()}>
+                <div class={styles.status}>
+                  <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
+                  <div>Saved changes. Last saved: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                </div>
+              </Match>
+
+              <Match when={isUnsaved()}>
+                <div class={styles.status}>
+                  <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
+                  <div>Unsaved changes. Last saved: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                </div>
+              </Match>
+            </Switch>
 
             <button
               class={styles.toolButton}

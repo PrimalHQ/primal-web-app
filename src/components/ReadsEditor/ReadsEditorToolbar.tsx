@@ -365,6 +365,28 @@ const ReadsEditorToolbar: Component<{
           />
 
           <button
+            id="attachBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterImage', () => true);
+            }}
+            title="image"
+          >
+            <div class={styles.attachIcon}></div>
+          </button>
+
+          <button
+            id="mentionBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterMention', () => true);
+            }}
+            title="mention"
+          >
+            <div class={styles.atIcon}></div>
+          </button>
+
+          <button
             id="linkBtn"
             class={`${styles.mdToolButton} ${formatControls.isLinkActive ? styles.selected : ''}`}
             onClick={() => {
@@ -384,45 +406,6 @@ const ReadsEditorToolbar: Component<{
           >
             <div class={styles.linkIcon}></div>
           </button>
-
-          <button
-            id="mentionBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterMention', () => true);
-            }}
-            title="mention"
-          >
-            <div class={styles.atIcon}></div>
-          </button>
-
-          <button
-            id="attachBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterImage', () => true);
-            }}
-            title="image"
-          >
-            <div class={styles.attachIcon}></div>
-          </button>
-
-          {/* <div
-            id="attachBtn"
-            class={styles.mdToolButton}
-            title="image"
-          >
-            <input
-              id="upload-content"
-              type="file"
-              onChange={onUploadContentImage}
-              ref={contentFileUpload}
-              hidden={true}
-              accept="image/*,video/*,audio/*"
-            />
-            <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
-            </label>
-          </div> */}
           <div class={styles.separator}></div>
         </div>
 
@@ -514,6 +497,28 @@ const ReadsEditorToolbar: Component<{
           />
 
           <button
+            id="attachBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterImage', () => true);
+            }}
+            title="image"
+          >
+            <div class={styles.attachIcon}></div>
+          </button>
+
+          <button
+            id="mentionBtn"
+            class={`${styles.mdToolButton}`}
+            onClick={() => {
+              updateFormatControls('enterMention', () => true);
+            }}
+            title="mention"
+          >
+            <div class={styles.atIcon}></div>
+          </button>
+
+          <button
             id="linkBtn"
             class={`${styles.mdToolButton} ${formatControls.isLinkActive ? styles.selected : ''}`}
             onClick={() => {
@@ -533,45 +538,6 @@ const ReadsEditorToolbar: Component<{
           >
             <div class={styles.linkIcon}></div>
           </button>
-
-          <button
-            id="mentionBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterMention', () => true);
-            }}
-            title="mention"
-          >
-            <div class={styles.atIcon}></div>
-          </button>
-
-          <button
-            id="attachBtn"
-            class={`${styles.mdToolButton}`}
-            onClick={() => {
-              updateFormatControls('enterImage', () => true);
-            }}
-            title="image"
-          >
-            <div class={styles.attachIcon}></div>
-          </button>
-
-          {/* <div
-            id="attachBtn"
-            class={styles.mdToolButton}
-            title="image"
-          >
-            <input
-              id="upload-content"
-              type="file"
-              onChange={onUploadContentImage}
-              ref={contentFileUpload}
-              hidden={true}
-              accept="image/*,video/*,audio/*"
-            />
-            <label for={'upload-content'} class={`attach_icon ${styles.attachIcon}`}>
-            </label>
-          </div> */}
           <div class={styles.separator}></div>
         </div>
 

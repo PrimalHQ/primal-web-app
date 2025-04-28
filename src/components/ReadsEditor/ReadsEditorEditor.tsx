@@ -532,7 +532,18 @@ const ReadsEditorEditor: Component<{
                       document.getElementById('upload-title-image')?.click();
                     }}
                   >
-                    Chage hero Image
+                    <div
+                      class={styles.closeBtn}
+                      onClick={(e: MouseEvent) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        props.setArticle('image', () => '');
+                        document.getElementById('upload-title-image')?.click();
+                      }}
+                    >
+                      <div class={styles.closeIcon}></div>
+                    </div>
+                    <div>Chage hero Image</div>
                   </div>
                   <input
                     id="upload-title-image"
@@ -549,7 +560,6 @@ const ReadsEditorEditor: Component<{
                 </div>
               </Show>
             </Show>
-
 
             <div class={styles.summary}>
               <div class={styles.border}></div>
