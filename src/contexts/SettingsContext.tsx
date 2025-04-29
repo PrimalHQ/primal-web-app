@@ -973,6 +973,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const publicKey = account?.publicKey;
 
+    if (!isConnected()) return;
+
     loadSettings(publicKey, () => {
     });
   });
