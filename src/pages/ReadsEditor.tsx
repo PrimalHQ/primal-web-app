@@ -16,7 +16,7 @@ import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { nip44 } from 'nostr-tools';
 import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { importEvents, NostrEvent, sendArticle, sendDraft, sendEvent, triggerImportEvents } from '../lib/notes';
+import { importEvents, NostrEvent, sendArticle, sendDeleteEvent, sendDraft, sendEvent, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
@@ -75,7 +75,12 @@ const ReadsEditor: Component = () => {
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
 
-  const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string, time: number }>({ ...emptyArticleEdit(), mdContent: '', time: 0, });
+  const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string, time: number, draftId: string }>({
+    ...emptyArticleEdit(),
+    mdContent: '',
+    time: 0,
+    draftId: '',
+  });
 
   const [showPublishArticle, setShowPublishArticle] = createSignal(false);
   const [showleavePage, setShowleavePage] = createSignal<BeforeLeaveEventArgs>();
@@ -250,7 +255,7 @@ const ReadsEditor: Component = () => {
 
       setMarkdownContent(r.content);
 
-      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: draft.created_at }));
+      setLastSaved(() => ({ ...article, mdContent: markdownContent(), time: draft.created_at, draftId: draft.id }));
 
       return;
     }
@@ -258,7 +263,9 @@ const ReadsEditor: Component = () => {
   }
 
   const postArticle = async (promote: boolean) => {
-    if (!account || !account.hasPublicKey()) {
+    const user = account?.activeUser;
+
+    if (!account || !account.hasPublicKey() || !user) {
       return;
     }
 
@@ -278,6 +285,7 @@ const ReadsEditor: Component = () => {
     }
 
     const content = markdownContent();
+
 
     let relayHints = {}
     let tags: string[][] = referencesToTags(content, relayHints);;
@@ -313,6 +321,7 @@ const ReadsEditor: Component = () => {
     if (success && note) {
 
       const importId = `import_article_${APP_ID}`;
+      const lastDraft = lastSaved.draftId;
 
       const unsub = subsTo(importId, {
         onEose: () => {
@@ -331,6 +340,18 @@ const ReadsEditor: Component = () => {
       });
 
       importEvents([note], importId);
+
+
+      if (lastDraft.length > 0) {
+        sendDeleteEvent(
+          user.pubkey,
+          lastDraft,
+          Kind.Draft,
+          account.activeRelays,
+          account.relaySettings,
+          account.proxyThroughPrimal,
+        );
+      }
 
       return;
     }
@@ -405,6 +426,8 @@ const ReadsEditor: Component = () => {
     const user = account?.activeUser;
     if (!user) return;
 
+    const lastDraft = lastSaved.draftId;
+
 
     const { success, note } = await sendDraft(
       user,
@@ -421,62 +444,25 @@ const ReadsEditor: Component = () => {
 
       setLastSaved(() => ({
         ...article,
+        draft: { ...note },
         mdContent: markdownContent(),
         time: note.created_at,
       }));
+
+      if (lastDraft.length > 0) {
+        sendDeleteEvent(
+          user.pubkey,
+          lastDraft,
+          Kind.Draft,
+          account.activeRelays,
+          account.relaySettings,
+          account.proxyThroughPrimal,
+        );
+      }
     }
     else {
       toast?.sendWarning('Draft saving failed');
     }
-
-    // const pk = account?.publicKey;
-    // if (!pk || !account) return;
-    // const time = Math.floor((new Date()).getTime() / 1000);
-    // const a: NostrEvent = {
-    //   content: markdownContent(),
-    //   kind: Kind.LongForm,
-    //   tags: [
-    //     ["title", article.title],
-    //     ["summary", article.summary],
-    //     ["image", article.image],
-    //     ["t", article.tags.join(" ")],
-    //     ["d", generateIdentifier()],
-    //     ['client', 'primal-web'],
-    //   ],
-    //   created_at: time,
-    // };
-
-    // const e = await encrypt44(pk, JSON.stringify(a));
-    // // const d = await decrypt44(pk, e);
-
-    // const draft: NostrEvent = {
-    //   kind: Kind.Draft,
-    //   created_at: Math.floor((new Date()).getTime() / 1_000),
-    //   tags: [
-    //     ['d', generateIdentifier()],
-    //     ['k', `${Kind.LongForm}`],
-    //     ['client', 'primal-web'],
-    //     // ["e", "<anchor event event id>", "<relay-url>"],
-    //     // ["a", "<anchor event address>", "<relay-url>"],
-    //   ],
-    //   content: e,
-    //   // other fields
-    // }
-
-    // const { success, note } = await sendEvent(draft, account.activeRelays, account.relaySettings, account.proxyThroughPrimal);
-
-    // if (success && note) {
-    //   toast?.sendSuccess('Draft saved');
-    //   triggerImportEvents([note], `draft_import_${APP_ID}`);
-
-    //   setLastSaved(() => ({
-    //     ...article,
-    //     mdContent: markdownContent(),
-    //   }));
-    // }
-    // else {
-    //   toast?.sendWarning('Draft saving failed');
-    // }
   };
 
   return (
