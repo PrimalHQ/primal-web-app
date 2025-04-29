@@ -81,7 +81,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
       threadContext?.notes.filter(n =>
         n.post.id !== note.post.id &&
         n.post.created_at <= note.post.created_at &&
-        !n.tags.find(t => t[0] === 'e' && t[3] === 'reply' && t[1] === note.id),
+        !n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),
       ) || [],
       true,
     );
@@ -97,7 +97,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     return threadContext?.notes.filter(n =>
       n.post.id !== note.post.id &&
       n.post.created_at >= note.post.created_at &&
-      n.tags.find(t => t[0] === 'e' && t[3] === 'reply' && t[1] === note.id),
+      n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),
     ) || [];
   };
 
