@@ -204,7 +204,6 @@ const ReadsImageDialog: Component<{
               accept="image/*,video/*,audio/*"
             />
 
-
             <UploaderBlossom
               uploadId="upload_content_image"
               hideLabel={false}
@@ -240,7 +239,6 @@ const ReadsImageDialog: Component<{
                 setCancelUploading(() => cancelUpload);
               }}
               progressBar={(uploadState, resetUploadState) => {
-
                 return (
                   <Progress value={uploadState.progress} class={styles.uploadProgress}>
                     <div class={styles.progressTrackContainer}>
@@ -258,7 +256,7 @@ const ReadsImageDialog: Component<{
           </div>
         </div>
         <div class={styles.inputHolder}>
-          <label for="input_title">Image title:</label>
+          <label for="input_title">Image Title <span>Describe the image</span></label>
           <input
             id="input_title"
             class={styles.textInput}
@@ -266,7 +264,7 @@ const ReadsImageDialog: Component<{
             onInput={(e) => setState(() => ({ title: e.target.value}))}
           />
 
-          <label for="input_alt">Image alt text:</label>
+          <label for="input_alt">Image Alt Text <span>Shown if the image doesn’t load</span></label>
           <input
             id="input_alt"
             class={styles.textInput}

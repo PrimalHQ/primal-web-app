@@ -116,6 +116,7 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    overflow: hidden;
 
     .uploadPlaceholder {
       display: flex;
@@ -135,6 +136,18 @@
   .inputHolder {
     label {
       margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+
+      span {
+        margin-left: 8px;
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 20px;
+      }
     }
     input {
       width: 332px;
