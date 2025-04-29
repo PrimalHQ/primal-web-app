@@ -498,9 +498,9 @@ export const encodeAuthorizationHeader = (uploadAuth: SignedEvent) => {
 
 export const checkBlossomServer = async (url: string) => {
   // const encodedAuthHeader = encodeAuthorizationHeader(auth);
-  const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}`;
+  // const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}`;
 
-  const blossomCheck = await fetchWithTimeout(uploadUrl, {
+  const blossomCheck = await fetchWithTimeout(url, {
     method: "GET",
     timeout: 3_000,
   });

@@ -59,6 +59,7 @@ const Blossom: Component = () => {
   const checkServers = (servers: string[]) => {
     for (let i = 0; i < servers.length;i++) {
       const url = servers[i];
+      console.log('checking: ', url)
       checkBlossomServer(url).then(available => setServerAvailability(() => ({ [url]: available })));
     }
   }
@@ -107,7 +108,7 @@ const Blossom: Component = () => {
     return account?.blossomServers.slice(1) || [];
   }
 
-  const reommendedNirrors = () => {
+  const reommendedMirrors = () => {
     const activeMirrors = account?.blossomServers || [];
 
     const recomended =  (settings?.recomendedBlossomServers || []).filter(s => !activeMirrors.includes(s));
@@ -252,7 +253,7 @@ const Blossom: Component = () => {
             {intl.formatMessage(t.blossomPage.suggestedMirrors)}
           </div>
 
-          <For each={reommendedNirrors()}>
+          <For each={reommendedMirrors()}>
             {mirror => (
               <div class={styles.mirrorServer}>
                 <div class={styles.label}>
