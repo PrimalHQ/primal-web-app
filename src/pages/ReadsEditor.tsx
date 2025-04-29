@@ -422,6 +422,21 @@ const ReadsEditor: Component = () => {
     return changed;
   }
 
+  const beforeUnload = (e: BeforeUnloadEvent) => {
+    if (isUnsaved()) {
+      e.preventDefault();
+      return e.returnValue = true;
+    }
+  };
+
+  onMount(() => {
+    window.addEventListener('beforeunload', beforeUnload, { capture: true });
+  });
+
+  onCleanup(() => {
+    window.removeEventListener('beforeunload', beforeUnload, { capture: true });
+  });
+
   const saveDraft = async () => {
     const user = account?.activeUser;
     if (!user) return;
