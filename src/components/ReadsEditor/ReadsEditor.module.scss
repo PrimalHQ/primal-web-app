@@ -547,6 +547,14 @@
     justify-content: flex-start;
     gap: 16px;
 
+    .uploadImageHolder {
+      width: 100%;
+      background-color: var(--background-sheet);
+      border: 1px solid var(--devider);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
     .uploadButton {
       position: relative;
       width: fit-content;
@@ -601,8 +609,6 @@
     .noTitleImagePlaceholder {
       width: 100%;
       height: 260px;
-      border: 1px solid var(--devider);
-      border-radius: 12px;
 
       label {
         display: flex;
@@ -1101,7 +1107,6 @@
   font-size: 16px;
   font-weight: 600;
   line-height: 14px;
-  background-color: var(--background-site);
 
   display: flex;
   justify-content: center;

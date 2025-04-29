@@ -461,158 +461,160 @@ const ReadsEditorEditor: Component<{
             </TextField>
 
             <Show when={accordionSection().includes('hero_image')}>
-              <Switch>
-                <Match
-                  when={isUploading()}
-                >
-                  <div
-                    class={styles.uploadingOverlay}
-                    onClick={() => {
-                      const canc = cancelUploading();
-                      resetUpload(titleImageUploadId);
-                      canc && canc();
-                    }}
+              <div class={styles.uploadImageHolder}>
+                <Switch>
+                  <Match
+                    when={isUploading()}
                   >
-                    <div>Cancel Upload</div>
-                    <div class={styles.closeBtn}>
-                      <div class={styles.closeIcon}></div>
+                    <div
+                      class={styles.uploadingOverlay}
+                      onClick={() => {
+                        const canc = cancelUploading();
+                        resetUpload(titleImageUploadId);
+                        canc && canc();
+                      }}
+                    >
+                      <div>Cancel Upload</div>
+                      <div class={styles.closeBtn}>
+                        <div class={styles.closeIcon}></div>
+                      </div>
                     </div>
-                  </div>
-                </Match>
+                  </Match>
 
-                <Match
-                  when={props.article.image.length > 0}
-                >
-                  <div
-                    class={styles.uploadButton}
+                  <Match
+                    when={props.article.image.length > 0}
                   >
-                    <Show when={imageLoaded()}>
-                      <div
-                        class={styles.uploadOverlay}
-                        onClick={() => {
-                          document.getElementById('upload-title-image')?.click();
-                        }}
-                      >
+                    <div
+                      class={styles.uploadButton}
+                    >
+                      <Show when={imageLoaded()}>
                         <div
-                          class={styles.closeBtn}
-                          onClick={(e: MouseEvent) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            props.setArticle('image', () => '');
-                            setImageLoaded(false);
+                          class={styles.uploadOverlay}
+                          onClick={() => {
                             document.getElementById('upload-title-image')?.click();
                           }}
                         >
-                          <div class={styles.closeIcon}></div>
+                          <div
+                            class={styles.closeBtn}
+                            onClick={(e: MouseEvent) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              props.setArticle('image', () => '');
+                              setImageLoaded(false);
+                              document.getElementById('upload-title-image')?.click();
+                            }}
+                          >
+                            <div class={styles.closeIcon}></div>
+                          </div>
+                          <div>Chage hero Image</div>
                         </div>
-                        <div>Chage hero Image</div>
-                      </div>
-                    </Show>
-                    <input
-                      id="upload-title-image"
-                      type="file"
-                      onChange={() => onUploadTitleImage(titleImageUpload)}
-                      ref={titleImageUpload}
-                      hidden={true}
-                      accept="image/*"
-                    />
-                    <img
-                      class={styles.titleImage}
-                      src={props.article.image}
-                      onload={() => setImageLoaded(true)}
-                    />
-                  </div>
-                </Match>
+                      </Show>
+                      <input
+                        id="upload-title-image"
+                        type="file"
+                        onChange={() => onUploadTitleImage(titleImageUpload)}
+                        ref={titleImageUpload}
+                        hidden={true}
+                        accept="image/*"
+                      />
+                      <img
+                        class={styles.titleImage}
+                        src={props.article.image}
+                        onload={() => setImageLoaded(true)}
+                      />
+                    </div>
+                  </Match>
 
-                <Match
-                  when={props.article.image.length === 0}
-                >
-                  <div class={styles.noTitleImagePlaceholder}>
-                    <input
-                      id="upload-avatar"
-                      type="file"
-                      onChange={() => onUploadTitleImage(titleImageUpload)}
-                      ref={titleImageUpload}
-                      hidden={true}
-                      accept="image/*"
-                    />
-                    <label for="upload-avatar">
-                      Add hero Image
-                    </label>
-                  </div>
-                </Match>
-              </Switch>
+                  <Match
+                    when={props.article.image.length === 0}
+                  >
+                    <div class={styles.noTitleImagePlaceholder}>
+                      <input
+                        id="upload-avatar"
+                        type="file"
+                        onChange={() => onUploadTitleImage(titleImageUpload)}
+                        ref={titleImageUpload}
+                        hidden={true}
+                        accept="image/*"
+                      />
+                      <label for="upload-avatar">
+                        Add hero Image
+                      </label>
+                    </div>
+                  </Match>
+                </Switch>
 
-              <UploaderBlossom
-                uploadId={fileUploadContext()}
-                hideLabel={true}
-                publicKey={account?.publicKey}
-                nip05={account?.activeUser?.nip05}
-                file={fileToUpload()}
-                onFail={(_, uploadId?: string) => {
-                  toast?.sendWarning(intl.formatMessage(tUpload.fail, {
-                    file: fileToUpload()?.name,
-                  }));
-                  resetUpload(uploadId);
-                }}
-                onRefuse={(reason: string, uploadId?: string) => {
-                  if (reason === 'file_too_big_100') {
-                    toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
-                  }
-                  if (reason === 'file_too_big_1024') {
-                    toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
-                  }
-                  resetUpload(uploadId);
-                }}
-                onCancel={(uploadId?: string) => {
-                  resetUpload(uploadId);
-                }}
-                onSuccsess={(url:string, uploadId?: string) => {
-                  if (uploadId === titleImageUploadId) {
-                    props.setArticle('image', () => url);
-                  }
+                <UploaderBlossom
+                  uploadId={fileUploadContext()}
+                  hideLabel={true}
+                  publicKey={account?.publicKey}
+                  nip05={account?.activeUser?.nip05}
+                  file={fileToUpload()}
+                  onFail={(_, uploadId?: string) => {
+                    toast?.sendWarning(intl.formatMessage(tUpload.fail, {
+                      file: fileToUpload()?.name,
+                    }));
+                    resetUpload(uploadId);
+                  }}
+                  onRefuse={(reason: string, uploadId?: string) => {
+                    if (reason === 'file_too_big_100') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigRegular));
+                    }
+                    if (reason === 'file_too_big_1024') {
+                      toast?.sendWarning(intl.formatMessage(tUpload.fileTooBigPremium));
+                    }
+                    resetUpload(uploadId);
+                  }}
+                  onCancel={(uploadId?: string) => {
+                    resetUpload(uploadId);
+                  }}
+                  onSuccsess={(url:string, uploadId?: string) => {
+                    if (uploadId === titleImageUploadId) {
+                      props.setArticle('image', () => url);
+                    }
 
-                  if (uploadId === contentImageUploadId) {
-                    const ed = editorTipTap();
-                    if (!ed) return;
+                    if (uploadId === contentImageUploadId) {
+                      const ed = editorTipTap();
+                      if (!ed) return;
 
-                    ed.
-                      chain().
-                      focus().
-                      setImage({
-                        src: url,
-                        title: 'image',
-                        alt: 'image alternative',
-                      }).
-                      run();
+                      ed.
+                        chain().
+                        focus().
+                        setImage({
+                          src: url,
+                          title: 'image',
+                          alt: 'image alternative',
+                        }).
+                        run();
 
-                    // Move cursor one space to the right to avoid overwriting the image.
-                    const el = document.querySelector('.tiptap.ProseMirror');
-                    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
-                  }
+                      // Move cursor one space to the right to avoid overwriting the image.
+                      const el = document.querySelector('.tiptap.ProseMirror');
+                      el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight'}))
+                    }
 
-                  resetUpload(uploadId);
-                }}
-                onStart={(_, cancelUpload) => {
-                  setIsUploading(true);
-                  setImageLoaded(false);
-                  setCancelUploading(() => cancelUpload);
-                }}
-                progressBar={(uploadState, resetUploadState) => {
+                    resetUpload(uploadId);
+                  }}
+                  onStart={(_, cancelUpload) => {
+                    setIsUploading(true);
+                    setImageLoaded(false);
+                    setCancelUploading(() => cancelUpload);
+                  }}
+                  progressBar={(uploadState, resetUploadState) => {
 
-                  return (
-                    <Progress value={uploadState.progress} class={styles.uploadProgress}>
-                      <div class={styles.progressTrackContainer}>
-                        <Progress.Track class={styles.progressTrack}>
-                          <Progress.Fill
-                            class={`${styles.progressFill}`}
-                          />
-                        </Progress.Track>
-                      </div>
-                    </Progress>
-                  );
-                }}
-              />
+                    return (
+                      <Progress value={uploadState.progress} class={styles.uploadProgress}>
+                        <div class={styles.progressTrackContainer}>
+                          <Progress.Track class={styles.progressTrack}>
+                            <Progress.Fill
+                              class={`${styles.progressFill}`}
+                            />
+                          </Progress.Track>
+                        </div>
+                      </Progress>
+                    );
+                  }}
+                />
+              </div>
             </Show>
 
             <div class={styles.summary}>
