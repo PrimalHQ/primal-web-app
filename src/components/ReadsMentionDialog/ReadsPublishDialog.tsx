@@ -86,16 +86,20 @@ const ReadsPublishDialog: Component<{
           </TextField>
         </Show>
 
-        <ArticlePreview
-          article={props.article}
-        />
+        <div class={styles.previewHolder}>
+          <ArticlePreview
+            article={props.article}
+            hideContext={true}
+            hideFooter={true}
+          />
+        </div>
 
-        <CheckBox2
+        {/* <CheckBox2
           onChange={setShowPromotion}
           checked={showPromotion()}
         >
           Add a short note to promote your article in the main feed
-        </CheckBox2>
+        </CheckBox2> */}
 
         <div class={styles.actions}>
           <ButtonSecondary

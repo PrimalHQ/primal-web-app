@@ -559,3 +559,11 @@ input.textInput {
     background-color: var(--success-bright);
   } */
 }
+
+.previewHolder {
+  background-color: var(--background-header-input);
+  border: 1px solid var(--subtile-devider);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}

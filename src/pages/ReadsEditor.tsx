@@ -534,9 +534,9 @@ const ReadsEditor: Component = () => {
                 setEditorPreviewMode('browser');
               }}
             >
-              Browser Preview
+              Preview
             </button>
-            <button
+            {/* <button
               class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
               onClick={() => {
                 setEditorPreviewMode('phone');
@@ -551,7 +551,7 @@ const ReadsEditor: Component = () => {
               }}
             >
               Feed Preview
-            </button>
+            </button> */}
           </div>
           <div class={styles.sidebarPublish}>
             <div class={styles.caption}>{'Save & Publish'}</div>
