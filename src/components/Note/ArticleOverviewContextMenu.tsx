@@ -251,12 +251,12 @@ const ArticleOverviewContextMenu: Component<{
         }
       }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toaster?.sendWarning(
-        intl.formatMessage(toast.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toaster?.sendWarning(
+    //     intl.formatMessage(toast.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
     props.onClose()

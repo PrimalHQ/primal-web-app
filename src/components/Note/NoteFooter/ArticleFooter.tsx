@@ -192,12 +192,12 @@ const ArticleFooter: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
@@ -232,9 +232,9 @@ const ArticleFooter: Component<{
       }
     }
 
-    if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
-      return;
-    }
+    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
+    //   return;
+    // }
 
     if (app?.customZap === undefined) {
       doQuickZap();

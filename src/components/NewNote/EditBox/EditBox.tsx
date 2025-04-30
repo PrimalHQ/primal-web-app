@@ -713,12 +713,12 @@ const EditBox: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(tToast.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(tToast.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     const value = message();
 

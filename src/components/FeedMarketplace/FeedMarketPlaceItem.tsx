@@ -83,12 +83,12 @@ const FeedMarketItem: Component<{
       return;
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     const success = await account.actions.addLike(props.dvm);
 
@@ -196,12 +196,12 @@ const FeedMarketItem: Component<{
       return;
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     if (!canUserReceiveZaps(props.author)) {
       toast?.sendWarning(
@@ -234,9 +234,9 @@ const FeedMarketItem: Component<{
       return;
     }
 
-    if ((!account.proxyThroughPrimal && account.relays.length === 0)) {
-      return;
-    }
+    // if ((!account.proxyThroughPrimal && account.relays.length === 0)) {
+    //   return;
+    // }
 
     if (app?.customZap === undefined) {
       doQuickZap();

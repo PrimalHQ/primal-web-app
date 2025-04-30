@@ -61,12 +61,12 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toaster?.sendWarning(
-        intl.formatMessage(toast.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toaster?.sendWarning(
+    //     intl.formatMessage(toast.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
 
     if (account && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {

@@ -117,12 +117,12 @@ const NoteFooter: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
@@ -168,12 +168,12 @@ const NoteFooter: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     const success = await account.actions.addLike(props.note);
 
@@ -203,12 +203,12 @@ const NoteFooter: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(t.noRelaysConnected),
+    //   );
+    //   return;
+    // }
 
     if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
@@ -243,9 +243,9 @@ const NoteFooter: Component<{
       }
     }
 
-    if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
-      return;
-    }
+    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
+    //   return;
+    // }
 
     if (app?.customZap === undefined) {
       doQuickZap();

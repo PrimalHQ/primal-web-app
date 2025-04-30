@@ -109,12 +109,13 @@ const CustomZap: Component<{
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(toastText.noRelaysConnected),
-      );
-      return;
-    }
+    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
+    //   toast?.sendWarning(
+    //     intl.formatMessage(toastText.noRelaysConnected),
+    //   );
+    //   return;
+    // }
+
     props.onConfirm(selectedValue());
 
     const note = props.note;
