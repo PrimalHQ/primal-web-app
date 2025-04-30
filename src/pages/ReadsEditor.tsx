@@ -115,6 +115,8 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
+    tags.push(['clent', 'Primal']);
+
     const now = Math.floor((new Date()).getTime() / 1_000);
     const pubkey = account.publicKey || '';
     const identifier = generateIdentifier();
@@ -149,13 +151,14 @@ const ReadsEditor: Component = () => {
       score: 0,
       score24h: 0,
       satszapped: 0,
+      client: 'Primal',
       msg: {
         kind: Kind.LongForm,
         content,
         id,
         pubkey,
         sig: 'signature',
-        tags: [],
+        tags,
       },
       mentionedNotes: readMentions.notes,
       mentionedArticles: readMentions.reads,
