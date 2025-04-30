@@ -24,6 +24,7 @@ import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import BookmarkArticle from '../../BookmarkNote/BookmarkArticle';
 import { readSecFromStorage } from '../../../lib/localStore';
+import { useNavigate } from '@solidjs/router';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -44,6 +45,7 @@ const ArticleFooter: Component<{
   const intl = useIntl();
   const settings = useSettingsContext();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -141,6 +143,7 @@ const ArticleFooter: Component<{
   const doReply = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    navigate(`/a/${props.note.noteId}`)
   };
 
   const doLike = async (e: MouseEvent) => {
