@@ -664,7 +664,6 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent, shouldProxy: 
 
   try {
     await Promise.any(responses);
-
     return { success: true, note: event } as SendNoteResult;
   }
   catch (e) {
@@ -750,25 +749,30 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   for (let i = 0;i < hintRelayUrls.length;i++) {
     const url = hintRelayUrls[i];
 
-    new Promise<string>(async (resolve, reject) => {
-      const relay = relayInit(url);
-      await relay.connect();
+    try {
+      new Promise<string>(async (resolve, reject) => {
+        const relay = relayInit(url);
+        await relay.connect();
 
-      try {
-        logInfo('publishing to relay: ', relay)
+        try {
+          logInfo('publishing to relay hint: ', relay)
 
-        await relay.publish(signedNote);
+          await relay.publish(signedNote);
 
-        logInfo(`${relay.url} has accepted our event`);
-        resolve('success');
+          logInfo(`hint ${relay.url} has accepted our event`);
+          resolve('success');
 
-      } catch (e) {
-        logError(`Failed publishing note to ${relay.url}: `, e);
-        reject('success');
-      }
+        } catch (e) {
+          logError(`Failed publishing note to hint ${relay.url}: `, e);
+          reject('success');
+        }
 
-      relay.close();
-    });
+        relay.close();
+      });
+
+    } catch (err) {
+      logError('REALY ERROR: ', err)
+    }
   }
 
   try {
@@ -778,7 +782,8 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
   }
   catch (e) {
     logError('Failed to publish the note: ', e);
-    return { success: false, reasons, note: signedNote} as SendNoteResult;
+    return await proxyEvent(event, relays, relaySettings);
+    // return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
 }
 
