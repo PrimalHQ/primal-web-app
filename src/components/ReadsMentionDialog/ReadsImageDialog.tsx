@@ -260,6 +260,7 @@ const ReadsImageDialog: Component<{
           <input
             id="input_title"
             class={styles.textInput}
+            autocomplete="off"
             value={state.title}
             onInput={(e) => setState(() => ({ title: e.target.value}))}
           />
@@ -268,6 +269,7 @@ const ReadsImageDialog: Component<{
           <input
             id="input_alt"
             class={styles.textInput}
+            autocomplete="off"
             value={state.alt}
             onInput={(e) => setState(() => ({ alt: e.target.value}))}
           />

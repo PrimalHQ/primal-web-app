@@ -689,7 +689,7 @@ const ReadsEditorEditor: Component<{
               >
                 <TextField.Input
                   placeholder={props.article.tags.length === 0 ? 'Enter tags (separated by commas)' : ''}
-
+                  autocomplete="off"
                   onBlur={(e: FocusEvent) => {
                     // @ts-ignore
                     const value = e.target?.value || '';

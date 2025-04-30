@@ -88,6 +88,7 @@ const ReadsLinkDialog: Component<{
         <input
           id="link_label"
           class={styles.textInput}
+          autocomplete="off"
           value={state.title}
           onInput={(e) => setState(() => ({ title: e.target.value}))}
         />

@@ -306,6 +306,8 @@ const ReadsEditor: Component = () => {
 
     tags = [...tags, ...relayTags];
 
+    tags.push(['client', 'Primal']);
+
     let articleToPost = {
       ...article,
       content,
@@ -316,6 +318,7 @@ const ReadsEditor: Component = () => {
     }
 
     setIsPublishing(true);
+
     const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
 
     if (success && note) {
