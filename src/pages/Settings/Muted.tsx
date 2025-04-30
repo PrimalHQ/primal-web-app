@@ -304,6 +304,7 @@ const Muted: Component = () => {
                 account?.actions.addToMuteList(word, 'word', (success) => {
                   if (!success) return;
                   setMutedWords((hashtags) => [word, ...hashtags]);
+                  if (wordInput) wordInput.value = '';
                 });
               }}
             >
@@ -356,6 +357,7 @@ const Muted: Component = () => {
                 account?.actions.addToMuteList(hashtag, 'hashtag', (success) => {
                   if (!success) return;
                   setMutedHashtags((hashtags) => [hashtag, ...hashtags]);
+                  if (hashtagInput) hashtagInput.value = '';
                 });
               }}
             >
