@@ -236,8 +236,13 @@
       font-style: normal;
       font-weight: 400;
       line-height: 28px;
-      border-radius: 12px;
+      border-radius: 8px;
+      padding: 0px 4px;
+    }
+
+    pre code {
       padding: 20px;
+      border-radius: 12px;
     }
 
     ins {
