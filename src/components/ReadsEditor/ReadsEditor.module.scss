@@ -553,6 +553,12 @@
       border: 1px solid var(--devider);
       border-radius: 12px;
       overflow: hidden;
+
+      transition: 0.3s;
+
+      &:hover {
+        background-color: var(--background-input);
+      }
     }
 
     .uploadButton {
