@@ -449,7 +449,6 @@ const ReadsEditor: Component = () => {
 
     const lastDraft = lastSaved.draftId;
 
-
     const { success, note } = await sendDraft(
       user,
       article,
@@ -468,10 +467,11 @@ const ReadsEditor: Component = () => {
         draft: { ...note },
         mdContent: markdownContent(),
         time: note.created_at,
+        draftId: note.id,
       }));
 
       if (lastDraft.length > 0) {
-        sendDeleteEvent(
+        const delResponse = await sendDeleteEvent(
           user.pubkey,
           lastDraft,
           Kind.Draft,
@@ -479,6 +479,10 @@ const ReadsEditor: Component = () => {
           account.relaySettings,
           account.proxyThroughPrimal,
         );
+
+        if (delResponse.success && delResponse.note) {
+          triggerImportEvents([delResponse.note], `del_last_draft_import_${APP_ID}`);
+        }
       }
     }
     else {
