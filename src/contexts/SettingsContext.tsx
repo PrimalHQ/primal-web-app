@@ -34,7 +34,7 @@ import {
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
-import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
+import { saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveTheme } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
@@ -43,7 +43,6 @@ import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
 import { getDefaultBlossomServers } from "../lib/relays";
-import { runColorMode } from "../utils";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -54,7 +53,6 @@ export type SettingsContextStore = {
   locale: string,
   theme: string,
   themes: PrimalTheme[],
-  useSystemTheme: boolean,
   isAnimated: boolean,
   availableFeeds: PrimalFeed[],
   readsFeeds: PrimalArticleFeed[],
@@ -107,7 +105,6 @@ export type SettingsContextStore = {
     isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
     getRecomendedBlossomServers: () => void,
-    setUseSystemTheme: (v: boolean) => void,
   }
 }
 
@@ -115,7 +112,6 @@ export const initialData = {
   locale: 'en-us',
   theme: 'sunrise',
   themes,
-  useSystemTheme: false,
   isAnimated: true,
   availableFeeds: [],
   readsFeeds: [],
@@ -148,17 +144,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
-
-  const setUseSystemTheme = (flag: boolean) => {
-    updateStore('useSystemTheme', () => flag);
-    saveSystemDarkMode(account?.publicKey, flag);
-
-    if (['sunrise', 'sunset'].includes(store.theme)) {
-      setThemeByName(flag ? 'sunset' : 'sunrise', true);
-    } else {
-      setThemeByName(flag ? 'midnight' : 'ice', true);
-    }
-  }
 
   const getRecomendedBlossomServers = () => {
     const subId = `recommended_blossom_${APP_ID}`;
@@ -769,19 +754,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             proxyThroughPrimal,
           } = JSON.parse(content.content || '{}');
 
-          if (store.useSystemTheme) {
-
-            runColorMode((isDark) => {
-              if (['sunrise', 'sunset'].includes(theme)) {
-                setThemeByName(isDark ? 'sunset' : 'sunrise', true);
-              } else {
-                setThemeByName(isDark ? 'midnight' : 'ice', true);
-              }
-            }, () => {
-              theme && setThemeByName(theme, true);
-            })
-          }
-          // theme && setThemeByName(theme, true);
+          theme && setThemeByName(theme, true);
 
           setAnimation(animated, true);
 
@@ -969,28 +942,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     fetchDefaultHomeFeeds(subId);
   }
 
-  const resolveTheme = () => {
-    const storedTheme = localStorage.getItem('theme') || 'sunrise';
-    const pubkey = localStorage.getItem('pubkey') || undefined;
-    const useSystemDarkMode = readSystemDarkMode(pubkey);
-
-
-    console.log('SYSTEM: ', pubkey, useSystemDarkMode);
-
-    updateStore('useSystemTheme', () => useSystemDarkMode || false);
-
-    if (useSystemDarkMode) {
-      runColorMode((isDark) => {
-        if (['sunrise', 'sunset'].includes(storedTheme)) {
-          setThemeByName(isDark ? 'sunset' : 'sunrise', true);
-        } else {
-          setThemeByName(isDark ? 'midnight' : 'ice', true);
-        }
-      }, () => {
-        setThemeByName(storedTheme, true);
-      })
-    }
-  }
 
 // EFFECTS --------------------------------------
 
@@ -1004,10 +955,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Set global theme, this is done to avoid changing the theme
     // when waiting for pubkey (like when reloading a page).
-    resolveTheme();
-    // const storedTheme = localStorage.getItem('theme');
-    // setThemeByName(storedTheme, true);
-
+    const storedTheme = localStorage.getItem('theme');
+    setThemeByName(storedTheme, true);
     const storedAnimated = localStorage.getItem('animated') || 'true';
     const anim = storedAnimated === 'true' ? true : false;
     setAnimation(anim, true);
@@ -1087,7 +1036,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setAnimation,
 
       getRecomendedBlossomServers,
-      setUseSystemTheme,
     },
   });
 

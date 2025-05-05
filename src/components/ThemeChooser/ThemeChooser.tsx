@@ -20,7 +20,7 @@ const ThemeChooser: Component<{ id?: string }> = (props) => {
         {(theme) => (
           <ThemeOption
             theme={theme}
-            isSelected={settings?.theme === theme.name && !settings.useSystemTheme}
+            isSelected={settings?.theme === theme.name}
             onSelect={() => onSelect(theme)}
           />
         )}
