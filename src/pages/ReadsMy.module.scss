@@ -19,6 +19,18 @@
   padding-inline: 20px;
 }
 
+.tabsPlaceholder {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  height: 26px;
+  padding-inline: 20px;
+}
+
 .profileTab {
   position: relative;
   display: inline-block;
