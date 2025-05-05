@@ -45,6 +45,7 @@ export type LocalStore = {
   usePrimalRelay: boolean | undefined,
   nwc: string[][] | undefined,
   nwcActive: string[] | undefined,
+  useSystemDarkMode: boolean | undefined,
 };
 
 export type UploadTime = {
@@ -97,6 +98,7 @@ export const emptyStorage: LocalStore = {
   usePrimalRelay: false,
   nwc: [],
   nwcActive: undefined,
+  useSystemDarkMode: false,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -260,6 +262,28 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
 
   setStorage(pubkey, store);
 };
+
+
+export const saveSystemDarkMode = (pubkey: string | undefined, flag: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.useSystemDarkMode = flag;
+
+  setStorage(pubkey, store);
+};
+
+export const readSystemDarkMode = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.useSystemDarkMode || false;
+}
 
 export const saveAnimated = (pubkey: string | undefined, animated: boolean) => {
   if (!pubkey) {

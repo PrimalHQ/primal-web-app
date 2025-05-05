@@ -39,6 +39,15 @@ const Appearance: Component = () => {
             <div class={styles.appearanceCheckLabel}>Show Animations</div>
           </CheckBox2>
         </div>
+
+        <div>
+          <CheckBox2
+            checked={settings?.useSystemTheme !== undefined ? settings.useSystemTheme : false}
+            onChange={settings?.actions.setUseSystemTheme}
+          >
+            <div class={styles.appearanceCheckLabel}>Auto adjust dark theme</div>
+          </CheckBox2>
+        </div>
       </div>
     </div>
   )
