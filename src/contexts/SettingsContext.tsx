@@ -781,7 +781,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
               theme && setThemeByName(theme, true);
             })
           }
-          // theme && setThemeByName(theme, true);
+          else if (theme) {
+            setThemeByName(theme, true);
+          }
 
           setAnimation(animated, true);
 
@@ -974,9 +976,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const pubkey = localStorage.getItem('pubkey') || undefined;
     const useSystemDarkMode = readSystemDarkMode(pubkey);
 
-
-    console.log('SYSTEM: ', pubkey, useSystemDarkMode);
-
     updateStore('useSystemTheme', () => useSystemDarkMode || false);
 
     if (useSystemDarkMode) {
@@ -989,6 +988,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       }, () => {
         setThemeByName(storedTheme, true);
       })
+    } else {
+      setThemeByName(storedTheme, true);
     }
   }
 
