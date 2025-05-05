@@ -243,7 +243,7 @@ const ReadsMy: Component = () => {
                   <div class={styles.zapIcon}></div>
                   <div class={styles.zapAmount}>
                     <div class={styles.zapNumber}>
-                      {articleStats().satszapped.toLocaleString()}
+                      {articleStats().satszapped?.toLocaleString()}
                     </div>
                     <div class={styles.sats}>sats</div>
                   </div>
@@ -268,7 +268,7 @@ const ReadsMy: Component = () => {
                       <div class={styles.dot}>•</div>
                       <div class={styles.stat}>
                         <div class={styles.number}>
-                          {topZappedArticle()?.satszapped.toLocaleString()}
+                          {topZappedArticle()?.satszapped?.toLocaleString()}
                         </div>
                         <div class={styles.unit}>Sats</div>
                       </div>
@@ -299,7 +299,7 @@ const ReadsMy: Component = () => {
                       <div class={styles.dot}>•</div>
                       <div class={styles.stat}>
                         <div class={styles.number}>
-                          {topEngagedArticle()?.replies.toLocaleString()}
+                          {topEngagedArticle()?.replies?.toLocaleString()}
                         </div>
                         <div class={styles.unit}>Comments</div>
                       </div>
