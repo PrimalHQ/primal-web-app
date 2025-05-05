@@ -30,6 +30,7 @@ import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { date, longDate } from '../lib/dates';
+import ReadsPublishSuccessDialog from '../components/ReadsMentionDialog/ReadsPublishSuccessDialog';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -74,6 +75,8 @@ const ReadsEditor: Component = () => {
   const [editorPreviewMode, setEditorPreviewMode] = createSignal<EditorPreviewMode>('editor');
   const [markdownContent, setMarkdownContent] = createSignal<string>('');
   const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit());
+
+  const [showPublishSucess, setShowPublishSucess] = createSignal(false);
 
   const [lastSaved, setLastSaved] = createStore<ArticleEdit & { mdContent: string, time: number, draftId: string }>({
     ...emptyArticleEdit(),
@@ -340,7 +343,7 @@ const ReadsEditor: Component = () => {
                 quoteArticle(note);
               }, 1_000);
             }
-            navigate('/myarticles');
+            setShowPublishSucess(() => true);
           }
         }
       });
@@ -597,6 +600,7 @@ const ReadsEditor: Component = () => {
 
             <button
               class={styles.toolPrimaryButton}
+              disabled={article.title.length === 0}
               onClick={() => {setShowPublishArticle(true)}}
             >
               Continue to Publish Article
@@ -674,6 +678,14 @@ const ReadsEditor: Component = () => {
         open={showPublishArticle()}
         setOpen={setShowPublishArticle}
         onPublish={postArticle}
+      />
+
+      <ReadsPublishSuccessDialog
+        open={showPublishSucess()}
+        onClose={() => {
+          setShowPublishSucess(false);
+          navigate(`/myarticles`);
+        }}
       />
 
       <ReadsLeaveDialog

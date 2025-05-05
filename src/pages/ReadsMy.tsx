@@ -357,7 +357,6 @@ const ReadsMy: Component = () => {
                           <ArticleOverview
                             article={article}
                             onRemove={(id: string) => {
-                              console.log('REMOVE: ', id);
                               profile?.actions.removeEvent(id, 'articles');
                               setArticleStats((a) => ({
                                 ...a,

@@ -18,7 +18,7 @@
   align-items: flex-start;
 
   .actions {
-    display:flex;
+    display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
@@ -39,7 +39,7 @@
   width: 640px;
 
   .actions {
-    display:flex;
+    display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
@@ -52,6 +52,54 @@
   }
 }
 
+.successIcon {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/big_success.svg) no-repeat center;
+  mask: url(../../assets/icons/big_success.svg) no-repeat center;
+}
+
+.readsPublishSuccessDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 640px;
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+
+    >button {
+      width: 100px;
+    }
+  }
+
+  .successCard {
+    width: 600px;
+    min-height: 196px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+
+    .successDesc {
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+}
+
 .leaveDialog {
   display: flex;
   flex-direction: column;
@@ -59,7 +107,7 @@
   align-items: flex-start;
 
   .actions {
-    display:flex;
+    display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
@@ -85,7 +133,7 @@
     align-items: flex-start;
 
     .actions {
-      display:flex;
+      display: flex;
       justify-content: flex-end;
       align-items: center;
       gap: 12px;
