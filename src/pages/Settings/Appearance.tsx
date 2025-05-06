@@ -45,7 +45,9 @@ const Appearance: Component = () => {
             checked={settings?.useSystemTheme !== undefined ? settings.useSystemTheme : false}
             onChange={settings?.actions.setUseSystemTheme}
           >
-            <div class={styles.appearanceCheckLabel}>Auto adjust to system theme</div>
+            <div class={styles.appearanceCheckLabel}>
+              Automatically set Dark or Light mode based on your system settings
+            </div>
           </CheckBox2>
         </div>
       </div>
