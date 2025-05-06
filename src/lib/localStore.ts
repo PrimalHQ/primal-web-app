@@ -263,6 +263,16 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
   setStorage(pubkey, store);
 };
 
+export const readTheme = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.theme || 'sunrise';
+}
+
 
 export const saveSystemDarkMode = (pubkey: string | undefined, flag: boolean) => {
   if (!pubkey) {

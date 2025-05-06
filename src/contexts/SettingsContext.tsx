@@ -244,10 +244,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    saveTheme(account?.publicKey, theme.name);
     updateStore('theme', () => theme.name);
+    if (!temp) {
+      saveTheme(account?.publicKey, theme.name);
 
-    !temp && saveSettings();
+      saveSettings();
+    }
   }
 
   const setThemeByName = (name: string | null, temp?: boolean) => {
