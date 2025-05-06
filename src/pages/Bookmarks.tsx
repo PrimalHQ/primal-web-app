@@ -96,6 +96,8 @@ const Bookmarks: Component = () => {
       offset = calculateNotesOffset(store.notes, store.paging);
     }
 
+    updateStore('fetchingInProgress', () => true);
+
     const { notes, reads, paging } = await fetchMegaFeed(
       account?.publicKey,
       spec,
