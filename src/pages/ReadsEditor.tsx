@@ -92,7 +92,9 @@ const ReadsEditor: Component = () => {
 
   const [fixedToolbar, setFixedToolbar] = createSignal(false);
 
-  const generateIdentifier = () => article.title.toLowerCase().split(' ').join('-')
+  const [identifier, setIdentifier] = createSignal('');
+
+  const generateIdentifier = () => identifier().length > 0 ? identifier() : article.title.toLowerCase().split(' ').join('-')
 
   const genereatePreviewArticle = (): PrimalArticle | undefined => {
     if (!account || !account.activeUser) return;
@@ -213,6 +215,8 @@ const ReadsEditor: Component = () => {
       const r = reads[0];
       if(!r) return
 
+      setIdentifier(() => (r.msg.tags.find(t => t[0] === 'd') || ['d', ''])[1])
+
       setArticle(() => ({
         title: r.title,
         image: r.image,
@@ -322,6 +326,15 @@ const ReadsEditor: Component = () => {
     if (!accordionSection().includes('hero_image')) {
       articleToPost.image = '';
     }
+
+    tags = [
+      ["title", articleToPost.title],
+      ["summary", articleToPost.summary],
+      ["image", articleToPost.image],
+      ["d", generateIdentifier()],
+      ...articleToPost.tags.map(t => ['t', t]),
+      ...tags,
+    ];
 
     setIsPublishing(true);
 

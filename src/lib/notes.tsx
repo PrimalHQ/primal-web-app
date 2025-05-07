@@ -473,13 +473,8 @@ export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
-      ["title", articleData.title],
-      ["summary", articleData.summary],
-      ["image", articleData.image],
-      ["published_at", `${time}`],
-      ["d", articleData.title.toLowerCase().replace(" ", "-")],
-      ...articleData.tags.map(t => [ 't', t]),
       ...tags,
+      ["published_at", `${time}`],
     ],
     created_at: time,
   };
