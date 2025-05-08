@@ -95,7 +95,7 @@ export const makeNProfileNode = (
   attrs: makeNProfileAttrs(bech32, user, relays, options),
 })
 
-export const PROFILE_REGEX = /(?<![\w./:?=])(nostr:)?(np(ub|rofile)1[0-9a-z]+)/g
+export const PROFILE_REGEX = /nostr:(np(ub|rofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
 // export type NProfileOptions = Nip19Options
 
@@ -185,11 +185,11 @@ export const NProfileExtension = Node.create({
               .sort((a, b) => (b.index || 0) - (a.index || 0))
               .forEach(match => {
                 try {
-                  const attrs = makeNProfileAttrs(match[2], undefined, this.options);
+                  const attrs = makeNProfileAttrs(match[1], undefined, this.options);
                   const node = state.schema.nodes[this.name].create(attrs);
 
-                  const start = match.index || 0;
-                  const end = start + match[0].length + 1;
+                  const start = match.index ? match.index-2 : 0;
+                  const end = start + match[0].length;
 
                   tr.replaceWith(start, end, node);
                 } catch (e) {

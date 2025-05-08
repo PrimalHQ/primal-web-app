@@ -57,7 +57,7 @@ import { ArticleEdit, emptyArticleEdit } from '../../pages/ReadsEditor';
 import UploaderBlossom, { UploadState } from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { MarkdownPlugin } from '../../markdownPlugins/markdownTransorm';
+import { MarkdownPlugin, extendMarkdownEditor, mdToHtml } from '../../markdownPlugins/markdownTransorm';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -189,9 +189,6 @@ const ReadsEditorEditor: Component<{
       //   transformPastedText: true,
       //   transformCopiedText: true,
       // }),
-      Underline,
-      NProfileExtension,
-      NEventExtension,
       NAddrExtension,
       Table.configure({
         resizable: true,
@@ -200,6 +197,9 @@ const ReadsEditorEditor: Component<{
       TableRow,
       TableHeader,
       TableCell,
+      Underline,
+      NProfileExtension,
+      NEventExtension,
       MarkdownPlugin.configure({
         exportOnUpdate: true,
         onMarkdownUpdate: (md) => {
@@ -359,8 +359,9 @@ const ReadsEditorEditor: Component<{
       setEditorContent(editor, props.markdownContent);
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
-    onUpdate() {
-    props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown());
+    onUpdate({ editor }) {
+
+      props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
     // onPaste(e: ClipboardEvent) {
     //   console.log('PASTE', e)
@@ -376,11 +377,13 @@ const ReadsEditorEditor: Component<{
   }));
 
   const setEditorContent = (editor: Editor, content: string) => {
+    const c = mdToHtml(content);
+    console.log('CONTENT: ', c)
     editor.chain().
-      setContent(content).
-      applyNostrPasteRules(content).
-      applyNProfilePasteRules(content).
-      applyNAddrPasteRules(content).
+      setContent(c).
+      applyNostrPasteRules(c).
+      applyNProfilePasteRules(c).
+      applyNAddrPasteRules(c).
       focus().run();
   }
 
@@ -390,7 +393,7 @@ const ReadsEditorEditor: Component<{
     if (!editor) return;
 
     if (editorMarkdown()) {
-      props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+      props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
     }
     else {
       editor.commands.setContent('');
@@ -737,7 +740,7 @@ const ReadsEditorEditor: Component<{
             console.log(editor.getJSON())
 
             if (editorMarkdown()) {
-              props.setMarkdownContent(() => editorTipTap()?.storage.markdown.getMarkdown())
+              props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
             }
             else {
               editor.commands.setContent('');
