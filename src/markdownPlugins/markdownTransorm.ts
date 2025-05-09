@@ -14,6 +14,16 @@ import rehypeParse from 'rehype-parse';
 import rehypeRemark from 'rehype-remark';
 import remarkGfm from 'remark-gfm'  // For GitHub Flavored Markdown (includes tables)
 import rehypeRaw from 'rehype-raw'  // To preserve HTML in markdown
+// import { rehypeExtendedTable } from 'rehype-extended-table';
+import remarkImages from 'remark-images'
+
+import { readMentions, setReadMentions } from '../pages/ReadsEditor';
+import { nip19 } from 'nostr-tools';
+import { userName } from '../stores/profile';
+import { fetchUserProfile } from '../handleFeeds';
+import { APP_ID } from '../App';
+import { unwrap } from 'solid-js/store';
+import { PrimalUser } from '../types/primal';
 
 export interface MarkdownPluginOptions {
   exportOnUpdate?: boolean
@@ -25,6 +35,36 @@ export const defaultMarkdownPluginOptions: MarkdownPluginOptions = {
   exportOnUpdate: false,
   importOnPaste: true,
   onMarkdownUpdate: () => {}
+}
+
+
+export const findMissingUser = async (nprofile: string) => {
+  const decode = nip19.decode(nprofile);
+
+  let pubkey = '';
+
+  if (decode.type === 'npub') {
+    pubkey = decode.data;
+  }
+
+  if (decode.type === 'nprofile') {
+    pubkey = decode.data.pubkey;
+  }
+
+  if (pubkey.length === 0) return;
+
+  let user = unwrap(readMentions.users[pubkey]);
+
+  if (!user) {
+    user = await fetchUserProfile(undefined, pubkey, `user_missing_${nprofile}_${APP_ID}`);
+    setReadMentions('users', () => ({ [pubkey]: { ...user } }));
+  }
+
+  return user;
+  // setTimeout(() => {
+  //   const mention = document.querySelector(`span[type=${decode.type}][bech32=${nprofile}]`);
+  //   mention && (mention.innerHTML = `@${userName(user)}`);
+  // }, 0);
 }
 
 // Helper function to handle nostr IDs in HTML -> Markdown conversion
@@ -48,48 +88,68 @@ const processHTMLForNostr = (html: string): string => {
 }
 
 // Helper function to handle nostr IDs in Markdown -> HTML conversion
-const processMarkdownForNostr = (html: string): string => {
-  return html;
+const processMarkdownForNostr = async (html: string): Promise<string> => {
   // This regex matches nostr: followed by an npub or nprofile identifier
   const nostrRegex = /nostr:(np(ub|rofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
-  return html.replace(nostrRegex, (match, bech32) => {
-    const type = bech32.startsWith('npub') ? 'npub' : 'nprofile';
-    // Note: In a real implementation, you'd likely want to extract pubkey and relays
-    // from the bech32 string using nip19 library. For this example, we're using placeholders.
-    const pubkey = 'placeholder-pubkey';
-    const relays = [];
-    const name = bech32;
+  const nostrIds = html.match(nostrRegex) || [];
+  let foundUsers: Record<string, PrimalUser> = {};
 
-    // Create the span element with the appropriate attributes
-    return `<span type="${type}" bech32="${bech32}" pubkey="${pubkey}" relays="${relays.join(',')}" name="${name}" data-type="nprofile" class="linkish_editor">@${name}</span>`;
+  for (let i = 0; i < nostrIds.length;i++) {
+    const nId = nostrIds[i];
+    const bech32 = nId.startsWith('nostr:') ? nId.slice(6) : nId;
+
+    const { type } = nip19.decode(bech32);
+
+    if (['npub', 'nprofile'].includes(type)) {
+      const user = await findMissingUser(bech32);
+
+      if (user) {
+        foundUsers[bech32] = { ...user };
+      }
+    }
+
+  }
+
+  return html.replace(nostrRegex, (match, bech32) => {
+    const { type } = nip19.decode(bech32);
+
+    if (['npub', 'nprofile'].includes(type)) {
+      const pubkey = 'placeholder-pubkey';
+      const relays: string[] = [];
+      const user = foundUsers[bech32]
+      const name = userName(user);
+
+      // Create the span element with the appropriate attributes
+      return `<span type="${type}" bech32="${bech32}" pubkey="${pubkey}" relays="${relays.join(',')}" name="${name}" data-type="${type}" class="linkish_editor">@${name}</span>`;
+    }
+
+    return bech32;
   });
 }
 
-export const mdToHtml = (markdown: string) => {
+export const mdToHtml = async (markdown: string) => {
   try {
-    // Fix for table processing - ensure GFM is properly initialized
+
     const processor = unified()
       .use(remarkParse)
       .use(remarkGfm)
-      .use(remarkRehype, {
-        allowDangerousHtml: true,
-        // Adding handlers to ensure proper table processing
-        handlers: {
-          // Explicitly handle tables if needed
-          table: (h, node) => {
-            return h(node, 'table', {}, h.all(node));
-          }
-        }
-      })
-      .use(rehypeRaw)
+      // .use(remarkImages)
+      .use(remarkRehype, { allowDangerousHtml: true })
+      // .use(rehypeExtendedTable)
+      // .use(rehypeRaw)
       .use(rehypeStringify);
+      // .process(markdown);
 
-    const result = processor.processSync(markdown);
+    console.log('MARKDOWN: ', markdown);
+
+    const result = await processor.process(markdown);
     let html = result.toString();
 
+    console.log('HTML: ', html)
+
     // Process the HTML for nostr identifiers
-    html = processMarkdownForNostr(html);
+    html = await processMarkdownForNostr(html);
 
     return html;
   } catch (error) {
@@ -108,6 +168,8 @@ export const htmlToMd = (html: string): string => {
       .use(rehypeParse, { fragment: true })
       .use(rehypeRemark)
       .use(remarkGfm)
+      .use(remarkImages)
+      // .use(remarkRehype, { allowDangerousHtml: true })
       .use(remarkStringify, {
         fences: true,
         incrementListMarker: true,
@@ -116,9 +178,9 @@ export const htmlToMd = (html: string): string => {
         // emphasis: '_',
         // strong: '**',
         // fence: '```',
-        table: true,
-        tableCellPadding: true,
-        tablePipeAlign: true
+        // table: true,
+        // tableCellPadding: true,
+        // tablePipeAlign: true
       })
       .processSync(processedHtml);
 
@@ -179,6 +241,7 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
               const hasMarkdownSyntax = /^#|\n#|^-|\n-|^\*|\n\*|^\d+\.|\n\d+\.|^>|\n>|^\[.*\]|^\s*```|\|.*\|/.test(text)
 
               if (hasMarkdownSyntax) {
+                console.log('ONE')
                 // Convert markdown to HTML
                 const html = mdToHtml(text)
 
@@ -222,6 +285,7 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
 
   // Methods to convert between formats
   markdownToHtml(markdown: string): string {
+    console.log('TWO')
     return mdToHtml(markdown);
   },
 
@@ -258,9 +322,10 @@ export const extendMarkdownEditor = (editor: Editor) => {
       if (!editor) return ''
       return cToMd(editor.state.doc)
     },
-    setMarkdown: (markdown: string) => {
+    setMarkdown: async (markdown: string) => {
+      console.log('SET: ', markdown);
       if (!editor) return
-      const html = mdToHtml(markdown)
+      const html = await mdToHtml(markdown)
       editor.commands.setContent(html, false)
     }
   }

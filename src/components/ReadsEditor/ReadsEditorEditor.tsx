@@ -181,7 +181,7 @@ const ReadsEditorEditor: Component<{
         defaultProtocol: 'https',
         protocols: ['http', 'https'],
       }),
-      Image,
+      Image.configure({ inline: true }),
       CodeBlock,
       // Markdown.configure({
       //   html: true,
@@ -376,14 +376,13 @@ const ReadsEditorEditor: Component<{
     // },
   }));
 
-  const setEditorContent = (editor: Editor, content: string) => {
-    const c = mdToHtml(content);
-    console.log('CONTENT: ', c)
+  const setEditorContent = async (editor: Editor, content: string) => {
+    const c = await mdToHtml(content);
     editor.chain().
       setContent(c).
-      applyNostrPasteRules(c).
-      applyNProfilePasteRules(c).
-      applyNAddrPasteRules(c).
+      // applyNostrPasteRules(c).
+      // applyNProfilePasteRules(c).
+      // applyNAddrPasteRules(c).
       focus().run();
   }
 
@@ -743,6 +742,7 @@ const ReadsEditorEditor: Component<{
               props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
             }
             else {
+              // extendMarkdownEditor(editor).setMarkdown(editorPlainText?.value || '')
               editor.commands.setContent('');
               const content = editorPlainText?.value || '';
               setEditorContent(editor, content);
