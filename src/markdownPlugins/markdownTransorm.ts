@@ -20,10 +20,11 @@ import { userName } from '../stores/profile';
 import { fetchUserProfile } from '../handleFeeds';
 import { APP_ID } from '../App';
 import { unwrap } from 'solid-js/store';
-import { PrimalNote, PrimalUser } from '../types/primal';
-import { fetchNotes } from '../handleNotes';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
+import { fetchArticles, fetchNotes } from '../handleNotes';
 import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote';
 import { Kind } from '../constants';
+import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview';
 
 export interface MarkdownPluginOptions {
   exportOnUpdate?: boolean
@@ -38,7 +39,7 @@ export const defaultMarkdownPluginOptions: MarkdownPluginOptions = {
 }
 
 
-export const findMissingUser = async (nprofile: string) => {
+const findMissingUser = async (nprofile: string) => {
   const decode = nip19.decode(nprofile);
 
   let pubkey = '';
@@ -68,7 +69,7 @@ export const findMissingUser = async (nprofile: string) => {
 }
 
 
-export const findMissingEvent = async (nevent: string) => {
+const findMissingEvent = async (nevent: string) => {
   if (!nevent) return;
   const decode = nip19.decode(nevent);
 
@@ -87,30 +88,28 @@ export const findMissingEvent = async (nevent: string) => {
   const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`);
 
   return events[0];
+}
 
-  const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
 
-  if (mentions.length > 0 && events[0]) {
-    setReadMentions('notes', () => ({ [id]: { ...events[0] } }));
+const findMissingAddr = async (naddr: string) => {
+  if (!naddr) return;
+  const decode = nip19.decode(naddr);
 
-    const el = renderEmbeddedNote({
-      note: events[0],
-      mentionedUsers: events[0].mentionedUsers,
-      includeEmbeds: true,
-      hideFooter: true,
-      noLinks: "links",
-    })
+  let identifier = '';
+  let kind = Kind.LongForm;
+  let pubkey = '';
 
-    mentions.forEach(mention => {
-      mention.classList.remove('nevent-node');
-      mention.innerHTML = el;
-    })
-
+  if (decode.type === 'naddr') {
+    identifier = decode.data.pubkey
+    kind = decode.data.kind || Kind.LongForm;
+    pubkey = decode.data.pubkey;
   }
 
-  // Move cursor one space to the right to avoid overwriting the note.
-  // const el = document.querySelector('.tiptap.ProseMirror');
-  // el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+  if (identifier.length === 0) return;
+
+  const events = await fetchArticles([naddr], `reads_missing_${naddr}_${APP_ID}`);
+
+  return events[0];
 
 }
 
@@ -121,7 +120,7 @@ const processHTMLForNostr = (html: string): string => {
   tempDiv.innerHTML = html;
 
   // Find all nostr spans and replace them
-  const nostrSpans = tempDiv.querySelectorAll('span[type="nprofile"], span[type="npub"], div[type="note"], div[type="nevent"]');
+  const nostrSpans = tempDiv.querySelectorAll('span[type="nprofile"], span[type="npub"], div[type="note"], div[type="nevent"], div[type="naddr"]');
   nostrSpans.forEach(span => {
     const bech32 = span.getAttribute('bech32');
     if (bech32) {
@@ -138,11 +137,12 @@ const processHTMLForNostr = (html: string): string => {
 const processMarkdownForNostr = async (html: string): Promise<string> => {
     // console.log('TYPE: ', html)
   // This regex matches nostr: followed by an npub or nprofile identifier
-  const nostrRegex = /nostr:(n(pub|profile|ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
+  const nostrRegex = /nostr:(n(pub|profile|ote|event|addr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
   const nostrIds = html.match(nostrRegex) || [];
   let foundUsers: Record<string, PrimalUser> = {};
   let foundNotes: Record<string, PrimalNote> = {};
+  let foundArticles: Record<string, PrimalArticle> = {};
 
   for (let i = 0; i < nostrIds.length;i++) {
     const nId = nostrIds[i];
@@ -163,6 +163,14 @@ const processMarkdownForNostr = async (html: string): Promise<string> => {
 
       if (note) {
         foundNotes[bech32] = { ...note };
+      }
+    }
+
+    if (['naddr'].includes(type)) {
+      const article = await findMissingAddr(bech32);
+
+      if (article) {
+        foundArticles[bech32] = { ...article };
       }
     }
 
@@ -211,11 +219,38 @@ const processMarkdownForNostr = async (html: string): Promise<string> => {
       mention.setAttribute('author', note.user.npub);
       mention.innerHTML = el;
 
-      // console.log('MENTION: ', mention.outerHTML)
+      return mention.outerHTML;
+    }
+
+    if (['naddr'].includes(type)) {
+      // return `nostr:${bech32}`;
+      const pubkey = 'placeholder-pubkey';
+      const relays: string[] = [];
+      const article = foundArticles[bech32];
+
+      const el = renderArticlePreview({
+        article,
+        bordered: true,
+        hideFooter: true,
+        noLinks: true,
+      })
+
+      const mention = document.createElement('div');
+      mention.setAttribute('data-type', type);
+      mention.setAttribute('data-bech32', bech32);
+      mention.setAttribute('data-relays', '');
+      mention.setAttribute('data-id', article.id);
+      mention.setAttribute('data-kind', `${Kind.Text}`);
+      mention.setAttribute('data-author', article.user.npub);
+      mention.setAttribute('type', type);
+      mention.setAttribute('bech32', bech32);
+      mention.setAttribute('relays', '');
+      mention.setAttribute('id', article.id);
+      mention.setAttribute('kind', `${Kind.LongForm}`);
+      mention.setAttribute('author', article.user.npub);
+      mention.innerHTML = el;
 
       return mention.outerHTML;
-      // Create the span element with the appropriate attributes
-      // return `<span type="${type}" bech32="${bech32}" pubkey="${pubkey}" relays="${relays.join(',')}" name="${name}" data-type="${type}" class="linkish_editor">@${name}</span>`;
     }
 
     return bech32;

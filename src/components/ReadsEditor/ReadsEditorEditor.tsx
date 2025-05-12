@@ -171,6 +171,8 @@ const ReadsEditorEditor: Component<{
   //   console.log('MAKDOWN: ', md());
   // })
 
+  const [isInScrollMode, setScrollMode] = createSignal(false);
+
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions: [
@@ -365,6 +367,19 @@ const ReadsEditorEditor: Component<{
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
     onUpdate({ editor }) {
+      const scr = document.body.scrollHeight > window.innerHeight;
+      if (scr && !isInScrollMode()) {
+        setScrollMode(() => true);
+      }
+
+      if (!scr && isInScrollMode()) {
+        setScrollMode(() => false);
+      }
+
+      if (isInScrollMode()) {
+        window.scrollTo(0, window.innerHeight);
+      }
+
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
     // onPaste(e: ClipboardEvent) {
@@ -782,6 +797,7 @@ const ReadsEditorEditor: Component<{
             />
           </TextField>
         </div>
+        <div style="height: 20px;"></div>
       </div>
     </div>
   );
