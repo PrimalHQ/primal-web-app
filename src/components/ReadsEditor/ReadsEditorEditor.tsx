@@ -165,11 +165,11 @@ const ReadsEditorEditor: Component<{
     getUsersRelayInfo(uids, subId);
   }));
 
-  const [md, setMarkdown] = createSignal('');
+  // const [md, setMarkdown] = createSignal('');
 
-  createEffect(() => {
-    console.log('MAKDOWN: ', md());
-  })
+  // createEffect(() => {
+  //   console.log('MAKDOWN: ', md());
+  // })
 
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
@@ -197,13 +197,18 @@ const ReadsEditorEditor: Component<{
       TableRow,
       TableHeader,
       TableCell,
-      Underline,
+      Underline.configure({
+        HTMLAttributes: {
+          'data-underline': true,
+        }
+      }),
       NProfileExtension,
       NEventExtension,
       MarkdownPlugin.configure({
         exportOnUpdate: true,
         onMarkdownUpdate: (md) => {
-          setMarkdown(md);
+          props.setMarkdownContent(() => md)
+          // setMarkdown(md);
         }
       }),
       // BubbleMenu.configure({
@@ -360,7 +365,6 @@ const ReadsEditorEditor: Component<{
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
     onUpdate({ editor }) {
-
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
     // onPaste(e: ClipboardEvent) {
@@ -386,20 +390,21 @@ const ReadsEditorEditor: Component<{
       focus().run();
   }
 
-  const toggleEditorMode = () => {
-    setEditorMarkdown(v => !v);
-    const editor = editorTipTap();
-    if (!editor) return;
+  // const toggleEditorMode = () => {
+  //   setEditorMarkdown(v => !v);
+  //   const editor = editorTipTap();
+  //   if (!editor) return;
 
-    if (editorMarkdown()) {
-      props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
-    }
-    else {
-      editor.commands.setContent('');
-      const content = editorPlainText?.value || '';
-      setEditorContent(editor, content);
-    }
-  }
+  //   if (editorMarkdown()) {
+  //     props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
+  //   }
+  //   else {
+  //     editor.commands.setContent('');
+
+  //     const content = editorPlainText?.value || '';
+  //     setEditorContent(editor, content);
+  //   }
+  // }
 
   // ----------------------------------------
 
@@ -736,16 +741,23 @@ const ReadsEditorEditor: Component<{
             const editor = editorTipTap();
             if (!editor) return;
 
-            console.log(editor.getJSON())
-
+            // console.log('JSON: ', editor.getJSON())
             if (editorMarkdown()) {
               props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
             }
             else {
-              // extendMarkdownEditor(editor).setMarkdown(editorPlainText?.value || '')
-              editor.commands.setContent('');
-              const content = editorPlainText?.value || '';
-              setEditorContent(editor, content);
+              const c = editorPlainText?.value || '';
+              extendMarkdownEditor(editor).setMarkdown(c);
+              // editor.chain().
+              //   setContent(c).
+              //   applyNostrPasteRules(c).
+              //   applyNProfilePasteRules(c).
+                // applyNAddrPasteRules(c).
+                // focus().run();
+              // editor.commands.setContent('');
+              // console.log('EDITOR: ', props.markdownContent)
+              // const content = editorPlainText?.value || '';
+              // setEditorContent(editor, content);
             }
           }}
         />

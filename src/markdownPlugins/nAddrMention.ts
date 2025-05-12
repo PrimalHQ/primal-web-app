@@ -11,6 +11,7 @@ import { renderArticlePreview } from '../components/ArticlePreview/ArticlePrevie
 import { setReadMentions } from '../pages/ReadsEditor';
 
 export const findMissingEvent = async (naddr: string) => {
+  if (!naddr) return;
   const decode = nip19.decode(naddr);
 
   let identifier = '';

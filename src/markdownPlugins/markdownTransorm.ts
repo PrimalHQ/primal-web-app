@@ -12,10 +12,7 @@ import rehypeStringify from 'rehype-stringify';
 import remarkStringify from 'remark-stringify';
 import rehypeParse from 'rehype-parse';
 import rehypeRemark from 'rehype-remark';
-import remarkGfm from 'remark-gfm'  // For GitHub Flavored Markdown (includes tables)
-import rehypeRaw from 'rehype-raw'  // To preserve HTML in markdown
-// import { rehypeExtendedTable } from 'rehype-extended-table';
-import remarkImages from 'remark-images'
+import remarkGfm from 'remark-gfm';
 
 import { readMentions, setReadMentions } from '../pages/ReadsEditor';
 import { nip19 } from 'nostr-tools';
@@ -23,7 +20,10 @@ import { userName } from '../stores/profile';
 import { fetchUserProfile } from '../handleFeeds';
 import { APP_ID } from '../App';
 import { unwrap } from 'solid-js/store';
-import { PrimalUser } from '../types/primal';
+import { PrimalNote, PrimalUser } from '../types/primal';
+import { fetchNotes } from '../handleNotes';
+import { renderEmbeddedNote } from '../components/EmbeddedNote/EmbeddedNote';
+import { Kind } from '../constants';
 
 export interface MarkdownPluginOptions {
   exportOnUpdate?: boolean
@@ -67,6 +67,53 @@ export const findMissingUser = async (nprofile: string) => {
   // }, 0);
 }
 
+
+export const findMissingEvent = async (nevent: string) => {
+  if (!nevent) return;
+  const decode = nip19.decode(nevent);
+
+  let id = '';
+
+  if (decode.type === 'note') {
+    id = decode.data;
+  }
+
+  if (decode.type === 'nevent') {
+    id = decode.data.id;
+  }
+
+  if (id.length === 0) return;
+
+  const events = await fetchNotes(undefined, [id], `event_missing_${nevent}${APP_ID}`);
+
+  return events[0];
+
+  const mentions = document.querySelectorAll(`div[data-type=${decode.type}][data-bech32=${nevent}]`);
+
+  if (mentions.length > 0 && events[0]) {
+    setReadMentions('notes', () => ({ [id]: { ...events[0] } }));
+
+    const el = renderEmbeddedNote({
+      note: events[0],
+      mentionedUsers: events[0].mentionedUsers,
+      includeEmbeds: true,
+      hideFooter: true,
+      noLinks: "links",
+    })
+
+    mentions.forEach(mention => {
+      mention.classList.remove('nevent-node');
+      mention.innerHTML = el;
+    })
+
+  }
+
+  // Move cursor one space to the right to avoid overwriting the note.
+  // const el = document.querySelector('.tiptap.ProseMirror');
+  // el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+
+}
+
 // Helper function to handle nostr IDs in HTML -> Markdown conversion
 const processHTMLForNostr = (html: string): string => {
   // Replace nostr spans with their markdown representation
@@ -74,7 +121,7 @@ const processHTMLForNostr = (html: string): string => {
   tempDiv.innerHTML = html;
 
   // Find all nostr spans and replace them
-  const nostrSpans = tempDiv.querySelectorAll('span[type="nprofile"], span[type="npub"]');
+  const nostrSpans = tempDiv.querySelectorAll('span[type="nprofile"], span[type="npub"], div[type="note"], div[type="nevent"]');
   nostrSpans.forEach(span => {
     const bech32 = span.getAttribute('bech32');
     if (bech32) {
@@ -89,11 +136,13 @@ const processHTMLForNostr = (html: string): string => {
 
 // Helper function to handle nostr IDs in Markdown -> HTML conversion
 const processMarkdownForNostr = async (html: string): Promise<string> => {
+    // console.log('TYPE: ', html)
   // This regex matches nostr: followed by an npub or nprofile identifier
-  const nostrRegex = /nostr:(np(ub|rofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
+  const nostrRegex = /nostr:(n(pub|profile|ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
   const nostrIds = html.match(nostrRegex) || [];
   let foundUsers: Record<string, PrimalUser> = {};
+  let foundNotes: Record<string, PrimalNote> = {};
 
   for (let i = 0; i < nostrIds.length;i++) {
     const nId = nostrIds[i];
@@ -109,10 +158,19 @@ const processMarkdownForNostr = async (html: string): Promise<string> => {
       }
     }
 
+    if (['note', 'nevent'].includes(type)) {
+      const note = await findMissingEvent(bech32);
+
+      if (note) {
+        foundNotes[bech32] = { ...note };
+      }
+    }
+
   }
 
   return html.replace(nostrRegex, (match, bech32) => {
     const { type } = nip19.decode(bech32);
+
 
     if (['npub', 'nprofile'].includes(type)) {
       const pubkey = 'placeholder-pubkey';
@@ -124,29 +182,68 @@ const processMarkdownForNostr = async (html: string): Promise<string> => {
       return `<span type="${type}" bech32="${bech32}" pubkey="${pubkey}" relays="${relays.join(',')}" name="${name}" data-type="${type}" class="linkish_editor">@${name}</span>`;
     }
 
+    if (['note', 'nevent'].includes(type)) {
+      // return `nostr:${bech32}`;
+      const pubkey = 'placeholder-pubkey';
+      const relays: string[] = [];
+      const note = foundNotes[bech32];
+
+      const el = renderEmbeddedNote({
+        note: note,
+        mentionedUsers: note.mentionedUsers,
+        includeEmbeds: true,
+        hideFooter: true,
+        noLinks: "links",
+      })
+
+      const mention = document.createElement('div');
+      mention.setAttribute('data-type', type);
+      mention.setAttribute('data-bech32', bech32);
+      mention.setAttribute('data-relays', '');
+      mention.setAttribute('data-id', note.id);
+      mention.setAttribute('data-kind', `${Kind.Text}`);
+      mention.setAttribute('data-author', note.user.npub);
+      mention.setAttribute('type', type);
+      mention.setAttribute('bech32', bech32);
+      mention.setAttribute('relays', '');
+      mention.setAttribute('id', note.id);
+      mention.setAttribute('kind', `${Kind.Text}`);
+      mention.setAttribute('author', note.user.npub);
+      mention.innerHTML = el;
+
+      // console.log('MENTION: ', mention.outerHTML)
+
+      return mention.outerHTML;
+      // Create the span element with the appropriate attributes
+      // return `<span type="${type}" bech32="${bech32}" pubkey="${pubkey}" relays="${relays.join(',')}" name="${name}" data-type="${type}" class="linkish_editor">@${name}</span>`;
+    }
+
     return bech32;
   });
 }
 
 export const mdToHtml = async (markdown: string) => {
   try {
-
     const processor = unified()
       .use(remarkParse)
-      .use(remarkGfm)
+      .use(remarkGfm, {
+        tableCellPadding: false,
+        tablePipeAlign: false,
+      })
       // .use(remarkImages)
-      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(remarkRehype, {
+        allowDangerousHtml: true,
+      })
       // .use(rehypeExtendedTable)
       // .use(rehypeRaw)
-      .use(rehypeStringify);
+      .use(rehypeStringify, {
+
+      });
       // .process(markdown);
 
-    console.log('MARKDOWN: ', markdown);
 
     const result = await processor.process(markdown);
     let html = result.toString();
-
-    console.log('HTML: ', html)
 
     // Process the HTML for nostr identifiers
     html = await processMarkdownForNostr(html);
@@ -162,22 +259,15 @@ export const mdToHtml = async (markdown: string) => {
 export const htmlToMd = (html: string): string => {
   try {
     // Process HTML to handle nostr spans before converting to markdown
-    const processedHtml = processHTMLForNostr(html);
+    const processedHtml = processHTMLForNostr(html.replaceAll('\n', ''));
 
     const result = unified()
       .use(rehypeParse, { fragment: true })
       .use(rehypeRemark)
       .use(remarkGfm)
-      .use(remarkImages)
-      // .use(remarkRehype, { allowDangerousHtml: true })
       .use(remarkStringify, {
         fences: true,
         incrementListMarker: true,
-        // Ensure table settings are correctly configured
-        // bullet: '-',
-        // emphasis: '_',
-        // strong: '**',
-        // fence: '```',
         // table: true,
         // tableCellPadding: true,
         // tablePipeAlign: true
@@ -241,7 +331,6 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
               const hasMarkdownSyntax = /^#|\n#|^-|\n-|^\*|\n\*|^\d+\.|\n\d+\.|^>|\n>|^\[.*\]|^\s*```|\|.*\|/.test(text)
 
               if (hasMarkdownSyntax) {
-                console.log('ONE')
                 // Convert markdown to HTML
                 const html = mdToHtml(text)
 
@@ -285,7 +374,6 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
 
   // Methods to convert between formats
   markdownToHtml(markdown: string): string {
-    console.log('TWO')
     return mdToHtml(markdown);
   },
 
@@ -305,9 +393,9 @@ export const MarkdownPlugin = Extension.create<MarkdownPluginOptions>({
         if (!editor) return ''
         return this.contentToMarkdown(editor.state.doc)
       },
-      setMarkdown: (markdown: string) => {
+      setMarkdown: async (markdown: string) => {
         if (!editor) return
-        const html = this.markdownToHtml(markdown)
+        const html = await mdToHtml(markdown);
         editor.commands.setContent(html, false)
       }
     }
@@ -323,10 +411,18 @@ export const extendMarkdownEditor = (editor: Editor) => {
       return cToMd(editor.state.doc)
     },
     setMarkdown: async (markdown: string) => {
-      console.log('SET: ', markdown);
       if (!editor) return
       const html = await mdToHtml(markdown)
+      editor.commands.setContent('', false)
       editor.commands.setContent(html, false)
+      // editor.chain().
+      //   setContent(html, false).
+      //   applyNostrPasteRules(html).
+      //   applyNProfilePasteRules(html).
+      //   applyNAddrPasteRules(html).
+      //   focus().run();
     }
   }
 }
+
+// nostr:nevent1qvzqqqqqqypzpzxvzd935e04fm6g4nqa7dn9qc7nafzlqn4t3t6xgmjkr3dwnyreqqsx6u9ykdnn50df50prxl2rkt0zl03y0x2wudl5esnw9td6phjeekgnj2yfp

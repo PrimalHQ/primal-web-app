@@ -21,7 +21,6 @@ const RadioBox: Component<{
     if (!v || v === pv) return;
 
     const option = props.options.find(o => o.value === v);
-    console.log('CHANGE: ', v, option)
 
     option && props.onChange(option)
   }));

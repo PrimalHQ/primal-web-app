@@ -16,6 +16,7 @@ export const createInputRuleMatch = <T extends Record<string, unknown>>(
 
 
 export const findMissingEvent = async (nevent: string) => {
+  if (!nevent) return;
   const decode = nip19.decode(nevent);
 
   let id = '';
@@ -96,7 +97,7 @@ export const makeNEventNode = (bech32: string, options?: any) => ({
   attrs: makeNEventAttrs(bech32, options),
 })
 
-export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g
+export const EVENT_REGEX = /nostr:(n(ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -112,8 +113,8 @@ declare module '@tiptap/core' {
 export const NEventExtension = Node.create({
   name: 'nevent',
   group: 'block',
-  selectable: true,
-  draggable: true,
+  selectable: false,
+  draggable: false,
   priority: 1000,
 
   addNodeView(): NodeViewRenderer {
@@ -197,6 +198,7 @@ export const NEventExtension = Node.create({
       applyNostrPasteRules:
         (text) =>
         ({ tr, state, dispatch }) => {
+          // const text = state.doc.textContent;
           const matches = Array.from(text.matchAll(EVENT_REGEX));
 
           if (matches.length === 0) return false;
@@ -206,11 +208,11 @@ export const NEventExtension = Node.create({
               .sort((a, b) => (b.index || 0) - (a.index || 0))
               .forEach(match => {
                 try {
-                  const attrs = makeNEventAttrs(match[2], this.options);
+                  const attrs = makeNEventAttrs(match[1], this.options);
                   const node = state.schema.nodes[this.name].create(attrs);
 
-                  const start = match.index || 0;
-                  const end = start + match[0].length + 1;
+                  const start = match.index ? match.index-2 : 0;
+                  const end = start + match[0].length;
 
                   tr.replaceWith(start, end, node);
                 } catch (e) {

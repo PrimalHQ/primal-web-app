@@ -85,7 +85,6 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
 
   const onContextMenuTrigger = () => {
     if (props.isDraft) {
-      console.log('DRAFT: ', props.article)
       app?.actions.openArticleDraftContextMenu(
         props.article,
         articleContextMenu?.getBoundingClientRect(),
