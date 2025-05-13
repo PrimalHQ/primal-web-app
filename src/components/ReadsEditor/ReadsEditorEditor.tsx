@@ -178,7 +178,9 @@ const ReadsEditorEditor: Component<{
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        dropcursor: false,
+      }),
       Link.configure({
         openOnClick: false,
         autolink: true,
@@ -194,10 +196,10 @@ const ReadsEditorEditor: Component<{
       //   transformCopiedText: true,
       // }),
       NAddrExtension,
-      Table.configure({
-        resizable: true,
-      }),
       Gapcursor,
+      Table.configure({
+        resizable: false,
+      }),
       TableRow,
       TableHeader,
       TableCell,
@@ -215,19 +217,29 @@ const ReadsEditorEditor: Component<{
           // setMarkdown(md);
         }
       }),
-      // BubbleMenu.configure({
-      //   pluginKey: 'bubbleMenuOne',
-      //   element: document.getElementById('bubble_menu_one'),
-      //   shouldShow: ({ editor, view, state, oldState, from, to }) => {
-      //     return (to - from) > 0 && (
-      //       editor.isActive('paragraph') ||
-      //       editor.isActive('bold') ||
-      //       editor.isActive('italic') ||
-      //       editor.isActive('underline') ||
-      //       editor.isActive('strike')
-      //     );
-      //   },
-      // }),
+      BubbleMenu.configure({
+        pluginKey: 'bubbleMenuOne',
+        element: document.getElementById('bubble_menu_one'),
+        tippyOptions: {
+          triggerTarget: document.getElementById('tableTrigger'),
+          popperOptions: {
+            strategy: 'fixed',
+          },
+        },
+        shouldShow: ({ editor, view, state, oldState, from, to }) => {
+
+          setShowTableOptions(() => editor.isActive('table'));
+          if (editor.isActive('table')) {
+            const tool = document.getElementById('tableOptions');
+            if (!tool) return false;
+
+            const rect = tool.getBoundingClientRect();
+            tool.style = `top: 460px; right: ${0 - 20 - rect.width}px`;
+          }
+
+          return false;
+        },
+      }),
       // Mention.configure({
       //   suggestion: {
       //     char: '@',
@@ -363,6 +375,9 @@ const ReadsEditorEditor: Component<{
       //   },
       // }),
     ],
+    editorProps: { handleDOMEvents: {
+      drop: (view, e) => { e.preventDefault(); },
+    } },
     content: '',
     onCreate({ editor }) {
       setEditorContent(editor, props.markdownContent);
@@ -381,6 +396,7 @@ const ReadsEditorEditor: Component<{
       if (isInScrollMode()) {
         window.scrollTo(0, Math.max(document.body.scrollHeight, window.innerHeight));
       }
+
 
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
@@ -533,6 +549,8 @@ const ReadsEditorEditor: Component<{
       return true;
     }
   };
+
+  const [showTableOptions, setShowTableOptions] = createSignal(false);
 
   return (
     <div class={styles.readsEditor}>
@@ -863,6 +881,46 @@ const ReadsEditorEditor: Component<{
         </div>
         <div style="height: 20px;"></div>
       </div>
+
+      <Show when={showTableOptions()}>
+        <div id="tableOptions" class={styles.tableOptions}>
+          <button
+            onClick={() => editorTipTap()?.commands.deleteTable()}
+          >
+            Delete Table
+          </button>
+          <button
+            onClick={() => editorTipTap()?.chain().focus().addColumnAfter().run()}
+          >
+            Insert Column After
+          </button>
+          <button
+            onClick={() => editorTipTap()?.chain().focus().addColumnBefore().run()}
+          >
+            Insert Column Before
+          </button>
+          <button
+            onClick={() => editorTipTap()?.chain().focus().addRowAfter().run()}
+          >
+            Insert Row After
+          </button>
+          <button
+            onClick={() => editorTipTap()?.chain().focus().addRowBefore().run()}
+          >
+            Insert Row Before
+          </button>
+          <button
+            onClick={() => editorTipTap()?.chain().focus().mergeCells().run()}
+          >
+            Merge Cell
+          </button>
+          <button
+            onClick={() => editorTipTap()?.commands.splitCell()}
+          >
+            Split Cell
+          </button>
+        </div>
+      </Show>
     </div>
   );
 }
