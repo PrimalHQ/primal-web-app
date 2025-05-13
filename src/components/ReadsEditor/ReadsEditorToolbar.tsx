@@ -592,6 +592,17 @@ const ReadsEditorToolbar: Component<{
           updateFormatControls('enterMention', () => false);
         }}
       />
+
+      <ReadsEditorBubbleMenu
+        editor={props.editor}
+        store={formatControls}
+        commands={{
+          bold: () => props.editor?.commands.deleteTable(),
+          italic: () => {},
+          uline: () => {},
+          strike: () => {},
+        }}
+      />
     </>
   );
 }
