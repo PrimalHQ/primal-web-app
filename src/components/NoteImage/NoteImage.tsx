@@ -21,6 +21,7 @@ const NoteImage: Component<{
   ignoreRatio?: boolean,
   forceHeight?: number;
   authorPk?: string,
+  noPlaceholders?: boolean,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -191,7 +192,7 @@ const NoteImage: Component<{
 
   return (
     <Show
-      when={isImageLoaded()}
+      when={props.noPlaceholders || isImageLoaded()}
       fallback={<div class={styles.placeholderImage}></div>}
     >
       <a

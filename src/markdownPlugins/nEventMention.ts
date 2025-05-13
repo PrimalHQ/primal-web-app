@@ -44,6 +44,7 @@ export const findMissingEvent = async (nevent: string) => {
       includeEmbeds: true,
       hideFooter: true,
       noLinks: "links",
+      noPlaceholders: true,
     })
 
     mentions.forEach(mention => {

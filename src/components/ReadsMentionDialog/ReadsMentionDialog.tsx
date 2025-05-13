@@ -233,8 +233,10 @@ const ReadsMentionDialog: Component<{
       return true;
     }
 
+    return false;
+
     // @ts-ignore
-    return component?.ref?.onKeyDown(props)
+    // return component?.ref?.onKeyDown(props)
   };
 
   let pop: Instance | undefined;

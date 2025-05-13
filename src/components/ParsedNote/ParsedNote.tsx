@@ -172,6 +172,7 @@ const ParsedNote: Component<{
   altEmbeds?: boolean,
   embedLevel?: number,
   rootNote?: PrimalNote,
+  noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
 }> = (props) => {
 
@@ -654,6 +655,7 @@ const ParsedNote: Component<{
         shortHeight={props.shorten}
         onError={imageError}
         authorPk={props.note.pubkey}
+        noPlaceholders={props.noPlaceholders}
       />
     }
 
