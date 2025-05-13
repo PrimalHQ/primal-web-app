@@ -58,6 +58,7 @@ import UploaderBlossom, { UploadState } from '../Uploader/UploaderBlossom';
 import { Progress } from '@kobalte/core/progress';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { MarkdownPlugin, extendMarkdownEditor, mdToHtml } from '../../markdownPlugins/markdownTransorm';
+import { useAppContext } from '../../contexts/AppContext';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -91,6 +92,7 @@ const ReadsEditorEditor: Component<{
   const intl = useIntl();
   const navigate = useNavigate();
   const profile = useProfileContext();
+  const app = useAppContext();
 
   const [editorMarkdown, setEditorMarkdown] = createSignal(false);
   // const [markdownContent, setMarkdownContent] = createSignal<string>('')
@@ -472,6 +474,66 @@ const ReadsEditorEditor: Component<{
     setOpenUploadSockets(false);
   });
 
+  const [heroImgSrc, setHeroImgSrc] = createSignal('');
+
+  createEffect(() => {
+    setHeroImgSrc(() => props.article.image);
+  })
+
+  const onImageError = async (event: any) => {
+    const image = event.target;
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    // list of user's blossom servers from kind 10_063
+    const userBlossoms = app?.actions.getUserBlossomUrls(pubkey) || [];
+
+    // Image url from a Note
+    const originalSrc = image.src || '';
+
+    // extract the file hash
+    const fileHash = originalSrc.slice(originalSrc.lastIndexOf('/') + 1)
+
+    // Send HEAD requests to each blossom server to check if the resource is there
+    const reqs = userBlossoms.map(url =>
+      new Promise<string>((resolve, reject) => {
+        const separator = url.endsWith('/') ? '' : '/';
+        const resourceUrl = `${url}${separator}${fileHash}`;
+
+        fetch(resourceUrl, { method: 'HEAD' }).
+          then(response => {
+            // Check to see if there is an image there
+            if (response.status === 200) {
+              resolve(resourceUrl);
+            } else {
+              reject('')
+            }
+          }).
+          catch((e) => {
+            reject('');
+          });
+      })
+    );
+
+    try {
+      // Wait for at least one req to succeed
+      const blossomUrl = await Promise.any(reqs);
+
+      // If found, set image src to the blossom url
+      if (blossomUrl.length > 0) {
+        image.onerror = "";
+        image.src = blossomUrl;
+        setImageLoaded(true);
+        return true;
+      }
+    } catch {
+      setHeroImgSrc(() => '');
+      setImageLoaded(false);
+      return true;
+    }
+  };
+
   return (
     <div class={styles.readsEditor}>
       <Show when={accordionSection().includes('metadata')}>
@@ -518,7 +580,7 @@ const ReadsEditorEditor: Component<{
                   </Match>
 
                   <Match
-                    when={props.article.image.length > 0}
+                    when={heroImgSrc().length > 0}
                   >
                     <div
                       class={styles.uploadButton}
@@ -555,14 +617,15 @@ const ReadsEditorEditor: Component<{
                       />
                       <img
                         class={styles.titleImage}
-                        src={props.article.image}
+                        src={heroImgSrc()}
                         onload={() => setImageLoaded(true)}
+                        onError={onImageError}
                       />
                     </div>
                   </Match>
 
                   <Match
-                    when={props.article.image.length === 0}
+                    when={heroImgSrc().length === 0}
                   >
                     <div class={styles.noTitleImagePlaceholder}>
                       <input
