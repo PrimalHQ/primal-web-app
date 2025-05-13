@@ -271,9 +271,7 @@ export const mdToHtml = async (markdown: string) => {
       })
       // .use(rehypeExtendedTable)
       // .use(rehypeRaw)
-      .use(rehypeStringify, {
-
-      });
+      .use(rehypeStringify);
       // .process(markdown);
 
 
@@ -294,7 +292,7 @@ export const mdToHtml = async (markdown: string) => {
 export const htmlToMd = (html: string): string => {
   try {
     // Process HTML to handle nostr spans before converting to markdown
-    const processedHtml = processHTMLForNostr(html.replaceAll('\n', ''));
+    const processedHtml = processHTMLForNostr(html);
 
     const result = unified()
       .use(rehypeParse, { fragment: true })
@@ -309,7 +307,7 @@ export const htmlToMd = (html: string): string => {
       })
       .processSync(processedHtml);
 
-    return result.toString();
+    return result.toString().replace(/(\n\n)/g, '\n');
   } catch (error) {
     console.error('Error converting HTML to markdown:', error);
     // Return a sanitized version of the HTML as fallback

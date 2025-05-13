@@ -382,9 +382,10 @@ const ReadsEditorEditor: Component<{
 
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
     },
-    // onPaste(e: ClipboardEvent) {
-    //   console.log('PASTE', e)
-    // }
+    // onPaste(e) {
+    //   const data = e.clipboardData?.getData('Text') || '';
+    //   console.log('PASTE', data);
+    // },
     // onSelectionUpdate({ editor: ed }) {
     //   updateFormatControls(() => ({
     //     isBoldActive: ed.isActive('bold'),

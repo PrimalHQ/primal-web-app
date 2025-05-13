@@ -227,11 +227,11 @@ export const NEventExtension = Node.create({
       insertNEvent:
         ({ nevent }) =>
         ({ commands }) =>
-          commands.insertContent([makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
+          commands.insertContent([makeNEventNode(nevent, this.options)], { updateSelection: false }),
       insertNEventAt:
         (range, { nevent }) =>
         ({ commands }) =>
-          commands.insertContentAt(range, [makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
+          commands.insertContentAt(range, [makeNEventNode(nevent, this.options)], { updateSelection: false }),
     }
   },
 

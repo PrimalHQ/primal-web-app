@@ -59,7 +59,6 @@ const Blossom: Component = () => {
   const checkServers = (servers: string[]) => {
     for (let i = 0; i < servers.length;i++) {
       const url = servers[i];
-      console.log('checking: ', url)
       checkBlossomServer(url).then(available => setServerAvailability(() => ({ [url]: available })));
     }
   }
