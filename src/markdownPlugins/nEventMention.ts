@@ -57,6 +57,7 @@ export const findMissingEvent = async (nevent: string) => {
   // Move cursor one space to the right to avoid overwriting the note.
   const el = document.querySelector('.tiptap.ProseMirror');
   el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+  el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
 }
 

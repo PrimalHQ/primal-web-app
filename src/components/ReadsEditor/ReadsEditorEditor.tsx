@@ -2,7 +2,7 @@ import { Component, For, JSXElement, Match, Setter, Show, Switch, batch, createE
 
 import styles from './ReadsEditor.module.scss';
 import { SetStoreFunction, createStore } from 'solid-js/store';
-import { Editor } from '@tiptap/core';
+import { Editor, Extension } from '@tiptap/core';
 import { PrimalUser } from '../../types/primal';
 import { nip19 } from '../../lib/nTools';
 import { useIntl } from '@cookbook/solid-intl';
@@ -175,6 +175,45 @@ const ReadsEditorEditor: Component<{
 
   const [isInScrollMode, setScrollMode] = createSignal(false);
 
+  const AutoScrollExtension = Extension.create({
+    addOptions() {
+      return {
+        // Default minimum padding
+        minPadding: 32,
+        // Whether to use dynamic padding based on node height
+        useDynamicPadding: true
+      }
+    },
+
+    onUpdate({ editor, transaction }) {
+      // Skip if not a user-originated change
+      // if (!transaction.docChanged || transaction.getMeta('preventScroll')) {
+      //   return;
+      // }
+
+      // Get the currently active node and calculate padding based on its height
+      const { selection } = editor.state;
+      const domPositionInfo = editor.view.domAtPos(selection.from);
+      let targetNode = domPositionInfo.node;
+
+      let padding = this.options.minPadding
+      // If it's a text node, get its parent element
+      if (targetNode.nodeType === Node.TEXT_NODE) {
+        targetNode = targetNode.parentElement;
+      }
+
+      if (targetNode) {
+        // Get the height of the node and use it as padding
+        const rect = targetNode.getBoundingClientRect();
+        console.log('HEIGHT: ', rect.height, targetNode)
+        padding = Math.max(this.options.minPadding, rect.height);
+      }
+
+      // Scroll to the node with the calculated padding
+      scrollToActiveNode(editor, { padding });
+    }
+  });
+
   const editorTipTap = createTiptapEditor(() => ({
     element: tiptapEditor!,
     extensions: [
@@ -240,6 +279,11 @@ const ReadsEditorEditor: Component<{
           return false;
         },
       }),
+
+      AutoScrollExtension.configure({
+        minPadding: 32,  // Minimum padding in pixels
+        useDynamicPadding: true // Use the node height as padding
+      })
       // Mention.configure({
       //   suggestion: {
       //     char: '@',
@@ -383,19 +427,24 @@ const ReadsEditorEditor: Component<{
       setEditorContent(editor, props.markdownContent);
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
-    onUpdate({ editor }) {
-      const scr = document.body.scrollHeight > window.innerHeight;
-      if (scr && !isInScrollMode()) {
-        setScrollMode(() => true);
-      }
+    onUpdate({ editor, transaction }) {
+      // console.log('UPDATE: ', transaction)
+      // scrollToActiveNode(editor);
+      // editor.commands.scrollIntoView();
+      // const activeElement = editor.state.selection.$anchor.parent;
+      // console.log('Active: ', activeElement.type)
+      // const scr = document.body.scrollHeight > window.innerHeight;
+      // if (scr && !isInScrollMode()) {
+      //   setScrollMode(() => true);
+      // }
 
-      if (!scr && isInScrollMode()) {
-        setScrollMode(() => false);
-      }
+      // if (!scr && isInScrollMode()) {
+      //   setScrollMode(() => false);
+      // }
 
-      if (isInScrollMode()) {
-        window.scrollTo(0, Math.max(document.body.scrollHeight, window.innerHeight));
-      }
+      // if (isInScrollMode()) {
+      //   window.scrollTo(0, Math.max(document.body.scrollHeight, window.innerHeight));
+      // }
 
 
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
@@ -413,6 +462,79 @@ const ReadsEditorEditor: Component<{
     //   }))
     // },
   }));
+
+  const scrollToActiveNode = (editor, options = {}) => {
+    const { padding = 32, behavior = 'instant' } = options;
+
+    if (!editor || !editor.state) {
+      console.warn('No valid editor instance provided');
+      return false;
+    }
+
+    try {
+      // Get the current selection position
+      const { selection } = editor.state;
+      const { from } = selection;
+
+      // Get the DOM node at the current position
+      const domPositionInfo = editor.view.domAtPos(from);
+
+      if (!domPositionInfo || !domPositionInfo.node) {
+        console.warn('Could not find DOM node at current position');
+        return false;
+      }
+
+      // Get the actual node (might be a text node, so we might need to get parent)
+      let targetNode = domPositionInfo.node;
+
+      // If it's a text node, get its parent element
+      if (targetNode.nodeType === Node.TEXT_NODE) {
+        targetNode = targetNode.parentElement;
+      }
+
+      if (!targetNode) {
+        console.warn('Could not determine target node');
+        return false;
+      }
+
+      // Get viewport and element positions
+      const rect = targetNode.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+
+      // Check if the element is fully in view
+      const isInView = (
+        rect.top >= 0 &&
+        rect.bottom <= viewportHeight
+      );
+
+      if (isInView) {
+        // Check if element is closer than padding to the bottom of the viewport
+        const distanceToBottom = viewportHeight - rect.bottom;
+
+        if (distanceToBottom < padding) {
+          // Scroll additional padding
+          window.scrollBy({
+            top: padding - distanceToBottom,
+            behavior
+          });
+        }
+
+        return true;
+      }
+
+      // Element is not in view, scroll it into view
+      targetNode.scrollIntoView({
+        behavior,
+        block: 'center'
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error scrolling to active node:', error);
+      return false;
+    }
+  }
+
 
   const setEditorContent = async (editor: Editor, content: string) => {
     const c = await mdToHtml(content);
