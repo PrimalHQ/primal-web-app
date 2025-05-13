@@ -165,6 +165,7 @@
     align-items: center;
     cursor: pointer;
     overflow: hidden;
+    position: relative;
 
     .uploadPlaceholder {
       display: flex;
@@ -551,6 +552,8 @@ input.textInput {
   flex-direction: column;
   gap: 2px;
   width: 100%;
+  position: absolute;
+  bottom: 0;
 
   .progressLabelContainer {
     display: flex;
