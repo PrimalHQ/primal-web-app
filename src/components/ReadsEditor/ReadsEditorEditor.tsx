@@ -379,7 +379,7 @@ const ReadsEditorEditor: Component<{
       }
 
       if (isInScrollMode()) {
-        window.scrollTo(0, window.innerHeight);
+        window.scrollTo(0, Math.max(document.body.scrollHeight, window.innerHeight));
       }
 
       props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
