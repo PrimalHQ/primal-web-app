@@ -206,12 +206,7 @@ const ReadsEditorToolbar: Component<{
 
     // Move cursor one space to the right to avoid overwriting the image.
     const el = document.querySelector('.tiptap.ProseMirror');
-    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-
-    editor.chain().insertContent('<p>a</p>').run();
-    editor.chain().insertContent('<p>b</p>').run();
-
-    // editor.chain().selectParentNode().createParagraphNear().run();
+    el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
   }
 
 
@@ -243,7 +238,7 @@ const ReadsEditorToolbar: Component<{
   }
 
   const table = (rows: number, cols: number) => {
-    props.editor?.chain().focus().insertTable({rows, cols, withHeaderRow: false}).run();
+    props.editor?.chain().focus().insertTable({rows: rows + 1, cols, withHeaderRow: true}).run();
   }
 
   const addMentionToEditor = (user: PrimalUser, relays: string[]) => {
