@@ -82,7 +82,7 @@
     }
 
     hr {
-      border-top:1px solid var(--subtile-devider);
+      border-top: 1px solid var(--subtile-devider);
       margin-top: 10px;
       margin-bottom: 20px;
     }
@@ -248,23 +248,44 @@
       color: inherit;
     }
 
+
     table {
       display: block;
       overflow-x: auto;
       white-space: nowrap;
+
+      border-collapse: separate;
+      border: 1px solid var(--text-tertiary-2);
+      border-radius: 8px;
 
       tbody {
         display: table;
         width: 100%;
       }
 
+      tr {
+        border: none;
+      }
+
       th {
+        position: relative;
         color: var(--text-primary);
         font-size: 16px;
         font-weight: 700;
         line-height: 28px;
-        border-bottom: 1px solid var(--text-secondary);
         padding: 12px 8px;
+        border-left: 1px solid var(--text-tertiary-2);
+        border-block: none;
+        background-color: var(--devider);
+
+        color: var(--text-tertiary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+
+        &:first-child {
+          border-left: none;
+        }
         * {
           margin-bottom: 0;
           font-size: inherit;
@@ -274,12 +295,19 @@
       }
 
       td {
+        position: relative;
         color: var(--brand-text);
         font-size: 16px;
         font-weight: 400;
-        line-height: 28px;
-        border-bottom: 1px solid var(--subtile-devider);
+        line-height: 24px;
+        border-left: 1px solid var(--text-tertiary-2);
+        border-top: 1px solid var(--text-tertiary-2);
+        border-bottom: none;
         padding: 12px 8px;
+
+        &:first-child {
+          border-left: none;
+        }
         * {
           margin-bottom: 0;
           font-size: inherit;
