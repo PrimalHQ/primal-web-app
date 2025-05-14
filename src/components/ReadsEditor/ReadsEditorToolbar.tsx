@@ -11,6 +11,7 @@ import { nip19 } from '../../lib/nTools';
 import ReadsEditorTableSelector from './ReadsEditorTableSelector';
 import ReadsEditorBubbleMenu from './ReadsEditorBubbleMenu';
 import ReadsImageDialog from '../ReadsMentionDialog/ReadsImageDialog';
+import { insertContent } from '@tiptap/core/dist/commands';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -238,7 +239,34 @@ const ReadsEditorToolbar: Component<{
   }
 
   const table = (rows: number, cols: number) => {
-    props.editor?.chain().focus().insertTable({rows: rows + 1, cols, withHeaderRow: true}).run();
+    props.editor?.chain().focus().
+      insertTable({rows: rows + 1, cols, withHeaderRow: true}).
+      run();
+
+    insertContentAtEnd(props.editor, ' ')
+  }
+
+  const insertContentAtEnd = (editor: Editor | undefined, content: string) => {
+    if (!editor) return;
+
+    // Store the current selection
+    const { from, to } = editor.state.selection
+
+    // Create a transaction that inserts content at the end
+    const tr = editor.state.tr.insert(
+      editor.state.doc.content.size, // This targets the end of the document
+      editor.schema.text(content)
+    )
+
+    // Preserve the original selection
+    tr.setSelection(editor.state.selection.constructor.create(
+      tr.doc,
+      from,
+      to
+    ))
+
+    // Apply the transaction
+    editor.view.dispatch(tr)
   }
 
   const addMentionToEditor = (user: PrimalUser, relays: string[]) => {
