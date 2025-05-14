@@ -1120,27 +1120,126 @@ input.textInput {
   flex-direction: column;
   gap: 4px;
   z-index: 25;
-  background-color: var(--devider);
-  padding: 8px 12px;
+  background-color: var(--background-input);
+  padding: 8px 4px;
   border-radius: 8px;
-  border: 1px solid var(--text-tertiary-2);
-  width: fit-content;
+  border: 1px solid var(--subtile-devider);
+  width: 220px;
 
   button {
-    color: var(--brand-text);
-    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-primary);
+    font-size: 14px;
     font-weight: 400;
-    line-height: 18px;
+    line-height: 20px;
     margin: 0;
     padding: 0;
     outline: none;
     border: none;
     border-radius: 0;
     background: none;
-    border-bottom: 1px solid var(--text-tertiary-2);
+    height: 36px;
+    padding-inline: 8px;
 
     &:hover {
-      color: var(--text-primary);
+      background-color: var(--subtile-devider);
+      border-radius: 4px;
     }
   }
+}
+
+.delTableIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--warning-bright);
+  -webkit-mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+}
+
+.colAfterIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+}
+
+.colBeforeIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+}
+
+.rowBellowIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+}
+
+.rowAboveIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+}
+
+.mergeIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+}
+
+.splitIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
+}
+
+.delRowIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-image: url(../assets/icons/table/del_row_dark.svg);
+  background-size: 18px;
+  /* background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px; */
+}
+
+.delColIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-image: url(../assets/icons/table/del_col_dark.svg);
+  background-size: 18px;
+  /* background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px; */
 }

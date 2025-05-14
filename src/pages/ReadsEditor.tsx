@@ -627,39 +627,61 @@ const ReadsEditor: Component = () => {
           <Show when={showTableOptions()}>
             <div id="tableOptions" class={styles.tableOptions}>
               <button
-                onClick={() => editor()?.commands.deleteTable()}
-              >
-                Delete Table
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().addColumnAfter().run()}
-              >
-                Insert Column After
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().addColumnBefore().run()}
-              >
-                Insert Column Before
-              </button>
-              <button
                 onClick={() => editor()?.chain().focus().addRowAfter().run()}
               >
-                Insert Row After
+                <div>Insert Row After</div>
+                <div class={styles.rowBellowIcon}></div>
               </button>
               <button
                 onClick={() => editor()?.chain().focus().addRowBefore().run()}
               >
-                Insert Row Before
+                <div>Insert Row Before</div>
+                <div class={styles.rowAboveIcon}></div>
               </button>
+
+              <button
+                onClick={() => editor()?.chain().focus().addColumnBefore().run()}
+              >
+                <div>Insert Column Before</div>
+                <div class={styles.colBeforeIcon}></div>
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().addColumnAfter().run()}
+              >
+                <div>Insert Column After</div>
+                <div class={styles.colAfterIcon}></div>
+              </button>
+
               <button
                 onClick={() => editor()?.chain().focus().mergeCells().run()}
               >
-                Merge Cell
+                <div>Merge Cell</div>
+                <div class={styles.mergeIcon}></div>
               </button>
+
               <button
                 onClick={() => editor()?.commands.splitCell()}
               >
-                Split Cell
+                <div>Split Cell</div>
+                <div class={styles.splitIcon}></div>
+              </button>
+              <button
+                onClick={() => editor()?.commands.deleteRow()}
+              >
+                <div>Delete Row</div>
+                <div class={styles.delRowIcon}></div>
+              </button>
+              <button
+                onClick={() => editor()?.commands.deleteColumn()}
+              >
+                <div>Delete Column</div>
+                <div class={styles.delColIcon}></div>
+              </button>
+              <button
+                onClick={() => editor()?.commands.deleteTable()}
+              >
+                <div>Delete Table</div>
+                <div class={styles.delTableIcon}></div>
               </button>
             </div>
           </Show>
