@@ -613,14 +613,19 @@ const ReadsEditor: Component = () => {
               <Match when={!isUnsaved()}>
                 <div class={styles.status}>
                   <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
-                  <div>Saved changes. Last saved: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                  <div>Saved changes: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
                 </div>
               </Match>
 
               <Match when={isUnsaved()}>
                 <div class={styles.status}>
                   <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
-                  <div>Unsaved changes. Last saved: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                  <Show
+                    when={lastSaved.time}
+                    fallback={<div>Unsaved changes (no saved drafts yet)</div>}
+                  >
+                    <div>Unsaved changes since: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                  </Show>
                 </div>
               </Match>
             </Switch>
