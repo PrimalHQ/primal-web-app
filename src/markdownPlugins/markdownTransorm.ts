@@ -280,7 +280,7 @@ export const mdToHtml = async (markdown: string) => {
     // Process the HTML for nostr identifiers
     html = await processMarkdownForNostr(html);
 
-    return html + '<p></p>';
+    return html;
   } catch (error) {
     console.error('Error converting markdown to HTML:', error);
     // Fallback to simple conversion or return original markdown
