@@ -35,12 +35,13 @@ export type EmbeddedNoteProps = {
   rootNote?: PrimalNote,
   noLinks?: 'text' | 'links',
   noPlaceholders?: boolean,
+  noLightbox?: boolean,
 };
 
 export const renderEmbeddedNote = (props: EmbeddedNoteProps) => (
   <div>
     <TranslatorProvider>
-      <EmbeddedNote {...props} noPlaceholders={true}  />
+      <EmbeddedNote {...props} />
     </TranslatorProvider>
   </div> as HTMLDivElement
   ).innerHTML;
@@ -257,6 +258,7 @@ const EmbeddedNote: Component<EmbeddedNoteProps> = (props) => {
           margins={2}
           noLinks={props.noLinks}
           noPlaceholders={props.noPlaceholders}
+          noLightbox={props.noLightbox}
         />
       </div>
       <div class={styles.footer}>

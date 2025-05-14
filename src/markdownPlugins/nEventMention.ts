@@ -1,5 +1,5 @@
 
-import { InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 import { nip19 } from '../lib/nTools';
@@ -15,7 +15,7 @@ export const createInputRuleMatch = <T extends Record<string, unknown>>(
 ): InputRuleMatch => ({ index: match.index!, replaceWith: match[2], text: match[0], match, data })
 
 
-export const findMissingEvent = async (nevent: string) => {
+export const findMissingEvent = async (nevent: string, editor: Editor) => {
   if (!nevent) return;
   const decode = nip19.decode(nevent);
 
@@ -45,6 +45,7 @@ export const findMissingEvent = async (nevent: string) => {
       hideFooter: true,
       noLinks: "links",
       noPlaceholders: true,
+      noLightbox: true,
     })
 
     mentions.forEach(mention => {
@@ -57,8 +58,10 @@ export const findMissingEvent = async (nevent: string) => {
   // Move cursor one space to the right to avoid overwriting the note.
   const el = document.querySelector('.tiptap.ProseMirror');
   el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
-  el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
 
+  setTimeout(() => {
+    editor.chain().focus().enter().run();
+  }, 100)
 }
 
 export type NEventAttributes = {
@@ -135,7 +138,7 @@ export const NEventExtension = Node.create({
       // Append paragraph to the main div
       // dom.appendChild(contentP);
 
-      findMissingEvent(node.attrs.bech32);
+      findMissingEvent(node.attrs.bech32, editor);
 
       return {
         dom,

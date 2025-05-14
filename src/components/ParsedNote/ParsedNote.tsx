@@ -697,6 +697,7 @@ const ParsedNote: Component<{
             forceHeight={500}
             onError={imageError}
             authorPk={props.note.pubkey}
+            noPlaceholders={props.noPlaceholders}
           />
         }}
       </For>

@@ -1,5 +1,5 @@
 
-import { mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import { Editor, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 import { nip19 } from '../lib/nTools';
@@ -10,7 +10,7 @@ import { Kind } from '../constants';
 import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview';
 import { setReadMentions } from '../pages/ReadsEditor';
 
-export const findMissingEvent = async (naddr: string) => {
+export const findMissingEvent = async (naddr: string, editor: Editor) => {
   if (!naddr) return;
   const decode = nip19.decode(naddr);
 
@@ -49,6 +49,9 @@ export const findMissingEvent = async (naddr: string) => {
   const el = document.querySelector('.tiptap.ProseMirror');
   el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
 
+  setTimeout(() => {
+    editor.chain().focus().enter().run();
+  }, 100)
 }
 
 export type NAddrAttributes = {
@@ -117,7 +120,7 @@ export const NAddrExtension = Node.create({
       // Append paragraph to the main div
       // dom.appendChild(contentP);
 
-      findMissingEvent(node.attrs.bech32);
+      findMissingEvent(node.attrs.bech32, editor);
 
       return {
         dom,

@@ -187,9 +187,9 @@ const ReadsEditorEditor: Component<{
 
     onUpdate({ editor, transaction }) {
       // Skip if not a user-originated change
-      // if (!transaction.docChanged || transaction.getMeta('preventScroll')) {
-      //   return;
-      // }
+      if (!transaction.docChanged || transaction.getMeta('preventScroll')) {
+        return;
+      }
 
       // Get the currently active node and calculate padding based on its height
       const { selection } = editor.state;
@@ -202,10 +202,28 @@ const ReadsEditorEditor: Component<{
         targetNode = targetNode.parentElement;
       }
 
+      let breakout = false;
+
+      while (!breakout) {
+        breakout =
+          !targetNode.parentElement ||
+          (
+            targetNode.parentElement.className.includes('tiptap') &&
+            targetNode.parentElement.className.includes('ProseMirror')
+          );
+
+        if (breakout) break;
+
+        breakout = ['TABLE'].includes(targetNode.parentElement.nodeName);
+
+        targetNode = targetNode.parentElement;
+
+        if (breakout) break;
+      }
+
       if (targetNode) {
         // Get the height of the node and use it as padding
         const rect = targetNode.getBoundingClientRect();
-        console.log('HEIGHT: ', rect.height, targetNode)
         padding = Math.max(this.options.minPadding, rect.height);
       }
 
