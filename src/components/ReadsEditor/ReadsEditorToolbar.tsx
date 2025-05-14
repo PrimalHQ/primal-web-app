@@ -239,11 +239,30 @@ const ReadsEditorToolbar: Component<{
   }
 
   const table = (rows: number, cols: number) => {
+    if (!props.editor) return;
+
+    const eod = isCursorAtEnd(props.editor);
     props.editor?.chain().focus().
       insertTable({rows: rows + 1, cols, withHeaderRow: true}).
       run();
 
-    insertContentAtEnd(props.editor, ' ')
+    eod && insertContentAtEnd(props.editor, ' ')
+  }
+
+  const isCursorAtEnd = (editor: Editor) => {
+    if (!editor || !editor.state) {
+      return false;
+    }
+
+    // Get current cursor position
+    const cursorPos = editor.state.selection.anchor;
+
+    // Get the total size of the document (position of the very end)
+    const docSize = editor.state.doc.content.size;
+
+    // Check if cursor is at the end (accounting for possible trailing spaces)
+    // The -1 is because in ProseMirror/TipTap, the document size includes an extra position
+    return cursorPos >= docSize - 1;
   }
 
   const insertContentAtEnd = (editor: Editor | undefined, content: string) => {
