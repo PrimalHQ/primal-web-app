@@ -86,7 +86,7 @@ const ReadsEditorEditor: Component<{
   setArticle: SetStoreFunction<ArticleEdit>,
   fixedToolbar: boolean,
   setEditor: (editor: Editor) => void,
-  showTableOptions: (value: boolean) => void,
+  showTableOptions: (value: boolean, position: DOMRect) => void,
 }> = (props) => {
   const account = useAccountContext();
   const search = useSearchContext();
@@ -287,7 +287,9 @@ const ReadsEditorEditor: Component<{
         },
         shouldShow: ({ editor, view, state, oldState, from, to }) => {
 
-          props.showTableOptions(editor.isActive('table'));
+          const dom = editor.view.coordsAtPos(state.selection.from);
+          props.showTableOptions(editor.isActive('table'), dom);
+
 
           return false;
         },

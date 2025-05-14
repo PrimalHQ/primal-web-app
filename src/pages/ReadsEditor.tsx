@@ -97,6 +97,24 @@ const ReadsEditor: Component = () => {
 
   const [editor, setEditor] = createSignal<Editor>();
   const [showTableOptions, setShowTableOptions] = createSignal<boolean>(false);
+  const [tableOptionsPosition, setTableOptionsPosition] = createSignal<boolean>(false);
+
+  const updateTableOptions = (show: boolean, pos: DOMRect) => {
+    setShowTableOptions(show);
+    const div = document.getElementById('tableOptions');
+    if (!div) return;
+
+    const divRect = div?.getBoundingClientRect();
+    const overflow = window.innerHeight - (pos.top + divRect.height) < 32;
+
+    if (overflow) {
+      // @ts-ignore
+      div.style = `top: unset; bottom: 32px;`;
+    } else {
+      // @ts-ignore
+      div.style = `top: ${pos.top - 17}px; bottom: unset;`;
+    }
+  }
 
   const generateIdentifier = () => identifier().length > 0 ? identifier() : article.title.toLowerCase().split(' ').join('-')
 
@@ -698,7 +716,7 @@ const ReadsEditor: Component = () => {
             setArticle={setArticle}
             fixedToolbar={fixedToolbar()}
             setEditor={setEditor}
-            showTableOptions={setShowTableOptions}
+            showTableOptions={updateTableOptions}
           />
         </Match>
 
