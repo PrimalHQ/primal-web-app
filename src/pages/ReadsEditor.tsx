@@ -31,6 +31,7 @@ import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog'
 import PageTitle from '../components/PageTitle/PageTitle';
 import { date, longDate } from '../lib/dates';
 import ReadsPublishSuccessDialog from '../components/ReadsMentionDialog/ReadsPublishSuccessDialog';
+import { Editor } from '@tiptap/core';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -93,6 +94,9 @@ const ReadsEditor: Component = () => {
   const [fixedToolbar, setFixedToolbar] = createSignal(false);
 
   const [identifier, setIdentifier] = createSignal('');
+
+  const [editor, setEditor] = createSignal<Editor>();
+  const [showTableOptions, setShowTableOptions] = createSignal<boolean>(false);
 
   const generateIdentifier = () => identifier().length > 0 ? identifier() : article.title.toLowerCase().split(' ').join('-')
 
@@ -619,6 +623,46 @@ const ReadsEditor: Component = () => {
               Continue to Publish Article
             </button>
           </div>
+
+          <Show when={showTableOptions()}>
+            <div id="tableOptions" class={styles.tableOptions}>
+              <button
+                onClick={() => editor()?.commands.deleteTable()}
+              >
+                Delete Table
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().addColumnAfter().run()}
+              >
+                Insert Column After
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().addColumnBefore().run()}
+              >
+                Insert Column Before
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().addRowAfter().run()}
+              >
+                Insert Row After
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().addRowBefore().run()}
+              >
+                Insert Row Before
+              </button>
+              <button
+                onClick={() => editor()?.chain().focus().mergeCells().run()}
+              >
+                Merge Cell
+              </button>
+              <button
+                onClick={() => editor()?.commands.splitCell()}
+              >
+                Split Cell
+              </button>
+            </div>
+          </Show>
         </div>
       </Wormhole>
 
@@ -631,6 +675,8 @@ const ReadsEditor: Component = () => {
             article={article}
             setArticle={setArticle}
             fixedToolbar={fixedToolbar()}
+            setEditor={setEditor}
+            showTableOptions={setShowTableOptions}
           />
         </Match>
 

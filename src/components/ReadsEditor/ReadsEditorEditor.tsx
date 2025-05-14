@@ -85,6 +85,8 @@ const ReadsEditorEditor: Component<{
   article: ArticleEdit,
   setArticle: SetStoreFunction<ArticleEdit>,
   fixedToolbar: boolean,
+  setEditor: (editor: Editor) => void,
+  showTableOptions: (value: boolean) => void,
 }> = (props) => {
   const account = useAccountContext();
   const search = useSearchContext();
@@ -285,14 +287,7 @@ const ReadsEditorEditor: Component<{
         },
         shouldShow: ({ editor, view, state, oldState, from, to }) => {
 
-          setShowTableOptions(() => editor.isActive('table'));
-          if (editor.isActive('table')) {
-            const tool = document.getElementById('tableOptions');
-            if (!tool) return false;
-
-            const rect = tool.getBoundingClientRect();
-            tool.style = `bottom: ${rect.height + 32}px; right: ${0 - 20 - rect.width}px`;
-          }
+          props.showTableOptions(editor.isActive('table'));
 
           return false;
         },
@@ -443,6 +438,7 @@ const ReadsEditorEditor: Component<{
     content: '',
     onCreate({ editor }) {
       setEditorContent(editor, props.markdownContent);
+      props.setEditor(editor);
       // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
     },
     onUpdate({ editor, transaction }) {
@@ -689,8 +685,6 @@ const ReadsEditorEditor: Component<{
       return true;
     }
   };
-
-  const [showTableOptions, setShowTableOptions] = createSignal(false);
 
   return (
     <div class={styles.readsEditor}>
@@ -1021,46 +1015,6 @@ const ReadsEditorEditor: Component<{
         </div>
         <div style="height: 20px;"></div>
       </div>
-
-      <Show when={showTableOptions()}>
-        <div id="tableOptions" class={styles.tableOptions}>
-          <button
-            onClick={() => editorTipTap()?.commands.deleteTable()}
-          >
-            Delete Table
-          </button>
-          <button
-            onClick={() => editorTipTap()?.chain().focus().addColumnAfter().run()}
-          >
-            Insert Column After
-          </button>
-          <button
-            onClick={() => editorTipTap()?.chain().focus().addColumnBefore().run()}
-          >
-            Insert Column Before
-          </button>
-          <button
-            onClick={() => editorTipTap()?.chain().focus().addRowAfter().run()}
-          >
-            Insert Row After
-          </button>
-          <button
-            onClick={() => editorTipTap()?.chain().focus().addRowBefore().run()}
-          >
-            Insert Row Before
-          </button>
-          <button
-            onClick={() => editorTipTap()?.chain().focus().mergeCells().run()}
-          >
-            Merge Cell
-          </button>
-          <button
-            onClick={() => editorTipTap()?.commands.splitCell()}
-          >
-            Split Cell
-          </button>
-        </div>
-      </Show>
     </div>
   );
 }
