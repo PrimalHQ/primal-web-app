@@ -291,7 +291,7 @@ const ReadsEditorEditor: Component<{
             if (!tool) return false;
 
             const rect = tool.getBoundingClientRect();
-            tool.style = `top: 460px; right: ${0 - 20 - rect.width}px`;
+            tool.style = `bottom: ${rect.height + 32}px; right: ${0 - 20 - rect.width}px`;
           }
 
           return false;
