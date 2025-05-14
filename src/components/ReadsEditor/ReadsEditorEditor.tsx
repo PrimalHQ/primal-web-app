@@ -977,7 +977,9 @@ const ReadsEditorEditor: Component<{
 
             // console.log('JSON: ', editor.getJSON())
             if (editorMarkdown()) {
-              props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown())
+              const md = extendMarkdownEditor(editor).getMarkdown();
+              props.setMarkdownContent(() => md);
+              // props.setArticle('content', () => md);
             }
             else {
               const c = editorPlainText?.value || '';
