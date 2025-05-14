@@ -272,7 +272,8 @@ const ReadsEditorEditor: Component<{
       MarkdownPlugin.configure({
         exportOnUpdate: true,
         onMarkdownUpdate: (md) => {
-          props.setMarkdownContent(() => md)
+          // console.log('MD UPDATE: ', md)
+          // props.setMarkdownContent(() => md)
           // setMarkdown(md);
         }
       }),
