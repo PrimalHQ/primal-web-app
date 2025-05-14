@@ -678,25 +678,25 @@ const ReadsEditor: Component = () => {
               </button>
 
               <button
-                onClick={() => editor()?.commands.splitCell()}
+                onClick={() => editor()?.chain().focus().splitCell().run()}
               >
                 <div>Split Cell</div>
                 <div class={styles.splitIcon}></div>
               </button>
               <button
-                onClick={() => editor()?.commands.deleteRow()}
+                onClick={() => editor()?.chain().focus().deleteRow().run()}
               >
                 <div>Delete Row</div>
                 <div class={styles.delRowIcon}></div>
               </button>
               <button
-                onClick={() => editor()?.commands.deleteColumn()}
+                onClick={() => editor()?.chain().focus().deleteColumn().run()}
               >
                 <div>Delete Column</div>
                 <div class={styles.delColIcon}></div>
               </button>
               <button
-                onClick={() => editor()?.commands.deleteTable()}
+                onClick={() => editor()?.chain().focus().deleteTable().run()}
               >
                 <div>Delete Table</div>
                 <div class={styles.delTableIcon}></div>
