@@ -459,9 +459,9 @@ const ReadsEditor: Component = () => {
     const changed = title !== article.title ||
       image !== article.image ||
       summary !== article.summary ||
-      content !== article.content ||
+      content.trim() !== article.content.trim() ||
       tags.some(t => !article.tags.includes(t)) ||
-      mdContent !== markdownContent();
+      mdContent.trim().replaceAll(' ','') !== markdownContent().trim().replaceAll(' ','');
 
     return changed;
   }

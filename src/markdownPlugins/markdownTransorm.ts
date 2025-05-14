@@ -135,7 +135,6 @@ const processHTMLForNostr = (html: string): string => {
 
 // Helper function to handle nostr IDs in Markdown -> HTML conversion
 const processMarkdownForNostr = async (html: string): Promise<string> => {
-    // console.log('TYPE: ', html)
   // This regex matches nostr: followed by an npub or nprofile identifier
   const nostrRegex = /nostr:(n(pub|profile|ote|event|addr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
