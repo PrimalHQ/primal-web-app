@@ -207,3 +207,31 @@
     }
   }
 }
+
+.noArticlePhone {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding-top: 48px;
+  padding-inline: 20px;
+  border-top: 1px solid var(--devider);
+
+}
+
+.noArticleGuest {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 48px;
+  padding-inline: 20px;
+  border-top: 1px solid var(--devider);
+
+  p {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+}

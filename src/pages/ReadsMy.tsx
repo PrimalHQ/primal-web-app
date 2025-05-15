@@ -24,7 +24,7 @@ import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { branding, readsMy } from '../translations';
+import { branding, readsMy, actions as tActions } from '../translations';
 import { isPhone } from '../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
@@ -40,6 +40,8 @@ import { ArticlesStats, fetchArticlesStats, fetchTopArticle } from '../handleFee
 import { APP_ID } from '../App';
 import { shortDate } from '../lib/dates';
 import { useAppContext } from '../contexts/AppContext';
+
+import noEditorPhone from '../assets/images/editor-phone-message.png';
 
 
 const ReadsMy: Component = () => {
@@ -223,15 +225,17 @@ const ReadsMy: Component = () => {
           <div>
             {intl.formatMessage(readsMy.pageCaption)}
           </div>
-          <ButtonPrimary
-            onClick={() => navigate('/reads/edit')}
-          >
-            New Article
-          </ButtonPrimary>
+          <Show when={!isPhone() && account?.publicKey}>
+            <ButtonPrimary
+              onClick={() => navigate('/reads/edit')}
+            >
+              New Article
+            </ButtonPrimary>
+          </Show>
         </div>
       </PageCaption>
 
-      <Show when={!isPhone()}>
+      <Show when={!isPhone() && account?.publicKey}>
         <StickySidebar>
           <div class={styles.sidebarSection}>
             <Show when={articleStats().satszapped > 0}>
@@ -314,149 +318,170 @@ const ReadsMy: Component = () => {
           </div>
         </StickySidebar>
       </Show>
+        <Switch>
+          <Match when={isPhone()}>
+            <div class={styles.noArticlePhone}>
+              <img src={noEditorPhone} />
+            </div>
+          </Match>
 
-        <div class={styles.pageContent}>
-          <Show
-            when={!isFetchingStats()}
-            fallback={
-              <div>
-                <div class={styles.tabsPlaceholder}></div>
-                <div class={styles.tabContent}>
-                  <For each={new Array(10)}>
-                    {() => <ArticleOverviewSkeleton />}
-                  </For>
-                </div>
-              </div>
-            }
-          >
-            <Tabs value={params.tab || 'published'} onChange={onChangeTab}>
-              <Tabs.List class={styles.profileTabs}>
-                <Tabs.Trigger class={styles.profileTab} value="published">
-                  Published ({articleStats().articles})
-                </Tabs.Trigger>
-                <Tabs.Trigger class={styles.profileTab} value="drafts">
-                  Drafts ({articleStats().drafts})
-                </Tabs.Trigger>
-                <Tabs.Indicator class={styles.profileTabIndicator} />
-              </Tabs.List>
+          <Match when={!account?.publicKey}>
+            <div class={styles.noArticleGuest}>
+              <p>
+                You must be logged in to use Article Editor
+              </p>
+              <ButtonPrimary onClick={account?.actions.showGetStarted}>
+                {intl.formatMessage(tActions.getStarted)}
+              </ButtonPrimary>
+            </div>
+          </Match>
+
+          <Match when={true}>
+            <div class={styles.pageContent}>
+              <Show
+                when={!isFetchingStats()}
+                fallback={
+                  <div>
+                    <div class={styles.tabsPlaceholder}></div>
+                    <div class={styles.tabContent}>
+                      <For each={new Array(10)}>
+                        {() => <ArticleOverviewSkeleton />}
+                      </For>
+                    </div>
+                  </div>
+                }
+              >
+                <Tabs value={params.tab || 'published'} onChange={onChangeTab}>
+                  <Tabs.List class={styles.profileTabs}>
+                    <Tabs.Trigger class={styles.profileTab} value="published">
+                      Published ({articleStats().articles})
+                    </Tabs.Trigger>
+                    <Tabs.Trigger class={styles.profileTab} value="drafts">
+                      Drafts ({articleStats().drafts})
+                    </Tabs.Trigger>
+                    <Tabs.Indicator class={styles.profileTabIndicator} />
+                  </Tabs.List>
 
 
-              <Tabs.Content class={styles.tabContent} value="published">
-                <div class={styles.profileNotes}>
+                  <Tabs.Content class={styles.tabContent} value="published">
+                    <div class={styles.profileNotes}>
 
-                  <TransitionGroup name="slide-fade">
-                    <div>
-                      <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                      <TransitionGroup name="slide-fade">
                         <div>
-                          <For each={new Array(10)}>
-                            {() => <ArticleOverviewSkeleton />}
-                          </For>
-                        </div>
-                      </Show>
-                    </div>
-
-                    <div>
-                      <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
-                        <div class={styles.noPublished}>
-                          <div class={styles.caption}>
-                            {intl.formatMessage(readsMy.noPublishedArticle)}
-                          </div>
-                          <a href={'/reads/edit'}>Create your first article now!</a>
-                        </div>
-                      </Show>
-                    </div>
-
-                    <Show when={profile && profile.articles.length > 0}>
-                      <div>
-                        <For each={profile?.articles}>
-                          {article => (
-                            <div class="animated">
-                              <ArticleOverview
-                                article={article}
-                                onRemove={(id: string) => {
-                                  profile?.actions.removeEvent(id, 'articles');
-                                  setArticleStats((a) => ({
-                                    ...a,
-                                    atricles: a.articles - 1,
-                                  }));
-                                }}
-                              />
+                          <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                            <div>
+                              <For each={new Array(10)}>
+                                {() => <ArticleOverviewSkeleton />}
+                              </For>
                             </div>
-                          )}
-                        </For>
-                        <Paginator
-                          loadNextPage={() => {
-                            profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
-                          }}
-                          isSmall={true}
-                        />
-                      </div>
-                    </Show>
-                  </TransitionGroup>
-                </div>
-              </Tabs.Content>
+                          </Show>
+                        </div>
 
-
-              <Tabs.Content class={styles.tabContent} value="drafts">
-                <div class={styles.profileNotes}>
-
-                  <TransitionGroup name="slide-fade">
-                    <div>
-                      <Show when={profile && profile.isFetchingDrafts && profile.drafts.length === 0}>
                         <div>
-                          <For each={new Array(10)}>
-                            {() => <ArticleOverviewSkeleton />}
-                          </For>
-                        </div>
-                      </Show>
-                    </div>
-
-                    <div>
-                      <Show when={profile && profile.drafts.length === 0 && !profile.isFetchingDrafts}>
-                        <div class={styles.noPublished}>
-                          <div class={styles.caption}>
-                            {intl.formatMessage(readsMy.noDrafts)}
-                          </div>
-                          <a href={'/reads/edit'}>Start drafting a new article now!</a>
-                        </div>
-                      </Show>
-                    </div>
-
-                    <Show when={profile && profile.drafts.length > 0}>
-                      <div>
-                        <For each={processedDrafts()}>
-                          {article => (
-                            <div class="animated">
-                              <ArticleOverview
-                                article={article}
-                                hideStats={true}
-                                isDraft={true}
-                                onRemove={(id: string) => {
-                                  profile?.actions.removeEvent(id, 'drafts');
-                                  setArticleStats((a) => ({
-                                    ...a,
-                                    drafts: a.drafts - 1,
-                                  }));
-                                }}
-                              />
+                          <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                            <div class={styles.noPublished}>
+                              <div class={styles.caption}>
+                                {intl.formatMessage(readsMy.noPublishedArticle)}
+                              </div>
+                              <a href={'/reads/edit'}>Create your first article now!</a>
                             </div>
-                          )}
-                        </For>
-                        <Paginator
-                          loadNextPage={() => {
-                            profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'drafts');
-                          }}
-                          isSmall={true}
-                        />
-                      </div>
-                    </Show>
-                  </TransitionGroup>
-                </div>
-              </Tabs.Content>
-            </Tabs>
-          </Show>
+                          </Show>
+                        </div>
+
+                        <Show when={profile && profile.articles.length > 0}>
+                          <div>
+                            <For each={profile?.articles}>
+                              {article => (
+                                <div class="animated">
+                                  <ArticleOverview
+                                    article={article}
+                                    onRemove={(id: string) => {
+                                      profile?.actions.removeEvent(id, 'articles');
+                                      setArticleStats((a) => ({
+                                        ...a,
+                                        atricles: a.articles - 1,
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </For>
+                            <Paginator
+                              loadNextPage={() => {
+                                profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
+                              }}
+                              isSmall={true}
+                            />
+                          </div>
+                        </Show>
+                      </TransitionGroup>
+                    </div>
+                  </Tabs.Content>
+
+
+                  <Tabs.Content class={styles.tabContent} value="drafts">
+                    <div class={styles.profileNotes}>
+
+                      <TransitionGroup name="slide-fade">
+                        <div>
+                          <Show when={profile && profile.isFetchingDrafts && profile.drafts.length === 0}>
+                            <div>
+                              <For each={new Array(10)}>
+                                {() => <ArticleOverviewSkeleton />}
+                              </For>
+                            </div>
+                          </Show>
+                        </div>
+
+                        <div>
+                          <Show when={profile && profile.drafts.length === 0 && !profile.isFetchingDrafts}>
+                            <div class={styles.noPublished}>
+                              <div class={styles.caption}>
+                                {intl.formatMessage(readsMy.noDrafts)}
+                              </div>
+                              <a href={'/reads/edit'}>Start drafting a new article now!</a>
+                            </div>
+                          </Show>
+                        </div>
+
+                        <Show when={profile && profile.drafts.length > 0}>
+                          <div>
+                            <For each={processedDrafts()}>
+                              {article => (
+                                <div class="animated">
+                                  <ArticleOverview
+                                    article={article}
+                                    hideStats={true}
+                                    isDraft={true}
+                                    onRemove={(id: string) => {
+                                      profile?.actions.removeEvent(id, 'drafts');
+                                      setArticleStats((a) => ({
+                                        ...a,
+                                        drafts: a.drafts - 1,
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </For>
+                            <Paginator
+                              loadNextPage={() => {
+                                profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'drafts');
+                              }}
+                              isSmall={true}
+                            />
+                          </div>
+                        </Show>
+                      </TransitionGroup>
+                    </div>
+                  </Tabs.Content>
+                </Tabs>
+              </Show>
+            </div>
+          </Match>
+        </Switch>
+
         </div>
-    </div>
   )
 }
 
