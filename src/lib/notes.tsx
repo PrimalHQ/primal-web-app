@@ -1,5 +1,5 @@
 import { Relay, relayInit } from "../lib/nTools";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
@@ -469,12 +469,18 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
 export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
+  const articleTags = [...(articleData.msg || { tags: [] }).tags];
+
+  const pubTime = articleTags.find(t => t[0] === 'published_at')
+
+  let timeTags = pubTime ? [[...pubTime] ]: [["published_at", `${time}`]]
+
   const event = {
     content: articleData.content,
     kind: Kind.LongForm,
     tags: [
       ...tags,
-      ["published_at", `${time}`],
+      ...timeTags,
     ],
     created_at: time,
   };

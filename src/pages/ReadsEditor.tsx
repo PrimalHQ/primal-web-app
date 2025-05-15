@@ -4,7 +4,7 @@ import styles from './ReadsEditor.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
-import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
+import { NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -44,6 +44,7 @@ export type ArticleEdit = {
   summary: string,
   content: string,
   tags: string[],
+  msg: NostrNoteContent | undefined,
 }
 
 export const emptyArticleEdit = (): ArticleEdit => ({
@@ -52,6 +53,7 @@ export const emptyArticleEdit = (): ArticleEdit => ({
   summary: '',
   content: '',
   tags: [],
+  msg: undefined,
 });
 
 export type ReadMentions = {
@@ -248,6 +250,7 @@ const ReadsEditor: Component = () => {
         summary: r.summary,
         content: r.content,
         tags: [ ...r.tags ],
+        msg: { ...r.msg },
       }));
 
       setMarkdownContent(r.content);
@@ -286,6 +289,7 @@ const ReadsEditor: Component = () => {
         image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
         tags,
         content: r.content || '',
+        msg: { ...r.msg },
       }));
 
       setMarkdownContent(r.content);
