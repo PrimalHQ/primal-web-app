@@ -24,7 +24,7 @@ import { APP_ID } from '../App';
 import ReadsPublishDialog from '../components/ReadsMentionDialog/ReadsPublishDialog';
 import { readSecFromStorage } from '../lib/localStore';
 import { useIntl } from '@cookbook/solid-intl';
-import { toast as tToast } from '../translations';
+import { toast as tToast, actions as tActions } from '../translations';
 import { subsTo } from '../sockets';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
@@ -32,6 +32,9 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import { date, longDate } from '../lib/dates';
 import ReadsPublishSuccessDialog from '../components/ReadsMentionDialog/ReadsPublishSuccessDialog';
 import { Editor } from '@tiptap/core';
+import { isIOS } from '../utils';
+import { isAndroid } from '@kobalte/utils';
+import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -535,281 +538,308 @@ const ReadsEditor: Component = () => {
         title={article.title ? `Editing ${article.title}` : `New Article`}
       />
 
-      <Wormhole to='right_sidebar'>
-        <div class={styles.sidebar}>
-          <div class={styles.sidebarOptions}>
-            <div class={styles.caption}>Options</div>
-            <CheckBox2
-              onChange={(checked: boolean) => {
-                if (!checked) {
-                  setAccordionSection((as) => as.filter(s => s !== 'metadata'));
-                  return;
-                }
-
-                setAccordionSection((as) => [...as, 'metadata']);
-              }}
-              checked={accordionSection().includes('metadata')}
-              label="Show article metadata"
-            />
-            <CheckBox2
-              onChange={(checked: boolean) => {
-                if (!checked) {
-                  setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
-                  return;
-                }
-
-                setAccordionSection((as) => [...as, 'hero_image']);
-              }}
-              checked={accordionSection().includes('hero_image')}
-              label="Use hero image"
-            />
-          </div>
-          <div class={styles.sidebarTools}>
-            <div class={styles.caption}>Edit & Preview</div>
-
-            <button
-              class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
-              onClick={() => {
-                setEditorPreviewMode('editor');
-              }}
-            >
-              Edit Mode
-            </button>
-
-            <button
-              class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
-              onClick={() => {
-                setEditorPreviewMode('browser');
-              }}
-            >
-              Preview
-            </button>
-            {/* <button
-              class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
-              onClick={() => {
-                setEditorPreviewMode('phone');
-              }}
-            >
-              Phone Preview
-            </button>
-            <button
-              class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
-              onClick={() => {
-                setEditorPreviewMode('feed');
-              }}
-            >
-              Feed Preview
-            </button> */}
-          </div>
-          <div class={styles.sidebarPublish}>
-            <div class={styles.caption}>{'Save & Publish'}</div>
-            <Switch>
-              <Match when={article.title.length === 0}>
-                <div class={styles.status}>
-                  Enter article title before you can save
-                </div>
-              </Match>
-
-              <Match when={!isUnsaved()}>
-                <div class={styles.status}>
-                  <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
-                  <div>Saved changes: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
-                </div>
-              </Match>
-
-              <Match when={isUnsaved()}>
-                <div class={styles.status}>
-                  <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
-                  <Show
-                    when={lastSaved.time}
-                    fallback={<div>Unsaved changes (no saved drafts yet)</div>}
-                  >
-                    <div>Unsaved changes since: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
-                  </Show>
-                </div>
-              </Match>
-            </Switch>
-
-            <button
-              class={styles.toolButton}
-              onClick={saveDraft}
-              disabled={!isUnsaved()}
-            >
-              Save Draft Privately
-            </button>
-
-            <button
-              class={styles.toolPrimaryButton}
-              disabled={article.title.length === 0}
-              onClick={() => {setShowPublishArticle(true)}}
-            >
-              Continue to Publish Article
-            </button>
-          </div>
-
-          <Show when={showTableOptions()}>
-            <div id="tableOptions" class={styles.tableOptions}>
-              <button
-                onClick={() => editor()?.chain().focus().addRowAfter().run()}
-              >
-                <div>Insert Row After</div>
-                <div class={styles.rowBellowIcon}></div>
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().addRowBefore().run()}
-              >
-                <div>Insert Row Before</div>
-                <div class={styles.rowAboveIcon}></div>
-              </button>
-
-              <button
-                onClick={() => editor()?.chain().focus().addColumnBefore().run()}
-              >
-                <div>Insert Column Before</div>
-                <div class={styles.colBeforeIcon}></div>
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().addColumnAfter().run()}
-              >
-                <div>Insert Column After</div>
-                <div class={styles.colAfterIcon}></div>
-              </button>
-
-              <button
-                onClick={() => editor()?.chain().focus().mergeCells().run()}
-              >
-                <div>Merge Cell</div>
-                <div class={styles.mergeIcon}></div>
-              </button>
-
-              <button
-                onClick={() => editor()?.chain().focus().splitCell().run()}
-              >
-                <div>Split Cell</div>
-                <div class={styles.splitIcon}></div>
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().deleteRow().run()}
-              >
-                <div>Delete Row</div>
-                <div class={styles.delRowIcon}></div>
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().deleteColumn().run()}
-              >
-                <div>Delete Column</div>
-                <div class={styles.delColIcon}></div>
-              </button>
-              <button
-                onClick={() => editor()?.chain().focus().deleteTable().run()}
-              >
-                <div>Delete Table</div>
-                <div class={styles.delTableIcon}></div>
-              </button>
-            </div>
-          </Show>
-        </div>
-      </Wormhole>
-
       <Switch>
-        <Match when={editorPreviewMode() === 'editor'}>
-          <ReadsEditorEditor
-            accordionSection={accordionSection()}
-            markdownContent={markdownContent()}
-            setMarkdownContent={setMarkdownContent}
-            article={article}
-            setArticle={setArticle}
-            fixedToolbar={fixedToolbar()}
-            setEditor={setEditor}
-            showTableOptions={updateTableOptions}
+        <Match when={isIOS() || isAndroid()}>
+          <div class={styles.caption}>
+            <p>
+              Article Editor is not available on the phone yet.
+            </p>
+            <p>
+              You must use a computer to create and edit articles.
+            </p>
+          </div>
+        </Match>
+
+        <Match when={!account?.publicKey}>
+          <div class={styles.caption}>
+            <p>
+              You must be logged in to use Article Editor
+            </p>
+            <ButtonPrimary onClick={account?.actions.showGetStarted}>
+              {intl.formatMessage(tActions.getStarted)}
+            </ButtonPrimary>
+          </div>
+        </Match>
+
+        <Match when={true}>
+          <Wormhole to='right_sidebar'>
+            <div class={styles.sidebar}>
+              <div class={styles.sidebarOptions}>
+                <div class={styles.caption}>Options</div>
+                <CheckBox2
+                  onChange={(checked: boolean) => {
+                    if (!checked) {
+                      setAccordionSection((as) => as.filter(s => s !== 'metadata'));
+                      return;
+                    }
+
+                    setAccordionSection((as) => [...as, 'metadata']);
+                  }}
+                  checked={accordionSection().includes('metadata')}
+                  label="Show article metadata"
+                />
+                <CheckBox2
+                  onChange={(checked: boolean) => {
+                    if (!checked) {
+                      setAccordionSection((as) => as.filter(s => s !== 'hero_image'));
+                      return;
+                    }
+
+                    setAccordionSection((as) => [...as, 'hero_image']);
+                  }}
+                  checked={accordionSection().includes('hero_image')}
+                  label="Use hero image"
+                />
+              </div>
+              <div class={styles.sidebarTools}>
+                <div class={styles.caption}>Edit & Preview</div>
+
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'editor' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('editor');
+                  }}
+                >
+                  Edit Mode
+                </button>
+
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'browser' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('browser');
+                  }}
+                >
+                  Preview
+                </button>
+                {/* <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'phone' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('phone');
+                  }}
+                >
+                  Phone Preview
+                </button>
+                <button
+                  class={`${styles.toolButton} ${editorPreviewMode() === 'feed' ? styles.selected : ''}`}
+                  onClick={() => {
+                    setEditorPreviewMode('feed');
+                  }}
+                >
+                  Feed Preview
+                </button> */}
+              </div>
+              <div class={styles.sidebarPublish}>
+                <div class={styles.caption}>{'Save & Publish'}</div>
+                <Switch>
+                  <Match when={article.title.length === 0}>
+                    <div class={styles.status}>
+                      Enter article title before you can save
+                    </div>
+                  </Match>
+
+                  <Match when={!isUnsaved()}>
+                    <div class={styles.status}>
+                      <div class={`${styles.statusBulb} ${styles.savedBulb}`}></div>
+                      <div>Saved changes: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                    </div>
+                  </Match>
+
+                  <Match when={isUnsaved()}>
+                    <div class={styles.status}>
+                      <div class={`${styles.statusBulb} ${styles.unsavedBulb}`}></div>
+                      <Show
+                        when={lastSaved.time}
+                        fallback={<div>Unsaved changes (no saved drafts yet)</div>}
+                      >
+                        <div>Unsaved changes since: {lastSaved.time ? longDate(lastSaved.time) : 'never'}</div>
+                      </Show>
+                    </div>
+                  </Match>
+                </Switch>
+
+                <button
+                  class={styles.toolButton}
+                  onClick={saveDraft}
+                  disabled={!isUnsaved()}
+                >
+                  Save Draft Privately
+                </button>
+
+                <button
+                  class={styles.toolPrimaryButton}
+                  disabled={article.title.length === 0}
+                  onClick={() => {setShowPublishArticle(true)}}
+                >
+                  Continue to Publish Article
+                </button>
+              </div>
+
+              <Show when={showTableOptions()}>
+                <div id="tableOptions" class={styles.tableOptions}>
+                  <button
+                    onClick={() => editor()?.chain().focus().addRowAfter().run()}
+                  >
+                    <div>Insert Row After</div>
+                    <div class={styles.rowBellowIcon}></div>
+                  </button>
+                  <button
+                    onClick={() => editor()?.chain().focus().addRowBefore().run()}
+                  >
+                    <div>Insert Row Before</div>
+                    <div class={styles.rowAboveIcon}></div>
+                  </button>
+
+                  <button
+                    onClick={() => editor()?.chain().focus().addColumnBefore().run()}
+                  >
+                    <div>Insert Column Before</div>
+                    <div class={styles.colBeforeIcon}></div>
+                  </button>
+                  <button
+                    onClick={() => editor()?.chain().focus().addColumnAfter().run()}
+                  >
+                    <div>Insert Column After</div>
+                    <div class={styles.colAfterIcon}></div>
+                  </button>
+
+                  <button
+                    onClick={() => editor()?.chain().focus().mergeCells().run()}
+                  >
+                    <div>Merge Cell</div>
+                    <div class={styles.mergeIcon}></div>
+                  </button>
+
+                  <button
+                    onClick={() => editor()?.chain().focus().splitCell().run()}
+                  >
+                    <div>Split Cell</div>
+                    <div class={styles.splitIcon}></div>
+                  </button>
+                  <button
+                    onClick={() => editor()?.chain().focus().deleteRow().run()}
+                  >
+                    <div>Delete Row</div>
+                    <div class={styles.delRowIcon}></div>
+                  </button>
+                  <button
+                    onClick={() => editor()?.chain().focus().deleteColumn().run()}
+                  >
+                    <div>Delete Column</div>
+                    <div class={styles.delColIcon}></div>
+                  </button>
+                  <button
+                    onClick={() => editor()?.chain().focus().deleteTable().run()}
+                  >
+                    <div>Delete Table</div>
+                    <div class={styles.delTableIcon}></div>
+                  </button>
+                </div>
+              </Show>
+            </div>
+          </Wormhole>
+
+          <Switch>
+            <Match when={editorPreviewMode() === 'editor'}>
+              <ReadsEditorEditor
+                accordionSection={accordionSection()}
+                markdownContent={markdownContent()}
+                setMarkdownContent={setMarkdownContent}
+                article={article}
+                setArticle={setArticle}
+                fixedToolbar={fixedToolbar()}
+                setEditor={setEditor}
+                showTableOptions={updateTableOptions}
+              />
+            </Match>
+
+            <Match when={editorPreviewMode() === 'browser'}>
+              <div>
+                <ReadsEditorPreview
+                  article={genereatePreviewArticle()}
+                />
+              </div>
+            </Match>
+
+            <Match when={editorPreviewMode() === 'phone'}>
+              <div class={styles.phonePreview} >
+                <ReadsEditorPreview
+                  article={genereatePreviewArticle()}
+                  isPhoneView={true}
+                />
+              </div>
+            </Match>
+
+            <Match when={editorPreviewMode() === 'feed'}>
+              <div class={styles.feedPreview}>
+                <div class={styles.caption}>
+                  Desktop Feed Preview
+                </div>
+                <ArticlePreview
+                  article={genereatePreviewArticle()}
+                />
+
+                <div class={styles.caption}>
+                  Phone Feed Preview
+                </div>
+                <div class={styles.phonePreview}>
+                  <ArticlePreviewPhone
+                    article={genereatePreviewArticle()}
+                    hideFooter={true}
+                    noBorder={true}
+                  />
+                </div>
+
+
+                <div class={styles.caption}>
+                  Sidebar Feed Preview
+                </div>
+                <div class={styles.sidebarPreview}>
+                  <ArticleShort
+                    article={genereatePreviewArticle()}
+                    noBorder={true}
+                  />
+                </div>
+              </div>
+            </Match>
+          </Switch>
+
+          <ReadsPublishDialog
+            article={genereatePreviewArticle()}
+            articleEdit={article}
+            open={showPublishArticle()}
+            setOpen={setShowPublishArticle}
+            onPublish={postArticle}
           />
-        </Match>
 
-        <Match when={editorPreviewMode() === 'browser'}>
-          <div>
-            <ReadsEditorPreview
-              article={genereatePreviewArticle()}
-            />
-          </div>
-        </Match>
+          <ReadsPublishSuccessDialog
+            open={showPublishSucess()}
+            onClose={() => {
+              setShowPublishSucess(false);
+              navigate(`/myarticles`);
+            }}
+          />
 
-        <Match when={editorPreviewMode() === 'phone'}>
-          <div class={styles.phonePreview} >
-            <ReadsEditorPreview
-              article={genereatePreviewArticle()}
-              isPhoneView={true}
-            />
-          </div>
-        </Match>
-
-        <Match when={editorPreviewMode() === 'feed'}>
-          <div class={styles.feedPreview}>
-            <div class={styles.caption}>
-              Desktop Feed Preview
-            </div>
-            <ArticlePreview
-              article={genereatePreviewArticle()}
-            />
-
-            <div class={styles.caption}>
-              Phone Feed Preview
-            </div>
-            <div class={styles.phonePreview}>
-              <ArticlePreviewPhone
-                article={genereatePreviewArticle()}
-                hideFooter={true}
-                noBorder={true}
-              />
-            </div>
-
-
-            <div class={styles.caption}>
-              Sidebar Feed Preview
-            </div>
-            <div class={styles.sidebarPreview}>
-              <ArticleShort
-                article={genereatePreviewArticle()}
-                noBorder={true}
-              />
-            </div>
-          </div>
+          <ReadsLeaveDialog
+            open={showleavePage() !== undefined}
+            setOpen={(v: boolean) => v === false && setShowleavePage(undefined)}
+            title="Unsaved changes"
+            description="Do you wish to save changes as a draft?"
+            onSave={async () => {
+              await saveDraft();
+              showleavePage()?.retry(true);
+              setShowleavePage(undefined);
+            }}
+            onLeave={() => {
+              showleavePage()?.retry(true);
+              setShowleavePage(undefined);
+            }}
+            onReturn={() => {
+              setShowleavePage(undefined);
+            }}
+          />
         </Match>
       </Switch>
 
-      <ReadsPublishDialog
-        article={genereatePreviewArticle()}
-        articleEdit={article}
-        open={showPublishArticle()}
-        setOpen={setShowPublishArticle}
-        onPublish={postArticle}
-      />
-
-      <ReadsPublishSuccessDialog
-        open={showPublishSucess()}
-        onClose={() => {
-          setShowPublishSucess(false);
-          navigate(`/myarticles`);
-        }}
-      />
-
-      <ReadsLeaveDialog
-        open={showleavePage() !== undefined}
-        setOpen={(v: boolean) => v === false && setShowleavePage(undefined)}
-        title="Unsaved changes"
-        description="Do you wish to save changes as a draft?"
-        onSave={async () => {
-          await saveDraft();
-          showleavePage()?.retry(true);
-          setShowleavePage(undefined);
-        }}
-        onLeave={() => {
-          showleavePage()?.retry(true);
-          setShowleavePage(undefined);
-        }}
-        onReturn={() => {
-          setShowleavePage(undefined);
-        }}
-      />
     </div>
   )
 }
