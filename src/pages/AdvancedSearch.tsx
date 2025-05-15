@@ -778,7 +778,7 @@ const AdvancedSearch: Component = () => {
                   Time frame:
                 </div>
 
-                <div class={styles.leftFloat}>
+                <div class={styles.datePicker}>
                   <DatePicker
                     type="range"
                     onChange={(data) => {
