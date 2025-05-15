@@ -297,7 +297,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0, minwords = 100) => {
+  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0, minwords = 0) => {
     if (!pubkey) return;
 
     if (tab === 'notes') {
