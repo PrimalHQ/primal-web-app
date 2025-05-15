@@ -35,6 +35,8 @@ import { Editor } from '@tiptap/core';
 import { isIOS } from '../utils';
 import { isAndroid } from '@kobalte/utils';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
+import noEditorPhone from '../assets/images/editor-phone-message.png';
+
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
 
@@ -544,13 +546,8 @@ const ReadsEditor: Component = () => {
 
       <Switch>
         <Match when={isIOS() || isAndroid()}>
-          <div class={styles.caption}>
-            <p>
-              Article Editor is not available on the phone yet.
-            </p>
-            <p>
-              You must use a computer to create and edit articles.
-            </p>
+          <div class={styles.noArticlePhone}>
+            <img src={noEditorPhone} />
           </div>
         </Match>
 
