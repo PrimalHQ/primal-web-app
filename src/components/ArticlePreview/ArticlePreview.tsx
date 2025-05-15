@@ -303,9 +303,11 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
     var divHeight = el.offsetHeight
 
     // @ts-ignore
-    var lineHeight = el.computedStyleMap().get('line-height').value;
+    var lineHeight = el.computedStyleMap ?
+      (el.computedStyleMap().get('line-height')?.toString() || '0') :
+      window.getComputedStyle(el).getPropertyValue('line-height').valueOf();
 
-    var lines = divHeight / lineHeight;
+    var lines = divHeight / parseInt(lineHeight);
 
     return lines;
   }
