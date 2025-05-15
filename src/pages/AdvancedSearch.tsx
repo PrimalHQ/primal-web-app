@@ -545,7 +545,7 @@ const AdvancedSearch: Component = () => {
 
   const isPremium = () => ['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '');
 
-  const submitSearch = () => {
+  const submitSearch = (e: SubmitEvent) => {
     let cmd = advSearchState.command;
 
     if(!cmd.includes(' pas:1')) {
@@ -798,7 +798,7 @@ const AdvancedSearch: Component = () => {
                     }}
                     maxDate={utils().getToday()}
                     renderInput={({ value, showDate }) => (
-                      <button class={styles.linkButton} onClick={showDate}>
+                      <button type="button" class={styles.linkButton} onClick={showDate}>
                         {value().label || 'Select a date range'}
                       </button>
                     )}
