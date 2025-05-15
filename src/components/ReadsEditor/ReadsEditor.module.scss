@@ -809,6 +809,17 @@
       }
     }
 
+    code {
+      color: var(--brand-text);
+      font-family: "Fira Mono", monospace;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 28px;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
     p {
       color: var(--brand-text);
       font-size: 16px;
@@ -816,6 +827,17 @@
       line-height: 28px;
       margin-top: 0;
       margin-bottom: 20px;
+
+      code {
+        color: var(--brand-text);
+        font-family: "Fira Mono", monospace;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 28px;
+        border-radius: 4px;
+        padding: 0 6px;
+      }
     }
 
     span {
@@ -1025,17 +1047,6 @@
       color: var(--text-highlight);
       text-decoration: none;
       cursor: pointer;
-    }
-
-    code {
-      color: var(--brand-text);
-      font-family: "Fira Mono", monospace;
-      font-size: 16px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 28px;
-      border-radius: 12px;
-      padding: 20px;
     }
 
     ins {
