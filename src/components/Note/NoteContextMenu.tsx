@@ -19,6 +19,8 @@ import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
+import { encodeCoordinate } from '../../stores/megaFeed';
+import Longform from '../../pages/Longform';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -176,9 +178,15 @@ const NoteContextMenu: Component<{
 
     if (!props.data || !user || !noteToDelete) return;
 
+    const kind = noteToDelete.msg.kind;
+
+    const id = kind === Kind.LongForm ?
+      (noteToDelete as PrimalArticle).coordinate :
+      noteToDelete.id;
+
     const { success, note: deleteEvent } = await sendDeleteEvent(
       user.pubkey,
-      noteToDelete.id,
+      id,
       noteToDelete.msg.kind,
       account.activeRelays,
       account.relaySettings,
