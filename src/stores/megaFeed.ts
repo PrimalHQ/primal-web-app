@@ -38,7 +38,7 @@ export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
   const pubkey = event.pubkey;
   const kind = forceKind || event.kind;
 
-  const coordinate =  `${kind}:${identifier}:${pubkey}`;
+  const coordinate =  `${kind}:${pubkey}:${identifier}`;
   const naddr = nip19.naddrEncode({ kind, pubkey, identifier });
 
   return { coordinate, naddr };
