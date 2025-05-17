@@ -179,7 +179,7 @@ const NoteContextMenu: Component<{
     const { success, note: deleteEvent } = await sendDeleteEvent(
       user.pubkey,
       noteToDelete.id,
-      Kind.Text,
+      noteToDelete.msg.kind,
       account.activeRelays,
       account.relaySettings,
       account.proxyThroughPrimal,
