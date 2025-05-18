@@ -469,7 +469,8 @@ export const sendNote = async (text: string, shouldProxy: boolean, relays: Relay
 export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean, relays: Relay[], tags: string[][], relaySettings?: NostrRelays) => {
   const time = Math.floor((new Date()).getTime() / 1000);
 
-  const articleTags = [...(articleData.msg || { tags: [] }).tags];
+  console.log('TAGS: ', articleData.msg?.tags);
+  const articleTags = [...(articleData.msg?.tags || [])];
 
   const pubTime = articleTags.find(t => t[0] === 'published_at')
 

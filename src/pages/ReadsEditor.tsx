@@ -5,7 +5,7 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
 import { NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
-import { createStore } from 'solid-js/store';
+import { createStore, unwrap } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
 import { Kind, wordsPerMinute } from '../constants';
@@ -291,7 +291,7 @@ const ReadsEditor: Component = () => {
         image: (tgs.find(t => t[0] === 'image') || ['image', ''])[1],
         tags,
         content: r.content || '',
-        msg: { ...r.msg },
+        msg: { ...r },
       }));
 
       setMarkdownContent(r.content);
@@ -504,6 +504,8 @@ const ReadsEditor: Component = () => {
       account.relaySettings,
       account.proxyThroughPrimal,
     );
+
+    console.log('DRAFT: ', note)
 
     if (success && note) {
       toast?.sendSuccess('Draft saved');
