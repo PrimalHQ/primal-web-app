@@ -195,7 +195,7 @@ const ReadsMy: Component = () => {
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${data.identifier}`;
+    return `/${vanityName}/${encodeURIComponent(data.identifier)}`;
   }
 
   const onImageError = (event: any) => {

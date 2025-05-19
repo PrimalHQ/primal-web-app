@@ -196,7 +196,7 @@ const ArticleOverviewContextMenu: Component<{
 
         const data = decoded.data as nip19.AddressPointer;
 
-        link = `${vanityName}/${data.identifier}`;
+        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
       }
     }
 
