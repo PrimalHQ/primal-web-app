@@ -188,18 +188,6 @@ const Longform: Component< { naddr: string } > = (props) => {
     quoteCount: 0,
   });
 
-
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#read_${naddr()}`,
-    children: `a.hero_image_${naddr()}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    thumbSelector: `a.hero_image_${naddr()}`,
-    pswpModule: () => import('photoswipe')
-  });
-
   createEffect(on(naddr, () => {
     clearArticle();
     fetchArticle();
@@ -208,6 +196,18 @@ const Longform: Component< { naddr: string } > = (props) => {
 
   createEffect(() => {
     if (store.article) {
+
+      const lightbox = new PhotoSwipeLightbox({
+        gallery: `#read_${naddr()}`,
+        children: `a.hero_image_${naddr()}`,
+        showHideAnimationType: 'zoom',
+        initialZoomLevel: 'fit',
+        secondaryZoomLevel: 2,
+        maxZoomLevel: 3,
+        thumbSelector: `a.hero_image_${naddr()}`,
+        pswpModule: () => import('photoswipe')
+      });
+
       lightbox.init();
     }
   })
@@ -997,7 +997,7 @@ const Longform: Component< { naddr: string } > = (props) => {
               </Show> */}
             </div>
 
-            <div class={`${styles.topBar} animated`}>
+            <div class={`${styles.topBar}`}>
               <div class={styles.left}>
                 <div class={styles.time}>
                   {shortDate(store.article?.published)}
@@ -1018,7 +1018,7 @@ const Longform: Component< { naddr: string } > = (props) => {
               </div>
             </div>
 
-            <div id={`read_${naddr()}`} class={`${styles.longform} animated`}>
+            <div id={`read_${naddr()}`} class={`${styles.longform}`}>
               <Show
                 when={store.article}
               >
