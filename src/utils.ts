@@ -5,6 +5,7 @@ import { DMContact, LeaderboardInfo, PaginationInfo } from './megaFeeds';
 import { isAndroid } from '@kobalte/utils';
 import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "blossom-client-sdk";
 import { signEvent } from './lib/nostrAPI';
+import { logWarning } from './lib/logger';
 
 let debounceTimer: number = 0;
 
@@ -522,4 +523,10 @@ export const runColorMode = (
   callback(query.matches);
 
   query.addEventListener('change', (event) => callback(event.matches));
+}
+
+export const getLang = () => {
+  if (navigator.languages !== undefined)
+    return navigator.languages[0];
+  return navigator.language;
 }

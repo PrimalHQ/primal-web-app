@@ -59,6 +59,8 @@ import { Progress } from '@kobalte/core/progress';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { MarkdownPlugin, extendMarkdownEditor, mdToHtml } from '../../markdownPlugins/markdownTransorm';
 import { useAppContext } from '../../contexts/AppContext';
+import { isRTL } from '@kobalte/core/i18n';
+import { getLang } from '../../utils';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -1003,6 +1005,7 @@ const ReadsEditorEditor: Component<{
           id="tiptapEditor"
           class={`${styles.editor} editorTipTap ${editorMarkdown() ? styles.hiddenEditor : ''} ${accordionSection().includes('metadata') ? '' : styles.topMargin}`} ref={tiptapEditor}
           onClick={() => editorTipTap()?.chain().focus().run()}
+          dir={isRTL(getLang()) ? 'rtl' : 'ltr'}
         ></div>
 
         <div class={`${editorMarkdown() ? '' : styles.hiddenEditor}`}>

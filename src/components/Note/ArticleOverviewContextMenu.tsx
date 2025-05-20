@@ -214,7 +214,7 @@ const ArticleOverviewContextMenu: Component<{
 
   const copyNoteId = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().noteId}`);
+    navigator.clipboard.writeText(`nostr:${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
