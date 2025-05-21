@@ -221,7 +221,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
     if (props.type === NotificationType.YOUR_POST_WAS_ZAPPED && props.sats) {
       const zapMessage = intl.formatMessage(t[NotificationType.YOUR_POST_WAS_ZAPPED], opts);
-      return `${zapMessage} ${reference} for a total of ${truncateNumber(props.sats)} zaps`;
+      return `${zapMessage} ${reference} for a total of ${truncateNumber(props.sats)} sats`;
     }
 
     return `${label} ${reference}`
