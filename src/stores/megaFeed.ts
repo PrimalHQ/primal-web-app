@@ -556,12 +556,12 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
 
   for (i=0;i<page.reads.length;i++) {
     const read = page.reads[i];
+    const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
     const author = convertToUser(page.users[read.pubkey], read.pubkey);
     const stat = page.noteStats[read.id];
-    const topZaps = page.topZaps[read.id] || [];
+    const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
     const wordCount = (page.wordCount || {})[read.id] || 0;
 
-    const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
 
 
     const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;

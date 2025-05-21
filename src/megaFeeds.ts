@@ -32,13 +32,13 @@ import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
 import { decodeIdentifier } from "./lib/keys";
 import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } from "./lib/profile";
-import { nip19 } from "nostr-tools";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
 import { getMessageCounts, getNewMessages, getOldMessages } from "./lib/messages";
 import { LeaderboardSort } from "./pages/Premium/PremiumLegendLeaderboard";
 import { LegendCustomizationConfig, fetchLeaderboard } from "./lib/premium";
 import { CohortInfo } from "./contexts/AppContext";
+import { nip19 } from './lib/nTools';
 
 export type PaginationInfo = {
   since: number,
@@ -760,7 +760,13 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       }
     }
 
-    const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+    let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e' || t[0] === 'a') || [])[1];
+
+    if (eventId.includes(':')) {
+      const [kind, pubkey, identifier] = eventId.split(':');
+
+      eventId = nip19.naddrEncode({ kind, pubkey, identifier })
+    }
 
     const topZap: TopZap = {
       id: zapInfo.id,
@@ -784,6 +790,7 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
     const newZaps = [ ...oldZaps, { ...topZap }].sort((a, b) => b.amount - a.amount);
 
     page.topZaps[eventId] = [ ...newZaps ];
+
     return;
   }
 
