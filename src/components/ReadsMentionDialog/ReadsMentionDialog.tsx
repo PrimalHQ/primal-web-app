@@ -134,7 +134,7 @@ const ReadsMentionDialog: Component<{
     }
 
     const kind = contentKinds[tab] || 1;
-    const term = `kind:${kind} ${q} pas:1`;
+    const term = `kind:${kind} ${q}`;
     advsearch?.actions.clearSearch();
     advsearch?.actions.findContent(term);
   }

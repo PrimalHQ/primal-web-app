@@ -35,9 +35,9 @@ const AdvancedSearchResults: Component = () => {
 
     let q = decodeURIComponent(params.query);
 
-    if (!q.includes(' pas:1')) {
-      q += ' pas:1';
-    }
+    // if (!q.includes(' pas:1')) {
+    //   q += ' pas:1';
+    // }
 
     setQueryString(() => q);
     search?.actions.clearSearch();

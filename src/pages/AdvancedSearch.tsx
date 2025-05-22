@@ -548,9 +548,9 @@ const AdvancedSearch: Component = () => {
   const submitSearch = (e: SubmitEvent) => {
     let cmd = advSearchState.command;
 
-    if(!cmd.includes(' pas:1')) {
-      cmd += ' pas:1';
-    }
+    // if(!cmd.includes(' pas:1')) {
+    //   cmd += ' pas:1';
+    // }
 
     search?.actions.setAdvancedSearchCommand(cmd);
 
