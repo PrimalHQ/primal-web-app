@@ -647,7 +647,7 @@ const ParsedNote: Component<{
       return <NoteImage
         class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
-        altSrc={url}
+        altSrc={token}
         isDev={dev}
         media={image}
         mediaThumb={imageThumb}
