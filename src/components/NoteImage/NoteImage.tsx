@@ -87,6 +87,8 @@ const NoteImage: Component<{
         return true;
       }
     } catch {
+      image.onerror = "";
+      image.src = props.altSrc;
       setSrc(() => props.altSrc || '');
       setIsImageLoaded(true);
       return true;

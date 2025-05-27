@@ -1030,6 +1030,7 @@ const Longform: Component< { naddr: string } > = (props) => {
                   <NoteImage
                     class={`${styles.image} hero_image_${naddr()}`}
                     src={store.article?.image}
+                    altSrc={store.article?.image}
                     media={articleMediaImage()}
                     mediaThumb={articleMediaThumb()}
                     width={640}

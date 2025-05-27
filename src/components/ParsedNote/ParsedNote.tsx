@@ -647,6 +647,7 @@ const ParsedNote: Component<{
       return <NoteImage
         class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
+        altSrc={url}
         isDev={dev}
         media={image}
         mediaThumb={imageThumb}
@@ -687,6 +688,7 @@ const ParsedNote: Component<{
           return <NoteImage
             class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
+            altSrc={url}
             isDev={dev}
             media={image}
             width={514}

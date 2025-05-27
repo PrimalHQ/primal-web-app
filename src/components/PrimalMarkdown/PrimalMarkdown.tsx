@@ -488,6 +488,7 @@ const PrimalMarkdown: Component<{
         <NoteImage
           class={`noteimage image_${props.noteId}`}
           src={src}
+          altSrc={token.value}
           media={mediaImage}
           mediaThumb={mediaThumb}
           width={isIOS() || isAndroid() ? window.innerWidth : 640}

@@ -223,6 +223,7 @@ const ReadsEditorPreview: Component< {
               <NoteImage
                 class={`${styles.image} hero_image_${naddr()}`}
                 src={props.article?.image}
+                altSc={props.article?.image}
                 mediaThumb={articleMediaThumb()}
                 width={640}
                 authorPk={props.article?.pubkey}
