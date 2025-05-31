@@ -25,7 +25,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { branding, readsMy, actions as tActions } from '../translations';
-import { isPhone } from '../utils';
+import { isPhone, urlEncode } from '../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
@@ -195,7 +195,7 @@ const ReadsMy: Component = () => {
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${encodeURIComponent(data.identifier)}`;
+    return `/${vanityName}/${urlEncode(data.identifier)}`;
   }
 
   const onImageError = (event: any) => {

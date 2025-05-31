@@ -21,6 +21,7 @@ import { Kind } from '../../constants';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import { encodeCoordinate } from '../../stores/megaFeed';
 import Longform from '../../pages/Longform';
+import { urlEncode } from '../../utils';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -135,7 +136,7 @@ const NoteContextMenu: Component<{
 
         const data = decoded.data as nip19.AddressPointer;
 
-        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
+        link = `${vanityName}/${urlEncode(data.identifier)}`;
       }
     }
 

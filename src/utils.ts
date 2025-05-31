@@ -530,3 +530,9 @@ export const getLang = () => {
     return navigator.languages[0];
   return navigator.language;
 }
+
+export const urlEncode = (text: string) => {
+    return text.replace(/[^a-zA-Z0-9-]/g,
+        char => '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
+    );
+};

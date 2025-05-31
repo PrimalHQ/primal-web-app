@@ -18,6 +18,7 @@ import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
+import { urlEncode } from '../../utils';
 
 const ArticleOverviewContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -196,7 +197,7 @@ const ArticleOverviewContextMenu: Component<{
 
         const data = decoded.data as nip19.AddressPointer;
 
-        link = `${vanityName}/${encodeURIComponent(data.identifier)}`;
+        link = `${vanityName}/${urlEncode(data.identifier)}`;
       }
     }
 

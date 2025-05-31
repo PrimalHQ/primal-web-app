@@ -10,7 +10,7 @@ import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
@@ -349,7 +349,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${encodeURIComponent(data.identifier)}`;
+    return `/${vanityName}/${urlEncode(data.identifier)}`;
   }
 
 
