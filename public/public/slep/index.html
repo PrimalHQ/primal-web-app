@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Embed</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background-color: black;
+    }
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
+    }
+    .error {
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+  </style>
+</head>
+<body
+  <script>
+    function getYouTubeIdFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("id");
+    }
+
+    function createYouTubeEmbed(id) {
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
+      iframe.allow = "autoplay; encrypted-media";
+      iframe.allowFullscreen = true;
+      document.body.appendChild(iframe);
+    }
+
+    function showError(message) {
+      const div = document.createElement("div");
+      div.className = "error";
+      div.textContent = message;
+      document.body.appendChild(div);
+    }
+
+    const videoId = getYouTubeIdFromURL();
+    if (videoId) {
+      createYouTubeEmbed(videoId);
+    } else {
+      showError("No YouTube video ID provided in URL. Use ?id=VIDEO_ID");
+    }
+  </script>
+</body>
+</html>
