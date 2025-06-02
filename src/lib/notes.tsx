@@ -489,9 +489,11 @@ export const sendArticle = async (articleData: ArticleEdit, shouldProxy: boolean
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 }
 
+export const generateIdentifier = (title: string) => {
+  let str = title.toLowerCase();
 
-export const generateIdentifier = (title: string) => title.toLowerCase().split(' ').join('-')
-
+  return str.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+}
 
 export const sendDeleteEvent = async (
   pubkey: string,
