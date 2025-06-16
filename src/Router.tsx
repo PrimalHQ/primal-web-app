@@ -185,6 +185,7 @@ const AppRouter: Component = () => {
             <Route path="/" component={Profile} preload={getKnownProfiles} />
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
+          <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>
           <Route path="/404" component={NotFound} />
         </Route>
       </Router>
