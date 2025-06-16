@@ -98,7 +98,12 @@ const ProfileDesktop: Component = () => {
 
   const resolveHex = async (vanityName: string | undefined) => {
     if (vanityName) {
-      const name = vanityName.toLowerCase();
+      let name = vanityName.toLowerCase();
+
+      if (name === 'gigi') {
+        name = 'dergigi';
+      }
+
       const vanityProfile = await fetchKnownProfiles(name);
 
       const hex = vanityProfile.names[name];
