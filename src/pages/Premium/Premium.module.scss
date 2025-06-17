@@ -25,6 +25,11 @@
     padding-inline: 0;
   }
 
+  &.introPage {
+    border-top: none;
+    padding-top: 0;
+  }
+
   .premiumStepContent {
     width: 100%;
     display: flex;
@@ -662,12 +667,201 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  width: 440px;
+  width: 100%;
 
   @media only screen and (max-width: 720px) {
     width: 100dvw;
     padding-inline: 12px;
   }
+
+  .premiumHighlightsTitle {
+    margin-block: 56px;
+
+    h1 {
+      color: var(--text-primary);
+      text-align: center;
+      font-family: Nacelle;
+      font-size: 40px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 40px; /* 100% */
+      margin: 0;
+    }
+
+    p {
+      color: var(--text-secondary);
+      text-align: center;
+      font-family: Nacelle;
+      font-size: 20px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 32px; /* 160% */
+      margin: 0;
+    }
+  }
+
+  .productList {
+    display: flex;
+    gap: 10px;
+
+    .primalProduct {
+      display: flex;
+      width: 193px;
+      padding: 12px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+      align-self: stretch;
+
+      border-radius: 12px;
+      background: var(--background-header-input);
+
+      .productName {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 16px;
+
+        .productFree {
+          color: var(--text-secondary);
+        }
+        .productPremium {
+          color: var(--accent);
+        }
+        .productPro {
+          color: var(--accent-pro);
+        }
+      }
+
+      .productPrice {
+        color: var(--text-primary);
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 28px;
+
+        span {
+          color: var(--text-primary);
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 18px;
+        }
+
+        .annual {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+
+          .annoPrice {
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 400;
+            line-height: 16px;
+          }
+          .savingsPremium {
+            color: var(--text-primary-button);
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 12px;
+            border-radius: 99px;
+            background: rgba(202, 7, 124, 0.40);
+            width: fit-content;
+            padding: 2px 4px;
+          }
+          .savingsPro{
+            color: var(--text-primary-button);
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 12px;
+            border-radius: 99px;
+            background: rgba(228, 124, 0, 0.40);
+            width: fit-content;
+            padding: 2px 4px;
+          }
+        }
+      }
+
+      .productFeatures {
+        .caption {
+          color: var(--text-secondary);
+          font-size: 12px;
+          font-weight: 400;
+          line-height: 16px;
+        }
+        .featureList {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .featureItem {
+            display: flex;
+            gap: 6px;
+
+            .checkIcon {
+              width: 16px;
+              height: 16px;
+
+              background-color: var(--text-tertiary);
+              -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+              mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+            }
+
+            .label {
+              color: var(--text-secondary);
+              font-size: 12px;
+              font-weight: 400;
+              line-height: 16px;
+            }
+          }
+
+        }
+      }
+
+      button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        border-radius: 99999px;
+        margin: 0px;
+        margin-top: auto;
+        padding-inline: 18px;
+        padding-block: 10px;
+        font-size: 16px;
+        line-height: 16px;
+        font-weight: 600;
+        background: var(--accent);
+        color: var(--text-primary-button);
+        width: 100%;
+        min-height: 36px;
+      }
+
+      .buttonPremium {
+        background-color: var(--accent);
+      }
+
+      .buttonPro {
+        background-color: var(--accent-pro);
+      }
+    }
+  }
+
+  .moreInfo {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-block: 28px;
+
+    a {
+      color: var(--accent-links);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+
 
   .ogCaption {
     color: var(--text-primary);

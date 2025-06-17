@@ -109,6 +109,7 @@ export type PremiumStore = {
   legendSupscription: PrimalPremiumSubscription,
   orderHistory: OrderHistoryItem[],
   pagingOrderHistory: PaginationInfo,
+  productGroup: string,
 }
 
 export type PremiumStatus = {
@@ -132,6 +133,11 @@ export type PremiumStatus = {
 const availablePremiumOptions: PremiumOption[] = [
   { id: '3-months-premium', price: 'm7', duration: 'm3' },
   { id: '12-months-premium', price: 'm6', duration: 'm12' },
+];
+
+const availableProOptions: PremiumOption[] = [
+  { id: '1-month-legend', price: 'm7', duration: 'm12' },
+  { id: '12-months-legend', price: 'm6', duration: 'm12' },
 ];
 
 const Premium: Component = () => {
@@ -170,6 +176,7 @@ const Premium: Component = () => {
     openDonation: undefined,
     subscriptions: {},
     membershipStatus: {},
+    productGroup: 'premium',
     recipientPubkey: undefined,
     recipient: undefined,
     promoCode: '',
@@ -208,7 +215,9 @@ const Premium: Component = () => {
     return premiumData.selectedSubOption.id.split('-')[0] || '0';
   }
 
-  const onStartAction = () => {
+  const onStartAction = (product: string) => {
+    setPremiumData('productGroup', () => product);
+
     if (!account?.publicKey) {
       account?.actions.showGetStarted()
       return;
@@ -872,57 +881,60 @@ const Premium: Component = () => {
         </Wormhole>
       </Show>
 
-      <PageCaption>
-        <Switch
-          fallback={
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
-          }
-        >
-          <Match when={premiumStep() === 'legends'}>
-            <div class={styles.pageTitle}>{intl.formatMessage(t.title.legends)}</div>
-          </Match>
+      <Show when={premiumStep()}>
+        <PageCaption>
+          <Switch
+            fallback={
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
+            }
+          >
+            <Match when={premiumStep() === 'legends'}>
+              <div class={styles.pageTitle}>{intl.formatMessage(t.title.legends)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'premiums'}>
-            <div class={styles.pageTitle}>{intl.formatMessage(t.title.premiums)}</div>
-          </Match>
+            <Match when={premiumStep() === 'premiums'}>
+              <div class={styles.pageTitle}>{intl.formatMessage(t.title.premiums)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'support'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
-          </Match>
+            <Match when={premiumStep() === 'support'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'legend'}>
-            <div class={styles.centerPageTitle}>
-              {!!isOG() ? intl.formatMessage(t.title.legendShort) : intl.formatMessage(t.title.legend)}
-            </div>
-          </Match>
+            <Match when={premiumStep() === 'legend'}>
+              <div class={styles.centerPageTitle}>
+                {!!isOG() ? intl.formatMessage(t.title.legendShort) : intl.formatMessage(t.title.legend)}
+              </div>
+            </Match>
 
-          <Match when={premiumStep() === 'legendary'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
-          </Match>
+            <Match when={premiumStep() === 'legendary'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'relay'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
-          </Match>
+            <Match when={premiumStep() === 'relay'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'media'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
-          </Match>
+            <Match when={premiumStep() === 'media'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'contacts'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
-          </Match>
+            <Match when={premiumStep() === 'contacts'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'content'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
-          </Match>
-          <Match when={!!isOG() && isOG() !== 'legend'}>
-            <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
-          </Match>
-          <Match when={!!isOG() && isOG() === 'legend'}>
-            <div class={`${styles.centerPageTitle}`}>{intl.formatMessage(t.title.og)}</div>
-          </Match>
-        </Switch>
-      </PageCaption>
+            <Match when={premiumStep() === 'content'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
+            </Match>
+            <Match when={!!isOG() && isOG() !== 'legend'}>
+              <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
+            </Match>
+            <Match when={!!isOG() && isOG() === 'legend'}>
+              <div class={`${styles.centerPageTitle}`}>{intl.formatMessage(t.title.og)}</div>
+            </Match>
+          </Switch>
+        </PageCaption>
+      </Show>
+
 
       <Show when={!isPhone()}>
         <StickySidebar>
@@ -950,7 +962,7 @@ const Premium: Component = () => {
       </Show>
 
 
-      <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''}`}>
+      <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''} ${premiumStep() === undefined ? styles.introPage : ''}`}>
         <div class={styles.premiumStepContent}>
           <Switch
             fallback={<Loader />}

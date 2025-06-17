@@ -10,7 +10,7 @@ import { PrimalUser } from '../../types/primal';
 
 
 const PremiumHighlights: Component<{
-  onStart?: () => void,
+  onStart?: (product: string) => void,
   onMore?: () => void,
   pubkey?: string | undefined,
   user?: PrimalUser | undefined,
@@ -24,85 +24,152 @@ const PremiumHighlights: Component<{
 
   return (
     <div class={styles.premiumHighlights}>
-      <div class={styles.ogCaption}>
-        The Primal OG tier was created to recognize those users who signed up to Primal Premium in the first year.
+      <div class={styles.premiumHighlightsTitle}>
+        <h1>Primal Premium and Pro</h1>
+        <p>Upgrade your Primal experience today.</p>
       </div>
-      <div class={styles.premiumHighlightInfo}>
-        <div class={styles.highlights}>
-          <div class={styles.highlight}>
-            <div class={styles.purpleCheckBig}></div>
-            <div class={styles.perk}>
-              <div class={styles.perkTitle}>
-                Primal Name
+
+      <div class={styles.productList}>
+        <div class={styles.primalProduct}>
+          <div class={styles.productName}>
+            Primal <span class={styles.productFree}>Free</span>
+          </div>
+
+          <div class={styles.productPrice}>Free</div>
+
+          <div class={styles.productFeatures}>
+            <div class={styles.featureList}>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Apps for iOS, Android, Web</div>
               </div>
-              <ul class={styles.perkItems}>
-                <li>Verified nostr address</li>
-                <li>Bitcoin lightning address</li>
-                <li>VIP profile on primal.net</li>
-              </ul>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Nostr text & user search</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Built-in bitcoin wallet</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>1GB media storage</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>100MB max file size</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class={styles.primalProduct}>
+          <div class={styles.productName}>
+            Primal <span class={styles.productPremium}>Premium</span>
+          </div>
+
+          <div class={styles.productPrice}>
+            <div>$7 <span>/month</span></div>
+            <div class={styles.annual}>
+              <div class={styles.annoPrice}>USD$75 billed annually</div>
+              <div class={styles.savingsPremium}>Save 10%</div>
             </div>
           </div>
 
-          <div class={styles.highlight}>
-            <div class={styles.purpleOstrich}></div>
+          <div class={styles.productFeatures}>
+            <div class={styles.caption}>
+              Everything in Free, and
+            </div>
 
-            <div class={styles.perk}>
-              <div class={styles.perkTitle}>
-                Nostr Tools
+            <div class={styles.featureList}>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Verified Nostr Address</div>
               </div>
-              <ul class={styles.perkItems}>
-                <li>Media hosting</li>
-                <li>Advanced search</li>
-                <li>Premium paid relay</li>
-                <li>Nostr account backup</li>
-                <ButtonLink onClick={props.onMore}>Much more...</ButtonLink>
-              </ul>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Custom Lightning Address</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>VIP profile on primal.net</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Advanced Nostr search</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Premium paid relay</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>10GB media storage</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>1GB max file size</div>
+              </div>
             </div>
           </div>
+          <button
+            class={styles.buttonPremium}
+            onClick={() => props.onStart && props.onStart('premium')}
+          >
+            Buy Now
+          </button>
+        </div>
+
+        <div class={styles.primalProduct}>
+          <div class={styles.productName}>
+            Primal <span class={styles.productPro}>Pro</span>
+          </div>
+
+          <div class={styles.productPrice}>
+            <div>$69.99 <span>/month</span></div>
+            <div class={styles.annual}>
+              <div class={styles.annoPrice}>USD$750 billed annually</div>
+              <div class={styles.savingsPro}>Save 10%</div>
+            </div>
+          </div>
+
+          <div class={styles.productFeatures}>
+            <div class={styles.caption}>
+              Everything in Premium, and
+            </div>
+
+            <div class={styles.featureList}>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Primal Studio</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>Legend Status on Primal</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>100GB media storage</div>
+              </div>
+              <div class={styles.featureItem}>
+                <div class={styles.checkIcon}></div>
+                <div class={styles.label}>10GB max file size</div>
+              </div>
+            </div>
+          </div>
+          <button
+            class={styles.buttonPro}
+            onClick={() => props.onStart && props.onStart('pro')}
+          >
+            Buy Now
+          </button>
         </div>
       </div>
 
-      <div class={styles.pricingSummary}>
-        <div>
-          <div class={styles.price}>$7/month</div>
-          <div class={styles.duration}>3 months</div>
-        </div>
-        <div class={styles.or}>or</div>
-        <div>
-          <div class={styles.price}>$6/month</div>
-          <div class={styles.duration}>12 months</div>
-        </div>
+      <div class={styles.moreInfo}>
+        <a href="/premium"  >Click here</a> for more information.
       </div>
 
-      <div class={styles.premiumStart}>
-        <Switch>
-          <Match when={isGuest()}>
-            <>Start by creating your Primal account:</>
-          </Match>
-          <Match when={hasNoMetadata()}>
-            <>Start by editing your profile:</>
-          </Match>
-          <Match when={true}>
-            <>Start by reserving your Primal name:</>
-          </Match>
-        </Switch>
-      </div>
-
-      <ButtonPremium
-        onClick={props.onStart}
-      >
-        <Switch>
-          <Match when={isGuest()}>
-            <>Create account</>
-          </Match>
-          <Match when={hasNoMetadata()}>
-            <>Edit profile</>
-          </Match>
-          <Match when={true}>
-            <>{intl.formatMessage(t.actions.start)}</>
-          </Match>
-        </Switch>
-      </ButtonPremium>
     </div>
   );
 }
