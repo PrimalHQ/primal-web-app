@@ -418,6 +418,12 @@
   font-size: 12px;
   font-weight: 400;
   line-height: 18px;
+
+  &.proVersion {
+    a {
+      color: var(--accent-pro);
+    }
+  }
 }
 
 .renewModal {
@@ -1080,6 +1086,22 @@
   height: 24px;
 
   background-image: url(../../assets/icons/purple_check.svg);
+  background-size: 24px;
+
+  margin-inline: 6px;
+
+  &.small {
+    width: 18px;
+    height: 18px;
+    background-size: 18px;
+  }
+}
+
+.proCheck {
+  width: 24px;
+  height: 24px;
+
+  background-image: url(../../assets/icons/pro_check.svg);
   background-size: 24px;
 
   margin-inline: 6px;
@@ -2949,4 +2971,8 @@
   border-radius: 2px 2px 0px 0px;
   background: var(--accent);
   transition: all 250ms;
+
+  &.proVersion {
+    background: var(--accent-pro);
+  }
 }

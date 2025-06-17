@@ -284,6 +284,10 @@
   &:focus {
     box-shadow: none;
   }
+
+  &.proVersion {
+    color: var(--accent-pro);
+  }
 }
 
 .tertiary {

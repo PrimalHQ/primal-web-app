@@ -13,6 +13,7 @@ import styles from './Premium.module.scss';
 const PremiumSidebarInactve: Component<{
   altCaption?: string,
   onOpenFAQ?: () => void,
+  pro?: boolean,
 }> = (props) => {
 
   return (
@@ -37,7 +38,7 @@ const PremiumSidebarInactve: Component<{
 
       <p>
         Have a question?&nbsp;
-        <ButtonLink onClick={props.onOpenFAQ}>Check out our FAQ.</ButtonLink>
+        <ButtonLink pro={props.pro} onClick={props.onOpenFAQ}>Check out our FAQ.</ButtonLink>
       </p>
     </div>
   </div>

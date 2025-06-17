@@ -961,6 +961,7 @@ const Premium: Component = () => {
               <Match when={premiumData.membershipStatus.tier === 'free'}>
                 <PremiumSidebarInactve
                   onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+                  pro={premiumData.productGroup === 'pro'}
                 />
               </Match>
               <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus.tier || '')}>
@@ -1094,7 +1095,7 @@ const Premium: Component = () => {
                   <div class={styles.userInfo}>
                     <div class={styles.explainer}>primal name:</div>
                     <div>{premiumData.name}</div>
-                    <div class={styles.purpleCheck}></div>
+                    <div class={premiumData.productGroup === 'pro' ? styles.proCheck : styles.purpleCheck}></div>
                   </div>
 
                   <div class={styles.npub}>
@@ -1104,6 +1105,7 @@ const Premium: Component = () => {
                   <div class={styles.changeAccount}>
                     <ButtonLink
                       onClick={() => setPremiumData('openAssignPubkey', () => true)}
+                      pro={premiumData.productGroup === 'pro'}
                     >
                       assign to a different nostr account
                     </ButtonLink>
@@ -1137,7 +1139,7 @@ const Premium: Component = () => {
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
 
-                <div class={styles.disclaimer}>
+                <div class={`${styles.disclaimer} ${premiumData.productGroup === 'pro' ? styles.proVersion : ''}`}>
                   By clicking “Continue to Payment” you acknowledge that<br/>
                   you agree to our <a href="https://primal.net/terms" target="__blank">Terms of Service</a>
                 </div>

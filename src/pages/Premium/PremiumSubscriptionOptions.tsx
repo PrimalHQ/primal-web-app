@@ -41,7 +41,7 @@ const PremiumSubscriptionOptions: Component<{
             <Tabs.Trigger class={styles.profileTab} value="card">
               Pay with Credit Card
             </Tabs.Trigger>
-            <Tabs.Indicator class={styles.profileTabIndicator} />
+            <Tabs.Indicator class={`${styles.profileTabIndicator} ${props.data.productGroup === 'pro' ? styles.proVersion : ''}`} />
           </Tabs.List>
         </Tabs>
       </div>
