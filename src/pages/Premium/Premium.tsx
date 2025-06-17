@@ -58,6 +58,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
 import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
+import PremiumStripeModal from './PremiumStripeModal';
 
 export const satsInBTC = 100_000_000;
 
@@ -94,6 +95,7 @@ export type PremiumStore = {
   openRename: boolean,
   openRenew: boolean,
   openManage: boolean,
+  openStripe: boolean,
   openOrderHistory: boolean,
   openFeatures: 'features' | 'faq' | undefined,
   openLegend: boolean,
@@ -110,6 +112,7 @@ export type PremiumStore = {
   orderHistory: OrderHistoryItem[],
   pagingOrderHistory: PaginationInfo,
   productGroup: string,
+  paymentMethod: string,
 }
 
 export type PremiumStatus = {
@@ -139,6 +142,12 @@ const availableProOptions: PremiumOption[] = [
   { id: '1-month-legend', price: 'm7', duration: 'm12' },
   { id: '12-months-legend', price: 'm6', duration: 'm12' },
 ];
+
+const premiumOptions = (group?: string) => {
+  if (group === 'pro') return availableProOptions;
+
+  return availablePremiumOptions;
+}
 
 const Premium: Component = () => {
   const intl = useIntl();
@@ -171,6 +180,7 @@ const Premium: Component = () => {
     openRenew: false,
     openManage: false,
     openLegend: false,
+    openStripe: false,
     openOrderHistory: false,
     openFeatures: undefined,
     openDonation: undefined,
@@ -193,6 +203,7 @@ const Premium: Component = () => {
     },
     orderHistory: [],
     pagingOrderHistory: { ...emptyPaging() },
+    paymentMethod: 'btc',
   });
 
   // const setPremiumStatus = async () => {
@@ -217,6 +228,8 @@ const Premium: Component = () => {
 
   const onStartAction = (product: string) => {
     setPremiumData('productGroup', () => product);
+    setPremiumData('subOptions', premiumOptions(product));
+    setPremiumData('selectedSubOption', premiumOptions(product)[0]);
 
     if (!account?.publicKey) {
       account?.actions.showGetStarted()
@@ -885,7 +898,7 @@ const Premium: Component = () => {
         <PageCaption>
           <Switch
             fallback={
-              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general, { productGroup: premiumData.productGroup })}</div>
             }
           >
             <Match when={premiumStep() === 'legends'}>
@@ -1015,6 +1028,7 @@ const Premium: Component = () => {
                   </ButtonSecondary>
                   <ButtonPremium
                     onClick={() => checkName()}
+                    pro={premiumData.productGroup === 'pro'}
                   >
                     {intl.formatMessage(t.actions.next)}
                   </ButtonPremium>
@@ -1050,6 +1064,7 @@ const Premium: Component = () => {
                       navigate('/premium/confirm')
                     }
                   }}
+                  pro={premiumData.productGroup === 'pro'}
                 >
                   {intl.formatMessage(t.actions.next)}
                 </ButtonPremium>
@@ -1060,7 +1075,14 @@ const Premium: Component = () => {
               <div class={styles.confirmStep}>
                 <div class={styles.title}>
                   <div>You are Buying:</div>
-                  <div>{subOptionCaption()} Months of Primal Premium</div>
+                  <Show
+                    when={premiumData.productGroup === 'pro'}
+                    fallback={
+                      <div>{subOptionCaption()} Months of Primal Premium</div>
+                    }
+                  >
+                    <div>{subOptionCaption()} Months of Primal Pro</div>
+                  </Show>
                 </div>
 
                 <div class={styles.premiumProfile}>
@@ -1092,6 +1114,7 @@ const Premium: Component = () => {
                   options={premiumData.subOptions}
                   selectedOption={premiumData.selectedSubOption}
                   data={premiumData}
+                  setData={setPremiumData}
                   onSelect={(option) => {
                     setPremiumData('selectedSubOption', () => ({ ...option }));
                   }}
@@ -1100,13 +1123,22 @@ const Premium: Component = () => {
                 />
 
                 <ButtonPremium
-                  onClick={() => premiumData.selectedSubOption && setPremiumData('openSubscribe', () => true)}
+                  onClick={() => {
+                    if (!premiumData.selectedSubOption) return;
+                    if (premiumData.paymentMethod === 'card') {
+                      setPremiumData('openStripe', () => true)
+                      return;
+                    }
+
+                    setPremiumData('openSubscribe', () => true);
+                  }}
+                  pro={premiumData.productGroup === 'pro'}
                 >
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
 
                 <div class={styles.disclaimer}>
-                  By clicking “Subscribe” you acknowledge that<br/>
+                  By clicking “Continue to Payment” you acknowledge that<br/>
                   you agree to our <a href="https://primal.net/terms" target="__blank">Terms of Service</a>
                 </div>
               </div>
@@ -1209,6 +1241,22 @@ const Premium: Component = () => {
             }}
             onOpen={() => {
               listenForPayement();
+            }}
+            subscription={premiumData.subscriptions[premiumData.selectedSubOption.id]}
+          />
+
+          <PremiumStripeModal
+            open={premiumData.openStripe}
+            setOpen={(v: boolean) => setPremiumData('openStripe', () => v)}
+            onClose={() => {
+              if (!premiumData.openStripe) return;
+              setPremiumData('openStripe', () => false);
+
+              // premiumSocket && stopListeningForPremiumPurchase(purchuseSubId, premiumSocket);
+              // purchuseMonitorUnsub();
+            }}
+            onOpen={() => {
+              // listenForPayement();
             }}
             subscription={premiumData.subscriptions[premiumData.selectedSubOption.id]}
           />

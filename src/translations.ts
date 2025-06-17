@@ -2711,7 +2711,7 @@ export const premium = {
     },
     subscribe: {
       id: 'pages.premium.actions.subscribe',
-      defaultMessage: 'Subscribe',
+      defaultMessage: 'Continue to Payment',
       description: 'Subscribe action on the premium page',
     },
     done: {
@@ -2748,7 +2748,7 @@ export const premium = {
   title: {
     general: {
       id: 'pages.premium.title',
-      defaultMessage: 'Primal Premium',
+      defaultMessage: 'Primal {productGroup}',
       description: 'Title of the premium page',
     },
     name: {

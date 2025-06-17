@@ -342,6 +342,10 @@
   color: var(--text-primary-button);
   width: 100%;
   min-height: 36px;
+
+  &.proVersion {
+    background-color: var(--accent-pro);
+  }
 }
 
 .green {

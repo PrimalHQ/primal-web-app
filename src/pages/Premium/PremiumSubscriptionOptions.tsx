@@ -1,6 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { A } from '@solidjs/router';
-import { Component, createEffect, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onMount, Show } from 'solid-js';
 import ButtonFlip from '../../components/Buttons/ButtonFlip';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
@@ -9,6 +9,8 @@ import { premium as t } from '../../translations';
 import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
+import { Tabs } from '@kobalte/core/tabs';
+import { SetStoreFunction } from 'solid-js/store';
 
 export type PremiumOption = {
   id: string,
@@ -20,6 +22,7 @@ const PremiumSubscriptionOptions: Component<{
   options: PremiumOption[],
   selectedOption: PremiumOption,
   data: PremiumStore,
+  setData: SetStoreFunction<PremiumStore>,
   onSelect: (option: PremiumOption) => void,
   openPromoCode: () => void,
   promoCode?: string,
@@ -29,12 +32,25 @@ const PremiumSubscriptionOptions: Component<{
 
   return (
     <div class={styles.subOptions}>
+      <div class={styles.paymentMethod}>
+        <Tabs value={props.data.paymentMethod} onChange={(method) => props.setData('paymentMethod', () => method)}>
+          <Tabs.List class={styles.profileTabs}>
+            <Tabs.Trigger class={styles.profileTab} value="btc">
+              Pay with Bitcoin
+            </Tabs.Trigger>
+            <Tabs.Trigger class={styles.profileTab} value="card">
+              Pay with Credit Card
+            </Tabs.Trigger>
+            <Tabs.Indicator class={styles.profileTabIndicator} />
+          </Tabs.List>
+        </Tabs>
+      </div>
       <div class={styles.totalPrice}>
         <TransactionAmount
           amountUSD={props.data.subscriptions[props.selectedOption.id]?.amounts.usd || 0}
           amountSats={Math.round(props.data.subscriptions[props.selectedOption.id]?.amounts.sats || 0)}
         />
-      </div>
+      d</div>
       <div class={styles.subOptionsSelections}>
         <For each={props.options}>
           {option =>

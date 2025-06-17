@@ -2895,3 +2895,58 @@
   }
   animation: fadeIn 1s;
 }
+
+
+.profileTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-inline: 8px;
+  // background-color: var(--background-card);
+  width: 100%;
+  border-radius: 0;
+  padding-top: 14px;
+  border-bottom: 1px solid var(--devider);
+  border-top: none;
+}
+
+
+[data-animated="true"] {
+  .profileTabs {
+    opacity: 0;
+
+    animation: fadeIn var(--profile-animation-duration) ease-in forwards;
+    animation-delay: var(--profile-card-animation-delay);
+  }
+
+}
+
+.profileTab {
+  position: relative;
+  display: inline-block;
+  padding-inline: 14px;
+  padding-block: 2px;
+  border: none;
+  background: none;
+  width: fit-content;
+  height: 40px;
+  margin: 0;
+  margin-bottom: 12px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.profileTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 62px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
