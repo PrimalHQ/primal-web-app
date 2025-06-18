@@ -1,3 +1,4 @@
+import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { LeaderboardSort } from "../pages/Premium/PremiumLegendLeaderboard";
 import { sendMessage, subTo } from "../sockets";
@@ -870,4 +871,140 @@ export const fetchLeaderboard = (subId: string, type: 'legend' | 'premium',  ord
   ]);
 
   sendMessage(message);
+};
+
+export type StripeInitResponse = {
+  client_secret: string,
+  session_id: string,
+}
+
+export const initStripe = async (pubkey: string | undefined, name: string, productId: string, socket: WebSocket) => {
+  return new Promise<StripeInitResponse>(async (resolve, reject) => {
+    if (!pubkey) {
+      reject('missing_pubkey');
+      return;
+    }
+
+    const subId = `init_stripe_${APP_ID}`;
+
+    let response: StripeInitResponse;
+
+    const unsub = subTo(socket, subId, (type, _, content) => {
+      if (type === 'EOSE') {
+        unsub();
+        resolve(response)
+      }
+
+      if (type === 'EVENT') {
+        response = JSON.parse(content?.content || "{ client_secret: '', session_id: '',}");
+      }
+
+      if (type === 'NOTICE') {
+        unsub();
+        reject('');
+      }
+    });
+
+    const event = {
+      kind: Kind.Settings,
+      tags: [['p', pubkey]],
+      created_at: Math.floor((new Date()).getTime() / 1000),
+      content: JSON.stringify({
+        name,
+        product_id: productId,
+        receiver_pubkey: pubkey,
+        stripe_subscription: true,
+      }),
+    };
+
+
+    try {
+      const signedNote = await signEvent(event);
+
+      const message = JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["membership_purchase_product", { event_from_user: signedNote }]},
+      ]);
+
+      if (socket) {
+        const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+        socket.send(message);
+        socket.dispatchEvent(e);
+      } else {
+        throw('no_socket');
+      }
+
+
+      return true;
+    } catch (reason) {
+      console.error('Failed to upload: ', reason);
+      return false;
+    }
+  });
+};
+
+
+export const resolveStripe = async (pubkey: string | undefined, session_id: string | undefined, socket: WebSocket) => {
+  return new Promise<StripeInitResponse>(async (resolve, reject) => {
+    if (!pubkey || !session_id) {
+      reject('missing_pubkey_or_session_id');
+      return;
+    }
+
+    const subId = `resolve_stripe_${APP_ID}`;
+
+    let response: StripeInitResponse;
+
+    const unsub = subTo(socket, subId, (type, _, content) => {
+      if (type === 'EOSE') {
+        unsub();
+        resolve(response)
+      }
+
+      if (type === 'EVENT') {
+        response = JSON.parse(content?.content || "{ client_secret: '', session_id: '',}");
+        console.log('RESOLVED RESPONSE: ', response);
+      }
+
+      if (type === 'NOTICE') {
+        unsub();
+        reject('failed_to_resolve_stripe_session');
+      }
+    });
+
+    const event = {
+      kind: Kind.Settings,
+      tags: [['p', pubkey]],
+      created_at: Math.floor((new Date()).getTime() / 1000),
+      content: JSON.stringify({ session_id }),
+    };
+
+
+    try {
+      const signedNote = await signEvent(event);
+
+      const message = JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["membership_stripe_checkout_session_check_status", { event_from_user: signedNote }]},
+      ]);
+
+      if (socket) {
+        const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+        socket.send(message);
+        socket.dispatchEvent(e);
+      } else {
+        throw('no_socket');
+      }
+
+
+      return true;
+    } catch (reason) {
+      console.error('Failed to upload: ', reason);
+      return false;
+    }
+  });
 };

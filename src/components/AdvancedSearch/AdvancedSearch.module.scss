@@ -49,7 +49,7 @@
   width: 16px;
   height: 16px;
 
-  background-color: var(--text-tertiary-2);
+  background-color: var(--text-tertiary);
   -webkit-mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
 }
@@ -58,7 +58,7 @@
   width: 16px;
   height: 16px;
 
-  background-color: var(--text-tertiary-2);
+  background-color: var(--text-tertiary);
   -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
 }
@@ -472,7 +472,6 @@
     &:hover {
       background-color: var(--subtile-devider);
     }
-
 
     width: 442px;
 

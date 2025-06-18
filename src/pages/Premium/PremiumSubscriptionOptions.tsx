@@ -14,8 +14,8 @@ import { SetStoreFunction } from 'solid-js/store';
 
 export type PremiumOption = {
   id: string,
-  price: 'm7' | 'm6',
-  duration: 'm3' | 'm12',
+  price: 'm7' | 'm6' | 'm70' | 'y750',
+  duration: 'm3' | 'm12' | 'm1' | 'y1',
 };
 
 const PremiumSubscriptionOptions: Component<{
@@ -50,7 +50,7 @@ const PremiumSubscriptionOptions: Component<{
           amountUSD={props.data.subscriptions[props.selectedOption.id]?.amounts.usd || 0}
           amountSats={Math.round(props.data.subscriptions[props.selectedOption.id]?.amounts.sats || 0)}
         />
-      d</div>
+      </div>
       <div class={styles.subOptionsSelections}>
         <For each={props.options}>
           {option =>

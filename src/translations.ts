@@ -2839,6 +2839,16 @@ export const premium = {
         defaultMessage: '$6/month',
         description: '$6 per month',
       },
+      m70: {
+        id: 'pages.premium.subOption.m70',
+        defaultMessage: '$69.99/month',
+        description: '$69.99 per month',
+      },
+      y750: {
+        id: 'pages.premium.subOption.y750',
+        defaultMessage: '$750/year',
+        description: '$750 per year',
+      },
     },
     durations: {
       m3: {
@@ -2850,6 +2860,16 @@ export const premium = {
         id: 'pages.premium.duration.m12',
         defaultMessage: '12 months',
         description: '12 month duration',
+      },
+      m1: {
+        id: 'pages.premium.duration.m1',
+        defaultMessage: 'monthly',
+        description: 'monthly payments',
+      },
+      y1: {
+        id: 'pages.premium.duration.y1',
+        defaultMessage: 'annually',
+        description: 'annual payments',
       },
     },
     success: {

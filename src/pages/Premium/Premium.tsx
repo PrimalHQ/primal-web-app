@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
@@ -59,6 +59,8 @@ import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
 import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
 import PremiumStripeModal from './PremiumStripeModal';
+import PrimalProInfoDialog from './PrimalProInfoDialog';
+import {loadStripe, Stripe} from '@stripe/stripe-js';
 
 export const satsInBTC = 100_000_000;
 
@@ -113,6 +115,7 @@ export type PremiumStore = {
   pagingOrderHistory: PaginationInfo,
   productGroup: string,
   paymentMethod: string,
+  openPremiumProInfo: boolean,
 }
 
 export type PremiumStatus = {
@@ -139,8 +142,8 @@ const availablePremiumOptions: PremiumOption[] = [
 ];
 
 const availableProOptions: PremiumOption[] = [
-  { id: '1-month-legend', price: 'm7', duration: 'm12' },
-  { id: '12-months-legend', price: 'm6', duration: 'm12' },
+  { id: '1-month-legend', price: 'm70', duration: 'm1' },
+  { id: '12-months-legend', price: 'y750', duration: 'y1' },
 ];
 
 const premiumOptions = (group?: string) => {
@@ -163,6 +166,18 @@ const Premium: Component = () => {
   let renameInput: HTMLInputElement | undefined;
 
   let premiumSocket: WebSocket | undefined;
+
+  const [stripe, setStripe] = createSignal<Stripe>();
+
+  const initStripe = async () => {
+    const stripe = await loadStripe('pk_live_51RVHYpFwkeNa1BHGECLthTjCyKDMtxQKCvIELbfjm1eE5yMMSwkJB44zcbioVWDCLhpKpkbL3wVhfWGvp6NTyHjf00TSUW1RVL');
+    setStripe(stripe);
+  }
+
+  onMount(() => {
+    initStripe();
+  });
+
 
   const [premiumData, setPremiumData] = createStore<PremiumStore>({
     name: '',
@@ -204,6 +219,7 @@ const Premium: Component = () => {
     orderHistory: [],
     pagingOrderHistory: { ...emptyPaging() },
     paymentMethod: 'btc',
+    openPremiumProInfo: false,
   });
 
   // const setPremiumStatus = async () => {
@@ -883,7 +899,7 @@ const Premium: Component = () => {
   return (
     <div>
       <PageTitle title={
-        intl.formatMessage(t.title.general)}
+        intl.formatMessage(t.title.general, { productGroup: premiumData.productGroup })}
       />
 
       <Show when={!isPhone()}>
@@ -1223,7 +1239,7 @@ const Premium: Component = () => {
             }>
               <PremiumHighlights
                 onStart={onStartAction}
-                onMore={() => setPremiumData('openFeatures', () => 'features')}
+                onMore={() => setPremiumData('openPremiumProInfo', () => true)}
                 pubkey={account?.publicKey}
                 user={account?.activeUser}
                 isOG={!!isOG()}
@@ -1250,6 +1266,12 @@ const Premium: Component = () => {
           <PremiumStripeModal
             open={premiumData.openStripe}
             setOpen={(v: boolean) => setPremiumData('openStripe', () => v)}
+            stripe={stripe()}
+            getSocket={() => premiumSocket}
+            data={premiumData}
+            onSuccess={() => {
+              setPremiumData('openSuccess', true);
+            }}
             onClose={() => {
               if (!premiumData.openStripe) return;
               setPremiumData('openStripe', () => false);
@@ -1387,6 +1409,12 @@ const Premium: Component = () => {
               premiumData.orderHistory.length === 0 && getOrderHistory();
             }}
             onNextPage={getOrderHistoryNextPage}
+          />
+
+          <PrimalProInfoDialog
+            open={premiumData.openPremiumProInfo}
+            setOpen={(v: boolean) => setPremiumData('openPremiumProInfo', () => v)}
+            onBuy={() => onStartAction('pro')}
           />
         </div>
       </div>

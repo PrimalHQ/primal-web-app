@@ -859,12 +859,22 @@
     line-height: 20px;
     margin-block: 28px;
 
-    a {
-      color: var(--accent-links);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+
+    button {
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--accent-pro);
       text-align: center;
       font-size: 14px;
       font-weight: 400;
       line-height: 20px;
+      width: fit-content;
     }
   }
 
@@ -2956,6 +2966,7 @@
   height: 40px;
   margin: 0;
   margin-bottom: 12px;
+  color: var(--text-primary);
 
   &:focus {
     outline: none;
@@ -2975,4 +2986,302 @@
   &.proVersion {
     background: var(--accent-pro);
   }
+}
+
+
+.dialogProOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  background-color: var(--background-site);
+  opacity: 0.7;
+
+  animation: overlayHide 100ms ease 50ms forwards;
+
+  &[data-expanded] {
+    animation: overlayShow 100ms ease;
+  }
+}
+
+.dialogPro {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .dialogContent {
+    padding: 20px 24px;
+    background-color: var(--background-input);
+    border-radius: var(--border-radius-big);
+
+    animation: contentHide 150ms ease-in forwards;
+
+    &[data-expanded] {
+      animation: contentShow 150ms ease-out;
+    }
+
+    .dialogHeader {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 24px;
+
+      .dialogCloseButton {
+        height: 16px;
+        width: 16px;
+        color: var(--text-secondary);
+        background: none;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+
+        .excludeIcon {
+          -webkit-transition: background-color 200ms linear;
+          -ms-transition: background-color 200ms linear;
+          transition: background-color 200ms linear;
+        }
+
+        &:hover {
+          .excludeIcon {
+            background-color: var(--text-secondary);
+            -webkit-transition: background-color 200ms linear;
+            -ms-transition: background-color 200ms linear;
+            transition: background-color 200ms linear;
+          }
+        }
+      }
+
+      .dialogTitle {
+        color: var(--text-primary);
+        font-size: 18px;
+        font-weight: 600;
+        line-height: 20px;
+        margin: 0;
+      }
+    }
+
+    .dialogDescription {
+      color: var(--text-secondary);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 20px;
+      margin: 0;
+    }
+
+  }
+
+  @media only screen and (max-width: 720px) {
+    .dialogContent {
+      width: 100dvw;
+      padding-inline: 4px;
+    }
+  }
+}
+
+.primalProInfoDialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 44px;
+
+  .productExplain {
+    display: flex;
+    gap:26px;
+
+    .primalProduct {
+      display: flex;
+      width: 275px;
+      padding: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+      align-self: stretch;
+
+      border-radius: 12px;
+      background: none;
+
+      .productName {
+        color: var(--text-primary);
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 24px;
+
+        .productFree {
+          color: var(--text-secondary);
+        }
+        .productPremium {
+          color: var(--accent);
+        }
+        .productPro {
+          color: var(--accent-pro);
+        }
+      }
+
+      .productPrice {
+        color: var(--text-primary);
+        font-size: 44px;
+        font-weight: 700;
+        line-height: 44px;
+
+        span {
+          color: var(--text-primary);
+          font-size: 20px;
+          font-weight: 400;
+          line-height: 26px;
+        }
+
+        .annual {
+          display: flex;
+          gap: 4px;
+          align-items: center;
+
+          .annoPrice {
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 20px;
+          }
+          .savingsPremium {
+            color: var(--text-primary-button);
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 20px;
+            border-radius: 99px;
+            background: rgba(202, 7, 124, 0.40);
+            width: fit-content;
+            padding: 2px 4px;
+          }
+          .savingsPro{
+            color: var(--text-primary-button);
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 20px;
+            border-radius: 99px;
+            background: rgba(228, 124, 0, 0.40);
+            width: fit-content;
+            padding: 2px 4px;
+          }
+        }
+      }
+
+      .productFeatures {
+        .caption {
+          color: var(--text-secondary);
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 20px;
+        }
+        .featureList {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+
+          .featureItem {
+            display: flex;
+            gap: 6px;
+
+            .checkIcon {
+              width: 16px;
+              height: 16px;
+
+              background-color: var(--text-tertiary);
+              -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+              mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
+            }
+
+            .label {
+              color: var(--text-secondary);
+              font-size: 16px;
+              font-weight: 400;
+              line-height: 20px;
+            }
+          }
+
+        }
+      }
+
+      button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: none;
+        border-radius: 99999px;
+        margin: 0px;
+        margin-top: auto;
+        padding-inline: 18px;
+        padding-block: 10px;
+        font-size: 16px;
+        line-height: 16px;
+        font-weight: 600;
+        background: var(--accent);
+        color: var(--text-primary-button);
+        width: 100%;
+        min-height: 36px;
+      }
+
+      .buttonPremium {
+        background-color: var(--accent);
+      }
+
+      .buttonPro {
+        background-color: var(--accent-pro);
+      }
+    }
+
+    .proOverview {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+
+      .proOverviewItem {
+        display: flex;
+        gap: 18px;
+        img {
+          width: 68px;
+          height: 68px;
+        }
+
+        .proDescription {
+          width: 331px;
+          h3 {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 140%;
+            margin: 0;
+          }
+          p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 400;
+            line-height: 140%;
+            margin: 0;
+          }
+          a {
+            color: var(--accent-pro);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 140%;
+            background: none;
+          }
+        }
+      }
+    }
+  }
+
+  .buyButton {
+    width: 526px;
+  }
+
+}
+
+.stripeModal {
+  width: min(calc(100dvw - 40px), 1000px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: scroll;
 }

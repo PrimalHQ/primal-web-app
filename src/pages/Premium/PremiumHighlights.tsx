@@ -167,7 +167,7 @@ const PremiumHighlights: Component<{
       </div>
 
       <div class={styles.moreInfo}>
-        <a href="/premium"  >Click here</a> for more information.
+        Learn more about <button onClick={props.onMore}>Primal Pro tier</button>.
       </div>
 
     </div>

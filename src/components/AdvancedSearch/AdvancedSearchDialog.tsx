@@ -1,4 +1,4 @@
-import { Component, JSXElement } from 'solid-js';
+import { Component, JSXElement, Show } from 'solid-js';
 
 import styles from './AdvancedSearch.module.scss';
 import { hookForDev } from '../../lib/devTools';
@@ -12,6 +12,7 @@ const AdvancedSearchDialog: Component<{
   children?: JSXElement,
   open?: boolean,
   setOpen?: (v: boolean) => void,
+  hideHeader?: boolean,
   id?: string,
 }> = (props) => {
 
@@ -24,14 +25,16 @@ const AdvancedSearchDialog: Component<{
         <Dialog.Overlay class={styles.dialogOverlay} />
         <div class={styles.dialog}>
           <Dialog.Content class={styles.dialogContent} >
-            <div class={styles.dialogHeader}>
-              <Dialog.Title class={styles.dialogTitle}>
-                {props.title}
-              </Dialog.Title>
-              <Dialog.CloseButton class={styles.dialogCloseButton}>
-                <div class={styles.excludeIcon}></div>
-              </Dialog.CloseButton>
-            </div>
+            <Show when={!props.hideHeader}>
+              <div class={styles.dialogHeader}>
+                <Dialog.Title class={styles.dialogTitle}>
+                  {props.title}
+                </Dialog.Title>
+                <Dialog.CloseButton class={styles.dialogCloseButton}>
+                  <div class={styles.excludeIcon}></div>
+                </Dialog.CloseButton>
+              </div>
+            </Show>
             <Dialog.Description class={styles.dialogDescription}>
               {props.children}
             </Dialog.Description>
