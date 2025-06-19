@@ -537,6 +537,63 @@
 }
 
 
+.failDialog {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .dialogContent {
+    padding: 20px 24px;
+    background-color: var(--background-input);
+    border-radius: var(--border-radius-big);
+
+    animation: contentHide 150ms ease-in forwards;
+
+    &[data-expanded] {
+      animation: contentShow 150ms ease-out;
+    }
+
+    .dialogHeader {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+
+      .dialogCloseButton {
+        height: 16px;
+        width: 16px;
+        color: var(--text-primary);
+        background: none;
+        border: none;
+        outline: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+
+        .excludeIcon {
+          background-color: var(--text-primary);
+          -webkit-transition: background-color 200ms linear;
+          -ms-transition: background-color 200ms linear;
+          transition: background-color 200ms linear;
+        }
+
+        &:hover {
+          .excludeIcon {
+            background-color: var(--text-primary);
+            -webkit-transition: background-color 200ms linear;
+            -ms-transition: background-color 200ms linear;
+            transition: background-color 200ms linear;
+          }
+        }
+      }
+    }
+
+  }
+}
+
 .moreDonateModal {
   @extend .subscribeModal;
   padding: 0;
@@ -661,6 +718,59 @@
       margin-bottom: 56px;
       width: 242px;
       color: var(--text-primary-button);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 28px;
+    }
+  }
+}
+
+
+.failModal {
+  @extend .subscribeModal;
+  padding: 0;
+
+  background-color: var(--background-input);
+
+  .userInfo {
+    margin-bottom: 0;
+    .details {
+      .name {
+        color: var(--text-primary);
+      }
+      .verification {
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+
+    .successCaption {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 60px;
+      color: var(--text-primary);
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 28px;
+    }
+
+    .successDescription {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-top: 28px;
+      margin-bottom: 56px;
+      width: 242px;
+      color: var(--text-primary);
       font-size: 18px;
       font-weight: 400;
       line-height: 28px;

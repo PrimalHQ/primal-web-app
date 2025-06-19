@@ -11,7 +11,7 @@ import { subsTo } from '../../sockets';
 import { subTo } from '../../lib/sockets';
 import { APP_ID } from '../../App';
 import { initStripe, resolveStripe } from '../../lib/premium';
-import { logError } from '../../lib/logger';
+import { logError, logWarning } from '../../lib/logger';
 
 
 const PremiumStripeModal: Component<{
@@ -20,6 +20,7 @@ const PremiumStripeModal: Component<{
   onOpen?: () => void,
   onClose: () => void,
   onSuccess?: () => void,
+  onFail?: () => void,
   getSocket: () => WebSocket | undefined,
   subscription: PrimalPremiumSubscription,
   allowSubscriptionChange?: boolean,
@@ -32,8 +33,13 @@ const PremiumStripeModal: Component<{
       props.onOpen && props.onOpen();
     } else {
       props.onClose && props.onClose();
-      checkout?.destroy();
       sessionId = undefined;
+      try {
+        checkout?.destroy();
+      }
+      catch (e) {
+        logWarning('Checkout already destroyed: ', e)
+      }
     }
   });
 
@@ -54,12 +60,15 @@ const PremiumStripeModal: Component<{
     try {
       const response = await initStripe(props.data.recipientPubkey, props.data.name, props.data.selectedSubOption.id, socket);
 
+      if (!response.client_secret || !response.session_id) {
+        return '';
+      }
+
       sessionId = response.session_id;
 
       return response.client_secret;
     }
-    catch (e){
-      console.log('FAILED')
+    catch (e) {
       return '';
     }
   };
@@ -68,11 +77,12 @@ const PremiumStripeModal: Component<{
     const success = await confirmPayment();
 
     if (success) {
-      checkout?.destroy();
-      console.log('COMPLETED: ', checkout);
       props.onSuccess && props.onSuccess();
+    } else {
+      props.onFail?.();
     }
 
+    checkout?.destroy();
     sessionId = undefined;
     props.setOpen && props.setOpen(false);
   };
@@ -84,7 +94,6 @@ const PremiumStripeModal: Component<{
     }
     try {
       const resp = await resolveStripe(props.data.recipientPubkey, sessionId, socket)
-      console.log('RESPONSE: ', resp);
       return true;
     } catch (e) {
       logError(`Stripe resolution error: ${e}`);
@@ -95,12 +104,23 @@ const PremiumStripeModal: Component<{
   }
 
   const embedStripe = async () => {
-    checkout = await props.stripe?.initEmbeddedCheckout({
-        fetchClientSecret,
+    try {
+      const clientSecret = await fetchClientSecret();
+      if (clientSecret.length === 0) {
+        throw ('failed_to_init_stripe');
+      }
+
+      checkout = await props.stripe?.initEmbeddedCheckout({
+        fetchClientSecret: () => new Promise((res) => res(clientSecret)),
         onComplete: handleComplete
       });
 
       checkout?.mount('#checkout');
+    }
+    catch (e) {
+      props.setOpen?.(false);
+      props.onFail?.();
+    }
   }
 
   return (

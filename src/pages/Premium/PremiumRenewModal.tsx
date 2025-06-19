@@ -49,6 +49,7 @@ const PremiumRenewModal: Component<{
           options={props.data.subOptions}
           selectedOption={props.data.selectedSubOption}
           data={props.data}
+          setData={props.setData}
           onSelect={(option) => {
             props.setData('selectedSubOption', () => ({ ...option }));
           }}
@@ -71,6 +72,11 @@ const PremiumRenewModal: Component<{
 
             <ButtonPrimary
               onClick={() => {
+                if (props.data.paymentMethod === 'card') {
+                  props.setData('openStripe', () => true)
+                  return;
+                }
+
                 props.setData('openSubscribe', () => true);
               }}
             >

@@ -17,7 +17,6 @@ import { changePremiumName, getPremiumQRCode, getPremiumStatus, startListeningFo
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
 import { useAccountContext } from '../../contexts/AccountContext';
-import PremiumSubscriptionOptions, { PremiumOption } from './PremiumSubscriptionOptions';
 import PremiumProfile from './PremiumProfile';
 import PremiumSubscribeModal from './PremiumSubscribeModal';
 import PremiumHighlights from './PremiumHighlights';

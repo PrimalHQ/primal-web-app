@@ -61,6 +61,7 @@ import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
 import PremiumStripeModal from './PremiumStripeModal';
 import PrimalProInfoDialog from './PrimalProInfoDialog';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
+import PremiumFailModal from './PremiumFailModal';
 
 export const satsInBTC = 100_000_000;
 
@@ -91,6 +92,7 @@ export type PremiumStore = {
   selectedSubOption: PremiumOption,
   openSubscribe: boolean,
   openSuccess: boolean,
+  openFail: boolean,
   successMessage: string,
   openAssignPubkey: boolean,
   openPromoCode: boolean,
@@ -188,6 +190,7 @@ const Premium: Component = () => {
     selectedSubOption: { ...availablePremiumOptions[0] },
     openSubscribe: false,
     openSuccess: false,
+    openFail: false,
     successMessage: '',
     openAssignPubkey: false,
     openPromoCode: false,
@@ -1272,6 +1275,9 @@ const Premium: Component = () => {
             onSuccess={() => {
               setPremiumData('openSuccess', true);
             }}
+            onFail={() => {
+              setPremiumData('openFail', true);
+            }}
             onClose={() => {
               if (!premiumData.openStripe) return;
               setPremiumData('openStripe', () => false);
@@ -1346,6 +1352,16 @@ const Premium: Component = () => {
               setPremiumData('openSuccess', () => false);
               checkPremiumStatus();
               navigate('/premium');
+            }}
+            data={premiumData}
+          />
+
+          <PremiumFailModal
+            open={premiumData.openFail}
+            profile={premiumData.recipient}
+            setOpen={(v: boolean) => setPremiumData('openFail', () => v)}
+            onClose={() => {
+              setPremiumData('openFail', () => false);
             }}
             data={premiumData}
           />

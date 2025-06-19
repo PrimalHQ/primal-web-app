@@ -2719,6 +2719,11 @@ export const premium = {
       defaultMessage: 'Done',
       description: 'Done action on the premium page',
     },
+    tryAgain: {
+      id: 'pages.premium.actions.tryAgain',
+      defaultMessage: 'Try Again',
+      description: 'Try again action on the premium page',
+    },
     rename: {
       id: 'pages.premium.actions.rename',
       defaultMessage: 'Rename',
@@ -2888,6 +2893,16 @@ export const premium = {
         defaultMessage: 'You subscribed to Primal Premium for 12 months.',
         description: 'Payment success description for 12 month plan',
       },
+      m70: {
+        id: 'pages.premium.success.m70',
+        defaultMessage: 'You subscribed to Primal Pro for 1 month.',
+        description: 'Payment success description for 1 month pro plan',
+      },
+      y750: {
+        id: 'pages.premium.success.y750',
+        defaultMessage: 'You subscribed to Primal Pro for 12 months.',
+        description: 'Payment success description for 12 month pro plan',
+      },
       legend: {
         id: 'pages.premium.success.legend',
         defaultMessage: 'You are now a Primal Legend.',
@@ -2897,6 +2912,18 @@ export const premium = {
         id: 'pages.premium.success.donation',
         defaultMessage: 'Thank you, Legend!',
         description: 'Payment success description for additional donations by legends',
+      },
+    },
+    fail: {
+      caption: {
+        id: 'pages.premium.fail.caption',
+        defaultMessage: 'Payment failed!',
+        description: 'Payment failure caption',
+      },
+      description: {
+        id: 'pages.premium.success.description',
+        defaultMessage: 'There was a problem procesing your payment',
+        description: 'Payment failure description',
       },
     }
   },
