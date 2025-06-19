@@ -69,7 +69,8 @@ const PremiumStatusOverview: Component<{
         updateUserMetadata={props.updateUserMetadata}
       />
 
-      <Show when={isLegend()}>
+      {/* <Show when={isLegend()}> */}
+      <Show when={false}>
         <div class={styles.legendContribution}>
           <div class={styles.current}>
             <div class={styles.label}>
