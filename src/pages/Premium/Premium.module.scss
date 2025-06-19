@@ -1198,6 +1198,20 @@
     font-size: 14px;
     font-weight: 400;
     line-height: 20px;
+
+    button {
+      margin: 0;
+      padding: 0;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--accent-pro);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 20px;
+      width: fit-content;
+    }
   }
 }
 

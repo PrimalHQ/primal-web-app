@@ -2624,12 +2624,12 @@ export const premium = {
     },
     supportFirstLine: {
       id: 'pages.premium.labes.supportFirstLine',
-      defaultMessage: 'Are you enjoying Primal?',
+      defaultMessage: 'Want to get more out of Primal?',
       description: 'Support label first line',
     },
     supportSecondLine: {
       id: 'pages.premium.labes.supportSecondLine',
-      defaultMessage: 'if so, see how you can ',
+      defaultMessage: 'Check out ',
       description: 'Support label second line',
     },
     supportCaption: {
@@ -2693,6 +2693,11 @@ export const premium = {
       id: 'pages.premium.actions.support',
       defaultMessage: 'support us',
       description: 'Action that takes user to the support page',
+    },
+    primalPro: {
+      id: 'pages.premium.actions.primalPro',
+      defaultMessage: 'Primal Pro',
+      description: 'Action that takes user to the Primal Pro dialog',
     },
     start: {
       id: 'pages.premium.actions.start',
