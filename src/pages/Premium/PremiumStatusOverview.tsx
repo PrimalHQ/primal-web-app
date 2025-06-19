@@ -107,7 +107,7 @@ const PremiumStatusOverview: Component<{
           <div>{intl.formatMessage(t.labels.supportFirstLine)}</div>
           <div>
             {intl.formatMessage(t.labels.supportSecondLine)}
-            <button onClick={() => props.setData('openPremiumProInfo', true)} >{intl.formatMessage(t.actions.primalPro)}</button>
+            <button onClick={() => props.setData('openPremiumProInfo', true)} >{intl.formatMessage(t.actions.primalPro)}</button>.
           </div>
         </div>
       </Show>

@@ -139,8 +139,8 @@ export type PremiumStatus = {
 };
 
 const availablePremiumOptions: PremiumOption[] = [
-  { id: '3-months-premium', price: 'm7', duration: 'm3' },
-  { id: '12-months-premium', price: 'm6', duration: 'm12' },
+  { id: '1-month-premium', price: 'm7', duration: 'm1' },
+  { id: '12-months-premium', price: 'm6', duration: 'y1' },
 ];
 
 const availableProOptions: PremiumOption[] = [
@@ -148,10 +148,18 @@ const availableProOptions: PremiumOption[] = [
   { id: '12-months-legend', price: 'y750', duration: 'y1' },
 ];
 
-const premiumOptions = (group?: string) => {
-  if (group === 'pro') return availableProOptions;
+const premiumOptions = (group?: string, paymentMethod?: string) => {
+  let options = [...availablePremiumOptions];
 
-  return availablePremiumOptions;
+  if (group === 'pro') {
+    options = [...availableProOptions];
+  }
+
+  if (paymentMethod === 'btc') {
+    options = options.filter(o => o.duration !== 'm1');
+  }
+
+  return options;
 }
 
 const Premium: Component = () => {
@@ -245,10 +253,18 @@ const Premium: Component = () => {
     return premiumData.selectedSubOption.id.split('-')[0] || '0';
   }
 
+  createEffect(() => {
+    const method = premiumData.paymentMethod;
+    const product = premiumData.productGroup;
+
+    setPremiumData('subOptions', premiumOptions(product, method));
+    setPremiumData('selectedSubOption', premiumOptions(product, method)[0]);
+  })
+
   const onStartAction = (product: string) => {
     setPremiumData('productGroup', () => product);
-    setPremiumData('subOptions', premiumOptions(product));
-    setPremiumData('selectedSubOption', premiumOptions(product)[0]);
+    setPremiumData('subOptions', premiumOptions(product, premiumData.paymentMethod));
+    setPremiumData('selectedSubOption', premiumOptions(product, premiumData.paymentMethod)[0]);
 
     if (!account?.publicKey) {
       account?.actions.showGetStarted()
@@ -493,7 +509,7 @@ const Premium: Component = () => {
 
   const getSubscriptionInfo = () => {
     return new Promise((resolve) => {
-      premiumData.subOptions.forEach(option => {
+      premiumOptions(premiumData.productGroup).forEach(option => {
         if (!premiumSocket) return;
 
         const subId = `qr__${option.id}_${APP_ID}`;
