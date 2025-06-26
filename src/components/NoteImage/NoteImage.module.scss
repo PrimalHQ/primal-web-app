@@ -21,3 +21,30 @@
   height: 148px;
   overflow: hidden;
 }
+
+.noteImageHolder {
+  position: relative;
+  overflow: hidden;
+
+  .seeMore {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-site);
+    opacity: 0.6;
+
+    >div {
+      color: var(--text-primary);
+      font-size: 28px;
+      line-height: 30px;
+    }
+
+  }
+
+  .hidden {
+    display: none;
+  }
+}

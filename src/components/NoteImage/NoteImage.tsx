@@ -22,6 +22,7 @@ const NoteImage: Component<{
   forceHeight?: number;
   authorPk?: string,
   noPlaceholders?: boolean,
+  seeMore?: number,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -198,7 +199,7 @@ const NoteImage: Component<{
       fallback={<div class={styles.placeholderImage}></div>}
     >
       <a
-        class={`${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
+        class={`${styles.noteImageHolder} ${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
         href={src()}
         data-pswp-width={zoomW()}
         data-pswp-height={zoomH()}
@@ -208,6 +209,9 @@ const NoteImage: Component<{
         data-ratio={ratio()}
         target="_blank"
       >
+        <div class={props.seeMore ? styles.seeMore : styles.hidden}>
+          <div>+{props.seeMore || '0'}</div>
+        </div>
         <img
           id={`${imgId}`}
           ref={imgActual}

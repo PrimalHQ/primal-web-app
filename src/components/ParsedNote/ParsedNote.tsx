@@ -73,7 +73,7 @@ import { parseBolt11 } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
 
-const groupGridLimit = 7;
+const groupGridLimit = 5;
 
 export type NoteContent = {
   type: string,
@@ -668,7 +668,7 @@ const ParsedNote: Component<{
 
     return <div
       class={`imageGrid ${gridClass}`}
-      style={`max-width: ${noteWidth() - (props.margins || 20)}px`}
+      style={`max-width: ${noteWidth()}px`}
     >
       <For each={item.tokens}>
         {(token, index) => {
@@ -700,6 +700,7 @@ const ParsedNote: Component<{
             onError={imageError}
             authorPk={props.note.pubkey}
             noPlaceholders={props.noPlaceholders}
+            seeMore={index() === 3 ? item.tokens.length - 4 : 0}
           />
         }}
       </For>

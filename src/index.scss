@@ -369,16 +369,21 @@ body::after{
   margin-block: 12px !important;
   display: grid;
 
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-auto-rows: 125px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 250px 250px;
+  grid-template-areas:
+    "cell1 cell2"
+    "cell3 cell4";
+  height: 500px;
   border-radius: var(--border-radius-large) !important;
   overflow: hidden !important;
-  grid-gap: 2px;
+  gap: 1px;
 
   img {
     width: 100%;
     height: 100%;
   }
+
 
   &.grid-2 {
     grid-template-columns: 1fr 1fr;
@@ -391,8 +396,8 @@ body::after{
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 250px 250px;
     grid-template-areas:
-      "cell1 cell2"
-      "cell1 cell3";
+      "cell1 cell1"
+      "cell2 cell3";
   }
   &.grid-4 {
     grid-template-columns: 1fr 1fr;
