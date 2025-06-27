@@ -23,6 +23,7 @@ const NoteImage: Component<{
   authorPk?: string,
   noPlaceholders?: boolean,
   seeMore?: number,
+  isGallery?: boolean,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -112,6 +113,8 @@ const NoteImage: Component<{
     if (props.forceHeight) {
       return `${props.forceHeight}px`;
     }
+
+    if (props.isGallery) return '250px';
 
     if (!props.media || props.ignoreRatio) return '100%';
 

@@ -382,6 +382,7 @@ body::after{
   img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
   }
 
 
@@ -425,15 +426,27 @@ body::after{
   }
   .cell_1 {
     grid-area: cell1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_2 {
     grid-area: cell2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_3 {
     grid-area: cell3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_4 {
     grid-area: cell4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_5 {
     grid-area: cell5;

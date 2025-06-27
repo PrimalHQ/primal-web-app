@@ -696,11 +696,11 @@ const ParsedNote: Component<{
             imageGroup={`${imageGroup}`}
             shortHeight={props.shorten}
             plainBorder={true}
-            forceHeight={500}
             onError={imageError}
             authorPk={props.note.pubkey}
             noPlaceholders={props.noPlaceholders}
             seeMore={index() === 3 ? item.tokens.length - 4 : 0}
+            isGallery={true}
           />
         }}
       </For>
