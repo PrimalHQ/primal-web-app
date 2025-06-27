@@ -35,6 +35,7 @@
     height: 100%;
     background-color: var(--background-site);
     opacity: 0.6;
+    z-index: 25;
 
     >div {
       color: var(--text-primary);

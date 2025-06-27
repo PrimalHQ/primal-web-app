@@ -387,8 +387,9 @@ body::after{
 
 
   &.grid-2 {
+    max-height: 250px;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 500px;
+    grid-template-rows: 250px;
     grid-template-areas:
       "cell1 cell2";
   }
