@@ -382,7 +382,7 @@ const Note: Component<NoteProps> = (props) => {
               <ParsedNote
                 note={props.note}
                 width={Math.min(598, window.innerWidth)}
-                margins={42}
+                margins={isPhone() ? 42 : 1}
               />
             </div>
 
@@ -594,8 +594,8 @@ const Note: Component<NoteProps> = (props) => {
                 <ParsedNote
                   note={props.note}
                   shorten={props.shorten}
-                  width={Math.min(508, window.innerWidth - 72)}
-                  margins={58}
+                  width={Math.min(510, window.innerWidth - 72)}
+                  margins={1}
                   footerSize="short"
                 />
               </a>
