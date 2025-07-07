@@ -7,7 +7,8 @@ import { Filterlist, NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from
 import { getStorage } from "./localStore";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
-import { sendEvent } from "./notes";
+import { sendEvent, triggerImportEvents } from "./notes";
+import { APP_ID } from "../App";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
@@ -421,7 +422,13 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, sh
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  const result = await sendEvent(event, relays, relaySettings, shouldProxy);
+
+  if (result.success && result.note) {
+    triggerImportEvents([result.note], `import_events_${APP_ID}`);
+  }
+
+  return result;
 };
 
 export const sendBookmarks = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
