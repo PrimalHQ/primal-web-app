@@ -139,7 +139,7 @@ const ReadsMy: Component = () => {
     for (let i = 0; i < drafts.length; i++) {
       const draft = drafts[i];
 
-      const cont = (JSON.parse(draft.plain) || '{}');
+      const cont = JSON.parse(draft.plain || '{}');
 
       const tgs: string[][] = (cont.tags || []);
 
