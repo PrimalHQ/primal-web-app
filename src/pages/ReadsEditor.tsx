@@ -510,8 +510,6 @@ const ReadsEditor: Component = () => {
       account.proxyThroughPrimal,
     );
 
-    console.log('DRAFT: ', note)
-
     if (success && note) {
       toast?.sendSuccess('Draft saved');
       triggerImportEvents([note], `draft_import_${APP_ID}`);

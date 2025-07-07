@@ -643,8 +643,9 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
     const pubkey = msg.pubkey;
     const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
     const kind = Kind.LongForm;
+    const relays = (event.tags || []).reduce<string[]>((acc, t) => t[0] === 'r' && acc.length < 2 ? [...acc, t[1]] : acc, []);
 
-    const naddr = nip19.naddrEncode({ identifier, pubkey, kind });
+    const naddr = nip19.naddrEncode({ identifier, pubkey, kind, relays });
 
     const user = page?.users[msg.pubkey];
     const stat = page?.postStats[msg.id];
