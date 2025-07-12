@@ -2281,12 +2281,12 @@ export const lnInvoice = {
   },
   expired: {
     id: 'lnInvoice.expired',
-    defaultMessage: 'Lejárt: {date} ezelőtt',
+    defaultMessage: 'Lejárt: {date}',
     description: 'Expired time',
   },
   expires: {
     id: 'lnInvoice.expires',
-    defaultMessage: 'Lejár: {date} múlva',
+    defaultMessage: 'Lejár: {date}',
     description: 'Expires time',
   },
   confirm: {
