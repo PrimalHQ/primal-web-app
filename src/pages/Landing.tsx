@@ -104,27 +104,27 @@ const Landing: Component = () => {
       <div class={styles.landingTestemonials}>
         <div class={styles.testemonial}>
           <p class={styles.pink}>
-            Nostr & Bitcoin Lightning is a game changer. Primal is not just better than Wallet of Satoshi, it is 1000x better than Venmo.
+            A Noszter és a Bitcoin Lightning mindent megváltoztat. A Primal nemcsak jobb, mint a Wallet of Satoshi, hanem ezerszer jobb, mint a Venmo.
           </p>
           <img src={nvk} />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.cyan}>
-            Primal is the freedom tech alternative to platforms like Twitter and TikTok. True free speech does not have gatekeepers.</p>
+            A Primal a szabad technológia válasza a Twitterre és a TikTokra. Az igazi szólásszabadságot nem korlátozza a cenzúra.</p>
           <img src={odell} />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.orange}>
-            I don’t know how anyone can stop this. I think we finally have a payments revolution for this epoch.
+            Nem tudom, hogyan állíthatná meg bárki is ezt. Úgy érzem, végre elérkezett a fizetési forradalom korszaka.
           </p>
           <img src={preston} />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.blue}>
-            The Primal wallet has erased all my memories of other wallets. Having an integrated social graph is a game-changer.
+            A Primal tárca mindent elfeledtetett velem a többi tárcáról. Az integrált közösségi hálózat valódi változást hoz.
           </p>
           <img src={pablo} />
         </div>

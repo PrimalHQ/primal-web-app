@@ -162,8 +162,8 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         isSelected={isSelected}
         isPhone={props.isPhone}
         big={props.big}
-        caption="Reads Feeds"
-        captionAction={<A href="/settings/reads_feeds">Edit Feeds</A>}
+        caption="Cikk-folyam"
+        captionAction={<A href="/settings/reads_feeds">Szerkesztés</A>}
       />
   );
 }

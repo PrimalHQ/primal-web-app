@@ -191,7 +191,7 @@ const Home: Component = () => {
             <div
               class={styles.backToReads}
             >
-              topic:
+              téma:
             </div>
             <A
               class={styles.topicBubble}

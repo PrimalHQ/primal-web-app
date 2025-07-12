@@ -5,7 +5,7 @@ import MissingPage from '../components/MissingPage/MissingPage';
 const Help: Component = () => {
   return (
     <>
-      <MissingPage title="help" />
+      <MissingPage title="Segítség" />
     </>
   );
 }

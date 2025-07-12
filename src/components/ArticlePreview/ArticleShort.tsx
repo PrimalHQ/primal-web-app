@@ -113,7 +113,7 @@ const ArticleShort: Component<{
             {props.article.title}
           </div>
           <div class={styles.estimate}>
-            {Math.ceil(props.article.wordCount / wordsPerMinute)} minutes
+            {Math.ceil(props.article.wordCount / wordsPerMinute)} perc
           </div>
         </div>
         <div class={styles.image}>

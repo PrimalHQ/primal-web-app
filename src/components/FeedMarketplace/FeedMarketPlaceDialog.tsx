@@ -113,7 +113,7 @@ const FeedMarketPlaceDialog: Component<{
       setOpen={props.setOpen}
       title={
         <div class={styles.feedMarketplaceTitle}>
-          Feed Marketplace
+          Hírfolyam Piactér
         </div>
       }
       triggerClass={'hidden'}
@@ -138,14 +138,14 @@ const FeedMarketPlaceDialog: Component<{
 
             <div class={styles.feedMarketplaceFooter}>
               <div class={styles.instruction}>
-                Select a feed to preview it
+                Válassz egy hírfolyamot az előnézethez
               </div>
 
               <ButtonSecondary
                 light={true}
                 onClick={() => props.setOpen && props.setOpen(false)}
               >
-                Cancel
+                Mégsem
               </ButtonSecondary>
             </div>
           </div>
@@ -166,7 +166,7 @@ const FeedMarketPlaceDialog: Component<{
               light={true}
               onClick={() => updateStore('previewDvm', () => undefined)}
             >
-              Back
+              Vissza
             </ButtonSecondary>
             <ButtonPrimary
               onClick={() => {
@@ -190,7 +190,7 @@ const FeedMarketPlaceDialog: Component<{
                 props.onAddFeed(feed)
               }}
             >
-              Add feed
+              Hírfolyam hozzáadása
             </ButtonPrimary>
           </div>
         </Match>

@@ -72,13 +72,13 @@ const PremiumRenameDialog: Component<{
       triggerClass="hidden"
       title={
         <div>
-          Change your primal name
+          Változtasd meg a Primal neved
         </div>
       }
     >
       <div class={styles.renameDialog}>
         <div class={styles.description}>
-          Enter your new desired name below. If available, it will be reserved immediately and your old name will be released.
+          Add meg az új kívánt nevet lentebb. Ha elérhető, azonnal lefoglaljuk, és a régi neved felszabadul.
         </div>
         <div class={styles.input}>
           <TextInput
@@ -92,7 +92,7 @@ const PremiumRenameDialog: Component<{
             descriptionClass={styles.centralize}
             errorClass={styles.centralError}
             noExtraSpace={true}
-            successMessage={isNameAvailable() && errorMessage().length === 0 ? 'Name is available' : ''}
+            successMessage={isNameAvailable() && errorMessage().length === 0 ? 'Név elérhető' : ''}
             successClass={styles.centralError}
           />
         </div>
@@ -101,7 +101,7 @@ const PremiumRenameDialog: Component<{
             onClick={() => props.setOpen && props.setOpen(false)}
             light={true}
           >
-            Cancel
+            Mégsem
           </ButtonSecondary>
 
           <ButtonPrimary
@@ -110,7 +110,7 @@ const PremiumRenameDialog: Component<{
             }}
             disabled={newName() === props.name || newName().length < 3 || errorMessage().length > 0 || !isNameAvailable}
           >
-            Apply
+            Alkalmaz
           </ButtonPrimary>
         </div>
       </div>

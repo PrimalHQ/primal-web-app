@@ -47,14 +47,14 @@ const BookmarksSelect: Component<{
 
     opts.push(
       {
-        label: 'Bookmarked Notes',
+        label: 'Mentett bejegyzések',
         value: 'notes',
       }
     );
 
     opts.push(
       {
-        label: 'Bookmarked Reads',
+        label: 'Mentett olvasnivalók',
         value: 'reads',
       }
     );

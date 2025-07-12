@@ -47,7 +47,7 @@ const AdvancedSearchCommandTextField: Component<{
         onKeyDown={onKeyDown}
         onChange={props.onCommandChange}
         >
-        <TextField.Label>Search Command</TextField.Label>
+        <TextField.Label>Keresési Parancs</TextField.Label>
         <TextField.TextArea
             autoResize={true}
             onFocus={() => setAllowCommandChange(() => true)}
@@ -59,7 +59,7 @@ const AdvancedSearchCommandTextField: Component<{
             class={styles.faintButton}
             type="submit"
         >
-            Press Enter to apply changes
+            Nyomd meg az Entert a módosítások alkalmazásához
         </button>
       </Show>
     </>

@@ -63,25 +63,25 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
   ];
 
   const notificationLabels: Record<string, string> = {
-    NEW_USER_FOLLOWED_YOU: 'new user followed you',
+    NEW_USER_FOLLOWED_YOU: 'új felhasználó követni kezdett',
 
-    YOUR_POST_WAS_ZAPPED: 'your note was zapped',
-    YOUR_POST_WAS_LIKED: 'your note was liked',
-    YOUR_POST_WAS_REPOSTED: 'your note was reposted',
-    YOUR_POST_WAS_REPLIED_TO: 'your note was replied to',
+    YOUR_POST_WAS_ZAPPED: 'a bejegyzésed zappolták',
+    YOUR_POST_WAS_LIKED: 'a bejegyzésed lájkolták',
+    YOUR_POST_WAS_REPOSTED: 'a bejegyzésed újramegosztották',
+    YOUR_POST_WAS_REPLIED_TO: 'a bejegyzésedre válaszoltak',
 
-    YOU_WERE_MENTIONED_IN_POST: 'you were mentioned in a note',
-    YOUR_POST_WAS_MENTIONED_IN_POST: 'your note was mentioned in a note',
+    YOU_WERE_MENTIONED_IN_POST: 'megemlítettek egy bejegyzésben',
+    YOUR_POST_WAS_MENTIONED_IN_POST: 'megemlítették a bejegyzésedet egy bejegyzésben',
 
-    POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: 'zapped',
-    POST_YOU_WERE_MENTIONED_IN_WAS_LIKED: 'liked',
-    POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED: 'reposted',
-    POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO: 'replied to',
+    POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED: 'zappolták',
+    POST_YOU_WERE_MENTIONED_IN_WAS_LIKED: 'lájkolták',
+    POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED: 'újramegosztották',
+    POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO: 'válaszoltak rá',
 
-    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED: 'zapped',
-    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: 'liked',
-    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: 'reposted',
-    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: 'replied to',
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED: 'zappolták',
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: 'lájkolták',
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: 'újramegosztották',
+    POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: 'válaszoltak rá',
   }
 
   const icons: Record<string, string> = {

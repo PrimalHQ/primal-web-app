@@ -17,71 +17,71 @@ export type FetureComparison = {
 
 const premiumFeatures = [
   {
-    name: 'Apps for Web, iOS, Android',
+    name: 'Web, iOS, Android applikáció',
     free: 'true',
     premium: 'true',
   },
   {
-    name: 'Built-in bitcoin lightning wallet',
+    name: 'Beépített Bitcoin Lightning tárca',
     free: 'true',
     premium: 'true',
   },
   {
-    name: 'Global Nostr text and user search',
+    name: 'Globális Noszter szöveg- és felhasználókereső',
     free: 'true',
     premium: 'true',
   },
   {
-    name: 'Media storage capacity',
+    name: 'Média tárhely kapacitás',
     free: '1 GB',
     premium: '10 GB',
   },
   {
-    name: 'Media maximum file size',
+    name: 'Maximum média fájl méret',
     free: '100 mb',
     premium: '1 GB',
   },
   {
-    name: 'Verified Nostr Address',
+    name: 'Ellenőrzött Noszter Cím',
     free: 'false',
     premium: 'true',
-    help: 'e. g. alice@primal.net',
+    help: 'Pl.: alice@primal.net',
   },
   {
-    name: 'Custom Lightning Address',
+    name: 'Egyedi Lightning Cím',
     free: 'false',
     premium: 'true',
-    help: 'e. g. alice@primal.net',
+    help: 'Pl.: alice@primal.net',
   },
   {
-    name: 'VIP Profile on primal.net',
+    name: 'VIP Profil a primal.net-en',
     free: 'false',
     premium: 'true',
-    help: 'e. g. primal.net/alice',
+    help: 'Pl.: primal.net/alice',
   },
   {
-    name: 'Advanced Nostr search',
+    name: 'Összetett Noszter keresés',
     free: 'false',
     premium: 'true',
-    help: 'Find anything on Nostr! Search by keywords & phrases, content type, who posted, who replied, who zapped, time posted, network scope, plus a bunch of filters.',
+    help: 'Találj meg bármit a Noszteren! Keresés kulcsszavak és kifejezések, tartalomtípus, ki posztolta, ki válaszolt, ki zappel, közzététel ideje, hálózati lefedettség és egy csomó szűrő alapján.',
   },
   {
-    name: 'Premium paid relay',
+    name: 'Prémium fizetős relé',
     free: 'false',
     premium: 'true',
     help: 'wss://premium.primal.net',
   },
   {
-    name: 'Nostr contact list backup',
+    name: 'Kapcsolati Lista Biztonsági Mentése',
     free: 'false',
     premium: 'true',
-    help: 'Primal creates a backup of 100+ most recent versions of your Nostr follow list. If your follow list gets erased or corrupted by another Nostr app, you will be able to restore it using the Contact List Backup tool in the Nostr Tools section for Primal Premium users.',
+    help: 'A Primal biztonsági mentést készít a Noszter követési listád 100+ legutóbbi verziójáról. Ha a követési listád törlődik vagy megsérül egy másik Noszter alkalmazás miatt, a Primal Prémium felhasználók a Noszter Eszközök szekcióban található Kapcsolati Lista Biztonsági Mentése eszközzel visszaállíthatják azt.',
   },
   {
-    name: 'Nostr account content backup',
+    name: 'Tartalom Biztonsági Mentése',
     free: 'false',
     premium: 'true',
-    help: 'Primal archives the complete history of all your Nostr content. You can rebroadcast any subset of your content to your selected set of relays at any time using the Content Backup tool in the Nostr Tools section for Primal Premium users.',
+    help: 'A Primal archiválja az összes Noszter tartalmad teljes előzményeit. A Primal Prémium felhasználók a Noszter Eszközök szekcióban található Tartalom Biztonsági Mentése eszközzel bármikor újraküldhetik tartalmaik tetszőleges részhalmazát a kiválasztott relékre.',
   },
   // {
   //   name: 'Premium feeds',
@@ -96,61 +96,61 @@ const premiumFeatures = [
   //   help: 'Get early exclusive access to Primal Beta releases.',
   // },
   {
-    name: 'Much more to come!',
+    name: 'És még sok minden várható!',
     free: 'false',
     premium: 'true',
-    help: 'We are working on a ton of new and exciting features for Primal Premium. We will announce them as we get closer to releasing them. In the meantime, please feel free to reach out and let us know what you would like to see included in Primal Premium. All suggestions are welcome!',
+    help: 'Rengeteg új és izgalmas funkción dolgozunk a Primal Prémium számára. Ahogy közeledünk a megjelenésükhöz, be fogjuk jelenteni őket. Addig is bátran vedd fel velünk a kapcsolatot, és oszd meg velünk, milyen funkciókat látnál szívesen a Primal Prémiumban. Minden javaslatot szívesen fogadunk!',
   },
 ]
 
 const faq = [
   {
-    question: 'How do I get support?',
-    answer: 'Simply email us at support@primal.net and include your Primal Name in the message. Support requests from Premium users are prioritized and typically handled on the same business day.',
+    question: 'Hogyan kaphatok segítséget?',
+    answer: 'Egyszerűen küldj egy emailt nekünk a support@primal.net címre, és tüntesd fel a Primal Nevedet az üzenetben. A prémium felhasználók támogatási kérelmei prioritást élveznek, és általában ugyanazon a munkanapon kezeljük őket.',
   },
   {
-    question: 'Can I change my Primal Name?',
-    answer: 'Yes! If you wish to change your Primal Name, simply use the “Change your Primal Name” option in the Manage Premium section of any Primal app. Your new name will be functional immediately and your old name will be released and available to other users to register.',
+    question: 'Módosíthatom a Primal Nevemet?',
+    answer: 'Igen! Ha szeretnéd megváltoztatni a Primal Nevedet, egyszerűen használd a „Primal Név Megváltoztatása” opciót a Prémium szekcióban bármelyik Primal alkalmazásban. Az új neved azonnal működni fog, és a régi neved felszabadul, így más felhasználók regisztrálhatják.',
   },
   {
-    question: 'Do I have to use my Primal verified name and lightning address?',
-    answer: 'No. As a Primal Premium user you are able to reserve a Primal Name, but you are not required to use it as your nostr verified address (NIP-05), nor the bitcoin lightning address. Simply set any nostr verified address and/or the bitcoin lightning address you wish to use in your Nostr account profile settings.',
+    question: 'Használnom kell a Primal ellenőrzött nevemet és lightning címet?',
+    answer: 'Nem. Primal Prémium felhasználóként lehetőséged van Primal Nevet fenntartani, de nem kötelező azt használnod a Noszter ellenőrzött címedként (NIP-05), sem pedig a bitcoin lightning címedként. Egyszerűen beállíthatod a kívánt Noszter ellenőrzött címet és/vagy bitcoin lightning címet a Noszter profilbeállításaidban.',
   },
   {
-    question: 'Do I own my Primal Name indefinitely?',
-    answer: 'You have the right to use your Primal Name for the duration of your Primal Premium subscription. After the subscription expires, there is a grace period of 30 days during which your Primal Name will not be available to others to register. Primal Legend users have non-expiring subscriptions, so they can use their Primal Names indefinitely. Please note that all Primal Names are owned by Primal and rented to users. Primal reserves the right to revoke any name if we determine that the name is trademarked by somebody else, that there is a possible case of impersonation, or for any other case of abuse, as determined by Primal. Please refer to our <a data-link="terms">Terms_of_Service</a> for details.',
+    question: 'Örökre az enyém marad a Primal Nevem?',
+    answer: 'Jogod van használni a Primal Nevedet a Primal Prémium előfizetésed időtartama alatt. Miután az előfizetésed lejár, 30 napos türelmi időszak van, amely alatt a Primal Neved nem lesz elérhető mások számára. A Primal Legenda felhasználóknak nem lejáró előfizetésük van, így ők korlátlan ideig használhatják a Primal Nevüket. Kérjük, vedd figyelembe, hogy minden Primal Név a Primal tulajdona, amit a felhasználóknak bérbe adunk. A Primal fenntartja a jogot, hogy visszavonja bármely nevet, ha megállapítja, hogy az védett márkanevű, lehetséges álnéven való használatra vagy bármilyen más visszaélésre van példa, ahogyan azt a Primal meghatározza. További részletekért kérjük, olvasd el a <a data-link="terms">Felhasználási feltételeinket</a>.',
   },
   {
-    question: 'Can I buy multiple Primal Names?',
-    answer: 'We are working on adding the capability to manage multiple Primal Names. In the meantime, feel free to reach out to us via support@primal.net and we will try to accommodate.',
+    question: 'Vásárolhatok több Primal Nevet?',
+    answer: 'Dolgozunk azon, hogy lehetővé tegyük több Primal Név kezelését. Addig is bátran vedd fel velünk a kapcsolatot a support@primal.net címen, és megpróbálunk segíteni.',
   },
   {
-    question: 'Is my payment information associated with my Nostr account?',
-    answer: 'No. Primal Premium can be purchased via an iOS App Store in-app purchase, Google Play in-app purchase, or directly over bitcoin lightning via the Primal web app. Regardless of the method of payment, your payment information is not associated with your Nostr account.',
+    question: 'Kapcsolódik a fizetési információm a Noszter fiókomhoz?',
+    answer: 'Nem. A Primal Prémium vásárolható iOS App Store in-app vásárlással, Google Play in-app vásárlással, vagy közvetlenül bitcoin lightning segítségével a Primal webalkalmazáson keresztül. Bármelyik fizetési módot választod, a fizetési információid nem kapcsolódnak a Noszter fiókodhoz.',
   },
   {
-    question: 'Can I extend my subscription? How does that work?',
-    answer: 'Yes, you can extend your subscription using any of the payment methods we support: iOS App Store in-app purchase, Google Play in-app purchase, or directly over bitcoin lightning via the Primal web app. Any payment will extend your subscription by the number of months purchased. For example, if you purchase 3 Months of Primal Premium using the Primal web app, and then subscribe again via your mobile device, your subscription expiry date will be four months in the future, and it will continue to be pushed out with every subsequent monthly payment.',
+    question: 'Hosszabbíthatom az előfizetésemet? Hogyan működik ez?',
+    answer: 'Igen, meghosszabbíthatod az előfizetésedet bármelyik általunk támogatott fizetési módon: iOS App Store in-app vásárlás, Google Play in-app vásárlás, vagy közvetlenül bitcoin lightning segítségével a Primal webalkalmazáson. Bármelyik vásárlás meghosszabbítja az előfizetésedet a megvásárolt hónapok számával. Például, ha vásárolsz 3 hónap Primal Prémiumot a Primal webalkalmazáson keresztül, majd újra előfizetsz a mobil eszközödön, az előfizetésed lejárati dátuma négy hónap múlva lesz, és minden további havi fizetéssel tovább fog nőni.',
   },
   {
-    question: 'If I buy Primal Premium on my phone, will I have access to it on the web?',
-    answer: 'Yes. Your Primal Premium subscription is assigned to your Nostr account. Therefore, regardless of the way you choose to subscribe, your Primal Premium subscription will be available to you in all Primal apps: web, iOS, Android.',
+    question: 'Ha telefonon vásárolom meg a Primal Prémiumot, elérhetem a weben is?',
+    answer: 'Igen. A Primal Prémium előfizetésed a Noszter fiókhoz van rendelve. Ezért függetlenül attól, hogy hogyan döntesz előfizetni, a Primal Prémium előfizetésed minden Primal alkalmazásban elérhető lesz: weben, iOS-en és Androidon.',
   },
   {
-    question: 'How does the Nostr contact list backup feature work?',
-    answer: 'Primal creates a backup of 100+ most recent versions of your Nostr follow list. If your follow list gets erased or corrupted by another Nostr app, you will be able to restore it using the Contact List Backup tool in the Nostr Tools section for Primal Premium users.',
+    question: 'Hogyan működik a Noszter kapcsolati lista biztonsági mentési funkció?',
+    answer: 'A Primal biztonsági mentést készít a Noszter követési listád 100+ legutóbbi verziójáról. Ha a követési listád törlődik vagy megsérül egy másik Noszter alkalmazás miatt, a Primal Prémium felhasználók a Noszter Eszközök szekcióban található Kapcsolati Lista Biztonsági Mentése eszközzel visszaállíthatják azt.',
   },
   {
-    question: 'How does the Nostr account content backup feature work?',
-    answer: 'Primal archives the complete history of all your Nostr content. You can rebroadcast any subset of your content to your selected set of relays at any time using the Content Backup tool in the Nostr Tools section for Primal Premium users.',
+    question: 'Hogyan működik a Noszter fiók tartalom biztonsági mentési funkció?',
+    answer: 'A Primal archiválja az összes Noszter tartalmad teljes előzményeit. A Primal Prémium felhasználók a Noszter Eszközök szekcióban található Tartalom Biztonsági Mentése eszközzel bármikor újraküldhetik tartalmaik tetszőleges részhalmazát a kiválasztott relékre.',
   },
   {
-    question: 'What other Premium features are coming in the future?',
-    answer: 'We are working on a ton of new and exciting features for Primal Premium. We will announce them as we get closer to releasing them. In the meantime, please feel free to reach out and let us know what you would like to see included in Primal Premium. All suggestions are welcome!',
+    question: 'Milyen más prémium funkciók várhatók a jövőben?',
+    answer: 'Rengeteg új és izgalmas funkción dolgozunk a Primal Prémium számára. Ahogy közeledünk a megjelenésükhöz, be fogjuk jelenteni őket. Addig is bátran vedd fel velünk a kapcsolatot, és oszd meg velünk, milyen funkciókat látnál szívesen a Primal Prémiumban. Minden javaslatot szívesen fogadunk!',
   },
   {
-    question: 'I’d like to support Primal. Can I do more?',
-    answer: 'At Primal, we don’t rely on advertising. We don’t monetize user data. We open source all our work to help the Nostr ecosystem flourish. If you wish to help us continue doing this work, please see how you can <a data-link="support">support_us</a>. Thank you from the entire Primal Team! 🙏❤️',
+    question: 'Szeretném támogatni a Primalt. Hogyan segíthetek?',
+    answer: 'A Primal nem támaszkodik hirdetésekre. Nem tesszük pénzzé a felhasználói adatokat. Munkánkat nyílt forráskóddal tesszük elérhetővé, hogy segíthessünk a Noszter közösség fejlődésében. Ha szeretnéd segíteni, hogy továbbra is végezhessük ezt a munkát, kérlek nézd meg, hogyan <a data-link="support">támogathatod a munkánkat</a>. Köszönjük az egész Primal csapat nevében! 🙏❤️',
   },
 ]
 
@@ -220,10 +220,10 @@ const PremiumFeaturesDialog: Component<{
         <Tabs value={activeTab()} onChange={setActiveTab}>
           <Tabs.List class={styles.premiumFeaturesTabs}>
             <Tabs.Trigger class={styles.premiumFeaturesTab} value="features">
-              Premium Features
+              Prémium Funkciók
             </Tabs.Trigger>
             <Tabs.Trigger class={styles.premiumFeaturesTab} value="faq">
-              Premium FAQ
+              Prémium Kérdések
             </Tabs.Trigger>
             <Tabs.Indicator class={styles.premiumFeaturesTabIndicator} />
           </Tabs.List>
@@ -238,9 +238,9 @@ const PremiumFeaturesDialog: Component<{
               <table>
                 <thead>
                   <tr>
-                    <th>Feature</th>
-                    <th>Primal Free</th>
-                    <th>Primal Premium</th>
+                    <th>Funkció</th>
+                    <th>Primal Ingyenes</th>
+                    <th>Primal Prémium</th>
                   </tr>
                 </thead>
 
@@ -287,7 +287,7 @@ const PremiumFeaturesDialog: Component<{
             light={true}
             onClick={() => props.setOpen(false)}
           >
-            Close
+            Bezárás
           </ButtonSecondary>
         </div>
       </div>

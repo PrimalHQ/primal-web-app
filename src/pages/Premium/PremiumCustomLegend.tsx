@@ -103,28 +103,28 @@ const PremiumCustomLegend: Component<{
             checked={config.custom_badge}
             onChange={(v: boolean) => setConfig('custom_badge', () => v)}
           >
-            <div class={styles.optionLabel}>Custom badge</div>
+            <div class={styles.optionLabel}>Egyedi jelvény</div>
           </CheckBox2>
           <CheckBox2
             checked={config.avatar_glow}
             onChange={(v: boolean) => setConfig('avatar_glow', () => v)}
           >
-          <div class={styles.optionLabel}>Avatar Ring</div>
+          <div class={styles.optionLabel}>Avatárkeret</div>
         </CheckBox2>
         </div>
 
         <div class={styles.legendStyleDescription}>
-          <div>Don’t want to stand out?</div>
+          <div>Nem szeretnél kitűnni?</div>
           <div>
-            If you disable the custom badge and avatar ring,
+            Ha letiltod az egyedi jelvényt és avatárkeretet,
           </div>
           <div>
-            your profile will look like any other profile on Primal.
+            a profilod úgy fog kinézni, mint bármely más profil a Primalon.
           </div>
         </div>
 
         <ButtonPrimary onClick={() => props.onConfigSave && props.onConfigSave(config)}>
-          Apply Legendary Profile Customization
+          Legendás Profil Testreszabás Alkalmazása
         </ButtonPrimary>
       </Show>
     </div>

@@ -41,7 +41,7 @@ const PremiumOrderHistoryModal: Component<{
       triggerClass="hidden"
       title={
         <div>
-          Order History
+          Rendelési Előzmények
         </div>
       }
     >
@@ -52,13 +52,13 @@ const PremiumOrderHistoryModal: Component<{
                 <thead>
                   <tr>
                     <th>
-                      Date
+                      Dátum
                     </th>
                     <th>
-                      Purchase
+                      Vásárlás
                     </th>
                     <th>
-                      Amount
+                      Összeg
                     </th>
                   </tr>
                 </thead>

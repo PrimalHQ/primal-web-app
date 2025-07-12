@@ -16,8 +16,8 @@ const SaveFeedDialog: Component<{
 }> = (props) => {
   const settings = useSettingsContext();
 
-  const [feedName, setFeedName] = createSignal('Seach results');
-  const [feedDescription, setFeedDescription] = createSignal('Primal Saved Search');
+  const [feedName, setFeedName] = createSignal('Keresés eredménye');
+  const [feedDescription, setFeedDescription] = createSignal('Primal Mentett Keresés');
 
   const generateFeedDefinition = () => {
 
@@ -78,26 +78,26 @@ const SaveFeedDialog: Component<{
           fallback={<>
             <div class={styles.addIcon}></div>
             <div>
-              Add this search to my {props.feedType} feeds
+              Add ezt a keresést a {props.feedType} hírfolyamomhoz
             </div>
           </>}
         >
-          Remove this search from my {props.feedType} feeds
+          Távolítsd el ezt a keresést a {props.feedType} hírfolyamomból
         </Show>
       }
       title={<div class={styles.addToFeedDialogTitle}>
-        Save to <span>{props.feedType}</span> Feeds
+        Mentsd a <span>{props.feedType}</span> Hírfolyamot
       </div>}
     >
       <div class={styles.addToFeedDialogContent}>
         <div class={styles.form}>
           <TextField class={styles.searchCommand} value={feedName()} onChange={setFeedName}>
-            <TextField.Label>Feed name:</TextField.Label>
+            <TextField.Label>Hírfolyam neve:</TextField.Label>
             <TextField.Input />
           </TextField>
 
           <TextField class={styles.searchCommand} value={feedDescription()} onChange={setFeedDescription}>
-            <TextField.Label>Feed description</TextField.Label>
+            <TextField.Label>Hírfolyam leírása:</TextField.Label>
             <TextField.Input />
           </TextField>
         </div>
@@ -106,7 +106,7 @@ const SaveFeedDialog: Component<{
             onClick={() => props.setOpen && props.setOpen(false)}
             light={true}
           >
-            Cancel
+            Mégsem
           </ButtonSecondary>
           <ButtonPremium
             onClick={() => {
@@ -114,7 +114,7 @@ const SaveFeedDialog: Component<{
               props.setOpen && props.setOpen(false);
             }}
           >
-            Save
+            Mentés
           </ButtonPremium>
         </div>
       </div>

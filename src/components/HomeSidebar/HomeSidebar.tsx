@@ -18,22 +18,22 @@ import SelectionBox2 from '../SelectionBox/SelectionBox2';
 
 const sidebarOptions = [
   {
-    label: 'Trending 24h',
+    label: 'Népszerű (24 óra)',
     value: 'trending_24h',
     id: 'trending_24h',
   },
   {
-    label: 'Trending 12h',
+    label: 'Népszerű (12 óra)',
     value: 'trending_12h',
     id: 'trending_12h',
   },
   {
-    label: 'Trending 4h',
+    label: 'Népszerű (4 óra)',
     value: 'trending_4h',
     id: 'trending_4h',
   },
   {
-    label: 'Trending 1h',
+    label: 'Népszerű (1 óra)',
     value: 'trending_1h',
     id: 'trending_1h',
   },
@@ -45,22 +45,22 @@ const sidebarOptions = [
   },
 
   {
-    label: 'Most-zapped 24h',
+    label: 'Legtöbbet zappolt (24 óra)',
     value: 'mostzapped_24h',
     id: 'mostzapped_24h',
   },
   {
-    label: 'Most-zapped 12h',
+    label: 'Legtöbbet zappolt (12 óra)',
     value: 'mostzapped_12h',
     id: 'mostzapped_12h',
   },
   {
-    label: 'Most-zapped 4h',
+    label: 'Legtöbbet zappolt (4 óra)',
     value: 'mostzapped_4h',
     id: 'mostzapped_4h',
   },
   {
-    label: 'Most-zapped 1h',
+    label: 'Legtöbbet zappolt (1 óra)',
     value: 'mostzapped_1h',
     id: 'mostzapped_1h',
   },

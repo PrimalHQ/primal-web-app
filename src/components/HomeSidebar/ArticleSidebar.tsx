@@ -92,14 +92,14 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
             <div>
               <Show when={props.article.satszapped > 0}>
                 <div class={`${styles.headingPicks} animated`}>
-                  Total zaps
+                  Összes zap
                 </div>
 
                 <div class={`${styles.section} animated`}>
                   <div class={styles.totalZaps}>
                     <span class={styles.totalZapsIcon} />
                     <span class={styles.amount}>{intl.formatNumber(props.article.satszapped)}</span>
-                    <span class={styles.unit}>sats</span>
+                    <span class={styles.unit}>sat</span>
                   </div>
                 </div>
               </Show>
@@ -107,7 +107,7 @@ const ArticleSidebar: Component< { id?: string, user: PrimalUser, article: Prima
                 when={recomended.length > 0}
               >
                 <div class={`${styles.headingReads} animated`}>
-                  More Reads from {userName(props.article.user)}
+                  Több cikk {userName(props.article.user)} felhasználótól
                 </div>
 
                 <div class={`${styles.section} animated`}>

@@ -28,19 +28,19 @@ export const humanizeNumber = (number: number, veryShort = false) => {
   const bottomLimit = veryShort ? 1000 : 10000;
 
   if (number < bottomLimit) {
-    return number.toLocaleString();
+    return number.toLocaleString("hu-HU");
   }
 
   if (number < 100000) {
-    return `${parseFloat((number/1000).toFixed(1))} k`;
+    return `${parseFloat((number/1000).toFixed(1)).toString().replace('.', ',')} e`;
   }
 
   if (number < 1000000) {
-    return `${Math.floor(number/1000)} k`;
+    return `${Math.floor(number/1000)} e`;
   }
 
   if (number < 100000000) {
-    return `${parseFloat((number/1000000).toFixed(1))} m`;
+    return `${parseFloat((number/1000000).toFixed(1)).toString().replace('.', ',')} m`;
   }
 
   return `${Math.floor(number/1000000)} m`;

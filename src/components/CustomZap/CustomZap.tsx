@@ -213,7 +213,7 @@ const CustomZap: Component<{
           <span class={styles.amount}>
             {truncateNumber(selectedValue().amount || 0)}
           </span>
-          <span class={styles.units}>sats</span>
+          <span class={styles.units}>sattal</span>
         </div>
 
         <div class={styles.options}>

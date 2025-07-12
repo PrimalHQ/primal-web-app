@@ -248,7 +248,7 @@ const ExploreFeeds: Component = () => {
               href={'/explore#feeds'}
             >
                 <div class={styles.backIcon}></div>
-                <div>Feed Marketplace</div>
+                <div>Hírfolyam Piactér</div>
             </A>
             <ButtonFlip
               when={isFeedAdded()}
@@ -256,11 +256,11 @@ const ExploreFeeds: Component = () => {
               onClick={toggleFeed}
               fallback={
                 <>
-                  Add this feed to your {addFeedDestination()} feed
+                  Add ezt a hírfolyamot a {addFeedDestination()} hírfolyamodhoz
                 </>
               }
               >
-              <>Remove this feed from your {addFeedDestination()} feed</>
+              <>Töröld ezt a hírfolyamot a {addFeedDestination()} hírfolyamodból</>
             </ButtonFlip>
           </div>
 

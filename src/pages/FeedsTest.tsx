@@ -50,18 +50,18 @@ const FeedsTest: Component = () => {
 
   return (
     <>
-      <PageTitle title="Feeds" />
+      <PageTitle title="Hírfolyamok" />
       <Wormhole
         to="search_section"
       >
         <Search />
       </Wormhole>
-      <PageCaption title="Feeds" />
+      <PageCaption title="Hírfolyamok" />
 
       <div class={styles.page}>
         <Show when={noteFeeds.length > 0}>
           <div class={styles.section}>
-            <div class={styles.caption}>Notes</div>
+            <div class={styles.caption}>Bejegyzések</div>
             <div class={styles.list}>
               <For each={noteFeeds}>
                 {feed => (
@@ -81,7 +81,7 @@ const FeedsTest: Component = () => {
 
         <Show when={articleFeeds.length > 0}>
           <div class={styles.section}>
-            <div class={styles.caption}>Reads</div>
+            <div class={styles.caption}>Cikkek</div>
             <div class={styles.list}>
               <For each={articleFeeds}>
                 {feed => (

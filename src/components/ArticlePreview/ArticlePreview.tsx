@@ -379,7 +379,7 @@ const ArticlePreview: Component<{
           </div>
           <div class={styles.tags}>
             <div class={styles.estimate}>
-              {Math.ceil(props.article.wordCount / wordsPerMinute)} minute read
+              {Math.ceil(props.article.wordCount / wordsPerMinute)} perces olvasmány
             </div>
             <For each={props.article.tags?.slice(0, 3)}>
               {tag => (
