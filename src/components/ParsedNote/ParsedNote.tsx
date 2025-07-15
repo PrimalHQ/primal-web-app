@@ -449,13 +449,6 @@ const ParsedNote: Component<{
         // }
       }
 
-
-      if (userMentionUrlRegex.test(token)) {
-        lastSignificantContent = 'usermention';
-        updateContent(content, 'usermention', token);
-        return;
-      }
-
       if (props.noLinks === 'text') {
         lastSignificantContent = 'text';
         updateContent(content, 'text', token);
