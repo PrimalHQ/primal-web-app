@@ -763,7 +763,10 @@ const EditBox: Component<{
 
     const messageToSend = value.replace(editMentionRegex, (url) => {
 
-      const [anythingBefore, mention] = url.split('@');
+      const atIndex = url.indexOf('@');
+
+      const anythingBefore = url.slice(0, atIndex);
+      const mention = url.slice(atIndex);
 
       const [_, name] = mention.split('\`');
       const user = userRefs[name];
