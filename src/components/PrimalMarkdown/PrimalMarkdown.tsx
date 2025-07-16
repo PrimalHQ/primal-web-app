@@ -230,7 +230,6 @@ const PrimalMarkdown: Component<{
 
   const [html, setHTML] = createSignal<string>();
 
-
   const regexIndexOf = (text: string, regex: RegExp, startpos: number) => {
     var indexOf = text.substring(startpos || 0).search(regex);
     return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
@@ -303,6 +302,11 @@ const PrimalMarkdown: Component<{
 
       // All tkoens that do not have this default value are considered parsed
       if (token.type !== defaultType) {
+        tokens.push({ ...token });
+        continue;
+      }
+
+      if (token.value.startsWith('[![')) {
         tokens.push({ ...token });
         continue;
       }
@@ -517,6 +521,14 @@ const PrimalMarkdown: Component<{
   const onMouseClick= (e: MouseEvent) => {
     const el = e.target as HTMLElement;
 
+    const parent = el.parentElement;
+
+    if (el.tagName === 'IMG' && parent && parent.tagName === 'A' && !parent.classList.contains('noteimage')) {
+      e.preventDefault();
+      window.open(parent.getAttribute('href') || '', '_blank')
+      return false;
+    }
+
     if (el.tagName === 'A') {
       const href = el.getAttribute('href') || '';
       const highlight = el.getAttribute('data-highlight') || '';
@@ -596,7 +608,6 @@ const PrimalMarkdown: Component<{
 
         return false;
       }
-
 
       return true;
     }

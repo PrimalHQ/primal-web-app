@@ -357,7 +357,7 @@ export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tv
 export const eventRegexNostrless = /((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 
-export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
+export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|webp|gif|format=png))|\!\[(.*?)\]\((https?:\/\/.*)\)/i;
 
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
