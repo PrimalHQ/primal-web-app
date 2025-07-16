@@ -10,6 +10,7 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
+import { cacheImages, isImageCached } from '../../lib/cache';
 
 const Avatar: Component<{
   src?: string | undefined,
@@ -164,7 +165,15 @@ const Avatar: Component<{
 
     setIsCached(!!url);
 
-    return url ?? src;
+    const ret = url ?? src;
+
+    navigator?.serviceWorker?.controller?.postMessage({
+      type: 'CACHE_AVATAR',
+      url: ret,
+    });
+
+    return ret;
+
   });
 
   const notCachedFlag = () => {

@@ -3,6 +3,7 @@ import styles from "./NoteImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
 import { useAppContext } from "../../contexts/AppContext";
+import { cacheImages, isImageCached } from "../../lib/cache";
 
 const NoteImage: Component<{
   class?: string,
