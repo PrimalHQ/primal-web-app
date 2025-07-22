@@ -1196,16 +1196,29 @@ const ParsedNote: Component<{
           kind: data.kind,
           pubkey: data.pubkey,
           identifier: data.identifier || '',
+          relays: data.relays || [],
         });
 
         if (data.kind === Kind.LongForm) {
           const mentionedArticles = rn.mentionedArticles;
 
+          const decodedKeys = Object.entries(mentionedArticles || {}).map(entry => ({ decoded: decodeIdentifier(entry[0]), mention: entry[1] }));
+
           if (!mentionedArticles || (props.embedLevel || 0) > 1) {
             return unknownMention(reEncoded, token);
           }
 
-          const mention = mentionedArticles[reEncoded];
+          // const mention = mentionedArticles[id];
+          const mention = decodedKeys.reduce<PrimalArticle | undefined>((acc, d) => {
+            const dta = d.decoded.data;
+
+            // @ts-ignore
+            if (data.identifier === dta.identifier && data.kind === dta.kind && data.pubkey === dta.pubkey) {
+              return d.mention;
+            }
+
+            return acc;
+          }, undefined);
 
           if (!mention) {
             return unknownMention(id, token);
@@ -1368,6 +1381,7 @@ const ParsedNote: Component<{
                 // @ts-ignore
                 identifier: eventId.identifier || '',
               });
+
               const ment = mentionedArticles && mentionedArticles[reEncoded];
 
               link = unknownMention(id, token);

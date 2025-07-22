@@ -473,6 +473,8 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
 
           const wordCount = page.wordCount ? page.wordCount[m.id] || 0 : 0;
 
+          const naddr = nip19.naddrEncode({ identifier, pubkey, kind });
+
           let article: PrimalArticle = {
             id: m.id,
             pubkey: m.pubkey,
@@ -484,8 +486,8 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             content: sanitize(m.content || ''),
             user: convertToUser(user, m.pubkey),
             topZaps: [...tz],
-            naddr: nip19.naddrEncode({ identifier, pubkey, kind }),
-            noteId: nip19.naddrEncode({ identifier, pubkey, kind }),
+            naddr,
+            noteId: naddr,
             coordinate: `${kind}:${pubkey}:${identifier}`,
             msg: m,
             mentionedNotes,
