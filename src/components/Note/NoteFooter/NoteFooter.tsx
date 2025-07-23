@@ -253,6 +253,9 @@ const NoteFooter: Component<{
     // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
     //   return;
     // }
+    if (!canUserReceiveZaps(props.note.user)) {
+      return;
+    }
 
     if (app?.customZap === undefined) {
       doQuickZap();

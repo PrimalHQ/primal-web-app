@@ -2239,12 +2239,12 @@ export const toast = {
   },
   zapUnavailable: {
     id: 'toast.zapUnavailable',
-    defaultMessage: 'Author of this note cannot be zapped',
+    defaultMessage: 'Author of this note cannot be zapped because they didn\'t setup their lightning address',
     description: 'Toast message indicating user cannot receieve a zap',
   },
   zapDVMUnavailable: {
     id: 'toast.zapDVMUnavailable',
-    defaultMessage: 'Author of this feed cannot be zapped',
+    defaultMessage: 'Author of this note cannot be zapped because they didn\'t setup their lightning address',
     description: 'Toast message indicating user cannot receieve a zap',
   },
   updateProfileSuccess: {
