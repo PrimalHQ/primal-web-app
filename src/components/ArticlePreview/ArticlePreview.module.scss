@@ -355,7 +355,7 @@
   padding: 0;
 
   display: grid;
-  grid-template-columns: 200px 1fr;
+  grid-template-columns: 200px 316px;
   column-gap: 16px;
 
   &:focus {
@@ -458,6 +458,7 @@
         height: 100%;
 
         .content {
+          width: 100%;
           .title {
             color: var(--text-primary);
             font-size: 16px;
@@ -529,7 +530,7 @@
           margin: 0;
           display: flex;
           justify-content: flex-end;
-          /* width: 174px; */
+          width: 174px;
         }
       }
 
