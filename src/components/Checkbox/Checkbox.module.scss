@@ -2,6 +2,13 @@
   input {
     display: inline-block;
     vertical-align: middle;
+
+    &[type="checkbox"]:checked,
+    &[type="checkbox"]:checked:active,
+    &[type="checkbox"]:checked:focus {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
   }
 
   img {
