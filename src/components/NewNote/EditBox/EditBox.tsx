@@ -1167,13 +1167,23 @@ const EditBox: Component<{
       if (idStart > 0) {
         id = url.slice(idStart);
       }
-      // const [_, id] = url.split(':');
 
-      if (!id || id !== noteId) {
-        return url;
-      }
+      const decId = decodeIdentifier(id);
+      const decNoteId = decodeIdentifier(noteId);
+
+      if (decId.type !== 'naddr' || decNoteId.type !== 'naddr') return url;
+
+      if (
+        // @ts-ignore
+        decId.data.identifier !== decNoteId.data.identifier ||
+        // @ts-ignore
+        decId.data.pubkey !== decNoteId.data.pubkey ||
+        // @ts-ignore
+        decId.data.kind !== decNoteId.data.kind
+      ) return url;
+
       try {
-        const article = articleRefs[id];
+        const article = articleRefs[noteId];
 
         const link = <div class={styles.highlight}>
           <SimpleArticlePreview article={article} noLink={true} />
