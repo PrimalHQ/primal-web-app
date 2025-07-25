@@ -948,16 +948,6 @@ const Premium: Component = () => {
               <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
             </Match>
 
-            <Match when={premiumStep() === 'legend'}>
-              <div class={styles.centerPageTitle}>
-                {!!isOG() ? intl.formatMessage(t.title.legendShort) : intl.formatMessage(t.title.legend)}
-              </div>
-            </Match>
-
-            <Match when={premiumStep() === 'legendary'}>
-              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
-            </Match>
-
             <Match when={premiumStep() === 'relay'}>
               <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
             </Match>
@@ -1184,28 +1174,6 @@ const Premium: Component = () => {
             <Match when={premiumStep() === 'support'}>
               <PremiumSupport
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}
-              />
-            </Match>
-
-            <Match when={premiumStep() === 'legend'}>
-              <PremiumLegend
-                pubkey={account?.publicKey}
-                user={account?.activeUser}
-                isOG={!!isOG()}
-                onBecomeLegendAction={onBecomeLegendAction}
-              />
-            </Match>
-
-            <Match when={premiumStep() === 'legendary'}>
-              <PremiumBecomeLegend
-                data={premiumData}
-                profile={account?.activeUser}
-                getExchangeRate={getExchangeRate}
-                onBuyLegend={(amount: number) => {
-                  setPremiumData('legendAmount', () => amount);
-                  setPremiumData('openLegend', () => true);
-                }}
-                isOG={!!isOG()}
               />
             </Match>
 
