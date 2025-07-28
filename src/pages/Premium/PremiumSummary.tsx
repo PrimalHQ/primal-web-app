@@ -39,6 +39,19 @@ const PremiumSummary: Component<{
     props.updateUserMetadata('lud16', true)
   }
 
+
+  const totalStorage = () => {
+    if (props.data.membershipStatus.tier === 'premium-legend') {
+      return '100GB';
+    }
+
+    if (props.data.membershipStatus.tier === 'premium') {
+      return '10GB';
+    }
+
+    return 0;
+  }
+
   return (
     <div class={styles.premiumSummary}>
       <div class={styles.summaryItem}>
@@ -115,7 +128,7 @@ const PremiumSummary: Component<{
           </div>
           <div>
             <span class={styles.summaryValue}>
-              {formatStorage(status().used_storage || 0)} of 100GB
+              {formatStorage(status().used_storage || 0)} of {totalStorage()}
             </span>
           </div>
         </div>
