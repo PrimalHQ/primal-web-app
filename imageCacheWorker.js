@@ -51,7 +51,7 @@ self.addEventListener('fetch', (event) => {
               cache.put(event.request, fetchResponse.clone());
               return fetchResponse;
             }).catch(error => {
-              console.error('FAILED TO FETCH IMAGE: ', url);
+              // console.error('FAILED TO FETCH IMAGE: ', url);
             });
           }
 
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
           return fetch(event.request).then(fetchResponse => {
             return fetchResponse;
           }).catch(error => {
-            console.error('FAILED TO FETCH IMAGE: ', url);
+            // console.error('FAILED TO FETCH IMAGE: ', url);
           });
         });
       })

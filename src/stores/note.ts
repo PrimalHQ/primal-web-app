@@ -484,7 +484,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             tags: [],
             published: m.created_at || 0,
             content: sanitize(m.content || ''),
-            user: convertToUser(user, m.pubkey),
+            user: convertToUser(page.users[m.pubkey], m.pubkey),
             topZaps: [...tz],
             naddr,
             noteId: naddr,
