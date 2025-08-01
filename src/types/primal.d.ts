@@ -488,12 +488,21 @@ export type ArticleStatsEvent= {
   tags?: string[][],
 };
 
-export type PrimalLeaderboard= {
+export type PrimalLeaderboard = {
   kind: Kind.LegendLeaderboard,
   content?: string,
   created_at?: number,
   pubkey: string,
   id?: string,
+  tags?: string[][],
+};
+
+export type NostrLiveChat = {
+  kind: Kind.LiveChatMessage,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id: string,
   tags?: string[][],
 };
 
@@ -554,6 +563,7 @@ export type NostrEventContent =
   NostrTopicStats |
   NostrLiveEvent |
   ArticleStatsEvent |
+  NostrLiveChat |
   PrimalLeaderboard;
 
 export type NostrEvent = [
@@ -561,6 +571,7 @@ export type NostrEvent = [
   subkey: string,
   content: NostrEventContent,
 ];
+
 export type NostrEvents = [
   type: "EVENTS",
   subkey: string,

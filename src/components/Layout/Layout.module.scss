@@ -19,6 +19,14 @@
   grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
 }
 
+.liveContainer {
+  width: var(--full-site-w);
+  margin: 0px auto;
+
+  display: grid;
+  grid-template-columns: 824px var(--right-col-w);
+}
+
 .leftColumn {
   >div {
     position: fixed;
@@ -63,6 +71,11 @@
   }
 }
 
+.noLeftCenter {
+  position: relative;
+  width: var(--full-site-w);
+  min-height: 100vh;
+}
 
 .centerColumn {
   position: relative;
@@ -113,6 +126,21 @@
       height: 85px;
       border-left: none;
     }
+  }
+}
+
+.rightColumnLive {
+  display: flex;
+  flex-direction: column;
+  width: var(--right-col-w);
+
+  >div {
+    position: fixed;
+    width: var(--right-col-w);
+    display: grid;
+    grid-template-rows: var(--header-height) 1fr 82px;
+    height: 100%;
+    border-left: 1px solid var(--devider);
   }
 }
 

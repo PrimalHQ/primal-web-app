@@ -68,6 +68,7 @@
     "dompurify": "3.0.5",
     "fuse.js": "7.0.0",
     "highlight.js": "11.9.0",
+    "hls.js": "^1.6.7",
     "light-bolt11-decoder": "3.1.1",
     "medium-zoom": "1.0.8",
     "nostr-tools": "2.7.0",

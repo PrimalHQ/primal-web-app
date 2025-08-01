@@ -76,9 +76,9 @@ export const emptyUser = (pubkey: string) => {
   } as PrimalUser;
 };
 
-export const userName = (user: PrimalUser | undefined) => {
+export const userName = (user: PrimalUser | undefined, pubkey?: string) => {
   if (!user) {
-    return '';
+    return pubkey ? hexToNpub(pubkey) : '';
   }
 
   const npub = user.npub || hexToNpub(user.pubkey) || '';

@@ -103,6 +103,7 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  LiveChatMessage = 1_311,
   ReportContent = 1_984,
 
   Subscribe = 7_001,

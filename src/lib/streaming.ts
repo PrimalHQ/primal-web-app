@@ -1,0 +1,104 @@
+import { APP_ID } from "../App";
+import { Kind } from "../constants";
+import { emptyMegaFeedPage, pageResolve, updateFeedPage } from "../megaFeeds";
+import { sendMessage, subsTo } from "../sockets";
+import { MegaFeedPage } from "../types/primal";
+import { getEvents } from "./feed";
+import { getReplacableEvent } from "./notes";
+
+export type StreamingData = {
+  id?: string,
+  url?: string,
+  image?: string,
+  status?: string,
+  starts?: number,
+  summary?: string,
+  title?: string,
+  client?: string,
+  pubkey?: string,
+  currentParticipants?: number,
+}
+
+export const startLiveChat = (
+  id: string | undefined,
+  pubkey: string | undefined,
+  user_pubkey: string | undefined,
+  subId: string,
+) => {
+  let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    if (!id && !pubkey || !user_pubkey) {
+      return;
+    }
+
+    let event = {
+      kind: 30311,
+      pubkey,
+      identifier: id,
+      user_pubkey,
+    };
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["live_feed", { ...event }]},
+    ]));
+};
+
+
+export const stopLiveChat = (subId: string) => {
+  sendMessage(JSON.stringify([
+    "CLOSE",
+    subId,
+    {cache: ["live_feed"]},
+  ]));
+};
+
+
+export const getStreamingEvent = (id: string, pubkey: string | undefined) => {
+  return new Promise<StreamingData>((resolve, reject) => {
+    if (!pubkey) {
+      resolve({});
+      return;
+    }
+
+    const subId = `get_stream_${APP_ID}`;
+
+    let streamData: StreamingData = {};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === 30_311) {
+          const data = { ...content };
+
+          streamData = {
+            id: (data.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (data.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (data.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (data.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((data.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            summary: (data.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (data.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (data.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((data.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: data.pubkey,
+          }
+
+        }
+      },
+      onEose: () => {
+        unsub();
+        resolve(streamData);
+      },
+      onNotice: () => {
+        reject('failed_to_find_streaming_data');
+      }
+    });
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["parametrized_replaceable_event", { identifier: id, pubkey, kind: 30311 }]},
+    ]));
+  });
+};

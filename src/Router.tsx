@@ -68,6 +68,9 @@ const AdvancedSearchResults = lazy(() => import('./pages/AdvancedSearchResults')
 const ReadsEditor = lazy(() => import('./pages/ReadsEditor'));
 const ReadsMy = lazy(() => import('./pages/ReadsMy'));
 
+
+const Streaming = lazy(() => import('./pages/StreamPage'));
+
 const primalWindow = window as PrimalWindow;
 
 const isDev = localStorage.getItem('devMode') === 'true';
@@ -164,7 +167,10 @@ const AppRouter: Component = () => {
           <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
-          <Route path="/p/:npub?" component={Profile} />
+          <Route path="/p/:npub?">
+            <Route path="/" component={Profile} />
+            <Route path="/live/streamId?" component={Streaming} />
+          </Route>
           <Route path="/help" component={Help} />
           {/* <Route path="/search/:query" component={Search} /> */}
           {/* <Route path="/rest" component={Explore} /> */}
@@ -183,6 +189,7 @@ const AppRouter: Component = () => {
           <Route path="/legends" component={Legends} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} preload={getKnownProfiles} />
+            <Route path="/live/:streamId?" component={Streaming} />
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
           <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>

@@ -1,0 +1,532 @@
+import { Component, createEffect, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js';
+import Branding from '../components/Branding/Branding';
+import Wormhole from '../components/Wormhole/Wormhole';
+import Search from '../components/Search/Search';
+
+import appstoreImg from '../assets/images/appstore_download.svg';
+import playstoreImg from '../assets/images/playstore_download.svg';
+import primalQR from '../assets/images/primal_qr.png';
+
+import gitHubLight from '../assets/icons/github_light.svg';
+import gitHubDark from '../assets/icons/github.svg';
+
+import primalDownloads from '../assets/images/video_placeholder.png';
+
+import styles from './StreamPage.module.scss';
+import { downloads as t } from '../translations';
+import { useIntl } from '@cookbook/solid-intl';
+import StickySidebar from '../components/StickySidebar/StickySidebar';
+import { appStoreLink, playstoreLink, apkLink, Kind } from '../constants';
+import ExternalLink from '../components/ExternalLink/ExternalLink';
+import PageCaption from '../components/PageCaption/PageCaption';
+import PageTitle from '../components/PageTitle/PageTitle';
+import { useSettingsContext } from '../contexts/SettingsContext';
+import { isAndroid } from '@kobalte/utils';
+import { isIOS, isPhone } from '../utils';
+import { useNavigate, useParams } from '@solidjs/router';
+import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
+
+import Hls from 'hls.js';
+import { useProfileContext } from '../contexts/ProfileContext';
+import { fetchKnownProfiles, getUserProfiles } from '../lib/profile';
+import { nip19 } from '../lib/nTools';
+import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
+import { useAccountContext } from '../contexts/AccountContext';
+import Avatar from '../components/Avatar/Avatar';
+import { userName } from '../stores/profile';
+import { humanizeNumber } from '../lib/stats';
+import FollowButton from '../components/FollowButton/FollowButton';
+import { createStore } from 'solid-js/store';
+import { date } from '../lib/dates';
+import { APP_ID } from '../App';
+import { readData, refreshSocketListeners, removeSocketListeners, socket, subsTo } from '../sockets';
+
+import { updateFeedPage, pageResolve, fetchPeople } from '../megaFeeds';
+import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap } from '../types/primal';
+import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
+import { useAppContext } from '../contexts/AppContext';
+import { sendEvent, triggerImportEvents } from '../lib/notes';
+import ButtonSecondary from '../components/Buttons/ButtonSecondary';
+import { convertToZap } from '../lib/zap';
+
+const StreamPage: Component = () => {
+  const profile = useProfileContext();
+  const account = useAccountContext();
+  const params = useParams();
+  const navigate = useNavigate();
+
+  const streamId = () => params.streamId;
+
+  const [getHex, setHex] = createSignal<string>();
+
+  let subId = '';
+
+  const setProfile = (hex: string | undefined) => {
+    profile?.actions.setProfileKey(hex);
+
+    profile?.actions.clearArticles();
+    profile?.actions.clearNotes();
+    profile?.actions.clearReplies();
+    profile?.actions.clearContacts();
+    profile?.actions.clearZaps();
+    profile?.actions.clearFilterReason();
+    profile?.actions.clearGallery();
+  }
+
+  const resolveHex = async (vanityName: string | undefined) => {
+    if (vanityName) {
+      let name = vanityName.toLowerCase();
+
+      if (name === 'gigi') {
+        name = 'dergigi';
+      }
+
+      const vanityProfile = await fetchKnownProfiles(name);
+
+      const hex = vanityProfile.names[name];
+
+      if (!hex) {
+        navigate('/404');
+        return;
+      }
+
+      setHex(() => hex);
+
+      profile?.profileKey !== hex && setProfile(hex);
+      return;
+    }
+
+    let hex = params.npub || account?.publicKey;
+
+    if (params.npub?.startsWith('npub')) {
+      hex = nip19.decode(params.npub).data as string;
+    }
+
+    if (params.npub?.startsWith('nprofile')) {
+      hex = (nip19.decode(params.npub).data as ProfilePointer).pubkey! as string;
+    }
+
+    setHex(() => hex);
+
+    profile?.profileKey !== hex && setProfile(hex);
+
+    return;
+  }
+
+  createEffect(() => {
+    resolveHex(params.vanityName)
+  })
+
+  let streamingContent: HTMLDivElement | undefined;
+  let videoElement: HTMLVideoElement | undefined;
+
+  const [streamData, setStreamData] = createStore<StreamingData>({});
+
+  const resolveStreamingData = async (id: string, pubkey: string | undefined) => {
+    const data = await getStreamingEvent(id, getHex());
+
+    setStreamData(() => data || {});
+  }
+
+  const startListeningForChat = (id: string | undefined, pubkey: string | undefined) => {
+    stopLiveChat(subId);
+
+    subId = `get_live_feed_${id}_${APP_ID}`;
+
+    startLiveChat(id, pubkey, account?.publicKey, subId);
+
+    refreshSocketListeners(
+      socket(),
+      { message: onMessage, close: onSocketClose },
+    );
+  }
+
+  const onSocketClose = (closeEvent: CloseEvent) => {
+    const webSocket = closeEvent.target as WebSocket;
+
+    removeSocketListeners(
+      webSocket,
+      { message: onMessage, close: onSocketClose },
+    );
+  };
+
+  const onMessage = async (event: MessageEvent) => {
+    const data = await readData(event);
+    const message: NostrEvent | NostrEOSE | NostrEvents = JSON.parse(data);
+
+    const [type, subkey, content] = message;
+
+    if (subkey !== subId) return;
+
+    if (type === 'EVENTS') {
+      for (let i=0;i<content.length;i++) {
+        const e = content[i];
+        handleLiveEventMessage(e);
+      }
+    }
+
+    if (type === 'EVENT') {
+      handleLiveEventMessage(content);
+    }
+  };
+
+  const [newEvents, setNewEvents] = createStore<NostrEventContent[]>([]);
+  const [events, setEvents] = createStore<NostrEventContent[]>([]);
+  const [people, setPeople] = createStore<PrimalUser[]>([]);
+
+  const fetchMissingUsers = async (pubkeys: string[]) => {
+    const subId = `fetch_missing_people_${APP_ID}`;
+
+    const pks = pubkeys.reduce<string[]>((acc, pk) => {
+      return acc.includes(pk) ? acc : [...acc, pk]
+    }, [])
+
+    const { users } = await fetchPeople(pks, subId);
+    setPeople((peps) => [ ...peps, ...users]);
+  }
+
+  let fetchedPubkeys: string[] = [];
+
+  let userFetcher = setInterval(() => {
+    let pks = events.map(e => e.pubkey || '');
+    pks = pks.filter(pk => !fetchedPubkeys.includes(pk));
+
+    if (pks.length > 0) {
+      fetchMissingUsers(pks);
+      fetchedPubkeys = [...fetchedPubkeys, ...pks];
+    }
+  }, 1_000);
+
+  const handleLiveEventMessage = (content: NostrEventContent) => {
+    if (content.kind === Kind.LiveEvent) {
+      const identifier = (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1];
+
+      if (identifier !== streamData.id) return;
+
+      setStreamData({
+        id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+        url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+        image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+        status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+        starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+        summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+        title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+        client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+        currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+        pubkey: content.pubkey,
+      });
+
+      return;
+    }
+
+    if (events.find(e => e.id === content.id)) return;
+
+    let evs = [ ...events, { ...content}].sort((a, b) => {
+      return (b.created_at || 0) - (a.created_at || 0);
+    })
+
+    setEvents(() => [...evs]);
+  }
+
+  createEffect(on(getHex, (pubkey) => {
+    const stremId = streamId();
+
+    stremId && resolveStreamingData(stremId, pubkey);
+  }));
+
+  createEffect(() => {
+    const id = streamData.id;
+    const pubkey = streamData.pubkey;
+
+    id && pubkey && startListeningForChat(id, pubkey);
+  });
+
+  createEffect(() => {
+    if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
+      videoElement.src = streamData.url || '';
+      //
+      // If no native HLS support, check if HLS.js is supported
+      //
+    } else if (Hls.isSupported() && videoElement) {
+      var hls = new Hls();
+      hls.loadSource(streamData.url || '');
+      hls.attachMedia(videoElement);
+    }
+  });
+
+  onCleanup(() => {
+    stopLiveChat(subId);
+    clearInterval(userFetcher);
+  })
+
+  const author = (pubkey: string) => {
+    return people.find(p => p.pubkey === pubkey);
+  }
+
+  const renderChatMessage = (event: NostrLiveChat) => {
+
+    const content = event.content || '';
+
+    return (
+      <div class={styles.liveMessage}>
+        <Show when={author(event.pubkey)}>
+          <div class={styles.leftSide}>
+            <Avatar user={author(event.pubkey)} size="micro" />
+          </div>
+        </Show>
+        <div class={styles.rightSide}>
+          <Show when={author(event.pubkey)}>
+            <span class={styles.authorName}>
+              {userName(author(event.pubkey))}
+              <VerificationCheck
+                user={author(event.pubkey)}
+                inline={true}
+              />
+            </span>
+          </Show>
+          <span class={styles.messageContent}>
+            {content}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const renderChatZap = (event: NostrUserZaps) => {
+
+    const zap = convertToZap(event);
+
+    return (
+      <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
+        <div class={styles.leftSide}>
+          <Avatar user={author(zap.sender as string)} size="micro" />
+        </div>
+        <div class={styles.rightSide}>
+            <span class={styles.authorName}>
+              <span>
+                {userName(author(zap.sender as string), zap.sender as string)}
+              </span>
+              <VerificationCheck
+                user={author(zap.sender as string)}
+                inline={true}
+              />
+              <span class={styles.zapped}>
+                zapped
+              </span>
+              <span class={styles.zapStats}>
+                {humanizeNumber(zap?.amount || 0)} sats
+              </span>
+            </span>
+          <span class={styles.messageContent}>
+            {zap?.message}
+          </span>
+        </div>
+      </div>
+    );
+  }
+  const renderEvent = (event: NostrEventContent) => {
+    switch (event.kind) {
+      case Kind.LiveChatMessage:
+        return renderChatMessage(event);
+      case Kind.Zap:
+        return renderChatZap(event);
+    }
+  }
+
+  const topZaps = () => {
+    const zaps = events.reduce<PrimalZap[]>((acc, e) => {
+      if (e.kind !== Kind.Zap) return acc;
+
+      const z = convertToZap(e);
+
+      return [...acc, { ...z }];
+    }, []);
+
+    return zaps.sort((a, b) => b.amount - a.amount);
+  }
+
+  const renderFirstZap = () => {
+    const zap = topZaps()[0];
+
+    return <div class={styles.topZap}>
+      <Avatar user={author(zap?.sender as string)} size="micro" />
+      <div class={styles.amount}>
+        <div class={styles.zapIcon}></div>
+        <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount)}</div>
+      </div>
+      <div class={styles.zapMessage}>
+        {zap?.message || ''}
+      </div>
+    </div>
+  }
+
+  const renderRestZaps = () => {
+    const zaps = topZaps().slice(1, 4);
+
+    return <div class={styles.restZaps}>
+      <For each={zaps}>
+        {zap => (
+          <div class={styles.topZap}>
+            <Avatar user={author(zap?.sender as string)} size="micro" />
+            <div class={styles.zapAmount}>{humanizeNumber(zap?.amount)}</div>
+          </div>
+        )}
+      </For>
+    </div>
+  }
+
+  const [videoWidth, setVideoWidth] = createSignal(824);
+
+  createEffect(() => {
+    const lc = showLiveChat();
+    const rect = streamingContent?.getBoundingClientRect();
+
+    setVideoWidth(() => lc ? (rect?.width || 823) : 1172);
+  })
+
+
+  const sendMessage = async (e: Event & { currentTarget: HTMLInputElement, target: HTMLInputElement}) => {
+    const content = e.target.value || '';
+
+    if (!account || content.length === 0) return;
+
+    const eventCoodrinate = `${Kind.LiveEvent}:${streamData.pubkey}:${streamData.id}`;
+
+    const messageEvent = {
+      kind: Kind.LiveChatMessage,
+      content,
+      created_at: Math.floor((new Date()).getTime() / 1_000),
+      tags: [
+        ['a', eventCoodrinate, account.activeRelays[0].url, 'root'],
+      ],
+    }
+    const { success, note } = await sendEvent(messageEvent, account.activeRelays, account.relaySettings, account.proxyThroughPrimal || false);
+
+    if (success && note) {
+      setEvents((es) => [{ ...note }, ...es ]);
+      triggerImportEvents([note], `import_live_message_${APP_ID}`);
+      e.target.value = '';
+    }
+  }
+
+  const [showLiveChat, setShowLiveChat] = createSignal(true);
+
+  return (
+    <div class={styles.streamingPage}>
+      <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
+        <div class={styles.streamingHeader}>
+          <div class={styles.branding}>
+            <Branding />
+          </div>
+
+          <div class={styles.separator}></div>
+
+          <div class={styles.streamerInfo}>
+            <Avatar user={profile?.userProfile} size="xs" />
+            <div class={styles.userInfo}>
+              <div class={styles.userName}>
+                {userName(profile?.userProfile)}
+              </div>
+              <div class={styles.userStats}>
+                {humanizeNumber(profile?.userStats.followers_count || 0)} followers
+              </div>
+            </div>
+          </div>
+
+          <div class={styles.headerActions}>
+            <FollowButton person={profile?.userProfile} />
+
+            <Show when={!showLiveChat()}>
+              <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
+                open chat
+              </button>
+            </Show>
+
+          </div>
+        </div>
+
+        <div ref={streamingContent}>
+          <video controls autoplay ref={videoElement} width={videoWidth()}>
+            <source src={streamData.url || ''} type="application/x-mpegURL" />
+          </video>
+        </div>
+
+        <div class={styles.streamInfo}>
+          <div class={styles.title}>{streamData.title}</div>
+          <div class={styles.statsRibbon}>
+            <div class={styles.status}>
+              <Show when={streamData.status === 'live'}>
+                <div class={styles.liveDot}>  </div>
+                Live
+              </Show>
+            </div>
+            <div class={styles.time}>
+              Started {date(streamData.starts || 0).label} ago
+            </div>
+            <div class={styles.participants}>
+              <div class={styles.participantsIcon}></div>
+              {streamData.currentParticipants || 0}
+            </div>
+          </div>
+          <div class={styles.summary}>
+            {streamData.summary}
+          </div>
+        </div>
+      </div>
+
+      <div class={`${styles.liveSidebar} ${!showLiveChat() ? styles.hidden : ''}`}>
+        <div class={styles.chatHeader}>
+          <div class={styles.chatInfo}>
+            <div class={styles.lcTitle}>Live chat</div>
+            <div class={styles.lcStats}>
+              <div class={styles.startTime}>
+                Started {date(streamData.starts || 0).label} ago
+              </div>
+              <div class={styles.participants}>
+                <div class={styles.participantsIcon}></div>
+                {streamData.currentParticipants || 0}
+              </div>
+            </div>
+          </div>
+          <div class={styles.chatActions}>
+            <button>
+              <div class={styles.settingsIcon}></div>
+            </button>
+            <button onClick={() => setShowLiveChat(false)}>
+              <div class={styles.closeIcon}></div>
+            </button>
+          </div>
+        </div>
+
+        <div class={styles.topZaps}>
+          <div class={styles.firstZap}>
+            {renderFirstZap()}
+          </div>
+          <div class={styles.other}>
+            {renderRestZaps()}
+            <button class={styles.zapButton}>
+              <div class={styles.zapIcon}></div>
+              Zap
+            </button>
+          </div>
+        </div>
+
+        <div class={styles.chatMessages}>
+          <For each={events}>
+            {event => renderEvent(event)}
+          </For>
+        </div>
+        <div class={styles.chatInput}>
+          <input
+            onChange={(e) => sendMessage(e)}
+            placeholder='Send a comment...'
+          />
+        </div>
+      </div>
+
+
+    </div>
+  );
+}
+
+export default StreamPage;

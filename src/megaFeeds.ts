@@ -31,7 +31,7 @@ import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
 import { decodeIdentifier } from "./lib/keys";
-import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } from "./lib/profile";
+import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps, getUserProfiles } from "./lib/profile";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
 import { getMessageCounts, getNewMessages, getOldMessages } from "./lib/messages";
@@ -605,6 +605,31 @@ export const fetchLeaderboardThread = (
     }
 
     fetchLeaderboard(subId, type, order, since, limit, offset);
+  });
+}
+
+export const fetchPeople = (
+  pubkeys: string[],
+  subId: string,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    getUserProfiles(pubkeys, subId);
   });
 }
 

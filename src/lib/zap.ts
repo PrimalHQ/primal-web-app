@@ -1,12 +1,13 @@
 import { bech32 } from "@scure/base";
-import { nip04, nip47, nip57, Relay, relayInit, utils } from "../lib/nTools";
+import { nip04, nip19, nip47, nip57, Relay, relayInit, utils } from "../lib/nTools";
 import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { Kind } from "../constants";
-import { NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from "../types/primal";
+import { MegaFeedPage, NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalZap, TopZap } from "../types/primal";
 import { logError } from "./logger";
 import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAPI";
 import { decodeNWCUri } from "./wallet";
-import { hexToBytes } from "../utils";
+import { hexToBytes, parseBolt11 } from "../utils";
+import { convertToUser } from "../stores/profile";
 
 export let lastZapError: string = "";
 
@@ -439,4 +440,28 @@ export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  
 
 export const canUserReceiveZaps = (user: PrimalUser | undefined) => {
   return !!user && (!!user.lud16 || !!user.lud06);
+}
+
+export const convertToZap = (zapContent: NostrUserZaps) => {
+
+  const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+  const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+  const senderPubkey = zapEvent.pubkey as string;
+  const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+
+  let zappedId = '';
+  let zappedKind: number = 0;
+
+  const zap: PrimalZap = {
+    id: zapContent.id,
+    message: zapEvent.content || '',
+    amount: parseBolt11(bolt11) || 0,
+    sender: senderPubkey,
+    reciver: receiverPubkey,
+    created_at: zapContent.created_at,
+    zappedId,
+    zappedKind,
+  };
+
+  return zap;
 }
