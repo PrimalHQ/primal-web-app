@@ -74,6 +74,7 @@ const StreamPage: Component = () => {
   }
 
   const resolveHex = async (vanityName: string | undefined) => {
+    console.log('VN: ', vanityName)
     if (vanityName) {
       let name = vanityName.toLowerCase();
 
@@ -85,18 +86,20 @@ const StreamPage: Component = () => {
 
       const hex = vanityProfile.names[name];
 
-      if (!hex) {
-        navigate('/404');
+      if (hex) {
+        setHex(() => hex);
+
+        profile?.profileKey !== hex && setProfile(hex);
         return;
       }
-
-      setHex(() => hex);
-
-      profile?.profileKey !== hex && setProfile(hex);
-      return;
     }
 
     let hex = params.npub || account?.publicKey;
+
+    if (!hex) {
+      navigate('/404');
+      return;
+    }
 
     if (params.npub?.startsWith('npub')) {
       hex = nip19.decode(params.npub).data as string;
