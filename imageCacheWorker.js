@@ -21,14 +21,17 @@ self.addEventListener('install', event => {
 
       return cache.addAll(uniqueAssetUrls);
     }).catch((e => {
-      console.error('Error prefetching cached images: ', e);
+      if (self.location.hostname === 'localhost') {
+        console.log('Error prefetching cached images: ', e);
+      }
     }))
   );
 });
 
-
 self.addEventListener('activate', event => {
-  console.log('V1 now ready to handle fetches!');
+  if (self.location.hostname === 'localhost') {
+    console.log('V1 now ready to handle fetches!');
+  }
 });
 
 // Fetch event - intercept image requests
@@ -75,7 +78,9 @@ self.addEventListener('message', event => {
       caches.open(IMAGE_CACHE).then(cache => {
         return cache.add(url);
       }).catch((e) => {
-        console.log('FAILED TO CACHE AVATAR: ', url)
+        if (self.location.hostname === 'localhost') {
+          console.warning('FAILED TO CACHE AVATAR: ', url);
+        }
       })
     )
   }
