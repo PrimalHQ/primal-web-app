@@ -849,7 +849,7 @@ export type PrimalNoteData = {
   tags: string[][],
   content: string,
   sig: string,
-  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell | Kind.Draft,
   likes: number,
   mentions: number,
   reposts: number,

@@ -557,13 +557,13 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
 
   for (i=0;i<page.reads.length;i++) {
     const read = page.reads[i];
-    const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
+    const { coordinate } = encodeCoordinate(read, Kind.LongForm);
+    const [kind, pubkey, identifier] = coordinate.split(':');
+    const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
     const author = convertToUser(page.users[read.pubkey], read.pubkey);
     const stat = page.noteStats[read.id];
     const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
     const wordCount = (page.wordCount || {})[read.id] || 0;
-
-
 
     const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;
     const tags = read.tags || [];
@@ -681,6 +681,7 @@ export const convertToDraftsMega = (page: MegaFeedPage) => {
       pubkey: draft.pubkey,
       created_at: draft.created_at || 0,
       msg: { ...draft },
+      noteId: `ndraft1${draft.id}`,
     }
 
     drafts.push(newDraft);

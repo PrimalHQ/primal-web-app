@@ -785,12 +785,14 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       }
     }
 
-    let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e' || t[0] === 'a') || [])[1];
+    let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'a') || [])[1];
 
-    if (eventId.includes(':')) {
+    if (eventId && eventId.includes(':')) {
       const [kind, pubkey, identifier] = eventId.split(':');
 
       eventId = nip19.naddrEncode({ kind, pubkey, identifier })
+    } else {
+      eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
     }
 
     const topZap: TopZap = {
@@ -800,6 +802,7 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
       message: zapInfo.content,
       eventId,
     };
+
 
     const oldZaps = page.topZaps[eventId];
 
