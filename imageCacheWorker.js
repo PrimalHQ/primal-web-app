@@ -74,14 +74,16 @@ self.addEventListener('message', event => {
   if (event.data.type === 'CACHE_AVATAR' && typeof event.data.url === 'string') {
     const url = event.data.url;
 
-    event.waitUntil(
-      caches.open(IMAGE_CACHE).then(cache => {
-        return cache.add(url);
-      }).catch((e) => {
-        if (self.location.hostname === 'localhost') {
-          console.warning('FAILED TO CACHE AVATAR: ', url);
-        }
-      })
-    )
+    event.waitUntil(new Promise(async (resolve) => {
+      const cache = await caches.open(IMAGE_CACHE);
+      const response = await cache.match(url);
+      if (!!response) {
+        resolve();
+      }
+      else {
+        await cache.add(url);
+        resolve();
+      }
+    }));
   }
 });
