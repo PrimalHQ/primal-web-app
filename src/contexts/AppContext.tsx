@@ -16,6 +16,7 @@ import { logInfo } from "../lib/logger";
 import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { config } from "@milkdown/core";
+import { StreamingData } from "../lib/streaming";
 
 
 export type ReactionStats = {
@@ -30,6 +31,8 @@ export type CustomZapInfo = {
   profile?: PrimalUser,
   note?: PrimalNote | PrimalArticle,
   dvm?: PrimalDVM,
+  stream?: StreamingData,
+  streamAuthor?: PrimalUser,
   onConfirm: (zapOption: ZapOption) => void,
   onSuccess: (zapOption: ZapOption) => void,
   onFail: (zapOption: ZapOption) => void,

@@ -4,7 +4,7 @@ import { defaultZap, defaultZapOptions, Kind } from '../../constants';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { zapArticle, zapDVM, zapNote, zapProfile } from '../../lib/zap';
+import { zapArticle, zapDVM, zapNote, zapProfile, zapStream } from '../../lib/zap';
 import { userName } from '../../stores/profile';
 import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount, toast as toastText } from '../../translations';
 import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
@@ -18,6 +18,7 @@ import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './CustomZap.module.scss';
 import { readSecFromStorage } from '../../lib/localStore';
+import { StreamingData } from '../../lib/streaming';
 
 const CustomZap: Component<{
   id?: string,
@@ -25,8 +26,10 @@ const CustomZap: Component<{
   note?: PrimalNote,
   profile?: PrimalUser,
   dvm?: PrimalDVM,
+  stream?: StreamingData,
+  streamAuthor?: PrimalUser,
   onConfirm: (zapOption?: ZapOption) => void,
-  onSuccess: (zapOption?: ZapOption) => void,
+  onSuccess: (zapOption?: ZapOption, data?: any) => void,
   onFail: (zapOption?: ZapOption) => void,
   onCancel: (zapOption?: ZapOption) => void
 }> = (props) => {
@@ -176,9 +179,38 @@ const CustomZap: Component<{
         }, lottieDuration());
       return;
     }
+
+    if (props.stream && props.streamAuthor) {
+      const s = props.stream;
+      const a = props.streamAuthor;
+
+      setTimeout(async () => {
+        const { success, event } = await zapStream(
+          s,
+          a,
+          account.publicKey,
+          selectedValue().amount || 0,
+          selectedValue().message,
+          account.activeRelays,
+          account.activeNWC,
+        );
+
+        if (success && event) {
+          props.onSuccess(selectedValue(), event);
+          return;
+        }
+
+        toast?.sendWarning(
+          intl.formatMessage(toastZapFail),
+        );
+
+        props.onFail(selectedValue());
+      }, lottieDuration());
+      return;
+    }
   };
 
-  const handleZap = (success = false) => {
+  const handleZap = (success = true) => {
     if (success) {
       props.onSuccess(selectedValue());
       return;

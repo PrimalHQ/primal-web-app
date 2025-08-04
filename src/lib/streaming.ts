@@ -2,7 +2,7 @@ import { APP_ID } from "../App";
 import { Kind } from "../constants";
 import { emptyMegaFeedPage, pageResolve, updateFeedPage } from "../megaFeeds";
 import { sendMessage, subsTo } from "../sockets";
-import { MegaFeedPage } from "../types/primal";
+import { MegaFeedPage, NostrEventContent } from "../types/primal";
 import { getEvents } from "./feed";
 import { getReplacableEvent } from "./notes";
 
@@ -17,6 +17,7 @@ export type StreamingData = {
   client?: string,
   pubkey?: string,
   currentParticipants?: number,
+  event?: NostrEventContent,
 }
 
 export const startLiveChat = (
@@ -82,6 +83,7 @@ export const getStreamingEvent = (id: string, pubkey: string | undefined) => {
             client: (data.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
             currentParticipants: parseInt((data.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
             pubkey: data.pubkey,
+            event: {...content},
           }
 
         }

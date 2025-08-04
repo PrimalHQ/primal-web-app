@@ -146,6 +146,8 @@ const Layout: Component<any> = (props) => {
           note={app?.customZap?.note}
           profile={app?.customZap?.profile}
           dvm={app?.customZap?.dvm}
+          stream={app?.customZap?.stream}
+          streamAuthor={app?.customZap?.streamAuthor}
           onConfirm={app?.customZap?.onConfirm}
           onSuccess={app?.customZap?.onSuccess}
           onFail={app?.customZap?.onFail}

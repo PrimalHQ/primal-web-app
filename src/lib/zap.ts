@@ -8,6 +8,7 @@ import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAP
 import { decodeNWCUri } from "./wallet";
 import { hexToBytes, parseBolt11 } from "../utils";
 import { convertToUser } from "../stores/profile";
+import { StreamingData } from "./streaming";
 
 export let lastZapError: string = "";
 
@@ -398,6 +399,69 @@ export const zapDVM = async (
   }
 }
 
+export const zapStream = async (
+  stream: StreamingData,
+  author: PrimalUser | undefined,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: Relay[],
+  nwc?: string[],
+) => {
+  if (!sender || !author) {
+    return { success: false };
+  }
+
+  const callback = await getZapEndpoint(author);
+
+  if (!callback) {
+    return { success: false };
+  }
+
+  const a = `${Kind.LiveEvent}:${author.pubkey}:${stream.id}`;
+
+  const sats = Math.round(amount * 1000);
+
+  let payload = {
+    profile: author.pubkey,
+    event: stream.event?.id || null,
+    amount: sats,
+    relays: relays.map(r => r.url),
+  };
+
+  if (comment.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+
+  const zapReq = nip57.makeZapRequest(payload);
+
+  if (!zapReq.tags.find((t: string[]) => t[0] === 'a' && t[1] === a)) {
+    zapReq.tags.push(['a', a]);
+  }
+
+  try {
+    const signedEvent = await signEvent(zapReq);
+
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
+
+    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const pr = r2.pr;
+
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      zapOverNWC(sender, nwc[1], pr);
+      return { success: true, event: signedEvent }
+    }
+
+    await enableWebLn();
+    await sendPayment(pr);
+
+    return { success: true, event: signEvent };
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
+    return { sucess: false };
+  }
+}
 export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  => {
   try {
     let lnurl: string = ''

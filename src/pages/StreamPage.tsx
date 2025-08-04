@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js';
 import Branding from '../components/Branding/Branding';
 import Wormhole from '../components/Wormhole/Wormhole';
 import Search from '../components/Search/Search';
@@ -13,7 +13,7 @@ import gitHubDark from '../assets/icons/github.svg';
 import primalDownloads from '../assets/images/video_placeholder.png';
 
 import styles from './StreamPage.module.scss';
-import { downloads as t } from '../translations';
+import { toast as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import { appStoreLink, playstoreLink, apkLink, Kind } from '../constants';
@@ -22,7 +22,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
-import { isIOS, isPhone } from '../utils';
+import { isIOS, isPhone, uuidv4 } from '../utils';
 import { useNavigate, useParams } from '@solidjs/router';
 import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
@@ -42,18 +42,24 @@ import { APP_ID } from '../App';
 import { readData, refreshSocketListeners, removeSocketListeners, socket, subsTo } from '../sockets';
 
 import { updateFeedPage, pageResolve, fetchPeople } from '../megaFeeds';
-import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption } from '../types/primal';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
-import { useAppContext } from '../contexts/AppContext';
+import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import { sendEvent, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import { convertToZap } from '../lib/zap';
+import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
+import { readSecFromStorage } from '../lib/localStore';
+import { useToastContext } from '../components/Toaster/Toaster';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
   const account = useAccountContext();
   const params = useParams();
   const navigate = useNavigate();
+  const toast = useToastContext();
+  const intl = useIntl();
+  const app = useAppContext();
+  const settings = useSettingsContext();
 
   const streamId = () => params.streamId;
 
@@ -74,7 +80,6 @@ const StreamPage: Component = () => {
   }
 
   const resolveHex = async (vanityName: string | undefined) => {
-    console.log('VN: ', vanityName)
     if (vanityName) {
       let name = vanityName.toLowerCase();
 
@@ -134,14 +139,16 @@ const StreamPage: Component = () => {
   const startListeningForChat = (id: string | undefined, pubkey: string | undefined) => {
     stopLiveChat(subId);
 
-    subId = `get_live_feed_${id}_${APP_ID}`;
+    setTimeout(() => {
+      subId = `get_live_feed_${id}_${APP_ID}`;
 
-    startLiveChat(id, pubkey, account?.publicKey, subId);
+      startLiveChat(id, pubkey, account?.publicKey, subId);
 
-    refreshSocketListeners(
-      socket(),
-      { message: onMessage, close: onSocketClose },
-    );
+      refreshSocketListeners(
+        socket(),
+        { message: onMessage, close: onSocketClose },
+      );
+    }, 100);
   }
 
   const onSocketClose = (closeEvent: CloseEvent) => {
@@ -191,7 +198,14 @@ const StreamPage: Component = () => {
   let fetchedPubkeys: string[] = [];
 
   let userFetcher = setInterval(() => {
-    let pks = events.map(e => e.pubkey || '');
+    let pks = events.map(e => {
+      if (e.kind === Kind.Zap) {
+        const zapEvent = JSON.parse((e.tags?.find((t: string[]) => t[0] === 'description') || [])[1] || '{}');
+        return (zapEvent.pubkey || '') as string;
+      }
+
+      return e.pubkey || ''
+    });
     pks = pks.filter(pk => !fetchedPubkeys.includes(pk));
 
     if (pks.length > 0) {
@@ -412,6 +426,174 @@ const StreamPage: Component = () => {
     }
   }
 
+  const [isZapping, setIsZapping] = createSignal(false);
+  const [zappedAmount, setZappedAmount] = createSignal(0);
+
+  let quickZapDelay = 0;
+
+  const customZapInfo: () => CustomZapInfo = () => ({
+    stream: streamData,
+    streamAuthor: profile?.userProfile,
+    onConfirm: onConfirmZap,
+    onSuccess: onSuccessZap,
+    onFail: onFailZap,
+    onCancel: onCancelZap,
+  });
+
+  const startZap = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      setIsZapping(() => false);
+      return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+    if (!canUserReceiveZaps(profile?.userProfile)) {
+      toast?.sendWarning(
+        intl.formatMessage(t.zapUnavailable),
+      );
+      setIsZapping(() => false);
+      return;
+    }
+
+    quickZapDelay = setTimeout(() => {
+      customZapInfo() && app?.actions.openCustomZapModal(customZapInfo());
+      setIsZapping(() => true);
+    }, 500);
+  };
+
+  const commitZap = (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    clearTimeout(quickZapDelay);
+
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
+
+    if (!account.sec || account.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        account.actions.setShowPin(sec);
+        return;
+      }
+    }
+
+    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
+    //   return;
+    // }
+    if (!canUserReceiveZaps(profile?.userProfile)) {
+      return;
+    }
+
+    if (app?.customZap === undefined) {
+      doQuickZap();
+    }
+  };
+
+  const doQuickZap = async () => {
+    if (!account?.hasPublicKey()) {
+      account?.actions.showGetStarted();
+      return;
+    }
+
+    const amount = settings?.defaultZap.amount || 10;
+    const message = settings?.defaultZap.message || '';
+    const emoji = settings?.defaultZap.emoji;
+
+    batch(() => {
+      setIsZapping(() => true);
+    });
+
+    setTimeout(async () => {
+      const { success, event } = await zapStream(
+        streamData,
+        profile?.userProfile,
+        account.publicKey,
+        amount,
+        message,
+        account.activeRelays,
+        account.activeNWC,
+      );
+
+      setIsZapping(() => false);
+
+      if (success && event) {
+        customZapInfo() && customZapInfo().onSuccess({
+          emoji,
+          amount,
+          message,
+        });
+
+        return;
+      } else {
+        app?.actions.openConfirmModal({
+          title: "Failed to zap",
+          description: "",
+          confirmLabel: "ok",
+          onConfirm: app.actions.closeConfirmModal,
+          // onAbort: app.actions.closeConfirmModal,
+        })
+      }
+
+      customZapInfo() && customZapInfo().onFail({
+        emoji,
+        amount,
+        message,
+      });
+    }, 100);
+
+  }
+
+  const onConfirmZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    batch(() => {
+      setZappedAmount(() => zapOption.amount || 0);
+    });
+  };
+
+  const onSuccessZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+
+    const pubkey = account?.publicKey;
+
+    if (!pubkey) return;
+
+    batch(() => {
+      setIsZapping(() => false);
+    });
+  };
+
+  const onFailZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      setZappedAmount(() => -(zapOption.amount || 0));
+      setIsZapping(() => false);
+    });
+  };
+
+  const onCancelZap = (zapOption: ZapOption) => {
+    app?.actions.closeCustomZapModal();
+    app?.actions.resetCustomZap();
+    batch(() => {
+      setZappedAmount(() => -(zapOption.amount || 0));
+      setIsZapping(() => false);
+    });
+  };
+
   const [showLiveChat, setShowLiveChat] = createSignal(true);
 
   return (
@@ -507,7 +689,11 @@ const StreamPage: Component = () => {
           </div>
           <div class={styles.other}>
             {renderRestZaps()}
-            <button class={styles.zapButton}>
+            <button
+              class={styles.zapButton}
+              onMouseDown={startZap}
+              onMouseUp={commitZap}
+            >
               <div class={styles.zapIcon}></div>
               Zap
             </button>
