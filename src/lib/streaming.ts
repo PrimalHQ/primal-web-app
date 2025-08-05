@@ -104,3 +104,21 @@ export const getStreamingEvent = (id: string, pubkey: string | undefined) => {
     ]));
   });
 };
+
+export const startListeningForLiveEventsSidebar = (user_pubkey: string | undefined, subId: string) => {
+  if (!user_pubkey) return;
+
+  sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {cache: ["live_events_from_follows", { user_pubkey }]},
+  ]));
+}
+
+export const stopListeningForLiveEventsSidebar = (subId: string) => {
+  sendMessage(JSON.stringify([
+    "CLOSE",
+    subId,
+    {cache: ["live_events_from_follows"]},
+  ]));
+};

@@ -140,7 +140,7 @@ export type AppContextStore = {
     closeAuthorSubscribeModal: () => void,
     addConnectedRelay: (relay: Relay) => void,
     removeConnectedRelay: (relay: Relay) => void,
-    profileLink: (pubkey: string | undefined) => string,
+    profileLink: (pubkey: string | undefined, noP?: boolean) => string,
     setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
     getUserBlossomUrls: (pubkey: string) => string[],
   },
@@ -361,7 +361,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('connectedRelays', (rs) => rs.filter(r => r.url !== relay.url));
   };
 
-  const profileLink = (pubkey: string | undefined) => {
+  const profileLink = (pubkey: string | undefined, noP?: boolean) => {
     if (!pubkey) return '/home';
 
     let pk = `${pubkey}`;
@@ -377,9 +377,9 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
     try {
       const npub = nip19.nprofileEncode({ pubkey: pk });
-      return `/p/${npub}`;
+      return `/${noP ? '' : 'p/'}${npub}`;
     } catch (e) {
-      return `/p/${pk}`;
+      return `/${noP ? '' : 'p/'}${pk}`;
     }
 
   }

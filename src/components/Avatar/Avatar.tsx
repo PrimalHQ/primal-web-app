@@ -10,7 +10,6 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
-import { cacheImages, isImageCached } from '../../lib/cache';
 
 const Avatar: Component<{
   src?: string | undefined,
@@ -199,6 +198,14 @@ const Avatar: Component<{
     return media?.actions.getMedia(src, 'm') || media?.actions.getMedia(src, 'o') || src;
   };
 
+  const liveHref = () => {
+    const stream = media?.actions.getStream(props.user?.pubkey || 'n/a');
+
+    if (!stream) return '';
+
+    return `${app?.actions.profileLink(stream.pubkey)}/live/${stream.id}`;
+  }
+
   return (
     <div
       id={props.id}
@@ -233,6 +240,19 @@ const Avatar: Component<{
       <Show when={props.user && props.showCheck}>
         <div class={styles.iconBackground}>
           <VerificationCheck user={props.user} />
+        </div>
+      </Show>
+
+      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
+        <div class={styles.centerBottom}>
+          <a
+            id={props.id}
+            href={liveHref()}
+            class={styles.liveBadge}
+          >
+            <div class={styles.liveDot}></div>
+            <div class={styles.caption}>LIVE</div>
+          </a>
         </div>
       </Show>
     </div>

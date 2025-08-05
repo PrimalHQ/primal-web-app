@@ -1,6 +1,6 @@
 @mixin highlight {
   border-radius: 99999px;
-  overflow: hidden
+  /* overflow: hidden */
 }
 
 .legend_GOLD {
@@ -81,6 +81,46 @@
     object-fit: cover;
     vertical-align: top;
   }
+
+
+  .centerBottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .liveBadge {
+    width: fit-content;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 6px;
+
+    background-color: var(--background-site);
+    border-radius: 10px;
+
+    .liveDot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: #E00;
+      -webkit-mask: url(../../assets/icons/dot.svg) no-repeat 0/100%;
+      mask: url(../../assets/icons/dot.svg) no-repeat 0/100%;
+    }
+
+    .caption {
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 11px;
+    }
+  }
 }
 
 .verifiedIcon {
@@ -121,6 +161,10 @@
     right: -6px;
   }
 
+  .liveBadge {
+    display: none;
+  }
+
   // &.legend {
   //   .missingBack {
   //     width: 16px;
@@ -144,6 +188,10 @@
     @include iconBackground;
     bottom: -6px;
     right: -6px;
+  }
+
+  .liveBadge {
+    display: none;
   }
 
   // &.legend {
@@ -172,6 +220,10 @@
     right: -6px;
   }
 
+  .liveBadge {
+    display: none;
+  }
+
   // &.legend {
   //   padding: 2px;
   //   .missingBack {
@@ -197,6 +249,10 @@
     @include iconBackground;
     bottom: -6px;
     right: -6px;
+  }
+
+  .liveBadge {
+    display: none;
   }
 
   // &.legend {
@@ -232,6 +288,21 @@
       // height: 28px;
     }
   }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
 }
 
 .vvsAvatar {
@@ -258,6 +329,21 @@
       // height: 32px;
     }
   }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
 }
 
 .vs2Avatar {
@@ -280,6 +366,21 @@
       border: 1px solid var(--background-site);
       // width: 36px;
       // height: 36px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -306,6 +407,21 @@
       // height: 38px;
     }
   }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
 }
 
 .smallAvatar {
@@ -328,6 +444,21 @@
       border: 1px solid var(--background-site);
       // width: 40px;
       // height: 40px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -354,6 +485,21 @@
       // height: 48px;
     }
   }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
 }
 
 .mlAvatar {
@@ -376,6 +522,20 @@
       border: 1px solid var(--background-site);
       // width: 54px;
       // height: 54px;
+    }
+  }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }
@@ -402,6 +562,20 @@
       // height: 58px;
     }
   }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
+    }
+  }
 }
 
 .largeAvatar {
@@ -426,6 +600,20 @@
       border: 1px solid var(--background-site);
       // width: 66px;
       // height: 66px;
+    }
+  }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }

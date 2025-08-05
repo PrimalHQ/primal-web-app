@@ -99,19 +99,19 @@ const StreamPage: Component = () => {
       }
     }
 
-    let hex = params.npub || account?.publicKey;
+    let hex = params.vanityName || account?.publicKey;
 
     if (!hex) {
       navigate('/404');
       return;
     }
 
-    if (params.npub?.startsWith('npub')) {
-      hex = nip19.decode(params.npub).data as string;
+    if (params.vanityName?.startsWith('npub')) {
+      hex = nip19.decode(params.vanityName).data as string;
     }
 
-    if (params.npub?.startsWith('nprofile')) {
-      hex = (nip19.decode(params.npub).data as ProfilePointer).pubkey! as string;
+    if (params.vanityName?.startsWith('nprofile')) {
+      hex = (nip19.decode(params.vanityName).data as ProfilePointer).pubkey! as string;
     }
 
     setHex(() => hex);

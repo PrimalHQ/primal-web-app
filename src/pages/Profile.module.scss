@@ -649,10 +649,12 @@
 
 .phoneAvatar {
   display: none;
+  position: relative;
 }
 .desktopAvatar {
   display: block;
   min-height: 128px;
+  position: relative;
 }
 .addToFeedButton {
   display: block;

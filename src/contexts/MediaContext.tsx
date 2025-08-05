@@ -10,6 +10,7 @@ import {
 import { MediaEvent, MediaSize, MediaVariant, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents } from "../types/primal";
 import { removeSocketListeners, isConnected, refreshSocketListeners, socket, decompressBlob, readData } from "../sockets";
 import { Kind } from "../constants";
+import { StreamingData } from "../lib/streaming";
 
 export type MediaStats = {
   video: number,
@@ -22,11 +23,14 @@ export type MediaContextStore = {
   media: Record<string, MediaVariant[]>,
   thumbnails: Record<string, string>,
   mediaStats: MediaStats,
+  liveEvents: StreamingData[],
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
     addVideo: (video: HTMLVideoElement | undefined) => void,
     getThumbnail: (url: string | undefined) => string | undefined,
+    getStream: (pubkey: string) => StreamingData,
+    isStreaming: (pubkey: string) => boolean,
   },
 }
 
@@ -39,6 +43,7 @@ const initialData = {
   },
   thumbnails: {},
   windowSize: { w: window.innerWidth, h: window.innerHeight },
+  liveEvents: [],
 };
 
 export const MediaContext = createContext<MediaContextStore>();
@@ -105,6 +110,14 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     return store.thumbnails[url];
   }
 
+  const getStream = (pubkey: string) => {
+    return store.liveEvents.find(s => s.pubkey === pubkey);
+  }
+
+  const isStreaming = (pubkey: string) => {
+    return store.liveEvents.findIndex(s => s.pubkey === pubkey) >= 0;
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const handleMediaEvent = (content: NostrEventContent) => {
@@ -133,6 +146,32 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       const stats = JSON.parse(content.content) as MediaStats;
 
       updateStore('mediaStats', () => ({ ...stats }));
+    }
+
+    if (content.kind === Kind.LiveEvent) {
+      const streamData = {
+        id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+        url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+        image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+        status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+        starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+        summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+        title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+        client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+        currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+        pubkey: content.pubkey,
+        event: { ...content },
+      };
+
+      const index = store.liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
+
+      if (index < 0) {
+        updateStore('liveEvents', store.liveEvents.length, () => ({ ...streamData }));
+        return;
+      }
+
+      updateStore('liveEvents', index, () => ({ ...streamData }));
+      return;
     }
   }
 
@@ -203,6 +242,8 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       getMediaUrl,
       addVideo,
       getThumbnail,
+      getStream,
+      isStreaming,
     },
   });
 

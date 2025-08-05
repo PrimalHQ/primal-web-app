@@ -75,6 +75,96 @@
   padding-bottom: 0px;
 }
 
+.headingLive {
+  @include heading();
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  text-transform: none;
+}
+
+.liveList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 280px;
+  gap: 12px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin-bottom: 36px;
+}
+
+.liveItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 8px;
+  border-radius: 99px;
+  background: #222;
+
+  .leftSide {
+    display: flex;
+    gap: 18px;
+  }
+
+  .eventInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .authorName {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 16px;
+      text-transform: uppercase;
+    }
+
+    .ribbon {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+    }
+  }
+
+  .liveStatus {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+    gap: 4px;
+
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: #E00;
+      -webkit-mask: url(../../assets/icons/dot.svg) no-repeat center;
+      mask: url(../../assets/icons/dot.svg) no-repeat center;
+    }
+  }
+}
+
+
+.participantIcon {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/profile.svg) no-repeat center;
+  mask: url(../../assets/icons/profile.svg) no-repeat center;
+}
+
 .readsSidebar {
   margin-left: -8px;
 
