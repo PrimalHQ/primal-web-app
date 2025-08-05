@@ -81,8 +81,12 @@ self.addEventListener('message', event => {
         resolve();
       }
       else {
-        await cache.add(url);
-        resolve();
+        try {
+          await cache.add(url);
+          resolve();
+        } catch {
+          resolve();
+        }
       }
     }));
   }
