@@ -378,7 +378,7 @@ const StreamPage: Component = () => {
   }
 
   const renderRestZaps = () => {
-    const zaps = topZaps().slice(1, 4);
+    const zaps = topZaps().slice(1, 6);
 
     return <div class={styles.restZaps}>
       <For each={zaps}>
@@ -596,6 +596,24 @@ const StreamPage: Component = () => {
 
   const [showLiveChat, setShowLiveChat] = createSignal(true);
 
+  const totalZaps = () => {
+    return events.reduce<number>((acc, e) => {
+      if (e.kind !== Kind.Zap) return acc;
+
+      return acc + 1;
+    }, 0);
+  }
+
+  const totalSats = () => {
+    return events.reduce<number>((acc, e) => {
+      if (e.kind !== Kind.Zap) return acc;
+
+      const z = convertToZap(e);
+
+      return acc + z.amount;
+    }, 0);
+  }
+
   return (
     <div class={styles.streamingPage}>
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
@@ -653,6 +671,35 @@ const StreamPage: Component = () => {
               {streamData.currentParticipants || 0}
             </div>
           </div>
+
+          <div class={styles.topZaps}>
+            <div class={styles.zapList}>
+              <div class={styles.firstZap}>
+                {renderFirstZap()}
+              </div>
+              <div class={styles.other}>
+                {renderRestZaps()}
+              </div>
+            </div>
+            <div class={styles.zapStats}>
+              <div class={styles.statsLine}>
+                <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
+                <div class={styles.totalSats}>
+                  <div class={styles.zapIcon}></div>
+                  {humanizeNumber(totalSats())}
+                </div>
+              </div>
+              <button
+                class={styles.zapButton}
+                onMouseDown={startZap}
+                onMouseUp={commitZap}
+              >
+                <div class={styles.zapIcon}></div>
+                Zap Now
+              </button>
+            </div>
+          </div>
+
           <div class={styles.summary}>
             {streamData.summary}
           </div>
@@ -679,23 +726,6 @@ const StreamPage: Component = () => {
             </button>
             <button onClick={() => setShowLiveChat(false)}>
               <div class={styles.closeIcon}></div>
-            </button>
-          </div>
-        </div>
-
-        <div class={styles.topZaps}>
-          <div class={styles.firstZap}>
-            {renderFirstZap()}
-          </div>
-          <div class={styles.other}>
-            {renderRestZaps()}
-            <button
-              class={styles.zapButton}
-              onMouseDown={startZap}
-              onMouseUp={commitZap}
-            >
-              <div class={styles.zapIcon}></div>
-              Zap
             </button>
           </div>
         </div>

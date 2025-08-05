@@ -92,7 +92,7 @@
 .streamInfo {
   display: flex;
   flex-direction: column;
-  padding: 16px 20px;
+  padding-top: 16px;
 
   .title {
     overflow: hidden;
@@ -105,6 +105,8 @@
     width: 100%;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+
+    padding-inline: 20px;
   }
 
   .statsRibbon {
@@ -117,7 +119,8 @@
     line-height: 14px;
 
     margin-top: 5px;
-    margin-bottom: 13px;
+    margin-bottom: 16px;
+    padding-inline: 20px;
 
     .status {
       display: flex;
@@ -132,6 +135,7 @@
     font-size: 15px;
     font-weight: 400;
     line-height: 22px;
+    padding: 16px 20px;
   }
 }
 
@@ -150,7 +154,7 @@
   flex-direction: column-reverse;
   gap: 16px;
   padding: 8px;
-  height: calc(100dvh - 202px);
+  height: calc(100dvh - 154px);
   overflow-y: scroll;
 }
 
@@ -220,7 +224,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  height: 56px;
+  height: 77px;
+  border-bottom: 1px solid var(--subtile-devider);
 
   .chatInfo {
     display: flex;
@@ -249,11 +254,6 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 14px;
-
-      .participants {
-        display: flex;
-        gap: 6px;
-      }
     }
   }
 
@@ -298,24 +298,74 @@
   }
 }
 
+.participants {
+  display: flex;
+  gap: 4px;
+}
+
 .topZaps {
-  diaplay: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 8px;
-  border-bottom: 1px solid var(--subtile-devider);
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  border-block: 1px solid var(--subtile-devider);
 
-  .other {
+  .zapList {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 12px;
 
-    .restZaps {
+    .other {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 6px;
+
+      .restZaps {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
     }
   }
+
+  .zapStats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .zapButton {
+      width: 100%;
+    }
+
+    .statsLine {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .totalZaps {
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+
+      .totalSats {
+        display: flex;
+        gap: 2px;
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 18px;
+
+        .zapIcon {
+          width: 11px;
+          height: 16px;
+          background-color: var(--text-primary);
+        }
+      }
+    }
+  }
+
 }
 
 .topZap {
@@ -371,6 +421,8 @@
   line-height: 18px;
 
   .zapIcon {
+    width: 11px;
+    height: 16px;
     background-color: var(--background-input);
   }
 }
