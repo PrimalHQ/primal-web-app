@@ -347,11 +347,11 @@ export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
 export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
 export const imageRegexEnd = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)$/;
-export const videoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/;
-export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/g;
+export const videoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm|3gp)/;
+export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm|3gp)/g;
 
-export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/g;
-export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/;
+export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|3gp|format=png)/g;
+export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|3gp|format=png)/;
 
 export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;

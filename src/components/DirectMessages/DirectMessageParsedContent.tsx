@@ -17,7 +17,7 @@ import { isDev, msgHasCashu, msgHasInvoice } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
-import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc } from '../../lib/notes';
+import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc, is3gppVideo } from '../../lib/notes';
 import { generatePrivateKey } from '../../lib/nTools';
 import { useMediaContext } from '../../contexts/MediaContext';
 import NoteImage from '../NoteImage/NoteImage';
@@ -182,6 +182,14 @@ const DirectMessageParsedContent: Component<{
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
+          return;
+        }
+
+        if (is3gppVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/3gpp'});
           return;
         }
 

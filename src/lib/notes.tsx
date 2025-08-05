@@ -92,6 +92,7 @@ export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif
 export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));
 export const isOggVideo = (url: string) => ['.ogg'].some(x => url.includes(x));
 export const isWebmVideo = (url: string) => ['.webm'].some(x => url.includes(x));
+export const is3gppVideo = (url: string) => ['.3gp'].some(x => url.includes(x));
 
 export const isYouTube = (url: string) => youtubeRegex.test(url);
 export const isSpotify = (url: string) => spotifyRegex.test(url);
@@ -141,6 +142,10 @@ export const urlify = (
 
       if (isWebmVideo(url)) {
         return `<video class="w-max" controls><source src="${url}" type="video/webm"></video>`;
+      }
+
+      if (is3gppVideo(url)) {
+        return `<video class="w-max" controls><source src="${url}" type="video/3gpp"></video>`;
       }
 
       if (isYouTube(url)) {

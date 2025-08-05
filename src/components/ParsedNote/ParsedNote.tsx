@@ -3,6 +3,7 @@ import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
   getParametrizedEvent,
+  is3gppVideo,
   isAddrMention,
   isAppleMusic,
   isCustomEmoji,
@@ -365,6 +366,14 @@ const ParsedNote: Component<{
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
+          return;
+        }
+
+        if (is3gppVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/3gpp'});
           return;
         }
 
