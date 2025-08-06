@@ -70,8 +70,8 @@
 
     .chatButton {
       display: flex;
-      height: 32px;
-      padding: 7px 18px;
+      height: 28px;
+      padding-inline: 18px;
       justify-content: center;
       align-items: center;
       gap: 10px;
@@ -162,14 +162,6 @@
   display: flex;
   gap: 8px;
 
-  &.zapMessage {
-    padding-block: 10px;
-    padding-inline: 8px;
-    border-radius: 8px;
-    border: 1px solid #E47C00;
-    background: linear-gradient(0deg, rgba(228, 124, 0, 0.20) 0%, rgba(228, 124, 0, 0.20) 100%), #000;
-  }
-
   .leftSide {
     width: 24px;
   }
@@ -217,6 +209,77 @@
     font-weight: 400;
     line-height: 20px;
   }
+
+  &.zapMessage {
+    width: 100%;
+    padding-block: 10px;
+    padding-inline: 8px;
+    border-radius: 8px;
+    border: 1px solid #E47C00;
+    background: rgba(228, 124, 0, 0.20);
+
+    .rightSide {
+      width: 100%;
+
+      .zapInfo {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .authorName {
+        color: var(--active-zap);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 20px;
+        width: fit-content;
+        display: flex;
+        gap: 4px;
+
+        >span {
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 1;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 160px;
+
+          &.zapped {
+            color: var(--active-zap);
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 20px;
+          }
+        }
+      }
+
+      .zapStats {
+        display: flex;
+        height: 24px;
+        padding-inline: 8px;
+        align-items: center;
+        gap: 2px;
+        width: fit-content;
+        border-radius: 24px;
+        background: var(--active-zap);
+
+        color: var(--background-site);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 16px;
+
+        .zapIcon {
+          background-color: var(--background-site);
+        }
+      }
+    }
+
+    .messageContent {
+      color: var(--text-primary);
+    }
+  }
+
 }
 
 .chatHeader {
@@ -224,7 +287,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  height: 77px;
+  height: 73px;
   border-bottom: 1px solid var(--subtile-devider);
 
   .chatInfo {

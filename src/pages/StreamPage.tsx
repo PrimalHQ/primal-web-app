@@ -320,6 +320,7 @@ const StreamPage: Component = () => {
           <Avatar user={author(zap.sender as string)} size="micro" />
         </div>
         <div class={styles.rightSide}>
+          <span class={styles.zapInfo}>
             <span class={styles.authorName}>
               <span>
                 {userName(author(zap.sender as string), zap.sender as string)}
@@ -331,10 +332,12 @@ const StreamPage: Component = () => {
               <span class={styles.zapped}>
                 zapped
               </span>
-              <span class={styles.zapStats}>
-                {humanizeNumber(zap?.amount || 0)} sats
-              </span>
             </span>
+            <div class={styles.zapStats}>
+              <div class={styles.zapIcon}></div>
+              {humanizeNumber(zap?.amount || 0)}
+            </div>
+          </span>
           <span class={styles.messageContent}>
             {zap?.message}
           </span>
@@ -631,14 +634,10 @@ const StreamPage: Component = () => {
     <div class={styles.streamingPage}>
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
         <div class={styles.streamingHeader}>
-          <div class={styles.branding}>
-            <Branding />
-          </div>
-
-          <div class={styles.separator}></div>
-
           <div class={styles.streamerInfo}>
-            <Avatar user={profile?.userProfile} size="xs" />
+            <a href={app?.actions.profileLink(profile?.profileKey)}>
+              <Avatar user={profile?.userProfile} size="xs" />
+            </a>
             <div class={styles.userInfo}>
               <div class={styles.userName}>
                 {userName(profile?.userProfile)}
