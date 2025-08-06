@@ -1229,3 +1229,11 @@
   background: #222;
   animation: skeleton-fade 2500ms linear infinite;
 }
+
+.topZapSkeleton {
+  width: 80px;
+  height: 24px;
+  border-radius: 99px;
+  background: var(--background-input);
+  animation: skeleton-fade 2500ms linear infinite;
+}

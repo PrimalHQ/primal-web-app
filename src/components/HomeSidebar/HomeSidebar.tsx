@@ -231,6 +231,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
   onCleanup(() => {
     unsub && unsub();
     stopListeningForLiveEventsSidebar(subId);
+    unsub = undefined;
   });
 
   const liveHref = (event: StreamingData | undefined) => {

@@ -50,6 +50,7 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
+import TopZapSkeleton from '../components/Skeleton/TopZapSkeleton';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -365,16 +366,23 @@ const StreamPage: Component = () => {
   const renderFirstZap = () => {
     const zap = topZaps()[0];
 
-    return <div class={styles.topZap}>
-      <Avatar user={author(zap?.sender as string)} size="micro" />
-      <div class={styles.amount}>
-        <div class={styles.zapIcon}></div>
-        <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount)}</div>
-      </div>
-      <div class={styles.zapMessage}>
-        {zap?.message || ''}
-      </div>
-    </div>
+    return (
+      <Show
+        when={zap}
+        fallback={<TopZapSkeleton />}
+      >
+        <div class={styles.topZap}>
+          <Avatar user={author(zap?.sender as string)} size="micro" />
+          <div class={styles.amount}>
+            <div class={styles.zapIcon}></div>
+            <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount)}</div>
+          </div>
+          <div class={styles.zapMessage}>
+            {zap?.message || ''}
+          </div>
+        </div>
+      </Show>
+    );
   }
 
   const renderRestZaps = () => {
@@ -383,10 +391,15 @@ const StreamPage: Component = () => {
     return <div class={styles.restZaps}>
       <For each={zaps}>
         {zap => (
-          <div class={styles.topZap}>
-            <Avatar user={author(zap?.sender as string)} size="micro" />
-            <div class={styles.zapAmount}>{humanizeNumber(zap?.amount)}</div>
-          </div>
+          <Show
+            when={zap}
+            fallback={<TopZapSkeleton />}
+          >
+            <div class={styles.topZap}>
+              <Avatar user={author(zap?.sender as string)} size="micro" />
+              <div class={styles.zapAmount}>{humanizeNumber(zap?.amount)}</div>
+            </div>
+          </Show>
         )}
       </For>
     </div>
@@ -683,10 +696,10 @@ const StreamPage: Component = () => {
             </div>
             <div class={styles.zapStats}>
               <div class={styles.statsLine}>
-                <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
+                <div class={styles.totalZaps}>Total {totalZaps() || 0} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
-                  {humanizeNumber(totalSats())}
+                  {humanizeNumber(totalSats() || 0)}
                 </div>
               </div>
               <button

@@ -339,6 +339,7 @@
 
     .statsLine {
       display: flex;
+      min-width: 180px;
       align-items: center;
       gap: 8px;
 
