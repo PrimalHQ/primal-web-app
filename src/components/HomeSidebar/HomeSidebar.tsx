@@ -27,6 +27,7 @@ import { userName } from '../../stores/profile';
 import { date } from '../../lib/dates';
 import { useAppContext } from '../../contexts/AppContext';
 import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
+import { useSearchParams } from '@solidjs/router';
 
 const sidebarOptions = [
   {
@@ -140,6 +141,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const home = useHomeContext();
   const app = useAppContext();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const subId = `live_events_sidebar_${APP_ID}`;
 
@@ -243,7 +245,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
-      <Show when={liveEvents.length > 0}>
+      <Show when={searchParams.live === '1' && liveEvents.length > 0}>
         <div class={styles.headingLive}>
           <div>
             Live on Nostr

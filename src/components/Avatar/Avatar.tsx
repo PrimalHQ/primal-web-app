@@ -10,6 +10,7 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
+import { useSearchParams } from '@solidjs/router';
 
 const Avatar: Component<{
   src?: string | undefined,
@@ -25,6 +26,7 @@ const Avatar: Component<{
 
   const media = useMediaContext();
   const app = useAppContext();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [isCached, setIsCached] = createSignal(false);
 
@@ -243,7 +245,7 @@ const Avatar: Component<{
         </div>
       </Show>
 
-      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
+      <Show when={searchParams.live === '1' && media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
         <div class={styles.centerBottom}>
           <a
             id={props.id}
