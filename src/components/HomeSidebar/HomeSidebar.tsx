@@ -26,6 +26,7 @@ import Avatar from '../Avatar/Avatar';
 import { userName } from '../../stores/profile';
 import { date } from '../../lib/dates';
 import { useAppContext } from '../../contexts/AppContext';
+import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
 
 const sidebarOptions = [
   {
@@ -251,25 +252,30 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
         <div class={styles.liveList}>
           <For each={liveEvents}>
             {liveEvent => (
-              <a class={styles.liveItem} href={liveHref(liveEvent)}>
-                <div class={styles.leftSide}>
-                  <Avatar user={liveAuthors.find(a => a.pubkey === liveEvent.pubkey)} size="xxs" />
-                  <div class={styles.eventInfo}>
-                    <div class={styles.authorName}>{userName(liveAuthors.find(a => a.pubkey === liveEvent.pubkey))}</div>
-                    <div class={styles.ribbon}>
-                      <div class={styles.time}>Started {date(liveEvent.starts || 0).label} ago</div>
+              <Show
+                when={liveAuthors.find(a => a.pubkey === liveEvent.pubkey)}
+                fallback={<LiveEventSidebarSkeleton />}
+              >
+                <a class={styles.liveItem} href={liveHref(liveEvent)}>
+                  <div class={styles.leftSide}>
+                    <Avatar user={liveAuthors.find(a => a.pubkey === liveEvent.pubkey)} size="xxs" />
+                    <div class={styles.eventInfo}>
+                      <div class={styles.authorName}>{userName(liveAuthors.find(a => a.pubkey === liveEvent.pubkey))}</div>
+                      <div class={styles.ribbon}>
+                        <div class={styles.time}>Started {date(liveEvent.starts || 0).label} ago</div>
 
-                        <div class={styles.participantIcon}></div>
-                        <div>{liveEvent.currentParticipants || 0}</div>
+                          <div class={styles.participantIcon}></div>
+                          <div>{liveEvent.currentParticipants || 0}</div>
 
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class={styles.liveStatus}>
-                  <div class={styles.liveDot}></div>
-                  Live
-                </div>
-              </a>
+                  <div class={styles.liveStatus}>
+                    <div class={styles.liveDot}></div>
+                    Live
+                  </div>
+                </a>
+              </Show>
             )}
           </For>
         </div>
