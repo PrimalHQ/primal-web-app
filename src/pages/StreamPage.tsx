@@ -289,17 +289,13 @@ const StreamPage: Component = () => {
       <div class={styles.liveMessage}>
         <Show when={author(event.pubkey)}>
           <div class={styles.leftSide}>
-            <Avatar user={author(event.pubkey)} size="micro" />
+            <Avatar user={author(event.pubkey)} size="xss" />
           </div>
         </Show>
         <div class={styles.rightSide}>
           <Show when={author(event.pubkey)}>
             <span class={styles.authorName}>
               {userName(author(event.pubkey))}
-              <VerificationCheck
-                user={author(event.pubkey)}
-                inline={true}
-              />
             </span>
           </Show>
           <span class={styles.messageContent}>
@@ -317,7 +313,7 @@ const StreamPage: Component = () => {
     return (
       <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
         <div class={styles.leftSide}>
-          <Avatar user={author(zap.sender as string)} size="micro" />
+          <Avatar user={author(zap.sender as string)} size="xss" />
         </div>
         <div class={styles.rightSide}>
           <span class={styles.zapInfo}>
@@ -325,10 +321,6 @@ const StreamPage: Component = () => {
               <span>
                 {userName(author(zap.sender as string), zap.sender as string)}
               </span>
-              <VerificationCheck
-                user={author(zap.sender as string)}
-                inline={true}
-              />
               <span class={styles.zapped}>
                 zapped
               </span>
@@ -375,7 +367,7 @@ const StreamPage: Component = () => {
         fallback={<TopZapSkeleton />}
       >
         <div class={styles.topZap}>
-          <Avatar user={author(zap?.sender as string)} size="micro" />
+          <Avatar user={author(zap?.sender as string)} size="vvs" />
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
             <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount)}</div>
@@ -389,7 +381,7 @@ const StreamPage: Component = () => {
   }
 
   const renderRestZaps = () => {
-    const zaps = topZaps().slice(1, 6);
+    const zaps = topZaps().slice(1, 5);
 
     return <div class={styles.restZaps}>
       <For each={zaps}>

@@ -155,18 +155,26 @@
   gap: 16px;
   padding: 8px;
   height: calc(100dvh - 154px);
-  overflow-y: scroll;
+  overflow: hidden;
+
+  &:hover {
+    width: calc(100% + 6px);
+    overflow-y: scroll;
+  }
+
 }
 
 .liveMessage {
   display: flex;
   gap: 8px;
+  padding-left: 9px;
 
   .leftSide {
     width: 24px;
   }
 
   .rightSide {
+    line-height: 20px;
     .authorName {
       color: var(--text-primary);
       font-size: 16px;
@@ -174,7 +182,7 @@
       line-height: 16px;
       width: fit-content;
       margin-right: 4px;
-      display: flex;
+      /* display: flex; */
       gap: 4px;
 
       >span {
@@ -212,7 +220,7 @@
 
   &.zapMessage {
     width: 100%;
-    padding-block: 10px;
+    padding-block: 8px;
     padding-inline: 8px;
     border-radius: 8px;
     border: 1px solid #E47C00;
@@ -220,12 +228,14 @@
 
     .rightSide {
       width: 100%;
+      line-height: 20px;
 
       .zapInfo {
         display: flex;
         width: 100%;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 4px;
       }
 
       .authorName {
@@ -394,10 +404,12 @@
   .zapStats {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    justify-content: flex-end;
+    gap: 8px;
 
     .zapButton {
       width: 100%;
+      height: 32px;
     }
 
     .statsLine {
@@ -405,6 +417,8 @@
       min-width: 180px;
       align-items: center;
       gap: 8px;
+      padding-inline: 8px;
+      padding-block: 11px;
 
       .totalZaps {
         color: var(--text-secondary);
@@ -448,21 +462,21 @@
 
   .firstZapAmount {
     color: var(--text-primary);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 18px;
   }
 
   .zapAmount {
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     line-height: 18px;
   }
 
   .zapMessage {
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     line-height: 18px;
   }
