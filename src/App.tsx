@@ -16,6 +16,10 @@ import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
 import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
 import { DMProvider } from './contexts/DMContext';
+import 'media-chrome';
+import "media-chrome/media-theme-element";
+import 'hls-video-element';
+
 
 
 export const version = import.meta.env.PRIMAL_VERSION;

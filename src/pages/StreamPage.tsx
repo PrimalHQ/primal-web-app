@@ -26,7 +26,6 @@ import { isIOS, isPhone, uuidv4 } from '../utils';
 import { useNavigate, useParams } from '@solidjs/router';
 import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
-import Hls from 'hls.js';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { fetchKnownProfiles, getUserProfiles } from '../lib/profile';
 import { nip19 } from '../lib/nTools';
@@ -51,6 +50,7 @@ import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
 import TopZapSkeleton from '../components/Skeleton/TopZapSkeleton';
+import LiveVideo from '../components/LiveVideo/LiveVideo';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -127,7 +127,6 @@ const StreamPage: Component = () => {
   })
 
   let streamingContent: HTMLDivElement | undefined;
-  let videoElement: HTMLVideoElement | undefined;
 
   const [streamData, setStreamData] = createStore<StreamingData>({});
 
@@ -259,19 +258,6 @@ const StreamPage: Component = () => {
     id && pubkey && startListeningForChat(id, pubkey);
   });
 
-  createEffect(() => {
-    if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
-      videoElement.src = streamData.url || '';
-      //
-      // If no native HLS support, check if HLS.js is supported
-      //
-    } else if (Hls.isSupported() && videoElement) {
-      var hls = new Hls();
-      hls.loadSource(streamData.url || '');
-      hls.attachMedia(videoElement);
-    }
-  });
-
   onCleanup(() => {
     stopLiveChat(subId);
     clearInterval(userFetcher);
@@ -399,15 +385,6 @@ const StreamPage: Component = () => {
       </For>
     </div>
   }
-
-  const [videoWidth, setVideoWidth] = createSignal(824);
-
-  createEffect(() => {
-    const lc = showLiveChat();
-    const rect = streamingContent?.getBoundingClientRect();
-
-    setVideoWidth(() => lc ? (rect?.width || 823) : 1172);
-  })
 
 
   const sendMessage = async (e: Event & { currentTarget: HTMLInputElement, target: HTMLInputElement}) => {
@@ -653,9 +630,12 @@ const StreamPage: Component = () => {
         </div>
 
         <div ref={streamingContent}>
-          <video controls autoplay ref={videoElement} width={videoWidth()}>
+          <LiveVideo
+            src={streamData.url || ''}
+          />
+          {/* <video controls autoplay ref={videoElement} width={videoWidth()}>
             <source src={streamData.url || ''} type="application/x-mpegURL" />
-          </video>
+          </video> */}
         </div>
 
         <div class={styles.streamInfo}>
