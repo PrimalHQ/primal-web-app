@@ -107,14 +107,13 @@ const LiveVideo: Component<{
   return (
     <div class={styles.liveVideo} >
       <Show when={props.src}>
-        <media-controller>
+        <media-controller autohide="2" autohideovercontrols>
           <hls-video
             src={props.src}
             slot="media"
             crossorigin
             muted
           ></hls-video>
-          <div class={styles.shroud}></div>
           <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
           <media-control-bar class={styles.controllBar}>
             <div>

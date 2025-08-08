@@ -6,7 +6,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    background-color: var(--background-site);
+    background-color: #000;
     opacity: 0.4;
     top: 0;
     left: 0;
@@ -18,10 +18,14 @@
 
   .controllBar {
     width: 100%;
-    display: none;
+    height: 100%;
+    display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     --media-control-background: transparent;
     --media-control-hover-background: transparent;
+    background-color: rgba(0,0,0,0.4);
+    padding-bottom: 12px;
 
     .timeRange {
       width: 100%;
@@ -79,7 +83,7 @@
     }
 
     media-time-display {
-      --media-text-color: var(--text-primary);
+      --media-text-color: #FFF;
       z-index: 1;
     }
   }
@@ -89,60 +93,10 @@
       display: block;
     }
 
-    .controllBar {
+    /* .controllBar {
       display: flex;
-    }
+    } */
   }
-
-  .customControls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    padding: 15px;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    display: flex;
-    flex-direction: column;
-
-    .timeProgress {
-      width: 100%;
-      height: 20px;
-
-      position: relative;
-      display: flex;
-      align-items: center;
-
-      .progressPassed {
-        height: 4px;
-        border-radius: 9px;
-        background: #CA077C;
-      }
-
-      .progressFuture {
-        height: 4px;
-        border-radius: 9px;
-        background: rgba(255, 255, 255, 0.25);
-      }
-
-      .progressHandle {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        border-radius: 99px;
-        background: #CA077C;
-      }
-
-    }
-  }
-
-  &:hover {
-    .customControls {
-      opacity: 1;
-    }
-  }
-
 }
 
 .playIcon {
@@ -150,7 +104,7 @@
   height: 16px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-primary);
+  background-color: #FFF;
   -webkit-mask: url(../../assets/icons/video_controlls/play.svg) no-repeat center;
   mask: url(../../assets/icons/video_controlls/play.svg) no-repeat center;
 }
@@ -160,7 +114,7 @@
   height: 16px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-primary);
+  background-color: #FFF;
   -webkit-mask: url(../../assets/icons/video_controlls/pause.svg) no-repeat center;
   mask: url(../../assets/icons/video_controlls/pause.svg) no-repeat center;
 }
@@ -170,7 +124,7 @@
   height: 16px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-primary);
+  background-color: #FFF;
   -webkit-mask: url(../../assets/icons/video_controlls/mute.svg) no-repeat center;
   mask: url(../../assets/icons/video_controlls/mute.svg) no-repeat center;
 }
@@ -180,7 +134,7 @@
   height: 16px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-primary);
+  background-color: #FFF;
   -webkit-mask: url(../../assets/icons/video_controlls/unmute.svg) no-repeat center;
   mask: url(../../assets/icons/video_controlls/unmute.svg) no-repeat center;
 }
