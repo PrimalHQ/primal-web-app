@@ -27,6 +27,44 @@
     background-color: rgba(0,0,0,0.4);
     padding-bottom: 12px;
 
+    .liveRange {
+      width: 100%;
+      margin-bottom: 10px;
+
+      &::-webkit-slider-runnable-track  { /* For WebKit browsers */
+        background: var(--accent); /* Example background color */
+        height: 4px; /* Example height */
+        border-radius: 2px; /* Example border-radius */
+      }
+
+      &::-webkit-slider-thumb { /* For WebKit browsers */
+        -webkit-appearance: none; /* Remove default thumb appearance */
+        width: 20px; /* Example width */
+        height: 20px; /* Example height */
+        background: var(--accent); /* Example background color */
+        border-radius: 50%; /* Make it circular */
+        border: none;
+        margin-top: -8px; /* Adjust vertical positioning to center on track */
+      }
+
+
+      &::-moz-range-track  { /* For WebKit browsers */
+        background: var(--accent); /* Example background color */
+        height: 4px; /* Example height */
+        border-radius: 2px; /* Example border-radius */
+      }
+
+      &::-moz-range-thumb  { /* For WebKit browsers */
+        -webkit-appearance: none; /* Remove default thumb appearance */
+        width: 20px; /* Example width */
+        height: 20px; /* Example height */
+        background: var(--accent); /* Example background color */
+        border-radius: 50%; /* Make it circular */
+        border: none;
+        margin-top: -6px; /* Adjust vertical positioning to center on track */
+      }
+    }
+
     .timeRange {
       width: 100%;
 
@@ -37,6 +75,7 @@
       /* --media-preview-time-margin: 0 0 -15px; */
       --media-range-thumb-background: var(--accent);
       --media-range-bar-color: var(--accent);
+      --media-preview-box-display: none;
     }
 
     .videoButtons {

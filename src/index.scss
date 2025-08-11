@@ -1047,3 +1047,35 @@ th.selectedCell, td.selectedCell {
 
   background-color: var(--subtile-devider) !important;
 }
+
+/* Force show progress bar for live streams */
+.video-js.vjs-live .vjs-progress-control {
+  display: flex !important;
+}
+
+/* Hide the "LIVE" indicator if you want */
+.video-js.vjs-live .vjs-live-display {
+  display: none;
+}
+
+/* Style the live seekbar differently */
+.video-js.vjs-live .vjs-progress-holder {
+  background: rgba(255, 0, 0, 0.2) !important; /* Red tint for live */
+}
+
+.video-js.vjs-live .vjs-play-progress {
+  background: #ff4444 !important; /* Red progress for live */
+}
+
+/* Show live edge indicator */
+.video-js.vjs-live .vjs-progress-control::after {
+  content: "LIVE";
+  position: absolute;
+  right: 0;
+  top: -25px;
+  background: #ff4444;
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 2px;
+}

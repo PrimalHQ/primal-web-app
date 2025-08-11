@@ -26,9 +26,6 @@ const LiveVideo: Component<{
   createEffect(() => {
     if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
       videoElement.src = props.src;
-      //
-      // If no native HLS support, check if HLS.js is supported
-      //
     } else if (Hls.isSupported() && videoElement) {
       var hls = new Hls();
       hls.loadSource(props.src);
@@ -54,13 +51,6 @@ const LiveVideo: Component<{
       if (playButton) playButton.textContent = '▶️';
     });
 
-    // Live button click
-    // this.liveButton.addEventListener('click', () => {
-    //     if (!this.isLive) {
-    //         this.goLive();
-    //     }
-    // });
-
     // Progress bar clicking
     timeProgress?.addEventListener('click', (e) => {
       if (!videoElement || !timeProgress) return;
@@ -68,24 +58,13 @@ const LiveVideo: Component<{
       const rect = timeProgress.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const newTime = percent * videoElement.duration;
-      console.log('VIDEO: ', videoElement.currentTime, newTime)
       videoElement.currentTime = newTime;
     });
 
     // Video time updates
     video.addEventListener('timeupdate', () => {
       updateProgress();
-      // updateTimeDisplay();
     });
-
-    // Video seeking
-  //   this.video.addEventListener('seeking', () => {
-  //       this.checkLiveStatus();
-  //   });
-
-  //   this.video.addEventListener('seeked', () => {
-  //       this.checkLiveStatus();
-  //   });
   }
 
 
@@ -104,20 +83,97 @@ const LiveVideo: Component<{
     }
   }
 
+  let mediaController: HTMLElement | undefined;
+  let hlsVideo: HTMLMediaElement | undefined;
+
+  const [isLive, setIsLive] = createSignal(false);
+
   return (
     <div class={styles.liveVideo} >
       <Show when={props.src}>
-        <media-controller autohide="2" autohideovercontrols>
+        <media-controller
+          autohide="2"
+          autohideovercontrols
+          ref={mediaController}
+        >
           <hls-video
             src={props.src}
             slot="media"
             crossorigin
             muted
+            ref={hlsVideo}
+            onloadstart={() => {
+              const hls = hlsVideo?.api as Hls;
+
+              if (hls) {
+
+                hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+
+                  const seekable = mediaController?.media.seekable;
+
+                  if (!seekable || seekable.length === 0) return;
+
+                  const seekableEnd = seekable.end(seekable.length - 1);
+                  const currentTime = mediaController?.media.currentTime || seekableEnd;
+
+                  const liveEdgeMargin = 14; // seconds
+                  const live = (currentTime >= (seekableEnd - liveEdgeMargin));
+
+                  setIsLive(() => live);
+                });
+              }
+            }}
           ></hls-video>
           <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
           <media-control-bar class={styles.controllBar}>
             <div>
-              <media-time-range  class={styles.timeRange}></media-time-range>
+              <Show
+                when={isLive()}
+                fallback={
+                  <media-time-range  class={styles.timeRange}></media-time-range>
+                }
+              >
+                <input
+                  type="range"
+                  class={styles.liveRange}
+                  min="0"
+                  max="1"
+                  step="any"
+                  value="1"
+                  onChange={(e) => {
+                    const seekable = mediaController?.media.seekable;
+
+                    mediaController.media.mediaSeekableStart
+
+                    if (!hlsVideo || !seekable || seekable.length === 0) return;
+
+                    const seekableStart = seekable.start(seekable.length - 1);
+                    const seekableEnd = seekable.end(seekable.length - 1);
+                    const ratio = parseFloat(e.target.value) || 1.0;
+
+                    const calcTimeFromRangeValue = (
+                    ): number => {
+                      if (!mediaController?.media) return 0;
+
+                      const el = mediaController?.media;
+                      const value = parseFloat(e.target?.value || '1.0');
+                      const startTime = Number.isFinite(el.mediaSeekableStart)
+                        ? el.mediaSeekableStart
+                        : 0;
+                      // Prefer `mediaDuration` when available and finite.
+                      const endTime = Number.isFinite(el.duration)
+                        ? el.duration
+                        : el.seekable.end(seekable.length - 1);
+                      if (Number.isNaN(endTime)) return 0;
+                      return value * (endTime - startTime) + startTime;
+                    };
+
+                    const time = (seekableEnd - seekableStart) * ratio + seekableStart;
+
+                    hlsVideo.currentTime = time;
+                  }}
+                ></input>
+              </Show>
             </div>
             <div class={styles.videoButtons}>
               <div class={styles.buttonSection}>
@@ -135,7 +191,7 @@ const LiveVideo: Component<{
                 <media-live-button class={styles.liveButton}>
                   <span slot="text" class={styles.text}>Live</span>
                 </media-live-button>
-                <media-time-display showduration remaining></media-time-display>
+                <media-time-display showduration></media-time-display>
               </div>
               <div class={styles.buttonSection}>
                 <media-fullscreen-button></media-fullscreen-button>
@@ -144,20 +200,6 @@ const LiveVideo: Component<{
           </media-control-bar>
         </media-controller>
       </Show>
-      {/* <video controls autoplay ref={videoElement}>
-        <source src={props.src || ''} type="application/x-mpegURL" />
-      </video> */}
-
-      {/* <div class={styles.customControls}>
-        <div class={styles.timeProgress} ref={timeProgress}>
-            <div class={styles.progressPassed} ref={progressPassed}></div>
-            <div class={styles.progressHandle} ref={progressHandle}></div>
-            <div class={styles.progressFuture} ref={progressFuture}></div>
-        </div>
-        <div class={styles.controlButtons}>
-          <button class={styles.playButton} ref={playButton}>▶️</button>
-        </div>
-      </div> */}
     </div>
   );
 }
