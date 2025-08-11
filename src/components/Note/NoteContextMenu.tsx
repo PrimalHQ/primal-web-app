@@ -114,7 +114,7 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
-
+  // get note url
   const noteLinkId = () => {
     try {
       return `e/${note().noteIdShort}`;
