@@ -239,6 +239,8 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     if ([Kind.LongForm, Kind.LongFormShell].includes(mention.kind)) {
 
       const { coordinate, naddr } = encodeCoordinate(mention, Kind.LongForm);
+      const [kind, pubkey, identifier] = coordinate.split(':');
+      const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
 
       const wordCount = wordCounts[mention.id] || 0;
 
@@ -262,6 +264,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         topZaps: page.topZaps[mention.id] || [],
         naddr,
         noteId: naddr,
+        noteIdShort: naddrShort,
         coordinate,
         msg: mention,
         mentionedNotes,
@@ -557,9 +560,9 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
 
   for (i=0;i<page.reads.length;i++) {
     const read = page.reads[i];
-    const { coordinate } = encodeCoordinate(read, Kind.LongForm);
+    const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
     const [kind, pubkey, identifier] = coordinate.split(':');
-    const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+    const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
     const author = convertToUser(page.users[read.pubkey], read.pubkey);
     const stat = page.noteStats[read.id];
     const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
@@ -605,6 +608,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       topZaps,
       naddr,
       noteId: naddr,
+      noteIdShort: naddrShort,
       coordinate,
       msg: {
         ...read,

@@ -117,7 +117,7 @@ const NoteContextMenu: Component<{
 
   const noteLinkId = () => {
     try {
-      return `e/${note().noteId}`;
+      return `e/${note().noteIdShort}`;
     } catch(e) {
       return '404';
     }
