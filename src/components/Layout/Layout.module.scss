@@ -75,6 +75,11 @@
   position: relative;
   width: var(--full-site-w);
   min-height: 100vh;
+
+  .headerFloater {
+    left: 50%; /* Position the left edge of the element at the horizontal center of the viewport */
+    transform: translateX(-50%);
+  }
 }
 
 .centerColumn {

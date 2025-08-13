@@ -177,3 +177,13 @@
   -webkit-mask: url(../../assets/icons/video_controlls/unmute.svg) no-repeat center;
   mask: url(../../assets/icons/video_controlls/unmute.svg) no-repeat center;
 }
+
+.contextIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: #FFF;
+  -webkit-mask: url(../../assets/icons/video_controlls/context.svg) no-repeat center;
+  mask: url(../../assets/icons/video_controlls/context.svg) no-repeat center;
+}

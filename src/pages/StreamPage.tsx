@@ -632,6 +632,8 @@ const StreamPage: Component = () => {
         <div ref={streamingContent}>
           <LiveVideo
             src={streamData.url || ''}
+            stream={streamData}
+            streamAuthor={profile?.userProfile}
           />
           {/* <video controls autoplay ref={videoElement} width={videoWidth()}>
             <source src={streamData.url || ''} type="application/x-mpegURL" />

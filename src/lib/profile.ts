@@ -288,7 +288,7 @@ export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: R
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
-export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
+export const reportUser = async (pubkey: string | undefined, subid: string, user?: PrimalUser) => {
   if (!pubkey) {
     return false;
   }

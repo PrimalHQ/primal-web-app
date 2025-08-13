@@ -72,6 +72,13 @@ export type CohortInfo = {
   premium_since?: number,
 };
 
+export type LiveStreamContextMenuInfo = {
+  stream: StreamingData,
+  streamAuthor: PrimalUser,
+  position: DOMRect | undefined,
+  onDelete?: (id: string) => void,
+};
+
 export type AppContextStore = {
   events: Record<number, NostrEventContent[]>,
   isInactive: boolean,
@@ -82,6 +89,8 @@ export type AppContextStore = {
   customZap: CustomZapInfo | undefined,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showStreamContextMenu: boolean,
+  streamContextMenuInfo: LiveStreamContextMenuInfo | undefined,
   showArticleOverviewContextMenu: boolean,
   articleOverviewContextMenuInfo: NoteContextMenuInfo | undefined,
   showArticleDraftContextMenu: boolean,
@@ -112,6 +121,13 @@ export type AppContextStore = {
       openReaction: () => void,
       onDelete: (id: string) => void,
     ) => void,
+    openStreamContextMenu: (
+      stream: StreamingData,
+      streamAuthor: PrimalUser,
+      position: DOMRect | undefined,
+      onDelete: (id: string) => void,
+    ) => void,
+    closeStreamContextMenu: () => void,
     closeContextMenu: () => void,
     openArticleOverviewContextMenu: (
       note: PrimalArticle,
@@ -166,6 +182,8 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   articleOverviewContextMenuInfo: undefined,
   showArticleDraftContextMenu: false,
   articleDraftContextMenuInfo: undefined,
+  showStreamContextMenu: false,
+  streamContextMenuInfo: undefined,
   showLnInvoiceModal: false,
   lnbc: undefined,
   showCashuInvoiceModal: false,
@@ -244,6 +262,21 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showNoteContextMenu', () => true);
   };
 
+  const openStreamContextMenu = (
+    stream: StreamingData,
+    streamAuthor: PrimalUser,
+    position: DOMRect | undefined,
+    onDelete: (id: string) => void,
+  ) => {
+    updateStore('streamContextMenuInfo', reconcile({
+      stream,
+      streamAuthor,
+      position,
+      onDelete,
+    }))
+    updateStore('showStreamContextMenu', () => true);
+  };
+
   const openArticleOverviewContextMenu = (
     note: PrimalArticle,
     position: DOMRect | undefined,
@@ -319,6 +352,10 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const closeContextMenu = () => {
     updateStore('showNoteContextMenu', () => false);
+  };
+
+  const closeStreamContextMenu = () => {
+    updateStore('showStreamContextMenu', () => false);
   };
 
   const closeArticleOverviewContextMenu = () => {
@@ -546,7 +583,9 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       closeCustomZapModal,
       resetCustomZap,
       openContextMenu,
+      openStreamContextMenu,
       closeContextMenu,
+      closeStreamContextMenu,
       openArticleOverviewContextMenu,
       closeArticleOverviewContextMenu,
       openArticleDraftContextMenu,

@@ -81,6 +81,9 @@ const LayoutDesktop: Component<{
               <Switch>
                 <Match when={location.pathname.includes('/live')}>
                   <div class={styles.noLeftCenter}>
+                    <div id="new_note_input" class={styles.headerFloater}>
+                      <NewNote onSuccess={props.onNewNotePosted}/>
+                    </div>
                     {props.children}
                   </div>
                 </Match>

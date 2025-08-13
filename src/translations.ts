@@ -399,6 +399,48 @@ export const actions = {
       description: 'Label for reporting user from profile context menu',
     },
   },
+  streamContext: {
+    copyLink: {
+      id: 'actions.streamContext.copyLink',
+      defaultMessage: 'Copy Stream Link',
+      description: 'Label for copy stream link from context menu',
+    },
+    copyId: {
+      id: 'actions.streamContext.copyId',
+      defaultMessage: 'Copy Stream ID',
+      description: 'Label for copy stream ID from context menu',
+    },
+    copyRaw: {
+      id: 'actions.streamContext.copyRaw',
+      defaultMessage: 'Copy Raw Data',
+      description: 'Label for copy stream raw data from context menu',
+    },
+    muteAuthor: {
+      id: 'actions.streamContext.muteAuthor',
+      defaultMessage: 'Mute User',
+      description: 'Label for muting user from context menu',
+    },
+    unmuteAuthor: {
+      id: 'actions.streamContext.unmuteAuthor',
+      defaultMessage: 'Unmute User',
+      description: 'Label for unmuting user from context menu',
+    },
+    reportContent: {
+      id: 'actions.streamContext.reportContent',
+      defaultMessage: 'Report Content',
+      description: 'Label for reporting user from context menu',
+    },
+    requestDelete: {
+      id: 'actions.streamContext.requestDelete',
+      defaultMessage: 'Request Delete',
+      description: 'Label for edit article from context menu',
+    },
+    quoteStream: {
+      id: 'actions.streamContext.quoteStream',
+      defaultMessage: 'Quote Stream',
+      description: 'Label for quoting stream from context menu',
+    },
+  },
   noteContext: {
     reactions: {
       id: 'actions.noteContext.reactions',
@@ -2171,6 +2213,26 @@ export const toast = {
     id: 'toast.noExtension',
     defaultMessage: 'Nostr extension is required to send events',
     description: 'Toast message indicating no extension was found',
+  },
+  streamPrimalLinkCoppied: {
+    id: 'toast.streamPrimalLinkCoppied',
+    defaultMessage: 'Stream link copied',
+    description: 'Confirmation message that the stream\'s link has been copied',
+  },
+  streamIdCoppied: {
+    id: 'toast.streamIdCoppied',
+    defaultMessage: 'Stream id copied',
+    description: 'Confirmation message that the stream\'s id has been copied',
+  },
+  streamRawDataCoppied: {
+    id: 'toast.streamRawDataCoppied',
+    defaultMessage: 'Stream raw data copied',
+    description: 'Confirmation message that the stream\'s raw data has been copied',
+  },
+  streamAuthorNpubCoppied: {
+    id: 'toast.streamAuthorNpubCoppied',
+    defaultMessage: 'Stream author npub copied',
+    description: 'Confirmation message that the stream\'s author npub has been copied',
   },
   noteNostrLinkCoppied: {
     id: 'toast.noteNostrLinkCoppied',

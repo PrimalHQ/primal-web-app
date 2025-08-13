@@ -29,6 +29,7 @@ import LayoutDesktop from './LayoutDesktop';
 import { isPhone } from '../../utils';
 import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
 import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
+import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -258,6 +259,12 @@ const Layout: Component<any> = (props) => {
           open={app?.showNoteContextMenu}
           onClose={app?.actions.closeContextMenu}
           data={app?.noteContextMenuInfo}
+        />
+
+        <LiveStreamContextMenu
+          open={app?.showStreamContextMenu}
+          onClose={app?.actions.closeStreamContextMenu}
+          data={app?.streamContextMenuInfo}
         />
 
         <ArticleOverviewContextMenu

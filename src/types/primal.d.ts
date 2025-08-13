@@ -16,7 +16,7 @@ export type TopZap = {
 }
 
 export type NostrNoteContent = {
-  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell | Kind.Draft,
+  kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell | Kind.Draft | Kind.LiveEvent,
   content: string,
   id: string,
   created_at?: number,
@@ -41,6 +41,7 @@ export type NostrStatsContent = {
   pubkey?: string,
   created_at?: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrNetStatsContent = {
@@ -49,6 +50,7 @@ export type NostrNetStatsContent = {
   pubkey?: string,
   created_at?: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrLegendStatsContent = {
@@ -57,6 +59,7 @@ export type NostrLegendStatsContent = {
   pubkey?: string,
   created_at?: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrUserStatsContent = {
@@ -65,6 +68,7 @@ export type NostrUserStatsContent = {
   pubkey: string,
   created_at: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMentionContent = {
@@ -73,6 +77,7 @@ export type NostrMentionContent = {
   pubkey?: string,
   created_at?: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrOldestEventContent = {
@@ -81,6 +86,7 @@ export type NostrOldestEventContent = {
   pubkey?: string,
   created_at?: number,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrContactsContent = {
@@ -107,6 +113,7 @@ export type NostrScoredUsersContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrNotificationContent = {
@@ -115,6 +122,7 @@ export type NostrNotificationContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrNotificationLastSeenContent = {
@@ -123,6 +131,7 @@ export type NostrNotificationLastSeenContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrNotificationStatsContent = {
@@ -131,6 +140,7 @@ export type NostrNotificationStatsContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrNoteActionsContent = {
@@ -139,6 +149,7 @@ export type NostrNoteActionsContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMessageStatsContent = {
@@ -148,6 +159,7 @@ export type NostrMessageStatsContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMessagePerSenderStatsContent = {
@@ -156,6 +168,7 @@ export type NostrMessagePerSenderStatsContent = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMessageEncryptedContent = {
@@ -164,6 +177,7 @@ export type NostrMessageEncryptedContent = {
   created_at: number,
   pubkey: string,
   id: string,
+  tags?: string[][],
 };
 
 export type NostrFeedRange = {
@@ -172,6 +186,7 @@ export type NostrFeedRange = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMediaInfo = {
@@ -180,6 +195,7 @@ export type NostrMediaInfo = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMediaUploaded = {
@@ -188,6 +204,7 @@ export type NostrMediaUploaded = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrLinkMetadata = {
@@ -196,6 +213,7 @@ export type NostrLinkMetadata = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrFilteringReason = {
@@ -204,6 +222,7 @@ export type NostrFilteringReason = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrUserFollwerCounts = {
@@ -212,6 +231,7 @@ export type NostrUserFollwerCounts = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrUserZaps = {
@@ -229,6 +249,7 @@ export type NostrSuggestedUsers = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type PrimalUserRelays = {
@@ -345,6 +366,7 @@ export type NostrDVMMetadata = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrTopicStats = {
@@ -353,6 +375,7 @@ export type NostrTopicStats = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrDVMFollowsActions = {
@@ -361,6 +384,7 @@ export type NostrDVMFollowsActions = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrUserFollowerIncrease = {
@@ -369,6 +393,7 @@ export type NostrUserFollowerIncrease = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrPrimalVanityNames = {
@@ -377,6 +402,7 @@ export type NostrPrimalVanityNames = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrPrimalExchangeRate = {
@@ -385,6 +411,7 @@ export type NostrPrimalExchangeRate = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrPrimalMediaStats = {
@@ -393,6 +420,7 @@ export type NostrPrimalMediaStats = {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrPrimalMediaList= {
@@ -401,6 +429,7 @@ export type NostrPrimalMediaList= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrContactList= {
@@ -409,6 +438,7 @@ export type NostrContactList= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrOrderHistory= {
@@ -417,6 +447,7 @@ export type NostrOrderHistory= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrLegendCustomization= {
@@ -425,6 +456,7 @@ export type NostrLegendCustomization= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrBroadcastStatus= {
@@ -433,6 +465,7 @@ export type NostrBroadcastStatus= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrMembershipCohortInfo= {
@@ -441,6 +474,7 @@ export type NostrMembershipCohortInfo= {
   created_at?: number,
   pubkey?: string,
   id?: string,
+  tags?: string[][],
 };
 
 export type NostrBlossom= {

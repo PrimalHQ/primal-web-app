@@ -4,10 +4,17 @@ import { hookForDev } from '../../lib/devTools';
 import Hls from 'hls.js';
 
 import styles from './LiveVideo.module.scss';
+import { StreamingData } from '../../lib/streaming';
+import { PrimalUser } from '../../types/primal';
+import { useAppContext } from '../../contexts/AppContext';
 
 const LiveVideo: Component<{
   src: string,
+  stream: StreamingData,
+  streamAuthor: PrimalUser | undefined,
+  onRemove: () => void,
 }> = (props) => {
+  const app = useAppContext();
 
   let videoElement: HTMLVideoElement | undefined;
   let playButton: HTMLButtonElement | undefined;
@@ -15,13 +22,6 @@ const LiveVideo: Component<{
   let progressHandle: HTMLDivElement | undefined;
   let progressFuture: HTMLDivElement | undefined;
   let timeProgress: HTMLDivElement | undefined;
-
-  createEffect(() => {
-    if (!videoElement) return;
-
-    console.log('VIDEO: ', videoElement)
-    bindEvents(videoElement);
-  });
 
   createEffect(() => {
     if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
@@ -33,60 +33,25 @@ const LiveVideo: Component<{
     }
   });
 
-  const bindEvents = (video: HTMLVideoElement) => {
-    playButton?.addEventListener('click', () => {
-        if (video.paused) {
-            video.play();
-        } else {
-            video.pause();
-        }
-    });
-
-    // Update play/pause button text
-    video.addEventListener('play', () => {
-      if (playButton) playButton.textContent = '⏸️';
-    });
-
-    video.addEventListener('pause', () => {
-      if (playButton) playButton.textContent = '▶️';
-    });
-
-    // Progress bar clicking
-    timeProgress?.addEventListener('click', (e) => {
-      if (!videoElement || !timeProgress) return;
-
-      const rect = timeProgress.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      const newTime = percent * videoElement.duration;
-      videoElement.currentTime = newTime;
-    });
-
-    // Video time updates
-    video.addEventListener('timeupdate', () => {
-      updateProgress();
-    });
-  }
-
-
-  const updateProgress = () => {
-    if (
-      progressPassed &&
-      progressHandle &&
-      progressFuture &&
-      videoElement?.duration &&
-      videoElement.duration !== Infinity
-    ) {
-      const percent = (videoElement.currentTime / videoElement.duration) * 100;
-      progressPassed.style.width = percent + '%';
-      progressHandle.style.left = percent + '%';
-      progressFuture.style.width = (100 - percent) + '%';
-    }
-  }
-
   let mediaController: HTMLElement | undefined;
   let hlsVideo: HTMLMediaElement | undefined;
 
   const [isLive, setIsLive] = createSignal(false);
+
+  let streamContextMenu: HTMLButtonElement | undefined;
+
+  const triggerContextMenu = () => {
+    if (!props.streamAuthor) return;
+
+    app?.actions.openStreamContextMenu(
+      props.stream,
+      props.streamAuthor,
+      streamContextMenu?.getBoundingClientRect(),
+      () => {
+        props.onRemove && props.onRemove();
+      },
+    );
+  }
 
   return (
     <div class={styles.liveVideo} >
@@ -195,6 +160,13 @@ const LiveVideo: Component<{
               </div>
               <div class={styles.buttonSection}>
                 <media-fullscreen-button></media-fullscreen-button>
+                <buttton
+                  role="button"
+                  onClick={triggerContextMenu}
+                  ref={streamContextMenu}
+                >
+                  <div class={styles.contextIcon}></div>
+                </buttton>
               </div>
             </div>
           </media-control-bar>
