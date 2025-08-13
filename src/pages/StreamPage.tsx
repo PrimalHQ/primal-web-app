@@ -313,7 +313,7 @@ const StreamPage: Component = () => {
             </span>
             <div class={styles.zapStats}>
               <div class={styles.zapIcon}></div>
-              {humanizeNumber(zap?.amount || 0)}
+              {humanizeNumber(zap?.amount || 0, false)}
             </div>
           </span>
           <span class={styles.messageContent}>
@@ -356,7 +356,7 @@ const StreamPage: Component = () => {
           <Avatar user={author(zap?.sender as string)} size="vvs" />
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
-            <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount)}</div>
+            <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount, false)}</div>
           </div>
           <div class={styles.zapMessage}>
             {zap?.message || ''}
@@ -378,7 +378,7 @@ const StreamPage: Component = () => {
           >
             <div class={styles.topZap}>
               <Avatar user={author(zap?.sender as string)} size="micro" />
-              <div class={styles.zapAmount}>{humanizeNumber(zap?.amount)}</div>
+              <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
             </div>
           </Show>
         )}
@@ -672,7 +672,7 @@ const StreamPage: Component = () => {
                 <div class={styles.totalZaps}>Total {totalZaps() || 0} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
-                  {humanizeNumber(totalSats() || 0)}
+                  {humanizeNumber(totalSats() || 0, false)}
                 </div>
               </div>
               <button

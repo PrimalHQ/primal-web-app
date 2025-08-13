@@ -39,9 +39,11 @@ export const getTopArticle = (pubkey: string | undefined, by: 'satszapped' | 'in
   ]));
 }
 
-export const humanizeNumber = (number: number, veryShort = false) => {
+export const humanizeNumber = (number: number, abbrLimit = true) => {
 
-  const bottomLimit = veryShort ? 1000 : 10000;
+  if (!abbrLimit) return number.toLocaleString();
+
+  const bottomLimit = 10000;
 
   if (number < bottomLimit) {
     return number.toLocaleString();
