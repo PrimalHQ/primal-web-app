@@ -1,0 +1,7 @@
+.mutedLinks {
+  color: var(--text-secondary);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

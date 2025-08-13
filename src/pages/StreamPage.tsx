@@ -51,6 +51,8 @@ import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
 import TopZapSkeleton from '../components/Skeleton/TopZapSkeleton';
 import LiveVideo from '../components/LiveVideo/LiveVideo';
+import DirectMessageParsedContent from '../components/DirectMessages/DirectMessageParsedContent';
+import ChatMessage from '../components/LiveVideo/ChatMessage';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -198,15 +200,61 @@ const StreamPage: Component = () => {
   let fetchedPubkeys: string[] = [];
 
   let userFetcher = setInterval(() => {
-    let pks = events.map(e => {
+    let pks = events.reduce<string[]>((acc, e) => {
+      let newPks: string[] = [];
+
       if (e.kind === Kind.Zap) {
         const zapEvent = JSON.parse((e.tags?.find((t: string[]) => t[0] === 'description') || [])[1] || '{}');
-        return (zapEvent.pubkey || '') as string;
+
+        const tagPks = zapEvent.tags.reduce(
+          (acc: string[], t: string[]) => {
+            if (t[0] === 'p' && !acc.includes(t[1])) {
+              return [...acc, t[1]];
+            }
+            return acc;
+          },
+          []
+        );
+
+
+        newPks = [...newPks, (zapEvent.pubkey || '') as string, ...tagPks];
       }
 
-      return e.pubkey || ''
-    });
-    pks = pks.filter(pk => !fetchedPubkeys.includes(pk));
+      const tagPks = (e.tags || []).reduce(
+        (acc: string[], t: string[]) => {
+          if (t[0] === 'p' && !acc.includes(t[1])) {
+            return [...acc, t[1]];
+          }
+          return acc;
+        },
+        []
+      );
+
+      function extractNostrIds(text: string) {
+        // Pattern matches optional 'nostr:' prefix followed by npub1 or nprofile1 and their content
+        const pattern = /(?:nostr:)?(npub1[a-z0-9]+|nprofile1[a-z0-9]+)/gi;
+        const matches = text.match(pattern);
+
+        // Remove 'nostr:' prefix if present and return clean IDs
+        const refs = matches ? matches.map(match => match.replace(/^nostr:/, '')) : [];
+
+        return refs.reduce<string[]>((acc, r) => {
+          const decoded = nip19.decode(r);
+
+          if (decoded.type === 'npub') return [...acc, decoded.data];
+          if (decoded.type === 'nprofile') return [...acc, decoded.data.pubkey];
+          return acc;
+        }, []);
+      }
+
+      let extracted = extractNostrIds(e.content || '')
+
+      newPks = [...newPks, (e.pubkey || '') as string, ...tagPks, ...extracted];
+
+      return [...acc, ...newPks];
+    }, []);
+
+    pks = pks.filter(pk => !fetchedPubkeys.includes(pk) && pk .length > 0);
 
     if (pks.length > 0) {
       fetchMissingUsers(pks);
@@ -267,10 +315,22 @@ const StreamPage: Component = () => {
     return people.find(p => p.pubkey === pubkey);
   }
 
-  const renderChatMessage = (event: NostrLiveChat) => {
-
+  const parseChatContent = (event: NostrLiveChat) => {
     const content = event.content || '';
 
+    return (
+      <Show when={people.length > 0}>
+        <ChatMessage
+          content={content}
+          sender={author(event.pubkey)}
+          mentionedUsers={people}
+          event={event}
+        />
+      </Show>
+    );
+  }
+
+  const renderChatMessage = (event: NostrLiveChat) => {
     return (
       <div class={styles.liveMessage}>
         <Show when={author(event.pubkey)}>
@@ -285,7 +345,7 @@ const StreamPage: Component = () => {
             </span>
           </Show>
           <span class={styles.messageContent}>
-            {content}
+            {parseChatContent(event)}
           </span>
         </div>
       </div>
