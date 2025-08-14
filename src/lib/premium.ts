@@ -965,7 +965,6 @@ export const resolveStripe = async (pubkey: string | undefined, session_id: stri
 
       if (type === 'EVENT') {
         response = JSON.parse(content?.content || "{ client_secret: '', session_id: '',}");
-        console.log('RESOLVED RESPONSE: ', response);
       }
 
       if (type === 'NOTICE') {

@@ -985,15 +985,6 @@ const ChatMessage: Component<{
       <></>;
   };
 
-
-  // const renderContent = (item: NoteContent, index: number) => {
-  //   return <>
-  //     <For each={item.tokens}>
-  //       {token => <>{token}</>}
-  //     </For>
-  //   </>
-  // }
-
   return (
     <div class={styles.parsedMessage}>
       <For each={content}>

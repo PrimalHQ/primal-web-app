@@ -53,6 +53,8 @@ import TopZapSkeleton from '../components/Skeleton/TopZapSkeleton';
 import LiveVideo from '../components/LiveVideo/LiveVideo';
 import DirectMessageParsedContent from '../components/DirectMessages/DirectMessageParsedContent';
 import ChatMessage from '../components/LiveVideo/ChatMessage';
+import DirectMessagesComposer from '../components/DirectMessages/DirectMessagesComposer';
+import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -447,9 +449,7 @@ const StreamPage: Component = () => {
   }
 
 
-  const sendMessage = async (e: Event & { currentTarget: HTMLInputElement, target: HTMLInputElement}) => {
-    const content = e.target.value || '';
-
+  const sendMessage = async (content: string) => {
     if (!account || content.length === 0) return;
 
     const eventCoodrinate = `${Kind.LiveEvent}:${streamData.pubkey}:${streamData.id}`;
@@ -467,7 +467,7 @@ const StreamPage: Component = () => {
     if (success && note) {
       setEvents((es) => [{ ...note }, ...es ]);
       triggerImportEvents([note], `import_live_message_${APP_ID}`);
-      e.target.value = '';
+      return success;
     }
   }
 
@@ -782,10 +782,13 @@ const StreamPage: Component = () => {
           </For>
         </div>
         <div class={styles.chatInput}>
-          <input
+          <ChatMessageComposer
+            sendMessage={sendMessage}
+          />
+          {/*<input
             onChange={(e) => sendMessage(e)}
             placeholder='Send a comment...'
-          />
+          />*/}
         </div>
       </div>
 
