@@ -65,7 +65,7 @@ const LiveVideo: Component<{
             src={props.src}
             slot="media"
             crossorigin
-            muted
+            autoplay
             ref={hlsVideo}
             onloadstart={() => {
               const hls = hlsVideo?.api as Hls;
