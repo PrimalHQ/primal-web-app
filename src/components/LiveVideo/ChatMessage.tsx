@@ -13,7 +13,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
-import { isDev, msgHasCashu, msgHasInvoice } from '../../utils';
+import { isDev, urlEncode } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
@@ -684,6 +684,10 @@ const ChatMessage: Component<{
     </For>
   };
 
+  const vanityName = (pubkey: string) => {
+    return app?.verifiedUsers[pubkey];
+  }
+
   const renderComunityMention = (item: NoteContent, index?: number) => {
 
     return <For each={item.tokens}>
@@ -703,6 +707,53 @@ const ChatMessage: Component<{
           const i = match.index;
           end = id.slice(i);
           id = id.slice(0, i);
+        }
+
+        try {
+          const decoded = nip19.decode(id);
+
+          if (decoded.type === 'naddr') {
+            const { kind, pubkey, identifier } = decoded.data;
+            const author = props.mentionedUsers.find(u => u.pubkey === pubkey);
+            const vn = vanityName(pubkey);
+
+
+            if (kind === Kind.LongForm) {
+              return <a
+                href={vn ? `/${vn}/${urlEncode(identifier)}` : `/a/${id}`}
+                class={styles.eventMention}
+                target="_blank"
+              >
+                Article <Show when={author || vn}><span> by {userName(author) || vn}</span></Show>
+              </a>;
+            }
+
+            if (kind === Kind.LiveEvent) {
+              return <a
+                href={vn ? `/${vn}/live/${urlEncode(identifier)}` : `/p/${pubkey}/live/${identifier}`}
+                class={styles.eventMention}
+                target="_blank"
+              >
+                Stream <Show when={author}><span> by {userName(author) || vn}</span></Show>
+              </a>;
+            }
+
+            return <a
+              href={`/a/${id}`}
+              class={styles.eventMention}
+              target="_blank"
+            >
+              Article
+            </a>;
+          }
+        } catch (e) {
+          return <a
+            href={`/a/${id}`}
+            class={styles.eventMention}
+            target="_blank"
+          >
+            Event
+          </a>;
         }
 
         const unknownMention = (nid: string) => {
@@ -773,105 +824,50 @@ const ChatMessage: Component<{
           id = id.slice(0, i);
         }
 
-        let link = <span>{token}</span>;
-
         try {
-          const eventId = nip19.decode(id).data as string | nip19.EventPointer;
-          let kind = typeof eventId === 'string' ? Kind.Text : eventId.kind;
-          let hex = typeof eventId === 'string' ? eventId : eventId.id;
-          let path = typeof eventId === 'string' ?
-            `/e/${nip19.neventEncode({ id: hex, kind })}` :
-            `/e/${id}`;
+          const decoded = nip19.decode(id);
 
-          if (props.noLinks === 'links') {
-            return <span class='linkish'>{token}</span>;
+          if (decoded.type === 'note') {
+            return <a
+              href={`/e/${id}`}
+              class={styles.eventMention}
+              target="_blank"
+            >
+              Note
+            </a>;
           }
 
-          const mentionedNotes = { ...(dms?.referecedNotes || {}) };
+          if (decoded.type === 'nevent') {
+            const pubkey = decoded.data.author;
+            const noteAuthor = props.mentionedUsers.find(u => u.pubkey === pubkey);
 
-          const mentionedArticles = { ...(dms?.referecedReads || {}) }
+            const short = nip19.neventEncode({
+                id: decoded.data.id,
+                author: decoded.data.author,
+                kind: decoded.data.kind,
+            })
 
-          const mentionedHighlights: Record<string, any> = {}
-
-          const mentionedUsers = { ...(dms?.referecedUsers || {}) }
-
-          if (kind === undefined) {
-            let f: any = mentionedNotes && mentionedNotes[hex];
-            if (!f) {
-              const reEncoded = nip19.naddrEncode({
-                // @ts-ignore
-                kind: eventId.kind,
-                // @ts-ignore
-                pubkey: eventId.pubkey,
-                // @ts-ignore
-                identifier: eventId.identifier || '',
-              });
-              f = mentionedArticles && mentionedArticles[reEncoded];
-            }
-            if (!f) {
-              f = mentionedHighlights && mentionedHighlights[hex];
-            }
-            kind = f?.post.kind || f?.msg?.kind || f.event.kind || Kind.Text;
+            return <a
+              href={`/e/${short}`}
+              class={styles.eventMention}
+              target="_blank"
+            >
+              Note  <Show when={noteAuthor}><span> by {userName(noteAuthor)}</span></Show>
+            </a>;
           }
 
-          if (typeof kind !== 'number') return link;
-
-          if ( [Kind.Text].includes(kind)) {
-            if (!props.noLinks) {
-              const ment = mentionedNotes && mentionedNotes[hex];
-
-              link = <A href={path}>{token}</A>;
-
-              if (ment) {
-                if ([Kind.LongForm, Kind.LongFormShell].includes(ment.post.kind)) {
-                  // @ts-ignore
-                  link = renderLongFormMention(ment, index)
-                }
-                else {
-                  link = <div>
-                    Note Mentioned
-                  </div>;
-                }
-              }
-            }
-          }
-
-          if ([Kind.LongForm, Kind.LongFormShell].includes(kind)) {
-
-            if (!props.noLinks) {
-              const reEncoded = nip19.naddrEncode({
-                // @ts-ignore
-                kind: eventId.kind,
-                // @ts-ignore
-                pubkey: eventId.pubkey,
-                // @ts-ignore
-                identifier: eventId.identifier || '',
-              });
-              const ment = mentionedArticles && mentionedArticles[reEncoded];
-
-              link = <A href={path}>{token}</A>;
-
-              if (ment) {
-                // @ts-ignore
-                link = renderLongFormMention(ment, index);
-              }
-            }
-          }
-
-          if (kind === Kind.Highlight) {
-            const ment = mentionedHighlights && mentionedHighlights[hex];
-
-            link = <div class={styles.mentionedHighlight}>
-              Highlight Mention
-            </div>;
-          }
+          return <>{token}</>;
 
         } catch (e) {
-          logError('ERROR rendering note mention', e);
-          link = <span class={styles.error}>{token}</span>;
+          return <a
+            href={`/e/${id}`}
+            class={styles.eventMention}
+            target="_blank"
+          >
+            Note
+          </a>;
         }
-
-        return link;}}
+       }}
     </For>
   };
 
