@@ -17,7 +17,6 @@ export class BloomFilter {
     this.size = size;
     this.hashCount = hashCount;
     this.bits = new Uint8Array(Math.ceil(size / 8));
-    this.setBitsCount = 0; // Initialize to 0 for new filters
   }
 
   // Fast non-cryptographic hash functions for better performance
@@ -36,7 +35,7 @@ export class BloomFilter {
     logInfo(`BloomFilter: Adding item "${item}" to filter`);
     
     // Ensure setBitsCount is initialized before we start adding items
-    if (this.setBitsCount === undefined) {
+    if (!this.setBitsCount) {
       this.estimateCapacity(); // This will trigger lazy initialization
     }
     
@@ -73,7 +72,7 @@ export class BloomFilter {
   // Estimate current capacity usage (now O(1) instead of O(n) after initial calculation)
   estimateCapacity(): number {
     // Lazy initialization: calculate setBitsCount only once if undefined
-    if (this.setBitsCount === undefined) {
+    if (!this.setBitsCount) {
       logInfo('BloomFilter: Performing one-time set bits count calculation');
       this.setBitsCount = this.bits.reduce((count, byte) => {
         let bits = 0;
