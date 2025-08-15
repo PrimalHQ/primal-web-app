@@ -682,7 +682,7 @@ const StreamPage: Component = () => {
 
             <Show when={!showLiveChat()}>
               <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
-                open chat
+                <div class={styles.chatIcon}></div>
               </button>
             </Show>
 

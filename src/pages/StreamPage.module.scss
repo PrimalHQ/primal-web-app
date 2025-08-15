@@ -72,21 +72,21 @@
 
     .chatButton {
       display: flex;
-      height: 36px;
-      padding-inline: 18px;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      border: none;
-      outline: none;
-      border-radius: 100px;
-      background: var(--background-input);
-      color: var(--text-primary);
-      text-align: center;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 18px;
+      width: 36px;
+      height: 36px;
       margin: 0;
+      padding: 0;
+      outline: none;
+      border: none;
+      background: none;
+
+      &:hover {
+        .chatIcon {
+          background-color: var(--text-primary);
+        }
+      }
     }
   }
 }
@@ -554,6 +554,16 @@
   background-color: var(--text-tertiary);
   -webkit-mask: url(../assets/icons/chat_settings.svg) no-repeat center;
   mask: url(../assets/icons/chat_settings.svg) no-repeat center;
+}
+
+.chatIcon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/video_controlls/chat.svg) no-repeat center;
+  mask: url(../assets/icons/video_controlls/chat.svg) no-repeat center;
 }
 
 .liveDot {
