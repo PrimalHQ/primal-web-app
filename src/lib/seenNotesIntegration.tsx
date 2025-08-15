@@ -75,7 +75,7 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
       'data-note-id': note.id,
       onMouseEnter: () => {
         console.log(`SeenNotesIntegration: Mouse entered note ${note.id}`);
-        markNoteInView(note.id);
+        markNoteInView(note.id, false); // Pass false to indicate this is from mouse hover
       },
       onMouseLeave: () => {
         console.log(`SeenNotesIntegration: Mouse left note ${note.id}`);

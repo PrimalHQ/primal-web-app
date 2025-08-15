@@ -101,7 +101,8 @@ export class SeenNotesManager {
   private readonly METADATA_KEY: string;
 
   // Configurable timers
-  private readonly VIEW_TIMEOUT = 1000; // 1 second to consider a note "seen" (reduced for testing)
+  private readonly INTERSECTION_VIEW_TIMEOUT = 5000; // 5 seconds for intersection observer (sustained viewing)
+  private readonly MOUSE_VIEW_TIMEOUT = 1000; // 1 second for mouse hover (quick interaction)
   private readonly SAVE_INTERVAL = 5000; // 5 seconds between saves to localStorage
   private readonly FILTER_ROTATION_DAYS = 7; // Rotate filters every 7 days
 
@@ -247,8 +248,11 @@ export class SeenNotesManager {
     return true;
   }
 
-  markNoteInView(noteId: string): void {
-    logInfo(`SeenNotesManager: Note "${noteId}" came into view - starting ${this.VIEW_TIMEOUT}ms timer`);
+  markNoteInView(noteId: string, isIntersectionObserver: boolean = false): void {
+    const timeout = isIntersectionObserver ? this.INTERSECTION_VIEW_TIMEOUT : this.MOUSE_VIEW_TIMEOUT;
+    const source = isIntersectionObserver ? "intersection observer" : "mouse hover";
+    
+    logInfo(`SeenNotesManager: Note "${noteId}" came into view via ${source} - starting ${timeout}ms timer`);
     
     // Clear existing timeout for this note
     const existingTimeout = this.viewTimeouts.get(noteId);
@@ -257,15 +261,15 @@ export class SeenNotesManager {
       clearTimeout(existingTimeout);
     }
 
-    // Set new timeout to mark as seen after VIEW_TIMEOUT
-    const timeout = setTimeout(() => {
-      logInfo(`SeenNotesManager: Timeout expired for note "${noteId}" - marking as seen`);
+    // Set new timeout to mark as seen after appropriate timeout
+    const timeoutHandle = setTimeout(() => {
+      logInfo(`SeenNotesManager: ${source} timeout (${timeout}ms) expired for note "${noteId}" - marking as seen`);
       this.markNoteSeen(noteId);
       this.viewTimeouts.delete(noteId);
-    }, this.VIEW_TIMEOUT);
+    }, timeout);
 
-    this.viewTimeouts.set(noteId, timeout);
-    logInfo(`SeenNotesManager: Set timeout for note "${noteId}" (${this.viewTimeouts.size} total timeouts active)`);
+    this.viewTimeouts.set(noteId, timeoutHandle);
+    logInfo(`SeenNotesManager: Set ${timeout}ms timeout for note "${noteId}" via ${source} (${this.viewTimeouts.size} total timeouts active)`);
   }
 
   markNoteOutOfView(noteId: string): void {
