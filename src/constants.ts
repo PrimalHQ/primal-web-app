@@ -113,6 +113,7 @@ export enum Kind  {
   MuteList = 10_000,
   RelayList = 10_002,
   Bookmarks = 10_003,
+  SeenNotesFilter = 10_042,
   Blossom = 10_063,
   TierList = 17_000,
 
