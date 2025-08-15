@@ -16,18 +16,37 @@ const SeenNotesSettings: Component<SeenNotesSettingsProps> = (props) => {
     isReady,
     isEnabled,
     getStats,
-    forceUpdate,
+    clearAllFilters,
+    rotateFilters,
     observedNotesCount
   } = useSeenNotesFilter();
 
   const stats = () => getStats();
 
-  const handleForceUpdate = async () => {
+  const handleClearFilters = () => {
     try {
-      await forceUpdate();
+      clearAllFilters();
     } catch (error) {
-      console.error('Failed to force update seen notes filter:', error);
+      console.error('Failed to clear seen notes filters:', error);
     }
+  };
+
+  const handleRotateFilters = () => {
+    try {
+      rotateFilters();
+    } catch (error) {
+      console.error('Failed to rotate seen notes filters:', error);
+    }
+  };
+
+  const formatFilterAge = (ageMs: number): string => {
+    const days = Math.floor(ageMs / (24 * 60 * 60 * 1000));
+    const hours = Math.floor((ageMs % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+    const minutes = Math.floor((ageMs % (60 * 60 * 1000)) / (60 * 1000));
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
   };
 
   return (
@@ -45,7 +64,7 @@ const SeenNotesSettings: Component<SeenNotesSettingsProps> = (props) => {
             <div class={styles.statusItem}>
               <span class={styles.label}>Status:</span>
               <span class={`${styles.value} ${isEnabled() ? styles.enabled : styles.disabled}`}>
-                {isEnabled() ? (isReady() ? 'Active' : 'Initializing...') : 'Disabled'}
+                {isEnabled() ? (isReady() ? 'Active (Local Storage)' : 'Initializing...') : 'Disabled'}
               </span>
             </div>
 
@@ -62,7 +81,7 @@ const SeenNotesSettings: Component<SeenNotesSettingsProps> = (props) => {
               <h4>Filter Statistics</h4>
               <div class={styles.statGrid}>
                 <div class={styles.statItem}>
-                  <span class={styles.statLabel}>Filter Capacity:</span>
+                  <span class={styles.statLabel}>New Filter Capacity:</span>
                   <span class={styles.statValue}>
                     {((stats()?.newFilterCapacity || 0) * 100).toFixed(1)}%
                   </span>
@@ -78,12 +97,15 @@ const SeenNotesSettings: Component<SeenNotesSettingsProps> = (props) => {
                   <span class={styles.statValue}>{stats()?.totalViewTimeouts || 0}</span>
                 </div>
                 <div class={styles.statItem}>
-                  <span class={styles.statLabel}>Last Sync:</span>
+                  <span class={styles.statLabel}>Filter Age:</span>
                   <span class={styles.statValue}>
-                    {stats()?.lastFetchTime ? 
-                      new Date(stats()!.lastFetchTime).toLocaleTimeString() : 
-                      'Never'
-                    }
+                    {stats()?.filterAge ? formatFilterAge(stats()!.filterAge) : 'Unknown'}
+                  </span>
+                </div>
+                <div class={styles.statItem}>
+                  <span class={styles.statLabel}>Filter Age (Days):</span>
+                  <span class={styles.statValue}>
+                    {stats()?.filterAgeDays || 0} / 7 days
                   </span>
                 </div>
               </div>
@@ -94,9 +116,15 @@ const SeenNotesSettings: Component<SeenNotesSettingsProps> = (props) => {
             <Show when={isEnabled() && isReady()}>
               <button 
                 class={styles.actionButton} 
-                onClick={handleForceUpdate}
+                onClick={handleRotateFilters}
               >
-                Sync Filter Now
+                Rotate Filters Now
+              </button>
+              <button 
+                class={styles.actionButton} 
+                onClick={handleClearFilters}
+              >
+                Clear All Filters
               </button>
             </Show>
             

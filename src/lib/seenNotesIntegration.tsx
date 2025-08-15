@@ -16,13 +16,17 @@ import { PrimalNote } from '../types/primal';
 export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
   const [filteredNotes, setFilteredNotes] = createSignal<PrimalNote[]>([]);
   
+  console.log('SeenNotesIntegration: Hook initialized');
+  
   const {
     filterSeenNotes,
     markNoteInView,
     markNoteOutOfView,
     isReady,
     isEnabled,
-    getStats
+    getStats,
+    clearAllFilters,
+    rotateFilters
   } = useSeenNotesFilter();
 
   // Setup intersection observer for automatic tracking
@@ -36,13 +40,19 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
   createEffect(async () => {
     const currentNotes = notes();
     
+    console.log(`SeenNotesIntegration: Effect triggered with ${currentNotes.length} notes`);
+    console.log(`SeenNotesIntegration: isEnabled=${isEnabled()}, isReady=${isReady()}`);
+    
     if (!isEnabled() || !isReady()) {
+      console.log('SeenNotesIntegration: Filter not enabled or not ready, showing all notes');
       setFilteredNotes(currentNotes);
       return;
     }
 
     try {
+      console.log('SeenNotesIntegration: Calling filterSeenNotes...');
       const filtered = await filterSeenNotes(currentNotes);
+      console.log(`SeenNotesIntegration: Filtered ${currentNotes.length} notes to ${filtered.length} notes`);
       setFilteredNotes(filtered);
     } catch (error) {
       console.error('Error filtering seen notes:', error);
@@ -55,13 +65,22 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
    */
   const setupNoteTracking = (note: PrimalNote): JSX.HTMLAttributes<HTMLDivElement> => {
     if (!isEnabled()) {
+      console.log(`SeenNotesIntegration: setupNoteTracking called for note ${note.id} but filtering is disabled`);
       return {};
     }
 
+    console.log(`SeenNotesIntegration: setupNoteTracking called for note ${note.id} - adding tracking attributes`);
+    
     return {
       'data-note-id': note.id,
-      onMouseEnter: () => markNoteInView(note.id),
-      onMouseLeave: () => markNoteOutOfView(note.id),
+      onMouseEnter: () => {
+        console.log(`SeenNotesIntegration: Mouse entered note ${note.id}`);
+        markNoteInView(note.id);
+      },
+      onMouseLeave: () => {
+        console.log(`SeenNotesIntegration: Mouse left note ${note.id}`);
+        markNoteOutOfView(note.id);
+      },
     };
   };
 
@@ -71,6 +90,8 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
     isEnabled,
     isReady,
     getStats,
+    clearAllFilters,
+    rotateFilters,
     originalNotesCount: () => notes().length,
     filteredNotesCount: () => filteredNotes().length,
     hiddenNotesCount: () => notes().length - filteredNotes().length,
