@@ -31,6 +31,7 @@ import FeedNoteSkeleton from '../components/Skeleton/FeedNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { isPhone } from '../utils';
 import PageCaption from '../components/PageCaption/PageCaption';
+import { useSeenNotesIntegration } from '../lib/seenNotesIntegration';
 
 
 const Home: Component = () => {
@@ -38,6 +39,14 @@ const Home: Component = () => {
   const context = useHomeContext();
   const intl = useIntl();
   const app = useAppContext();
+
+  // Add seen notes integration
+  const {
+    filteredNotes,
+    setupNoteTracking,
+    isEnabled,
+    hiddenNotesCount
+  } = useSeenNotesIntegration(() => context?.notes || []);
 
   const isPageLoading = () => context?.isFetching;
 
@@ -155,7 +164,7 @@ const Home: Component = () => {
       <div class={styles.homeFeed}>
         <Transition name="slide-fade">
           <Show
-            when={context?.notes && context.notes.length > 0}
+            when={filteredNotes().length > 0}
             fallback={
               <div>
                 <For each={new Array(5)}>
@@ -165,9 +174,9 @@ const Home: Component = () => {
             }
           >
             <div class={isPhone() ? styles.readsFeed : ''}>
-              <For each={context?.notes} >
+              <For each={filteredNotes()} >
                 {note => (
-                  <div class="animated">
+                  <div class="animated" {...setupNoteTracking(note)}>
                     <Note
                       note={note}
                       shorten={true}
@@ -184,6 +193,17 @@ const Home: Component = () => {
       </div>
 
       <Switch>
+        <Match
+          when={!isPageLoading() && filteredNotes().length === 0 && (context?.notes?.length || 0) > 0}
+        >
+          <div class={styles.noContent}>
+            <div class={styles.allSeenMessage}>
+              <h3>🎉 You're all caught up!</h3>
+              <p>All notes in your feed have been seen.</p>
+              <p>New notes will appear here when available.</p>
+            </div>
+          </div>
+        </Match>
         <Match
           when={!isPageLoading() && context?.notes && context?.notes.length === 0}
         >

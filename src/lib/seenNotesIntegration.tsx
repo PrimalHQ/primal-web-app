@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from 'solid-js';
+import { createEffect, createSignal, JSX } from 'solid-js';
 import { useSeenNotesFilter, useNoteVisibilityTracker } from './feedIntegration';
 import { PrimalNote } from '../types/primal';
 
@@ -53,7 +53,7 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
   /**
    * Returns props to add to note wrapper elements for tracking
    */
-  const setupNoteTracking = (note: PrimalNote) => {
+  const setupNoteTracking = (note: PrimalNote): JSX.HTMLAttributes<HTMLDivElement> => {
     if (!isEnabled()) {
       return {};
     }
@@ -75,30 +75,4 @@ export function useSeenNotesIntegration(notes: () => PrimalNote[]) {
     filteredNotesCount: () => filteredNotes().length,
     hiddenNotesCount: () => notes().length - filteredNotes().length,
   };
-}
-
-/**
- * Simple component wrapper that adds seen notes tracking to any child
- * 
- * Usage:
- * <SeenNotesWrapper note={note}>
- *   <Note note={note} />
- * </SeenNotesWrapper>
- */
-export function SeenNotesWrapper(props: { note: PrimalNote, children: any }) {
-  const { markNoteInView, markNoteOutOfView, isEnabled } = useSeenNotesFilter();
-
-  if (!isEnabled()) {
-    return props.children;
-  }
-
-  return (
-    <div
-      data-note-id={props.note.id}
-      onMouseEnter={() => markNoteInView(props.note.id)}
-      onMouseLeave={() => markNoteOutOfView(props.note.id)}
-    >
-      {props.children}
-    </div>
-  );
 }

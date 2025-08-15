@@ -152,3 +152,21 @@
   -webkit-mask: url(../assets/icons/close.svg) no-repeat 0 / 100%;
   mask: url(../assets/icons/close.svg) no-repeat 0 / 100%;
 }
+
+
+.allSeenMessage {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-secondary);
+}
+
+.allSeenMessage h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.allSeenMessage p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
