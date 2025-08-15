@@ -11,11 +11,13 @@ export class BloomFilter {
   private bits: Uint8Array;
   private size: number;
   private hashCount: number;
+  private setBitsCount: number | undefined; // Track number of set bits for efficient capacity estimation
 
   constructor(size: number = BLOOM_FILTER_PARAMS.m, hashCount: number = BLOOM_FILTER_PARAMS.k) {
     this.size = size;
     this.hashCount = hashCount;
     this.bits = new Uint8Array(Math.ceil(size / 8));
+    this.setBitsCount = 0; // Initialize to 0 for new filters
   }
 
   // Fast non-cryptographic hash functions for better performance
@@ -32,11 +34,24 @@ export class BloomFilter {
 
   add(item: string): void {
     logInfo(`BloomFilter: Adding item "${item}" to filter`);
+    
+    // Ensure setBitsCount is initialized before we start adding items
+    if (this.setBitsCount === undefined) {
+      this.estimateCapacity(); // This will trigger lazy initialization
+    }
+    
     for (let i = 0; i < this.hashCount; i++) {
       const index = this.hash(item, i);
       const byteIndex = Math.floor(index / 8);
       const bitIndex = index % 8;
-      this.bits[byteIndex] |= (1 << bitIndex);
+      const mask = 1 << bitIndex;
+      
+      // Only increment setBitsCount if the bit wasn't already set
+      if ((this.bits[byteIndex] & mask) === 0) {
+        this.setBitsCount!++; // Safe to use ! since we initialized above
+      }
+      
+      this.bits[byteIndex] |= mask;
     }
     logInfo(`BloomFilter: Item "${item}" successfully added to filter`);
   }
@@ -55,15 +70,23 @@ export class BloomFilter {
     return true;
   }
 
-  // Estimate current capacity usage
+  // Estimate current capacity usage (now O(1) instead of O(n) after initial calculation)
   estimateCapacity(): number {
-    const setBits = this.bits.reduce((count, byte) => {
-      let bits = 0;
-      for (let i = 0; i < 8; i++) {
-        if (byte & (1 << i)) bits++;
-      }
-      return count + bits;
-    }, 0);
+    // Lazy initialization: calculate setBitsCount only once if undefined
+    if (this.setBitsCount === undefined) {
+      logInfo('BloomFilter: Performing one-time set bits count calculation');
+      this.setBitsCount = this.bits.reduce((count, byte) => {
+        let bits = 0;
+        for (let i = 0; i < 8; i++) {
+          if (byte & (1 << i)) bits++;
+        }
+        return count + bits;
+      }, 0);
+      logInfo(`BloomFilter: Calculated ${this.setBitsCount} set bits`);
+    }
+    
+    // Use the cached setBitsCount for O(1) performance
+    const setBits = this.setBitsCount;
     
     // Estimate number of items based on bit density
     const expectedBitsSet = this.hashCount * BLOOM_FILTER_PARAMS.n * (1 - Math.exp(-this.hashCount * BLOOM_FILTER_PARAMS.n / this.size));
@@ -82,9 +105,21 @@ export class BloomFilter {
     const filter = new BloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k);
     const binaryString = atob(base64);
     filter.bits = new Uint8Array(binaryString.length);
+    
+    // Reconstruct the bits array and count set bits
+    let setBitsCount = 0;
     for (let i = 0; i < binaryString.length; i++) {
       filter.bits[i] = binaryString.charCodeAt(i);
+      
+      // Count set bits in this byte
+      let byte = filter.bits[i];
+      while (byte) {
+        setBitsCount += byte & 1;
+        byte >>= 1;
+      }
     }
+    
+    filter.setBitsCount = setBitsCount;
     return filter;
   }
 }
