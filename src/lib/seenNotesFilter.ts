@@ -21,7 +21,8 @@ export class BloomFilter {
   // Fast non-cryptographic hash functions for better performance
   private hash(data: string, seed: number): number {
     // Use FNV-1a hash algorithm for speed
-    let hash = 2166136261 + seed;
+    data = seed.toString(16) + data;
+    let hash = 2166136261;
     for (let i = 0; i < data.length; i++) {
       hash ^= data.charCodeAt(i);
       hash = Math.imul(hash, 16777619);
