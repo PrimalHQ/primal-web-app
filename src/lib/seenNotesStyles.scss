@@ -1,0 +1,39 @@
+.filterStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #6c757d;
+  gap: 0.5rem;
+}
+
+.filterStats {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.emptyFiltered {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.emptyFiltered h3 {
+  margin: 0 0 1rem 0;
+  color: #495057;
+}
+
+.emptyFiltered p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.filterHint {
+  font-style: italic;
+  color: #28a745;
+}

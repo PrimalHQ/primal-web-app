@@ -1,12 +1,14 @@
 import { nip19 } from './nTools';
 import { Kind } from '../constants';
 import { sendEvent } from './notes';
-import { subsTo } from '../sockets';
-import { NostrEventContent, NostrRelaySignedEvent } from '../types/primal';
+import { subsTo, sendMessage } from '../sockets';
+import { NostrEventContent, NostrRelaySignedEvent, NostrRelays } from '../types/primal';
 import { logInfo, logWarning } from './logger';
+import { Relay } from './nTools';
+import { encrypt, decrypt } from './nostrAPI';
 
-// New replaceable event kind for seen notes filter
-export const SEEN_NOTES_FILTER_KIND = 10042;
+// Use the existing constant from constants.ts
+export const SEEN_NOTES_FILTER_KIND = Kind.SeenNotesFilter;
 
 // Bloom filter parameters optimized for 4KB max size
 const BLOOM_FILTER_PARAMS = {
@@ -21,68 +23,40 @@ interface SeenNotesFilterContent {
   timestamp: number;   // when this filter was created
 }
 
-export class KeyedBloomFilter {
+export class BloomFilter {
   private bits: Uint8Array;
   private size: number;
   private hashCount: number;
-  private key: Uint8Array;
 
-  constructor(size: number = BLOOM_FILTER_PARAMS.m, hashCount: number = BLOOM_FILTER_PARAMS.k, nsec?: string) {
+  constructor(size: number = BLOOM_FILTER_PARAMS.m, hashCount: number = BLOOM_FILTER_PARAMS.k) {
     this.size = size;
     this.hashCount = hashCount;
     this.bits = new Uint8Array(Math.ceil(size / 8));
-    
-    // Derive key from nsec for privacy
-    if (nsec) {
-      const decoded = nip19.decode(nsec);
-      if (decoded.type === 'nsec' && decoded.data) {
-        // Use first 32 bytes of private key as hash key
-        this.key = new Uint8Array(decoded.data);
-      } else {
-        throw new Error('Invalid nsec provided');
-      }
-    } else {
-      // Fallback to random key (not recommended for production)
-      this.key = crypto.getRandomValues(new Uint8Array(32));
-    }
   }
 
-  // HMAC-based hash function for privacy
-  private async hash(data: string, seed: number): Promise<number> {
-    const encoder = new TextEncoder();
-    const keyMaterial = await crypto.subtle.importKey(
-      'raw',
-      this.key,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    
-    const message = encoder.encode(data + seed.toString());
-    const signature = await crypto.subtle.sign('HMAC', keyMaterial, message);
-    const hashArray = new Uint8Array(signature);
-    
-    // Convert first 4 bytes to uint32
-    let hash = 0;
-    for (let i = 0; i < 4; i++) {
-      hash = (hash << 8) | hashArray[i];
+  // Fast non-cryptographic hash functions for better performance
+  private hash(data: string, seed: number): number {
+    // Use FNV-1a hash algorithm for speed
+    let hash = 2166136261 + seed;
+    for (let i = 0; i < data.length; i++) {
+      hash ^= data.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
     }
-    
     return Math.abs(hash) % this.size;
   }
 
-  async add(item: string): Promise<void> {
+  add(item: string): void {
     for (let i = 0; i < this.hashCount; i++) {
-      const index = await this.hash(item, i);
+      const index = this.hash(item, i);
       const byteIndex = Math.floor(index / 8);
       const bitIndex = index % 8;
       this.bits[byteIndex] |= (1 << bitIndex);
     }
   }
 
-  async contains(item: string): Promise<boolean> {
+  contains(item: string): boolean {
     for (let i = 0; i < this.hashCount; i++) {
-      const index = await this.hash(item, i);
+      const index = this.hash(item, i);
       const byteIndex = Math.floor(index / 8);
       const bitIndex = index % 8;
       if ((this.bits[byteIndex] & (1 << bitIndex)) === 0) {
@@ -115,8 +89,8 @@ export class KeyedBloomFilter {
     return btoa(String.fromCharCode(...this.bits));
   }
 
-  static fromBase64(base64: string, nsec: string): KeyedBloomFilter {
-    const filter = new KeyedBloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k, nsec);
+  static fromBase64(base64: string): BloomFilter {
+    const filter = new BloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k);
     const binaryString = atob(base64);
     filter.bits = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
@@ -127,22 +101,31 @@ export class KeyedBloomFilter {
 }
 
 export class SeenNotesManager {
-  private oldFilter?: KeyedBloomFilter;
-  private newFilter: KeyedBloomFilter;
-  private nsec: string;
+  private oldFilter?: BloomFilter;
+  private newFilter: BloomFilter;
   private pubkey: string;
   private lastFetchTime: number = 0;
   private viewTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private lastPublishedFilterHash?: string;
+  private relays: Relay[];
+  private relaySettings: NostrRelays;
+  private shouldProxy: boolean;
 
   // Configurable timers
   private readonly VIEW_TIMEOUT = 3000; // 3 seconds to consider a note "seen"
   private readonly FETCH_INTERVAL = 30000; // 30 seconds between filter fetches
 
-  constructor(nsec: string, pubkey: string) {
-    this.nsec = nsec;
+  constructor(
+    pubkey: string, 
+    relays: Relay[] = [], 
+    relaySettings: NostrRelays = {}, 
+    shouldProxy: boolean = false
+  ) {
     this.pubkey = pubkey;
-    this.newFilter = new KeyedBloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k, nsec);
+    this.relays = relays;
+    this.relaySettings = relaySettings;
+    this.shouldProxy = shouldProxy;
+    this.newFilter = new BloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k);
   }
 
   async initialize(): Promise<void> {
@@ -155,16 +138,18 @@ export class SeenNotesManager {
       const subId = `seen_notes_filter_${Date.now()}`;
       
       const unsub = subsTo(subId, {
-        onEvent: (_, content) => {
+        onEvent: async (_, content) => {
           if (content && content.kind === SEEN_NOTES_FILTER_KIND && content.pubkey === this.pubkey) {
             try {
-              const filterData: SeenNotesFilterContent = JSON.parse(content.content);
+              // Decrypt the content using NIP-04
+              const decryptedContent = await decrypt(this.pubkey, content.content);
+              const filterData: SeenNotesFilterContent = JSON.parse(decryptedContent);
               
               // Load filters from the event
               if (filterData.oldFilter) {
-                this.oldFilter = KeyedBloomFilter.fromBase64(filterData.oldFilter, this.nsec);
+                this.oldFilter = BloomFilter.fromBase64(filterData.oldFilter);
               }
-              this.newFilter = KeyedBloomFilter.fromBase64(filterData.newFilter, this.nsec);
+              this.newFilter = BloomFilter.fromBase64(filterData.newFilter);
               
               this.lastFetchTime = Date.now();
               logInfo('Loaded seen notes filter from relay');
@@ -185,25 +170,22 @@ export class SeenNotesManager {
   }
 
   private requestSeenNotesFilter(subId: string): void {
-    // This would need to be implemented in the existing feed/relay infrastructure
-    // For now, showing the concept
     const filter = {
       kinds: [SEEN_NOTES_FILTER_KIND],
       authors: [this.pubkey],
       limit: 1
     };
     
-    // Would use existing relay infrastructure to request this filter
-    // sendMessage(JSON.stringify(["REQ", subId, filter]));
+    sendMessage(JSON.stringify(["REQ", subId, filter]));
   }
 
   async shouldShowNote(noteId: string): Promise<boolean> {
     // Check if note ID is in either filter
-    const inNewFilter = await this.newFilter.contains(noteId);
+    const inNewFilter = this.newFilter.contains(noteId);
     if (inNewFilter) return false;
     
     if (this.oldFilter) {
-      const inOldFilter = await this.oldFilter.contains(noteId);
+      const inOldFilter = this.oldFilter.contains(noteId);
       if (inOldFilter) return false;
     }
     
@@ -218,8 +200,8 @@ export class SeenNotesManager {
     }
 
     // Set new timeout to mark as seen after VIEW_TIMEOUT
-    const timeout = setTimeout(async () => {
-      await this.markNoteSeen(noteId);
+    const timeout = setTimeout(() => {
+      this.markNoteSeen(noteId);
       this.viewTimeouts.delete(noteId);
     }, this.VIEW_TIMEOUT);
 
@@ -235,15 +217,15 @@ export class SeenNotesManager {
     }
   }
 
-  private async markNoteSeen(noteId: string): Promise<void> {
+  private markNoteSeen(noteId: string): void {
     // Check if we need to rotate filters
     if (this.newFilter.isNearCapacity()) {
       logInfo('Rotating bloom filters - new filter at capacity');
       this.oldFilter = this.newFilter;
-      this.newFilter = new KeyedBloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k, this.nsec);
+      this.newFilter = new BloomFilter(BLOOM_FILTER_PARAMS.m, BLOOM_FILTER_PARAMS.k);
     }
 
-    await this.newFilter.add(noteId);
+    this.newFilter.add(noteId);
     logInfo(`Marked note ${noteId} as seen`);
   }
 
@@ -289,18 +271,26 @@ export class SeenNotesManager {
     }
 
     try {
-      const event: any = {
+      // Encrypt the content using NIP-04
+      const encryptedContent = await encrypt(this.pubkey, JSON.stringify(filterContent));
+      
+      const event = {
         kind: SEEN_NOTES_FILTER_KIND,
-        content: JSON.stringify(filterContent),
+        content: encryptedContent,
         tags: [],
         created_at: Math.floor(Date.now() / 1000),
       };
 
-      // This would use the existing sendEvent infrastructure
-      const { success } = await sendEvent(event, false, [], {}); // placeholder parameters
+      // Use the existing sendEvent infrastructure with proper parameters
+      const { success, note } = await sendEvent(
+        event, 
+        this.relays, 
+        this.relaySettings, 
+        this.shouldProxy
+      );
       
-      if (success) {
-        this.lastPublishedFilterHash = await this.hashEvent(event);
+      if (success && note) {
+        this.lastPublishedFilterHash = await this.hashEvent(note);
         logInfo('Published updated seen notes filter');
       }
     } catch (error) {
@@ -316,6 +306,27 @@ export class SeenNotesManager {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  updateSettings(relays: Relay[], relaySettings: NostrRelays, shouldProxy: boolean): void {
+    this.relays = relays;
+    this.relaySettings = relaySettings;
+    this.shouldProxy = shouldProxy;
+  }
+
+  // Public method to manually trigger a filter update
+  async forceUpdate(): Promise<void> {
+    await this.publishSeenNotesFilter();
+  }
+
+  // Get current filter statistics
+  getStats() {
+    return {
+      newFilterCapacity: this.newFilter.estimateCapacity(),
+      oldFilterExists: !!this.oldFilter,
+      totalViewTimeouts: this.viewTimeouts.size,
+      lastFetchTime: this.lastFetchTime,
+    };
+  }
+
   cleanup(): void {
     // Clear all pending timeouts
     this.viewTimeouts.forEach(timeout => clearTimeout(timeout));
@@ -324,8 +335,13 @@ export class SeenNotesManager {
 }
 
 // Integration helper functions
-export function createSeenNotesManager(nsec: string, pubkey: string): SeenNotesManager {
-  return new SeenNotesManager(nsec, pubkey);
+export function createSeenNotesManager(
+  pubkey: string, 
+  relays: Relay[] = [], 
+  relaySettings: NostrRelays = {}, 
+  shouldProxy: boolean = false
+): SeenNotesManager {
+  return new SeenNotesManager(pubkey, relays, relaySettings, shouldProxy);
 }
 
 export async function shouldShowNoteInFeed(noteId: string, manager: SeenNotesManager): Promise<boolean> {

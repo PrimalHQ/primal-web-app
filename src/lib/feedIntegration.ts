@@ -1,20 +1,53 @@
-import { createSignal, onMount, onCleanup } from 'solid-js';
-import { SeenNotesManager, shouldShowNoteInFeed } from '../lib/seenNotesFilter';
+import { createSignal, createEffect, onCleanup } from 'solid-js';
+import { SeenNotesManager } from '../lib/seenNotesFilter';
 import { useAccountContext } from '../contexts/AccountContext';
 import { PrimalNote } from '../types/primal';
 
-// Example integration showing how to use the SeenNotesFilter in a feed component
-export function useFeedWithSeenNotesFilter() {
+/**
+ * Hook to integrate seen notes filtering into existing feed components
+ * This replaces the previous standalone feed component approach
+ */
+export function useSeenNotesFilter() {
   const account = useAccountContext();
   const [seenNotesManager, setSeenNotesManager] = createSignal<SeenNotesManager>();
   const [observedNotes, setObservedNotes] = createSignal<Set<string>>(new Set());
+  const [isInitialized, setIsInitialized] = createSignal(false);
 
-  // Initialize the seen notes manager
-  onMount(async () => {
-    if (account?.sec && account?.publicKey) {
-      const manager = new SeenNotesManager(account.sec, account.publicKey);
-      await manager.initialize();
-      setSeenNotesManager(manager);
+  // Initialize the seen notes manager when account is available
+  createEffect(async () => {
+    if (account?.publicKey) {
+      // If manager already exists, update its settings
+      const existingManager = seenNotesManager();
+      if (existingManager) {
+        existingManager.updateSettings(
+          account.activeRelays || [], 
+          account.relaySettings || {}, 
+          account.proxyThroughPrimal || false
+        );
+        return;
+      }
+
+      // Create new manager
+      const manager = new SeenNotesManager(
+        account.publicKey,
+        account.activeRelays || [], 
+        account.relaySettings || {}, 
+        account.proxyThroughPrimal || false
+      );
+      
+      try {
+        await manager.initialize();
+        setSeenNotesManager(manager);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize seen notes manager:', error);
+        setIsInitialized(false);
+      }
+    } else {
+      // Clean up if no account
+      seenNotesManager()?.cleanup();
+      setSeenNotesManager(undefined);
+      setIsInitialized(false);
     }
   });
 
@@ -25,13 +58,19 @@ export function useFeedWithSeenNotesFilter() {
   // Filter notes that should be shown in the feed
   const filterSeenNotes = async (notes: PrimalNote[]): Promise<PrimalNote[]> => {
     const manager = seenNotesManager();
-    if (!manager) return notes;
+    if (!manager || !isInitialized()) return notes;
 
     const filteredNotes: PrimalNote[] = [];
     
     for (const note of notes) {
-      const shouldShow = await manager.shouldShowNote(note.id);
-      if (shouldShow) {
+      try {
+        const shouldShow = await manager.shouldShowNote(note.id);
+        if (shouldShow) {
+          filteredNotes.push(note);
+        }
+      } catch (error) {
+        console.error(`Error checking note ${note.id}:`, error);
+        // On error, include the note to be safe
         filteredNotes.push(note);
       }
     }
@@ -42,7 +81,7 @@ export function useFeedWithSeenNotesFilter() {
   // Mark note as in view when it becomes visible
   const markNoteInView = (noteId: string) => {
     const manager = seenNotesManager();
-    if (!manager) return;
+    if (!manager || !isInitialized()) return;
 
     // Only mark if not already being observed
     if (!observedNotes().has(noteId)) {
@@ -54,7 +93,7 @@ export function useFeedWithSeenNotesFilter() {
   // Mark note as out of view when it becomes invisible
   const markNoteOutOfView = (noteId: string) => {
     const manager = seenNotesManager();
-    if (!manager) return;
+    if (!manager || !isInitialized()) return;
 
     if (observedNotes().has(noteId)) {
       setObservedNotes(prev => {
@@ -66,22 +105,48 @@ export function useFeedWithSeenNotesFilter() {
     }
   };
 
+  // Get filter statistics for debugging
+  const getStats = () => {
+    const manager = seenNotesManager();
+    return manager ? manager.getStats() : null;
+  };
+
+  // Manually force a filter update
+  const forceUpdate = async () => {
+    const manager = seenNotesManager();
+    if (manager && isInitialized()) {
+      await manager.forceUpdate();
+    }
+  };
+
   return {
     filterSeenNotes,
     markNoteInView,
     markNoteOutOfView,
-    isReady: () => !!seenNotesManager(),
+    isReady: () => !!seenNotesManager() && isInitialized(),
+    getStats,
+    forceUpdate,
+    observedNotesCount: () => observedNotes().size,
+    isEnabled: () => !!account?.publicKey,
   };
 }
 
-// Intersection Observer hook for tracking when notes come into view
-export function useIntersectionObserver(
+/**
+ * Hook for setting up intersection observer to automatically track note visibility
+ */
+export function useNoteVisibilityTracker(
   markInView: (id: string) => void,
-  markOutOfView: (id: string) => void
+  markOutOfView: (id: string) => void,
+  enabled: boolean = true
 ) {
   let observer: IntersectionObserver | undefined;
 
-  onMount(() => {
+  createEffect(() => {
+    if (!enabled) {
+      observer?.disconnect();
+      return;
+    }
+
     observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -100,6 +165,10 @@ export function useIntersectionObserver(
         rootMargin: '0px 0px -100px 0px', // Account for header/navigation
       }
     );
+
+    // Observe all existing note elements
+    const noteElements = document.querySelectorAll('[data-note-id]');
+    noteElements.forEach(el => observer?.observe(el as HTMLElement));
   });
 
   onCleanup(() => {
@@ -107,11 +176,15 @@ export function useIntersectionObserver(
   });
 
   const observeElement = (element: HTMLElement) => {
-    observer?.observe(element);
+    if (enabled && observer) {
+      observer.observe(element);
+    }
   };
 
   const unobserveElement = (element: HTMLElement) => {
-    observer?.unobserve(element);
+    if (observer) {
+      observer.unobserve(element);
+    }
   };
 
   return { observeElement, unobserveElement };

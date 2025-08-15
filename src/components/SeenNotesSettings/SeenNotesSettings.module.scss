@@ -1,0 +1,137 @@
+.panel {
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 1rem auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.header h3 {
+  margin: 0;
+  color: #495057;
+  font-size: 1.1rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  color: #495057;
+}
+
+.content {
+  padding: 1rem;
+}
+
+.status {
+  margin-bottom: 1rem;
+}
+
+.statusItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.value.enabled {
+  color: #28a745;
+}
+
+.value.disabled {
+  color: #6c757d;
+}
+
+.stats {
+  margin-bottom: 1rem;
+}
+
+.stats h4 {
+  margin: 0 0 0.5rem 0;
+  color: #495057;
+  font-size: 1rem;
+}
+
+.statGrid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.statLabel {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.statValue {
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.actions {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1rem;
+}
+
+.actionButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #007acc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.actionButton:hover {
+  background: #005a99;
+}
+
+.disabledMessage {
+  text-align: center;
+  color: #6c757d;
+}
+
+.disabledMessage p {
+  margin: 0.5rem 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
